@@ -7,7 +7,6 @@ import React, { Fragment, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -22,29 +21,15 @@ import {
   EuiFieldNumber,
   EuiSelect,
   EuiIconTip,
-  EuiAccordion,
   EuiButtonIcon,
-  EuiEmptyPrompt,
-  EuiButtonEmpty,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { loadAlertTypes } from '../../lib/alert_api';
-import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
 import { AlertReducerAction } from './alert_reducer';
-import {
-  AlertTypeModel,
-  Alert,
-  IErrorObject,
-  ActionTypeModel,
-  AlertAction,
-  ActionTypeIndex,
-  ActionConnector,
-  AlertTypeIndex,
-} from '../../../types';
-import { SectionLoading } from '../../components/section_loading';
-import { ConnectorAddModal } from '../action_connector_form/connector_add_modal';
+import { AlertTypeModel, Alert, IErrorObject, AlertAction, AlertTypeIndex } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { useAlertsContext } from '../../context/alerts_context';
+import { ActionForm } from '../action_connector_form/action_form';
 
 export function validateBaseProperties(alertObject: Alert) {
   const validationResult = { errors: {} };
@@ -86,12 +71,12 @@ interface AlertFormProps {
   canChangeTrigger?: boolean; // to hide Change trigger button
 }
 
-interface ActiveActionConnectorState {
-  actionTypeId: string;
-  index: number;
-}
-
-export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: AlertFormProps) => {
+export const AlertForm = ({
+  alert,
+  canChangeTrigger = true,
+  dispatch,
+  errors,
+}: AlertFormProps) => {
   const alertsContext = useAlertsContext();
   const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = alertsContext;
 
@@ -99,9 +84,6 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
     alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null
   );
 
-  const [addModalVisible, setAddModalVisibility] = useState<boolean>(false);
-  const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
-  const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | undefined>(undefined);
   const [alertInterval, setAlertInterval] = useState<number>(
     alert.schedule.interval ? parseInt(alert.schedule.interval.replace(/^[A-Za-z]+$/, ''), 0) : 1
@@ -115,39 +97,7 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
   const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>(
     alert.throttle ? alert.throttle.replace((alertThrottle ?? '').toString(), '') : 'm'
   );
-  const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(true);
-  const [connectors, setConnectors] = useState<ActionConnector[]>([]);
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
-  const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
-    undefined
-  );
-
-  // load action types
-  useEffect(() => {
-    (async () => {
-      try {
-        setIsLoadingActionTypes(true);
-        const actionTypes = await loadActionTypes({ http });
-        const index: ActionTypeIndex = {};
-        for (const actionTypeItem of actionTypes) {
-          index[actionTypeItem.id] = actionTypeItem;
-        }
-        setActionTypesIndex(index);
-      } catch (e) {
-        if (toastNotifications) {
-          toastNotifications.addDanger({
-            title: i18n.translate(
-              'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionTypesMessage',
-              { defaultMessage: 'Unable to load action types' }
-            ),
-          });
-        }
-      } finally {
-        setIsLoadingActionTypes(false);
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // load alert types
   useEffect(() => {
@@ -163,21 +113,14 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
         }
         setAlertTypesIndex(index);
       } catch (e) {
-        if (toastNotifications) {
-          toastNotifications.addDanger({
-            title: i18n.translate(
-              'xpack.triggersActionsUI.sections.alertForm.unableToLoadAlertTypesMessage',
-              { defaultMessage: 'Unable to load alert types' }
-            ),
-          });
-        }
+        toastNotifications.addDanger({
+          title: i18n.translate(
+            'xpack.triggersActionsUI.sections.alertForm.unableToLoadAlertTypesMessage',
+            { defaultMessage: 'Unable to load alert types' }
+          ),
+        });
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    loadConnectors();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -193,92 +136,19 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
     dispatch({ command: { type: 'setScheduleProperty' }, payload: { key, value } });
   };
 
-  const setActionParamsProperty = (key: string, value: any, index: number) => {
-    dispatch({ command: { type: 'setAlertActionParams' }, payload: { key, value, index } });
-  };
-
   const setActionProperty = (key: string, value: any, index: number) => {
     dispatch({ command: { type: 'setAlertActionProperty' }, payload: { key, value, index } });
   };
 
+  const setActionParamsProperty = (key: string, value: any, index: number) => {
+    dispatch({ command: { type: 'setAlertActionParams' }, payload: { key, value, index } });
+  };
+
   const tagsOptions = alert.tags ? alert.tags.map((label: string) => ({ label })) : [];
-
-  async function loadConnectors() {
-    try {
-      const actionsResponse = await loadAllActions({ http });
-      setConnectors(actionsResponse.data);
-    } catch (e) {
-      if (toastNotifications) {
-        toastNotifications.addDanger({
-          title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionsMessage',
-            {
-              defaultMessage: 'Unable to load connectors',
-            }
-          ),
-        });
-      }
-    }
-  }
-
-  const actionsErrors = alert.actions.reduce(
-    (acc: Record<string, { errors: IErrorObject }>, alertAction: AlertAction) => {
-      const actionType = actionTypeRegistry.get(alertAction.actionTypeId);
-      if (!actionType) {
-        return { ...acc };
-      }
-      const actionValidationErrors = actionType.validateParams(alertAction.params);
-      return { ...acc, [alertAction.id]: actionValidationErrors };
-    },
-    {}
-  );
 
   const AlertParamsExpressionComponent = alertTypeModel
     ? alertTypeModel.alertParamsExpression
     : null;
-
-  function addActionType(actionTypeModel: ActionTypeModel) {
-    if (!defaultActionGroupId) {
-      toastNotifications!.addDanger({
-        title: i18n.translate('xpack.triggersActionsUI.sections.alertForm.unableToAddAction', {
-          defaultMessage: 'Unable to add action, because default action group is not defined',
-        }),
-      });
-      return;
-    }
-    setIsAddActionPanelOpen(false);
-    const actionTypeConnectors = connectors.filter(
-      field => field.actionTypeId === actionTypeModel.id
-    );
-    let freeConnectors;
-    if (actionTypeConnectors.length > 0) {
-      // Should we allow adding multiple actions to the same connector under the alert?
-      freeConnectors = actionTypeConnectors.filter(
-        (actionConnector: ActionConnector) =>
-          !alert.actions.find((actionItem: AlertAction) => actionItem.id === actionConnector.id)
-      );
-      if (freeConnectors.length > 0) {
-        alert.actions.push({
-          id: '',
-          actionTypeId: actionTypeModel.id,
-          group: defaultActionGroupId,
-          params: {},
-        });
-        setActionProperty('id', freeConnectors[0].id, alert.actions.length - 1);
-      }
-    }
-    if (actionTypeConnectors.length === 0 || !freeConnectors || freeConnectors.length === 0) {
-      // if no connectors exists or all connectors is already assigned an action under current alert
-      // set actionType as id to be able to create new connector within the alert form
-      alert.actions.push({
-        id: '',
-        actionTypeId: actionTypeModel.id,
-        group: defaultActionGroupId,
-        params: {},
-      });
-      setActionProperty('id', alert.actions.length, alert.actions.length - 1);
-    }
-  }
 
   const alertTypeNodes = alertTypeRegistry.list().map(function(item, index) {
     return (
@@ -298,293 +168,6 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
       </EuiKeyPadMenuItem>
     );
   });
-
-  const actionTypeNodes = actionTypeRegistry.list().map(function(item, index) {
-    return (
-      <EuiKeyPadMenuItem
-        key={index}
-        data-test-subj={`${item.id}-ActionTypeSelectOption`}
-        label={actionTypesIndex ? actionTypesIndex[item.id].name : item.id}
-        onClick={() => addActionType(item)}
-      >
-        <EuiIcon size="xl" type={item.iconClass} />
-      </EuiKeyPadMenuItem>
-    );
-  });
-
-  const getSelectedOptions = (actionItemId: string) => {
-    const val = connectors.find(connector => connector.id === actionItemId);
-    if (!val) {
-      return [];
-    }
-    return [
-      {
-        label: val.name,
-        value: val.name,
-        id: actionItemId,
-      },
-    ];
-  };
-
-  const getActionTypeForm = (
-    actionItem: AlertAction,
-    actionConnector: ActionConnector,
-    index: number
-  ) => {
-    const optionsList = connectors
-      .filter(
-        connectorItem =>
-          connectorItem.actionTypeId === actionItem.actionTypeId &&
-          (connectorItem.id === actionItem.id ||
-            !alert.actions.find(
-              (existingAction: AlertAction) =>
-                existingAction.id === connectorItem.id && existingAction.group === actionItem.group
-            ))
-      )
-      .map(({ name, id }) => ({
-        label: name,
-        key: id,
-        id,
-      }));
-    const actionTypeRegisterd = actionTypeRegistry.get(actionConnector.actionTypeId);
-    if (!actionTypeRegisterd || actionItem.group !== defaultActionGroupId) return null;
-    const ParamsFieldsComponent = actionTypeRegisterd.actionParamsFields;
-    const actionParamsErrors: { errors: IErrorObject } =
-      Object.keys(actionsErrors).length > 0 ? actionsErrors[actionItem.id] : { errors: {} };
-
-    return (
-      <EuiAccordion
-        initialIsOpen={true}
-        key={index}
-        id={index.toString()}
-        className="euiAccordionForm"
-        buttonContentClassName="euiAccordionForm__button"
-        data-test-subj={`alertActionAccordion-${defaultActionGroupId}`}
-        buttonContent={
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={actionTypeRegisterd.iconClass} size="m" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h5>
-                  <FormattedMessage
-                    defaultMessage="Action: {actionConnectorName}"
-                    id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeEditTitle"
-                    values={{
-                      actionConnectorName: actionConnector.name,
-                    }}
-                  />
-                </h5>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        extraAction={
-          <EuiButtonIcon
-            iconType="cross"
-            color="danger"
-            className="euiAccordionForm__extraAction"
-            aria-label={i18n.translate(
-              'xpack.triggersActionsUI.sections.alertForm.accordion.deleteIconAriaLabel',
-              {
-                defaultMessage: 'Delete',
-              }
-            )}
-            onClick={() => {
-              const updatedActions = alert.actions.filter(
-                (item: AlertAction) => item.id !== actionItem.id
-              );
-              setAlertProperty('actions', updatedActions);
-              setIsAddActionPanelOpen(
-                updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length === 0
-              );
-              setActiveActionItem(undefined);
-            }}
-          />
-        }
-        paddingSize="l"
-      >
-        <EuiFlexGroup component="div">
-          <EuiFlexItem>
-            <EuiFormRow
-              fullWidth
-              label={
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertForm.actionIdLabel"
-                  defaultMessage="{connectorInstance} instance"
-                  values={{
-                    connectorInstance: actionTypesIndex
-                      ? actionTypesIndex[actionConnector.actionTypeId].name
-                      : actionConnector.actionTypeId,
-                  }}
-                />
-              }
-              labelAppend={
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={() => {
-                    setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
-                    setAddModalVisibility(true);
-                  }}
-                >
-                  <FormattedMessage
-                    defaultMessage="Add new"
-                    id="xpack.triggersActionsUI.sections.alertForm.addNewConnectorEmptyButton"
-                  />
-                </EuiButtonEmpty>
-              }
-            >
-              <EuiComboBox
-                fullWidth
-                singleSelection={{ asPlainText: true }}
-                options={optionsList}
-                selectedOptions={getSelectedOptions(actionItem.id)}
-                onChange={selectedOptions => {
-                  setActionProperty('id', selectedOptions[0].id, index);
-                }}
-                isClearable={false}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="xl" />
-        {ParamsFieldsComponent ? (
-          <ParamsFieldsComponent
-            actionParams={actionItem.params as any}
-            index={index}
-            errors={actionParamsErrors.errors}
-            editAction={setActionParamsProperty}
-            messageVariables={
-              alertTypesIndex && alertTypesIndex[alert.alertTypeId]
-                ? alertTypesIndex[alert.alertTypeId].actionVariables
-                : undefined
-            }
-            defaultMessage={alertTypeModel?.defaultActionMessage ?? undefined}
-          />
-        ) : null}
-      </EuiAccordion>
-    );
-  };
-
-  const getAddConnectorsForm = (actionItem: AlertAction, index: number) => {
-    const actionTypeName = actionTypesIndex
-      ? actionTypesIndex[actionItem.actionTypeId].name
-      : actionItem.actionTypeId;
-    const actionTypeRegisterd = actionTypeRegistry.get(actionItem.actionTypeId);
-    if (!actionTypeRegisterd || actionItem.group !== defaultActionGroupId) return null;
-    return (
-      <EuiAccordion
-        initialIsOpen={true}
-        key={index}
-        id={index.toString()}
-        className="euiAccordionForm"
-        buttonContentClassName="euiAccordionForm__button"
-        data-test-subj={`alertActionAccordion-${defaultActionGroupId}`}
-        buttonContent={
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={actionTypeRegisterd.iconClass} size="m" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h5>
-                  <FormattedMessage
-                    defaultMessage="Action: {actionConnectorName}"
-                    id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeEditTitle"
-                    values={{
-                      actionConnectorName: actionTypeRegisterd.actionTypeTitle,
-                    }}
-                  />
-                </h5>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        extraAction={
-          <EuiButtonIcon
-            iconType="cross"
-            color="danger"
-            className="euiAccordionForm__extraAction"
-            aria-label={i18n.translate(
-              'xpack.triggersActionsUI.sections.alertForm.accordion.deleteIconAriaLabel',
-              {
-                defaultMessage: 'Delete',
-              }
-            )}
-            onClick={() => {
-              const updatedActions = alert.actions.filter(
-                (item: AlertAction) => item.id !== actionItem.id
-              );
-              setAlertProperty('actions', updatedActions);
-              setIsAddActionPanelOpen(
-                updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length === 0
-              );
-              setActiveActionItem(undefined);
-            }}
-          />
-        }
-        paddingSize="l"
-      >
-        <EuiEmptyPrompt
-          title={
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertForm.emptyConnectorsLabel"
-              defaultMessage="There are no {actionTypeName} connectors"
-              values={{
-                actionTypeName,
-              }}
-            />
-          }
-          actions={[
-            <EuiButton
-              color="primary"
-              fill
-              data-test-subj="createActionConnectorButton"
-              onClick={() => {
-                setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
-                setAddModalVisibility(true);
-              }}
-            >
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertForm.addConnectorButtonLabel"
-                defaultMessage="Add {actionTypeName} connector"
-                values={{
-                  actionTypeName,
-                }}
-              />
-            </EuiButton>,
-          ]}
-        />
-      </EuiAccordion>
-    );
-  };
-
-  const selectedGroupActions = (
-    <Fragment>
-      {alert.actions.map((actionItem: AlertAction, index: number) => {
-        const actionConnector = connectors.find(field => field.id === actionItem.id);
-        // connectors doesn't exists
-        if (!actionConnector) {
-          return getAddConnectorsForm(actionItem, index);
-        }
-        return getActionTypeForm(actionItem, actionConnector, index);
-      })}
-      <EuiSpacer size="m" />
-      {isAddActionPanelOpen === false ? (
-        <EuiButton
-          iconType="plusInCircle"
-          data-test-subj="addAlertActionButton"
-          onClick={() => setIsAddActionPanelOpen(true)}
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertForm.addActionButtonLabel"
-            defaultMessage="Add action"
-          />
-        </EuiButton>
-      ) : null}
-    </Fragment>
-  );
 
   const alertTypeDetails = (
     <Fragment>
@@ -630,31 +213,27 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
         />
       ) : null}
       <EuiSpacer size="xl" />
-      {selectedGroupActions}
-      {isAddActionPanelOpen ? (
-        <Fragment>
-          <EuiTitle size="xs">
-            <h5 id="alertActionTypeTitle">
-              <FormattedMessage
-                defaultMessage="Actions: Select an action type"
-                id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeTitle"
-              />
-            </h5>
-          </EuiTitle>
-          <EuiSpacer />
-          <EuiFlexGroup gutterSize="s" wrap>
-            {isLoadingActionTypes ? (
-              <SectionLoading>
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertForm.loadingActionTypesDescription"
-                  defaultMessage="Loading action types…"
-                />
-              </SectionLoading>
-            ) : (
-              actionTypeNodes
-            )}
-          </EuiFlexGroup>
-        </Fragment>
+      {defaultActionGroupId ? (
+        <ActionForm
+          actions={alert.actions}
+          messageVariables={
+            alertTypesIndex && alertTypesIndex[alert.alertTypeId]
+              ? alertTypesIndex[alert.alertTypeId].actionVariables
+              : undefined
+          }
+          defaultActionGroupId={defaultActionGroupId}
+          setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
+          setAlertProperty={(updatedActions: AlertAction[]) =>
+            setAlertProperty('actions', updatedActions)
+          }
+          setActionParamsProperty={(key: string, value: any, index: number) =>
+            setActionParamsProperty(key, value, index)
+          }
+          http={http}
+          actionTypeRegistry={actionTypeRegistry}
+          defaultActionMessage={alertTypeModel?.defaultActionMessage}
+          toastNotifications={toastNotifications}
+        />
       ) : null}
     </Fragment>
   );
@@ -854,22 +433,6 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
           </EuiFlexGroup>
         </Fragment>
       )}
-      {actionTypesIndex && activeActionItem ? (
-        <ConnectorAddModal
-          key={activeActionItem.index}
-          actionType={actionTypesIndex[activeActionItem.actionTypeId]}
-          addModalVisible={addModalVisible}
-          setAddModalVisibility={setAddModalVisibility}
-          postSaveEventHandler={(savedAction: ActionConnector) => {
-            connectors.push(savedAction);
-            setActionProperty('id', savedAction.id, activeActionItem.index);
-          }}
-          actionTypeRegistry={actionTypeRegistry}
-          alertTypeRegistry={alertTypeRegistry}
-          http={http}
-          toastNotifications={toastNotifications}
-        />
-      ) : null}
     </EuiForm>
   );
 };

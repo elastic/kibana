@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MessageBody } from '../../../../components/ml/api/throw_if_not_ok';
+import { MessageBody } from '../../../../hooks/api/throw_if_not_ok';
 
 export class PrivilegeUserError extends Error {
   message: string = '';

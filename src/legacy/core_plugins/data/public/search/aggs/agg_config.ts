@@ -20,10 +20,8 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { IAggType } from './agg_type';
-import { AggGroupNames } from './agg_groups';
 import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
-import { Schema } from './schemas';
 import {
   ISearchSource,
   FetchOptions,
@@ -38,36 +36,8 @@ export interface AggConfigOptions {
   enabled?: boolean;
   id?: string;
   params?: Record<string, any>;
-  schema?: string | Schema;
+  schema?: string;
 }
-
-const unknownSchema: Schema = {
-  name: 'unknown',
-  title: 'Unknown', // only here for illustrative purposes
-  hideCustomLabel: true,
-  aggFilter: [],
-  min: 1,
-  max: 1,
-  params: [],
-  defaults: {},
-  editor: false,
-  group: AggGroupNames.Metrics,
-  aggSettings: {
-    top_hits: {
-      allowStrings: true,
-    },
-  },
-};
-
-const getSchemaFromRegistry = (schemas: any, schema: string): Schema => {
-  let registeredSchema = schemas ? schemas.byName[schema] : null;
-  if (!registeredSchema) {
-    registeredSchema = Object.assign({}, unknownSchema);
-    registeredSchema.name = schema;
-  }
-
-  return registeredSchema;
-};
 
 /**
  * @name AggConfig
@@ -122,8 +92,8 @@ export class AggConfig {
   public params: any;
   public parent?: IAggConfigs;
   public brandNew?: boolean;
+  public schema?: string;
 
-  private __schema: Schema;
   private __type: IAggType;
   private __typeDecorations: any;
   private subAggs: AggConfig[] = [];
@@ -141,14 +111,12 @@ export class AggConfig {
     this.setType(opts.type);
 
     if (opts.schema) {
-      this.setSchema(opts.schema);
+      this.schema = opts.schema;
     }
 
     // set the params to the values from opts, or just to the defaults
     this.setParams(opts.params || {});
 
-    // @ts-ignore
-    this.__schema = this.__schema;
     // @ts-ignore
     this.__type = this.__type;
   }
@@ -305,16 +273,13 @@ export class AggConfig {
       id: this.id,
       enabled: this.enabled,
       type: this.type && this.type.name,
-      schema: _.get(this, 'schema.name', this.schema),
+      schema: this.schema,
       params: outParams,
     };
   }
 
   getAggParams() {
-    return [
-      ...(_.has(this, 'type.params') ? this.type.params : []),
-      ...(_.has(this, 'schema.params') ? (this.schema as Schema).params : []),
-    ];
+    return [...(_.has(this, 'type.params') ? this.type.params : [])];
   }
 
   getRequestAggs() {
@@ -434,9 +399,6 @@ export class AggConfig {
 
     // clear out the previous params except for a few special ones
     this.setParams({
-      // split row/columns is "outside" of the agg, so don't reset it
-      row: this.params.row,
-
       // almost every agg has fields, so we try to persist that when type changes
       field: availableFields.find((field: any) => field.name === this.getField()),
     });
@@ -444,18 +406,5 @@ export class AggConfig {
 
   public setType(type: IAggType) {
     this.type = type;
-  }
-
-  public get schema() {
-    return this.__schema;
-  }
-
-  public set schema(schema) {
-    this.__schema = schema;
-  }
-
-  public setSchema(schema: string | Schema) {
-    this.schema =
-      typeof schema === 'string' ? getSchemaFromRegistry(this.aggConfigs.schemas, schema) : schema;
   }
 }
