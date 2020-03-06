@@ -39,7 +39,7 @@ export type ComboBoxGroupedOptions<T> = Array<GroupOrOption<T>>;
  *
  * @returns An array of grouped and sorted alphabetically `objects` that are compatible with EuiComboBox options.
  */
-function groupAndSortBy<
+export function groupAndSortBy<
   T extends Record<TGroupBy | TLabelName, string>,
   TGroupBy extends string = 'type',
   TLabelName extends string = 'title'
@@ -79,4 +79,31 @@ function sortByLabel<T>(a: GroupOrOption<T>, b: GroupOrOption<T>) {
   return (a.label || '').toLowerCase().localeCompare((b.label || '').toLowerCase());
 }
 
-export { groupAndSortBy };
+/**
+ * Check a string if it's a valid JSON.
+ *
+ * @param {string} value a string that should be validated
+ * @returns {boolean} true if value is a valid JSON or if value is an empty string, or a string with whitespaces, otherwise false
+ */
+export function isValidJson(value: string): boolean {
+  if (!value || value.length === 0) {
+    return true;
+  }
+
+  const trimmedValue = value.trim();
+
+  if (trimmedValue.length === 0) {
+    return true;
+  }
+
+  if (trimmedValue[0] === '{' || trimmedValue[0] === '[') {
+    try {
+      JSON.parse(trimmedValue);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  } else {
+    return false;
+  }
+}

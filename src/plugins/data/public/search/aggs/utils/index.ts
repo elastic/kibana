@@ -18,5 +18,4 @@
  */
 
 export * from './calculate_auto_time_expression';
-export * from './is_valid_json';
 export * from './to_angular_json';

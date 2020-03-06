@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { groupAndSortBy } from './utils';
+import { groupAndSortBy, isValidJson } from './utils';
 import { AggGroupNames } from './legacy_imports';
 
 jest.mock('ui/new_platform');
@@ -193,5 +193,32 @@ describe('Default Editor groupAggregationsBy', () => {
       },
     ];
     expect(groupAndSortBy(aggs, 'subtype', 'title')).toEqual(groupedAggs);
+  });
+});
+
+describe('DefaultEditor isValidJson', () => {
+  const input = {
+    valid: '{ "test": "json input" }',
+    invalid: 'strings are not json',
+  };
+
+  it('should return true when empty string', () => {
+    expect(isValidJson('')).toBeTruthy();
+  });
+
+  it('should return true when undefine', () => {
+    expect(isValidJson(undefined as any)).toBeTruthy();
+  });
+
+  it('should return false when invalid string', () => {
+    expect(isValidJson(input.invalid)).toBeFalsy();
+  });
+
+  it('should return true when valid string', () => {
+    expect(isValidJson(input.valid)).toBeTruthy();
+  });
+
+  it('should return false if a number', () => {
+    expect(isValidJson('0')).toBeFalsy();
   });
 });
