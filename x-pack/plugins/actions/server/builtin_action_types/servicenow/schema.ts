@@ -40,9 +40,10 @@ export const SecretsSchemaProps = {
 export const SecretsSchema = schema.object(SecretsSchemaProps);
 
 export const CommentSchema = schema.object({
-  id: schema.string(),
+  commentId: schema.string(),
   comment: schema.string(),
   version: schema.maybe(schema.string()),
+  incidentCommentId: schema.maybe(schema.string()),
 });
 
 export const ExecutorAction = schema.oneOf([
@@ -51,8 +52,7 @@ export const ExecutorAction = schema.oneOf([
 ]);
 
 export const ParamsSchema = schema.object({
-  executorAction: ExecutorAction,
-  id: schema.nullable(schema.string()),
+  caseId: schema.string(),
   comments: schema.maybe(schema.arrayOf(CommentSchema)),
   description: schema.maybe(schema.string()),
   title: schema.maybe(schema.string()),

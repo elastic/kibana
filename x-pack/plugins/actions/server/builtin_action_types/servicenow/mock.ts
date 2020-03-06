@@ -5,7 +5,7 @@
  */
 
 import { MapsType, FinalMapping, ParamsType } from './types';
-import { Incident } from '../lib/servicenow/types';
+import { Incident, IncidentResponse, UpdateIncident } from '../lib/servicenow/types';
 
 const mapping: MapsType[] = [
   { source: 'title', target: 'short_description', onEditAndUpdate: 'nothing' },
@@ -44,20 +44,22 @@ finalMapping.set(mapping[0].target, {
 
 const params: ParamsType = {
   executorAction: 'updateIncident',
-  id: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
+  caseId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
   incidentId: 'ceb5986e079f00100e48fbbf7c1ed06d',
   title: 'Incident title',
   description: 'Incident description',
   comments: [
     {
-      id: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
+      commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
       version: 'WzU3LDFd',
       comment: 'A comment',
+      incidentCommentId: '263ede42075300100e48fbbf7c1ed047',
     },
     {
-      id: 'e3db587f-ca27-4ae9-ad2e-31f2dcc9bd0d',
+      commentId: 'e3db587f-ca27-4ae9-ad2e-31f2dcc9bd0d',
       version: 'WlK3LDFd',
       comment: 'Another comment',
+      incidentCommentId: '315e1ece071300100e48fbbf7c1ed0d0',
     },
   ],
 };
