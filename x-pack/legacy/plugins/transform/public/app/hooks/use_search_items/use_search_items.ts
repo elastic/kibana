@@ -4,30 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState, FC } from 'react';
+import { useEffect, useState } from 'react';
+
+import { createSavedSearchesLoader } from '../../../shared_imports';
 
 import { useAppDependencies } from '../../app_dependencies';
 
 import {
   createSearchItems,
+  getIndexPatternIdByTitle,
   loadCurrentIndexPattern,
   loadIndexPatterns,
   loadCurrentSavedSearch,
+  SearchItems,
 } from './common';
 
-import { InitializedKibanaContextValue, KibanaContext, KibanaContextValue } from './kibana_context';
+export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
+  const [savedObjectId, setSavedObjectId] = useState(defaultSavedObjectId);
 
-interface Props {
-  savedObjectId: string;
-}
-
-export const KibanaProvider: FC<Props> = ({ savedObjectId, children }) => {
   const appDeps = useAppDependencies();
   const indexPatterns = appDeps.plugins.data.indexPatterns;
+  const uiSettings = appDeps.core.uiSettings;
   const savedObjectsClient = appDeps.core.savedObjects.client;
-  const savedSearches = appDeps.plugins.savedSearches.getClient();
+  const savedSearches = createSavedSearchesLoader({
+    savedObjectsClient,
+    indexPatterns,
+    chrome: appDeps.core.chrome,
+    overlays: appDeps.core.overlays,
+  });
 
-  const [contextValue, setContextValue] = useState<KibanaContextValue>({ initialized: false });
+  const [searchItems, setSearchItems] = useState<SearchItems | undefined>(undefined);
 
   async function fetchSavedObject(id: string) {
     await loadIndexPatterns(savedObjectsClient, indexPatterns);
@@ -47,31 +53,21 @@ export const KibanaProvider: FC<Props> = ({ savedObjectId, children }) => {
       // Just let fetchedSavedSearch stay undefined in case it doesn't exist.
     }
 
-    const kibanaConfig = appDeps.core.uiSettings;
-
-    const {
-      indexPattern: currentIndexPattern,
-      savedSearch: currentSavedSearch,
-      combinedQuery,
-    } = createSearchItems(fetchedIndexPattern, fetchedSavedSearch, kibanaConfig);
-
-    const kibanaContext: InitializedKibanaContextValue = {
-      indexPatterns,
-      initialized: true,
-      kibanaConfig,
-      combinedQuery,
-      currentIndexPattern,
-      currentSavedSearch,
-    };
-
-    setContextValue(kibanaContext);
+    setSearchItems(createSearchItems(fetchedIndexPattern, fetchedSavedSearch, uiSettings));
   }
 
   useEffect(() => {
-    fetchSavedObject(savedObjectId);
-    // fetchSavedObject should not be tracked.
+    if (savedObjectId !== undefined) {
+      fetchSavedObject(savedObjectId);
+    }
+    // Run this only when savedObjectId changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedObjectId]);
 
-  return <KibanaContext.Provider value={contextValue}>{children}</KibanaContext.Provider>;
+  return {
+    getIndexPatternIdByTitle,
+    loadIndexPatterns,
+    searchItems,
+    setSavedObjectId,
+  };
 };
