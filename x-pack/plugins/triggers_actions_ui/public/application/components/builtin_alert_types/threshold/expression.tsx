@@ -66,6 +66,7 @@ const expressionFieldsWithValidation = [
 
 interface IndexThresholdProps {
   alertParams: IndexThresholdAlertParams;
+  alertInterval: string;
   setAlertParams: (property: string, value: any) => void;
   setAlertProperty: (key: string, value: any) => void;
   errors: { [key: string]: string[] };
@@ -74,6 +75,7 @@ interface IndexThresholdProps {
 
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThresholdProps> = ({
   alertParams,
+  alertInterval,
   setAlertParams,
   setAlertProperty,
   errors,
@@ -499,6 +501,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
           <Fragment>
             <ThresholdVisualization
               alertParams={alertParams}
+              alertInterval={alertInterval}
               aggregationTypes={builtInAggregationTypes}
               comparators={builtInComparators}
               alertsContext={alertsContext}
