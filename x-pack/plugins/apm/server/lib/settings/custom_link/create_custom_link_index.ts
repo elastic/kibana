@@ -12,7 +12,7 @@ import {
 } from '../../helpers/create_or_update_index';
 import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
-export async function createApmAgentConfigurationIndex({
+export const createApmCustomLinkIndex = async ({
   esClient,
   config,
   logger
@@ -20,55 +20,41 @@ export async function createApmAgentConfigurationIndex({
   esClient: IClusterClient;
   config: APMConfig;
   logger: Logger;
-}) {
-  const index = getApmIndicesConfig(config).apmAgentConfigurationIndex;
+}) => {
+  const index = getApmIndicesConfig(config).apmCustomLinkIndex;
   return createOrUpdateIndex({ index, esClient, logger, mappings });
-}
+};
 
 const mappings: Mappings = {
   properties: {
     '@timestamp': {
       type: 'date'
     },
+    label: {
+      type: 'text'
+    },
+    url: {
+      type: 'keyword'
+    },
     service: {
       properties: {
         name: {
-          type: 'keyword',
-          ignore_above: 1024
+          type: 'keyword'
         },
         environment: {
-          type: 'keyword',
-          ignore_above: 1024
+          type: 'keyword'
         }
       }
     },
-    settings: {
+    transaction: {
       properties: {
-        transaction_sample_rate: {
-          type: 'scaled_float',
-          scaling_factor: 1000,
-          ignore_malformed: true,
-          coerce: false
+        name: {
+          type: 'keyword'
         },
-        capture_body: {
-          type: 'keyword',
-          ignore_above: 1024
-        },
-        transaction_max_spans: {
-          type: 'short'
+        type: {
+          type: 'keyword'
         }
       }
-    },
-    applied_by_agent: {
-      type: 'boolean'
-    },
-    agent_name: {
-      type: 'keyword',
-      ignore_above: 1024
-    },
-    etag: {
-      type: 'keyword',
-      ignore_above: 1024
     }
   }
 };
