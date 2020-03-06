@@ -71,12 +71,7 @@ interface AlertFormProps {
   canChangeTrigger?: boolean; // to hide Change trigger button
 }
 
-export const AlertForm = ({
-  alert,
-  canChangeTrigger = true,
-  dispatch,
-  errors,
-}: AlertFormProps) => {
+export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: AlertFormProps) => {
   const alertsContext = useAlertsContext();
   const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = alertsContext;
 
