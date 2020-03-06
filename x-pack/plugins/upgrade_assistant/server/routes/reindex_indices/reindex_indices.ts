@@ -109,38 +109,8 @@ export function registerReindexIndicesRoutes(
         request,
         response
       ) => {
-<<<<<<< HEAD:x-pack/plugins/upgrade_assistant/server/routes/reindex_indices.ts
-        const { indexName } = request.params as any;
-        const { openAndClose } = request.body as any;
-        const { client } = savedObjects;
-        const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
-        const reindexActions = reindexActionsFactory(client, callAsCurrentUser);
-        const reindexService = reindexServiceFactory(
-          callAsCurrentUser,
-          reindexActions,
-          log,
-          licensing
-        );
-
-        try {
-          if (!(await reindexService.hasRequiredPrivileges(indexName))) {
-            return response.forbidden({
-              body: `You do not have adequate privileges to reindex this index.`,
-            });
-          }
-
-          const existingOp = await reindexService.findReindexOperation(indexName);
-
-          // If the reindexOp already exists and it's paused, resume it. Otherwise create a new one.
-          const reindexOp =
-            existingOp && existingOp.attributes.status === ReindexStatus.paused
-              ? await reindexService.resumeReindexOperation(indexName)
-              : await reindexService.createReindexOperation(indexName, { openAndClose });
-
-          // Add users credentials for the worker to use
-          credentialStore.set(reindexOp, request.headers);
-=======
         const { indexName } = request.params;
+        const { openAndClose } = request.body;
         try {
           const result = await reindexHandler({
             savedObjects: savedObjectsClient,
@@ -150,8 +120,8 @@ export function registerReindexIndicesRoutes(
             licensing,
             headers: request.headers,
             credentialStore,
+            reindexOptions: { openAndClose },
           });
->>>>>>> 3a53fe8e452b6b872fe59c53682b7f79c4cea7ad:x-pack/plugins/upgrade_assistant/server/routes/reindex_indices/reindex_indices.ts
 
           // Kick the worker on this node to immediately pickup the new reindex operation.
           getWorker().forceRefresh();
@@ -236,7 +206,9 @@ export function registerReindexIndicesRoutes(
               licensing,
               headers: request.headers,
               credentialStore,
-              enqueue: true,
+              reindexOptions: {
+                enqueue: true,
+              },
             });
             results.enqueued.push(result);
           } catch (e) {
