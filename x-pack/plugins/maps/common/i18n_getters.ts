@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { $Values } from '@kbn/utility-types';
 import { ES_SPATIAL_RELATIONS } from './constants';
 
 export function getAppTitle() {
@@ -26,7 +27,7 @@ export function getUrlLabel() {
   });
 }
 
-export function getEsSpatialRelationLabel(spatialRelation) {
+export function getEsSpatialRelationLabel(spatialRelation: $Values<typeof ES_SPATIAL_RELATIONS>) {
   switch (spatialRelation) {
     case ES_SPATIAL_RELATIONS.INTERSECTS:
       return i18n.translate('xpack.maps.common.esSpatialRelation.intersectsLabel', {
@@ -40,6 +41,7 @@ export function getEsSpatialRelationLabel(spatialRelation) {
       return i18n.translate('xpack.maps.common.esSpatialRelation.withinLabel', {
         defaultMessage: 'within',
       });
+    // @ts-ignore
     case ES_SPATIAL_RELATIONS.CONTAINS:
       return i18n.translate('xpack.maps.common.esSpatialRelation.containsLabel', {
         defaultMessage: 'contains',
