@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dispatch, SetStateAction, useCallback, useEffect, useReducer, useState } from 'react';
-import { isEqual } from 'lodash/fp';
+import { useCallback, useEffect, useReducer } from 'react';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
 import { AllCases, SortFieldCase, FilterOptions, QueryParams, Case } from './types';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import * as i18n from './translations';
 import { UpdateByKey } from './use_update_case';
-import { getCases, updateCaseProperty } from './api';
+import { getCases, patchCase } from './api';
 
 export interface UseGetCasesState {
   caseCount: CaseCount;
@@ -108,11 +107,11 @@ const initialData: AllCases = {
   total: 0,
 };
 interface UseGetCases extends UseGetCasesState {
-  dispatchUpdateCaseProperty: Dispatch<UpdateCase>;
-  getCaseCount: Dispatch<keyof CaseCount>;
-  setFilters: Dispatch<SetStateAction<FilterOptions>>;
-  setQueryParams: Dispatch<SetStateAction<Partial<QueryParams>>>;
-  setSelectedCases: Dispatch<Case[]>;
+  dispatchUpdateCaseProperty: ({ updateKey, updateValue, caseId, version }: UpdateCase) => void;
+  getCaseCount: (caseState: keyof CaseCount) => void;
+  setFilters: (filters: FilterOptions) => void;
+  setQueryParams: (queryParams: QueryParams) => void;
+  setSelectedCases: (mySelectedCases: Case[]) => void;
 }
 export const useGetCases = (): UseGetCases => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
@@ -137,33 +136,27 @@ export const useGetCases = (): UseGetCases => {
     selectedCases: [],
   });
   const [, dispatchToaster] = useStateToaster();
-  const [filterQuery, setFilters] = useState<FilterOptions>(state.filterOptions);
-  const [queryParams, setQueryParams] = useState<Partial<QueryParams>>(state.queryParams);
 
   const setSelectedCases = useCallback((mySelectedCases: Case[]) => {
     dispatch({ type: 'UPDATE_TABLE_SELECTIONS', payload: mySelectedCases });
   }, []);
 
-  useEffect(() => {
-    if (!isEqual(queryParams, state.queryParams)) {
-      dispatch({ type: 'UPDATE_QUERY_PARAMS', payload: queryParams });
-    }
-  }, [queryParams, state.queryParams]);
+  const setQueryParams = useCallback((newQueryParams: QueryParams) => {
+    dispatch({ type: 'UPDATE_QUERY_PARAMS', payload: newQueryParams });
+  }, []);
 
-  useEffect(() => {
-    if (!isEqual(filterQuery, state.filterOptions)) {
-      dispatch({ type: 'UPDATE_FILTER_OPTIONS', payload: filterQuery });
-    }
-  }, [filterQuery, state.filterOptions]);
+  const setFilters = useCallback((newFilters: FilterOptions) => {
+    dispatch({ type: 'UPDATE_FILTER_OPTIONS', payload: newFilters });
+  }, []);
 
-  const fetchCases = useCallback(() => {
+  const fetchCases = useCallback((filterOptions: FilterOptions, queryParams: QueryParams) => {
     let didCancel = false;
     const fetchData = async () => {
       dispatch({ type: 'FETCH_INIT', payload: 'cases' });
       try {
         const response = await getCases({
-          filterOptions: state.filterOptions,
-          queryParams: state.queryParams,
+          filterOptions,
+          queryParams,
         });
         if (!didCancel) {
           dispatch({
@@ -173,7 +166,11 @@ export const useGetCases = (): UseGetCases => {
         }
       } catch (error) {
         if (!didCancel) {
-          errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
+          errorToToaster({
+            title: i18n.ERROR_TITLE,
+            error: error.body && error.body.message ? new Error(error.body.message) : error,
+            dispatchToaster,
+          });
           dispatch({ type: 'FETCH_FAILURE', payload: 'cases' });
         }
       }
@@ -182,8 +179,12 @@ export const useGetCases = (): UseGetCases => {
     return () => {
       didCancel = true;
     };
-  }, [state.queryParams, state.filterOptions]);
-  useEffect(() => fetchCases(), [state.queryParams, state.filterOptions]);
+  }, []);
+
+  useEffect(() => fetchCases(state.filterOptions, state.queryParams), [
+    state.queryParams,
+    state.filterOptions,
+  ]);
 
   const getCaseCount = useCallback((caseState: keyof CaseCount) => {
     let didCancel = false;
@@ -218,14 +219,14 @@ export const useGetCases = (): UseGetCases => {
       const fetchData = async () => {
         dispatch({ type: 'FETCH_INIT', payload: 'caseUpdate' });
         try {
-          await updateCaseProperty(
+          await patchCase(
             caseId,
             { [updateKey]: updateValue },
             version ?? '' // saved object versions are typed as string | undefined, hope that's not true
           );
           if (!didCancel) {
             dispatch({ type: 'FETCH_UPDATE_CASE_SUCCESS' });
-            fetchCases();
+            fetchCases(state.filterOptions, state.queryParams);
             getCaseCount('open');
             getCaseCount('closed');
           }
@@ -241,7 +242,7 @@ export const useGetCases = (): UseGetCases => {
         didCancel = true;
       };
     },
-    [filterQuery, state.filterOptions]
+    [state.filterOptions, state.queryParams]
   );
 
   return {

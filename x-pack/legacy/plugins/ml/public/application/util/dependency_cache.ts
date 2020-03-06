@@ -35,7 +35,6 @@ export interface DependencyCache {
   autocomplete: DataPublicPluginStart['autocomplete'] | null;
   basePath: IBasePath | null;
   savedObjectsClient: SavedObjectsClientContract | null;
-  XSRF: string | null;
   application: ApplicationStart | null;
   http: HttpStart | null;
   security: SecurityPluginSetup | null;
@@ -54,7 +53,6 @@ const cache: DependencyCache = {
   autocomplete: null,
   basePath: null,
   savedObjectsClient: null,
-  XSRF: null,
   application: null,
   http: null,
   security: null,
@@ -73,7 +71,6 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.autocomplete = deps.autocomplete || null;
   cache.basePath = deps.basePath || null;
   cache.savedObjectsClient = deps.savedObjectsClient || null;
-  cache.XSRF = deps.XSRF || null;
   cache.application = deps.application || null;
   cache.http = deps.http || null;
   cache.security = deps.security || null;
@@ -160,13 +157,6 @@ export function getSavedObjectsClient() {
     throw new Error("savedObjectsClient hasn't been initialized");
   }
   return cache.savedObjectsClient;
-}
-
-export function getXSRF() {
-  if (cache.XSRF === null) {
-    throw new Error("xsrf hasn't been initialized");
-  }
-  return cache.XSRF;
 }
 
 export function getApplication() {

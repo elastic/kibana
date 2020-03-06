@@ -5,10 +5,11 @@
  */
 
 import { useEffect, useReducer } from 'react';
+
 import { errorToToaster, useStateToaster } from '../../components/toasters';
-import * as i18n from './translations';
+import { getTags } from './api';
 import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
-import { KibanaServices } from '../../lib/kibana';
+import * as i18n from './translations';
 
 interface TagsState {
   data: string[];
@@ -61,15 +62,17 @@ export const useGetTags = (): [TagsState] => {
     const fetchData = async () => {
       dispatch({ type: FETCH_INIT });
       try {
-        const response = await KibanaServices.get().http.fetch('/api/cases/tags', {
-          method: 'GET',
-        });
+        const response = await getTags();
         if (!didCancel) {
           dispatch({ type: FETCH_SUCCESS, payload: response });
         }
       } catch (error) {
         if (!didCancel) {
-          errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
+          errorToToaster({
+            title: i18n.ERROR_TITLE,
+            error: error.body && error.body.message ? new Error(error.body.message) : error,
+            dispatchToaster,
+          });
           dispatch({ type: FETCH_FAILURE });
         }
       }
