@@ -22,25 +22,6 @@ import { useSelector } from 'react-redux';
 import { KueryBar } from '../../connected';
 import { selectAlertStatus } from '../../../state/selectors';
 
-interface AlertMonitorStatusProps {
-  autocomplete: any;
-  enabled: boolean;
-  numTimes: number;
-  setAlertParams: (key: string, value: any) => void;
-  timerange: {
-    from: string;
-    to: string;
-  };
-}
-
-interface AlertExpressionPopoverProps {
-  content: React.ReactElement;
-  description: string;
-  'data-test-subj': string;
-  id: string;
-  value: string;
-}
-
 interface AlertNumberFieldProps {
   'data-test-subj': string;
   disabled: boolean;
@@ -77,6 +58,14 @@ export const AlertFieldNumber = ({
   );
 };
 
+interface AlertExpressionPopoverProps {
+  content: React.ReactElement;
+  description: string;
+  'data-test-subj': string;
+  id: string;
+  value: string;
+}
+
 const AlertExpressionPopover: React.FC<AlertExpressionPopoverProps> = ({
   content,
   'data-test-subj': dataTestSubj,
@@ -106,6 +95,17 @@ const AlertExpressionPopover: React.FC<AlertExpressionPopoverProps> = ({
     </EuiPopover>
   );
 };
+
+interface AlertMonitorStatusProps {
+  autocomplete: any;
+  enabled: boolean;
+  numTimes: number;
+  setAlertParams: (key: string, value: any) => void;
+  timerange: {
+    from: string;
+    to: string;
+  };
+}
 
 export const AlertMonitorStatus: React.FC<AlertMonitorStatusProps> = props => {
   const { filters, locations } = useSelector(selectAlertStatus);
