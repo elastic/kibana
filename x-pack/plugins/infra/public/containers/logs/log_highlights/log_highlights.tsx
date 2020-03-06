@@ -13,6 +13,8 @@ import { useNextAndPrevious } from './next_and_previous';
 import { LogPositionState } from '../log_position';
 import { TimeKey } from '../../../../common/time';
 
+const FETCH_THROTTLE_INTERVAL = 3000;
+
 export const useLogHighlightsState = ({
   sourceId,
   sourceVersion,
@@ -31,8 +33,8 @@ export const useLogHighlightsState = ({
     LogPositionState.Context
   );
 
-  const throttledStartTimestamp = useThrottle(startTimestamp, 3000);
-  const throttledEndTimestamp = useThrottle(endTimestamp, 3000);
+  const throttledStartTimestamp = useThrottle(startTimestamp, FETCH_THROTTLE_INTERVAL);
+  const throttledEndTimestamp = useThrottle(endTimestamp, FETCH_THROTTLE_INTERVAL);
 
   const {
     logEntryHighlights,

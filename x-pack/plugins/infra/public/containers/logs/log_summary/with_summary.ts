@@ -13,6 +13,8 @@ import { LogSummaryBuckets, useLogSummary } from './log_summary';
 import { LogFilterState } from '../log_filter';
 import { LogPositionState } from '../log_position';
 
+const FETCH_THROTTLE_INTERVAL = 3000;
+
 export const WithSummary = ({
   children,
 }: {
@@ -27,8 +29,8 @@ export const WithSummary = ({
   const { startTimestamp, endTimestamp } = useContext(LogPositionState.Context);
 
   // Keep it reasonably updated for the `now` case, but don't reload all the time when the user scrolls
-  const throttledStartTimestamp = useThrottle(startTimestamp, 3000);
-  const throttledEndTimestamp = useThrottle(endTimestamp, 3000);
+  const throttledStartTimestamp = useThrottle(startTimestamp, FETCH_THROTTLE_INTERVAL);
+  const throttledEndTimestamp = useThrottle(endTimestamp, FETCH_THROTTLE_INTERVAL);
 
   const { buckets, start, end } = useLogSummary(
     sourceId,
