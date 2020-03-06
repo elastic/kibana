@@ -15,12 +15,11 @@ export const handleCreateIncident = async ({
 }: ActionHandlerArguments) => {
   const paramsAsIncident = params as Incident;
 
-  const userId = await serviceNow.getUserID();
   const { id, number } = await serviceNow.createIncident({
     ...paramsAsIncident,
-    caller_id: userId,
   });
 
+  // Should return comment ID
   if (comments && Array.isArray(comments) && comments.length > 0) {
     await serviceNow.batchAddComments(
       id,
@@ -43,6 +42,7 @@ export const handleUpdateIncident = async ({
 
   await serviceNow.updateIncident(incidentId, { ...paramsAsIncident });
 
+  // Should return comment ID
   if (comments && Array.isArray(comments) && comments.length > 0) {
     await serviceNow.batchAddComments(
       incidentId,
