@@ -7,15 +7,12 @@
 import React from 'react';
 import './form_drilldown_wizard.scss';
 import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { DrilldownHelloBar } from '../drilldown_hello_bar';
 import { txtDrilldownAction, txtNameOfDrilldown, txtUntitledDrilldown } from './i18n';
 import {
-  ActionFactory,
   ActionBaseConfig,
+  ActionFactory,
   ActionWizard,
 } from '../../../../advanced_ui_actions/public';
-// TODO: this should be actual input to the component and should not be using test data
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 
 const noop = () => {};
 
@@ -72,7 +69,6 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
 
   return (
     <>
-      <DrilldownHelloBar />
       <EuiSpacer size={'l'} />
       <EuiForm>
         {nameFragment}

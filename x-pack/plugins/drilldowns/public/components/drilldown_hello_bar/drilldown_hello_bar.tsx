@@ -22,9 +22,6 @@ export interface DrilldownHelloBarProps {
   onHideClick?: () => void;
 }
 
-/**
- * @todo improve with https://github.com/elastic/eui/pull/2837 when newer eui is merged into kibana
- */
 export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({
   docsLink,
   onHideClick = () => {},

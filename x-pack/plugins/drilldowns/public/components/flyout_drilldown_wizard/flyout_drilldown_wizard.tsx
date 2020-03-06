@@ -21,6 +21,7 @@ import {
   urlDrilldownActionFactory,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../advanced_ui_actions/public/components/action_wizard/test_data';
+import { DrilldownHelloBar } from '../drilldown_hello_bar';
 
 export interface DrilldownWizardConfig<ActionConfig extends ActionBaseConfig = ActionBaseConfig> {
   name: string;
@@ -38,6 +39,8 @@ export interface FlyoutDrilldownWizardProps<
 
   mode?: 'create' | 'edit';
   initialDrilldownWizardConfig?: DrilldownWizardConfig<CurrentActionConfig>;
+
+  showWelcomeMessage?: boolean;
 }
 
 export function FlyoutDrilldownWizard<
@@ -49,6 +52,7 @@ export function FlyoutDrilldownWizard<
   initialDrilldownWizardConfig,
   mode = 'create',
   onDelete = () => {},
+  showWelcomeMessage = false,
 }: FlyoutDrilldownWizardProps<CurrentActionConfig>) {
   const [wizardConfig, setWizardConfig] = useState<DrilldownWizardConfig>(
     () =>
@@ -85,6 +89,15 @@ export function FlyoutDrilldownWizard<
       footer={footer}
       onClose={onClose}
       onBack={onBack}
+      banner={
+        showWelcomeMessage && (
+          <DrilldownHelloBar
+            onHideClick={() => {
+              // TODO:
+            }}
+          />
+        )
+      }
     >
       <FormDrilldownWizard
         name={wizardConfig.name}

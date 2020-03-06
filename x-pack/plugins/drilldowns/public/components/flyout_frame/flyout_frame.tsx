@@ -20,6 +20,7 @@ import { txtClose, txtBack } from './i18n';
 export interface FlyoutFrameProps {
   title?: React.ReactNode;
   footer?: React.ReactNode;
+  banner?: React.ReactNode;
   onClose?: () => void;
   onBack?: () => void;
 }
@@ -33,6 +34,7 @@ export const FlyoutFrame: React.FC<FlyoutFrameProps> = ({
   onClose,
   children,
   onBack,
+  banner,
 }) => {
   const headerFragment = (title || onBack) && (
     <EuiFlyoutHeader hasBorder>
@@ -95,7 +97,7 @@ export const FlyoutFrame: React.FC<FlyoutFrameProps> = ({
   return (
     <>
       {headerFragment}
-      <EuiFlyoutBody>{children}</EuiFlyoutBody>
+      <EuiFlyoutBody banner={banner}>{children}</EuiFlyoutBody>
       {footerFragment}
     </>
   );

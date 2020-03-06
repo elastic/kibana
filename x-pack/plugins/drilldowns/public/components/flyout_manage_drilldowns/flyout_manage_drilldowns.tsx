@@ -9,10 +9,12 @@ import { FlyoutFrame } from '../flyout_frame';
 import { DrilldownListItem, ListManageDrilldowns } from '../list_manage_drilldowns';
 import { FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
 import { txtManageDrilldowns } from './i18n';
+import { DrilldownHelloBar } from '../drilldown_hello_bar';
 
 export interface FlyoutManageDrilldownsProps {
   drilldowns: DrilldownListItem[];
   onClose?: () => void;
+  showWelcomeMessage?: boolean;
 }
 
 enum ViewState {
@@ -24,6 +26,7 @@ enum ViewState {
 export function FlyoutManageDrilldowns({
   drilldowns,
   onClose = () => {},
+  showWelcomeMessage = true,
 }: FlyoutManageDrilldownsProps) {
   const [viewState, setViewState] = useState<ViewState>(ViewState.List);
 
@@ -43,12 +46,25 @@ export function FlyoutManageDrilldowns({
           onBack={() => {
             setViewState(ViewState.List);
           }}
+          showWelcomeMessage={showWelcomeMessage}
         />
       );
     case ViewState.List:
     default:
       return (
-        <FlyoutFrame title={txtManageDrilldowns} onClose={onClose}>
+        <FlyoutFrame
+          title={txtManageDrilldowns}
+          onClose={onClose}
+          banner={
+            showWelcomeMessage && (
+              <DrilldownHelloBar
+                onHideClick={() => {
+                  // TODO:
+                }}
+              />
+            )
+          }
+        >
           <ListManageDrilldowns
             drilldowns={drilldowns}
             onCreate={() => {

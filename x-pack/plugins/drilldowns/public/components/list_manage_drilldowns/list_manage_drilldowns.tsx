@@ -79,7 +79,10 @@ export function ListManageDrilldowns({
           },
           selectableMessage: () => txtSelectDrilldown,
         }}
-        rowProps={{ 'data-test-subj': TEST_SUBJ_DRILLDOWN_ITEM }}
+        rowProps={{
+          'data-test-subj': TEST_SUBJ_DRILLDOWN_ITEM,
+          'data-testid': TEST_SUBJ_DRILLDOWN_ITEM,
+        }}
         hasActions={true}
       />
       <EuiSpacer />
