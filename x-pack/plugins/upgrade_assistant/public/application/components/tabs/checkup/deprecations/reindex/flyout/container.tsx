@@ -9,16 +9,16 @@ import { DocLinksStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiCallOut,
   EuiFlyout,
   EuiFlyoutHeader,
-  EuiPortal,
-  EuiTitle,
-  EuiCallOut,
   EuiLink,
+  EuiPortal,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 
-import { EnrichedDeprecationInfo } from '../../../../../../../../common/types';
+import { EnrichedDeprecationInfo, ReindexStatus } from '../../../../../../../../common/types';
 
 import { ReindexState } from '../polling_service';
 import { ChecklistFlyoutStep } from './checklist_step';
@@ -117,13 +117,16 @@ export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFl
     const { currentFlyoutStep } = this.state;
 
     let flyoutContents: React.ReactNode;
+
+    const globalCallout =
+      reindexBlocker === 'index-closed' && reindexState.status !== ReindexStatus.completed
+        ? getIndexClosedCallout(docLinks)
+        : undefined;
     switch (currentFlyoutStep) {
       case ReindexFlyoutStep.reindexWarnings:
         flyoutContents = (
           <WarningsFlyoutStep
-            renderGlobalCallouts={() =>
-              reindexBlocker === 'index-closed' ? getIndexClosedCallout(docLinks) : undefined
-            }
+            renderGlobalCallouts={() => globalCallout}
             closeFlyout={closeFlyout}
             warnings={reindexState.reindexWarnings!}
             advanceNextStep={this.advanceNextStep}
@@ -133,9 +136,7 @@ export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFl
       case ReindexFlyoutStep.checklist:
         flyoutContents = (
           <ChecklistFlyoutStep
-            renderGlobalCallouts={() =>
-              reindexBlocker === 'index-closed' ? getIndexClosedCallout(docLinks) : undefined
-            }
+            renderGlobalCallouts={() => globalCallout}
             closeFlyout={closeFlyout}
             reindexState={reindexState}
             startReindex={startReindex}
