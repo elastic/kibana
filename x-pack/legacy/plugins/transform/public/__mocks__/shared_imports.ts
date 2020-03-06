@@ -6,12 +6,14 @@
 
 jest.mock('ui/new_platform');
 
-export function XJsonMode() {}
-export function setDependencyCache() {}
-export const useRequest = () => ({
+export const expandLiteralStrings = jest.fn();
+export const XJsonMode = jest.fn();
+export const setDependencyCache = jest.fn();
+export const useRequest = jest.fn(() => ({
   isLoading: false,
   error: null,
   data: undefined,
-});
+}));
 export { mlInMemoryTableBasicFactory } from '../../../ml/public/application/components/ml_in_memory_table';
 export const SORT_DIRECTION = { ASC: 'asc' };
+export const KqlFilterBar = jest.fn(() => null);
