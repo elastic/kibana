@@ -12,9 +12,10 @@ import { ThemeProvider } from 'styled-components';
 
 import { wait } from '../../../lib/helpers';
 import { TestProviderWithoutDragAndDrop } from '../../../mock/test_providers';
-import { mockInsertTimelineQueryResults } from '../../../mock/timeline_results';
+import { mockOpenTimelineQueryResults } from '../../../mock/timeline_results';
 
 import { InsertTimelinePopover } from '.';
+import { InsertTimelinePopoverButton } from './insert_timeline_popover_button';
 
 jest.mock('../../../lib/kibana');
 jest.mock('../../../utils/apollo_context', () => ({
@@ -28,8 +29,12 @@ describe('InsertTimelinePopover', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockInsertTimelineQueryResults} addTypename={false}>
-            <InsertTimelinePopover onClose={jest.fn()} />
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+            <InsertTimelinePopover
+              button={<InsertTimelinePopoverButton onClick={jest.fn()} />}
+              isOpen={true}
+              onClose={jest.fn()}
+            />
           </MockedProvider>
         </TestProviderWithoutDragAndDrop>
       </ThemeProvider>
@@ -39,6 +44,8 @@ describe('InsertTimelinePopover', () => {
 
     wrapper.update();
 
-    expect(wrapper.find('div[data-test-subj="insert-timeline-modal"].euiPopover').length).toEqual(1);
+    expect(wrapper.find('div[data-test-subj="insert-timeline-popover"].euiPopover').length).toEqual(
+      1
+    );
   });
 });

@@ -118,8 +118,6 @@ export interface InsertTimelineProps {
   sortDirection: 'asc' | 'desc';
   /** the requested field to sort on */
   sortField: string;
-  /** The title of the Open Timeline component  */
-  title: string;
   /** The total (server-side) count of the search results */
   totalSearchResultsCount: number;
   /** Hide action on timeline if needed it */

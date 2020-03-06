@@ -12,7 +12,6 @@ import { ThemeProvider } from 'styled-components';
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
 import { InsertTimelineResult } from '../types';
-import { TimelinesTableProps } from '../timelines_table';
 import { mockTimelineResults } from '../../../mock/timeline_results';
 import { InsertTimelinePopoverBody } from './insert_timeline_popover_body';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
@@ -21,77 +20,29 @@ jest.mock('../../../lib/kibana');
 
 describe('InsertTimelinePopover', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
-  const title = 'All Timelines / Open Timelines';
-
   let mockResults: InsertTimelineResult[];
 
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);
   });
 
-  test('it renders the title row', () => {
-    const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
-        <InsertTimelinePopoverBody
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          isLoading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={jest.fn()}
-          onlyFavorites={false}
-          onInsertTimeline={jest.fn()}
-          onQueryChange={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          query={''}
-          searchResults={mockResults}
-          selectedItems={[]}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          title={title}
-          totalSearchResultsCount={mockResults.length}
-        />
-      </ThemeProvider>
-    );
-
-    expect(
-      wrapper
-        .find('[data-test-subj="title-row"]')
-        .first()
-        .exists()
-    ).toBe(true);
-  });
-
   test('it renders the search row', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <InsertTimelinePopoverBody
-          deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           isLoading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={jest.fn()}
           onlyFavorites={false}
           onInsertTimeline={jest.fn()}
           onQueryChange={jest.fn()}
-          onSelectionChange={jest.fn()}
           onTableChange={jest.fn()}
           onToggleOnlyFavorites={jest.fn()}
-          onToggleShowNotes={jest.fn()}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           query={''}
           searchResults={mockResults}
-          selectedItems={[]}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
-          title={title}
           totalSearchResultsCount={mockResults.length}
         />
       </ThemeProvider>
@@ -109,27 +60,19 @@ describe('InsertTimelinePopover', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
         <InsertTimelinePopoverBody
-          deleteTimelines={jest.fn()}
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           isLoading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={jest.fn()}
           onlyFavorites={false}
           onInsertTimeline={jest.fn()}
           onQueryChange={jest.fn()}
-          onSelectionChange={jest.fn()}
           onTableChange={jest.fn()}
           onToggleOnlyFavorites={jest.fn()}
-          onToggleShowNotes={jest.fn()}
           pageIndex={0}
           pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           query={''}
           searchResults={mockResults}
-          selectedItems={[]}
           sortDirection={DEFAULT_SORT_DIRECTION}
           sortField={DEFAULT_SORT_FIELD}
-          title={title}
           totalSearchResultsCount={mockResults.length}
         />
       </ThemeProvider>
@@ -141,153 +84,5 @@ describe('InsertTimelinePopover', () => {
         .first()
         .exists()
     ).toBe(true);
-  });
-
-  test('it shows the delete action when onDeleteSelected and deleteTimelines are specified', () => {
-    const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
-        <InsertTimelinePopoverBody
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          isLoading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={jest.fn()}
-          onlyFavorites={false}
-          onInsertTimeline={jest.fn()}
-          onQueryChange={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          query={''}
-          searchResults={mockResults}
-          selectedItems={[]}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          title={title}
-          totalSearchResultsCount={mockResults.length}
-        />
-      </ThemeProvider>
-    );
-
-    const props = wrapper
-      .find('[data-test-subj="timelines-table"]')
-      .first()
-      .props() as TimelinesTableProps;
-
-    expect(props.actionTimelineToShow).toContain('delete');
-  });
-
-  test('it does NOT show the delete when is onDeleteSelected undefined and deleteTimelines is specified', () => {
-    const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
-        <InsertTimelinePopoverBody
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          isLoading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onAddTimelinesToFavorites={jest.fn()}
-          onlyFavorites={false}
-          onInsertTimeline={jest.fn()}
-          onQueryChange={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          query={''}
-          searchResults={mockResults}
-          selectedItems={[]}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          title={title}
-          totalSearchResultsCount={mockResults.length}
-        />
-      </ThemeProvider>
-    );
-
-    const props = wrapper
-      .find('[data-test-subj="timelines-table"]')
-      .first()
-      .props() as TimelinesTableProps;
-
-    expect(props.actionTimelineToShow).not.toContain('delete');
-  });
-
-  test('it does NOT show the delete action when is onDeleteSelected provided and deleteTimelines is undefined', () => {
-    const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
-        <InsertTimelinePopoverBody
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          isLoading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={jest.fn()}
-          onlyFavorites={false}
-          onInsertTimeline={jest.fn()}
-          onQueryChange={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          query={''}
-          searchResults={mockResults}
-          selectedItems={[]}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          title={title}
-          totalSearchResultsCount={mockResults.length}
-        />
-      </ThemeProvider>
-    );
-
-    const props = wrapper
-      .find('[data-test-subj="timelines-table"]')
-      .first()
-      .props() as TimelinesTableProps;
-
-    expect(props.actionTimelineToShow).not.toContain('delete');
-  });
-
-  test('it does NOT show extended columns when both onDeleteSelected and deleteTimelines are undefined', () => {
-    const wrapper = mountWithIntl(
-      <ThemeProvider theme={theme}>
-        <InsertTimelinePopoverBody
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          isLoading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onAddTimelinesToFavorites={jest.fn()}
-          onlyFavorites={false}
-          onInsertTimeline={jest.fn()}
-          onQueryChange={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          query={''}
-          searchResults={mockResults}
-          selectedItems={[]}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          title={title}
-          totalSearchResultsCount={mockResults.length}
-        />
-      </ThemeProvider>
-    );
-
-    const props = wrapper
-      .find('[data-test-subj="timelines-table"]')
-      .first()
-      .props() as TimelinesTableProps;
-
-    expect(props.actionTimelineToShow).not.toContain('delete');
   });
 });

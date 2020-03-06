@@ -39,7 +39,7 @@ interface OwnProps<TCache = object> {
 }
 
 export type InsertTimelineOwnProps = OwnProps &
-  Pick<InsertTimelineProps, 'defaultPageSize' | 'title'> &
+  Pick<InsertTimelineProps, 'defaultPageSize'> &
   PropsFromRedux;
 
 /** Manages the state (e.g table selection) of the (pure) `InsertTimeline` component */
@@ -51,7 +51,6 @@ export const StatefulInsertTimelineComponent = React.memo<InsertTimelineOwnProps
     hideActions = [],
     onInsertTimeline,
     timeline,
-    title,
     updateTimeline,
     updateIsLoading,
   }) => {
@@ -128,7 +127,7 @@ export const StatefulInsertTimelineComponent = React.memo<InsertTimelineOwnProps
       >
         {({ timelines, loading, totalCount }) => (
           <InsertTimelinePopoverBody
-            data-test-subj={'insert-timeline-modal'}
+            data-test-subj={'insert-timeline-popover'}
             defaultPageSize={defaultPageSize}
             hideActions={hideActions}
             isLoading={loading}
@@ -143,7 +142,6 @@ export const StatefulInsertTimelineComponent = React.memo<InsertTimelineOwnProps
             searchResults={timelines}
             sortDirection={sortDirection}
             sortField={sortField}
-            title={title}
             totalSearchResultsCount={totalCount}
           />
         )}
@@ -184,3 +182,5 @@ const connector = connect(makeMapStateToProps, mapDispatchToProps);
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
 export const StatefulInsertTimeline = connector(StatefulInsertTimelineComponent);
+
+StatefulInsertTimelineComponent.displayName = 'StatefulInsertTimelineComponent';

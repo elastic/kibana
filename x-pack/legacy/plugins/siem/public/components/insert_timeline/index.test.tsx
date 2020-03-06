@@ -12,7 +12,7 @@ import { ThemeProvider } from 'styled-components';
 
 import { wait } from '../../lib/helpers';
 import { TestProviderWithoutDragAndDrop, apolloClient } from '../../mock/test_providers';
-import { mockInsertTimelineQueryResults } from '../../mock/timeline_results';
+import { mockOpenTimelineQueryResults } from '../../mock/timeline_results';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines/timelines_page';
 
 import { StatefulInsertTimeline } from '.';
@@ -28,12 +28,11 @@ describe('StatefulInsertTimeline', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockInsertTimelineQueryResults} addTypename={false}>
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulInsertTimeline
               data-test-subj="stateful-timeline"
               apolloClient={apolloClient}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
             />
           </MockedProvider>
         </TestProviderWithoutDragAndDrop>
@@ -63,12 +62,11 @@ describe('StatefulInsertTimeline', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <TestProviderWithoutDragAndDrop>
-            <MockedProvider mocks={mockInsertTimelineQueryResults} addTypename={false}>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
               <StatefulInsertTimeline
                 data-test-subj="stateful-timeline"
                 apolloClient={apolloClient}
                 defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-                title={title}
               />
             </MockedProvider>
           </TestProviderWithoutDragAndDrop>
@@ -89,11 +87,10 @@ describe('StatefulInsertTimeline', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <TestProviderWithoutDragAndDrop>
-            <MockedProvider mocks={mockInsertTimelineQueryResults} addTypename={false}>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
               <StatefulInsertTimeline
                 apolloClient={apolloClient}
                 defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-                title={title}
               />
             </MockedProvider>
           </TestProviderWithoutDragAndDrop>
@@ -118,11 +115,10 @@ describe('StatefulInsertTimeline', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <TestProviderWithoutDragAndDrop>
-            <MockedProvider mocks={mockInsertTimelineQueryResults} addTypename={false}>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
               <StatefulInsertTimeline
                 apolloClient={apolloClient}
                 defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-                title={title}
               />
             </MockedProvider>
           </TestProviderWithoutDragAndDrop>
@@ -149,11 +145,10 @@ describe('StatefulInsertTimeline', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <TestProviderWithoutDragAndDrop>
-            <MockedProvider mocks={mockInsertTimelineQueryResults} addTypename={false}>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
               <StatefulInsertTimeline
                 apolloClient={apolloClient}
                 defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-                title={title}
               />
             </MockedProvider>
           </TestProviderWithoutDragAndDrop>
@@ -176,12 +171,11 @@ describe('StatefulInsertTimeline', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <TestProviderWithoutDragAndDrop>
-            <MockedProvider mocks={mockInsertTimelineQueryResults} addTypename={false}>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
               <StatefulInsertTimeline
                 data-test-subj="stateful-timeline"
                 apolloClient={apolloClient}
                 defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-                title={title}
               />
             </MockedProvider>
           </TestProviderWithoutDragAndDrop>
@@ -214,12 +208,11 @@ describe('StatefulInsertTimeline', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <TestProviderWithoutDragAndDrop>
-            <MockedProvider mocks={mockInsertTimelineQueryResults} addTypename={false}>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
               <StatefulInsertTimeline
                 data-test-subj="stateful-timeline"
                 apolloClient={apolloClient}
                 defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-                title={title}
               />
             </MockedProvider>
           </TestProviderWithoutDragAndDrop>
@@ -251,12 +244,11 @@ describe('StatefulInsertTimeline', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockInsertTimelineQueryResults} addTypename={false}>
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulInsertTimeline
               data-test-subj="stateful-timeline"
               apolloClient={apolloClient}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
             />
           </MockedProvider>
         </TestProviderWithoutDragAndDrop>
@@ -276,13 +268,12 @@ describe('StatefulInsertTimeline', () => {
   test('it renders the expected count of matching timelines when no query has been entered', async () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
-        <MockedProvider mocks={mockInsertTimelineQueryResults} addTypename={false}>
+        <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
           <TestProviderWithoutDragAndDrop>
             <StatefulInsertTimeline
               data-test-subj="stateful-timeline"
               apolloClient={apolloClient}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
             />
           </TestProviderWithoutDragAndDrop>
         </MockedProvider>
@@ -308,12 +299,11 @@ describe('StatefulInsertTimeline', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockInsertTimelineQueryResults} addTypename={false}>
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulInsertTimeline
               data-test-subj="stateful-timeline"
               apolloClient={apolloClient}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
             />
           </MockedProvider>
         </TestProviderWithoutDragAndDrop>
@@ -325,7 +315,7 @@ describe('StatefulInsertTimeline', () => {
     wrapper
       .find(
         `[data-test-subj="title-${
-          mockInsertTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].savedObjectId
+          mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].savedObjectId
         }"]`
       )
       .first()
@@ -333,7 +323,7 @@ describe('StatefulInsertTimeline', () => {
 
     expect(onInsertTimeline).toHaveBeenCalledWith({
       duplicate: false,
-      timelineId: mockInsertTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0]
+      timelineId: mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0]
         .savedObjectId,
     });
   });
@@ -345,12 +335,11 @@ describe('StatefulInsertTimeline', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <TestProviderWithoutDragAndDrop>
-          <MockedProvider mocks={mockInsertTimelineQueryResults} addTypename={false}>
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulInsertTimeline
               data-test-subj="stateful-timeline"
               apolloClient={apolloClient}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-              title={title}
             />
           </MockedProvider>
         </TestProviderWithoutDragAndDrop>

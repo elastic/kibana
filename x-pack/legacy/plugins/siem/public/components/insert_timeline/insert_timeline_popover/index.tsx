@@ -10,7 +10,6 @@ import React from 'react';
 import { TimelineModel } from '../../../store/timeline/model';
 import { useApolloClient } from '../../../utils/apollo_context';
 
-import * as i18n from '../translations';
 import { ActionTimelineToShow } from '../types';
 import { StatefulInsertTimeline } from '..';
 
@@ -19,14 +18,13 @@ export interface InsertTimelinePopoverProps {
   isOpen: boolean;
   onClose: () => void;
   hideActions?: ActionTimelineToShow[];
-  modalTitle?: string;
   onOpen?: (timeline: TimelineModel) => void;
 }
 
 const DEFAULT_SEARCH_RESULTS_PER_PAGE = 100;
 
 export const InsertTimelinePopover = React.memo<InsertTimelinePopoverProps>(
-  ({ onClose, button, hideActions = [], modalTitle, isOpen, onOpen }) => {
+  ({ onClose, button, hideActions = [], isOpen, onOpen }) => {
     const apolloClient = useApolloClient();
 
     if (!apolloClient) return null;
@@ -43,7 +41,6 @@ export const InsertTimelinePopover = React.memo<InsertTimelinePopoverProps>(
           defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
           hideActions={hideActions}
           onInsertTimeline={onOpen}
-          title={modalTitle ?? i18n.INSERT_TIMELINE_TITLE}
         />
       </EuiPopover>
     );
