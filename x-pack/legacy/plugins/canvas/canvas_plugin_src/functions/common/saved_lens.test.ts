@@ -24,7 +24,6 @@ describe('savedLens', () => {
   const fn = savedLens().fn;
   const args = {
     id: 'some-id',
-    center: null,
     title: null,
     timerange: null,
   };
