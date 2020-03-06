@@ -6,7 +6,7 @@
 
 import React, { FC, memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { Validation } from '../job_validator';
 import { tabColor } from '../../../../../../common/util/group_color_utils';
 import { Description } from '../../pages/components/job_details_step/components/groups/description';
@@ -20,28 +20,28 @@ export interface JobGroupsInputProps {
 
 export const JobGroupsInput: FC<JobGroupsInputProps> = memo(
   ({ existingGroups, selectedGroups, onChange, validation }) => {
-    const options = existingGroups.map<EuiComboBoxOptionProps>(g => ({
+    const options = existingGroups.map<EuiComboBoxOptionOption>(g => ({
       label: g,
       color: tabColor(g),
     }));
 
-    const selectedOptions = selectedGroups.map<EuiComboBoxOptionProps>(g => ({
+    const selectedOptions = selectedGroups.map<EuiComboBoxOptionOption>(g => ({
       label: g,
       color: tabColor(g),
     }));
 
-    function onChangeCallback(optionsIn: EuiComboBoxOptionProps[]) {
+    function onChangeCallback(optionsIn: EuiComboBoxOptionOption[]) {
       onChange(optionsIn.map(g => g.label));
     }
 
-    function onCreateGroup(input: string, flattenedOptions: EuiComboBoxOptionProps[]) {
+    function onCreateGroup(input: string, flattenedOptions: EuiComboBoxOptionOption[]) {
       const normalizedSearchValue = input.trim().toLowerCase();
 
       if (!normalizedSearchValue) {
         return;
       }
 
-      const newGroup: EuiComboBoxOptionProps = {
+      const newGroup: EuiComboBoxOptionOption = {
         label: input,
         color: tabColor(input),
       };

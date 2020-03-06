@@ -6,8 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { AbstractESSource } from './es_source';
-import { ESAggMetricField } from '../fields/es_agg_field';
-import { ESDocField } from '../fields/es_doc_field';
+import { esAggFieldsFactory } from '../fields/es_agg_field';
+
 import {
   AGG_TYPE,
   COUNT_PROP_LABEL,
@@ -20,20 +20,14 @@ export const AGG_DELIMITER = '_of_';
 export class AbstractESAggSource extends AbstractESSource {
   constructor(descriptor, inspectorAdapters) {
     super(descriptor, inspectorAdapters);
-    this._metricFields = this._descriptor.metrics
-      ? this._descriptor.metrics.map(metric => {
-          const esDocField = metric.field
-            ? new ESDocField({ fieldName: metric.field, source: this })
-            : null;
-          return new ESAggMetricField({
-            label: metric.label,
-            esDocField: esDocField,
-            aggType: metric.type,
-            source: this,
-            origin: this.getOriginForField(),
-          });
-        })
-      : [];
+    this._metricFields = [];
+    if (this._descriptor.metrics) {
+      this._descriptor.metrics.forEach(aggDescriptor => {
+        this._metricFields.push(
+          ...esAggFieldsFactory(aggDescriptor, this, this.getOriginForField())
+        );
+      });
+    }
   }
 
   getFieldByName(name) {
@@ -61,16 +55,9 @@ export class AbstractESAggSource extends AbstractESSource {
 
   getMetricFields() {
     const metrics = this._metricFields.filter(esAggField => esAggField.isValid());
-    if (metrics.length === 0) {
-      metrics.push(
-        new ESAggMetricField({
-          aggType: AGG_TYPE.COUNT,
-          source: this,
-          origin: this.getOriginForField(),
-        })
-      );
-    }
-    return metrics;
+    return metrics.length === 0
+      ? esAggFieldsFactory({ type: AGG_TYPE.COUNT }, this, this.getOriginForField())
+      : metrics;
   }
 
   getAggKey(aggType, fieldName) {
@@ -93,13 +80,12 @@ export class AbstractESAggSource extends AbstractESSource {
 
   getValueAggsDsl(indexPattern) {
     const valueAggsDsl = {};
-    this.getMetricFields()
-      .filter(esAggMetric => {
-        return esAggMetric.getAggType() !== AGG_TYPE.COUNT;
-      })
-      .forEach(esAggMetric => {
+    this.getMetricFields().forEach(esAggMetric => {
+      const aggDsl = esAggMetric.getValueAggDsl(indexPattern);
+      if (aggDsl) {
         valueAggsDsl[esAggMetric.getName()] = esAggMetric.getValueAggDsl(indexPattern);
-      });
+      }
+    });
     return valueAggsDsl;
   }
 

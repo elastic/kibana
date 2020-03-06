@@ -15,12 +15,15 @@ export interface IField {
   getLabel(): Promise<string>;
   getDataType(): Promise<string>;
   createTooltipProperty(value: string): Promise<ITooltipProperty>;
+  getSource(): IVectorSource;
+  getOrigin(): FIELD_ORIGIN;
+  isValid(): boolean;
 }
 
 export class AbstractField implements IField {
   private _fieldName: string;
   private _source: IVectorSource;
-  private _origin: string;
+  private _origin: FIELD_ORIGIN;
 
   constructor({
     fieldName,
@@ -29,7 +32,7 @@ export class AbstractField implements IField {
   }: {
     fieldName: string;
     source: IVectorSource;
-    origin: string;
+    origin: FIELD_ORIGIN;
   }) {
     this._fieldName = fieldName;
     this._source = source;
@@ -68,7 +71,7 @@ export class AbstractField implements IField {
     throw new Error('must implement Field#createTooltipProperty');
   }
 
-  getOrigin(): string {
+  getOrigin(): FIELD_ORIGIN {
     return this._origin;
   }
 
@@ -76,7 +79,7 @@ export class AbstractField implements IField {
     return false;
   }
 
-  async getOrdinalFieldMetaRequest(/* config */): Promise<unknown> {
+  async getOrdinalFieldMetaRequest(): Promise<unknown> {
     return null;
   }
 
