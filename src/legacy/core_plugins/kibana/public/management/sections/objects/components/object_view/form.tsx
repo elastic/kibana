@@ -19,6 +19,7 @@
 
 import React, { Component } from 'react';
 import {
+  EuiPanel,
   EuiForm,
   EuiFormRow,
   EuiFlexGroup,
@@ -92,62 +93,64 @@ export class Form extends Component<FormProps, FormState> {
     const { fields, fieldStates } = this.state;
     const isValid = this.isFormValid();
     return (
-      <EuiForm data-test-subj="savedObjectEditForm" role="form">
-        <div className="kuiVerticalRhythm">
-          {fields.map(field => (
-            <Field
-              key={`${field.type}-${field.name}`}
-              type={field.type}
-              name={field.name}
-              value={field.value}
-              state={fieldStates[field.name]}
-              disabled={!editionEnabled}
-              onChange={this.handleFieldChange}
-            />
-          ))}
-        </div>
-        <EuiFormRow fullWidth={true}>
-          <EuiFlexGroup>
-            {editionEnabled && (
+      <EuiPanel paddingSize="l">
+        <EuiForm data-test-subj="savedObjectEditForm" role="form">
+          <div className="kuiVerticalRhythm">
+            {fields.map(field => (
+              <Field
+                key={`${field.type}-${field.name}`}
+                type={field.type}
+                name={field.name}
+                value={field.value}
+                state={fieldStates[field.name]}
+                disabled={!editionEnabled}
+                onChange={this.handleFieldChange}
+              />
+            ))}
+          </div>
+          <EuiFormRow fullWidth={true}>
+            <EuiFlexGroup>
+              {editionEnabled && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill={true}
+                    aria-label={i18n.translate('kbn.management.objects.view.saveButtonAriaLabel', {
+                      defaultMessage: 'Save { title } object',
+                      values: {
+                        title: service.type,
+                      },
+                    })}
+                    onClick={this.onSubmit}
+                    disabled={!isValid}
+                    data-test-subj="savedObjectEditSave"
+                  >
+                    <FormattedMessage
+                      id="kbn.management.objects.view.saveButtonLabel"
+                      defaultMessage="Save { title } object"
+                      values={{ title: service.type }}
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
+
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill={true}
-                  aria-label={i18n.translate('kbn.management.objects.view.saveButtonAriaLabel', {
-                    defaultMessage: 'Save { title } Object',
-                    values: {
-                      title: service.type,
-                    },
+                <EuiButtonEmpty
+                  aria-label={i18n.translate('kbn.management.objects.view.cancelButtonAriaLabel', {
+                    defaultMessage: 'Cancel',
                   })}
-                  onClick={this.onSubmit}
-                  disabled={!isValid}
-                  data-test-subj="savedObjectEditSave"
+                  onClick={this.onCancel}
+                  data-test-subj="savedObjectEditCancel"
                 >
                   <FormattedMessage
-                    id="kbn.management.objects.view.saveButtonLabel"
-                    defaultMessage="Save { title } Object"
-                    values={{ title: service.type }}
+                    id="kbn.management.objects.view.cancelButtonLabel"
+                    defaultMessage="Cancel"
                   />
-                </EuiButton>
+                </EuiButtonEmpty>
               </EuiFlexItem>
-            )}
-
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                aria-label={i18n.translate('kbn.management.objects.view.cancelButtonAriaLabel', {
-                  defaultMessage: 'Cancel',
-                })}
-                onClick={this.onCancel}
-                data-test-subj="savedObjectEditCancel"
-              >
-                <FormattedMessage
-                  id="kbn.management.objects.view.cancelButtonLabel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFormRow>
-      </EuiForm>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        </EuiForm>
+      </EuiPanel>
     );
   }
 
