@@ -84,7 +84,7 @@ export class Form extends Component<FormProps, FormState> {
     const { fields, fieldStates } = this.state;
     const isValid = this.isFormValid();
     return (
-      <div className="kuiViewContentItem kuiVerticalRhythm">
+      <div className="kuiViewContentItem kuiVerticalRhythm" data-test-subj="savedObjectEditForm">
         <div className="kuiVerticalRhythm">
           {fields.map(field => (
             <Field
