@@ -12,7 +12,6 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiText,
-  EuiKeyPadMenuItem,
   EuiKeyPadMenuItemButton,
 } from '@elastic/eui';
 import { txtChangeButton } from './i18n';
