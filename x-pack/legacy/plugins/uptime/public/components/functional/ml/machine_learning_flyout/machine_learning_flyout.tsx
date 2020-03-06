@@ -45,7 +45,7 @@ export function MachineLearningFlyoutView({
 
   const isLoadingMLJob = false;
 
-  const hasPlatinumLicense = !license?.getFeature('ml')?.isAvailable;
+  const hasPlatinumLicense = license?.getFeature('ml')?.isAvailable;
 
   return (
     <EuiFlyout onClose={onClose} size="s">

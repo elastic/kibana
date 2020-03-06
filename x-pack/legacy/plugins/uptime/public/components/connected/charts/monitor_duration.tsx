@@ -43,15 +43,9 @@ export const DurationChart: React.FC<Props> = ({ monitorId }: Props) => {
     };
 
     dispatch(anomalyRecordsAction.get(anomalyParams));
-  }, [
-    dateRangeStart,
-    dateRangeEnd,
-    dispatch,
-    lastRefresh,
-    monitorId,
-    absoluteDateRangeStart,
-    absoluteDateRangeEnd,
-  ]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateRangeStart, dateRangeEnd, dispatch, lastRefresh, monitorId]);
 
   return (
     <DurationChartComponent

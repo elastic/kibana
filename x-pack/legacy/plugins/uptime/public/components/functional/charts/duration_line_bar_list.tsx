@@ -38,7 +38,9 @@ export const DurationAnomaliesBar = ({ anomalies, maxY }: Props) => {
 
       const anomalyRect = {
         coordinates: {
-          x0: record.source.timestamp,
+          x0: moment(record.source.timestamp)
+            // .subtract(record.source.bucket_span / 2, 's')
+            .valueOf(),
           x1: moment(record.source.timestamp)
             .add(record.source.bucket_span, 's')
             .valueOf(),

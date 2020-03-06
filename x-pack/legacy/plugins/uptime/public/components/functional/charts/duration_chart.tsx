@@ -79,9 +79,10 @@ export const DurationChartComponent = ({
             <EuiTitle size="xs">
               <h4>
                 <FormattedMessage
-                  id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
-                  defaultMessage="Monitor duration"
+                  id="xpack.uptime.monitorCharts.monitorDuration.titleLabelWithAnomaly"
+                  defaultMessage="Monitor duration (Anomalies: {noOfAnomalies})"
                   description="The 'ms' is an abbreviation for milliseconds."
+                  values={{ noOfAnomalies: anomalies?.anomalies?.length ?? 0 }}
                 />
               </h4>
             </EuiTitle>

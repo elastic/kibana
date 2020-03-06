@@ -56,12 +56,12 @@ export const PageHeader = ({ headingText, breadcrumbs, datePicker = true }: Page
   return (
     <>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s" wrap={true}>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <EuiTitle>
             <h1>{headingText}</h1>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <MLIntegrationComponent />
         </EuiFlexItem>
         {datePickerComponent}

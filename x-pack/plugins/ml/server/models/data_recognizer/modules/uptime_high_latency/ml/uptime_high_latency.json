@@ -3,7 +3,7 @@
   "groups": ["uptime"],
   "description": "Uptime Heartbeat: Identify monitors that are exhibiting higher than normal latency.",
   "analysis_config": {
-    "bucket_span": "2m",
+    "bucket_span": "15m",
     "detectors": [
       {
         "detector_description": "increased latency",

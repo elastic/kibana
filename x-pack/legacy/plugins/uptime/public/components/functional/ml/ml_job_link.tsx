@@ -59,9 +59,8 @@ export const MLJobLink: React.FC<Props> = ({ fill, children }) => {
   const href = url.format({
     pathname: basePath + '/app/ml',
     hash:
-      `${path}?_g=${rison.encode(query as RisonValue)}` + monitorId
-        ? `&_a=${rison.encode(queryParams as RisonValue)}`
-        : '',
+      `${path}?_g=${rison.encode(query as RisonValue)}` +
+      (monitorId ? `&_a=${rison.encode(queryParams as RisonValue)}` : ''),
   });
 
   return fill ? (
