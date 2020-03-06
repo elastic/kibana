@@ -161,10 +161,7 @@ export const ExpressionDataSourceStrings = {
     getWarning: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.warningDescription', {
         defaultMessage: `
-          This datasource pulls directly from {elasticsearch}
-          without the use of aggregations. It is best used with low volume datasets and in
-          situations where you need to view raw documents or plot exact, non-aggregated values on a
-          chart.`,
+          This datasource does not use aggregations, and is best used with low volume datasets.`,
         values: {
           elasticsearch: ELASTICSEARCH,
         },

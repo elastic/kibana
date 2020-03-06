@@ -103,21 +103,9 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
 
       <EuiAccordion
         id="accordionAdvancedSettings"
-        buttonContent="Advanced Options"
+        buttonContent="Advanced Settings"
         arrowDisplay="right"
       >
-        <EuiFormRow
-          label={strings.getQueryTitle()}
-          helpText={strings.getQueryLabel()}
-          display="rowCompressed"
-        >
-          <EuiTextArea
-            value={getQuery()}
-            onChange={e => setArg(getArgName(), e.target.value)}
-            compressed
-          />
-        </EuiFormRow>
-
         <EuiFormRow
           label={strings.getSortFieldTitle()}
           helpText={strings.getSortFieldLabel()}
@@ -139,6 +127,18 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
             value={sortOrder.toLowerCase()}
             onChange={e => setArg('sort', [sortField, e.target.value].join(', '))}
             options={sortOptions}
+            compressed
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label={strings.getQueryTitle()}
+          helpText={strings.getQueryLabel()}
+          display="rowCompressed"
+        >
+          <EuiTextArea
+            value={getQuery()}
+            onChange={e => setArg(getArgName(), e.target.value)}
             compressed
           />
         </EuiFormRow>
