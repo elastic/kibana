@@ -71,7 +71,6 @@ export class EndpointDocGenerator {
   agentId: string;
   hostId: string;
   hostname: string;
-  lastDHCPLeaseAt: number;
   macAddress: string[];
   ip: string[];
   agentVersion: string;
@@ -84,7 +83,6 @@ export class EndpointDocGenerator {
     this.hostId = this.seededUUIDv4();
     this.agentId = this.seededUUIDv4();
     this.hostname = this.randomHostname();
-    this.lastDHCPLeaseAt = new Date().getTime();
     this.ip = this.randomArray(3, () => this.randomIP());
     this.macAddress = this.randomArray(3, () => this.randomMac());
     this.agentVersion = this.randomVersion();
@@ -92,13 +90,11 @@ export class EndpointDocGenerator {
     this.policy = this.randomChoice(POLICIES);
   }
 
-  public generateEndpointMetadata(ts: number): EndpointMetadata {
-    // If we generate metadata with a timestamp at least 12 hours after the last generated doc,
-    // change the IPs for the host
-    if (Math.abs(ts - this.lastDHCPLeaseAt) > 3600 * 12 * 1000) {
-      this.lastDHCPLeaseAt = ts;
-      this.ip = this.randomArray(3, () => this.randomIP());
-    }
+  public randomizeIPs() {
+    this.ip = this.randomArray(3, () => this.randomIP());
+  }
+
+  public generateEndpointMetadata(ts = new Date().getTime()): EndpointMetadata {
     return {
       '@timestamp': ts,
       event: {
