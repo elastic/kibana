@@ -8,7 +8,6 @@ import turf from 'turf';
 import React from 'react';
 import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector/vector_style';
-import { InnerJoin } from './joins/inner_join';
 import {
   FEATURE_ID_PROPERTY_NAME,
   SOURCE_DATA_ID_ORIGIN,
@@ -49,18 +48,16 @@ export class VectorLayer extends AbstractLayer {
       layerDescriptor.style = VectorStyle.createDescriptor(styleProperties);
     }
 
+    if (!options.joins) {
+      layerDescriptor.joins = [];
+    }
+
     return layerDescriptor;
   }
 
-  constructor(options) {
-    super(options);
-    this._joins = [];
-    if (options.layerDescriptor.joins) {
-      options.layerDescriptor.joins.forEach(joinDescriptor => {
-        const join = new InnerJoin(joinDescriptor, this._source);
-        this._joins.push(join);
-      });
-    }
+  constructor({ layerDescriptor, source, joins = [] }) {
+    super({ layerDescriptor, source });
+    this._joins = joins;
     this._style = new VectorStyle(this._descriptor.style, this._source, this);
   }
 

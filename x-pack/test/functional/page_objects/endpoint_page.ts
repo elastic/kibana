@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function EndpointPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   return {
     /**
@@ -57,6 +58,14 @@ export function EndpointPageProvider({ getService }: FtrProviderContext) {
                 .trim()
             )
         );
+    },
+
+    async waitForTableToHaveData(dataTestSubj: string) {
+      await retry.waitForWithTimeout('table to have data', 2000, async () => {
+        const tableData = await this.getEndpointAppTableData(dataTestSubj);
+        if (tableData[1][0] === 'No items found') return false;
+        return true;
+      });
     },
   };
 }

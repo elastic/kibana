@@ -194,7 +194,6 @@ export class Authenticator {
         logger: this.options.loggers.get('tokens'),
       }),
       getServerBaseURL: this.options.getServerBaseURL,
-      isProviderEnabled: this.isProviderEnabled.bind(this),
     };
 
     const authProviders = this.options.config.authc.providers;
