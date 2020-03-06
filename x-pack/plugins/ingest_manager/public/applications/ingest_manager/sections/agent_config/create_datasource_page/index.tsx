@@ -22,6 +22,7 @@ import { CreateDatasourcePageLayout } from './components';
 import { CreateDatasourceFrom, CreateDatasourceStep } from './types';
 import { CREATE_DATASOURCE_STEP_PATHS } from './constants';
 import { StepSelectPackage } from './step_select_package';
+import { StepSelectConfig } from './step_select_config';
 import { StepConfigureDatasource } from './step_configure_datasource';
 import { StepReviewDatasource } from './step_review';
 
@@ -61,6 +62,19 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
 
     // eslint-disable-next-line no-console
     console.debug('Package info updated', updatedPackageInfo);
+  };
+
+  // Update agent config method
+  const updateAgentConfig = (updatedAgentConfig: AgentConfig | undefined) => {
+    if (updatedAgentConfig) {
+      setAgentConfig(updatedAgentConfig);
+    } else {
+      setAgentConfig(undefined);
+      setMaxStep('');
+    }
+
+    // eslint-disable-next-line no-console
+    console.debug('Agent config updated', updatedAgentConfig);
   };
 
   // Update datasource method
@@ -118,6 +132,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     maxStep,
     agentConfig,
     packageInfo,
+    restrictWidth: 770,
   };
 
   return (
@@ -141,14 +156,10 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
         {/* First step, either render select package or select config depending on entry */}
         {from === 'config' ? (
           <Route path={`${matchPath}${CREATE_DATASOURCE_STEP_PATHS.selectPackage}`}>
-            <CreateDatasourcePageLayout
-              {...layoutProps}
-              restrictWidth={770}
-              currentStep="selectPackage"
-            >
+            <CreateDatasourcePageLayout {...layoutProps} currentStep="selectPackage">
               <StepSelectPackage
                 agentConfigId={configId}
-                setAgentConfig={setAgentConfig}
+                updateAgentConfig={updateAgentConfig}
                 packageInfo={packageInfo}
                 updatePackageInfo={updatePackageInfo}
                 cancelUrl={cancelUrl}
@@ -162,7 +173,17 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
         ) : (
           <Route path={`${matchPath}${CREATE_DATASOURCE_STEP_PATHS.selectConfig}`}>
             <CreateDatasourcePageLayout {...layoutProps} currentStep="selectConfig">
-              <span>Select config</span>
+              <StepSelectConfig
+                pkgkey={pkgkey}
+                updatePackageInfo={updatePackageInfo}
+                agentConfig={agentConfig}
+                updateAgentConfig={updateAgentConfig}
+                cancelUrl={cancelUrl}
+                onNext={() => {
+                  setMaxStep('selectConfig');
+                  history.push(`${basePath}${CREATE_DATASOURCE_STEP_PATHS.configure}`);
+                }}
+              />
             </CreateDatasourcePageLayout>
           </Route>
         )}
@@ -170,7 +191,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
         {/* Second step to configure data source, redirect to first step if agent config */}
         {/* or package info isn't defined (i.e. after full page reload) */}
         <Route path={`${matchPath}${CREATE_DATASOURCE_STEP_PATHS.configure}`}>
-          <CreateDatasourcePageLayout {...layoutProps} restrictWidth={770} currentStep="configure">
+          <CreateDatasourcePageLayout {...layoutProps} currentStep="configure">
             {!agentConfig || !packageInfo ? (
               redirectToFirstStep
             ) : (

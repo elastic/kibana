@@ -1,0 +1,253 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+import React, { useEffect, useState, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiButtonEmpty,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiSelectable,
+  EuiSpacer,
+  EuiTextColor,
+} from '@elastic/eui';
+import { Error } from '../../../components';
+import { AGENT_CONFIG_PATH } from '../../../constants';
+import { useLink } from '../../../hooks';
+import { AgentConfig, PackageInfo } from '../../../types';
+import { useGetPackageInfoByKey, useGetAgentConfigs, sendGetOneAgentConfig } from '../../../hooks';
+
+export const StepSelectConfig: React.FunctionComponent<{
+  pkgkey: string;
+  updatePackageInfo: (packageInfo: PackageInfo | undefined) => void;
+  agentConfig: AgentConfig | undefined;
+  updateAgentConfig: (config: AgentConfig | undefined) => void;
+  cancelUrl: string;
+  onNext: () => void;
+}> = ({ pkgkey, updatePackageInfo, agentConfig, updateAgentConfig, cancelUrl, onNext }) => {
+  // Selected config state
+  const [selectedConfigId, setSelectedConfigId] = useState<string | undefined>(
+    agentConfig ? agentConfig.id : undefined
+  );
+  const [selectedConfigLoading, setSelectedConfigLoading] = useState<boolean>(false);
+  const [selectedConfigError, setSelectedConfigError] = useState<Error>();
+
+  // Todo: replace with create agent config flyout
+  const CREATE_NEW_CONFIG_URI = useLink(AGENT_CONFIG_PATH);
+
+  // Fetch package info
+  const { data: packageInfoData, error: packageInfoError } = useGetPackageInfoByKey(pkgkey);
+
+  // Fetch agent configs info
+  const {
+    data: agentConfigsData,
+    error: agentConfigsError,
+    isLoading: isAgentConfigsLoading,
+  } = useGetAgentConfigs();
+  const agentConfigs = agentConfigsData?.items || [];
+  const agentConfigsById = agentConfigs.reduce(
+    (acc: { [key: string]: AgentConfig }, config: AgentConfig) => {
+      acc[config.id] = config;
+      return acc;
+    },
+    {}
+  );
+
+  // Update parent package state
+  useEffect(() => {
+    if (packageInfoData && packageInfoData.response) {
+      updatePackageInfo(packageInfoData.response);
+    }
+  }, [packageInfoData, updatePackageInfo]);
+
+  // Update parent selected agent config state
+  useEffect(() => {
+    const fetchAgentConfigInfo = async () => {
+      if (selectedConfigId) {
+        setSelectedConfigLoading(true);
+        const { data, error } = await sendGetOneAgentConfig(selectedConfigId);
+        setSelectedConfigLoading(false);
+        if (error) {
+          setSelectedConfigError(error);
+          updateAgentConfig(undefined);
+        } else if (data && data.item) {
+          setSelectedConfigError(undefined);
+          updateAgentConfig(data.item);
+        }
+      } else {
+        setSelectedConfigError(undefined);
+        updateAgentConfig(undefined);
+      }
+    };
+    if (!agentConfig || selectedConfigId !== agentConfig.id) {
+      fetchAgentConfigInfo();
+    }
+  }, [selectedConfigId, agentConfig, updateAgentConfig]);
+
+  // Display package error if there is one
+  if (packageInfoError) {
+    return (
+      <Error
+        title={
+          <FormattedMessage
+            id="xpack.ingestManager.createDatasource.StepSelectConfig.errorLoadingPackageTitle"
+            defaultMessage="Error loading package information"
+          />
+        }
+        error={packageInfoError}
+      />
+    );
+  }
+
+  // Display agent configs list error if there is one
+  if (agentConfigsError) {
+    return (
+      <Error
+        title={
+          <FormattedMessage
+            id="xpack.ingestManager.createDatasource.StepSelectConfig.errorLoadingAgentConfigsTitle"
+            defaultMessage="Error loading agent configurations"
+          />
+        }
+        error={agentConfigsError}
+      />
+    );
+  }
+
+  return (
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.ingestManager.createDatasource.StepSelectConfig.selectAgentConfigTitle"
+                  defaultMessage="Select an agent configuration"
+                />
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty iconType="plusInCircle" href={CREATE_NEW_CONFIG_URI} size="s">
+              <FormattedMessage
+                id="xpack.ingestManager.createDatasource.StepSelectConfig.createNewConfigButtonText"
+                defaultMessage="Create new configuration"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiSelectable
+          searchable
+          allowExclusions={false}
+          singleSelection={true}
+          isLoading={isAgentConfigsLoading}
+          options={agentConfigs.map(({ id, name, description }) => {
+            return {
+              label: name,
+              key: id,
+              checked: selectedConfigId === id ? 'on' : undefined,
+            };
+          })}
+          renderOption={option => (
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>{option.label}</EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTextColor color="subdued">
+                  {agentConfigsById[option.key!].description}
+                </EuiTextColor>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiTextColor color="subdued">
+                  <FormattedMessage
+                    id="xpack.ingestManager.createDatasource.StepSelectConfig.agentConfigAgentsCountText"
+                    defaultMessage="{count, plural, one {# agent} other {# agents}}"
+                    values={{
+                      count: 3,
+                    }}
+                  />
+                </EuiTextColor>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+          listProps={{
+            bordered: true,
+          }}
+          searchProps={{
+            placeholder: i18n.translate(
+              'xpack.ingestManager.createDatasource.StepSelectConfig.filterAgentConfigsInputPlaceholder',
+              {
+                defaultMessage: 'Search for agent configurations',
+              }
+            ),
+          }}
+          height={240}
+          onChange={options => {
+            const selectedOption = options.find(option => option.checked === 'on');
+            if (selectedOption) {
+              setSelectedConfigId(selectedOption.key);
+            } else {
+              setSelectedConfigId(undefined);
+            }
+          }}
+        >
+          {(list, search) => (
+            <Fragment>
+              {search}
+              <EuiSpacer size="m" />
+              {list}
+            </Fragment>
+          )}
+        </EuiSelectable>
+      </EuiFlexItem>
+      {/* Display selected agent config error if there is one */}
+      {selectedConfigError ? (
+        <EuiFlexItem>
+          <Error
+            title={
+              <FormattedMessage
+                id="xpack.ingestManager.createDatasource.StepSelectConfig.errorLoadingSelectedAgentConfigTitle"
+                defaultMessage="Error loading selected agent config"
+              />
+            }
+            error={selectedConfigError}
+          />
+        </EuiFlexItem>
+      ) : null}
+      <EuiFlexItem>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty href={cancelUrl}>
+              <FormattedMessage
+                id="xpack.ingestManager.createDatasource.cancelLinkText"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              iconType="arrowRight"
+              iconSide="right"
+              isLoading={selectedConfigLoading}
+              disabled={!selectedConfigId || !!selectedConfigError || selectedConfigLoading}
+              onClick={() => onNext()}
+            >
+              <FormattedMessage
+                id="xpack.ingestManager.createDatasource.continueButtonText"
+                defaultMessage="Continue"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};

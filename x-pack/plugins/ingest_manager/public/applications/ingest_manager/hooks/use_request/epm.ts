@@ -30,6 +30,13 @@ export const useGetPackages = (query: HttpFetchQuery = {}) => {
   });
 };
 
+export const useGetPackageInfoByKey = (pkgKey: string) => {
+  return useRequest<GetInfoResponse>({
+    path: epmRouteService.getInfoPath(pkgKey),
+    method: 'get',
+  });
+};
+
 export const sendGetPackageInfoByKey = (pkgKey: string) => {
   return sendRequest<GetInfoResponse>({
     path: epmRouteService.getInfoPath(pkgKey),

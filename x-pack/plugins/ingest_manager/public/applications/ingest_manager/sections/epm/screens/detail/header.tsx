@@ -3,10 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiTitle, IconType } from '@elastic/eui';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiTitle, IconType, EuiButton } from '@elastic/eui';
 import { PackageInfo } from '../../../../types';
+import { EPM_PATH } from '../../../../constants';
+import { useLink } from '../../../../hooks';
 import { IconPanel } from '../../components/icon_panel';
 import { NavButtonBack } from '../../components/nav_button_back';
 import { Version } from '../../components/version';
@@ -31,9 +34,11 @@ const StyledVersion = styled(Version)`
 type HeaderProps = PackageInfo & { iconType?: IconType };
 
 export function Header(props: HeaderProps) {
-  const { iconType, title, version } = props;
+  const { iconType, name, title, version } = props;
   const { toListView } = useLinks();
   // useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }, { text: title }]);
+
+  const ADD_DATASOURCE_URI = useLink(`${EPM_PATH}/${name}-${version}/add-datasource`);
 
   return (
     <Fragment>
@@ -55,9 +60,17 @@ export function Header(props: HeaderProps) {
           </EuiTitle>
         </CenterColumn>
         <RightColumn>
-          <EuiFlexGroup direction="column" alignItems="flexEnd">
+          <EuiFlexGroup alignItems="flexEnd">
             <EuiFlexItem grow={false}>
               <InstallationButton package={props} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton iconType="plusInCircle" href={ADD_DATASOURCE_URI}>
+                <FormattedMessage
+                  id="xpack.ingestManager.epm.addDatasourceButtonText"
+                  defaultMessage="Create data source"
+                />
+              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </RightColumn>

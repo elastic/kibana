@@ -22,12 +22,12 @@ import { PackageIcon } from '../../epm/components';
 
 export const StepSelectPackage: React.FunctionComponent<{
   agentConfigId: string;
+  updateAgentConfig: (config: AgentConfig | undefined) => void;
   packageInfo?: PackageInfo;
-  setAgentConfig: (config: AgentConfig) => void;
   updatePackageInfo: (packageInfo: PackageInfo | undefined) => void;
   cancelUrl: string;
   onNext: () => void;
-}> = ({ agentConfigId, setAgentConfig, packageInfo, updatePackageInfo, cancelUrl, onNext }) => {
+}> = ({ agentConfigId, updateAgentConfig, packageInfo, updatePackageInfo, cancelUrl, onNext }) => {
   // Selected package state
   const [selectedPkgKey, setSelectedPkgKey] = useState<string | undefined>(
     packageInfo ? `${packageInfo.name}-${packageInfo.version}` : undefined
@@ -49,9 +49,9 @@ export const StepSelectPackage: React.FunctionComponent<{
   // Update parent agent config state
   useEffect(() => {
     if (agentConfigData && agentConfigData.item) {
-      setAgentConfig(agentConfigData.item);
+      updateAgentConfig(agentConfigData.item);
     }
-  }, [agentConfigData, setAgentConfig]);
+  }, [agentConfigData, updateAgentConfig]);
 
   // Update parent selected package state
   useEffect(() => {
@@ -141,7 +141,7 @@ export const StepSelectPackage: React.FunctionComponent<{
             placeholder: i18n.translate(
               'xpack.ingestManager.createDatasource.stepSelectPackage.filterPackagesInputPlaceholder',
               {
-                defaultMessage: 'Search for a package',
+                defaultMessage: 'Search for packages',
               }
             ),
           }}
