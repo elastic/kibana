@@ -13,7 +13,7 @@ import { RouteCapture } from '../route_capture';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
 import { AppAction } from '../../types';
-import { ManagementList } from './index';
+import { HostList } from './index';
 import { mockHostResultList } from '../../store/managing/mock_host_result_list';
 
 describe('when on the managing page', () => {
@@ -30,7 +30,7 @@ describe('when on the managing page', () => {
           <I18nProvider>
             <Router history={history}>
               <RouteCapture>
-                <ManagementList />
+                <HostList />
               </RouteCapture>
             </Router>
           </I18nProvider>
@@ -41,7 +41,7 @@ describe('when on the managing page', () => {
 
   it('should show a table', async () => {
     const renderResult = render();
-    const table = await renderResult.findByTestId('managementListTable');
+    const table = await renderResult.findByTestId('hostListTable');
     expect(table).not.toBeNull();
   });
 
@@ -49,7 +49,7 @@ describe('when on the managing page', () => {
     it('should not show the flyout', () => {
       const renderResult = render();
       expect.assertions(1);
-      return renderResult.findByTestId('managementDetailsFlyout').catch(e => {
+      return renderResult.findByTestId('hostDetailsFlyout').catch(e => {
         expect(e).not.toBeNull();
       });
     });
@@ -57,14 +57,14 @@ describe('when on the managing page', () => {
       beforeEach(() => {
         reactTestingLibrary.act(() => {
           const action: AppAction = {
-            type: 'serverReturnedManagementList',
+            type: 'serverReturnedHostList',
             payload: mockHostResultList(),
           };
           store.dispatch(action);
         });
       });
 
-      it('should render the management summary row in the table', async () => {
+      it('should render the host summary row in the table', async () => {
         const renderResult = render();
         const rows = await renderResult.findAllByRole('row');
         expect(rows).toHaveLength(2);
@@ -81,7 +81,7 @@ describe('when on the managing page', () => {
         });
 
         it('should show the flyout', () => {
-          return renderResult.findByTestId('managementDetailsFlyout').then(flyout => {
+          return renderResult.findByTestId('hostDetailsFlyout').then(flyout => {
             expect(flyout).not.toBeNull();
           });
         });
@@ -100,7 +100,7 @@ describe('when on the managing page', () => {
     });
     it('should show the flyout', () => {
       const renderResult = render();
-      return renderResult.findByTestId('managementDetailsFlyout').then(flyout => {
+      return renderResult.findByTestId('hostDetailsFlyout').then(flyout => {
         expect(flyout).not.toBeNull();
       });
     });

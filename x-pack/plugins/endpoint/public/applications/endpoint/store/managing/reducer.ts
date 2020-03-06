@@ -5,10 +5,10 @@
  */
 
 import { Reducer } from 'redux';
-import { ManagementListState } from '../../types';
+import { HostListState } from '../../types';
 import { AppAction } from '../action';
 
-const initialState = (): ManagementListState => {
+const initialState = (): HostListState => {
   return {
     endpoints: [],
     pageSize: 10,
@@ -21,11 +21,11 @@ const initialState = (): ManagementListState => {
   };
 };
 
-export const managementListReducer: Reducer<ManagementListState, AppAction> = (
+export const hostListReducer: Reducer<HostListState, AppAction> = (
   state = initialState(),
   action
 ) => {
-  if (action.type === 'serverReturnedManagementList') {
+  if (action.type === 'serverReturnedHostList') {
     const {
       endpoints,
       total,
@@ -40,19 +40,19 @@ export const managementListReducer: Reducer<ManagementListState, AppAction> = (
       pageIndex,
       loading: false,
     };
-  } else if (action.type === 'serverReturnedManagementDetails') {
+  } else if (action.type === 'serverReturnedHostDetails') {
     return {
       ...state,
       details: action.payload,
     };
-  } else if (action.type === 'serverFailedToReturnManagementDetails') {
+  } else if (action.type === 'serverFailedToReturnHostDetails') {
     return {
       ...state,
       detailsError: action.payload,
     };
-  } else if (action.type === 'userExitedManagementList') {
+  } else if (action.type === 'userExitedHostList') {
     return initialState();
-  } else if (action.type === 'userPaginatedManagementList') {
+  } else if (action.type === 'userPaginatedHostList') {
     return {
       ...state,
       ...action.payload,

@@ -5,10 +5,10 @@
  */
 
 import querystring from 'querystring';
-import { EndpointAppLocation, ManagingIndexUIQueryParams } from '../../types';
+import { EndpointAppLocation, HostIndexUIQueryParams } from '../../types';
 
 export function urlFromQueryParams(
-  queryParams: ManagingIndexUIQueryParams
+  queryParams: HostIndexUIQueryParams
 ): Partial<EndpointAppLocation> {
   const search = querystring.stringify(queryParams);
   return {

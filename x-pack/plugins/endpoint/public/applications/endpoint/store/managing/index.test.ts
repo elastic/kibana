@@ -5,19 +5,18 @@
  */
 
 import { createStore, Dispatch, Store } from 'redux';
-import { ManagementAction, managementListReducer } from './index';
-import { EndpointMetadata } from '../../../../../common/types';
-import { EndpointDocGenerator } from '../../../../../common/generate_data';
-import { ManagementListState } from '../../types';
+import { HostAction, hostListReducer } from './index';
+import { HostListState } from '../../types';
 import { listData } from './selectors';
+import { EndpointDocGenerator } from '../../../../../common/generate_data';
 import { mockHostResultList } from './mock_host_result_list';
 
-describe('endpoint_list store concerns', () => {
-  let store: Store<ManagementListState>;
-  let dispatch: Dispatch<ManagementAction>;
+describe('HostList store concerns', () => {
+  let store: Store<HostListState>;
+  let dispatch: Dispatch<HostAction>;
   const generator = new EndpointDocGenerator();
   const createTestStore = () => {
-    store = createStore(managementListReducer);
+    store = createStore(hostListReducer);
     dispatch = store.dispatch;
   };
   const generateEndpoint = (): EndpointMetadata => {
@@ -25,7 +24,7 @@ describe('endpoint_list store concerns', () => {
   };
   const loadDataToStore = () => {
     dispatch({
-      type: 'serverReturnedManagementList',
+      type: 'serverReturnedHostList',
       payload: mockHostResultList({ request_page_size: 1, request_page_index: 1, total: 10 }),
     });
   };
@@ -45,14 +44,14 @@ describe('endpoint_list store concerns', () => {
       });
     });
 
-    test('it handles `serverReturnedManagementList', () => {
+    test('it handles `serverReturnedHostList', () => {
       const payload = mockHostResultList({
         request_page_size: 1,
         request_page_index: 1,
         total: 10,
       });
       dispatch({
-        type: 'serverReturnedManagementList',
+        type: 'serverReturnedHostList',
         payload,
       });
 
@@ -62,16 +61,6 @@ describe('endpoint_list store concerns', () => {
       expect(currentState.pageIndex).toEqual(payload.request_page_index);
       expect(currentState.total).toEqual(payload.total);
     });
-
-    test('it handles `userExitedManagementListPage`', () => {
-      loadDataToStore();
-
-      expect(store.getState().total).toEqual(10);
-
-      dispatch({ type: 'userExitedManagementList' });
-      expect(store.getState().endpoints.length).toEqual(0);
-      expect(store.getState().pageIndex).toEqual(0);
-    });
   });
 
   describe('# Selectors', () => {
@@ -80,7 +69,7 @@ describe('endpoint_list store concerns', () => {
       loadDataToStore();
     });
 
-    test('it selects `managementListData`', () => {
+    test('it selects `hostListData`', () => {
       const currentState = store.getState();
       expect(listData(currentState)).toEqual(currentState.endpoints);
     });

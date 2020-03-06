@@ -16,7 +16,7 @@ import { RouteCapture } from './view/route_capture';
 import { EndpointPluginStartDependencies } from '../../plugin';
 import { appStoreFactory } from './store';
 import { AlertIndex } from './view/alerts';
-import { ManagementList } from './view/managing';
+import { HostList } from './view/managing';
 import { PolicyList } from './view/policy';
 import { PolicyDetails } from './view/policy';
 import { HeaderNavigation } from './components/header_nav';
@@ -68,7 +68,7 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
                     </h1>
                   )}
                 />
-                <Route path="/management" component={ManagementList} />
+                <Route path="/hosts" component={HostList} />
                 <Route path="/alerts" component={AlertIndex} />
                 <Route path="/policy" exact component={PolicyList} />
                 <Route path="/policy/:id" exact component={PolicyDetails} />

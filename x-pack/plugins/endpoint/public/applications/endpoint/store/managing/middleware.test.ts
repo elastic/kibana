@@ -7,10 +7,10 @@ import { CoreStart, HttpSetup } from 'kibana/public';
 import { applyMiddleware, createStore, Dispatch, Store } from 'redux';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { History, createBrowserHistory } from 'history';
-import { managementListReducer, managementMiddlewareFactory } from './index';
-import { EndpointMetadata, EndpointResultList } from '../../../../../common/types';
+import { hostListReducer, hostMiddlewareFactory } from './index';
+import { EndpointResultList } from '../../../../../common/types';
+import { HostListState } from '../../types';
 import { EndpointDocGenerator } from '../../../../../common/generate_data';
-import { ManagementListState } from '../../types';
 import { AppAction } from '../action';
 import { listData } from './selectors';
 import { DepsStartMock, depsStartMock } from '../../mocks';
@@ -21,7 +21,7 @@ describe('endpoint list saga', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
-  let store: Store<ManagementListState>;
+  let store: Store<HostListState>;
   let getState: typeof store['getState'];
   let dispatch: Dispatch<AppAction>;
 
@@ -56,7 +56,7 @@ describe('endpoint list saga', () => {
       type: 'userChangedUrl',
       payload: {
         ...history.location,
-        pathname: '/management',
+        pathname: '/hosts',
       },
     });
     await sleep();

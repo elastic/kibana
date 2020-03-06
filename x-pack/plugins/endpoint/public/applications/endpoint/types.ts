@@ -25,7 +25,7 @@ export type MiddlewareFactory<S = GlobalState> = (
   api: MiddlewareAPI<Dispatch<AppAction>, S>
 ) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
 
-export interface ManagementListState {
+export interface HostListState {
   endpoints: EndpointMetadata[];
   total: number;
   pageSize: number;
@@ -36,11 +36,11 @@ export interface ManagementListState {
   location?: Immutable<EndpointAppLocation>;
 }
 
-export interface ManagementListPagination {
+export interface HostListPagination {
   pageIndex: number;
   pageSize: number;
 }
-export interface ManagingIndexUIQueryParams {
+export interface HostIndexUIQueryParams {
   selected_host?: string;
 }
 
@@ -92,7 +92,7 @@ export interface PolicyDetailsState {
 }
 
 export interface GlobalState {
-  readonly managementList: ManagementListState;
+  readonly hostList: HostListState;
   readonly alertList: AlertListState;
   readonly policyList: PolicyListState;
   readonly policyDetails: PolicyDetailsState;

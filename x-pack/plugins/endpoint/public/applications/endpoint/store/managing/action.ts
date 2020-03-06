@@ -4,36 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ManagementListPagination, ServerApiError } from '../../types';
+import { HostListPagination, ServerApiError } from '../../types';
 import { EndpointResultList, EndpointMetadata } from '../../../../../common/types';
 
-interface ServerReturnedManagementList {
-  type: 'serverReturnedManagementList';
+interface ServerReturnedHostList {
+  type: 'serverReturnedHostList';
   payload: EndpointResultList;
 }
 
-interface ServerReturnedManagementDetails {
-  type: 'serverReturnedManagementDetails';
+interface ServerReturnedHostDetails {
+  type: 'serverReturnedHostDetails';
   payload: EndpointMetadata;
 }
 
-interface ServerFailedToReturnManagementDetails {
-  type: 'serverFailedToReturnManagementDetails';
+interface ServerFailedToReturnHostDetails {
+  type: 'serverFailedToReturnHostDetails';
   payload: ServerApiError;
 }
 
-interface UserExitedManagementList {
-  type: 'userExitedManagementList';
+interface UserPaginatedHostList {
+  type: 'userPaginatedHostList';
+  payload: HostListPagination;
 }
 
-interface UserPaginatedManagementList {
-  type: 'userPaginatedManagementList';
-  payload: ManagementListPagination;
-}
-
-export type ManagementAction =
-  | ServerReturnedManagementList
-  | ServerReturnedManagementDetails
-  | ServerFailedToReturnManagementDetails
-  | UserExitedManagementList
-  | UserPaginatedManagementList;
+export type HostAction =
+  | ServerReturnedHostList
+  | ServerReturnedHostDetails
+  | ServerFailedToReturnHostDetails
+  | UserPaginatedHostList;
