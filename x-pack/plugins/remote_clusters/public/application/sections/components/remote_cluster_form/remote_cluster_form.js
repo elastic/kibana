@@ -38,7 +38,7 @@ import { skippingDisconnectedClustersUrl, transportPortUrl } from '../../../serv
 
 import { RequestFlyout } from './request_flyout';
 
-import { validateName, validateSeeds, validateSeed } from './validators';
+import { validateName, validateSeeds, validateProxy, validateSeed } from './validators';
 
 import { SNIFF_MODE, PROXY_MODE } from '../../../../../common/constants';
 
@@ -96,10 +96,12 @@ export class RemoteClusterForm extends Component {
   };
 
   getFieldsErrors(fields, seedInput = '') {
-    const { name, seeds, mode } = fields;
+    const { name, seeds, mode, proxyAddress } = fields;
+
     return {
       name: validateName(name),
       seeds: mode === SNIFF_MODE ? validateSeeds(seeds, seedInput) : null,
+      proxyAddress: mode === PROXY_MODE ? validateProxy(proxyAddress) : null,
     };
   }
 
@@ -328,7 +330,7 @@ export class RemoteClusterForm extends Component {
           fullWidth
         >
           <EuiFieldNumber
-            value={nodeConnections}
+            value={nodeConnections || ''}
             onChange={e => this.onFieldsChange({ nodeConnections: Number(e.target.value) || null })}
             fullWidth
           />
@@ -339,7 +341,9 @@ export class RemoteClusterForm extends Component {
 
   renderProxyModeSettings() {
     const {
+      areErrorsVisible,
       fields: { proxyAddress, proxySocketConnections, serverName },
+      fieldsErrors: { proxyAddress: errorProxyAddress },
     } = this.state;
 
     return (
@@ -358,11 +362,20 @@ export class RemoteClusterForm extends Component {
               defaultMessage="The address used for all remote connections."
             />
           }
+          isInvalid={Boolean(areErrorsVisible && errorProxyAddress)}
+          error={errorProxyAddress}
           fullWidth
         >
           <EuiFieldText
             value={proxyAddress}
+            placeholder={i18n.translate(
+              'xpack.remoteClusters.remoteClusterForm.fieldProxyAddressPlaceholder',
+              {
+                defaultMessage: 'host:port',
+              }
+            )}
             onChange={e => this.onFieldsChange({ proxyAddress: e.target.value })}
+            isInvalid={Boolean(areErrorsVisible && errorProxyAddress)}
             fullWidth
           />
         </EuiFormRow>
@@ -384,7 +397,7 @@ export class RemoteClusterForm extends Component {
           fullWidth
         >
           <EuiFieldNumber
-            value={proxySocketConnections}
+            value={proxySocketConnections || ''}
             onChange={e =>
               this.onFieldsChange({ proxySocketConnections: Number(e.target.value) || null })
             }
@@ -438,7 +451,7 @@ export class RemoteClusterForm extends Component {
           <>
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.sectionModeDescription"
-              defaultMessage="Remote cluster connections work by configuring a remote cluster and connecting only to a limited number of nodes in that remote cluster. There are two potential modes: sniff mode and proxy mode."
+              defaultMessage="Remote cluster connections work by configuring a remote cluster and connecting only to a limited number of nodes in that remote cluster."
             />
             <EuiSpacer size="m" />
             <EuiSwitch
@@ -684,7 +697,7 @@ export class RemoteClusterForm extends Component {
   renderErrors = () => {
     const {
       areErrorsVisible,
-      fieldsErrors: { name: errorClusterName, seeds: errorsSeeds },
+      fieldsErrors: { name: errorClusterName, seeds: errorsSeeds, proxyAddress: errorProxyAddress },
       localSeedErrors,
     } = this.state;
 
@@ -723,6 +736,16 @@ export class RemoteClusterForm extends Component {
           defaultMessage: 'The "Seed nodes" field is invalid.',
         }),
         error: localSeedErrors.join(' '),
+      });
+    }
+
+    if (errorProxyAddress) {
+      errorExplanations.push({
+        key: 'seedsExplanation',
+        field: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputProxyErrorMessage', {
+          defaultMessage: 'The "Proxy address" field is invalid.',
+        }),
+        error: errorProxyAddress,
       });
     }
 

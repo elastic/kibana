@@ -20,38 +20,11 @@ const bodyValidation = schema.object({
   name: schema.string(),
   skipUnavailable: schema.boolean(),
   mode: schema.oneOf([schema.literal(PROXY_MODE), schema.literal(SNIFF_MODE)]),
-  // The following validation only applies to "sniff" mode
-  seeds: schema.conditional(
-    schema.siblingRef('mode'),
-    SNIFF_MODE,
-    schema.arrayOf(schema.string()),
-    schema.never()
-  ),
-  nodeConnections: schema.conditional(
-    schema.siblingRef('mode'),
-    SNIFF_MODE,
-    schema.maybe(schema.number()),
-    schema.never()
-  ),
-  // The following validation only applies to "proxy" mode
-  proxyAddress: schema.conditional(
-    schema.siblingRef('mode'),
-    PROXY_MODE,
-    schema.string(),
-    schema.never()
-  ),
-  proxySocketConnections: schema.conditional(
-    schema.siblingRef('mode'),
-    PROXY_MODE,
-    schema.maybe(schema.number()),
-    schema.never()
-  ),
-  serverName: schema.conditional(
-    schema.siblingRef('mode'),
-    PROXY_MODE,
-    schema.maybe(schema.string()),
-    schema.never()
-  ),
+  seeds: schema.nullable(schema.arrayOf(schema.string())),
+  nodeConnections: schema.nullable(schema.number()),
+  proxyAddress: schema.nullable(schema.string()),
+  proxySocketConnections: schema.nullable(schema.number()),
+  serverName: schema.nullable(schema.string()),
 });
 
 type RouteBody = TypeOf<typeof bodyValidation>;
