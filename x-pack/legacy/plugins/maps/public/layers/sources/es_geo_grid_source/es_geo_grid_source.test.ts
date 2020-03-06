@@ -7,24 +7,24 @@ jest.mock('../../../kibana_services', () => {});
 jest.mock('ui/new_platform');
 
 import { ESGeoGridSource } from './es_geo_grid_source';
-import { ES_GEO_GRID } from '../../../../common/constants';
+import { AGG_TYPE, ES_GEO_GRID, GRID_RESOLUTION, RENDER_AS } from '../../../../common/constants';
 import { IField } from '../../fields/field';
 
 describe('ESGeoGridSource', () => {
   it('metrics and fields should match', async () => {
     const metricExamples = [
       {
-        type: 'sum',
+        type: AGG_TYPE.SUM,
         field: 'myFieldGettingSummed',
         label: 'my custom label',
       },
       {
         // metric config is invalid beause field is missing
-        type: 'max',
+        type: AGG_TYPE.MAX,
       },
       {
         // metric config is valid because "count" metric does not need to provide field
-        type: 'count',
+        type: AGG_TYPE.COUNT,
         label: '', // should ignore empty label fields
       },
     ];
@@ -35,9 +35,9 @@ describe('ESGeoGridSource', () => {
         indexPatternId: 'fooIp',
         geoField: 'bar',
         metrics: metricExamples,
-        resolution: 'coarse',
+        resolution: GRID_RESOLUTION.COARSE,
         type: ES_GEO_GRID,
-        requestType: 'heatmap',
+        requestType: RENDER_AS.HEATMAP,
       },
       {}
     );
