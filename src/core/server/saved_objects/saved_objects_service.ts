@@ -50,6 +50,7 @@ import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objec
 import { PropertyValidators } from './validation';
 import { SavedObjectsSerializer } from './serialization';
 import { registerRoutes } from './routes';
+import { config as configSavedObjectType } from './so_types';
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
@@ -293,6 +294,8 @@ export class SavedObjectsService
     this.logger.debug('Setting up SavedObjects service');
 
     this.setupDeps = setupDeps;
+
+    this.typeRegistry.registerType(configSavedObjectType);
 
     const legacyTypes = convertLegacyTypes(
       setupDeps.legacyPlugins.uiExports,

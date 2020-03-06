@@ -23,7 +23,7 @@ import {
   clientProviderInstanceMock,
   typeRegistryInstanceMock,
 } from './saved_objects_service.test.mocks';
-
+import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { SavedObjectsService } from './saved_objects_service';
 import { mockCoreContext } from '../core_context.mock';
@@ -34,8 +34,10 @@ import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service
 import { legacyServiceMock } from '../legacy/legacy_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { SavedObjectsClientFactoryProvider } from './service/lib';
-import { BehaviorSubject } from 'rxjs';
 import { NodesVersionCompatibility } from '../elasticsearch/version_check/ensure_es_version';
+import { config as configSavedObjectType } from './so_types';
+
+const internalTypesCount = 1;
 
 describe('SavedObjectsService', () => {
   const createCoreContext = ({
@@ -69,6 +71,13 @@ describe('SavedObjectsService', () => {
   });
 
   describe('#setup()', () => {
+    it('registers the `config` type', async () => {
+      const coreContext = createCoreContext();
+      const soService = new SavedObjectsService(coreContext);
+      await soService.setup(createSetupDeps());
+      expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledWith(configSavedObjectType);
+    });
+
     describe('#setClientFactoryProvider', () => {
       it('registers the factory to the clientProvider', async () => {
         const coreContext = createCoreContext();
@@ -144,7 +153,8 @@ describe('SavedObjectsService', () => {
         };
         setup.registerType(type);
 
-        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledTimes(1);
+        // the config type is also registered during setup
+        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledTimes(internalTypesCount + 1);
         expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledWith(type);
       });
     });
