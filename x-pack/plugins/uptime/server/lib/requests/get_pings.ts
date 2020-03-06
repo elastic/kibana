@@ -61,7 +61,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingResults> = asy
   }
   const queryContext = { bool: { filter } };
   const params = {
-    index: dynamicSettings,
+    index: dynamicSettings.heartbeatIndices,
     body: {
       query: {
         ...queryContext,
