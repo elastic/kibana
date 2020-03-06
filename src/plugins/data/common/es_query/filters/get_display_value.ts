@@ -32,8 +32,8 @@ function getValueFormatter(indexPattern?: IIndexPattern, key?: string) {
     if (!field) {
       throw new Error(
         i18n.translate('data.filter.filterBar.fieldNotFound', {
-          defaultMessage: 'Field {key} not found',
-          values: { key },
+          defaultMessage: 'Field {key} not found in index pattern {indexPattern}',
+          values: { key, indexPattern: indexPattern.title },
         })
       );
     }

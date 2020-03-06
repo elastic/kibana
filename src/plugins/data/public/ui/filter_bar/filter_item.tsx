@@ -74,7 +74,7 @@ class FilterItemUI extends Component<Props, State> {
       getNotifications().toasts.addError(e, {
         title: this.props.intl.formatMessage({
           id: 'data.filter.filterBar.labelErrorMessage',
-          defaultMessage: 'Failed to render filter',
+          defaultMessage: 'Failed to display filter',
         }),
       });
       valueLabel = this.props.intl.formatMessage({
