@@ -16,6 +16,7 @@ import { getColumns } from './columns';
 const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 const BasicTable = styled(EuiBasicTable)`
+  max-width: 500px;
   .euiTableCellContent {
     animation: none; /* Prevents applying max-height from animation */
   }

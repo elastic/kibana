@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPopover } from '@elastic/eui';
 import React, { memo } from 'react';
 import styled from 'styled-components';
 
@@ -35,7 +34,7 @@ export const InsertTimelinePopoverBody = memo<InsertTimelineProps>(
     totalSearchResultsCount,
   }) => {
     return (
-      <EuiPopover>
+      <>
         <HeaderContainer>
           <SearchRow
             data-test-subj="search-row"
@@ -59,7 +58,7 @@ export const InsertTimelinePopoverBody = memo<InsertTimelineProps>(
           sortField={sortField}
           totalSearchResultsCount={totalSearchResultsCount}
         />
-      </EuiPopover>
+      </>
     );
   }
 );
