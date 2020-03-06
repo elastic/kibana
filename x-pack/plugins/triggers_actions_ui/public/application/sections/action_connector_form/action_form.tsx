@@ -44,13 +44,13 @@ interface ActionAccordionFormProps {
   setActionParamsProperty: (key: string, value: any, index: number) => void;
   http: HttpSetup;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  actionTypes?: ActionType[];
-  messageVariables?: string[];
-  defaultActionMessage?: string;
-  toastNotifications?: Pick<
+  toastNotifications: Pick<
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
+  actionTypes?: ActionType[];
+  messageVariables?: string[];
+  defaultActionMessage?: string;
 }
 
 interface ActiveActionConnectorState {
@@ -176,9 +176,9 @@ export const ActionForm = ({
         key: id,
         id,
       }));
-    const actionTypeRegisterd = actionTypeRegistry.get(actionConnector.actionTypeId);
-    if (!actionTypeRegisterd || actionItem.group !== defaultActionGroupId) return null;
-    const ParamsFieldsComponent = actionTypeRegisterd.actionParamsFields;
+    const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
+    if (!actionTypeRegistered || actionItem.group !== defaultActionGroupId) return null;
+    const ParamsFieldsComponent = actionTypeRegistered.actionParamsFields;
     const actionParamsErrors: { errors: IErrorObject } =
       Object.keys(actionsErrors).length > 0 ? actionsErrors[actionItem.id] : { errors: {} };
 
@@ -193,7 +193,7 @@ export const ActionForm = ({
         buttonContent={
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={actionTypeRegisterd.iconClass} size="m" />
+              <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="s">
@@ -297,8 +297,8 @@ export const ActionForm = ({
     const actionTypeName = actionTypesIndex
       ? actionTypesIndex[actionItem.actionTypeId].name
       : actionItem.actionTypeId;
-    const actionTypeRegisterd = actionTypeRegistry.get(actionItem.actionTypeId);
-    if (!actionTypeRegisterd || actionItem.group !== defaultActionGroupId) return null;
+    const actionTypeRegistered = actionTypeRegistry.get(actionItem.actionTypeId);
+    if (!actionTypeRegistered || actionItem.group !== defaultActionGroupId) return null;
     return (
       <EuiAccordion
         initialIsOpen={true}
@@ -310,7 +310,7 @@ export const ActionForm = ({
         buttonContent={
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={actionTypeRegisterd.iconClass} size="m" />
+              <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="s">
@@ -319,7 +319,7 @@ export const ActionForm = ({
                     defaultMessage="Action: {actionConnectorName}"
                     id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeEditTitle"
                     values={{
-                      actionConnectorName: actionTypeRegisterd.actionTypeTitle,
+                      actionConnectorName: actionTypeRegistered.actionTypeTitle,
                     }}
                   />
                 </h5>
