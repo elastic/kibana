@@ -13,17 +13,13 @@ export const goToManageSignalDetectionRules = () => {
 };
 
 export const waitForSignalsIndexToBeCreated = () => {
-  for (let i = 0; i < 60; i++) {
-    i = cy
-      .request({ url: '/api/detection_engine/index', failOnStatusCode: false })
-      .then(response => {
-        if (response.status === 200) {
-          return 60;
-        } else {
-          cy.wait(1000);
-        }
-      });
-  }
+  cy.request({ url: '/api/detection_engine/index', retryOnStatusCodeFailure: true }).then(
+    response => {
+      if (response.status !== 200) {
+        cy.wait(7500);
+      }
+    }
+  );
 };
 
 export const waitForSignalsPanelToBeLoaded = () => {
