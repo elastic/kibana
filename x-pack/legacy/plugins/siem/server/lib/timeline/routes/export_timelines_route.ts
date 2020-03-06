@@ -4,161 +4,149 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
-
 import { set as _set } from 'lodash/fp';
-import { RequestHandlerContext } from '../../../../../../../../src/core/server';
-import { GetScopedClients } from '../../../services';
+import { SavedObjectsClient, IRouter } from '../../../../../../../../src/core/server';
 import { LegacyServices, LegacyRequest } from '../../../types';
-import { ExportTimelineRequest, ExportTimelineResults } from '../types';
-import { timelineSavedObjectType } from '../../../saved_objects';
-import { PinnedEvent } from '../../pinned_event/saved_object';
+import { ExportTimelineResults, ExportTimelineRequestParams } from '../types';
+import { timelineSavedObjectType, noteSavedObjectType } from '../../../saved_objects';
+
 import { convertSavedObjectToSavedTimeline } from '../convert_saved_object_to_savedtimeline';
 import { transformRulesToNdjson } from '../../detection_engine/routes/rules/utils';
-import { Note } from '../../note/saved_object';
-import { timelineWithReduxProperties } from '../saved_object';
-import { transformError } from '../../detection_engine/routes/utils';
+import { convertSavedObjectToSavedNote } from '../../note/saved_object';
+
+import {
+  transformError,
+  buildRouteValidation,
+  buildSiemResponse,
+} from '../../detection_engine/routes/utils';
 import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
 
-import { SavedObjectsClient } from '../../../../../../../../src/legacy/server/kbn_server';
 import {
   exportTimelinesSchema,
   exportTimelinesQuerySchema,
 } from './schemas/export_timelines_schema';
-import { FrameworkRequest } from '../../framework';
 
-const getExportTimelineByObjectIds = async (
-  client: Pick<
-    SavedObjectsClient,
-    | 'get'
-    | 'delete'
-    | 'errors'
-    | 'create'
-    | 'bulkCreate'
-    | 'find'
-    | 'bulkGet'
-    | 'update'
-    | 'bulkUpdate'
-  >,
-  request: ExportTimelineRequest & LegacyRequest
-) => {
-  const { timeline } = await getTimelinesFromObjects(client, request);
+const getNotesByTimelineId = (notes, timelineId) => {
+  const initialNotes = {
+    eventNotes: [],
+    globalNotes: [],
+  };
+  if (notes == null) return initialNotes;
+  const notesByTimelineId = notes?.filter(note => note.timelineId !== timelineId);
+  return notesByTimelineId.reduce((acc, curr) => {
+    if (curr.eventId == null)
+      return {
+        ...acc,
+        globalNotes: [...acc.globalNotes, curr],
+      };
+    else
+      return {
+        ...acc,
+        eventNotes: [...acc.eventNotes, curr],
+      };
+  }, initialNotes);
+};
+
+const getExportTimelineByObjectIds = async ({ client, request }) => {
+  const timeline = await getTimelinesFromObjects(client, request);
 
   const timelinesNdjson = transformRulesToNdjson(timeline);
   return { timelinesNdjson };
 };
 
 const getTimelinesFromObjects = async (
-  client: Pick<
-    SavedObjectsClient,
-    | 'get'
-    | 'delete'
-    | 'errors'
-    | 'create'
-    | 'bulkCreate'
-    | 'find'
-    | 'bulkGet'
-    | 'update'
-    | 'bulkUpdate'
-  >,
+  client: SavedObjectsClient,
   request: ExportTimelineRequest & LegacyRequest
 ): Promise<ExportTimelineResults> => {
-  const note = new Note();
-  const pinnedEvent = new PinnedEvent();
-  const savedObjects = await client.bulkGet(
-    request?.payload?.objects?.map(id => ({ id, type: timelineSavedObjectType }))
+  const bulkGetTimelines = request.body.objects.map(item => ({
+    id: item.timelineId,
+    type: timelineSavedObjectType,
+  }));
+  const bulkGetNotes = request.body.objects.reduce((acc, item) => {
+    return item.noteIds.length > 0
+      ? [
+          ...acc,
+          ...item.noteIds?.map(noteId => ({
+            id: noteId,
+            type: noteSavedObjectType,
+          })),
+        ]
+      : acc;
+  }, []);
+
+  const savedObjects = await Promise.all([
+    bulkGetTimelines.length > 0 ? client.bulkGet(bulkGetTimelines) : Promise.resolve({}),
+    bulkGetNotes.length > 0 ? client.bulkGet(bulkGetNotes) : Promise.resolve({}),
+  ]);
+
+  const timelineObjects = savedObjects[0].saved_objects.map(savedObject =>
+    convertSavedObjectToSavedTimeline(savedObject)
   );
 
-  const requestWithClient: FrameworkRequest & RequestHandlerContext = {
-    ...request,
-    context: {
-      core: {
-        savedObjects: {
-          client,
-        },
-      },
-    },
-  };
-  const timelinesWithNotesAndPinnedEvents = await Promise.all(
-    savedObjects.saved_objects.map(async savedObject => {
-      const timelineSaveObject = convertSavedObjectToSavedTimeline(savedObject);
-      return Promise.all([
-        note.getNotesByTimelineId(requestWithClient, timelineSaveObject.savedObjectId),
-        pinnedEvent.getAllPinnedEventsByTimelineId(
-          requestWithClient,
-          timelineSaveObject.savedObjectId
-        ),
-        Promise.resolve(timelineSaveObject),
-      ]);
-    })
+  const noteObjects = savedObjects[1]?.saved_objects?.map(savedObject =>
+    convertSavedObjectToSavedNote(savedObject)
   );
-
-  return {
-    timeline: timelinesWithNotesAndPinnedEvents.map(([notes, pinnedEvents, timeline]) =>
-      timelineWithReduxProperties(notes, pinnedEvents, timeline)
-    ),
-  };
+  return timelineObjects.map((timeline, index) => {
+    return {
+      ...timeline,
+      ...getNotesByTimelineId(noteObjects, timeline.savedObjectId),
+      pinEventsIds: request.body.objects.find(item => item.timelineId === timeline.savedObjectId)
+        ?.pinnedEventIds,
+    };
+  });
 };
 
-const createExportTimelinesRoute = (
-  config: LegacyServices['config'],
-  getClients: GetScopedClients
-): Hapi.ServerRoute => {
-  return {
-    method: 'POST',
-    path: TIMELINE_EXPORT_URL,
-    options: {
-      tags: ['access:siem'],
+export const exportTimelinesRoute = (router: IRouter, config: LegacyServices['config']) => {
+  router.post(
+    {
+      path: TIMELINE_EXPORT_URL,
       validate: {
-        options: {
-          abortEarly: false,
-        },
-        payload: exportTimelinesSchema,
-        query: exportTimelinesQuerySchema,
+        query: buildRouteValidation<ExportTimelineRequestParams['query']>(
+          exportTimelinesQuerySchema
+        ),
+        body: buildRouteValidation<ExportTimelineRequestParams['body']>(exportTimelinesSchema),
+      },
+      options: {
+        tags: ['access:siem'],
       },
     },
-    async handler(request: ExportTimelineRequest & LegacyRequest, headers) {
-      const { savedObjectsClient } = await getClients(request);
+    async (context, request, response) => {
+      const savedObjectsClient = context.core.savedObjects.client;
+      const siemResponse = buildSiemResponse(response);
 
       if (!savedObjectsClient) {
-        return headers.response().code(404);
+        return siemResponse.error({ statusCode: 404 });
       }
 
       try {
         const exportSizeLimit = config().get<number>('savedObjects.maxImportExportSize');
-        if (request.payload?.objects != null && request.payload.objects.length > exportSizeLimit) {
-          return headers
-            .response({
-              message: `Can't export more than ${exportSizeLimit} rules`,
-              status_code: 400,
-            })
-            .code(400);
+        if (request.body?.objects != null && request.body.objects.length > exportSizeLimit) {
+          return siemResponse.error({
+            statusCode: 400,
+            body: `Can't export more than ${exportSizeLimit} rules`,
+          });
         }
+        const exported = await getExportTimelineByObjectIds({
+          client: savedObjectsClient,
+          request,
+        });
 
-        const exported = await getExportTimelineByObjectIds(savedObjectsClient, request);
+        const responseBody = exported.timelinesNdjson;
 
-        const response = headers.response(exported.timelinesNdjson);
-
-        return response
-          .header('Content-Disposition', `attachment; filename="${request.query.file_name}"`)
-          .header('Content-Type', 'application/ndjson');
+        return response.ok({
+          headers: {
+            'Content-Disposition': `attachment; filename="${request.query.file_name}"`,
+            'Content-Type': 'application/ndjson',
+          },
+          body: responseBody,
+        });
       } catch (err) {
         const error = transformError(err);
-        return headers
-          .response({
-            message: error.message,
-            status_code: error.statusCode,
-          })
-          .code(error.statusCode);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
       }
-    },
-  };
-};
-
-export const exportTimelinesRoute = (
-  route: LegacyServices['route'],
-  config: LegacyServices['config'],
-  getClients: GetScopedClients
-): void => {
-  route(createExportTimelinesRoute(config, getClients));
+    }
+  );
 };

@@ -8,6 +8,7 @@ import { EuiPanel, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui'
 import React, { useMemo, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import uuid from 'uuid';
+import { keys } from 'lodash/fp';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { OpenTimelineProps } from './types';
 import { SearchRow } from './search_row';
@@ -144,14 +145,20 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       [selectedItems, dispatchToaster, history]
     );
 
+    const getSelectedItemsIds = useMemo(() => {
+      return selectedItems.map(item => ({
+        timelineId: item.savedObjectId,
+        pinnedEventIds: keys(item.pinnedEventIds),
+        noteIds: item.noteIds,
+      }));
+    }, [selectedItems]);
+
     return (
       <>
         {enableDownloader && (
           <RuleDownloader
             filename={`${EXPORT_FILENAME}.ndjson`}
-            ids={selectedItems
-              ?.filter(item => item.savedObjectId != null)
-              .map(item => item.savedObjectId)}
+            ids={getSelectedItemsIds}
             exportSelectedData={exportSelectedTimeline}
             onExportComplete={exportCount => {
               setEnableDownloader(false);

@@ -180,7 +180,7 @@ export class PinnedEvent {
   }
 }
 
-const convertSavedObjectToSavedPinnedEvent = (
+export const convertSavedObjectToSavedPinnedEvent = (
   savedObject: unknown,
   timelineVersion?: string | undefined | null
 ): PinnedEventSavedObject =>

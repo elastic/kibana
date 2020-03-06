@@ -25,9 +25,16 @@ export type ExportSelectedData = ({
   signal,
 }: ExportDocumentsProps) => Promise<Blob>;
 
+interface ExportTimelineIds {
+  timelineId: string;
+  noteIds: string[];
+  pinnedEventIds: string[];
+}
+
 export interface RuleDownloaderProps {
   filename: string;
-  ids?: string[];
+  ids?: ExportTimelineIds[];
+  ruleIds?: string[];
   exportSelectedData?: ExportSelectedData;
   onExportComplete: (exportCount: number) => void;
   onExportFailure?: () => void;
@@ -44,6 +51,7 @@ export const RuleDownloaderComponent = ({
   exportSelectedData,
   filename,
   ids,
+  ruleIds,
   onExportComplete,
   onExportFailure,
 }: RuleDownloaderProps) => {
@@ -55,12 +63,16 @@ export const RuleDownloaderComponent = ({
     const abortCtrl = new AbortController();
 
     async function exportData() {
-      if (anchorRef && anchorRef.current && ids != null && ids.length > 0) {
+      if (
+        anchorRef &&
+        anchorRef.current &&
+        ((ruleIds != null && ruleIds.length > 0) || (ids != null && ids.length > 0))
+      ) {
         let exportResponse;
         try {
           if (isNil(exportSelectedData)) {
             exportResponse = await exportRules({
-              ids,
+              ruleIds,
               signal: abortCtrl.signal,
             });
           } else {

@@ -6,7 +6,16 @@
 import Joi from 'joi';
 
 /* eslint-disable @typescript-eslint/camelcase */
-export const objects = Joi.array().items(Joi.string().required());
+export const timelineId = Joi.string();
+export const pinnedEventIds = Joi.array().items(Joi.string());
+export const noteIds = Joi.array().items(Joi.string());
+export const objects = Joi.array().items(
+  Joi.object({
+    timelineId,
+    pinnedEventIds,
+    noteIds,
+  })
+);
 
 export const exclude_export_details = Joi.boolean();
 export const file_name = Joi.string();

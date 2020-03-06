@@ -202,8 +202,8 @@ export const AllTimelineSavedObjectRuntimeType = runtimeTypes.type({
 export interface AllTimelineSavedObject
   extends runtimeTypes.TypeOf<typeof AllTimelineSavedObjectRuntimeType> {}
 
-export interface ExportTimelineRequest extends Omit<LegacyRequest, 'query'> {
-  payload: { objects: Array<{ timelime_id: string }> | null | undefined };
+export interface ExportTimelineRequestParams {
+  body: { objects: string[] | null | undefined };
   query: {
     file_name: string;
     exclude_export_details: boolean;
