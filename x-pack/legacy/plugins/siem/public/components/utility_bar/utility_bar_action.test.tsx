@@ -7,7 +7,7 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import { TestProviders } from '../../../mock';
+import { TestProviders } from '../../mock';
 import { UtilityBarAction } from './index';
 
 describe('UtilityBarAction', () => {
