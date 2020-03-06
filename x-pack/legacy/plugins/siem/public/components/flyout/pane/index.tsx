@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlyout, EuiFlyoutHeader, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import styled from 'styled-components';
@@ -46,12 +46,30 @@ const EuiFlyoutContainer = styled.div<{ headerHeight: number }>`
     overflow: hidden;
     padding: 5px 0 0 10px;
   }
+
   .timeline-flyout-body {
     overflow-y: hidden;
-    padding: 0;
+    padding: 0 10px 0 12px;
+
+    .euiFlyoutBody__overflow {
+      overflow: hidden;
+    }
+
     .euiFlyoutBody__overflowContent {
       padding: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+
+      > div:first-child {
+        flex: 0;
+      }
     }
+  }
+
+  .timeline-flyout-footer {
+    background: none;
+    padding: 0 10px 0 12px;
   }
 `;
 
@@ -66,6 +84,11 @@ const FlyoutHeaderContainer = styled.div`
 // manually wrap the close button because EuiButtonIcon can't be a wrapped `styled`
 const WrappedCloseButton = styled.div`
   margin-right: 5px;
+`;
+
+const StyledResizable = styled(Resizable)`
+  display: flex;
+  flex-direction: column;
 `;
 
 const FlyoutHeaderWithCloseButtonComponent: React.FC<{
@@ -136,7 +159,7 @@ const FlyoutPaneComponent: React.FC<Props> = ({
         onClose={onClose}
         size="l"
       >
-        <Resizable
+        <StyledResizable
           enable={{ left: true }}
           defaultSize={{
             width,
@@ -163,10 +186,8 @@ const FlyoutPaneComponent: React.FC<Props> = ({
               usersViewing={usersViewing}
             />
           </EuiFlyoutHeader>
-          <EuiFlyoutBody data-test-subj="eui-flyout-body" className="timeline-flyout-body">
-            {children}
-          </EuiFlyoutBody>
-        </Resizable>
+          {children}
+        </StyledResizable>
       </EuiFlyout>
     </EuiFlyoutContainer>
   );

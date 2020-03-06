@@ -40,7 +40,6 @@ interface OwnProps {
   data: TimelineItem[];
   id: string;
   isEventViewer?: boolean;
-  height: number;
   sort: Sort;
   toggleColumn: (column: ColumnHeaderOptions) => void;
 }
@@ -57,7 +56,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     columnHeaders,
     data,
     eventIdToNoteIds,
-    height,
     id,
     isEventViewer = false,
     isSelectAllChecked,
@@ -165,7 +163,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         data={data}
         eventIdToNoteIds={eventIdToNoteIds}
         getNotesByIds={getNotesByIds}
-        height={height}
         id={id}
         isEventViewer={isEventViewer}
         isSelectAllChecked={isSelectAllChecked}
@@ -196,7 +193,6 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
       prevProps.data === nextProps.data &&
       prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
       prevProps.notesById === nextProps.notesById &&
-      prevProps.height === nextProps.height &&
       prevProps.id === nextProps.id &&
       prevProps.isEventViewer === nextProps.isEventViewer &&
       prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
