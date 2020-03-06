@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultIndexPattern } from '../../../default_index_pattern';
+import { DEFAULT_INDEX_PATTERN } from '../../../common/constants';
 import { RequestBasicOptions } from '../framework/types';
 
 export const mockOptions: RequestBasicOptions = {
-  defaultIndex: defaultIndexPattern,
+  defaultIndex: DEFAULT_INDEX_PATTERN,
   sourceConfiguration: {
     fields: {
       container: 'docker.container.name',

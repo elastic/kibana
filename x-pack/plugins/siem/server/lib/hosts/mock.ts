@@ -5,7 +5,7 @@
  */
 
 import { Direction, HostsFields } from '../../graphql/types';
-import { defaultIndexPattern } from '../../../default_index_pattern';
+import { DEFAULT_INDEX_PATTERN } from '../../../common/constants';
 
 import {
   HostOverviewRequestOptions,
@@ -14,7 +14,7 @@ import {
 } from '.';
 
 export const mockGetHostsOptions: HostsRequestOptions = {
-  defaultIndex: defaultIndexPattern,
+  defaultIndex: DEFAULT_INDEX_PATTERN,
   sourceConfiguration: {
     fields: {
       container: 'docker.container.name',
@@ -297,7 +297,7 @@ export const mockGetHostOverviewOptions: HostOverviewRequestOptions = {
     },
   },
   timerange: { interval: '12h', to: 1554824274610, from: 1554737874610 },
-  defaultIndex: defaultIndexPattern,
+  defaultIndex: DEFAULT_INDEX_PATTERN,
   fields: [
     '_id',
     'host.architecture',
@@ -501,7 +501,7 @@ export const mockGetHostOverviewResult = {
 };
 
 export const mockGetHostLastFirstSeenOptions: HostLastFirstSeenRequestOptions = {
-  defaultIndex: defaultIndexPattern,
+  defaultIndex: DEFAULT_INDEX_PATTERN,
   sourceConfiguration: {
     fields: {
       container: 'docker.container.name',

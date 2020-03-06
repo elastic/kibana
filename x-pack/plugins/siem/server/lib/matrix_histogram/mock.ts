@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultIndexPattern } from '../../../default_index_pattern';
+import { DEFAULT_INDEX_PATTERN } from '../../../common/constants';
 import { HistogramType } from '../../graphql/types';
 
 export const mockAlertsHistogramDataResponse = {
@@ -111,7 +111,7 @@ export const mockOptions = {
     to: 9999,
     from: 1234,
   },
-  defaultIndex: defaultIndexPattern,
+  defaultIndex: DEFAULT_INDEX_PATTERN,
   filterQuery: '',
   stackByField: 'event.module',
   histogramType: HistogramType.alerts,

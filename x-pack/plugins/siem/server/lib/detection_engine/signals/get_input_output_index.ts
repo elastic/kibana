@@ -5,7 +5,7 @@
  */
 
 import { AlertServices } from '../../../../../../plugins/alerting/server';
-import { defaultIndexPattern } from '../../../../default_index_pattern';
+import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 
 export const getInputIndex = async (
@@ -22,7 +22,7 @@ export const getInputIndex = async (
     if (configuration.attributes != null && configuration.attributes[DEFAULT_INDEX_KEY] != null) {
       return configuration.attributes[DEFAULT_INDEX_KEY];
     } else {
-      return defaultIndexPattern;
+      return DEFAULT_INDEX_PATTERN;
     }
   }
 };

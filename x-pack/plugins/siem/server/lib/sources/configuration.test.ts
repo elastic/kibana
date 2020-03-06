@@ -5,7 +5,7 @@
  */
 
 import { InmemoryConfigurationAdapter } from '../configuration/inmemory_configuration_adapter';
-import { defaultIndexPattern } from '../../../default_index_pattern';
+import { DEFAULT_INDEX_PATTERN } from '../../../common/constants';
 
 import { ConfigurationSourcesAdapter } from './configuration';
 import { PartialSourceConfiguration } from './types';
@@ -76,7 +76,7 @@ describe('the ConfigurationSourcesAdapter', () => {
       new InmemoryConfigurationAdapter({
         sources: {
           sourceOne: {
-            defaultIndex: defaultIndexPattern,
+            defaultIndex: DEFAULT_INDEX_PATTERN,
             fields: {
               container: 'DIFFERENT_CONTAINER_FIELD',
             },

@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultIndexPattern } from '../../../default_index_pattern';
+import { DEFAULT_INDEX_PATTERN } from '../../../common/constants';
 import { Direction, FlowTargetSourceDest, NetworkTopTablesFields } from '../../graphql/types';
 
 import { NetworkTopNFlowRequestOptions } from '.';
 
 export const mockOptions: NetworkTopNFlowRequestOptions = {
-  defaultIndex: defaultIndexPattern,
+  defaultIndex: DEFAULT_INDEX_PATTERN,
   sourceConfiguration: {
     fields: {
       container: 'docker.container.name',

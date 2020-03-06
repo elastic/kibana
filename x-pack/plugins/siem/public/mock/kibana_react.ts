@@ -24,7 +24,7 @@ import {
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_BYTES_FORMAT,
 } from '../../common/constants';
-import { defaultIndexPattern } from '../../default_index_pattern';
+import { DEFAULT_INDEX_PATTERN } from '../../common/constants';
 import { createKibanaCoreStartMock, createKibanaPluginsStartMock } from './kibana_core';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,7 +39,7 @@ export const mockUiSettings: Record<string, any> = {
     pause: DEFAULT_INTERVAL_PAUSE,
     value: DEFAULT_INTERVAL_VALUE,
   },
-  [DEFAULT_INDEX_KEY]: defaultIndexPattern,
+  [DEFAULT_INDEX_KEY]: DEFAULT_INDEX_PATTERN,
   [DEFAULT_BYTES_FORMAT]: '0,0.[0]b',
   [DEFAULT_DATE_FORMAT_TZ]: 'UTC',
   [DEFAULT_DATE_FORMAT]: 'MMM D, YYYY @ HH:mm:ss.SSS',

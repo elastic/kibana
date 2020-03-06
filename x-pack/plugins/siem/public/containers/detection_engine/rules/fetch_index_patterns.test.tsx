@@ -6,7 +6,7 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { defaultIndexPattern } from '../../../../default_index_pattern';
+import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { useApolloClient } from '../../../utils/apollo_context';
 import { mocksSource } from '../../source/mock';
 
@@ -25,7 +25,7 @@ describe('useFetchIndexPatterns', () => {
         query: () => Promise.resolve(mocksSource[0].result),
       }));
       const { result, waitForNextUpdate } = renderHook<unknown, Return>(() =>
-        useFetchIndexPatterns(defaultIndexPattern)
+        useFetchIndexPatterns(DEFAULT_INDEX_PATTERN)
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -429,7 +429,7 @@ describe('useFetchIndexPatterns', () => {
         query: () => Promise.reject(new Error('Something went wrong')),
       }));
       const { result, waitForNextUpdate } = renderHook<unknown, Return>(() =>
-        useFetchIndexPatterns(defaultIndexPattern)
+        useFetchIndexPatterns(DEFAULT_INDEX_PATTERN)
       );
 
       await waitForNextUpdate();

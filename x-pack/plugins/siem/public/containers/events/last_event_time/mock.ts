@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultIndexPattern } from '../../../../default_index_pattern';
+import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { GetLastEventTimeQuery, LastEventIndexKey } from '../../../graphql/types';
 
 import { LastEventTimeGqlQuery } from './last_event_time.gql_query';
@@ -43,7 +43,7 @@ export const mockLastEventTimeQuery: MockLastEventTimeQuery[] = [
         sourceId: 'default',
         indexKey: LastEventIndexKey.hosts,
         details: {},
-        defaultIndex: defaultIndexPattern,
+        defaultIndex: DEFAULT_INDEX_PATTERN,
       },
     },
     result: {

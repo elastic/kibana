@@ -6,7 +6,7 @@
 
 import { omit } from 'lodash/fp';
 
-import { defaultIndexPattern } from '../../../default_index_pattern';
+import { DEFAULT_INDEX_PATTERN } from '../../../common/constants';
 import { Direction } from '../../graphql/types';
 import { RequestOptions } from '../../lib/framework';
 
@@ -30,7 +30,7 @@ describe('createOptions', () => {
       },
     };
     args = {
-      defaultIndex: defaultIndexPattern,
+      defaultIndex: DEFAULT_INDEX_PATTERN,
       pagination: {
         limit: 5,
       },
@@ -57,7 +57,7 @@ describe('createOptions', () => {
   test('should create options given all input including sort field', () => {
     const options = createOptions(source, args, info);
     const expected: RequestOptions = {
-      defaultIndex: defaultIndexPattern,
+      defaultIndex: DEFAULT_INDEX_PATTERN,
       sourceConfiguration: {
         fields: {
           host: 'host-1',
@@ -87,7 +87,7 @@ describe('createOptions', () => {
     const argsWithoutSort: Args = omit('sortField', args);
     const options = createOptions(source, argsWithoutSort, info);
     const expected: RequestOptions = {
-      defaultIndex: defaultIndexPattern,
+      defaultIndex: DEFAULT_INDEX_PATTERN,
       sourceConfiguration: {
         fields: {
           host: 'host-1',
