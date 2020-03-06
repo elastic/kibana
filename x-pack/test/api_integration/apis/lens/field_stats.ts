@@ -232,7 +232,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body).to.eql({
           totalDocuments: 4634,
           sampledDocuments: 4634,
-          sampledValues: 4634,
+          sampledValues: 4633,
           topValues: {
             buckets: [
               {
