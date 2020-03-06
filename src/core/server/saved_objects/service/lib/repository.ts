@@ -776,56 +776,76 @@ export class SavedObjectsRepository {
       return { saved_objects: [] };
     }
 
-    const unsupportedTypeObjects = objects
-      .filter(o => !this._allowedTypes.includes(o.type))
-      .map(({ type, id }) => {
-        return ({
-          id,
-          type,
-          error: SavedObjectsErrorHelpers.createUnsupportedTypeError(type).output.payload,
-        } as any) as SavedObject<T>;
-      });
+    let bulkGetRequestIndexCounter = 0;
+    const bulkGetDocs: object[] = [];
+    const expectedBulkGetResults: Array<Either<any, any>> = objects.map(object => {
+      const { type, id, fields } = object;
 
-    const supportedTypeObjects = objects.filter(o => this._allowedTypes.includes(o.type));
-
-    const response = await this._callCluster('mget', {
-      body: {
-        docs: supportedTypeObjects.map(({ type, id, fields }) => {
-          return {
-            _id: this._serializer.generateRawId(namespace, type, id),
-            _index: this.getIndexForType(type),
-            _source: includedFields(type, fields),
-          };
-        }),
-      },
-    });
-
-    return {
-      saved_objects: (response.docs as any[])
-        .map((doc, i) => {
-          const { id, type } = supportedTypeObjects[i];
-
-          if (!doc.found || !this._rawInNamespaces(doc, namespace)) {
-            return ({
-              id,
-              type,
-              error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload,
-            } as any) as SavedObject<T>;
-          }
-
-          const time = doc._source.updated_at;
-          return {
+      if (!this._allowedTypes.includes(type)) {
+        return {
+          tag: 'Left' as 'Left',
+          error: {
             id,
             type,
-            ...(doc._source.namespaces && { namespaces: doc._source.namespaces }),
-            ...(time && { updated_at: time }),
-            version: encodeHitVersion(doc),
-            attributes: doc._source[type],
-            references: doc._source.references || [],
-            migrationVersion: doc._source.migrationVersion,
-          };
+            error: SavedObjectsErrorHelpers.createUnsupportedTypeError(type).output.payload,
+          },
+        };
+      }
+
+      bulkGetDocs.push({
+        _id: this._serializer.generateRawId(namespace, type, id),
+        _index: this.getIndexForType(type),
+        _source: includedFields(type, fields),
+      });
+
+      return {
+        tag: 'Right' as 'Right',
+        value: {
+          type,
+          id,
+          esRequestIndex: bulkGetRequestIndexCounter++,
+        },
+      };
+    });
+
+    const bulkGetResponse = bulkGetDocs.length
+      ? await this._callCluster('mget', {
+          body: {
+            docs: bulkGetDocs,
+          },
+          ignore: [404],
         })
-        .concat(unsupportedTypeObjects),
+      : undefined;
+
+    return {
+      saved_objects: expectedBulkGetResults.map(expectedResult => {
+        if (isLeft(expectedResult)) {
+          return expectedResult.error;
+        }
+
+        const { type, id, esRequestIndex } = expectedResult.value;
+        const doc = bulkGetResponse.docs[esRequestIndex];
+
+        if (!doc.found || !this._rawInNamespaces(doc, namespace)) {
+          return ({
+            id,
+            type,
+            error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload,
+          } as any) as SavedObject<T>;
+        }
+
+        const time = doc._source.updated_at;
+        return {
+          id,
+          type,
+          ...(doc._source.namespaces && { namespaces: doc._source.namespaces }),
+          ...(time && { updated_at: time }),
+          version: encodeHitVersion(doc),
+          attributes: doc._source[type],
+          references: doc._source.references || [],
+          migrationVersion: doc._source.migrationVersion,
+        };
+      }),
     };
   }
 

@@ -876,7 +876,7 @@ describe('SavedObjectsRepository', () => {
         const result = await bulkGet([obj1, obj, obj2]);
         expect(callAdminCluster).toHaveBeenCalledTimes(1);
         expect(result).toEqual({
-          saved_objects: [expectSuccess(obj1), expectSuccess(obj2), expectErrorInvalidType(obj)],
+          saved_objects: [expectSuccess(obj1), expectErrorInvalidType(obj), expectSuccess(obj2)],
         });
       };
 
@@ -969,8 +969,8 @@ describe('SavedObjectsRepository', () => {
         expect(result).toEqual({
           saved_objects: [
             expectSuccessResult(obj1, response.docs[0]),
-            expectSuccessResult(obj2, response.docs[1]),
             expectError(obj),
+            expectSuccessResult(obj2, response.docs[1]),
           ],
         });
       });
