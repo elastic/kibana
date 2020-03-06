@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 
 // @ts-ignore
