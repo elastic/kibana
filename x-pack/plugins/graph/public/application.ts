@@ -10,6 +10,7 @@
 import angular from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import '../../../../webpackShims/ace';
+// required for i18nIdDirective
 import 'angular-sanitize';
 // type imports
 import {
@@ -118,6 +119,7 @@ function mountGraphApp(appBasePath: string, element: HTMLElement) {
   // make angular-within-angular possible
   const $injector = angular.bootstrap(mountpoint, [moduleName]);
   element.appendChild(mountpoint);
+  element.setAttribute('class', 'kbnLocalApplicationWrapper');
   return $injector;
 }
 
