@@ -12,7 +12,8 @@ import {
   CoreStart,
   PluginInitializerContext,
   Plugin as IPlugin,
-} from '../../../../src/core/public';
+} from './core_types';
+
 import {
   HomePublicPluginSetup,
   FeatureCatalogueCategory,
@@ -44,7 +45,7 @@ export type StartServices = CoreStart & StartPlugins;
 export type Setup = ReturnType<Plugin['setup']>;
 export type Start = ReturnType<Plugin['start']>;
 
-export class Plugin {
+export class Plugin implements IPlugin<Setup, Start> {
   public id = 'siem';
   public name = 'SIEM';
   private kibanaVersion: string;

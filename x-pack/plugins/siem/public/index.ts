@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, PluginInitializerContext } from './plugin';
+import { PluginInitializerContext } from './core_types';
+import { Plugin } from './plugin';
 
 export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(context);

@@ -6,7 +6,7 @@
 
 import { get, isEmpty } from 'lodash/fp';
 
-import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
+import { ChromeBreadcrumb } from '../../../core_types';
 import { decodeIpv6 } from '../../../lib/helpers';
 import { getNetworkUrl, getIPDetailsUrl } from '../../../components/link_to/redirect_to_network';
 import { networkModel } from '../../../store/network';

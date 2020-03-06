@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Breadcrumb } from 'ui/chrome';
+import { ChromeBreadcrumb } from '../../core_types';
 import { getCaseDetailsUrl, getCaseUrl, getCreateCaseUrl } from '../../components/link_to';
 import { RouteSpyState } from '../../utils/route/types';
 import * as i18n from './translations';
 
-export const getBreadcrumbs = (params: RouteSpyState): Breadcrumb[] => {
-  let breadcrumb = [
+export const getBreadcrumbs = (params: RouteSpyState): ChromeBreadcrumb[] => {
+  let breadcrumb: ChromeBreadcrumb[] = [
     {
       text: i18n.PAGE_TITLE,
       href: getCaseUrl(),
