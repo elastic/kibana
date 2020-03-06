@@ -25,7 +25,7 @@ import { setup as visualizations } from '../../../../../../src/legacy/core_plugi
 visualizations.types.createReactVisualization({
   name: 'self_changing_vis',
   title: 'Self Changing Vis',
-  icon: 'visControls',
+  icon: 'controlsHorizontal',
   description:
     'This visualization is able to change its own settings, that you could also set in the editor.',
   visConfig: {
