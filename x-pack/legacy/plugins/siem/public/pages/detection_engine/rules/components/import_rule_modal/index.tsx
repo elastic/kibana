@@ -113,8 +113,8 @@ export const ImportRuleModalComponent = ({
               <EuiFilePicker
                 id="rule-file-picker"
                 initialPromptText={i18n.INITIAL_PROMPT_TEXT}
-                onChange={(files: FileList) => {
-                  setSelectedFiles(Object.keys(files).length > 0 ? files : null);
+                onChange={(files: FileList | null) => {
+                  setSelectedFiles(files && files.length > 0 ? files : null);
                 }}
                 display={'large'}
                 fullWidth={true}
