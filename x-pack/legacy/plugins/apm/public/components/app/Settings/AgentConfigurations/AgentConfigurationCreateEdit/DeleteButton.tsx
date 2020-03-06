@@ -35,7 +35,7 @@ export function DeleteButton({ onDeleted, selectedConfig }: Props) {
       }}
     >
       {i18n.translate(
-        'xpack.apm.settings.agentConf.flyout.deleteSection.buttonLabel',
+        'xpack.apm.settings.agentConf.deleteSection.buttonLabel',
         { defaultMessage: 'Delete' }
       )}
     </EuiButtonEmpty>
@@ -62,11 +62,11 @@ async function deleteConfig(
 
     toasts.addSuccess({
       title: i18n.translate(
-        'xpack.apm.settings.agentConf.flyout.deleteSection.deleteConfigSucceededTitle',
+        'xpack.apm.settings.agentConf.deleteSection.deleteConfigSucceededTitle',
         { defaultMessage: 'Configuration was deleted' }
       ),
       text: i18n.translate(
-        'xpack.apm.settings.agentConf.flyout.deleteSection.deleteConfigSucceededText',
+        'xpack.apm.settings.agentConf.deleteSection.deleteConfigSucceededText',
         {
           defaultMessage:
             'You have successfully deleted a configuration for "{serviceName}". It will take some time to propagate to the agents.',
@@ -77,11 +77,11 @@ async function deleteConfig(
   } catch (error) {
     toasts.addDanger({
       title: i18n.translate(
-        'xpack.apm.settings.agentConf.flyout.deleteSection.deleteConfigFailedTitle',
+        'xpack.apm.settings.agentConf.deleteSection.deleteConfigFailedTitle',
         { defaultMessage: 'Configuration could not be deleted' }
       ),
       text: i18n.translate(
-        'xpack.apm.settings.agentConf.flyout.deleteSection.deleteConfigFailedText',
+        'xpack.apm.settings.agentConf.deleteSection.deleteConfigFailedText',
         {
           defaultMessage:
             'Something went wrong when deleting a configuration for "{serviceName}". Error: "{errorMessage}"',

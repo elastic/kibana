@@ -24,18 +24,21 @@ import { Config } from '.';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { px, units } from '../../../../style/variables';
 import { getOptionLabel } from '../../../../../../../../plugins/apm/common/agent_configuration_constants';
+import { useLocation } from '../../../../hooks/useLocation';
+import {
+  createAgentConfigurationHref,
+  editAgentConfigurationHref
+} from '../../../shared/Links/apm/agentConfiguration';
 
 export function AgentConfigurationList({
   status,
-  data,
-  setIsFlyoutOpen,
-  setSelectedConfig
+  data
 }: {
   status: FETCH_STATUS;
   data: AgentConfigurationListAPIResponse;
-  setIsFlyoutOpen: (val: boolean) => void;
-  setSelectedConfig: (val: Config | null) => void;
 }) {
+  const { search } = useLocation();
+
   const columns: Array<ITableColumn<Config>> = [
     {
       field: 'applied_by_agent',
@@ -73,10 +76,7 @@ export function AgentConfigurationList({
           flush="left"
           size="s"
           color="primary"
-          onClick={() => {
-            setSelectedConfig(config);
-            setIsFlyoutOpen(true);
-          }}
+          href={editAgentConfigurationHref(search, config.service)}
         >
           {getOptionLabel(config.service.name)}
         </EuiButtonEmpty>
@@ -148,10 +148,7 @@ export function AgentConfigurationList({
           icon: 'pencil',
           color: 'primary',
           type: 'icon',
-          onClick: (config: Config) => {
-            setSelectedConfig(config);
-            setIsFlyoutOpen(true);
-          }
+          onClick: (config: Config) => {}
         }
       ]
     }
@@ -182,7 +179,11 @@ export function AgentConfigurationList({
         </>
       }
       actions={
-        <EuiButton color="primary" fill onClick={() => setIsFlyoutOpen(true)}>
+        <EuiButton
+          color="primary"
+          fill
+          href={createAgentConfigurationHref(search)}
+        >
           {i18n.translate(
             'xpack.apm.settings.agentConf.configTable.createConfigButtonLabel',
             { defaultMessage: 'Create configuration' }

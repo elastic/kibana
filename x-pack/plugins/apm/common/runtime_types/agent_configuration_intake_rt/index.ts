@@ -17,10 +17,18 @@ export const agentConfigurationIntakeRt = t.intersection([
   t.partial({ agent_name: t.string }),
   t.type({
     service: serviceRt,
-    settings: t.partial({
-      transaction_sample_rate: transactionSampleRateRt,
-      capture_body: t.string,
-      transaction_max_spans: transactionMaxSpansRt
-    })
+    settings: t.intersection([
+      t.record(t.string, t.string),
+      t.partial({
+        transaction_sample_rate: transactionSampleRateRt,
+        capture_body: t.union([
+          t.literal('off'),
+          t.literal('errors'),
+          t.literal('transactions'),
+          t.literal('all')
+        ]),
+        transaction_max_spans: transactionMaxSpansRt
+      })
+    ])
   })
 ]);

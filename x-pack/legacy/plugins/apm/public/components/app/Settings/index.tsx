@@ -46,7 +46,6 @@ export const Settings: React.FC = props => {
                       }
                     ),
                     id: '1',
-                    // @ts-ignore
                     href: getAPMHref('/settings/agent-configuration', search),
                     isSelected: pathname === '/settings/agent-configuration'
                   },
@@ -55,7 +54,6 @@ export const Settings: React.FC = props => {
                       defaultMessage: 'Indices'
                     }),
                     id: '2',
-                    // @ts-ignore
                     href: getAPMHref('/settings/apm-indices', search),
                     isSelected: pathname === '/settings/apm-indices'
                   },
@@ -64,7 +62,6 @@ export const Settings: React.FC = props => {
                       defaultMessage: 'Customize UI'
                     }),
                     id: '3',
-                    // @ts-ignore
                     href: getAPMHref('/settings/customize-ui', search),
                     isSelected: pathname === '/settings/customize-ui'
                   }

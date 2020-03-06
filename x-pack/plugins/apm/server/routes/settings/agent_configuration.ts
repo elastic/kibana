@@ -32,6 +32,32 @@ export const agentConfigurationRoute = createRoute(core => ({
   }
 }));
 
+// get a specific of configurations
+export const getSingleAgentConfigurationRoute = createRoute(core => ({
+  method: 'POST',
+  path: '/api/apm/settings/agent-configuration/view',
+  params: {
+    body: t.type({
+      service: serviceRt
+    })
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { service } = context.params.body;
+    const config = await findExactConfiguration({ service, setup });
+
+    if (!config) {
+      context.logger.info(
+        `Config was not found for ${service.name}/${service.environment}`
+      );
+
+      throw Boom.notFound();
+    }
+
+    return config;
+  }
+}));
+
 // delete configuration
 export const deleteAgentConfigurationRoute = createRoute(() => ({
   method: 'DELETE',

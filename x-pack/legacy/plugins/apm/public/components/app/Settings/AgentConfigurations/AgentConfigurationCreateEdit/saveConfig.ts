@@ -6,68 +6,29 @@
 
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
-import { callApmApi } from '../../../../../services/rest/createCallApmApi';
-import { isRumAgentName } from '../../../../../../../../../plugins/apm/common/agent_name';
-import {
-  getOptionLabel,
-  omitAllOption
-} from '../../../../../../../../../plugins/apm/common/agent_configuration_constants';
-import { UiTracker } from '../../../../../../../../../plugins/observability/public';
-
-interface Settings {
-  transaction_sample_rate: number;
-  capture_body?: string;
-  transaction_max_spans?: number;
-}
+import { AgentConfigurationIntake } from '../../../../../../../../../plugins/apm/server/lib/settings/agent_configuration/configuration_types';
+import { APMClient } from '../../../../../services/rest/createCallApmApi';
+import { getOptionLabel } from '../../../../../../../../../plugins/apm/common/agent_configuration_constants';
 
 export async function saveConfig({
-  serviceName,
-  environment,
-  sampleRate,
-  captureBody,
-  transactionMaxSpans,
-  agentName,
+  callApmApi,
+  config,
   isExistingConfig,
-  toasts,
-  trackApmEvent
+  toasts
 }: {
-  serviceName: string;
-  environment: string;
-  sampleRate: string;
-  captureBody: string;
-  transactionMaxSpans: string;
+  callApmApi: APMClient;
+  config: AgentConfigurationIntake;
   agentName?: string;
   isExistingConfig: boolean;
   toasts: NotificationsStart['toasts'];
-  trackApmEvent: UiTracker;
 }) {
-  trackApmEvent({ metric: 'save_agent_configuration' });
-
   try {
-    const settings: Settings = {
-      transaction_sample_rate: Number(sampleRate)
-    };
-
-    if (!isRumAgentName(agentName)) {
-      settings.capture_body = captureBody;
-      settings.transaction_max_spans = Number(transactionMaxSpans);
-    }
-
-    const configuration = {
-      agent_name: agentName,
-      service: {
-        name: omitAllOption(serviceName),
-        environment: omitAllOption(environment)
-      },
-      settings
-    };
-
     await callApmApi({
       pathname: '/api/apm/settings/agent-configuration',
       method: 'PUT',
       params: {
         query: { overwrite: isExistingConfig },
-        body: configuration
+        body: config
       }
     });
 
@@ -81,7 +42,7 @@ export async function saveConfig({
         {
           defaultMessage:
             'The configuration for "{serviceName}" was saved. It will take some time to propagate to the agents.',
-          values: { serviceName: getOptionLabel(serviceName) }
+          values: { serviceName: getOptionLabel(config.service.name) }
         }
       )
     });
@@ -97,7 +58,7 @@ export async function saveConfig({
           defaultMessage:
             'Something went wrong when saving the configuration for "{serviceName}". Error: "{errorMessage}"',
           values: {
-            serviceName: getOptionLabel(serviceName),
+            serviceName: getOptionLabel(config.service.name),
             errorMessage: error.message
           }
         }

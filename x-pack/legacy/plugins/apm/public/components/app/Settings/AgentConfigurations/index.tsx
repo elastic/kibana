@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiTitle,
@@ -20,47 +20,26 @@ import { useFetcher } from '../../../../hooks/useFetcher';
 import { AgentConfigurationListAPIResponse } from '../../../../../../../../plugins/apm/server/lib/settings/agent_configuration/list_configurations';
 import { AgentConfigurationList } from './AgentConfigurationList';
 import { useTrackPageview } from '../../../../../../../../plugins/observability/public';
-import { AddEditFlyout } from './AddEditFlyout';
+import { getAPMHref } from '../../../shared/Links/apm/APMLink';
+import { useLocation } from '../../../../hooks/useLocation';
 
 export type Config = AgentConfigurationListAPIResponse[0];
 
 export function AgentConfigurations() {
-  const { data = [], status, refetch } = useFetcher(
+  const { data = [], status } = useFetcher(
     callApmApi =>
-      callApmApi({ pathname: `/api/apm/settings/agent-configuration` }),
+      callApmApi({ pathname: '/api/apm/settings/agent-configuration' }),
     [],
     { preservePreviousData: false }
   );
-  const [selectedConfig, setSelectedConfig] = useState<Config | null>(null);
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   useTrackPageview({ app: 'apm', path: 'agent_configuration' });
   useTrackPageview({ app: 'apm', path: 'agent_configuration', delay: 15000 });
 
   const hasConfigurations = !isEmpty(data);
 
-  const onClose = () => {
-    setSelectedConfig(null);
-    setIsFlyoutOpen(false);
-  };
-
   return (
     <>
-      {isFlyoutOpen && (
-        <AddEditFlyout
-          selectedConfig={selectedConfig}
-          onClose={onClose}
-          onSaved={() => {
-            onClose();
-            refetch();
-          }}
-          onDeleted={() => {
-            onClose();
-            refetch();
-          }}
-        />
-      )}
-
       <EuiPanel>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
@@ -74,35 +53,25 @@ export function AgentConfigurations() {
             </EuiTitle>
           </EuiFlexItem>
 
-          {hasConfigurations ? (
-            <CreateConfigurationButton onClick={() => setIsFlyoutOpen(true)} />
-          ) : null}
+          {hasConfigurations ? <CreateConfigurationButton /> : null}
         </EuiFlexGroup>
 
         <EuiSpacer size="m" />
 
-        <AgentConfigurationList
-          status={status}
-          data={data}
-          setIsFlyoutOpen={setIsFlyoutOpen}
-          setSelectedConfig={setSelectedConfig}
-        />
+        <AgentConfigurationList status={status} data={data} />
       </EuiPanel>
     </>
   );
 }
 
-function CreateConfigurationButton({ onClick }: { onClick: () => void }) {
+function CreateConfigurationButton() {
+  const { search } = useLocation();
+  const href = getAPMHref('/settings/agent-configuration/create', search);
   return (
     <EuiFlexItem>
       <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton
-            color="primary"
-            fill
-            iconType="plusInCircle"
-            onClick={onClick}
-          >
+          <EuiButton color="primary" fill iconType="plusInCircle" href={href}>
             {i18n.translate(
               'xpack.apm.settings.agentConf.createConfigButtonLabel',
               { defaultMessage: 'Create configuration' }

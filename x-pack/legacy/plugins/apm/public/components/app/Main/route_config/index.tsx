@@ -23,6 +23,9 @@ import { resolveUrlParams } from '../../../../context/UrlParamsContext/resolveUr
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../../../../plugins/apm/common/i18n';
 import { TraceLink } from '../../TraceLink';
 import { CustomizeUI } from '../../Settings/CustomizeUI';
+import { useLocation } from '../../../../hooks/useLocation';
+import { AgentConfigurationCreateEdit } from '../../Settings/AgentConfigurations/AgentConfigurationCreateEdit';
+import { useFetcher } from '../../../../hooks/useFetcher';
 
 const metricsBreadcrumb = i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
   defaultMessage: 'Metrics'
@@ -99,6 +102,52 @@ export const routes: BreadcrumbRoute[] = [
         <AgentConfigurations />
       </Settings>
     ),
+    breadcrumb: i18n.translate(
+      'xpack.apm.breadcrumb.settings.agentConfigurationTitle',
+      {
+        defaultMessage: 'Agent Configuration'
+      }
+    ),
+    name: RouteName.AGENT_CONFIGURATION
+  },
+  {
+    exact: true,
+    path: '/settings/agent-configuration/edit',
+    component: () => {
+      // hooks rule is complaining about not using a hook here but it works so 🤷
+      // We should revisit how route params are handled anyway: https://github.com/elastic/kibana/issues/51963
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const { search } = useLocation();
+
+      // Ignoring here because I specifically DO NOT want to add the query params to the global route handler
+      // @ts-ignore
+      const { name, environment } = toQuery(search);
+
+      // fetch existing config
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const { data } = useFetcher(
+        callApmApi => {
+          return callApmApi({
+            method: 'POST',
+            pathname: '/api/apm/settings/agent-configuration/view',
+            params: { body: { service: { name, environment } } }
+          });
+        },
+        [environment, name]
+      );
+
+      if (!data) {
+        return null;
+      }
+
+      const existingConfig = data._source;
+
+      return (
+        <Settings>
+          <AgentConfigurationCreateEdit existingConfig={existingConfig} />
+        </Settings>
+      );
+    },
     breadcrumb: i18n.translate(
       'xpack.apm.breadcrumb.settings.agentConfigurationTitle',
       {
