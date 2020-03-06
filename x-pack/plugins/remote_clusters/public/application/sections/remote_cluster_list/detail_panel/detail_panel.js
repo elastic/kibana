@@ -148,7 +148,7 @@ export class DetailPanel extends Component {
               </EuiDescriptionListTitle>
 
               <EuiDescriptionListDescription data-test-subj="remoteClusterDetailIsConnected">
-                <ConnectionStatus isConnected={isConnected} />
+                <ConnectionStatus isConnected={isConnected} mode={mode} />
               </EuiDescriptionListDescription>
             </EuiFlexItem>
 

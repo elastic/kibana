@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH, UIM_SHOW_DETAILS_CLICK } from '../../../constants';
+import { PROXY_MODE } from '../../../../../common/constants';
 import { getRouterLinkProps, trackUiMetric, METRIC_TYPE } from '../../../services';
 import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';
 
@@ -124,32 +125,58 @@ export class RemoteClusterTable extends Component {
         },
       },
       {
-        field: 'seeds',
-        name: i18n.translate('xpack.remoteClusters.remoteClusterList.table.seedsColumnTitle', {
-          defaultMessage: 'Seeds',
-        }),
-        truncateText: true,
-        render: seeds => (seeds ? seeds.join(', ') : ''), // TODO Determine better way to support proxy mode
-      },
-      {
         field: 'isConnected',
         name: i18n.translate('xpack.remoteClusters.remoteClusterList.table.connectedColumnTitle', {
-          defaultMessage: 'Connection',
+          defaultMessage: 'Status',
         }),
         sortable: true,
-        render: isConnected => <ConnectionStatus isConnected={isConnected} />,
+        render: (isConnected, { mode }) => (
+          <ConnectionStatus isConnected={isConnected} mode={mode} />
+        ),
         width: '240px',
       },
       {
-        field: 'connectedNodesCount',
+        field: 'mode',
+        name: i18n.translate('xpack.remoteClusters.remoteClusterList.table.modeColumnTitle', {
+          defaultMessage: 'Mode',
+        }),
+        sortable: true,
+        render: mode =>
+          mode === PROXY_MODE
+            ? mode
+            : i18n.translate('xpack.remoteClusters.remoteClusterList.table.sniffModeDescription', {
+                defaultMessage: 'default',
+              }),
+      },
+      {
+        field: 'mode',
+        name: i18n.translate('xpack.remoteClusters.remoteClusterList.table.addressesColumnTitle', {
+          defaultMessage: 'Addresses',
+        }),
+        truncateText: true,
+        render: (mode, { seeds, proxyAddress }) => {
+          if (mode === PROXY_MODE) {
+            return proxyAddress;
+          }
+          return seeds.join(', ');
+        },
+      },
+      {
+        field: 'mode',
         name: i18n.translate(
-          'xpack.remoteClusters.remoteClusterList.table.connectedNodesColumnTitle',
+          'xpack.remoteClusters.remoteClusterList.table.connectionsColumnTitle',
           {
-            defaultMessage: 'Connected nodes',
+            defaultMessage: 'Connections',
           }
         ),
         sortable: true,
         width: '160px',
+        render: (mode, { connectedNodesCount, connectedSocketsCount }) => {
+          if (mode === PROXY_MODE) {
+            return connectedSocketsCount;
+          }
+          return connectedNodesCount;
+        },
       },
       {
         name: i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionsColumnTitle', {
