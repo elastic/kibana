@@ -24,7 +24,7 @@ export function legacyClusterAlertsRoute(server) {
           clusterUuid: schema.string(),
         }),
         payload: schema.object({
-          ccs: schema.string({ defaultValue: '' }),
+          ccs: schema.maybe(schema.string()),
           timeRange: schema.object({
             min: schema.string(),
             max: schema.string(),

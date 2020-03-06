@@ -9,7 +9,11 @@ import { i18n } from '@kbn/i18n';
 import { has, get } from 'lodash';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { TelemetryCollectionManager } from 'src/legacy/core_plugins/telemetry/server/collection_manager';
-import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG } from '../common/constants';
+import {
+  LOGGING_TAG,
+  KIBANA_MONITORING_LOGGING_TAG,
+  KIBANA_ALERTING_ENABLED,
+} from '../common/constants';
 import {
   Logger,
   PluginInitializerContext,
@@ -20,12 +24,14 @@ import {
   ICustomClusterClient,
   ElasticsearchConfig,
   ElasticsearchConfigType,
+  UiSettingsServiceStart,
+  CoreStart,
 } from '../../../../src/core/server';
 import { MonitoringConfig } from './config';
 // @ts-ignore
 import { requireUIRoutes } from './routes';
 // @ts-ignore
-import { instantiateClient } from './es_client/instantiate_client';
+import { instantiateClient, hasMonitoringCluster } from './es_client/instantiate_client';
 // @ts-ignore
 import { initBulkUploader, registerCollectors } from './kibana_monitoring';
 // @ts-ignore
@@ -33,9 +39,14 @@ import { initInfraSource } from './lib/logs/init_infra_source';
 import { registerMonitoringCollection } from './telemetry_collection';
 import { XPackMainPlugin } from '../../../legacy/plugins/xpack_main/server/xpack_main';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { PluginSetupContract } from '../../features/server';
+import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { LicenseService } from './license_service';
 import { MonitoringLicenseService } from './types';
+import {
+  PluginStartContract as AlertingPluginStartContract,
+  PluginSetupContract as AlertingPluginSetupContract,
+} from '../../alerting/server';
+import { getLicenseExpiration } from './alerts/license_expiration';
 
 export interface LegacyAPI {
   xpackMain: XPackMainPlugin;
@@ -52,14 +63,20 @@ export interface LegacyAPI {
 interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
-  features: PluginSetupContract;
+  features: FeaturesPluginSetupContract;
+  alerting: AlertingPluginSetupContract;
+}
+
+interface PluginsStart {
+  alerting: AlertingPluginStartContract;
 }
 
 interface MonitoringCoreConfig {
   get: (key: string) => string;
 }
+
 interface MonitoringCore {
-  config?: () => MonitoringCoreConfig;
+  config: () => MonitoringCoreConfig;
   log?: Logger;
   route?: (options: any) => void;
   xpackInfo?: any;
@@ -70,6 +87,13 @@ export class Plugin {
   private readonly log: Logger;
   private readonly getLogger: (...scopes: string[]) => Logger;
   private cluster?: ICustomClusterClient;
+  private coreSetup?: CoreSetup;
+  private licenseService?: MonitoringLicenseService;
+  private legacyAPI?: LegacyAPI;
+  private uiSettingsService?: UiSettingsServiceStart;
+  private monitoringCore?: MonitoringCore;
+  private setupPlugins?: PluginsSetup;
+  private config?: MonitoringConfig;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
@@ -78,13 +102,14 @@ export class Plugin {
   }
 
   async setup(core: CoreSetup, plugins: PluginsSetup) {
-    const [config, legacyConfig] = await combineLatest([
-      this.initializerContext.config.create<MonitoringConfig>(),
-      this.initializerContext.config.legacy.globalConfig$,
-    ])
+    this.coreSetup = core;
+    this.setupPlugins = plugins;
+    const config = await this.initializerContext.config
+      .create<MonitoringConfig>()
       .pipe(first())
       .toPromise();
 
+    this.config = config;
     // Monitoring creates and maintains a connection to a potentially
     // separate ES cluster - create this first
     const elasticsearchConfig = new ElasticsearchConfig(
@@ -100,34 +125,70 @@ export class Plugin {
 
     // Start our license service which will ensure
     // the appropriate licenses are present
-    const licenseService = new LicenseService().setup({
+    this.licenseService = new LicenseService().setup({
       licensing: plugins.licensing,
       monitoringClient: cluster,
       config,
       log: this.log,
     });
-    await licenseService.refresh();
+    await this.licenseService.refresh();
 
-    // Create our shim which is currently used to power our routing
-    const monitoringCore = await this.getLegacyShim(
-      config,
-      legacyConfig,
-      core,
-      plugins,
-      licenseService,
-      cluster
-    );
+    if (KIBANA_ALERTING_ENABLED && this.cluster && this.getLogger) {
+      plugins.alerting.registerType(
+        getLicenseExpiration(
+          () => this.uiSettingsService,
+          this.cluster,
+          this.getLogger,
+          config.ui.ccs.enabled
+        )
+      );
+    }
 
     if (config.ui.enabled) {
       this.registerPluginInUI(plugins);
-      await requireUIRoutes(monitoringCore);
     }
 
     return {
       registerLegacyAPI: (legacyAPI: LegacyAPI) => {
-        this.setupLegacy(legacyAPI, core, monitoringCore, config, plugins, cluster);
+        this.legacyAPI = legacyAPI;
       },
     };
+  }
+
+  async start(core: CoreStart, plugins: PluginsStart) {
+    if (!this.coreSetup || !this.licenseService || !this.cluster) {
+      return;
+    }
+
+    const [config, legacyConfig] = await combineLatest([
+      this.initializerContext.config.create<MonitoringConfig>(),
+      this.initializerContext.config.legacy.globalConfig$,
+    ])
+      .pipe(first())
+      .toPromise();
+
+    // Create our shim which is currently used to power our routing
+    this.monitoringCore = await this.getLegacyShim(
+      config,
+      legacyConfig,
+      this.coreSetup,
+      plugins,
+      this.licenseService,
+      this.cluster
+    );
+
+    if (config.ui.enabled) {
+      await requireUIRoutes(this.monitoringCore);
+    }
+
+    this.uiSettingsService = core.uiSettings;
+    this.setupLegacy();
+  }
+
+  stop() {
+    if (this.cluster) {
+      this.cluster.close();
+    }
   }
 
   registerPluginInUI(plugins: PluginsSetup) {
@@ -156,92 +217,84 @@ export class Plugin {
     });
   }
 
-  async setupLegacy(
-    legacyApi: LegacyAPI,
-    core: CoreSetup,
-    monitoringCore: MonitoringCore,
-    config: MonitoringConfig,
-    plugins: PluginsSetup,
-    cluster: ICustomClusterClient
-  ) {
-    const legacyConfigWrapper = monitoringCore.config
-      ? monitoringCore.config()
+  async setupLegacy() {
+    if (!this.monitoringCore || !this.cluster || !this.legacyAPI) {
+      return;
+    }
+
+    const legacyConfigWrapper = this.monitoringCore.config
+      ? this.monitoringCore.config()
       : { get: () => null };
     const log = this.getLogger(LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG);
 
     // Initialize telemetry
-    registerMonitoringCollection(cluster, legacyApi.telemetryCollectionManager);
+    registerMonitoringCollection(this.cluster, this.legacyAPI.telemetryCollectionManager);
     // Register collector objects for stats to show up in the APIs
-    registerCollectors(plugins.usageCollection, {
-      elasticsearchPlugin: legacyApi.elasticsearch,
-      interval: legacyApi.opsInterval,
+    registerCollectors(this.setupPlugins?.usageCollection, {
+      elasticsearchPlugin: this.legacyAPI.elasticsearch,
+      interval: this.legacyAPI.opsInterval,
       log,
       config: legacyConfigWrapper,
-      getOSInfo: legacyApi.getOSInfo,
-      hapiServer: legacyApi.hapiServer,
-      metrics$: core.metrics.getOpsMetrics$(),
+      getOSInfo: this.legacyAPI.getOSInfo,
+      hapiServer: this.legacyAPI.hapiServer,
+      metrics$: this.coreSetup?.metrics.getOpsMetrics$(),
     });
 
     // If collection is enabled, create the bulk uploader
-    const kibanaCollectionEnabled = config.kibana.collection.enabled;
+    const kibanaCollectionEnabled = this.config?.kibana.collection.enabled;
     if (kibanaCollectionEnabled) {
       // Start kibana internal collection
-      const serverInfo = core.http.getServerInfo();
+      const serverInfo = this.coreSetup?.http.getServerInfo();
       const legacyConfig = await this.initializerContext.config.legacy.globalConfig$
         .pipe(first())
         .toPromise();
       const bulkUploader = initBulkUploader({
-        elasticsearch: core.elasticsearch,
-        config,
+        elasticsearch: this.coreSetup?.elasticsearch,
+        config: this.config,
         log,
         kibanaStats: {
-          uuid: core.uuid.getInstanceUuid(),
+          uuid: this.coreSetup?.uuid.getInstanceUuid(),
           name: serverInfo?.name,
           index: get(legacyConfig, 'kibana.index'),
           host: serverInfo?.host,
           port: serverInfo?.port?.toString(),
           version: this.initializerContext.env.packageInfo.version,
-          status: legacyApi.getServerStatus(),
+          status: this.legacyAPI?.getServerStatus(),
         },
       });
 
       // Do not use `this.licenseService` as that looks at the monitoring cluster
       // whereas we want to check the production cluster here
-      plugins.licensing.license$.subscribe((license: any) => {
-        // use updated xpack license info to start/stop bulk upload
-        const mainMonitoring = license.getFeature('monitoring');
-        const monitoringBulkEnabled =
-          mainMonitoring && mainMonitoring.isAvailable && mainMonitoring.isEnabled;
-        if (monitoringBulkEnabled) {
-          bulkUploader.start(plugins.usageCollection);
-        } else {
-          bulkUploader.handleNotEnabled();
-        }
-      });
+      const licensing = this.setupPlugins?.licensing;
+      if (licensing) {
+        licensing.license$.subscribe((license: any) => {
+          // use updated xpack license info to start/stop bulk upload
+          const mainMonitoring = license.getFeature('monitoring');
+          const monitoringBulkEnabled =
+            mainMonitoring && mainMonitoring.isAvailable && mainMonitoring.isEnabled;
+          if (monitoringBulkEnabled) {
+            bulkUploader.start(this.setupPlugins?.usageCollection);
+          } else {
+            bulkUploader.handleNotEnabled();
+          }
+        });
+      }
     } else if (!kibanaCollectionEnabled) {
       log.info('Internal collection for Kibana monitoring is disabled per configuration.');
     }
 
-    initInfraSource(config, legacyApi.infra);
-  }
-
-  start() {}
-
-  stop() {
-    if (this.cluster) {
-      this.cluster.close();
-    }
+    initInfraSource(this.config, this.legacyAPI.infra);
   }
 
   async getLegacyShim(
     config: MonitoringConfig,
     legacyConfig: any,
-    core: CoreSetup,
-    plugins: PluginsSetup,
+    coreSetup: CoreSetup,
+    plugins: PluginsStart,
     licenseService: MonitoringLicenseService,
     cluster: ICustomClusterClient
-  ) {
-    const router = core.http.createRouter();
+  ): Promise<MonitoringCore> {
+    const router = coreSetup.http.createRouter();
     const legacyConfigWrapper = () => ({
       get: (_key: string): string => {
         const key = _key.includes('monitoring.') ? _key.split('monitoring.')[1] : _key;
@@ -253,7 +306,7 @@ export class Plugin {
         }
 
         if (key === 'server.uuid') {
-          return core.uuid.getInstanceUuid();
+          return coreSetup.uuid.getInstanceUuid();
         }
 
         throw new Error(`Unknown key '${_key}'`);
@@ -276,6 +329,7 @@ export class Plugin {
               getLogger: this.getLogger,
               payload: req.body,
               getUiSettingsService: () => context.core.uiSettings.client,
+              getAlertsClient: () => plugins.alerting.getAlertsClientWithRequest(req),
               server: {
                 config: legacyConfigWrapper,
                 newPlatform: {
@@ -291,7 +345,7 @@ export class Plugin {
                     getCluster: (name: string) => ({
                       callWithRequest: async (_req: any, endpoint: string, params: any) => {
                         const client =
-                          name === 'monitoring' ? cluster : core.elasticsearch.dataClient;
+                          name === 'monitoring' ? cluster : coreSetup.elasticsearch.dataClient;
                         return client?.asScoped(req).callAsCurrentUser(endpoint, params);
                       },
                     }),

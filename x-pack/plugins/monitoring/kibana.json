@@ -3,7 +3,7 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["monitoring"],
-  "requiredPlugins": ["usageCollection", "licensing", "features"],
+  "requiredPlugins": ["usageCollection", "licensing", "features", "alerting", "actions"],
   "server": true,
   "ui": false
 }
