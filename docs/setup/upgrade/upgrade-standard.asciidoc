@@ -57,5 +57,10 @@ and becomes a new instance in the monitoring data.
 . Install the appropriate versions of all your plugins for your new
   installation using the `kibana-plugin` script. Check out the
   <<kibana-plugins,plugins>> documentation for more information.
+. Perform a dry run migration to detect any problems that might prevent a
+  successfull upgrade. Start the new {kib} process with the
+  `--dry-run-migration` command line argument. If the dry run migration fails,
+  the new {kib} will most likely fail to start up. Only proceed to the next
+  step if the dry run migration succeeds.
 . Stop the old {kib} process.
 . Start the new {kib} process.
