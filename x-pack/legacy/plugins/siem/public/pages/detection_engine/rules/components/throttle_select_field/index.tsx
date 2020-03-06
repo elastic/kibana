@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { SelectField } from '../../../../../shared_imports';
 
@@ -20,22 +19,4 @@ export const THROTTLE_OPTIONS = [
 
 type ThrottleSelectField = typeof SelectField;
 
-export const ThrottleSelectField: ThrottleSelectField = props => (
-  <>
-    <SelectField {...props} />
-    {props.field.value === 'signal' && (
-      <>
-        <EuiSpacer />
-        <EuiCallOut
-          title="Selected frequency will trigger a high quantity of actions"
-          color="warning"
-          iconType="alert"
-        >
-          {
-            'The currently selected action frequency will likely trigger an extremely high quantity of actions to run. If this is not desirable, it is recommended that you alter your selection above in order to trigger less actions.'
-          }
-        </EuiCallOut>
-      </>
-    )}
-  </>
-);
+export const ThrottleSelectField: ThrottleSelectField = props => <SelectField {...props} />;

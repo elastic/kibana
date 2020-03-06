@@ -85,7 +85,7 @@ export const updateRules = async ({
       name,
       schedule: { interval },
       actions,
-      throttle: ['no_actions', 'signal', 'rule'].includes(throttle as string) ? null : throttle,
+      throttle: ['no_actions', 'rule'].includes(throttle as string) ? null : throttle,
       params: {
         description,
         ruleId: rule.params.ruleId,

@@ -225,48 +225,28 @@ export const signalRulesAlertType = ({
 
             const inputIndexes = inputIndex.join(', ');
 
-            if (throttle) {
-              if (throttle === 'signal') {
-                (noReIndexResult.hits.hits as Array<Record<string, string>>).forEach(signal => {
-                  const alertInstance = services.alertInstanceFactory(signal._id!);
-                  alertInstance.scheduleActions(
-                    'default',
-                    {
-                      inputIndexes,
-                      outputIndex,
-                      name,
-                      alertId,
-                      ruleId,
-                      signal,
-                    },
-                    true
-                  );
-                });
-              }
+            if (throttle && throttle !== 'no_actions') {
+              const alertInstance = services.alertInstanceFactory(ruleId!);
 
-              if (!['no_actions', 'signal'].includes(throttle)) {
-                const alertInstance = services.alertInstanceFactory(ruleId!);
+              const newSignalsCount = noReIndexResult.hits.total.value;
+              const currentSignalsCount = alertInstance.getState().signalsCount ?? 0;
+              const signalsCount = currentSignalsCount + newSignalsCount;
 
-                const newSignalsCount = noReIndexResult.hits.total.value;
-                const currentSignalsCount = alertInstance.getState().signalsCount ?? 0;
-                const signalsCount = currentSignalsCount + newSignalsCount;
-
-                alertInstance
-                  .replaceState({
-                    signalsCount,
-                  })
-                  .scheduleActions(
-                    'default',
-                    {
-                      inputIndexes,
-                      outputIndex,
-                      name,
-                      alertId,
-                      ruleId,
-                    },
-                    true // clears state after the throttled rule has been executed
-                  );
-              }
+              alertInstance
+                .replaceState({
+                  signalsCount,
+                })
+                .scheduleActions(
+                  'default',
+                  {
+                    inputIndexes,
+                    outputIndex,
+                    name,
+                    alertId,
+                    ruleId,
+                  },
+                  true // clears state after the throttled rule has been executed
+                );
             }
 
             logger.info(
