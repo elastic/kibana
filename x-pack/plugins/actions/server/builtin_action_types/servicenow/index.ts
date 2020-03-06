@@ -113,9 +113,10 @@ async function serviceNowExecutor(
       data,
     };
   } else {
-    await handleUpdateIncident({ incidentId, ...handlerInput });
+    data = await handleUpdateIncident({ incidentId, ...handlerInput });
     return {
       ...res,
+      data,
     };
   }
 }

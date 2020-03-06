@@ -4,31 +4,46 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Incident } from '../lib/servicenow/types';
-import { ActionHandlerArguments, UpdateParamsType, UpdateActionHandlerArguments } from './types';
+import { zipWith } from 'lodash';
+import { Incident, CommentResponse } from '../lib/servicenow/types';
+import {
+  ActionHandlerArguments,
+  UpdateParamsType,
+  UpdateActionHandlerArguments,
+  IncidentCreationResponse,
+  CommentType,
+  CommentsZipped,
+} from './types';
 
 export const handleCreateIncident = async ({
   serviceNow,
   params,
   comments,
   mapping,
-}: ActionHandlerArguments) => {
+}: ActionHandlerArguments): Promise<IncidentCreationResponse> => {
   const paramsAsIncident = params as Incident;
 
-  const { id, number } = await serviceNow.createIncident({
+  const { incidentId, number } = await serviceNow.createIncident({
     ...paramsAsIncident,
   });
 
+  const res: IncidentCreationResponse = { incidentId, number };
+
   // Should return comment ID
   if (comments && Array.isArray(comments) && comments.length > 0) {
-    await serviceNow.batchAddComments(
-      id,
-      comments.map(c => c.comment),
+    const commentResponse = await serviceNow.batchCreateComments(
+      incidentId,
+      comments,
       mapping.get('comments').target
     );
+
+    res.comments = zipWith(comments, commentResponse, (a: CommentType, b: CommentResponse) => ({
+      commentId: a.commentId,
+      incidentCommentId: b.commentId,
+    }));
   }
 
-  return { id, number };
+  return { ...res };
 };
 
 export const handleUpdateIncident = async ({
@@ -40,14 +55,45 @@ export const handleUpdateIncident = async ({
 }: UpdateActionHandlerArguments) => {
   const paramsAsIncident = params as UpdateParamsType;
 
-  await serviceNow.updateIncident(incidentId, { ...paramsAsIncident });
+  const { number } = await serviceNow.updateIncident(incidentId, {
+    ...paramsAsIncident,
+  });
+
+  const res: IncidentCreationResponse = { incidentId, number };
 
   // Should return comment ID
   if (comments && Array.isArray(comments) && comments.length > 0) {
-    await serviceNow.batchAddComments(
+    const commentsToUpdate = comments.filter(c => c.incidentCommentId);
+    const commentsToCreate = comments.filter(c => !c.incidentCommentId);
+
+    const commentCreationResponse = await serviceNow.batchCreateComments(
       incidentId,
-      comments.map(c => c.comment),
+      commentsToCreate,
       mapping.get('comments').target
     );
+
+    const commentUpdateResponse = await serviceNow.batchUpdateComments(commentsToUpdate);
+
+    const updateRes: CommentsZipped[] = zipWith(
+      commentsToCreate,
+      commentCreationResponse,
+      (a: CommentType, b: CommentResponse) => ({
+        commentId: a.commentId,
+        incidentCommentId: b.commentId,
+      })
+    );
+
+    const createRes: CommentsZipped[] = zipWith(
+      commentsToUpdate,
+      commentUpdateResponse,
+      (a: CommentType, b: CommentResponse) => ({
+        commentId: a.commentId,
+        incidentCommentId: b.commentId,
+      })
+    );
+
+    res.comments = [...updateRes, ...createRes];
   }
+
+  return { ...res };
 };

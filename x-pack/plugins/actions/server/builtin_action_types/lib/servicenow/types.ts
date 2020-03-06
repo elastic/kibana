@@ -18,7 +18,11 @@ export interface Incident {
 
 export interface IncidentResponse {
   number: string;
-  id: string;
+  incidentId: string;
+}
+
+export interface CommentResponse {
+  commentId: string;
 }
 
 export type UpdateIncident = Partial<Incident>;

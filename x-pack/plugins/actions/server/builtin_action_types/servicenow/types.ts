@@ -44,3 +44,14 @@ export type UpdateParamsType = Partial<ParamsType>;
 export type UpdateActionHandlerArguments = ActionHandlerArguments & {
   incidentId: string;
 };
+
+export interface IncidentCreationResponse {
+  incidentId: string;
+  number: string;
+  comments?: CommentsZipped[];
+}
+
+export interface CommentsZipped {
+  commentId: string;
+  incidentCommentId: string;
+}
