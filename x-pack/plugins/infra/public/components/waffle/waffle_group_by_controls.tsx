@@ -183,7 +183,7 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
     if (groupBy.some(g => g.field === field)) {
       this.handleRemove(field)();
     } else if (this.props.groupBy.length < 2) {
-      this.props.onChange([...groupBy, { field, label: field }]);
+      this.props.onChange([...groupBy, { field }]);
     }
     this.handleClose();
   };

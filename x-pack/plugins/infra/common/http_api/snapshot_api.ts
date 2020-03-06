@@ -48,7 +48,7 @@ export const InfraTimerangeInputRT = rt.type({
 });
 
 export const SnapshotGroupByRT = rt.array(
-  rt.type({
+  rt.partial({
     label: rt.union([rt.string, rt.null]),
     field: rt.union([rt.string, rt.null]),
   })
