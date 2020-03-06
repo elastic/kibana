@@ -37,7 +37,6 @@ export default {
     '<rootDir>/packages',
     '<rootDir>/src/test_utils',
     '<rootDir>/test/functional/services/remote',
-    '<rootDir>/src/dev/code_coverage/ingest_coverage',
   ],
   collectCoverageFrom: [
     'src/plugins/**/*.{ts,tsx}',
