@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment, useEffect, useState } from 'react';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient, HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import {
   AnnotationDomainTypes,
@@ -18,17 +18,16 @@ import {
   Position,
   ScaleType,
   Settings,
+  niceTimeFormatter,
 } from '@elastic/charts';
-import dateMath from '@elastic/datemath';
 import moment from 'moment-timezone';
 import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getThresholdAlertVisualizationData } from './lib/api';
 import { AggregationType, Comparator } from '../../../../common/types';
-/* TODO: This file was copied from ui/time_buckets for NP migration. We should clean this up and add TS support */
-import { TimeBuckets } from './lib/time_buckets';
 import { AlertsContextValue } from '../../../context/alerts_context';
 import { IndexThresholdAlertParams } from './types';
+import { parseDuration } from '../../../../../../alerting/common/parse_duration';
 
 const customTheme = () => {
   return {
@@ -60,35 +59,26 @@ const getTimezone = (uiSettings: IUiSettingsClient) => {
   return tzOffset;
 };
 
-const getDomain = (alertParams: any) => {
-  const VISUALIZE_TIME_WINDOW_MULTIPLIER = 5;
-  const fromExpression = `now-${alertParams.timeWindowSize * VISUALIZE_TIME_WINDOW_MULTIPLIER}${
-    alertParams.timeWindowUnit
-  }`;
-  const toExpression = 'now';
-  const fromMoment = dateMath.parse(fromExpression);
-  const toMoment = dateMath.parse(toExpression);
-  const visualizeTimeWindowFrom = fromMoment ? fromMoment.valueOf() : 0;
-  const visualizeTimeWindowTo = toMoment ? toMoment.valueOf() : 0;
-  return {
-    min: visualizeTimeWindowFrom,
-    max: visualizeTimeWindowTo,
-  };
-};
+const getDomain = (alertInterval: string) => {
+  const VISUALIZE_INTERVALS = 30;
+  let intervalMillis: number;
 
-const getTimeBuckets = (
-  uiSettings: IUiSettingsClient,
-  dataFieldsFormats: any,
-  alertParams: any
-) => {
-  const domain = getDomain(alertParams);
-  const timeBuckets = new TimeBuckets(uiSettings, dataFieldsFormats);
-  timeBuckets.setBounds(domain);
-  return timeBuckets;
+  try {
+    intervalMillis = parseDuration(alertInterval);
+  } catch (err) {
+    intervalMillis = 1000 * 60; // default to one minute if not parseable
+  }
+
+  const now = Date.now();
+  return {
+    min: now - intervalMillis * VISUALIZE_INTERVALS,
+    max: now,
+  };
 };
 
 interface Props {
   alertParams: IndexThresholdAlertParams;
+  alertInterval: string;
   aggregationTypes: { [key: string]: AggregationType };
   comparators: {
     [key: string]: Comparator;
@@ -96,8 +86,10 @@ interface Props {
   alertsContext: AlertsContextValue;
 }
 
+type MetricResult = [number, number]; // [epochMillis, value]
 export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   alertParams,
+  alertInterval,
   aggregationTypes,
   comparators,
   alertsContext,
@@ -119,18 +111,14 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<undefined | any>(undefined);
-  const [visualizationData, setVisualizationData] = useState<Record<string, any>>([]);
+  const [visualizationData, setVisualizationData] = useState<Record<string, MetricResult[]>>();
 
   useEffect(() => {
     (async () => {
       try {
         setIsLoading(true);
         setVisualizationData(
-          await getThresholdAlertVisualizationData({
-            model: alertWithoutActions,
-            visualizeOptions,
-            http,
-          })
+          await getVisualizationData(alertWithoutActions, visualizeOptions, http)
         );
       } catch (e) {
         if (toastNotifications) {
@@ -167,15 +155,11 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   }
   const chartsTheme = charts.theme.useChartsTheme();
 
-  const domain = getDomain(alertParams);
-  const timeBuckets = new TimeBuckets(uiSettings, dataFieldsFormats);
-  timeBuckets.setBounds(domain);
-  const interval = timeBuckets.getInterval().expression;
+  const domain = getDomain(alertInterval);
   const visualizeOptions = {
-    rangeFrom: domain.min,
-    rangeTo: domain.max,
-    interval,
-    timezone: getTimezone(uiSettings),
+    rangeFrom: new Date(domain.min).toISOString(),
+    rangeTo: new Date(domain.max).toISOString(),
+    interval: alertInterval,
   };
 
   // Fetching visualization data is independent of alert actions
@@ -238,11 +222,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
         }
       });
     });
-    const dateFormatter = (d: number) => {
-      return moment(d)
-        .tz(timezone)
-        .format(getTimeBuckets(uiSettings, dataFieldsFormats, alertParams).getScaledDateFormat());
-    };
+    const dateFormatter = niceTimeFormatter([domain.min, domain.max]);
     const aggLabel = aggregationTypes[aggType].text;
     return (
       <div data-test-subj="alertVisualizationChart">
@@ -317,3 +297,22 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
 
   return null;
 };
+
+// convert the data from the visualization API into something easier to digest with charts
+async function getVisualizationData(model: any, visualizeOptions: any, http: HttpSetup) {
+  const vizData = await getThresholdAlertVisualizationData({
+    model,
+    visualizeOptions,
+    http,
+  });
+  const result: Record<string, Array<[number, number]>> = {};
+
+  for (const groupMetrics of vizData.results) {
+    result[groupMetrics.group] = groupMetrics.metrics.map(metricResult => [
+      Date.parse(metricResult[0]),
+      metricResult[1],
+    ]);
+  }
+
+  return result;
+}

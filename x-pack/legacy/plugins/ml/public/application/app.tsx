@@ -25,9 +25,6 @@ export interface MlDependencies extends AppMountParameters {
   data: DataPublicPluginStart;
   security: SecurityPluginSetup;
   licensing: LicensingPluginSetup;
-  __LEGACY: {
-    XSRF: string;
-  };
 }
 
 interface AppProps {
@@ -49,7 +46,6 @@ const App: FC<AppProps> = ({ coreStart, deps }) => {
     recentlyAccessed: coreStart.chrome!.recentlyAccessed,
     basePath: coreStart.http.basePath,
     savedObjectsClient: coreStart.savedObjects.client,
-    XSRF: deps.__LEGACY.XSRF,
     application: coreStart.application,
     http: coreStart.http,
     security: deps.security,
