@@ -53,6 +53,12 @@ describe('SavedObjectsFinder', () => {
 
   const doc3 = { type: 'vis', id: '3', attributes: { title: 'Vis' } };
 
+  const doc4 = {
+    type: 'visualization',
+    id: '4',
+    attributes: { title: 'Hidden vis', visible: false },
+  };
+
   const searchMetaData = [
     {
       type: 'search',
@@ -86,6 +92,7 @@ describe('SavedObjectsFinder', () => {
       perPage: 10,
       searchFields: ['title^3', 'description'],
       defaultSearchOperator: 'AND',
+      filter: undefined,
     });
   });
 
@@ -244,6 +251,7 @@ describe('SavedObjectsFinder', () => {
         perPage: 10,
         searchFields: ['title^3', 'description'],
         defaultSearchOperator: 'AND',
+        filter: undefined,
       });
     });
 
@@ -287,6 +295,7 @@ describe('SavedObjectsFinder', () => {
         perPage: 10,
         searchFields: ['title^3', 'description'],
         defaultSearchOperator: 'AND',
+        filter: undefined,
       });
     });
 
@@ -353,6 +362,51 @@ describe('SavedObjectsFinder', () => {
       perPage: 10,
       searchFields: ['title^3', 'description'],
       defaultSearchOperator: 'AND',
+      filter: undefined,
+    });
+  });
+
+  it('should include visualization visible filter', async () => {
+    const core = coreMock.createStart();
+    ((core.savedObjects.client.find as any) as jest.SpyInstance).mockImplementation(() =>
+      Promise.resolve({ savedObjects: [doc, doc2, doc4] })
+    );
+    core.uiSettings.get.mockImplementation(() => 10);
+
+    const wrapper = shallow(
+      <SavedObjectFinder
+        savedObjects={core.savedObjects}
+        uiSettings={core.uiSettings}
+        savedObjectMetaData={[
+          {
+            type: 'search',
+            name: 'Search',
+            getIconForSavedObject: () => 'search',
+          },
+          {
+            type: 'vis',
+            name: 'Vis',
+            getIconForSavedObject: () => 'visLine',
+          },
+          {
+            type: 'visualization',
+            name: 'Visualization',
+            getIconForSavedObject: () => 'visLine',
+          },
+        ]}
+      />
+    );
+    wrapper.instance().componentDidMount!();
+
+    expect(core.savedObjects.client.find).toHaveBeenCalledWith({
+      type: ['search', 'vis', 'visualization'],
+      fields: ['title'],
+      search: undefined,
+      page: 1,
+      perPage: 10,
+      searchFields: ['title^3', 'description'],
+      defaultSearchOperator: 'AND',
+      filter: 'visualization.attributes.visible:true OR search.type:search OR vis.type:vis',
     });
   });
 

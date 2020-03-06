@@ -125,7 +125,7 @@ describe('saved_visualizations', () => {
       [
         {
           search: 'ahoythere*',
-          filter: 'visualization.attributes.visible:true OR lens.type:lens',
+          filter: 'visualization.attributes.visible:true',
         },
       ],
     ]);

@@ -59,10 +59,14 @@ export async function findListItems({
       .flatten()
       .uniq()
       .value() as string[];
+  const types = Object.keys(extensionByType);
+  const reducer = (filterExpression: string, type: string) =>
+    filterExpression.concat(` OR ${type}.type:${type}`);
+  const filter = types.reduce(reducer, 'visualization.attributes.visible:true');
   const searchOptions = {
     type: searchOption('docTypes', 'visualization'),
     searchFields: searchOption('searchFields', 'title^3', 'description'),
-    filter: 'visualization.attributes.visible:true OR lens.type:lens',
+    filter,
     search: search ? `${search}*` : undefined,
     perPage: size,
     page: 1,
