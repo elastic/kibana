@@ -6,8 +6,11 @@
 
 import { get, sortBy } from 'lodash';
 import { QueryContext } from './query_context';
-import { getHistogramIntervalFormatted } from '../../helper';
-import { INDEX_NAMES, STATES } from '../../../../../../legacy/plugins/uptime/common/constants';
+import {
+  INDEX_NAMES,
+  QUERY,
+  STATES,
+} from '../../../../../../legacy/plugins/uptime/common/constants';
 import {
   MonitorSummary,
   SummaryHistogram,
@@ -322,12 +325,9 @@ const getHistogramForMonitors = async (
           },
           aggs: {
             histogram: {
-              date_histogram: {
+              auto_date_histogram: {
                 field: '@timestamp',
-                fixed_interval: getHistogramIntervalFormatted(
-                  queryContext.dateRangeStart,
-                  queryContext.dateRangeEnd
-                ),
+                buckets: QUERY.DEFAULT_BUCKET_COUNT,
                 missing: 0,
               },
               aggs: {
