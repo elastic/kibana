@@ -129,3 +129,13 @@ export interface GetAgentStatusForConfig {
     configId: string;
   };
 }
+export interface GetAgentStatusResponse {
+  success: boolean;
+  results: {
+    events: number;
+    total: number;
+    online: number;
+    error: number;
+    offline: number;
+  };
+}

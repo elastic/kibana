@@ -89,8 +89,8 @@ export const UpdateAgentRequestSchema = {
   }),
 };
 
-export const GetAgentStatusForConfigSchema = {
-  params: schema.object({
-    configId: schema.string(),
+export const GetAgentStatusRequestSchema = {
+  query: schema.object({
+    configId: schema.maybe(schema.string()),
   }),
 };
