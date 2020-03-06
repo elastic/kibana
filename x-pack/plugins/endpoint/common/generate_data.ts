@@ -81,8 +81,8 @@ export class EndpointDocGenerator {
 
   constructor(seed = Math.random().toString()) {
     this.random = seedrandom(seed);
-    this.hostId = uuid.v4();
-    this.agentId = uuid.v4();
+    this.hostId = this.seededUUIDv4();
+    this.agentId = this.seededUUIDv4();
     this.hostname = this.randomHostname();
     this.lastDHCPLeaseAt = new Date().getTime();
     this.ip = this.randomArray(3, () => this.randomIP());
@@ -138,7 +138,7 @@ export class EndpointDocGenerator {
         action: this.randomChoice(FILE_OPERATIONS),
         kind: 'alert',
         category: 'malware',
-        id: uuid.v4(),
+        id: this.seededUUIDv4(),
         dataset: 'endpoint',
         module: 'endpoint',
         type: 'creation',
@@ -258,7 +258,7 @@ export class EndpointDocGenerator {
         category: options.eventCategory ? options.eventCategory : 'process',
         kind: 'event',
         type: options.eventType ? options.eventType : 'creation',
-        id: uuid.v4(),
+        id: this.seededUUIDv4(),
       },
       host: {
         id: this.hostId,
@@ -426,5 +426,9 @@ export class EndpointDocGenerator {
 
   private randomHostname(): string {
     return `Host-${this.randomString(10)}`;
+  }
+
+  private seededUUIDv4(): string {
+    return uuid.v4({ random: [...this.randomNGenerator(255, 16)] });
   }
 }
