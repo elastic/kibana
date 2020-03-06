@@ -4,4 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TimeBuckets } from './time_buckets';
+export interface TimeSeriesResult {
+  results: TimeSeriesResultRow[];
+}
+
+export interface TimeSeriesResultRow {
+  group: string;
+  metrics: MetricResult[];
+}
+
+export type MetricResult = [string, number]; // [iso date, value]
