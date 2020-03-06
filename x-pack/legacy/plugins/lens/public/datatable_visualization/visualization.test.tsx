@@ -4,14 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { createMockDatasource } from '../editor_frame_service/mocks';
 import { DatatableVisualizationState, datatableVisualization } from './visualization';
-import { mount } from 'enzyme';
 import { Operation, DataType, FramePublicAPI, TableSuggestionColumn } from '../types';
-import { generateId } from '../id_generator';
-
-jest.mock('../id_generator');
 
 function mockFrame(): FramePublicAPI {
   return {
@@ -30,12 +25,11 @@ function mockFrame(): FramePublicAPI {
 describe('Datatable Visualization', () => {
   describe('#initialize', () => {
     it('should initialize from the empty state', () => {
-      (generateId as jest.Mock).mockReturnValueOnce('id');
       expect(datatableVisualization.initialize(mockFrame(), undefined)).toEqual({
         layers: [
           {
             layerId: 'aaa',
-            columns: ['id'],
+            columns: [],
           },
         ],
       });
@@ -84,7 +78,6 @@ describe('Datatable Visualization', () => {
 
   describe('#clearLayer', () => {
     it('should reset the layer', () => {
-      (generateId as jest.Mock).mockReturnValueOnce('testid');
       const state: DatatableVisualizationState = {
         layers: [
           {
@@ -97,7 +90,7 @@ describe('Datatable Visualization', () => {
         layers: [
           {
             layerId: 'baz',
-            columns: ['testid'],
+            columns: [],
           },
         ],
       });
@@ -210,10 +203,30 @@ describe('Datatable Visualization', () => {
     });
   });
 
-  describe('DataTableLayer', () => {
+  describe('#getLayerOptions', () => {
+    it('returns a single layer option', () => {
+      const setState = jest.fn();
+      const datasource = createMockDatasource('test');
+      const frame = mockFrame();
+      frame.datasourceLayers = { first: datasource.publicAPIMock };
+
+      expect(
+        datatableVisualization.getLayerOptions({
+          layerId: 'first',
+          state: {
+            layers: [{ layerId: 'first', columns: [] }],
+          },
+          setState,
+          frame,
+        }).dimensions
+      ).toHaveLength(1);
+    });
+
     it('allows all kinds of operations', () => {
       const setState = jest.fn();
+      const datasource = createMockDatasource('test');
       const frame = mockFrame();
+      frame.datasourceLayers = { first: datasource.publicAPIMock };
 
       const filterOperations = datatableVisualization.getLayerOptions({
         layerId: 'first',
@@ -239,108 +252,82 @@ describe('Datatable Visualization', () => {
       );
     });
 
-    it('allows columns to be removed', () => {
-      const setState = jest.fn();
-      const datasource = createMockDatasource();
+    it('reorders the rendered colums based on the order from the datasource', () => {
+      const datasource = createMockDatasource('test');
       const layer = { layerId: 'a', columns: ['b', 'c'] };
       const frame = mockFrame();
       frame.datasourceLayers = { a: datasource.publicAPIMock };
-      const component = mount(
-        <DataTableLayer
-          layerId="layer1"
-          dragDropContext={{ dragging: undefined, setDragging: () => {} }}
-          frame={frame}
-          layer={layer}
-          setState={setState}
-          state={{ layers: [layer] }}
-        />
-      );
+      datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'c' }, { columnId: 'b' }]);
 
-      const onRemove = component
-        .find('[data-test-subj="datatable_multicolumnEditor"]')
-        .first()
-        .prop('onRemove') as (k: string) => {};
+      expect(
+        datatableVisualization.getLayerOptions({
+          layerId: 'a',
+          state: { layers: [layer] },
+          setState: jest.fn(),
+          frame,
+        }).dimensions[0].accessors
+      ).toEqual(['c', 'b']);
+    });
+  });
 
-      onRemove('b');
-
-      expect(setState).toHaveBeenCalledWith({
+  describe('#removeDimension', () => {
+    it('allows columns to be removed', () => {
+      const layer = { layerId: 'layer1', columns: ['b', 'c'] };
+      expect(
+        datatableVisualization.removeDimension({
+          prevState: { layers: [layer] },
+          layerId: 'layer1',
+          columnId: 'b',
+          dimensionId: '',
+        })
+      ).toEqual({
         layers: [
           {
-            layerId: 'a',
+            layerId: 'layer1',
             columns: ['c'],
           },
         ],
       });
     });
+  });
 
+  describe('#setDimension', () => {
     it('allows columns to be added', () => {
-      (generateId as jest.Mock).mockReturnValueOnce('d');
-      const setState = jest.fn();
-      const datasource = createMockDatasource();
-      const layer = { layerId: 'a', columns: ['b', 'c'] };
-      const frame = mockFrame();
-      frame.datasourceLayers = { a: datasource.publicAPIMock };
-      const component = mount(
-        <DataTableLayer
-          layerId="layer1"
-          dragDropContext={{ dragging: undefined, setDragging: () => {} }}
-          frame={frame}
-          layer={layer}
-          setState={setState}
-          state={{ layers: [layer] }}
-        />
-      );
-
-      const onAdd = component
-        .find('[data-test-subj="datatable_multicolumnEditor"]')
-        .first()
-        .prop('onAdd') as () => {};
-
-      onAdd();
-
-      expect(setState).toHaveBeenCalledWith({
+      const layer = { layerId: 'layer1', columns: ['b', 'c'] };
+      expect(
+        datatableVisualization.setDimension({
+          prevState: { layers: [layer] },
+          layerId: 'layer1',
+          columnId: 'd',
+          dimensionId: '',
+        })
+      ).toEqual({
         layers: [
           {
-            layerId: 'a',
+            layerId: 'layer1',
             columns: ['b', 'c', 'd'],
           },
         ],
       });
     });
 
-    it('reorders the rendered colums based on the order from the datasource', () => {
-      const datasource = createMockDatasource();
-      const layer = { layerId: 'a', columns: ['b', 'c'] };
-      const frame = mockFrame();
-      frame.datasourceLayers = { a: datasource.publicAPIMock };
-      const component = mount(
-        <DataTableLayer
-          layerId="layer1"
-          dragDropContext={{ dragging: undefined, setDragging: () => {} }}
-          frame={frame}
-          layer={layer}
-          setState={jest.fn()}
-          state={{ layers: [layer] }}
-        />
-      );
-
-      const accessors = component
-        .find('[data-test-subj="datatable_multicolumnEditor"]')
-        .first()
-        .prop('accessors') as string[];
-
-      expect(accessors).toEqual(['b', 'c']);
-
-      component.setProps({
-        layer: { layerId: 'a', columns: ['c', 'b'] },
+    it('does not set a duplicate dimension', () => {
+      const layer = { layerId: 'layer1', columns: ['b', 'c'] };
+      expect(
+        datatableVisualization.setDimension({
+          prevState: { layers: [layer] },
+          layerId: 'layer1',
+          columnId: 'b',
+          dimensionId: '',
+        })
+      ).toEqual({
+        layers: [
+          {
+            layerId: 'layer1',
+            columns: ['b', 'c'],
+          },
+        ],
       });
-
-      const newAccessors = component
-        .find('[data-test-subj="datatable_multicolumnEditor"]')
-        .first()
-        .prop('accessors') as string[];
-
-      expect(newAccessors).toEqual(['c', 'b']);
     });
   });
 });

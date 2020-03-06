@@ -240,7 +240,6 @@ describe('xy_suggestions', () => {
   });
 
   test('only makes a seriesType suggestion for unchanged table without split', () => {
-    (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
@@ -249,7 +248,7 @@ describe('xy_suggestions', () => {
           accessors: ['price'],
           layerId: 'first',
           seriesType: 'bar',
-          splitAccessor: 'dummyCol',
+          splitAccessor: undefined,
           xAccessor: 'date',
         },
       ],

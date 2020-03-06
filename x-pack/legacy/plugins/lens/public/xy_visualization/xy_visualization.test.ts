@@ -9,7 +9,6 @@ import { Position } from '@elastic/charts';
 import { Operation } from '../types';
 import { State, SeriesType } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
-import { generateId } from '../id_generator';
 import { Ast } from '@kbn/interpreter/target/common';
 
 jest.mock('../id_generator');
@@ -87,31 +86,22 @@ describe('xy_visualization', () => {
 
   describe('#initialize', () => {
     it('loads default state', () => {
-      (generateId as jest.Mock)
-        .mockReturnValueOnce('test-id1')
-        .mockReturnValueOnce('test-id2')
-        .mockReturnValue('test-id3');
       const mockFrame = createMockFramePublicAPI();
       const initialState = xyVisualization.initialize(mockFrame);
 
       expect(initialState.layers).toHaveLength(1);
-      expect(initialState.layers[0].xAccessor).toBeDefined();
-      expect(initialState.layers[0].accessors[0]).toBeDefined();
-      expect(initialState.layers[0].xAccessor).not.toEqual(initialState.layers[0].accessors[0]);
+      expect(initialState.layers[0].xAccessor).not.toBeDefined();
+      expect(initialState.layers[0].accessors).toHaveLength(0);
 
       expect(initialState).toMatchInlineSnapshot(`
         Object {
           "layers": Array [
             Object {
-              "accessors": Array [
-                "test-id1",
-              ],
+              "accessors": Array [],
               "layerId": "",
               "position": "top",
               "seriesType": "bar_stacked",
               "showGridlines": false,
-              "splitAccessor": "test-id2",
-              "xAccessor": "test-id3",
             },
           ],
           "legend": Object {
@@ -167,14 +157,11 @@ describe('xy_visualization', () => {
 
   describe('#clearLayer', () => {
     it('clears the specified layer', () => {
-      (generateId as jest.Mock).mockReturnValue('test_empty_id');
       const layer = xyVisualization.clearLayer(exampleState(), 'first').layers[0];
       expect(layer).toMatchObject({
-        accessors: ['test_empty_id'],
+        accessors: [],
         layerId: 'first',
         seriesType: 'bar',
-        splitAccessor: 'test_empty_id',
-        xAccessor: 'test_empty_id',
       });
     });
   });
@@ -185,13 +172,17 @@ describe('xy_visualization', () => {
     });
   });
 
+  describe('#setDimension', () => {});
+
+  describe('#removeDimension', () => {});
+
   describe('#toExpression', () => {
     let mockDatasource: ReturnType<typeof createMockDatasource>;
     let frame: ReturnType<typeof createMockFramePublicAPI>;
 
     beforeEach(() => {
       frame = createMockFramePublicAPI();
-      mockDatasource = createMockDatasource();
+      mockDatasource = createMockDatasource('testDatasource');
 
       mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
         { columnId: 'd' },

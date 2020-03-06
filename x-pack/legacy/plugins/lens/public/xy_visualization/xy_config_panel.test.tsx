@@ -35,7 +35,7 @@ describe('LayerContextMenu', () => {
   beforeEach(() => {
     frame = createMockFramePublicAPI();
     frame.datasourceLayers = {
-      first: createMockDatasource().publicAPIMock,
+      first: createMockDatasource('test').publicAPIMock,
     };
   });
 

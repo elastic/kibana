@@ -128,12 +128,22 @@ export const datatableVisualization: Visualization<
     ];
   },
 
-  getLayerOptions({ state }) {
+  getLayerOptions({ state, frame, layerId }) {
+    const layer = state.layers.find(l => l.layerId === layerId);
+    if (!layer) {
+      return { dimensions: [] };
+    }
+
+    const datasource = frame.datasourceLayers[layer.layerId];
+    const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
+    // When we add a column it could be empty, and therefore have no order
+    const sortedColumns = Array.from(new Set(originalOrder.concat(layer.columns)));
+
     return {
       dimensions: [
         {
           layerId: state.layers[0].layerId,
-          accessors: state.layers[0].columns,
+          accessors: sortedColumns,
           dimensionId: 'columns',
           dimensionLabel: i18n.translate('xpack.lens.datatable.columns', {
             defaultMessage: 'Columns',
