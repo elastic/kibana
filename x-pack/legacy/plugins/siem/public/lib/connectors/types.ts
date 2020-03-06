@@ -6,6 +6,9 @@
 
 interface ServiceNowConfig {
   apiUrl: string;
+  casesConfiguration: {
+    closure: string;
+  };
 }
 
 interface ServiceNowSecrets {
