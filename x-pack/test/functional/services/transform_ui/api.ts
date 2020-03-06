@@ -7,11 +7,11 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+import { TRANSFORM_STATE } from '../../../../plugins/transform/common';
 import {
-  TRANSFORM_STATE,
   TransformPivotConfig,
   TransformStats,
-} from '../../../../legacy/plugins/transform/public/app/common';
+} from '../../../../plugins/transform/public/app/common';
 
 export function TransformAPIProvider({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');

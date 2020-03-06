@@ -24,11 +24,10 @@ import { FrameLayout } from './frame_layout';
 
 // calling this function will wait for all pending Promises from mock
 // datasources to be processed by its callers.
-async function waitForPromises(n = 3) {
-  for (let i = 0; i < n; ++i) {
-    await Promise.resolve();
-  }
-}
+const waitForPromises = async () =>
+  act(async () => {
+    await new Promise(resolve => setTimeout(resolve));
+  });
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
@@ -102,7 +101,7 @@ describe('editor_frame', () => {
   });
 
   describe('initialization', () => {
-    it('should initialize initial datasource', () => {
+    it('should initialize initial datasource', async () => {
       act(() => {
         mount(
           <EditorFrame
@@ -119,6 +118,7 @@ describe('editor_frame', () => {
           />
         );
       });
+      await waitForPromises();
 
       expect(mockDatasource.initialize).toHaveBeenCalled();
     });
@@ -145,7 +145,7 @@ describe('editor_frame', () => {
       expect(mockDatasource.initialize).not.toHaveBeenCalled();
     });
 
-    it('should initialize all datasources with state from doc', () => {
+    it('should initialize all datasources with state from doc', async () => {
       const mockDatasource3 = createMockDatasource();
       const datasource1State = { datasource1: '' };
       const datasource2State = { datasource2: '' };
@@ -185,13 +185,13 @@ describe('editor_frame', () => {
           />
         );
       });
-
+      await waitForPromises();
       expect(mockDatasource.initialize).toHaveBeenCalledWith(datasource1State);
       expect(mockDatasource2.initialize).toHaveBeenCalledWith(datasource2State);
       expect(mockDatasource3.initialize).not.toHaveBeenCalled();
     });
 
-    it('should not render something before all datasources are initialized', () => {
+    it('should not render something before all datasources are initialized', async () => {
       act(() => {
         mount(
           <EditorFrame
@@ -211,6 +211,7 @@ describe('editor_frame', () => {
 
       expect(mockVisualization.renderLayerConfigPanel).not.toHaveBeenCalled();
       expect(mockDatasource.renderDataPanel).not.toHaveBeenCalled();
+      await waitForPromises();
     });
 
     it('should not initialize visualization before datasource is initialized', async () => {
@@ -294,7 +295,9 @@ describe('editor_frame', () => {
 
       await waitForPromises();
 
-      mockVisualization.initialize.mock.calls[0][0].addNewLayer();
+      act(() => {
+        mockVisualization.initialize.mock.calls[0][0].addNewLayer();
+      });
 
       expect(mockDatasource2.insertLayer).toHaveBeenCalledWith(initialState, expect.anything());
     });
@@ -325,7 +328,9 @@ describe('editor_frame', () => {
 
       await waitForPromises();
 
-      mockVisualization.initialize.mock.calls[0][0].removeLayers(['abc', 'def']);
+      act(() => {
+        mockVisualization.initialize.mock.calls[0][0].removeLayers(['abc', 'def']);
+      });
 
       expect(mockDatasource2.removeLayer).toHaveBeenCalledWith(initialState, 'abc');
       expect(mockDatasource2.removeLayer).toHaveBeenCalledWith({ removed: true }, 'def');
@@ -989,6 +994,7 @@ describe('editor_frame', () => {
           '[data-test-subj="datasource-switch-testDatasource2"]'
         ) as HTMLButtonElement).click();
       });
+      await waitForPromises();
       expect(mockDatasource2.initialize).toHaveBeenCalled();
     });
 
