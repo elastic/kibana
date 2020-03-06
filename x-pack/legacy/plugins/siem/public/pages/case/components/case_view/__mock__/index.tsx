@@ -10,11 +10,11 @@ import { Case } from '../../../../../containers/case/types';
 export const caseProps: CaseProps = {
   caseId: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
   initialData: {
-    caseId: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
+    id: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
     comments: [
       {
         comment: 'Solve this fast!',
-        commentId: 'a357c6a0-5435-11ea-b427-fb51a1fcb7b8',
+        id: 'a357c6a0-5435-11ea-b427-fb51a1fcb7b8',
         createdAt: '2020-02-20T23:06:33.798Z',
         createdBy: {
           fullName: 'Steph Milovic',
@@ -36,11 +36,11 @@ export const caseProps: CaseProps = {
 };
 
 export const data: Case = {
-  caseId: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
+  id: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
   comments: [
     {
       comment: 'Solve this fast!',
-      commentId: 'a357c6a0-5435-11ea-b427-fb51a1fcb7b8',
+      id: 'a357c6a0-5435-11ea-b427-fb51a1fcb7b8',
       createdAt: '2020-02-20T23:06:33.798Z',
       createdBy: {
         fullName: 'Steph Milovic',
