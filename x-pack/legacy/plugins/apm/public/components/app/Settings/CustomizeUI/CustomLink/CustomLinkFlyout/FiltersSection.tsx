@@ -15,14 +15,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import React, { useRef } from 'react';
+import React from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FilterOptionsType } from '../../../../../../../../../../plugins/apm/server/routes/settings/custom_link';
+import { FilterOptions } from '../../../../../../../../../../plugins/apm/server/routes/settings/custom_link';
 import {
-  getSelectOptions,
   DEFAULT_OPTION,
+  Filters,
   filterSelectOptions,
-  Filters
+  getSelectOptions
 } from './helper';
 
 export const FiltersSection = ({
@@ -32,27 +32,23 @@ export const FiltersSection = ({
   filters: Filters;
   onChangeFilters: (filters: Filters) => void;
 }) => {
-  const filterValueRefs = useRef<HTMLInputElement[]>([]);
-
   const onChangeFilter = (filter: Filters[0], idx: number) => {
-    if (filterValueRefs.current[idx]) {
-      filterValueRefs.current[idx].focus();
-    }
-    const copyOfFilters = [...filters];
-    copyOfFilters[idx] = filter;
-    onChangeFilters(copyOfFilters);
+    const newFilters = [...filters];
+    newFilters[idx] = filter;
+    onChangeFilters(newFilters);
   };
 
   const onRemoveFilter = (idx: number) => {
-    const copyOfFilters = [...filters];
-    copyOfFilters.splice(idx, 1);
-    // When empty, means that it was the last filter that got removed,
-    // so instead of showing an empty list, will add a new empty filter.
-    if (isEmpty(copyOfFilters)) {
-      copyOfFilters.push(['', '']);
-    }
+    // remove without mutating original array
+    const newFilters = [...filters].splice(idx, 1);
 
-    onChangeFilters(copyOfFilters);
+    // if there is only one item left it should not be removed
+    // but reset to empty
+    if (isEmpty(newFilters)) {
+      onChangeFilters([['', '']]);
+    } else {
+      onChangeFilters(newFilters);
+    }
   };
 
   const handleAddFilter = () => {
@@ -105,7 +101,7 @@ export const FiltersSection = ({
                 )}
                 onChange={e =>
                   onChangeFilter(
-                    [e.target.value as keyof FilterOptionsType, value],
+                    [e.target.value as keyof FilterOptions, value],
                     idx
                   )
                 }
@@ -125,13 +121,6 @@ export const FiltersSection = ({
                 onChange={e => onChangeFilter([key, e.target.value], idx)}
                 value={value}
                 isInvalid={!isEmpty(key) && isEmpty(value)}
-                inputRef={ref => {
-                  if (ref) {
-                    filterValueRefs.current.push(ref);
-                  } else {
-                    filterValueRefs.current.splice(idx, 1);
-                  }
-                }}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

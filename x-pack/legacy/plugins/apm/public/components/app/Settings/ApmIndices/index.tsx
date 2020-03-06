@@ -92,8 +92,8 @@ export function ApmIndices() {
   const [isSaving, setIsSaving] = useState(false);
 
   const { data = INITIAL_STATE, status, refetch } = useFetcher(
-    callApmApiFromFetcher =>
-      callApmApiFromFetcher({
+    _callApmApi =>
+      _callApmApi({
         pathname: `/api/apm/settings/apm-index-settings`
       }),
     []

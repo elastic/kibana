@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as t from 'io-ts';
-import { FilterOptionsType } from '../../../routes/settings/custom_link';
+import { FilterOptions } from '../../../routes/settings/custom_link';
 
 export type CustomLink = {
   id?: string;
   '@timestamp': number;
   label: string;
   url: string;
-} & FilterOptionsType;
+} & FilterOptions;

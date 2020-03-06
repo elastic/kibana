@@ -6,16 +6,16 @@
 import { i18n } from '@kbn/i18n';
 import { isEmpty, pick } from 'lodash';
 import {
-  FilterOptionsType,
+  FilterOptions,
   filterOptions
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../../../../../plugins/apm/server/routes/settings/custom_link';
 import { CustomLink } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 
-export type Filters = Array<[keyof FilterOptionsType | '', string]>;
+export type Filters = Array<[keyof FilterOptions | '', string]>;
 
 interface FilterSelectOption {
-  value: 'DEFAULT' | keyof FilterOptionsType;
+  value: 'DEFAULT' | keyof FilterOptions;
   text: string;
 }
 
@@ -74,7 +74,7 @@ export const DEFAULT_OPTION: FilterSelectOption = {
 export const filterSelectOptions: FilterSelectOption[] = [
   DEFAULT_OPTION,
   ...filterOptions.map(filter => ({
-    value: filter as keyof FilterOptionsType,
+    value: filter as keyof FilterOptions,
     text: filter
   }))
 ];

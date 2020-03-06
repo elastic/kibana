@@ -16,16 +16,16 @@ import { createOrUpdateCustomLink } from '../../lib/settings/custom_link/create_
 import { deleteCustomLink } from '../../lib/settings/custom_link/delete_custom_link';
 import { listCustomLinks } from '../../lib/settings/custom_link/list_custom_links';
 
-const FilterOptions = t.partial({
+const FilterOptionsRt = t.partial({
   [SERVICE_NAME]: t.string,
   [SERVICE_ENVIRONMENT]: t.string,
   [TRANSACTION_NAME]: t.string,
   [TRANSACTION_TYPE]: t.string
 });
 
-export type FilterOptionsType = t.TypeOf<typeof FilterOptions>;
+export type FilterOptions = t.TypeOf<typeof FilterOptionsRt>;
 
-export const filterOptions: Array<keyof FilterOptionsType> = [
+export const filterOptions: Array<keyof FilterOptions> = [
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
   TRANSACTION_TYPE,
@@ -33,9 +33,9 @@ export const filterOptions: Array<keyof FilterOptionsType> = [
 ];
 
 export const listCustomLinksRoute = createRoute(core => ({
-  path: '/api/apm/settings/custom-links',
+  path: '/api/apm/settings/custom_links',
   params: {
-    query: FilterOptions
+    query: FilterOptionsRt
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
@@ -49,12 +49,12 @@ const payload = t.intersection([
     label: t.string,
     url: t.string
   }),
-  FilterOptions
+  FilterOptionsRt
 ]);
 
 export const createCustomLinkRoute = createRoute(() => ({
   method: 'POST',
-  path: '/api/apm/settings/custom-links',
+  path: '/api/apm/settings/custom_links',
   params: {
     body: payload
   },
@@ -71,7 +71,7 @@ export const createCustomLinkRoute = createRoute(() => ({
 
 export const updateCustomLinkRoute = createRoute(() => ({
   method: 'PUT',
-  path: '/api/apm/settings/custom-links/{id}',
+  path: '/api/apm/settings/custom_links/{id}',
   params: {
     path: t.type({
       id: t.string
@@ -96,7 +96,7 @@ export const updateCustomLinkRoute = createRoute(() => ({
 
 export const deleteCustomLinkRoute = createRoute(() => ({
   method: 'DELETE',
-  path: '/api/apm/settings/custom-links/{id}',
+  path: '/api/apm/settings/custom_links/{id}',
   params: {
     path: t.type({
       id: t.string

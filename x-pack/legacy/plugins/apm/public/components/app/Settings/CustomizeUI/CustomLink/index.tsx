@@ -22,7 +22,7 @@ export const CustomLinkOverview = () => {
   >();
 
   const { data: customLinks, status, refetch } = useFetcher(
-    callApmApi => callApmApi({ pathname: '/api/apm/settings/custom-links' }),
+    callApmApi => callApmApi({ pathname: '/api/apm/settings/custom_links' }),
     []
   );
 

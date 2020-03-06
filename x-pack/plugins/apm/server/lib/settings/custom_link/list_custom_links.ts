@@ -6,14 +6,14 @@
 
 import { Setup } from '../../helpers/setup_request';
 import { CustomLink } from './custom_link_types';
-import { FilterOptionsType } from '../../../routes/settings/custom_link';
+import { FilterOptions } from '../../../routes/settings/custom_link';
 
 export async function listCustomLinks({
   setup,
   filters = {}
 }: {
   setup: Setup;
-  filters?: FilterOptionsType;
+  filters?: FilterOptions;
 }) {
   const { internalClient, indices } = setup;
 
