@@ -197,7 +197,7 @@ export default ({ getService }: FtrProviderContext) => {
           histogram: {
             buckets: [
               {
-                count: 1161,
+                count: 1162,
                 key: 1442875680000,
               },
               {
