@@ -33,3 +33,7 @@ export function expandCombinedJobConfig(combinedJob: CombinedJob) {
 
   return { job, datafeed };
 }
+
+export function isCombinedJobWithStats(arg: any): arg is CombinedJobWithStats {
+  return typeof arg.job_id === 'string';
+}
