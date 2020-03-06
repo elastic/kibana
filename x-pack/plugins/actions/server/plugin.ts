@@ -217,6 +217,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     taskRunnerFactory!.initialize({
       logger,
+      actionTypeRegistry: actionTypeRegistry!,
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       getBasePath: this.getBasePath,
       spaceIdToNamespace: this.spaceIdToNamespace,

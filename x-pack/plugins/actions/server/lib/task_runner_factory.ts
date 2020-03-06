@@ -9,10 +9,18 @@ import { ExecutorError } from './executor_error';
 import { Logger, CoreStart } from '../../../../../src/core/server';
 import { RunContext } from '../../../task_manager/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
-import { ActionTaskParams, GetBasePathFunction, SpaceIdToNamespaceFunction } from '../types';
+import { ForbiddenError } from './errors';
+import {
+  ActionTaskParams,
+  ActionTypeRegistryContract,
+  GetBasePathFunction,
+  SpaceIdToNamespaceFunction,
+  ActionTypeExecutorResult,
+} from '../types';
 
 export interface TaskRunnerContext {
   logger: Logger;
+  actionTypeRegistry: ActionTypeRegistryContract;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;
@@ -85,11 +93,20 @@ export class TaskRunnerFactory {
           },
         };
 
-        const executorResult = await actionExecutor.execute({
-          params,
-          actionId,
-          request: fakeRequest,
-        });
+        let executorResult: ActionTypeExecutorResult;
+        try {
+          executorResult = await actionExecutor.execute({
+            params,
+            actionId,
+            request: fakeRequest,
+          });
+        } catch (e) {
+          if (e instanceof ForbiddenError) {
+            // We'll stop re-trying due to action being forbidden
+            throw new ExecutorError(e.message, {}, false);
+          }
+          throw e;
+        }
 
         if (executorResult.status === 'error') {
           // Task manager error handler only kicks in when an error thrown (at this time)
