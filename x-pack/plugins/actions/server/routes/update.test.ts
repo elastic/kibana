@@ -181,7 +181,6 @@ describe('updateActionRoute', () => {
     const [context, req, res] = mockHandlerArguments({ actionsClient }, { params: {}, body: {} }, [
       'ok',
       'forbidden',
-      'badRequest',
     ]);
 
     await handler(context, req, res);

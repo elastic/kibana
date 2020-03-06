@@ -54,7 +54,7 @@ export const createActionRoute = (router: IRouter, licenseState: ILicenseState) 
         if (e instanceof ForbiddenError) {
           return res.forbidden({ body: { message: e.message } });
         }
-        return res.badRequest({ body: { message: e.message } });
+        throw e;
       }
     })
   );

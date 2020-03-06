@@ -145,11 +145,7 @@ describe('createActionRoute', () => {
       create: jest.fn().mockRejectedValue(new ForbiddenError('Fail')),
     };
 
-    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, [
-      'ok',
-      'forbidden',
-      'badRequest',
-    ]);
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok', 'forbidden']);
 
     await handler(context, req, res);
 
