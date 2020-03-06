@@ -64,7 +64,7 @@ describe('timeline data providers', () => {
     );
   });
 
-  it('sets the background to euiColorSuccess with a 20% alpha channel and renders the dashed border color as euiColorSuccess when the user starts dragging a host AND is hovering over the data providers', () => {
+  it.skip('sets the background to euiColorSuccess with a 20% alpha channel and renders the dashed border color as euiColorSuccess when the user starts dragging a host AND is hovering over the data providers', () => {
     dragFirstHostToEmptyTimelineDataProviders();
 
     cy.get(TIMELINE_DATA_PROVIDERS_EMPTY).should(

@@ -94,10 +94,9 @@ const apiFactory = (basePath: string, indicesBasePath: string, http: Http) => ({
 export const useApi = () => {
   const appDeps = useAppDependencies();
 
-  const basePath = appDeps.core.http.basePath.prepend('/api/transform');
-  const indicesBasePath = appDeps.core.http.basePath.prepend('/api');
-  const xsrfToken = appDeps.plugins.xsrfToken;
-  const http = httpFactory(xsrfToken);
+  const basePath = '/api/transform';
+  const indicesBasePath = '/api';
+  const http = httpFactory(appDeps.core.http);
 
   return apiFactory(basePath, indicesBasePath, http);
 };

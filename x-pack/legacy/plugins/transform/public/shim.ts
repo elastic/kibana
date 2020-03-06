@@ -6,14 +6,12 @@
 
 import { npStart } from 'ui/new_platform';
 
-import chrome from 'ui/chrome';
 import { docTitle } from 'ui/doc_title/doc_title';
 
 // @ts-ignore: allow traversal to fail on x-pack build
 import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui_metric/public';
 
 import { TRANSFORM_DOC_PATHS } from './app/constants';
-import { SavedSearchLoader } from '../../../../../src/plugins/discover/public';
 
 export type NpCore = typeof npStart.core;
 export type NpPlugins = typeof npStart.plugins;
@@ -33,7 +31,7 @@ export type AppCore = Pick<
   | 'overlays'
   | 'notifications'
 >;
-export type AppPlugins = Pick<ShimPlugins, 'data' | 'management' | 'savedSearches' | 'xsrfToken'>;
+export type AppPlugins = Pick<ShimPlugins, 'data' | 'management'>;
 
 export interface AppDependencies {
   core: AppCore;
@@ -61,18 +59,9 @@ export interface ShimPlugins extends NpPlugins {
   uiMetric: {
     createUiStatsReporter: typeof createUiStatsReporter;
   };
-  savedSearches: {
-    getClient(): any;
-    setClient(client: any): void;
-  };
-  xsrfToken: string;
 }
 
 export function createPublicShim(): { core: ShimCore; plugins: ShimPlugins } {
-  // This is an Angular service, which is why we use this provider pattern
-  // to access it within our React app.
-  let savedSearches: SavedSearchLoader;
-
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = npStart.core.docLinks;
 
   return {
@@ -94,16 +83,9 @@ export function createPublicShim(): { core: ShimCore; plugins: ShimPlugins } {
     },
     plugins: {
       ...npStart.plugins,
-      savedSearches: {
-        setClient: (client: any): void => {
-          savedSearches = client;
-        },
-        getClient: (): any => savedSearches,
-      },
       uiMetric: {
         createUiStatsReporter,
       },
-      xsrfToken: chrome.getXsrfToken(),
     },
   };
 }
