@@ -28,7 +28,7 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 
-import { esFilters, Filter, MatchAllFilter } from '../../../../../../../src/plugins/data/public';
+import { esFilters, Filter, MatchAllFilter } from '../../../../../../src/plugins/data/public';
 import { persistTimelineMutation } from '../../containers/timeline/persist.gql_query';
 import {
   PersistTimelineMutation,

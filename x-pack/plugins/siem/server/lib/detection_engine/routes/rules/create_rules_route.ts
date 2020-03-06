@@ -6,7 +6,7 @@
 
 import uuid from 'uuid';
 
-import { IRouter } from '../../../../../../../../../src/core/server';
+import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRules } from '../../rules/create_rules';
 import { IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';

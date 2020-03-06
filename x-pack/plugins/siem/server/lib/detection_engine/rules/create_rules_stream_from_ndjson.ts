@@ -11,7 +11,7 @@ import {
   createMapStream,
   createFilterStream,
   createConcatStream,
-} from '../../../../../../../../src/legacy/utils/streams';
+} from '../../../../../../../src/legacy/utils/streams';
 import { importRulesSchema } from '../routes/schemas/import_rules_schema';
 
 export interface RulesObjectsExportResultDetails {

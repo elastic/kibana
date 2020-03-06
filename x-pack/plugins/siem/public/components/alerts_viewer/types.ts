@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '../../../../../../../src/plugins/data/public';
+import { Filter } from '../../../../../../src/plugins/data/public';
 import { HostsComponentsQueryProps } from '../../pages/hosts/navigation/types';
 import { NetworkComponentQueryProps } from '../../pages/network/navigation/types';
 import { MatrixHistogramOption } from '../matrix_histogram/types';

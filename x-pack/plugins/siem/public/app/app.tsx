@@ -18,7 +18,7 @@ import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 
 import { KibanaContextProvider, useKibana, useUiSetting$ } from '../lib/kibana';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import { DEFAULT_DARK_MODE } from '../../common/constants';
 import { ErrorToastDispatcher } from '../components/error_toast_dispatcher';

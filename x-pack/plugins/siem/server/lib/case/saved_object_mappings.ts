@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable @typescript-eslint/no-empty-interface */
-/* eslint-disable @typescript-eslint/camelcase */
-import { CaseAttributes, CommentAttributes } from '../../../../../../../x-pack/plugins/case/server';
+
+import { CaseAttributes, CommentAttributes } from '../../../../case/server';
 import { ElasticsearchMappingOf } from '../../utils/typed_elasticsearch_mappings';
 
 // Temporary file to write mappings for case

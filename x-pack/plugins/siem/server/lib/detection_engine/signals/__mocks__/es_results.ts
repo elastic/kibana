@@ -6,7 +6,7 @@
 
 import { SignalSourceHit, SignalSearchResponse } from '../types';
 import { Logger } from 'kibana/server';
-import { loggingServiceMock } from '../../../../../../../../../src/core/server/mocks';
+import { loggingServiceMock } from '../../../../../../../../src/core/server/mocks';
 import { RuleTypeParams, OutputRuleAlertRest } from '../../types';
 
 export const sampleRuleAlertParams = (

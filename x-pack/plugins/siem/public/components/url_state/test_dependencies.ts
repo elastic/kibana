@@ -15,7 +15,7 @@ import { HostsTableType } from '../../store/hosts/model';
 import { CONSTANTS } from './constants';
 import { dispatchSetInitialStateFromUrl } from './initialize_redux_by_url';
 import { UrlStateContainerPropTypes, LocationTypes } from './types';
-import { Query } from '../../../../../../../src/plugins/data/public';
+import { Query } from '../../../../../../src/plugins/data/public';
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';

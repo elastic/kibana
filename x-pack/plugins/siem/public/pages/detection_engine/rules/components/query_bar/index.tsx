@@ -17,7 +17,7 @@ import {
   FilterManager,
   SavedQuery,
   SavedQueryTimeFilter,
-} from '../../../../../../../../../../src/plugins/data/public';
+} from '../../../../../../../../../src/plugins/data/public';
 
 import { BrowserFields } from '../../../../../containers/source';
 import { OpenTimelineModal } from '../../../../../components/open_timeline/open_timeline_modal';

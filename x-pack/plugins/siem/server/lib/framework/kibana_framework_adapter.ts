@@ -13,9 +13,9 @@ import {
   KibanaResponseFactory,
   RequestHandlerContext,
   KibanaRequest,
-} from '../../../../../../../src/core/server';
-import { IndexPatternsFetcher } from '../../../../../../../src/plugins/data/server';
-import { AuthenticatedUser } from '../../../../../../plugins/security/common/model';
+} from '../../../../../../src/core/server';
+import { IndexPatternsFetcher } from '../../../../../../src/plugins/data/server';
+import { AuthenticatedUser } from '../../../../../plugins/security/common/model';
 import { CoreSetup, SetupPlugins } from '../../plugin';
 
 import {

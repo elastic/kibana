@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from '../../../../../../../../../src/core/server';
+import { RequestHandlerContext } from '../../../../../../../../src/core/server';
 import {
   coreMock,
   elasticsearchServiceMock,
   savedObjectsClientMock,
-} from '../../../../../../../../../src/core/server/mocks';
-import { alertsClientMock } from '../../../../../../../../plugins/alerting/server/mocks';
-import { actionsClientMock } from '../../../../../../../../plugins/actions/server/mocks';
+} from '../../../../../../../../src/core/server/mocks';
+import { alertsClientMock } from '../../../../../../../plugins/alerting/server/mocks';
+import { actionsClientMock } from '../../../../../../../plugins/actions/server/mocks';
 
 const createMockClients = () => ({
   actionsClient: actionsClientMock.create(),

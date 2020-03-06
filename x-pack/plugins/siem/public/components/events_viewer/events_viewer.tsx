@@ -33,7 +33,7 @@ import {
   esQuery,
   IIndexPattern,
   Query,
-} from '../../../../../../../src/plugins/data/public';
+} from '../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../store';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 500;

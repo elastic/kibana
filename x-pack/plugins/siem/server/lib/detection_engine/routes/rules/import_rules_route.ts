@@ -7,8 +7,8 @@
 import { chunk } from 'lodash/fp';
 import { extname } from 'path';
 
-import { IRouter } from '../../../../../../../../../src/core/server';
-import { createPromiseFromStreams } from '../../../../../../../../../src/legacy/utils/streams';
+import { IRouter } from '../../../../../../../../src/core/server';
+import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils/streams';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { LegacyServices } from '../../../../types';
 import { createRules } from '../../rules/create_rules';

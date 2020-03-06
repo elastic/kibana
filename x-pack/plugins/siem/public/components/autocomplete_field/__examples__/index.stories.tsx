@@ -11,7 +11,7 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import {
   QuerySuggestion,
   QuerySuggestionTypes,
-} from '../../../../../../../../src/plugins/data/public';
+} from '../../../../../../../src/plugins/data/public';
 import { SuggestionItem } from '../suggestion_item';
 
 const suggestion: QuerySuggestion = {

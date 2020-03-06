@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsFindResponse } from 'kibana/server';
-import { ActionResult } from '../../../../../../../../plugins/actions/server';
+import { ActionResult } from '../../../../../../../plugins/actions/server';
 import {
   SignalsStatusRestParams,
   SignalsQueryRestParams,

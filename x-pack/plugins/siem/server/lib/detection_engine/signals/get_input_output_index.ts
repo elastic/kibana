@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertServices } from '../../../../../../../plugins/alerting/server';
+import { AlertServices } from '../../../../../../plugins/alerting/server';
 import { defaultIndexPattern } from '../../../../default_index_pattern';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 

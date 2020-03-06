@@ -14,7 +14,7 @@ import {
   esFilters,
   FilterManager,
   Query,
-} from '../../../../../../../../../../src/plugins/data/public';
+} from '../../../../../../../../../src/plugins/data/public';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/search_super_select/translations';
 import { useKibana } from '../../../../../lib/kibana';
 import { IMitreEnterpriseAttack } from '../../types';

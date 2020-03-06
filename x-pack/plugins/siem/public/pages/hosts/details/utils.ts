@@ -6,7 +6,7 @@
 
 import { get, isEmpty } from 'lodash/fp';
 
-import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
+import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
 import { hostsModel } from '../../../store';
 import { HostsTableType } from '../../../store/hosts/model';
 import { getHostsUrl, getHostDetailsUrl } from '../../../components/link_to/redirect_to_hosts';

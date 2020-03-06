@@ -6,7 +6,7 @@
 
 import React, { useMemo } from 'react';
 
-import { Filter } from '../../../../../../../src/plugins/data/public';
+import { Filter } from '../../../../../../src/plugins/data/public';
 import { StatefulEventsViewer } from '../events_viewer';
 import * as i18n from './translations';
 import { alertsDefaultModel } from './default_headers';

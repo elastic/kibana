@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import { httpServerMock } from '../../../../../src/core/server/mocks';
 import { SiemClientFactory } from './factory';
 import { SiemClient } from './client';
 

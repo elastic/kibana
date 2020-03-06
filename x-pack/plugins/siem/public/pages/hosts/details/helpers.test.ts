@@ -5,7 +5,7 @@
  */
 
 import { getHostDetailsEventsKqlQueryExpression, getHostDetailsPageFilters } from './helpers';
-import { Filter } from '../../../../../../../../src/plugins/data/common/es_query';
+import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 
 describe('hosts page helpers', () => {
   describe('getHostDetailsEventsKqlQueryExpression', () => {

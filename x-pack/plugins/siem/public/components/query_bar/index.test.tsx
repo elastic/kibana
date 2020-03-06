@@ -10,7 +10,7 @@ import React from 'react';
 import { TestProviders, mockIndexPattern } from '../../mock';
 import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../common/constants';
-import { FilterManager, SearchBar } from '../../../../../../../src/plugins/data/public';
+import { FilterManager, SearchBar } from '../../../../../../src/plugins/data/public';
 import { QueryBar, QueryBarComponentProps } from '.';
 import { createKibanaContextProviderMock } from '../../mock/kibana_react';
 

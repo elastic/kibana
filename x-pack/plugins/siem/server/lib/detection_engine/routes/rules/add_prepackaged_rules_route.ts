@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from '../../../../../../../../../src/core/server';
+import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
 import { getIndexExists } from '../../index/get_index_exists';
 import { transformError, buildSiemResponse } from '../utils';

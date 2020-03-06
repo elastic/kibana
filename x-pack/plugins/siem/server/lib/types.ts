@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AuthenticatedUser } from '../../../../../plugins/security/public';
-import { RequestHandlerContext } from '../../../../../../src/core/server';
-export { ConfigType as Configuration } from '../../../../../plugins/siem/server';
+import { AuthenticatedUser } from '../../../../plugins/security/public';
+import { RequestHandlerContext } from '../../../../../src/core/server';
+export { ConfigType as Configuration } from '../../../../plugins/siem/server';
 
 import { Authentications } from './authentications';
 import { Events } from './events';

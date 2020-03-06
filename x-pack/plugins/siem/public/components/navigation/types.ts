@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter, Query } from '../../../../../../../src/plugins/data/public';
+import { Filter, Query } from '../../../../../../src/plugins/data/public';
 import { HostsTableType } from '../../store/hosts/model';
 import { UrlInputsModel } from '../../store/inputs/model';
 import { TimelineUrl } from '../../store/timeline/model';

@@ -12,7 +12,7 @@ import {
   RouteValidationFunction,
   KibanaResponseFactory,
   CustomHttpResponseOptions,
-} from '../../../../../../../../src/core/server';
+} from '../../../../../../../src/core/server';
 
 export interface OutputError {
   message: string;

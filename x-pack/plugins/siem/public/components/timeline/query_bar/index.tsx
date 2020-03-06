@@ -17,7 +17,7 @@ import {
   FilterManager,
   SavedQuery,
   SavedQueryTimeFilter,
-} from '../../../../../../../../src/plugins/data/public';
+} from '../../../../../../../src/plugins/data/public';
 
 import { BrowserFields } from '../../../containers/source';
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';

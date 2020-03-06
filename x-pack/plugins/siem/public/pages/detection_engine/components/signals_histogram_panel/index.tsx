@@ -12,7 +12,7 @@ import { isEmpty } from 'lodash/fp';
 
 import { HeaderSection } from '../../../../components/header_section';
 import { SignalsHistogram } from './signals_histogram';
-import { Filter, esQuery, Query } from '../../../../../../../../../src/plugins/data/public';
+import { Filter, esQuery, Query } from '../../../../../../../../src/plugins/data/public';
 import { RegisterQuery, SignalsHistogramOption, SignalsAggregation, SignalsTotal } from './types';
 import { signalsHistogramOptions } from './config';
 import { getDetectionEngineUrl } from '../../../../components/link_to';

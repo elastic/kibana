@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CallAPIOptions } from '../../../../../../../src/core/server';
-import { Filter } from '../../../../../../../src/plugins/data/server';
+import { CallAPIOptions } from '../../../../../../src/core/server';
+import { Filter } from '../../../../../../src/plugins/data/server';
 import { IRuleStatusAttributes } from './rules/types';
 
 export type PartialFilter = Partial<Filter>;

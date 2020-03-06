@@ -18,7 +18,7 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { esFilters } from '../../../../../../../../../../src/plugins/data/public';
+import { esFilters } from '../../../../../../../../../src/plugins/data/public';
 
 import { tacticsOptions, techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
 

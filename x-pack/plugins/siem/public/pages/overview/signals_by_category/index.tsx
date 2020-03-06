@@ -10,7 +10,7 @@ import { SignalsHistogramPanel } from '../../detection_engine/components/signals
 import { signalsHistogramOptions } from '../../detection_engine/components/signals_histogram_panel/config';
 import { useSignalIndex } from '../../../containers/detection_engine/signals/use_signal_index';
 import { SetAbsoluteRangeDatePicker } from '../../network/types';
-import { Filter, IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
+import { Filter, IIndexPattern, Query } from '../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../../store';
 import * as i18n from '../translations';
 

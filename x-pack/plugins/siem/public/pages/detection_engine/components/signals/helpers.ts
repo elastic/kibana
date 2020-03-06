@@ -5,7 +5,7 @@
  */
 
 import { get, isEmpty } from 'lodash/fp';
-import { Filter, esKuery, KueryNode } from '../../../../../../../../../src/plugins/data/public';
+import { Filter, esKuery, KueryNode } from '../../../../../../../../src/plugins/data/public';
 import {
   DataProvider,
   DataProvidersAnd,

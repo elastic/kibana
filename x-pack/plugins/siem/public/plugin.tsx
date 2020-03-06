@@ -10,14 +10,14 @@ import {
   CoreStart,
   PluginInitializerContext,
   Plugin as IPlugin,
-} from '../../../../../src/core/public';
-import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { IEmbeddableStart } from '../../../../../src/plugins/embeddable/public';
-import { Start as NewsfeedStart } from '../../../../../src/plugins/newsfeed/public';
-import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
-import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
+} from '../../../../src/core/public';
+import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { IEmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import { Start as NewsfeedStart } from '../../../../src/plugins/newsfeed/public';
+import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
+import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { initTelemetry } from './lib/telemetry';
 import { KibanaServices } from './lib/kibana';
 

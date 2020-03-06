@@ -12,9 +12,9 @@ import {
   esQuery,
   esKuery,
   IIndexPattern,
-} from '../../../../../../../src/plugins/data/public';
+} from '../../../../../../src/plugins/data/public';
 
-import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
+import { JsonObject } from '../../../../../../src/plugins/kibana_utils/public';
 
 import { KueryFilterQuery } from '../../store';
 

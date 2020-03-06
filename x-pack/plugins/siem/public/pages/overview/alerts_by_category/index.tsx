@@ -20,7 +20,7 @@ import {
   esQuery,
   IIndexPattern,
   Query,
-} from '../../../../../../../../src/plugins/data/public';
+} from '../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../../store';
 import { HostsType } from '../../../store/hosts/model';
 

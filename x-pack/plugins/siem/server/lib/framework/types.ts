@@ -7,8 +7,8 @@
 import { IndicesGetMappingParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 
-import { RequestHandlerContext, KibanaRequest } from '../../../../../../../src/core/server';
-import { AuthenticatedUser } from '../../../../../../plugins/security/common/model';
+import { RequestHandlerContext, KibanaRequest } from '../../../../../../src/core/server';
+import { AuthenticatedUser } from '../../../../../plugins/security/common/model';
 import { ESQuery } from '../../../common/typed_json';
 import {
   PaginationInput,

@@ -13,11 +13,11 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import { AlertsClient, PartialAlert } from '../../../../../../../plugins/alerting/server';
-import { Alert } from '../../../../../../../plugins/alerting/common';
+import { AlertsClient, PartialAlert } from '../../../../../../plugins/alerting/server';
+import { Alert } from '../../../../../../plugins/alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { LegacyRequest } from '../../../types';
-import { ActionsClient } from '../../../../../../../plugins/actions/server';
+import { ActionsClient } from '../../../../../../plugins/actions/server';
 import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
 
 export type PatchRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {

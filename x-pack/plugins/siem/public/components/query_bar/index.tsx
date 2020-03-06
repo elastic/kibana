@@ -17,8 +17,8 @@ import {
   SavedQuery,
   SearchBar,
   SavedQueryTimeFilter,
-} from '../../../../../../../src/plugins/data/public';
-import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
+} from '../../../../../../src/plugins/data/public';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 
 export interface QueryBarComponentProps {
   dataTestSubj?: string;

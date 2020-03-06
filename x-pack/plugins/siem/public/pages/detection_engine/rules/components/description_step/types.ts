@@ -10,7 +10,7 @@ import {
   Filter,
   FilterManager,
   Query,
-} from '../../../../../../../../../../src/plugins/data/public';
+} from '../../../../../../../../../src/plugins/data/public';
 import { IMitreEnterpriseAttack } from '../../types';
 
 export interface ListItems {

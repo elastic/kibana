@@ -32,7 +32,7 @@ import {
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
 } from './common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { DEFAULT_APP_CATEGORIES } from '../../../src/core/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const siem = (kibana: any) => {

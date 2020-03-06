@@ -6,7 +6,7 @@
 
 import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
 
-import { Filter } from '../../../../../../../src/plugins/data/public';
+import { Filter } from '../../../../../../src/plugins/data/public';
 import { getColumnWidthFromType } from '../../components/timeline/body/column_headers/helpers';
 import { Sort } from '../../components/timeline/body/sort';
 import {

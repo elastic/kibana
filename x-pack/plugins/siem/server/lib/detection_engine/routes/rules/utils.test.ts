@@ -25,9 +25,9 @@ import { BulkError, ImportSuccessError } from '../utils';
 import { sampleRule } from '../../signals/__mocks__/es_results';
 import { getSimpleRule } from '../__mocks__/utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
-import { createPromiseFromStreams } from '../../../../../../../../../src/legacy/utils/streams';
-import { PartialAlert } from '../../../../../../../../plugins/alerting/server';
-import { SanitizedAlert } from '../../../../../../../../plugins/alerting/server/types';
+import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils/streams';
+import { PartialAlert } from '../../../../../../../plugins/alerting/server';
+import { SanitizedAlert } from '../../../../../../../plugins/alerting/server/types';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 

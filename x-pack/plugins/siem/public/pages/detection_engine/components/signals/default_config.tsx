@@ -10,7 +10,7 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import ApolloClient from 'apollo-client';
 import React from 'react';
 
-import { Filter } from '../../../../../../../../../src/plugins/data/common/es_query';
+import { Filter } from '../../../../../../../../src/plugins/data/common/es_query';
 import { TimelineAction, TimelineActionProps } from '../../../../components/timeline/body/actions';
 import { defaultColumnHeaderType } from '../../../../components/timeline/body/column_headers/default_headers';
 import {

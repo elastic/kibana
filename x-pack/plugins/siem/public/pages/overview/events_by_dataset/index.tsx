@@ -21,7 +21,7 @@ import {
   esQuery,
   IIndexPattern,
   Query,
-} from '../../../../../../../../src/plugins/data/public';
+} from '../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../../store';
 import { HostsTableType, HostsType } from '../../../store/hosts/model';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';

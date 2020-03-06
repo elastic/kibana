@@ -5,7 +5,7 @@
  */
 
 import { readRules } from './read_rules';
-import { alertsClientMock } from '../../../../../../../plugins/alerting/server/mocks';
+import { alertsClientMock } from '../../../../../../plugins/alerting/server/mocks';
 import { getResult, getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
 
 class TestError extends Error {

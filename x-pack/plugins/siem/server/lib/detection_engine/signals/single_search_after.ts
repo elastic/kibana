@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertServices } from '../../../../../../../plugins/alerting/server';
+import { AlertServices } from '../../../../../../plugins/alerting/server';
 import { RuleTypeParams } from '../types';
-import { Logger } from '../../../../../../../../src/core/server';
+import { Logger } from '../../../../../../../src/core/server';
 import { SignalSearchResponse } from './types';
 import { buildEventsSearchQuery } from './build_events_query';
 

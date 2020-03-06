@@ -13,7 +13,7 @@ import {
   transformValidateBulkError,
 } from './validate';
 import { getResult } from '../__mocks__/request_responses';
-import { FindResult } from '../../../../../../../../plugins/alerting/server';
+import { FindResult } from '../../../../../../../plugins/alerting/server';
 import { RulesSchema } from '../schemas/response/rules_schema';
 import { BulkError } from '../utils';
 

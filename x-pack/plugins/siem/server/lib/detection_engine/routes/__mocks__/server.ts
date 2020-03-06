@@ -9,8 +9,8 @@ import {
   RouteConfig,
   KibanaRequest,
   RequestHandlerContext,
-} from '../../../../../../../../../src/core/server';
-import { httpServiceMock } from '../../../../../../../../../src/core/server/mocks';
+} from '../../../../../../../../src/core/server';
+import { httpServiceMock } from '../../../../../../../../src/core/server/mocks';
 import { requestContextMock } from './request_context';
 import { responseMock as responseFactoryMock } from './response_factory';
 import { requestMock } from '.';

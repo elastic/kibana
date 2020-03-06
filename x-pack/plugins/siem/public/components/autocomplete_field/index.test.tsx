@@ -13,7 +13,7 @@ import { ThemeProvider } from 'styled-components';
 import {
   QuerySuggestion,
   QuerySuggestionTypes,
-} from '../../../../../../../src/plugins/data/public';
+} from '../../../../../../src/plugins/data/public';
 
 import { TestProviders } from '../../mock';
 

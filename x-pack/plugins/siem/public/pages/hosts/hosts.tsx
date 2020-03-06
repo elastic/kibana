@@ -29,7 +29,7 @@ import { inputsSelectors, State, hostsModel } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 
 import { SpyRoute } from '../../utils/route/spy_routes';
-import { esQuery } from '../../../../../../../src/plugins/data/public';
+import { esQuery } from '../../../../../../src/plugins/data/public';
 import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsTabs } from './hosts_tabs';
 import { navTabsHosts } from './nav_tabs';

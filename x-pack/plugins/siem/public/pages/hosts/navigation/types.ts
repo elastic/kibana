@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { Filter, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import { NarrowDateRange } from '../../../components/ml/types';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { InspectQuery, Refetch } from '../../../store/inputs/model';

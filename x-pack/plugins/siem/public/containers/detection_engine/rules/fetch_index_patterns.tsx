@@ -8,7 +8,7 @@ import { isEmpty, get } from 'lodash/fp';
 import { useEffect, useState, Dispatch, SetStateAction } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import {
   BrowserFields,
   getBrowserFields,

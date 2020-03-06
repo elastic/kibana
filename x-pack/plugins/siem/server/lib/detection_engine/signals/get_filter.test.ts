@@ -7,7 +7,7 @@
 import { getQueryFilter, getFilter } from './get_filter';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { PartialFilter } from '../types';
-import { AlertServices } from '../../../../../../../plugins/alerting/server';
+import { AlertServices } from '../../../../../../plugins/alerting/server';
 
 describe('get_filter', () => {
   let savedObjectsClient = savedObjectsClientMock.create();

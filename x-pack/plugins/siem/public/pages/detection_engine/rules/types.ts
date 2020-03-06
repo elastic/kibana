@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '../../../../../../../../src/plugins/data/common';
+import { Filter } from '../../../../../../../src/plugins/data/common';
 import { FieldValueQueryBar } from './components/query_bar';
 import { FormData, FormHook } from '../../../shared_imports';
 import { FieldValueTimeline } from './components/pick_timeline';

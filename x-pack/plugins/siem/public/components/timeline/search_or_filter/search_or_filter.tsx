@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiToolTip } from '@elastic/
 import React from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 
-import { Filter, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { Filter, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../containers/source';
 import { KueryFilterQuery, KueryFilterQueryKind } from '../../../store';
 import { KqlMode, EventType } from '../../../store/timeline/model';

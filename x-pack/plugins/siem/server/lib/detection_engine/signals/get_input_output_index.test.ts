@@ -8,7 +8,7 @@ import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { getInputIndex } from './get_input_output_index';
 import { defaultIndexPattern } from '../../../../default_index_pattern';
-import { AlertServices } from '../../../../../../../plugins/alerting/server';
+import { AlertServices } from '../../../../../../plugins/alerting/server';
 
 describe('get_input_output_index', () => {
   let savedObjectsClient = savedObjectsClientMock.create();

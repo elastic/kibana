@@ -40,7 +40,7 @@ import { TlsQueryTable } from './tls_query_table';
 import { IPDetailsComponentProps } from './types';
 import { UsersQueryTable } from './users_query_table';
 import { AnomaliesQueryTabBody } from '../../../containers/anomalies/anomalies_query_tab_body';
-import { esQuery } from '../../../../../../../../src/plugins/data/public';
+import { esQuery } from '../../../../../../../src/plugins/data/public';
 
 export { getBreadcrumbs } from './utils';
 

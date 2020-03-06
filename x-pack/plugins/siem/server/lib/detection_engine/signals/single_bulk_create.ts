@@ -6,12 +6,12 @@
 
 import { countBy, isEmpty } from 'lodash';
 import { performance } from 'perf_hooks';
-import { AlertServices } from '../../../../../../../plugins/alerting/server';
+import { AlertServices } from '../../../../../../plugins/alerting/server';
 import { SignalSearchResponse, BulkResponse } from './types';
 import { RuleTypeParams } from '../types';
 import { generateId } from './utils';
 import { buildBulkBody } from './build_bulk_body';
-import { Logger } from '../../../../../../../../src/core/server';
+import { Logger } from '../../../../../../../src/core/server';
 
 interface SingleBulkCreateParams {
   someResult: SignalSearchResponse;

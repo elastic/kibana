@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-require('../../../../../src/setup_node_env');
+require('../../../../src/setup_node_env');
 
 const fs = require('fs');
 const path = require('path');

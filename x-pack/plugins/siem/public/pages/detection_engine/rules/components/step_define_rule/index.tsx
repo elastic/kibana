@@ -16,7 +16,7 @@ import React, { FC, memo, useCallback, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
-import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+import { IIndexPattern } from '../../../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../../../containers/detection_engine/rules';
 import { DEFAULT_INDEX_KEY } from '../../../../../../common/constants';
 import { useUiSetting$ } from '../../../../../lib/kibana';

@@ -10,7 +10,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 
-import { esQuery } from '../../../../../../../src/plugins/data/public';
+import { esQuery } from '../../../../../../src/plugins/data/public';
 import { EmbeddedMap } from '../../components/embeddables/embedded_map';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';

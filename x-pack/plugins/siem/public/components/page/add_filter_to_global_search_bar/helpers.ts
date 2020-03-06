@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '../../../../../../../../src/plugins/data/public';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 
 export const createFilter = (key: string, value: string[] | string | null | undefined): Filter => {
   const queryValue = value != null ? (Array.isArray(value) ? value[0] : value) : null;

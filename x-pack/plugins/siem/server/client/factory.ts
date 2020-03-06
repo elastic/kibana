@@ -6,7 +6,7 @@
 
 import { Legacy } from 'kibana';
 
-import { KibanaRequest } from '../../../../../../src/core/server';
+import { KibanaRequest } from '../../../../../src/core/server';
 import { SiemClient } from './client';
 
 interface SetupDependencies {

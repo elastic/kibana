@@ -6,7 +6,7 @@
 import { createHash } from 'crypto';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
-import { parseDuration } from '../../../../../../../plugins/alerting/server';
+import { parseDuration } from '../../../../../../plugins/alerting/server';
 
 export const generateId = (
   docIndex: string,

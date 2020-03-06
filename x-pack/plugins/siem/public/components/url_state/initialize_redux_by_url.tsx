@@ -7,7 +7,7 @@
 import { get, isEmpty } from 'lodash/fp';
 import { Dispatch } from 'redux';
 
-import { Query, Filter } from '../../../../../../../src/plugins/data/public';
+import { Query, Filter } from '../../../../../../src/plugins/data/public';
 import { inputsActions } from '../../store/actions';
 import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
 import {

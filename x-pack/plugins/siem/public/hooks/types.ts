@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SimpleSavedObject } from '../../../../../../src/core/public';
+import { SimpleSavedObject } from '../../../../../src/core/public';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type IndexPatternSavedObjectAttributes = { title: string };

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AuthenticatedUser } from '../../../../../../plugins/security/common/model';
+import { AuthenticatedUser } from '../../../../../plugins/security/common/model';
 import { UNAUTHENTICATED_USER } from '../../../common/constants';
 import { SavedTimeline } from './types';
 

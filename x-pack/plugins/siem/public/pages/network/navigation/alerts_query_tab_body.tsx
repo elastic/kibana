@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { Filter } from '../../../../../../../../src/plugins/data/common/es_query';
+import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 import { AlertsView } from '../../../components/alerts_viewer';
 import { NetworkComponentQueryProps } from './types';
 

@@ -16,7 +16,7 @@ import {
   TimelineModel,
 } from '../../store/timeline/model';
 import { OnChangeItemsPerPage } from '../timeline/events';
-import { Filter } from '../../../../../../../src/plugins/data/public';
+import { Filter } from '../../../../../../src/plugins/data/public';
 
 import { useUiSetting } from '../../lib/kibana';
 import { EventsViewer } from './events_viewer';

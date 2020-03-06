@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-require('../../../../../src/setup_node_env');
+require('../../../../src/setup_node_env');
 require('../dev_tools/circular_deps/run_check_circular_deps_cli');

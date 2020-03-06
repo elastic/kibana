@@ -19,7 +19,7 @@ import {
   esQuery,
   IIndexPattern,
   Query,
-} from '../../../../../../../../src/plugins/data/public';
+} from '../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../../store';
 
 const HorizontalSpacer = styled(EuiFlexItem)`

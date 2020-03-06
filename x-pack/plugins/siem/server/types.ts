@@ -7,7 +7,7 @@
 import { Legacy } from 'kibana';
 import { SiemClient } from './client';
 
-export { LegacyRequest } from '../../../../../src/core/server';
+export { LegacyRequest } from '../../../../src/core/server';
 
 export interface LegacyServices {
   alerting?: Legacy.Server['plugins']['alerting'];

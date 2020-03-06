@@ -14,7 +14,7 @@ import { emptyEntity, multipleEntities, getMultipleEntities } from './entity_hel
 import { SiemPageName } from '../../../pages/home/types';
 import { HostsTableType } from '../../../store/hosts/model';
 
-import { url as urlUtils } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { url as urlUtils } from '../../../../../../../src/plugins/kibana_utils/public';
 
 interface QueryStringType {
   '?_g': string;

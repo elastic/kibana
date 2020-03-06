@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertServices } from '../../../../../../../plugins/alerting/server';
+import { AlertServices } from '../../../../../../plugins/alerting/server';
 import { assertUnreachable } from '../../../utils/build_query';
 import {
   Filter,
@@ -12,7 +12,7 @@ import {
   esQuery,
   esFilters,
   IIndexPattern,
-} from '../../../../../../../../src/plugins/data/server';
+} from '../../../../../../../src/plugins/data/server';
 import { PartialFilter, RuleAlertParams } from '../types';
 
 export const getQueryFilter = (

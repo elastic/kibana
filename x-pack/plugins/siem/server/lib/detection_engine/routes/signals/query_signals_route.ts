@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from '../../../../../../../../../src/core/server';
+import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
 import { SignalsQueryRestParams } from '../../signals/types';
 import { querySignalsSchema } from '../schemas/query_signals_index_schema';

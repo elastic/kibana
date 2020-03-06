@@ -16,7 +16,7 @@ import {
   replaceStateKeyInQueryString,
   getQueryStringFromLocation,
 } from '../url_state/helpers';
-import { Query, Filter } from '../../../../../../../src/plugins/data/public';
+import { Query, Filter } from '../../../../../../src/plugins/data/public';
 
 import { TabNavigationProps } from './tab_navigation/types';
 import { SearchNavTab } from './types';

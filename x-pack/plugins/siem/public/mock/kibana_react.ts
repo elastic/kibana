@@ -7,7 +7,7 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 import {
   DEFAULT_SIEM_TIME_RANGE,

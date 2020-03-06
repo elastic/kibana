@@ -34,7 +34,7 @@ import { TimelineHeader } from './header';
 import { calculateBodyHeight, combineQueries } from './helpers';
 import { TimelineRefetch } from './refetch_timeline';
 import { ManageTimelineContext } from './timeline_context';
-import { esQuery, Filter, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import { esQuery, Filter, IIndexPattern } from '../../../../../../src/plugins/data/public';
 
 const WrappedByAutoSizer = styled.div`
   width: 100%;

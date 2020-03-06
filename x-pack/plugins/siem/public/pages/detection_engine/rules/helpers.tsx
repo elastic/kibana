@@ -9,7 +9,7 @@ import { get, pick } from 'lodash/fp';
 import moment from 'moment';
 import { useLocation } from 'react-router-dom';
 
-import { Filter } from '../../../../../../../../src/plugins/data/public';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 import { Rule } from '../../../containers/detection_engine/rules';
 import { FormData, FormHook, FormSchema } from '../../../shared_imports';
 import { AboutStepRule, DefineStepRule, IMitreEnterpriseAttack, ScheduleStepRule } from './types';

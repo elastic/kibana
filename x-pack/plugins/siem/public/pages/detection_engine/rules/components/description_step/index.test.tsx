@@ -6,7 +6,7 @@
 
 import { addFilterStateIfNotThere } from './';
 
-import { esFilters, Filter } from '../../../../../../../../../../src/plugins/data/public';
+import { esFilters, Filter } from '../../../../../../../../../src/plugins/data/public';
 
 describe('description_step', () => {
   describe('addFilterStateIfNotThere', () => {

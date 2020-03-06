@@ -11,7 +11,7 @@ import {
   FindHit,
 } from '../routes/__mocks__/request_responses';
 import * as readRules from './read_rules';
-import { alertsClientMock } from '../../../../../../../plugins/alerting/server/mocks';
+import { alertsClientMock } from '../../../../../../plugins/alerting/server/mocks';
 
 describe('get_export_by_object_ids', () => {
   beforeEach(() => {

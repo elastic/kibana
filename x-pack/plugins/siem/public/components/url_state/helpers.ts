@@ -9,8 +9,8 @@ import { parse, stringify } from 'query-string';
 import { decode, encode } from 'rison-node';
 import * as H from 'history';
 
-import { Query, Filter } from '../../../../../../../src/plugins/data/public';
-import { url } from '../../../../../../../src/plugins/kibana_utils/public';
+import { Query, Filter } from '../../../../../../src/plugins/data/public';
+import { url } from '../../../../../../src/plugins/kibana_utils/public';
 
 import { SiemPageName } from '../../pages/home/types';
 import { inputsSelectors, State, timelineSelectors } from '../../store';

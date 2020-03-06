@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { QuerySuggestion, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestion, IIndexPattern } from '../../../../../../src/plugins/data/public';
 import { useKibana } from '../../lib/kibana';
 
 type RendererResult = React.ReactElement<JSX.Element> | null;

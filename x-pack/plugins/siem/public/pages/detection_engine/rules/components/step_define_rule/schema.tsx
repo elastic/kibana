@@ -9,7 +9,7 @@ import { EuiText } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
 
-import { esKuery } from '../../../../../../../../../../src/plugins/data/public';
+import { esKuery } from '../../../../../../../../../src/plugins/data/public';
 import { FieldValueQueryBar } from '../query_bar';
 import {
   ERROR_CODE,

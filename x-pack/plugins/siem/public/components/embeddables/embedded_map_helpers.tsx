@@ -8,7 +8,7 @@ import uuid from 'uuid';
 import React from 'react';
 import { OutPortal, PortalNode } from 'react-reverse-portal';
 import minimatch from 'minimatch';
-import { ViewMode } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { ViewMode } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import {
   IndexPatternMapping,
   MapEmbeddable,
@@ -20,7 +20,7 @@ import { getLayerList } from './map_config';
 // @ts-ignore Missing type defs as maps moves to Typescript
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../maps/common/constants';
 import * as i18n from './translations';
-import { Query, Filter } from '../../../../../../../src/plugins/data/public';
+import { Query, Filter } from '../../../../../../src/plugins/data/public';
 import { IndexPatternSavedObject } from '../../hooks/types';
 
 /**

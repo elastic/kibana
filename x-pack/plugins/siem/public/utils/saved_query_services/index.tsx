@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import {
   SavedQueryService,
   createSavedQueryService,
-} from '../../../../../../../src/plugins/data/public';
+} from '../../../../../../src/plugins/data/public';
 
 import { useKibana } from '../../lib/kibana';
 

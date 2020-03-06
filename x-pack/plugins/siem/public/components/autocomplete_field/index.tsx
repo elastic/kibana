@@ -11,9 +11,9 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import React from 'react';
-import { QuerySuggestion } from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestion } from '../../../../../../src/plugins/data/public';
 
-import euiStyled from '../../../../../common/eui_styled_components';
+import euiStyled from '../../../../../legacy/common/eui_styled_components';
 
 import { SuggestionItem } from './suggestion_item';
 
