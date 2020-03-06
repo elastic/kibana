@@ -62,7 +62,7 @@ const WarningCheckbox: React.FunctionComponent<{
 );
 
 interface WarningsConfirmationFlyoutProps {
-  renderGlobalCallouts: () => React.Node;
+  renderGlobalCallouts: () => React.ReactNode;
   closeFlyout: () => void;
   warnings: ReindexWarning[];
   advanceNextStep: () => void;

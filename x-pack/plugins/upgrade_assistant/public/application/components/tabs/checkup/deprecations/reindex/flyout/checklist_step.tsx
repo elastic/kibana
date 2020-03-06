@@ -68,7 +68,7 @@ const buttonLabel = (status?: ReindexStatus) => {
  * Displays a flyout that shows the current reindexing status for a given index.
  */
 export const ChecklistFlyoutStep: React.FunctionComponent<{
-  renderGlobalCallouts: () => React.Node;
+  renderGlobalCallouts: () => React.ReactNode;
   closeFlyout: () => void;
   reindexState: ReindexState;
   startReindex: () => void;
