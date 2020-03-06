@@ -65,7 +65,7 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, a
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
 "[index]: types that failed validation:
 - [index.0]: value has length [0] but it must have a minimum length of [1].
-- [index.1]: could not parse array value from []"
+- [index.1]: could not parse array value from json input"
 `);
 
       params.index = ['', 'a'];
