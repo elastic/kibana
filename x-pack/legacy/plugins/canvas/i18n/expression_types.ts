@@ -162,9 +162,6 @@ export const ExpressionDataSourceStrings = {
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.warningDescription', {
         defaultMessage: `
           This datasource does not use aggregations, and is best used with low volume datasets.`,
-        values: {
-          elasticsearch: ELASTICSEARCH,
-        },
       }),
     getIndexTitle: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.indexTitle', {

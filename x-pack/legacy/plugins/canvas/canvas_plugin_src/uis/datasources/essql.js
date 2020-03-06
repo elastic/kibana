@@ -95,7 +95,6 @@ export const essql = () => ({
   name: 'essql',
   displayName: strings.getDisplayName(),
   help: strings.getHelp(),
-  // Replace this with a SQL logo when we have one in EUI
   image: 'sqlApp',
   template: templateFromReactComponent(EssqlDatasource),
 });
