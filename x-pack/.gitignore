@@ -12,4 +12,3 @@
 /.kibana-plugin-helpers.dev.*
 !/legacy/plugins/infra/**/target
 .cache
-!/legacy/plugins/siem/**/target
