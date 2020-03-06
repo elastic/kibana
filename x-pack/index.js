@@ -25,7 +25,6 @@ import { canvas } from './legacy/plugins/canvas';
 import { infra } from './legacy/plugins/infra';
 import { taskManager } from './legacy/plugins/task_manager';
 import { rollup } from './legacy/plugins/rollup';
-import { siem } from './legacy/plugins/siem';
 import { remoteClusters } from './legacy/plugins/remote_clusters';
 import { crossClusterReplication } from './legacy/plugins/cross_cluster_replication';
 import { upgradeAssistant } from './legacy/plugins/upgrade_assistant';
@@ -62,7 +61,6 @@ module.exports = function(kibana) {
     taskManager(kibana),
     rollup(kibana),
     transform(kibana),
-    siem(kibana),
     remoteClusters(kibana),
     crossClusterReplication(kibana),
     upgradeAssistant(kibana),

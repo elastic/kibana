@@ -5,29 +5,161 @@
  */
 
 import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
+import { i18n } from '@kbn/i18n';
 
-import { CoreSetup, PluginInitializerContext, Logger } from '../../../../src/core/server';
+import {
+  PluginStartContract as AlertingStart,
+  PluginSetupContract as AlertingSetup,
+} from '../../alerting/server';
+import {
+  CoreSetup,
+  CoreStart,
+  PluginInitializerContext,
+  Logger,
+} from '../../../../src/core/server';
+import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
+import { PluginSetupContract as FeaturesSetup } from '../../features/server';
+import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
+import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
+import { PluginStartContract as ActionsStart } from '../../actions/server';
+import { initServer } from './init_server';
+import { compose } from './lib/compose/kibana';
+import { initRoutes } from './routes';
+import { isAlertExecutor } from './lib/detection_engine/signals/types';
+import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
+import {
+  noteSavedObjectType,
+  pinnedEventSavedObjectType,
+  timelineSavedObjectType,
+  ruleStatusSavedObjectType,
+} from './saved_objects';
 import { createConfig$, ConfigType } from './config';
+import { SiemClientFactory } from './client';
+
+export { CoreSetup, CoreStart };
+
+export interface SetupPlugins {
+  encryptedSavedObjects: EncryptedSavedObjectsSetup;
+  features: FeaturesSetup;
+  security: SecuritySetup;
+  spaces?: SpacesSetup;
+  alerting: AlertingSetup;
+}
+
+export interface StartPlugins {
+  actions: ActionsStart;
+  alerting: AlertingStart;
+}
 
 export class Plugin {
   readonly name = 'siem';
   private readonly logger: Logger;
-  // @ts-ignore-next-line TODO(rylnd): use it or lose it
   private readonly config$: Observable<ConfigType>;
+  private readonly context: PluginInitializerContext;
+  private readonly siemClientFactory: SiemClientFactory;
 
   constructor(context: PluginInitializerContext) {
-    const { logger } = context;
-    this.logger = logger.get();
-    this.logger.debug('plugin initialized');
-
+    this.context = context;
+    this.logger = context.logger.get('plugins', this.name);
+    this.siemClientFactory = new SiemClientFactory();
     this.config$ = createConfig$(context);
+
+    this.logger.debug('plugin initialized');
   }
 
-  public setup(core: CoreSetup, plugins: {}) {
+  public async setup(core: CoreSetup, plugins: SetupPlugins) {
     this.logger.debug('plugin setup');
+
+    const router = core.http.createRouter();
+    core.http.registerRouteHandlerContext(this.name, (context, request, response) => ({
+      getSiemClient: () => this.siemClientFactory.create(request),
+    }));
+
+    const config = await this.config$.pipe(first()).toPromise();
+
+    this.siemClientFactory.setup({
+      getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
+      config,
+    });
+
+    initRoutes(router, config, plugins.encryptedSavedObjects?.usingEphemeralEncryptionKey ?? false);
+
+    plugins.features.registerFeature({
+      id: this.name,
+      name: i18n.translate('xpack.siem.featureRegistry.linkSiemTitle', {
+        defaultMessage: 'SIEM',
+      }),
+      icon: 'securityAnalyticsApp',
+      navLinkId: 'siem',
+      app: ['siem', 'kibana'],
+      catalogue: ['siem'],
+      privileges: {
+        all: {
+          api: ['siem', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+          savedObject: {
+            all: [
+              'alert',
+              'action',
+              'action_task_params',
+              noteSavedObjectType,
+              pinnedEventSavedObjectType,
+              timelineSavedObjectType,
+              ruleStatusSavedObjectType,
+            ],
+            read: ['config'],
+          },
+          ui: [
+            'show',
+            'crud',
+            'alerting:show',
+            'actions:show',
+            'alerting:save',
+            'actions:save',
+            'alerting:delete',
+            'actions:delete',
+          ],
+        },
+        read: {
+          api: ['siem', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+          savedObject: {
+            all: ['alert', 'action', 'action_task_params'],
+            read: [
+              'config',
+              noteSavedObjectType,
+              pinnedEventSavedObjectType,
+              timelineSavedObjectType,
+              ruleStatusSavedObjectType,
+            ],
+          },
+          ui: [
+            'show',
+            'alerting:show',
+            'actions:show',
+            'alerting:save',
+            'actions:save',
+            'alerting:delete',
+            'actions:delete',
+          ],
+        },
+      },
+    });
+
+    if (plugins.alerting != null) {
+      const type = signalRulesAlertType({
+        logger: this.logger,
+        version: this.context.env.packageInfo.version,
+      });
+      if (isAlertExecutor(type)) {
+        plugins.alerting.registerType(type);
+      }
+    }
+
+    const libs = compose(core, plugins, this.context.env.mode.prod);
+    initServer(libs);
   }
 
-  public start() {
+  public start(core: CoreStart, plugins: StartPlugins) {
     this.logger.debug('plugin started');
   }
 
