@@ -30,7 +30,8 @@ const regexes = {
   staticHostIncluded: /https:\/\/kibana-coverage\.elastic\.dev/,
   jobNameIncluded: /jobs\/elastic\+kibana\+code-coverage/,
   timeStampIncluded: /\d{4}-\d{2}-\d{2}T\d{2}.*\d{2}.*\d{2}Z/,
-  folderStructureIncluded: /live_cc_app\/coverage_data/,
+  // folderStructureIncluded: /live_cc_app\/coverage_data/,
+  folderStructureIncluded: /live_cc_app\/coverage_data\/(?:.*|.*-combined)\//,
   endsInDotHtml: /.html$/,
 };
 const env = {
@@ -64,7 +65,7 @@ describe('Ingesting Coverage to Cluster', () => {
       verboseIngestAndMutateAsyncWithPath(mutableTotalsIndexLoggingChunks);
     });
     it(`should have a link to the index page for the specific test runner`, () => {
-      mutableTotalsIndexLoggingChunks.forEach(x => console.log(x))
+      mutableTotalsIndexLoggingChunks.forEach(x => console.log(green(x)))
 
 
 
