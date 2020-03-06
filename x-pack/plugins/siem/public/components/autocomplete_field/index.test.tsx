@@ -10,10 +10,7 @@ import { mount, shallow } from 'enzyme';
 import { noop } from 'lodash/fp';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import {
-  QuerySuggestion,
-  QuerySuggestionTypes,
-} from '../../../../../../src/plugins/data/public';
+import { QuerySuggestion, QuerySuggestionTypes } from '../../../../../../src/plugins/data/public';
 
 import { TestProviders } from '../../mock';
 

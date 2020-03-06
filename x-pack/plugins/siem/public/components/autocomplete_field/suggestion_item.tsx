@@ -8,7 +8,7 @@ import { EuiIcon } from '@elastic/eui';
 import { transparentize } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
-import euiStyled from '../../../../observability/public';
+import { euiStyled } from '../../../../observability/public';
 import { QuerySuggestion } from '../../../../../../src/plugins/data/public';
 
 interface SuggestionItemProps {
