@@ -138,7 +138,7 @@ export interface AuthToolkit {
    * */
   notHandled: () => AuthResult;
   /**
-   * Redirect user to IdP when authRequired: true
+   * Redirects user to another location to complete authentication when authRequired: true
    * Allows user to access a resource without redirection when authRequired: 'optional'
    * */
   redirected: (headers: { location: string } & ResponseHeaders) => AuthResult;

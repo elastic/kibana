@@ -147,7 +147,7 @@ export class HttpServer {
         this.log.debug(`registering route handler for [${route.path}]`);
         // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
         const validate = isSafeMethod(route.method) ? undefined : { payload: true };
-        const { authRequired = true, tags, body = {} } = route.options;
+        const { authRequired, tags, body = {} } = route.options;
         const { accepts: allow, maxBytes, output, parse } = body;
 
         const kibanaRouteState: KibanaRouteState = {
