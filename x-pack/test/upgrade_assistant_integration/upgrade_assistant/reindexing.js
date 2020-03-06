@@ -11,6 +11,7 @@ import {
   ReindexWarning,
   REINDEX_OP_TYPE,
 } from '../../../plugins/upgrade_assistant/common/types';
+import { generateNewIndexName } from '../../../plugins/upgrade_assistant/server/lib/reindexing/index_settings';
 
 export default function({ getService }) {
   const supertest = getService('supertest');
@@ -137,6 +138,74 @@ export default function({ getService }) {
       const lastState = await waitForReindexToComplete('6.0-data');
       expect(lastState.errorMessage).to.equal(null);
       expect(lastState.status).to.equal(ReindexStatus.completed);
+    });
+
+    it('should reindex a batch in order and report queue state', async () => {
+      const assertQueueState = async (firstInQueueIndexName, queueLength) => {
+        const response = await supertest
+          .get(`/api/upgrade_assistant/reindex/batch/queue`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        const { queue } = response.body;
+
+        const [firstInQueue] = queue;
+
+        if (!firstInQueueIndexName) {
+          expect(firstInQueueIndexName).to.be(undefined);
+        } else {
+          expect(firstInQueue.indexName).to.be(firstInQueueIndexName);
+        }
+
+        expect(queue.length).to.be(queueLength);
+      };
+
+      const test1 = 'batch-reindex-test1';
+      const test2 = 'batch-reindex-test2';
+      const test3 = 'batch-reindex-test3';
+
+      const cleanupReindex = async indexName => {
+        try {
+          await es.indices.delete({ index: generateNewIndexName(indexName) });
+        } catch (e) {
+          try {
+            await es.indices.delete({ index: indexName });
+          } catch (e) {
+            // Ignore
+          }
+        }
+      };
+
+      try {
+        // Set up indices for the batch
+        await es.indices.create({ index: test1 });
+        await es.indices.create({ index: test2 });
+        await es.indices.create({ index: test3 });
+
+        const result = await supertest
+          .post(`/api/upgrade_assistant/reindex/batch`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ indexNames: [test1, test2, test3] })
+          .expect(200);
+
+        expect(result.body.enqueued.length).to.equal(3);
+        expect(result.body.errors.length).to.equal(0);
+
+        await assertQueueState(test1, 3);
+        await waitForReindexToComplete(test1);
+
+        await assertQueueState(test2, 2);
+        await waitForReindexToComplete(test2);
+
+        await assertQueueState(test3, 1);
+        await waitForReindexToComplete(test3);
+
+        await assertQueueState(undefined, 0);
+      } finally {
+        await cleanupReindex(test1);
+        await cleanupReindex(test2);
+        await cleanupReindex(test3);
+      }
     });
   });
 }

@@ -13,6 +13,7 @@ import {
   ReindexAlreadyInProgress,
   MultipleReindexJobsFound,
   CannotReindexSystemIndexInCurrent,
+  ReindexCannotBeCancelled,
 } from './error_symbols';
 
 export class ReindexError extends Error {
@@ -34,4 +35,5 @@ export const error = {
   reindexAlreadyInProgress: createErrorFactory(ReindexAlreadyInProgress),
   reindexSystemIndex: createErrorFactory(CannotReindexSystemIndexInCurrent),
   multipleReindexJobsFound: createErrorFactory(MultipleReindexJobsFound),
+  reindexCannotBeCancelled: createErrorFactory(ReindexCannotBeCancelled),
 };
