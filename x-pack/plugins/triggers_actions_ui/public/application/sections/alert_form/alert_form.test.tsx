@@ -157,28 +157,6 @@ describe('alert_form', () => {
         mutedInstanceIds: [],
       } as unknown) as Alert;
 
-      fetchMock.mock(`${BASE_ACTION_API_PATH}/_find`, {
-        returnedData: {
-          page: 1,
-          perPage: 10,
-          total: 1,
-          data: {
-            secrets: {},
-            id: 'test',
-            actionTypeId: actionType.id,
-            name: 'Test',
-            config: {},
-          },
-        },
-      });
-
-      fetchMock.mock(`${BASE_ACTION_API_PATH}/types`, {
-        returnedData: {
-          id: actionType.id,
-          name: 'Test',
-          enabled: true,
-        },
-      });
       wrapper = mountWithIntl(
         <AlertsContextProvider
           value={{
@@ -218,14 +196,6 @@ describe('alert_form', () => {
       await setup();
       const alertTypeSelectOptions = wrapper.find('[data-test-subj="selectedAlertTypeTitle"]');
       expect(alertTypeSelectOptions.exists()).toBeTruthy();
-    });
-
-    it('renders registered action types', async () => {
-      await setup();
-      const actionTypeSelectOptions = wrapper.find(
-        '[data-test-subj="my-action-type-ActionTypeSelectOption"]'
-      );
-      expect(actionTypeSelectOptions.exists()).toBeTruthy();
     });
   });
 });
