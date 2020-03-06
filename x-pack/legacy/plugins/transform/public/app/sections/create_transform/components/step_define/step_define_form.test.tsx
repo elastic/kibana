@@ -4,40 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
+import '@testing-library/jest-dom/extend-expect';
 
-import { KibanaContext } from '../../../../lib/kibana';
-
+import { createPublicShim } from '../../../../../shim';
+import { getAppProviders } from '../../../../app_dependencies';
 import {
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
   PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
+import { SearchItems } from '../../../../hooks/use_search_items';
+
 import { StepDefineForm, getAggNameConflictToastMessages } from './step_define_form';
 
-// workaround to make React.memo() work with enzyme
-jest.mock('react', () => {
-  const r = jest.requireActual('react');
-  return { ...r, memo: (x: any) => x };
-});
-
+jest.mock('ui/new_platform');
 jest.mock('../../../../../shared_imports');
 
 describe('Transform: <DefinePivotForm />', () => {
   test('Minimal initialization', () => {
-    // Using a wrapping <div> element because shallow() would fail
-    // with the Provider being the outer most component.
-    const wrapper = shallow(
-      <div>
-        <KibanaContext.Provider value={{ initialized: false }}>
-          <StepDefineForm onChange={() => {}} />
-        </KibanaContext.Provider>
-      </div>
+    // Arrange
+    const searchItems = {
+      indexPattern: {
+        title: 'the-index-pattern-title',
+        fields: [] as any[],
+      } as SearchItems['indexPattern'],
+    };
+    const Providers = getAppProviders(createPublicShim());
+    const { getByLabelText } = render(
+      <Providers>
+        <StepDefineForm onChange={jest.fn()} searchItems={searchItems as SearchItems} />
+      </Providers>
     );
 
-    expect(wrapper).toMatchSnapshot();
+    // Act
+    // Assert
+    expect(getByLabelText('Index pattern')).toBeInTheDocument();
   });
 });
 

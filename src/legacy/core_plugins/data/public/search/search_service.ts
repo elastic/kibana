@@ -99,7 +99,6 @@ export class SearchService {
         calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
         createAggConfigs: (indexPattern, configStates = [], schemas) => {
           return new AggConfigs(indexPattern, configStates, {
-            schemas,
             typesRegistry: aggTypesStart,
           });
         },

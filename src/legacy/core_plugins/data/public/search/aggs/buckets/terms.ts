@@ -43,8 +43,6 @@ import {
   mergeOtherBucketAggResponse,
   updateMissingBucket,
 } from './_terms_other_bucket_helper';
-import { Schemas } from '../schemas';
-import { AggGroupNames } from '../agg_groups';
 
 export const termsAggFilter = [
   '!top_hits',
@@ -60,17 +58,6 @@ export const termsAggFilter = [
   '!min_bucket',
   '!sum_bucket',
 ];
-
-const [orderAggSchema] = new Schemas([
-  {
-    group: AggGroupNames.None,
-    name: 'orderAgg',
-    // This string is never visible to the user so it doesn't need to be translated
-    title: 'Order Agg',
-    hideCustomLabel: true,
-    aggFilter: termsAggFilter,
-  },
-]).all;
 
 const termsTitle = i18n.translate('data.search.aggs.buckets.termsTitle', {
   defaultMessage: 'Terms',
@@ -161,10 +148,11 @@ export const termsBucketAgg = new BucketAggType({
     {
       name: 'orderAgg',
       type: 'agg',
+      allowedAggs: termsAggFilter,
       default: null,
       makeAgg(termsAgg, state) {
         state = state || {};
-        state.schema = orderAggSchema;
+        state.schema = 'orderAgg';
         const orderAgg = termsAgg.aggConfigs.createAggConfig<IBucketAggConfig>(state, {
           addToAggConfigs: false,
         });

@@ -23,7 +23,6 @@ import { Assign } from '@kbn/utility-types';
 import { AggConfig, AggConfigOptions, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
-import { Schema } from './schemas';
 import { AggGroupNames } from './agg_groups';
 import {
   IndexPattern,
@@ -31,8 +30,6 @@ import {
   FetchOptions,
   TimeRange,
 } from '../../../../../../plugins/data/public';
-
-type Schemas = Record<string, any>;
 
 function removeParentAggs(obj: any) {
   for (const prop in obj) {
@@ -51,7 +48,6 @@ function parseParentAggs(dslLvlCursor: any, dsl: any) {
 }
 
 export interface AggConfigsOptions {
-  schemas?: Schemas;
   typesRegistry: AggTypesRegistryStart;
 }
 
@@ -73,7 +69,6 @@ export type IAggConfigs = AggConfigs;
 
 export class AggConfigs {
   public indexPattern: IndexPattern;
-  public schemas: any;
   public timeRange?: TimeRange;
   private readonly typesRegistry: AggTypesRegistryStart;
 
@@ -90,37 +85,8 @@ export class AggConfigs {
 
     this.aggs = [];
     this.indexPattern = indexPattern;
-    this.schemas = opts.schemas;
 
     configStates.forEach((params: any) => this.createAggConfig(params));
-
-    if (this.schemas) {
-      this.initializeDefaultsFromSchemas(this.schemas);
-    }
-  }
-
-  // do this wherever the schemas were passed in, & pass in state defaults instead
-  initializeDefaultsFromSchemas(schemas: Schemas) {
-    // Set the defaults for any schema which has them. If the defaults
-    // for some reason has more then the max only set the max number
-    // of defaults (not sure why a someone define more...
-    // but whatever). Also if a schema.name is already set then don't
-    // set anything.
-    _(schemas)
-      .filter((schema: Schema) => {
-        return Array.isArray(schema.defaults) && schema.defaults.length > 0;
-      })
-      .each((schema: any) => {
-        if (!this.aggs.find((agg: AggConfig) => agg.schema && agg.schema.name === schema.name)) {
-          // the result here should be passable as a configState
-          const defaults = schema.defaults.slice(0, schema.max);
-          _.each(defaults, defaultState => {
-            const state = _.defaults({ id: AggConfig.nextId(this.aggs) }, defaultState);
-            this.createAggConfig(state as AggConfigOptions);
-          });
-        }
-      })
-      .commit();
   }
 
   setTimeRange(timeRange: TimeRange) {
@@ -148,7 +114,6 @@ export class AggConfigs {
     };
 
     const aggConfigs = new AggConfigs(this.indexPattern, this.aggs.filter(filterAggs), {
-      schemas: this.schemas,
       typesRegistry: this.typesRegistry,
     });
 
@@ -271,23 +236,19 @@ export class AggConfigs {
   }
 
   byName(name: string) {
-    return this.aggs.filter(agg => agg.type.name === name);
+    return this.aggs.filter(agg => agg.type?.name === name);
   }
 
   byType(type: string) {
-    return this.aggs.filter(agg => agg.type.type === type);
+    return this.aggs.filter(agg => agg.type?.type === type);
   }
 
   byTypeName(type: string) {
-    return this.aggs.filter(agg => agg.type.name === type);
+    return this.byName(type);
   }
 
   bySchemaName(schema: string) {
-    return this.aggs.filter(agg => agg.schema && agg.schema.name === schema);
-  }
-
-  bySchemaGroup(group: string) {
-    return this.aggs.filter(agg => agg.schema && agg.schema.group === group);
+    return this.aggs.filter(agg => agg.schema === schema);
   }
 
   getRequestAggs(): AggConfig[] {
