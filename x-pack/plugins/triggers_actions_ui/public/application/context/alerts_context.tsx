@@ -11,7 +11,7 @@ import { FieldFormatsRegistry } from 'src/plugins/data/common/field_formats';
 import { TypeRegistry } from '../type_registry';
 import { AlertTypeModel, ActionTypeModel } from '../../types';
 
-export interface AlertsContextValue {
+export interface AlertsContextValue<MetaData = Record<string, any>> {
   reloadAlerts?: () => Promise<void>;
   http: HttpSetup;
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
@@ -23,6 +23,7 @@ export interface AlertsContextValue {
   >;
   charts?: ChartsPluginSetup;
   dataFieldsFormats?: Pick<FieldFormatsRegistry, 'register'>;
+  metadata?: MetaData;
 }
 
 const AlertsContext = createContext<AlertsContextValue>(null as any);
