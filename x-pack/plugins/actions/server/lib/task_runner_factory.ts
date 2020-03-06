@@ -9,7 +9,7 @@ import { ExecutorError } from './executor_error';
 import { Logger, CoreStart } from '../../../../../src/core/server';
 import { RunContext } from '../../../task_manager/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
-import { ForbiddenError } from './errors';
+import { ActionTypeDisabledError } from './errors';
 import {
   ActionTaskParams,
   ActionTypeRegistryContract,
@@ -101,7 +101,7 @@ export class TaskRunnerFactory {
             request: fakeRequest,
           });
         } catch (e) {
-          if (e instanceof ForbiddenError) {
+          if (e instanceof ActionTypeDisabledError) {
             // We'll stop re-trying due to action being forbidden
             throw new ExecutorError(e.message, {}, false);
           }

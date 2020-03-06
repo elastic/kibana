@@ -14,7 +14,7 @@ import { actionExecutorMock } from './action_executor.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { savedObjectsClientMock, loggingServiceMock } from 'src/core/server/mocks';
 import { eventLoggerMock } from '../../../event_log/server/mocks';
-import { ForbiddenError } from './errors';
+import { ActionTypeDisabledError } from './errors';
 
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -327,7 +327,7 @@ test(`throws an error when license doesn't support the action type`, async () =>
     references: [],
   });
   mockedActionExecutor.execute.mockImplementation(() => {
-    throw new ForbiddenError('Fail');
+    throw new ActionTypeDisabledError('Fail', 'license_invalid');
   });
 
   try {

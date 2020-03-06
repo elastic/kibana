@@ -10,7 +10,7 @@ import { assertNever } from '../../../../../src/core/utils';
 import { ILicense, LICENSE_CHECK_STATE } from '../../../licensing/common/types';
 import { PLUGIN } from '../constants/plugin';
 import { ActionType } from '../types';
-import { ForbiddenError } from './errors';
+import { ActionTypeDisabledError } from './errors';
 
 export type ILicenseState = PublicMethodsOf<LicenseState>;
 
@@ -74,30 +74,33 @@ export class LicenseState {
 
     switch (check.reason) {
       case 'unavailable':
-        throw new ForbiddenError(
+        throw new ActionTypeDisabledError(
           i18n.translate('xpack.actions.serverSideErrors.unavailableLicenseErrorMessage', {
             defaultMessage:
               'Action type {actionTypeId} is disabled because license information is not available at this time.',
             values: {
               actionTypeId: actionType.id,
             },
-          })
+          }),
+          'license_unavailable'
         );
       case 'expired':
-        throw new ForbiddenError(
+        throw new ActionTypeDisabledError(
           i18n.translate('xpack.actions.serverSideErrors.expirerdLicenseErrorMessage', {
             defaultMessage:
               'Action type {actionTypeId} is disabled because your {licenseType} license has expired.',
             values: { actionTypeId: actionType.id, licenseType: this.license!.type },
-          })
+          }),
+          'license_expired'
         );
       case 'invalid':
-        throw new ForbiddenError(
+        throw new ActionTypeDisabledError(
           i18n.translate('xpack.actions.serverSideErrors.invalidLicenseErrorMessage', {
             defaultMessage:
               'Action type {actionTypeId} is disabled because your {licenseType} license does not support it. Please upgrade your license.',
             values: { actionTypeId: actionType.id, licenseType: this.license!.type },
-          })
+          }),
+          'license_invalid'
         );
       default:
         assertNever(check.reason);

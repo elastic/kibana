@@ -12,8 +12,9 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
+import { assertNever } from '../../../../../src/core/utils';
 import { ActionResult } from '../types';
-import { ForbiddenError, ILicenseState, verifyApiAccess } from '../lib';
+import { ActionTypeDisabledError, ILicenseState, verifyApiAccess } from '../lib';
 
 export const bodySchema = schema.object({
   name: schema.string(),
@@ -51,10 +52,19 @@ export const createActionRoute = (router: IRouter, licenseState: ILicenseState) 
           body: actionRes,
         });
       } catch (e) {
-        if (e instanceof ForbiddenError) {
-          return res.forbidden({ body: { message: e.message } });
+        if (e instanceof ActionTypeDisabledError) {
+          switch (e.reason) {
+            case 'config':
+              return res.badRequest({ body: { message: e.message } });
+            case 'license_unavailable':
+            case 'license_invalid':
+            case 'license_expired':
+              return res.forbidden({ body: { message: e.message } });
+            default:
+              assertNever(e.reason);
+          }
         }
-        return res.badRequest({ body: { message: e.message } });
+        throw e;
       }
     })
   );

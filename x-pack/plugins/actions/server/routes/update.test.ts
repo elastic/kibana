@@ -6,7 +6,7 @@
 import { updateActionRoute } from './update';
 import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
 import { licenseStateMock } from '../lib/license_state.mock';
-import { verifyApiAccess, ForbiddenError } from '../lib';
+import { verifyApiAccess, ActionTypeDisabledError } from '../lib';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 
 jest.mock('../lib/verify_api_access.ts', () => ({
@@ -175,13 +175,12 @@ describe('updateActionRoute', () => {
     const [, handler] = router.put.mock.calls[0];
 
     const actionsClient = {
-      update: jest.fn().mockRejectedValue(new ForbiddenError('Fail')),
+      update: jest.fn().mockRejectedValue(new ActionTypeDisabledError('Fail', 'license_invalid')),
     };
 
     const [context, req, res] = mockHandlerArguments({ actionsClient }, { params: {}, body: {} }, [
       'ok',
       'forbidden',
-      'badRequest',
     ]);
 
     await handler(context, req, res);
