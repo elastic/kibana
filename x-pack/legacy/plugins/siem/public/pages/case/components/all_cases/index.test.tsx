@@ -41,7 +41,7 @@ describe('AllCases', () => {
         .find(`a[data-test-subj="case-details-link"]`)
         .first()
         .prop('href')
-    ).toEqual(`#/link-to/case/${useGetCasesMockState.data.cases[0].caseId}`);
+    ).toEqual(`#/link-to/case/${useGetCasesMockState.data.cases[0].id}`);
     expect(
       wrapper
         .find(`a[data-test-subj="case-details-link"]`)
