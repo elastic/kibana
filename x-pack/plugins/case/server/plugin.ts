@@ -17,7 +17,7 @@ import {
   caseConfigureSavedObjectType,
   caseCommentSavedObjectType,
 } from './saved_object_types';
-import { CaseService } from './services';
+import { CaseConfigureService, CaseService } from './services';
 
 function createConfig$(context: PluginInitializerContext) {
   return context.config.create<ConfigType>().pipe(map(config => config));
@@ -47,7 +47,8 @@ export class CasePlugin {
     core.savedObjects.registerType(caseCommentSavedObjectType);
     core.savedObjects.registerType(caseConfigureSavedObjectType);
 
-    const service = new CaseService(this.log);
+    const caseServicePlugin = new CaseService(this.log);
+    const caseConfigureServicePlugin = new CaseConfigureService(this.log);
 
     this.log.debug(
       `Setting up Case Workflow with core contract [${Object.keys(
@@ -55,12 +56,14 @@ export class CasePlugin {
       )}] and plugins [${Object.keys(plugins)}]`
     );
 
-    const caseService = await service.setup({
+    const caseService = await caseServicePlugin.setup({
       authentication: plugins.security.authc,
     });
+    const caseConfigureService = await caseConfigureServicePlugin.setup();
 
     const router = core.http.createRouter();
     initCaseApi({
+      caseConfigureService,
       caseService,
       router,
     });

@@ -18,22 +18,37 @@ import { initGetCommentApi } from './cases/comments/get_comment';
 import { initPatchCommentApi } from './cases/comments/patch_comment';
 import { initPostCommentApi } from './cases/comments/post_comment';
 
+import { initCaseConfigurePutActionConnector } from './cases/configure/get_connectors';
+import { initCaseConfigurePatchActionConnector } from './cases/configure/put_connector';
+import { initGetCaseConfigure } from './cases/configure/get_configure';
+import { initPatchCaseConfigure } from './cases/configure/patch_configure';
+import { initPostCaseConfigure } from './cases/configure/post_configure';
+
 import { initGetTagsApi } from './cases/tags/get_tags';
 
 import { RouteDeps } from './types';
 
 export function initCaseApi(deps: RouteDeps) {
+  // Cases
   initDeleteCasesApi(deps);
-  initDeleteCommentApi(deps);
-  initDeleteAllCommentsApi(deps);
   initFindCaseCommentsApi(deps);
   initGetAllCasesApi(deps);
   initGetCaseApi(deps);
+  initPostCaseApi(deps);
+  initPatchCaseApi(deps);
+  // Cases Comments
+  initDeleteCommentApi(deps);
+  initDeleteAllCommentsApi(deps);
   initGetCommentApi(deps);
   initGetAllCommentsApi(deps);
-  initGetTagsApi(deps);
-  initPostCaseApi(deps);
   initPostCommentApi(deps);
-  initPatchCaseApi(deps);
   initPatchCommentApi(deps);
+  // Cases Configure
+  initCaseConfigurePutActionConnector(deps);
+  initCaseConfigurePatchActionConnector(deps);
+  initGetCaseConfigure(deps);
+  initPatchCaseConfigure(deps);
+  initPostCaseConfigure(deps);
+  // Cases Tags
+  initGetTagsApi(deps);
 }

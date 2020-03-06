@@ -5,9 +5,10 @@
  */
 
 import { IRouter } from 'src/core/server';
-import { CaseServiceSetup } from '../../services';
+import { CaseConfigureServiceSetup, CaseServiceSetup } from '../../services';
 
 export interface RouteDeps {
+  caseConfigureService: CaseConfigureServiceSetup;
   caseService: CaseServiceSetup;
   router: IRouter;
 }

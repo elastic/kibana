@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiIcon,
 } from '@elastic/eui';
 
 import styled from 'styled-components';
@@ -40,15 +39,30 @@ const EuiFormRowExtended = styled(EuiFormRow)`
   }
 `;
 
-const ConnectorsComponent: React.FC = () => {
+interface Props {
+  connectors: Connector[];
+  isLoading: boolean;
+  refetchConnectors: () => void;
+}
+const actionTypes = [
+  {
+    id: '.servicenow',
+    name: 'ServiceNow',
+    enabled: true,
+  },
+];
+
+const ConnectorsComponent: React.FC<Props> = ({ connectors, isLoading, refetchConnectors }) => {
   const { http, triggers_actions_ui, notifications, application } = useKibana().services;
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
+
+  const handleShowFlyout = useCallback(() => setAddFlyoutVisibility(true), []);
 
   const dropDownLabel = (
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>{i18n.INCIDENT_MANAGEMENT_SYSTEM_LABEL}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiLink onClick={() => setAddFlyoutVisibility(true)}>{i18n.ADD_NEW_CONNECTOR}</EuiLink>
+        <EuiLink onClick={handleShowFlyout}>{i18n.ADD_NEW_CONNECTOR}</EuiLink>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -61,7 +75,14 @@ const ConnectorsComponent: React.FC = () => {
         description={i18n.INCIDENT_MANAGEMENT_SYSTEM_DESC}
       >
         <EuiFormRowExtended fullWidth label={dropDownLabel}>
-          <ConnectorsDropdown />
+          <ConnectorsDropdown
+            connectors={connectors}
+            connectorSelectedId={'none'}
+            isLoading={isLoading}
+            onChange={(id: string) => {
+              console.log(id);
+            }}
+          />
         </EuiFormRowExtended>
       </EuiDescribedFormGroup>
       <ActionsConnectorsContextProvider
@@ -70,11 +91,13 @@ const ConnectorsComponent: React.FC = () => {
           actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
           toastNotifications: notifications.toasts,
           capabilities: application.capabilities,
+          reloadConnectors: refetchConnectors as () => Promise<void>,
         }}
       >
         <ConnectorAddFlyout
           addFlyoutVisible={addFlyoutVisible}
           setAddFlyoutVisibility={setAddFlyoutVisibility}
+          actionTypes={actionTypes}
         />
       </ActionsConnectorsContextProvider>
     </>

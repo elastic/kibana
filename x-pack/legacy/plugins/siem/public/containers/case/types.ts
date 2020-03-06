@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ActionResult } from '../../../../../../plugins/actions/common';
+
 export interface Comment {
   id: string;
   createdAt: string;
@@ -62,18 +64,8 @@ export interface FetchCasesProps {
   filterOptions?: FilterOptions;
 }
 
-export interface Connector {
-  id: string;
-  name: string;
-}
-
-export interface FetchConnectorsResponse {
-  page: number;
-  perPage: number;
-  total: number;
-  data: Connector[];
-}
-
-export interface FetchConnectorsProps {
+export interface ApiProps {
   signal: AbortSignal;
 }
+
+export type Connector = ActionResult;

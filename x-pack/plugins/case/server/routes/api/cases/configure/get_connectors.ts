@@ -17,7 +17,7 @@ const CASE_SERVICE_NOW_ACTION = '.servicenow';
 export function initCaseConfigurePutActionConnector({ caseService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases/configure/connectors',
+      path: '/api/cases/configure/connectors/_find',
       validate: false,
     },
     async (context, request, response) => {

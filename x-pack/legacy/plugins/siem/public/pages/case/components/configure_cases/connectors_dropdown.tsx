@@ -4,54 +4,71 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
-import { EuiSuperSelect, EuiSuperSelectOption } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiIcon, EuiSuperSelect } from '@elastic/eui';
+import styled from 'styled-components';
+
+import { Connector } from '../../../../containers/case/types';
+import * as i18n from './translations';
 
 interface Props {
-  connectors: Array<EuiSuperSelectOption<string>>;
+  connectors: Connector[];
+  connectorSelectedId: string;
+  isLoading: boolean;
+  onChange: (id: string) => void;
 }
 
-import { connectors as connectorsDefinition } from '../../../../lib/connectors/config';
-
 const ICON_SIZE = 'm';
-const serviceNowDefinition = connectorsDefinition.get('.servicenow')!;
 
 const EuiIconExtended = styled(EuiIcon)`
   margin-right: 13px;
 `;
 
-const connectors: Array<EuiSuperSelectOption<string>> = [
-  {
-    value: 'no-connector',
-    inputDisplay: (
-      <>
-        <EuiIconExtended type="minusInCircle" size={ICON_SIZE} />
-        <span>{i18n.NO_CONNECTOR}</span>
-      </>
-    ),
-    'data-test-subj': 'no-connector',
-  },
-  {
-    value: 'servicenow-connector',
-    inputDisplay: (
-      <>
-        <EuiIconExtended type={serviceNowDefinition.logo} size={ICON_SIZE} />
-        <span>{'My ServiceNow connector'}</span>
-      </>
-    ),
-    'data-test-subj': 'servicenow-connector',
-  },
-];
+const noConnectorOption = {
+  value: 'none',
+  inputDisplay: (
+    <>
+      <EuiIconExtended type="minusInCircle" size={ICON_SIZE} />
+      <span>{i18n.NO_CONNECTOR}</span>
+    </>
+  ),
+  'data-test-subj': 'no-connector',
+};
 
-const ConnectorsDropdownComponent: React.FC = () => {
-  const [selectedConnector, setSelectedConnector] = useState(connectors[0].value);
+const ConnectorsDropdownComponent: React.FC<Props> = ({
+  connectors,
+  connectorSelectedId,
+  isLoading,
+  onChange,
+}) => {
+  const connectorsAsOptions = useMemo(
+    () =>
+      connectors.reduce(
+        (acc, connector) => [
+          ...acc,
+          {
+            value: connector.id,
+            inputDisplay: (
+              <>
+                <EuiIconExtended type="logoWebhook" size={ICON_SIZE} />
+                <span>{connector.name}</span>
+              </>
+            ),
+            'data-test-subj': 'servicenow-connector',
+          },
+        ],
+        [noConnectorOption]
+      ),
+    [connectors]
+  );
 
   return (
     <EuiSuperSelect
-      options={connectors}
-      valueOfSelected={selectedConnector}
+      isLoading={isLoading}
+      options={connectorsAsOptions}
+      valueOfSelected={connectorSelectedId}
       fullWidth
-      onChange={setSelectedConnector}
+      onChange={onChange}
     />
   );
 };

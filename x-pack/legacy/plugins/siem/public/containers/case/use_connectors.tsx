@@ -4,18 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useEffect } from 'react';
+import { noop } from 'lodash/fp';
+import { useState, useEffect, useRef } from 'react';
 import { fetchConnectors } from './api';
+
+import { errorToToaster } from '../../components/ml/api/error_to_toaster';
+import { useStateToaster } from '../../components/toasters';
+import * as i18n from './translations';
 import { Connector } from './types';
 
-export type ReturnConnectors = [boolean];
-
-export interface UseConnectors {
-  dispatchConnectors: (connectors: Connector[]) => void;
+export interface ReturnConnectors {
+  loading: boolean;
+  connectors: Connector[];
+  refetchConnectors: () => void;
 }
 
-export const useConnectors = ({ dispatchConnectors }: UseConnectors): ReturnConnectors => {
+export const useConnectors = (): ReturnConnectors => {
+  const [, dispatchToaster] = useStateToaster();
   const [loading, setLoading] = useState(true);
+  const [connectors, setConnectors] = useState<Connector[]>([]);
+  const refetchConnectors = useRef<() => void>(noop);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -25,13 +33,17 @@ export const useConnectors = ({ dispatchConnectors }: UseConnectors): ReturnConn
       try {
         setLoading(true);
         const res = await fetchConnectors({ signal: abortCtrl.signal });
-
         if (isSubscribed) {
-          dispatchConnectors(res.data);
+          setConnectors(res.data);
         }
       } catch (error) {
         if (isSubscribed) {
-          dispatchConnectors([]);
+          setConnectors([]);
+          errorToToaster({
+            title: i18n.ERROR_TITLE,
+            error: error.body && error.body.message ? new Error(error.body.message) : error,
+            dispatchToaster,
+          });
         }
       }
 
@@ -39,7 +51,7 @@ export const useConnectors = ({ dispatchConnectors }: UseConnectors): ReturnConn
         setLoading(false);
       }
     };
-
+    refetchConnectors.current = fetchData;
     fetchData();
 
     return () => {
@@ -48,5 +60,9 @@ export const useConnectors = ({ dispatchConnectors }: UseConnectors): ReturnConn
     };
   }, []);
 
-  return [loading];
+  return {
+    loading,
+    connectors,
+    refetchConnectors: refetchConnectors.current,
+  };
 };
