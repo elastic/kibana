@@ -34,7 +34,7 @@ export function createInputControlVisTypeDefinition(deps: InputControlVisDepende
     title: i18n.translate('inputControl.register.controlsTitle', {
       defaultMessage: 'Controls',
     }),
-    icon: 'visControls',
+    icon: 'controlsHorizontal',
     description: i18n.translate('inputControl.register.controlsDescription', {
       defaultMessage: 'Create interactive controls for easy dashboard manipulation.',
     }),
