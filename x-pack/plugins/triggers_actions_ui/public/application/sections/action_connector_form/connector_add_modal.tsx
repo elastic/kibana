@@ -29,6 +29,7 @@ import {
 import { connectorReducer } from './connector_reducer';
 import { createActionConnector } from '../../lib/action_connector_api';
 import { TypeRegistry } from '../../type_registry';
+import './connector_add_modal.scss';
 
 interface ConnectorAddModalProps {
   actionType: ActionType;
