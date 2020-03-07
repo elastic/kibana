@@ -50,10 +50,10 @@ export class CaseConfigureService {
   public setup = async (): Promise<CaseConfigureServiceSetup> => ({
     delete: async ({ client, caseConfigureId }: GetCaseConfigureArgs) => {
       try {
-        this.log.debug(`Attempting to GET case configure ${caseConfigureId}`);
+        this.log.debug(`Attempting to DELETE case configure ${caseConfigureId}`);
         return await client.delete(CASE_CONFIGURE_SAVED_OBJECT, caseConfigureId);
       } catch (error) {
-        this.log.debug(`Error on GET case configure ${caseConfigureId}: ${error}`);
+        this.log.debug(`Error on DELETE case configure ${caseConfigureId}: ${error}`);
         throw error;
       }
     },
