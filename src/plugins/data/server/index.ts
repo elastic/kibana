@@ -151,8 +151,16 @@ export {
  * Search
  */
 
-export { IRequestTypesMap, IResponseTypesMap } from './search';
-export * from './search';
+export {
+  ISearch,
+  ICancel,
+  ISearchOptions,
+  IRequestTypesMap,
+  IResponseTypesMap,
+  ISearchContext,
+  TSearchStrategyProvider,
+  getDefaultSearchParams,
+} from './search';
 
 /**
  * Types to be shared externally
