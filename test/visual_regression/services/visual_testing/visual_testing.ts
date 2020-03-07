@@ -71,6 +71,13 @@ export async function VisualTestingProvider({ getService }: FtrProviderContext) 
 
   return new (class VisualTesting {
     public async snapshot(options: SnapshotOptions = {}) {
+      if (process.env.DISABLE_VISUAL_TESTING) {
+        log.warning(
+          'Capturing of percy snapshots disabled, would normally capture a snapshot here!'
+        );
+        return;
+      }
+
       log.debug('Capturing percy snapshot');
 
       if (!currentTest) {
