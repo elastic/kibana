@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TimeBuckets } from './time_buckets';
+export { EnhancedSearchParams, IEnhancedEsSearchRequest } from './search';

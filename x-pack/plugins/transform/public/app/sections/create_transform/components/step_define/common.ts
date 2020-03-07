@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import { EuiComboBoxOptionProps, EuiDataGridSorting } from '@elastic/eui';
+import { EuiComboBoxOptionOption, EuiDataGridSorting } from '@elastic/eui';
 import { IndexPattern, KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/public';
 
 import { getNestedProperty } from '../../../../../../common/utils/object_utils';
@@ -109,11 +109,11 @@ const illegalEsAggNameChars = /[[\]>]/g;
 
 export function getPivotDropdownOptions(indexPattern: IndexPattern) {
   // The available group by options
-  const groupByOptions: EuiComboBoxOptionProps[] = [];
+  const groupByOptions: EuiComboBoxOptionOption[] = [];
   const groupByOptionsData: PivotGroupByConfigWithUiSupportDict = {};
 
   // The available aggregations
-  const aggOptions: EuiComboBoxOptionProps[] = [];
+  const aggOptions: EuiComboBoxOptionOption[] = [];
   const aggOptionsData: PivotAggsConfigWithUiSupportDict = {};
 
   const ignoreFieldNames = ['_id', '_index', '_type'];
