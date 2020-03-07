@@ -14,9 +14,9 @@ import { createMemoryHistory, MemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
 import { AppAction } from '../../types';
 import { HostList } from './index';
-import { mockHostResultList } from '../../store/managing/mock_host_result_list';
+import { mockHostResultList } from '../../store/hosts/mock_host_result_list';
 
-describe('when on the managing page', () => {
+describe('when on the hosts page', () => {
   let render: () => reactTestingLibrary.RenderResult;
   let history: MemoryHistory<never>;
   let store: ReturnType<typeof appStoreFactory>;

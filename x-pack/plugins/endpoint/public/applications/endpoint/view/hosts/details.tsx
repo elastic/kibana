@@ -24,7 +24,7 @@ import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useHostListSelector } from './hooks';
 import { urlFromQueryParams } from './url_from_query_params';
-import { uiQueryParams, detailsData, detailsError } from './../../store/managing/selectors';
+import { uiQueryParams, detailsData, detailsError } from './../../store/hosts/selectors';
 
 const HostDetails = memo(({ details }: { details: HostListState }) => {
   const detailsResultsUpper = useMemo(() => {

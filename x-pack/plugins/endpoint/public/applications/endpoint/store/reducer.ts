@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { combineReducers, Reducer } from 'redux';
-import { hostListReducer } from './managing';
+import { hostListReducer } from './hosts';
 import { AppAction } from './action';
 import { alertListReducer } from './alerts';
 import { GlobalState } from '../types';

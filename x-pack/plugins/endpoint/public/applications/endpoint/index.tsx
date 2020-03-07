@@ -16,7 +16,7 @@ import { RouteCapture } from './view/route_capture';
 import { EndpointPluginStartDependencies } from '../../plugin';
 import { appStoreFactory } from './store';
 import { AlertIndex } from './view/alerts';
-import { HostList } from './view/managing';
+import { HostList } from './view/hosts';
 import { PolicyList } from './view/policy';
 import { PolicyDetails } from './view/policy';
 import { HeaderNavigation } from './components/header_nav';
