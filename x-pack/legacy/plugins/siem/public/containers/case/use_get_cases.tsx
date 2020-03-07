@@ -110,6 +110,7 @@ const initialData: AllCases = {
 interface UseGetCases extends UseGetCasesState {
   dispatchUpdateCaseProperty: ({ updateKey, updateValue, caseId, version }: UpdateCase) => void;
   getCaseCount: (caseState: keyof CaseCount) => void;
+  refetchCases: (filters: FilterOptions, queryParams: QueryParams) => void;
   setFilters: (filters: FilterOptions) => void;
   setQueryParams: (queryParams: QueryParams) => void;
   setSelectedCases: (mySelectedCases: Case[]) => void;
@@ -250,6 +251,7 @@ export const useGetCases = (): UseGetCases => {
     ...state,
     dispatchUpdateCaseProperty,
     getCaseCount,
+    refetchCases: fetchCases,
     setFilters,
     setQueryParams,
     setSelectedCases,

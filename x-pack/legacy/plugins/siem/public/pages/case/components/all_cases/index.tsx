@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
@@ -25,6 +25,7 @@ import { getCasesColumns } from './columns';
 import { Case, FilterOptions, SortFieldCase } from '../../../../containers/case/types';
 
 import { useGetCases } from '../../../../containers/case/use_get_cases';
+import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
 import { EuiBasicTableOnChange } from '../../../detection_engine/rules/types';
 import { Panel } from '../../../../components/panel';
 import { CasesTableFilters } from './table_filters';
@@ -41,6 +42,7 @@ import { getBulkItems } from '../bulk_actions';
 import { CaseHeaderPage } from '../case_header_page';
 import { OpenClosedStats } from '../open_closed_stats';
 import { getActions } from './actions';
+import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -83,6 +85,7 @@ export const AllCases = React.memo(() => {
     loading,
     queryParams,
     selectedCases,
+    refetchCases,
     setFilters,
     setQueryParams,
     setSelectedCases,
@@ -115,12 +118,6 @@ export const AllCases = React.memo(() => {
       setFilters({ ...filterOptions, ...newFilterOptions });
     },
     [filterOptions, setFilters]
-  );
-
-  const actions = useMemo(
-    () =>
-      getActions({ caseStatus: filterOptions.state, dispatchUpdate: dispatchUpdateCaseProperty }),
-    [filterOptions.state, dispatchUpdateCaseProperty]
   );
 
   const memoizedGetCasesColumns = useMemo(() => getCasesColumns(actions), [filterOptions.state]);
@@ -163,6 +160,54 @@ export const AllCases = React.memo(() => {
   );
   const isDataEmpty = useMemo(() => data.total === 0, [data]);
 
+  // Delete case
+  // const {
+  //   dispatchResetIsDeleted,
+  //   handleOnDeleteConfirm,
+  //   handleToggleModal,
+  //   isDeleted,
+  //   isDisplayConfirmDeleteModal,
+  // } = useDeleteCases();
+  //
+  // useEffect(() => {
+  //   if (isDeleted) {
+  //     refetchCases(filterOptions, queryParams);
+  //     dispatchResetIsDeleted();
+  //   }
+  // }, [isDeleted, filterOptions, queryParams]);
+  //
+  // const [deleteThisCase, setDeleteThisCase] = useState({
+  //   title: '',
+  //   id: '',
+  // });
+  // const confirmDeleteModal = useMemo(
+  //   () => (
+  //     <ConfirmDeleteCaseModal
+  //       caseTitle={deleteThisCase.title}
+  //       isModalVisible={isDisplayConfirmDeleteModal}
+  //       onCancel={handleToggleModal}
+  //       onConfirm={handleOnDeleteConfirm.bind(null, [deleteThisCase.id])}
+  //     />
+  //   ),
+  //   [deleteThisCase, isDisplayConfirmDeleteModal]
+  // );
+  //
+  // const toggleDeleteModal = useCallback(
+  //   (deleteCase: Case) => {
+  //     handleToggleModal();
+  //     setDeleteThisCase(deleteCase);
+  //   },
+  //   [isDisplayConfirmDeleteModal]
+  // );
+
+  const actions = useMemo(
+    () =>
+      getActions({
+        caseStatus: filterOptions.state,
+        dispatchUpdate: dispatchUpdateCaseProperty,
+      }),
+    [filterOptions.state, dispatchUpdateCaseProperty]
+  );
   return (
     <>
       <CaseHeaderPage title={i18n.PAGE_TITLE}>

@@ -14,6 +14,10 @@ export const CANCEL = i18n.translate('xpack.siem.case.caseView.cancel', {
   defaultMessage: 'Cancel',
 });
 
+export const DELETE_CASE = i18n.translate('xpack.siem.case.confirmDeleteCase.deleteCase', {
+  defaultMessage: 'Delete case',
+});
+
 export const NAME = i18n.translate('xpack.siem.case.caseView.name', {
   defaultMessage: 'Name',
 });
@@ -60,24 +64,8 @@ export const OPTIONAL = i18n.translate('xpack.siem.case.caseView.optional', {
   defaultMessage: 'Optional',
 });
 
-export const LAST_UPDATED = i18n.translate('xpack.siem.case.caseView.updatedAt', {
-  defaultMessage: 'Last updated',
-});
-
-export const PAGE_SUBTITLE = i18n.translate('xpack.siem.case.caseView.pageSubtitle', {
-  defaultMessage: 'Cases within the Elastic SIEM',
-});
-
 export const PAGE_TITLE = i18n.translate('xpack.siem.case.pageTitle', {
   defaultMessage: 'Cases',
-});
-
-export const STATE = i18n.translate('xpack.siem.case.caseView.state', {
-  defaultMessage: 'State',
-});
-
-export const SUBMIT = i18n.translate('xpack.siem.case.caseView.submit', {
-  defaultMessage: 'Submit',
 });
 
 export const CREATE_CASE = i18n.translate('xpack.siem.case.caseView.createCase', {
