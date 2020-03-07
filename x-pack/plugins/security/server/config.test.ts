@@ -134,15 +134,15 @@ describe('config schema', () => {
       expect(() => ConfigSchema.validate({ public: { protocol: 'ftp' } }))
         .toThrowErrorMatchingInlineSnapshot(`
 "[public.protocol]: types that failed validation:
-- [public.protocol.0]: expected value to equal [http] but got [ftp]
-- [public.protocol.1]: expected value to equal [https] but got [ftp]"
+- [public.protocol.0]: expected value to equal [http]
+- [public.protocol.1]: expected value to equal [https]"
 `);
 
       expect(() => ConfigSchema.validate({ public: { protocol: 'some-protocol' } }))
         .toThrowErrorMatchingInlineSnapshot(`
 "[public.protocol]: types that failed validation:
-- [public.protocol.0]: expected value to equal [http] but got [some-protocol]
-- [public.protocol.1]: expected value to equal [https] but got [some-protocol]"
+- [public.protocol.0]: expected value to equal [http]
+- [public.protocol.1]: expected value to equal [https]"
 `);
     });
 
@@ -170,13 +170,13 @@ describe('config schema', () => {
       expect(() =>
         ConfigSchema.validate({ public: { hostname: 'http://elastic.co' } })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[public.hostname]: value is [http://elastic.co] but it must be a valid hostname (see RFC 1123)."`
+        `"[public.hostname]: value must be a valid hostname (see RFC 1123)."`
       );
 
       expect(() =>
         ConfigSchema.validate({ public: { hostname: 'localhost:5601' } })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[public.hostname]: value is [localhost:5601] but it must be a valid hostname (see RFC 1123)."`
+        `"[public.hostname]: value must be a valid hostname (see RFC 1123)."`
       );
     });
 
@@ -202,13 +202,13 @@ describe('config schema', () => {
       expect(() =>
         ConfigSchema.validate({ public: { port: -1 } })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[public.port]: Value is [-1] but it must be equal to or greater than [0]."`
+        `"[public.port]: Value must be equal to or greater than [0]."`
       );
 
       expect(() =>
         ConfigSchema.validate({ public: { port: 65536 } })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[public.port]: Value is [65536] but it must be equal to or lower than [65535]."`
+        `"[public.port]: Value must be equal to or lower than [65535]."`
       );
 
       expect(() =>
