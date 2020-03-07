@@ -12,7 +12,7 @@ import { getTags } from './api';
 import * as i18n from './translations';
 
 interface TagsState {
-  data: string[];
+  tags: string[];
   isLoading: boolean;
   isError: boolean;
 }
@@ -34,7 +34,7 @@ const dataFetchReducer = (state: TagsState, action: Action): TagsState => {
         ...state,
         isLoading: false,
         isError: false,
-        data: action.payload,
+        tags: action.payload,
       };
     case 'FETCH_FAILURE':
       return {
@@ -48,11 +48,11 @@ const dataFetchReducer = (state: TagsState, action: Action): TagsState => {
 };
 const initialData: string[] = [];
 
-export const useGetTags = (): [TagsState] => {
+export const useGetTags = (): TagsState => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
-    data: initialData,
+    tags: initialData,
   });
   const [, dispatchToaster] = useStateToaster();
 
@@ -81,5 +81,5 @@ export const useGetTags = (): [TagsState] => {
       didCancel = true;
     };
   }, []);
-  return [state];
+  return state;
 };

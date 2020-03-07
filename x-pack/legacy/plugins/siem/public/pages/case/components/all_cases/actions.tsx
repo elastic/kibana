@@ -25,7 +25,7 @@ export const getActions = ({
     description: i18n.DELETE,
     icon: 'trash',
     name: i18n.DELETE,
-    onClick: (theCase: Case) => deleteCaseOnClick(theCase),
+    onClick: deleteCaseOnClick,
     type: 'icon',
     'data-test-subj': 'action-delete',
   },

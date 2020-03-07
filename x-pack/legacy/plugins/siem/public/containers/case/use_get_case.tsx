@@ -64,7 +64,7 @@ const initialData: Case = {
   version: '',
 };
 
-export const useGetCase = (caseId: string): [CaseState] => {
+export const useGetCase = (caseId: string): CaseState => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: true,
     isError: false,
@@ -101,5 +101,5 @@ export const useGetCase = (caseId: string): [CaseState] => {
   useEffect(() => {
     callFetch();
   }, [caseId]);
-  return [state];
+  return state;
 };

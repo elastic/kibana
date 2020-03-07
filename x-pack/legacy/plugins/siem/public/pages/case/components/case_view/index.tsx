@@ -255,7 +255,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
 });
 
 export const CaseView = React.memo(({ caseId }: Props) => {
-  const [{ data, isLoading, isError }] = useGetCase(caseId);
+  const { data, isLoading, isError } = useGetCase(caseId);
   if (isError) {
     return null;
   }
