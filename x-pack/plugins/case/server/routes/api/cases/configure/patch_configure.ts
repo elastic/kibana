@@ -34,6 +34,7 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
         );
 
         const myCaseConfigure = await caseConfigureService.find({ client });
+        const { version, ...queryWithoutVersion } = query;
 
         if (myCaseConfigure.saved_objects.length === 0) {
           throw Boom.conflict(
@@ -41,7 +42,7 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
           );
         }
 
-        if (query.version !== myCaseConfigure.saved_objects[0].version) {
+        if (version !== myCaseConfigure.saved_objects[0].version) {
           throw Boom.conflict(
             'This configuration has been updated. Please refresh before saving additional updates.'
           );
@@ -55,7 +56,7 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
           client,
           caseConfigureId: myCaseConfigure.saved_objects[0].id,
           updatedAttributes: {
-            ...query,
+            ...queryWithoutVersion,
             updated_at: updateDate,
             updated_by: { full_name, username },
           },
