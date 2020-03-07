@@ -10,7 +10,7 @@ import * as yaml from 'js-yaml';
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
  * with Kibana when credentials are not provided via environment variables
  */
-const KIBANA_DEV_YML_PATH = '../../../../config/kibana.dev.yml';
+const KIBANA_DEV_YML_PATH = '../../../config/kibana.dev.yml';
 
 /**
  * The configuration path in `kibana.dev.yml` to the username to be used when
