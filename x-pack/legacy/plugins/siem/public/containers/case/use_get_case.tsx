@@ -53,6 +53,7 @@ const initialData: Case = {
   id: '',
   createdAt: '',
   comments: [],
+  commentIds: [],
   createdBy: {
     username: '',
   },
