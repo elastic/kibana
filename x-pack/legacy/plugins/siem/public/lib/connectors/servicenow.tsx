@@ -27,6 +27,7 @@ import { ServiceNowActionConnector } from './types';
 import { isUrlInvalid } from './validators';
 
 import { connectors } from './config';
+import { CasesConfigurationMapping } from '../../containers/case/configure/types';
 
 const serviceNowDefinition = connectors.get('.servicenow')!;
 
@@ -90,27 +91,25 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
   const isUsernameInvalid: boolean = errors.username.length > 0 && username !== undefined;
   const isPasswordInvalid: boolean = errors.password.length > 0 && password !== undefined;
 
-  if (!casesConfiguration) {
-    editActionConfig('casesConfiguration', {
-      mapping: [
-        {
-          source: 'title',
-          target: 'description',
-          actionType: 'nothing',
-        },
-        {
-          source: 'description',
-          target: 'short_description',
-          actionType: 'nothing',
-        },
-        {
-          source: 'comments',
-          target: 'work_notes',
-          actionType: 'nothing',
-        },
-      ],
-    });
-  }
+  const defaultMapping = [
+    {
+      source: 'title',
+      target: 'description',
+      actionType: 'overwrite',
+    },
+    {
+      source: 'description',
+      target: 'short_description',
+      actionType: 'overwrite',
+    },
+    {
+      source: 'comments',
+      target: 'comments',
+      actionType: 'append',
+    },
+  ];
+
+  const mappings = casesConfiguration?.mapping ?? defaultMapping;
 
   return (
     <>
@@ -198,7 +197,13 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
       </EuiFlexGroup>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <FieldMapping />
+          <FieldMapping
+            disabled={false}
+            mappings={mappings as CasesConfigurationMapping[]}
+            onChangeMappings={newMappings => {
+              editActionConfig('casesConfiguration', { mapping: newMappings });
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

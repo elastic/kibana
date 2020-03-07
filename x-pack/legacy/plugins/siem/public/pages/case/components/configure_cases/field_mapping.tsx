@@ -33,7 +33,7 @@ const supportedThirdPartyFields: Array<EuiSuperSelectOption<ThirdPartyField>> = 
   },
   {
     value: 'comments',
-    inputDisplay: <span>{'Comment'}</span>,
+    inputDisplay: <span>{'Comments'}</span>,
   },
   {
     value: 'description',

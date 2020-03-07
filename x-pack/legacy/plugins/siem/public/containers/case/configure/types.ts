@@ -14,7 +14,12 @@ import {
   ThirdPartyField,
 } from '../../../../../../../plugins/case/common/api';
 
-export { ActionType, CaseField, ClosureType, Connector, ThirdPartyField };
+export { Connector } from '../../../../../../../plugins/case/common/api';
+
+export type CaseConfigureClosureType = 'close-by-user' | 'close-by-pushing';
+export type ActionType = 'nothing' | 'overwrite' | 'append';
+export type ThirdPartyField = 'comments' | 'description' | 'short_description' | 'not_mapped';
+export type CaseField = 'name' | 'description' | 'comments';
 
 export interface CasesConfigurationMapping {
   source: CaseField;

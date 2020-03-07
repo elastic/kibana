@@ -4,21 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface ServiceNowConfig {
-  apiUrl: string;
-  casesConfiguration: {
-    closure: string;
-  };
-}
+/* eslint-disable no-restricted-imports */
+/* eslint-disable @kbn/eslint/no-restricted-paths */
 
-interface ServiceNowSecrets {
-  username: string;
-  password: string;
-}
+import {
+  ConfigType,
+  SecretsType,
+} from '../../../../../../plugins/actions/server/builtin_action_types/servicenow/types';
 
 export interface ServiceNowActionConnector {
-  config: ServiceNowConfig;
-  secrets: ServiceNowSecrets;
+  config: ConfigType;
+  secrets: SecretsType;
 }
 
 export interface Connector {
