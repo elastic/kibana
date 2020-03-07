@@ -104,7 +104,7 @@ const ConfigureCasesComponent: React.FC = () => {
       <SectionWrapper>
         <Connectors
           connectors={connectors ?? []}
-          disabled={persistLoading}
+          disabled={persistLoading || isLoadingConnectors}
           isLoading={isLoadingConnectors}
           onChangeConnector={setConnectorId}
           refetchConnectors={refetchConnectors}
@@ -114,7 +114,7 @@ const ConfigureCasesComponent: React.FC = () => {
       <SectionWrapper>
         <ClosureOptions
           closureTypeSelected={closureType}
-          disabled={persistLoading}
+          disabled={persistLoading || isLoadingConnectors}
           onChangeClosureType={setClosureType}
         />
       </SectionWrapper>
