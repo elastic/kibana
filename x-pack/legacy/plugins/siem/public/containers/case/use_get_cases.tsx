@@ -247,11 +247,17 @@ export const useGetCases = (): UseGetCases => {
     [state.filterOptions, state.queryParams]
   );
 
+  const refetchCases = useCallback(() => {
+    fetchCases(state.filterOptions, state.queryParams);
+    getCaseCount('open');
+    getCaseCount('closed');
+  }, [state.filterOptions, state.queryParams]);
+
   return {
     ...state,
     dispatchUpdateCaseProperty,
     getCaseCount,
-    refetchCases: fetchCases,
+    refetchCases,
     setFilters,
     setQueryParams,
     setSelectedCases,

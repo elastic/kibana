@@ -91,6 +91,56 @@ export const AllCases = React.memo(() => {
     setSelectedCases,
   } = useGetCases();
 
+  // Delete case
+  const {
+    dispatchResetIsDeleted,
+    handleOnDeleteConfirm,
+    handleToggleModal,
+    isDeleted,
+    isDisplayConfirmDeleteModal,
+  } = useDeleteCases();
+
+  useEffect(() => {
+    if (isDeleted) {
+      refetchCases(filterOptions, queryParams);
+      dispatchResetIsDeleted();
+    }
+  }, [isDeleted, filterOptions, queryParams]);
+
+  const [deleteThisCase, setDeleteThisCase] = useState({
+    title: '',
+    id: '',
+  });
+  const confirmDeleteModal = useMemo(
+    () => (
+      <ConfirmDeleteCaseModal
+        caseTitle={deleteThisCase.title}
+        isModalVisible={isDisplayConfirmDeleteModal}
+        onCancel={handleToggleModal}
+        onConfirm={handleOnDeleteConfirm.bind(null, [deleteThisCase.id])}
+      />
+    ),
+    [deleteThisCase, isDisplayConfirmDeleteModal]
+  );
+
+  const toggleDeleteModal = useCallback(
+    (deleteCase: Case) => {
+      handleToggleModal();
+      setDeleteThisCase(deleteCase);
+    },
+    [isDisplayConfirmDeleteModal]
+  );
+
+  const actions = useMemo(
+    () =>
+      getActions({
+        caseStatus: filterOptions.state,
+        deleteCaseOnClick: toggleDeleteModal,
+        dispatchUpdate: dispatchUpdateCaseProperty,
+      }),
+    [filterOptions.state, dispatchUpdateCaseProperty]
+  );
+
   const tableOnChangeCallback = useCallback(
     ({ page, sort }: EuiBasicTableOnChange) => {
       let newQueryParams = queryParams;
@@ -159,55 +209,6 @@ export const AllCases = React.memo(() => {
     [loading]
   );
   const isDataEmpty = useMemo(() => data.total === 0, [data]);
-
-  // Delete case
-  // const {
-  //   dispatchResetIsDeleted,
-  //   handleOnDeleteConfirm,
-  //   handleToggleModal,
-  //   isDeleted,
-  //   isDisplayConfirmDeleteModal,
-  // } = useDeleteCases();
-  //
-  // useEffect(() => {
-  //   if (isDeleted) {
-  //     refetchCases(filterOptions, queryParams);
-  //     dispatchResetIsDeleted();
-  //   }
-  // }, [isDeleted, filterOptions, queryParams]);
-  //
-  // const [deleteThisCase, setDeleteThisCase] = useState({
-  //   title: '',
-  //   id: '',
-  // });
-  // const confirmDeleteModal = useMemo(
-  //   () => (
-  //     <ConfirmDeleteCaseModal
-  //       caseTitle={deleteThisCase.title}
-  //       isModalVisible={isDisplayConfirmDeleteModal}
-  //       onCancel={handleToggleModal}
-  //       onConfirm={handleOnDeleteConfirm.bind(null, [deleteThisCase.id])}
-  //     />
-  //   ),
-  //   [deleteThisCase, isDisplayConfirmDeleteModal]
-  // );
-  //
-  // const toggleDeleteModal = useCallback(
-  //   (deleteCase: Case) => {
-  //     handleToggleModal();
-  //     setDeleteThisCase(deleteCase);
-  //   },
-  //   [isDisplayConfirmDeleteModal]
-  // );
-
-  const actions = useMemo(
-    () =>
-      getActions({
-        caseStatus: filterOptions.state,
-        dispatchUpdate: dispatchUpdateCaseProperty,
-      }),
-    [filterOptions.state, dispatchUpdateCaseProperty]
-  );
   return (
     <>
       <CaseHeaderPage title={i18n.PAGE_TITLE}>
@@ -282,7 +283,7 @@ export const AllCases = React.memo(() => {
             <EuiBasicTable
               columns={memoizedGetCasesColumns}
               isSelectable
-              itemId="caseId"
+              itemId="id"
               items={data.cases}
               noItemsMessage={
                 <EuiEmptyPrompt
@@ -304,6 +305,7 @@ export const AllCases = React.memo(() => {
           </Div>
         )}
       </Panel>
+      {confirmDeleteModal}
     </>
   );
 });
