@@ -17,12 +17,9 @@
  * under the License.
  */
 
-import { IContextProvider, APICaller } from 'kibana/server';
+import { IContextProvider } from 'kibana/server';
 import { ISearchContext } from './i_search_context';
-import { IResponseTypesMap, IRequestTypesMap } from './i_search';
 import { TRegisterSearchStrategyProvider, TSearchStrategyProvider } from './i_search_strategy';
-import { TStrategyTypes } from './strategy_types';
-import { DEFAULT_SEARCH_STRATEGY } from '../../common/search';
 
 /**
  * The setup contract exposed by the Search plugin exposes the search strategy extension
@@ -40,12 +37,4 @@ export interface ISearchSetup {
    * strategies.
    */
   registerSearchStrategyProvider: TRegisterSearchStrategyProvider;
-
-  __LEGACY: {
-    search: <T extends TStrategyTypes = typeof DEFAULT_SEARCH_STRATEGY>(
-      caller: APICaller,
-      request: IRequestTypesMap[T],
-      strategyName?: T
-    ) => Promise<IResponseTypesMap[T]>;
-  };
 }
