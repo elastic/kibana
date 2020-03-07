@@ -7,14 +7,14 @@
 import React from 'react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
-import { CaseConfigureClosureType } from '../../../../containers/case/configure/types';
+import { ClosureType } from '../../../../containers/case/configure/types';
 import { ClosureOptionsRadio } from './closure_options_radio';
 import * as i18n from './translations';
 
 interface ClosureOptionsProps {
-  closureTypeSelected: CaseConfigureClosureType;
+  closureTypeSelected: ClosureType;
   disabled: boolean;
-  onChangeClosureType: (newClosureType: CaseConfigureClosureType) => void;
+  onChangeClosureType: (newClosureType: ClosureType) => void;
 }
 
 const ClosureOptionsComponent: React.FC<ClosureOptionsProps> = ({

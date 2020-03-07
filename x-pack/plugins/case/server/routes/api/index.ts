@@ -19,7 +19,7 @@ import { initPatchCommentApi } from './cases/comments/patch_comment';
 import { initPostCommentApi } from './cases/comments/post_comment';
 
 import { initCaseConfigurePutActionConnector } from './cases/configure/get_connectors';
-import { initCaseConfigurePatchActionConnector } from './cases/configure/put_connector';
+import { initCaseConfigurePatchActionConnector } from './cases/configure/patch_connector';
 import { initGetCaseConfigure } from './cases/configure/get_configure';
 import { initPatchCaseConfigure } from './cases/configure/patch_configure';
 import { initPostCaseConfigure } from './cases/configure/post_configure';

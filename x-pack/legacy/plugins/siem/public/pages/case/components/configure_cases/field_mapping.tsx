@@ -32,7 +32,7 @@ const supportedThirdPartyFields: Array<EuiSuperSelectOption<ThirdPartyField>> = 
     inputDisplay: <span>{'Short Description'}</span>,
   },
   {
-    value: 'comment',
+    value: 'comments',
     inputDisplay: <span>{'Comment'}</span>,
   },
   {
@@ -43,7 +43,7 @@ const supportedThirdPartyFields: Array<EuiSuperSelectOption<ThirdPartyField>> = 
 
 const defaultMappings: CasesConfigurationMapping[] = [
   {
-    source: 'name',
+    source: 'title',
     target: 'short_description',
     actionType: 'overwrite',
   },
@@ -53,8 +53,8 @@ const defaultMappings: CasesConfigurationMapping[] = [
     actionType: 'append',
   },
   {
-    source: 'comment',
-    target: 'comment',
+    source: 'comments',
+    target: 'comments',
     actionType: 'append',
   },
 ];

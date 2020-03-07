@@ -39,12 +39,6 @@ export function initCaseConfigurePatchActionConnector({ caseService, router }: R
 
         const action = await client.get<ActionResult>('action', connectorId);
 
-        if (query.version !== action.version) {
-          throw Boom.conflict(
-            'This connector has been updated. Please refresh before saving additional updates.'
-          );
-        }
-
         const { config } = action.attributes;
         const res = await client.update('action', connectorId, {
           config: { ...config, casesConfiguration },
@@ -55,7 +49,6 @@ export function initCaseConfigurePatchActionConnector({ caseService, router }: R
             cases_configuration:
               res.attributes.config?.casesConfiguration ??
               action.attributes.config.casesConfiguration,
-            version: res.version ?? action.version,
           }),
         });
       } catch (error) {

@@ -7,11 +7,11 @@
 import React, { ReactNode, useCallback } from 'react';
 import { EuiRadioGroup } from '@elastic/eui';
 
-import { CaseConfigureClosureType } from '../../../../containers/case/configure/types';
+import { ClosureType } from '../../../../containers/case/configure/types';
 import * as i18n from './translations';
 
 interface ClosureRadios {
-  id: CaseConfigureClosureType;
+  id: ClosureType;
   label: ReactNode;
 }
 
@@ -31,9 +31,9 @@ const radios: ClosureRadios[] = [
 ];
 
 interface ClosureOptionsRadioComponentProps {
-  closureTypeSelected: CaseConfigureClosureType;
+  closureTypeSelected: ClosureType;
   disabled: boolean;
-  onChangeClosureType: (newClosureType: CaseConfigureClosureType) => void;
+  onChangeClosureType: (newClosureType: ClosureType) => void;
 }
 
 const ClosureOptionsRadioComponent: React.FC<ClosureOptionsRadioComponentProps> = ({
@@ -43,7 +43,7 @@ const ClosureOptionsRadioComponent: React.FC<ClosureOptionsRadioComponentProps> 
 }) => {
   const onChangeLocal = useCallback(
     (id: string) => {
-      onChangeClosureType(id as CaseConfigureClosureType);
+      onChangeClosureType(id as ClosureType);
     },
     [onChangeClosureType]
   );

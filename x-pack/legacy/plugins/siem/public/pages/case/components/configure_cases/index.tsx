@@ -12,7 +12,7 @@ import { noop, isEmpty } from 'lodash/fp';
 import { useConnectors } from '../../../../containers/case/configure/use_connectors';
 import { useCaseConfigure } from '../../../../containers/case/configure/use_configure';
 import {
-  CaseConfigureClosureType,
+  ClosureType,
   CasesConfigurationMapping,
 } from '../../../../containers/case/configure/types';
 import { Connectors } from '../configure_cases/connectors';
@@ -52,7 +52,7 @@ const ConfigureCasesComponent: React.FC = () => {
     });
   }, []);
 
-  const setClosureType = useCallback((newClosureType: CaseConfigureClosureType) => {
+  const setClosureType = useCallback((newClosureType: ClosureType) => {
     dispatch({
       type: 'setClosureType',
       closureType: newClosureType,
@@ -70,11 +70,21 @@ const ConfigureCasesComponent: React.FC = () => {
     setConnectorId,
     setClosureType,
   });
-  const { loading: isLoadingConnectors, connectors, refetchConnectors } = useConnectors();
+  const {
+    loading: isLoadingConnectors,
+    connectors,
+    refetchConnectors,
+    updateConnector,
+  } = useConnectors();
 
   const handleSubmit = useCallback(
     // TO DO give a warning/error to user when field are not mapped so they have chance to do it
-    () => persistCaseConfigure({ connectorId, closureType, mappings: mappings ?? [] }),
+    async () =>
+      // eslint-disable-next-line no-return-await
+      await Promise.all([
+        persistCaseConfigure({ connectorId, closureType }),
+        updateConnector(connectorId, mappings ?? []),
+      ]),
     [connectorId, closureType, mappings]
   );
 

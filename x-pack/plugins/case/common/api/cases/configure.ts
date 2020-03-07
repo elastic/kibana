@@ -21,10 +21,23 @@ const ActionTypeRT = rt.union([
   rt.literal('overwrite'),
 ]);
 
+const CaseFieldRT = rt.union([
+  rt.literal('title'),
+  rt.literal('description'),
+  rt.literal('comments'),
+]);
+
+const ThirdPartyFieldRT = rt.union([
+  rt.literal('comments'),
+  rt.literal('description'),
+  rt.literal('not_mapped'),
+  rt.literal('short_description'),
+]);
+
 export const CasesConfigurationMapsRT = rt.type({
-  source: rt.string,
-  target: rt.string,
-  actionType: ActionTypeRT,
+  source: CaseFieldRT,
+  target: ThirdPartyFieldRT,
+  action_type: ActionTypeRT,
 });
 
 export const CasesConfigurationRT = rt.type({
@@ -33,8 +46,12 @@ export const CasesConfigurationRT = rt.type({
 
 export const CasesConnectorConfigurationRT = rt.type({
   cases_configuration: CasesConfigurationRT,
-  version: rt.string,
+  // version: rt.string,
 });
+
+export type ActionType = rt.TypeOf<typeof ActionTypeRT>;
+export type CaseField = rt.TypeOf<typeof CaseFieldRT>;
+export type ThirdPartyField = rt.TypeOf<typeof ThirdPartyFieldRT>;
 
 export type CasesConfigurationMaps = rt.TypeOf<typeof CasesConfigurationMapsRT>;
 export type CasesConfiguration = rt.TypeOf<typeof CasesConfigurationRT>;
@@ -51,13 +68,12 @@ export interface CasesConnectorsFindResult {
   data: Connector[];
 }
 
+// TO DO we will need to add this type rt.literal('close-by-thrid-party')
+const ClosureTypeRT = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);
+
 const CasesConfigureBasicRt = rt.type({
   connector_id: rt.string,
-  closure_type: rt.union([
-    rt.literal('close-by-user'),
-    rt.literal('close-by-pushing'),
-    // rt.literal('close-by-thrid-party'),
-  ]),
+  closure_type: ClosureTypeRT,
 });
 
 export const CasesConfigureRequestRt = CasesConfigureBasicRt;
@@ -82,6 +98,8 @@ export const CaseConfigureResponseRt = rt.intersection([
     version: rt.string,
   }),
 ]);
+
+export type ClosureType = rt.TypeOf<typeof ClosureTypeRT>;
 
 export type CasesConfigureRequest = rt.TypeOf<typeof CasesConfigureRequestRt>;
 export type CasesConfigurePatch = rt.TypeOf<typeof CasesConfigurePatchRt>;

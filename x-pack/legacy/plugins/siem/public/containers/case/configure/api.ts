@@ -17,7 +17,7 @@ import { throwIfNotOk } from '../../../hooks/api/api';
 import { CASES_CONFIGURE_URL } from '../constants';
 import { ApiProps } from '../types';
 import { convertToCamelCase, decodeCaseConfigureResponse } from '../utils';
-import { CaseConfigure } from './types';
+import { CaseConfigure, PatchConnectorProps } from './types';
 
 export const fetchConnectors = async ({ signal }: ApiProps): Promise<CasesConnectorsFindResult> => {
   const response = await KibanaServices.get().http.fetch(
@@ -87,4 +87,23 @@ export const patchCaseConfigure = async (
   return convertToCamelCase<CasesConfigureResponse, CaseConfigure>(
     decodeCaseConfigureResponse(response.body)
   );
+};
+
+export const patchConfigConnector = async ({
+  connectorId,
+  config,
+  signal,
+}: PatchConnectorProps): Promise<CasesConnectorsFindResult> => {
+  const response = await KibanaServices.get().http.fetch(
+    `${CASES_CONFIGURE_URL}/connectors/${connectorId}`,
+    {
+      method: 'PATCH',
+      asResponse: true,
+      body: JSON.stringify(config),
+      signal,
+    }
+  );
+
+  await throwIfNotOk(response.response);
+  return response.body!;
 };

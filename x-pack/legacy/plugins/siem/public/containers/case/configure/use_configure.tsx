@@ -10,24 +10,23 @@ import { getCaseConfigure, patchCaseConfigure, postCaseConfigure } from './api';
 import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
 import { useStateToaster } from '../../../components/toasters';
 import * as i18n from '../translations';
-import { CaseConfigureClosureType, CasesConfigurationMapping } from './types';
+import { ClosureType } from './types';
 
 interface PersistCaseConfigure {
   connectorId: string;
-  closureType: CaseConfigureClosureType;
-  mappings: CasesConfigurationMapping[];
+  closureType: ClosureType;
 }
 
 export interface ReturnUseCaseConfigure {
   loading: boolean;
   refetchCaseConfigure: () => void;
-  persistCaseConfigure: ({ connectorId, closureType, mappings }: PersistCaseConfigure) => void;
+  persistCaseConfigure: ({ connectorId, closureType }: PersistCaseConfigure) => Promise<unknown>;
   persistLoading: boolean;
 }
 
 interface UseCaseConfigure {
   setConnectorId: (newConnectorId: string) => void;
-  setClosureType: (newClosureType: CaseConfigureClosureType) => void;
+  setClosureType: (newClosureType: ClosureType) => void;
 }
 
 export const useCaseConfigure = ({
@@ -70,7 +69,7 @@ export const useCaseConfigure = ({
   }, []);
 
   const persistCaseConfigure = useCallback(
-    async ({ connectorId, closureType, mappings }: PersistCaseConfigure) => {
+    async ({ connectorId, closureType }: PersistCaseConfigure) => {
       let didCancel = false;
       const abortCtrl = new AbortController();
       try {
