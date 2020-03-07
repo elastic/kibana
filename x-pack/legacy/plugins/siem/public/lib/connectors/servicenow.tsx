@@ -94,12 +94,12 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
   const defaultMapping = [
     {
       source: 'title',
-      target: 'description',
+      target: 'short_description',
       actionType: 'overwrite',
     },
     {
       source: 'description',
-      target: 'short_description',
+      target: 'description',
       actionType: 'overwrite',
     },
     {
