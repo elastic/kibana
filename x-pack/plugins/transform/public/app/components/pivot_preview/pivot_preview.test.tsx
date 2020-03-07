@@ -20,7 +20,7 @@ import {
 import { PivotPreview } from './pivot_preview';
 
 jest.mock('ui/new_platform');
-jest.mock('../../../../../shared_imports');
+jest.mock('../../../shared_imports');
 
 describe('Transform: <PivotPreview />', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.
