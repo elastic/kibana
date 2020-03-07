@@ -69,21 +69,14 @@ export const UserActionMarkdown = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              isDisabled={content.length === 0}
-              color="secondary"
-              fill
-              iconType="save"
-              onClick={saveAction}
-              size="s"
-            >
+            <EuiButton color="secondary" fill iconType="save" onClick={saveAction} size="s">
               {i18n.SAVE}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
     },
-    [content, handleCancelAction, handleSaveAction]
+    [handleCancelAction, handleSaveAction]
   );
   return isEditable ? (
     <Form form={form}>
