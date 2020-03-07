@@ -84,14 +84,14 @@ export const useCaseConfigure = ({
                 { connector_id: connectorId, closure_type: closureType, version },
                 abortCtrl.signal
               );
-        if (didCancel) {
+        if (!didCancel) {
           setPersistLoading(false);
           setConnectorId(res.connectorId);
           setClosureType(res.closureType);
           setVersion(res.version);
         }
       } catch (error) {
-        if (didCancel) {
+        if (!didCancel) {
           setPersistLoading(false);
           errorToToaster({
             title: i18n.ERROR_TITLE,
