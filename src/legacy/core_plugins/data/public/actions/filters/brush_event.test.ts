@@ -21,9 +21,10 @@ import moment from 'moment';
 
 import { onBrushEvent, BrushEvent } from './brush_event';
 
-import { mockDataServices } from '../../search/aggs/test_helpers';
 import { IndexPatternsContract } from '../../../../../../plugins/data/public';
 import { dataPluginMock } from '../../../../../../plugins/data/public/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { mockDataServices } from '../../../../../../plugins/data/public/search/aggs/test_helpers';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setIndexPatterns } from '../../../../../../plugins/data/public/services';
 

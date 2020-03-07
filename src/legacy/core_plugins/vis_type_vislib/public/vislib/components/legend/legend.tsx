@@ -22,8 +22,8 @@ import { compact, uniq, map, every, isUndefined } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { EuiPopoverProps, EuiIcon, keyCodes, htmlIdGenerator } from '@elastic/eui';
-import { IAggConfig } from '../../../../../data/public';
 
+import { IAggConfig } from '../../../../../../../plugins/data/public';
 import { createFiltersFromEvent } from '../../../../../data/public/actions/filters/create_filters_from_event';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
 import { VisLegendItem } from './legend_item';

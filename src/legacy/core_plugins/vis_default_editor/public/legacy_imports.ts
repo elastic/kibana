@@ -19,24 +19,25 @@
 
 /* `ui/agg_types` dependencies */
 export {
-  AggType,
-  IAggType,
-  IAggConfig,
-  IAggConfigs,
-  AggParam,
   AggGroupNames,
   aggGroupNamesMap,
+  AggParam,
+  AggParamType,
+  AggType,
   aggTypes,
+  BUCKET_TYPES,
   createAggConfigs,
   FieldParamType,
+  IAggConfig,
+  IAggConfigs,
+  IAggGroupNames,
+  IAggType,
   IFieldParamType,
-  BUCKET_TYPES,
   METRIC_TYPES,
   termsAggFilter,
 } from 'ui/agg_types';
 export { aggTypeFilters, propFilter } from 'ui/agg_types';
 export { aggTypeFieldFilters } from 'ui/agg_types';
-export { AggParamType } from 'ui/agg_types';
 export { MetricAggType, IMetricAggType } from 'ui/agg_types';
 export { parentPipelineType } from 'ui/agg_types';
 export { siblingPipelineType } from 'ui/agg_types';
@@ -45,5 +46,3 @@ export { OptionedValueProp, OptionedParamEditorProps, OptionedParamType } from '
 export { isValidInterval } from 'ui/agg_types';
 export { AggParamOption } from 'ui/agg_types';
 export { CidrMask } from 'ui/agg_types';
-
-export * from 'ui/vis/lib';

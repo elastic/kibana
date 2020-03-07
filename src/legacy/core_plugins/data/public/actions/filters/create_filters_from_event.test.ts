@@ -27,7 +27,8 @@ import {
 import { setIndexPatterns } from '../../../../../../plugins/data/public/services';
 import { dataPluginMock } from '../../../../../../plugins/data/public/mocks';
 import { createFiltersFromEvent, EventData } from './create_filters_from_event';
-import { mockDataServices } from '../../search/aggs/test_helpers';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { mockDataServices } from '../../../../../../plugins/data/public/search/aggs/test_helpers';
 
 jest.mock('ui/new_platform');
 

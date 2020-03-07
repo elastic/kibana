@@ -44,13 +44,13 @@ export { IpRangeKey } from './buckets/ip_range';
 export { OptionedValueProp, OptionedParamEditorProps } from './param_types/optioned';
 
 /** @internal */
-export interface AggsSetup {
+export interface SearchAggsSetup {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
   types: AggTypesRegistrySetup;
 }
 
 /** @internal */
-export interface AggsStartLegacy {
+export interface SearchAggsStartLegacy {
   AggConfig: typeof AggConfig;
   AggType: typeof AggType;
   aggTypeFieldFilters: typeof aggTypeFieldFilters;
@@ -61,7 +61,7 @@ export interface AggsStartLegacy {
 }
 
 /** @internal */
-export interface AggsStart {
+export interface SearchAggsStart {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
   createAggConfigs: (
     indexPattern: IndexPattern,

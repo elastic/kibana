@@ -18,6 +18,7 @@
  */
 
 import { IUiSettingsClient } from '../../../../../core/public';
+import { searchAggsStartMock } from '../aggs/mocks';
 import { SearchStrategySearchParams } from './types';
 import { defaultSearchStrategy } from './default_search_strategy';
 
@@ -63,11 +64,16 @@ describe('defaultSearchStrategy', function() {
         ],
         esShardTimeout: 0,
         searchService: {
-          aggs: {
-            calculateAutoTimeExpression: jest.fn().mockReturnValue('1d'),
-          },
+          aggs: searchAggsStartMock(),
           search: newSearchMock,
           __LEGACY: {
+            AggConfig: jest.fn() as any,
+            AggType: jest.fn(),
+            aggTypeFieldFilters: jest.fn() as any,
+            FieldParamType: jest.fn(),
+            MetricAggType: jest.fn(),
+            parentPipelineAggHelper: jest.fn() as any,
+            siblingPipelineAggHelper: jest.fn() as any,
             esClient: {
               search: searchMock,
               msearch: msearchMock,

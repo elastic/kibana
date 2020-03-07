@@ -40,8 +40,7 @@ import {
 } from '../../../../../../plugins/data/public';
 
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
-import { calculateObjectHash } from '../../../../../../plugins/kibana_utils/common';
-import { tabifyAggResponse } from '../tabify';
+import { calculateObjectHash } from '../../../../../../plugins/kibana_utils/public';
 import { PersistedState } from '../../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../../plugins/inspector/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

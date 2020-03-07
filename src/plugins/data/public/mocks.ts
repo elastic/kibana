@@ -17,14 +17,11 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { coreMock } from '../../../../src/core/public/mocks';
 import { Plugin, DataPublicPluginSetup, DataPublicPluginStart, IndexPatternsContract } from '.';
 import { fieldFormatsMock } from '../common/field_formats/mocks';
 import { searchSetupMock } from './search/mocks';
+import { searchAggsStartMock } from './search/aggs/mocks';
 import { queryServiceMock } from './query/mocks';
-import { AggConfigs, getCalculateAutoTimeExpression } from './search/aggs';
-import { mockAggTypesRegistry } from './search/aggs/test_helpers';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
@@ -54,23 +51,12 @@ const createSetupContract = (): Setup => {
 };
 
 const createStartContract = (): Start => {
-  const coreStart = coreMock.createStart();
   const queryStartMock = queryServiceMock.createStartContract();
   const startContract = {
     autocomplete: autocompleteMock,
     getSuggestions: jest.fn(),
     search: {
-      aggs: {
-        calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreStart.uiSettings),
-        createAggConfigs: jest
-          .fn()
-          .mockImplementation((indexPattern, configStates = [], schemas) => {
-            return new AggConfigs(indexPattern, configStates, {
-              typesRegistry: mockAggTypesRegistry(),
-            });
-          }),
-        types: mockAggTypesRegistry(),
-      },
+      aggs: searchAggsStartMock(),
       search: jest.fn(),
       __LEGACY: {
         AggConfig: jest.fn() as any,

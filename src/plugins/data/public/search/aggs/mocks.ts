@@ -19,7 +19,14 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { coreMock } from 'src/core/public/mocks';
-import { AggTypesRegistrySetup, AggTypesRegistryStart, getCalculateAutoTimeExpression } from './';
+import {
+  AggConfigs,
+  AggTypesRegistrySetup,
+  AggTypesRegistryStart,
+  getCalculateAutoTimeExpression,
+} from './';
+import { SearchAggsSetup, SearchAggsStart } from './types';
+import { mockAggTypesRegistry } from './test_helpers';
 
 const aggTypeBaseParamMock = () => ({
   name: 'some_param',
@@ -55,7 +62,17 @@ export const aggTypesRegistryStartMock = (): AggTypesRegistryStart => ({
   })),
 });
 
-export const searchAggsSetupMock = () => ({
+export const searchAggsSetupMock = (): SearchAggsSetup => ({
   calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreMock.createSetup().uiSettings),
   types: aggTypesRegistrySetupMock(),
+});
+
+export const searchAggsStartMock = (): SearchAggsStart => ({
+  calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreMock.createStart().uiSettings),
+  createAggConfigs: jest.fn().mockImplementation((indexPattern, configStates = [], schemas) => {
+    return new AggConfigs(indexPattern, configStates, {
+      typesRegistry: mockAggTypesRegistry(),
+    });
+  }),
+  types: mockAggTypesRegistry(),
 });

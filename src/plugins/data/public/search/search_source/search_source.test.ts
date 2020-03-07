@@ -25,15 +25,21 @@ import {
   injectedMetadataServiceMock,
   uiSettingsServiceMock,
 } from '../../../../../core/public/mocks';
+import { searchAggsStartMock } from '../aggs/mocks';
 
 setUiSettings(uiSettingsServiceMock.createStartContract());
 setInjectedMetadata(injectedMetadataServiceMock.createSetupContract());
 setSearchService({
-  aggs: {
-    calculateAutoTimeExpression: jest.fn().mockReturnValue('1d'),
-  },
+  aggs: searchAggsStartMock(),
   search: jest.fn(),
   __LEGACY: {
+    AggConfig: jest.fn() as any,
+    AggType: jest.fn(),
+    aggTypeFieldFilters: jest.fn() as any,
+    FieldParamType: jest.fn(),
+    MetricAggType: jest.fn(),
+    parentPipelineAggHelper: jest.fn() as any,
+    siblingPipelineAggHelper: jest.fn() as any,
     esClient: {
       search: jest.fn(),
       msearch: jest.fn(),

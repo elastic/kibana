@@ -20,8 +20,6 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock } from '../../../../public/mocks';
-import { searchStartMock } from '../../mocks';
-import { setSearchServiceShim } from '../../../services';
 import {
   setFieldFormats,
   setIndexPatterns,
@@ -30,7 +28,6 @@ import {
   setQueryService,
   setSearchService,
   setUiSettings,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../public/services';
 
 /**
@@ -42,9 +39,7 @@ import {
 export function mockDataServices() {
   const core = coreMock.createStart();
   const data = dataPluginMock.createStartContract();
-  const searchShim = searchStartMock();
 
-  setSearchServiceShim(searchShim);
   setFieldFormats(data.fieldFormats);
   setIndexPatterns(data.indexPatterns);
   setNotifications(core.notifications);

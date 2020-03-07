@@ -17,21 +17,11 @@
  * under the License.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
 import { npSetup, npStart } from 'ui/new_platform';
-import { start as legacyDataStart } from '../../../../data/public/legacy';
-/* eslint-enable @kbn/eslint/no-restricted-paths */
-
 import { PluginInitializerContext } from '../../../../../../core/public';
-
 import { plugin } from '.';
 
 const pluginInstance = plugin({} as PluginInitializerContext);
 
 export const setup = pluginInstance.setup(npSetup.core, npSetup.plugins);
-export const start = pluginInstance.start(npStart.core, {
-  ...npStart.plugins,
-  __LEGACY: {
-    aggs: legacyDataStart.search.aggs,
-  },
-});
+export const start = pluginInstance.start(npStart.core, npStart.plugins);

@@ -18,7 +18,7 @@
  */
 
 import { CoreStart } from 'kibana/public';
-import { AggsSetup, AggsStart, AggsStartLegacy } from './aggs';
+import { SearchAggsSetup, SearchAggsStart, SearchAggsStartLegacy } from './aggs';
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
 import { LegacyApiCaller } from './es_client';
@@ -76,7 +76,7 @@ interface ISearchStartLegacy {
  * point.
  */
 export interface ISearchSetup {
-  aggs: AggsSetup;
+  aggs: SearchAggsSetup;
   /**
    * Extension point exposed for other plugins to register their own search
    * strategies.
@@ -85,7 +85,7 @@ export interface ISearchSetup {
 }
 
 export interface ISearchStart {
-  aggs: AggsStart;
+  aggs: SearchAggsStart;
   search: ISearchGeneric;
-  __LEGACY: ISearchStartLegacy & AggsStartLegacy;
+  __LEGACY: ISearchStartLegacy & SearchAggsStartLegacy;
 }

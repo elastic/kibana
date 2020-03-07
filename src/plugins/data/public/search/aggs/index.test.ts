@@ -17,10 +17,13 @@
  * under the License.
  */
 
-import { aggTypes } from './index';
+import { coreMock } from 'src/core/public/mocks';
+import { getAggTypes } from './index';
 
 import { isBucketAggType } from './buckets/_bucket_agg_type';
 import { isMetricAggType } from './metrics/metric_agg_type';
+
+const aggTypes = getAggTypes({ uiSettings: coreMock.createStart().uiSettings });
 
 const bucketAggs = aggTypes.buckets;
 const metricAggs = aggTypes.metrics;

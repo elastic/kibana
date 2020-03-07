@@ -46,6 +46,7 @@ import {
   isPhrasesFilter,
   isQueryStringFilter,
   isRangeFilter,
+  isValidEsInterval,
   isValidInterval,
   toAbsoluteDates,
   toggleFilterNegated,
@@ -287,11 +288,7 @@ export {
 
 import {
   AggConfigs,
-  AggParamType,
-  AggTypeFilters, // TODO convert to interface
   aggTypeFilters,
-  AggTypeFieldFilters, // TODO convert to interface
-  AggGroupNames,
   aggGroupNamesMap,
   BUCKET_TYPES,
   CidrMask,
@@ -302,7 +299,6 @@ import {
   isStringType,
   isType,
   METRIC_TYPES,
-  OptionedParamType,
   parentPipelineType,
   propFilter,
   siblingPipelineType,
@@ -311,18 +307,24 @@ import {
 import { tabifyAggResponse, tabifyGetColumns } from './search/tabify';
 
 export {
+  AggGroupNames,
   AggParam, // only the type is used externally, only in vis editor
   AggParamOption, // only the type is used externally
+  AggParamType,
+  AggTypeFieldFilters, // TODO convert to interface
+  AggTypeFilters, // TODO convert to interface
   DateRangeKey, // only used in field formatter deserialization, which will live in data
   IAggConfig,
   IAggConfigs,
+  IAggGroupNames,
   IAggType,
   IFieldParamType,
   IMetricAggType,
   IpRangeKey, // only used in field formatter deserialization, which will live in data
   OptionedParamEditorProps, // only type is used externally
+  OptionedParamType,
   OptionedValueProp, // only type is used externally
-} from './search/aggs/types';
+} from './search/aggs';
 export { TabbedTable, TabbedAggRow, TabbedAggColumn } from './search/tabify/types';
 
 export {
@@ -359,12 +361,8 @@ export {
 export const search = {
   aggs: {
     AggConfigs,
-    AggGroupNames,
     aggGroupNamesMap,
-    AggParamType,
-    AggTypeFieldFilters, // TODO convert to interface
     aggTypeFilters,
-    AggTypeFilters, // TODO convert to interface
     BUCKET_TYPES,
     CidrMask,
     convertDateRangeToString,
@@ -373,9 +371,9 @@ export const search = {
     isDateHistogramBucketAggConfig,
     isStringType,
     isType,
+    isValidEsInterval,
     isValidInterval,
     METRIC_TYPES,
-    OptionedParamType,
     parentPipelineType,
     propFilter,
     siblingPipelineType,
