@@ -19,6 +19,8 @@ import {
   EuiComboBoxOptionOption,
   EuiFormRow,
   EuiCallOut,
+  EuiEmptyPrompt,
+  EuiText,
 } from '@elastic/eui';
 import { COMPARATORS, builtInComparators } from '../../../../common/constants';
 import {
@@ -38,6 +40,7 @@ import {
 import { builtInAggregationTypes } from '../../../../common/constants';
 import { IndexThresholdAlertParams } from './types';
 import { AlertsContextValue } from '../../../context/alerts_context';
+import './expression.scss';
 
 const DEFAULT_VALUES = {
   AGGREGATION_TYPE: 'count',
@@ -430,6 +433,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
             thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
             threshold={threshold}
             errors={errors}
+            popupPosition={'upLeft'}
             onChangeSelectedThreshold={selectedThresholds =>
               setAlertParams('threshold', selectedThresholds)
             }
@@ -440,6 +444,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ForLastExpression
+            popupPosition={'upLeft'}
             timeWindowSize={timeWindowSize || 1}
             timeWindowUnit={timeWindowUnit || ''}
             errors={errors}
@@ -452,17 +457,35 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {canShowVizualization ? null : (
-        <Fragment>
-          <ThresholdVisualization
-            alertParams={alertParams}
-            alertInterval={alertInterval}
-            aggregationTypes={builtInAggregationTypes}
-            comparators={builtInComparators}
-            alertsContext={alertsContext}
-          />
-        </Fragment>
-      )}
+      <EuiSpacer size="l" />
+      <div className="actAlertVisualization__chart">
+        {canShowVizualization ? (
+          <Fragment>
+            <EuiSpacer size="xl" />
+            <EuiEmptyPrompt
+              iconType="visBarVertical"
+              body={
+                <EuiText color="subdued">
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.alertAdd.previewAlertVisualizationDescription"
+                    defaultMessage="Complete the expression above to generate a preview"
+                  />
+                </EuiText>
+              }
+            />
+          </Fragment>
+        ) : (
+          <Fragment>
+            <ThresholdVisualization
+              alertParams={alertParams}
+              alertInterval={alertInterval}
+              aggregationTypes={builtInAggregationTypes}
+              comparators={builtInComparators}
+              alertsContext={alertsContext}
+            />
+          </Fragment>
+        )}
+      </div>
     </Fragment>
   );
 };

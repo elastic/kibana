@@ -226,7 +226,6 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
     const aggLabel = aggregationTypes[aggType].text;
     return (
       <div data-test-subj="alertVisualizationChart">
-        <EuiSpacer size="l" />
         {alertVisualizationDataKeys.length ? (
           <Chart size={['100%', 300]} renderer="canvas">
             <Settings
@@ -290,7 +289,6 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
             />
           </EuiCallOut>
         )}
-        <EuiSpacer size="l" />
       </div>
     );
   }
