@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionResult } from '../../../../../../plugins/actions/common';
-
 export interface Comment {
   id: string;
   createdAt: string;
   createdBy: ElasticUser;
   comment: string;
-  updatedAt: string;
+  updatedAt: string | null;
+  updatedBy: ElasticUser | null;
   version: string;
 }
 
@@ -25,7 +24,8 @@ export interface Case {
   state: string;
   tags: string[];
   title: string;
-  updatedAt: string;
+  updatedAt: string | null;
+  updatedBy: ElasticUser | null;
   version: string;
 }
 
@@ -67,5 +67,3 @@ export interface FetchCasesProps {
 export interface ApiProps {
   signal: AbortSignal;
 }
-
-export type Connector = ActionResult;

@@ -8,14 +8,15 @@ import React, { useMemo } from 'react';
 import { EuiIcon, EuiSuperSelect } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { Connector } from '../../../../containers/case/types';
+import { Connector } from '../../../../containers/case/configure/types';
 import * as i18n from './translations';
 
 interface Props {
   connectors: Connector[];
-  connectorSelectedId: string;
+  disabled: boolean;
   isLoading: boolean;
   onChange: (id: string) => void;
+  selectedConnector: string;
 }
 
 const ICON_SIZE = 'm';
@@ -37,9 +38,10 @@ const noConnectorOption = {
 
 const ConnectorsDropdownComponent: React.FC<Props> = ({
   connectors,
-  connectorSelectedId,
+  disabled,
   isLoading,
   onChange,
+  selectedConnector,
 }) => {
   const connectorsAsOptions = useMemo(
     () =>
@@ -64,9 +66,10 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
 
   return (
     <EuiSuperSelect
+      disabled={disabled}
       isLoading={isLoading}
       options={connectorsAsOptions}
-      valueOfSelected={connectorSelectedId}
+      valueOfSelected={selectedConnector}
       fullWidth
       onChange={onChange}
     />

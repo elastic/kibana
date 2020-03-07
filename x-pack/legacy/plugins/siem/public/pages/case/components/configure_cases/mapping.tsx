@@ -10,14 +10,21 @@ import { EuiDescribedFormGroup } from '@elastic/eui';
 import * as i18n from './translations';
 
 import { FieldMapping } from './field_mapping';
+import { CasesConfigurationMapping } from '../../../../containers/case/configure/types';
 
-const MappingComponent: React.FC = () => (
+interface MappingProps {
+  disabled: boolean;
+  mappings: CasesConfigurationMapping[] | null;
+  onChangeMappings: (newMappings: CasesConfigurationMapping[]) => void;
+}
+
+const MappingComponent: React.FC<MappingProps> = ({ disabled, mappings, onChangeMappings }) => (
   <EuiDescribedFormGroup
     fullWidth
     title={<h3>{i18n.FIELD_MAPPING_TITLE}</h3>}
     description={i18n.FIELD_MAPPING_DESC}
   >
-    <FieldMapping />
+    <FieldMapping disabled={disabled} mappings={mappings} onChangeMappings={onChangeMappings} />
   </EuiDescribedFormGroup>
 );
 

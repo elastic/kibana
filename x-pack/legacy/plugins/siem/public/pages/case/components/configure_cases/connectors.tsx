@@ -29,6 +29,7 @@ import {
   ActionsConnectorsContextProvider,
   ConnectorAddFlyout,
 } from '../../../../../../../../plugins/triggers_actions_ui/public';
+import { Connector } from '../../../../containers/case/configure/types';
 import { useKibana } from '../../../../lib/kibana';
 
 const EuiFormRowExtended = styled(EuiFormRow)`
@@ -41,8 +42,11 @@ const EuiFormRowExtended = styled(EuiFormRow)`
 
 interface Props {
   connectors: Connector[];
+  disabled: boolean;
   isLoading: boolean;
+  onChangeConnector: (id: string) => void;
   refetchConnectors: () => void;
+  selectedConnector: string;
 }
 const actionTypes = [
   {
@@ -52,7 +56,14 @@ const actionTypes = [
   },
 ];
 
-const ConnectorsComponent: React.FC<Props> = ({ connectors, isLoading, refetchConnectors }) => {
+const ConnectorsComponent: React.FC<Props> = ({
+  connectors,
+  disabled,
+  isLoading,
+  onChangeConnector,
+  refetchConnectors,
+  selectedConnector,
+}) => {
   const { http, triggers_actions_ui, notifications, application } = useKibana().services;
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
 
@@ -77,11 +88,10 @@ const ConnectorsComponent: React.FC<Props> = ({ connectors, isLoading, refetchCo
         <EuiFormRowExtended fullWidth label={dropDownLabel}>
           <ConnectorsDropdown
             connectors={connectors}
-            connectorSelectedId={'none'}
+            disabled={disabled}
+            selectedConnector={selectedConnector}
             isLoading={isLoading}
-            onChange={(id: string) => {
-              console.log(id);
-            }}
+            onChange={onChangeConnector}
           />
         </EuiFormRowExtended>
       </EuiDescribedFormGroup>

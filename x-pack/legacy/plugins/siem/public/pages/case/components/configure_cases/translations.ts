@@ -135,3 +135,11 @@ export const FIELD_MAPPING_EDIT_APPEND = i18n.translate(
     defaultMessage: 'Append',
   }
 );
+
+export const CANCEL = i18n.translate('xpack.siem.case.configureCases.cancelButton', {
+  defaultMessage: 'Cancel',
+});
+
+export const SAVE_CHANGES = i18n.translate('xpack.siem.case.configureCases.saveChangesButton', {
+  defaultMessage: 'Save Changes',
+});

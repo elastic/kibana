@@ -10,13 +10,12 @@ import {
   CaseRequest,
   CommentRequest,
   CommentResponse,
-  CasesConnectorsFindResult,
 } from '../../../../../../plugins/case/common/api';
 import { KibanaServices } from '../../lib/kibana';
 import { throwIfNotOk } from '../../hooks/api/api';
 
-import { CASES_CONFIGURE_URL, CASES_URL } from './constants';
-import { AllCases, Case, Comment, FetchCasesProps, SortFieldCase, ApiProps } from './types';
+import { CASES_URL } from './constants';
+import { AllCases, Case, Comment, FetchCasesProps, SortFieldCase } from './types';
 import {
   convertToCamelCase,
   convertAllCasesToCamel,

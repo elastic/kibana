@@ -4,37 +4,56 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { ReactNode, useCallback } from 'react';
 import { EuiRadioGroup } from '@elastic/eui';
 
+import { CaseConfigureClosureType } from '../../../../containers/case/configure/types';
 import * as i18n from './translations';
 
-const ID_PREFIX = 'closure_options';
-const DEFAULT_RADIO = `${ID_PREFIX}_manual`;
+interface ClosureRadios {
+  id: CaseConfigureClosureType;
+  label: ReactNode;
+}
 
-const radios = [
+const radios: ClosureRadios[] = [
   {
-    id: DEFAULT_RADIO,
+    id: 'close-by-user',
     label: i18n.CASE_CLOSURE_OPTIONS_MANUAL,
   },
   {
-    id: `${ID_PREFIX}_new_incident`,
+    id: 'close-by-pushing',
     label: i18n.CASE_CLOSURE_OPTIONS_NEW_INCIDENT,
   },
-  {
-    id: `${ID_PREFIX}_closed_incident`,
-    label: i18n.CASE_CLOSURE_OPTIONS_CLOSED_INCIDENT,
-  },
+  // {
+  //   id: `${ID_PREFIX}_closed_incident`,
+  //   label: i18n.CASE_CLOSURE_OPTIONS_CLOSED_INCIDENT,
+  // },
 ];
 
-const ClosureOptionsRadioComponent: React.FC = () => {
-  const [selectedClosure, setSelectedClosure] = useState(DEFAULT_RADIO);
+interface ClosureOptionsRadioComponentProps {
+  closureTypeSelected: CaseConfigureClosureType;
+  disabled: boolean;
+  onChangeClosureType: (newClosureType: CaseConfigureClosureType) => void;
+}
+
+const ClosureOptionsRadioComponent: React.FC<ClosureOptionsRadioComponentProps> = ({
+  closureTypeSelected,
+  disabled,
+  onChangeClosureType,
+}) => {
+  const onChangeLocal = useCallback(
+    (id: string) => {
+      onChangeClosureType(id as CaseConfigureClosureType);
+    },
+    [onChangeClosureType]
+  );
 
   return (
     <EuiRadioGroup
+      disabled={disabled}
       options={radios}
-      idSelected={selectedClosure}
-      onChange={setSelectedClosure}
+      idSelected={closureTypeSelected}
+      onChange={onChangeLocal}
       name="closure_options"
     />
   );

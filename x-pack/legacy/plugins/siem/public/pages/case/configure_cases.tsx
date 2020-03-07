@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import styled, { css } from 'styled-components';
 
 import { WrapperPage } from '../../components/wrapper_page';
 import { CaseHeaderPage } from './components/case_header_page';
@@ -25,17 +24,6 @@ const wrapperPageStyle: Record<string, string> = {
   paddingRight: '0',
   paddingBottom: '0',
 };
-
-const FormWrapper = styled.div`
-  ${({ theme }) => css`
-    & > * {
-      margin-top 40px;
-    }
-
-    padding-top: ${theme.eui.paddingSizes.l};
-    padding-bottom: ${theme.eui.paddingSizes.l};
-  `}
-`;
 
 const ConfigureCasesPageComponent: React.FC = () => (
   <>
