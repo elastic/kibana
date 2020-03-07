@@ -57,7 +57,7 @@ export const useConnectors = (): ReturnConnectors => {
       const abortCtrl = new AbortController();
       try {
         setLoading(true);
-        const res = await patchConfigConnector({
+        await patchConfigConnector({
           connectorId,
           config: {
             cases_configuration: {
@@ -72,12 +72,12 @@ export const useConnectors = (): ReturnConnectors => {
         });
         if (!didCancel) {
           setLoading(false);
-          setConnectors(res.data);
+          refetchConnectors();
         }
       } catch (error) {
         if (!didCancel) {
           setLoading(false);
-          setConnectors([]);
+          refetchConnectors();
           errorToToaster({
             title: i18n.ERROR_TITLE,
             error: error.body && error.body.message ? new Error(error.body.message) : error,

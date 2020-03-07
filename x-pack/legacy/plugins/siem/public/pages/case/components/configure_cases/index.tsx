@@ -95,7 +95,14 @@ const ConfigureCasesComponent: React.FC = () => {
       connectors.some(c => c.id === connectorId)
     ) {
       const myConnector = connectors.find(c => c.id === connectorId);
-      setMappings(myConnector?.config?.casesConfiguration?.mapping ?? []);
+      const myMappings = myConnector?.config?.casesConfiguration?.mapping ?? [];
+      setMappings(
+        myMappings.map(m => ({
+          source: m.source,
+          target: m.target,
+          actionType: m.action_type,
+        }))
+      );
     }
   }, [connectors, connectorId]);
 
@@ -121,7 +128,7 @@ const ConfigureCasesComponent: React.FC = () => {
       <SectionWrapper>
         <Mapping
           disabled={
-            connectors.length === 0 ||
+            isEmpty(connectors) ||
             connectorId === 'none' ||
             loadingCaseConfigure ||
             persistLoading ||

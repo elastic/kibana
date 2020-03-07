@@ -8,18 +8,14 @@ import { ElasticUser, ApiProps } from '../types';
 import {
   ActionType,
   CasesConnectorConfiguration,
+  CasesConfigurationMaps,
   CaseField,
   ClosureType,
   Connector,
   ThirdPartyField,
 } from '../../../../../../../plugins/case/common/api';
 
-export { Connector } from '../../../../../../../plugins/case/common/api';
-
-export type CaseConfigureClosureType = 'close-by-user' | 'close-by-pushing';
-export type ActionType = 'nothing' | 'overwrite' | 'append';
-export type ThirdPartyField = 'comments' | 'description' | 'short_description' | 'not_mapped';
-export type CaseField = 'name' | 'description' | 'comments';
+export { ActionType, CasesConfigurationMaps, CaseField, ClosureType, Connector, ThirdPartyField };
 
 export interface CasesConfigurationMapping {
   source: CaseField;
