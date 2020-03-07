@@ -11,14 +11,14 @@ import { FieldHook, getFieldValidityAndErrorMessage } from '../../shared_imports
 import { CursorPosition, MarkdownEditor } from '.';
 
 interface IMarkdownEditorForm {
+  bottomRightContent?: React.ReactNode;
   dataTestSubj: string;
   field: FieldHook;
-  bottomRightContent?: React.ReactNode;
-  topRightContent?: React.ReactNode;
   idAria: string;
   isDisabled: boolean;
-  placeholder?: string;
   onCursorPositionUpdate?: (cursorPosition: CursorPosition) => void;
+  placeholder?: string;
+  topRightContent?: React.ReactNode;
 }
 export const MarkdownEditorForm = ({
   bottomRightContent,
@@ -51,13 +51,13 @@ export const MarkdownEditorForm = ({
       labelAppend={field.labelAppend}
     >
       <MarkdownEditor
-        onCursorPositionUpdate={onCursorPositionUpdate}
         bottomRightContent={bottomRightContent}
-        topRightContent={topRightContent}
         initialContent={field.value as string}
         isDisabled={isDisabled}
         onChange={handleContentChange}
+        onCursorPositionUpdate={onCursorPositionUpdate}
         placeholder={placeholder}
+        topRightContent={topRightContent}
       />
     </EuiFormRow>
   );

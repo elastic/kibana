@@ -8,15 +8,15 @@ import { FIELD_TYPES, fieldValidators, FormSchema } from '../../../../shared_imp
 import * as i18n from '../../translations';
 
 const { emptyField } = fieldValidators;
-export interface Generic {
-  generic: string;
+export interface Content {
+  content: string;
 }
-export const schema: FormSchema<Generic> = {
-  generic: {
+export const schema: FormSchema<Content> = {
+  content: {
     type: FIELD_TYPES.TEXTAREA,
     validations: [
       {
-        validator: emptyField(i18n.COMMENT_REQUIRED),
+        validator: emptyField(i18n.REQUIRED_FIELD),
       },
     ],
   },

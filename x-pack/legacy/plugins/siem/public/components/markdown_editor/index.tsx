@@ -116,7 +116,6 @@ export const MarkdownEditor = React.memo<{
               }}
               inputRef={x => {
                 if (x != null) {
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   x.addEventListener('blur', setCursorPosition);
                 }
               }}

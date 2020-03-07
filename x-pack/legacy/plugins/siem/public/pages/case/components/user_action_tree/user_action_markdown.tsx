@@ -5,14 +5,13 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 
-import { MarkdownEditor } from '../../../../components/markdown_editor';
 import * as i18n from '../case_view/translations';
 import { Markdown } from '../../../../components/markdown';
 import { Form, useForm, UseField } from '../../../../shared_imports';
-import { schema, Generic } from './schema';
+import { schema, Content } from './schema';
 import {
   InsertTimelinePopover,
   useInsertTimeline,
@@ -39,14 +38,14 @@ export const UserActionMarkdown = ({
   onChangeEditable,
   onSaveContent,
 }: UserActionMarkdownProps) => {
-  const { form } = useForm<Generic>({
-    defaultValue: { generic: content },
+  const { form } = useForm<Content>({
+    defaultValue: { content },
     options: { stripEmptyFields: false },
     schema,
   });
-  const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<Generic>(
+  const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<Content>(
     form,
-    'generic'
+    'content'
   );
   const handleCancelAction = useCallback(() => {
     onChangeEditable(id);
@@ -55,7 +54,7 @@ export const UserActionMarkdown = ({
   const handleSaveAction = useCallback(async () => {
     const { isValid, data } = await form.submit();
     if (isValid) {
-      onSaveContent(data.generic);
+      onSaveContent(data.content);
     }
     onChangeEditable(id);
   }, [form, id, onChangeEditable, onSaveContent]);
@@ -70,19 +69,26 @@ export const UserActionMarkdown = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton color="secondary" fill iconType="save" onClick={saveAction} size="s">
+            <EuiButton
+              isDisabled={content.length === 0}
+              color="secondary"
+              fill
+              iconType="save"
+              onClick={saveAction}
+              size="s"
+            >
               {i18n.SAVE}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
     },
-    [handleCancelAction, handleSaveAction]
+    [content, handleCancelAction, handleSaveAction]
   );
   return isEditable ? (
     <Form form={form}>
       <UseField
-        path="generic"
+        path="content"
         component={MarkdownEditorForm}
         componentProps={{
           bottomRightContent: renderButtons({
