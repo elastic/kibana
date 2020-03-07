@@ -5,7 +5,7 @@
  */
 
 import { EuiFormRow } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../shared_imports';
 import { MarkdownEditor } from '.';
@@ -34,7 +34,6 @@ export const MarkdownEditorForm = ({
     },
     [field]
   );
-
   return (
     <EuiFormRow
       label={field.label}

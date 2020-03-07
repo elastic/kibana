@@ -11,7 +11,6 @@ import { useStateToaster } from '../../components/toasters';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 
 import { postComment } from './api';
-import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
 import * as i18n from './translations';
 import { Comment } from './types';
 
@@ -21,27 +20,33 @@ interface NewCommentState {
   isError: boolean;
   caseId: string;
 }
-interface Action {
-  type: string;
-  payload?: Comment;
-}
+type Action =
+  | { type: 'RESET_COMMENT_DATA' }
+  | { type: 'FETCH_INIT' }
+  | { type: 'FETCH_SUCCESS'; payload: Comment }
+  | { type: 'FETCH_FAILURE' };
 
 const dataFetchReducer = (state: NewCommentState, action: Action): NewCommentState => {
   switch (action.type) {
-    case FETCH_INIT:
+    case 'RESET_COMMENT_DATA':
+      return {
+        ...state,
+        commentData: null,
+      };
+    case 'FETCH_INIT':
       return {
         ...state,
         isLoading: true,
         isError: false,
       };
-    case FETCH_SUCCESS:
+    case 'FETCH_SUCCESS':
       return {
         ...state,
         isLoading: false,
         isError: false,
         commentData: action.payload ?? null,
       };
-    case FETCH_FAILURE:
+    case 'FETCH_FAILURE':
       return {
         ...state,
         isLoading: false,
@@ -54,6 +59,7 @@ const dataFetchReducer = (state: NewCommentState, action: Action): NewCommentSta
 
 interface UsePostComment extends NewCommentState {
   postComment: (data: CommentRequest) => void;
+  resetCommentData: () => void;
 }
 
 export const usePostComment = (caseId: string): UsePostComment => {
@@ -68,10 +74,10 @@ export const usePostComment = (caseId: string): UsePostComment => {
   const postMyComment = useCallback(async (data: CommentRequest) => {
     let cancel = false;
     try {
-      dispatch({ type: FETCH_INIT });
+      dispatch({ type: 'FETCH_INIT' });
       const response = await postComment(data, state.caseId);
       if (!cancel) {
-        dispatch({ type: FETCH_SUCCESS, payload: response });
+        dispatch({ type: 'FETCH_SUCCESS', payload: response });
       }
     } catch (error) {
       if (!cancel) {
@@ -80,7 +86,7 @@ export const usePostComment = (caseId: string): UsePostComment => {
           error: error.body && error.body.message ? new Error(error.body.message) : error,
           dispatchToaster,
         });
-        dispatch({ type: FETCH_FAILURE });
+        dispatch({ type: 'FETCH_FAILURE' });
       }
     }
     return () => {
@@ -88,5 +94,7 @@ export const usePostComment = (caseId: string): UsePostComment => {
     };
   }, []);
 
-  return { ...state, postComment: postMyComment };
+  const resetCommentData = useCallback(() => dispatch({ type: 'RESET_COMMENT_DATA' }), []);
+
+  return { ...state, postComment: postMyComment, resetCommentData };
 };

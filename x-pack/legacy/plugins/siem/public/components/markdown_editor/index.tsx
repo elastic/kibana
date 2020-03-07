@@ -72,6 +72,9 @@ export const MarkdownEditor = React.memo<{
   useEffect(() => {
     onChange(content);
   }, [content]);
+  useEffect(() => {
+    setContent(initialContent);
+  }, [initialContent]);
   const tabs = useMemo(
     () => [
       {

@@ -5,7 +5,7 @@
  */
 
 import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { CommentRequest } from '../../../../../../../../plugins/case/common/api';
@@ -14,6 +14,7 @@ import { MarkdownEditorForm } from '../../../../components/markdown_editor/form'
 import { Form, useForm, UseField } from '../../../../shared_imports';
 import * as i18n from '../../translations';
 import { schema } from './schema';
+import { Comment } from '../../../../containers/case/types';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
@@ -25,15 +26,26 @@ const initialCommentValue: CommentRequest = {
   comment: '',
 };
 
-export const AddComment = React.memo<{
+interface AddCommentProps {
   caseId: string;
-}>(({ caseId }) => {
-  const { commentData, isLoading, postComment } = usePostComment(caseId);
+  onCommentPosted: (commentResponse: Comment) => void;
+}
+
+export const AddComment = React.memo<AddCommentProps>(({ caseId, onCommentPosted }) => {
+  const { commentData, isLoading, postComment, resetCommentData } = usePostComment(caseId);
   const { form } = useForm<CommentRequest>({
     defaultValue: initialCommentValue,
     options: { stripEmptyFields: false },
     schema,
   });
+
+  useEffect(() => {
+    if (commentData !== null) {
+      onCommentPosted(commentData);
+      form.reset();
+      resetCommentData();
+    }
+  }, [commentData]);
 
   const onSubmit = useCallback(async () => {
     const { isValid, data } = await form.submit();
