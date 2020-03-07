@@ -145,14 +145,15 @@ export const ArgTypesStrings = {
 };
 
 export const ExpressionDataSourceStrings = {
+  // Elasticsearch documents
   ESDocs: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocsTitle', {
-        defaultMessage: 'Elasticsearch raw documents',
+        defaultMessage: 'Elasticsearch documents',
       }),
     getHelp: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocsLabel', {
-        defaultMessage: 'Pull back raw documents from elasticsearch',
+        defaultMessage: 'Query documents from elasticsearch',
       }),
     getWarningTitle: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.warningTitle', {
@@ -161,7 +162,7 @@ export const ExpressionDataSourceStrings = {
     getWarning: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.warningDescription', {
         defaultMessage: `
-          This datasource does not use aggregations, and is best used with low volume datasets.`,
+        The Elasticsearch basic data source only retrieves non-aggregated data. Use with low volume data sets`,
       }),
     getIndexTitle: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.indexTitle', {
@@ -177,7 +178,7 @@ export const ExpressionDataSourceStrings = {
       }),
     getQueryLabel: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.queryLabel', {
-        defaultMessage: '{lucene} query string syntax',
+        defaultMessage: 'Lucene query string syntax',
         values: {
           lucene: LUCENE,
         },
@@ -204,7 +205,7 @@ export const ExpressionDataSourceStrings = {
       }),
     getFieldsLabel: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.fieldsLabel', {
-        defaultMessage: 'The fields to extract. Kibana scripted fields are not currently available',
+        defaultMessage: 'Scripted fields are unavailable',
       }),
     getFieldsWarningLabel: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.fieldsWarningLabel', {

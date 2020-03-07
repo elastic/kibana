@@ -308,6 +308,7 @@ export const ArgumentStrings = {
 };
 
 export const DataSourceStrings = {
+  // Demo data source
   DemoData: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.dataSources.demoDataTitle', {
@@ -330,6 +331,7 @@ export const DataSourceStrings = {
         },
       }),
   },
+  // Elasticsearch SQL data source
   Essql: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.dataSources.essqlTitle', {
@@ -360,6 +362,7 @@ export const DataSourceStrings = {
         },
       }),
   },
+  // Timelion datasource
   Timelion: {
     getAbout: () =>
       i18n.translate('xpack.canvas.uis.dataSources.timelion.aboutDetail', {
