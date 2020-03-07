@@ -48,6 +48,22 @@ describe('filter manager utilities', () => {
       expect(compareFilters(f1, f2)).toBeTruthy();
     });
 
+    test('should compare filters, where one filter is null', () => {
+      const f1 = buildQueryFilter(
+        { _type: { match: { query: 'apache', type: 'phrase' } } },
+        'index',
+        ''
+      );
+      const f2 = null;
+      expect(compareFilters(f1, f2)).toBeFalsy();
+    });
+
+    test('should compare different types of empty filters', () => {
+      const f1 = null;
+      const f2 = buildEmptyFilter(true);
+      expect(compareFilters(f1, f2)).toBeTruthy();
+    });
+
     test('should compare duplicates, ignoring meta attributes', () => {
       const f1 = buildQueryFilter(
         { _type: { match: { query: 'apache', type: 'phrase' } } },
