@@ -12737,7 +12737,6 @@
     "xpack.uptime.snapshot.noDataTitle": "ヒストグラムデータがありません",
     "xpack.uptime.snapshot.pingsOverTimeTitle": "一定時間のピング",
     "xpack.uptime.snapshotHistogram.description": "{startTime} から {endTime} までの期間のアップタイムステータスを表示する棒グラフです。",
-    "xpack.uptime.snapshotHistogram.downMonitorsId": "ダウンモニター",
     "xpack.uptime.snapshotHistogram.series.downLabel": "ダウン",
     "xpack.uptime.snapshotHistogram.series.upLabel": "アップ",
     "xpack.uptime.snapshotHistogram.xAxisId": "スナップショットX軸",

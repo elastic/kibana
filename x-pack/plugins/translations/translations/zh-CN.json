@@ -12737,7 +12737,6 @@
     "xpack.uptime.snapshot.noDataTitle": "没有可用的直方图数据",
     "xpack.uptime.snapshot.pingsOverTimeTitle": "时移 Ping 数",
     "xpack.uptime.snapshotHistogram.description": "显示从 {startTime} 到 {endTime} 的运行时间时移状态的条形图。",
-    "xpack.uptime.snapshotHistogram.downMonitorsId": "已关闭监测",
     "xpack.uptime.snapshotHistogram.series.downLabel": "关闭",
     "xpack.uptime.snapshotHistogram.series.upLabel": "运行",
     "xpack.uptime.snapshotHistogram.xAxisId": "快照 X 轴",
