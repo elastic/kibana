@@ -57,7 +57,7 @@ const params: ParamsType = {
 };
 
 const incidentResponse = {
-  id: 'c816f79cc0a8016401c5a33be04be441',
+  incidentId: 'c816f79cc0a8016401c5a33be04be441',
   number: 'INC0010001',
 };
 
@@ -74,7 +74,7 @@ const userIdResponse = {
 };
 
 const incidentAxiosResponse = {
-  result: { sys_id: incidentResponse.id, number: incidentResponse.number },
+  result: { sys_id: incidentResponse.incidentId, number: incidentResponse.number },
 };
 
 const instance = {

@@ -6,16 +6,7 @@
 
 import axios from 'axios';
 import { ServiceNow } from '.';
-import {
-  instance,
-  incident,
-  axiosResponse,
-  userIdResponse,
-  incidentAxiosResponse,
-  incidentResponse,
-  params,
-} from '../../servicenow/mock';
-import { USER_URL, INCIDENT_URL } from './constants';
+import { instance, params } from '../../servicenow/mock';
 
 jest.mock('axios');
 
@@ -57,78 +48,224 @@ describe('ServiceNow lib', () => {
   });
 
   test('get user id', async () => {
-    axiosMock.mockResolvedValue({ ...axiosResponse, data: userIdResponse });
+    axiosMock.mockResolvedValue({
+      status: 200,
+      headers: {
+        'content-type': 'application/json',
+      },
+      data: { result: [{ sys_id: '123' }] },
+    });
+
     const res = await serviceNow.getUserID();
     const [url, { method }] = axiosMock.mock.calls[0];
 
-    expect(url).toEqual(prependInstanceUrl(`${USER_URL}${instance.username}`));
+    expect(url).toEqual(prependInstanceUrl('api/now/v1/table/sys_user?user_name=username'));
     expect(method).toEqual('get');
-    expect(res).toEqual(userIdResponse.result[0].sys_id);
+    expect(res).toEqual('123');
   });
 
   test('create incident', async () => {
-    axiosMock.mockResolvedValue({ ...axiosResponse, data: incidentAxiosResponse });
-    const res = await serviceNow.createIncident(incident);
-    const [url, { method }] = axiosMock.mock.calls[0];
+    axiosMock.mockResolvedValue({
+      status: 200,
+      headers: {
+        'content-type': 'application/json',
+      },
+      data: { result: { sys_id: '123', number: 'INC01' } },
+    });
 
-    expect(url).toEqual(prependInstanceUrl(`${INCIDENT_URL}`));
+    const res = await serviceNow.createIncident({
+      short_description: 'A title',
+      description: 'A description',
+      caller_id: '123',
+    });
+    const [url, { method, data }] = axiosMock.mock.calls[0];
+
+    expect(url).toEqual(prependInstanceUrl('api/now/v1/table/incident'));
     expect(method).toEqual('post');
-    expect(res).toEqual(incidentResponse);
+    expect(data).toEqual({
+      short_description: 'A title',
+      description: 'A description',
+      caller_id: '123',
+    });
+
+    expect(res).toEqual({
+      incidentId: '123',
+      number: 'INC01',
+    });
   });
 
   test('update incident', async () => {
-    axiosMock.mockResolvedValue({ ...axiosResponse, data: {} });
-    const res = await serviceNow.updateIncident(params.incidentId!, {
+    axiosMock.mockResolvedValue({
+      status: 200,
+      headers: {
+        'content-type': 'application/json',
+      },
+      data: { result: { sys_id: '123', number: 'INC01' } },
+    });
+
+    const res = await serviceNow.updateIncident('123', {
       short_description: params.title,
     });
-    const [url, { method }] = axiosMock.mock.calls[0];
+    const [url, { method, data }] = axiosMock.mock.calls[0];
 
-    expect(url).toEqual(prependInstanceUrl(`${INCIDENT_URL}/${params.incidentId}`));
+    expect(url).toEqual(prependInstanceUrl(`api/now/v1/table/incident/123`));
     expect(method).toEqual('patch');
-    expect(res).not.toBeDefined();
+    expect(data).toEqual({ short_description: params.title });
+    expect(res).toEqual({
+      incidentId: '123',
+      number: 'INC01',
+    });
   });
 
   test('add comment', async () => {
-    const fieldKey = 'comments';
+    axiosMock.mockResolvedValue({
+      status: 200,
+      headers: {
+        'content-type': 'application/json',
+      },
+      data: { result: { sys_id: '456' } },
+    });
 
-    axiosMock.mockResolvedValue({ ...axiosResponse, data: {} });
-    const res = await serviceNow.addComment(
-      params.incidentId!,
-      params.comments![0].comment,
-      fieldKey
-    );
+    const comment = {
+      commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
+      version: 'WzU3LDFd',
+      comment: 'A comment',
+      incidentCommentId: undefined,
+    };
+
+    const res = await serviceNow.createComment('123', comment, 'comments');
 
     const [url, { method, data }] = axiosMock.mock.calls[0];
 
-    expect(url).toEqual(prependInstanceUrl(`${INCIDENT_URL}/${params.incidentId}`));
-    expect(method).toEqual('patch');
-    expect(data).toEqual({ [fieldKey]: params.comments![0].comment });
-    expect(res).not.toBeDefined();
+    expect(url).toEqual(prependInstanceUrl(`api/now/v1/table/sys_journal_field`));
+    expect(method).toEqual('post');
+    expect(data).toEqual({
+      name: 'incident',
+      element: 'comments',
+      element_id: '123',
+      value: 'A comment',
+    });
+
+    expect(res).toEqual({
+      commentId: '456',
+    });
   });
 
-  test('add batch comment', async () => {
-    const fieldKey = 'comments';
+  test('update comment', async () => {
+    axiosMock.mockResolvedValue({
+      status: 200,
+      headers: {
+        'content-type': 'application/json',
+      },
+      data: { result: { sys_id: '456' } },
+    });
 
-    axiosMock.mockResolvedValue({ ...axiosResponse, data: {} });
-    const res = await serviceNow.batchAddComments(
-      params.incidentId!,
-      params.comments!.map(c => c.comment),
-      fieldKey
-    );
+    const comment = {
+      commentId: '123',
+      version: 'WzU3LDFd',
+      comment: 'A comment',
+      incidentCommentId: '456',
+    };
 
-    for (let i = 0; i < params.comments!.length; i++) {
-      const [url, { method, data }] = axiosMock.mock.calls[i];
-      expect(url).toEqual(prependInstanceUrl(`${INCIDENT_URL}/${params.incidentId}`));
+    const res = await serviceNow.updateComment(comment);
+
+    const [url, { method, data }] = axiosMock.mock.calls[0];
+
+    expect(url).toEqual(prependInstanceUrl(`api/now/v1/table/sys_journal_field/456`));
+    expect(method).toEqual('patch');
+    expect(data).toEqual({
+      value: 'A comment',
+    });
+
+    expect(res).toEqual({
+      commentId: '456',
+    });
+  });
+
+  test('create batch comment', async () => {
+    axiosMock.mockResolvedValue({
+      status: 200,
+      headers: {
+        'content-type': 'application/json',
+      },
+      data: { result: { sys_id: '789' } },
+    });
+    const comments = [
+      {
+        commentId: '123',
+        version: 'WzU3LDFd',
+        comment: 'A comment',
+        incidentCommentId: undefined,
+      },
+      {
+        commentId: '456',
+        version: 'WzU3LDFd',
+        comment: 'A second comment',
+        incidentCommentId: undefined,
+      },
+    ];
+    const res = await serviceNow.batchCreateComments('000', comments, 'comments');
+
+    comments.forEach((comment, index) => {
+      const [url, { method, data }] = axiosMock.mock.calls[index];
+      expect(url).toEqual(prependInstanceUrl('api/now/v1/table/sys_journal_field'));
+      expect(method).toEqual('post');
+      expect(data).toEqual({
+        name: 'incident',
+        element: 'comments',
+        element_id: '000',
+        value: comment.comment,
+      });
+      expect(res).toEqual([{ commentId: '789' }, { commentId: '789' }]);
+    });
+  });
+
+  test('update batch comment', async () => {
+    axiosMock.mockResolvedValue({
+      status: 200,
+      headers: {
+        'content-type': 'application/json',
+      },
+      data: { result: { sys_id: '789' } },
+    });
+    const comments = [
+      {
+        commentId: '123',
+        version: 'WzU3LDFd',
+        comment: 'A comment',
+        incidentCommentId: '001',
+      },
+      {
+        commentId: '456',
+        version: 'WzU3LDFd',
+        comment: 'A second comment',
+        incidentCommentId: '002',
+      },
+    ];
+    const res = await serviceNow.batchUpdateComments(comments);
+
+    comments.forEach((comment, index) => {
+      const [url, { method, data }] = axiosMock.mock.calls[index];
+      expect(url).toEqual(
+        prependInstanceUrl(`api/now/v1/table/sys_journal_field/${comment.incidentCommentId}`)
+      );
       expect(method).toEqual('patch');
-      expect(data).toEqual({ [fieldKey]: params.comments![i].comment });
-      expect(res).not.toBeDefined();
-    }
+      expect(data).toEqual({
+        value: comment.comment,
+      });
+      expect(res).toEqual([{ commentId: '789' }, { commentId: '789' }]);
+    });
   });
 
   test('throw if not status is not ok', async () => {
     expect.assertions(1);
 
-    axiosMock.mockResolvedValue({ ...axiosResponse, status: 401 });
+    axiosMock.mockResolvedValue({
+      status: 401,
+      headers: {
+        'content-type': 'application/json',
+      },
+    });
     try {
       await serviceNow.getUserID();
     } catch (error) {
@@ -140,8 +277,10 @@ describe('ServiceNow lib', () => {
     expect.assertions(1);
 
     axiosMock.mockResolvedValue({
-      ...axiosResponse,
-      headers: { 'content-type': 'application/html' },
+      status: 200,
+      headers: {
+        'content-type': 'application/html',
+      },
     });
     try {
       await serviceNow.getUserID();

@@ -18,18 +18,21 @@ const incident: Incident = {
   description: 'A description',
 };
 
-const comments = [
+const commentsToCreate = [
   {
     commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
     version: 'WzU3LDFd',
     comment: 'A comment',
-    incidentCommentId: '263ede42075300100e48fbbf7c1ed047',
+    incidentCommentId: undefined,
   },
+];
+
+const commentsToUpdate = [
   {
-    commentId: 'e3db587f-ca27-4ae9-ad2e-31f2dcc9bd0d',
-    version: 'WlK3LDFd',
-    comment: 'Another comment',
-    incidentCommentId: '315e1ece071300100e48fbbf7c1ed0d0',
+    commentId: '3e869fc0-4d1a-11ea-bace-d9629f4c49ff',
+    version: 'WzU3LDFd',
+    comment: 'A comment',
+    incidentCommentId: '333c0583075f00100e48fbbf7c1ed05d',
   },
 ];
 
@@ -39,9 +42,14 @@ describe('handleCreateIncident', () => {
       return {
         serviceNow: {
           getUserID: jest.fn().mockResolvedValue('1234'),
-          createIncident: jest.fn().mockResolvedValue({ id: '123', number: 'INC01' }),
-          updateIncident: jest.fn(),
-          batchAddComments: jest.fn(),
+          createIncident: jest.fn().mockResolvedValue({ incidentId: '123', number: 'INC01' }),
+          updateIncident: jest.fn().mockResolvedValue({ incidentId: '123', number: 'INC01' }),
+          batchCreateComments: jest
+            .fn()
+            .mockResolvedValue([{ commentId: '133c78cf071f00100e48fbbf7c1ed0f2' }]),
+          batchUpdateComments: jest
+            .fn()
+            .mockResolvedValue([{ commentId: '333c0583075f00100e48fbbf7c1ed05d' }]),
         },
       };
     });
@@ -60,8 +68,8 @@ describe('handleCreateIncident', () => {
     expect(serviceNow.createIncident).toHaveBeenCalled();
     expect(serviceNow.createIncident).toHaveBeenCalledWith(incident);
     expect(serviceNow.createIncident).toHaveReturned();
-    expect(serviceNow.batchAddComments).not.toHaveBeenCalled();
-    expect(res).toEqual({ id: '123', number: 'INC01' });
+    expect(serviceNow.batchCreateComments).not.toHaveBeenCalled();
+    expect(res).toEqual({ incidentId: '123', number: 'INC01' });
   });
 
   test('create an incident with comments', async () => {
@@ -70,26 +78,35 @@ describe('handleCreateIncident', () => {
     const res = await handleCreateIncident({
       serviceNow,
       params: incident,
-      comments,
+      comments: commentsToCreate,
       mapping: finalMapping,
     });
 
     expect(serviceNow.createIncident).toHaveBeenCalled();
     expect(serviceNow.createIncident).toHaveBeenCalledWith(incident);
     expect(serviceNow.createIncident).toHaveReturned();
-    expect(serviceNow.batchAddComments).toHaveBeenCalled();
-    expect(serviceNow.batchAddComments).toHaveBeenCalledWith(
+    expect(serviceNow.batchCreateComments).toHaveBeenCalled();
+    expect(serviceNow.batchCreateComments).toHaveBeenCalledWith(
       '123',
-      comments.map(c => c.comment),
+      commentsToCreate,
       'comments'
     );
-    expect(res).toEqual({ id: '123', number: 'INC01' });
+    expect(res).toEqual({
+      incidentId: '123',
+      number: 'INC01',
+      comments: [
+        {
+          commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
+          incidentCommentId: '133c78cf071f00100e48fbbf7c1ed0f2',
+        },
+      ],
+    });
   });
 
   test('update an incident without comments', async () => {
     const { serviceNow } = new ServiceNowMock();
 
-    await handleUpdateIncident({
+    const res = await handleUpdateIncident({
       incidentId: '123',
       serviceNow,
       params: incident,
@@ -100,27 +117,106 @@ describe('handleCreateIncident', () => {
     expect(serviceNow.updateIncident).toHaveBeenCalled();
     expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', incident);
     expect(serviceNow.updateIncident).toHaveReturned();
-    expect(serviceNow.batchAddComments).not.toHaveBeenCalled();
+    expect(serviceNow.batchUpdateComments).not.toHaveBeenCalled();
+    expect(res).toEqual({ incidentId: '123', number: 'INC01' });
   });
 
-  test('update an incident with comments', async () => {
+  test('update an incident and create new comments', async () => {
     const { serviceNow } = new ServiceNowMock();
 
-    await handleUpdateIncident({
+    const res = await handleUpdateIncident({
       incidentId: '123',
       serviceNow,
       params: incident,
-      comments,
+      comments: commentsToCreate,
       mapping: finalMapping,
     });
 
     expect(serviceNow.updateIncident).toHaveBeenCalled();
     expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', incident);
     expect(serviceNow.updateIncident).toHaveReturned();
-    expect(serviceNow.batchAddComments).toHaveBeenCalledWith(
+    expect(serviceNow.batchUpdateComments).not.toHaveBeenCalled();
+    expect(serviceNow.batchCreateComments).toHaveBeenCalledWith(
       '123',
-      comments.map(c => c.comment),
+      commentsToCreate,
       'comments'
     );
+
+    expect(res).toEqual({
+      incidentId: '123',
+      number: 'INC01',
+      comments: [
+        {
+          commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
+          incidentCommentId: '133c78cf071f00100e48fbbf7c1ed0f2',
+        },
+      ],
+    });
+  });
+
+  test('update an incident and update comments', async () => {
+    const { serviceNow } = new ServiceNowMock();
+
+    const res = await handleUpdateIncident({
+      incidentId: '123',
+      serviceNow,
+      params: incident,
+      comments: commentsToUpdate,
+      mapping: finalMapping,
+    });
+
+    expect(serviceNow.updateIncident).toHaveBeenCalled();
+    expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', incident);
+    expect(serviceNow.updateIncident).toHaveReturned();
+    expect(serviceNow.batchCreateComments).not.toHaveBeenCalled();
+    expect(serviceNow.batchUpdateComments).toHaveBeenCalledWith(commentsToUpdate);
+
+    expect(res).toEqual({
+      incidentId: '123',
+      number: 'INC01',
+      comments: [
+        {
+          commentId: '3e869fc0-4d1a-11ea-bace-d9629f4c49ff',
+          incidentCommentId: '333c0583075f00100e48fbbf7c1ed05d',
+        },
+      ],
+    });
+  });
+
+  test('update an incident, create and update comments', async () => {
+    const { serviceNow } = new ServiceNowMock();
+
+    const res = await handleUpdateIncident({
+      incidentId: '123',
+      serviceNow,
+      params: incident,
+      comments: [...commentsToCreate, ...commentsToUpdate],
+      mapping: finalMapping,
+    });
+
+    expect(serviceNow.updateIncident).toHaveBeenCalled();
+    expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', incident);
+    expect(serviceNow.updateIncident).toHaveReturned();
+    expect(serviceNow.batchCreateComments).toHaveBeenCalledWith(
+      '123',
+      commentsToCreate,
+      'comments'
+    );
+    expect(serviceNow.batchUpdateComments).toHaveBeenCalledWith(commentsToUpdate);
+
+    expect(res).toEqual({
+      incidentId: '123',
+      number: 'INC01',
+      comments: [
+        {
+          commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
+          incidentCommentId: '133c78cf071f00100e48fbbf7c1ed0f2',
+        },
+        {
+          commentId: '3e869fc0-4d1a-11ea-bace-d9629f4c49ff',
+          incidentCommentId: '333c0583075f00100e48fbbf7c1ed05d',
+        },
+      ],
+    });
   });
 });

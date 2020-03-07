@@ -29,7 +29,6 @@ export const handleCreateIncident = async ({
 
   const res: IncidentCreationResponse = { incidentId, number };
 
-  // Should return comment ID
   if (comments && Array.isArray(comments) && comments.length > 0) {
     const commentResponse = await serviceNow.batchCreateComments(
       incidentId,
@@ -61,38 +60,44 @@ export const handleUpdateIncident = async ({
 
   const res: IncidentCreationResponse = { incidentId, number };
 
-  // Should return comment ID
   if (comments && Array.isArray(comments) && comments.length > 0) {
-    const commentsToUpdate = comments.filter(c => c.incidentCommentId);
     const commentsToCreate = comments.filter(c => !c.incidentCommentId);
+    const commentsToUpdate = comments.filter(c => c.incidentCommentId);
 
-    const commentCreationResponse = await serviceNow.batchCreateComments(
-      incidentId,
-      commentsToCreate,
-      mapping.get('comments').target
-    );
+    let createRes: CommentsZipped[] = [];
+    let updateRes: CommentsZipped[] = [];
 
-    const commentUpdateResponse = await serviceNow.batchUpdateComments(commentsToUpdate);
+    if (commentsToCreate.length > 0) {
+      const commentCreationResponse = await serviceNow.batchCreateComments(
+        incidentId,
+        commentsToCreate,
+        mapping.get('comments').target
+      );
 
-    const updateRes: CommentsZipped[] = zipWith(
-      commentsToCreate,
-      commentCreationResponse,
-      (a: CommentType, b: CommentResponse) => ({
-        commentId: a.commentId,
-        incidentCommentId: b.commentId,
-      })
-    );
+      createRes = zipWith(
+        commentsToCreate,
+        commentCreationResponse,
+        (a: CommentType, b: CommentResponse) => ({
+          commentId: a.commentId,
+          incidentCommentId: b.commentId,
+        })
+      );
+    }
 
-    const createRes: CommentsZipped[] = zipWith(
-      commentsToUpdate,
-      commentUpdateResponse,
-      (a: CommentType, b: CommentResponse) => ({
-        commentId: a.commentId,
-        incidentCommentId: b.commentId,
-      })
-    );
+    if (commentsToUpdate.length > 0) {
+      const commentUpdateResponse = await serviceNow.batchUpdateComments(commentsToUpdate);
 
-    res.comments = [...updateRes, ...createRes];
+      updateRes = zipWith(
+        commentsToUpdate,
+        commentUpdateResponse,
+        (a: CommentType, b: CommentResponse) => ({
+          commentId: a.commentId,
+          incidentCommentId: b.commentId,
+        })
+      );
+    }
+
+    res.comments = [...createRes, ...updateRes];
   }
 
   return { ...res };
