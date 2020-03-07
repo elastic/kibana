@@ -49,7 +49,7 @@ describe('ESGeoGridSource', () => {
     };
   };
 
-  it('getMetricFields should remove incomplete metric aggregations. Smaller tests t', async () => {
+  it('getMetricFields should remove incomplete metric aggregations.', async () => {
     const fields = await geogridSource.getFields();
     const fieldsMeta = await Promise.all(fields.map(getFieldMeta));
     expect(
