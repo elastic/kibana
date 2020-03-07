@@ -55,9 +55,6 @@ export default function({ getService }) {
       const { body } = await supertest
         .post(`/api/upgrade_assistant/reindex/dummydata`)
         .set('kbn-xsrf', 'xxx')
-        .send({
-          openAndClose: false,
-        })
         .expect(200);
 
       expect(body.indexName).to.equal('dummydata');
@@ -106,9 +103,6 @@ export default function({ getService }) {
       await supertest
         .post(`/api/upgrade_assistant/reindex/dummydata`)
         .set('kbn-xsrf', 'xxx')
-        .send({
-          openAndClose: false,
-        })
         .expect(200);
       const lastState = await waitForReindexToComplete('dummydata');
 
@@ -133,9 +127,6 @@ export default function({ getService }) {
       const { body } = await supertest
         .post(`/api/upgrade_assistant/reindex/7.0-data`)
         .set('kbn-xsrf', 'xxx')
-        .send({
-          openAndClose: false,
-        })
         .expect(200);
 
       expect(body.indexName).to.equal('7.0-data');
@@ -199,6 +190,8 @@ export default function({ getService }) {
         expect(result.body.enqueued.length).to.equal(3);
         expect(result.body.errors.length).to.equal(0);
 
+        const [{ newIndexName: newTest1Name }] = result.body.enqueued;
+
         await assertQueueState(test1, 3);
         await waitForReindexToComplete(test1);
 
@@ -212,12 +205,12 @@ export default function({ getService }) {
 
         // Check that the closed index is still closed after reindexing
         const clusterStateResponse = await es.cluster.state({
-          index: generateNewIndexName(test1),
+          index: newTest1Name,
           metric: 'metadata',
         });
 
         const test1ReindexedState = getIndexStateFromClusterState(
-          generateNewIndexName(test1),
+          newTest1Name,
           clusterStateResponse
         );
         expect(test1ReindexedState).to.be('close');

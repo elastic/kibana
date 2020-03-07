@@ -163,7 +163,7 @@ describe('reindex API', () => {
         pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
       })(
         routeHandlerContextMock,
-        createRequestMock({ params: { indexName: 'theIndex' }, body: { openAndClose: false } }),
+        createRequestMock({ params: { indexName: 'theIndex' } }),
         kibanaResponseFactory
       );
 
@@ -188,7 +188,7 @@ describe('reindex API', () => {
         pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
       })(
         routeHandlerContextMock,
-        createRequestMock({ params: { indexName: 'theIndex' }, body: { openAndClose: false } }),
+        createRequestMock({ params: { indexName: 'theIndex' } }),
         kibanaResponseFactory
       );
 
@@ -211,7 +211,6 @@ describe('reindex API', () => {
             'kbn-auth-x': 'HERE!',
           },
           params: { indexName: 'theIndex' },
-          body: { openAndClose: false },
         }),
         kibanaResponseFactory
       );
@@ -234,7 +233,6 @@ describe('reindex API', () => {
         routeHandlerContextMock,
         createRequestMock({
           params: { indexName: 'theIndex' },
-          body: { openAndClose: false },
         }),
         kibanaResponseFactory
       );
@@ -261,7 +259,6 @@ describe('reindex API', () => {
         routeHandlerContextMock,
         createRequestMock({
           params: { indexName: 'theIndex' },
-          body: { openAndClose: false },
         }),
         kibanaResponseFactory
       );
@@ -387,7 +384,6 @@ describe('reindex API', () => {
         routeHandlerContextMock,
         createRequestMock({
           params: { indexName: 'cancelMe' },
-          body: { openAndClose: false },
         }),
         kibanaResponseFactory
       );
