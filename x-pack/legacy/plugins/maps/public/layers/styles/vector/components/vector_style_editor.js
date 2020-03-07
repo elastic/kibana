@@ -69,7 +69,7 @@ export class VectorStyleEditor extends Component {
     const fields = await this.props.layer.getFields();
     const fieldPromises = fields.map(getFieldMeta);
     const fieldsArrayAll = await Promise.all(fieldPromises);
-    if (this._isMounted && !_.isEqual(fieldsArrayAll, this.state.fields)) {
+    if (!this._isMounted || _.isEqual(fieldsArrayAll, this.state.fields)) {
       return;
     }
 
