@@ -32,7 +32,6 @@ import execa from 'execa';
 import fs from 'fs';
 import path from 'path';
 import getopts from 'getopts';
-import _ from 'lodash';
 
 /*
  * Step 1: execute build:types
@@ -42,14 +41,14 @@ import _ from 'lodash';
  */
 
 const getReportFileName = (folder: string) => {
-  if (folder.startsWith('core')) {
-    return folder.split('/')[1];
-  } else {
-    return folder.replace(/\//g, '_');
-  }
+  // if (folder.startsWith('core')) {
+  return folder.indexOf('public') > -1 ? 'public' : 'server';
+  // } else {
+  //   return folder.replace(/\//g, '_');
+  // }
 };
 
-const apiExtractorConfig = (srcFolder: string, trgFolder: string): ExtractorConfig => {
+const apiExtractorConfig = (srcFolder: string): ExtractorConfig => {
   const fname = getReportFileName(srcFolder);
   const config: IConfigFile = {
     newlineKind: 'lf',
@@ -98,21 +97,23 @@ const runBuildTypes = async () => {
 };
 
 const runApiDocumenter = async (folder: string) => {
-  await execa(
-    'api-documenter',
-    ['generate', '-i', `./build/${folder}`, '-o', `./docs/development/core/${folder}`],
-    {
-      preferLocal: true,
-    }
-  );
+  const sourceFolder = `./build/${folder}`;
+  const targetFolder = `./docs/development/${folder}`;
+  // eslint-disable-next-line no-console
+  console.log(`Generating docs from ${sourceFolder} into ${targetFolder}...`);
+  await execa('api-documenter', ['generate', '-i', sourceFolder, '-o', targetFolder], {
+    preferLocal: true,
+  });
 };
 
 const renameExtractedApiPackageName = async (folder: string) => {
   const fname = getReportFileName(folder);
-  const json = JSON.parse(fs.readFileSync(`build/${folder}/${fname}.api.json`).toString());
-  json.canonicalReference = `kibana-plugin-${folder}`;
-  json.name = `kibana-plugin-${folder}`;
-  fs.writeFileSync(`build/${folder}/${folder}.api.json`, JSON.stringify(json, null, 2));
+  const jsonApiFile = `build/${folder}/${fname}.api.json`;
+  // eslint-disable-next-line no-console
+  console.log(`Updating ${jsonApiFile}...`);
+  const json = JSON.parse(fs.readFileSync(jsonApiFile).toString());
+  json.name = json.canonicalReference = `kibana-plugin-${folder.replace(/\//g, '-')}`;
+  fs.writeFileSync(jsonApiFile, JSON.stringify(json, null, 2));
 };
 
 /**
@@ -122,10 +123,9 @@ const renameExtractedApiPackageName = async (folder: string) => {
 const runApiExtractor = (
   log: ToolingLog,
   srcFolder: string,
-  trgFolder: string,
   acceptChanges: boolean = false
 ): ExtractorResult => {
-  const config = apiExtractorConfig(srcFolder, trgFolder);
+  const config = apiExtractorConfig(srcFolder);
   const options = {
     // Indicates that API Extractor is running as part of a local build,
     // e.g. on developer's machine. For example, if the *.api.md output file
@@ -171,12 +171,11 @@ interface Options {
 
 async function run(
   srcFolder: string,
-  trgFolder: string,
   { log, opts }: { log: ToolingLog; opts: Options }
 ): Promise<boolean> {
   log.info(`Core ${srcFolder} API: checking for changes in API signature...`);
 
-  const { apiReportChanged, succeeded } = runApiExtractor(log, srcFolder, trgFolder, opts.accept);
+  const { apiReportChanged, succeeded } = runApiExtractor(log, srcFolder, opts.accept);
 
   // If we're not accepting changes and there's a failure, exit.
   if (!opts.accept && !succeeded) {
@@ -263,18 +262,9 @@ async function run(
     return false;
   }
 
-  const folderMapping: { [key: string]: string } = {
-    // 'core/public': 'core/public',
-    // 'core/server': 'core/server',
-    // 'plugins/data/server': 'data/server',
-    'plugins/data/public': 'data/public',
-  };
+  const folders = ['core/public', 'core/server', 'plugins/data/server', 'plugins/data/public'];
 
-  const results = await Promise.all(
-    Object.keys(folderMapping).map(srcFolder =>
-      run(srcFolder, folderMapping[srcFolder], { log, opts })
-    )
-  );
+  const results = await Promise.all(folders.map(folder => run(folder, { log, opts })));
 
   if (results.find(r => r === false) !== undefined) {
     process.exitCode = 1;
