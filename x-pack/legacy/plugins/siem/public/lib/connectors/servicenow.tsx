@@ -11,6 +11,9 @@ import {
   EuiFormRow,
   EuiFieldPassword,
 } from '@elastic/eui';
+
+import { isEmpty } from 'lodash/fp';
+
 import {
   ActionConnectorFieldsProps,
   ActionTypeModel,
@@ -26,7 +29,7 @@ import * as i18n from './translations';
 import { ServiceNowActionConnector } from './types';
 import { isUrlInvalid } from './validators';
 
-import { connectors } from './config';
+import { connectors, defaultMapping } from './config';
 import { CasesConfigurationMapping } from '../../containers/case/configure/types';
 
 const serviceNowDefinition = connectors.get('.servicenow')!;
@@ -84,32 +87,19 @@ export function getActionType(): ActionTypeModel {
 const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
   ServiceNowActionConnector
 >> = ({ action, editActionConfig, editActionSecrets, errors }) => {
-  const { apiUrl, casesConfiguration } = action.config;
+  const { apiUrl, casesConfiguration: { mapping = [] } = {} } = action.config;
   const { username, password } = action.secrets;
 
   const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl !== undefined;
   const isUsernameInvalid: boolean = errors.username.length > 0 && username !== undefined;
   const isPasswordInvalid: boolean = errors.password.length > 0 && password !== undefined;
 
-  const defaultMapping = [
-    {
-      source: 'title',
-      target: 'short_description',
-      actionType: 'overwrite',
-    },
-    {
-      source: 'description',
-      target: 'description',
-      actionType: 'overwrite',
-    },
-    {
-      source: 'comments',
-      target: 'comments',
-      actionType: 'append',
-    },
-  ];
-
-  const mappings = casesConfiguration?.mapping ?? defaultMapping;
+  if (isEmpty(mapping)) {
+    editActionConfig('casesConfiguration', {
+      ...action.config.casesConfiguration,
+      mapping: defaultMapping,
+    });
+  }
 
   return (
     <>
@@ -199,9 +189,12 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
         <EuiFlexItem>
           <FieldMapping
             disabled={false}
-            mappings={mappings as CasesConfigurationMapping[]}
-            onChangeMappings={newMappings => {
-              editActionConfig('casesConfiguration', { mapping: newMappings });
+            mappings={mapping as CasesConfigurationMapping[]}
+            onChangeMappings={newMapping => {
+              editActionConfig('casesConfiguration', {
+                ...action.config.casesConfiguration,
+                mapping: newMapping,
+              });
             }}
           />
         </EuiFlexItem>
