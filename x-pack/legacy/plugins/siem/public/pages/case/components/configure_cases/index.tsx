@@ -106,6 +106,23 @@ const ConfigureCasesComponent: React.FC = () => {
     }
   }, [connectors, connectorId]);
 
+  useEffect(() => {
+    const resetConnectorToDefaultState = async () => {
+      if (
+        !isLoadingConnectors &&
+        connectorId !== 'none' &&
+        !connectors.some(c => c.id === connectorId)
+      ) {
+        await persistCaseConfigure({
+          connectorId: initialState.connectorId,
+          closureType: initialState.closureType,
+        });
+      }
+    };
+
+    resetConnectorToDefaultState();
+  }, [connectors, connectorId]);
+
   return (
     <FormWrapper>
       <SectionWrapper>
