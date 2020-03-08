@@ -14,11 +14,10 @@ import { callApmApi } from '../../../../../services/rest/createCallApmApi';
 import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
 
 interface Props {
-  onDeleted: () => void;
-  selectedConfig: Config;
+  service: Config['service'];
 }
 
-export function DeleteButton({ onDeleted, selectedConfig }: Props) {
+export function DeleteButton({ service }: Props) {
   const [isDeleting, setIsDeleting] = useState(false);
   const { toasts } = useApmPluginContext().core.notifications;
 
@@ -29,9 +28,8 @@ export function DeleteButton({ onDeleted, selectedConfig }: Props) {
       iconSide="right"
       onClick={async () => {
         setIsDeleting(true);
-        await deleteConfig(selectedConfig, toasts);
+        await deleteConfig(service, toasts);
         setIsDeleting(false);
-        onDeleted();
       }}
     >
       {i18n.translate(
@@ -43,7 +41,7 @@ export function DeleteButton({ onDeleted, selectedConfig }: Props) {
 }
 
 async function deleteConfig(
-  selectedConfig: Config,
+  service: Config,
   toasts: NotificationsStart['toasts']
 ) {
   try {
@@ -53,8 +51,8 @@ async function deleteConfig(
       params: {
         body: {
           service: {
-            name: selectedConfig.service.name,
-            environment: selectedConfig.service.environment
+            name: service.service.name,
+            environment: service.service.environment
           }
         }
       }
@@ -70,7 +68,7 @@ async function deleteConfig(
         {
           defaultMessage:
             'You have successfully deleted a configuration for "{serviceName}". It will take some time to propagate to the agents.',
-          values: { serviceName: getOptionLabel(selectedConfig.service.name) }
+          values: { serviceName: getOptionLabel(service.service.name) }
         }
       )
     });
@@ -86,7 +84,7 @@ async function deleteConfig(
           defaultMessage:
             'Something went wrong when deleting a configuration for "{serviceName}". Error: "{errorMessage}"',
           values: {
-            serviceName: getOptionLabel(selectedConfig.service.name),
+            serviceName: getOptionLabel(service.service.name),
             errorMessage: error.message
           }
         }

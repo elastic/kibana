@@ -1,0 +1,198 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import {
+  EuiTitle,
+  EuiSpacer,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiButtonEmpty
+} from '@elastic/eui';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { isString } from 'lodash';
+import {
+  omitAllOption,
+  getOptionLabel
+} from '../../../../../../../../../../plugins/apm/common/agent_configuration_constants';
+import { useFetcher } from '../../../../../../hooks/useFetcher';
+import { NewConfig } from '../NewConfig';
+import { FormRowSelect } from './FormRowSelect';
+
+interface Props {
+  newConfig: NewConfig;
+  setNewConfig: React.Dispatch<React.SetStateAction<NewConfig>>;
+  onClickNext: () => void;
+}
+
+export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
+  const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher(
+    callApmApi => {
+      return callApmApi({
+        pathname: '/api/apm/settings/agent-configuration/services',
+        forceCache: true
+      });
+    },
+    [],
+    { preservePreviousData: false }
+  );
+
+  const { data: environments = [], status: environmentStatus } = useFetcher(
+    callApmApi => {
+      if (newConfig.service.name) {
+        return callApmApi({
+          pathname: '/api/apm/settings/agent-configuration/environments',
+          params: {
+            query: { serviceName: omitAllOption(newConfig.service.name) }
+          }
+        });
+      }
+    },
+    [newConfig.service.name],
+    { preservePreviousData: false }
+  );
+
+  const { status: agentNameStatus } = useFetcher(
+    async callApmApi => {
+      const serviceName = newConfig.service.name;
+
+      // TODO: perhaps use service name validator
+      if (!isString(serviceName) || serviceName.length === 0) {
+        return;
+      }
+
+      const { agentName } = await callApmApi({
+        pathname: '/api/apm/settings/agent-configuration/agent_name',
+        params: { query: { serviceName } }
+      });
+
+      setNewConfig(prev => ({ ...prev, agentName }));
+    },
+    [newConfig.service.name, setNewConfig]
+  );
+
+  const ALREADY_CONFIGURED_TRANSLATED = i18n.translate(
+    'xpack.apm.settings.agentConf.servicePage.alreadyConfiguredOption',
+    { defaultMessage: 'already configured' }
+  );
+
+  const serviceNameOptions = serviceNames.map(name => ({
+    text: getOptionLabel(name),
+    value: name
+  }));
+  const environmentOptions = environments.map(
+    ({ name, alreadyConfigured }) => ({
+      disabled: alreadyConfigured,
+      text: `${getOptionLabel(name)} ${
+        alreadyConfigured ? `(${ALREADY_CONFIGURED_TRANSLATED})` : ''
+      }`,
+      value: name
+    })
+  );
+
+  return (
+    <EuiPanel paddingSize="m">
+      <EuiTitle size="xs">
+        <h3>
+          {i18n.translate('xpack.apm.settings.agentConf.servicePage.title', {
+            defaultMessage: 'Choose Service'
+          })}
+        </h3>
+      </EuiTitle>
+
+      <EuiSpacer size="m" />
+
+      {/* Service name options */}
+      <FormRowSelect
+        title="Service"
+        description={i18n.translate(
+          'xpack.apm.settings.agentConf.servicePage.serviceNameSelectHelpText',
+          { defaultMessage: 'Choose the service you want to configure.' }
+        )}
+        fieldLabel={i18n.translate(
+          'xpack.apm.settings.agentConf.servicePage.serviceNameSelectLabel',
+          { defaultMessage: 'Service Name' }
+        )}
+        isLoading={serviceNamesStatus === 'loading'}
+        options={serviceNameOptions}
+        value={newConfig.service.name}
+        isDisabled={serviceNamesStatus === 'loading'}
+        onChange={e => {
+          e.preventDefault();
+          const name = e.target.value;
+          setNewConfig(prev => ({
+            ...prev,
+            service: { name, environment: '' }
+          }));
+        }}
+      />
+
+      {/* Environment options */}
+      <FormRowSelect
+        title="Environment"
+        description={i18n.translate(
+          'xpack.apm.settings.agentConf.servicePage.serviceEnvironmentSelectHelpText',
+          {
+            defaultMessage:
+              'Only a single environment per configuration is supported.'
+          }
+        )}
+        fieldLabel={i18n.translate(
+          'xpack.apm.settings.agentConf.servicePage.serviceEnvironmentSelectLabel',
+          { defaultMessage: 'Service Environment' }
+        )}
+        isLoading={environmentStatus === 'loading'}
+        options={environmentOptions}
+        value={newConfig.service.environment}
+        isDisabled={!newConfig.service.name || environmentStatus === 'loading'}
+        onChange={e => {
+          e.preventDefault();
+          const environment = e.target.value;
+          setNewConfig(prev => ({
+            ...prev,
+            service: { name: prev.service.name, environment }
+          }));
+        }}
+      />
+
+      <EuiSpacer />
+
+      <EuiFlexGroup justifyContent="flexEnd">
+        {/* Cancel button */}
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty>
+            {i18n.translate(
+              'xpack.apm.settings.agentConf.saveConfigurationButtonLabel',
+              { defaultMessage: 'Cancel' }
+            )}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+
+        {/* Next button */}
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            type="submit"
+            fill
+            onClick={onClickNext}
+            isLoading={agentNameStatus === 'loading'}
+            isDisabled={
+              !newConfig.service.name ||
+              !newConfig.service.environment ||
+              agentNameStatus === 'loading'
+            }
+          >
+            {i18n.translate(
+              'xpack.apm.settings.agentConf.saveConfigurationButtonLabel',
+              { defaultMessage: 'Next step' }
+            )}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+}

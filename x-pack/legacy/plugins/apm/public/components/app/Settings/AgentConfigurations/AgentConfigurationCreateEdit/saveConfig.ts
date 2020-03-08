@@ -7,19 +7,17 @@
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
 import { AgentConfigurationIntake } from '../../../../../../../../../plugins/apm/server/lib/settings/agent_configuration/configuration_types';
-import { APMClient } from '../../../../../services/rest/createCallApmApi';
 import { getOptionLabel } from '../../../../../../../../../plugins/apm/common/agent_configuration_constants';
+import { callApmApi } from '../../../../../services/rest/createCallApmApi';
 
 export async function saveConfig({
-  callApmApi,
   config,
-  isExistingConfig,
+  isEditMode,
   toasts
 }: {
-  callApmApi: APMClient;
   config: AgentConfigurationIntake;
   agentName?: string;
-  isExistingConfig: boolean;
+  isEditMode: boolean;
   toasts: NotificationsStart['toasts'];
 }) {
   try {
@@ -27,7 +25,7 @@ export async function saveConfig({
       pathname: '/api/apm/settings/agent-configuration',
       method: 'PUT',
       params: {
-        query: { overwrite: isExistingConfig },
+        query: { overwrite: isEditMode },
         body: config
       }
     });

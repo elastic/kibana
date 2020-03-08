@@ -12,6 +12,8 @@
 
 import { storiesOf } from '@storybook/react';
 import React from 'react';
+import { HttpSetup } from 'kibana/public';
+import { createCallApmApi } from '../../../../../services/rest/createCallApmApi';
 import { AgentConfigurationCreateEdit } from './index';
 import {
   ApmPluginContext,
@@ -24,13 +26,26 @@ storiesOf(
 ).add(
   'selectedConfig=null',
   () => {
-    const contextMock = ({
-      core: { notifications: { toasts: {} } }
-    } as unknown) as ApmPluginContextValue;
+    const httpMock = {};
 
+    // mock
+    createCallApmApi((httpMock as unknown) as HttpSetup);
+
+    const contextMock = {
+      core: {
+        notifications: { toasts: { addWarning: () => {}, addDanger: () => {} } }
+      }
+    };
     return (
-      <ApmPluginContext.Provider value={contextMock}>
-        <AgentConfigurationCreateEdit />
+      <ApmPluginContext.Provider
+        value={(contextMock as unknown) as ApmPluginContextValue}
+      >
+        <AgentConfigurationCreateEdit
+          existingConfig={{
+            service: { name: 'opbeans-node', environment: 'production' },
+            settings: {}
+          }}
+        />
       </ApmPluginContext.Provider>
     );
   },

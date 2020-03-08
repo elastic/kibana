@@ -92,35 +92,6 @@ export function AgentConfigurationList({
       render: (value: string) => getOptionLabel(value)
     },
     {
-      field: 'settings.transaction_sample_rate',
-      name: i18n.translate(
-        'xpack.apm.settings.agentConf.configTable.sampleRateColumnLabel',
-        { defaultMessage: 'Sample rate' }
-      ),
-      dataType: 'number',
-      sortable: true,
-      render: (value: number) => value
-    },
-    {
-      field: 'settings.capture_body',
-      name: i18n.translate(
-        'xpack.apm.settings.agentConf.configTable.captureBodyColumnLabel',
-        { defaultMessage: 'Capture body' }
-      ),
-      sortable: true,
-      render: (value: string) => value
-    },
-    {
-      field: 'settings.transaction_max_spans',
-      name: i18n.translate(
-        'xpack.apm.settings.agentConf.configTable.transactionMaxSpansColumnLabel',
-        { defaultMessage: 'Transaction max spans' }
-      ),
-      dataType: 'number',
-      sortable: true,
-      render: (value: number) => value
-    },
-    {
       align: 'right',
       field: '@timestamp',
       name: i18n.translate(

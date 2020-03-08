@@ -26,6 +26,19 @@ export async function createApmAgentConfigurationIndex({
 }
 
 const mappings: Mappings = {
+  dynamic: 'strict',
+  dynamic_templates: [
+    {
+      // force string to keyword (instead of default of text + keyword)
+      strings: {
+        match_mapping_type: 'string',
+        mapping: {
+          type: 'keyword',
+          ignore_above: 1024
+        }
+      }
+    }
+  ],
   properties: {
     '@timestamp': {
       type: 'date'
@@ -43,6 +56,7 @@ const mappings: Mappings = {
       }
     },
     settings: {
+      dynamic: true,
       properties: {
         transaction_sample_rate: {
           type: 'scaled_float',

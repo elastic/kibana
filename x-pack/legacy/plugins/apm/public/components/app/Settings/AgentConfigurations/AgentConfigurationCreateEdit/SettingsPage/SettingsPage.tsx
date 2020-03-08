@@ -1,0 +1,184 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import {
+  EuiButton,
+  EuiForm,
+  EuiTitle,
+  EuiSpacer,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiStat,
+  EuiButtonEmpty
+} from '@elastic/eui';
+import React, { useState, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { saveConfig } from '../saveConfig';
+import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
+import { useUiTracker } from '../../../../../../../../../../plugins/observability/public';
+import { settings } from '../settings';
+import { FormRow } from './FormRow';
+import { getOptionLabel } from '../../../../../../../../../../plugins/apm/common/agent_configuration_constants';
+import { NewConfig } from '../NewConfig';
+
+export function SettingsPage({
+  newConfig,
+  setNewConfig,
+  isEditMode,
+  onClickEdit
+}: {
+  newConfig: NewConfig;
+  setNewConfig: React.Dispatch<React.SetStateAction<NewConfig>>;
+  isEditMode: boolean;
+  onClickEdit: () => void;
+}) {
+  // get a telemetry UI event tracker
+  const trackApmEvent = useUiTracker({ app: 'apm' });
+  const { toasts } = useApmPluginContext().core.notifications;
+  const [isSaving, setIsSaving] = useState(false);
+
+  const isFormValid = useMemo(() => {
+    return (
+      settings
+        // only validate settings that are not empty
+        .filter(({ key }) => {
+          const value = newConfig.settings[key];
+          return value != null && value !== '';
+        })
+
+        // every setting must be valid for the form to be valid
+        .every(({ key, isValid }) => {
+          const value = newConfig.settings[key];
+          return isValid(value);
+        })
+    );
+  }, [newConfig.settings]);
+
+  const handleSubmitEvent = async () => {
+    trackApmEvent({ metric: 'save_agent_configuration' });
+    const config = { ...newConfig, settings: removeEmpty(newConfig.settings) };
+
+    setIsSaving(true);
+    await saveConfig({ config, isEditMode, toasts });
+    setIsSaving(false);
+  };
+
+  return (
+    <EuiForm>
+      <form
+        onSubmit={e => {
+          e.preventDefault();
+          handleSubmitEvent();
+        }}
+      >
+        {/* Show Selected Service panel */}
+        <EuiPanel paddingSize="m">
+          <EuiTitle size="s">
+            <h3>
+              {i18n.translate('xpack.apm.settings.agentConf.editConfigTitle', {
+                defaultMessage: 'Choose service'
+              })}
+            </h3>
+          </EuiTitle>
+
+          <EuiSpacer size="m" />
+
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiStat
+                titleSize="xs"
+                title={newConfig.service.name}
+                description="Service name"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiStat
+                titleSize="xs"
+                title={getOptionLabel(newConfig.service.environment)}
+                description="Environment"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {!isEditMode && (
+                <EuiButton onClick={onClickEdit} iconType="pencil">
+                  {i18n.translate('xpack.apm.settings.agentConf.editButton', {
+                    defaultMessage: 'Edit'
+                  })}
+                </EuiButton>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+
+        <EuiSpacer size="m" />
+
+        {/* Settings panel */}
+        <EuiPanel paddingSize="m">
+          <EuiTitle size="s">
+            <h3>
+              {i18n.translate('xpack.apm.settings.agentConf.settings.title', {
+                defaultMessage: 'Core configuration options'
+              })}
+            </h3>
+          </EuiTitle>
+
+          <EuiSpacer size="m" />
+
+          {settings.map(setting => (
+            <FormRow
+              key={setting.key}
+              setting={setting}
+              value={newConfig.settings[setting.key]}
+              onChange={(key, value) => {
+                setNewConfig(prev => ({
+                  ...prev,
+                  settings: {
+                    ...prev.settings,
+                    [key]: value
+                  }
+                }));
+              }}
+            />
+          ))}
+
+          <EuiSpacer />
+
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty>
+                {i18n.translate(
+                  'xpack.apm.settings.agentConf.saveConfigurationButtonLabel',
+                  { defaultMessage: 'Cancel' }
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                type="submit"
+                fill
+                isLoading={isSaving}
+                isDisabled={!isFormValid}
+              >
+                {i18n.translate(
+                  'xpack.apm.settings.agentConf.saveConfigurationButtonLabel',
+                  { defaultMessage: 'Save' }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </form>
+    </EuiForm>
+  );
+}
+
+function removeEmpty<T>(obj: T): T {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([k, v]) => v != null && v !== '')
+  );
+}

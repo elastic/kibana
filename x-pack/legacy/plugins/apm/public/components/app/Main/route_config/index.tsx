@@ -110,16 +110,38 @@ export const routes: BreadcrumbRoute[] = [
     ),
     name: RouteName.AGENT_CONFIGURATION
   },
+
+  {
+    exact: true,
+    path: '/settings/agent-configuration/create',
+    breadcrumb: i18n.translate(
+      'xpack.apm.breadcrumb.settings.agentConfigurationTitle',
+      { defaultMessage: 'Create Agent Configuration' }
+    ),
+    name: RouteName.AGENT_CONFIGURATION_CREATE,
+    component: () => {
+      return (
+        <Settings>
+          <AgentConfigurationCreateEdit />
+        </Settings>
+      );
+    }
+  },
   {
     exact: true,
     path: '/settings/agent-configuration/edit',
+    breadcrumb: i18n.translate(
+      'xpack.apm.breadcrumb.settings.agentConfigurationTitle',
+      { defaultMessage: 'Edit Agent Configuration' }
+    ),
+    name: RouteName.AGENT_CONFIGURATION_EDIT,
     component: () => {
       // hooks rule is complaining about not using a hook here but it works so 🤷
       // We should revisit how route params are handled anyway: https://github.com/elastic/kibana/issues/51963
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const { search } = useLocation();
 
-      // Ignoring here because I specifically DO NOT want to add the query params to the global route handler
+      // Ignoring here because we specifically DO NOT want to add the query params to the global route handler
       // @ts-ignore
       const { name, environment } = toQuery(search);
 
@@ -133,28 +155,19 @@ export const routes: BreadcrumbRoute[] = [
             params: { body: { service: { name, environment } } }
           });
         },
-        [environment, name]
+        [name, environment]
       );
 
       if (!data) {
         return null;
       }
 
-      const existingConfig = data._source;
-
       return (
         <Settings>
-          <AgentConfigurationCreateEdit existingConfig={existingConfig} />
+          <AgentConfigurationCreateEdit existingConfig={data} />
         </Settings>
       );
-    },
-    breadcrumb: i18n.translate(
-      'xpack.apm.breadcrumb.settings.agentConfigurationTitle',
-      {
-        defaultMessage: 'Agent Configuration'
-      }
-    ),
-    name: RouteName.AGENT_CONFIGURATION
+    }
   },
   {
     exact: true,

@@ -20,7 +20,7 @@ import { markAppliedByAgent } from '../../lib/settings/agent_configuration/mark_
 import {
   serviceRt,
   agentConfigurationIntakeRt
-} from '../../../common/runtime_types/agent_configuration_intake_rt';
+} from '../../../common/runtime_types/agent_configuration/agent_configuration_intake_rt';
 import { jsonRt } from '../../../common/runtime_types/json_rt';
 
 // get list of configurations
@@ -54,7 +54,7 @@ export const getSingleAgentConfigurationRoute = createRoute(core => ({
       throw Boom.notFound();
     }
 
-    return config;
+    return config._source;
   }
 }));
 

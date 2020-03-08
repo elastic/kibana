@@ -5,8 +5,9 @@
  */
 
 import * as t from 'io-ts';
-import { transactionSampleRateRt } from '../transaction_sample_rate_rt';
-import { transactionMaxSpansRt } from '../transaction_max_spans_rt';
+import { transactionSampleRateRt } from './transaction_sample_rate_rt';
+import { transactionMaxSpansRt } from './transaction_max_spans_rt';
+import { captureBodyRt } from './capture_body_rt';
 
 export const serviceRt = t.partial({
   name: t.string,
@@ -21,12 +22,7 @@ export const agentConfigurationIntakeRt = t.intersection([
       t.record(t.string, t.string),
       t.partial({
         transaction_sample_rate: transactionSampleRateRt,
-        capture_body: t.union([
-          t.literal('off'),
-          t.literal('errors'),
-          t.literal('transactions'),
-          t.literal('all')
-        ]),
+        capture_body: captureBodyRt,
         transaction_max_spans: transactionMaxSpansRt
       })
     ])
