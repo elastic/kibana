@@ -49,7 +49,6 @@ import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
-  hasSearchStategyForIndexPattern,
   intervalOptions,
   migrateLegacyQuery,
   unhashUrl,
@@ -1065,9 +1064,9 @@ function discoverController(
 
   // Block the UI from loading if the user has loaded a rollup index pattern but it isn't
   // supported.
-  $scope.isUnsupportedIndexPattern =
-    !indexPatternsUtils.isDefault($route.current.locals.savedObjects.ip.loaded) &&
-    !hasSearchStategyForIndexPattern($route.current.locals.savedObjects.ip.loaded);
+  $scope.isUnsupportedIndexPattern = !indexPatternsUtils.isDefault(
+    $route.current.locals.savedObjects.ip.loaded
+  );
 
   if ($scope.isUnsupportedIndexPattern) {
     $scope.unsupportedIndexPatternType = $route.current.locals.savedObjects.ip.loaded.type;

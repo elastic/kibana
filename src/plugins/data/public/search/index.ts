@@ -42,12 +42,7 @@ export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search
 
 export { LegacyApiCaller, SearchRequest, SearchResponse } from './es_client';
 
-export {
-  hasSearchStategyForIndexPattern,
-  SearchError,
-  SearchStrategyProvider,
-  getSearchErrorType,
-} from './search_strategy';
+export { SearchError, SearchStrategyProvider, getSearchErrorType } from './search_strategy';
 
 export {
   ISearchSource,

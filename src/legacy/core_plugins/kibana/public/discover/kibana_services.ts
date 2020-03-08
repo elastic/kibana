@@ -73,7 +73,6 @@ export {
   IIndexPattern,
   IndexPattern,
   indexPatterns,
-  hasSearchStategyForIndexPattern,
   IFieldType,
   SearchSource,
   ISearchSource,

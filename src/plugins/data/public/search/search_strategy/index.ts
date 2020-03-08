@@ -17,8 +17,6 @@
  * under the License.
  */
 
-export { hasSearchStategyForIndexPattern } from './search_strategy_registry';
-
 export { SearchError, getSearchErrorType } from './search_error';
 
 export { SearchStrategyProvider, SearchStrategySearchParams } from './types';
