@@ -20,60 +20,37 @@
 import { callClient } from './call_client';
 import { handleResponse } from './handle_response';
 import { FetchHandlers } from './types';
-import { SearchRequest } from '../..';
-import { SearchStrategySearchParams } from '../search_strategy';
+import { SearchStrategySearchParams, defaultSearchStrategy } from '../search_strategy';
 
-const mockResponses = [{}, {}];
-const mockAbortFns = [jest.fn(), jest.fn()];
-const mockSearchFns = [
-  jest.fn(({ searchRequests }: SearchStrategySearchParams) => ({
-    searching: Promise.resolve(Array(searchRequests.length).fill(mockResponses[0])),
-    abort: mockAbortFns[0],
-  })),
-  jest.fn(({ searchRequests }: SearchStrategySearchParams) => ({
-    searching: Promise.resolve(Array(searchRequests.length).fill(mockResponses[1])),
-    abort: mockAbortFns[1],
-  })),
-];
-const mockSearchStrategies = mockSearchFns.map((search, i) => ({ search, id: i }));
-
+const mockAbortFn = jest.fn();
 jest.mock('./handle_response', () => ({
   handleResponse: jest.fn((request, response) => response),
 }));
 
-jest.mock('../search_strategy', () => ({
-  getSearchStrategyForSearchRequest: (request: SearchRequest) =>
-    mockSearchStrategies[request._searchStrategyId],
-  getSearchStrategyById: (id: number) => mockSearchStrategies[id],
-}));
+jest.mock('../search_strategy', () => {
+  return {
+    defaultSearchStrategy: {
+      search: jest.fn(({ searchRequests }: SearchStrategySearchParams) => {
+        return {
+          searching: Promise.resolve(
+            searchRequests.map(req => {
+              return {
+                id: req._searchStrategyId,
+              };
+            })
+          ),
+          abort: mockAbortFn,
+        };
+      }),
+    },
+  };
+});
 
 describe('callClient', () => {
   beforeEach(() => {
     (handleResponse as jest.Mock).mockClear();
-    mockAbortFns.forEach(fn => fn.mockClear());
-    mockSearchFns.forEach(fn => fn.mockClear());
-  });
-
-  test('Executes each search strategy with its group of matching requests', () => {
-    const searchRequests = [
-      { _searchStrategyId: 0 },
-      { _searchStrategyId: 1 },
-      { _searchStrategyId: 0 },
-      { _searchStrategyId: 1 },
-    ];
-
-    callClient(searchRequests, [], {} as FetchHandlers);
-
-    expect(mockSearchFns[0]).toBeCalled();
-    expect(mockSearchFns[0].mock.calls[0][0].searchRequests).toEqual([
-      searchRequests[0],
-      searchRequests[2],
-    ]);
-    expect(mockSearchFns[1]).toBeCalled();
-    expect(mockSearchFns[1].mock.calls[0][0].searchRequests).toEqual([
-      searchRequests[1],
-      searchRequests[3],
-    ]);
+    // mockSearchFn.mockClear();
+    // mockAbortFn.mockClear();
   });
 
   test('Passes the additional arguments it is given to the search strategy', () => {
@@ -82,8 +59,11 @@ describe('callClient', () => {
 
     callClient(searchRequests, [], args);
 
-    expect(mockSearchFns[0]).toBeCalled();
-    expect(mockSearchFns[0].mock.calls[0][0]).toEqual({ searchRequests, ...args });
+    expect(defaultSearchStrategy.search).toBeCalled();
+    expect((defaultSearchStrategy.search as any).mock.calls[0][0]).toEqual({
+      searchRequests,
+      ...args,
+    });
   });
 
   test('Returns the responses in the original order', async () => {
@@ -91,7 +71,8 @@ describe('callClient', () => {
 
     const responses = await Promise.all(callClient(searchRequests, [], {} as FetchHandlers));
 
-    expect(responses).toEqual([mockResponses[1], mockResponses[0]]);
+    expect(responses[0]).toEqual({ id: searchRequests[0]._searchStrategyId });
+    expect(responses[1]).toEqual({ id: searchRequests[1]._searchStrategyId });
   });
 
   test('Calls handleResponse with each request and response', async () => {
@@ -101,8 +82,12 @@ describe('callClient', () => {
     await Promise.all(responses);
 
     expect(handleResponse).toBeCalledTimes(2);
-    expect(handleResponse).toBeCalledWith(searchRequests[0], mockResponses[0]);
-    expect(handleResponse).toBeCalledWith(searchRequests[1], mockResponses[1]);
+    expect(handleResponse).toBeCalledWith(searchRequests[0], {
+      id: searchRequests[0]._searchStrategyId,
+    });
+    expect(handleResponse).toBeCalledWith(searchRequests[1], {
+      id: searchRequests[1]._searchStrategyId,
+    });
   });
 
   test('If passed an abortSignal, calls abort on the strategy if the signal is aborted', () => {
@@ -117,7 +102,7 @@ describe('callClient', () => {
     callClient(searchRequests, requestOptions, {} as FetchHandlers);
     abortController.abort();
 
-    expect(mockAbortFns[0]).toBeCalled();
-    expect(mockAbortFns[1]).not.toBeCalled();
+    expect(mockAbortFn).toBeCalled();
+    // expect(mockAbortFns[1]).not.toBeCalled();
   });
 });
