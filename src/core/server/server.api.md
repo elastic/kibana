@@ -419,7 +419,26 @@ export type AuthenticationHandler = (request: KibanaRequest, response: Lifecycle
 export type AuthHeaders = Record<string, string | string[]>;
 
 // @public (undocumented)
-export type AuthResult = Authenticated;
+export interface AuthNotHandled {
+    // (undocumented)
+    type: AuthResultType.notHandled;
+}
+
+// @public (undocumented)
+export interface AuthRedirected extends AuthRedirectedParams {
+    // (undocumented)
+    type: AuthResultType.redirected;
+}
+
+// @public
+export interface AuthRedirectedParams {
+    headers: {
+        location: string;
+    } & ResponseHeaders;
+}
+
+// @public (undocumented)
+export type AuthResult = Authenticated | AuthNotHandled | AuthRedirected;
 
 // @public
 export interface AuthResultParams {
@@ -431,7 +450,11 @@ export interface AuthResultParams {
 // @public (undocumented)
 export enum AuthResultType {
     // (undocumented)
-    authenticated = "authenticated"
+    authenticated = "authenticated",
+    // (undocumented)
+    notHandled = "notHandled",
+    // (undocumented)
+    redirected = "redirected"
 }
 
 // @public
@@ -444,6 +467,10 @@ export enum AuthStatus {
 // @public
 export interface AuthToolkit {
     authenticated: (data?: AuthResultParams) => AuthResult;
+    notHandled: () => AuthResult;
+    redirected: (headers: {
+        location: string;
+    } & ResponseHeaders) => AuthResult;
 }
 
 // @public
@@ -606,6 +633,8 @@ export interface CoreSetup<TPluginsStart extends object = object> {
     // (undocumented)
     http: HttpServiceSetup;
     // (undocumented)
+    metrics: MetricsServiceSetup;
+    // (undocumented)
     savedObjects: SavedObjectsServiceSetup;
     // (undocumented)
     uiSettings: UiSettingsServiceSetup;
@@ -686,6 +715,9 @@ export interface DeprecationSettings {
 }
 
 // @public
+export type DestructiveRouteMethod = 'post' | 'put' | 'delete' | 'patch';
+
+// @public
 export interface DiscoveredPlugin {
     readonly configPath: ConfigPath;
     readonly id: PluginName;
@@ -762,6 +794,9 @@ export interface ErrorHttpResponseOptions {
     body?: ResponseError;
     headers?: ResponseHeaders;
 }
+
+// @public
+export function exportSavedObjectsToStream({ types, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, }: SavedObjectsExportOptions): Promise<import("stream").Readable>;
 
 // @public
 export interface FakeRequest {
@@ -891,6 +926,9 @@ export interface ImageValidation {
     };
 }
 
+// @public
+export function importSavedObjectsFromStream({ readStream, objectLimit, overwrite, savedObjectsClient, supportedTypes, namespace, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+
 // @public (undocumented)
 export interface IndexSettingsDeprecationInfo {
     // (undocumented)
@@ -958,6 +996,10 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     // @internal (undocumented)
     protected readonly [requestSymbol]: Request;
     constructor(request: Request, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
+    // (undocumented)
+    readonly auth: {
+        isAuthenticated: boolean;
+    };
     // (undocumented)
     readonly body: Body;
     readonly events: KibanaRequestEvents;
@@ -1432,6 +1474,9 @@ export type RequestHandlerContextContainer = IContextContainer<RequestHandler<an
 export type RequestHandlerContextProvider<TContextName extends keyof RequestHandlerContext> = IContextProvider<RequestHandler<any, any, any>, TContextName>;
 
 // @public
+export function resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, supportedTypes, namespace, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
+
+// @public
 export type ResponseError = string | Error | {
     message: string | Error;
     attributes?: ResponseErrorAttributes;
@@ -1456,9 +1501,10 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
 
 // @public
 export interface RouteConfigOptions<Method extends RouteMethod> {
-    authRequired?: boolean;
+    authRequired?: boolean | 'optional';
     body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
     tags?: readonly string[];
+    xsrfRequired?: Method extends 'get' ? never : boolean;
 }
 
 // @public
@@ -1473,7 +1519,7 @@ export interface RouteConfigOptionsBody {
 export type RouteContentType = 'application/json' | 'application/*+json' | 'application/octet-stream' | 'application/x-www-form-urlencoded' | 'multipart/form-data' | 'text/*';
 
 // @public
-export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
+export type RouteMethod = SafeRouteMethod | DestructiveRouteMethod;
 
 // @public
 export type RouteRegistrar<Method extends RouteMethod> = <P, Q, B>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
@@ -1525,6 +1571,9 @@ export interface RouteValidatorOptions {
         body?: boolean;
     };
 }
+
+// @public
+export type SafeRouteMethod = 'get' | 'options';
 
 // @public (undocumented)
 export interface SavedObject<T = unknown> {
@@ -1889,17 +1938,11 @@ export interface SavedObjectsImportMissingReferencesError {
 
 // @public
 export interface SavedObjectsImportOptions {
-    // (undocumented)
     namespace?: string;
-    // (undocumented)
     objectLimit: number;
-    // (undocumented)
     overwrite: boolean;
-    // (undocumented)
     readStream: Readable;
-    // (undocumented)
     savedObjectsClient: SavedObjectsClientContract;
-    // (undocumented)
     supportedTypes: string[];
 }
 
@@ -2053,17 +2096,11 @@ export interface SavedObjectsRepositoryFactory {
 
 // @public
 export interface SavedObjectsResolveImportErrorsOptions {
-    // (undocumented)
     namespace?: string;
-    // (undocumented)
     objectLimit: number;
-    // (undocumented)
     readStream: Readable;
-    // (undocumented)
     retries: SavedObjectsImportRetry[];
-    // (undocumented)
     savedObjectsClient: SavedObjectsClientContract;
-    // (undocumented)
     supportedTypes: string[];
 }
 
@@ -2094,6 +2131,7 @@ export class SavedObjectsSerializer {
 // @public
 export interface SavedObjectsServiceSetup {
     addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
+    getImportExportObjectLimit: () => number;
     registerType: (type: SavedObjectsType) => void;
     setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 }

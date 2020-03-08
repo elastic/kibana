@@ -37,6 +37,14 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AuthResultType](./kibana-plugin-server.authresulttype.md) |  |
 |  [AuthStatus](./kibana-plugin-server.authstatus.md) | Status indicating an outcome of the authentication. |
 
+## Functions
+
+|  Function | Description |
+|  --- | --- |
+|  [exportSavedObjectsToStream({ types, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, })](./kibana-plugin-server.exportsavedobjectstostream.md) | Generates sorted saved object stream to be used for export. See the [options](./kibana-plugin-server.savedobjectsexportoptions.md) for more detailed information. |
+|  [importSavedObjectsFromStream({ readStream, objectLimit, overwrite, savedObjectsClient, supportedTypes, namespace, })](./kibana-plugin-server.importsavedobjectsfromstream.md) | Import saved objects from given stream. See the [options](./kibana-plugin-server.savedobjectsimportoptions.md) for more detailed information. |
+|  [resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, supportedTypes, namespace, })](./kibana-plugin-server.resolvesavedobjectsimporterrors.md) | Resolve and return saved object import errors. See the [options](./kibana-plugin-server.savedobjectsresolveimporterrorsoptions.md) for more detailed informations. |
+
 ## Interfaces
 
 |  Interface | Description |
@@ -45,7 +53,10 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AssistanceAPIResponse](./kibana-plugin-server.assistanceapiresponse.md) |  |
 |  [AssistantAPIClientParams](./kibana-plugin-server.assistantapiclientparams.md) |  |
 |  [Authenticated](./kibana-plugin-server.authenticated.md) |  |
-|  [AuthResultParams](./kibana-plugin-server.authresultparams.md) | Result of an incoming request authentication. |
+|  [AuthNotHandled](./kibana-plugin-server.authnothandled.md) |  |
+|  [AuthRedirected](./kibana-plugin-server.authredirected.md) |  |
+|  [AuthRedirectedParams](./kibana-plugin-server.authredirectedparams.md) | Result of auth redirection. |
+|  [AuthResultParams](./kibana-plugin-server.authresultparams.md) | Result of successful authentication. |
 |  [AuthToolkit](./kibana-plugin-server.authtoolkit.md) | A tool set defining an outcome of Auth interceptor for incoming request. |
 |  [CallAPIOptions](./kibana-plugin-server.callapioptions.md) | The set of options that defines how API call should be made and result be processed. |
 |  [Capabilities](./kibana-plugin-server.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
@@ -188,6 +199,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ConfigDeprecationLogger](./kibana-plugin-server.configdeprecationlogger.md) | Logger interface used when invoking a [ConfigDeprecation](./kibana-plugin-server.configdeprecation.md) |
 |  [ConfigDeprecationProvider](./kibana-plugin-server.configdeprecationprovider.md) | A provider that should returns a list of [ConfigDeprecation](./kibana-plugin-server.configdeprecation.md)<!-- -->.<!-- -->See [ConfigDeprecationFactory](./kibana-plugin-server.configdeprecationfactory.md) for more usage examples. |
 |  [ConfigPath](./kibana-plugin-server.configpath.md) |  |
+|  [DestructiveRouteMethod](./kibana-plugin-server.destructiveroutemethod.md) | Set of HTTP methods changing the state of the server. |
 |  [ElasticsearchClientConfig](./kibana-plugin-server.elasticsearchclientconfig.md) |  |
 |  [GetAuthHeaders](./kibana-plugin-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |
 |  [GetAuthState](./kibana-plugin-server.getauthstate.md) | Gets authentication state for a request. Returned by <code>auth</code> interceptor. |
@@ -232,6 +244,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [RouteValidationFunction](./kibana-plugin-server.routevalidationfunction.md) | The custom validation function if @<!-- -->kbn/config-schema is not a valid solution for your specific plugin requirements. |
 |  [RouteValidationSpec](./kibana-plugin-server.routevalidationspec.md) | Allowed property validation options: either @<!-- -->kbn/config-schema validations or custom validation functions<!-- -->See [RouteValidationFunction](./kibana-plugin-server.routevalidationfunction.md) for custom validation. |
 |  [RouteValidatorFullConfig](./kibana-plugin-server.routevalidatorfullconfig.md) | Route validations config and options merged into one object |
+|  [SafeRouteMethod](./kibana-plugin-server.saferoutemethod.md) | Set of HTTP methods not changing the state of the server. |
 |  [SavedObjectAttribute](./kibana-plugin-server.savedobjectattribute.md) | Type definition for a Saved Object attribute value |
 |  [SavedObjectAttributeSingle](./kibana-plugin-server.savedobjectattributesingle.md) | Don't use this type, it's simply a helper type for [SavedObjectAttribute](./kibana-plugin-server.savedobjectattribute.md) |
 |  [SavedObjectMigrationFn](./kibana-plugin-server.savedobjectmigrationfn.md) | A migration function for a [saved object type](./kibana-plugin-server.savedobjectstype.md) used to migrate it to a given version |

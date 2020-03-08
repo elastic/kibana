@@ -112,8 +112,7 @@ export function setupAuthorization({
         authz
       );
 
-      // if we're an anonymous route, we disable all ui capabilities
-      if (request.route.options.authRequired === false) {
+      if (!request.auth.isAuthenticated) {
         return disableUICapabilities.all(capabilities);
       }
 

@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { RENDER_AS } from './render_as';
+import { RENDER_AS } from '../../../../common/constants';
 import { getTileBoundingBox } from './geo_tile_utils';
 import { extractPropertiesFromBucket } from '../../util/es_agg_utils';
 import { clamp } from '../../../elasticsearch_geo_utils';

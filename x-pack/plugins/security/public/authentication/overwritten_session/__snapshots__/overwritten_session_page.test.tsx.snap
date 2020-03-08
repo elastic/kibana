@@ -1,0 +1,135 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OverwrittenSessionPage renders as expected 1`] = `
+<AuthenticationStatePage
+  title={
+    <FormattedMessage
+      defaultMessage="You previously logged in as a different user."
+      id="xpack.security.overwrittenSession.title"
+      values={Object {}}
+    />
+  }
+>
+  <div
+    className="secAuthenticationStatePage"
+  >
+    <header
+      className="secAuthenticationStatePage__header"
+    >
+      <div
+        className="secAuthenticationStatePage__content eui-textCenter"
+      >
+        <EuiSpacer
+          size="xxl"
+        >
+          <div
+            className="euiSpacer euiSpacer--xxl"
+          />
+        </EuiSpacer>
+        <span
+          className="secAuthenticationStatePage__logo"
+        >
+          <EuiIcon
+            size="xxl"
+            type="logoKibana"
+          >
+            <EuiIconLogoKibana
+              aria-hidden={true}
+              className="euiIcon euiIcon--xxLarge euiIcon-isLoaded"
+              focusable="false"
+              role="img"
+              style={null}
+            >
+              <svg
+                aria-hidden={true}
+                className="euiIcon euiIcon--xxLarge euiIcon-isLoaded"
+                focusable="false"
+                height={32}
+                role="img"
+                style={null}
+                viewBox="0 0 32 32"
+                width={32}
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g
+                  fill="none"
+                  fillRule="evenodd"
+                >
+                  <path
+                    d="M4 0v28.789L28.935.017z"
+                    fill="#F04E98"
+                  />
+                  <path
+                    className="euiIcon__fillNegative"
+                    d="M4 12v16.789l11.906-13.738A24.721 24.721 0 004 12"
+                  />
+                  <path
+                    d="M18.479 16.664L6.268 30.754l-1.073 1.237h23.191c-1.252-6.292-4.883-11.719-9.908-15.327"
+                    fill="#00BFB3"
+                  />
+                </g>
+              </svg>
+            </EuiIconLogoKibana>
+          </EuiIcon>
+        </span>
+        <EuiTitle
+          className="secAuthenticationStatePage__title"
+          size="l"
+        >
+          <h1
+            className="euiTitle euiTitle--large secAuthenticationStatePage__title"
+          >
+            <FormattedMessage
+              defaultMessage="You previously logged in as a different user."
+              id="xpack.security.overwrittenSession.title"
+              values={Object {}}
+            >
+              You previously logged in as a different user.
+            </FormattedMessage>
+          </h1>
+        </EuiTitle>
+        <EuiSpacer
+          size="xl"
+        >
+          <div
+            className="euiSpacer euiSpacer--xl"
+          />
+        </EuiSpacer>
+      </div>
+    </header>
+    <div
+      className="secAuthenticationStatePage__content eui-textCenter"
+    >
+      <EuiButton
+        href="/mock-base-path/"
+      >
+        <a
+          className="euiButton euiButton--primary"
+          href="/mock-base-path/"
+          rel="noreferrer"
+        >
+          <span
+            className="euiButton__content"
+          >
+            <span
+              className="euiButton__text"
+            >
+              <FormattedMessage
+                defaultMessage="Continue as {username}"
+                id="xpack.security.overwrittenSession.continueAsUserText"
+                values={
+                  Object {
+                    "username": "mock-user",
+                  }
+                }
+              >
+                Continue as mock-user
+              </FormattedMessage>
+            </span>
+          </span>
+        </a>
+      </EuiButton>
+    </div>
+  </div>
+</AuthenticationStatePage>
+`;

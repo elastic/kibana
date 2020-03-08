@@ -124,6 +124,7 @@ export function SavedQueryManagementComponent({
     }
 
     await savedQueryService.deleteSavedQuery(savedQuery.id);
+    setActivePage(0);
   };
 
   const savedQueryPopoverButton = (
