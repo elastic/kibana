@@ -108,6 +108,7 @@ interface UpdateOptions {
     actions: NormalizedAlertAction[];
     throttle: string | null;
     params: Record<string, any>;
+    throttle: string | null;
   };
 }
 

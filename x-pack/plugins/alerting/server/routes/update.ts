@@ -62,11 +62,11 @@ export const updateAlertRoute = (router: IRouter, licenseState: LicenseState) =>
       }
       const alertsClient = context.alerting.getAlertsClient();
       const { id } = req.params;
-      const { name, actions, throttle, params, schedule, tags } = req.body;
+      const { name, actions, params, schedule, tags, throttle } = req.body;
       return res.ok({
         body: await alertsClient.update({
           id,
-          data: { name, actions, throttle, params, schedule, tags },
+          data: { name, actions, params, schedule, tags, throttle },
         }),
       });
     })
