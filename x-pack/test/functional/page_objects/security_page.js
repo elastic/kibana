@@ -110,12 +110,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       }
 
       await userMenu.clickLogoutButton();
-
-      await retry.waitForWithTimeout(
-        'login form',
-        config.get('timeouts.waitFor') * 5,
-        async () => await find.existsByDisplayedByCssSelector('.login-form')
-      );
+      await this.waitForLoginForm();
     }
 
     async forceLogout() {
@@ -129,11 +124,17 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       const url = PageObjects.common.getHostPort() + '/logout';
       await browser.get(url);
       log.debug('Waiting on the login form to appear');
-      await retry.waitForWithTimeout(
-        'login form',
-        config.get('timeouts.waitFor') * 5,
-        async () => await find.existsByDisplayedByCssSelector('.login-form')
-      );
+      await this.waitForLoginForm();
+    }
+
+    async waitForLoginForm() {
+      await retry.waitForWithTimeout('login form', config.get('timeouts.waitFor') * 5, async () => {
+        const alert = await browser.getAlert();
+        if (alert && alert.accept) {
+          await alert.accept();
+        }
+        return await find.existsByDisplayedByCssSelector('.login-form');
+      });
     }
 
     async clickRolesSection() {
