@@ -253,9 +253,13 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async clickFieldListPlusFilter(field: string, value: string) {
-      // this method requires the field details to be open from clickFieldListItem()
+      const plusFilterTestSubj = `plus-${field}-${value}`;
+      if (!(await testSubjects.exists(plusFilterTestSubj))) {
+        // field has to be open
+        await this.clickFieldListItem(field);
+      }
       // testSubjects.find doesn't handle spaces in the data-test-subj value
-      await find.clickByCssSelector(`[data-test-subj="plus-${field}-${value}"]`);
+      await find.clickByCssSelector(`[data-test-subj="${plusFilterTestSubj}"]`);
       await header.waitUntilLoadingHasFinished();
     }
 

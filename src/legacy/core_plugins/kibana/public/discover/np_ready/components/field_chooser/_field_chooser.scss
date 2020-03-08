@@ -13,6 +13,8 @@
 }
 
 .dscSidebarItemExpanded {
+  border-top: 1px solid $euiColorLightShade;
+  margin-bottom: $euiSizeS;
   background-color: #FFF;
   padding: 2px;
 }

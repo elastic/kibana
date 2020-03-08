@@ -47,6 +47,7 @@ export function createFieldChooserDirective($location, config, $route) {
     },
     template: fieldChooserTemplate,
     link: function($scope) {
+      $scope.openFields = new Map();
       $scope.showFilter = false;
       $scope.toggleShowFilter = () => ($scope.showFilter = !$scope.showFilter);
 
@@ -252,30 +253,38 @@ export function createFieldChooserDirective($location, config, $route) {
         );
       }
 
-      $scope.computeDetails = function(field, recompute) {
-        if (_.isUndefined(field.details) || recompute) {
-          field.details = {
-            visualizeUrl:
-              getServices().capabilities.visualize.show && isFieldVisualizable(field)
-                ? getVisualizeUrl(field)
-                : null,
-            ...fieldCalculator.getFieldValueCounts({
-              hits: $scope.hits,
-              field: field,
-              count: 5,
-              grouped: false,
-            }),
-          };
-          _.each(field.details.buckets, function(bucket) {
-            bucket.display = field.format.convert(bucket.value);
-          });
+      function getDetails(field) {
+        const details = {
+          visualizeUrl:
+            getServices().capabilities.visualize.show && isFieldVisualizable(field)
+              ? getVisualizeUrl(field)
+              : null,
+          ...fieldCalculator.getFieldValueCounts({
+            hits: $scope.hits,
+            field: field,
+            count: 5,
+            grouped: false,
+          }),
+        };
+        _.each(details.buckets, bucket => {
+          bucket.display = field.format.convert(bucket.value);
+        });
+        return details;
+      }
+
+      $scope.computeDetails = function(show, field) {
+        if (show) {
+          field.details = getDetails(field);
+          $scope.openFields.set(field.name, true);
           $scope.increaseFieldCounter(field, 1);
+        } else {
+          $scope.openFields.set(field.name, false);
+          delete field.details;
         }
         return field.details;
       };
 
       function getFields() {
-        const prevFields = $scope.fields;
         const indexPattern = $scope.indexPattern;
         const hits = $scope.hits;
         const fieldCounts = $scope.fieldCounts;
@@ -297,9 +306,11 @@ export function createFieldChooserDirective($location, config, $route) {
 
         const fields = new IndexPatternFieldList(indexPattern, fieldSpecs);
 
-        if (prevFields) {
+        if ($scope.openFields.size) {
           fields.forEach(function(field) {
-            field.details = (prevFields.getByName(field.name) || {}).details;
+            if ($scope.openFields.get(field.name)) {
+              field.details = getDetails(field);
+            }
           });
         }
 

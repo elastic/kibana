@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverFieldDetails, Field } from './discover_field_details';
@@ -24,20 +24,23 @@ import { FieldIcon } from '../../../../../../../../plugins/kibana_react/public';
 
 export interface Props {
   field: Field;
+  details: any;
   onAddField: any;
   onAddFilter: any;
   onRemoveField: any;
   onShowDetails: any;
+  showDetails: boolean;
 }
 
 export function DiscoverField({
   field,
+  details,
   onAddField,
   onRemoveField,
   onAddFilter,
   onShowDetails,
+  showDetails,
 }: Props) {
-  const [showDetails, setShowDetails] = useState(false);
   const addLabel = i18n.translate('kbn.discover.fieldChooser.discoverField.addButtonLabel', {
     defaultMessage: 'Add to selected fields',
   });
@@ -70,7 +73,7 @@ export function DiscoverField({
               color="text"
               size="xs"
               data-test-subj={`field-${field.name}`}
-              onClick={() => setShowDetails(!showDetails)}
+              onClick={() => onShowDetails(!showDetails, field, true)}
               flush="left"
               style={{ textAlign: 'left' }}
             >
@@ -103,8 +106,8 @@ export function DiscoverField({
           )}
         </span>
       </div>
-      {showDetails && onShowDetails(field, true) && (
-        <DiscoverFieldDetails field={field} onAddFilter={onAddFilter} />
+      {showDetails && (
+        <DiscoverFieldDetails field={field} details={details} onAddFilter={onAddFilter} />
       )}
     </div>
   );

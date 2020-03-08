@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { getWarnings } from './lib/get_warnings';
@@ -46,15 +46,16 @@ export interface Field {
 
 interface Props {
   field: Field;
+  details: any;
   onAddFilter: (field: Field | string, value: string, type: '+' | '-') => void;
 }
 
-export function DiscoverFieldDetails({ field, onAddFilter }: Props) {
+export function DiscoverFieldDetails({ field, details, onAddFilter }: Props) {
   const warnings = getWarnings(field);
 
   return (
     <div className="dscFieldDetails">
-      {!field.details.error && (
+      {!details.error && (
         <p className="euiText euiText--extraSmall euiTextColor--subdued">
           <FormattedMessage
             id="kbn.discover.fieldChooser.detailViews.topValuesInRecordsDescription"
@@ -62,27 +63,25 @@ export function DiscoverFieldDetails({ field, onAddFilter }: Props) {
           />{' '}
           {field.indexPattern.metaFields.includes(field.name) && !field.scripted && (
             <EuiLink className="kuiLink" onClick={() => onAddFilter('_exists_', field.name, '+')}>
-              {field.details.exists}
+              {details.exists}
             </EuiLink>
           )}{' '}
           {field.indexPattern.metaFields.includes(field.name) && field.scripted && (
-            <span>{field.details.exists}</span>
+            <span>{details.exists}</span>
           )}
-          / {field.details.total}{' '}
+          / {details.total}{' '}
           <FormattedMessage
             id="kbn.discover.fieldChooser.detailViews.recordsText"
             defaultMessage="records"
           />
         </p>
       )}
-      {field.details.error && (
-        <div className="euiText euiText--extraSmall euiTextColor--subdued">
-          {field.details.error}
-        </div>
+      {details.error && (
+        <div className="euiText euiText--extraSmall euiTextColor--subdued">{details.error}</div>
       )}
-      {!field.details.error && (
+      {!details.error && (
         <div style={{ marginTop: '4px' }}>
-          {field.details.buckets.map((bucket: any, idx: number) => (
+          {details.buckets.map((bucket: any, idx: number) => (
             <DiscoverFieldBucket
               key={`bucket${idx}`}
               bucket={bucket}
@@ -93,10 +92,11 @@ export function DiscoverFieldDetails({ field, onAddFilter }: Props) {
         </div>
       )}
 
-      {field.details.visualizeUrl && (
+      {details.visualizeUrl && (
         <>
+          <EuiSpacer size={'xs'} />
           <EuiLink
-            href={field.details.visualizeUrl}
+            href={details.visualizeUrl}
             className="kuiButton kuiButton--secondary kuiButton--small kuiVerticalRhythmSmall"
             data-test-subj={`fieldVisualize-${field.name}`}
           >

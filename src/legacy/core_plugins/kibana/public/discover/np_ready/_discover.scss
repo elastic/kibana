@@ -163,7 +163,8 @@ discover-app {
 }
 
 .dscFieldDetails {
-  padding: $euiSizeS;
+  padding: 0 $euiSizeS $euiSizeS $euiSizeS;
+
   color: $euiTextColor;
 }
 

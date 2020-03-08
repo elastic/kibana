@@ -21,9 +21,11 @@ import { DiscoverField } from './discover_field';
 export function createDiscoverFieldDirective(reactDirective: any) {
   return reactDirective(DiscoverField, [
     ['field', { watchDepth: 'reference' }],
+    ['details', { watchDepth: 'reference' }],
     ['onAddField', { watchDepth: 'reference' }],
     ['onAddFilter', { watchDepth: 'reference' }],
     ['onShowDetails', { watchDepth: 'reference' }],
-    ['onRemoveField', { watchDepth: 'collection' }],
+    ['onRemoveField', { watchDepth: 'reference' }],
+    ['showDetails', { watchDepth: 'reference' }],
   ]);
 }
