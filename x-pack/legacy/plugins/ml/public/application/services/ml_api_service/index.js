@@ -13,10 +13,9 @@ import { filters } from './filters';
 import { results } from './results';
 import { jobs } from './jobs';
 import { fileDatavisualizer } from './datavisualizer';
-import { getBasePath } from '../../util/dependency_cache';
 
 export function basePath() {
-  return getBasePath().prepend('/api/ml');
+  return '/api/ml';
 }
 
 export const ml = {
@@ -452,7 +451,7 @@ export const ml = {
   },
 
   getIndices() {
-    const tempBasePath = getBasePath().prepend('/api');
+    const tempBasePath = '/api';
     return http({
       url: `${tempBasePath}/index_management/indices`,
       method: 'GET',
