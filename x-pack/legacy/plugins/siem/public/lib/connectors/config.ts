@@ -14,4 +14,22 @@ connectors.set('.servicenow', {
   logo: serviceNowLogo,
 });
 
-export { connectors };
+const defaultMapping = [
+  {
+    source: 'title',
+    target: 'short_description',
+    actionType: 'overwrite',
+  },
+  {
+    source: 'description',
+    target: 'description',
+    actionType: 'overwrite',
+  },
+  {
+    source: 'comments',
+    target: 'comments',
+    actionType: 'append',
+  },
+];
+
+export { connectors, defaultMapping };

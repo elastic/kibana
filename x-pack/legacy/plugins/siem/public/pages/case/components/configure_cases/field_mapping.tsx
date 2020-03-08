@@ -16,6 +16,7 @@ import {
 } from '../../../../containers/case/configure/types';
 import { FieldMappingRow } from './field_mapping_row';
 import * as i18n from './translations';
+import { defaultMapping } from '../../../../lib/connectors/config';
 
 const FieldRowWrapper = styled.div`
   margin-top: 8px;
@@ -41,24 +42,6 @@ const supportedThirdPartyFields: Array<EuiSuperSelectOption<ThirdPartyField>> = 
   },
 ];
 
-const defaultMappings: CasesConfigurationMapping[] = [
-  {
-    source: 'title',
-    target: 'short_description',
-    actionType: 'overwrite',
-  },
-  {
-    source: 'description',
-    target: 'description',
-    actionType: 'append',
-  },
-  {
-    source: 'comments',
-    target: 'comments',
-    actionType: 'append',
-  },
-];
-
 interface FieldMappingProps {
   disabled: boolean;
   mappings: CasesConfigurationMapping[] | null;
@@ -72,7 +55,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
 }) => {
   const onChangeActionType = useCallback(
     (caseField: CaseField, newActionType: ActionType) => {
-      const myMappings = mappings ?? defaultMappings;
+      const myMappings = mappings ?? defaultMapping;
       const findItemIndex = myMappings.findIndex(item => item.source === caseField);
       if (findItemIndex >= 0) {
         onChangeMappings([
@@ -87,7 +70,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
 
   const onChangeThirdParty = useCallback(
     (caseField: CaseField, newThirdPartyField: ThirdPartyField) => {
-      const myMappings = mappings ?? defaultMappings;
+      const myMappings = mappings ?? defaultMapping;
       onChangeMappings(
         myMappings.map(item => {
           if (item.source !== caseField && item.target === newThirdPartyField) {
@@ -117,7 +100,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
         </EuiFlexGroup>
       </EuiFormRow>
       <FieldRowWrapper>
-        {(mappings ?? defaultMappings).map(item => (
+        {(mappings ?? defaultMapping).map(item => (
           <FieldMappingRow
             key={item.source}
             disabled={disabled}
