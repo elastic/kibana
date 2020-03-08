@@ -84,8 +84,6 @@
     "**/@types/angular": "^1.6.56",
     "**/@types/hoist-non-react-statics": "^3.3.1",
     "**/typescript": "3.7.2",
-    "**/apollo-link": "^1.2.13",
-    "**/graphql-tools": "^4.0.7",
     "**/graphql-toolkit/lodash": "^4.17.13",
     "**/hoist-non-react-statics": "^3.3.2",
     "**/isomorphic-git/**/base64-js": "^1.2.1",
