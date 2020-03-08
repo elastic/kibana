@@ -37,7 +37,7 @@ import getopts from 'getopts';
  * Step 1: execute build:types
  * This users tsconfig.types.json to generate types in `target/types`
  * Step 2: run Api Extractor to detect API changes
- * Step 3:
+ * Step 3: generate new docs if needed
  */
 
 const getReportFileName = (folder: string) => {
@@ -181,13 +181,13 @@ async function run(
   // Attempt to generate docs even if api-extractor didn't succeed
   if ((opts.accept && apiReportChanged) || opts.docs) {
     try {
-      await renameExtractedApiPackageName(srcFolder);
-      await runApiDocumenter(srcFolder);
+      await renameExtractedApiPackageName(folder);
+      await runApiDocumenter(folder);
     } catch (e) {
       log.error(e);
       return false;
     }
-    log.info(`Core ${srcFolder} API: updated documentation ✔`);
+    log.info(`Core ${folder} API: updated documentation ✔`);
   }
 
   // If the api signature changed or any errors or warnings occured, exit with an error
