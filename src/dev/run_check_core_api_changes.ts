@@ -41,31 +41,27 @@ import getopts from 'getopts';
  */
 
 const getReportFileName = (folder: string) => {
-  // if (folder.startsWith('core')) {
   return folder.indexOf('public') > -1 ? 'public' : 'server';
-  // } else {
-  //   return folder.replace(/\//g, '_');
-  // }
 };
 
-const apiExtractorConfig = (srcFolder: string): ExtractorConfig => {
-  const fname = getReportFileName(srcFolder);
+const apiExtractorConfig = (folder: string): ExtractorConfig => {
+  const fname = getReportFileName(folder);
   const config: IConfigFile = {
     newlineKind: 'lf',
     compiler: {
       tsconfigFilePath: '<projectFolder>/tsconfig.json',
     },
     projectFolder: path.resolve('./'),
-    mainEntryPointFilePath: `target/types/${srcFolder}/index.d.ts`,
+    mainEntryPointFilePath: `target/types/${folder}/index.d.ts`,
     apiReport: {
       enabled: true,
       reportFileName: `${fname}.api.md`,
-      reportFolder: `<projectFolder>/src/${srcFolder}/`,
-      reportTempFolder: `<projectFolder>/build/${srcFolder}/`,
+      reportFolder: `<projectFolder>/src/${folder}/`,
+      reportTempFolder: `<projectFolder>/build/${folder}/`,
     },
     docModel: {
       enabled: true,
-      apiJsonFilePath: `./build/${srcFolder}/${fname}.api.json`,
+      apiJsonFilePath: `./build/${folder}/${fname}.api.json`,
     },
     tsdocMetadata: {
       enabled: false,
@@ -122,10 +118,10 @@ const renameExtractedApiPackageName = async (folder: string) => {
  */
 const runApiExtractor = (
   log: ToolingLog,
-  srcFolder: string,
+  folder: string,
   acceptChanges: boolean = false
 ): ExtractorResult => {
-  const config = apiExtractorConfig(srcFolder);
+  const config = apiExtractorConfig(folder);
   const options = {
     // Indicates that API Extractor is running as part of a local build,
     // e.g. on developer's machine. For example, if the *.api.md output file
@@ -135,7 +131,7 @@ const runApiExtractor = (
     messageCallback: (message: ExtractorMessage) => {
       if (message.messageId === 'console-api-report-not-copied') {
         // ConsoleMessageId.ApiReportNotCopied
-        log.warning(`You have changed the signature of the ${srcFolder} Core API`);
+        log.warning(`You have changed the signature of the ${folder} Core API`);
         log.warning(
           'To accept these changes run `node scripts/check_core_api_changes.js --accept` and then:\n' +
             "\t 1. Commit the updated documentation and API review file '" +
@@ -146,7 +142,7 @@ const runApiExtractor = (
         message.handled = true;
       } else if (message.messageId === 'console-api-report-copied') {
         // ConsoleMessageId.ApiReportCopied
-        log.warning(`You have changed the signature of the ${srcFolder} Core API`);
+        log.warning(`You have changed the signature of the ${folder} Core API`);
         log.warning(
           "Please commit the updated API documentation and the API review file: '" +
             config.reportFilePath
@@ -154,7 +150,7 @@ const runApiExtractor = (
         message.handled = true;
       } else if (message.messageId === 'console-api-report-unchanged') {
         // ConsoleMessageId.ApiReportUnchanged
-        log.info(`Core ${srcFolder} API: no changes detected ✔`);
+        log.info(`Core ${folder} API: no changes detected ✔`);
         message.handled = true;
       }
     },
@@ -170,12 +166,12 @@ interface Options {
 }
 
 async function run(
-  srcFolder: string,
+  folder: string,
   { log, opts }: { log: ToolingLog; opts: Options }
 ): Promise<boolean> {
-  log.info(`Core ${srcFolder} API: checking for changes in API signature...`);
+  log.info(`Core ${folder} API: checking for changes in API signature...`);
 
-  const { apiReportChanged, succeeded } = runApiExtractor(log, srcFolder, opts.accept);
+  const { apiReportChanged, succeeded } = runApiExtractor(log, folder, opts.accept);
 
   // If we're not accepting changes and there's a failure, exit.
   if (!opts.accept && !succeeded) {
