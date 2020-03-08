@@ -24,6 +24,7 @@ import {
 import { registerRollupUsageCollector } from './collectors';
 
 import { rollupDataEnricher } from './rollup_data_enricher';
+import { registerRollupSearchStrategy } from './lib/search_strategies';
 
 export class RollupsServerPlugin implements Plugin<void, void, any, any> {
   log: Logger;
@@ -80,6 +81,11 @@ export class RollupsServerPlugin implements Plugin<void, void, any, any> {
 
     if (indexManagement && indexManagement.indexDataEnricher) {
       indexManagement.indexDataEnricher.add(rollupDataEnricher);
+    }
+
+    if (metrics) {
+      const { addSearchStrategy } = metrics;
+      registerRollupSearchStrategy(routeDependencies, addSearchStrategy);
     }
   }
 
