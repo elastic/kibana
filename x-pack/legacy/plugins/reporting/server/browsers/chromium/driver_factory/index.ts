@@ -168,7 +168,7 @@ export class HeadlessChromiumDriverFactory {
         logger.debug(`deleting chromium user data directory at [${userDataDir}]`);
         // the unsubscribe function isn't `async` so we're going to make our best effort at
         // deleting the userDataDir and if it fails log an error.
-        del(userDataDir).catch(error => {
+        del(userDataDir, { force: true }).catch(error => {
           logger.error(`error deleting user data directory at [${userDataDir}]: [${error}]`);
         });
       });
