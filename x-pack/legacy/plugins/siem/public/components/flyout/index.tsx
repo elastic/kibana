@@ -16,9 +16,7 @@ import { FlyoutButton } from './button';
 import { Pane } from './pane';
 import { timelineActions } from '../../store/actions';
 import { DEFAULT_TIMELINE_WIDTH } from '../timeline/body/constants';
-
-/** The height in pixels of the flyout header, exported for use in height calculations */
-export const flyoutHeaderHeight: number = 60;
+import { StatefulTimeline } from '../timeline';
 
 export const Badge = styled(EuiBadge)`
   position: absolute;
@@ -38,9 +36,7 @@ const Visible = styled.div<{ show?: boolean }>`
 Visible.displayName = 'Visible';
 
 interface OwnProps {
-  children?: React.ReactNode;
   flyoutHeight: number;
-  headerHeight: number;
   timelineId: string;
   usersViewing: string[];
 }
@@ -48,17 +44,7 @@ interface OwnProps {
 type Props = OwnProps & ProsFromRedux;
 
 export const FlyoutComponent = React.memo<Props>(
-  ({
-    children,
-    dataProviders,
-    flyoutHeight,
-    headerHeight,
-    show,
-    showTimeline,
-    timelineId,
-    usersViewing,
-    width,
-  }) => {
+  ({ dataProviders, flyoutHeight, show, showTimeline, timelineId, usersViewing, width }) => {
     const handleClose = useCallback(() => showTimeline({ id: timelineId, show: false }), [
       showTimeline,
       timelineId,
@@ -73,13 +59,16 @@ export const FlyoutComponent = React.memo<Props>(
         <Visible show={show}>
           <Pane
             flyoutHeight={flyoutHeight}
-            headerHeight={headerHeight}
             onClose={handleClose}
             timelineId={timelineId}
-            usersViewing={usersViewing}
             width={width}
           >
-            {children}
+            <StatefulTimeline
+              onClose={handleClose}
+              usersViewing={usersViewing}
+              flyoutHeight={flyoutHeight}
+              id={timelineId}
+            />
           </Pane>
         </Visible>
         <FlyoutButton

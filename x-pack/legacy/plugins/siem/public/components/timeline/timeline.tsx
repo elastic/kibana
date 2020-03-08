@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
+import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
+import { FlyoutHeaderWithCloseButton } from '../flyout/header_with_close_button';
 import { BrowserFields } from '../../containers/source';
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
@@ -44,14 +45,40 @@ WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
 
 export const isCompactFooter = (width: number): boolean => width < 600;
 
-interface Props {
+const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
+  align-items: center;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  padding: 5px 0 0 10px;
+`;
+
+const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
+  overflow-y: hidden;
+
+  .euiFlyoutBody__overflow {
+    overflow: hidden;
+  }
+
+  .euiFlyoutBody__overflowContent {
+    padding: 0 10px 0 12px;
+    height: 100%;
+    display: flex;
+  }
+`;
+
+const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
+  background: none;
+  padding: 0 10px 0 12px;
+`;
+
+export interface Props {
   browserFields: BrowserFields;
   columns: ColumnHeaderOptions[];
   dataProviders: DataProvider[];
   end: number;
   eventType?: EventType;
   filters: Filter[];
-  flyoutHeaderHeight: number;
   flyoutHeight: number;
   id: string;
   indexPattern: IIndexPattern;
@@ -65,6 +92,7 @@ interface Props {
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
   onChangeItemsPerPage: OnChangeItemsPerPage;
+  onClose: () => void;
   onDataProviderEdited: OnDataProviderEdited;
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
@@ -74,6 +102,7 @@ interface Props {
   start: number;
   sort: Sort;
   toggleColumn: (column: ColumnHeaderOptions) => void;
+  usersViewing: string[];
 }
 
 /** The parent Timeline component */
@@ -97,6 +126,7 @@ export const TimelineComponent: React.FC<Props> = ({
   onChangeDataProviderKqlQuery,
   onChangeDroppableAndProvider,
   onChangeItemsPerPage,
+  onClose,
   onDataProviderEdited,
   onDataProviderRemoved,
   onToggleDataProviderEnabled,
@@ -106,6 +136,7 @@ export const TimelineComponent: React.FC<Props> = ({
   start,
   sort,
   toggleColumn,
+  usersViewing,
 }) => {
   const { ref: measureRef, width = 0 } = useResizeObserver<HTMLDivElement>({});
   const kibana = useKibana();
@@ -121,79 +152,105 @@ export const TimelineComponent: React.FC<Props> = ({
     end,
   });
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
+  const timelineQueryFields = useMemo(() => columnsHeader.map(c => c.id), [columnsHeader]);
+  const timelineQuerySortField = {
+    sortFieldId: sort.columnId,
+    direction: sort.sortDirection as Direction,
+  };
 
   return (
     <>
+      <StyledEuiFlyoutHeader data-test-subj="eui-flyout-header" hasBorder={false}>
+        <FlyoutHeaderWithCloseButton
+          onClose={onClose}
+          timelineId={id}
+          usersViewing={usersViewing}
+        />
+        <WrappedByAutoSizer ref={measureRef as React.RefObject<HTMLDivElement>}>
+          <TimelineHeader
+            browserFields={browserFields}
+            id={id}
+            indexPattern={indexPattern}
+            dataProviders={dataProviders}
+            onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
+            onChangeDroppableAndProvider={onChangeDroppableAndProvider}
+            onDataProviderEdited={onDataProviderEdited}
+            onDataProviderRemoved={onDataProviderRemoved}
+            onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+            onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+            show={show}
+            showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+            sort={sort}
+          />
+        </WrappedByAutoSizer>
+      </StyledEuiFlyoutHeader>
       <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
-      <TimelineQuery
-        eventType={eventType}
-        id={id}
-        indexToAdd={indexToAdd}
-        fields={columnsHeader.map(c => c.id)}
-        sourceId="default"
-        limit={itemsPerPage}
-        filterQuery={combinedQueries?.filterQuery}
-        sortField={{
-          sortFieldId: sort.columnId,
-          direction: sort.sortDirection as Direction,
-        }}
-      >
-        {({ events, inspect, loading, totalCount, pageInfo, loadMore, getUpdatedAt, refetch }) => (
-          <ManageTimelineContext loading={loading || loadingIndexName} width={width}>
-            <TimelineRefetch
-              id={id}
-              inputId="timeline"
-              inspect={inspect}
-              loading={loading}
-              refetch={refetch}
-            />
-            <EuiFlyoutBody data-test-subj="eui-flyout-body" className="timeline-flyout-body">
-              <WrappedByAutoSizer ref={measureRef as React.RefObject<HTMLDivElement>}>
-                <TimelineHeader
-                  browserFields={browserFields}
-                  id={id}
-                  indexPattern={indexPattern}
-                  dataProviders={dataProviders}
-                  onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
-                  onChangeDroppableAndProvider={onChangeDroppableAndProvider}
-                  onDataProviderEdited={onDataProviderEdited}
-                  onDataProviderRemoved={onDataProviderRemoved}
-                  onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-                  onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-                  show={show}
-                  showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-                  sort={sort}
-                />
-              </WrappedByAutoSizer>
-              <StatefulBody
-                browserFields={browserFields}
-                data={events}
+      {combinedQueries !== null && (
+        <TimelineQuery
+          eventType={eventType}
+          id={id}
+          indexToAdd={indexToAdd}
+          fields={timelineQueryFields}
+          sourceId="default"
+          limit={itemsPerPage}
+          filterQuery={combinedQueries?.filterQuery}
+          sortField={timelineQuerySortField}
+        >
+          {({
+            events,
+            inspect,
+            loading,
+            totalCount,
+            pageInfo,
+            loadMore,
+            getUpdatedAt,
+            refetch,
+          }) => (
+            <ManageTimelineContext loading={loading || loadingIndexName} width={width}>
+              <TimelineRefetch
                 id={id}
-                sort={sort}
-                toggleColumn={toggleColumn}
+                inputId="timeline"
+                inspect={inspect}
+                loading={loading}
+                refetch={refetch}
               />
-            </EuiFlyoutBody>
-            <EuiFlyoutFooter data-test-subj="eui-flyout-footer" className="timeline-flyout-footer">
-              <Footer
-                serverSideEventCount={totalCount}
-                hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                height={footerHeight}
-                isLive={isLive}
-                isLoading={loading || loadingIndexName}
-                itemsCount={events.length}
-                itemsPerPage={itemsPerPage}
-                itemsPerPageOptions={itemsPerPageOptions}
-                onChangeItemsPerPage={onChangeItemsPerPage}
-                onLoadMore={loadMore}
-                nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                getUpdatedAt={getUpdatedAt}
-                compact={isCompactFooter(width)}
-              />
-            </EuiFlyoutFooter>
-          </ManageTimelineContext>
-        )}
-      </TimelineQuery>
+              <StyledEuiFlyoutBody
+                data-test-subj="eui-flyout-body"
+                className="timeline-flyout-body"
+              >
+                <StatefulBody
+                  browserFields={browserFields}
+                  data={events}
+                  id={id}
+                  sort={sort}
+                  toggleColumn={toggleColumn}
+                />
+              </StyledEuiFlyoutBody>
+              <StyledEuiFlyoutFooter
+                data-test-subj="eui-flyout-footer"
+                className="timeline-flyout-footer"
+              >
+                <Footer
+                  serverSideEventCount={totalCount}
+                  hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                  height={footerHeight}
+                  isLive={isLive}
+                  isLoading={loading || loadingIndexName}
+                  itemsCount={events.length}
+                  itemsPerPage={itemsPerPage}
+                  itemsPerPageOptions={itemsPerPageOptions}
+                  onChangeItemsPerPage={onChangeItemsPerPage}
+                  onLoadMore={loadMore}
+                  nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                  tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
+                  getUpdatedAt={getUpdatedAt}
+                  compact={isCompactFooter(width)}
+                />
+              </StyledEuiFlyoutFooter>
+            </ManageTimelineContext>
+          )}
+        </TimelineQuery>
+      )}
     </>
   );
 };
