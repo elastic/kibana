@@ -11,5 +11,6 @@ export const CannotCreateIndex = Symbol('CannotCreateIndex');
 export const ReindexTaskFailed = Symbol('ReindexTaskFailed');
 export const ReindexTaskCannotBeDeleted = Symbol('ReindexTaskCannotBeDeleted');
 export const ReindexAlreadyInProgress = Symbol('ReindexAlreadyInProgress');
+export const ReindexCannotBeCancelled = Symbol('ReindexCannotBeCancelled');
 
 export const MultipleReindexJobsFound = Symbol('MultipleReindexJobsFound');
