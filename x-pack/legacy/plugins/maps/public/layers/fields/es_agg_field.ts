@@ -21,6 +21,7 @@ import { TopTermPercentageField } from './top_term_percentage_field';
 export interface IESAggField extends IField {
   getValueAggDsl(indexPattern: IndexPattern): unknown | null;
   getBucketCount(): number;
+  getAggType(): AGG_TYPE;
 }
 
 export class ESAggField implements IESAggField {

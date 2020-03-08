@@ -5,7 +5,6 @@
  */
 
 import { ESTermSource, extractPropertiesMap } from './es_term_source';
-import _ from 'lodash';
 
 jest.mock('ui/new_platform');
 jest.mock('../vector_layer', () => {});
@@ -32,62 +31,29 @@ const metricExamples = [
 ];
 
 describe('getMetricFields', () => {
-  it('should add default "count" metric when no metrics are provided', async () => {
+  it('should override name and label of count metric', async () => {
     const source = new ESTermSource({
       indexPatternTitle: indexPatternTitle,
       term: termFieldName,
     });
     const metrics = source.getMetricFields();
-    expect(metrics.length).toBe(1);
-
-    expect(metrics[0].getAggType()).toEqual('count');
     expect(metrics[0].getName()).toEqual('__kbnjoin__count_groupby_myIndex.myTermField');
     expect(await metrics[0].getLabel()).toEqual('Count of myIndex');
   });
 
-  it('should remove incomplete metric configurations', async () => {
+  it('should override name and label of sum metric', async () => {
     const source = new ESTermSource({
       indexPatternTitle: indexPatternTitle,
       term: termFieldName,
       metrics: metricExamples,
     });
     const metrics = source.getMetricFields();
-    expect(metrics.length).toBe(2);
-
-    expect(metrics[0].getAggType()).toEqual('sum');
-    expect(metrics[0].getRootName()).toEqual(sumFieldName);
     expect(metrics[0].getName()).toEqual(
       '__kbnjoin__sum_of_myFieldGettingSummed_groupby_myIndex.myTermField'
     );
     expect(await metrics[0].getLabel()).toEqual('my custom label');
-
-    expect(metrics[1].getAggType()).toEqual('count');
     expect(metrics[1].getName()).toEqual('__kbnjoin__count_groupby_myIndex.myTermField');
     expect(await metrics[1].getLabel()).toEqual('Count of myIndex');
-  });
-
-  it('should match getFields since term_source is agg_source', async () => {
-    const source = new ESTermSource({
-      indexPatternTitle: indexPatternTitle,
-      term: termFieldName,
-      metrics: metricExamples,
-    });
-    const metrics = source.getMetricFields();
-    const fields = await source.getFields();
-
-    const getFieldMeta = async field => {
-      return {
-        aggType: field.getAggType(),
-        name: field.getName(),
-        label: await field.getLabel(),
-        esDoc: field.getRootName(),
-      };
-    };
-
-    const metricsFieldMeta = await Promise.all(metrics.map(getFieldMeta));
-    const fieldsFieldMeta = await Promise.all(fields.map(getFieldMeta));
-
-    expect(_.isEqual(metricsFieldMeta, fieldsFieldMeta)).toEqual(true);
   });
 });
 

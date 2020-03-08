@@ -8,7 +8,6 @@ jest.mock('ui/new_platform');
 
 import { ESGeoGridSource } from './es_geo_grid_source';
 import { AGG_TYPE, ES_GEO_GRID, GRID_RESOLUTION, RENDER_AS } from '../../../../common/constants';
-import { IField } from '../../fields/field';
 
 describe('ESGeoGridSource', () => {
   const metricExamples = [
@@ -41,39 +40,11 @@ describe('ESGeoGridSource', () => {
     {}
   );
 
-  const getFieldMeta = async (field: IField) => {
-    return {
-      field: field.getName(),
-      label: await field.getLabel(),
-      type: await field.getDataType(),
-    };
-  };
-
-  it('getMetricFields should remove incomplete metric aggregations.', async () => {
-    const fields = await geogridSource.getFields();
-    const fieldsMeta = await Promise.all(fields.map(getFieldMeta));
-    expect(
-      _.isEqual(fieldsMeta, [
-        {
-          type: 'number',
-          field: 'sum_of_myFieldGettingSummed',
-          label: 'my custom label',
-        },
-        {
-          type: 'number',
-          label: 'count',
-          field: 'doc_count',
-        },
-      ])
-    ).toEqual(true);
+  it('should echo gridResoltuion', () => {
+    expect(geogridSource.getGridResolution()).toBe(GRID_RESOLUTION.COARSE);
   });
 
-  it('getFields should return getMetricFields', async () => {
-    const fields = await geogridSource.getFields();
-    const metrics = await geogridSource.getMetricFields();
-    const fieldsMeta = await Promise.all(fields.map(getFieldMeta));
-    const metricFieldsMeta = await Promise.all(metrics.map(getFieldMeta));
-
-    expect(_.isEqual(fieldsMeta, metricFieldsMeta)).toEqual(true);
+  it('should clamp geo-grid derived zoom to max geotile level supported by ES', () => {
+    expect(geogridSource.getGeoGridPrecision(29)).toBe(29);
   });
 });
