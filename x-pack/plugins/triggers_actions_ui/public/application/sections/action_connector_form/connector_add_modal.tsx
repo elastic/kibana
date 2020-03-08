@@ -19,16 +19,11 @@ import { EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HttpSetup, ToastsApi } from 'kibana/public';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
-import {
-  ActionType,
-  ActionConnector,
-  IErrorObject,
-  AlertTypeModel,
-  ActionTypeModel,
-} from '../../../types';
+import { ActionType, ActionConnector, IErrorObject, ActionTypeModel } from '../../../types';
 import { connectorReducer } from './connector_reducer';
 import { createActionConnector } from '../../lib/action_connector_api';
 import { TypeRegistry } from '../../type_registry';
+import './connector_add_modal.scss';
 
 interface ConnectorAddModalProps {
   actionType: ActionType;
@@ -36,7 +31,6 @@ interface ConnectorAddModalProps {
   setAddModalVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   postSaveEventHandler?: (savedAction: ActionConnector) => void;
   http: HttpSetup;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   toastNotifications?: Pick<
     ToastsApi,

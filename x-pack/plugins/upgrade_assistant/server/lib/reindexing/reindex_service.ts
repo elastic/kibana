@@ -8,6 +8,7 @@ import { first } from 'rxjs/operators';
 
 import {
   IndexGroup,
+  ReindexOptions,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
@@ -51,8 +52,9 @@ export interface ReindexService {
   /**
    * Creates a new reindex operation for a given index.
    * @param indexName
+   * @param opts
    */
-  createReindexOperation(indexName: string): Promise<ReindexSavedObject>;
+  createReindexOperation(indexName: string, opts?: ReindexOptions): Promise<ReindexSavedObject>;
 
   /**
    * Retrieves all reindex operations that have the given status.
@@ -83,8 +85,9 @@ export interface ReindexService {
   /**
    * Resumes the paused reindex operation for a given index.
    * @param indexName
+   * @param opts As with {@link createReindexOperation} we support this setting.
    */
-  resumeReindexOperation(indexName: string): Promise<ReindexSavedObject>;
+  resumeReindexOperation(indexName: string, opts?: ReindexOptions): Promise<ReindexSavedObject>;
 
   /**
    * Cancel an in-progress reindex operation for a given index. Only allowed when the
@@ -517,7 +520,7 @@ export const reindexServiceFactory = (
       }
     },
 
-    async createReindexOperation(indexName: string) {
+    async createReindexOperation(indexName: string, opts?: ReindexOptions) {
       const indexExists = await callAsUser('indices.exists', { index: indexName });
       if (!indexExists) {
         throw error.indexNotFound(`Index ${indexName} does not exist in this cluster.`);
@@ -539,7 +542,7 @@ export const reindexServiceFactory = (
         }
       }
 
-      return actions.createReindexOp(indexName);
+      return actions.createReindexOp(indexName, opts);
     },
 
     async findReindexOperation(indexName: string) {
@@ -627,7 +630,7 @@ export const reindexServiceFactory = (
       });
     },
 
-    async resumeReindexOperation(indexName: string) {
+    async resumeReindexOperation(indexName: string, opts?: ReindexOptions) {
       const reindexOp = await this.findReindexOperation(indexName);
 
       if (!reindexOp) {
@@ -642,7 +645,10 @@ export const reindexServiceFactory = (
           throw new Error(`Reindex operation must be paused in order to be resumed.`);
         }
 
-        return actions.updateReindexOp(op, { status: ReindexStatus.inProgress });
+        return actions.updateReindexOp(op, {
+          status: ReindexStatus.inProgress,
+          reindexOptions: opts,
+        });
       });
     },
 
@@ -650,11 +656,13 @@ export const reindexServiceFactory = (
       const reindexOp = await this.findReindexOperation(indexName);
 
       if (!reindexOp) {
-        throw new Error(`No reindex operation found for index ${indexName}`);
+        throw error.indexNotFound(`No reindex operation found for index ${indexName}`);
       } else if (reindexOp.attributes.status !== ReindexStatus.inProgress) {
-        throw new Error(`Reindex operation is not in progress`);
+        throw error.reindexCannotBeCancelled(`Reindex operation is not in progress`);
       } else if (reindexOp.attributes.lastCompletedStep !== ReindexStep.reindexStarted) {
-        throw new Error(`Reindex operation is not current waiting for reindex task to complete`);
+        throw error.reindexCannotBeCancelled(
+          `Reindex operation is not currently waiting for reindex task to complete`
+        );
       }
 
       const resp = await callAsUser('tasks.cancel', {
@@ -662,7 +670,7 @@ export const reindexServiceFactory = (
       });
 
       if (resp.node_failures && resp.node_failures.length > 0) {
-        throw new Error(`Could not cancel reindex.`);
+        throw error.reindexCannotBeCancelled(`Could not cancel reindex.`);
       }
 
       return reindexOp;
