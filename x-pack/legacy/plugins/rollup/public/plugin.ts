@@ -7,14 +7,12 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { AggTypeFilters, AggTypeFieldFilters } from './legacy_imports';
-import { SearchStrategyProvider } from '../../../../../src/plugins/data/public';
 import { ManagementSetup as ManagementSetupLegacy } from '../../../../../src/legacy/core_plugins/management/public/np_ready';
 import { rollupBadgeExtension, rollupToggleExtension } from './extend_index_management';
 // @ts-ignore
 import { RollupIndexPatternCreationConfig } from './index_pattern_creation/rollup_index_pattern_creation_config';
 // @ts-ignore
 import { RollupIndexPatternListConfig } from './index_pattern_list/rollup_index_pattern_list_config';
-import { getRollupSearchStrategy } from './search/rollup_search_strategy';
 // @ts-ignore
 import { initAggTypeFilter } from './visualize/agg_type_filter';
 // @ts-ignore
