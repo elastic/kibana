@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { findLayout } from '../../../../common/inventory_models/layouts';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 
-import { MetricsTimeInput } from '../containers/with_metrics_time';
+import { MetricsTimeInput } from '../hooks/use_metrics_time';
 import { InfraLoadingPanel } from '../../../components/loading';
 import { NoData } from '../../../components/empty_states';
 import { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
@@ -19,9 +19,9 @@ interface Props {
   refetch: () => void;
   type: InventoryItemType;
   metrics: NodeDetailsMetricData[];
-  onChangeRangeTime?: (time: MetricsTimeInput) => void;
-  isLiveStreaming?: boolean;
-  stopLiveStreaming?: () => void;
+  onChangeRangeTime: (time: MetricsTimeInput) => void;
+  isLiveStreaming: boolean;
+  stopLiveStreaming: () => void;
 }
 
 export const PageBody = ({

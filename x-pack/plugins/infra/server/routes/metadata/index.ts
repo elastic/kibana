@@ -38,7 +38,7 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
     },
     async (requestContext, request, response) => {
       try {
-        const { nodeId, nodeType, sourceId } = pipe(
+        const { nodeId, nodeType, sourceId, timeRange } = pipe(
           InfraMetadataRequestRT.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
@@ -52,7 +52,8 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
           requestContext,
           configuration,
           nodeId,
-          nodeType
+          nodeType,
+          timeRange
         );
         const metricFeatures = pickFeatureName(metricsMetadata.buckets).map(
           nameToFeature('metrics')
@@ -62,7 +63,13 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
         const cloudInstanceId = get<string>(info, 'cloud.instance.id');
 
         const cloudMetricsMetadata = cloudInstanceId
-          ? await getCloudMetricsMetadata(framework, requestContext, configuration, cloudInstanceId)
+          ? await getCloudMetricsMetadata(
+              framework,
+              requestContext,
+              configuration,
+              cloudInstanceId,
+              timeRange
+            )
           : { buckets: [] };
         const cloudMetricsFeatures = pickFeatureName(cloudMetricsMetadata.buckets).map(
           nameToFeature('metrics')

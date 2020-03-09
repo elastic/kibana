@@ -23,7 +23,7 @@ import { MetadataDetails } from '../../../public/pages/metrics/components/metada
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { LayoutContent } from '../../../public/pages/metrics/components/layout_content';
 
-export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
+export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPropsWithTheme) => (
   <React.Fragment>
     <MetadataDetails />
     <LayoutContent>
@@ -38,6 +38,7 @@ export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
           }
         )}
         metrics={metrics}
+        onChangeRangeTime={onChangeRangeTime}
       >
         <SubSection id="podOverview">
           <GaugesSectionVis
@@ -161,7 +162,7 @@ export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
           />
         </SubSection>
       </Section>
-      <Nginx.Layout metrics={metrics} />
+      <Nginx.Layout metrics={metrics} onChangeRangeTime={onChangeRangeTime} />
     </LayoutContent>
   </React.Fragment>
 ));

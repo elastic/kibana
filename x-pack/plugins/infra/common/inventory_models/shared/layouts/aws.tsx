@@ -18,7 +18,7 @@ import { ChartSectionVis } from '../../../../public/pages/metrics/components/cha
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { withTheme } from '../../../../../observability/public';
 
-export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
+export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPropsWithTheme) => (
   <React.Fragment>
     <Section
       navLabel="AWS"
@@ -29,6 +29,7 @@ export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
         }
       )}
       metrics={metrics}
+      onChangeRangeTime={onChangeRangeTime}
     >
       <SubSection id="awsOverview">
         <GaugesSectionVis

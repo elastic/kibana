@@ -20,7 +20,7 @@ import { withTheme } from '../../../../observability/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MetadataDetails } from '../../../public/pages/metrics/components/metadata_details';
 
-export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
+export const Layout = withTheme(({ metrics, theme, onChangeRangeTime }: LayoutPropsWithTheme) => (
   <React.Fragment>
     <MetadataDetails
       fields={[
@@ -42,6 +42,7 @@ export const Layout = withTheme(({ metrics, theme }: LayoutPropsWithTheme) => (
           }
         )}
         metrics={metrics}
+        onChangeRangeTime={onChangeRangeTime}
       >
         <SubSection
           id="awsEC2CpuUtilization"
