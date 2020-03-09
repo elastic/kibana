@@ -58,7 +58,7 @@ export function timefilter(): ExpressionFunctionDefinition<
       }
 
       const { from, to, column } = args;
-      const filter = {
+      const filter: Filter = {
         type: 'time',
         column,
         and: [],
@@ -75,11 +75,11 @@ export function timefilter(): ExpressionFunctionDefinition<
       }
 
       if (!!to) {
-        (filter as any).to = parseAndValidate(to, { roundUp: true });
+        filter.to = parseAndValidate(to, { roundUp: true });
       }
 
       if (!!from) {
-        (filter as any).from = parseAndValidate(from, { roundUp: false });
+        filter.from = parseAndValidate(from, { roundUp: false });
       }
 
       return { ...input, and: [...input.and, filter] };
