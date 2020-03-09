@@ -18,7 +18,7 @@ const incident: Incident = {
   description: 'A description',
 };
 
-const commentsToCreate = [
+const comments = [
   {
     commentId: '456',
     version: 'WzU3LDFd',
@@ -81,7 +81,7 @@ describe('handleCreateIncident', () => {
     const res = await handleCreateIncident({
       serviceNow,
       params: incident,
-      comments: commentsToCreate,
+      comments,
       mapping: finalMapping,
     });
 
@@ -132,7 +132,7 @@ describe('handleCreateIncident', () => {
       incidentId: '123',
       serviceNow,
       params: incident,
-      comments: commentsToCreate,
+      comments,
       mapping: finalMapping,
     });
 
