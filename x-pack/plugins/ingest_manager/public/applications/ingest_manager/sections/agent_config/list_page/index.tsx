@@ -87,7 +87,8 @@ const DangerEuiContextMenuItem = styled(EuiContextMenuItem)`
 
 const RowActions = React.memo<{ config: AgentConfig; onDelete: () => void }>(
   ({ config, onDelete }) => {
-    const DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
+    const DETAILS_URI = useLink(`${AGENT_CONFIG_DETAILS_PATH}${config.id}`);
+    const ADD_DATASOURCE_URI = `${DETAILS_URI}/add-datasource`;
 
     const [isOpen, setIsOpen] = useState(false);
     const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
@@ -111,14 +112,18 @@ const RowActions = React.memo<{ config: AgentConfig; onDelete: () => void }>(
       >
         <EuiContextMenuPanel
           items={[
-            <EuiContextMenuItem icon="inspect" href={`${DETAILS_URI}${config.id}`} key="viewConfig">
+            <EuiContextMenuItem icon="inspect" href={DETAILS_URI} key="viewConfig">
               <FormattedMessage
                 id="xpack.ingestManager.agentConfigList.viewConfigActionText"
                 defaultMessage="View configuration"
               />
             </EuiContextMenuItem>,
 
-            <EuiContextMenuItem icon="plusInCircle" disabled={true} key="createDataSource">
+            <EuiContextMenuItem
+              icon="plusInCircle"
+              href={ADD_DATASOURCE_URI}
+              key="createDataSource"
+            >
               <FormattedMessage
                 id="xpack.ingestManager.agentConfigList.createDatasourceActionText"
                 defaultMessage="Create data source"
