@@ -37,7 +37,7 @@ export const EmptyStateComponent = ({
           })}
         />
       );
-    } else if (indexExists && docCount && docCount === 0) {
+    } else if (indexExists && docCount === 0) {
       return (
         <DataMissing
           headingMessage={i18n.translate('xpack.uptime.emptyState.noDataMessage', {

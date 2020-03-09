@@ -2,16 +2,6 @@
 
 exports[`EmptyState component does not render empty state with appropriate base path and no docs 1`] = `
 <EmptyStateComponent
-  data={
-    Object {
-      "statesIndexStatus": Object {
-        "docCount": Object {
-          "count": 0,
-        },
-        "indexExists": true,
-      },
-    }
-  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -115,6 +105,12 @@ exports[`EmptyState component does not render empty state with appropriate base 
     }
   }
   loading={false}
+  statesIndexStatus={
+    Object {
+      "docCount": 0,
+      "indexExists": true,
+    }
+  }
 >
   <DataMissing
     headingMessage="No uptime data found"
@@ -297,174 +293,6 @@ exports[`EmptyState component does not render empty state with appropriate base 
 </EmptyStateComponent>
 `;
 
-exports[`EmptyState component doesn't render child components when count is falsey 1`] = `
-<EmptyStateComponent
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
-  loading={false}
->
-  <EmptyStateLoading>
-    <EuiEmptyPrompt
-      body={
-        <React.Fragment>
-          <EuiLoadingSpinner
-            size="xl"
-          />
-          <EuiSpacer />
-          <EuiTitle
-            size="l"
-          >
-            <h2>
-              Loading…
-            </h2>
-          </EuiTitle>
-        </React.Fragment>
-      }
-    >
-      <div
-        className="euiEmptyPrompt"
-      >
-        <EuiTextColor
-          color="subdued"
-        >
-          <span
-            className="euiTextColor euiTextColor--subdued"
-          >
-            <EuiText>
-              <div
-                className="euiText euiText--medium"
-              >
-                <EuiLoadingSpinner
-                  size="xl"
-                >
-                  <span
-                    className="euiLoadingSpinner euiLoadingSpinner--xLarge"
-                  />
-                </EuiLoadingSpinner>
-                <EuiSpacer>
-                  <div
-                    className="euiSpacer euiSpacer--l"
-                  />
-                </EuiSpacer>
-                <EuiTitle
-                  size="l"
-                >
-                  <h2
-                    className="euiTitle euiTitle--large"
-                  >
-                    Loading…
-                  </h2>
-                </EuiTitle>
-              </div>
-            </EuiText>
-          </span>
-        </EuiTextColor>
-      </div>
-    </EuiEmptyPrompt>
-  </EmptyStateLoading>
-</EmptyStateComponent>
-`;
-
 exports[`EmptyState component doesn't render child components when count is falsy 1`] = `
 <EmptyStateComponent
   intl={
@@ -636,16 +464,6 @@ exports[`EmptyState component doesn't render child components when count is fals
 
 exports[`EmptyState component notifies when index does not exist 1`] = `
 <EmptyStateComponent
-  data={
-    Object {
-      "statesIndexStatus": Object {
-        "docCount": Object {
-          "count": 1,
-        },
-        "indexExists": false,
-      },
-    }
-  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -749,6 +567,12 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
     }
   }
   loading={false}
+  statesIndexStatus={
+    Object {
+      "docCount": 1,
+      "indexExists": false,
+    }
+  }
 >
   <DataMissing
     headingMessage="Uptime index not found"
@@ -1065,6 +889,7 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
     }
   }
   loading={false}
+  statesIndexStatus={null}
 >
   <EmptyStateError
     errors={
@@ -1309,6 +1134,7 @@ exports[`EmptyState component renders loading state if no errors or doc count 1`
     }
   }
   loading={true}
+  statesIndexStatus={null}
 >
   <EmptyStateLoading>
     <EuiEmptyPrompt
