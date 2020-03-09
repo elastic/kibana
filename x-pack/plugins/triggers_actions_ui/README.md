@@ -43,6 +43,9 @@ Table of Contents
     - [Action type model definition](#action-type-model-definition)
     - [Register action type model](#register-action-type-model)
     - [Create and register new action type UI example](#reate-and-register-new-action-type-ui-example)
+    - [Embed the Alert Actions form within any Kibana plugin](#embed-the-alert-actions-form-within-any-kibana-plugin)
+    - [Embed the Create Connector flyout within any Kibana plugin](#embed-the-create-connector-flyout-within-any-kibana-plugin)
+    - [Embed the Edit Connector flyout within any Kibana plugin](#embed-the-edit-connector-flyout-within-any-kibana-plugin)
 
 ## Built-in Alert Types
 
@@ -69,7 +72,7 @@ AlertTypeModel:
 ```
 export function getAlertType(): AlertTypeModel {
   return {
-    id: 'threshold',
+    id: '.index-threshold',
     name: 'Index Threshold',
     iconClass: 'alert',
     alertParamsExpression: IndexThresholdAlertTypeExpression,
@@ -658,8 +661,6 @@ const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
 // in render section of component
 <AlertsContextProvider
   value={{
-    addFlyoutVisible: alertFlyoutVisible,
-    setAddFlyoutVisibility: setAlertFlyoutVisibility,
     http,
     actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
     alertTypeRegistry: triggers_actions_ui.alertTypeRegistry,
@@ -667,9 +668,11 @@ const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
     uiSettings,
     charts,
     dataFieldsFormats,
+    metadata: { test: 'some value', fields: ['test'] },
   }}
 >
-  <AlertAdd consumer={'watcher'}  />
+  <AlertAdd consumer={'watcher'} addFlyoutVisible={alertFlyoutVisible}
+    setAddFlyoutVisibility={setAlertFlyoutVisibility} />
 </AlertsContextProvider>
 ```
 
@@ -677,6 +680,8 @@ AlertAdd Props definition:
 ```
 interface AlertAddProps {
   consumer: string;
+  addFlyoutVisible: boolean;
+  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   alertTypeId?: string;
   canChangeTrigger?: boolean;
 }
@@ -685,40 +690,40 @@ interface AlertAddProps {
 |Property|Description|
 |---|---|
 |consumer|Name of the plugin that creates an alert.|
+|addFlyoutVisible|Visibility state of the Create Alert flyout.|
+|setAddFlyoutVisibility|Function for changing visibility state of the Create Alert flyout.|
 |alertTypeId|Optional property to preselect alert type.|
 |canChangeTrigger|Optional property, that hides change alert type possibility.|
 
 AlertsContextProvider value options:
 ```
-export interface AlertsContextValue {
-  addFlyoutVisible: boolean;
-  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+export interface AlertsContextValue<MetaData = Record<string, any>> {
   reloadAlerts?: () => Promise<void>;
   http: HttpSetup;
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   uiSettings?: IUiSettingsClient;
-  toastNotifications?: Pick<
+  toastNotifications: Pick<
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
   charts?: ChartsPluginSetup;
   dataFieldsFormats?: Pick<FieldFormatsRegistry, 'register'>;
+  metadata?: MetaData;
 }
 ```
 
 |Property|Description|
 |---|---|
-|addFlyoutVisible|Visibility state of the Create Alert flyout.|
-|setAddFlyoutVisibility|Function for changing visibility state of the Create Alert flyout.|
 |reloadAlerts|Optional function, which will be executed if alert was saved sucsessfuly.|
 |http|HttpSetup needed for executing API calls.|
 |alertTypeRegistry|Registry for alert types.|
 |actionTypeRegistry|Registry for action types.|
 |uiSettings|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
-|toastNotifications|Optional toast messages.|
+|toastNotifications|Toast messages.|
 |charts|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
 |dataFieldsFormats|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
+|metadata|Optional generic property, which allows to define component specific metadata. This metadata can be used for passing down preloaded data for Alert type expression component.|
 
 ## Build and register Action Types
 
@@ -1198,3 +1203,358 @@ Clicking on the select card for `Example Action Type` will open the action type 
 
 or create a new connector:
 ![Example Action Type with empty connectors list](https://i.imgur.com/EamA9Xv.png)
+
+## Embed the Alert Actions form within any Kibana plugin
+
+Follow the instructions bellow to embed the Alert Actions form within any Kibana plugin:
+1. Add TriggersAndActionsUIPublicPluginSetup and TriggersAndActionsUIPublicPluginStart to Kibana plugin setup dependencies:
+
+```
+import {
+   TriggersAndActionsUIPublicPluginSetup,
+   TriggersAndActionsUIPublicPluginStart,
+ } from '../../../../../x-pack/plugins/triggers_actions_ui/public';
+
+triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+...
+
+triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+```
+Then this dependencies will be used to embed Actions form or register your own action type.
+
+2. Add Actions form to React component:
+
+```
+ import React, { useCallback } from 'react';
+ import { ActionForm } from '../../../../../../../../../plugins/triggers_actions_ui/public';
+ import { AlertAction } from '../../../../../../../../../plugins/triggers_actions_ui/public/types';
+
+ const ALOWED_BY_PLUGIN_ACTION_TYPES = [
+   { id: '.email', name: 'Email', enabled: true },
+   { id: '.index', name: 'Index', enabled: false },
+   { id: '.example-action', name: 'Example Action', enabled: false },
+ ];
+
+ export const ComponentWithActionsForm: () => {
+   const { http, triggers_actions_ui, toastNotifications } = useKibana().services;
+   const actionTypeRegistry = triggers_actions_ui.actionTypeRegistry;
+   const initialAlert = ({
+        name: 'test',
+        params: {},
+        consumer: 'alerting',
+        alertTypeId: '.index-threshold',
+        schedule: {
+          interval: '1m',
+        },
+        actions: [
+          {
+            group: 'default',
+            id: 'test',
+            actionTypeId: '.index',
+            params: {
+              message: '',
+            },
+          },
+        ],
+        tags: [],
+        muteAll: false,
+        enabled: false,
+        mutedInstanceIds: [],
+      } as unknown) as Alert;
+
+   return (
+     <ActionForm
+          actions={initialAlert.actions}
+          messageVariables={['test var1', 'test var2']}
+          defaultActionGroupId={'default'}
+          setActionIdByIndex={(id: string, index: number) => {
+            initialAlert.actions[index].id = id;
+          }}
+          setAlertProperty={(_updatedActions: AlertAction[]) => {}}
+          setActionParamsProperty={(key: string, value: any, index: number) =>
+            (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
+          }
+          http={http}
+          actionTypeRegistry={actionTypeRegistry}
+          defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
+          actionTypes={ALOWED_BY_PLUGIN_ACTION_TYPES}
+          toastNotifications={toastNotifications}
+        />
+   );
+ };
+```
+
+ActionForm Props definition:
+```
+interface ActionAccordionFormProps {
+  actions: AlertAction[];
+  defaultActionGroupId: string;
+  setActionIdByIndex: (id: string, index: number) => void;
+  setAlertProperty: (actions: AlertAction[]) => void;
+  setActionParamsProperty: (key: string, value: any, index: number) => void;
+  http: HttpSetup;
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  toastNotifications: Pick<
+    ToastsApi,
+    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
+  >;
+  actionTypes?: ActionType[];
+  messageVariables?: string[];
+  defaultActionMessage?: string;
+}
+
+```
+
+|Property|Description|
+|---|---|
+|actions|List of actions comes from alert.actions property.|
+|defaultActionGroupId|Default action group id to which each new action will belong to.|
+|setActionIdByIndex|Function for changing action 'id' by the proper index in alert.actions array.|
+|setAlertProperty|Function for changing alert property 'actions'. Used when deleting action from the array to reset it.|
+|setActionParamsProperty|Function for changing action key/value property by index in alert.actions array.|
+|http|HttpSetup needed for executing API calls.|
+|actionTypeRegistry|Registry for action types.|
+|toastNotifications|Toast messages.|
+|actionTypes|Optional property, which allowes to define a list of available actions specific for a current plugin.|
+|actionTypes|Optional property, which allowes to define a list of variables for action 'message' property.|
+|defaultActionMessage|Optional property, which allowes to define a message value for action with 'message' property.|
+
+
+AlertsContextProvider value options:
+```
+export interface AlertsContextValue {
+  reloadAlerts?: () => Promise<void>;
+  http: HttpSetup;
+  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  uiSettings?: IUiSettingsClient;
+  toastNotifications: Pick<
+    ToastsApi,
+    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
+  >;
+  charts?: ChartsPluginSetup;
+  dataFieldsFormats?: Pick<FieldFormatsRegistry, 'register'>;
+}
+```
+
+|Property|Description|
+|---|---|
+|reloadAlerts|Optional function, which will be executed if alert was saved sucsessfuly.|
+|http|HttpSetup needed for executing API calls.|
+|alertTypeRegistry|Registry for alert types.|
+|actionTypeRegistry|Registry for action types.|
+|uiSettings|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
+|toastNotifications|Toast messages.|
+|charts|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
+|dataFieldsFormats|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
+
+## Embed the Create Connector flyout within any Kibana plugin
+
+Follow the instructions bellow to embed the Create Connector flyout within any Kibana plugin:
+1. Add TriggersAndActionsUIPublicPluginSetup and TriggersAndActionsUIPublicPluginStart to Kibana plugin setup dependencies:
+
+```
+import {
+   TriggersAndActionsUIPublicPluginSetup,
+   TriggersAndActionsUIPublicPluginStart,
+ } from '../../../../../x-pack/plugins/triggers_actions_ui/public';
+
+triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+...
+
+triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+```
+Then this dependency will be used to embed Create Connector flyout or register new action type.
+
+2. Add Create Connector flyout to React component:
+```
+// import section
+import { ActionsConnectorsContextProvider, ConnectorAddFlyout } from '../../../../../../../triggers_actions_ui/public';
+
+// in the component state definition section
+const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
+
+// load required dependancied
+const { http, triggers_actions_ui, toastNotifications, capabilities } = useKibana().services;
+
+const connector = {
+      secrets: {},
+      id: 'test',
+      actionTypeId: '.index',
+      actionType: 'Index',
+      name: 'action-connector',
+      referencedByCount: 0,
+      config: {},
+    };
+
+// UI control item for open flyout
+<EuiButton
+  fill
+  iconType="plusInCircle"
+  iconSide="left"
+  onClick={() => setAddFlyoutVisibility(true)}
+>
+  <FormattedMessage
+    id="emptyButton"
+    defaultMessage="Create connector"
+  />
+</EuiButton>
+
+// in render section of component
+<ActionsConnectorsContextProvider
+        value={{
+          http: http,
+          toastNotifications: toastNotifications,
+          actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
+          capabilities: capabilities,
+        }}
+      >
+        <ConnectorAddFlyout
+          addFlyoutVisible={addFlyoutVisible}
+          setAddFlyoutVisibility={setAddFlyoutVisibility}
+          actionTypes={[
+            {
+              id: '.index',
+              enabled: true,
+              name: 'Index',
+            },
+          ]}
+        />
+</ActionsConnectorsContextProvider>
+```
+
+ConnectorAddFlyout Props definition:
+```
+export interface ConnectorAddFlyoutProps {
+  addFlyoutVisible: boolean;
+  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  actionTypes?: ActionType[];
+}
+```
+
+|Property|Description|
+|---|---|
+|addFlyoutVisible|Visibility state of the Create Connector flyout.|
+|setAddFlyoutVisibility|Function for changing visibility state of the Create Connector flyout.|
+|actionTypes|Optional property, that allows to define only specific action types list which is available for a current plugin.|
+
+ActionsConnectorsContextValue options:
+```
+export interface ActionsConnectorsContextValue {
+  http: HttpSetup;
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  toastNotifications: Pick<
+    ToastsApi,
+    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
+  >;
+  capabilities: ApplicationStart['capabilities'];
+  reloadConnectors?: () => Promise<void>;
+}
+```
+
+|Property|Description|
+|---|---|
+|http|HttpSetup needed for executing API calls.|
+|actionTypeRegistry|Registry for action types.|
+|capabilities|Property, which is defining action current user usage capabilities like canSave or canDelete.|
+|toastNotifications|Toast messages.|
+|reloadConnectors|Optional function, which will be executed if connector was saved sucsessfuly, like reload list of connecotrs.|
+
+
+## Embed the Edit Connector flyout within any Kibana plugin
+
+Follow the instructions bellow to embed the Edit Connector flyout within any Kibana plugin:
+1. Add TriggersAndActionsUIPublicPluginSetup and TriggersAndActionsUIPublicPluginStart to Kibana plugin setup dependencies:
+
+```
+import {
+   TriggersAndActionsUIPublicPluginSetup,
+   TriggersAndActionsUIPublicPluginStart,
+ } from '../../../../../x-pack/plugins/triggers_actions_ui/public';
+
+triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+...
+
+triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+```
+Then this dependency will be used to embed Edit Connector flyout.
+
+2. Add Create Connector flyout to React component:
+```
+// import section
+import { ActionsConnectorsContextProvider, ConnectorEditFlyout } from '../../../../../../../triggers_actions_ui/public';
+
+// in the component state definition section
+const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
+
+// load required dependancied
+const { http, triggers_actions_ui, toastNotifications, capabilities } = useKibana().services;
+
+// UI control item for open flyout
+<EuiButton
+  fill
+  iconType="plusInCircle"
+  iconSide="left"
+  onClick={() => setEditFlyoutVisibility(true)}
+>
+  <FormattedMessage
+    id="emptyButton"
+    defaultMessage="Edit connector"
+  />
+</EuiButton>
+
+// in render section of component
+<ActionsConnectorsContextProvider
+        value={{
+          http: http,
+          toastNotifications: toastNotifications,
+          actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
+          capabilities: capabilities,
+        }}
+      >
+        <ConnectorEditFlyout
+            initialConnector={connector}
+            editFlyoutVisible={editFlyoutVisible}
+            setEditFlyoutVisibility={setEditFlyoutVisibility}
+          />
+</ActionsConnectorsContextProvider>
+
+```
+
+ConnectorEditFlyout Props definition:
+```
+export interface ConnectorEditProps {
+  initialConnector: ActionConnectorTableItem;
+  editFlyoutVisible: boolean;
+  setEditFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+}
+```
+
+|Property|Description|
+|---|---|
+|initialConnector|Property, that allows to define the initial state of edited connector.|
+|editFlyoutVisible|Visibility state of the Edit Connector flyout.|
+|setEditFlyoutVisibility|Function for changing visibility state of the Edit Connector flyout.|
+
+ActionsConnectorsContextValue options:
+```
+export interface ActionsConnectorsContextValue {
+  http: HttpSetup;
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  toastNotifications: Pick<
+    ToastsApi,
+    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
+  >;
+  capabilities: ApplicationStart['capabilities'];
+  reloadConnectors?: () => Promise<void>;
+}
+```
+
+|Property|Description|
+|---|---|
+|http|HttpSetup needed for executing API calls.|
+|actionTypeRegistry|Registry for action types.|
+|capabilities|Property, which is defining action current user usage capabilities like canSave or canDelete.|
+|toastNotifications|Toast messages.|
+|reloadConnectors|Optional function, which will be executed if connector was saved sucsessfuly, like reload list of connecotrs.|
+

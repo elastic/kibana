@@ -143,7 +143,7 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackActionPa
   const { message } = actionParams;
   const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
   useEffect(() => {
-    if (defaultMessage && defaultMessage.length > 0) {
+    if (!message && defaultMessage && defaultMessage.length > 0) {
       editAction('message', defaultMessage, index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
