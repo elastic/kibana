@@ -43,7 +43,7 @@ const getCurrentValueFromAggregations = (aggregations: Aggregation) => {
 };
 
 const getParsedFilterQuery: (
-  filterQuery: string | Record<string, any>
+  filterQuery: string | undefined
 ) => Record<string, any> = filterQuery => {
   if (!filterQuery) return {};
   try {
