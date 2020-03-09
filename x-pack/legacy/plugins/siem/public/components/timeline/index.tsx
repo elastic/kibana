@@ -28,7 +28,6 @@ import { Timeline } from './timeline';
 
 export interface OwnProps {
   id: string;
-  flyoutHeight: number;
   onClose: () => void;
   usersViewing: string[];
 }
@@ -43,7 +42,6 @@ const StatefulTimelineComponent = React.memo<Props>(
     eventType,
     end,
     filters,
-    flyoutHeight,
     id,
     isLive,
     itemsPerPage,
@@ -175,7 +173,6 @@ const StatefulTimelineComponent = React.memo<Props>(
             end={end}
             eventType={eventType}
             filters={filters}
-            flyoutHeight={flyoutHeight}
             id={id}
             indexPattern={indexPattern}
             indexToAdd={indexToAdd}
@@ -208,7 +205,6 @@ const StatefulTimelineComponent = React.memo<Props>(
     return (
       prevProps.eventType === nextProps.eventType &&
       prevProps.end === nextProps.end &&
-      prevProps.flyoutHeight === nextProps.flyoutHeight &&
       prevProps.id === nextProps.id &&
       prevProps.isLive === nextProps.isLive &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&

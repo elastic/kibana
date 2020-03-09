@@ -2,12 +2,11 @@
 
 exports[`Timeline rendering renders correctly against snapshot 1`] = `
 <Fragment>
-  <EuiFlyoutHeader
-    className="timeline-flyout-header"
+  <Styled(EuiFlyoutHeader)
     data-test-subj="eui-flyout-header"
     hasBorder={false}
   >
-    <Memo(FlyoutHeaderWithCloseButtonComponent)
+    <FlyoutHeaderWithCloseButton
       onClose={[MockFunction]}
       timelineId="foo"
       usersViewing={
@@ -699,7 +698,7 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
         }
       />
     </WrappedByAutoSizer>
-  </EuiFlyoutHeader>
+  </Styled(EuiFlyoutHeader)>
   <Connect(Component)
     id="foo"
     indexPattern={

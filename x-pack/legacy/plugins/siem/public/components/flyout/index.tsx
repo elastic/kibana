@@ -63,12 +63,7 @@ export const FlyoutComponent = React.memo<Props>(
             timelineId={timelineId}
             width={width}
           >
-            <StatefulTimeline
-              onClose={handleClose}
-              usersViewing={usersViewing}
-              flyoutHeight={flyoutHeight}
-              id={timelineId}
-            />
+            <StatefulTimeline onClose={handleClose} usersViewing={usersViewing} id={timelineId} />
           </Pane>
         </Visible>
         <FlyoutButton

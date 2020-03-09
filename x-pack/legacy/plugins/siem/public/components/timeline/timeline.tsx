@@ -79,7 +79,6 @@ export interface Props {
   end: number;
   eventType?: EventType;
   filters: Filter[];
-  flyoutHeight: number;
   id: string;
   indexPattern: IIndexPattern;
   indexToAdd: string[];
@@ -113,7 +112,6 @@ export const TimelineComponent: React.FC<Props> = ({
   end,
   eventType,
   filters,
-  flyoutHeight,
   id,
   indexPattern,
   indexToAdd,
@@ -159,7 +157,7 @@ export const TimelineComponent: React.FC<Props> = ({
   };
 
   return (
-    <>
+    <div data-test-subj="timeline">
       <StyledEuiFlyoutHeader data-test-subj="eui-flyout-header" hasBorder={false}>
         <FlyoutHeaderWithCloseButton
           onClose={onClose}
@@ -251,7 +249,7 @@ export const TimelineComponent: React.FC<Props> = ({
           )}
         </TimelineQuery>
       )}
-    </>
+    </div>
   );
 };
 
