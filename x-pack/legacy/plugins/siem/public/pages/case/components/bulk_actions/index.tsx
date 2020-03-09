@@ -4,18 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import React, { useMemo } from 'react';
 import * as i18n from './translations';
-import { Case } from '../../../../containers/case/types';
 
 interface GetBulkItems {
-  // cases: Case[];
   closePopover: () => void;
   deleteCasesAction: (cases: string[]) => void;
-  // dispatch: Dispatch<Action>;
-  // dispatchToaster: Dispatch<ActionToaster>;
-  // reFetchCases: (refreshPrePackagedCase?: boolean) => void;
   selectedCaseIds: string[];
   caseStatus: string;
 }
@@ -24,9 +19,6 @@ export const getBulkItems = ({
   deleteCasesAction,
   closePopover,
   caseStatus,
-  // dispatch,
-  // dispatchToaster,
-  // reFetchCases,
   selectedCaseIds,
 }: GetBulkItems) => {
   return [
@@ -48,9 +40,6 @@ export const getBulkItems = ({
         disabled={true} // TO DO
         onClick={() => {
           closePopover();
-
-          // deleteCasesAction(selectedCaseIds);
-          // reFetchCases(true);
         }}
       >
         {i18n.BULK_ACTION_OPEN_SELECTED}

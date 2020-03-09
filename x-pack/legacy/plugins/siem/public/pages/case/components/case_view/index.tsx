@@ -129,6 +129,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
       <ConfirmDeleteCaseModal
         caseTitle={caseData.title}
         isModalVisible={isDisplayConfirmDeleteModal}
+        isPlural={false}
         onCancel={handleToggleModal}
         onConfirm={handleOnDeleteConfirm.bind(null, [caseId])}
       />
