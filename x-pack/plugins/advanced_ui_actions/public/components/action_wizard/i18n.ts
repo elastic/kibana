@@ -4,5 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './flyout_create_drilldown';
-export * from './flyout_edit_drilldown';
+import { i18n } from '@kbn/i18n';
+
+export const txtChangeButton = i18n.translate(
+  'xpack.advancedUiActions.components.actionWizard.changeButton',
+  {
+    defaultMessage: 'change',
+  }
+);
