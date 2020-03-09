@@ -28,14 +28,17 @@ export const monitoring = kibana => {
     publicDir: resolve(__dirname, 'public'),
     init(server) {
       const serverConfig = server.config();
-      const kbnServerStatus = this.kbnServer.status;
-      server.newPlatform.setup.plugins.monitoring.registerLegacyAPI({
-        telemetryCollectionManager,
-        getServerStatus: () => {
-          const status = kbnServerStatus.toJSON();
-          return get(status, 'overall.state');
-        },
-      });
+      const npMonitoring = server.newPlatform.setup.plugins.monitoring;
+      if (npMonitoring) {
+        const kbnServerStatus = this.kbnServer.status;
+        npMonitoring.registerLegacyAPI({
+          telemetryCollectionManager,
+          getServerStatus: () => {
+            const status = kbnServerStatus.toJSON();
+            return get(status, 'overall.state');
+          },
+        });
+      }
 
       server.injectUiAppVars('monitoring', () => {
         return {
