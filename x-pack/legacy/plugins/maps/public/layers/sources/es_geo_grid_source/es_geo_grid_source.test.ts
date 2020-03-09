@@ -44,7 +44,13 @@ describe('ESGeoGridSource', () => {
     expect(geogridSource.getGridResolution()).toBe(GRID_RESOLUTION.COARSE);
   });
 
-  it('should clamp geo-grid derived zoom to max geotile level supported by ES', () => {
-    expect(geogridSource.getGeoGridPrecision(29)).toBe(29);
+  describe('getGeoGridPrecision', () => {
+    it('should clamp geo-grid derived zoom to max geotile level supported by ES', () => {
+      expect(geogridSource.getGeoGridPrecision(29)).toBe(29);
+    });
+
+    it('should use heuristic to derive precision', () => {
+      expect(geogridSource.getGeoGridPrecision(10)).toBe(12);
+    });
   });
 });
