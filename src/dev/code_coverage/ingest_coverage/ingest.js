@@ -34,7 +34,7 @@ export const ingest = log => async body => {
   const index = !body.staticSiteUrl ? TOTALS_INDEX : COVERAGE_INDEX;
 
   if (process.env.NODE_ENV === 'integration_test') {
-    log.debug(`### Just Logging, ${green('NOT actually sending')}`);
+    log.debug(`### Just Logging, ${green('NOT actually sending')} to ${green(index)}`);
     logSuccess(log, index, body);
   } else {
     try {

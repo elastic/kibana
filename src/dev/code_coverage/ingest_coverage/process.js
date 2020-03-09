@@ -53,6 +53,7 @@ const addTestRunnerAndStaticSiteUrl =
 export default ({ jsonSummaryPath }, log) => {
   log.debug(`### Code coverage ingestion set to delay for: ${green(ms)} ms`);
   log.debug(`### KIBANA_ROOT: \n\t${green(KIBANA_ROOT)}`);
+  log.debug(`### Ingesting from summary json: \n\t[${green(jsonSummaryPath)}]`)
 
   validateRoot(KIBANA_ROOT, log);
 

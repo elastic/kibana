@@ -22,7 +22,7 @@ import { spawn } from 'child_process';
 import { resolve } from 'path';
 import { green, always as F } from '../utils';
 
-import { STATIC_SITE_URL_PROP_NAME } from '../constants';
+import { STATIC_SITE_URL_PROP_NAME, TOTALS_INDEX, COVERAGE_INDEX } from '../constants';
 
 const ROOT_DIR = resolve(__dirname, '../../../../..');
 const MOCKS_DIR = resolve(__dirname, './mocks');
@@ -30,7 +30,6 @@ const regexes = {
   staticHostIncluded: /https:\/\/kibana-coverage\.elastic\.dev/,
   jobNameIncluded: /jobs\/elastic\+kibana\+code-coverage/,
   timeStampIncluded: /\d{4}-\d{2}-\d{2}T\d{2}.*\d{2}.*\d{2}Z/,
-  // folderStructureIncluded: /live_cc_app\/coverage_data/,
   folderStructureIncluded: /live_cc_app\/coverage_data\/(?:.*|.*-combined)\//,
   endsInDotHtml: /.html$/,
 };
@@ -54,9 +53,8 @@ describe('Ingesting Coverage to Cluster', () => {
   const justTotalPath = 'jest-combined/coverage-summary-just-total.json';
   const noTotalsPath = 'jest-combined/coverage-summary-NO-total.json';
 
-  describe(`to the 'totals' index`, () => {
+  describe(`to the [${TOTALS_INDEX}] index`, () => {
     const mutableTotalsIndexLoggingChunks = [];
-
     beforeAll(done => {
       const ingestAndMutateAsync = ingestAndMutate(done);
       const ingestAndMutateAsyncWithPath = ingestAndMutateAsync(justTotalPath);
@@ -64,19 +62,24 @@ describe('Ingesting Coverage to Cluster', () => {
 
       verboseIngestAndMutateAsyncWithPath(mutableTotalsIndexLoggingChunks);
     });
+
+    it.skip(`should say it's not sending to the totals index: [${TOTALS_INDEX}]`, () => {
+      // mutableTotalsIndexLoggingChunks.forEach(x => console.log(green(x)))
+      expect(mutableTotalsIndexLoggingChunks.some(x => x.includes(`debg ### Just Logging, NOT actually sending to ${TOTALS_INDEX}`)))
+        .to.be(true);
+    });
     it(`should have a link to the index page for the specific test runner`, () => {
       // mutableTotalsIndexLoggingChunks.forEach(x => console.log(green(x)))
-
+      //
+      // expect(mutableTotalsIndexLoggingChunks.some(x => x.includes('debg ### Just Logging, NOT actually sending to kibana_code_coverage')))
+      //   .to.be(true);
 
 
       // siteUrlsSplitByNewLineWithoutBlanks(mutableTotalsIndexLoggingChunks)
       //   .forEach(expectAllRegexesToPass(regexes))
-
-
     });
   });
-
-  describe(`to the 'coverage' index`, () => {
+  describe(`to the [${COVERAGE_INDEX}] index`, () => {
     const mutableCoverageIndexChunks = [];
 
     beforeAll(done => {
