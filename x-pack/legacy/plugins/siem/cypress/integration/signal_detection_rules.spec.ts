@@ -18,17 +18,23 @@ import {
   waitForSignalsIndexToBeCreated,
   waitForSignalsPanelToBeLoaded,
 } from '../tasks/detections';
+import { esArchiverLoadFolder, esArchiverResetKibana } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS } from '../urls/navigation';
 
 describe('Signal detection rules', () => {
   before(() => {
+    esArchiverLoadFolder();
     loginAndWaitForPageWithoutDateRange(DETECTIONS);
     waitForSignalsPanelToBeLoaded();
     waitForSignalsIndexToBeCreated();
     goToManageSignalDetectionRules();
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
+  });
+
+  after(() => {
+    esArchiverResetKibana();
   });
 
   it('Loads prebuilt rules', () => {
