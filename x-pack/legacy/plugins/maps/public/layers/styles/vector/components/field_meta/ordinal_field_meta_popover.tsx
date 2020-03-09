@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { EuiFormRow, EuiRange, EuiSwitch } from '@elastic/eui';
-import { VECTOR_STYLES } from '../../vector_style_defaults';
 import { i18n } from '@kbn/i18n';
+import { VECTOR_STYLES } from '../../vector_style_defaults';
 import { FieldMetaPopover } from './field_meta_popover';
 
 function getIsEnableToggleLabel(styleName) {
@@ -36,10 +36,9 @@ function getIsEnableToggleLabel(styleName) {
 type Props = {
   styleProperty: unknown;
   onChange: (unknown) => void;
-}
+};
 
 export function OrdinalFieldMetaPopover(props: Props) {
-
   const onIsEnabledChange = event => {
     props.onChange({
       ...props.styleProperty.getFieldMetaOptions(),
@@ -60,7 +59,7 @@ export function OrdinalFieldMetaPopover(props: Props) {
         <EuiSwitch
           label={getIsEnableToggleLabel(props.styleProperty.getStyleName())}
           checked={props.styleProperty.getFieldMetaOptions().isEnabled}
-          onChange={this._onIsEnabledChange}
+          onChange={onIsEnabledChange}
           compressed
         />
       </EuiFormRow>
@@ -76,7 +75,7 @@ export function OrdinalFieldMetaPopover(props: Props) {
           max={5}
           step={0.25}
           value={props.styleProperty.getFieldMetaOptions().sigma}
-          onChange={this._onSigmaChange}
+          onChange={onSigmaChange}
           disabled={!props.styleProperty.getFieldMetaOptions().isEnabled}
           showTicks
           tickInterval={1}

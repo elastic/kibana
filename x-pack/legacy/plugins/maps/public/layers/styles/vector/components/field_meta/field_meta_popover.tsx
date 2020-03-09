@@ -7,16 +7,16 @@
 
 import React, { Component, ReactElement } from 'react';
 import { EuiButtonIcon, EuiPopover } from '@elastic/eui';
-import { VECTOR_STYLES } from '../vector_style_defaults';
 import { i18n } from '@kbn/i18n';
+import { VECTOR_STYLES } from '../vector_style_defaults';
 
 type Props = {
   children: ReactElement<any>;
-}
+};
 
 type State = {
   isPopoverOpen: boolean;
-}
+};
 
 export class FieldMetaPopover extends Component<Props, State> {
   state = {
@@ -39,7 +39,7 @@ export class FieldMetaPopover extends Component<Props, State> {
     return (
       <EuiButtonIcon
         onClick={this._togglePopover}
-        size="xs"
+        size="s"
         iconType="gear"
         aria-label={i18n.translate('xpack.maps.styles.fieldMetaOptions.popoverToggle', {
           defaultMessage: 'Field meta options popover toggle',
