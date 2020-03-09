@@ -30,7 +30,7 @@ import {
   UtilityBarGroup,
   UtilityBarSection,
   UtilityBarText,
-} from '../../../../components/detection_engine/utility_bar';
+} from '../../../../components/utility_bar';
 import { useStateToaster } from '../../../../components/toasters';
 import { Loader } from '../../../../components/loader';
 import { Panel } from '../../../../components/panel';
@@ -317,6 +317,7 @@ export const AllRules = React.memo<AllRulesProps>(
                   </UtilityBarSection>
                 </UtilityBar>
                 <MyEuiBasicTable
+                  data-test-subj="rules-table"
                   columns={columns}
                   isSelectable={!hasNoPermissions ?? false}
                   itemId="id"

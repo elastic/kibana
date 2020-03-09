@@ -10,8 +10,8 @@ import {
   ExpressionValueSearchContext,
   KibanaDatatable,
 } from 'src/plugins/expressions/public';
+import { toAbsoluteDates } from '../../../../../../src/legacy/core_plugins/data/public';
 import { LensMultiTable } from '../types';
-import { toAbsoluteDates } from '../indexpattern_datasource/auto_date';
 
 interface MergeTables {
   layerIds: string[];
@@ -60,11 +60,14 @@ function getDateRange(value?: ExpressionValueSearchContext | null) {
     return;
   }
 
-  const dateRange = toAbsoluteDates({ fromDate: value.timeRange.from, toDate: value.timeRange.to });
+  const dateRange = toAbsoluteDates(value.timeRange);
 
   if (!dateRange) {
     return;
   }
 
-  return dateRange;
+  return {
+    fromDate: dateRange.from,
+    toDate: dateRange.to,
+  };
 }
