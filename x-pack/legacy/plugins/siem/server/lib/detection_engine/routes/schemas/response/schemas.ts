@@ -24,7 +24,12 @@ export const file_name = t.string;
  * become the actual ESFilter as a type.
  */
 export const filters = t.array(t.unknown); // Filters are not easily type-able yet
-export const actions = t.array(t.unknown);
+
+/**
+ * TODO: Right now the actions is an "unknown", when it could more than likely
+ * become the actual AlertAction as a type.
+ */
+export const actions = t.array(t.unknown); // Actions are not easily type-able yet
 
 // TODO: Create a regular expression type or custom date math part type here
 export const from = t.string;
