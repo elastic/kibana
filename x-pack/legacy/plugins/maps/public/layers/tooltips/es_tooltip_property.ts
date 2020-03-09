@@ -8,11 +8,12 @@ import _ from 'lodash';
 import { ITooltipProperty } from './tooltip_property';
 import { IField } from '../fields/field';
 import { esFilters, IFieldType, IndexPattern } from '../../../../../../../src/plugins/data/public';
+import { PhraseFilter } from '../../../../../../../src/plugins/data/public';
 
 export class ESTooltipProperty implements ITooltipProperty {
-  private _tooltipProperty: ITooltipProperty;
-  private _indexPattern: IndexPattern;
-  private _field: IField;
+  private readonly _tooltipProperty: ITooltipProperty;
+  private readonly _indexPattern: IndexPattern;
+  private readonly _field: IField;
 
   constructor(tooltipProperty: ITooltipProperty, indexPattern: IndexPattern, field: IField) {
     this._tooltipProperty = tooltipProperty;
@@ -63,7 +64,7 @@ export class ESTooltipProperty implements ITooltipProperty {
     );
   }
 
-  async getESFilters(): Promise<unknown[]> {
+  async getESFilters(): Promise<PhraseFilter[]> {
     const indexPatternField = this._getIndexPatternField();
     if (!indexPatternField) {
       return [];

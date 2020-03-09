@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import { PhraseFilter } from '../../../../../../../src/plugins/data/public';
 
 export interface ITooltipProperty {
   getPropertyKey(): string;
@@ -12,13 +13,13 @@ export interface ITooltipProperty {
   getHtmlDisplayValue(): string;
   getRawValue(): string | undefined;
   isFilterable(): boolean;
-  getESFilters(): Promise<unknown[]>;
+  getESFilters(): Promise<PhraseFilter[]>;
 }
 
 export class TooltipProperty implements ITooltipProperty {
-  private _propertyKey: string;
-  private _propertyName: string;
-  private _rawValue: string | undefined;
+  private readonly _propertyKey: string;
+  private readonly _propertyName: string;
+  private readonly _rawValue: string | undefined;
 
   constructor(propertyKey: string, propertyName: string, rawValue: string | undefined) {
     this._propertyKey = propertyKey;
@@ -46,7 +47,7 @@ export class TooltipProperty implements ITooltipProperty {
     return false;
   }
 
-  async getESFilters(): Promise<unknown[]> {
+  async getESFilters(): Promise<PhraseFilter[]> {
     return [];
   }
 }

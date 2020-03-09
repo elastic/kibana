@@ -6,10 +6,11 @@
 
 import { ITooltipProperty } from './tooltip_property';
 import { IJoin } from '../joins/join';
+import { PhraseFilter } from '../../../../../../../src/plugins/data/public';
 
 export class JoinTooltipProperty implements ITooltipProperty {
-  private _tooltipProperty: ITooltipProperty;
-  private _leftInnerJoins: IJoin[];
+  private readonly _tooltipProperty: ITooltipProperty;
+  private readonly _leftInnerJoins: IJoin[];
 
   constructor(tooltipProperty: ITooltipProperty, leftInnerJoins: IJoin[]) {
     this._tooltipProperty = tooltipProperty;
@@ -36,7 +37,7 @@ export class JoinTooltipProperty implements ITooltipProperty {
     return this._tooltipProperty.getHtmlDisplayValue();
   }
 
-  async getESFilters(): Promise<unknown[]> {
+  async getESFilters(): Promise<PhraseFilter[]> {
     const esFilters = [];
     if (this._tooltipProperty.isFilterable()) {
       esFilters.push(...(await this._tooltipProperty.getESFilters()));
