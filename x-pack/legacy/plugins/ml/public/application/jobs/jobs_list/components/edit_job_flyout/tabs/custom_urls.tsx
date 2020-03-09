@@ -35,7 +35,7 @@ import {
 import { withKibana } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 import { loadSavedDashboards, loadIndexPatterns } from '../edit_utils';
 import { openCustomUrlWindow } from '../../../../../util/custom_url_utils';
-import { Job } from '../../../../new_job/common/job_creator/configs';
+import { Job } from '../../../../../../../common/types/anomaly_detection_jobs';
 import { UrlConfig } from '../../../../../../../common/types/custom_urls';
 import { IIndexPattern } from '../../../../../../../../../../../src/plugins/data/common/index_patterns';
 import { MlKibanaReactContextValue } from '../../../../../contexts/kibana';
