@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { assertNever } from '../../../../../../src/core/utils';
 import { KibanaResponseFactory } from '../../../../../../src/core/server';
 
 export type ActionTypeDisabledReason =
