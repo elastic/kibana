@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimefilterSetup } from 'src/plugins/data/public';
+import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import {
   IUiSettingsClient,
   ChromeStart,
@@ -23,7 +23,7 @@ import {
 import { SecurityPluginSetup } from '../../../../../../plugins/security/public';
 
 export interface DependencyCache {
-  timefilter: TimefilterSetup | null;
+  timefilter: DataPublicPluginSetup['timefilter'] | null;
   config: IUiSettingsClient | null;
   indexPatterns: IndexPatternsContract | null;
   chrome: ChromeStart | null;
