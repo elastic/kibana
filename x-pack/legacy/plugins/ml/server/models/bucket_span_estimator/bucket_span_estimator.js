@@ -343,11 +343,21 @@ export function estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, 
           filterPath: '*.*max_buckets',
         })
           .then(settings => {
-            if (typeof settings !== 'object' || typeof settings.defaults !== 'object') {
+            if (typeof settings !== 'object') {
+              reject('Unable to retrieve cluster settings');
+            }
+
+            // search.max_buckets could exist in default, persistent or transient cluster settings
+            const maxBucketsSetting = (settings.defaults ||
+              settings.persistent ||
+              settings.transient ||
+              {})['search.max_buckets'];
+
+            if (maxBucketsSetting === undefined) {
               reject('Unable to retrieve cluster setting search.max_buckets');
             }
 
-            const maxBuckets = parseInt(settings.defaults['search.max_buckets']);
+            const maxBuckets = parseInt(maxBucketsSetting);
 
             const runEstimator = (splitFieldValues = []) => {
               const bucketSpanEstimator = new BucketSpanEstimator(
