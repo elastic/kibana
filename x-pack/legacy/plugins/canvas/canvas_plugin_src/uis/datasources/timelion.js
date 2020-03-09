@@ -124,6 +124,6 @@ export const timelion = () => ({
   name: 'timelion',
   displayName: TIMELION,
   help: strings.getHelp(),
-  image: 'timelionApp',
+  image: 'visTimelion',
   template: templateFromReactComponent(TimelionDatasource),
 });

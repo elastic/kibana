@@ -101,16 +101,14 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
         />
       </EuiFormRow>
 
+      <EuiSpacer size="s" />
       <EuiAccordion
         id="accordionAdvancedSettings"
-        buttonContent="Advanced Settings"
-        arrowDisplay="right"
+        buttonContent="Advanced settings"
+        className="canvasArg__accordion"
       >
-        <EuiFormRow
-          label={strings.getSortFieldTitle()}
-          helpText={strings.getSortFieldLabel()}
-          display="columnCompressed"
-        >
+        <EuiSpacer size="s" />
+        <EuiFormRow label={strings.getSortFieldTitle()} display="columnCompressed">
           <ESFieldSelect
             index={index}
             value={sortField}
@@ -118,11 +116,7 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
           />
         </EuiFormRow>
 
-        <EuiFormRow
-          label={strings.getSortOrderTitle()}
-          helpText={strings.getSortOrderLabel()}
-          display="columnCompressed"
-        >
+        <EuiFormRow label={strings.getSortOrderTitle()} display="columnCompressed">
           <EuiSelect
             value={sortOrder.toLowerCase()}
             onChange={e => setArg('sort', [sortField, e.target.value].join(', '))}
@@ -163,6 +157,6 @@ export const esdocs = () => ({
   name: 'esdocs',
   displayName: strings.getDisplayName(),
   help: strings.getHelp(),
-  image: 'filebeatApp',
+  image: 'documents',
   template: templateFromReactComponent(EsdocsDatasource),
 });
