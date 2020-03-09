@@ -4,15 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ApolloQueryResult,
-  NetworkStatus,
-  FetchMoreOptions,
-  FetchMoreQueryOptions,
-  OperationVariables,
-} from '@apollo/client';
-import React from 'react';
+import { ApolloQueryResult, NetworkStatus } from 'apollo-client';
 import memoizeOne from 'memoize-one';
+import React from 'react';
+import { FetchMoreOptions, FetchMoreQueryOptions, OperationVariables } from 'react-apollo';
 import deepEqual from 'fast-deep-equal';
 
 import { ESQuery } from '../../common/typed_json';

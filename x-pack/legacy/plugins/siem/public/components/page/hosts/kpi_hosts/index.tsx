@@ -33,7 +33,9 @@ interface KpiHostDetailsProps extends GenericKpiHostProps {
 }
 
 const FlexGroupSpinner = styled(EuiFlexGroup)`
-  min-height: ${kpiWidgetHeight}px;
+   {
+    min-height: ${kpiWidgetHeight}px;
+  }
 `;
 
 FlexGroupSpinner.displayName = 'FlexGroupSpinner';
