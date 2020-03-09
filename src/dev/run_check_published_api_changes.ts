@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable no-console */
+
 import { ToolingLog } from '@kbn/dev-utils';
 import {
   Extractor,
@@ -95,7 +97,6 @@ const runBuildTypes = async () => {
 const runApiDocumenter = async (folder: string) => {
   const sourceFolder = `./build/${folder}`;
   const targetFolder = `./docs/development/${folder}`;
-  // eslint-disable-next-line no-console
   console.log(`Generating docs from ${sourceFolder} into ${targetFolder}...`);
   await execa('api-documenter', ['generate', '-i', sourceFolder, '-o', targetFolder], {
     preferLocal: true,
@@ -105,7 +106,6 @@ const runApiDocumenter = async (folder: string) => {
 const renameExtractedApiPackageName = async (folder: string) => {
   const fname = getReportFileName(folder);
   const jsonApiFile = `build/${folder}/${fname}.api.json`;
-  // eslint-disable-next-line no-console
   console.log(`Updating ${jsonApiFile}...`);
   const json = JSON.parse(fs.readFileSync(jsonApiFile).toString());
   json.name = json.canonicalReference = `kibana-plugin-${folder.replace(/\//g, '-')}`;
@@ -266,6 +266,6 @@ async function run(
     process.exitCode = 1;
   }
 })().catch(e => {
-  // eslint-disable-next-line no-console
   console.log(e);
+  process.exitCode = 1;
 });

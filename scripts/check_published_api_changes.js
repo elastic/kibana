@@ -18,4 +18,4 @@
  */
 
 require('../src/setup_node_env');
-require('../src/dev/run_check_core_api_changes');
+require('../src/dev/run_check_published_api_changes');
