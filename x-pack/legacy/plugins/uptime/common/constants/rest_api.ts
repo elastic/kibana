@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { pingsQuery, pingsQueryString } from './pings_query';
+export enum REST_API_URLS {
+  INDEX_STATUS = '/api/uptime/index_status',
+}
