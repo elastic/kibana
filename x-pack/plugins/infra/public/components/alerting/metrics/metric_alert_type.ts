@@ -13,7 +13,7 @@ import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../server/lib/alerting/
 export function getAlertType(): AlertTypeModel {
   return {
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
-    name: 'Threshold Alert',
+    name: 'Alert Trigger',
     iconClass: 'bell',
     alertParamsExpression: MetricExpression,
     validate: validateExampleAlertType,

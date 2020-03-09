@@ -12,10 +12,12 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../server/lib/alerting/metric_threshold/types';
 import { SourceConfiguration } from '../../../utils/source_configuration';
+import { MetricsExplorerOptions } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
 
 interface Props {
   visible?: boolean;
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  options: MetricsExplorerOptions;
   derivedIndexPattern: IIndexPattern;
   source?: SourceConfiguration;
 }
@@ -29,7 +31,12 @@ export const AlertFlyout = (props: Props) => {
       {triggersActionsUI && (
         <AlertsContextProvider
           value={{
-            metadata: { source: props.source, derivedIndexPattern: props.derivedIndexPattern },
+            toastNotifications: {} as any,
+            metadata: {
+              source: props.source,
+              derivedIndexPattern: props.derivedIndexPattern,
+              currentOptions: props.options,
+            },
             http: services.http,
             actionTypeRegistry: triggersActionsUI.actionTypeRegistry,
             alertTypeRegistry: triggersActionsUI.alertTypeRegistry,

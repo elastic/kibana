@@ -203,6 +203,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
       >
         <EuiContextMenu initialPanelId={0} panels={panels} />
         <AlertFlyout
+          options={options}
           derivedIndexPattern={derivedIndexPattern}
           source={source}
           setVisible={setFlyoutVisible}
