@@ -122,8 +122,6 @@ export class Server {
       context: contextServiceSetup,
     });
 
-    this.registerDefaultRoute(httpSetup);
-
     const capabilitiesSetup = this.capabilities.setup({ http: httpSetup });
 
     const elasticsearchServiceSetup = await this.elasticsearch.setup({
@@ -167,6 +165,7 @@ export class Server {
     });
 
     this.registerCoreContext(coreSetup, renderingSetup);
+    this.registerDefaultRoute(httpSetup);
 
     return coreSetup;
   }
@@ -218,8 +217,19 @@ export class Server {
   }
 
   private registerDefaultRoute(httpSetup: InternalHttpServiceSetup) {
-    const router = httpSetup.createRouter('/core');
-    router.get({ path: '/', validate: false }, async (context, req, res) =>
+    const router = httpSetup.createRouter('/');
+    router.get({ path: '/', validate: false }, async (context, req, res) => {
+      const defaultRoute = await context.core.uiSettings.client.get<string>('defaultRoute');
+      const basePath = httpSetup.basePath.get(req);
+      const url = `${basePath}${defaultRoute}`;
+
+      return res.redirected({
+        headers: {
+          location: url,
+        },
+      });
+    });
+    router.get({ path: '/core', validate: false }, async (context, req, res) =>
       res.ok({ body: { version: '0.0.1' } })
     );
   }

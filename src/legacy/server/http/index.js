@@ -61,14 +61,6 @@ export default async function(kbnServer, server, config) {
   });
 
   server.route({
-    path: '/',
-    method: 'GET',
-    async handler(req, h) {
-      return h.redirect(await req.getDefaultRoute());
-    },
-  });
-
-  server.route({
     method: 'GET',
     path: '/{p*}',
     handler: function(req, h) {

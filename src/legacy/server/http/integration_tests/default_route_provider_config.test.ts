@@ -20,35 +20,67 @@ import * as kbnTestServer from '../../../../test_utils/kbn_server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Root } from '../../../../core/server/root';
 
+const { startES } = kbnTestServer.createTestServers({
+  adjustTimeout: (t: number) => jest.setTimeout(t),
+});
+let esServer: kbnTestServer.TestElasticsearchUtils;
+
 describe('default route provider', () => {
   let root: Root;
 
-  afterEach(async () => await root.shutdown());
-
-  it('redirects to the configured default route', async function() {
-    root = kbnTestServer.createRoot({
+  beforeAll(async () => {
+    esServer = await startES();
+    root = kbnTestServer.createRootWithCorePlugins({
       server: {
-        defaultRoute: '/app/some/default/route',
+        basePath: '/hello',
       },
-      migrations: { skip: true },
     });
 
     await root.setup();
     await root.start();
+  });
 
-    const kbnServer = kbnTestServer.getKbnServer(root);
+  afterAll(async () => {
+    await esServer.stop();
+    await root.shutdown();
+  });
 
-    kbnServer.server.decorate('request', 'getSavedObjectsClient', function() {
-      return {
-        get: (type: string, id: string) => ({ attributes: {} }),
-      };
-    });
-
+  it('redirects to the configured default route respecting basePath', async function() {
     const { status, header } = await kbnTestServer.request.get(root, '/');
 
     expect(status).toEqual(302);
     expect(header).toMatchObject({
-      location: '/app/some/default/route',
+      location: '/hello/app/kibana',
+    });
+  });
+
+  it('ignores invalid values', async function() {
+    const invalidRoutes = ['http://not-your-kibana.com', 'example.com', ' //example.com'];
+
+    for (const url of invalidRoutes) {
+      await kbnTestServer.request
+        .post(root, '/api/kibana/settings/defaultRoute')
+        .send({ value: url })
+        .expect(400);
+    }
+
+    const { status, header } = await kbnTestServer.request.get(root, '/');
+    expect(status).toEqual(302);
+    expect(header).toMatchObject({
+      location: '/hello/app/kibana',
+    });
+  });
+
+  it('consumes valid values', async function() {
+    await kbnTestServer.request
+      .post(root, '/api/kibana/settings/defaultRoute')
+      .send({ value: '/valid' })
+      .expect(200);
+
+    const { status, header } = await kbnTestServer.request.get(root, '/');
+    expect(status).toEqual(302);
+    expect(header).toMatchObject({
+      location: '/hello/valid',
     });
   });
 });
