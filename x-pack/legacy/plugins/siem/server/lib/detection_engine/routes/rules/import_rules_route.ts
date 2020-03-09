@@ -111,6 +111,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                     return null;
                   }
                   const {
+                    actions,
                     description,
                     enabled,
                     false_positives: falsePositives,
@@ -131,6 +132,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                     severity,
                     tags,
                     threat,
+                    throttle,
                     to,
                     type,
                     references,
@@ -158,6 +160,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                       await createRules({
                         alertsClient,
                         actionsClient,
+                        actions,
                         description,
                         enabled,
                         falsePositives,
@@ -182,6 +185,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         to,
                         type,
                         threat,
+                        throttle,
                         references,
                         version,
                       });
@@ -190,6 +194,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                       await patchRules({
                         alertsClient,
                         actionsClient,
+                        actions,
                         savedObjectsClient,
                         description,
                         enabled,
@@ -216,6 +221,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         to,
                         type,
                         threat,
+                        throttle,
                         references,
                         version,
                       });

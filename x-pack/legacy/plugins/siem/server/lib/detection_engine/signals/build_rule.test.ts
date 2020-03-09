@@ -39,6 +39,7 @@ describe('buildRule', () => {
       tags: ['some fake tag 1', 'some fake tag 2'],
     });
     const expected: Partial<OutputRuleAlertRest> = {
+      actions: [],
       created_by: 'elastic',
       description: 'Detecting root and admin users',
       enabled: false,
@@ -95,6 +96,7 @@ describe('buildRule', () => {
       tags: ['some fake tag 1', 'some fake tag 2'],
     });
     const expected: Partial<OutputRuleAlertRest> = {
+      actions: [],
       created_by: 'elastic',
       description: 'Detecting root and admin users',
       enabled: true,
@@ -140,6 +142,7 @@ describe('buildRule', () => {
       tags: ['some fake tag 1', 'some fake tag 2'],
     });
     const expected: Partial<OutputRuleAlertRest> = {
+      actions: [],
       created_by: 'elastic',
       description: 'Detecting root and admin users',
       enabled: true,

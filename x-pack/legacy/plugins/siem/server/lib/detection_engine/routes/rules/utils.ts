@@ -101,6 +101,7 @@ export const transformAlertToRule = (
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): Partial<OutputRuleAlertRest> => {
   return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
+    actions: alert.actions,
     created_at: alert.createdAt.toISOString(),
     updated_at: alert.updatedAt.toISOString(),
     created_by: alert.createdBy,
@@ -131,6 +132,7 @@ export const transformAlertToRule = (
     to: alert.params.to,
     type: alert.params.type,
     threat: alert.params.threat,
+    throttle: alert.params.throttle,
     version: alert.params.version,
     status: ruleStatus?.attributes.status,
     status_date: ruleStatus?.attributes.statusDate,

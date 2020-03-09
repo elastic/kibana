@@ -37,6 +37,7 @@ describe('utils', () => {
       const fullRule = getResult();
       const rule = transformAlertToRule(fullRule);
       const expected: OutputRuleAlertRest = {
+        actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -101,6 +102,7 @@ describe('utils', () => {
       const fullRule = getResult();
       const { from, language, ...omitData } = transformAlertToRule(fullRule);
       const expected: Partial<OutputRuleAlertRest> = {
+        actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -164,6 +166,7 @@ describe('utils', () => {
       fullRule.params.query = null;
       const rule = transformAlertToRule(fullRule);
       const expected: Partial<OutputRuleAlertRest> = {
+        actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -228,6 +231,7 @@ describe('utils', () => {
       fullRule.params.query = undefined;
       const rule = transformAlertToRule(fullRule);
       const expected: Partial<OutputRuleAlertRest> = {
+        actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -293,6 +297,7 @@ describe('utils', () => {
       fullRule.params.language = null;
       const { from, enabled, ...omitData } = transformAlertToRule(fullRule);
       const expected: Partial<OutputRuleAlertRest> = {
+        actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -354,6 +359,7 @@ describe('utils', () => {
       fullRule.enabled = false;
       const ruleWithEnabledFalse = transformAlertToRule(fullRule);
       const expected: OutputRuleAlertRest = {
+        actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -419,6 +425,7 @@ describe('utils', () => {
       fullRule.params.immutable = false;
       const ruleWithEnabledFalse = transformAlertToRule(fullRule);
       const expected: OutputRuleAlertRest = {
+        actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -484,6 +491,7 @@ describe('utils', () => {
       fullRule.tags = ['tag 1', 'tag 2', `${INTERNAL_IDENTIFIER}_some_other_value`];
       const rule = transformAlertToRule(fullRule);
       const expected: OutputRuleAlertRest = {
+        actions: [],
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
         created_by: 'elastic',
@@ -633,6 +641,7 @@ describe('utils', () => {
         data: [getResult()],
       });
       const expected: OutputRuleAlertRest = {
+        actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -714,6 +723,7 @@ describe('utils', () => {
     test('outputs 200 if the data is of type siem alert', () => {
       const output = transform(getResult());
       const expected: OutputRuleAlertRest = {
+        actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -886,6 +896,7 @@ describe('utils', () => {
     test('outputs 200 if the data is of type siem alert', () => {
       const output = transformOrBulkError('rule-1', getResult());
       const expected: OutputRuleAlertRest = {
+        actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -1008,6 +1019,7 @@ describe('utils', () => {
       const transformed = transformAlertsToRules([result1]);
       expect(transformed).toEqual([
         {
+          actions: [],
           created_at: '2019-12-13T16:40:33.400Z',
           created_by: 'elastic',
           description: 'Detecting root and admin users',
@@ -1067,6 +1079,7 @@ describe('utils', () => {
       const transformed = transformAlertsToRules([result1, result2]);
       expect(transformed).toEqual([
         {
+          actions: [],
           created_at: '2019-12-13T16:40:33.400Z',
           created_by: 'elastic',
           description: 'Detecting root and admin users',
@@ -1115,6 +1128,7 @@ describe('utils', () => {
           version: 1,
         },
         {
+          actions: [],
           created_at: '2019-12-13T16:40:33.400Z',
           created_by: 'elastic',
           description: 'Detecting root and admin users',

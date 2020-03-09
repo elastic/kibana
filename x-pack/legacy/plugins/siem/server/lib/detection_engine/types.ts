@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AlertAction } from '../../../../../../plugins/triggers_actions_ui/public/types';
+
 import { CallAPIOptions } from '../../../../../../../src/core/server';
 import { Filter } from '../../../../../../../src/plugins/data/server';
 import { IRuleStatusAttributes } from './rules/types';
@@ -23,6 +26,7 @@ export interface ThreatParams {
 }
 
 export interface RuleAlertParams {
+  actions: AlertAction[];
   description: string;
   enabled: boolean;
   falsePositives: string[];
@@ -49,7 +53,7 @@ export interface RuleAlertParams {
   threat: ThreatParams[] | undefined | null;
   type: 'query' | 'saved_query';
   version: number;
-  throttle?: string;
+  throttle?: string | null;
 }
 
 export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval' | 'tags'>;
@@ -94,11 +98,12 @@ export type RuleAlertParamsRest = Omit<
     last_success_message?: IRuleStatusAttributes['lastSuccessMessage'] | undefined;
   };
 
-export type OutputRuleAlertRest = RuleAlertParamsRest & {
+export type OutputRuleAlertRest = Omit<RuleAlertParamsRest, 'throttle'> & {
   id: string;
   created_by: string | undefined | null;
   updated_by: string | undefined | null;
   immutable: boolean;
+  throttle?: RuleAlertParams['throttle'];
 };
 
 export type ImportRuleAlertRest = Omit<OutputRuleAlertRest, 'rule_id' | 'id'> & {

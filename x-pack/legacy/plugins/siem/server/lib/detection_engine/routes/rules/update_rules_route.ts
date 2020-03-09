@@ -30,6 +30,7 @@ export const updateRulesRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const {
+        actions,
         description,
         enabled,
         false_positives: falsePositives,
@@ -54,6 +55,7 @@ export const updateRulesRoute = (router: IRouter) => {
         to,
         type,
         threat,
+        throttle,
         references,
         version,
       } = request.body;
@@ -76,6 +78,7 @@ export const updateRulesRoute = (router: IRouter) => {
         const rule = await updateRules({
           alertsClient,
           actionsClient,
+          actions,
           description,
           enabled,
           falsePositives,
@@ -102,6 +105,7 @@ export const updateRulesRoute = (router: IRouter) => {
           to,
           type,
           threat,
+          throttle,
           references,
           version,
         });

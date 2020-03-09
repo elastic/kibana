@@ -14,6 +14,7 @@ import { calculateVersion } from './utils';
 export const updateRules = async ({
   alertsClient,
   actionsClient, // TODO: Use this whenever we add feature support for different action types
+  actions,
   savedObjectsClient,
   description,
   falsePositives,
@@ -38,11 +39,11 @@ export const updateRules = async ({
   severity,
   tags,
   threat,
+  throttle,
   to,
   type,
   references,
   version,
-  throttle,
 }: UpdateRuleParams): Promise<PartialAlert | null> => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
@@ -50,6 +51,7 @@ export const updateRules = async ({
   }
 
   const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
+    actions,
     description,
     falsePositives,
     query,
@@ -69,11 +71,11 @@ export const updateRules = async ({
     severity,
     tags,
     threat,
+    throttle,
     to,
     type,
     references,
     version,
-    throttle,
   });
 
   const update = await alertsClient.update({
@@ -82,8 +84,8 @@ export const updateRules = async ({
       tags: addTags(tags, rule.params.ruleId, immutable),
       name,
       schedule: { interval },
-      actions: rule.actions,
-      throttle: throttle ?? rule.throttle ?? null,
+      actions,
+      throttle: ['no_actions', 'rule'].includes(throttle as string) ? null : throttle,
       params: {
         description,
         ruleId: rule.params.ruleId,
@@ -103,6 +105,7 @@ export const updateRules = async ({
         riskScore,
         severity,
         threat,
+        throttle,
         to,
         type,
         references,

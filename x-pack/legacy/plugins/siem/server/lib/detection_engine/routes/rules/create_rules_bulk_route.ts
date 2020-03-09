@@ -56,6 +56,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
           .filter(rule => rule.rule_id == null || !dupes.includes(rule.rule_id))
           .map(async payloadRule => {
             const {
+              actions,
               description,
               enabled,
               false_positives: falsePositives,
@@ -75,6 +76,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
               severity,
               tags,
               threat,
+              throttle,
               to,
               type,
               references,
@@ -106,6 +108,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
               const createdRule = await createRules({
                 alertsClient,
                 actionsClient,
+                actions,
                 description,
                 enabled,
                 falsePositives,
@@ -127,6 +130,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
                 name,
                 severity,
                 tags,
+                throttle,
                 to,
                 type,
                 threat,

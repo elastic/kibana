@@ -47,6 +47,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
       const rules = await Promise.all(
         request.body.map(async payloadRule => {
           const {
+            actions,
             description,
             enabled,
             false_positives: falsePositives,
@@ -71,6 +72,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
             to,
             type,
             threat,
+            throttle,
             references,
             version,
           } = payloadRule;
@@ -80,6 +82,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
             const rule = await updateRules({
               alertsClient,
               actionsClient,
+              actions,
               description,
               enabled,
               immutable: false,
@@ -106,6 +109,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
               to,
               type,
               threat,
+              throttle,
               references,
               version,
             });

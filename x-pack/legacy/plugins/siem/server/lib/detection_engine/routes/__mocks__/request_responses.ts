@@ -50,6 +50,7 @@ export const mockPrepackagedRule = (): PrepackagedRules => ({
       technique: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
     },
   ],
+  throttle: null,
   enabled: true,
   filters: [],
   immutable: false,
@@ -348,6 +349,7 @@ export const getResult = (): RuleAlertType => ({
   alertTypeId: 'siem.signals',
   consumer: 'siem',
   params: {
+    actions: [],
     description: 'Detecting root and admin users',
     ruleId: 'rule-1',
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -391,6 +393,7 @@ export const getResult = (): RuleAlertType => ({
         ],
       },
     ],
+    throttle: null,
     references: ['http://www.example.com', 'https://ww.example.com'],
     version: 1,
   },

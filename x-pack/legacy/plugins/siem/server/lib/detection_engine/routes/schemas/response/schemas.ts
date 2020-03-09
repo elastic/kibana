@@ -24,6 +24,7 @@ export const file_name = t.string;
  * become the actual ESFilter as a type.
  */
 export const filters = t.array(t.unknown); // Filters are not easily type-able yet
+export const actions = t.array(t.unknown);
 
 // TODO: Create a regular expression type or custom date math part type here
 export const from = t.string;
@@ -45,6 +46,7 @@ export const output_index = t.string;
 export const saved_id = t.string;
 export const timeline_id = t.string;
 export const timeline_title = t.string;
+export const throttle = t.string;
 
 /**
  * Note that this is a plain unknown object because we allow the UI

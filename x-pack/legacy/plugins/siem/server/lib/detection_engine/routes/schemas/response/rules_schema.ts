@@ -11,6 +11,7 @@ import { Either } from 'fp-ts/lib/Either';
 
 import { checkTypeDependents } from './check_type_dependents';
 import {
+  actions,
   description,
   enabled,
   false_positives,
@@ -39,6 +40,7 @@ import {
   timeline_title,
   type,
   threat,
+  throttle,
   job_status,
   status_date,
   last_success_at,
@@ -104,6 +106,8 @@ export const dependentRulesSchema = t.partial({
  * Instead use dependentRulesSchema and check_type_dependents for how to do those.
  */
 export const partialRulesSchema = t.partial({
+  actions,
+  throttle,
   status: job_status,
   status_date,
   last_success_at,

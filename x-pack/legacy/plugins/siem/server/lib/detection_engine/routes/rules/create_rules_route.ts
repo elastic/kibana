@@ -31,6 +31,7 @@ export const createRulesRoute = (router: IRouter): void => {
     },
     async (context, request, response) => {
       const {
+        actions,
         description,
         enabled,
         false_positives: falsePositives,
@@ -52,6 +53,7 @@ export const createRulesRoute = (router: IRouter): void => {
         severity,
         tags,
         threat,
+        throttle,
         to,
         type,
         references,
@@ -92,6 +94,7 @@ export const createRulesRoute = (router: IRouter): void => {
         const createdRule = await createRules({
           alertsClient,
           actionsClient,
+          actions,
           description,
           enabled,
           falsePositives,
@@ -113,6 +116,7 @@ export const createRulesRoute = (router: IRouter): void => {
           name,
           severity,
           tags,
+          throttle,
           to,
           type,
           threat,
