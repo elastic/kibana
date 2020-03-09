@@ -47,7 +47,7 @@ Quantitative data driven styling symbolizes features from a range of numeric pro
 
 Property values are fit from the domain range to the style range on a linear scale.
 For example, let's symbolize <<add-sample-data, Kibana sample web log>> documents by size.
-The smallest feature will have a symbol radius of 1, and the largest feature will have a symbol radius of 24.
+The smallest feature has a symbol radius of 1, and the largest feature has a symbol radius of 24.
 The sample web logs `bytes` field ranges from 0 to 18,000.
 The `bytes` property value for each feature will be fit on a linear scale from the range 0 to 18,000 to the style range 1 to 24.
 
