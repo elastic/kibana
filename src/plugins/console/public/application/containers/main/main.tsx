@@ -118,7 +118,12 @@ export function Main() {
         </EuiFlexItem>
         {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
         <EuiFlexItem>
-          <EuiFlexGroup style={{ height: '100%' }} direction="row" gutterSize="none">
+          <EuiFlexGroup
+            responsive={false}
+            style={{ height: '100%' }}
+            direction="row"
+            gutterSize="none"
+          >
             {showFileTree && (
               <EuiFlexItem grow={false}>
                 <FileTree />

@@ -22,7 +22,6 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiLoadingSpinner,
   EuiPopover,
 } from '@elastic/eui';
@@ -51,11 +50,7 @@ export const FileActionsBar: FunctionComponent<Props> = ({
       gutterSize="none"
       className="conApp__fileTree__actionBar"
     >
-      <EuiFlexItem>
-        <EuiText size="s">
-          {i18n.translate('console.fileTree.title', { defaultMessage: 'Files' })}
-        </EuiText>
-      </EuiFlexItem>
+      <EuiFlexItem />
       {fileActionInProgress && (
         <EuiFlexItem className="conApp__fileTree__spinner" grow={false}>
           <EuiLoadingSpinner size="m" />
@@ -69,7 +64,7 @@ export const FileActionsBar: FunctionComponent<Props> = ({
             setShowCreateFilePopover(false);
             onFilter();
           }}
-          color="ghost"
+          color="text"
           aria-label={i18n.translate('console.fileTree.forms.createSearchToggleAriaLabel', {
             defaultMessage: 'Toggle file filter',
           })}
@@ -88,7 +83,7 @@ export const FileActionsBar: FunctionComponent<Props> = ({
               onClick={() => {
                 setShowCreateFilePopover(true);
               }}
-              color="ghost"
+              color="text"
               aria-label={i18n.translate('console.fileTree.forms.createButtonAriaLabel', {
                 defaultMessage: 'Create a file',
               })}

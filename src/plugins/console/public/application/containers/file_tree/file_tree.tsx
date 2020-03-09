@@ -19,17 +19,11 @@
 import { flow } from 'fp-ts/lib/function';
 import React, { useState, FunctionComponent } from 'react';
 import classNames from 'classnames';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { sortTextObjectsAsc, TextObjectWithId } from '../../../../common/text_object';
 
 import { useTextObjectsCRUD } from '../../hooks/text_objects';
-import {
-  FileActionsBar,
-  FileSearchBar,
-  DeleteFileModal,
-  FileTree as FileTreeComponent,
-} from '../../components';
+import { DeleteFileModal, FileTree as FileTreeComponent } from '../../components';
 import { useTextObjectsActionContext, useTextObjectsReadContext } from '../../contexts';
 
 import { filterTextObjects, EnhancedTextObjectWithId } from './filter_text_objects';
@@ -51,7 +45,6 @@ export const FileTree: FunctionComponent = () => {
   const [searchFilter, setSearchFilter] = useState<string | undefined>(undefined);
   const [isFileActionInProgress, setIsFileActionInProgress] = useState(false);
   const [idToDelete, setIdToDelete] = useState<undefined | string>(undefined);
-  const [showFileSearchBar, setShowFileSearchBar] = useState(false);
 
   const textObjectsCRUD = useTextObjectsCRUD();
   const { textObjects, currentTextObjectId, textObjectsSaveError } = useTextObjectsReadContext();
@@ -65,88 +58,60 @@ export const FileTree: FunctionComponent = () => {
 
   return (
     <>
-      <EuiFlexGroup
-        className="conApp__fileTree"
-        direction="column"
-        gutterSize="none"
-        responsive={false}
-      >
-        {/* File Actions Bar */}
-        <EuiFlexItem grow={false}>
-          <FileActionsBar
-            fileActionInProgress={isFileActionInProgress}
-            disabled={isFileActionInProgress}
-            onCreate={fileName => {
+      <FileTreeComponent
+        onCreate={fileName => {
+          setIsFileActionInProgress(true);
+          textObjectsCRUD
+            .create({
+              textObject: {
+                text: '',
+                updatedAt: Date.now(),
+                createdAt: Date.now(),
+                name: fileName,
+              },
+            })
+            .finally(() => setIsFileActionInProgress(false));
+        }}
+        disabled={isFileActionInProgress}
+        searchFilter={searchFilter}
+        onSearchFilter={string => setSearchFilter(string)}
+        entries={filteredTextObjects.map(({ isScratchPad, name, id, displayName }) => {
+          return {
+            id,
+            className: classNames({
+              conApp__fileTree__scratchPadEntry: isScratchPad,
+              'conApp__fileTree__entry--selected': id === currentTextObjectId,
+            }),
+            name: name!,
+            error: textObjectsSaveError[id],
+            displayName,
+            onSelect: () => {
+              dispatch({
+                type: 'setCurrent',
+                payload: id,
+              });
+            },
+            canDelete: !isScratchPad,
+            onDelete: deleteId => {
+              setIdToDelete(deleteId);
+            },
+            canEdit: !isScratchPad,
+            onEdit: ({ name: fileName, id: idToEdit }) => {
               setIsFileActionInProgress(true);
               textObjectsCRUD
-                .create({
+                .update({
                   textObject: {
-                    text: '',
-                    updatedAt: Date.now(),
-                    createdAt: Date.now(),
+                    id: idToEdit,
                     name: fileName,
                   },
                 })
-                .finally(() => setIsFileActionInProgress(false));
-            }}
-            onFilter={() => setShowFileSearchBar(!showFileSearchBar)}
-          />
-        </EuiFlexItem>
-        {/* File Search Bar */}
-        {showFileSearchBar && (
-          <EuiFlexItem grow={false}>
-            <FileSearchBar
-              onChange={(searchTerm: string) => {
-                setSearchFilter(searchTerm);
-              }}
-              searchValue={searchFilter ?? ''}
-            />
-          </EuiFlexItem>
-        )}
-
-        {/* File Tree */}
-        <EuiFlexItem grow={false}>
-          <FileTreeComponent
-            entries={filteredTextObjects.map(({ isScratchPad, name, id, displayName }) => {
-              const entryName = isScratchPad ? 'Default' : name ?? `Untitled`;
-              return {
-                id,
-                className: classNames({
-                  conApp__fileTree__scratchPadEntry: isScratchPad,
-                  'conApp__fileTree__entry--selected': id === currentTextObjectId,
-                }),
-                name: entryName,
-                error: textObjectsSaveError[id],
-                displayName,
-                onSelect: () => {
-                  dispatch({
-                    type: 'setCurrent',
-                    payload: id,
-                  });
-                },
-                canDelete: !isScratchPad,
-                onDelete: deleteId => {
-                  setIdToDelete(deleteId);
-                },
-                canEdit: !isScratchPad,
-                onEdit: ({ name: fileName, id: idToEdit }) => {
-                  setIsFileActionInProgress(true);
-                  textObjectsCRUD
-                    .update({
-                      textObject: {
-                        id: idToEdit,
-                        name: fileName,
-                      },
-                    })
-                    .finally(() => {
-                      setIsFileActionInProgress(false);
-                    });
-                },
-              };
-            })}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+                .finally(() => {
+                  setIsFileActionInProgress(false);
+                });
+            },
+          };
+        })}
+      />
       {idToDelete && (
         <DeleteFileModal
           fileName={textObjects[idToDelete]?.name ?? 'Untitled'}

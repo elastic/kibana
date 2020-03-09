@@ -44,7 +44,7 @@ export interface Props {
   canEdit?: boolean;
   displayName?: React.ReactNode;
   ariaLabel?: string;
-  error?: string;
+  error?: string | Error;
 }
 
 export const FileTreeEntry: FunctionComponent<Props> = ({

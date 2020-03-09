@@ -19,7 +19,9 @@
 import React from 'react';
 import { TextObjectWithId } from '../../../../common/text_object';
 
-export type EnhancedTextObjectWithId = TextObjectWithId & { displayName?: JSX.Element };
+export type EnhancedTextObjectWithId = TextObjectWithId & {
+  displayName?: JSX.Element;
+};
 
 export const filterTextObjects = (
   searchTerm: string,

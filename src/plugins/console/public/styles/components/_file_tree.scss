@@ -1,5 +1,6 @@
 .conApp__fileTree {
-
+  position: relative;
+  height: 100%;
 
   background-color: $euiColorLightestShade;
   min-width: $euiButtonMinWidth * 2.5;
@@ -9,8 +10,12 @@
   }
 
   &__actionBar {
+    top: 0;
+    right: 0;
+    z-index: $euiZLevel1;
     padding: 0 5px;
-    background-color: $euiColorDarkestShade;
+    position: absolute;
+    background-color: $euiColorMediumShade;
     color: $euiColorLightestShade;
   }
 
@@ -18,11 +23,14 @@
     font-style: italic;
   }
   &__entryContainer {
-    // TODO: Find a better way to get these px values (2 + 3)
-    // 1. Subtract the header size (height of Console app)
-    // 2. Subtract tab height
-    // 3. Subtract File actions height
-    height: calc(100vh - calc(#{$euiHeaderChildSize} * 2) - 37px - 24px);
+    // Absolute position this to fill the entire file
+    // tree area. This provides the element with the correct
+    // height for scrolling.
+    position: absolute;
+    top:0;
+    bottom:0;
+    left:0;
+    right:0;
     overflow: auto;
   }
 

@@ -17,32 +17,65 @@
  * under the License.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FileTreeEntry, Props as FileEntryProps } from './file_tree_entry';
+import { FileActionsBar } from './file_actions_bar';
+import { FileSearchBar } from './file_search_bar';
 
 export interface Props {
   entries: FileEntryProps[];
-  editingDisabled?: boolean;
+  onCreate: (fileName: string) => void;
+  onSearchFilter: (search: string) => void;
+  searchFilter?: string;
+  disabled?: boolean;
 }
 
-export const FileTree: FunctionComponent<Props> = ({ entries, editingDisabled }) => {
+export const FileTree: FunctionComponent<Props> = ({
+  entries,
+  onSearchFilter,
+  disabled,
+  searchFilter,
+  onCreate,
+}) => {
+  const [showFileSearchBar, setShowFileSearchBar] = useState(false);
+
   return (
-    <EuiFlexGroup
-      className="conApp__fileTree__entryContainer"
-      gutterSize="none"
-      responsive={false}
-      direction="column"
-    >
-      {entries.map((props, idx) => (
-        <EuiFlexItem key={idx} grow={false}>
-          <FileTreeEntry
-            {...props}
-            canDelete={props.canDelete && !editingDisabled}
-            canEdit={props.canEdit && !editingDisabled}
-          />
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
+    <div className="conApp__fileTree">
+      {/* File Actions Bar */}
+      <FileActionsBar
+        disabled={disabled}
+        onCreate={onCreate}
+        onFilter={() => setShowFileSearchBar(!showFileSearchBar)}
+      />
+      <EuiFlexGroup
+        className="conApp__fileTree__entryContainer"
+        gutterSize="none"
+        responsive={false}
+        direction="column"
+      >
+        {/* File Search Bar */}
+        {showFileSearchBar && (
+          <EuiFlexItem grow={false}>
+            <FileSearchBar
+              onChange={(searchTerm: string) => {
+                onSearchFilter(searchTerm);
+              }}
+              searchValue={searchFilter ?? ''}
+            />
+          </EuiFlexItem>
+        )}
+
+        {entries.map((props, idx) => (
+          <EuiFlexItem key={idx} grow={false}>
+            <FileTreeEntry
+              {...props}
+              canDelete={props.canDelete && !disabled}
+              canEdit={props.canEdit && !disabled}
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </div>
   );
 };
