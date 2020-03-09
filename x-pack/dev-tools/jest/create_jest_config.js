@@ -40,7 +40,7 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
     setupFilesAfterEnv: [
       `<rootDir>/dev-tools/jest/setup/setup_test.js`,
       `${kibanaDirectory}/src/dev/jest/setup/mocks.js`,
-      `<rootDir>/dev-tools/jest/setup/react_testing_library.js`,
+      `${kibanaDirectory}/src/dev/jest/setup/react_testing_library.js`,
     ],
     testMatch: ['**/*.test.{js,ts,tsx}'],
     transform: {
