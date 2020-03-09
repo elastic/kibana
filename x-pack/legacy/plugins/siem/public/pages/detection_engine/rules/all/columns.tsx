@@ -43,7 +43,7 @@ export const getActions = (
   {
     description: i18n.EDIT_RULE_SETTINGS,
     type: 'icon',
-    icon: 'visControls',
+    icon: 'controlsHorizontal',
     name: i18n.EDIT_RULE_SETTINGS,
     onClick: (rowItem: Rule) => editRuleAction(rowItem, history),
     enabled: (rowItem: Rule) => !rowItem.immutable,
