@@ -35,7 +35,7 @@ export interface ReindexActions {
   /**
    * Creates a new reindexOp, does not perform any pre-flight checks.
    * @param indexName
-   * @param opts Options for the reindex operation
+   * @param opts Additional options when creating the reindex operation
    */
   createReindexOp(indexName: string, opts?: ReindexOptions): Promise<ReindexSavedObject>;
 

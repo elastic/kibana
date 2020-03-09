@@ -4,24 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { APICaller } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import {
   JOB_STATE,
   DATAFEED_STATE,
 } from '../../../../../legacy/plugins/ml/common/constants/states';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
+import {
+  Datafeed,
+  DatafeedStats,
+} from '../../../../../legacy/plugins/ml/common/types/anomaly_detection_jobs';
 
-export function datafeedsProvider(callWithRequest) {
-  async function forceStartDatafeeds(datafeedIds, start, end) {
+export interface MlDatafeedsResponse {
+  datafeeds: Datafeed[];
+  count: number;
+}
+export interface MlDatafeedsStatsResponse {
+  datafeeds: DatafeedStats[];
+  count: number;
+}
+
+interface Results {
+  [id: string]: {
+    started: boolean;
+    error?: any;
+  };
+}
+
+export function datafeedsProvider(callAsCurrentUser: APICaller) {
+  async function forceStartDatafeeds(datafeedIds: string[], start: number, end: number) {
     const jobIds = await getJobIdsByDatafeedId();
-    const doStartsCalled = datafeedIds.reduce((p, c) => {
-      p[c] = false;
-      return p;
-    }, {});
+    const doStartsCalled = datafeedIds.reduce((acc, cur) => {
+      acc[cur] = false;
+      return acc;
+    }, {} as { [id: string]: boolean });
 
-    const results = {};
+    const results: Results = {};
 
-    async function doStart(datafeedId) {
+    async function doStart(datafeedId: string): Promise<{ started: boolean; error?: string }> {
       if (doStartsCalled[datafeedId] === false) {
         doStartsCalled[datafeedId] = true;
         try {
@@ -30,6 +51,8 @@ export function datafeedsProvider(callWithRequest) {
         } catch (error) {
           return { started: false, error };
         }
+      } else {
+        return { started: true };
       }
     }
 
@@ -64,10 +87,10 @@ export function datafeedsProvider(callWithRequest) {
     return results;
   }
 
-  async function openJob(jobId) {
+  async function openJob(jobId: string) {
     let opened = false;
     try {
-      const resp = await callWithRequest('ml.openJob', { jobId });
+      const resp = await callAsCurrentUser('ml.openJob', { jobId });
       opened = resp.opened;
     } catch (error) {
       if (error.statusCode === 409) {
@@ -79,16 +102,16 @@ export function datafeedsProvider(callWithRequest) {
     return opened;
   }
 
-  async function startDatafeed(datafeedId, start, end) {
-    return callWithRequest('ml.startDatafeed', { datafeedId, start, end });
+  async function startDatafeed(datafeedId: string, start: number, end: number) {
+    return callAsCurrentUser('ml.startDatafeed', { datafeedId, start, end });
   }
 
-  async function stopDatafeeds(datafeedIds) {
-    const results = {};
+  async function stopDatafeeds(datafeedIds: string[]) {
+    const results: Results = {};
 
     for (const datafeedId of datafeedIds) {
       try {
-        results[datafeedId] = await callWithRequest('ml.stopDatafeed', { datafeedId });
+        results[datafeedId] = await callAsCurrentUser('ml.stopDatafeed', { datafeedId });
       } catch (error) {
         if (isRequestTimeout(error)) {
           return fillResultsWithTimeouts(results, datafeedId, datafeedIds, DATAFEED_STATE.STOPPED);
@@ -99,24 +122,24 @@ export function datafeedsProvider(callWithRequest) {
     return results;
   }
 
-  async function forceDeleteDatafeed(datafeedId) {
-    return callWithRequest('ml.deleteDatafeed', { datafeedId, force: true });
+  async function forceDeleteDatafeed(datafeedId: string) {
+    return callAsCurrentUser('ml.deleteDatafeed', { datafeedId, force: true });
   }
 
   async function getDatafeedIdsByJobId() {
-    const datafeeds = await callWithRequest('ml.datafeeds');
-    return datafeeds.datafeeds.reduce((p, c) => {
-      p[c.job_id] = c.datafeed_id;
-      return p;
-    }, {});
+    const { datafeeds } = await callAsCurrentUser<MlDatafeedsResponse>('ml.datafeeds');
+    return datafeeds.reduce((acc, cur) => {
+      acc[cur.job_id] = cur.datafeed_id;
+      return acc;
+    }, {} as { [id: string]: string });
   }
 
   async function getJobIdsByDatafeedId() {
-    const datafeeds = await callWithRequest('ml.datafeeds');
-    return datafeeds.datafeeds.reduce((p, c) => {
-      p[c.datafeed_id] = c.job_id;
-      return p;
-    }, {});
+    const { datafeeds } = await callAsCurrentUser<MlDatafeedsResponse>('ml.datafeeds');
+    return datafeeds.reduce((acc, cur) => {
+      acc[cur.datafeed_id] = cur.job_id;
+      return acc;
+    }, {} as { [id: string]: string });
   }
 
   return {

@@ -17,24 +17,12 @@
  * under the License.
  */
 
-import { getDefaultFormat } from '../get_default_format';
-import { fieldFormats } from '../../../../../../plugins/data/public';
+import { i18n } from '@kbn/i18n';
 
-const getConfig = () => {
-  return '0,0.[000]';
-};
-
-describe('getDefaultFormat', () => {
-  it('should create default format', () => {
-    const DefaultFormat = getDefaultFormat(fieldFormats.NumberFormat);
-    const defaultFormatObject = new DefaultFormat(null, getConfig);
-    const formatObject = new fieldFormats.NumberFormat(null, getConfig);
-
-    expect(DefaultFormat.id).toEqual('');
-    expect(DefaultFormat.resolvedTitle).toEqual(fieldFormats.NumberFormat.title);
-    expect(DefaultFormat.title).toEqual('- Default -');
-    expect(JSON.stringify(defaultFormatObject.params())).toEqual(
-      JSON.stringify(formatObject.params())
-    );
-  });
+export const defaultFeedbackMessage = i18n.translate('kibana_utils.defaultFeedbackMessage', {
+  defaultMessage: 'Have feedback? Please create an issue in {link}.',
+  values: {
+    link:
+      '<a href="https://github.com/elastic/kibana/issues/new/choose" rel="noopener noreferrer" target="_blank">GitHub</a>',
+  },
 });
