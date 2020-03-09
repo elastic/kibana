@@ -122,7 +122,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         <EuiContextMenuPanel
           items={[
             <EuiContextMenuItem
-              key={'ExportItemKey'}
+              key="ExportItemKey"
               icon="exportAction"
               disabled={selectedItems.length === 0}
               onClick={async () => {
@@ -134,7 +134,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
               {BATCH_ACTION_EXPORT_SELECTED}
             </EuiContextMenuItem>,
             <EuiContextMenuItem
-              key={'DeleteItemKey'}
+              key="DeleteItemKey"
               icon="trash"
               disabled={selectedItems.length === 0}
               onClick={async () => {
@@ -142,7 +142,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
                 if (typeof onDeleteSelected === 'function') onDeleteSelected();
               }}
             >
-              {'Delete selected timeline'}
+              {i18n.DELETE_SELECTED}
             </EuiContextMenuItem>,
           ]}
         />
@@ -155,7 +155,10 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         timelineId: item.savedObjectId,
         pinnedEventIds:
           item.pinnedEventIds != null ? keys(item.pinnedEventIds) : item.pinnedEventIds,
-        noteIds: item.noteIds,
+        noteIds: item?.notes?.reduce(
+          (acc, note) => (note.noteId != null ? [...acc, note.noteId] : acc),
+          [] as string[]
+        ),
       }));
     }, [selectedItems]);
 
@@ -184,7 +187,6 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           <TitleRow
             data-test-subj="title-row"
             onAddTimelinesToFavorites={onAddTimelinesToFavorites}
-            // onDeleteSelected={onDeleteSelected}
             selectedTimelinesCount={selectedItems.length}
             title={title}
           >

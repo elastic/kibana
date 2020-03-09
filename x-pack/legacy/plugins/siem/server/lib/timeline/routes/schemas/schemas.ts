@@ -6,7 +6,7 @@
 import Joi from 'joi';
 
 /* eslint-disable @typescript-eslint/camelcase */
-export const timelineId = Joi.string();
+export const timelineId = Joi.string().required();
 export const pinnedEventIds = Joi.array().items(Joi.string());
 export const noteIds = Joi.array().items(Joi.string());
 export const objects = Joi.array().items(
@@ -14,7 +14,7 @@ export const objects = Joi.array().items(
     timelineId,
     pinnedEventIds,
     noteIds,
-  })
+  }).required()
 );
 
 export const exclude_export_details = Joi.boolean();

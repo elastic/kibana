@@ -11,7 +11,7 @@ import * as i18n from '../translations';
 import { OpenTimelineProps } from '../types';
 import { HeaderSection } from '../../header_section';
 
-type Props = Pick<OpenTimelineProps, 'onAddTimelinesToFavorites' | 'onDeleteSelected' | 'title'> & {
+type Props = Pick<OpenTimelineProps, 'onAddTimelinesToFavorites' | 'title'> & {
   /** The number of timelines currently selected */
   selectedTimelinesCount: number;
   children?: JSX.Element;
@@ -22,41 +22,25 @@ type Props = Pick<OpenTimelineProps, 'onAddTimelinesToFavorites' | 'onDeleteSele
  * and action buttons (i.e. Favorite Selected and Delete Selected)
  */
 export const TitleRow = React.memo<Props>(
-  ({ children, onAddTimelinesToFavorites, onDeleteSelected, selectedTimelinesCount, title }) => (
-    <HeaderSection title={title}>
-      {(onAddTimelinesToFavorites || onDeleteSelected) && (
-        <EuiFlexGroup gutterSize="s" responsive={false}>
-          {onAddTimelinesToFavorites && (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="favorite-selected"
-                iconSide="left"
-                iconType="starEmptySpace"
-                isDisabled={selectedTimelinesCount === 0}
-                onClick={onAddTimelinesToFavorites}
-              >
-                {i18n.FAVORITE_SELECTED}
-              </EuiButton>
-            </EuiFlexItem>
-          )}
+  ({ children, onAddTimelinesToFavorites, selectedTimelinesCount, title }) => (
+    <HeaderSection title={title} split={true}>
+      <EuiFlexGroup gutterSize="s" responsive={false}>
+        {onAddTimelinesToFavorites && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="favorite-selected"
+              iconSide="left"
+              iconType="starEmptySpace"
+              isDisabled={selectedTimelinesCount === 0}
+              onClick={onAddTimelinesToFavorites}
+            >
+              {i18n.FAVORITE_SELECTED}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
 
-          {children && <EuiFlexItem>{children}</EuiFlexItem>}
-
-          {onDeleteSelected && (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="delete-selected"
-                iconSide="left"
-                iconType="trash"
-                isDisabled={selectedTimelinesCount === 0}
-                onClick={onDeleteSelected}
-              >
-                {i18n.DELETE_SELECTED}
-              </EuiButton>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      )}
+        {children && <EuiFlexItem>{children}</EuiFlexItem>}
+      </EuiFlexGroup>
     </HeaderSection>
   )
 );

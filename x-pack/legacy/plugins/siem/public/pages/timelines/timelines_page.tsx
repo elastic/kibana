@@ -8,7 +8,6 @@ import ApolloClient from 'apollo-client';
 import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 
-import { EuiButton } from '@elastic/eui';
 import { HeaderPage } from '../../components/header_page';
 import { StatefulOpenTimeline } from '../../components/open_timeline';
 import { WrapperPage } from '../../components/wrapper_page';
@@ -47,13 +46,13 @@ const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => {
       />
       <WrapperPage>
         <HeaderPage title={i18n.PAGE_TITLE}>
-          <EuiButton
+          {/* {<EuiButton
             iconType="indexOpen"
             isDisabled={false}
             onClick={toggleImportModal.bind(null, true)}
           >
-            {'Import Timeline'}
-          </EuiButton>
+            {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
+          </EuiButton>} */}
         </HeaderPage>
 
         <TimelinesContainer>

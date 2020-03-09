@@ -16,3 +16,10 @@ export const ALL_TIMELINES_PANEL_TITLE = i18n.translate(
     defaultMessage: 'All timelines',
   }
 );
+
+export const ALL_TIMELINES_IMPORT_TIMELINE_TITLE = i18n.translate(
+  'xpack.siem.timelines.allTimelines.importTimelineTitle',
+  {
+    defaultMessage: 'Import Timeline',
+  }
+);

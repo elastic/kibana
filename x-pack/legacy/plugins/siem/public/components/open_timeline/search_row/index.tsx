@@ -11,20 +11,12 @@ import {
   EuiFlexItem,
   // @ts-ignore
   EuiSearchBar,
-  EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import * as i18n from '../translations';
 import { OpenTimelineProps } from '../types';
-import {
-  UtilityBarSection,
-  UtilityBarGroup,
-  UtilityBarText,
-  UtilityBar,
-} from '../../detection_engine/utility_bar';
 
 const SearchRowContainer = styled.div`
   &:not(:last-child) {

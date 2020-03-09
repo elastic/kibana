@@ -6,6 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ALL_ACTIONS = i18n.translate('xpack.siem.open.timeline.allActionsTooltip', {
+  defaultMessage: 'All actions',
+});
+
 export const CANCEL = i18n.translate('xpack.siem.open.timeline.cancelButton', {
   defaultMessage: 'Cancel',
 });

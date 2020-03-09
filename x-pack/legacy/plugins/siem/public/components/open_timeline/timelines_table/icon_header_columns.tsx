@@ -6,7 +6,14 @@
 
 /* eslint-disable react/display-name */
 
-import { EuiIcon, EuiToolTip, EuiButtonIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiToolTip,
+  EuiButtonIcon,
+  EuiPopover,
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
+} from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
 
 import { ACTION_COLUMN_WIDTH } from './common_styles';
@@ -14,7 +21,9 @@ import { getNotesCount, getPinnedEventCount } from '../helpers';
 import * as i18n from '../translations';
 import { FavoriteTimelineResult, OpenTimelineResult } from '../types';
 
-const EditTimelineActions = React.memo<{ actionsColumns: [] }>(({ actionsColumns }) => {
+const EditTimelineActions = React.memo<{
+  actionsColumns: EuiContextMenuPanelDescriptor[] | undefined;
+}>(({ actionsColumns }) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const tooglePopover = useCallback(
     (newState: boolean) => {
@@ -45,7 +54,9 @@ EditTimelineActions.displayName = 'EditTimelineActions';
 /**
  * Returns the columns that have icon headers
  */
-export const getIconHeaderColumns = actionsColumns => [
+export const getIconHeaderColumns = (
+  actionsColumns: EuiContextMenuPanelDescriptor[] | undefined
+) => [
   {
     align: 'center',
     field: 'pinnedEventIds',
@@ -95,9 +106,14 @@ export const getIconHeaderColumns = actionsColumns => [
   {
     align: 'center',
     field: 'visControls',
-    name: null,
+    name: (
+      <EuiToolTip content={i18n.ALL_ACTIONS}>
+        <EuiIcon data-test-subj="all-timeline-actions-icon" size="m" type="visControls" />
+      </EuiToolTip>
+    ),
     render: () => {
       return <EditTimelineActions actionsColumns={actionsColumns} />;
+      // return <span>xxx</span>;
     },
     sortable: false,
     width: ACTION_COLUMN_WIDTH,
