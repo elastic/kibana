@@ -11,7 +11,6 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { ApmOverview } from '../../../components/apm/overview';
-import { I18nContext } from 'ui/i18n';
 import { CODE_PATH_APM } from '../../../../common/constants';
 
 uiRoutes.when('/apm', {
@@ -48,11 +47,7 @@ uiRoutes.when('/apm', {
     }
 
     renderReact(data) {
-      const component = (
-        <I18nContext>
-          <ApmOverview {...data} onBrush={this.onBrush} zoomInfo={this.zoomInfo} />
-        </I18nContext>
-      );
+      const component = <ApmOverview {...data} onBrush={this.onBrush} zoomInfo={this.zoomInfo} />;
       super.renderReact(component);
     }
   },

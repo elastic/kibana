@@ -7,10 +7,10 @@
 import React from 'react';
 import { mockUseEffects } from '../../../jest.helpers';
 import { shallow, ShallowWrapper } from 'enzyme';
-import { kfetch } from 'ui/kfetch';
+import { kfetch } from '../../../np_imports/ui/kfetch';
 import { AlertsConfiguration, AlertsConfigurationProps } from './configuration';
 
-jest.mock('ui/kfetch', () => ({
+jest.mock('../../../np_imports/ui/kfetch', () => ({
   kfetch: jest.fn(),
 }));
 

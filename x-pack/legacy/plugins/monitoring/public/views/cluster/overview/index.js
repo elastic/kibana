@@ -5,14 +5,13 @@
  */
 import React, { Fragment } from 'react';
 import { isEmpty } from 'lodash';
-import chrome from 'ui/chrome';
+import chrome from '../../../np_imports/ui/chrome';
 import { i18n } from '@kbn/i18n';
 import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../';
 import { Overview } from 'plugins/monitoring/components/cluster/overview';
-import { I18nContext } from 'ui/i18n';
 import { SetupModeRenderer } from '../../../components/renderers';
 import {
   CODE_PATH_ALL,
@@ -76,25 +75,23 @@ uiRoutes.when('/overview', {
           }
 
           this.renderReact(
-            <I18nContext>
-              <SetupModeRenderer
-                scope={$scope}
-                injector={$injector}
-                render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
-                  <Fragment>
-                    {flyoutComponent}
-                    <Overview
-                      cluster={data}
-                      emailAddress={emailAddress}
-                      setupMode={setupMode}
-                      changeUrl={changeUrl}
-                      showLicenseExpiration={showLicenseExpiration}
-                    />
-                    {bottomBarComponent}
-                  </Fragment>
-                )}
-              />
-            </I18nContext>
+            <SetupModeRenderer
+              scope={$scope}
+              injector={$injector}
+              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+                <Fragment>
+                  {flyoutComponent}
+                  <Overview
+                    cluster={data}
+                    emailAddress={emailAddress}
+                    setupMode={setupMode}
+                    changeUrl={changeUrl}
+                    showLicenseExpiration={showLicenseExpiration}
+                  />
+                  {bottomBarComponent}
+                </Fragment>
+              )}
+            />
           );
         }
       );

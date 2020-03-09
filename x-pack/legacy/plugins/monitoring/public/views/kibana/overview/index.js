@@ -24,7 +24,6 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { ClusterStatus } from '../../../components/kibana/cluster_status';
-import { I18nContext } from 'ui/i18n';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { CODE_PATH_KIBANA } from '../../../../common/constants';
 
@@ -79,34 +78,32 @@ uiRoutes.when('/kibana', {
           }
 
           this.renderReact(
-            <I18nContext>
-              <EuiPage>
-                <EuiPageBody>
-                  <EuiPanel>
-                    <ClusterStatus stats={data.clusterStatus} />
-                  </EuiPanel>
-                  <EuiSpacer size="m" />
-                  <EuiPageContent>
-                    <EuiFlexGroup>
-                      <EuiFlexItem grow={true}>
-                        <MonitoringTimeseriesContainer
-                          series={data.metrics.kibana_cluster_requests}
-                          onBrush={this.onBrush}
-                          zoomInfo={this.zoomInfo}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={true}>
-                        <MonitoringTimeseriesContainer
-                          series={data.metrics.kibana_cluster_response_times}
-                          onBrush={this.onBrush}
-                          zoomInfo={this.zoomInfo}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiPageContent>
-                </EuiPageBody>
-              </EuiPage>
-            </I18nContext>
+            <EuiPage>
+              <EuiPageBody>
+                <EuiPanel>
+                  <ClusterStatus stats={data.clusterStatus} />
+                </EuiPanel>
+                <EuiSpacer size="m" />
+                <EuiPageContent>
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={true}>
+                      <MonitoringTimeseriesContainer
+                        series={data.metrics.kibana_cluster_requests}
+                        onBrush={this.onBrush}
+                        zoomInfo={this.zoomInfo}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={true}>
+                      <MonitoringTimeseriesContainer
+                        series={data.metrics.kibana_cluster_response_times}
+                        onBrush={this.onBrush}
+                        zoomInfo={this.zoomInfo}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPageContent>
+              </EuiPageBody>
+            </EuiPage>
           );
         }
       );

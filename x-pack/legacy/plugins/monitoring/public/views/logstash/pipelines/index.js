@@ -13,7 +13,6 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { isPipelineMonitoringSupportedInVersion } from 'plugins/monitoring/lib/logstash/pipelines';
 import template from './index.html';
 import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
-import { I18nContext } from 'ui/i18n';
 import { PipelineListing } from '../../../components/logstash/pipeline_listing/pipeline_listing';
 import { MonitoringViewBaseEuiTableController } from '../..';
 import { CODE_PATH_LOGSTASH } from '../../../../common/constants';
@@ -103,21 +102,19 @@ uiRoutes.when('/logstash/pipelines', {
         };
 
         super.renderReact(
-          <I18nContext>
-            <PipelineListing
-              className="monitoringLogstashPipelinesTable"
-              onBrush={xaxis => this.onBrush({ xaxis })}
-              stats={pageData.clusterStatus}
-              data={pageData.pipelines}
-              {...this.getPaginationTableProps(pagination)}
-              upgradeMessage={upgradeMessage}
-              dateFormat={config.get('dateFormat')}
-              angular={{
-                kbnUrl,
-                scope: $scope,
-              }}
-            />
-          </I18nContext>
+          <PipelineListing
+            className="monitoringLogstashPipelinesTable"
+            onBrush={xaxis => this.onBrush({ xaxis })}
+            stats={pageData.clusterStatus}
+            data={pageData.pipelines}
+            {...this.getPaginationTableProps(pagination)}
+            upgradeMessage={upgradeMessage}
+            dateFormat={config.get('dateFormat')}
+            angular={{
+              kbnUrl,
+              scope: $scope,
+            }}
+          />
         );
       };
 

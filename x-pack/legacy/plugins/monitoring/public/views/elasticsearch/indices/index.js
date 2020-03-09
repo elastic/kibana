@@ -12,7 +12,6 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { ElasticsearchIndices } from '../../../components';
 import template from './index.html';
-import { I18nContext } from 'ui/i18n';
 import { CODE_PATH_ELASTICSEARCH } from '../../../../common/constants';
 
 uiRoutes.when('/elasticsearch/indices', {
@@ -71,17 +70,15 @@ uiRoutes.when('/elasticsearch/indices', {
 
       this.renderReact = ({ clusterStatus, indices }) => {
         super.renderReact(
-          <I18nContext>
-            <ElasticsearchIndices
-              clusterStatus={clusterStatus}
-              indices={indices}
-              showSystemIndices={showSystemIndices}
-              toggleShowSystemIndices={toggleShowSystemIndices}
-              sorting={this.sorting}
-              pagination={this.pagination}
-              onTableChange={this.onTableChange}
-            />
-          </I18nContext>
+          <ElasticsearchIndices
+            clusterStatus={clusterStatus}
+            indices={indices}
+            showSystemIndices={showSystemIndices}
+            toggleShowSystemIndices={toggleShowSystemIndices}
+            sorting={this.sorting}
+            pagination={this.pagination}
+            onTableChange={this.onTableChange}
+          />
         );
       };
     }

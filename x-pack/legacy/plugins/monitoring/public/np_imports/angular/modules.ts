@@ -18,7 +18,6 @@ import {
   GlobalStateProvider,
   StateManagementConfigProvider,
   AppStateProvider,
-  KbnUrlProvider,
   npStart,
 } from '../legacy_imports';
 
@@ -26,6 +25,8 @@ import {
 import { PromiseServiceCreator } from './providers/promises';
 // @ts-ignore
 import { PrivateProvider } from './providers/private';
+// @ts-ignore
+import { KbnUrlProvider } from './providers/url';
 
 type IPrivate = <T>(provider: (...injectable: any[]) => T) => T;
 

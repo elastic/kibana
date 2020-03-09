@@ -8,7 +8,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { Reason } from './reason';
 
-jest.mock('ui/documentation_links', () => ({
+jest.mock('../../np_imports/ui/shims', () => ({
   ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
   DOC_LINK_VERSION: 'current',
 }));

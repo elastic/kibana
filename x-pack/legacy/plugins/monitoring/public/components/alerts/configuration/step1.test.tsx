@@ -48,7 +48,7 @@ describe('Step1', () => {
 
   beforeEach(() => {
     jest.isolateModules(() => {
-      jest.doMock('ui/kfetch', () => ({
+      jest.doMock('../../../np_imports/ui/kfetch', () => ({
         kfetch: () => {
           return {};
         },
@@ -95,7 +95,7 @@ describe('Step1', () => {
     it('should send up the create to the server', async () => {
       const kfetch = jest.fn().mockImplementation(() => {});
       jest.isolateModules(() => {
-        jest.doMock('ui/kfetch', () => ({
+        jest.doMock('../../../np_imports/ui/kfetch', () => ({
           kfetch,
         }));
         setModules();
@@ -150,7 +150,7 @@ describe('Step1', () => {
     it('should send up the edit to the server', async () => {
       const kfetch = jest.fn().mockImplementation(() => {});
       jest.isolateModules(() => {
-        jest.doMock('ui/kfetch', () => ({
+        jest.doMock('../../../np_imports/ui/kfetch', () => ({
           kfetch,
         }));
         setModules();
@@ -192,7 +192,7 @@ describe('Step1', () => {
   describe('testing', () => {
     it('should allow for testing', async () => {
       jest.isolateModules(() => {
-        jest.doMock('ui/kfetch', () => ({
+        jest.doMock('../../../np_imports/ui/kfetch', () => ({
           kfetch: jest.fn().mockImplementation(arg => {
             if (arg.pathname === '/api/action/1/_execute') {
               return { status: 'ok' };
@@ -232,7 +232,7 @@ describe('Step1', () => {
 
     it('should show a successful test', async () => {
       jest.isolateModules(() => {
-        jest.doMock('ui/kfetch', () => ({
+        jest.doMock('../../../np_imports/ui/kfetch', () => ({
           kfetch: (arg: any) => {
             if (arg.pathname === '/api/action/1/_execute') {
               return { status: 'ok' };
@@ -255,7 +255,7 @@ describe('Step1', () => {
 
     it('should show a failed test error', async () => {
       jest.isolateModules(() => {
-        jest.doMock('ui/kfetch', () => ({
+        jest.doMock('../../../np_imports/ui/kfetch', () => ({
           kfetch: (arg: any) => {
             if (arg.pathname === '/api/action/1/_execute') {
               return { message: 'Very detailed error message' };
@@ -302,7 +302,7 @@ describe('Step1', () => {
     it('should send up the delete to the server', async () => {
       const kfetch = jest.fn().mockImplementation(() => {});
       jest.isolateModules(() => {
-        jest.doMock('ui/kfetch', () => ({
+        jest.doMock('../../../np_imports/ui/kfetch', () => ({
           kfetch,
         }));
         setModules();

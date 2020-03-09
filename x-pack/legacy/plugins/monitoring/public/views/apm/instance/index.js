@@ -18,7 +18,6 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { ApmServerInstance } from '../../../components/apm/instance';
-import { I18nContext } from 'ui/i18n';
 import { CODE_PATH_APM } from '../../../../common/constants';
 
 uiRoutes.when('/apm/instances/:uuid', {
@@ -64,14 +63,12 @@ uiRoutes.when('/apm/instances/:uuid', {
 
     renderReact(data) {
       const component = (
-        <I18nContext>
-          <ApmServerInstance
-            summary={data.apmSummary || {}}
-            metrics={data.metrics || {}}
-            onBrush={this.onBrush}
-            zoomInfo={this.zoomInfo}
-          />
-        </I18nContext>
+        <ApmServerInstance
+          summary={data.apmSummary || {}}
+          metrics={data.metrics || {}}
+          onBrush={this.onBrush}
+          zoomInfo={this.zoomInfo}
+        />
       );
       super.renderReact(component);
     }

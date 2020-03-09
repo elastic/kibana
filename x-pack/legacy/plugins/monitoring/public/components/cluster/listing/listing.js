@@ -19,7 +19,7 @@ import {
   EuiSpacer,
   EuiIcon,
 } from '@elastic/eui';
-import { toastNotifications } from 'ui/notify';
+import { toastNotifications } from '../../../np_imports/ui/shims';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
 import { AlertsIndicator } from 'plugins/monitoring/components/cluster/listing/alerts_indicator';
 import { FormattedMessage } from '@kbn/i18n/react';

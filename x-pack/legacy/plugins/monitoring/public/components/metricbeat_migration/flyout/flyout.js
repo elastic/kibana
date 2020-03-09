@@ -38,7 +38,7 @@ import {
   INSTRUCTION_STEP_ENABLE_METRICBEAT,
   INSTRUCTION_STEP_DISABLE_INTERNAL,
 } from '../constants';
-import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
+import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from '../../../np_imports/ui/shims';
 import { getIdentifier, formatProductName } from '../../setup_mode/formatting';
 
 const storage = new Storage(window.localStorage);

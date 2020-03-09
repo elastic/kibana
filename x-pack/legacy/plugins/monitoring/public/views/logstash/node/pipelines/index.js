@@ -17,7 +17,6 @@ import { isPipelineMonitoringSupportedInVersion } from 'plugins/monitoring/lib/l
 import template from './index.html';
 import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
 import { MonitoringViewBaseEuiTableController } from '../../../';
-import { I18nContext } from 'ui/i18n';
 import { PipelineListing } from '../../../../components/logstash/pipeline_listing/pipeline_listing';
 import { DetailStatus } from '../../../../components/logstash/detail_status';
 import { CODE_PATH_LOGSTASH } from '../../../../../common/constants';
@@ -107,23 +106,21 @@ uiRoutes.when('/logstash/node/:uuid/pipelines', {
           };
 
           this.renderReact(
-            <I18nContext>
-              <PipelineListing
-                className="monitoringLogstashPipelinesTable"
-                onBrush={this.onBrush}
-                zoomInfo={this.zoomInfo}
-                stats={data.nodeSummary}
-                statusComponent={DetailStatus}
-                data={data.pipelines}
-                {...this.getPaginationTableProps(pagination)}
-                dateFormat={config.get('dateFormat')}
-                upgradeMessage={makeUpgradeMessage(data.nodeSummary.version, i18n)}
-                angular={{
-                  kbnUrl,
-                  scope: $scope,
-                }}
-              />
-            </I18nContext>
+            <PipelineListing
+              className="monitoringLogstashPipelinesTable"
+              onBrush={this.onBrush}
+              zoomInfo={this.zoomInfo}
+              stats={data.nodeSummary}
+              statusComponent={DetailStatus}
+              data={data.pipelines}
+              {...this.getPaginationTableProps(pagination)}
+              dateFormat={config.get('dateFormat')}
+              upgradeMessage={makeUpgradeMessage(data.nodeSummary.version, i18n)}
+              angular={{
+                kbnUrl,
+                scope: $scope,
+              }}
+            />
           );
         }
       );

@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { uiModules } from 'plugins/monitoring/np_imports/ui/modules';
-import { docTitle } from 'ui/doc_title';
+import { docTitle } from '../np_imports/ui/shims';
 
 const uiModule = uiModules.get('monitoring/title', []);
 uiModule.service('title', () => {
@@ -19,8 +19,7 @@ uiModule.service('title', () => {
       i18n.translate('xpack.monitoring.stackMonitoringDocTitle', {
         defaultMessage: 'Stack Monitoring {clusterName} {suffix}',
         values: { clusterName, suffix },
-      }),
-      true
+      })
     );
   };
 });

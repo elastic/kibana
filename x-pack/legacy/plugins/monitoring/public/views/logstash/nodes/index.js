@@ -9,7 +9,6 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';
-import { I18nContext } from 'ui/i18n';
 import { Listing } from '../../../components/logstash/listing';
 import { SetupModeRenderer } from '../../../components/renderers';
 import { CODE_PATH_LOGSTASH, LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
@@ -41,28 +40,26 @@ uiRoutes.when('/logstash/nodes', {
         () => this.data,
         data => {
           this.renderReact(
-            <I18nContext>
-              <SetupModeRenderer
-                scope={$scope}
-                injector={$injector}
-                productName={LOGSTASH_SYSTEM_ID}
-                render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
-                  <Fragment>
-                    {flyoutComponent}
-                    <Listing
-                      data={data.nodes}
-                      setupMode={setupMode}
-                      stats={data.clusterStatus}
-                      sorting={this.sorting}
-                      pagination={this.pagination}
-                      onTableChange={this.onTableChange}
-                      angular={{ kbnUrl, scope: $scope }}
-                    />
-                    {bottomBarComponent}
-                  </Fragment>
-                )}
-              />
-            </I18nContext>
+            <SetupModeRenderer
+              scope={$scope}
+              injector={$injector}
+              productName={LOGSTASH_SYSTEM_ID}
+              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+                <Fragment>
+                  {flyoutComponent}
+                  <Listing
+                    data={data.nodes}
+                    setupMode={setupMode}
+                    stats={data.clusterStatus}
+                    sorting={this.sorting}
+                    pagination={this.pagination}
+                    onTableChange={this.onTableChange}
+                    angular={{ kbnUrl, scope: $scope }}
+                  />
+                  {bottomBarComponent}
+                </Fragment>
+              )}
+            />
           );
         }
       );
