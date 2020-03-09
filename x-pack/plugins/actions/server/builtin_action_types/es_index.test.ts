@@ -76,7 +76,7 @@ describe('config validation', () => {
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action type config: [index]: types that failed validation:
 - [index.0]: expected value of type [string] but got [number]
-- [index.1]: expected value to equal [null] but got [666]"
+- [index.1]: expected value to equal [null]"
 `);
   });
 });
@@ -150,7 +150,7 @@ describe('params validation', () => {
     expect(() => {
       validateParams(actionType, { documents: ['should be an object'] });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [documents.0]: could not parse record value from [should be an object]"`
+      `"error validating action params: [documents.0]: could not parse record value from json input"`
     );
   });
 });
