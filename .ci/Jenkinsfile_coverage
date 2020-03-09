@@ -73,20 +73,8 @@ kibanaPipeline(timeoutMinutes: 180) {
 
             . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${BUILD_NUMBER} ${env.BUILD_URL}
 
-            # Bootstrap the CC App
-            . src/dev/code_coverage/shell_scripts/query_app_initial_data.sh
-
-            # Populate the CC App with bootstrapped dat file
-            node src/dev/code_coverage/node_scripts/populate_cc_app/index.js ./bootstrapped.dat src/dev/code_coverage/cc_app/public/initial_data.js
-
-            # build cc app
-            pushd src/dev/code_coverage/cc_app
-            yarn
-            yarn build:prod
-            popd
-
-            # copy built app over to it's final resting place :)
-            cp -R src/dev/code_coverage/cc_app/build src/dev/code_coverage/live_cc_app
+            # Bootstrap, Populate, Build and Deploy the CC App
+            . src/dev/code_coverage/shell_scripts/deploy_cc_app.sh
 
           """,
             "### Run `yarn kbn bootstrap && merge coverage` AND Ingest Code Coverage to ES Cluster AND Boot Coverage App"
