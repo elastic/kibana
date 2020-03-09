@@ -6,14 +6,17 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
+import { Query } from 'react-apollo';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { GetIpOverviewQueryComponent, IpOverviewData } from '../../graphql/types';
+import { GetIpOverviewQuery, IpOverviewData } from '../../graphql/types';
 import { networkModel, inputsModel, inputsSelectors, State } from '../../store';
 import { useUiSetting } from '../../lib/kibana';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
+
+import { ipOverviewQuery } from './index.gql_query';
 
 const ID = 'ipOverviewQuery';
 
@@ -26,14 +29,15 @@ export interface IpOverviewArgs {
 }
 
 export interface IpOverviewProps extends QueryTemplateProps {
-  children: (args: IpOverviewArgs) => React.ReactElement;
+  children: (args: IpOverviewArgs) => React.ReactNode;
   type: networkModel.NetworkType;
   ip: string;
 }
 
 const IpOverviewComponentQuery = React.memo<IpOverviewProps & PropsFromRedux>(
   ({ id = ID, isInspected, children, filterQuery, skip, sourceId, ip }) => (
-    <GetIpOverviewQueryComponent
+    <Query<GetIpOverviewQuery.Query, GetIpOverviewQuery.Variables>
+      query={ipOverviewQuery}
       fetchPolicy={getDefaultFetchPolicy()}
       notifyOnNetworkStatusChange
       skip={skip}
@@ -56,7 +60,7 @@ const IpOverviewComponentQuery = React.memo<IpOverviewProps & PropsFromRedux>(
           refetch,
         });
       }}
-    </GetIpOverviewQueryComponent>
+    </Query>
   )
 );
 

@@ -197,13 +197,5 @@ describe('alert_form', () => {
       const alertTypeSelectOptions = wrapper.find('[data-test-subj="selectedAlertTypeTitle"]');
       expect(alertTypeSelectOptions.exists()).toBeTruthy();
     });
-
-    it('renders registered action types', async () => {
-      await setup();
-      const actionTypeSelectOptions = wrapper.find(
-        '[data-test-subj="my-action-type-ActionTypeSelectOption"]'
-      );
-      expect(actionTypeSelectOptions.exists()).toBeTruthy();
-    });
   });
 });

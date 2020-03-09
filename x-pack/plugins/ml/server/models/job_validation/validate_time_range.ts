@@ -7,7 +7,7 @@
 import { APICaller } from 'src/core/server';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/server';
 import { parseInterval } from '../../../../../legacy/plugins/ml/common/util/parse_interval';
-import { CombinedJob } from '../../../../../legacy/plugins/ml/public/application/jobs/new_job/common/job_creator/configs';
+import { CombinedJob } from '../../../../../legacy/plugins/ml/common/types/anomaly_detection_jobs';
 // @ts-ignore
 import { validateJobObject } from './validate_job_object';
 

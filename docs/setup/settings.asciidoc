@@ -240,8 +240,9 @@ object points to an external vector file that contains a geojson
 FeatureCollection. The file must use the
 https://en.wikipedia.org/wiki/World_Geodetic_System[WGS84 coordinate reference system (ESPG:4326)]
 and only include polygons. If the file is hosted on a separate domain from
-{kib}, the server needs to be CORS-enabled so {kib} can download the file. The
-following example shows a valid region map configuration.
+Kibana, the server needs to be CORS-enabled so Kibana can download the file.
+[[region-map-configuration-example]]
+The following example shows a valid region map configuration.
 +
 --
     map
@@ -268,7 +269,7 @@ References the originating source of the geojson file. Supported on {ece}.
 
 [[regionmap-fields]]`map.regionmap.layers[].fields[]:`:: Mandatory. Each layer
 can contain multiple fields to indicate what properties from the geojson
-features you wish to expose. The example above shows how to define multiple
+features you wish to expose. This <<region-map-configuration-example,region map example>> shows how to define multiple
 properties. Supported on {ece}.
 
 [[regionmap-field-description]]`map.regionmap.layers[].fields[].description:`::
@@ -330,10 +331,6 @@ deprecation warning at startup. This setting cannot end in a slash (`/`).
 `server.compression.referrerWhitelist:`:: *Default: none* Specifies an array of trusted hostnames, such as the {kib} host, or a reverse
 proxy sitting in front of it. This determines whether HTTP compression may be used for responses, based on the request's `Referer` header.
 This setting may not be used when `server.compression.enabled` is set to `false`.
-
-[[server-cors]]`server.cors:`:: *Default: `false`* Set to `true` to enable CORS support. This setting is required to configure `server.cors.origin`.
-
-`server.cors.origin:`:: *Default: none* Specifies origins. “origin” must be an array. To use this setting, you must set `server.cors` to `true`. To accept all origins, use `server.cors.origin: ["*"]`.
 
 `server.customResponseHeaders:`:: *Default: `{}`* Header names and values to
   send on all responses to the client from the {kib} server.

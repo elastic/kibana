@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ElasticsearchMonitorsAdapter getMonitorChartsData will provide expected filters when a location is specified 1`] = `
+exports[`ElasticsearchMonitorsAdapter getMonitorChartsData will provide expected filters 1`] = `
 Array [
   "search",
   Object {
@@ -55,11 +55,6 @@ Array [
             Object {
               "term": Object {
                 "monitor.status": "up",
-              },
-            },
-            Object {
-              "term": Object {
-                "observer.geo.name": "Philadelphia",
               },
             },
           ],
