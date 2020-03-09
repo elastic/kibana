@@ -25,6 +25,7 @@ exports[`renders ListControl 1`] = `
     compressed={false}
     data-test-subj="listControlSelect0"
     fullWidth={false}
+    inputRef={[Function]}
     isClearable={true}
     isLoading={false}
     onChange={[Function]}

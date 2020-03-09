@@ -23,7 +23,7 @@ test('it renders without crashing', () => {
     indexPatterns: [],
     availableFields: [],
     availableIndexPrivileges: ['all', 'read', 'write', 'index'],
-    isReadOnlyRole: false,
+    isRoleReadOnly: false,
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
@@ -50,7 +50,7 @@ describe('delete button', () => {
     indexPatterns: [],
     availableFields: [],
     availableIndexPrivileges: ['all', 'read', 'write', 'index'],
-    isReadOnlyRole: false,
+    isRoleReadOnly: false,
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
@@ -59,19 +59,19 @@ describe('delete button', () => {
     intl: {} as any,
   };
 
-  test('it is hidden when isReadOnlyRole is true', () => {
+  test('it is hidden when isRoleReadOnly is true', () => {
     const testProps = {
       ...props,
-      isReadOnlyRole: true,
+      isRoleReadOnly: true,
     };
     const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     expect(wrapper.find(EuiButtonIcon)).toHaveLength(0);
   });
 
-  test('it is shown when isReadOnlyRole is false', () => {
+  test('it is shown when isRoleReadOnly is false', () => {
     const testProps = {
       ...props,
-      isReadOnlyRole: false,
+      isRoleReadOnly: false,
     };
     const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     expect(wrapper.find(EuiButtonIcon)).toHaveLength(1);
@@ -80,7 +80,7 @@ describe('delete button', () => {
   test('it invokes onDelete when clicked', () => {
     const testProps = {
       ...props,
-      isReadOnlyRole: false,
+      isRoleReadOnly: false,
     };
     const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     wrapper.find(EuiButtonIcon).simulate('click');
@@ -102,7 +102,7 @@ describe(`document level security`, () => {
     indexPatterns: [],
     availableFields: [],
     availableIndexPrivileges: ['all', 'read', 'write', 'index'],
-    isReadOnlyRole: false,
+    isRoleReadOnly: false,
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
@@ -161,7 +161,7 @@ describe('field level security', () => {
     indexPatterns: [],
     availableFields: [],
     availableIndexPrivileges: ['all', 'read', 'write', 'index'],
-    isReadOnlyRole: false,
+    isRoleReadOnly: false,
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),

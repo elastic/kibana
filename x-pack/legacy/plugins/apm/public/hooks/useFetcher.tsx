@@ -9,8 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { IHttpFetchError } from 'src/core/public';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { LoadingIndicatorContext } from '../context/LoadingIndicatorContext';
-import { APMClient } from '../services/rest/createCallApmApi';
-import { useCallApmApi } from './useCallApmApi';
+import { APMClient, callApmApi } from '../services/rest/createCallApmApi';
 import { useApmPluginContext } from './useApmPluginContext';
 import { useLoadingIndicator } from './useLoadingIndicator';
 
@@ -45,8 +44,6 @@ export function useFetcher<TReturn>(
   const { notifications } = useApmPluginContext().core;
   const { preservePreviousData = true } = options;
   const { setIsLoading } = useLoadingIndicator();
-
-  const callApmApi = useCallApmApi();
 
   const { dispatchStatus } = useContext(LoadingIndicatorContext);
   const [result, setResult] = useState<Result<InferResponseType<TReturn>>>({
