@@ -21,8 +21,23 @@ import * as React from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { uiToReactComponent } from '../../../kibana_react/public';
-import { Action } from '../actions';
+import { uiToReactComponent, reactToUiComponent } from '../../../kibana_react/public';
+import { Action, ActionInternal } from '../actions';
+
+export const contextMenuSeparatorAction = new ActionInternal({
+  id: 'CONTEXT_MENU_SEPARATOR',
+  getDisplayName: () => 'separator',
+  MenuItem: reactToUiComponent(() => (
+    <div
+      style={{
+        width: '100%',
+        height: '1px',
+        background: 'red',
+      }}
+    />
+  )),
+  execute: () => Promise.resolve(),
+});
 
 /**
  * Transforms an array of Actions to the shape EuiContextMenuPanel expects.

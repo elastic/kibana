@@ -20,7 +20,12 @@ import { EuiContextMenuPanelDescriptor, EuiPanel, htmlIdGenerator } from '@elast
 import classNames from 'classnames';
 import React from 'react';
 import { Subscription } from 'rxjs';
-import { buildContextMenuForActions, UiActionsService, Action } from '../ui_actions';
+import {
+  buildContextMenuForActions,
+  UiActionsService,
+  Action,
+  contextMenuSeparatorAction,
+} from '../ui_actions';
 import { CoreStart, OverlayStart } from '../../../../../core/public';
 import { toMountPoint } from '../../../../kibana_react/public';
 
@@ -265,7 +270,11 @@ export class EmbeddablePanel extends React.Component<Props, State> {
 
     const sortedRegularActions = [...regularActions, ...extraActions].sort(sortByOrderField);
     const sortedDrilldownActions = [...drilldownActions].sort(sortByOrderField);
-    const actions = [...sortedDrilldownActions, ...sortedRegularActions];
+    const actions = [
+      ...sortedDrilldownActions,
+      ...(sortedDrilldownActions.length ? [contextMenuSeparatorAction] : []),
+      ...sortedRegularActions,
+    ];
 
     return await buildContextMenuForActions({
       actions,
