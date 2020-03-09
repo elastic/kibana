@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+export type QueryLanguage = 'kuery' | 'lucene';
 
-export const defaultFeedbackMessage = i18n.translate('visualizations.defaultFeedbackMessage', {
-  defaultMessage: 'Have feedback? Please create an issue in {link}.',
-  values: {
-    link:
-      '<a href="https://github.com/elastic/kibana/issues/new/choose" rel="noopener noreferrer" target="_blank">GitHub</a>',
-  },
-});
+export function getDefaultQuery(language: QueryLanguage = 'kuery') {
+  return {
+    query: '',
+    language,
+  };
+}
