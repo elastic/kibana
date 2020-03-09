@@ -18,8 +18,7 @@
  */
 
 import { left, right } from './either';
-import { always, id, pretty, noop } from './utils';
-import { STATIC_SITE_URL_PROP_NAME } from './constants';
+import { always, id, noop } from './utils';
 
 const maybeTotal = x =>
   x === 'total' ? left(x) : right(x);
@@ -67,13 +66,6 @@ export const distro = obj => {
   };
 };
 
-const endsInDotJs = /.js$/;
-const appendDotHtml = x => `${x}.html`;
-const maybeAppend = x => endsInDotJs.test(x) ? right(x) : left(x);
-const suffix = x =>
-  maybeAppend(x)
-    .fold(id, appendDotHtml);
-
 const captureAfterJobNameAndRootFolder = /.*elastic\+kibana\+code-coverage\/kibana(.*$)/;
 const afterJobNameAndRootFolder = x =>
   captureAfterJobNameAndRootFolder.exec(x)[1];
@@ -81,29 +73,37 @@ const fixFront = x =>
   afterJobNameAndRootFolder(x);
 
 export const staticSite = (urlBase, liveAppPath) => obj => {
-  const { staticSiteUrl, testRunnerType } = obj;
+  const { staticSiteUrl , testRunnerType } = obj;
   const ts = obj['@timestamp'];
+
   const parts = [
     `${urlBase}/`,
     ts,
-    `/${liveAppPath}/`,
-    'coverage_data/',
-    `${testRunnerType.toLowerCase()}-combined`,
+    `/${liveAppPath}`,
   ];
+
   const join = xs => x => `${xs.join('')}${x}`;
   const joinParts = join(parts);
 
   const url = maybeTotal(staticSiteUrl)
     .fold(
       () => right(process.env.STATIC_SITE_URL_BASE).map(_ => {
+
         obj['isTotal'] = true;
 
         return joinParts('/index.html');
       }).fold(noop, id)
     , () => {
+
         obj['isTotal'] = false;
 
-          return right(staticSiteUrl).map(fixFront).map(x => joinParts(suffix(x))).fold(noop, id)
+        return right(staticSiteUrl)
+          .map(fixFront)
+          .map(x => {
+            const result = [...parts, '/coverage_data/', `${testRunnerType.toLowerCase()}-combined`, x, '.html'].join('')
+            return result;
+          })
+          .fold(noop, id)
       }
     );
 

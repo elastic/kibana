@@ -26,12 +26,10 @@ import { STATIC_SITE_URL_PROP_NAME, TOTALS_INDEX, COVERAGE_INDEX } from '../cons
 
 const ROOT_DIR = resolve(__dirname, '../../../../..');
 const MOCKS_DIR = resolve(__dirname, './mocks');
-const regexes = {
+const staticSiteUrlRegexes = {
   staticHostIncluded: /https:\/\/kibana-coverage\.elastic\.dev/,
   jobNameIncluded: /jobs\/elastic\+kibana\+code-coverage/,
   timeStampIncluded: /\d{4}-\d{2}-\d{2}T\d{2}.*\d{2}.*\d{2}Z/,
-  folderStructureIncluded: /live_cc_app\/coverage_data\/(?:.*|.*-combined)\//,
-  endsInDotHtml: /.html$/,
 };
 const env = {
   BUILD_ID: 407,
@@ -74,14 +72,21 @@ describe('Ingesting Coverage to Cluster', () => {
         });
 
         it(`should have a link to the index page for the specific test runner`, () => {
-          // mutableTotalsIndexLoggingChunks.forEach(x => console.log(green(x)))
-          //
-          // expect(mutableTotalsIndexLoggingChunks.some(x => x.includes('debg ### Just Logging, NOT actually sending to kibana_code_coverage')))
-          //   .to.be(true);
+          const totalsIndexRegexes = {
+            ...staticSiteUrlRegexes,
+            folderStructureIncluded: /live_cc_app\//,
+            endsInDotHtml: /.html$/,
+          };
 
+          const justUrl = text => x =>
+            x.split(text)[1].trim()
 
-          // siteUrlsSplitByNewLineWithoutBlanks(mutableTotalsIndexLoggingChunks)
-          //   .forEach(expectAllRegexesToPass(regexes))
+          const splitFromText = justUrl('staticSiteUrl:');
+
+            siteUrlsSplitByNewLineWithoutBlanks(mutableTotalsIndexLoggingChunks)
+              .filter(x => x.includes('### staticSiteUrl'))
+              .map(splitFromText)
+              .forEach(expectAllRegexesToPass(totalsIndexRegexes))
         });
 
       });
@@ -97,7 +102,14 @@ describe('Ingesting Coverage to Cluster', () => {
 
         it('should result in every posted item having a site url that meets all regex assertions',
           F(siteUrlsSplitByNewLineWithoutBlanks(mutableCoverageIndexChunks)
-            .forEach(expectAllRegexesToPass(regexes))));
+            .forEach(expectAllRegexesToPass({
+                ...staticSiteUrlRegexes,
+                folderStructureIncluded: /live_cc_app\/coverage_data\/(?:.*|.*-combined)\//,
+                endsInDotJsDotHtml: /.js.html$/,
+              }),
+            ),
+          ),
+        );
 
         describe(`with a jsonSummaryPath containing the text 'combined'`, () => {
           const combinedMsg = 'combined';
@@ -128,7 +140,12 @@ describe('Ingesting Coverage to Cluster', () => {
 
         it('should result in every posted item having a site url that meets all regex assertions',
           F(siteUrlsSplitByNewLineWithoutBlanks(mutableBothIndexesChunks)
-            .forEach(expectAllRegexesToPass(regexes))));
+            .forEach(expectAllRegexesToPass({
+              ...staticSiteUrlRegexes,
+              folderStructureIncluded: /live_cc_app\/coverage_data\/(?:.*|.*-combined)\//,
+            }))
+          )
+        );
 
         it('should result in the "just logging" message being present in the log', () => {
           expect(mutableBothIndexesChunks.some(x => x.includes('Just Logging'))).to.be(true);
@@ -168,9 +185,9 @@ function notBlankLines (acc, item) {
   return acc;
 }
 
-function expectAllRegexesToPass (regexes) {
+function expectAllRegexesToPass (staticSiteUrlRegexes) {
   return urlLine =>
-    Object.entries(regexes)
+    Object.entries(staticSiteUrlRegexes)
       .forEach(regexTuple => {
         if (!regexTuple[1].test(urlLine))
           throw new Error(`\n### ${green('FAILED')} Asserting: [${regexTuple[0]}]\n\tAgainst: [\n${urlLine}\n]`);
