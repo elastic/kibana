@@ -120,9 +120,20 @@ export const routes: BreadcrumbRoute[] = [
     ),
     name: RouteName.AGENT_CONFIGURATION_CREATE,
     component: () => {
+      // hooks rule is complaining about not using a hook here but it works so 🤷
+      // We should revisit how route params are handled anyway: https://github.com/elastic/kibana/issues/51963
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const { search } = useLocation();
+
+      // Ignoring here because we specifically DO NOT want to add the query params to the global route handler
+      // @ts-ignore
+      const { pageStep } = toQuery(search);
+
       return (
         <Settings>
-          <AgentConfigurationCreateEdit />
+          <AgentConfigurationCreateEdit
+            pageStep={pageStep || 'choose-service-step'}
+          />
         </Settings>
       );
     }
@@ -143,7 +154,7 @@ export const routes: BreadcrumbRoute[] = [
 
       // Ignoring here because we specifically DO NOT want to add the query params to the global route handler
       // @ts-ignore
-      const { name, environment } = toQuery(search);
+      const { name, environment, pageStep } = toQuery(search);
 
       // fetch existing config
       // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -164,7 +175,10 @@ export const routes: BreadcrumbRoute[] = [
 
       return (
         <Settings>
-          <AgentConfigurationCreateEdit existingConfig={data} />
+          <AgentConfigurationCreateEdit
+            pageStep={pageStep || 'choose-settings-step'}
+            existingConfig={data}
+          />
         </Settings>
       );
     }

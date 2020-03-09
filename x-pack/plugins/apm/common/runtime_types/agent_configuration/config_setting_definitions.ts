@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isRight } from 'fp-ts/lib/Either';
 import { i18n } from '@kbn/i18n';
-import { transactionMaxSpansRt } from '../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/transaction_max_spans_rt';
-import { transactionSampleRateRt } from '../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/transaction_sample_rate_rt';
+import { Type } from 'io-ts';
+import { isRight } from 'fp-ts/lib/Either';
+import { transactionSampleRateRt } from './transaction_sample_rate_rt';
+import { transactionMaxSpansRt } from './transaction_max_spans_rt';
+import { captureBodyRt } from './capture_body_rt';
 
 interface BaseSetting {
   key: string;
@@ -15,7 +17,7 @@ interface BaseSetting {
   defaultValue: string;
   helpText: string;
   placeholder: string;
-  isValid: (value: unknown) => boolean;
+  validation: Type<any, any, unknown>;
 }
 
 interface TextSetting extends BaseSetting {
@@ -35,12 +37,17 @@ interface SelectSetting extends BaseSetting {
   options: Array<{ text: string }>;
 }
 
-export type Setting = TextSetting | NumberSetting | SelectSetting;
+export type SettingDefinition = TextSetting | NumberSetting | SelectSetting;
 
-export const settings: Setting[] = [
+/*
+ * Settings added here will automatically be added to  `agent_configuration/agent_configuration_intake_rt.ts`
+ * and validated bothj client and server-side
+ */
+export const settingDefinitions: SettingDefinition[] = [
   // Transaction sample rate
   {
     key: 'transaction_sample_rate',
+    validation: transactionSampleRateRt,
     type: 'text',
     defaultValue: '1.0',
     label: i18n.translate(
@@ -61,13 +68,13 @@ export const settings: Setting[] = [
     validationError: i18n.translate(
       'xpack.apm.settings.agentConf.sampleRateConfigurationInputErrorText',
       { defaultMessage: 'Sample rate must be between 0.000 and 1' }
-    ),
-    isValid: (value: unknown) => isRight(transactionSampleRateRt.decode(value))
+    )
   },
 
   // Capture body
   {
     key: 'capture_body',
+    validation: captureBodyRt,
     type: 'select',
     defaultValue: 'off',
     label: i18n.translate(
@@ -90,13 +97,13 @@ export const settings: Setting[] = [
       { text: 'errors' },
       { text: 'transactions' },
       { text: 'all' }
-    ],
-    isValid: () => true
+    ]
   },
 
   // Transaction max spans
   {
     key: 'transaction_max_spans',
+    validation: transactionMaxSpansRt,
     type: 'number',
     defaultValue: '500',
     label: i18n.translate(
@@ -119,7 +126,10 @@ export const settings: Setting[] = [
       { defaultMessage: 'Must be between 0 and 32000' }
     ),
     min: 0,
-    max: 32000,
-    isValid: (value: unknown) => isRight(transactionMaxSpansRt.decode(value))
+    max: 32000
   }
 ];
+
+export function isValid(setting: SettingDefinition, value: unknown) {
+  return isRight(setting.validation.decode(value));
+}

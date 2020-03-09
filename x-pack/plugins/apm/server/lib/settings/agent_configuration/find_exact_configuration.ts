@@ -11,6 +11,7 @@ import {
 import { Setup } from '../../helpers/setup_request';
 import { AgentConfiguration } from './configuration_types';
 import { ESSearchHit } from '../../../../typings/elasticsearch';
+import { convertConfigSettingsToString } from './convert_settings_to_string';
 
 export async function findExactConfiguration({
   service,
@@ -42,5 +43,11 @@ export async function findExactConfiguration({
     params
   );
 
-  return resp.hits.hits[0] as ESSearchHit<AgentConfiguration> | undefined;
+  const hit = resp.hits.hits[0] as ESSearchHit<AgentConfiguration> | undefined;
+
+  if (!hit) {
+    return;
+  }
+
+  return convertConfigSettingsToString(hit);
 }

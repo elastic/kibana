@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// The "in-progress", un-validated config
+// "in-progress", un-validated config
 export interface NewConfig {
   agent_name?: string;
   service: {

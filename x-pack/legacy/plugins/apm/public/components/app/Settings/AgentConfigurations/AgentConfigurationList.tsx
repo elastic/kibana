@@ -20,7 +20,6 @@ import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AgentConfigurationListAPIResponse } from '../../../../../../../../plugins/apm/server/lib/settings/agent_configuration/list_configurations';
-import { Config } from '.';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { px, units } from '../../../../style/variables';
 import { getOptionLabel } from '../../../../../../../../plugins/apm/common/agent_configuration_constants';
@@ -29,6 +28,8 @@ import {
   createAgentConfigurationHref,
   editAgentConfigurationHref
 } from '../../../shared/Links/apm/agentConfiguration';
+
+type Config = AgentConfigurationListAPIResponse[0];
 
 export function AgentConfigurationList({
   status,

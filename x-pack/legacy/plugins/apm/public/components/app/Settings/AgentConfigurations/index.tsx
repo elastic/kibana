@@ -16,14 +16,10 @@ import {
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { useFetcher } from '../../../../hooks/useFetcher';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AgentConfigurationListAPIResponse } from '../../../../../../../../plugins/apm/server/lib/settings/agent_configuration/list_configurations';
 import { AgentConfigurationList } from './AgentConfigurationList';
 import { useTrackPageview } from '../../../../../../../../plugins/observability/public';
 import { getAPMHref } from '../../../shared/Links/apm/APMLink';
 import { useLocation } from '../../../../hooks/useLocation';
-
-export type Config = AgentConfigurationListAPIResponse[0];
 
 export function AgentConfigurations() {
   const { data = [], status } = useFetcher(

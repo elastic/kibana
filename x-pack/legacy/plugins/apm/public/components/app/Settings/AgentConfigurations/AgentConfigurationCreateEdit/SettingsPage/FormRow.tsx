@@ -11,15 +11,18 @@ import {
   EuiFieldNumber,
   EuiDescribedFormGroup
 } from '@elastic/eui';
+import {
+  SettingDefinition,
+  isValid
+} from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/config_setting_definitions';
 import { SelectWithPlaceholder } from '../../../../../shared/SelectWithPlaceholder';
-import { Setting } from '../settings';
 
 export function FormRow({
   setting,
   value,
   onChange
 }: {
-  setting: Setting;
+  setting: SettingDefinition;
   value?: string;
   onChange: (key: string, value: string) => void;
 }) {
@@ -31,7 +34,7 @@ export function FormRow({
         label={setting.label}
         helpText={setting.helpText}
         error={setting.validationError}
-        isInvalid={value != null && value !== '' && !setting.isValid(value)}
+        isInvalid={value != null && value !== '' && !isValid(setting, value)}
       >
         <EuiFieldText
           placeholder={setting.placeholder}
@@ -48,7 +51,7 @@ export function FormRow({
         label={setting.label}
         helpText={setting.helpText}
         error={setting.validationError}
-        isInvalid={value != null && value !== '' && !setting.isValid(value)}
+        isInvalid={value != null && value !== '' && !isValid(setting, value)}
       >
         <EuiFieldNumber
           placeholder={setting.placeholder}

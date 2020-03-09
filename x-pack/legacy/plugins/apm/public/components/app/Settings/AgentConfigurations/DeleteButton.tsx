@@ -8,10 +8,13 @@ import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { NotificationsStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { Config } from '../index';
-import { getOptionLabel } from '../../../../../../../../../plugins/apm/common/agent_configuration_constants';
-import { callApmApi } from '../../../../../services/rest/createCallApmApi';
-import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AgentConfigurationListAPIResponse } from '../../../../../../../../plugins/apm/server/lib/settings/agent_configuration/list_configurations';
+import { getOptionLabel } from '../../../../../../../../plugins/apm/common/agent_configuration_constants';
+import { callApmApi } from '../../../../services/rest/createCallApmApi';
+import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
+
+type Config = AgentConfigurationListAPIResponse[0];
 
 interface Props {
   service: Config['service'];
@@ -41,7 +44,7 @@ export function DeleteButton({ service }: Props) {
 }
 
 async function deleteConfig(
-  service: Config,
+  service: Config['service'],
   toasts: NotificationsStart['toasts']
 ) {
   try {
@@ -51,8 +54,8 @@ async function deleteConfig(
       params: {
         body: {
           service: {
-            name: service.service.name,
-            environment: service.service.environment
+            name: service.name,
+            environment: service.environment
           }
         }
       }
@@ -68,7 +71,7 @@ async function deleteConfig(
         {
           defaultMessage:
             'You have successfully deleted a configuration for "{serviceName}". It will take some time to propagate to the agents.',
-          values: { serviceName: getOptionLabel(service.service.name) }
+          values: { serviceName: getOptionLabel(service.name) }
         }
       )
     });
@@ -84,7 +87,7 @@ async function deleteConfig(
           defaultMessage:
             'Something went wrong when deleting a configuration for "{serviceName}". Error: "{errorMessage}"',
           values: {
-            serviceName: getOptionLabel(service.service.name),
+            serviceName: getOptionLabel(service.name),
             errorMessage: error.message
           }
         }

@@ -5,14 +5,20 @@
  */
 
 import * as t from 'io-ts';
-import { transactionSampleRateRt } from './transaction_sample_rate_rt';
-import { transactionMaxSpansRt } from './transaction_max_spans_rt';
-import { captureBodyRt } from './capture_body_rt';
+import { settingDefinitions } from './config_setting_definitions';
 
 export const serviceRt = t.partial({
   name: t.string,
   environment: t.string
 });
+
+// retrieve validation from config definitions settings and validate on the server
+const knownSettings = settingDefinitions.reduce<
+  Record<string, t.Type<any, any, unknown>>
+>((acc, { key, validation }) => {
+  acc[key] = validation;
+  return acc;
+}, {});
 
 export const agentConfigurationIntakeRt = t.intersection([
   t.partial({ agent_name: t.string }),
@@ -20,11 +26,7 @@ export const agentConfigurationIntakeRt = t.intersection([
     service: serviceRt,
     settings: t.intersection([
       t.record(t.string, t.string),
-      t.partial({
-        transaction_sample_rate: transactionSampleRateRt,
-        capture_body: captureBodyRt,
-        transaction_max_spans: transactionMaxSpansRt
-      })
+      t.partial(knownSettings)
     ])
   })
 ]);

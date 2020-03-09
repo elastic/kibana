@@ -56,22 +56,25 @@ const mappings: Mappings = {
       }
     },
     settings: {
+      // allowing dynamic fields without specifying anything specific
       dynamic: true,
-      properties: {
-        transaction_sample_rate: {
-          type: 'scaled_float',
-          scaling_factor: 1000,
-          ignore_malformed: true,
-          coerce: false
-        },
-        capture_body: {
-          type: 'keyword',
-          ignore_above: 1024
-        },
-        transaction_max_spans: {
-          type: 'short'
-        }
-      }
+      properties: {}
+
+      // properties: {
+      //   transaction_sample_rate: {
+      //     type: 'scaled_float',
+      //     scaling_factor: 1000,
+      //     ignore_malformed: true,
+      //     coerce: false
+      //   },
+      //   capture_body: {
+      //     type: 'keyword',
+      //     ignore_above: 1024
+      //   },
+      //   transaction_max_spans: {
+      //     type: 'short'
+      //   }
+      // }
     },
     applied_by_agent: {
       type: 'boolean'

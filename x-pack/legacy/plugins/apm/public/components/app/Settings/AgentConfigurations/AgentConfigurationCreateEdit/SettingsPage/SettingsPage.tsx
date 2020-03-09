@@ -17,10 +17,13 @@ import {
 } from '@elastic/eui';
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { saveConfig } from '../saveConfig';
+import {
+  settingDefinitions,
+  isValid
+} from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/config_setting_definitions';
+import { saveConfig } from './saveConfig';
 import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
 import { useUiTracker } from '../../../../../../../../../../plugins/observability/public';
-import { settings } from '../settings';
 import { FormRow } from './FormRow';
 import { getOptionLabel } from '../../../../../../../../../../plugins/apm/common/agent_configuration_constants';
 import { NewConfig } from '../NewConfig';
@@ -43,7 +46,7 @@ export function SettingsPage({
 
   const isFormValid = useMemo(() => {
     return (
-      settings
+      settingDefinitions
         // only validate settings that are not empty
         .filter(({ key }) => {
           const value = newConfig.settings[key];
@@ -51,9 +54,9 @@ export function SettingsPage({
         })
 
         // every setting must be valid for the form to be valid
-        .every(({ key, isValid }) => {
-          const value = newConfig.settings[key];
-          return isValid(value);
+        .every(def => {
+          const value = newConfig.settings[def.key];
+          return isValid(def, value);
         })
     );
   }, [newConfig.settings]);
@@ -128,7 +131,7 @@ export function SettingsPage({
 
           <EuiSpacer size="m" />
 
-          {settings.map(setting => (
+          {settingDefinitions.map(setting => (
             <FormRow
               key={setting.key}
               setting={setting}

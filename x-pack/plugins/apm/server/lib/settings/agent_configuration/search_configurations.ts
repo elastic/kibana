@@ -10,6 +10,7 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../helpers/setup_request';
 import { AgentConfiguration } from './configuration_types';
+import { convertConfigSettingsToString } from './convert_settings_to_string';
 
 export async function searchConfigurations({
   service,
@@ -66,5 +67,11 @@ export async function searchConfigurations({
     params
   );
 
-  return resp.hits.hits[0] as ESSearchHit<AgentConfiguration> | undefined;
+  const hit = resp.hits.hits[0] as ESSearchHit<AgentConfiguration> | undefined;
+
+  if (!hit) {
+    return;
+  }
+
+  return convertConfigSettingsToString(hit);
 }

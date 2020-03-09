@@ -7,19 +7,32 @@
 import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { history } from '../../../../../utils/history';
 import { AgentConfigurationIntake } from '../../../../../../../../../plugins/apm/server/lib/settings/agent_configuration/configuration_types';
 import { ServicePage } from './ServicePage/ServicePage';
 import { SettingsPage } from './SettingsPage/SettingsPage';
 import { NewConfig } from './NewConfig';
+import { fromQuery, toQuery } from '../../../../shared/Links/url_helpers';
+
+type PageStep = 'choose-service-step' | 'choose-settings-step' | 'review-step';
+
+function setPage(pageStep: PageStep) {
+  history.push({
+    ...history.location,
+    search: fromQuery({
+      ...toQuery(history.location.search),
+      pageStep
+    })
+  });
+}
 
 export function AgentConfigurationCreateEdit({
+  pageStep,
   existingConfig
 }: {
+  pageStep: PageStep;
   existingConfig?: AgentConfigurationIntake;
 }) {
-  const [page, setPage] = useState<
-    'service-page' | 'settings-page' | 'review-page'
-  >('service-page');
   const [newConfig, setNewConfig] = useState<NewConfig>({
     agent_name: existingConfig?.agent_name,
     service: existingConfig?.service || {},
@@ -28,10 +41,18 @@ export function AgentConfigurationCreateEdit({
   const isEditMode = Boolean(existingConfig);
 
   useEffect(() => {
-    if (isEditMode) {
-      setPage('settings-page');
+    // the user tried to edit the service of an existing config
+    if (pageStep === 'choose-service-step' && isEditMode) {
+      setPage('choose-settings-step');
+
+      // the user tried to edit the settings before selecting a service
+    } else if (
+      pageStep === 'choose-settings-step' &&
+      newConfig.service.name == null
+    ) {
+      setPage('choose-service-step');
     }
-  }, [isEditMode]);
+  }, [isEditMode, newConfig, pageStep]);
 
   return (
     <>
@@ -55,24 +76,24 @@ export function AgentConfigurationCreateEdit({
 
       <EuiSpacer size="m" />
 
-      {page === 'service-page' && (
+      {pageStep === 'choose-service-step' && (
         <ServicePage
           newConfig={newConfig}
           setNewConfig={setNewConfig}
-          onClickNext={() => setPage('settings-page')}
+          onClickNext={() => setPage('choose-settings-step')}
         />
       )}
 
-      {page === 'settings-page' && (
+      {pageStep === 'choose-settings-step' && (
         <SettingsPage
-          onClickEdit={() => setPage('service-page')}
+          onClickEdit={() => setPage('choose-service-step')}
           newConfig={newConfig}
           setNewConfig={setNewConfig}
           isEditMode={isEditMode}
         />
       )}
 
-      {page === 'review-page' && <div>Review will be here </div>}
+      {pageStep === 'review-step' && <div>Review will be here </div>}
     </>
   );
 }
