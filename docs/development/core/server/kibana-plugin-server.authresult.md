@@ -8,5 +8,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type AuthResult = Authenticated;
+export declare type AuthResult = Authenticated | AuthNotHandled | AuthRedirected;
 ```
