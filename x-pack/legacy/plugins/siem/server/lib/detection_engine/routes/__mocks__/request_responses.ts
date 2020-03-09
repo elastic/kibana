@@ -393,7 +393,7 @@ export const getResult = (): RuleAlertType => ({
         ],
       },
     ],
-    throttle: null,
+    throttle: 'no_actions',
     references: ['http://www.example.com', 'https://ww.example.com'],
     version: 1,
   },

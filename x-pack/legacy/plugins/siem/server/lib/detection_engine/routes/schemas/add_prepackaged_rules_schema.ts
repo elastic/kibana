@@ -8,6 +8,7 @@ import Joi from 'joi';
 
 /* eslint-disable @typescript-eslint/camelcase */
 import {
+  actions,
   enabled,
   description,
   false_positives,
@@ -31,6 +32,7 @@ import {
   to,
   type,
   threat,
+  throttle,
   references,
   version,
 } from './schemas';
@@ -48,6 +50,7 @@ import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
  *  - index is a required field that must exist
  */
 export const addPrepackagedRulesSchema = Joi.object({
+  actions,
   description: description.required(),
   enabled: enabled.default(false),
   false_positives: false_positives.default([]),
@@ -78,6 +81,7 @@ export const addPrepackagedRulesSchema = Joi.object({
   to: to.default('now'),
   type: type.required(),
   threat: threat.default([]),
+  throttle,
   references: references.default([]),
   version: version.required(),
 });

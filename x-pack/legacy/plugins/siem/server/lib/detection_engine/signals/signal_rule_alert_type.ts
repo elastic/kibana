@@ -74,7 +74,7 @@ export const signalRulesAlertType = ({
         riskScore: schema.number(),
         severity: schema.string(),
         threat: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
-        throttle: schema.nullable(schema.string()),
+        throttle: schema.string(),
         to: schema.string(),
         type: schema.string(),
         references: schema.arrayOf(schema.string(), { defaultValue: [] }),
@@ -213,13 +213,13 @@ export const signalRulesAlertType = ({
             `[+] Initial search call of signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
           );
           const noReIndexResult = await services.callCluster('search', noReIndex);
+          const newSignalsCount = noReIndexResult.hits.total.value;
 
-          if (noReIndexResult.hits.total.value !== 0) {
+          if (newSignalsCount !== 0) {
             const inputIndexes = inputIndex.join(', ');
 
             if (throttle && throttle !== 'no_actions') {
               const alertInstance = services.alertInstanceFactory(ruleId!);
-              const newSignalsCount = noReIndexResult.hits.total.value;
 
               alertInstance
                 .replaceState({
@@ -235,7 +235,7 @@ export const signalRulesAlertType = ({
             }
 
             logger.info(
-              `Found ${noReIndexResult.hits.total.value} signals from the indexes of "[${inputIndexes}]" using signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
+              `Found ${newSignalsCount} signals from the indexes of "[${inputIndexes}]" using signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
             );
           }
 

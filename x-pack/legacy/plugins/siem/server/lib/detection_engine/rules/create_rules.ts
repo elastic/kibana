@@ -8,6 +8,7 @@ import { Alert } from '../../../../../../../plugins/alerting/common';
 import { APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { CreateRuleParams } from './types';
 import { addTags } from './add_tags';
+import { getAlertThrottle } from './utils';
 
 export const createRules = ({
   alertsClient,
@@ -66,6 +67,7 @@ export const createRules = ({
         riskScore,
         severity,
         threat,
+        throttle,
         to,
         type,
         references,
@@ -74,7 +76,7 @@ export const createRules = ({
       schedule: { interval },
       enabled,
       actions,
-      throttle,
+      throttle: getAlertThrottle(throttle),
     },
   });
 };

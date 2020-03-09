@@ -112,6 +112,7 @@ export const binaryToString = (res: any, callback: any): void => {
  * This is the typical output of a simple rule that Kibana will output with all the defaults.
  */
 export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+  actions: [],
   created_by: 'elastic',
   description: 'Simple Rule Query',
   enabled: true,
@@ -133,6 +134,7 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertR
   to: 'now',
   type: 'query',
   threat: [],
+  throttle: 'no_actions',
   version: 1,
 });
 

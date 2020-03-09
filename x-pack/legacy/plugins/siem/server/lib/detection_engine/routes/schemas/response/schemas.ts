@@ -26,6 +26,12 @@ export const file_name = t.string;
 export const filters = t.array(t.unknown); // Filters are not easily type-able yet
 export const actions = t.array(t.unknown);
 
+/**
+ * TODO: Right now the actions is an "unknown", when it could more than likely
+ * become the actual AlertAction as a type.
+ */
+export const actions = t.array(t.unknown); // Actions are not easily type-able yet
+
 // TODO: Create a regular expression type or custom date math part type here
 export const from = t.string;
 
@@ -46,7 +52,13 @@ export const output_index = t.string;
 export const saved_id = t.string;
 export const timeline_id = t.string;
 export const timeline_title = t.string;
-export const throttle = t.string;
+export const throttle = t.keyof({
+  no_actions: null,
+  rule: null,
+  '1h': null,
+  '1d': null,
+  '7d': null,
+});
 
 /**
  * Note that this is a plain unknown object because we allow the UI
