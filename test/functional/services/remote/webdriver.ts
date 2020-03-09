@@ -31,6 +31,8 @@ import { Builder, Capabilities, By, logging, until } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome';
 import firefox from 'selenium-webdriver/firefox';
 // @ts-ignore internal modules are not typed
+import edge from 'selenium-webdriver/edge';
+// @ts-ignore internal modules are not typed
 import { Executor } from 'selenium-webdriver/lib/http';
 // @ts-ignore internal modules are not typed
 import { getLogger } from 'selenium-webdriver/lib/logging';
@@ -48,6 +50,7 @@ const certValidation: string = process.env.NODE_TLS_REJECT_UNAUTHORIZED as strin
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const NO_QUEUE_COMMANDS = ['getLog', 'getStatus', 'newSession', 'quit'];
+const MAC_EDGE_BINARY_PATH = '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge';
 
 /**
  * Best we can tell WebDriver locks up sometimes when we send too many
@@ -75,13 +78,20 @@ async function attemptToCreateCommand(
   const buildDriverInstance = async () => {
     switch (browserType) {
       case 'edge': {
+        const edgeOptions = new edge.Options();
+        if (headlessBrowser === '1') {
+          // @ts-ignore internal modules are not typed
+          edgeOptions.headless();
+        }
+        // @ts-ignore internal modules are not typed
+        edgeOptions.setEdgeChromium(true);
+        // @ts-ignore internal modules are not typed
+        edgeOptions.setBinaryPath(MAC_EDGE_BINARY_PATH);
         const session = new Builder()
-          .withCapabilities({
-            browserName: 'MicrosoftEdge',
-            'ms:edgeChromium': true,
-          })
+          .forBrowser('MicrosoftEdge')
+          .setEdgeOptions(edgeOptions)
+          .setEdgeService(new edge.ServiceBuilder('path/msedgedriver'))
           .build();
-
         return {
           session,
           consoleLog$: Rx.EMPTY,
