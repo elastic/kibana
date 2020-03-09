@@ -5,7 +5,7 @@
  */
 
 import { JsonObject } from '../../../infra/common/typed_json';
-import { AlertType, SanitizedAlert } from '../types';
+import { AlertType, SanitizedAlert } from '../../common';
 
 export type AlertNavigationHandler = (
   alert: SanitizedAlert,

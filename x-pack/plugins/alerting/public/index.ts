@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './types';
+import { AlertingPublicPlugin } from './plugin';
+export { PluginSetupContract, PluginStartContract } from './plugin';
 
-export const BASE_ACTION_API_PATH = '/api/action';
+export function plugin() {
+  return new AlertingPublicPlugin();
+}

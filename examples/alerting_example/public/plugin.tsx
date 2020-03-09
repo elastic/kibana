@@ -19,12 +19,19 @@
 
 import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
 import { NavState } from './application';
+import { PluginSetupContract as AlertingSetup } from '../../../x-pack/plugins/alerting/public';
+import { ALERTING_EXAMPLE_APP_ID } from '../common/constants';
+import { AlertType, SanitizedAlert } from '../../../x-pack/plugins/alerting/common';
 
 export type Setup = void;
 export type Start = void;
 
-export class AlertingExamplePlugin implements Plugin<Setup, Start> {
-  public setup(core: CoreSetup) {
+export interface AlertingExamplePublicSetupDeps {
+  alerting: AlertingSetup;
+}
+
+export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamplePublicSetupDeps> {
+  public setup(core: CoreSetup, { alerting }: AlertingExamplePublicSetupDeps) {
     core.application.register({
       id: 'AlertingExample',
       title: 'Alerting Example',
@@ -34,6 +41,18 @@ export class AlertingExamplePlugin implements Plugin<Setup, Start> {
         return renderApp(coreStart, depsStart, params);
       },
     });
+
+    alerting.registerNavigation(
+      ALERTING_EXAMPLE_APP_ID,
+      '.alerting-example',
+      (alert: SanitizedAlert, alertType: AlertType) => ({
+        state: {
+          // LOLs
+          alert: JSON.parse(JSON.stringify(alert)),
+          alertType: JSON.parse(JSON.stringify(alertType)),
+        },
+      })
+    );
   }
 
   public start() {}

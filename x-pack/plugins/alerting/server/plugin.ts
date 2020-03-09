@@ -43,7 +43,6 @@ import {
   unmuteAllAlertRoute,
   muteAlertInstanceRoute,
   unmuteAlertInstanceRoute,
-  getAlertNavigationRoute,
 } from './routes';
 import { LicensingPluginSetup } from '../../licensing/server';
 import {
@@ -51,15 +50,9 @@ import {
   PluginStartContract as ActionsPluginStartContract,
 } from '../../../plugins/actions/server';
 import { Services } from './types';
-import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
 
 export interface PluginSetupContract {
   registerType: AlertTypeRegistry['register'];
-  registerNavigation: (
-    consumer: string,
-    alertType: string,
-    handler: AlertNavigationHandler
-  ) => void;
 }
 export interface PluginStartContract {
   listTypes: AlertTypeRegistry['list'];
@@ -129,7 +122,6 @@ export class AlertingPlugin {
       taskRunnerFactory: this.taskRunnerFactory,
     });
     this.alertTypeRegistry = alertTypeRegistry;
-    const alertNavigationRegistry = new AlertNavigationRegistry();
 
     this.serverBasePath = core.http.basePath.serverBasePath;
 
@@ -143,7 +135,6 @@ export class AlertingPlugin {
     findAlertRoute(router, this.licenseState);
     getAlertRoute(router, this.licenseState);
     getAlertStateRoute(router, this.licenseState);
-    getAlertNavigationRoute(router, this.licenseState, alertTypeRegistry, alertNavigationRegistry);
     listAlertTypesRoute(router, this.licenseState);
     updateAlertRoute(router, this.licenseState);
     enableAlertRoute(router, this.licenseState);
@@ -156,8 +147,6 @@ export class AlertingPlugin {
 
     return {
       registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
-      registerNavigation: (consumer: string, alertType: string, handler: AlertNavigationHandler) =>
-        alertNavigationRegistry.register(consumer, alertTypeRegistry.get(alertType), handler),
     };
   }
 

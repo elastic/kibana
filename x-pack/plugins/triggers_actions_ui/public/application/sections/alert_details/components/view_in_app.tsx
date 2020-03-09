@@ -11,38 +11,32 @@ import { CoreStart } from 'kibana/public';
 import { useAppDependencies } from '../../../app_context';
 
 import {
-  ComponentOpts as BulkOperationsComponentOpts,
-  withBulkAlertOperations,
-} from '../../common/components/with_bulk_alert_api_operations';
-import {
   AlertNavigation,
   AlertStateNavigation,
   AlertUrlNavigation,
 } from '../../../../../../alerting/common';
 import { Alert } from '../../../../types';
 
-type ViewInAppProps = {
+interface ViewInAppProps {
   alert: Alert;
-} & Pick<BulkOperationsComponentOpts, 'loadAlertNavigation'>;
+}
 
 const NO_NAVIGATION = 'NO_NAVIGATION';
 
 type AlertNavigationLoadingState = AlertNavigation | 'NO_NAVIGATION' | null;
 
-export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({
-  alert,
-  loadAlertNavigation,
-}) => {
-  const { navigateToApp } = useAppDependencies();
+export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ alert }) => {
+  const { navigateToApp, alerting } = useAppDependencies();
 
   const [alertNavigation, setAlertNavigation] = useState<AlertNavigationLoadingState>(null);
   useEffect(() => {
-    loadAlertNavigation(alert.id)
+    alerting
+      .getNavigation(alert.id)
       .then(nav => (nav ? setAlertNavigation(nav) : setAlertNavigation(NO_NAVIGATION)))
       .catch(() => {
         setAlertNavigation(NO_NAVIGATION);
       });
-  }, [alert.id, loadAlertNavigation]);
+  }, [alert.id, alerting]);
 
   return (
     <EuiButtonEmpty
@@ -92,5 +86,3 @@ function getNavigationHandler(
   }
   return {};
 }
-
-export const ViewInAppWithApi = withBulkAlertOperations(ViewInApp);

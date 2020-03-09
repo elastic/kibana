@@ -17,13 +17,8 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, PluginInitializerContext } from 'kibana/server';
-import { SanitizedAlert } from '../../../x-pack/plugins/alerting/common';
-import {
-  PluginSetupContract as AlertingSetup,
-  AlertType,
-} from '../../../x-pack/plugins/alerting/server';
-import { ALERTING_EXAMPLE_APP_ID } from '../common/constants';
+import { Plugin, CoreSetup } from 'kibana/server';
+import { PluginSetupContract as AlertingSetup } from '../../../x-pack/plugins/alerting/server';
 
 // this plugin's dependendencies
 export interface AlertingExampleDeps {
@@ -57,18 +52,6 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
       },
     };
     alerting.registerType(alwaysFiringAlertType);
-
-    alerting.registerNavigation(
-      ALERTING_EXAMPLE_APP_ID,
-      '.alerting-example',
-      (alert: SanitizedAlert, alertType: AlertType) => ({
-        state: {
-          // LOLs
-          alert: JSON.parse(JSON.stringify(alert)),
-          alertType: JSON.parse(JSON.stringify(alertType)),
-        },
-      })
-    );
   }
 
   public start() {}

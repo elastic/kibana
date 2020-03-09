@@ -24,6 +24,5 @@ export default function alertingTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./update_api_key'));
     loadTestFile(require.resolve('./alerts'));
-    loadTestFile(require.resolve('./navigation'));
   });
 }

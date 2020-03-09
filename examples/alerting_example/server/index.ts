@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext, PluginInitializer } from 'kibana/server';
+import { PluginInitializer } from 'kibana/server';
 import { AlertingExamplePlugin } from './plugin';
 
-export const plugin: PluginInitializer<void, void> = (
-  initializerContext: PluginInitializerContext
-) => new AlertingExamplePlugin(initializerContext);
+export const plugin: PluginInitializer<void, void> = () => new AlertingExamplePlugin();

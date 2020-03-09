@@ -33,7 +33,7 @@ import {
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
 import { AlertInstancesRouteWithApi } from './alert_instances_route';
-import { ViewInAppWithApi as ViewInApp } from './view_in_app';
+import { ViewInApp } from './view_in_app';
 
 type AlertDetailsProps = {
   alert: Alert;

@@ -23,15 +23,12 @@ describe('connector_add_flyout', () => {
     const mocks = coreMock.createSetup();
     const [
       {
-        chrome,
-        docLinks,
-        application: { capabilities, navigateToApp },
+        application: { capabilities },
       },
     ] = await mocks.getStartServices();
     deps = {
       toastNotifications: mocks.notifications.toasts,
       http: mocks.http,
-      navigateToApp,
       capabilities: {
         ...capabilities,
         actions: {

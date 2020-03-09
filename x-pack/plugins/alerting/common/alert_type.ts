@@ -4,6 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './types';
+export interface AlertType {
+  id: string;
+  name: string;
+  actionGroups: ActionGroup[];
+  actionVariables: string[];
+  defaultActionGroupId: ActionGroup['id'];
+}
 
-export const BASE_ACTION_API_PATH = '/api/action';
+export interface ActionGroup {
+  id: string;
+  name: string;
+}

@@ -3,6 +3,6 @@
     "version": "kibana",
     "server": false,
     "ui": true,
-    "optionalPlugins": ["alerting", "alertingBuiltins"],
-    "requiredPlugins": ["management", "charts", "data"]
+    "optionalPlugins": ["alertingBuiltins"],
+    "requiredPlugins": ["management", "charts", "data", "alerting"]
   }
