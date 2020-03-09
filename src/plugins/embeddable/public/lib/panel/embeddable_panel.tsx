@@ -27,6 +27,7 @@ import { toMountPoint } from '../../../../kibana_react/public';
 import { Start as InspectorStartContract } from '../inspector';
 import { CONTEXT_MENU_TRIGGER, PANEL_BADGE_TRIGGER, EmbeddableContext } from '../triggers';
 import { IEmbeddable } from '../embeddables/i_embeddable';
+import { Embeddable } from '../embeddables';
 import { ViewMode, GetEmbeddableFactory, GetEmbeddableFactories } from '../types';
 
 import { RemovePanelAction } from './panel_header/panel_actions';
@@ -38,7 +39,7 @@ import { EditPanelAction } from '../actions';
 import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
 
 interface Props {
-  embeddable: IEmbeddable<any, any>;
+  embeddable: Embeddable<any, any>;
   getActions: UiActionsService['getTriggerCompatibleActions'];
   getEmbeddableFactory: GetEmbeddableFactory;
   getAllEmbeddableFactories: GetEmbeddableFactories;
@@ -56,6 +57,7 @@ interface State {
   hidePanelTitles: boolean;
   closeContextMenu: boolean;
   badges: Array<Action<EmbeddableContext>>;
+  drilldownCount?: number;
 }
 
 export class EmbeddablePanel extends React.Component<Props, State> {
@@ -102,10 +104,11 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     });
   }
 
-  public UNSAFE_componentWillMount() {
+  public async UNSAFE_componentWillMount() {
     this.mounted = true;
     const { embeddable } = this.props;
     const { parent } = embeddable;
+    embeddable.actionStorage.count().then(drilldownCount => this.setState({ drilldownCount }));
 
     this.subscription = embeddable.getInput$().subscribe(async () => {
       if (this.mounted) {
@@ -176,6 +179,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
             badges={this.state.badges}
             embeddable={this.props.embeddable}
             headerId={headerId}
+            drilldownCount={this.state.drilldownCount}
           />
         )}
         <div className="embPanel__content" ref={this.embeddableRoot} />
