@@ -38,7 +38,7 @@ export const ingest = log => async body => {
     logSuccess(log, index, body);
   } else {
     try {
-      log.debug('### Actually sending...')
+      log.debug(`### Actually sending to: ${green(index)}`)
       await client.index({ index, body });
       logSuccess(log, index, body);
     } catch (e) {
