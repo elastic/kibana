@@ -79,7 +79,10 @@ export const useRequest = <D = any, E = Error>(
     deserializer = (data: any): any => data,
   }: UseRequestConfig
 ): UseRequestResponse<D, E> => {
+  const isMounted = useRef(true);
   const sendRequestRef = useRef<() => Promise<SendRequestResponse<D, E>>>();
+  const scheduleRequestRef = useRef<() => void>();
+
   // Main states for tracking request status and data
   const [error, setError] = useState<null | any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -87,31 +90,28 @@ export const useRequest = <D = any, E = Error>(
 
   // Consumers can use isInitialRequest to implement a polling UX.
   const [isInitialRequest, setIsInitialRequest] = useState<boolean>(true);
-  const pollInterval = useRef<any>(null);
-  const pollIntervalId = useRef<any>(null);
+  const pollIntervalMsRef = useRef<number | undefined>();
+  const pollIntervalIdRef = useRef<any>(null);
 
-  // We always want to use the most recently-set interval in scheduleRequest.
-  pollInterval.current = pollIntervalMs;
+  // We always want to use the most recently-set interval when scheduling the next request.
+  pollIntervalMsRef.current = pollIntervalMs;
 
-  // Tied to every render and bound to each request.
-  let isOutdatedRequest = false;
-
-  const scheduleRequest = () => {
+  scheduleRequestRef.current = () => {
     // Clear current interval
-    if (pollIntervalId.current) {
-      clearTimeout(pollIntervalId.current);
+    if (pollIntervalIdRef.current) {
+      clearTimeout(pollIntervalIdRef.current);
     }
 
     // Set new interval
-    if (pollInterval.current) {
-      pollIntervalId.current = setTimeout(
-        () => (sendRequestRef.current ?? _sendRequest)(),
-        pollInterval.current
+    if (pollIntervalMsRef.current && isMounted.current) {
+      pollIntervalIdRef.current = setTimeout(
+        () => sendRequestRef.current!(),
+        pollIntervalMsRef.current
       );
     }
   };
 
-  const _sendRequest = async () => {
+  sendRequestRef.current = async () => {
     // We don't clear error or data, so it's up to the consumer to decide whether to display the
     // "old" error/data or loading state when a new request is in-flight.
     setIsLoading(true);
@@ -126,50 +126,50 @@ export const useRequest = <D = any, E = Error>(
     const response = await sendRequest<D, E>(httpClient, requestBody);
     const { data: serializedResponseData, error: responseError } = response;
 
-    // If an outdated request has resolved, DON'T update state, but DO allow the processData handler
-    // to execute side effects like update telemetry.
-    if (isOutdatedRequest) {
+    // Don't set state if this request resolves after the consuming component has unmounted.
+    // Exit early to stop further polling.
+    if (!isMounted.current) {
       return { data: null, error: null };
     }
 
     setError(responseError);
-
+    // If there's an error, keep the data from the last request in case it's still useful to the user.
     if (!responseError) {
       const responseData = deserializer(serializedResponseData);
       setData(responseData);
     }
-
     setIsLoading(false);
     setIsInitialRequest(false);
 
     // If we're on an interval, we need to schedule the next request. This also allows us to reset
     // the interval if the user has manually requested the data, to avoid doubled-up requests.
-    scheduleRequest();
+    scheduleRequestRef.current!();
 
     return { data: serializedResponseData, error: responseError };
   };
 
-  useEffect(() => {
-    sendRequestRef.current = _sendRequest;
-  }, [_sendRequest]);
-
   const stringifiedQuery = useMemo(() => JSON.stringify(query), [query]);
 
   useEffect(() => {
-    (sendRequestRef.current ?? _sendRequest)();
+    sendRequestRef.current!();
+
+    // Prevent state being set if consuming component unmounts while a request is in-flight.
+    return () => {
+      isMounted.current = false;
+    };
+
     // To be functionally correct we'd send a new request if the method, path, query or body changes.
     // But it doesn't seem likely that the method will change and body is likely to be a new
     // object even if its shape hasn't changed, so for now we're just watching the path and the query.
   }, [path, stringifiedQuery]);
 
   useEffect(() => {
-    scheduleRequest();
+    scheduleRequestRef.current!();
 
-    // Clean up intervals and inflight requests and corresponding state changes
+    // Clean up timeout.
     return () => {
-      isOutdatedRequest = true;
-      if (pollIntervalId.current) {
-        clearTimeout(pollIntervalId.current);
+      if (pollIntervalIdRef.current) {
+        clearTimeout(pollIntervalIdRef.current);
       }
     };
   }, [pollIntervalMs]);
@@ -179,6 +179,6 @@ export const useRequest = <D = any, E = Error>(
     isLoading,
     error,
     data,
-    sendRequest: sendRequestRef.current ?? _sendRequest, // Gives the user the ability to manually request data
+    sendRequest: sendRequestRef.current, // Gives the user the ability to manually request data
   };
 };
