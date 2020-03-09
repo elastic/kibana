@@ -27,9 +27,10 @@ export const DELETE_SELECTED_CASES = i18n.translate(
   }
 );
 
-export const CONFIRM_QUESTION_PLURAL = (totalCases: number) =>
-  i18n.translate('xpack.siem.case.confirmDeleteCase.confirmQuestion', {
-    values: { totalCases },
+export const CONFIRM_QUESTION_PLURAL = i18n.translate(
+  'xpack.siem.case.confirmDeleteCase.confirmQuestionPlural',
+  {
     defaultMessage:
       'By deleting these cases, all related case data will be permanently removed and you will no longer be able to push data to a third-party case management system. Are you sure you wish to proceed?',
-  });
+  }
+);

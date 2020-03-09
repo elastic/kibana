@@ -140,3 +140,15 @@ export const deleteCases = async (caseIds: string[]): Promise<boolean> => {
   await throwIfNotOk(response.response);
   return response.body === 'true' ? true : false;
 };
+
+export const deleteComment = async (caseId: string, commentId: string): Promise<boolean> => {
+  const response = await KibanaServices.get().http.fetch<string>(
+    `${CASES_URL}/${caseId}/comments/${commentId}`,
+    {
+      method: 'DELETE',
+      asResponse: true,
+    }
+  );
+  await throwIfNotOk(response.response);
+  return response.body === 'true' ? true : false;
+};
