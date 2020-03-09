@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { IESTermSource } from '../sources/es_term_source';
 
 export interface IJoin {
