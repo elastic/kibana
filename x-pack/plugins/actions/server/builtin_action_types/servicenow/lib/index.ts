@@ -8,7 +8,7 @@ import axios, { AxiosInstance, Method, AxiosResponse } from 'axios';
 
 import { INCIDENT_URL, USER_URL, COMMENT_URL } from './constants';
 import { Instance, Incident, IncidentResponse, UpdateIncident, CommentResponse } from './types';
-import { CommentType } from '../../servicenow/types';
+import { CommentType } from '../types';
 
 const validStatusCodes = [200, 201];
 

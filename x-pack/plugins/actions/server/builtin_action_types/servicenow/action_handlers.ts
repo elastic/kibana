@@ -5,7 +5,7 @@
  */
 
 import { zipWith } from 'lodash';
-import { Incident, CommentResponse } from '../lib/servicenow/types';
+import { Incident, CommentResponse } from './lib/types';
 import {
   ActionHandlerArguments,
   UpdateParamsType,

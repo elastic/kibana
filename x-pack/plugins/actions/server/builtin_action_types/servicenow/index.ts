@@ -13,7 +13,7 @@ import {
   ExecutorType,
 } from '../../types';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { ServiceNow } from '../lib/servicenow';
+import { ServiceNow } from './lib';
 
 import * as i18n from './translations';
 

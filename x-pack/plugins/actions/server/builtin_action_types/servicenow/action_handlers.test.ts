@@ -5,11 +5,11 @@
  */
 
 import { handleCreateIncident, handleUpdateIncident } from './action_handlers';
-import { ServiceNow } from '../lib/servicenow';
+import { ServiceNow } from './lib';
 import { finalMapping } from './mock';
-import { Incident } from '../lib/servicenow/types';
+import { Incident } from './lib/types';
 
-jest.mock('../lib/servicenow');
+jest.mock('./lib');
 
 const ServiceNowMock = ServiceNow as jest.Mock;
 

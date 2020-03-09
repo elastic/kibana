@@ -6,7 +6,7 @@
 
 import axios from 'axios';
 import { ServiceNow } from '.';
-import { instance, params } from '../../servicenow/mock';
+import { instance, params } from '../mock';
 
 jest.mock('axios');
 

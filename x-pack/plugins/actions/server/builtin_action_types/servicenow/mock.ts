@@ -5,7 +5,7 @@
  */
 
 import { MapsType, FinalMapping, ParamsType } from './types';
-import { Incident } from '../lib/servicenow/types';
+import { Incident } from './lib/types';
 
 const mapping: MapsType[] = [
   { source: 'title', target: 'short_description', actionType: 'nothing' },

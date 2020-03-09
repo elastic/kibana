@@ -15,7 +15,7 @@ import {
   CommentSchema,
 } from './schema';
 
-import { ServiceNow } from '../lib/servicenow';
+import { ServiceNow } from './lib';
 
 // config definition
 export type ConfigType = TypeOf<typeof ConfigSchema>;
