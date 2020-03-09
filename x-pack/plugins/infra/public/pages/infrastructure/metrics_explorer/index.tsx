@@ -83,6 +83,7 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
         />
       ) : (
         <MetricsExplorerCharts
+          derivedIndexPattern={derivedIndexPattern}
           timeRange={currentTimerange}
           loading={loading}
           data={data}

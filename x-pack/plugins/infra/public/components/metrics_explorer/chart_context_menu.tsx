@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import DateMath from '@elastic/datemath';
 import { Capabilities } from 'src/core/public';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { MetricsExplorerSeries } from '../../../common/http_api/metrics_explorer';
 import {
   MetricsExplorerOptions,
@@ -28,6 +29,7 @@ import { usePrefixPathWithBasepath } from '../../hooks/use_prefix_path_with_base
 import { AlertFlyout } from '../alerting/metrics/alert_flyout';
 
 export interface Props {
+  derivedIndexPattern: IIndexPattern;
   options: MetricsExplorerOptions;
   onFilter?: (query: string) => void;
   series: MetricsExplorerSeries;
@@ -73,6 +75,7 @@ export const createNodeDetailLink = (
 };
 
 export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
+  derivedIndexPattern,
   onFilter,
   options,
   series,
@@ -199,7 +202,12 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
         panelPaddingSize="none"
       >
         <EuiContextMenu initialPanelId={0} panels={panels} />
-        <AlertFlyout setVisible={setFlyoutVisible} visible={flyoutVisible} />
+        <AlertFlyout
+          derivedIndexPattern={derivedIndexPattern}
+          source={source}
+          setVisible={setFlyoutVisible}
+          visible={flyoutVisible}
+        />
       </EuiPopover>
     </>
   );

@@ -6,6 +6,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonIcon } from '@elastic/eui';
+import { IFieldType, IIndexPattern } from 'src/plugins/data/public';
 import {
   WhenExpression,
   OfExpression,
@@ -27,12 +28,13 @@ interface MetricExpressionParams {
   threshold?: number[];
   timeSize?: number;
   timeUnit?: TimeUnit;
+  indexPattern: string;
 }
 
 interface Props {
   errors: IErrorObject;
   alertParams: { criteria: MetricExpressionParams[] };
-  alertContext: AlertsContextValue;
+  alertsContext: AlertsContextValue;
   setAlertParams(key: string, value: any): void;
   setAlertProperty(key: string, value: any): void;
 }
@@ -41,11 +43,24 @@ type Comparator = '>' | '>=' | 'between' | '<' | '<=';
 type TimeUnit = 's' | 'm' | 'h' | 'd';
 
 export const MetricExpression: React.FC<Props> = props => {
-  const { setAlertParams, alertParams, errors } = props;
+  const { setAlertParams, alertParams, errors, alertsContext } = props;
+
+  const defaultExpression = useMemo<MetricExpressionParams>(
+    () => ({
+      aggType: 'count',
+      metric: '',
+      comparator: '>',
+      threshold: [],
+      timeSize: 1,
+      timeUnit: 's',
+      indexPattern: alertsContext.metadata?.source.metricAlias,
+    }),
+    [alertsContext.metadata]
+  );
 
   const expressions = useMemo<MetricExpressionParams[]>(() => {
-    return alertParams.criteria || [{}];
-  }, [alertParams.criteria]);
+    return alertParams.criteria || [defaultExpression];
+  }, [alertParams.criteria, defaultExpression]);
 
   const updateParams = useCallback(
     (id, e: MetricExpressionParams) => {
@@ -58,9 +73,9 @@ export const MetricExpression: React.FC<Props> = props => {
 
   const addExpression = useCallback(() => {
     const exp = alertParams.criteria ? alertParams.criteria.slice() : [];
-    exp.push({});
+    exp.push(defaultExpression);
     setAlertParams('criteria', exp);
-  }, [setAlertParams, alertParams.criteria]);
+  }, [setAlertParams, alertParams.criteria, defaultExpression]);
 
   const removeExpression = useCallback(
     (id: number) => {
@@ -73,10 +88,10 @@ export const MetricExpression: React.FC<Props> = props => {
 
   return (
     <>
-      <EuiButton onClick={addExpression}>Add Expression</EuiButton>
       {expressions.map((e, idx) => {
         return (
           <ExpressionRow
+            fields={(alertsContext.metadata!.derivedIndexPattern as IIndexPattern).fields}
             remove={removeExpression}
             key={idx} // idx's don't usually make good key's but here the index has semantic meaning
             expressionId={idx}
@@ -86,11 +101,13 @@ export const MetricExpression: React.FC<Props> = props => {
           />
         );
       })}
+      <EuiButton onClick={addExpression}>Add Expression</EuiButton>
     </>
   );
 };
 
 interface ExpressionRowProps {
+  fields: IFieldType[];
   expressionId: number;
   expression: MetricExpressionParams;
   errors: any;
@@ -98,7 +115,7 @@ interface ExpressionRowProps {
   setAlertParams(id: number, params: MetricExpressionParams): void;
 }
 export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
-  const { setAlertParams, expression, errors, expressionId, remove } = props;
+  const { setAlertParams, expression, errors, expressionId, remove, fields } = props;
   const {
     aggType = 'count',
     metric,
@@ -110,44 +127,44 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
 
   const updateAggType = useCallback(
     (at: string) => {
-      setAlertParams(expressionId, { aggType: at });
+      setAlertParams(expressionId, { ...expression, aggType: at });
     },
-    [expressionId, setAlertParams]
+    [expressionId, expression, setAlertParams]
   );
 
   const updateMetric = useCallback(
     (m?: string) => {
-      setAlertParams(expressionId, { metric: m });
+      setAlertParams(expressionId, { ...expression, metric: m });
     },
-    [expressionId, setAlertParams]
+    [expressionId, expression, setAlertParams]
   );
 
   const updateComparator = useCallback(
     (c?: string) => {
-      setAlertParams(expressionId, { comparator: c as Comparator });
+      setAlertParams(expressionId, { ...expression, comparator: c as Comparator });
     },
-    [expressionId, setAlertParams]
+    [expressionId, expression, setAlertParams]
   );
 
   const updateThreshold = useCallback(
     t => {
-      setAlertParams(expressionId, { threshold: t });
+      setAlertParams(expressionId, { ...expression, threshold: t });
     },
-    [expressionId, setAlertParams]
+    [expressionId, expression, setAlertParams]
   );
 
   const updateTimeSize = useCallback(
     (ts: number | '') => {
-      setAlertParams(expressionId, { timeSize: ts || undefined });
+      setAlertParams(expressionId, { ...expression, timeSize: ts || undefined });
     },
-    [expressionId, setAlertParams]
+    [expressionId, expression, setAlertParams]
   );
 
   const updateTimeUnit = useCallback(
     (tu: string) => {
-      setAlertParams(expressionId, { timeUnit: tu as TimeUnit });
+      setAlertParams(expressionId, { ...expression, timeUnit: tu as TimeUnit });
     },
-    [expressionId, setAlertParams]
+    [expressionId, expression, setAlertParams]
   );
 
   return (
@@ -166,7 +183,10 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
             <EuiFlexItem grow={false}>
               <OfExpression
                 aggField={metric}
-                fields={[{ normalizedType: 'number', name: 'system.cpu.user.pct' }]} // can be some data from server API
+                fields={fields.map(f => ({
+                  normalizedType: f.type,
+                  name: f.name,
+                }))}
                 aggType={aggType}
                 errors={errors}
                 onChangeSelectedAggField={updateMetric}

@@ -18,12 +18,13 @@ export function validateExampleAlertType({
     aggField: new Array<string>(),
   };
   validationResult.errors = errors;
-  if (!testAggField) {
-    errors.aggField.push(
-      i18n.translate('xpack.triggersActionsUI.components.example.error.requiredTestAggFieldText', {
-        defaultMessage: 'Test aggregation field is required.',
-      })
-    );
-  }
+  // if (!testAggField) {
+  //   errors.aggField.push(
+  //     i18n.translate('xpack.triggersActionsUI.components.example.error.requiredTestAggFieldText', {
+  //       defaultMessage: 'Test aggregation field is required.',
+  //     })
+  //   );
+  // }
+
   return validationResult;
 }
