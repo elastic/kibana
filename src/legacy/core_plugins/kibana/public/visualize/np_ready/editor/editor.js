@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { makeStateful, useVisualizeAppState } from './lib';
+import { makeStateful, useVisualizeAppState, handleSavedSearch } from './lib';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
@@ -488,6 +488,15 @@ function VisualizeAppController(
       })
     );
 
+    // handle linked search updates, such as link/unlink a saved search
+    handleSavedSearch({
+      kbnUrlStateStorage,
+      savedVis,
+      stateContainer,
+      toastNotifications,
+      vis,
+    });
+
     $scope.$on('$destroy', () => {
       if ($scope._handler) {
         $scope._handler.destroy();
@@ -557,20 +566,6 @@ function VisualizeAppController(
     $scope.savedQuery = savedQuery;
     updateStateFromSavedQuery(savedQuery);
   };
-
-  $scope.$watch('linked', linked => {
-    if (linked && !savedVis.savedSearchId) {
-      savedVis.savedSearchId = savedVis.searchSource.id;
-      vis.savedSearchId = savedVis.searchSource.id;
-
-      $scope.$broadcast('render');
-    } else if (!linked && savedVis.savedSearchId) {
-      delete savedVis.savedSearchId;
-      delete vis.savedSearchId;
-
-      $scope.$broadcast('render');
-    }
-  });
 
   /**
    * Called when the user clicks "Save" button.
@@ -662,36 +657,6 @@ function VisualizeAppController(
     );
   }
 
-  const unlinkFromSavedSearch = () => {
-    const searchSourceParent = searchSource.getParent();
-    const searchSourceGrandparent = searchSourceParent.getParent();
-
-    delete savedVis.savedSearchId;
-    delete vis.savedSearchId;
-    searchSourceParent.setField(
-      'filter',
-      _.union(searchSource.getOwnField('filter'), searchSourceParent.getOwnField('filter'))
-    );
-
-    stateContainer.transitions.unlinkSavedSearch(
-      searchSourceParent.getField('query'),
-      searchSourceParent.getField('filter')
-    );
-    searchSource.setField('index', searchSourceParent.getField('index'));
-    searchSource.setParent(searchSourceGrandparent);
-
-    toastNotifications.addSuccess(
-      i18n.translate('kbn.visualize.linkedToSearch.unlinkSuccessNotificationText', {
-        defaultMessage: `Unlinked from saved search '{searchTitle}'`,
-        values: {
-          searchTitle: savedVis.savedSearch.title,
-        },
-      })
-    );
-
-    $scope.fetch();
-  };
-
   $scope.getAdditionalMessage = () => {
     return (
       '<i class="kuiIcon fa-flask"></i>' +
@@ -702,8 +667,6 @@ function VisualizeAppController(
       vis.type.feedbackMessage
     );
   };
-
-  vis.on('unlinkFromSavedSearch', unlinkFromSavedSearch);
 
   addHelpMenuToAppChrome(chrome, docLinks);
 

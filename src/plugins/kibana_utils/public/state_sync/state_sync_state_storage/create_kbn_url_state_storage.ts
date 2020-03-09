@@ -25,6 +25,7 @@ import {
   createKbnUrlControls,
   getStateFromKbnUrl,
   setStateToKbnUrl,
+  removeStateFromKbnUrl,
 } from '../../state_management/url';
 
 export interface IKbnUrlStateStorage extends IStateStorage {
@@ -34,6 +35,9 @@ export interface IKbnUrlStateStorage extends IStateStorage {
     opts?: { replace: boolean }
   ) => Promise<string | undefined>;
   get: <State = unknown>(key: string) => State | null;
+
+  // removes the key from url
+  remove: (key: string) => Promise<string | undefined>;
   change$: <State = unknown>(key: string) => Observable<State | null>;
 
   // cancels any pending url updates
@@ -54,17 +58,14 @@ export const createKbnUrlStateStorage = (
 ): IKbnUrlStateStorage => {
   const url = createKbnUrlControls(history);
   return {
-    set: <State>(
-      key: string,
-      state: State,
-      { replace = false }: { replace: boolean } = { replace: false }
-    ) => {
+    set: (key, state, { replace = false }: { replace: boolean } = { replace: false }) => {
       // syncState() utils doesn't wait for this promise
       return url.updateAsync(
         currentUrl => setStateToKbnUrl(key, state, { useHash }, currentUrl),
         replace
       );
     },
+    remove: key => url.updateAsync(currentUrl => removeStateFromKbnUrl(key, currentUrl)),
     get: key => {
       // if there is a pending url update, then state will be extracted from that pending url,
       // otherwise current url will be used to retrieve state from
