@@ -15,7 +15,7 @@ import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from '../common/constants';
  * major version!
  * @return {Array} array of rename operations and callback function for rename logging
  */
-export const deprecations = () => {
+export const deprecations = ({ renameFromRoot }) => {
   return [
     (settings, log) => {
       const clusterAlertsEnabled = get(settings, 'cluster_alerts.enabled');
@@ -26,6 +26,7 @@ export const deprecations = () => {
           `Config key "${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}" will be required for email notifications to work in 7.0."`
         );
       }
+      return settings;
     },
     (settings, log) => {
       const fromPath = 'monitoring.elasticsearch';
@@ -37,6 +38,7 @@ export const deprecations = () => {
           );
         }
       }
+      return settings;
     },
     (settings, log) => {
       const fromPath = 'monitoring.elasticsearch.ssl';
@@ -52,6 +54,11 @@ export const deprecations = () => {
           );
         }
       }
+      return settings;
     },
+    renameFromRoot(
+      'monitoring.xpack_api_polling_frequency_millis',
+      'monitoring.licensing.api_polling_frequency'
+    ),
   ];
 };

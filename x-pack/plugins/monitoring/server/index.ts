@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
+import { TypeOf } from '@kbn/config-schema';
+import { PluginInitializerContext, PluginConfigDescriptor } from '../../../../src/core/server';
 import { Plugin } from './plugin';
 import { configSchema } from './config';
 // @ts-ignore
@@ -13,8 +14,10 @@ import { getKibanaInfoForStats } from './kibana_monitoring/lib';
 import { deprecations } from './deprecations';
 
 export const plugin = (initContext: PluginInitializerContext) => new Plugin(initContext);
-export const config = {
+export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
   schema: configSchema,
+  deprecations,
 };
 
-export { getKibanaInfoForStats, deprecations };
+// TODO: why are we doing this?
+export { getKibanaInfoForStats };

@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema, TypeOf } from '@kbn/config-schema';
-// TODO: NP
-// import { XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS } from '../common/constants';
-const XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS = 30001;
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 const DEFAULT_API_VERSION = 'master';
@@ -213,8 +210,10 @@ export const configSchema = schema.object({
       email_address: schema.string({ defaultValue: '' }),
     }),
   }),
-  xpack_api_polling_frequency_millis: schema.number({
-    defaultValue: XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS,
+  licensing: schema.object({
+    api_polling_frequency: schema.duration({
+      defaultValue: '30s',
+    }),
   }),
   agent: schema.object({
     interval: schema.string({ defaultValue: '10s' }),

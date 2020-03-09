@@ -26,7 +26,7 @@ export class LicenseService {
   public setup({ licensing, monitoringClient, config, log }: SetupDeps): MonitoringLicenseService {
     const { refresh, license$ } = licensing.createLicensePoller(
       monitoringClient,
-      config.xpack_api_polling_frequency_millis
+      config.licensing.api_polling_frequency.asMilliseconds()
     );
 
     let rawLicense: Readonly<ILicense> | undefined;

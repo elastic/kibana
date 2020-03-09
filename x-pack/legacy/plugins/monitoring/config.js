@@ -132,9 +132,9 @@ export const config = Joi => {
         email_address: Joi.string().email(),
       }).default(),
     }).default(),
-    xpack_api_polling_frequency_millis: Joi.number().default(
-      XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS
-    ),
+    licensing: Joi.object({
+      api_polling_frequency: Joi.number().default(XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS),
+    }),
     agent: Joi.object({
       interval: Joi.string()
         .regex(/[\d\.]+[yMwdhms]/)
