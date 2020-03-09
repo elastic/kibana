@@ -17,8 +17,10 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { collapseLiteralStrings } from '../../../../../../../../../../../src/plugins/es_ui_shared/console_lang/lib/json_xjson_translation_tools';
 
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
+import { xJsonMode } from '../../../../../components/custom_hooks';
 
 export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
   const {
@@ -42,7 +44,8 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
   const onChange = (str: string) => {
     setAdvancedEditorRawString(str);
     try {
-      setJobConfig(JSON.parse(str));
+      const resultJobConfig = JSON.parse(collapseLiteralStrings(str));
+      setJobConfig(resultJobConfig);
     } catch (e) {
       resetAdvancedEditorMessages();
     }
@@ -119,7 +122,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
             style={{ maxWidth: '100%' }}
           >
             <EuiCodeEditor
-              mode="json"
+              mode={xJsonMode}
               width="100%"
               value={advancedEditorRawString}
               onChange={onChange}

@@ -37,7 +37,6 @@ import {
   Embeddable,
 } from '../../../../../embeddable_api/public/np_ready/public';
 import * as columnActions from '../angular/doc_table/actions/columns';
-import { SavedSearch } from '../types';
 import searchTemplate from './search_template.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
@@ -51,6 +50,7 @@ import {
   ISearchSource,
 } from '../../kibana_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
+import { SavedSearch } from '../../../../../../../plugins/discover/public';
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
@@ -214,24 +214,24 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
         return;
       }
       indexPattern.popularizeField(columnName, 1);
-      columnActions.addColumn(searchScope.columns, columnName);
-      this.updateInput({ columns: searchScope.columns });
+      const columns = columnActions.addColumn(searchScope.columns, columnName);
+      this.updateInput({ columns });
     };
 
     searchScope.removeColumn = (columnName: string) => {
       if (!searchScope.columns) {
         return;
       }
-      columnActions.removeColumn(searchScope.columns, columnName);
-      this.updateInput({ columns: searchScope.columns });
+      const columns = columnActions.removeColumn(searchScope.columns, columnName);
+      this.updateInput({ columns });
     };
 
     searchScope.moveColumn = (columnName, newIndex: number) => {
       if (!searchScope.columns) {
         return;
       }
-      columnActions.moveColumn(searchScope.columns, columnName, newIndex);
-      this.updateInput({ columns: searchScope.columns });
+      const columns = columnActions.moveColumn(searchScope.columns, columnName, newIndex);
+      this.updateInput({ columns });
     };
 
     searchScope.filter = async (field, value, operator) => {

@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '../../../../src/core/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import {
   FeatureCatalogueCategory,
@@ -15,17 +19,18 @@ import {
 import { LicensingPluginSetup } from '../../licensing/public';
 import { ManagementSetup, ManagementStart } from '../../../../src/plugins/management/public';
 import {
+  ISessionTimeout,
   SessionExpired,
   SessionTimeout,
-  ISessionTimeout,
   SessionTimeoutHttpInterceptor,
   UnauthorizedResponseHttpInterceptor,
 } from './session';
 import { SecurityLicenseService } from '../common/licensing';
 import { SecurityNavControlService } from './nav_control';
-import { AccountManagementPage } from './account_management';
 import { AuthenticationService, AuthenticationServiceSetup } from './authentication';
-import { ManagementService, UserAPIClient } from './management';
+import { ConfigType } from './config';
+import { ManagementService } from './management';
+import { accountManagementApp } from './account_management';
 
 export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
@@ -47,23 +52,27 @@ export class SecurityPlugin
       PluginStartDependencies
     > {
   private sessionTimeout!: ISessionTimeout;
+  private readonly authenticationService = new AuthenticationService();
   private readonly navControlService = new SecurityNavControlService();
   private readonly securityLicenseService = new SecurityLicenseService();
   private readonly managementService = new ManagementService();
   private authc!: AuthenticationServiceSetup;
+  private readonly config: ConfigType;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config = this.initializerContext.config.get<ConfigType>();
+  }
 
   public setup(
     core: CoreSetup<PluginStartDependencies>,
     { home, licensing, management }: PluginSetupDependencies
   ) {
-    const { http, notifications, injectedMetadata } = core;
+    const { http, notifications } = core;
     const { anonymousPaths } = http;
-    anonymousPaths.register('/login');
-    anonymousPaths.register('/logout');
-    anonymousPaths.register('/logged_out');
 
-    const tenant = injectedMetadata.getInjectedVar('session.tenant', '') as string;
-    const logoutUrl = injectedMetadata.getInjectedVar('logoutUrl') as string;
+    const logoutUrl = `${core.http.basePath.serverBasePath}/logout`;
+    const tenant = core.http.basePath.serverBasePath;
+
     const sessionExpired = new SessionExpired(logoutUrl, tenant);
     http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));
     this.sessionTimeout = new SessionTimeout(notifications, sessionExpired, http, tenant);
@@ -71,11 +80,23 @@ export class SecurityPlugin
 
     const { license } = this.securityLicenseService.setup({ license$: licensing.license$ });
 
-    this.authc = new AuthenticationService().setup({ http: core.http });
+    this.authc = this.authenticationService.setup({
+      application: core.application,
+      config: this.config,
+      getStartServices: core.getStartServices,
+      http: core.http,
+    });
 
     this.navControlService.setup({
       securityLicense: license,
       authc: this.authc,
+      logoutUrl,
+    });
+
+    accountManagementApp.create({
+      authc: this.authc,
+      application: core.application,
+      getStartServices: core.getStartServices,
     });
 
     if (management) {
@@ -109,6 +130,7 @@ export class SecurityPlugin
       authc: this.authc,
       sessionTimeout: this.sessionTimeout,
       license,
+      __legacyCompat: { logoutUrl, tenant },
     };
   }
 
@@ -119,22 +141,6 @@ export class SecurityPlugin
     if (management) {
       this.managementService.start({ management });
     }
-
-    return {
-      __legacyCompat: {
-        account_management: {
-          AccountManagementPage: () => (
-            <core.i18n.Context>
-              <AccountManagementPage
-                authc={this.authc}
-                notifications={core.notifications}
-                apiClient={new UserAPIClient(core.http)}
-              />
-            </core.i18n.Context>
-          ),
-        },
-      },
-    };
   }
 
   public stop() {

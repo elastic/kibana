@@ -39,9 +39,16 @@ export const usersManagementApp = Object.freeze({
         ];
 
         const userAPIClient = new UserAPIClient(http);
+        const rolesAPIClient = new RolesAPIClient(http);
         const UsersGridPageWithBreadcrumbs = () => {
           setBreadcrumbs(usersBreadcrumbs);
-          return <UsersGridPage notifications={notifications} apiClient={userAPIClient} />;
+          return (
+            <UsersGridPage
+              notifications={notifications}
+              userAPIClient={userAPIClient}
+              rolesAPIClient={rolesAPIClient}
+            />
+          );
         };
 
         const EditUserPageWithBreadcrumbs = () => {
@@ -61,7 +68,7 @@ export const usersManagementApp = Object.freeze({
           return (
             <EditUserPage
               authc={authc}
-              apiClient={userAPIClient}
+              userAPIClient={userAPIClient}
               rolesAPIClient={new RolesAPIClient(http)}
               notifications={notifications}
               username={username}

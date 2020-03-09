@@ -64,7 +64,7 @@ export const useSendCurrentRequestToES = () => {
         // or templates may have changed, so we'll need to update this data. Assume that if
         // the user disables polling they're trying to optimize performance or otherwise
         // preserve resources, so they won't want this request sent either.
-        mappings.retrieveAutoCompleteInfo();
+        mappings.retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
       }
 
       dispatch({
@@ -74,12 +74,16 @@ export const useSendCurrentRequestToES = () => {
         },
       });
     } catch (e) {
-      if (e.response?.contentType) {
+      if (e?.response) {
         dispatch({
           type: 'requestFail',
           payload: e,
         });
       } else {
+        dispatch({
+          type: 'requestFail',
+          payload: undefined,
+        });
         notifications.toasts.addError(e, {
           title: i18n.translate('console.notification.unknownRequestErrorTitle', {
             defaultMessage: 'Unknown Request Error',

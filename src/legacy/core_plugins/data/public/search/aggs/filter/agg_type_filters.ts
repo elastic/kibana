@@ -23,7 +23,8 @@ import { IAggConfig, IAggType } from '../types';
 type AggTypeFilter = (
   aggType: IAggType,
   indexPattern: IndexPattern,
-  aggConfig: IAggConfig
+  aggConfig: IAggConfig,
+  aggFilter: string[]
 ) => boolean;
 
 /**
@@ -48,12 +49,20 @@ class AggTypeFilters {
    * @param aggTypes A list of aggTypes that will be filtered down by this registry.
    * @param indexPattern The indexPattern for which this list should be filtered down.
    * @param aggConfig The aggConfig for which the returning list will be used.
+   * @param schema
    * @return A filtered list of the passed aggTypes.
    */
-  public filter(aggTypes: IAggType[], indexPattern: IndexPattern, aggConfig: IAggConfig) {
+  public filter(
+    aggTypes: IAggType[],
+    indexPattern: IndexPattern,
+    aggConfig: IAggConfig,
+    aggFilter: string[]
+  ) {
     const allFilters = Array.from(this.filters);
     const allowedAggTypes = aggTypes.filter(aggType => {
-      const isAggTypeAllowed = allFilters.every(filter => filter(aggType, indexPattern, aggConfig));
+      const isAggTypeAllowed = allFilters.every(filter =>
+        filter(aggType, indexPattern, aggConfig, aggFilter)
+      );
       return isAggTypeAllowed;
     });
     return allowedAggTypes;
