@@ -24,7 +24,7 @@
 module.exports = function(cp) {
   // The `exec` function is currently just a wrapper around `execFile`. So for
   // now there's no need to patch it. If this changes in the future, our tests
-  // will fail and we can comment out the line below.
+  // will fail and we can uncomment the line below.
   //
   // cp.exec = new Proxy(cp.exec, { apply: patchOptions() });
 
