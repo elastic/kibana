@@ -21,7 +21,7 @@ type Action =
   | { type: 'FETCH_INIT' }
   | { type: 'FETCH_SUCCESS'; payload: boolean }
   | { type: 'FETCH_FAILURE' }
-  | { type: 'RESET_IS_DELETED'; payload: boolean };
+  | { type: 'RESET_IS_DELETED' };
 
 const dataFetchReducer = (state: DeleteState, action: Action): DeleteState => {
   switch (action.type) {
@@ -101,7 +101,7 @@ export const useDeleteCases = (): UseDeleteCase => {
   }, [state.isDisplayConfirmDeleteModal]);
 
   const dispatchResetIsDeleted = useCallback(() => {
-    dispatch({ type: 'RESET_IS_DELETED', payload: false });
+    dispatch({ type: 'RESET_IS_DELETED' });
   }, [state.isDisplayConfirmDeleteModal]);
 
   const handleOnDeleteConfirm = useCallback(
