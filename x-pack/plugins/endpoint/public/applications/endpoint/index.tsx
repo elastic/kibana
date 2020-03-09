@@ -64,8 +64,8 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
                     render={() => (
                       <h1 data-test-subj="welcomeTitle">
                         <FormattedMessage
-                          id="xpack.endpoint.notFound"
-                          defaultMessage="Page Not Found"
+                          id="xpack.endpoint.welcomeTitle"
+                          defaultMessage="Hello World"
                         />
                       </h1>
                     )}
