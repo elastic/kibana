@@ -18,7 +18,11 @@
  */
 
 import * as React from 'react';
-import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { uiToReactComponent, reactToUiComponent } from '../../../kibana_react/public';
@@ -27,15 +31,7 @@ import { Action, ActionInternal } from '../actions';
 export const contextMenuSeparatorAction = new ActionInternal({
   id: 'CONTEXT_MENU_SEPARATOR',
   getDisplayName: () => 'separator',
-  MenuItem: reactToUiComponent(() => (
-    <div
-      style={{
-        width: '100%',
-        height: '1px',
-        background: 'red',
-      }}
-    />
-  )),
+  MenuItem: reactToUiComponent(() => <EuiHorizontalRule margin={'none'} />),
   execute: () => Promise.resolve(),
 });
 
@@ -117,10 +113,12 @@ function convertPanelActionToContextMenuItem<Context extends object>({
     'data-test-subj': `embeddablePanelAction-${action.id}`,
   };
 
-  menuPanelItem.onClick = () => {
-    action.execute(actionContext);
-    closeMenu();
-  };
+  if (action.id !== 'CONTEXT_MENU_SEPARATOR') {
+    menuPanelItem.onClick = () => {
+      action.execute(actionContext);
+      closeMenu();
+    };
+  }
 
   if (action.getHref) {
     const href = action.getHref(actionContext);

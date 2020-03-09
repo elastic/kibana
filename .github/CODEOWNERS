@@ -3,6 +3,7 @@
 # For more info, see https://help.github.com/articles/about-codeowners/
 
 # App
+/x-pack/legacy/plugins/dashboard_enhanced/ @elastic/kibana-app
 /x-pack/legacy/plugins/lens/ @elastic/kibana-app
 /x-pack/legacy/plugins/graph/ @elastic/kibana-app
 /src/legacy/server/url_shortening/ @elastic/kibana-app

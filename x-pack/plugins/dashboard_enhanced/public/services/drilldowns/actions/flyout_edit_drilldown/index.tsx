@@ -8,16 +8,19 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
 import { EuiNotificationBadge } from '@elastic/eui';
-import { ActionByType } from '../../../../../../src/plugins/ui_actions/public';
+import { ActionByType } from '../../../../../../../../src/plugins/ui_actions/public';
 import {
   reactToUiComponent,
   toMountPoint,
-} from '../../../../../../src/plugins/kibana_react/public';
-import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
-import { FlyoutManageDrilldowns } from '../../components/flyout_manage_drilldowns';
-// TODO: MOCK DATA
-import { drilldowns } from '../../components/list_manage_drilldowns/test_data';
-import { ActionFactory } from '../../../../advanced_ui_actions/public';
+} from '../../../../../../../../src/plugins/kibana_react/public';
+import { IEmbeddable } from '../../../../../../../../src/plugins/embeddable/public';
+
+const FlyoutManageDrilldowns: React.FC<{ onClose: () => {} }> = () => (
+  <div>FormDrilldownWizard</div>
+);
+
+// Mock data
+const drilldowns: any = [];
 
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 
@@ -27,7 +30,6 @@ export interface FlyoutEditDrilldownActionContext {
 
 export interface FlyoutEditDrilldownParams {
   overlays: () => Promise<CoreStart['overlays']>;
-  getDrilldownActionFactories: () => Array<ActionFactory<any>>;
 }
 
 const displayName = i18n.translate('xpack.drilldowns.panel.openFlyoutEditDrilldown.displayName', {
@@ -69,21 +71,8 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
   public async execute(context: FlyoutEditDrilldownActionContext) {
     const overlays = await this.params.overlays();
 
-    const drilldownActionFactories = this.params.getDrilldownActionFactories();
-    const compatibleDrilldownActionFactories = await Promise.all(
-      drilldownActionFactories.map(factory => factory.isCompatible(context))
-    ).then(compatibilityList =>
-      drilldownActionFactories.filter((factory, index) => compatibilityList[index])
-    );
-
     const handle = overlays.openFlyout(
-      toMountPoint(
-        <FlyoutManageDrilldowns
-          onClose={() => handle.close()}
-          drilldowns={drilldowns}
-          drilldownActionFactories={compatibleDrilldownActionFactories}
-        />
-      )
+      toMountPoint(<FlyoutManageDrilldowns onClose={() => handle.close()} />)
     );
   }
 }
