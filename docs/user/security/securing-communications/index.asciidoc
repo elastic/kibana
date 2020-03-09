@@ -114,6 +114,7 @@ Specify one or more PEM-formatted CA certificates in `kibana.yml`:
 --------------------------------------------------------------------------------
 elasticsearch.ssl.certificateAuthorities: ["/path/to/elasticsearch-ca.pem"]
 --------------------------------------------------------------------------------
+--
 For more information about settings for certificates and keys, see <<settings,{kib} configuration settings>>.
 --
 . Configure {kib} to enable TLS for outbound connections to {es}.
@@ -128,6 +129,6 @@ NOTE: Using the HTTPS protocol results in a default `elasticsearch.ssl.verificat
 verification. For more information about this setting, see <<settings,{kib} configuration settings>>.
 
 --
-If the Elastic {monitor-features} are enabled and you have set up a separate {es} monitoring cluster, you can also configure {kib} to
-connect to the monitoring cluster via HTTPS. The steps are the same as above, but each setting is prefixed by `xpack.monitoring.`. For
-example, `xpack.monitoring.elasticsearch.hosts`, `xpack.monitoring.elasticsearch.ssl.certificateAuthorities`, etc.
+If the Elastic {monitor-features} are enabled and you have set up a separate {es} monitoring cluster, you can also configure {kib} t0
+connect to the monitoring cluster via HTTPS. The steps are the same, but each setting is prefixed by `xpack.monitoring.`. For
+example, `xpack.monitoring.elasticsearch.hosts`, `xpack.monitoring.elasticsearch.ssl.truststore.path`, etc.

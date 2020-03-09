@@ -29,7 +29,7 @@ certain components. Here is a breakdown of those modules:
     the required modules and import them were they are actually necessary.
 
 - *`import 'ui/autoload/all'`*
-    Imports all of the above modules
+    Imports all of the modules
 
 [float]
 ==== Resolving Require Paths
@@ -69,4 +69,4 @@ Here is how import/require statements are resolved to a file:
     ** path/index + '.js'
     ** path/index + '.json'
     ** path/index
-  * if none of the above paths matches then an error is thrown
+  * if none of the paths matches then an error is thrown
