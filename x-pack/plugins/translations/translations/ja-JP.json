@@ -2849,7 +2849,6 @@
     "timelion.vis.intervalLabel": "間隔",
     "uiActions.actionPanel.title": "オプション",
     "uiActions.errors.incompatibleAction": "操作に互換性がありません",
-    "visualizations.defaultFeedbackMessage": "フィードバックがありますか？{link} で問題を報告してください。",
     "visualizations.newVisWizard.betaDescription": "このビジュアライゼーションはベータ段階で、変更される可能性があります。デザインとコードはオフィシャル GA 機能よりも完成度が低く、現状のまま保証なしで提供されています。ベータ機能にはオフィシャル GA 機能の SLA が適用されません",
     "visualizations.newVisWizard.betaTitle": "ベータ",
     "visualizations.newVisWizard.chooseSourceTitle": "ソースの選択",
