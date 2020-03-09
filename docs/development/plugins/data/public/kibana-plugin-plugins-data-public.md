@@ -31,6 +31,7 @@
 
 |  Function | Description |
 |  --- | --- |
+|  [getDefaultQuery(language)](./kibana-plugin-plugins-data-public.getdefaultquery.md) |  |
 |  [getEsPreference(uiSettings, sessionId)](./kibana-plugin-plugins-data-public.getespreference.md) |  |
 |  [getQueryLog(uiSettings, storage, appName, language)](./kibana-plugin-plugins-data-public.getquerylog.md) |  |
 |  [getSearchErrorType({ message })](./kibana-plugin-plugins-data-public.getsearcherrortype.md) |  |
@@ -62,12 +63,9 @@
 |  [IResponseTypesMap](./kibana-plugin-plugins-data-public.iresponsetypesmap.md) |  |
 |  [ISearchContext](./kibana-plugin-plugins-data-public.isearchcontext.md) |  |
 |  [ISearchOptions](./kibana-plugin-plugins-data-public.isearchoptions.md) |  |
-|  [ISearchSetup](./kibana-plugin-plugins-data-public.isearchsetup.md) | The setup contract exposed by the Search plugin exposes the search strategy extension point. |
-|  [ISearchStart](./kibana-plugin-plugins-data-public.isearchstart.md) |  |
 |  [ISearchStrategy](./kibana-plugin-plugins-data-public.isearchstrategy.md) | Search strategy interface contains a search method that takes in a request and returns a promise that resolves to a response. |
 |  [ISyncSearchRequest](./kibana-plugin-plugins-data-public.isyncsearchrequest.md) |  |
 |  [KueryNode](./kibana-plugin-plugins-data-public.kuerynode.md) |  |
-|  [LegacyApiCaller](./kibana-plugin-plugins-data-public.legacyapicaller.md) |  |
 |  [Query](./kibana-plugin-plugins-data-public.query.md) |  |
 |  [QueryState](./kibana-plugin-plugins-data-public.querystate.md) | All query state service state |
 |  [QuerySuggestionBasic](./kibana-plugin-plugins-data-public.querysuggestionbasic.md) | \* |

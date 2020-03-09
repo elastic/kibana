@@ -22,7 +22,6 @@ import { HttpSetup } from 'src/core/public';
 import { HttpStart } from 'src/core/public';
 import { IconType } from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n/react';
-import { ISearchStart as ISearchStart_2 } from 'src/plugins/data/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IUiSettingsClient } from 'src/core/public';
 import { Location } from 'history';
@@ -119,6 +118,8 @@ export interface DataPublicPluginSetup {
     //
     // (undocumented)
     query: QuerySetup;
+    // Warning: (ae-forgotten-export) The symbol "ISearchSetup" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
     search: ISearchSetup;
 }
@@ -141,6 +142,8 @@ export interface DataPublicPluginStart {
     //
     // (undocumented)
     query: QueryStart;
+    // Warning: (ae-forgotten-export) The symbol "ISearchStart" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
     search: ISearchStart;
     // (undocumented)
@@ -448,6 +451,15 @@ export class FilterManager {
     static setFiltersStore(filters: Filter[], store: FilterStateStore, shouldOverrideStore?: boolean): void;
     setGlobalFilters(newGlobalFilters: Filter[]): void;
     }
+
+// Warning: (ae-forgotten-export) The symbol "QueryLanguage" needs to be exported by the entry point index.d.ts
+// Warning: (ae-missing-release-tag) "getDefaultQuery" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export function getDefaultQuery(language?: QueryLanguage): {
+    query: string;
+    language: QueryLanguage;
+};
 
 // Warning: (ae-forgotten-export) The symbol "IUiSettingsClient" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "getEsPreference" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -938,38 +950,10 @@ export interface ISearchOptions {
     signal?: AbortSignal;
 }
 
-// Warning: (ae-missing-release-tag) "ISearchSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public
-export interface ISearchSetup {
-    // Warning: (ae-forgotten-export) The symbol "SearchAggsSetup" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    aggs: SearchAggsSetup;
-    // Warning: (ae-forgotten-export) The symbol "TRegisterSearchStrategyProvider" needs to be exported by the entry point index.d.ts
-    registerSearchStrategyProvider: TRegisterSearchStrategyProvider;
-}
-
 // Warning: (ae-missing-release-tag) "ISearchSource" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
-
-// Warning: (ae-missing-release-tag) "ISearchStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface ISearchStart {
-    // (undocumented)
-    __LEGACY: {
-        esClient: LegacyApiCaller;
-    };
-    // Warning: (ae-forgotten-export) The symbol "SearchAggsStart" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    aggs: SearchAggsStart;
-    // (undocumented)
-    search: ISearchGeneric;
-}
 
 // Warning: (ae-missing-release-tag) "ISearchStrategy" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1029,18 +1013,6 @@ export interface KueryNode {
     //
     // (undocumented)
     type: keyof NodeTypes;
-}
-
-// Warning: (ae-missing-release-tag) "LegacyApiCaller" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface LegacyApiCaller {
-    // (undocumented)
-    msearch: (searchRequest: SearchRequest) => LegacyApiCallerResponse;
-    // Warning: (ae-forgotten-export) The symbol "LegacyApiCallerResponse" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    search: (searchRequest: SearchRequest) => LegacyApiCallerResponse;
 }
 
 // Warning: (ae-missing-release-tag) "MatchAllFilter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
