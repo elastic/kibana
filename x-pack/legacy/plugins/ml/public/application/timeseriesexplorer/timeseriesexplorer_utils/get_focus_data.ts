@@ -13,7 +13,7 @@ import {
 } from '../../../../common/constants/search';
 import { mlTimeSeriesSearchService } from '../timeseries_search_service';
 import { mlResultsService, CriteriaField } from '../../services/results_service';
-import { Job } from '../../jobs/new_job/common/job_creator/configs';
+import { Job } from '../../../../common/types/anomaly_detection_jobs';
 import { MAX_SCHEDULED_EVENTS, TIME_FIELD_NAME } from '../timeseriesexplorer_constants';
 import {
   processDataForFocusAnomalies,

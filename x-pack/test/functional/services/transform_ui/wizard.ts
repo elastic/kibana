@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function TransformWizardProvider({ getService }: FtrProviderContext) {
+  const aceEditor = getService('aceEditor');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
@@ -75,17 +76,17 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail(selector);
     },
 
-    async parseEuiInMemoryTable(tableSubj: string) {
+    async parseEuiDataGrid(tableSubj: string) {
       const table = await testSubjects.find(`~${tableSubj}`);
       const $ = await table.parseDomContent();
       const rows = [];
 
       // For each row, get the content of each cell and
       // add its values as an array to each row.
-      for (const tr of $.findTestSubjects(`~${tableSubj}Row`).toArray()) {
+      for (const tr of $.findTestSubjects(`~dataGridRow`).toArray()) {
         rows.push(
           $(tr)
-            .find('.euiTableCellContent')
+            .find('.euiDataGridRowCell__truncate')
             .toArray()
             .map(cell =>
               $(cell)
@@ -98,14 +99,14 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       return rows;
     },
 
-    async assertEuiInMemoryTableColumnValues(
+    async assertEuiDataGridColumnValues(
       tableSubj: string,
       column: number,
       expectedColumnValues: string[]
     ) {
       await retry.tryForTime(2000, async () => {
         // get a 2D array of rows and cell values
-        const rows = await this.parseEuiInMemoryTable(tableSubj);
+        const rows = await this.parseEuiDataGrid(tableSubj);
 
         // reduce the rows data to an array of unique values in the specified column
         const uniqueColumnValues = rows
@@ -118,7 +119,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
         // check if the returned unique value matches the supplied filter value
         expect(uniqueColumnValues).to.eql(
           expectedColumnValues,
-          `Unique EuiInMemoryTable column values should be '${expectedColumnValues.join()}' (got ${uniqueColumnValues.join()})`
+          `Unique EuiDataGrid column values should be '${expectedColumnValues.join()}' (got ${uniqueColumnValues.join()})`
         );
       });
     },
@@ -126,28 +127,28 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     async assertSourceIndexPreview(columns: number, rows: number) {
       await retry.tryForTime(2000, async () => {
         // get a 2D array of rows and cell values
-        const rowsData = await this.parseEuiInMemoryTable('transformSourceIndexPreview');
+        const rowsData = await this.parseEuiDataGrid('transformSourceIndexPreview');
 
         expect(rowsData).to.length(
           rows,
-          `EuiInMemoryTable rows should be ${rows} (got ${rowsData.length})`
+          `EuiDataGrid rows should be ${rows} (got ${rowsData.length})`
         );
 
         rowsData.map((r, i) =>
           expect(r).to.length(
             columns,
-            `EuiInMemoryTable row #${i + 1} column count should be ${columns} (got ${r.length})`
+            `EuiDataGrid row #${i + 1} column count should be ${columns} (got ${r.length})`
           )
         );
       });
     },
 
     async assertSourceIndexPreviewColumnValues(column: number, values: string[]) {
-      await this.assertEuiInMemoryTableColumnValues('transformSourceIndexPreview', column, values);
+      await this.assertEuiDataGridColumnValues('transformSourceIndexPreview', column, values);
     },
 
     async assertPivotPreviewColumnValues(column: number, values: string[]) {
-      await this.assertEuiInMemoryTableColumnValues('transformPivotPreview', column, values);
+      await this.assertEuiDataGridColumnValues('transformPivotPreview', column, values);
     },
 
     async assertPivotPreviewLoaded() {
@@ -273,6 +274,12 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await this.assertAggregationEntryExists(index, expectedLabel);
     },
 
+    async assertAdvancedPivotEditorContent(expectedValue: Record<string, any>) {
+      const advancedEditorString = await aceEditor.getValue('transformAdvancedPivotEditor');
+      const advancedEditorValue = JSON.parse(advancedEditorString);
+      expect(advancedEditorValue).to.eql(expectedValue);
+    },
+
     async assertAdvancedPivotEditorSwitchExists() {
       await testSubjects.existOrFail(`transformAdvancedPivotEditorSwitch`, { allowHidden: true });
     },
@@ -285,6 +292,13 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
         expectedCheckState,
         `Advanced pivot editor switch check state should be ${expectedCheckState} (got ${actualCheckState})`
       );
+    },
+
+    async enabledAdvancedPivotEditor() {
+      await this.assertAdvancedPivotEditorSwitchCheckState(false);
+      await testSubjects.click('transformAdvancedPivotEditorSwitch');
+      await this.assertAdvancedPivotEditorSwitchCheckState(true);
+      await testSubjects.existOrFail('transformAdvancedPivotEditor');
     },
 
     async assertTransformIdInputExists() {
@@ -431,21 +445,25 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     },
 
     async assertStartButtonExists() {
-      await testSubjects.existOrFail('transformWizardStartButton');
-      expect(await testSubjects.isDisplayed('transformWizardStartButton')).to.eql(
-        true,
-        `Expected 'Start' button to be displayed`
-      );
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail('transformWizardStartButton');
+        expect(await testSubjects.isDisplayed('transformWizardStartButton')).to.eql(
+          true,
+          `Expected 'Start' button to be displayed`
+        );
+      });
     },
 
     async assertStartButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('transformWizardStartButton');
-      expect(isEnabled).to.eql(
-        expectedValue,
-        `Expected 'Start' button to be '${expectedValue ? 'enabled' : 'disabled'}' (got ${
-          isEnabled ? 'enabled' : 'disabled'
-        }')`
-      );
+      await retry.tryForTime(5000, async () => {
+        const isEnabled = await testSubjects.isEnabled('transformWizardStartButton');
+        expect(isEnabled).to.eql(
+          expectedValue,
+          `Expected 'Start' button to be '${expectedValue ? 'enabled' : 'disabled'}' (got ${
+            isEnabled ? 'enabled' : 'disabled'
+          }')`
+        );
+      });
     },
 
     async assertManagementCardExists() {
@@ -478,17 +496,21 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
 
     async createTransform() {
       await testSubjects.click('transformWizardCreateButton');
-      await this.assertStartButtonExists();
-      await this.assertStartButtonEnabled(true);
-      await this.assertManagementCardExists();
-      await this.assertCreateButtonEnabled(false);
+      await retry.tryForTime(5000, async () => {
+        await this.assertStartButtonExists();
+        await this.assertStartButtonEnabled(true);
+        await this.assertManagementCardExists();
+        await this.assertCreateButtonEnabled(false);
+      });
     },
 
     async startTransform() {
       await testSubjects.click('transformWizardStartButton');
-      await this.assertDiscoverCardExists();
-      await this.assertStartButtonEnabled(false);
-      await this.assertProgressbarExists();
+      await retry.tryForTime(5000, async () => {
+        await this.assertDiscoverCardExists();
+        await this.assertStartButtonEnabled(false);
+        await this.assertProgressbarExists();
+      });
     },
   };
 }

@@ -29,6 +29,8 @@ jest.mock('react', () => {
   return { ...r, memo: (x: any) => x };
 });
 
+jest.mock('../../../../../../../shared_imports');
+
 describe('Data Frame Analytics: <CreateAnalyticsButton />', () => {
   test('Minimal initialization', () => {
     const { getLastHookValue } = getMountedHook();

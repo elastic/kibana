@@ -4,18 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
+import { requestContextMock } from './request_context';
+import { serverMock } from './server';
+import { requestMock } from './request';
+import { responseMock } from './response_factory';
 
-export { clientsServiceMock } from './clients_service_mock';
-
-export const createMockServer = () => {
-  const server = new Hapi.Server({ port: 0 });
-
-  return {
-    route: server.route.bind(server),
-    inject: server.inject.bind(server),
-  };
-};
+export { requestMock, requestContextMock, responseMock, serverMock };
 
 export const createMockConfig = () => () => ({
   get: jest.fn(),
