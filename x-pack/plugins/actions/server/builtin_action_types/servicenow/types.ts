@@ -23,9 +23,7 @@ export type ConfigType = TypeOf<typeof ConfigSchema>;
 // secrets definition
 export type SecretsType = TypeOf<typeof SecretsSchema>;
 
-export type ParamsType = TypeOf<typeof ParamsSchema> & {
-  [key: string]: any;
-};
+export type ParamsType = TypeOf<typeof ParamsSchema>;
 
 export type CasesConfigurationType = TypeOf<typeof CasesConfigurationSchema>;
 export type MapsType = TypeOf<typeof MapsSchema>;
