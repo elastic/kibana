@@ -24,11 +24,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import styled from 'styled-components';
+import { useHistory } from 'react-router-dom';
 import { AgentConfig } from '../../../types';
 import {
   AGENT_CONFIG_DETAILS_PATH,
   FLEET_AGENTS_PATH,
   AGENT_CONFIG_SAVED_OBJECT_TYPE,
+  AGENT_CONFIG_PATH,
 } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
 import {
@@ -159,16 +161,30 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
     fleet: { enabled: isFleetEnabled },
   } = useConfig();
 
-  // Create agent config flyout state
-  const [isCreateAgentConfigFlyoutOpen, setIsCreateAgentConfigFlyoutOpen] = useState<boolean>(
-    false
-  );
+  // Base URL paths
+  const DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
+  const FLEET_URI = useLink(FLEET_AGENTS_PATH);
 
   // Table and search states
   const [search, setSearch] = useState<string>('');
   const { pagination, pageSizeOptions, setPagination } = usePagination();
   const [selectedAgentConfigs, setSelectedAgentConfigs] = useState<AgentConfig[]>([]);
-  const urlParams = useUrlParams();
+  const history = useHistory();
+  const { urlParams, toUrlParams } = useUrlParams();
+  const isCreateAgentConfigFlyoutOpen = 'create' in urlParams;
+  const setIsCreateAgentConfigFlyoutOpen = useCallback(
+    (isOpen: boolean) => {
+      if (isOpen !== isCreateAgentConfigFlyoutOpen) {
+        if (isOpen) {
+          history.push(`${AGENT_CONFIG_PATH}?${toUrlParams({ ...urlParams, create: null })}`);
+        } else {
+          const { create, ...params } = urlParams;
+          history.push(`${AGENT_CONFIG_PATH}?${toUrlParams(params)}`);
+        }
+      }
+    },
+    [history, isCreateAgentConfigFlyoutOpen, toUrlParams, urlParams]
+  );
 
   // Fetch agent configs
   const { isLoading, data: agentConfigData, sendRequest } = useGetAgentConfigs({
@@ -177,20 +193,15 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
     kuery: search,
   });
 
-  // Base path for config details
-  const DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
-  const FLEET_URI = useLink(FLEET_AGENTS_PATH);
-
+  // If `kuery` url param changes trigger a search
   useEffect(() => {
-    if ('kuery' in urlParams) {
-      const kuery = Array.isArray(urlParams.kuery)
-        ? urlParams.kuery[urlParams.kuery.length - 1]
-        : urlParams.kuery;
-      if (kuery) {
-        setSearch(kuery);
-      }
+    const kuery = Array.isArray(urlParams.kuery)
+      ? urlParams.kuery[urlParams.kuery.length - 1]
+      : urlParams.kuery ?? '';
+    if (kuery !== search) {
+      setSearch(kuery);
     }
-  }, [urlParams]);
+  }, [search, urlParams]);
 
   // Some configs retrieved, set up table props
   const columns = useMemo(() => {
@@ -315,7 +326,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         />
       </EuiButton>
     ),
-    []
+    [setIsCreateAgentConfigFlyoutOpen]
   );
 
   const emptyPrompt = useMemo(
