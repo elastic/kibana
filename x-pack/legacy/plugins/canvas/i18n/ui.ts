@@ -335,7 +335,10 @@ export const DataSourceStrings = {
   ESDocs: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocsTitle', {
-        defaultMessage: 'Elasticsearch documents',
+        defaultMessage: '{elasticsearch} documents',
+        values: {
+          elasticsearch: ELASTICSEARCH,
+        },
       }),
     getHelp: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocsLabel', {
@@ -348,7 +351,10 @@ export const DataSourceStrings = {
     getWarning: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.warningDescription', {
         defaultMessage: `
-        The Elasticsearch basic data source only retrieves non-aggregated data. Use with low volume data sets`,
+        The {elasticsearch} basic data source only retrieves non-aggregated data. Use with low volume data sets`,
+        values: {
+          elasticsearch: ELASTICSEARCH,
+        },
       }),
     getIndexTitle: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.indexTitle', {
@@ -364,7 +370,7 @@ export const DataSourceStrings = {
       }),
     getQueryLabel: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.queryLabel', {
-        defaultMessage: 'Lucene query string syntax',
+        defaultMessage: '{lucene} query string syntax',
         values: {
           lucene: LUCENE,
         },
@@ -418,7 +424,7 @@ export const DataSourceStrings = {
       }),
     getHelp: () =>
       i18n.translate('xpack.canvas.uis.dataSources.essqlLabel', {
-        defaultMessage: 'Write an Elasticsearch SQL query to retrieve data',
+        defaultMessage: 'Write an {elasticsearch} {sql} query to retrieve data',
         values: {
           elasticsearch: ELASTICSEARCH,
           sql: SQL,
@@ -430,7 +436,7 @@ export const DataSourceStrings = {
       }),
     getLabelAppend: () =>
       i18n.translate('xpack.canvas.uis.dataSources.essql.queryTitleAppend', {
-        defaultMessage: 'Learn Elasticsearch SQL query syntax',
+        defaultMessage: 'Learn {elasticsearch} {sql} query syntax',
         values: {
           elasticsearchShort: ELASTICSEARCH_SHORT,
           sql: SQL,
@@ -441,7 +447,7 @@ export const DataSourceStrings = {
   Timelion: {
     getAbout: () =>
       i18n.translate('xpack.canvas.uis.dataSources.timelion.aboutDetail', {
-        defaultMessage: 'Use Timelion syntax to retrieve timeseries data',
+        defaultMessage: 'Use {timelion} syntax in {canvas} to retrieve timeseries data',
         values: {
           timelion: TIMELION,
           canvas: CANVAS,
@@ -449,7 +455,7 @@ export const DataSourceStrings = {
       }),
     getHelp: () =>
       i18n.translate('xpack.canvas.uis.dataSources.timelionLabel', {
-        defaultMessage: 'Use Timelion syntax to retrieve timeseries data',
+        defaultMessage: 'Use {timelion} syntax to retrieve timeseries data',
         values: {
           timelion: TIMELION,
         },
