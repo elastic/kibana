@@ -42,6 +42,20 @@ const getCurrentValueFromAggregations = (aggregations: Aggregation) => {
   return value;
 };
 
+const getParsedFilterQuery: (filterQuery: string) => Record<string, any> = filterQuery => {
+  if (!filterQuery) return {};
+  try {
+    return JSON.parse(filterQuery).bool;
+  } catch (e) {
+    return {
+      query_string: {
+        query: filterQuery,
+        analyze_wildcard: true,
+      },
+    };
+  }
+};
+
 const getMetric: (
   services: AlertServices,
   params: MetricExpressionParams,
@@ -97,20 +111,7 @@ const getMetric: (
       }
     : baseAggs;
 
-  const parsedFilterQuery = filterQuery
-    ? (() => {
-        try {
-          return JSON.parse(filterQuery).bool;
-        } catch (e) {
-          return {
-            query_string: {
-              query: filterQuery,
-              analyze_wildcard: true,
-            },
-          };
-        }
-      })()
-    : {};
+  const parsedFilterQuery = getParsedFilterQuery(filterQuery);
 
   const searchBody = {
     query: {
