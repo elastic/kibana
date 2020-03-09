@@ -5,7 +5,6 @@
  */
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, CustomHttpResponseOptions } from 'kibana/server';
-import { EPM_API_ROOT } from '../../../common';
 import {
   GetPackagesRequestSchema,
   GetFileRequestSchema,
@@ -76,12 +75,8 @@ export const getFileHandler: RequestHandler<TypeOf<typeof GetFileRequestSchema.p
   response
 ) => {
   try {
-    // checking for url.path, but maybe should use validated response.params to build the url:
-    // `package/${response.params.pkgkey}/${response.params.filePath}`?
-    if (!request.url.path) throw new Error('path is required');
-    const reqPath = request.url.path.replace(EPM_API_ROOT, '');
-
-    const registryResponse = await getFile(reqPath);
+    const { pkgkey, filePath } = request.params;
+    const registryResponse = await getFile(`/package/${pkgkey}/${filePath}`);
     const contentType = registryResponse.headers.get('Content-Type');
     const customResponseObj: CustomHttpResponseOptions<typeof registryResponse.body> = {
       body: registryResponse.body,
