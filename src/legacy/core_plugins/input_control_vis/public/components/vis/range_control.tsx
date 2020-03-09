@@ -20,7 +20,8 @@
 import _ from 'lodash';
 import React, { PureComponent } from 'react';
 
-import { ValidatedDualRange } from '../../legacy_imports';
+// @ts-ignore
+import { ValidatedDualRange } from '../../../../kibana_react/public/validate_range';
 import { FormRow } from './form_row';
 import { RangeControl as RangeControlClass } from '../../control/range_control_factory';
 

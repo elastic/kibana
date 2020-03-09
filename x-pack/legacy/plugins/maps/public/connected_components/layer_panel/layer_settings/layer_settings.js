@@ -11,7 +11,7 @@ import { EuiTitle, EuiPanel, EuiFormRow, EuiFieldText, EuiSpacer } from '@elasti
 import { ValidatedRange } from '../../../components/validated_range';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ValidatedDualRange } from 'ui/validated_range';
+import { ValidatedDualRange } from '../../../../../../../../src/plugins/kibana_react/public/validated_range';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
 
 export function LayerSettings(props) {
