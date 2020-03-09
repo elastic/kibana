@@ -24,7 +24,6 @@ export class ActionTypeDisabledError extends Error {
   public sendResponse(res: KibanaResponseFactory) {
     switch (this.reason) {
       case 'config':
-        return res.badRequest({ body: { message: this.message } });
       case 'license_unavailable':
       case 'license_invalid':
       case 'license_expired':
