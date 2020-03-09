@@ -103,13 +103,13 @@ describe('config schema', () => {
     expect(() =>
       ConfigSchema.validate({ encryptionKey: 'foo' })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[encryptionKey]: value is [foo] but it must have a minimum length of [32]."`
+      `"[encryptionKey]: value has length [3] but it must have a minimum length of [32]."`
     );
 
     expect(() =>
       ConfigSchema.validate({ encryptionKey: 'foo' }, { dist: true })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[encryptionKey]: value is [foo] but it must have a minimum length of [32]."`
+      `"[encryptionKey]: value has length [3] but it must have a minimum length of [32]."`
     );
   });
 
