@@ -7,10 +7,10 @@
 import { DrilldownsPlugin } from './plugin';
 
 export {
-  DrilldownsSetupContract,
-  DrilldownsSetupDependencies,
-  DrilldownsStartContract,
-  DrilldownsStartDependencies,
+  SetupContract as DrilldownsSetupContract,
+  SetupDependencies as DrilldownsSetupDependencies,
+  StartContract as DrilldownsStartContract,
+  StartDependencies as DrilldownsStartDependencies,
 } from './plugin';
 
 export function plugin() {

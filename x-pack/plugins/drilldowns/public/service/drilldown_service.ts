@@ -5,7 +5,8 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { DrilldownsSetupDependencies } from '../plugin';
+import { AdvancedUiActionsSetup, ActionFactory } from '../../../advanced_ui_actions/public';
+
 // TODO: MOCK DATA
 import {
   dashboardDrilldownActionFactory,
@@ -13,18 +14,31 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../advanced_ui_actions/public/components/action_wizard/test_data';
 
-export class DrilldownService {
-  bootstrap(core: CoreSetup, { uiActions, advancedUiActions }: DrilldownsSetupDependencies) {
-    // TODO: mocks
-    advancedUiActions.actionFactory.register(dashboardDrilldownActionFactory);
-    advancedUiActions.actionFactory.register(urlDrilldownActionFactory);
-  }
+export interface DrilldownServiceSetupDeps {
+  advancedUiActions: AdvancedUiActionsSetup;
+}
 
+export interface DrilldownServiceSetupContract {
   /**
-   * Convenience method to register a drilldown. (It should set-up all the
-   * necessary triggers and actions.)
+   * Convenience method to register a drilldown.
    */
-  registerDrilldown = (): void => {
-    throw new Error('not implemented');
-  };
+  registerDrilldown: (drilldownFactory: ActionFactory<any>) => void;
+}
+
+export class DrilldownService {
+  setup(
+    core: CoreSetup,
+    { advancedUiActions }: DrilldownServiceSetupDeps
+  ): DrilldownServiceSetupContract {
+    const registerDrilldown: DrilldownServiceSetupContract['registerDrilldown'] = drilldownFactory => {
+      advancedUiActions.actionFactory.register(drilldownFactory);
+    };
+
+    registerDrilldown(dashboardDrilldownActionFactory);
+    registerDrilldown(urlDrilldownActionFactory);
+
+    return {
+      registerDrilldown,
+    };
+  }
 }

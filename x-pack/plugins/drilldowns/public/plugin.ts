@@ -6,38 +6,35 @@
 
 import { CoreStart, CoreSetup, Plugin } from 'src/core/public';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
-import { DrilldownService } from './service';
+import { AdvancedUiActionsSetup, AdvancedUiActionsStart } from '../../advanced_ui_actions/public';
+import { DrilldownService, DrilldownServiceSetupContract } from './service';
 
-export interface DrilldownsSetupDependencies {
+export interface SetupDependencies {
   uiActions: UiActionsSetup;
   advancedUiActions: AdvancedUiActionsSetup;
 }
 
-export interface DrilldownsStartDependencies {
+export interface StartDependencies {
   uiActions: UiActionsStart;
   advancedUiActions: AdvancedUiActionsStart;
 }
 
-export type DrilldownsSetupContract = Pick<DrilldownService, 'registerDrilldown'>;
+export type SetupContract = DrilldownServiceSetupContract;
 
 // eslint-disable-next-line
-export interface DrilldownsStartContract {}
+export interface StartContract {}
 
 export class DrilldownsPlugin
-  implements
-    Plugin<
-      DrilldownsSetupContract,
-      DrilldownsStartContract,
-      DrilldownsSetupDependencies,
-      DrilldownsStartDependencies
-    > {
+  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
   private readonly service = new DrilldownService();
 
-  public setup(core: CoreSetup, plugins: DrilldownsSetupDependencies): DrilldownsSetupContract {
-    return this.service;
+  public setup(core: CoreSetup, plugins: SetupDependencies): SetupContract {
+    const setup = this.service.setup(core, plugins);
+
+    return setup;
   }
 
-  public start(core: CoreStart, plugins: DrilldownsStartDependencies): DrilldownsStartContract {
+  public start(core: CoreStart, plugins: StartDependencies): StartContract {
     return {};
   }
 
