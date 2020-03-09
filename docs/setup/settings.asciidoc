@@ -175,8 +175,9 @@ object points to an external vector file that contains a geojson
 FeatureCollection. The file must use the
 https://en.wikipedia.org/wiki/World_Geodetic_System[WGS84 coordinate reference system]
 and only include polygons. If the file is hosted on a separate domain from
-Kibana, the server needs to be CORS-enabled so Kibana can download the file. The
-following example shows a valid regionmap configuration.
+Kibana, the server needs to be CORS-enabled so Kibana can download the file.
+[[region-map-configuration-example]]
+The following example shows a valid region map configuration.
 +
 --
     map.regionmap:
@@ -202,7 +203,7 @@ References the originating source of the geojson file. Supported on {ece}.
 
 [[regionmap-fields]]`map.regionmap.layers[].fields[]:`:: Mandatory. Each layer
 can contain multiple fields to indicate what properties from the geojson
-features you wish to expose. The example above shows how to define multiple
+features you wish to expose. This <<region-map-configuration-example,region map example>> shows how to define multiple
 properties. Supported on {ece}.
 
 [[regionmap-field-description]]`map.regionmap.layers[].fields[].description:`::

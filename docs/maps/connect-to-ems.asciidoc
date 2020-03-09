@@ -9,7 +9,6 @@ If you are using Kibana's out-of-the-box settings, the **Maps** application is a
 The **Maps** application makes requests directly from the browser to EMS.
 To proxy EMS requests through the Kibana server, set `map.proxyElasticMapsServiceInMaps` to `true` in your <<settings, kibana.yml>> file.
 
-
 [float]
 === Disabling Elastic Maps Service
 

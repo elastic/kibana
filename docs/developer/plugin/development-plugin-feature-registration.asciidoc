@@ -175,7 +175,7 @@ init(server) {
 }
 -----------
 
-Unlike the Canvas example above, Dev Tools does not require access to any saved objects to function. Dev Tools does specify an API endpoint, however. When this is configured, the Security plugin will automatically authorize access to any server API route that is tagged with `access:console`, similar to the following:
+Unlike the Canvas example, Dev Tools does not require access to any saved objects to function. Dev Tools does specify an API endpoint, however. When this is configured, the Security plugin will automatically authorize access to any server API route that is tagged with `access:console`, similar to the following:
 
 ["source","javascript"]
 -----------

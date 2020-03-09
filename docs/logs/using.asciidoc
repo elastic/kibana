@@ -41,7 +41,6 @@ To quickly jump to a nearby point in time, click on the timeline to the right.
 [role="screenshot"]
 image::logs/images/logs-usage-timeline.png[Logs timeline]
 
-
 [float]
 [[logs-customize]]
 === Customize your view
@@ -49,7 +48,7 @@ Use *Customize* to adjust your console view and to set the time scale of the log
 
 * *Text size.*  Select `Small`, `Medium`, or `Large`.
 * *Wrap long lines.* Enable or disable line wrap.
-* *Minimap Scale.* Set the scale to 'year', 'month', 'week', 'day', 'hour', or 'minute'. 
+* *Minimap Scale.* Set the scale to 'year', 'month', 'week', 'day', 'hour', or 'minute'.
 
 [role="screenshot"]
 image::logs/images/logs-usage-customize.png[Logs view customization popover]
@@ -57,7 +56,7 @@ image::logs/images/logs-usage-customize.png[Logs view customization popover]
 [float]
 [[logs-stream]]
 === Stream or pause logs
-You can stream data for live log tailing, or pause streaming to focus on historical log data. 
+You can stream data for live log tailing, or pause streaming to focus on historical log data.
 
 [role="screenshot"]
 image::logs/images/logs-usage-start-streaming.png[Logs start streaming]
@@ -65,7 +64,7 @@ image::logs/images/logs-usage-start-streaming.png[Logs start streaming]
 [role="screenshot"]
 image::logs/images/logs-usage-stop-streaming.png[Logs stop streaming]
 
-When you are streaming logs, the most recent log appears at the bottom on the console. 
+When you are streaming logs, the most recent log appears at the bottom on the console.
 
 [role="screenshot"]
 image::logs/images/logs-usage-streaming-indicator.png[Logs streaming indicator]
