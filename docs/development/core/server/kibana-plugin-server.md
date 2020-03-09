@@ -53,7 +53,10 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AssistanceAPIResponse](./kibana-plugin-server.assistanceapiresponse.md) |  |
 |  [AssistantAPIClientParams](./kibana-plugin-server.assistantapiclientparams.md) |  |
 |  [Authenticated](./kibana-plugin-server.authenticated.md) |  |
-|  [AuthResultParams](./kibana-plugin-server.authresultparams.md) | Result of an incoming request authentication. |
+|  [AuthNotHandled](./kibana-plugin-server.authnothandled.md) |  |
+|  [AuthRedirected](./kibana-plugin-server.authredirected.md) |  |
+|  [AuthRedirectedParams](./kibana-plugin-server.authredirectedparams.md) | Result of auth redirection. |
+|  [AuthResultParams](./kibana-plugin-server.authresultparams.md) | Result of successful authentication. |
 |  [AuthToolkit](./kibana-plugin-server.authtoolkit.md) | A tool set defining an outcome of Auth interceptor for incoming request. |
 |  [CallAPIOptions](./kibana-plugin-server.callapioptions.md) | The set of options that defines how API call should be made and result be processed. |
 |  [Capabilities](./kibana-plugin-server.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |

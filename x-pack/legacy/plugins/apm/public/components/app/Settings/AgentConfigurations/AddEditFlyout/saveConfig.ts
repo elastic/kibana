@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
-import { APMClient } from '../../../../../services/rest/createCallApmApi';
+import { callApmApi } from '../../../../../services/rest/createCallApmApi';
 import { isRumAgentName } from '../../../../../../../../../plugins/apm/common/agent_name';
 import {
   getOptionLabel,
@@ -21,7 +21,6 @@ interface Settings {
 }
 
 export async function saveConfig({
-  callApmApi,
   serviceName,
   environment,
   sampleRate,
@@ -32,7 +31,6 @@ export async function saveConfig({
   toasts,
   trackApmEvent
 }: {
-  callApmApi: APMClient;
   serviceName: string;
   environment: string;
   sampleRate: string;
