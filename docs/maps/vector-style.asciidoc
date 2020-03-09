@@ -51,7 +51,7 @@ The smallest feature has a symbol radius of 1, and the largest feature has a sym
 The sample web logs `bytes` field ranges from 0 to 18,000.
 The `bytes` property value for each feature will be fit on a linear scale from the range 0 to 18,000 to the style range 1 to 24.
 
-To ensure symbols are consistent as you pan, zoom, and filter the map, quantitative data driven styling uses {ref}/search-aggregations-metrics-extendedstats-aggregation.html[extended_stats aggregation] to retrieve statistical metadata. Extended_stats is not available for numeric property values from <<maps-aggregations, metric aggregations>> count, sum, and unique count.
+To ensure symbols are consistent as you pan, zoom, and filter the map, quantitative data driven styling uses {ref}/search-aggregations-metrics-extendedstats-aggregation.html[extended_stats aggregation] to retrieve statistical metadata. Extended_stats is not available for numeric property values from the <<maps-aggregations, metric aggregations>> count, sum, and unique count.
 
 Click the gear icon image:maps/images/gear_icon.png[] to configure extended_stats. Set *Sigma* to a smaller value to minimize outliers by moving the range minimum and maximum closer to the average. Clear the *Calculate range from indices* checkbox to turn off the extended_stats aggregation request. The gear icon is not available for numeric property values from <<maps-aggregations, metric aggregations>> count, sum, and unique count.
 
