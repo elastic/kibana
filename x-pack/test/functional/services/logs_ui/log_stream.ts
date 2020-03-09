@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RisonValue } from 'rison-node';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { TabsParams } from '../../page_objects/infra_logs_page';
 
 export function LogStreamPageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['infraLogs']);
@@ -14,7 +14,7 @@ export function LogStreamPageProvider({ getPageObjects, getService }: FtrProvide
   const testSubjects = getService('testSubjects');
 
   return {
-    async navigateTo(params?: Record<string, RisonValue>) {
+    async navigateTo(params?: TabsParams['stream']) {
       pageObjects.infraLogs.navigateToTab('stream', params);
     },
 

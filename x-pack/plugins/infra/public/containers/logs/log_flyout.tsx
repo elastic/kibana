@@ -19,7 +19,7 @@ export enum FlyoutVisibility {
   visible = 'visible',
 }
 
-interface FlyoutOptionsUrlState {
+export interface FlyoutOptionsUrlState {
   flyoutId?: string | null;
   flyoutVisibility?: string | null;
   surroundingLogsId?: string | null;

@@ -8,6 +8,18 @@
 // import moment from 'moment';
 import { encode, RisonValue } from 'rison-node';
 import { FtrProviderContext } from '../ftr_provider_context';
+import { LogPositionUrlState } from '../../../../x-pack/plugins/infra/public/containers/logs/log_position/with_log_position_url_state';
+import { FlyoutOptionsUrlState } from '../../../../x-pack/plugins/infra/public/containers/logs/log_flyout';
+
+export interface TabsParams {
+  stream: {
+    logPosition?: Partial<LogPositionUrlState>;
+    flyoutOptions?: Partial<FlyoutOptionsUrlState>;
+  };
+  settings: never;
+  'log-categories': any;
+  'log-rate': any;
+}
 
 export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -18,15 +30,20 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
       await pageObjects.common.navigateToApp('infraLogs');
     },
 
-    async navigateToTab(logsUiTab: LogsUiTab, params?: Record<string, RisonValue>) {
+    async navigateToTab<T extends LogsUiTab>(logsUiTab: T, params?: TabsParams[T]) {
       let queryString = '';
       if (params) {
-        queryString = Object.keys(params).reduce((qs, key, idx) => {
-          qs += (idx > 0 ? '&' : '') + `${key}=${encode(params[key])}`;
+        const qsPairs = [];
 
-          return qs;
-        }, '?');
+        for (const key in params) {
+          if (params.hasOwnProperty(key)) {
+            const value = (params[key] as unknown) as RisonValue;
+            qsPairs.push(`${key}=${encode(value)}`);
+          }
+        }
+        queryString = '?' + qsPairs.join('&');
       }
+
       await pageObjects.common.navigateToUrlWithBrowserHistory(
         'infraLogs',
         `/${logsUiTab}`,
