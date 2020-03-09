@@ -17,6 +17,7 @@ import {
 import { CURRENT_MAJOR_VERSION } from '../../../common/version';
 import { apmReindexScript, isLegacyApmIndex } from '../apm';
 import apmMappings from '../apm/mapping.json';
+
 import {
   generateNewIndexName,
   getReindexWarnings,
@@ -55,7 +56,7 @@ export interface ReindexService {
   /**
    * Creates a new reindex operation for a given index.
    * @param indexName
-   * @param opts
+   * @param opts Additional options when creating a new reindex operation
    */
   createReindexOperation(indexName: string, opts?: ReindexOptions): Promise<ReindexSavedObject>;
 
@@ -319,7 +320,11 @@ export const reindexServiceFactory = (
    * @param reindexOp
    */
   const startReindexing = async (reindexOp: ReindexSavedObject) => {
-    const { indexName } = reindexOp.attributes;
+    const { indexName, reindexOptions } = reindexOp.attributes;
+
+    if (reindexOptions?.openAndClose === true) {
+      await callAsUser('indices.open', { index: indexName });
+    }
 
     const reindexBody = {
       source: { index: indexName },
@@ -414,7 +419,7 @@ export const reindexServiceFactory = (
    * @param reindexOp
    */
   const switchAlias = async (reindexOp: ReindexSavedObject) => {
-    const { indexName, newIndexName } = reindexOp.attributes;
+    const { indexName, newIndexName, reindexOptions } = reindexOp.attributes;
 
     const existingAliases = (
       await callAsUser('indices.getAlias', {
@@ -438,6 +443,10 @@ export const reindexServiceFactory = (
 
     if (!aliasResponse.acknowledged) {
       throw error.cannotCreateIndex(`Index aliases could not be created.`);
+    }
+
+    if (reindexOptions?.openAndClose === true) {
+      await callAsUser('indices.close', { index: indexName });
     }
 
     return actions.updateReindexOp(reindexOp, {
@@ -673,7 +682,7 @@ export const reindexServiceFactory = (
 
         return actions.updateReindexOp(op, {
           status: ReindexStatus.inProgress,
-          reindexOptions: opts,
+          reindexOptions: opts ?? op.attributes.reindexOptions,
         });
       });
     },
