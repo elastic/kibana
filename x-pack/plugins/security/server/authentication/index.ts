@@ -139,10 +139,8 @@ export async function setupAuthentication({
       // authentication (username and password) or arbitrary external page managed by 3rd party
       // Identity Provider for SSO authentication mechanisms. Authentication provider is the one who
       // decides what location user should be redirected to.
-      return response.redirected({
-        headers: {
-          location: authenticationResult.redirectURL!,
-        },
+      return t.redirected({
+        location: authenticationResult.redirectURL!,
       });
     }
 
@@ -165,9 +163,7 @@ export async function setupAuthentication({
     }
 
     authLogger.debug('Could not handle authentication attempt');
-    return response.unauthorized({
-      headers: authenticationResult.authResponseHeaders,
-    });
+    return t.notHandled();
   });
 
   authLogger.debug('Successfully registered core authentication handler.');

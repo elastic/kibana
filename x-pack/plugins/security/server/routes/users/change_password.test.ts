@@ -82,12 +82,12 @@ describe('Change password', () => {
       `"[username]: expected value of type [string] but got [undefined]"`
     );
     expect(() => paramsSchema.validate({ username: '' })).toThrowErrorMatchingInlineSnapshot(
-      `"[username]: value is [] but it must have a minimum length of [1]."`
+      `"[username]: value has length [0] but it must have a minimum length of [1]."`
     );
     expect(() =>
       paramsSchema.validate({ username: 'a'.repeat(1025) })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[username]: value is [aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] but it must have a maximum length of [1024]."`
+      `"[username]: value has length [1025] but it must have a maximum length of [1024]."`
     );
 
     const bodySchema = (routeConfig.validate as any).body as ObjectType;
@@ -95,12 +95,12 @@ describe('Change password', () => {
       `"[newPassword]: expected value of type [string] but got [undefined]"`
     );
     expect(() => bodySchema.validate({ newPassword: '' })).toThrowErrorMatchingInlineSnapshot(
-      `"[newPassword]: value is [] but it must have a minimum length of [1]."`
+      `"[newPassword]: value has length [0] but it must have a minimum length of [1]."`
     );
     expect(() =>
       bodySchema.validate({ newPassword: '123456', password: '' })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[password]: value is [] but it must have a minimum length of [1]."`
+      `"[password]: value has length [0] but it must have a minimum length of [1]."`
     );
   });
 

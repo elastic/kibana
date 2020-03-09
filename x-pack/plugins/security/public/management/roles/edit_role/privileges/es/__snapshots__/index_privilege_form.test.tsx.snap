@@ -26,6 +26,7 @@ exports[`it renders without crashing 1`] = `
             labelType="label"
           >
             <EuiComboBox
+              async={false}
               compressed={false}
               data-test-subj="indicesInput0"
               fullWidth={false}
@@ -56,6 +57,7 @@ exports[`it renders without crashing 1`] = `
             labelType="label"
           >
             <EuiComboBox
+              async={false}
               compressed={false}
               data-test-subj="privilegesInput0"
               fullWidth={false}
