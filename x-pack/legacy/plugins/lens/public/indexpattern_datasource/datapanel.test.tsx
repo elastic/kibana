@@ -462,12 +462,11 @@ describe('IndexPattern Data Panel', () => {
       });
     });
 
-    const waitForNextTick = async () => act(async () => {});
-
     it('shows a loading indicator when loading', async () => {
+      const load = async () => {};
       const inst = mountWithIntl(<IndexPatternDataPanel {...testProps()} />);
       expect(inst.find(EuiProgress).length).toEqual(1);
-      await waitForNextTick();
+      await act(load);
       inst.update();
       expect(inst.find(EuiProgress).length).toEqual(0);
     });
