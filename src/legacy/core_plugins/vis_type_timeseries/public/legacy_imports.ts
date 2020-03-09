@@ -17,8 +17,5 @@
  * under the License.
  */
 
-export { PersistedState } from 'ui/persisted_state';
-// @ts-ignore
-export { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 // @ts-ignore
 export { timezoneProvider } from 'ui/vis/lib/timezone';

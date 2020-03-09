@@ -63,6 +63,10 @@ export default function({ getService, getPageObjects }) {
         await filterBar.addFilter('bytes', 'is', '12345678');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
+        // first round of requests sometimes times out, refresh all visualizations to fetch again
+        await queryBar.clickQuerySubmitButton();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
       });
 
       it('filters on pie charts', async () => {

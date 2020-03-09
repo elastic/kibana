@@ -18,6 +18,7 @@ import {
   getTransientLayerId,
   getOpenTooltips,
   getQuery,
+  getDataRequestDescriptor,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
 import {
@@ -76,7 +77,7 @@ export const HIDE_LAYER_CONTROL = 'HIDE_LAYER_CONTROL';
 export const HIDE_VIEW_CONTROL = 'HIDE_VIEW_CONTROL';
 export const SET_WAITING_FOR_READY_HIDDEN_LAYERS = 'SET_WAITING_FOR_READY_HIDDEN_LAYERS';
 
-function getLayerLoadingCallbacks(dispatch, layerId) {
+function getLayerLoadingCallbacks(dispatch, getState, layerId) {
   return {
     startLoading: (dataId, requestToken, meta) =>
       dispatch(startDataLoad(layerId, dataId, requestToken, meta)),
@@ -86,6 +87,13 @@ function getLayerLoadingCallbacks(dispatch, layerId) {
       dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
     updateSourceData: newData => {
       dispatch(updateSourceDataRequest(layerId, newData));
+    },
+    isRequestStillActive: (dataId, requestToken) => {
+      const dataRequest = getDataRequestDescriptor(getState(), layerId, dataId);
+      if (!dataRequest) {
+        return false;
+      }
+      return dataRequest.dataRequestToken === requestToken;
     },
     registerCancelCallback: (requestToken, callback) =>
       dispatch(registerCancelCallback(requestToken, callback)),
@@ -98,11 +106,11 @@ function getLayerById(layerId, state) {
   });
 }
 
-async function syncDataForAllLayers(getState, dispatch, dataFilters) {
+async function syncDataForAllLayers(dispatch, getState, dataFilters) {
   const state = getState();
   const layerList = getLayerList(state);
   const syncs = layerList.map(layer => {
-    const loadingFunctions = getLayerLoadingCallbacks(dispatch, layer.getId());
+    const loadingFunctions = getLayerLoadingCallbacks(dispatch, getState, layer.getId());
     return layer.syncData({ ...loadingFunctions, dataFilters });
   });
   await Promise.all(syncs);
@@ -412,7 +420,7 @@ export function mapExtentChanged(newMapConstants) {
       },
     });
     const newDataFilters = { ...dataFilters, ...newMapConstants };
-    await syncDataForAllLayers(getState, dispatch, newDataFilters);
+    await syncDataForAllLayers(dispatch, getState, newDataFilters);
   };
 }
 
@@ -653,7 +661,7 @@ export function syncDataForLayer(layerId) {
     const targetLayer = getLayerById(layerId, getState());
     if (targetLayer) {
       const dataFilters = getDataFilters(getState());
-      const loadingFunctions = getLayerLoadingCallbacks(dispatch, layerId);
+      const loadingFunctions = getLayerLoadingCallbacks(dispatch, getState, layerId);
       await targetLayer.syncData({
         ...loadingFunctions,
         dataFilters,
@@ -773,7 +781,7 @@ export function setQuery({ query, timeFilters, filters = [], refresh = false }) 
     });
 
     const dataFilters = getDataFilters(getState());
-    await syncDataForAllLayers(getState, dispatch, dataFilters);
+    await syncDataForAllLayers(dispatch, getState, dataFilters);
   };
 }
 
@@ -792,7 +800,7 @@ export function triggerRefreshTimer() {
     });
 
     const dataFilters = getDataFilters(getState());
-    await syncDataForAllLayers(getState, dispatch, dataFilters);
+    await syncDataForAllLayers(dispatch, getState, dataFilters);
   };
 }
 

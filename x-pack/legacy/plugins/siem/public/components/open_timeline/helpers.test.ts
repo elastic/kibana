@@ -236,7 +236,7 @@ describe('helpers', () => {
         description: '',
         deletedEventIds: [],
         eventIdToNoteIds: {},
-        eventType: 'raw',
+        eventType: 'all',
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -330,7 +330,7 @@ describe('helpers', () => {
         description: '',
         deletedEventIds: [],
         eventIdToNoteIds: {},
-        eventType: 'raw',
+        eventType: 'all',
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -417,7 +417,7 @@ describe('helpers', () => {
         description: '',
         deletedEventIds: [],
         eventIdToNoteIds: {},
-        eventType: 'raw',
+        eventType: 'all',
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -539,7 +539,7 @@ describe('helpers', () => {
         description: '',
         deletedEventIds: [],
         eventIdToNoteIds: {},
-        eventType: 'raw',
+        eventType: 'all',
         filters: [
           {
             $state: {

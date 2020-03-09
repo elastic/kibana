@@ -67,7 +67,7 @@ export interface AppLinkSchema {
   label: string;
 }
 
-export interface SampleDatasetSchema {
+export interface SampleDatasetSchema<T = unknown> {
   id: string;
   name: string;
   description: string;
@@ -83,7 +83,7 @@ export interface SampleDatasetSchema {
 
   // Kibana saved objects (index patter, visualizations, dashboard, ...)
   // Should provide a nice demo of Kibana's functionality with the sample data set
-  savedObjects: SavedObject[];
+  savedObjects: Array<SavedObject<T>>;
   dataIndices: DataIndexSchema[];
   status?: string | undefined;
   statusMsg?: unknown;

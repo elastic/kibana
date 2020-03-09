@@ -23,9 +23,9 @@ interface SavedObjectsManagementTypeDefinition {
   isImportableAndExportable?: boolean;
   defaultSearchField?: string;
   icon?: string;
-  getTitle?: (savedObject: SavedObject) => string;
-  getEditUrl?: (savedObject: SavedObject) => string;
-  getInAppUrl?: (savedObject: SavedObject) => { path: string; uiCapabilitiesPath: string };
+  getTitle?: (savedObject: SavedObject<any>) => string;
+  getEditUrl?: (savedObject: SavedObject<any>) => string;
+  getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
 }
 
 export interface SavedObjectsManagementDefinition {

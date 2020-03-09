@@ -263,6 +263,7 @@ export {
   IFieldSubType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
+  IndexPatternAttributes,
 } from '../common';
 
 /*
@@ -282,8 +283,52 @@ export {
  * Search:
  */
 
-export { IRequestTypesMap, IResponseTypesMap } from './search';
-export * from './search';
+export {
+  ES_SEARCH_STRATEGY,
+  SYNC_SEARCH_STRATEGY,
+  defaultSearchStrategy,
+  esSearchStrategyProvider,
+  getEsPreference,
+  addSearchStrategy,
+  hasSearchStategyForIndexPattern,
+  getSearchErrorType,
+  ISearchContext,
+  TSearchStrategyProvider,
+  ISearchStrategy,
+  ISearch,
+  ISearchOptions,
+  IRequestTypesMap,
+  IResponseTypesMap,
+  ISearchGeneric,
+  IEsSearchResponse,
+  IEsSearchRequest,
+  ISyncSearchRequest,
+  IKibanaSearchResponse,
+  IKibanaSearchRequest,
+  SearchRequest,
+  SearchResponse,
+  SearchError,
+  SearchStrategyProvider,
+  ISearchSource,
+  SearchSource,
+  SearchSourceFields,
+  EsQuerySortValue,
+  SortDirection,
+  FetchOptions,
+} from './search';
+
+/*
+ * UI components
+ */
+
+export {
+  SearchBar,
+  SearchBarProps,
+  StatefulSearchBarProps,
+  FilterBar,
+  QueryStringInput,
+  IndexPatternSelect,
+} from './ui';
 
 /**
  * Types to be shared externally
@@ -293,11 +338,11 @@ export { Filter, Query, RefreshInterval, TimeRange } from '../common';
 
 export {
   createSavedQueryService,
-  syncAppFilters,
-  syncQuery,
+  connectToQueryState,
+  syncQueryStateWithUrl,
+  QueryState,
   getTime,
   getQueryLog,
-  getQueryStateContainer,
   FilterManager,
   SavedQuery,
   SavedQueryService,
@@ -309,7 +354,7 @@ export {
   TimefilterContract,
   TimeHistoryContract,
 } from './query';
-export * from './ui';
+
 export {
   // kbn field types
   castEsToKbnFieldTypeName,

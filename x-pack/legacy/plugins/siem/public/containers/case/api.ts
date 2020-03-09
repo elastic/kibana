@@ -4,14 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  CaseResponse,
+  CasesResponse,
+  CaseRequest,
+  CommentRequest,
+  CommentResponse,
+} from '../../../../../../plugins/case/common/api';
 import { KibanaServices } from '../../lib/kibana';
-import { AllCases, FetchCasesProps, Case, NewCase, SortFieldCase } from './types';
-import { Direction } from '../../graphql/types';
+import { AllCases, Case, Comment, FetchCasesProps, SortFieldCase } from './types';
 import { throwIfNotOk } from '../../hooks/api/api';
 import { CASES_URL } from './constants';
+import {
+  convertToCamelCase,
+  convertAllCasesToCamel,
+  decodeCaseResponse,
+  decodeCasesResponse,
+  decodeCommentResponse,
+} from './utils';
 
-export const getCase = async (caseId: string, includeComments: boolean) => {
-  const response = await KibanaServices.get().http.fetch(`${CASES_URL}/${caseId}`, {
+const CaseSavedObjectType = 'cases';
+
+export const getCase = async (caseId: string, includeComments: boolean = true): Promise<Case> => {
+  const response = await KibanaServices.get().http.fetch<CaseResponse>(`${CASES_URL}/${caseId}`, {
     method: 'GET',
     asResponse: true,
     query: {
@@ -19,55 +34,99 @@ export const getCase = async (caseId: string, includeComments: boolean) => {
     },
   });
   await throwIfNotOk(response.response);
-  return response.body!;
+  return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response.body));
+};
+
+export const getTags = async (): Promise<string[]> => {
+  const response = await KibanaServices.get().http.fetch<string[]>(`${CASES_URL}/tags`, {
+    method: 'GET',
+    asResponse: true,
+  });
+  await throwIfNotOk(response.response);
+  return response.body ?? [];
 };
 
 export const getCases = async ({
   filterOptions = {
     search: '',
+    state: 'open',
     tags: [],
   },
   queryParams = {
     page: 1,
     perPage: 20,
     sortField: SortFieldCase.createdAt,
-    sortOrder: Direction.desc,
+    sortOrder: 'desc',
   },
 }: FetchCasesProps): Promise<AllCases> => {
-  const tags = [...(filterOptions.tags?.map(t => `case-workflow.attributes.tags: ${t}`) ?? [])];
+  const stateFilter = `${CaseSavedObjectType}.attributes.state: ${filterOptions.state}`;
+  const tags = [
+    ...(filterOptions.tags?.reduce(
+      (acc, t) => [...acc, `${CaseSavedObjectType}.attributes.tags: ${t}`],
+      [stateFilter]
+    ) ?? [stateFilter]),
+  ];
   const query = {
     ...queryParams,
-    filter: tags.join(' AND '),
-    search: filterOptions.search,
+    ...(tags.length > 0 ? { filter: tags.join(' AND ') } : {}),
+    ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
   };
-  const response = await KibanaServices.get().http.fetch(`${CASES_URL}`, {
+  const response = await KibanaServices.get().http.fetch<CasesResponse>(`${CASES_URL}/_find`, {
     method: 'GET',
     query,
     asResponse: true,
   });
   await throwIfNotOk(response.response);
-  return response.body!;
+  return convertAllCasesToCamel(decodeCasesResponse(response.body));
 };
 
-export const createCase = async (newCase: NewCase): Promise<Case> => {
-  const response = await KibanaServices.get().http.fetch(`${CASES_URL}`, {
+export const postCase = async (newCase: CaseRequest): Promise<Case> => {
+  const response = await KibanaServices.get().http.fetch<CaseResponse>(`${CASES_URL}`, {
     method: 'POST',
     asResponse: true,
     body: JSON.stringify(newCase),
   });
   await throwIfNotOk(response.response);
-  return response.body!;
+  return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response.body));
 };
 
-export const updateCaseProperty = async (
+export const patchCase = async (
   caseId: string,
-  updatedCase: Partial<Case>
-): Promise<Partial<Case>> => {
-  const response = await KibanaServices.get().http.fetch(`${CASES_URL}/${caseId}`, {
+  updatedCase: Partial<CaseRequest>,
+  version: string
+): Promise<Case> => {
+  const response = await KibanaServices.get().http.fetch(`${CASES_URL}`, {
     method: 'PATCH',
     asResponse: true,
-    body: JSON.stringify(updatedCase),
+    body: JSON.stringify({ ...updatedCase, id: caseId, version }),
   });
   await throwIfNotOk(response.response);
-  return response.body!;
+  return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response.body));
+};
+
+export const postComment = async (newComment: CommentRequest, caseId: string): Promise<Comment> => {
+  const response = await KibanaServices.get().http.fetch<CommentResponse>(
+    `${CASES_URL}/${caseId}/comments`,
+    {
+      method: 'POST',
+      asResponse: true,
+      body: JSON.stringify(newComment),
+    }
+  );
+  await throwIfNotOk(response.response);
+  return convertToCamelCase<CommentResponse, Comment>(decodeCommentResponse(response.body));
+};
+
+export const patchComment = async (
+  commentId: string,
+  commentUpdate: string,
+  version: string
+): Promise<Partial<Comment>> => {
+  const response = await KibanaServices.get().http.fetch<CommentResponse>(`${CASES_URL}/comments`, {
+    method: 'PATCH',
+    asResponse: true,
+    body: JSON.stringify({ comment: commentUpdate, id: commentId, version }),
+  });
+  await throwIfNotOk(response.response);
+  return convertToCamelCase<CommentResponse, Comment>(decodeCommentResponse(response.body));
 };

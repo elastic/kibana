@@ -5,7 +5,7 @@
  */
 
 import sinon from 'sinon';
-import { addStackStats, getAllStats, handleAllStats } from './get_all_stats';
+import { getStackStats, getAllStats, handleAllStats } from './get_all_stats';
 import { ESClusterStats } from './get_es_stats';
 import { KibanaStats } from './get_kibana_stats';
 import { ClustersHighLevelStats } from './get_high_level_stats';
@@ -223,7 +223,8 @@ describe('get_all_stats', () => {
         beats: {},
       });
 
-      expect(clusters).toStrictEqual(expectedClusters);
+      const [a, b, c] = expectedClusters;
+      expect(clusters).toStrictEqual([a, b, { ...c, stack_stats: {} }]);
     });
 
     it('handles no clusters response', () => {
@@ -233,9 +234,8 @@ describe('get_all_stats', () => {
     });
   });
 
-  describe('addStackStats', () => {
+  describe('getStackStats', () => {
     it('searches for clusters', () => {
-      const cluster = { cluster_uuid: 'a' };
       const stats = {
         a: {
           count: 2,
@@ -250,9 +250,7 @@ describe('get_all_stats', () => {
         },
       };
 
-      addStackStats(cluster as ESClusterStats, stats, 'xyz');
-
-      expect((cluster as any).stack_stats.xyz).toStrictEqual(stats.a);
+      expect(getStackStats('a', stats, 'xyz')).toStrictEqual({ xyz: stats.a });
     });
   });
 });

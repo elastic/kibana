@@ -8,10 +8,12 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'endpoint']);
   const testSubjects = getService('testSubjects');
+  const esArchiver = getService('esArchiver');
 
   describe('Endpoint Alert List', function() {
     this.tags(['ciGroup7']);
     before(async () => {
+      await esArchiver.load('endpoint/alerts/api_feature');
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/alerts');
     });
 
@@ -20,6 +22,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     });
     it('includes Alert list data grid', async () => {
       await testSubjects.existOrFail('alertListGrid');
+    });
+
+    after(async () => {
+      await esArchiver.unload('endpoint/alerts/api_feature');
     });
   });
 }

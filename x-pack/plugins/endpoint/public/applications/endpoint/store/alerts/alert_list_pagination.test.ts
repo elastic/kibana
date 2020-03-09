@@ -7,37 +7,47 @@
 import { Store, createStore, applyMiddleware } from 'redux';
 import { History } from 'history';
 import { alertListReducer } from './reducer';
-import { AlertListState } from '../../types';
+import { AlertListState, AlertingIndexUIQueryParams } from '../../types';
 import { alertMiddlewareFactory } from './middleware';
 import { AppAction } from '../action';
 import { coreMock } from 'src/core/public/mocks';
 import { createBrowserHistory } from 'history';
-import {
-  urlFromNewPageSizeParam,
-  paginationDataFromUrl,
-  urlFromNewPageIndexParam,
-} from './selectors';
+import { uiQueryParams } from './selectors';
+import { urlFromQueryParams } from '../../view/alerts/url_from_query_params';
 
 describe('alert list pagination', () => {
   let store: Store<AlertListState, AppAction>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
   let history: History<never>;
+  let queryParams: () => AlertingIndexUIQueryParams;
+  /**
+   * Update the history with a new `AlertingIndexUIQueryParams`
+   */
+  let historyPush: (params: AlertingIndexUIQueryParams) => void;
   beforeEach(() => {
     coreStart = coreMock.createStart();
     history = createBrowserHistory();
+
     const middleware = alertMiddlewareFactory(coreStart);
     store = createStore(alertListReducer, applyMiddleware(middleware));
+
+    history.listen(location => {
+      store.dispatch({ type: 'userChangedUrl', payload: location });
+    });
+
+    queryParams = () => uiQueryParams(store.getState());
+
+    historyPush = (nextQueryParams: AlertingIndexUIQueryParams): void => {
+      return history.push(urlFromQueryParams(nextQueryParams));
+    };
   });
   describe('when the user navigates to the alert list page', () => {
     describe('when a new page size is passed', () => {
       beforeEach(() => {
-        const urlPageSizeSelector = urlFromNewPageSizeParam(store.getState());
-        history.push(urlPageSizeSelector(1));
-        store.dispatch({ type: 'userChangedUrl', payload: history.location });
+        historyPush({ ...queryParams(), page_size: '1' });
       });
       it('should modify the url correctly', () => {
-        const actualPaginationQuery = paginationDataFromUrl(store.getState());
-        expect(actualPaginationQuery).toMatchInlineSnapshot(`
+        expect(queryParams()).toMatchInlineSnapshot(`
           Object {
             "page_size": "1",
           }
@@ -46,13 +56,10 @@ describe('alert list pagination', () => {
 
       describe('and then a new page index is passed', () => {
         beforeEach(() => {
-          const urlPageIndexSelector = urlFromNewPageIndexParam(store.getState());
-          history.push(urlPageIndexSelector(1));
-          store.dispatch({ type: 'userChangedUrl', payload: history.location });
+          historyPush({ ...queryParams(), page_index: '1' });
         });
         it('should modify the url in the correct order', () => {
-          const actualPaginationQuery = paginationDataFromUrl(store.getState());
-          expect(actualPaginationQuery).toMatchInlineSnapshot(`
+          expect(queryParams()).toMatchInlineSnapshot(`
             Object {
               "page_index": "1",
               "page_size": "1",
@@ -64,34 +71,14 @@ describe('alert list pagination', () => {
 
     describe('when a new page index is passed', () => {
       beforeEach(() => {
-        const urlPageIndexSelector = urlFromNewPageIndexParam(store.getState());
-        history.push(urlPageIndexSelector(1));
-        store.dispatch({ type: 'userChangedUrl', payload: history.location });
+        historyPush({ ...queryParams(), page_index: '1' });
       });
       it('should modify the url correctly', () => {
-        const actualPaginationQuery = paginationDataFromUrl(store.getState());
-        expect(actualPaginationQuery).toMatchInlineSnapshot(`
+        expect(queryParams()).toMatchInlineSnapshot(`
           Object {
             "page_index": "1",
           }
         `);
-      });
-
-      describe('and then a new page size is passed', () => {
-        beforeEach(() => {
-          const urlPageSizeSelector = urlFromNewPageSizeParam(store.getState());
-          history.push(urlPageSizeSelector(1));
-          store.dispatch({ type: 'userChangedUrl', payload: history.location });
-        });
-        it('should modify the url correctly and reset index to `0`', () => {
-          const actualPaginationQuery = paginationDataFromUrl(store.getState());
-          expect(actualPaginationQuery).toMatchInlineSnapshot(`
-            Object {
-              "page_index": "0",
-              "page_size": "1",
-            }
-          `);
-        });
       });
     });
   });

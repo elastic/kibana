@@ -28,3 +28,6 @@ export { FieldName } from './components/field_name/field_name';
 export function plugin() {
   return new DiscoverPlugin();
 }
+
+export { createSavedSearchesLoader } from './saved_searches/saved_searches';
+export { SavedSearchLoader, SavedSearch } from './saved_searches/types';

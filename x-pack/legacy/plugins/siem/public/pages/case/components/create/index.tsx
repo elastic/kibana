@@ -3,54 +3,77 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiPanel,
 } from '@elastic/eui';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Redirect } from 'react-router-dom';
-import { Field, Form, getUseField, useForm } from '../../../shared_imports';
-import { NewCase } from '../../../../containers/case/types';
+
+import { CaseRequest } from '../../../../../../../../plugins/case/common/api';
+import { Field, Form, getUseField, useForm, UseField } from '../../../../shared_imports';
 import { usePostCase } from '../../../../containers/case/use_post_case';
 import { schema } from './schema';
 import * as i18n from '../../translations';
 import { SiemPageName } from '../../../home/types';
-import { DescriptionMarkdown } from '../description_md_editor';
+import { MarkdownEditorForm } from '../../../../components/markdown_editor/form';
 
 export const CommonUseField = getUseField({ component: Field });
 
-const TagContainer = styled.div`
-  margin-top: 16px;
+const ContainerBig = styled.div`
+  ${({ theme }) => css`
+    margin-top: ${theme.eui.euiSizeXL};
+  `}
+`;
+
+const Container = styled.div`
+  ${({ theme }) => css`
+    margin-top: ${theme.eui.euiSize};
+  `}
 `;
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
   top: 50%;
   left: 50%;
+  z-index: 99;
 `;
 
+const initialCaseValue: CaseRequest = {
+  description: '',
+  state: 'open',
+  tags: [],
+  title: '',
+};
+
 export const Create = React.memo(() => {
-  const [{ data, isLoading, newCase }, setFormData] = usePostCase();
-  const { form } = useForm({
-    defaultValue: data,
+  const { caseData, isLoading, postCase } = usePostCase();
+  const [isCancel, setIsCancel] = useState(false);
+  const { form } = useForm<CaseRequest>({
+    defaultValue: initialCaseValue,
     options: { stripEmptyFields: false },
     schema,
   });
 
   const onSubmit = useCallback(async () => {
-    const { isValid, data: newData } = await form.submit();
+    const { isValid, data } = await form.submit();
     if (isValid) {
-      setFormData({ ...newData, isNew: true } as NewCase);
+      await postCase(data);
     }
   }, [form]);
 
-  if (newCase && newCase.case_id) {
-    return <Redirect to={`/${SiemPageName.case}/${newCase.case_id}`} />;
+  if (caseData != null && caseData.id) {
+    return <Redirect to={`/${SiemPageName.case}/${caseData.id}`} />;
   }
+
+  if (isCancel) {
+    return <Redirect to={`/${SiemPageName.case}`} />;
+  }
+
   return (
     <EuiPanel>
       {isLoading && <MySpinner size="xl" />}
@@ -62,18 +85,11 @@ export const Create = React.memo(() => {
             'data-test-subj': 'caseTitle',
             euiFieldProps: {
               fullWidth: false,
+              disabled: isLoading,
             },
-            isDisabled: isLoading,
           }}
         />
-        <DescriptionMarkdown
-          descriptionInputHeight={200}
-          formHook={true}
-          initialDescription={data.description}
-          isLoading={isLoading}
-          onChange={description => setFormData({ ...data, description })}
-        />
-        <TagContainer>
+        <Container>
           <CommonUseField
             path="tags"
             componentProps={{
@@ -82,14 +98,24 @@ export const Create = React.memo(() => {
               euiFieldProps: {
                 fullWidth: true,
                 placeholder: '',
+                isDisabled: isLoading,
               },
+            }}
+          />
+        </Container>
+        <ContainerBig>
+          <UseField
+            path="description"
+            component={MarkdownEditorForm}
+            componentProps={{
+              idAria: 'caseDescription',
+              dataTestSubj: 'caseDescription',
               isDisabled: isLoading,
             }}
           />
-        </TagContainer>
+        </ContainerBig>
       </Form>
-      <>
-        <EuiHorizontalRule margin="m" />
+      <Container>
         <EuiFlexGroup
           alignItems="center"
           justifyContent="flexEnd"
@@ -97,12 +123,23 @@ export const Create = React.memo(() => {
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiButton fill isDisabled={isLoading} isLoading={isLoading} onClick={onSubmit}>
-              {i18n.SUBMIT}
+            <EuiButtonEmpty size="s" onClick={() => setIsCancel(true)} iconType="cross">
+              {i18n.CANCEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              iconType="plusInCircle"
+              isDisabled={isLoading}
+              isLoading={isLoading}
+              onClick={onSubmit}
+            >
+              {i18n.CREATE_CASE}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </>
+      </Container>
     </EuiPanel>
   );
 });

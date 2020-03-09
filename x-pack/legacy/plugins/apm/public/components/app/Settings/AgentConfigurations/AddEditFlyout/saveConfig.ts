@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
-import { APMClient } from '../../../../../services/rest/createCallApmApi';
+import { callApmApi } from '../../../../../services/rest/createCallApmApi';
 import { isRumAgentName } from '../../../../../../../../../plugins/apm/common/agent_name';
 import {
   getOptionLabel,
@@ -21,25 +21,23 @@ interface Settings {
 }
 
 export async function saveConfig({
-  callApmApi,
   serviceName,
   environment,
   sampleRate,
   captureBody,
   transactionMaxSpans,
-  configurationId,
   agentName,
+  isExistingConfig,
   toasts,
   trackApmEvent
 }: {
-  callApmApi: APMClient;
   serviceName: string;
   environment: string;
   sampleRate: string;
   captureBody: string;
   transactionMaxSpans: string;
-  configurationId?: string;
   agentName?: string;
+  isExistingConfig: boolean;
   toasts: NotificationsStart['toasts'];
   trackApmEvent: UiTracker;
 }) {
@@ -64,24 +62,14 @@ export async function saveConfig({
       settings
     };
 
-    if (configurationId) {
-      await callApmApi({
-        pathname: '/api/apm/settings/agent-configuration/{configurationId}',
-        method: 'PUT',
-        params: {
-          path: { configurationId },
-          body: configuration
-        }
-      });
-    } else {
-      await callApmApi({
-        pathname: '/api/apm/settings/agent-configuration/new',
-        method: 'POST',
-        params: {
-          body: configuration
-        }
-      });
-    }
+    await callApmApi({
+      pathname: '/api/apm/settings/agent-configuration',
+      method: 'PUT',
+      params: {
+        query: { overwrite: isExistingConfig },
+        body: configuration
+      }
+    });
 
     toasts.addSuccess({
       title: i18n.translate(

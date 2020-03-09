@@ -30,13 +30,12 @@ import {
   IndexPatternsContract,
   DataPublicPluginStart,
 } from 'src/plugins/data/public';
-import { createSavedSearchesLoader } from './saved_searches';
+
 import { DiscoverStartPlugins } from './plugin';
 import { SharePluginStart } from '../../../../../plugins/share/public';
-import { SavedSearch } from './np_ready/types';
 import { ChartsPluginStart } from '../../../../../plugins/charts/public';
 import { VisualizationsStart } from '../../../visualizations/public';
-import { DocViewerComponent } from '../../../../../plugins/discover/public';
+import { createSavedSearchesLoader, SavedSearch } from '../../../../../plugins/discover/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;

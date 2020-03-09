@@ -16,6 +16,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
         Object {
           "field": "job_ids_string",
           "name": "Jobs",
+          "render": [Function],
           "sortable": true,
           "truncateText": true,
         },

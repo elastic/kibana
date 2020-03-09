@@ -152,11 +152,7 @@ export default class BaseOptimizer {
 
   getThreadLoaderPoolConfig() {
     // Calculate the node options from the NODE_OPTIONS env var
-    const parsedNodeOptions = process.env.NODE_OPTIONS
-      ? // thread-loader could not receive empty string as options
-        // or it would break that's why we need to filter here
-        process.env.NODE_OPTIONS.split(/\s/).filter(opt => !!opt)
-      : [];
+    const parsedNodeOptions = process.env.NODE_OPTIONS ? process.env.NODE_OPTIONS.split(/\s/) : [];
 
     return {
       name: 'optimizer-thread-loader-main-pool',

@@ -15,6 +15,11 @@ export const NewCommentSchema = schema.object({
   comment: schema.string(),
 });
 
+export const UpdateCommentArguments = schema.object({
+  comment: schema.string(),
+  version: schema.string(),
+});
+
 export const CommentSchema = schema.object({
   comment: schema.string(),
   created_at: schema.string(),
@@ -39,6 +44,11 @@ export const UpdatedCaseSchema = schema.object({
   state: schema.maybe(schema.oneOf([schema.literal('open'), schema.literal('closed')])),
   tags: schema.maybe(schema.arrayOf(schema.string())),
   title: schema.maybe(schema.string()),
+});
+
+export const UpdateCaseArguments = schema.object({
+  case: UpdatedCaseSchema,
+  version: schema.string(),
 });
 
 export const SavedObjectsFindOptionsSchema = schema.object({

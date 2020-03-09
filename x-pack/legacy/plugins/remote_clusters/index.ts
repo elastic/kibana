@@ -5,6 +5,8 @@
  */
 
 import { resolve } from 'path';
+import { Legacy } from 'kibana';
+
 import { PLUGIN } from './common';
 
 export function remoteClusters(kibana: any) {
@@ -28,7 +30,7 @@ export function remoteClusters(kibana: any) {
         enabled: Joi.boolean().default(true),
       }).default();
     },
-    isEnabled(config: any) {
+    isEnabled(config: Legacy.KibanaConfig) {
       return (
         config.get('xpack.remote_clusters.enabled') && config.get('xpack.index_management.enabled')
       );

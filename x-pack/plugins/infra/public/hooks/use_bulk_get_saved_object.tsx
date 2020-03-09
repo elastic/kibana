@@ -5,12 +5,13 @@
  */
 
 import { useState, useCallback } from 'react';
-import { SavedObjectAttributes, SavedObjectsBatchResponse } from 'src/core/public';
+import { SavedObjectsBatchResponse } from 'src/core/public';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 export const useBulkGetSavedObject = (type: string) => {
   const kibana = useKibana();
-  const [data, setData] = useState<SavedObjectsBatchResponse<SavedObjectAttributes> | null>(null);
+  // TODO: define saved object type
+  const [data, setData] = useState<SavedObjectsBatchResponse<any> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 

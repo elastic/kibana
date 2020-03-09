@@ -12,7 +12,7 @@ Returns an array of objects by id
 bulkGet: (objects?: {
         id: string;
         type: string;
-    }[]) => Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
+    }[]) => Promise<SavedObjectsBatchResponse<unknown>>;
 ```
 
 ## Example

@@ -19,6 +19,8 @@
 
 import { Plugin } from 'src/core/public';
 
+import './index.scss';
+
 export class SavedObjectsPublicPlugin implements Plugin {
   public setup() {}
   public start() {}

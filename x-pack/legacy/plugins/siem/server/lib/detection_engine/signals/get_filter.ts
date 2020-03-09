@@ -51,6 +51,15 @@ interface GetFilterArgs {
   index: string[] | undefined | null;
 }
 
+interface QueryAttributes {
+  // NOTE: doesn't match Query interface
+  query: {
+    query: string;
+    language: string;
+  };
+  filters: PartialFilter[];
+}
+
 export const getFilter = async ({
   filters,
   index,
@@ -72,7 +81,10 @@ export const getFilter = async ({
       if (savedId != null && index != null) {
         try {
           // try to get the saved object first
-          const savedObject = await services.savedObjectsClient.get('query', savedId);
+          const savedObject = await services.savedObjectsClient.get<QueryAttributes>(
+            'query',
+            savedId
+          );
           return getQueryFilter(
             savedObject.attributes.query.query,
             savedObject.attributes.query.language,

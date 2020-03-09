@@ -78,7 +78,7 @@ export default function({ getService, getPageObjects }) {
     });
 
     it('should show Median', async function() {
-      const medianBytes = ['5,565.263', '50th percentile of bytes'];
+      const medianBytes = ['5,565.263', 'Median bytes'];
       //  For now, only comparing the text label part of the metric
       log.debug('Aggregation = Median');
       await PageObjects.visEditor.selectAggregation('Median', 'metrics');

@@ -19,9 +19,10 @@ import { InfraLoadingPanel } from '../loading';
 import { Map } from '../waffle/map';
 import { ViewSwitcher } from '../waffle/view_switcher';
 import { TableView } from './table';
-import { SnapshotNode } from '../../../common/http_api/snapshot_api';
+import { SnapshotNode, SnapshotCustomMetricInputRT } from '../../../common/http_api/snapshot_api';
 import { convertIntervalToString } from '../../utils/convert_interval_to_string';
 import { InventoryItemType } from '../../../common/inventory_models/types';
+import { createFormatterForMetric } from '../metrics_explorer/helpers/create_formatter_for_metric';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -211,6 +212,10 @@ export const NodesOverview = class extends React.Component<Props, {}> {
   // TODO: Change this to a real implimentation using the tickFormatter from the prototype as an example.
   private formatter = (val: string | number) => {
     const { metric } = this.props.options;
+    if (SnapshotCustomMetricInputRT.is(metric)) {
+      const formatter = createFormatterForMetric(metric);
+      return formatter(val);
+    }
     const metricFormatter = get(METRIC_FORMATTERS, metric.type, METRIC_FORMATTERS.count);
     if (val == null) {
       return '';

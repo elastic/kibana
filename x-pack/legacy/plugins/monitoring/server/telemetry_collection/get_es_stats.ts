@@ -48,11 +48,6 @@ export function fetchElasticsearchStats(
       'hits.hits._source.timestamp',
       'hits.hits._source.cluster_name',
       'hits.hits._source.version',
-      'hits.hits._source.license.status', // license data only includes necessary fields to drive UI
-      'hits.hits._source.license.type',
-      'hits.hits._source.license.issue_date',
-      'hits.hits._source.license.expiry_date',
-      'hits.hits._source.license.expiry_date_in_millis',
       'hits.hits._source.cluster_stats',
       'hits.hits._source.stack_stats',
     ],
@@ -79,7 +74,11 @@ export function fetchElasticsearchStats(
 
 export interface ESClusterStats {
   cluster_uuid: string;
-  type: 'cluster_stats';
+  cluster_name: string;
+  timestamp: string;
+  version: string;
+  cluster_stats: object;
+  stack_stats?: object;
 }
 
 /**

@@ -33,8 +33,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { PRIVACY_STATEMENT_URL } from '../../common/constants';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
-// @ts-ignore
 import { Field } from '../../../advanced_settings/public';
+import { ToastsStart } from '../../../../core/public/';
 import { TelemetryService } from '../services/telemetry_service';
 const SEARCH_TERMS = ['telemetry', 'usage', 'data', 'usage data'];
 
@@ -44,12 +44,14 @@ interface Props {
   showAppliesSettingMessage: boolean;
   enableSaving: boolean;
   query?: any;
+  toasts: ToastsStart;
 }
 
 interface State {
   processing: boolean;
   showExample: boolean;
   queryMatches: boolean | null;
+  enabled: boolean;
 }
 
 export class TelemetryManagementSection extends Component<Props, State> {
@@ -57,6 +59,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
     processing: false,
     showExample: false,
     queryMatches: null,
+    enabled: this.props.telemetryService.getIsOptedIn() || false,
   };
 
   UNSAFE_componentWillReceiveProps(nextProps: Props) {
@@ -79,7 +82,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
 
   render() {
     const { telemetryService } = this.props;
-    const { showExample, queryMatches } = this.state;
+    const { showExample, queryMatches, enabled, processing } = this.state;
 
     if (!telemetryService.getCanChangeOptInStatus()) {
       return null;
@@ -119,7 +122,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
                   displayName: i18n.translate('telemetry.provideUsageStatisticsTitle', {
                     defaultMessage: 'Provide usage statistics',
                   }),
-                  value: telemetryService.getIsOptedIn(),
+                  value: enabled,
                   description: this.renderDescription(),
                   defVal: true,
                   ariaName: i18n.translate('telemetry.provideUsageStatisticsAriaName', {
@@ -127,10 +130,10 @@ export class TelemetryManagementSection extends Component<Props, State> {
                   }),
                 } as any
               }
+              loading={processing}
               dockLinks={null as any}
               toasts={null as any}
-              save={this.toggleOptIn}
-              clear={this.toggleOptIn}
+              handleChange={this.toggleOptIn}
               enableSaving={this.props.enableSaving}
             />
           </EuiForm>
@@ -151,13 +154,13 @@ export class TelemetryManagementSection extends Component<Props, State> {
           <p>
             <FormattedMessage
               id="telemetry.callout.appliesSettingTitle"
-              defaultMessage="This setting applies to {allOfKibanaText}"
+              defaultMessage="Changes to this setting apply to {allOfKibanaText} and are saved automatically."
               values={{
                 allOfKibanaText: (
                   <strong>
                     <FormattedMessage
                       id="telemetry.callout.appliesSettingTitle.allOfKibanaText"
-                      defaultMessage="all of Kibana."
+                      defaultMessage="all of Kibana"
                     />
                   </strong>
                 ),
@@ -200,20 +203,35 @@ export class TelemetryManagementSection extends Component<Props, State> {
   );
 
   toggleOptIn = async (): Promise<boolean> => {
-    const { telemetryService } = this.props;
-    const newOptInValue = !telemetryService.getIsOptedIn();
+    const { telemetryService, toasts } = this.props;
+    const newOptInValue = !this.state.enabled;
 
     return new Promise((resolve, reject) => {
-      this.setState({ processing: true }, async () => {
-        try {
-          await telemetryService.setOptIn(newOptInValue);
-          this.setState({ processing: false });
-          resolve(true);
-        } catch (err) {
-          this.setState({ processing: false });
-          reject(err);
+      this.setState(
+        {
+          processing: true,
+          enabled: newOptInValue,
+        },
+        async () => {
+          try {
+            await telemetryService.setOptIn(newOptInValue);
+            this.setState({ processing: false });
+            toasts.addSuccess(
+              newOptInValue
+                ? i18n.translate('telemetry.optInSuccessOn', {
+                    defaultMessage: 'Usage data collection turned on.',
+                  })
+                : i18n.translate('telemetry.optInSuccessOff', {
+                    defaultMessage: 'Usage data collection turned off.',
+                  })
+            );
+            resolve(true);
+          } catch (err) {
+            this.setState({ processing: false });
+            reject(err);
+          }
         }
-      });
+      );
     });
   };
 

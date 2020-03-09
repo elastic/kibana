@@ -5,8 +5,9 @@
  */
 
 import { SavedObject, SavedObjectsClientContract } from 'kibana/server';
-import { CASE_SAVED_OBJECT } from '../../constants';
-import { CaseAttributes } from '../..';
+
+import { CaseAttributes } from '../../../common/api';
+import { CASE_SAVED_OBJECT } from '../../saved_object_types';
 
 const DEFAULT_PER_PAGE: number = 1000;
 
@@ -23,7 +24,7 @@ export const convertTagsToSet = (tagObjects: Array<SavedObject<CaseAttributes>>)
   return new Set(convertToTags(tagObjects));
 };
 
-// Note: This is doing an in-memory aggregation of the tags by calling each of the alerting
+// Note: This is doing an in-memory aggregation of the tags by calling each of the case
 // records in batches of this const setting and uses the fields to try to get the least
 // amount of data per record back. If saved objects at some point supports aggregations
 // then this should be replaced with a an aggregation call.
@@ -52,7 +53,7 @@ export const readRawTags = async ({
     page: 1,
     perPage,
   });
-  const tags = await client.find({
+  const tags = await client.find<CaseAttributes>({
     type: CASE_SAVED_OBJECT,
     fields: ['tags'],
     page: 1,

@@ -60,3 +60,82 @@ Object {
   },
 }
 `;
+
+exports[`buildActiveMappings handles the \`dynamic\` property of types 1`] = `
+Object {
+  "_meta": Object {
+    "migrationMappingPropertyHashes": Object {
+      "config": "87aca8fdb053154f11383fce3dbf3edf",
+      "firstType": "635418ab953d81d93f1190b70a8d3f57",
+      "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
+      "namespace": "2f4316de49999235636386fe51dc06c1",
+      "references": "7997cf5a56cc02bdc9c93361bde732b0",
+      "secondType": "72d57924f415fbadb3ee293b67d233ab",
+      "thirdType": "510f1f0adb69830cf8a1c5ce2923ed82",
+      "type": "2f4316de49999235636386fe51dc06c1",
+      "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
+    },
+  },
+  "dynamic": "strict",
+  "properties": Object {
+    "config": Object {
+      "dynamic": "true",
+      "properties": Object {
+        "buildNum": Object {
+          "type": "keyword",
+        },
+      },
+    },
+    "firstType": Object {
+      "dynamic": "strict",
+      "properties": Object {
+        "field": Object {
+          "type": "keyword",
+        },
+      },
+    },
+    "migrationVersion": Object {
+      "dynamic": "true",
+      "type": "object",
+    },
+    "namespace": Object {
+      "type": "keyword",
+    },
+    "references": Object {
+      "properties": Object {
+        "id": Object {
+          "type": "keyword",
+        },
+        "name": Object {
+          "type": "keyword",
+        },
+        "type": Object {
+          "type": "keyword",
+        },
+      },
+      "type": "nested",
+    },
+    "secondType": Object {
+      "dynamic": false,
+      "properties": Object {
+        "field": Object {
+          "type": "long",
+        },
+      },
+    },
+    "thirdType": Object {
+      "properties": Object {
+        "field": Object {
+          "type": "text",
+        },
+      },
+    },
+    "type": Object {
+      "type": "keyword",
+    },
+    "updated_at": Object {
+      "type": "date",
+    },
+  },
+}
+`;

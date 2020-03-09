@@ -18,13 +18,14 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import angular, { auto } from 'angular';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import {
   DataPublicPluginStart,
   DataPublicPluginSetup,
-  getQueryStateContainer,
+  esFilters,
 } from '../../../../../plugins/data/public';
 import { registerFeature } from './np_ready/register_feature';
 import './kibana_services';
@@ -90,10 +91,7 @@ export class DiscoverPlugin implements Plugin<void, void> {
   public initializeInnerAngular?: () => void;
   public initializeServices?: () => Promise<{ core: CoreStart; plugins: DiscoverStartPlugins }>;
 
-  setup(core: CoreSetup, plugins: DiscoverSetupPlugins) {
-    const { querySyncStateContainer, stop: stopQuerySyncStateContainer } = getQueryStateContainer(
-      plugins.data.query
-    );
+  setup(core: CoreSetup, plugins: DiscoverSetupPlugins): DiscoverSetup {
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
       defaultSubUrl: '#/discover',
@@ -103,12 +101,19 @@ export class DiscoverPlugin implements Plugin<void, void> {
       stateParams: [
         {
           kbnUrlKey: '_g',
-          stateUpdate$: querySyncStateContainer.state$,
+          stateUpdate$: plugins.data.query.state$.pipe(
+            filter(
+              ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
+            ),
+            map(({ state }) => ({
+              ...state,
+              filters: state.filters?.filter(esFilters.isFilterPinned),
+            }))
+          ),
         },
       ],
     });
     this.stopUrlTracking = () => {
-      stopQuerySyncStateContainer();
       stopUrlTracker();
     };
 

@@ -18,7 +18,7 @@
  */
 
 jest.mock('../../export', () => ({
-  getSortedObjectsForExport: jest.fn(),
+  exportSavedObjectsToStream: jest.fn(),
 }));
 
 import * as exportMock from '../../export';
@@ -30,7 +30,7 @@ import { registerExportRoute } from '../export';
 import { setupServer } from './test_utils';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
-const getSortedObjectsForExport = exportMock.getSortedObjectsForExport as jest.Mock;
+const exportSavedObjectsToStream = exportMock.exportSavedObjectsToStream as jest.Mock;
 const allowedTypes = ['index-pattern', 'search'];
 const config = {
   maxImportPayloadBytes: 10485760,
@@ -76,7 +76,7 @@ describe('POST /api/saved_objects/_export', () => {
         ],
       },
     ];
-    getSortedObjectsForExport.mockResolvedValueOnce(createListStream(sortedObjects));
+    exportSavedObjectsToStream.mockResolvedValueOnce(createListStream(sortedObjects));
 
     const result = await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/_export')
@@ -96,7 +96,7 @@ describe('POST /api/saved_objects/_export', () => {
 
     const objects = (result.text as string).split('\n').map(row => JSON.parse(row));
     expect(objects).toEqual(sortedObjects);
-    expect(getSortedObjectsForExport.mock.calls[0][0]).toEqual(
+    expect(exportSavedObjectsToStream.mock.calls[0][0]).toEqual(
       expect.objectContaining({
         excludeExportDetails: false,
         exportSizeLimit: 10000,

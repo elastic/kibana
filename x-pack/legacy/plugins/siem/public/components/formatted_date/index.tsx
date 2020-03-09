@@ -125,3 +125,32 @@ export const FormattedRelativePreferenceDate = ({ value }: { value?: string | nu
     </LocalizedDateTooltip>
   );
 };
+
+/**
+ * Renders a preceding label according to under/over one hour
+ */
+
+export const FormattedRelativePreferenceLabel = ({
+  value,
+  preferenceLabel,
+  relativeLabel,
+}: {
+  value?: string | number | null;
+  preferenceLabel?: string | null;
+  relativeLabel?: string | null;
+}) => {
+  if (value == null) {
+    return null;
+  }
+  const maybeDate = getMaybeDate(value);
+  if (!maybeDate.isValid()) {
+    return null;
+  }
+  return moment(maybeDate.toDate())
+    .add(1, 'hours')
+    .isBefore(new Date()) ? (
+    <>{preferenceLabel}</>
+  ) : (
+    <>{relativeLabel}</>
+  );
+};

@@ -48,7 +48,6 @@ import {
 } from '../saved_objects_client';
 import {
   SavedObject,
-  SavedObjectAttributes,
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
@@ -213,7 +212,7 @@ export class SavedObjectsRepository {
    * @property {array} [options.references=[]] - [{ name, type, id }]
    * @returns {promise} - { id, type, version, attributes }
    */
-  public async create<T extends SavedObjectAttributes>(
+  public async create<T = unknown>(
     type: string,
     attributes: T,
     options: SavedObjectsCreateOptions = {}
@@ -254,7 +253,7 @@ export class SavedObjectsRepository {
         body: raw._source,
       });
 
-      return this._rawToSavedObject({
+      return this._rawToSavedObject<T>({
         ...raw,
         ...response,
       });
@@ -277,7 +276,7 @@ export class SavedObjectsRepository {
    * @property {string} [options.namespace]
    * @returns {promise} -  {saved_objects: [[{ id, type, version, references, attributes, error: { message } }]}
    */
-  async bulkCreate<T extends SavedObjectAttributes = any>(
+  async bulkCreate<T = unknown>(
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
@@ -464,7 +463,7 @@ export class SavedObjectsRepository {
    * @property {object} [options.hasReference] - { type, id }
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
-  async find<T extends SavedObjectAttributes = any>({
+  async find<T = unknown>({
     search,
     defaultSearchOperator = 'OR',
     searchFields,
@@ -577,7 +576,7 @@ export class SavedObjectsRepository {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  async bulkGet<T extends SavedObjectAttributes = any>(
+  async bulkGet<T = unknown>(
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
@@ -648,7 +647,7 @@ export class SavedObjectsRepository {
    * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
    */
-  async get<T extends SavedObjectAttributes = any>(
+  async get<T = unknown>(
     type: string,
     id: string,
     options: SavedObjectsBaseOptions = {}
@@ -696,7 +695,7 @@ export class SavedObjectsRepository {
    * @property {array} [options.references] - [{ name, type, id }]
    * @returns {promise}
    */
-  async update<T extends SavedObjectAttributes = any>(
+  async update<T = unknown>(
     type: string,
     id: string,
     attributes: Partial<T>,
@@ -753,7 +752,7 @@ export class SavedObjectsRepository {
    * @property {string} [options.namespace]
    * @returns {promise} -  {saved_objects: [[{ id, type, version, references, attributes, error: { message } }]}
    */
-  async bulkUpdate<T extends SavedObjectAttributes = any>(
+  async bulkUpdate<T = unknown>(
     objects: Array<SavedObjectsBulkUpdateObject<T>>,
     options: SavedObjectsBulkUpdateOptions = {}
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
@@ -972,7 +971,7 @@ export class SavedObjectsRepository {
   // includes the namespace, and we use this for migrating documents. However, we don't
   // want the namespace to be returned from the repository, as the repository scopes each
   // method transparently to the specified namespace.
-  private _rawToSavedObject(raw: SavedObjectsRawDoc): SavedObject {
+  private _rawToSavedObject<T = unknown>(raw: SavedObjectsRawDoc): SavedObject<T> {
     const savedObject = this._serializer.rawToSavedObject(raw);
     return omit(savedObject, 'namespace');
   }
