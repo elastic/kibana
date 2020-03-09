@@ -30,12 +30,20 @@ const createSetupContractMock = (): PluginsServiceSetup => ({
   },
 });
 const createStartContractMock = () => ({ contracts: new Map() });
-const createServiceMock = (): PluginsServiceMock => ({
-  discover: jest.fn().mockResolvedValue([]),
-  setup: jest.fn().mockResolvedValue(createSetupContractMock()),
-  start: jest.fn().mockResolvedValue(createStartContractMock()),
-  stop: jest.fn(),
-});
+const createServiceMock = (): PluginsServiceMock => {
+  const mocked: PluginsServiceMock = {
+    discover: jest.fn(),
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+
+  mocked.discover.mockResolvedValue(new Map());
+  mocked.setup.mockResolvedValue(createSetupContractMock());
+  mocked.start.mockResolvedValue(createStartContractMock());
+
+  return mocked;
+};
 
 export const pluginServiceMock = {
   create: createServiceMock,
