@@ -97,7 +97,7 @@ export const Editor = memo(() => {
                   {
                     controlType: 'text',
                     id: 'saving_status',
-                    text: saving ? 'Saving...' : 'Saved.',
+                    text: saving ? <span>Saving...</span> : <span>Saved.</span>,
                   },
                 ]}
               />

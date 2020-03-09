@@ -16,6 +16,8 @@
 }
 
 .conApp__editor {
+  // Full height, minus the EuiControlBar height (size "s");
+  height: calc(100% - 40px);
   width: 100%;
   display: flex;
   flex: 0 0 auto;
