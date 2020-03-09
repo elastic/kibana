@@ -252,31 +252,6 @@ describe('alert_details', () => {
       ).toBeTruthy();
     });
 
-    // it('links to the app that created the alert', () => {
-    //   const alert = mockAlert();
-
-    //   const alertType = {
-    //     id: '.noop',
-    //     name: 'No Op',
-    //     actionGroups: [{ id: 'default', name: 'Default' }],
-    //     defaultActionGroupId: 'default',
-    //     actionVariables: [],
-    //   };
-
-    //   expect(
-    //     shallow(
-    //       <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-    //     ).containsMatchingElement(
-    //       <EuiButtonEmpty disabled={true} iconType="popout">
-    //         <FormattedMessage
-    //           id="xpack.triggersActionsUI.sections.alertDetails.viewAlertInAppButtonLabel"
-    //           defaultMessage="View in app"
-    //         />
-    //       </EuiButtonEmpty>
-    //     )
-    //   ).toBeTruthy();
-    // });
-
     it('links to the activity log', () => {
       const alert = mockAlert();
 
