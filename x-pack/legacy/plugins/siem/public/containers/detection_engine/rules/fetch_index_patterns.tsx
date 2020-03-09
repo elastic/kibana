@@ -6,7 +6,6 @@
 
 import { isEmpty, get } from 'lodash/fp';
 import { useEffect, useState, Dispatch, SetStateAction } from 'react';
-import { useApolloClient } from '@apollo/client';
 import deepEqual from 'fast-deep-equal';
 
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
@@ -19,6 +18,7 @@ import {
 import { useStateToaster } from '../../../components/toasters';
 import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
 import { SourceQuery } from '../../../graphql/types';
+import { useApolloClient } from '../../../utils/apollo_context';
 
 import * as i18n from './translations';
 

@@ -21,7 +21,7 @@ import * as Rx from 'rxjs';
 import { resolve } from 'path';
 import JoiNamespace from 'joi';
 import { Server } from 'hapi';
-import { CoreSetup, PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext } from 'src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getConfigPath } from '../../../core/server/path';
 // @ts-ignore
@@ -132,11 +132,6 @@ const telemetry = (kibana: any) => {
         },
       } as PluginInitializerContext;
 
-      const coreSetup = ({
-        http: { server },
-        log: server.log,
-      } as any) as CoreSetup;
-
       try {
         await handleOldSettings(server);
       } catch (err) {
@@ -147,7 +142,9 @@ const telemetry = (kibana: any) => {
         usageCollection,
       };
 
-      telemetryPlugin(initializerContext).setup(coreSetup, pluginsSetup, server);
+      const npPlugin = telemetryPlugin(initializerContext);
+      await npPlugin.setup(server.newPlatform.setup.core, pluginsSetup, server);
+      await npPlugin.start(server.newPlatform.start.core);
     },
   });
 };

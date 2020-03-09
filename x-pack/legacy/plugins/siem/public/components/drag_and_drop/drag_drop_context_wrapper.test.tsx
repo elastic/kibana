@@ -6,7 +6,7 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { MockedProvider } from '@apollo/client/testing';
+import { MockedProvider } from 'react-apollo/test-utils';
 
 import { mockBrowserFields, mocksSource } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
@@ -20,7 +20,7 @@ describe('DragDropContextWrapper', () => {
 
       const wrapper = shallow(
         <TestProviders>
-          <MockedProvider mocks={[]} addTypename={false}>
+          <MockedProvider mocks={{}} addTypename={false}>
             <DragDropContextWrapper browserFields={mockBrowserFields}>
               {message}
             </DragDropContextWrapper>

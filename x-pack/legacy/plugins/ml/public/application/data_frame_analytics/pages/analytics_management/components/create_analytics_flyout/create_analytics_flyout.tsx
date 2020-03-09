@@ -29,7 +29,7 @@ export const CreateAnalyticsFlyout: FC<CreateAnalyticsFormProps> = ({
   const { isJobCreated, isJobStarted, isModalButtonDisabled, isValid } = state;
 
   return (
-    <EuiFlyout size="s" onClose={closeModal} data-test-subj="mlAnalyticsCreateJobFlyout">
+    <EuiFlyout size="m" onClose={closeModal} data-test-subj="mlAnalyticsCreateJobFlyout">
       <EuiFlyoutHeader>
         <EuiTitle>
           <h2 data-test-subj="mlDataFrameAnalyticsFlyoutHeaderTitle">

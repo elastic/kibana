@@ -83,7 +83,7 @@ export default function({ getService }: FtrProviderContext) {
           .get(buildUrl(null, args))
           .set('kbn-xsrf', 'xxx')
           .expect(400);
-        expect(body.message).to.contain('Value is [0] but it must be equal to or greater than [1]');
+        expect(body.message).to.contain('Value must be equal to or greater than [1]');
       });
 
       it('alerts api should return links to the next and previous pages using cursor-based pagination', async () => {

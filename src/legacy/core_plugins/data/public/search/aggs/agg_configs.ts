@@ -17,18 +17,12 @@
  * under the License.
  */
 
-/**
- * @name AggConfig
- *
- * @extends IndexedArray
- *
- * @description A "data structure"-like class with methods for indexing and
- * accessing instances of AggConfig.
- */
-
 import _ from 'lodash';
+import { Assign } from '@kbn/utility-types';
+
 import { AggConfig, AggConfigOptions, IAggConfig } from './agg_config';
-import { Schema } from './schemas';
+import { IAggType } from './agg_type';
+import { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
 import {
   IndexPattern,
@@ -36,8 +30,6 @@ import {
   FetchOptions,
   TimeRange,
 } from '../../../../../../plugins/data/public';
-
-type Schemas = Record<string, any>;
 
 function removeParentAggs(obj: any) {
   for (const prop in obj) {
@@ -55,50 +47,46 @@ function parseParentAggs(dslLvlCursor: any, dsl: any) {
   }
 }
 
+export interface AggConfigsOptions {
+  typesRegistry: AggTypesRegistryStart;
+}
+
+export type CreateAggConfigParams = Assign<AggConfigOptions, { type: string | IAggType }>;
+
+/**
+ * @name AggConfigs
+ *
+ * @description A "data structure"-like class with methods for indexing and
+ * accessing instances of AggConfig. This should never be instantiated directly
+ * outside of this plugin. Rather, downstream plugins should do this via
+ * `createAggConfigs()`
+ *
+ * @internal
+ */
+
 // TODO need to make a more explicit interface for this
 export type IAggConfigs = AggConfigs;
 
 export class AggConfigs {
   public indexPattern: IndexPattern;
-  public schemas: any;
   public timeRange?: TimeRange;
+  private readonly typesRegistry: AggTypesRegistryStart;
 
   aggs: IAggConfig[];
 
-  constructor(indexPattern: IndexPattern, configStates = [] as any, schemas?: any) {
+  constructor(
+    indexPattern: IndexPattern,
+    configStates: CreateAggConfigParams[] = [],
+    opts: AggConfigsOptions
+  ) {
+    this.typesRegistry = opts.typesRegistry;
+
     configStates = AggConfig.ensureIds(configStates);
 
     this.aggs = [];
     this.indexPattern = indexPattern;
-    this.schemas = schemas;
 
     configStates.forEach((params: any) => this.createAggConfig(params));
-
-    if (schemas) {
-      this.initializeDefaultsFromSchemas(schemas);
-    }
-  }
-
-  initializeDefaultsFromSchemas(schemas: Schemas) {
-    // Set the defaults for any schema which has them. If the defaults
-    // for some reason has more then the max only set the max number
-    // of defaults (not sure why a someone define more...
-    // but whatever). Also if a schema.name is already set then don't
-    // set anything.
-    _(schemas)
-      .filter((schema: Schema) => {
-        return Array.isArray(schema.defaults) && schema.defaults.length > 0;
-      })
-      .each((schema: any) => {
-        if (!this.aggs.find((agg: AggConfig) => agg.schema && agg.schema.name === schema.name)) {
-          const defaults = schema.defaults.slice(0, schema.max);
-          _.each(defaults, defaultState => {
-            const state = _.defaults({ id: AggConfig.nextId(this.aggs) }, defaultState);
-            this.aggs.push(new AggConfig(this, state as AggConfigOptions));
-          });
-        }
-      })
-      .commit();
   }
 
   setTimeRange(timeRange: TimeRange) {
@@ -124,28 +112,35 @@ export class AggConfigs {
       if (!enabledOnly) return true;
       return agg.enabled;
     };
-    const aggConfigs = new AggConfigs(
-      this.indexPattern,
-      this.aggs.filter(filterAggs),
-      this.schemas
-    );
+
+    const aggConfigs = new AggConfigs(this.indexPattern, this.aggs.filter(filterAggs), {
+      typesRegistry: this.typesRegistry,
+    });
+
     return aggConfigs;
   }
 
   createAggConfig = <T extends AggConfig = AggConfig>(
-    params: AggConfig | AggConfigOptions,
+    params: CreateAggConfigParams,
     { addToAggConfigs = true } = {}
   ) => {
+    const { type } = params;
     let aggConfig;
+
     if (params instanceof AggConfig) {
       aggConfig = params;
       params.parent = this;
     } else {
-      aggConfig = new AggConfig(this, params);
+      aggConfig = new AggConfig(this, {
+        ...params,
+        type: typeof type === 'string' ? this.typesRegistry.get(type) : type,
+      });
     }
+
     if (addToAggConfigs) {
       this.aggs.push(aggConfig);
     }
+
     return aggConfig as T;
   };
 
@@ -166,10 +161,10 @@ export class AggConfigs {
     return true;
   }
 
-  toDsl(hierarchical: boolean = false) {
+  toDsl(hierarchical: boolean = false): Record<string, any> {
     const dslTopLvl = {};
     let dslLvlCursor: Record<string, any>;
-    let nestedMetrics: Array<{ config: AggConfig; dsl: any }> | [];
+    let nestedMetrics: Array<{ config: AggConfig; dsl: Record<string, any> }> | [];
 
     if (hierarchical) {
       // collect all metrics, and filter out the ones that we won't be copying
@@ -241,23 +236,19 @@ export class AggConfigs {
   }
 
   byName(name: string) {
-    return this.aggs.filter(agg => agg.type.name === name);
+    return this.aggs.filter(agg => agg.type?.name === name);
   }
 
   byType(type: string) {
-    return this.aggs.filter(agg => agg.type.type === type);
+    return this.aggs.filter(agg => agg.type?.type === type);
   }
 
   byTypeName(type: string) {
-    return this.aggs.filter(agg => agg.type.name === type);
+    return this.byName(type);
   }
 
   bySchemaName(schema: string) {
-    return this.aggs.filter(agg => agg.schema && agg.schema.name === schema);
-  }
-
-  bySchemaGroup(group: string) {
-    return this.aggs.filter(agg => agg.schema && agg.schema.group === group);
+    return this.aggs.filter(agg => agg.schema === schema);
   }
 
   getRequestAggs(): AggConfig[] {

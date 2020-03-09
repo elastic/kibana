@@ -108,6 +108,7 @@ export class DashboardAppController {
     embeddable,
     share,
     dashboardCapabilities,
+    embeddableCapabilities: { visualizeCapabilities, mapsCapabilities },
     data: { query: queryService },
     core: {
       notifications,
@@ -134,7 +135,6 @@ export class DashboardAppController {
     } = syncQueryStateWithUrl(queryService, kbnUrlStateStorage);
 
     let lastReloadRequestTime = 0;
-
     const dash = ($scope.dash = $route.current.locals.dash);
     if (dash.id) {
       chrome.docTitle.change(dash.title);
@@ -180,11 +180,18 @@ export class DashboardAppController {
       dashboardStateManager.getIsViewMode() &&
       !dashboardConfig.getHideWriteControls();
 
-    const getIsEmptyInReadonlyMode = () =>
-      !dashboardStateManager.getPanels().length &&
-      !getShouldShowEditHelp() &&
-      !getShouldShowViewHelp() &&
-      dashboardConfig.getHideWriteControls();
+    const shouldShowUnauthorizedEmptyState = () => {
+      const readonlyMode =
+        !dashboardStateManager.getPanels().length &&
+        !getShouldShowEditHelp() &&
+        !getShouldShowViewHelp() &&
+        dashboardConfig.getHideWriteControls();
+      const userHasNoPermissions =
+        !dashboardStateManager.getPanels().length &&
+        !visualizeCapabilities.save &&
+        !mapsCapabilities.save;
+      return readonlyMode || userHasNoPermissions;
+    };
 
     const addVisualization = () => {
       navActions[TopNavIds.VISUALIZE]();
@@ -250,7 +257,7 @@ export class DashboardAppController {
       }
       const shouldShowEditHelp = getShouldShowEditHelp();
       const shouldShowViewHelp = getShouldShowViewHelp();
-      const isEmptyInReadonlyMode = getIsEmptyInReadonlyMode();
+      const isEmptyInReadonlyMode = shouldShowUnauthorizedEmptyState();
       return {
         id: dashboardStateManager.savedDashboard.id || '',
         filters: queryFilter.getFilters(),
@@ -307,7 +314,7 @@ export class DashboardAppController {
           dashboardContainer.renderEmpty = () => {
             const shouldShowEditHelp = getShouldShowEditHelp();
             const shouldShowViewHelp = getShouldShowViewHelp();
-            const isEmptyInReadOnlyMode = getIsEmptyInReadonlyMode();
+            const isEmptyInReadOnlyMode = shouldShowUnauthorizedEmptyState();
             const isEmptyState = shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadOnlyMode;
             return isEmptyState ? (
               <DashboardEmptyScreen

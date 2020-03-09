@@ -37,7 +37,7 @@ import {
 import { ChartsPluginSetup, ChartsPluginStart } from '../../../../plugins/charts/public';
 import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/public';
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana_legacy/public';
-import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../plugins/home/public';
+import { HomePublicPluginSetup } from '../../../../plugins/home/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
 import {
   AdvancedSettingsSetup,
@@ -79,7 +79,6 @@ export interface PluginsStart {
   data: ReturnType<DataPlugin['start']>;
   embeddable: IEmbeddableStart;
   expressions: ReturnType<ExpressionsPlugin['start']>;
-  home: HomePublicPluginStart;
   inspector: InspectorStart;
   uiActions: UiActionsStart;
   navigation: NavigationPublicPluginStart;

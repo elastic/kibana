@@ -37,7 +37,7 @@ import { useMlContext } from '../../../../contexts/ml';
 import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
 import { TimeBuckets } from '../../../../util/time_buckets';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
-import { expandCombinedJobConfig } from '../../common/job_creator/configs';
+import { expandCombinedJobConfig } from '../../../../../../common/types/anomaly_detection_jobs';
 import { newJobCapsService } from '../../../../services/new_job_capabilities_service';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';

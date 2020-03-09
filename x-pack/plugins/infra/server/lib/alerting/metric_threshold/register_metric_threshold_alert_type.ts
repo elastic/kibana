@@ -6,8 +6,9 @@
 import uuid from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
+import { networkTraffic } from '../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
 import {
-  MetricThresholdAlertTypeParams,
+  MetricExpressionParams,
   Comparator,
   AlertStates,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
@@ -23,9 +24,20 @@ const FIRED_ACTIONS = {
 
 async function getMetric(
   { callCluster }: AlertServices,
-  { metric, aggType, timeUnit, timeSize, indexPattern }: MetricThresholdAlertTypeParams
+  { metric, aggType, timeUnit, timeSize, indexPattern }: MetricExpressionParams
 ) {
   const interval = `${timeSize}${timeUnit}`;
+  const aggregations =
+    aggType === 'rate'
+      ? networkTraffic('aggregatedValue', metric)
+      : {
+          aggregatedValue: {
+            [aggType]: {
+              field: metric,
+            },
+          },
+        };
+
   const searchBody = {
     query: {
       bool: {
@@ -50,13 +62,7 @@ async function getMetric(
           field: '@timestamp',
           fixed_interval: interval,
         },
-        aggregations: {
-          aggregatedValue: {
-            [aggType]: {
-              field: metric,
-            },
-          },
-        },
+        aggregations,
       },
     },
   };
@@ -95,37 +101,49 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
     name: 'Metric Alert - Threshold',
     validate: {
       params: schema.object({
-        threshold: schema.arrayOf(schema.number()),
-        comparator: schema.string(),
-        aggType: schema.string(),
-        metric: schema.string(),
-        timeUnit: schema.string(),
-        timeSize: schema.number(),
-        indexPattern: schema.string(),
+        criteria: schema.arrayOf(
+          schema.object({
+            threshold: schema.arrayOf(schema.number()),
+            comparator: schema.string(),
+            aggType: schema.string(),
+            metric: schema.string(),
+            timeUnit: schema.string(),
+            timeSize: schema.number(),
+            indexPattern: schema.string(),
+          })
+        ),
       }),
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],
     async executor({ services, params }) {
-      const { threshold, comparator } = params as MetricThresholdAlertTypeParams;
+      const { criteria } = params as { criteria: MetricExpressionParams[] };
       const alertInstance = services.alertInstanceFactory(alertUUID);
-      const currentValue = await getMetric(services, params as MetricThresholdAlertTypeParams);
-      if (typeof currentValue === 'undefined')
-        throw new Error('Could not get current value of metric');
 
-      const comparisonFunction = comparatorMap[comparator];
+      const alertResults = await Promise.all(
+        criteria.map(({ threshold, comparator }) =>
+          (async () => {
+            const currentValue = await getMetric(services, params as MetricExpressionParams);
+            if (typeof currentValue === 'undefined')
+              throw new Error('Could not get current value of metric');
 
-      const isValueInAlertState = comparisonFunction(currentValue, threshold);
+            const comparisonFunction = comparatorMap[comparator];
+            return { shouldFire: comparisonFunction(currentValue, threshold), currentValue };
+          })()
+        )
+      );
 
-      if (isValueInAlertState) {
+      const shouldAlertFire = alertResults.every(({ shouldFire }) => shouldFire);
+
+      if (shouldAlertFire) {
         alertInstance.scheduleActions(FIRED_ACTIONS.id, {
-          value: currentValue,
+          value: alertResults.map(({ currentValue }) => currentValue),
         });
       }
 
       // Future use: ability to fetch display current alert state
       alertInstance.replaceState({
-        alertState: isValueInAlertState ? AlertStates.ALERT : AlertStates.OK,
+        alertState: shouldAlertFire ? AlertStates.ALERT : AlertStates.OK,
       });
     },
   });
