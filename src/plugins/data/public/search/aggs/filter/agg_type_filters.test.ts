@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IndexPattern } from '../../../../public';
+import { IndexPattern } from '../../../index_patterns';
 import { AggTypeFilters } from './agg_type_filters';
 import { IAggConfig, IAggType } from '../types';
 

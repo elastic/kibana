@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { siblingPipelineAggWriter } from './sibling_pipeline_agg_writer';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
-import { fieldFormats } from '../../../../../public';
+import { FieldFormat } from '../../../../../common';
 
 const metricAggFilter: string[] = [
   '!top_hits',
@@ -95,7 +95,7 @@ const siblingPipelineAggHelper = {
     const customMetric = agg.getParam('customMetric');
     return customMetric
       ? customMetric.type.getFormat(customMetric)
-      : new (fieldFormats.FieldFormat.from(identity))();
+      : new (FieldFormat.from(identity))();
   },
 };
 

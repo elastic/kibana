@@ -20,7 +20,8 @@
 import moment from 'moment';
 import { dateRangeBucketAgg } from '../date_range';
 import { createFilterDateRange } from './date_range';
-import { fieldFormats, FieldFormatsGetConfigFn } from '../../../../../public';
+import { FieldFormatsGetConfigFn } from '../../../../../common';
+import { DateFormat } from '../../../../field_formats';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
@@ -33,7 +34,7 @@ describe('AggConfig Filters', () => {
     const getAggConfigs = () => {
       const field = {
         name: '@timestamp',
-        format: new fieldFormats.DateFormat({}, getConfig),
+        format: new DateFormat({}, getConfig),
       };
 
       const indexPattern = {

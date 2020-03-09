@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '../../../../../../src/core/public/mocks';
 import { getAggTypes } from './index';
 
 import { isBucketAggType } from './buckets/_bucket_agg_type';

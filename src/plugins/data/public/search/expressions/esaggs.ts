@@ -29,18 +29,11 @@ import { calculateObjectHash } from '../../../../../plugins/kibana_utils/public'
 import { PersistedState } from '../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../plugins/inspector/public';
 
-import {
-  IAggConfigs,
-  ISearchSource,
-  SearchSource,
-  Query,
-  TimeRange,
-  fieldFormats,
-  Filter,
-  getTime,
-  FilterManager,
-  search,
-} from '../../../public';
+import { IAggConfigs } from '../aggs';
+import { ISearchSource, SearchSource } from '../search_source';
+import { tabifyAggResponse } from '../tabify';
+import { Filter, Query, serializeFieldFormat, TimeRange } from '../../../common';
+import { FilterManager, getTime } from '../../query';
 import { getSearchService, getQueryService, getIndexPatterns } from '../../services';
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
 import { getRequestInspectorStats, getResponseInspectorStats, serializeAggConfig } from './utils';
@@ -202,7 +195,7 @@ const handleCourierRequest = async ({
 
   if (shouldCalculateNewTabify) {
     (searchSource as any).lastTabifyHash = tabifyCacheHash;
-    (searchSource as any).tabifiedResponse = search.tabifyAggResponse(
+    (searchSource as any).tabifiedResponse = tabifyAggResponse(
       aggs,
       (searchSource as any).finalResponse,
       tabifyParams
@@ -288,7 +281,7 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
           meta: serializeAggConfig(column.aggConfig),
         };
         if (args.includeFormatHints) {
-          cleanedColumn.formatHint = fieldFormats.serialize(column.aggConfig);
+          cleanedColumn.formatHint = serializeFieldFormat(column.aggConfig);
         }
         return cleanedColumn;
       }),

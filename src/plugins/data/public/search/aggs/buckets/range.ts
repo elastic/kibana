@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { BucketAggType } from './_bucket_agg_type';
-import { fieldFormats, KBN_FIELD_TYPES } from '../../../../public';
+import { FieldFormat, KBN_FIELD_TYPES } from '../../../../common';
 import { RangeKey } from './range_key';
 import { createFilterRange } from './create_filter/range';
 import { BUCKET_TYPES } from './bucket_agg_types';
@@ -65,7 +65,7 @@ export const rangeBucketAgg = new BucketAggType({
     let aggFormat = formats.get(agg);
     if (aggFormat) return aggFormat;
 
-    const RangeFormat = fieldFormats.FieldFormat.from((range: any) => {
+    const RangeFormat = FieldFormat.from((range: any) => {
       const format = agg.fieldOwnFormatter();
       const gte = '\u2265';
       const lt = '\u003c';

@@ -21,7 +21,7 @@ import { rangeBucketAgg } from './range';
 import { AggConfigs } from '../agg_configs';
 import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { FieldFormatsGetConfigFn, fieldFormats } from '../../../../public';
+import { FieldFormatsGetConfigFn, NumberFormat } from '../../../../common';
 
 const buckets = [
   {
@@ -54,7 +54,7 @@ describe('Range Agg', () => {
   const getAggConfigs = () => {
     const field = {
       name: 'bytes',
-      format: new fieldFormats.NumberFormat(
+      format: new NumberFormat(
         {
           pattern: '0,0.[000] b',
         },

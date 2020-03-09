@@ -19,7 +19,7 @@
 
 import { get } from 'lodash';
 import { IBucketAggConfig } from '../_bucket_agg_type';
-import { esFilters } from '../../../../../public';
+import { buildQueryFilter } from '../../../../../common';
 
 export const createFilterFilters = (aggConfig: IBucketAggConfig, key: string) => {
   // have the aggConfig write agg dsl params
@@ -28,6 +28,6 @@ export const createFilterFilters = (aggConfig: IBucketAggConfig, key: string) =>
   const indexPattern = aggConfig.getIndexPattern();
 
   if (filter && indexPattern && indexPattern.id) {
-    return esFilters.buildQueryFilter(filter.query, indexPattern.id, key);
+    return buildQueryFilter(filter.query, indexPattern.id, key);
   }
 };

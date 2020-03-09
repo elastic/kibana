@@ -21,7 +21,7 @@ import _ from 'lodash';
 import moment from 'moment';
 
 import { IUiSettingsClient } from 'src/core/public';
-import { parseInterval } from '../../../../../../public';
+import { parseInterval } from '../../../../../../common';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {
   convertDurationToNormalizedEsInterval,

@@ -19,8 +19,7 @@
 
 import { IUiSettingsClient } from 'src/core/public';
 import { TimeBuckets } from '../buckets/lib/time_buckets';
-import { toAbsoluteDates } from '../../../../common';
-import { TimeRange } from '../../../../public';
+import { toAbsoluteDates, TimeRange } from '../../../../common';
 
 export function getCalculateAutoTimeExpression(uiSettings: IUiSettingsClient) {
   return function calculateAutoTimeExpression(range: TimeRange) {

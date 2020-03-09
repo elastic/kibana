@@ -76,7 +76,6 @@ export const {
   isStringType,
   isType,
   isValidInterval,
-  OptionedParamType,
   parentPipelineType,
   propFilter,
   siblingPipelineType,

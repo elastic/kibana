@@ -18,7 +18,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { setUiSettings } from '../../../../public/services';
 import { AggConfigs } from '../agg_configs';
 import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';

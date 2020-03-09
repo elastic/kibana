@@ -46,9 +46,6 @@ import {
   isPhrasesFilter,
   isQueryStringFilter,
   isRangeFilter,
-  isValidEsInterval,
-  isValidInterval,
-  toAbsoluteDates,
   toggleFilterNegated,
 } from '../common';
 
@@ -291,7 +288,6 @@ import {
   AggConfigs,
   aggTypeFilters,
   aggGroupNamesMap,
-  BUCKET_TYPES,
   CidrMask,
   convertDateRangeToString,
   convertIPRangeToString,
@@ -299,7 +295,6 @@ import {
   isDateHistogramBucketAggConfig,
   isStringType,
   isType,
-  METRIC_TYPES,
   parentPipelineType,
   propFilter,
   siblingPipelineType,
@@ -312,6 +307,19 @@ import {
   tabifyGetColumns,
 } from './search';
 
+import {
+  dateHistogramInterval,
+  InvalidEsCalendarIntervalError,
+  InvalidEsIntervalFormatError,
+  isValidEsInterval,
+  isValidInterval,
+  parseEsInterval,
+  parseInterval,
+  toAbsoluteDates,
+} from '../common';
+
+export { ParsedInterval } from '../common';
+
 export {
   // aggs
   AggGroupNames,
@@ -320,6 +328,7 @@ export {
   AggParamType,
   AggTypeFieldFilters, // TODO convert to interface
   AggTypeFilters, // TODO convert to interface
+  BUCKET_TYPES,
   DateRangeKey, // only used in field formatter deserialization, which will live in data
   IAggConfig,
   IAggConfigs,
@@ -328,6 +337,7 @@ export {
   IFieldParamType,
   IMetricAggType,
   IpRangeKey, // only used in field formatter deserialization, which will live in data
+  METRIC_TYPES,
   OptionedParamEditorProps, // only type is used externally
   OptionedParamType,
   OptionedValueProp, // only type is used externally
@@ -371,18 +381,21 @@ export const search = {
     AggConfigs,
     aggGroupNamesMap,
     aggTypeFilters,
-    BUCKET_TYPES,
     CidrMask,
     convertDateRangeToString,
     convertIPRangeToString,
+    dateHistogramInterval,
     intervalOptions, // only used in Discover
+    InvalidEsCalendarIntervalError,
+    InvalidEsIntervalFormatError,
     isDateHistogramBucketAggConfig,
     isStringType,
     isType,
     isValidEsInterval,
     isValidInterval,
-    METRIC_TYPES,
     parentPipelineType,
+    parseEsInterval,
+    parseInterval,
     propFilter,
     siblingPipelineType,
     termsAggFilter,
@@ -435,8 +448,6 @@ export {
   // kbn field types
   castEsToKbnFieldTypeName,
   getKbnTypeNames,
-  // utils
-  parseInterval,
 } from '../common';
 
 /*

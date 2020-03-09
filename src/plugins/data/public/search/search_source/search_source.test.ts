@@ -19,33 +19,7 @@
 
 import { SearchSource } from '../search_source';
 import { IndexPattern } from '../..';
-import { setSearchService, setUiSettings, setInjectedMetadata } from '../../services';
-
-import {
-  injectedMetadataServiceMock,
-  uiSettingsServiceMock,
-} from '../../../../../core/public/mocks';
-import { searchAggsStartMock } from '../aggs/mocks';
-
-setUiSettings(uiSettingsServiceMock.createStartContract());
-setInjectedMetadata(injectedMetadataServiceMock.createSetupContract());
-setSearchService({
-  aggs: searchAggsStartMock(),
-  search: jest.fn(),
-  __LEGACY: {
-    AggConfig: jest.fn() as any,
-    AggType: jest.fn(),
-    aggTypeFieldFilters: jest.fn() as any,
-    FieldParamType: jest.fn(),
-    MetricAggType: jest.fn(),
-    parentPipelineAggHelper: jest.fn() as any,
-    siblingPipelineAggHelper: jest.fn() as any,
-    esClient: {
-      search: jest.fn(),
-      msearch: jest.fn(),
-    },
-  },
-});
+import { mockDataServices } from '../aggs/test_helpers';
 
 jest.mock('../fetch', () => ({
   fetchSoon: jest.fn().mockResolvedValue({}),
@@ -70,6 +44,10 @@ const indexPattern2 = ({
 } as unknown) as IndexPattern;
 
 describe('SearchSource', function() {
+  beforeEach(() => {
+    mockDataServices();
+  });
+
   describe('#setField()', function() {
     it('sets the value for the property', function() {
       const searchSource = new SearchSource();

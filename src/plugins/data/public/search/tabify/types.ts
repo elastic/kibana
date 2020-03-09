@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { RangeFilterParams } from '../../../public';
+import { RangeFilterParams } from '../../../common';
 import { IAggConfig } from '../aggs';
 
 /** @internal **/

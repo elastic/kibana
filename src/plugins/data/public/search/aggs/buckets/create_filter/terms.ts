@@ -18,7 +18,12 @@
  */
 
 import { IBucketAggConfig } from '../_bucket_agg_type';
-import { esFilters, Filter } from '../../../../../public';
+import {
+  buildPhrasesFilter,
+  buildExistsFilter,
+  buildPhraseFilter,
+  Filter,
+} from '../../../../../common';
 
 export const createFilterTerms = (aggConfig: IBucketAggConfig, key: string, params: any) => {
   const field = aggConfig.params.field;
@@ -27,20 +32,20 @@ export const createFilterTerms = (aggConfig: IBucketAggConfig, key: string, para
   if (key === '__other__') {
     const terms = params.terms;
 
-    const phraseFilter = esFilters.buildPhrasesFilter(field, terms, indexPattern);
+    const phraseFilter = buildPhrasesFilter(field, terms, indexPattern);
     phraseFilter.meta.negate = true;
 
     const filters: Filter[] = [phraseFilter];
 
     if (terms.some((term: string) => term === '__missing__')) {
-      filters.push(esFilters.buildExistsFilter(field, indexPattern));
+      filters.push(buildExistsFilter(field, indexPattern));
     }
 
     return filters;
   } else if (key === '__missing__') {
-    const existsFilter = esFilters.buildExistsFilter(field, indexPattern);
+    const existsFilter = buildExistsFilter(field, indexPattern);
     existsFilter.meta.negate = true;
     return existsFilter;
   }
-  return esFilters.buildPhraseFilter(field, key, indexPattern);
+  return buildPhraseFilter(field, key, indexPattern);
 };

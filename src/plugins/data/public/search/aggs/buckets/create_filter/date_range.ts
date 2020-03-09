@@ -19,8 +19,8 @@
 
 import moment from 'moment';
 import { IBucketAggConfig } from '../_bucket_agg_type';
-import { DateRangeKey } from '../date_range';
-import { esFilters, RangeFilterParams } from '../../../../../public';
+import { DateRangeKey } from '../lib/date_range';
+import { buildRangeFilter, RangeFilterParams } from '../../../../../common';
 
 export const createFilterDateRange = (agg: IBucketAggConfig, { from, to }: DateRangeKey) => {
   const filter: RangeFilterParams = {};
@@ -28,5 +28,5 @@ export const createFilterDateRange = (agg: IBucketAggConfig, { from, to }: DateR
   if (to) filter.lt = moment(to).toISOString();
   if (to && from) filter.format = 'strict_date_optional_time';
 
-  return esFilters.buildRangeFilter(agg.params.field, filter, agg.getIndexPattern());
+  return buildRangeFilter(agg.params.field, filter, agg.getIndexPattern());
 };

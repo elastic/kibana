@@ -18,11 +18,12 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { dataPluginMock } from '../../../../public/mocks';
 import {
   setFieldFormats,
   setIndexPatterns,
+  setInjectedMetadata,
   setNotifications,
   setOverlays,
   setQueryService,
@@ -42,6 +43,7 @@ export function mockDataServices() {
 
   setFieldFormats(data.fieldFormats);
   setIndexPatterns(data.indexPatterns);
+  setInjectedMetadata(core.injectedMetadata);
   setNotifications(core.notifications);
   setOverlays(core.overlays);
   setQueryService(data.query);

@@ -19,7 +19,8 @@
 
 import { IAggConfigs } from '../agg_configs';
 import { IAggConfig } from '../agg_config';
-import { FetchOptions, ISearchSource } from '../../../../public';
+import { FetchOptions } from '../../fetch';
+import { ISearchSource } from '../../search_source';
 
 export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
   name: string;

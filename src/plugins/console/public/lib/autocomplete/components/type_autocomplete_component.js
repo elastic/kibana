@@ -34,12 +34,8 @@ export class TypeAutocompleteComponent extends ListComponent {
       return false;
     }
 
-<<<<<<< HEAD:src/plugins/console/public/lib/autocomplete/components/type_autocomplete_component.js
     return !_.find(tokens, nonValidIndexType);
   }
-=======
-import { isValidJson } from './is_valid_json';
->>>>>>> Clean up utils & exports!:src/plugins/data/public/search/aggs/utils/is_valid_json.test.ts
 
   getDefaultTermMeta() {
     return 'type';

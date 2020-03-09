@@ -18,7 +18,7 @@
  */
 
 import { isNumber, keys, values, find, each, cloneDeep, flatten } from 'lodash';
-import { esFilters, esQuery } from '../../../../public';
+import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '../../../../common';
 import { AggGroupNames } from '../agg_groups';
 import { IAggConfigs } from '../agg_configs';
 import { IBucketAggConfig } from './_bucket_agg_type';
@@ -207,7 +207,7 @@ export const buildOtherBucketAgg = (
       agg.buckets.some((bucket: { key: string }) => bucket.key === '__missing__')
     ) {
       filters.push(
-        esFilters.buildExistsFilter(
+        buildExistsFilter(
           aggWithOtherBucket.params.field,
           aggWithOtherBucket.params.field.indexPattern
         )
@@ -223,7 +223,7 @@ export const buildOtherBucketAgg = (
     });
 
     resultAgg.filters.filters[key] = {
-      bool: esQuery.buildQueryFromFilters(filters, indexPattern),
+      bool: buildQueryFromFilters(filters, indexPattern),
     };
   };
   walkBucketTree(0, response.aggregations, bucketAggs[0].id, [], '');
@@ -259,7 +259,7 @@ export const mergeOtherBucketAggResponse = (
     );
     const requestFilterTerms = getOtherAggTerms(requestAgg, key, otherAgg);
 
-    const phraseFilter = esFilters.buildPhrasesFilter(
+    const phraseFilter = buildPhrasesFilter(
       otherAgg.params.field,
       requestFilterTerms,
       otherAgg.params.field.indexPattern
@@ -274,7 +274,7 @@ export const mergeOtherBucketAggResponse = (
       )
     ) {
       bucket.filters.push(
-        esFilters.buildExistsFilter(otherAgg.params.field, otherAgg.params.field.indexPattern)
+        buildExistsFilter(otherAgg.params.field, otherAgg.params.field.indexPattern)
       );
     }
     aggResultBuckets.push(bucket);

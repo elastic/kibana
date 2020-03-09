@@ -24,7 +24,7 @@ import { AggConfigs, CreateAggConfigParams } from './agg_configs';
 import { AggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockDataServices, mockAggTypesRegistry } from './test_helpers';
-import { IndexPatternField, IndexPattern } from '../../../public';
+import { Field as IndexPatternField, IndexPattern } from '../../index_patterns';
 import { stubIndexPatternWithFields } from '../../../public/stubs';
 import { dataPluginMock } from '../../../public/mocks';
 import { setFieldFormats } from '../../../public/services';

@@ -18,7 +18,7 @@
  */
 
 import { IAggConfig } from '../agg_config';
-import { KBN_FIELD_TYPES } from '../../../../public';
+import { KBN_FIELD_TYPES } from '../../../../common';
 import { AggType, AggTypeConfig } from '../agg_type';
 import { AggParamType } from '../param_types/agg';
 

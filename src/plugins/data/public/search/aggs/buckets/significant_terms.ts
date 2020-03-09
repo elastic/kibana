@@ -22,7 +22,7 @@ import { BucketAggType } from './_bucket_agg_type';
 import { createFilterTerms } from './create_filter/terms';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../public';
+import { KBN_FIELD_TYPES } from '../../../../common';
 
 const significantTermsTitle = i18n.translate('data.search.aggs.buckets.significantTermsTitle', {
   defaultMessage: 'Significant Terms',

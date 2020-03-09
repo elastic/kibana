@@ -24,7 +24,7 @@ import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers
 import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
 import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';
 
-import { fieldFormats } from '../../../../../public';
+import { FieldFormat } from '../../../../../common';
 
 const metricAggFilter = [
   '!top_hits',
@@ -86,7 +86,7 @@ const parentPipelineAggHelper = {
     } else {
       subAgg = agg.aggConfigs.byId(agg.getParam('metricAgg'));
     }
-    return subAgg ? subAgg.type.getFormat(subAgg) : new (fieldFormats.FieldFormat.from(identity))();
+    return subAgg ? subAgg.type.getFormat(subAgg) : new (FieldFormat.from(identity))();
   },
 };
 

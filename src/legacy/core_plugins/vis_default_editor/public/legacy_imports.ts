@@ -18,6 +18,7 @@
  */
 
 /* `ui/agg_types` dependencies */
+export { BUCKET_TYPES, METRIC_TYPES } from '../../../../plugins/data/public';
 export {
   AggGroupNames,
   aggGroupNamesMap,
@@ -25,7 +26,6 @@ export {
   AggParamType,
   AggType,
   aggTypes,
-  BUCKET_TYPES,
   createAggConfigs,
   FieldParamType,
   IAggConfig,
@@ -33,7 +33,6 @@ export {
   IAggGroupNames,
   IAggType,
   IFieldParamType,
-  METRIC_TYPES,
   termsAggFilter,
 } from 'ui/agg_types';
 export { aggTypeFilters, propFilter } from 'ui/agg_types';

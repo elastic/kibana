@@ -18,10 +18,10 @@
  */
 
 import { IBucketAggConfig } from '../_bucket_agg_type';
-import { esFilters } from '../../../../../public';
+import { buildRangeFilter } from '../../../../../common';
 
 export const createFilterRange = (aggConfig: IBucketAggConfig, params: any) => {
-  return esFilters.buildRangeFilter(
+  return buildRangeFilter(
     aggConfig.params.field,
     params,
     aggConfig.getIndexPattern(),

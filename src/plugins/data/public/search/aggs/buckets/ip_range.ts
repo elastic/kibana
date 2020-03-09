@@ -23,11 +23,8 @@ import { BucketAggType } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 import { createFilterIpRange } from './create_filter/ip_range';
-import { KBN_FIELD_TYPES, fieldFormats } from '../../../../public';
-
 import { IpRangeKey, convertIPRangeToString } from './lib/ip_range';
-export { IpRangeKey, convertIPRangeToString }; // for BWC
-
+import { KBN_FIELD_TYPES, FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../common';
 import { getFieldFormats } from '../../../../public/services';
 
 const ipRangeTitle = i18n.translate('data.search.aggs.buckets.ipRangeTitle', {
@@ -47,10 +44,10 @@ export const ipRangeBucketAgg = new BucketAggType({
   getFormat(agg) {
     const fieldFormatsService = getFieldFormats();
     const formatter = agg.fieldOwnFormatter(
-      fieldFormats.TEXT_CONTEXT_TYPE,
+      TEXT_CONTEXT_TYPE,
       fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.IP)
     );
-    const IpRangeFormat = fieldFormats.FieldFormat.from(function(range: IpRangeKey) {
+    const IpRangeFormat = FieldFormat.from(function(range: IpRangeKey) {
       return convertIPRangeToString(range, formatter);
     });
     return new IpRangeFormat();

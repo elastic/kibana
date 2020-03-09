@@ -28,7 +28,8 @@ import { BucketAggType } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { Storage } from '../../../../../../plugins/kibana_utils/public';
 
-import { getQueryLog, esQuery, Query } from '../../../../public';
+import { getEsQueryConfig, buildEsQuery, Query } from '../../../../common';
+import { getQueryLog } from '../../../query';
 
 const filtersTitle = i18n.translate('data.search.aggs.buckets.filtersTitle', {
   defaultMessage: 'Filters',
@@ -79,13 +80,8 @@ export function getFiltersBucketAgg(deps: { uiSettings: IUiSettingsClient }) {
                 return;
               }
 
-              const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
-              const query = esQuery.buildEsQuery(
-                aggConfig.getIndexPattern(),
-                [input],
-                [],
-                esQueryConfigs
-              );
+              const esQueryConfigs = getEsQueryConfig(uiSettings);
+              const query = buildEsQuery(aggConfig.getIndexPattern(), [input], [], esQueryConfigs);
 
               if (!query) {
                 console.log('malformed filter agg params, missing "query" on input'); // eslint-disable-line no-console

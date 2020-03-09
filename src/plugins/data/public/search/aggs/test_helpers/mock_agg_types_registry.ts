@@ -18,7 +18,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { AggTypesRegistry, AggTypesRegistryStart } from '../agg_types_registry';
 import { getAggTypes } from '../agg_types';
 import { BucketAggType } from '../buckets/_bucket_agg_type';

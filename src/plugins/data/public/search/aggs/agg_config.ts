@@ -22,12 +22,9 @@ import { i18n } from '@kbn/i18n';
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
-import {
-  ISearchSource,
-  FetchOptions,
-  FieldFormatsContentType,
-  KBN_FIELD_TYPES,
-} from '../../../public';
+import { FetchOptions } from '../fetch';
+import { ISearchSource } from '../search_source';
+import { FieldFormatsContentType, KBN_FIELD_TYPES } from '../../../common';
 import { getFieldFormats } from '../../../public/services';
 
 export interface AggConfigOptions {

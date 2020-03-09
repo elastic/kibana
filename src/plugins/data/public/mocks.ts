@@ -20,6 +20,7 @@
 import { Plugin, DataPublicPluginSetup, DataPublicPluginStart, IndexPatternsContract } from '.';
 import { fieldFormatsMock } from '../common/field_formats/mocks';
 import { searchSetupMock } from './search/mocks';
+import { AggTypeFieldFilters } from './search/aggs';
 import { searchAggsStartMock } from './search/aggs/mocks';
 import { queryServiceMock } from './query/mocks';
 
@@ -64,7 +65,7 @@ const createStartContract = (): Start => {
       __LEGACY: {
         AggConfig: jest.fn() as any,
         AggType: jest.fn(),
-        aggTypeFieldFilters: jest.fn() as any,
+        aggTypeFieldFilters: new AggTypeFieldFilters(),
         FieldParamType: jest.fn(),
         MetricAggType: jest.fn(),
         parentPipelineAggHelper: jest.fn() as any,

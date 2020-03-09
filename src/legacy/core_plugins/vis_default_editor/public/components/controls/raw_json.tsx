@@ -22,10 +22,6 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { EuiFormRow, EuiIconTip, EuiCodeEditor, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-<<<<<<< HEAD
-=======
-import { isValidJson } from '../../utils';
->>>>>>> Fix TS!
 import { AggParamEditorProps } from '../agg_param_props';
 
 function RawJsonParamEditor({

@@ -18,13 +18,13 @@
  */
 
 import { IBucketAggConfig } from '../_bucket_agg_type';
-import { esFilters, RangeFilterParams } from '../../../../../public';
+import { buildRangeFilter, RangeFilterParams } from '../../../../../common';
 
 export const createFilterHistogram = (aggConfig: IBucketAggConfig, key: string) => {
   const value = parseInt(key, 10);
   const params: RangeFilterParams = { gte: value, lt: value + aggConfig.params.interval };
 
-  return esFilters.buildRangeFilter(
+  return buildRangeFilter(
     aggConfig.params.field,
     params,
     aggConfig.getIndexPattern(),

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+// eslint-disable-next-line
 import { npSetup, npStart } from 'ui/new_platform';
 import { PluginInitializerContext } from '../../../../../../core/public';
 import { plugin } from '.';

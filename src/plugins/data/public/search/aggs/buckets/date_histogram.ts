@@ -30,7 +30,8 @@ import { dateHistogramInterval } from '../../../../common';
 import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 
-import { fieldFormats, KBN_FIELD_TYPES, TimefilterContract } from '../../../../public';
+import { FIELD_FORMAT_IDS, KBN_FIELD_TYPES } from '../../../../common';
+import { TimefilterContract } from '../../../query';
 import { getFieldFormats, getQueryService, getUiSettings } from '../../../../public/services';
 
 const detectedTimezone = moment.tz.guess();
@@ -108,7 +109,7 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
     };
   },
   getFormat(agg) {
-    const DateFieldFormat = getFieldFormats().getType(fieldFormats.FIELD_FORMAT_IDS.DATE);
+    const DateFieldFormat = getFieldFormats().getType(FIELD_FORMAT_IDS.DATE);
 
     if (!DateFieldFormat) {
       throw new Error('Unable to retrieve Date Field Format');

@@ -23,12 +23,10 @@ import { i18n } from '@kbn/i18n';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
-
-import { KBN_FIELD_TYPES, fieldFormats } from '../../../../public';
-import { getFieldFormats, getUiSettings } from '../../../../public/services';
-
 import { convertDateRangeToString, DateRangeKey } from './lib/date_range';
-export { convertDateRangeToString, DateRangeKey }; // for BWC
+
+import { KBN_FIELD_TYPES, FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../common';
+import { getFieldFormats, getUiSettings } from '../../../../public/services';
 
 const dateRangeTitle = i18n.translate('data.search.aggs.buckets.dateRangeTitle', {
   defaultMessage: 'Date Range',
@@ -45,10 +43,10 @@ export const dateRangeBucketAgg = new BucketAggType({
     const fieldFormatsService = getFieldFormats();
 
     const formatter = agg.fieldOwnFormatter(
-      fieldFormats.TEXT_CONTEXT_TYPE,
+      TEXT_CONTEXT_TYPE,
       fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.DATE)
     );
-    const DateRangeFormat = fieldFormats.FieldFormat.from(function(range: DateRangeKey) {
+    const DateRangeFormat = FieldFormat.from(function(range: DateRangeKey) {
       return convertDateRangeToString(range, formatter);
     });
     return new DateRangeFormat();

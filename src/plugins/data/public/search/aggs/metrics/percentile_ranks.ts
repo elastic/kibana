@@ -22,7 +22,7 @@ import { MetricAggType } from './metric_agg_type';
 import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
 import { getPercentileValue } from './percentiles_get_value';
 import { METRIC_TYPES } from './metric_agg_types';
-import { fieldFormats, KBN_FIELD_TYPES } from '../../../../public';
+import { FIELD_FORMAT_IDS, KBN_FIELD_TYPES } from '../../../../common';
 import { getFieldFormats } from '../../../../public/services';
 
 // required by the values editor
@@ -80,7 +80,7 @@ export const percentileRanksMetricAgg = new MetricAggType<IPercentileRanksAggCon
   getFormat() {
     const fieldFormatsService = getFieldFormats();
     return (
-      fieldFormatsService.getInstance(fieldFormats.FIELD_FORMAT_IDS.PERCENT) ||
+      fieldFormatsService.getInstance(FIELD_FORMAT_IDS.PERCENT) ||
       fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.NUMBER)
     );
   },

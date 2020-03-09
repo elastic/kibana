@@ -28,8 +28,6 @@ import { setIndexPatterns } from '../../../public/services';
 import { mockDataServices } from '../../../public/search/aggs/test_helpers';
 import { createFiltersFromEvent, EventData } from './create_filters_from_event';
 
-jest.mock('ui/new_platform');
-
 const mockField = {
   name: 'bytes',
   indexPattern: {

@@ -22,7 +22,8 @@ import { IAggConfig } from '../agg_config';
 import { SavedObjectNotFound } from '../../../../../../plugins/kibana_utils/public';
 import { BaseParamType } from './base';
 import { propFilter } from '../filter';
-import { IndexPatternField, indexPatterns, KBN_FIELD_TYPES } from '../../../../public';
+import { isNestedField, KBN_FIELD_TYPES } from '../../../../common';
+import { Field as IndexPatternField } from '../../../index_patterns';
 import { getNotifications } from '../../../../public/services';
 
 const filterByType = propFilter('type');
@@ -113,7 +114,7 @@ export class FieldParamType extends BaseParamType {
       const { onlyAggregatable, scriptable, filterFieldTypes } = this;
 
       if (
-        (onlyAggregatable && (!field.aggregatable || indexPatterns.isNestedField(field))) ||
+        (onlyAggregatable && (!field.aggregatable || isNestedField(field))) ||
         (!scriptable && field.scripted)
       ) {
         return false;

@@ -217,8 +217,6 @@ const nestedOtherResponse = {
   status: 200,
 };
 
-jest.mock('ui/new_platform');
-
 describe('Terms Agg Other bucket helper', () => {
   const typesRegistry = mockAggTypesRegistry();
   const getAggConfigs = (aggs: CreateAggConfigParams[] = []) => {

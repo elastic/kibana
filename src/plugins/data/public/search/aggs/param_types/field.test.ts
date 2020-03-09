@@ -19,7 +19,7 @@
 
 import { BaseParamType } from './base';
 import { FieldParamType } from './field';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../common';
 import { IAggConfig } from '../agg_config';
 
 describe('Field', () => {

@@ -18,7 +18,7 @@
  */
 
 import { tabifyAggResponse } from './tabify';
-import { IndexPattern } from '../../../public';
+import { IndexPattern } from '../../index_patterns';
 import { AggConfigs, IAggConfig, IAggConfigs } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { metricOnly, threeTermBuckets } from 'fixtures/fake_hierarchical_data';

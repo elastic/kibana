@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../public';
+import { KBN_FIELD_TYPES } from '../../../../common';
 import { getFieldFormats } from '../../../../public/services';
 
 const uniqueCountTitle = i18n.translate('data.search.aggs.metrics.uniqueCountTitle', {

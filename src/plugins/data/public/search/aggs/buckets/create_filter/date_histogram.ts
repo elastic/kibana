@@ -19,7 +19,7 @@
 
 import moment from 'moment';
 import { IBucketDateHistogramAggConfig } from '../date_histogram';
-import { esFilters } from '../../../../../public';
+import { buildRangeFilter } from '../../../../../common';
 
 export const createFilterDateHistogram = (
   agg: IBucketDateHistogramAggConfig,
@@ -28,7 +28,7 @@ export const createFilterDateHistogram = (
   const start = moment(key);
   const interval = agg.buckets.getInterval();
 
-  return esFilters.buildRangeFilter(
+  return buildRangeFilter(
     agg.params.field,
     {
       gte: start.toISOString(),

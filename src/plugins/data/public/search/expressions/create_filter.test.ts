@@ -18,14 +18,9 @@
  */
 
 import { createFilter } from './create_filter';
-import {
-  esFilters,
-  fieldFormats,
-  FieldFormatsGetConfigFn,
-  IAggConfig,
-  TabbedTable,
-} from '../../../public';
-import { AggConfigs } from '../aggs';
+import { AggConfigs, IAggConfig } from '../aggs';
+import { TabbedTable } from '../tabify';
+import { isRangeFilter, BytesFormat, FieldFormatsGetConfigFn } from '../../../common';
 import { mockDataServices, mockAggTypesRegistry } from '../aggs/test_helpers';
 
 describe('createFilter', () => {
@@ -41,7 +36,7 @@ describe('createFilter', () => {
       indexPattern: {
         id: '1234',
       },
-      format: new fieldFormats.BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
+      format: new BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
     };
 
     const indexPattern = {
@@ -121,7 +116,7 @@ describe('createFilter', () => {
 
       const [rangeFilter] = filters;
 
-      if (esFilters.isRangeFilter(rangeFilter)) {
+      if (isRangeFilter(rangeFilter)) {
         expect(rangeFilter.range.bytes.gte).toEqual(2048);
         expect(rangeFilter.range.bytes.lt).toEqual(2078);
       }

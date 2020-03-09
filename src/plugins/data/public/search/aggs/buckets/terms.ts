@@ -27,14 +27,9 @@ import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exc
 import { IAggConfigs } from '../agg_configs';
 
 import { Adapters } from '../../../../../inspector/public';
-import {
-  ISearchSource,
-  IFieldFormat,
-  FieldFormatsContentType,
-  KBN_FIELD_TYPES,
-  search,
-} from '../../../../public';
-const { getRequestInspectorStats, getResponseInspectorStats } = search;
+import { ISearchSource } from '../../search_source';
+import { IFieldFormat, FieldFormatsContentType, KBN_FIELD_TYPES } from '../../../../common';
+import { getRequestInspectorStats, getResponseInspectorStats } from '../../expressions';
 
 import {
   buildOtherBucketAgg,

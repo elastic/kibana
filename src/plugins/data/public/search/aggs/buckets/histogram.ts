@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../public';
+import { KBN_FIELD_TYPES } from '../../../../common';
 import { getNotifications, getUiSettings } from '../../../../public/services';
 
 export interface AutoBounds {
