@@ -84,6 +84,7 @@ export const getNodeLogsUrl = ({
   time?: number;
 }): LinkDescriptor => {
   return {
+    app: 'logs',
     pathname: `link-to/${nodeType}-logs/${nodeId}`,
     search: time
       ? {

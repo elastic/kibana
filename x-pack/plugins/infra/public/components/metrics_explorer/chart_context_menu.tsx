@@ -107,6 +107,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
 
   const nodeType = source && options.groupBy && fieldToNodeType(source, options.groupBy);
   const nodeDetailLinkProps = useLinkProps({
+    app: 'metrics',
     ...(nodeType ? createNodeDetailLink(nodeType, series.id, timeRange.from, timeRange.to) : {}),
   });
   const tsvbLinkProps = useLinkProps({
@@ -120,7 +121,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
             values: { name: nodeType },
           }),
           icon: 'metricsApp',
-          ...nodeDetailLinkProps,
+          ...(nodeType ? nodeDetailLinkProps : {}),
           'data-test-subj': 'metricsExplorerAction-ViewNodeMetrics',
         },
       ]

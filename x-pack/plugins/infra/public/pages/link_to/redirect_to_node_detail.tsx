@@ -43,6 +43,7 @@ export const getNodeDetailUrl = ({
   from?: number;
 }): LinkDescriptor => {
   return {
+    app: 'metrics',
     pathname: `link-to/${nodeType}-detail/${nodeId}`,
     search:
       to && from

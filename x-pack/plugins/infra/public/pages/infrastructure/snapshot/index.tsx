@@ -92,7 +92,10 @@ export const SnapshotPage = () => {
               </EuiFlexItem>
               {uiCapabilities?.infrastructure?.configureSource ? (
                 <EuiFlexItem>
-                  <ViewSourceConfigurationButton data-test-subj="configureSourceButton">
+                  <ViewSourceConfigurationButton
+                    app="metrics"
+                    data-test-subj="configureSourceButton"
+                  >
                     {i18n.translate('xpack.infra.configureSourceActionLabel', {
                       defaultMessage: 'Change source configuration',
                     })}

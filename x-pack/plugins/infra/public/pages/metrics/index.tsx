@@ -63,6 +63,7 @@ export const MetricDetail = withMetricPageProviders(
     );
 
     const metricsLinkProps = useLinkProps({
+      app: 'metrics',
       pathname: '/',
     });
 

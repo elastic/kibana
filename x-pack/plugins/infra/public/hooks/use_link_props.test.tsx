@@ -5,22 +5,32 @@
  */
 
 import { encode } from 'rison-node';
-import { createMemoryHistory } from 'history';
+import { createMemoryHistory, LocationDescriptorObject } from 'history';
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { HistoryContext } from '../utils/history_context';
 import { coreMock } from 'src/core/public/mocks';
-import { useLinkProps } from './use_link_props';
+import { useLinkProps, LinkDescriptor } from './use_link_props';
+
+const PREFIX = '/test-basepath/s/test-space/app/';
 
 const coreStartMock = coreMock.createStart();
 
 coreStartMock.application.getUrlForApp.mockImplementation((app, options) => {
-  return `/test-basepath/s/test-space/app/${app}${options?.path}`;
+  return `${PREFIX}${app}${options?.path}`;
 });
 
-// Note: Memory history doesn't support baseName
+const INTERNAL_APP = 'metrics';
+
+// Note: Memory history doesn't support basename,
+// we'll work around this by re-assigning 'createHref' so that
+// it includes a basename, this then acts as our browserHistory instance would.
 const history = createMemoryHistory();
+const originalCreateHref = history.createHref;
+history.createHref = (location: LocationDescriptorObject): string => {
+  return `${PREFIX}${INTERNAL_APP}${originalCreateHref.call(history, location)}`;
+};
 
 const ProviderWrapper: React.FC = ({ children }) => {
   return (
@@ -30,33 +40,37 @@ const ProviderWrapper: React.FC = ({ children }) => {
   );
 };
 
-const renderUseLinkPropsHook = (props?: any) => {
-  return renderHook(() => useLinkProps(props), { wrapper: ProviderWrapper });
+const renderUseLinkPropsHook = (props?: Partial<LinkDescriptor>) => {
+  return renderHook(() => useLinkProps({ app: INTERNAL_APP, ...props }), {
+    wrapper: ProviderWrapper,
+  });
 };
 describe('useLinkProps hook', () => {
   describe('Handles internal linking', () => {
     it('Provides the correct baseline props', () => {
-      const { result } = renderUseLinkPropsHook({});
-      expect(result.current.href).toBe('/');
+      const { result } = renderUseLinkPropsHook({ pathname: '/' });
+      expect(result.current.href).toBe('/test-basepath/s/test-space/app/metrics/');
       expect(result.current.onClick).toBeDefined();
     });
 
     it('Provides the correct props with options', () => {
       const { result } = renderUseLinkPropsHook({
-        pathname: 'inventory',
+        pathname: '/inventory',
         search: {
           type: 'host',
           id: 'some-id',
           count: '12345',
         },
       });
-      expect(result.current.href).toBe('/inventory?type=host&id=some-id&count=12345');
+      expect(result.current.href).toBe(
+        '/test-basepath/s/test-space/app/metrics/inventory?type=host&id=some-id&count=12345'
+      );
       expect(result.current.onClick).toBeDefined();
     });
 
     it('Provides the correct props with more complex encoding', () => {
       const { result } = renderUseLinkPropsHook({
-        pathname: 'inventory',
+        pathname: '/inventory',
         search: {
           type: 'host + host',
           name: 'this name has spaces and ** and %',
@@ -66,7 +80,7 @@ describe('useLinkProps hook', () => {
         },
       });
       expect(result.current.href).toBe(
-        '/inventory?type=host%20%2B%20host&name=this%20name%20has%20spaces%20and%20**%20and%20%25&id=some-id&count=12345&animals=dog,cat,bear'
+        '/test-basepath/s/test-space/app/metrics/inventory?type=host%20%2B%20host&name=this%20name%20has%20spaces%20and%20**%20and%20%25&id=some-id&count=12345&animals=dog,cat,bear'
       );
       expect(result.current.onClick).toBeDefined();
     });
@@ -77,14 +91,14 @@ describe('useLinkProps hook', () => {
         time: { from: 12345, to: 54321 },
       };
       const { result } = renderUseLinkPropsHook({
-        pathname: 'inventory',
+        pathname: '/inventory',
         search: {
           type: 'host + host',
           state: encode(state),
         },
       });
       expect(result.current.href).toBe(
-        '/inventory?type=host%20%2B%20host&state=(refreshInterval:(pause:!t,value:0),time:(from:12345,to:54321))'
+        '/test-basepath/s/test-space/app/metrics/inventory?type=host%20%2B%20host&state=(refreshInterval:(pause:!t,value:0),time:(from:12345,to:54321))'
       );
       expect(result.current.onClick).toBeDefined();
     });
@@ -94,8 +108,9 @@ describe('useLinkProps hook', () => {
     it('Provides the correct baseline props', () => {
       const { result } = renderUseLinkPropsHook({
         app: 'ml',
+        pathname: '/',
       });
-      expect(result.current.href).toBe('/test-basepath/s/test-space/app/ml');
+      expect(result.current.href).toBe('/test-basepath/s/test-space/app/ml/');
       expect(result.current.onClick).not.toBeDefined();
     });
 

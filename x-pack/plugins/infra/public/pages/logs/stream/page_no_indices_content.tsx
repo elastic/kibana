@@ -50,7 +50,7 @@ export const LogsPageNoIndicesContent = () => {
           </EuiFlexItem>
           {canConfigureSource ? (
             <EuiFlexItem>
-              <ViewSourceConfigurationButton data-test-subj="configureSourceButton">
+              <ViewSourceConfigurationButton app="logs" data-test-subj="configureSourceButton">
                 {i18n.translate('xpack.infra.configureSourceActionLabel', {
                   defaultMessage: 'Change source configuration',
                 })}

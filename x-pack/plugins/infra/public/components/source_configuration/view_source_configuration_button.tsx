@@ -11,13 +11,15 @@ import { useLinkProps } from '../../hooks/use_link_props';
 interface ViewSourceConfigurationButtonProps {
   'data-test-subj'?: string;
   children: React.ReactNode;
+  app: 'logs' | 'metrics';
 }
 
 export const ViewSourceConfigurationButton = ({
   'data-test-subj': dataTestSubj,
+  app,
   children,
 }: ViewSourceConfigurationButtonProps) => {
-  const linkProps = useLinkProps({ pathname: '/settings' });
+  const linkProps = useLinkProps({ app, pathname: '/settings' });
   return (
     <EuiButton data-test-subj={dataTestSubj} color="primary" {...linkProps}>
       {children}

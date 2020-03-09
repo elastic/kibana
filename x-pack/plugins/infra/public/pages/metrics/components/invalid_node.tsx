@@ -53,7 +53,7 @@ export const InvalidNodeError: React.FunctionComponent<InvalidNodeErrorProps> = 
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem>
-            <ViewSourceConfigurationButton data-test-subj="configureSourceButton">
+            <ViewSourceConfigurationButton app="metrics" data-test-subj="configureSourceButton">
               <FormattedMessage
                 id="xpack.infra.configureSourceActionLabel"
                 defaultMessage="Change source configuration"

@@ -10,11 +10,13 @@ import { Route } from 'react-router-dom';
 
 import { euiStyled } from '../../../../observability/public';
 import { useLinkProps } from '../../hooks/use_link_props';
+import { LinkDescriptor } from '../../hooks/use_link_props';
 
-interface TabConfiguration {
+interface TabConfig {
   title: string | React.ReactNode;
-  path: string;
 }
+
+type TabConfiguration = TabConfig & LinkDescriptor;
 
 interface RoutedTabsProps {
   tabs: TabConfiguration[];
@@ -26,22 +28,22 @@ export const RoutedTabs = ({ tabs }: RoutedTabsProps) => {
   return (
     <EuiTabs display="condensed">
       {tabs.map(tab => {
-        return <Tab key={`${tab.path}-${tab.title}`} {...tab} />;
+        return <Tab key={`${tab.pathname}-${tab.title}`} {...tab} />;
       })}
     </EuiTabs>
   );
 };
 
-const Tab = ({ title, path }: TabConfiguration) => {
-  const linkProps = useLinkProps({ pathname: path });
+const Tab = ({ title, pathname, app }: TabConfiguration) => {
+  const linkProps = useLinkProps({ app, pathname });
   return (
     <Route
-      path={path}
+      path={pathname}
       children={({ match, history }) => {
         return (
           <TabContainer className="euiTab">
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-            <EuiLink {...linkProps} data-test-subj={`infrastructureNavLink_${path}`}>
+            <EuiLink {...linkProps} data-test-subj={`infrastructureNavLink_${pathname}`}>
               <EuiTab onClick={noop} isSelected={match !== null}>
                 {title}
               </EuiTab>

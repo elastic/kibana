@@ -109,6 +109,7 @@ const getUptimeLink = (logItem: LogEntriesItem): LinkDescriptor | undefined => {
     return undefined;
   }
   return {
+    app: 'uptime',
     hash: '/',
     search: {
       search: `${searchExpressions.join(' or ')}`,
@@ -140,6 +141,7 @@ const getAPMLink = (logItem: LogEntriesItem): LinkDescriptor | undefined => {
     : { rangeFrom: 'now-1y', rangeTo: 'now' };
 
   return {
+    app: 'apm',
     hash: getTraceUrl({ traceId: traceIdEntry.value, rangeFrom, rangeTo }),
   };
 };

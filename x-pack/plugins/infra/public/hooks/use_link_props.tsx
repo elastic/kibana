@@ -14,9 +14,7 @@ import { useHistory } from '../utils/history_context';
 type Search = Record<string, string | string[]>;
 
 export interface LinkDescriptor {
-  // When an app isn't provided (for external linking) the history instance will
-  // be used to ensure either metrics or logs is used.
-  app?: string;
+  app: string;
   pathname?: string;
   hash?: string;
   search?: Search;
@@ -37,34 +35,37 @@ export const useLinkProps = ({ app, pathname, hash, search }: LinkDescriptor): L
     return search ? encodeSearch(search) : undefined;
   }, [search]);
 
-  const href = useMemo(() => {
+  const internalLinkResult = useMemo(() => {
     // When the logs / metrics apps are first mounted a history instance is setup with a 'basename' equal to the
     // 'appBasePath' received from Core's 'AppMountParams', e.g. /BASE_PATH/s/SPACE_ID/app/APP_ID. With internal
     // linking we are using 'createHref' and 'push' on top of this history instance. So a pathname of /inventory used within
     // the metrics app will ultimatey end up as /BASE_PATH/s/SPACE_ID/app/metrics/inventory. React-router responds to this
     // as it is instantiated with the same history instance.
-    if (!app) {
-      return history?.createHref({
-        pathname: pathname ? formatPathname(pathname) : undefined,
-        search: encodedSearch,
-      })
-    } else {
-      // The URI spec defines that the query should appear before the fragment
-      // https://tools.ietf.org/html/rfc3986#section-3 (e.g. url.format()). However, in Kibana, apps that use
-      // hash based routing expect the query to be part of the hash. This will handle that.
-      const mergedHash = hash && encodedSearch ? `${hash}?${encodedSearch}` : hash;
+    return history?.createHref({
+      pathname: pathname ? formatPathname(pathname) : undefined,
+      search: encodedSearch,
+    });
+  }, [history, pathname, encodedSearch]);
 
-      const link = url.format({
-        pathname,
-        hash: mergedHash,
-        search: !hash ? encodedSearch : undefined,
-      });
-      return prefixer(app, link);
-    }
-  }, [app, history, pathname, hash, encodedSearch, prefixer]);
+  const externalLinkResult = useMemo(() => {
+    // The URI spec defines that the query should appear before the fragment
+    // https://tools.ietf.org/html/rfc3986#section-3 (e.g. url.format()). However, in Kibana, apps that use
+    // hash based routing expect the query to be part of the hash. This will handle that.
+    const mergedHash = hash && encodedSearch ? `${hash}?${encodedSearch}` : hash;
+
+    const link = url.format({
+      pathname,
+      hash: mergedHash,
+      search: !hash ? encodedSearch : undefined,
+    });
+
+    return prefixer(app, link);
+  }, [hash, encodedSearch, pathname, prefixer, app]);
 
   const onClick = useMemo(() => {
-    if (!app) {
+    // If these results are equal we know we're trying to navigate within the same application
+    // that the current history instance is representing
+    if (linksAreEquivalent(externalLinkResult, internalLinkResult)) {
       return (e: React.MouseEvent | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
         e.preventDefault();
         if (history) {
@@ -77,10 +78,10 @@ export const useLinkProps = ({ app, pathname, hash, search }: LinkDescriptor): L
     } else {
       return undefined;
     }
-  }, [app, history, pathname, encodedSearch]);
+  }, [internalLinkResult, externalLinkResult, history, pathname, encodedSearch]);
 
   return {
-    href,
+    href: externalLinkResult,
     onClick,
   };
 };
@@ -99,4 +100,10 @@ const validateParams = ({ app, pathname, hash, search }: LinkDescriptor) => {
       'The metrics and logs apps use browserHistory. Please provide a pathname rather than a hash.'
     );
   }
+};
+
+const linksAreEquivalent = (externalLink: string, internalLink: string | undefined): boolean => {
+  // Compares with trailing slashes removed. This handles the case where the pathname is '/'
+  // and 'createHref' will include the '/' but Kibana's 'getUrlForApp' will remove it.
+  return internalLink ? externalLink.replace(/\/$/, '') === internalLink.replace(/\/$/, '') : false;
 };
