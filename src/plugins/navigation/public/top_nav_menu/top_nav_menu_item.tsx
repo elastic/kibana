@@ -72,6 +72,7 @@ export function TopNavMenuItem(props: TopNavMenuData) {
         id={`${props.id}-popover`}
         button={btn}
         isOpen={isPopoverOpen}
+        anchorPosition="downLeft"
         closePopover={() => setPopoverOpen(false)}
       >
         {props.popOverContents}

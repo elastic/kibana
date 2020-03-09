@@ -19,6 +19,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiContextMenuItem } from '@elastic/eui';
+import { EuiContextMenuPanel } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ViewMode } from '../../../../../../../plugins/embeddable/public';
 import { TopNavIds } from './top_nav_ids';
 import { NavAction } from '../types';
@@ -49,7 +52,7 @@ export function getTopNavConfig(
           ];
     case ViewMode.EDIT:
       return [
-        getAddConfig(actions[TopNavIds.ADD]),
+        getAddConfig(actions[TopNavIds.ADD], actions[TopNavIds.VISUALIZE]),
         getSaveConfig(actions[TopNavIds.SAVE]),
         getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
         getOptionsConfig(actions[TopNavIds.OPTIONS]),
@@ -148,16 +151,29 @@ function getCloneConfig(action: NavAction) {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getAddConfig(action: NavAction) {
+function getAddConfig(addExistingAction: NavAction, addNewAction: NavAction) {
   return {
     emphasize: true,
-    iconType: 'plusInCircle',
+    iconType: 'arrowDown',
+    iconRight: true,
     id: 'add',
     popOverContents: (
-      <>
-        <h1>Popover Test</h1>
-        <p>todo: new visualization / existing visualization</p>
-      </>
+      <EuiContextMenuPanel
+        items={[
+          <EuiContextMenuItem key="addExisting" icon="folderOpen" onClick={addExistingAction}>
+            <FormattedMessage
+              id="kbn.dashboard.topNav.addPopover.addExisting"
+              defaultMessage="Select Existing"
+            />
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem key="addNewAction" icon="plusInCircle" onClick={addNewAction}>
+            <FormattedMessage
+              id="kbn.dashboard.topNav.addPopover.addNew"
+              defaultMessage="Create New"
+            />
+          </EuiContextMenuItem>,
+        ]}
+      />
     ),
     label: i18n.translate('kbn.dashboard.topNave.addButtonAriaLabel', {
       defaultMessage: 'Add Panel',

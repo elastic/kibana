@@ -30,6 +30,7 @@ export interface TopNavMenuData {
   tooltip?: string | (() => string);
   emphasize?: boolean;
   iconType?: string;
+  iconRight?: boolean;
   popOverContents?: Element;
 }
 

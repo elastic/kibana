@@ -833,24 +833,15 @@ export class DashboardAppController {
       showCloneModal(onClone, currentTitle);
     };
     navActions[TopNavIds.ADD] = async () => {
-      // if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
-      //   openAddPanelFlyout({
-      //     embeddable: dashboardContainer,
-      //     getAllFactories: embeddable.getEmbeddableFactories,
-      //     getFactory: embeddable.getEmbeddableFactory,
-      //     notifications,
-      //     overlays,
-      //     SavedObjectFinder: getSavedObjectFinder(savedObjects, uiSettings),
-      //   });
-      // }
-      const type = 'visualization';
-      const factory = embeddable.getEmbeddableFactory(type);
-      if (!factory) {
-        throw new EmbeddableFactoryNotFoundError(type);
-      }
-      const explicitInput = await factory.getExplicitInput();
-      if (dashboardContainer) {
-        await dashboardContainer.addNewEmbeddable(type, explicitInput);
+      if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
+        openAddPanelFlyout({
+          embeddable: dashboardContainer,
+          getAllFactories: embeddable.getEmbeddableFactories,
+          getFactory: embeddable.getEmbeddableFactory,
+          notifications,
+          overlays,
+          SavedObjectFinder: getSavedObjectFinder(savedObjects, uiSettings),
+        });
       }
     };
 
