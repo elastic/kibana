@@ -19,14 +19,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const getDefaultFormat = Format => {
-  class DefaultFormat extends Format {
-    static id = '';
-    static resolvedTitle = Format.title;
-    static title = i18n.translate('common.ui.fieldEditor.defaultFormatDropDown', {
-      defaultMessage: '- Default -',
-    });
-  }
-
-  return DefaultFormat;
-};
+export const defaultFeedbackMessage = i18n.translate('kibana_utils.defaultFeedbackMessage', {
+  defaultMessage: 'Have feedback? Please create an issue in {link}.',
+  values: {
+    link:
+      '<a href="https://github.com/elastic/kibana/issues/new/choose" rel="noopener noreferrer" target="_blank">GitHub</a>',
+  },
+});

@@ -3,13 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { decode } from 'rison-node';
-import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
-import { esKuery } from '../../../../../../../src/plugins/data/server';
-import { EndpointAppConstants } from '../../../../common/types';
 
-export const alertListReqSchema = schema.object(
+import { schema, Type } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
+import { decode } from 'rison-node';
+import { fromKueryExpression } from '../../../../../src/plugins/data/common';
+import { EndpointAppConstants } from '../types';
+
+/**
+ * Used to validate GET requests against the index of the alerting APIs.
+ */
+export const alertingIndexGetQuerySchema = schema.object(
   {
     page_size: schema.maybe(
       schema.number({
@@ -26,31 +30,21 @@ export const alertListReqSchema = schema.object(
       schema.arrayOf(schema.string(), {
         minSize: 2,
         maxSize: 2,
-      })
+      }) as Type<[string, string]> // Cast this to a string tuple. `@kbn/config-schema` doesn't do this automatically
     ),
     before: schema.maybe(
       schema.arrayOf(schema.string(), {
         minSize: 2,
         maxSize: 2,
-      })
+      }) as Type<[string, string]> // Cast this to a string tuple. `@kbn/config-schema` doesn't do this automatically
     ),
     sort: schema.maybe(schema.string()),
-    order: schema.maybe(
-      schema.string({
-        validate(value) {
-          if (value !== 'asc' && value !== 'desc') {
-            return i18n.translate('xpack.endpoint.alerts.errors.bad_sort_direction', {
-              defaultMessage: 'must be `asc` or `desc`',
-            });
-          }
-        },
-      })
-    ),
+    order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
     query: schema.maybe(
       schema.string({
         validate(value) {
           try {
-            esKuery.fromKueryExpression(value);
+            fromKueryExpression(value);
           } catch (err) {
             return i18n.translate('xpack.endpoint.alerts.errors.bad_kql', {
               defaultMessage: 'must be valid KQL',
