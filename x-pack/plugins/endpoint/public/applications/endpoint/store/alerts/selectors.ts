@@ -9,6 +9,8 @@ import {
   createSelector,
   createStructuredSelector as createStructuredSelectorWithBadType,
 } from 'reselect';
+import { encode, decode } from 'rison-node';
+import { Query, TimeRange, Filter } from 'src/plugins/data/public';
 import { AlertListState, AlertingIndexUIQueryParams, CreateStructuredSelector } from '../../types';
 import { Immutable, AlertingIndexGetQueryInput } from '../../../../../common/types';
 
@@ -59,6 +61,9 @@ export const uiQueryParams: (
         'page_size',
         'page_index',
         'selected_alert',
+        'query',
+        'date_range',
+        'filters',
       ];
       for (const key of keys) {
         const value = query[key];
@@ -73,6 +78,46 @@ export const uiQueryParams: (
   }
 );
 
+export const searchBarQuery: (state: AlertListState) => Query = createSelector(
+  uiQueryParams,
+  ({ query }) => {
+    if (query !== undefined) {
+      return (decode(query) as unknown) as Query;
+    } else {
+      return { query: '', language: 'kuery' };
+    }
+  }
+);
+
+export const encodedSearchBarDateRange: (state: AlertListState) => string = createSelector(
+  uiQueryParams,
+  ({ date_range: dateRange }) => {
+    if (dateRange === undefined) {
+      return encode({ from: 'now-15m', to: 'now' });
+    } else {
+      return dateRange;
+    }
+  }
+);
+
+export const searchBarDateRange: (state: AlertListState) => TimeRange = createSelector(
+  encodedSearchBarDateRange,
+  encodedDateRange => {
+    return (decode(encodedDateRange) as unknown) as TimeRange;
+  }
+);
+
+export const searchBarFilters: (state: AlertListState) => Filter[] = createSelector(
+  uiQueryParams,
+  ({ filters }) => {
+    if (filters !== undefined) {
+      return (decode(filters) as unknown) as Filter[];
+    } else {
+      return [];
+    }
+  }
+);
+
 /**
  * query params to use when requesting alert data.
  */
@@ -80,9 +125,15 @@ export const apiQueryParams: (
   state: AlertListState
 ) => Immutable<AlertingIndexGetQueryInput> = createSelector(
   uiQueryParams,
-  ({ page_size, page_index }) => ({
+  encodedSearchBarDateRange,
+  ({ page_size, page_index, query, filters }, encodedDateRange) => ({
     page_size,
     page_index,
+    query,
+    // Always send a default date range param to the API
+    // even if there is no date_range param in the url
+    date_range: encodedDateRange,
+    filters,
   })
 );
 
@@ -108,6 +159,3 @@ export const selectedAlertIsLegacyEndpointEvent: (
 });
 
 export const searchBarIndexPatterns = (state: AlertListState) => state.searchBar.patterns;
-export const searchBarQuery = (state: AlertListState) => state.searchBar.query;
-export const searchBarFilters = (state: AlertListState) => state.searchBar.filters;
-export const searchBarDateRange = (state: AlertListState) => state.searchBar.dateRange;

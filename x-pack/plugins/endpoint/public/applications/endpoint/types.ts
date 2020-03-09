@@ -5,7 +5,7 @@
  */
 
 import { Dispatch, MiddlewareAPI } from 'redux';
-import { Query, TimeRange, IIndexPattern, esFilters } from 'src/plugins/data/public';
+import { IIndexPattern } from 'src/plugins/data/public';
 import {
   EndpointMetadata,
   AlertData,
@@ -106,15 +106,6 @@ export interface EndpointAppLocation {
 
 interface AlertsSearchBarState {
   patterns: IIndexPattern[];
-  query: Query;
-  dateRange: TimeRange;
-  filters: esFilters.Filter[];
-}
-
-export interface UserUpdatedAlertsSearchBarFilterPayload {
-  query?: Query;
-  filters?: esFilters.Filter[];
-  dateRange?: TimeRange;
 }
 
 export type AlertListData = AlertResultList;
@@ -158,4 +149,7 @@ export interface AlertingIndexUIQueryParams {
    * If any value is present, show the alert detail view for the selected alert. Should be an ID for an alert event.
    */
   selected_alert?: string;
+  query?: string;
+  date_range?: string;
+  filters?: string;
 }

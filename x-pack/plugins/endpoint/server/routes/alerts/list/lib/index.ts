@@ -7,7 +7,7 @@ import { decode } from 'rison-node';
 import { SearchResponse } from 'elasticsearch';
 import { KibanaRequest } from 'kibana/server';
 import { RequestHandlerContext } from 'src/core/server';
-import { Filter, TimeRange } from '../../../../../../../../src/plugins/data/server';
+import { Query, Filter, TimeRange } from '../../../../../../../../src/plugins/data/server';
 import {
   AlertEvent,
   AlertData,
@@ -36,7 +36,10 @@ export const getRequestData = async (
       : config.alertResultListDefaultDateRange) as unknown) as TimeRange,
 
     // Filtering
-    query: request.query.query,
+    query:
+      request.query.query !== undefined
+        ? ((decode(request.query.query) as unknown) as Query)
+        : { query: '', language: 'kuery' },
     filters:
       request.query.filters !== undefined
         ? ((decode(request.query.filters) as unknown) as Filter[])

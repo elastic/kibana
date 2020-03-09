@@ -6,7 +6,7 @@
 
 import { IIndexPattern } from 'src/plugins/data/public';
 import { Immutable, AlertData } from '../../../../../common/types';
-import { AlertListData, UserUpdatedAlertsSearchBarFilterPayload } from '../../types';
+import { AlertListData } from '../../types';
 
 interface ServerReturnedAlertsData {
   readonly type: 'serverReturnedAlertsData';
@@ -23,19 +23,7 @@ interface ServerReturnedSearchBarIndexPatterns {
   payload: IIndexPattern[];
 }
 
-interface UserUpdatedAlertsSearchBarFilter {
-  type: 'userUpdatedAlertsSearchBarFilter';
-  payload: UserUpdatedAlertsSearchBarFilterPayload;
-}
-
-interface UserSubmittedAlertsSearchBarFilter {
-  type: 'userSubmittedAlertsSearchBarFilter';
-  payload: UserUpdatedAlertsSearchBarFilterPayload;
-}
-
 export type AlertAction =
   | ServerReturnedAlertsData
   | ServerReturnedAlertDetailsData
-  | ServerReturnedSearchBarIndexPatterns
-  | UserUpdatedAlertsSearchBarFilter
-  | UserSubmittedAlertsSearchBarFilter;
+  | ServerReturnedSearchBarIndexPatterns;

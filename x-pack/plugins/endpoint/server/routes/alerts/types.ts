@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Filter, TimeRange } from '../../../../../../src/plugins/data/server';
+import { Query, Filter, TimeRange } from '../../../../../../src/plugins/data/server';
 import { JsonObject } from '../../../../../../src/plugins/kibana_utils/public';
 import { Direction } from '../../../common/types';
 
@@ -33,9 +33,9 @@ export interface AlertSearchQuery {
   pageSize: number;
   pageIndex?: number;
   fromIndex?: number;
-  query?: string;
-  filters?: Filter[];
-  dateRange?: TimeRange;
+  query: Query;
+  filters: Filter[];
+  dateRange: TimeRange;
   sort: string;
   order: Direction;
   searchAfter?: SearchCursor;

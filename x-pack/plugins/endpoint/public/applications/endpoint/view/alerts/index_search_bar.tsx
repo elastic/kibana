@@ -6,18 +6,21 @@
 
 import React from 'react';
 import { memo, useContext, useEffect, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
-import { Query, TimeRange } from 'src/plugins/data/public';
-import { AlertAction } from '../../store/alerts/action';
+import { useHistory } from 'react-router-dom';
+import { encode, RisonValue } from 'rison-node';
+import { Query, TimeRange, Filter } from 'src/plugins/data/public';
+import { urlFromQueryParams } from './url_from_query_params';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
 import * as selectors from '../../store/alerts/selectors';
 import { DepsStartContext } from '../../../endpoint/index';
 
 export const AlertIndexSearchBar = memo(() => {
-  // TODO: Why can't we use AppAction here?
-  const dispatch: (action: AlertAction) => unknown = useDispatch();
+  const history = useHistory();
+  const queryParams = useAlertListSelector(selectors.uiQueryParams);
   const searchBarIndexPatterns = useAlertListSelector(selectors.searchBarIndexPatterns);
   const searchBarQuery = useAlertListSelector(selectors.searchBarQuery);
+  const searchBarDateRange = useAlertListSelector(selectors.searchBarDateRange);
+  const searchBarFilters = useAlertListSelector(selectors.searchBarFilters);
 
   // TODO: Can we import like `import { SearchBar } from '../data/public'`?
   const depsStartContext = useContext(DepsStartContext);
@@ -26,49 +29,34 @@ export const AlertIndexSearchBar = memo(() => {
     query: { filterManager },
   } = depsStartContext.data!;
 
-  // TODO: Is this the only way to do this? Looks like this plugin
-  // doesn't expect an onFiltersUpdated callback or a filters prop.
-  // See: https://github.com/elastic/kibana/blob/master/src/plugins/data/public/ui/search_bar/create_search_bar.tsx#L189
+  // Update the the filters in filterManager when the filters url value (searchBarFilters) changes
   useEffect(() => {
-    const filterSubscription = filterManager.getUpdates$().subscribe({
-      next: () => {
-        dispatch({
-          type: 'userSubmittedAlertsSearchBarFilter',
-          payload: {
-            filters: filterManager.getFilters(),
-          },
-        });
-      },
-    });
-    return () => {
-      filterSubscription.unsubscribe();
-    };
-  }, []);
+    filterManager.setFilters(searchBarFilters);
+  }, [filterManager, searchBarFilters]);
 
-  const onQueryChange = useCallback(
-    (params: { dateRange: TimeRange; query?: Query }) => {
-      dispatch({
-        type: 'userUpdatedAlertsSearchBarFilter',
-        payload: {
-          query: params.query,
-          dateRange: params.dateRange,
-        },
-      });
+  const onFiltersUpdated = useCallback(
+    (filters: Filter[]) => {
+      history.push(
+        urlFromQueryParams({
+          ...queryParams,
+          filters: encode((filters as unknown) as RisonValue),
+        })
+      );
     },
-    [dispatch]
+    [queryParams, history]
   );
 
   const onQuerySubmit = useCallback(
     (params: { dateRange: TimeRange; query?: Query }) => {
-      dispatch({
-        type: 'userSubmittedAlertsSearchBarFilter',
-        payload: {
-          query: params.query,
-          dateRange: params.dateRange,
-        },
-      });
+      history.push(
+        urlFromQueryParams({
+          ...queryParams,
+          query: encode((params.query as unknown) as RisonValue),
+          date_range: encode((params.dateRange as unknown) as RisonValue),
+        })
+      );
     },
-    [dispatch]
+    [history, queryParams]
   );
 
   return (
@@ -79,8 +67,10 @@ export const AlertIndexSearchBar = memo(() => {
           isLoading={false}
           indexPatterns={searchBarIndexPatterns}
           query={searchBarQuery}
+          dateRangeFrom={searchBarDateRange.from}
+          dateRangeTo={searchBarDateRange.to}
           onQuerySubmit={onQuerySubmit}
-          onQueryChange={onQueryChange}
+          onFiltersUpdated={onFiltersUpdated}
           showFilterBar={true}
           showDatePicker={true}
           showQueryBar={true}
