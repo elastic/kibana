@@ -64,7 +64,7 @@ describe('Editor Store', () => {
         payload: { id: '1', whoIs: 'this' } as any,
       });
 
-      expect(s1.textObjectsSaveError['1']).toContain('Cannot assign');
+      expect((s1.textObjectsSaveError['1'] as Error).message).toContain('Cannot assign');
     });
 
     it('deletes and defaults back to existing file', () => {

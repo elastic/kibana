@@ -32,7 +32,7 @@ const exactTextObjectSchema = exact(textObjectSchemaWithId);
 export interface Store {
   currentTextObjectId: string;
   textObjects: Record<string, TextObjectWithId>;
-  textObjectsSaveError: Record<string, string>;
+  textObjectsSaveError: Record<string, Error | string>;
 }
 
 export const initialValue: Store = {
