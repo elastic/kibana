@@ -1,7 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Timeline rendering renders correctly against snapshot 1`] = `
-<Fragment>
+<styled.div
+  data-test-subj="timeline"
+>
   <Styled(EuiFlyoutHeader)
     data-test-subj="eui-flyout-header"
     hasBorder={false}
@@ -15,7 +17,7 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
         ]
       }
     />
-    <WrappedByAutoSizer>
+    <TimelineHeaderContainer>
       <Memo(TimelineHeaderComponent)
         browserFields={
           Object {
@@ -697,7 +699,7 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
           }
         }
       />
-    </WrappedByAutoSizer>
+    </TimelineHeaderContainer>
   </Styled(EuiFlyoutHeader)>
   <Connect(Component)
     id="foo"
@@ -825,5 +827,5 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
   >
     <Component />
   </Connect(Component)>
-</Fragment>
+</styled.div>
 `;
