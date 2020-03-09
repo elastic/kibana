@@ -51,7 +51,7 @@ describe('ingestManager', () => {
     });
 
     it('does not have EPM api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/epm/list').expect(404);
+      await kbnTestServer.request.get(root, '/api/ingest_manager/epm/packages').expect(404);
     });
 
     it('does not have Fleet api', async () => {
@@ -84,7 +84,7 @@ describe('ingestManager', () => {
     });
 
     it('does not have EPM api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/epm/list').expect(404);
+      await kbnTestServer.request.get(root, '/api/ingest_manager/epm/packages').expect(404);
     });
 
     it('does not have Fleet api', async () => {
@@ -123,7 +123,7 @@ describe('ingestManager', () => {
     });
 
     it('does have EPM api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/epm/list').expect(500);
+      await kbnTestServer.request.get(root, '/api/ingest_manager/epm/packages').expect(500);
     });
 
     it('does not have Fleet api', async () => {
@@ -157,7 +157,7 @@ describe('ingestManager', () => {
     });
 
     it('does not have EPM api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/epm/list').expect(404);
+      await kbnTestServer.request.get(root, '/api/ingest_manager/epm/packages').expect(404);
     });
 
     it('does have Fleet api', async () => {
@@ -192,7 +192,7 @@ describe('ingestManager', () => {
     });
 
     it('does have EPM api', async () => {
-      await kbnTestServer.request.get(root, '/api/ingest_manager/epm/list').expect(500);
+      await kbnTestServer.request.get(root, '/api/ingest_manager/epm/packages').expect(500);
     });
 
     it('does have Fleet api', async () => {

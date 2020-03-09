@@ -11,11 +11,14 @@ export const EPM_API_ROOT = `${API_ROOT}/epm`;
 export const FLEET_API_ROOT = `${API_ROOT}/fleet`;
 
 // EPM API routes
+const EPM_PACKAGES_MANY = `${EPM_API_ROOT}/packages`;
+const EPM_PACKAGES_ONE = `${EPM_PACKAGES_MANY}/{pkgkey}`;
 export const EPM_API_ROUTES = {
-  LIST_PATTERN: `${EPM_API_ROOT}/list`,
-  INFO_PATTERN: `${EPM_API_ROOT}/package/{pkgkey}`,
-  INSTALL_PATTERN: `${EPM_API_ROOT}/install/{pkgkey}`,
-  DELETE_PATTERN: `${EPM_API_ROOT}/delete/{pkgkey}`,
+  LIST_PATTERN: EPM_PACKAGES_MANY,
+  INFO_PATTERN: EPM_PACKAGES_ONE,
+  INSTALL_PATTERN: EPM_PACKAGES_ONE,
+  DELETE_PATTERN: EPM_PACKAGES_ONE,
+  FILEPATH_PATTERN: `${EPM_API_ROOT}/package/{pkgkey}/{filePath*}`,
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
 };
 

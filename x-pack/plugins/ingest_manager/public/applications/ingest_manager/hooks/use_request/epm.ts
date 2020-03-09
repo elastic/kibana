@@ -54,6 +54,6 @@ export const sendInstallPackage = (pkgkey: string) => {
 export const sendRemovePackage = (pkgkey: string) => {
   return sendRequest<DeletePackageResponse>({
     path: epmRouteService.getRemovePath(pkgkey),
-    method: 'post',
+    method: 'delete',
   });
 };

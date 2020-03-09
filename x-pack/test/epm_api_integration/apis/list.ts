@@ -55,7 +55,7 @@ export default function({ getService }: FtrProviderContext) {
       const supertest = getService('supertest');
       const fetchPackageList = async () => {
         const response = await supertest
-          .get('/api/ingest_manager/epm/list')
+          .get('/api/ingest_manager/epm/packages')
           .set('kbn-xsrf', 'xxx')
           .expect(200);
         return response.body;
@@ -107,7 +107,7 @@ export default function({ getService }: FtrProviderContext) {
       const supertest = getService('supertest');
       const fetchPackageList = async () => {
         const response = await supertest
-          .get('/api/ingest_manager/epm/list')
+          .get('/api/ingest_manager/epm/packages')
           .set('kbn-xsrf', 'xxx')
           .expect(200);
         return response.body;
