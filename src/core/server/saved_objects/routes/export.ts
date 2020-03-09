@@ -27,6 +27,7 @@ import {
 import { IRouter } from '../../http';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { exportSavedObjectsToStream } from '../export';
+import { validateTypes, validateObjects } from './utils';
 
 export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) => {
   const { maxImportExportSize } = config;
@@ -62,23 +63,21 @@ export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) 
         .getImportableAndExportableTypes()
         .map(t => t.name);
       if (types) {
-        const invalidTypes = types.filter(t => !supportedTypes.includes(t));
-        if (invalidTypes.length) {
+        const validationError = validateTypes(types, supportedTypes);
+        if (validationError) {
           return res.badRequest({
             body: {
-              message: `Trying to export non-exportable type(s): ${invalidTypes.join(', ')}`,
+              message: validationError,
             },
           });
         }
       }
       if (objects) {
-        const invalidObjects = objects.filter(obj => !supportedTypes.includes(obj.type));
-        if (invalidObjects.length) {
+        const validationError = validateObjects(objects, supportedTypes);
+        if (validationError) {
           return res.badRequest({
             body: {
-              message: `Trying to export object(s) with non-exportable types: ${invalidObjects
-                .map(obj => `${obj.type}-${obj.id}`)
-                .join(', ')}`,
+              message: validationError,
             },
           });
         }

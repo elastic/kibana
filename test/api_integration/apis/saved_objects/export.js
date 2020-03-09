@@ -212,7 +212,7 @@ export default function({ getService }) {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: 'Trying to export object(s) with non-exportable types: wigwags-1',
+                message: 'Trying to export object(s) with non-exportable types: wigwags:1',
               });
             });
         });

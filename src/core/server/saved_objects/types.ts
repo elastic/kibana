@@ -246,7 +246,7 @@ export interface SavedObjectsType {
    */
   migrations?: SavedObjectMigrationMap;
   /**
-   * An optional {@link SavedObjectsTypeManagementDefinition | management section} definition for the type.
+   * An optional {@link SavedObjectsTypeManagementDefinition | saved objects management section} definition for the type.
    */
   management?: SavedObjectsTypeManagementDefinition;
 }
@@ -266,8 +266,8 @@ export interface SavedObjectsTypeManagementDefinition {
    */
   defaultSearchField?: string;
   /**
-   * The icon name to display in the management table.
-   * If not defined, no icon will be displayed.
+   * The eui icon name to display in the management table.
+   * If not defined, the default icon will be used.
    */
   icon?: string;
   /**
@@ -276,13 +276,17 @@ export interface SavedObjectsTypeManagementDefinition {
    */
   getTitle?: (savedObject: SavedObject<any>) => string;
   /**
-   * Function returning the url to use to redirect to the edition page of this object.
-   * If not defined, edition will not be allowed.
+   * Function returning the url to use to redirect to the editing page of this object.
+   * If not defined, editing will not be allowed.
    */
   getEditUrl?: (savedObject: SavedObject<any>) => string;
   /**
    * Function returning the url to use to redirect to this object from the management section.
    * If not defined, redirecting to the object will not be allowed.
+   *
+   * @returns an object containing a `path` and `uiCapabilitiesPath` properties. the `path` is the path to
+   *          the object page, relative to the base path. `uiCapabilitiesPath` is the path to check in the
+   *          {@link Capabilities | uiCapabilities} to check if the user has permission to access the object.
    */
   getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
 }
@@ -310,7 +314,8 @@ export interface SavedObjectsLegacyMapping {
 
 /**
  * @internal
- * @deprecated
+ * @deprecated Use {@link SavedObjectsTypeManagementDefinition | management definition} when registering
+ *             from new platform plugins
  */
 export interface SavedObjectsLegacyManagementDefinition {
   [key: string]: SavedObjectsLegacyManagementTypeDefinition;
