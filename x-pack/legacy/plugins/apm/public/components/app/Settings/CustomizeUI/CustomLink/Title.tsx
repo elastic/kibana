@@ -14,8 +14,8 @@ export const Title = () => (
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <h1>
-              {i18n.translate('xpack.apm.settings.customizeUI.customActions', {
-                defaultMessage: 'Custom actions'
+              {i18n.translate('xpack.apm.settings.customizeUI.customLink', {
+                defaultMessage: 'Custom Links'
               })}
             </h1>
           </EuiFlexItem>
@@ -25,10 +25,10 @@ export const Title = () => (
               type="iInCircle"
               position="top"
               content={i18n.translate(
-                'xpack.apm.settings.customizeUI.customActions.info',
+                'xpack.apm.settings.customizeUI.customLink.info',
                 {
                   defaultMessage:
-                    "These actions will be shown in the 'Actions' context menu for the trace and error detail components."
+                    "These links will be shown in the 'Actions' context menu for the transaction detail."
                 }
               )}
             />
