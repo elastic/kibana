@@ -8,6 +8,7 @@
 // Scalars
 // ====================================================
 
+
 export type UnsignedInteger = any;
 
 // ====================================================
@@ -17,14 +18,6 @@ export type UnsignedInteger = any;
 export interface Query {
   /** Get a list of all recorded pings for all monitors */
   allPings: PingResults;
-
-  getMonitors?: LatestMonitorsResult | null;
-
-  getSnapshot?: Snapshot | null;
-
-  getMonitorChartsData?: MonitorChart | null;
-  /** Fetch the most recent event data for a monitor ID, date range, location. */
-  getLatestMonitors: Ping[];
 
   /** Fetches the current state of Uptime monitors for the given parameters. */
   getMonitorStates?: MonitorSummaryResult | null;
@@ -376,32 +369,6 @@ export interface DocCount {
   count: UnsignedInteger;
 }
 
-export interface LatestMonitorsResult {
-  monitors?: LatestMonitor[] | null;
-}
-/** Represents the latest recorded information about a monitor. */
-export interface LatestMonitor {
-  /** The ID of the monitor represented by this data. */
-  id: MonitorKey;
-  /** Information from the latest document. */
-  ping?: Ping | null;
-  /** Buckets of recent up count status data. */
-  upSeries?: MonitorSeriesPoint[] | null;
-  /** Buckets of recent down count status data. */
-  downSeries?: MonitorSeriesPoint[] | null;
-}
-
-export interface MonitorKey {
-  key: string;
-
-  url?: string | null;
-}
-
-export interface MonitorSeriesPoint {
-  x?: UnsignedInteger | null;
-
-  y?: number | null;
-}
 
 export interface Snapshot {
   counts: SnapshotCount;
@@ -415,42 +382,6 @@ export interface SnapshotCount {
   total: number;
 }
 
-
-/** The data used to populate the monitor charts. */
-export interface MonitorChart {
-  /** The average values for the monitor duration. */
-  locationDurationLines: LocationDurationLine[];
-  /** The counts of up/down checks for the monitor. */
-  status: StatusData[];
-  /** The maximum status doc count in this chart. */
-  statusMaxCount: number;
-  /** The maximum duration value in this chart. */
-  durationMaxValue: number;
-}
-
-export interface LocationDurationLine {
-  name: string;
-
-  line: MonitorDurationAveragePoint[];
-}
-/** Represents the average monitor duration ms at a point in time. */
-export interface MonitorDurationAveragePoint {
-  /** The timeseries value for this point. */
-  x: UnsignedInteger;
-  /** The average duration ms for the monitor. */
-  y?: number | null;
-}
-/** Represents a bucket of monitor status information. */
-export interface StatusData {
-  /** The timeseries point for this status data. */
-  x: UnsignedInteger;
-  /** The value of up counts for this point. */
-  up?: number | null;
-  /** The value for down counts for this point. */
-  down?: number | null;
-  /** The total down counts for this point. */
-  total?: number | null;
-}
 
 /** The primary object returned for monitor states. */
 export interface MonitorSummaryResult {
@@ -616,16 +547,6 @@ export interface AllPingsQueryArgs {
   /** The upper limit of the date range. */
   dateRangeEnd: string;
   /** Optional: agent location to filter by. */
-  location?: string | null;
-}
-
-export interface GetMonitorChartsDataQueryArgs {
-  monitorId: string;
-
-  dateRangeStart: string;
-
-  dateRangeEnd: string;
-
   location?: string | null;
 }
 
