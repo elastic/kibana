@@ -151,12 +151,12 @@ describe('saved object migrations', () => {
       `);
     });
 
-    it('does not setup or start plugins', async () => {
+    it('does not start plugins', async () => {
       expect.assertions(2);
       const root = createRootWithCorePlugins({}, { dryRunMigration: true });
       const pluginService = new PluginsService({} as any);
       await root.setup();
-      expect(pluginService.setup).not.toHaveBeenCalled();
+      expect(pluginService.setup).toHaveBeenCalled();
       await root.start();
       expect(pluginService.start).not.toHaveBeenCalled();
       await root.shutdown();

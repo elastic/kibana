@@ -153,10 +153,6 @@ export class Server {
       metrics: metricsSetup,
     };
 
-    if (this.env.cliArgs.dryRunMigration) {
-      return coreSetup;
-    }
-
     const pluginsSetup = await this.plugins.setup(coreSetup);
 
     const renderingSetup = await this.rendering.setup({
@@ -164,6 +160,10 @@ export class Server {
       legacyPlugins,
       plugins: pluginsSetup,
     });
+
+    if (this.env.cliArgs.dryRunMigration) {
+      return coreSetup;
+    }
 
     await this.legacy.setup({
       core: { ...coreSetup, plugins: pluginsSetup, rendering: renderingSetup },
@@ -188,6 +188,8 @@ export class Server {
       uiSettings: uiSettingsStart,
     };
 
+    // Dry run migrations should not start plugins as this can produce
+    // unwanted side-effects.
     if (this.env.cliArgs.dryRunMigration) {
       return this.coreStart;
     }
