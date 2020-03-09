@@ -43,6 +43,7 @@ export function initVisEditorDirective(app, deps) {
             filters: $scope.filters,
             query: $scope.query,
             appState: $scope.appState,
+            linked: !!$scope.savedObj.savedSearchId,
           });
         };
 

@@ -3,7 +3,7 @@
   "value": {
     "aliases": {
     },
-    "index": "my-index",
+    "index": "events-endpoint-1",
     "mappings": {
       "_meta": {
         "version": "1.5.0-dev"

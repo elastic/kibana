@@ -33,6 +33,15 @@ export interface GithubIssue {
   body: string;
 }
 
+/**
+ * Minimal GithubIssue type that can be easily replicated by dry-run helpers
+ */
+export interface GithubIssueMini {
+  number: GithubIssue['number'];
+  body: GithubIssue['body'];
+  html_url: GithubIssue['html_url'];
+}
+
 type RequestOptions = AxiosRequestConfig & {
   safeForDryRun?: boolean;
   maxAttempts?: number;
@@ -162,7 +171,7 @@ export class GithubApi {
   }
 
   async createIssue(title: string, body: string, labels?: string[]) {
-    const resp = await this.request(
+    const resp = await this.request<GithubIssueMini>(
       {
         method: 'POST',
         url: Url.resolve(BASE_URL, 'issues'),
@@ -173,11 +182,13 @@ export class GithubApi {
         },
       },
       {
+        body,
+        number: 999,
         html_url: 'https://dryrun',
       }
     );
 
-    return resp.data.html_url;
+    return resp.data;
   }
 
   private async request<T>(

@@ -11,8 +11,6 @@ import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult } from '../../../types';
 import { ConnectorEditFlyout } from './connector_edit_flyout';
 import { AppContextProvider } from '../../app_context';
-import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 let deps: any;
@@ -22,18 +20,11 @@ describe('connector_edit_flyout', () => {
     const mockes = coreMock.createSetup();
     const [
       {
-        chrome,
-        docLinks,
         application: { capabilities },
       },
     ] = await mockes.getStartServices();
     deps = {
-      chrome,
-      docLinks,
-      dataPlugin: dataPluginMock.createStartContract(),
-      charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       capabilities: {
@@ -44,7 +35,6 @@ describe('connector_edit_flyout', () => {
           show: true,
         },
       },
-      setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: {} as any,
     };
@@ -82,19 +72,20 @@ describe('connector_edit_flyout', () => {
       <AppContextProvider appDeps={deps}>
         <ActionsConnectorsContextProvider
           value={{
-            addFlyoutVisible: false,
-            setAddFlyoutVisibility: state => {},
-            editFlyoutVisible: true,
-            setEditFlyoutVisibility: state => {},
-            actionTypesIndex: {
-              'test-action-type-id': { id: 'test-action-type-id', name: 'test', enabled: true },
-            },
+            http: deps.http,
+            toastNotifications: deps.toastNotifications,
+            capabilities: deps.capabilities,
+            actionTypeRegistry: deps.actionTypeRegistry,
             reloadConnectors: () => {
               return new Promise<void>(() => {});
             },
           }}
         >
-          <ConnectorEditFlyout initialConnector={connector} />
+          <ConnectorEditFlyout
+            initialConnector={connector}
+            editFlyoutVisible={true}
+            setEditFlyoutVisibility={state => {}}
+          />
         </ActionsConnectorsContextProvider>
       </AppContextProvider>
     );

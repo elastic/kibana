@@ -28,11 +28,21 @@ import { Logger } from '../logging';
 
 const FILE_ENCODING = 'utf8';
 const FILE_NAME = 'uuid';
+/**
+ * This UUID was inadvertantly shipped in the 7.6.0 distributable and should be deleted if found.
+ * See https://github.com/elastic/kibana/issues/57673 for more info.
+ */
+export const UUID_7_6_0_BUG = `ce42b997-a913-4d58-be46-bb1937feedd6`;
 
-export async function resolveInstanceUuid(
-  configService: IConfigService,
-  logger: Logger
-): Promise<string> {
+export async function resolveInstanceUuid({
+  configService,
+  syncToFile,
+  logger,
+}: {
+  configService: IConfigService;
+  syncToFile: boolean;
+  logger: Logger;
+}): Promise<string> {
   const [pathConfig, serverConfig] = await Promise.all([
     configService
       .atPath<PathConfigType>(pathConfigDef.path)
@@ -46,7 +56,7 @@ export async function resolveInstanceUuid(
 
   const uuidFilePath = join(pathConfig.data, FILE_NAME);
 
-  const uuidFromFile = await readUuidFromFile(uuidFilePath);
+  const uuidFromFile = await readUuidFromFile(uuidFilePath, logger);
   const uuidFromConfig = serverConfig.uuid;
 
   if (uuidFromConfig) {
@@ -61,7 +71,7 @@ export async function resolveInstanceUuid(
       } else {
         logger.debug(`Updating Kibana instance UUID to: ${uuidFromConfig} (was: ${uuidFromFile})`);
       }
-      await writeUuidToFile(uuidFilePath, uuidFromConfig);
+      await writeUuidToFile(uuidFilePath, uuidFromConfig, syncToFile);
       return uuidFromConfig;
     }
   }
@@ -69,7 +79,7 @@ export async function resolveInstanceUuid(
     const newUuid = uuid.v4();
     // no uuid either in config or file, we need to generate and write it.
     logger.debug(`Setting new Kibana instance UUID: ${newUuid}`);
-    await writeUuidToFile(uuidFilePath, newUuid);
+    await writeUuidToFile(uuidFilePath, newUuid, syncToFile);
     return newUuid;
   }
 
@@ -77,10 +87,17 @@ export async function resolveInstanceUuid(
   return uuidFromFile;
 }
 
-async function readUuidFromFile(filepath: string): Promise<string | undefined> {
+async function readUuidFromFile(filepath: string, logger: Logger): Promise<string | undefined> {
   try {
     const content = await readFile(filepath);
-    return content.toString(FILE_ENCODING);
+    const decoded = content.toString(FILE_ENCODING);
+
+    if (decoded === UUID_7_6_0_BUG) {
+      logger.debug(`UUID from 7.6.0 bug detected, ignoring file UUID`);
+      return undefined;
+    } else {
+      return decoded;
+    }
   } catch (e) {
     if (e.code === 'ENOENT') {
       // non-existent uuid file is ok, we will create it.
@@ -94,7 +111,11 @@ async function readUuidFromFile(filepath: string): Promise<string | undefined> {
   }
 }
 
-async function writeUuidToFile(filepath: string, uuidValue: string) {
+async function writeUuidToFile(filepath: string, uuidValue: string, syncToFile: boolean) {
+  if (!syncToFile) {
+    return;
+  }
+
   try {
     return await writeFile(filepath, uuidValue, { encoding: FILE_ENCODING });
   } catch (e) {

@@ -67,7 +67,7 @@ export class ESTermSource extends AbstractESAggSource {
     return this._descriptor.whereQuery;
   }
 
-  formatMetricKey(aggType, fieldName) {
+  getAggKey(aggType, fieldName) {
     const metricKey =
       aggType !== AGG_TYPE.COUNT ? `${aggType}${AGG_DELIMITER}${fieldName}` : aggType;
     return `${FIELD_NAME_PREFIX}${metricKey}${GROUP_BY_DELIMITER}${
@@ -75,21 +75,13 @@ export class ESTermSource extends AbstractESAggSource {
     }.${this._termField.getName()}`;
   }
 
-  formatMetricLabel(type, fieldName) {
-    switch (type) {
-      case AGG_TYPE.COUNT:
-        return i18n.translate('xpack.maps.source.esJoin.countLabel', {
+  getAggLabel(aggType, fieldName) {
+    return aggType === AGG_TYPE.COUNT
+      ? i18n.translate('xpack.maps.source.esJoin.countLabel', {
           defaultMessage: `Count of {indexPatternTitle}`,
           values: { indexPatternTitle: this._descriptor.indexPatternTitle },
-        });
-      case AGG_TYPE.TERMS:
-        return i18n.translate('xpack.maps.source.esJoin.topTermLabel', {
-          defaultMessage: `Top {fieldName}`,
-          values: { fieldName },
-        });
-      default:
-        return `${type} ${fieldName}`;
-    }
+        })
+      : super.getAggLabel(aggType, fieldName);
   }
 
   async getPropertiesMap(searchFilters, leftSourceName, leftFieldName, registerCancelCallback) {
@@ -113,10 +105,16 @@ export class ESTermSource extends AbstractESAggSource {
       requestName: `${this._descriptor.indexPatternTitle}.${this._termField.getName()}`,
       searchSource,
       registerCancelCallback,
-      requestDescription: this._getRequestDescription(leftSourceName, leftFieldName),
+      requestDescription: i18n.translate('xpack.maps.source.esJoin.joinDescription', {
+        defaultMessage: `Elasticsearch terms aggregation request, left source: {leftSource}, right source: {rightSource}`,
+        values: {
+          leftSource: `${leftSourceName}:${leftFieldName}`,
+          rightSource: `${this._descriptor.indexPatternTitle}:${this._termField.getName()}`,
+        },
+      }),
     });
 
-    const countPropertyName = this.formatMetricKey(AGG_TYPE.COUNT);
+    const countPropertyName = this.getAggKey(AGG_TYPE.COUNT);
     return {
       propertiesMap: extractPropertiesMap(rawEsData, countPropertyName),
     };
@@ -124,30 +122,6 @@ export class ESTermSource extends AbstractESAggSource {
 
   isFilterByMapBounds() {
     return false;
-  }
-
-  _getRequestDescription(leftSourceName, leftFieldName) {
-    const metrics = this.getMetricFields().map(esAggMetric => esAggMetric.getRequestDescription());
-    const joinStatement = [];
-    joinStatement.push(
-      i18n.translate('xpack.maps.source.esJoin.joinLeftDescription', {
-        defaultMessage: `Join {leftSourceName}:{leftFieldName} with`,
-        values: { leftSourceName, leftFieldName },
-      })
-    );
-    joinStatement.push(`${this._descriptor.indexPatternTitle}:${this._termField.getName()}`);
-    joinStatement.push(
-      i18n.translate('xpack.maps.source.esJoin.joinMetricsDescription', {
-        defaultMessage: `for metrics {metrics}`,
-        values: { metrics: metrics.join(',') },
-      })
-    );
-    return i18n.translate('xpack.maps.source.esJoin.joinDescription', {
-      defaultMessage: `Elasticsearch terms aggregation request for {description}`,
-      values: {
-        description: joinStatement.join(' '),
-      },
-    });
   }
 
   async getDisplayName() {

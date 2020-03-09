@@ -6,6 +6,7 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
+import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
@@ -13,7 +14,6 @@ import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   FlowTargetSourceDest,
   GetNetworkTopNFlowQuery,
-  GetNetworkTopNFlowQueryComponent,
   NetworkTopNFlowEdges,
   NetworkTopTablesSortField,
   PageInfoPaginated,
@@ -23,6 +23,7 @@ import { inputsModel, inputsSelectors, networkModel, networkSelectors, State } f
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
+import { networkTopNFlowQuery } from './index.gql_query';
 
 const ID = 'networkTopNFlowQuery';
 
@@ -40,7 +41,7 @@ export interface NetworkTopNFlowArgs {
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: NetworkTopNFlowArgs) => React.ReactElement;
+  children: (args: NetworkTopNFlowArgs) => React.ReactNode;
   flowTarget: FlowTargetSourceDest;
   ip?: string;
   type: networkModel.NetworkType;
@@ -93,9 +94,10 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
       },
     };
     return (
-      <GetNetworkTopNFlowQueryComponent
+      <Query<GetNetworkTopNFlowQuery.Query, GetNetworkTopNFlowQuery.Variables>
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
+        query={networkTopNFlowQuery}
         skip={skip}
         variables={variables}
       >
@@ -135,7 +137,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplatePaginated<
             totalCount: getOr(-1, 'source.NetworkTopNFlow.totalCount', data),
           });
         }}
-      </GetNetworkTopNFlowQueryComponent>
+      </Query>
     );
   }
 }

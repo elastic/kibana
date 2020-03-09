@@ -59,6 +59,10 @@ export interface RenderDeps {
   savedDashboards: SavedObjectLoader;
   dashboardConfig: KibanaLegacyStart['dashboardConfig'];
   dashboardCapabilities: any;
+  embeddableCapabilities: {
+    visualizeCapabilities: any;
+    mapsCapabilities: any;
+  };
   uiSettings: IUiSettingsClient;
   chrome: ChromeStart;
   addBasePath: (path: string) => string;

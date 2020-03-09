@@ -20,7 +20,7 @@ import { Draggable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
-import { Scalars } from '../../graphql/types';
+import { ToStringArray } from '../../graphql/types';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { DragEffects } from '../drag_and_drop/draggable_wrapper';
@@ -159,7 +159,7 @@ export const getColumns = ({
     name: i18n.VALUE,
     sortable: true,
     truncateText: false,
-    render: (values: Scalars['ToStringArray'] | null | undefined, data: EventFieldsData) => (
+    render: (values: ToStringArray | null | undefined, data: EventFieldsData) => (
       <EuiFlexGroup direction="column" alignItems="flexStart" component="span" gutterSize="none">
         {values != null &&
           values.map((value, i) => (

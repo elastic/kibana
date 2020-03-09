@@ -18,7 +18,7 @@
  */
 
 export { IAggConfig } from './agg_config';
-export { IAggConfigs } from './agg_configs';
+export { CreateAggConfigParams, IAggConfigs } from './agg_configs';
 export { IAggType } from './agg_type';
 export { AggParam, AggParamOption } from './agg_params';
 export { IFieldParamType } from './param_types';
@@ -26,4 +26,3 @@ export { IMetricAggType } from './metrics/metric_agg_type';
 export { DateRangeKey } from './buckets/date_range';
 export { IpRangeKey } from './buckets/ip_range';
 export { OptionedValueProp, OptionedParamEditorProps } from './param_types/optioned';
-export { ISchemas } from './schemas';

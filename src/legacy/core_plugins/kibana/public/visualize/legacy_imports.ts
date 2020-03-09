@@ -24,17 +24,7 @@
  * directly where they are needed.
  */
 
-export { State } from 'ui/state_management/state';
-// @ts-ignore
-export { GlobalStateProvider } from 'ui/state_management/global_state';
-// @ts-ignore
-export { StateManagementConfigProvider } from 'ui/state_management/config_provider';
-export { PersistedState } from 'ui/persisted_state';
-
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-// @ts-ignore
-export { EventsProvider } from 'ui/events';
-export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
 // @ts-ignore
 export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
