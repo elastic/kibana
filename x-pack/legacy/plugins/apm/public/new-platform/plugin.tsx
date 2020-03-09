@@ -39,6 +39,7 @@ import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { setReadonlyBadge } from './updateBadge';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { APMIndicesPermission } from '../components/app/APMIndicesPermission';
+import { createCallApmApi } from '../services/rest/createCallApmApi';
 
 export const REACT_APP_ROOT_ID = 'react-apm-root';
 
@@ -104,6 +105,7 @@ export class ApmPlugin
   public start(core: CoreStart) {
     const i18nCore = core.i18n;
     const plugins = this.setupPlugins;
+    createCallApmApi(core.http);
 
     // Once we're actually an NP plugin we'll get the config from the
     // initializerContext like:
@@ -157,7 +159,7 @@ export class ApmPlugin
     );
 
     // create static index pattern and store as saved object. Not needed by APM UI but for legacy reasons in Discover, Dashboard etc.
-    createStaticIndexPattern(core.http).catch(e => {
+    createStaticIndexPattern().catch(e => {
       // eslint-disable-next-line no-console
       console.log('Error fetching static index pattern', e);
     });

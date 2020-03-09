@@ -24,7 +24,7 @@ export const getActions = ({
     icon: 'trash',
     name: i18n.DELETE,
     // eslint-disable-next-line no-console
-    onClick: ({ caseId }: Case) => console.log('TO DO Delete case', caseId),
+    onClick: ({ id }: Case) => console.log('TO DO Delete case', id),
     type: 'icon',
     'data-test-subj': 'action-delete',
   },
@@ -37,7 +37,7 @@ export const getActions = ({
           dispatchUpdate({
             updateKey: 'state',
             updateValue: 'closed',
-            caseId: theCase.caseId,
+            caseId: theCase.id,
             version: theCase.version,
           }),
         type: 'icon',
@@ -51,7 +51,7 @@ export const getActions = ({
           dispatchUpdate({
             updateKey: 'state',
             updateValue: 'open',
-            caseId: theCase.caseId,
+            caseId: theCase.id,
             version: theCase.version,
           }),
         type: 'icon',

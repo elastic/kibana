@@ -45,7 +45,10 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-export const waitForPromises = () => new Promise(resolve => setTimeout(resolve, 0));
+const waitForPromises = async () =>
+  act(async () => {
+    await new Promise(resolve => setTimeout(resolve));
+  });
 
 /**
  * this works but logs ugly error messages until we're using React 16.9
