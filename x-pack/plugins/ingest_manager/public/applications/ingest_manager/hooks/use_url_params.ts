@@ -5,18 +5,24 @@
  */
 
 import { useLocation } from 'react-router-dom';
-import { parse } from 'query-string';
-import { useEffect, useState } from 'react';
+import { parse, stringify } from 'query-string';
+import { useCallback, useEffect, useState } from 'react';
 
 /**
- * Parses `search` params and returns an object with them. Object will be recreated
- * every time `search` changes.
+ * Parses `search` params and returns an object with them along with a `toUrlParams` function
+ * that allows being able to retrieve a stringified version of an object (default is the
+ * `urlParams` that was parsed) for use in the url.
+ * Object will be recreated every time `search` changes.
  */
 export function useUrlParams() {
   const { search } = useLocation();
   const [urlParams, setUrlParams] = useState(() => parse(search));
+  const toUrlParams = useCallback((params = urlParams) => stringify(params), [urlParams]);
   useEffect(() => {
     setUrlParams(parse(search));
   }, [search]);
-  return urlParams;
+  return {
+    urlParams,
+    toUrlParams,
+  };
 }
