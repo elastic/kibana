@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { ActionByType } from './actions/action';
+import { ActionInternal } from './actions/action_internal';
 import { TriggerInternal } from './triggers/trigger_internal';
 
 export type TriggerRegistry = Map<TriggerId, TriggerInternal<any>>;
-export type ActionRegistry = Map<string, ActionByType<any>>;
+export type ActionRegistry = Map<string, ActionInternal<any>>;
 export type TriggerToActionsRegistry = Map<TriggerId, string[]>;
 
 const DEFAULT_TRIGGER = '';

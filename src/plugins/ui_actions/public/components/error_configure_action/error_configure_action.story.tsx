@@ -17,5 +17,15 @@
  * under the License.
  */
 
-export { createHelloWorldAction } from './hello_world_action';
-export * from './go_to_url_action';
+import * as React from 'react';
+import { storiesOf } from '@storybook/react';
+import { ErrorConfigureAction } from '.';
+import { createSampleGoToUrlAction } from '../../tests';
+import { ActionInternal } from '../../actions';
+
+const action = new ActionInternal(createSampleGoToUrlAction());
+
+storiesOf('components/ErrorConfigureAction', module)
+  .add('default', () => <ErrorConfigureAction />)
+  .add('with action', () => <ErrorConfigureAction action={action} />)
+  .add('with action and message', () => <ErrorConfigureAction action={action} msg="Foo bar." />);

@@ -17,5 +17,24 @@
  * under the License.
  */
 
-export { createHelloWorldAction } from './hello_world_action';
-export * from './go_to_url_action';
+import React from 'react';
+import { EuiCallOut } from '@elastic/eui';
+import { txtSorryActionConfigurationError } from './i18n';
+import { AnyActionInternal } from '../../actions';
+import { ActionIdentifier } from './action_identifier';
+
+export interface ErrorConfigureActionProps {
+  msg?: React.ReactNode;
+  action?: AnyActionInternal;
+}
+
+export const ErrorConfigureAction: React.FC<ErrorConfigureActionProps> = ({
+  action,
+  msg,
+  children,
+}) => (
+  <EuiCallOut title={txtSorryActionConfigurationError} color="danger" iconType="alert">
+    {(msg || children) && <p>{msg || children}</p>}
+    {action && <ActionIdentifier action={action} />}
+  </EuiCallOut>
+);

@@ -17,5 +17,11 @@
  * under the License.
  */
 
-export { createHelloWorldAction } from './hello_world_action';
-export * from './go_to_url_action';
+import { i18n } from '@kbn/i18n';
+
+export const txtSorryActionConfigurationError = i18n.translate(
+  'uiActions.components.sorryActionConfigurationError',
+  {
+    defaultMessage: 'Sorry, action configuration error',
+  }
+);

@@ -17,5 +17,8 @@
  * under the License.
  */
 
-export { createHelloWorldAction } from './hello_world_action';
-export * from './go_to_url_action';
+import { i18n } from '@kbn/i18n';
+
+export const txtMissingCollectConfig = i18n.translate('uiActions.components.missingCollectConfig', {
+  defaultMessage: 'Dynamic action must have CollectConfig component defined.',
+});

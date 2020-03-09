@@ -18,7 +18,7 @@
  */
 
 import { UiActionsService } from './ui_actions_service';
-import { Action, createAction } from '../actions';
+import { Action, ActionInternal, createAction } from '../actions';
 import { createHelloWorldAction } from '../tests/test_samples';
 import { ActionRegistry, TriggerRegistry, TriggerId, ActionType } from '../types';
 import { Trigger } from '../triggers';
@@ -143,7 +143,8 @@ describe('UiActionsService', () => {
       const list1 = service.getTriggerActions(FOO_TRIGGER);
 
       expect(list1).toHaveLength(1);
-      expect(list1).toEqual([action1]);
+      expect(list1[0]).toBeInstanceOf(ActionInternal);
+      expect(list1[0].id).toBe(action1.id);
 
       service.attachAction(FOO_TRIGGER, action2);
       const list2 = service.getTriggerActions(FOO_TRIGGER);
@@ -164,7 +165,7 @@ describe('UiActionsService', () => {
       service.registerAction(helloWorldAction);
 
       expect(actions.size - length).toBe(1);
-      expect(actions.get(helloWorldAction.id)).toBe(helloWorldAction);
+      expect((actions.get(helloWorldAction.id) as any).id).toBe(helloWorldAction.id);
     });
 
     test('getTriggerCompatibleActions returns attached actions', async () => {

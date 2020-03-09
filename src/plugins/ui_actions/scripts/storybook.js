@@ -17,5 +17,10 @@
  * under the License.
  */
 
-export { createHelloWorldAction } from './hello_world_action';
-export * from './go_to_url_action';
+import { join } from 'path';
+
+// eslint-disable-next-line
+require('@kbn/storybook').runStorybookCli({
+  name: 'ui_actions',
+  storyGlobs: [join(__dirname, '..', 'public', 'components', '**', '*.story.tsx')],
+});

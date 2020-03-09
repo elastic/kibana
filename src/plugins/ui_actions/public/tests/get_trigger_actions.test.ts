@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Action } from '../actions';
+import { ActionInternal, Action } from '../actions';
 import { uiActionsPluginMock } from '../mocks';
 import { TriggerId, ActionType } from '../types';
 
@@ -51,7 +51,8 @@ test('returns actions set on trigger', () => {
   const list1 = start.getTriggerActions('trigger' as TriggerId);
 
   expect(list1).toHaveLength(1);
-  expect(list1).toEqual([action1]);
+  expect(list1[0]).toBeInstanceOf(ActionInternal);
+  expect(list1[0].id).toBe(action1.id);
 
   setup.attachAction('trigger' as TriggerId, action2);
   const list2 = start.getTriggerActions('trigger' as TriggerId);

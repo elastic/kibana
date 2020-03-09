@@ -17,5 +17,27 @@
  * under the License.
  */
 
-export { createHelloWorldAction } from './hello_world_action';
-export * from './go_to_url_action';
+import React from 'react';
+import { EuiCode } from '@elastic/eui';
+import { AnyActionInternal } from '../../actions';
+
+export interface ActionIdentifierProps {
+  action: AnyActionInternal;
+}
+
+export const ActionIdentifier: React.FC<ActionIdentifierProps> = ({ action }) => (
+  <p>
+    {action.id && (
+      <>
+        Action ID: <EuiCode>{action.id}</EuiCode>
+        <br />
+      </>
+    )}
+    {action.type && (
+      <>
+        Action type: <EuiCode>{action.type}</EuiCode>
+        <br />
+      </>
+    )}
+  </p>
+);

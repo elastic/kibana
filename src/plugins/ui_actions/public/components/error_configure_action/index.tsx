@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { createHelloWorldAction } from './hello_world_action';
-export * from './go_to_url_action';
+export * from './error_configure_action';

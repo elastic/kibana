@@ -19,10 +19,13 @@
 
 import { UiComponent } from 'src/plugins/kibana_utils/common';
 import { ActionType, ActionContextMapping } from '../types';
+import { Presentable } from '../util/presentable';
+import { Configurable } from '../util/configurable';
 
 export type ActionByType<T extends ActionType> = Action<ActionContextMapping[T], T>;
 
-export interface Action<Context = {}, T = ActionType> {
+export interface Action<Context extends {} = {}, T = ActionType>
+  extends Partial<Presentable<Context>> {
   /**
    * Determined the order when there is more than one action matched to a trigger.
    * Higher numbers are displayed first.
@@ -72,3 +75,48 @@ export interface Action<Context = {}, T = ActionType> {
    */
   execute(context: Context): Promise<void>;
 }
+
+/**
+ * A convenience interface used to register an action.
+ */
+export interface ActionDefinition<
+  Context extends object = object,
+  Config extends object | undefined = undefined
+> extends Partial<Presentable<Context>>, Partial<Configurable<Config, Context>> {
+  /**
+   * ID of the action that uniquely identifies this action in the actions registry.
+   */
+  readonly id: string;
+
+  /**
+   * ID of the factory for this action. Used to construct dynamic actions.
+   */
+  readonly type?: ActionType;
+
+  getHref?(context: Context): string | undefined;
+
+  /**
+   * Executes the action.
+   */
+  execute(context: Context): Promise<void>;
+}
+
+export type AnyActionDefinition = ActionDefinition<any, any>;
+export type ActionContext<A> = A extends ActionDefinition<infer Context, any> ? Context : never;
+export type ActionConfig<A> = A extends ActionDefinition<any, infer Config> ? Config : never;
+
+/**
+ * A convenience interface used to register a dynamic action.
+ *
+ * A dynamic action is one that can be create by user and registered into the
+ * actions registry at runtime. User can also provide custom config for this
+ * action. And dynamic actions can be serialized for storage and deserialized
+ * back.
+ */
+export type DynamicActionDefinition<
+  Context extends object = object,
+  Config extends object | undefined = undefined
+> = ActionDefinition<Context, Config> &
+  Required<Pick<ActionDefinition<Context, Config>, 'CollectConfig' | 'defaultConfig' | 'type'>>;
+
+export type AnyDynamicActionDefinition = DynamicActionDefinition<any, any>;

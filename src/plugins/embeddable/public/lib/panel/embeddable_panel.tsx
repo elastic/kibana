@@ -245,7 +245,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       new EditPanelAction(this.props.getEmbeddableFactory),
     ];
 
-    const sorted = actions
+    const sorted = (actions as Array<Action<EmbeddableContext>>)
       .concat(extraActions)
       .sort((a: Action<EmbeddableContext>, b: Action<EmbeddableContext>) => {
         const bOrder = b.order || 0;

@@ -25,7 +25,13 @@ import {
   TriggerContextMapping,
   ActionType,
 } from '../types';
-import { Action, ActionByType } from '../actions';
+import {
+  ActionDefinition,
+  ActionInternal,
+  AnyActionInternal,
+  Action,
+  ActionByType,
+} from '../actions';
 import { Trigger, TriggerContext } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import { TriggerContract } from '../triggers/trigger_contract';
@@ -76,20 +82,22 @@ export class UiActionsService {
     return trigger.contract;
   };
 
-  public readonly registerAction = <T extends ActionType>(action: ActionByType<T>) => {
-    if (this.actions.has(action.id)) {
-      throw new Error(`Action [action.id = ${action.id}] already registered.`);
+  public readonly registerAction = <A extends ActionDefinition<any, any>>(definition: A) => {
+    if (this.actions.has(definition.id)) {
+      throw new Error(`Action [action.id = ${definition.id}] already registered.`);
     }
 
-    this.actions.set(action.id, action);
+    this.actions.set(definition.id, new ActionInternal(definition));
   };
 
-  public readonly getAction = <T extends ActionType>(id: string): ActionByType<T> => {
+  public readonly getAction = <T extends ActionDefinition<any, any>>(
+    id: string
+  ): ActionInternal<T> => {
     if (!this.actions.has(id)) {
       throw new Error(`Action [action.id = ${id}] not registered.`);
     }
 
-    return this.actions.get(id) as ActionByType<T>;
+    return this.actions.get(id) as ActionInternal<T>;
   };
 
   public readonly attachAction = <TType extends TriggerId, AType extends ActionType>(
@@ -102,7 +110,8 @@ export class UiActionsService {
       this.registerAction(action);
     } else {
       const registeredAction = this.actions.get(action.id);
-      if (registeredAction !== action) {
+      // todo - verify this
+      if (registeredAction!.id !== action.id) {
         throw new Error(`A different action instance with this id is already registered.`);
       }
     }
@@ -147,9 +156,10 @@ export class UiActionsService {
 
     const actionIds = this.triggerToActions.get(triggerId);
 
-    const actions = actionIds!.map(actionId => this.actions.get(actionId)).filter(Boolean) as Array<
-      Action<TriggerContextMapping[T]>
-    >;
+    const actions = actionIds!
+      .map(actionId => this.actions.get(actionId) as AnyActionInternal)
+      .filter(Boolean)
+      .map(({ contract }) => contract) as Array<Action<TriggerContextMapping[T]>>;
 
     return actions as Array<Action<TriggerContext<T>>>;
   };
