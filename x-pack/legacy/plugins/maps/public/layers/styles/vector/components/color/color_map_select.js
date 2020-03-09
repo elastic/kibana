@@ -93,22 +93,28 @@ export class ColorMapSelect extends Component {
       return null;
     }
 
+    let colorStopEditor;
     if (this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
-      return (
+      colorStopEditor = (
         <ColorStopsOrdinal
           colorStops={this.state.customColorMap}
           onChange={this._onCustomColorMapChange}
         />
       );
-    }
+    } else
+      colorStopEditor = (
+        <ColorStopsCategorical
+          colorStops={this.state.customColorMap}
+          field={this.props.styleProperty.getField()}
+          getValueSuggestions={this.props.styleProperty.getValueSuggestions}
+          onChange={this._onCustomColorMapChange}
+        />
+      );
 
     return (
-      <ColorStopsCategorical
-        colorStops={this.state.customColorMap}
-        field={this.props.styleProperty.getField()}
-        getValueSuggestions={this.props.styleProperty.getValueSuggestions}
-        onChange={this._onCustomColorMapChange}
-      />
+      <EuiFlexGroup>
+        <EuiFlexItem>{colorStopEditor}</EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
@@ -154,12 +160,8 @@ export class ColorMapSelect extends Component {
     return (
       <Fragment>
         {this._renderColorMapSelections()}
-
         <EuiSpacer size="s" />
-
-        <EuiFlexGroup>
-          <EuiFlexItem>{this._renderColorStopsInput()}</EuiFlexItem>
-        </EuiFlexGroup>
+        {this._renderColorStopsInput()}
       </Fragment>
     );
   }
