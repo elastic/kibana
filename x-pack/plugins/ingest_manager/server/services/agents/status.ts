@@ -15,6 +15,7 @@ import {
   AGENT_TYPE_TEMPORARY,
   AGENT_TYPE_EPHEMERAL,
 } from '../../constants';
+import { AgentStatusKueryHelper } from '../../../common/services';
 
 export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentStatus {
   const { type, last_checkin: lastCheckIn } = agent;
@@ -52,7 +53,11 @@ export async function getAgentStatusForConfig(
   configId?: string
 ) {
   const [all, error, offline] = await Promise.all(
-    [undefined, buildKueryForErrorAgents(), buildKueryForOfflineAgents()].map(kuery =>
+    [
+      undefined,
+      AgentStatusKueryHelper.buildKueryForErrorAgents(),
+      AgentStatusKueryHelper.buildKueryForOfflineAgents(),
+    ].map(kuery =>
       listAgents(soClient, {
         showInactive: true,
         perPage: 0,
@@ -87,14 +92,4 @@ async function getEventsCount(soClient: SavedObjectsClientContract, configId?: s
   });
 
   return total;
-}
-
-function buildKueryForOfflineAgents(now: number = Date.now()) {
-  return `agents.type:${AGENT_TYPE_TEMPORARY} AND agents.last_checkin < ${now -
-    3 * AGENT_POLLING_THRESHOLD_MS} `;
-}
-
-function buildKueryForErrorAgents(now: number = Date.now()) {
-  return `agents.type:${AGENT_TYPE_PERMANENT} AND agents.last_checkin < ${now -
-    4 * AGENT_POLLING_THRESHOLD_MS}`;
 }

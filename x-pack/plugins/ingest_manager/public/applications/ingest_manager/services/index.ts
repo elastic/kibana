@@ -14,4 +14,5 @@ export {
   setupRouteService,
   packageToConfigDatasourceInputs,
   storedDatasourceToAgentDatasource,
+  AgentStatusKueryHelper,
 } from '../../../../common';

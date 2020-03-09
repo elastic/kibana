@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 import {
   EuiBasicTable,
@@ -24,19 +24,31 @@ import {
   EuiStat,
   EuiI18nNumber,
   EuiHealth,
+  EuiButtonIcon,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import { AgentEnrollmentFlyout } from './components';
 import { WithHeaderLayout } from '../../../layouts';
 import { Agent } from '../../../types';
-import { usePagination, useCore, useGetAgentConfigs, useGetAgents } from '../../../hooks';
+import {
+  usePagination,
+  useCore,
+  useGetAgentConfigs,
+  useGetAgents,
+  useUrlParams,
+  useLink,
+} from '../../../hooks';
 import { ConnectedLink } from '../components';
 import { SearchBar } from '../../../components/search_bar';
 import { AgentHealth } from '../components/agent_health';
 import { AgentUnenrollProvider } from '../components/agent_unenroll_provider';
 import { DonutChart } from './components/donut_chart';
 import { useGetAgentStatus } from '../../agent_config/details_page/hooks';
+import { AgentStatusKueryHelper } from '../../../services';
+import { FLEET_AGENT_DETAIL_PATH } from '../../../constants';
 
 const Divider = styled.div`
   width: 0;
@@ -47,13 +59,91 @@ const Divider = styled.div`
 
 const REFRESH_INTERVAL_MS = 5000;
 
+const statusFilters = [
+  {
+    status: 'online',
+    label: i18n.translate('xpack.ingestManager.agentList.statusOnlineFilterText', {
+      defaultMessage: 'Online',
+    }),
+  },
+  {
+    status: 'offline',
+    label: i18n.translate('xpack.ingestManager.agentList.statusOfflineFilterText', {
+      defaultMessage: 'Offline',
+    }),
+  },
+  ,
+  {
+    status: 'error',
+    label: i18n.translate('xpack.ingestManager.agentList.statusErrorFilterText', {
+      defaultMessage: 'Error',
+    }),
+  },
+] as Array<{ label: string; status: string }>;
+
+const RowActions = React.memo<{ agent: Agent; refresh: () => void }>(({ agent, refresh }) => {
+  const DETAILS_URI = useLink(FLEET_AGENT_DETAIL_PATH);
+  const [isOpen, setIsOpen] = useState(false);
+  const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
+  const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
+
+  return (
+    <EuiPopover
+      anchorPosition="downRight"
+      panelPaddingSize="none"
+      button={
+        <EuiButtonIcon
+          iconType="boxesHorizontal"
+          onClick={handleToggleMenu}
+          aria-label={i18n.translate('xpack.ingestManager.agentList.actionsMenuText', {
+            defaultMessage: 'Open',
+          })}
+        />
+      }
+      isOpen={isOpen}
+      closePopover={handleCloseMenu}
+    >
+      <EuiContextMenuPanel
+        items={[
+          <EuiContextMenuItem icon="inspect" href={`${DETAILS_URI}${agent.id}`} key="viewConfig">
+            <FormattedMessage
+              id="xpack.ingestManager.agentList.viewActionText"
+              defaultMessage="View Agent"
+            />
+          </EuiContextMenuItem>,
+
+          <AgentUnenrollProvider>
+            {unenrollAgentsPrompt => (
+              <EuiContextMenuItem
+                color="danger"
+                icon="cross"
+                onClick={() => {
+                  unenrollAgentsPrompt([agent.id], 1, () => {
+                    refresh();
+                  });
+                }}
+              >
+                <FormattedMessage
+                  id="xpack.ingestManager.agentList.unenrollOneButton"
+                  defaultMessage="unenroll"
+                />
+              </EuiContextMenuItem>
+            )}
+          </AgentUnenrollProvider>,
+        ]}
+      />
+    </EuiPopover>
+  );
+});
+
 export const AgentListPage: React.FunctionComponent<{}> = () => {
+  const defaultKuery: string = (useUrlParams().kuery as string) || '';
   const core = useCore();
   // Agent data states
   const [showInactive, setShowInactive] = useState<boolean>(false);
 
   // Table and search states
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(defaultKuery);
   const { pagination, pageSizeOptions, setPagination } = usePagination();
   const [selectedAgents, setSelectedAgents] = useState<Agent[]>([]);
   const [areAllAgentsSelected, setAreAllAgentsSelected] = useState<boolean>(false);
@@ -61,6 +151,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   // Configs state (for filtering)
   const [isConfigsFilterOpen, setIsConfigsFilterOpen] = useState<boolean>(false);
   const [selectedConfigs, setSelectedConfigs] = useState<string[]>([]);
+  // Status for filtering
+  const [isStatusFilterOpen, setIsStatutsFilterOpen] = useState<boolean>(false);
+  const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
 
   // Add a config id to current search
   const addConfigFilter = (configId: string) => {
@@ -83,6 +176,27 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     kuery = `${kuery} agents.config_id : (${selectedConfigs
       .map(config => `"${config}"`)
       .join(' or ')})`;
+  }
+
+  if (selectedStatus.length) {
+    if (kuery) {
+      kuery = `(${kuery}) and`;
+    }
+
+    kuery = selectedStatus
+      .map(status => {
+        switch (status) {
+          case 'online':
+            return AgentStatusKueryHelper.buildKueryForOnlineAgents();
+          case 'offline':
+            return AgentStatusKueryHelper.buildKueryForOfflineAgents();
+          case 'error':
+            return AgentStatusKueryHelper.buildKueryForErrorAgents();
+        }
+
+        return '';
+      })
+      .join(' or ');
   }
 
   const agentStatusRequest = useGetAgentStatus(undefined, {
@@ -120,6 +234,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       name: i18n.translate('xpack.ingestManager.agentList.hostColumnTitle', {
         defaultMessage: 'Host',
       }),
+      render: (host: string, agent: Agent) => (
+        <ConnectedLink color="primary" path={`/fleet/agents/${agent.id}`}>
+          {host}
+        </ConnectedLink>
+      ),
       footer: () => {
         if (selectedAgents.length === agents.length && totalAgents > selectedAgents.length) {
           return areAllAgentsSelected ? (
@@ -163,23 +282,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       },
     },
     {
-      field: 'config_id',
-      name: i18n.translate('xpack.ingestManager.agentList.configColumnTitle', {
-        defaultMessage: 'Agent Config',
-      }),
-      truncateText: true,
-      render: (configId: string) => {
-        const configName = agentConfigs.find(p => p.id === configId)?.name;
-        return configName ? (
-          <ConnectedLink color="primary" path={`/configs/${configId}`}>
-            {configName}
-          </ConnectedLink>
-        ) : (
-          <EuiTextColor color="subdued">{configId}</EuiTextColor>
-        );
-      },
-    },
-    {
       field: 'active',
       name: i18n.translate('xpack.ingestManager.agentList.statusColumnTitle', {
         defaultMessage: 'Status',
@@ -188,20 +290,48 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       render: (active: boolean, agent: any) => <AgentHealth agent={agent} />,
     },
     {
+      field: 'config_id',
+      name: i18n.translate('xpack.ingestManager.agentList.configColumnTitle', {
+        defaultMessage: 'Configuration',
+      }),
+      truncateText: true,
+      render: (configId: string) => {
+        const configName = agentConfigs.find(p => p.id === configId)?.name;
+        return configName ? (
+          <ConnectedLink color="primary" path={`/configs/${configId}`}>
+            {configName}{' '}
+            <EuiTextColor color="subdued">{/* TODO Fix with revision */}v1</EuiTextColor>
+          </ConnectedLink>
+        ) : (
+          <EuiTextColor color="subdued">{configId}</EuiTextColor>
+        );
+      },
+    },
+    {
+      field: 'local_metadata.agent_version',
+      name: i18n.translate('xpack.ingestManager.agentList.versionTitle', {
+        defaultMessage: 'Version',
+      }),
+      truncateText: true,
+      render: (version: string, agent: any) => <EuiText>{version}</EuiText>,
+    },
+    {
+      field: 'last_checkin',
+      name: i18n.translate('xpack.ingestManager.agentList.lastCheckinTitle', {
+        defaultMessage: 'Last activity',
+      }),
+      truncateText: true,
+      render: (lastCheckin: string, agent: any) =>
+        lastCheckin ? <FormattedRelative value={lastCheckin} /> : null,
+    },
+    {
       name: i18n.translate('xpack.ingestManager.agentList.actionsColumnTitle', {
         defaultMessage: 'Actions',
       }),
       actions: [
         {
           render: (agent: Agent) => {
-            return (
-              <ConnectedLink color="primary" path={`/fleet/agents/${agent.id}`}>
-                <FormattedMessage
-                  id="xpack.ingestManager.agentList.viewActionLinkText"
-                  defaultMessage="view"
-                />
-              </ConnectedLink>
-            );
+            return <RowActions agent={agent} refresh={() => agentsRequest.sendRequest()} />;
           },
         },
       ],
@@ -443,9 +573,49 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                   button={
                     <EuiFilterButton
                       iconType="arrowDown"
+                      onClick={() => setIsStatutsFilterOpen(!isStatusFilterOpen)}
+                      isSelected={isStatusFilterOpen}
+                      hasActiveFilters={selectedStatus.length > 0}
+                      numActiveFilters={selectedStatus.length}
+                      disabled={isAgentConfigsLoading}
+                    >
+                      <FormattedMessage
+                        id="xpack.ingestManager.agentList.statusFilterText"
+                        defaultMessage="Status"
+                      />
+                    </EuiFilterButton>
+                  }
+                  isOpen={isStatusFilterOpen}
+                  closePopover={() => setIsStatutsFilterOpen(false)}
+                  panelPaddingSize="none"
+                >
+                  <div className="euiFilterSelect__items">
+                    {statusFilters.map(({ label, status }, idx) => (
+                      <EuiFilterSelectItem
+                        checked={selectedStatus.includes(status) ? 'on' : undefined}
+                        onClick={() => {
+                          if (selectedStatus.includes(status)) {
+                            setSelectedStatus([...selectedStatus.filter(s => s !== status)]);
+                          } else {
+                            setSelectedStatus([...selectedStatus, status]);
+                          }
+                        }}
+                      >
+                        {label}
+                      </EuiFilterSelectItem>
+                    ))}
+                  </div>
+                </EuiPopover>
+                <EuiPopover
+                  ownFocus
+                  button={
+                    <EuiFilterButton
+                      iconType="arrowDown"
                       onClick={() => setIsConfigsFilterOpen(!isConfigsFilterOpen)}
                       isSelected={isConfigsFilterOpen}
                       hasActiveFilters={selectedConfigs.length > 0}
+                      numActiveFilters={selectedConfigs.length}
+                      numFilters={agentConfigs.length}
                       disabled={isAgentConfigsLoading}
                     >
                       <FormattedMessage
@@ -486,6 +656,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       <EuiBasicTable<Agent>
         className="fleet__agentList__table"
         loading={isLoading && agentsRequest.isInitialRequest}
+        hasActions={true}
         noItemsMessage={
           isLoading ? (
             <FormattedMessage
