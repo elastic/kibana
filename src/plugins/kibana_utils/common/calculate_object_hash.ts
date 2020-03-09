@@ -19,14 +19,14 @@
 
 // adopted form https://github.com/bevacqua/hash-sum
 
-function pad(hash, len) {
+function pad(hash: string, len: number): string {
   while (hash.length < len) {
     hash = '0' + hash;
   }
   return hash;
 }
 
-function fold(hash, text) {
+function fold(hash: number, text: string): number {
   let i;
   let chr;
   let len;
@@ -35,22 +35,25 @@ function fold(hash, text) {
   }
   for (i = 0, len = text.length; i < len; i++) {
     chr = text.charCodeAt(i);
+    // eslint-disable-next-line no-bitwise
     hash = (hash << 5) - hash + chr;
+    // eslint-disable-next-line no-bitwise
     hash |= 0;
   }
   return hash < 0 ? hash * -2 : hash;
 }
 
-function foldObject(hash, o, seen) {
+function foldObject(hash: number, o: any, seen: any[]) {
+  function foldKey(h: number, key: string): number {
+    return foldValue(h, o[key], key, seen);
+  }
+
   return Object.keys(o)
     .sort()
     .reduce(foldKey, hash);
-  function foldKey(hash, key) {
-    return foldValue(hash, o[key], key, seen);
-  }
 }
 
-function foldValue(input, value, key, seen) {
+function foldValue(input: number, value: any, key: string, seen: any[]) {
   const hash = fold(fold(fold(input, key), toString(value)), typeof value);
   if (value === null) {
     return fold(hash, 'null');
@@ -72,11 +75,11 @@ function foldValue(input, value, key, seen) {
   return fold(hash, value.toString());
 }
 
-function toString(o) {
+function toString(o: object): string {
   return Object.prototype.toString.call(o);
 }
 
-function sum(o) {
+function sum(o: object): string {
   return pad(foldValue(0, o, '', []).toString(16), 8);
 }
 
