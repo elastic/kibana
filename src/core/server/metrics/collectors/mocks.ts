@@ -17,29 +17,19 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
-import { IRouter } from '../../http';
-import { CapabilitiesResolver } from '../resolve_capabilities';
+import { MetricsCollector } from './types';
 
-export function registerCapabilitiesRoutes(router: IRouter, resolver: CapabilitiesResolver) {
-  router.post(
-    {
-      path: '/api/core/capabilities',
-      options: {
-        authRequired: 'optional',
-      },
-      validate: {
-        body: schema.object({
-          applications: schema.arrayOf(schema.string()),
-        }),
-      },
-    },
-    async (ctx, req, res) => {
-      const { applications } = req.body;
-      const capabilities = await resolver(req, applications);
-      return res.ok({
-        body: capabilities,
-      });
-    }
-  );
-}
+const createMock = () => {
+  const mocked: jest.Mocked<MetricsCollector<any>> = {
+    collect: jest.fn(),
+    reset: jest.fn(),
+  };
+
+  mocked.collect.mockResolvedValue({});
+
+  return mocked;
+};
+
+export const collectorMock = {
+  create: createMock,
+};
