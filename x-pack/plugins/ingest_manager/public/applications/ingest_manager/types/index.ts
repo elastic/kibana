@@ -29,6 +29,7 @@ export {
   PostAgentUnenrollResponse,
   GetOneAgentEventsRequest,
   GetOneAgentEventsResponse,
+  GetAgentStatusResponse,
   // API schemas - Enrollment API Keys
   GetEnrollmentAPIKeysResponse,
   GetOneEnrollmentAPIKeyResponse,
