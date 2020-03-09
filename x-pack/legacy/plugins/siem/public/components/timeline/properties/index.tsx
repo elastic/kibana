@@ -97,6 +97,10 @@ export const Properties = React.memo<Props>(
       setShowTimelineModal(false);
     }, []);
 
+    const onToggleLock = useCallback(() => {
+      toggleLock({ linkToId: 'timeline' });
+    }, [toggleLock]);
+
     const datePickerWidth =
       width -
       rightGutter -
@@ -127,9 +131,7 @@ export const Properties = React.memo<Props>(
           showNotesFromWidth={width >= showNotesThreshold}
           timelineId={timelineId}
           title={title}
-          toggleLock={() => {
-            toggleLock({ linkToId: 'timeline' });
-          }}
+          toggleLock={onToggleLock}
           updateDescription={updateDescription}
           updateIsFavorite={updateIsFavorite}
           updateNote={updateNote}
