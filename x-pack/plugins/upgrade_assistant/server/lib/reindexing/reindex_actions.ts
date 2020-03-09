@@ -11,6 +11,7 @@ import {
   IndexGroup,
   REINDEX_OP_TYPE,
   ReindexOperation,
+  ReindexOptions,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
@@ -34,8 +35,9 @@ export interface ReindexActions {
   /**
    * Creates a new reindexOp, does not perform any pre-flight checks.
    * @param indexName
+   * @param opts Options for the reindex operation
    */
-  createReindexOp(indexName: string): Promise<ReindexSavedObject>;
+  createReindexOp(indexName: string, opts?: ReindexOptions): Promise<ReindexSavedObject>;
 
   /**
    * Deletes a reindexOp.
@@ -156,7 +158,7 @@ export const reindexActionsFactory = (
 
   // ----- Public interface
   return {
-    async createReindexOp(indexName: string) {
+    async createReindexOp(indexName: string, opts?: ReindexOptions) {
       return client.create<ReindexOperation>(REINDEX_OP_TYPE, {
         indexName,
         newIndexName: generateNewIndexName(indexName),
@@ -167,6 +169,7 @@ export const reindexActionsFactory = (
         reindexTaskPercComplete: null,
         errorMessage: null,
         runningReindexCount: null,
+        reindexOptions: opts,
       });
     },
 
