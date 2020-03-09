@@ -31,8 +31,6 @@ export interface AlertingExampleDeps {
 }
 
 export class AlertingExamplePlugin implements Plugin<void, void, AlertingExampleDeps> {
-  constructor(private initializerContext: PluginInitializerContext) {}
-
   public setup(core: CoreSetup, { alerting }: AlertingExampleDeps) {
     // Create Alert type
     const alwaysFiringAlertType: any = {
