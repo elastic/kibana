@@ -80,5 +80,5 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
     return <AlertMonitorStatus {...params} autocomplete={autocomplete} />;
   },
   validate,
-  defaultActionMessage: 'Monitor [{{ctx.metadata.name}}] is down',
+  defaultActionMessage: '{{context.message}}\n{{context.completeIdList}}',
 });

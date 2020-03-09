@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { isRight } from 'fp-ts/lib/Either';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
+import { i18n } from '@kbn/i18n';
 import { AlertExecutorOptions } from '../../../../alerting/server';
 import { ACTION_GROUP_DEFINITIONS } from '../../../../../legacy/plugins/uptime/common/constants';
 import { UptimeAlertTypeFactory } from './types';
@@ -40,22 +41,80 @@ export const contextMessage = (monitorIds: string[], max: number): string => {
 
   // generate the message
   let message;
-  if (monitorIds.length === 1) message = 'Down monitor:';
-  else if (monitorIds.length) message = 'Down monitors:';
+  if (monitorIds.length === 1) {
+    message = i18n.translate('xpack.uptime.alerts.message.singularTitle', {
+      defaultMessage: 'Down monitor: ',
+    });
+  } else if (monitorIds.length) {
+    message = i18n.translate('xpack.uptime.alerts.message.multipleTitle', {
+      defaultMessage: 'Down monitors: ',
+    });
+  }
   // this shouldn't happen because the function should only be called
   // when > 0 monitors are down
-  else message = 'No down monitor IDs received';
+  else {
+    message = i18n.translate('xpack.uptime.alerts.message.emptyTitle', {
+      defaultMessage: 'No down monitor IDs received',
+    });
+  }
 
   for (let i = 0; i < monitorIds.length; i++) {
+    const id = monitorIds[i];
     if (i === max) {
-      return message + `\n...and ${monitorIds.length - i} other monitors`;
+      return (
+        message +
+        i18n.translate('xpack.uptime.alerts.message.overflowBody', {
+          defaultMessage: `... and {overflowCount} other monitors`,
+          values: {
+            overflowCount: monitorIds.length - i,
+          },
+        })
+      );
+    } else if (i === 0) {
+      message = message + id;
     } else {
-      const id = monitorIds[i];
-      message = message + `\n${id}`;
+      message = message + `, ${id}`;
     }
   }
 
   return message;
+};
+
+/**
+ * Creates an exhaustive list of all the down monitors.
+ * @param list all the monitors that are down
+ * @param sizeLimit the max monitors, we shouldn't allow an arbitrarily long string
+ */
+export const fullListByIdAndLocation = (
+  list: GetMonitorStatusResult[],
+  sizeLimit: number = 1000
+) => {
+  return (
+    list
+      // sort by id, then location
+      .sort((a, b) => {
+        if (a.monitor_id > b.monitor_id) {
+          return 1;
+        } else if (a.monitor_id < b.monitor_id) {
+          return -1;
+        } else if (a.location > b.location) {
+          return 1;
+        }
+        return -1;
+      })
+      .slice(0, sizeLimit)
+      .reduce((cur, { monitor_id: id, location }) => cur + `${id} from ${location}; `, '') +
+    (sizeLimit < list.length
+      ? i18n.translate('xpack.uptime.alerts.message.fullListOverflow', {
+          defaultMessage: '...and {overflowCount} other {pluralizedMonitor}',
+          values: {
+            pluralizedMonitor:
+              list.length - sizeLimit === 1 ? 'monitor/location' : 'monitors/locations',
+            overflowCount: list.length - sizeLimit,
+          },
+        })
+      : '')
+  );
 };
 
 export const updateState = (
@@ -162,7 +221,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
       alertInstance.scheduleActions(DOWN_MONITOR.id, {
         message: contextMessage(Array.from(uniqueIds.keys()), DEFAULT_MAX_MESSAGE_ROWS),
         server,
-        monitors: monitorsByLocation,
+        completeIdList: fullListByIdAndLocation(monitorsByLocation),
       });
     }
 

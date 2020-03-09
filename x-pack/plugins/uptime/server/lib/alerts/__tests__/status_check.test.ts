@@ -9,6 +9,7 @@ import {
   uniqueMonitorIds,
   updateState,
   statusCheckAlertFactory,
+  fullListByIdAndLocation,
 } from '../status_check';
 import { GetMonitorStatusResult } from '../../requests';
 import { AlertType } from '../../../../../alerting/server';
@@ -18,7 +19,7 @@ import { UptimeCoreSetup } from '../../adapters';
 
 /**
  * The alert takes some dependencies as parameters; these are things like
- * kibana core services and plugins. This funciton helps reduce the amount of
+ * kibana core services and plugins. This function helps reduce the amount of
  * boilerplate required.
  * @param customRequests client tests can use this paramter to provide their own request mocks,
  * so we don't have to mock them all for each test.
@@ -133,13 +134,13 @@ describe('status check alert', () => {
             "monitors": Array [
               Object {
                 "count": 234,
-                "location": "harrisburg",
+                "location": "fairbanks",
                 "monitor_id": "first",
                 "status": "down",
               },
               Object {
                 "count": 234,
-                "location": "fairbanks",
+                "location": "harrisburg",
                 "monitor_id": "first",
                 "status": "down",
               },
@@ -152,28 +153,124 @@ describe('status check alert', () => {
         Array [
           "xpack.uptime.alerts.actionGroups.downMonitor",
           Object {
-            "message": "Down monitor:
-        first",
-            "monitors": Array [
-              Object {
-                "count": 234,
-                "location": "harrisburg",
-                "monitor_id": "first",
-                "status": "down",
-              },
-              Object {
-                "count": 234,
-                "location": "fairbanks",
-                "monitor_id": "first",
-                "status": "down",
-              },
-            ],
+            "completeIdList": "first from fairbanks; first from harrisburg; ",
+            "message": "Down monitor: first",
             "server": Object {
               "route": Object {},
             },
           },
         ]
       `);
+    });
+  });
+
+  describe('fullListByIdAndLocation', () => {
+    it('renders a list of all monitors', () => {
+      const statuses: GetMonitorStatusResult[] = [
+        {
+          location: 'harrisburg',
+          monitor_id: 'first',
+          status: 'down',
+          count: 34,
+        },
+        {
+          location: 'fairbanks',
+          monitor_id: 'second',
+          status: 'down',
+          count: 23,
+        },
+        {
+          location: 'fairbanks',
+          monitor_id: 'first',
+          status: 'down',
+          count: 23,
+        },
+        {
+          location: 'harrisburg',
+          monitor_id: 'second',
+          status: 'down',
+          count: 34,
+        },
+      ];
+      expect(fullListByIdAndLocation(statuses)).toMatchInlineSnapshot(
+        `"first from fairbanks; first from harrisburg; second from fairbanks; second from harrisburg; "`
+      );
+    });
+
+    it('renders a list of monitors when greater than limit', () => {
+      const statuses: GetMonitorStatusResult[] = [
+        {
+          location: 'fairbanks',
+          monitor_id: 'second',
+          status: 'down',
+          count: 23,
+        },
+        {
+          location: 'fairbanks',
+          monitor_id: 'first',
+          status: 'down',
+          count: 23,
+        },
+        {
+          location: 'harrisburg',
+          monitor_id: 'first',
+          status: 'down',
+          count: 34,
+        },
+        {
+          location: 'harrisburg',
+          monitor_id: 'second',
+          status: 'down',
+          count: 34,
+        },
+      ];
+      expect(fullListByIdAndLocation(statuses.slice(0, 2), 1)).toMatchInlineSnapshot(
+        `"first from fairbanks; ...and 1 other monitor/location"`
+      );
+    });
+
+    it('renders expected list of monitors when limit difference > 1', () => {
+      const statuses: GetMonitorStatusResult[] = [
+        {
+          location: 'fairbanks',
+          monitor_id: 'second',
+          status: 'down',
+          count: 23,
+        },
+        {
+          location: 'harrisburg',
+          monitor_id: 'first',
+          status: 'down',
+          count: 34,
+        },
+        {
+          location: 'harrisburg',
+          monitor_id: 'second',
+          status: 'down',
+          count: 34,
+        },
+        {
+          location: 'harrisburg',
+          monitor_id: 'third',
+          status: 'down',
+          count: 34,
+        },
+        {
+          location: 'fairbanks',
+          monitor_id: 'third',
+          status: 'down',
+          count: 23,
+        },
+        {
+          location: 'fairbanks',
+          monitor_id: 'first',
+          status: 'down',
+          count: 23,
+        },
+      ];
+      expect(fullListByIdAndLocation(statuses, 4)).toMatchInlineSnapshot(
+        `"first from fairbanks; first from harrisburg; second from fairbanks; second from harrisburg; ...and 2 other monitors/locations"`
+      );
     });
   });
 
@@ -466,8 +563,8 @@ describe('status check alert', () => {
     });
 
     it('creates a message with appropriate number of monitors', () => {
-      expect(contextMessage(ids, 3)).toBe(
-        'Down monitors:\nfirst\nsecond\nthird\n...and 2 other monitors'
+      expect(contextMessage(ids, 3)).toMatchInlineSnapshot(
+        `"Down monitors: first, second, third... and 2 other monitors"`
       );
     });
 
@@ -478,7 +575,9 @@ describe('status check alert', () => {
     });
 
     it('returns only the ids if length < max', () => {
-      expect(contextMessage(ids.slice(0, 2), 3)).toBe('Down monitors:\nfirst\nsecond');
+      expect(contextMessage(ids.slice(0, 2), 3)).toMatchInlineSnapshot(
+        `"Down monitors: first, second"`
+      );
     });
 
     it('returns a default message when no monitors are provided', () => {
