@@ -25,7 +25,7 @@ import { getTestUrl } from './utils';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { TIME_RANGE_TYPE } from './constants';
 import { UrlConfig, KibanaUrlConfig } from '../../../../../common/types/custom_urls';
-import { Job } from '../../new_job/common/job_creator/configs';
+import { Job } from '../../../../../common/types/anomaly_detection_jobs';
 
 function isValidTimeRange(timeRange: KibanaUrlConfig['time_range']): boolean {
   // Allow empty timeRange string, which gives the 'auto' behaviour.
