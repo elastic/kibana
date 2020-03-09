@@ -20,6 +20,8 @@
 import moment from 'moment-timezone';
 import numeralLanguages from '@elastic/numeral/languages';
 import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
+
 import { DEFAULT_QUERY_LANGUAGE } from '../../../plugins/data/common';
 
 export function getUiSettingDefaults() {
@@ -67,12 +69,18 @@ export function getUiSettingDefaults() {
         defaultMessage: 'Default route',
       }),
       value: '/app/kibana',
-      validation: {
-        regexString: '^/',
-        message: i18n.translate('kbn.advancedSettings.defaultRoute.defaultRouteValidationMessage', {
-          defaultMessage: 'The route must start with a slash ("/")',
-        }),
-      },
+      schema: schema.string({
+        validate(value) {
+          if (!value.startsWith('/')) {
+            return i18n.translate(
+              'kbn.advancedSettings.defaultRoute.defaultRouteValidationMessage',
+              {
+                defaultMessage: 'The route must start with a slash ("/")',
+              }
+            );
+          }
+        },
+      }),
       description: i18n.translate('kbn.advancedSettings.defaultRoute.defaultRouteText', {
         defaultMessage:
           'This setting specifies the default route when opening Kibana. ' +
