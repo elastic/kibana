@@ -380,9 +380,9 @@ Note that for VSCode, to enable "live" linting of TypeScript (and other) file ty
 
 All user-facing labels and info texts in Kibana should be internationalized. Please take a look at the [readme](packages/kbn-i18n/README.md) and the [guideline](packages/kbn-i18n/GUIDELINE.md) of the i18n package on how to do so.
 
-In order to enable translations in the React parts of the application, the top most component of every `ReactDOM.render` call should be an `I18nContext`:
+In order to enable translations in the React parts of the application, the top most component of every `ReactDOM.render` call should be the `Context` component from the `i18n` core service:
 ```jsx
-import { I18nContext } from 'ui/i18n';
+const I18nContext = coreStart.i18n.Context;
 
 ReactDOM.render(
   <I18nContext>
