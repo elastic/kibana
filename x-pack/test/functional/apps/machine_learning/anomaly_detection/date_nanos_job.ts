@@ -165,8 +165,8 @@ export default function({ getService }: FtrProviderContext) {
     },
   ];
 
-  // test failures, see #59419
-  describe.skip('job on data set with date_nanos time field', function() {
+  // eslint-disable-next-line ban/ban
+  describe.only('job on data set with date_nanos time field', function() {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('ml/event_rate_nanos');
