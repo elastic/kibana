@@ -12,7 +12,7 @@
 
     query="state.query"
     on-query-submit="updateQuery"
-	
+
     show-save-query="showSaveQuery"
     saved-query-id="state.savedQuery"
     on-saved-query-id-change="updateSavedQueryId"
@@ -41,11 +41,6 @@
       </div>
 
       <div class="dscWrapper col-md-10">
-        <discover-unsupported-index-pattern
-          ng-if="isUnsupportedIndexPattern"
-          unsupported-type="unsupportedIndexPatternType"
-        ></discover-unsupported-index-pattern>
-
         <discover-no-results
           ng-show="resultState === 'none'"
           shard-failures="failures"

@@ -23,7 +23,7 @@ import {
 import { SecurityPluginSetup } from '../../../../../../plugins/security/public';
 
 export interface DependencyCache {
-  timefilter: DataPublicPluginSetup['timefilter'] | null;
+  timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
   config: IUiSettingsClient | null;
   indexPatterns: IndexPatternsContract | null;
   chrome: ChromeStart | null;

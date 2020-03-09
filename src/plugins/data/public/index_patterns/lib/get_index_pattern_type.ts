@@ -17,10 +17,8 @@
  * under the License.
  */
 
-export { getTitle } from './get_title';
-export * from './types';
-export { validateIndexPattern } from './validate_index_pattern';
-export { IndexPatternMissingIndices } from './errors';
-export { getFromSavedObject } from './get_from_saved_object';
-export { isDefault } from './is_default';
-export { getIndexPatternType } from './is_rollup';
+import { IIndexPattern } from '../../../common/index_patterns';
+
+export function getIndexPatternType(indexPattern: IIndexPattern) {
+  return indexPattern.type || (indexPattern.get && indexPattern.get('type'));
+}

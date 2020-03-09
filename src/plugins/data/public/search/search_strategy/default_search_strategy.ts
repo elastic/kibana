@@ -74,9 +74,10 @@ function search({
 }: SearchStrategySearchParams) {
   const abortController = new AbortController();
   const searchParams = getSearchParams(config, esShardTimeout);
-  const promises = searchRequests.map(({ index, body }) => {
+  const promises = searchRequests.map(({ index, indexType, body }) => {
     const params = {
       index: index.title || index,
+      indexType,
       body,
       ...searchParams,
     };

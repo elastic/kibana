@@ -1062,17 +1062,6 @@ function discoverController(
     return loadedIndexPattern;
   }
 
-  // Block the UI from loading if the user has loaded a rollup index pattern but it isn't
-  // supported.
-  $scope.isUnsupportedIndexPattern = !indexPatternsUtils.isDefault(
-    $route.current.locals.savedObjects.ip.loaded
-  );
-
-  if ($scope.isUnsupportedIndexPattern) {
-    $scope.unsupportedIndexPatternType = $route.current.locals.savedObjects.ip.loaded.type;
-    return;
-  }
-
   addHelpMenuToAppChrome(chrome);
 
   init();
