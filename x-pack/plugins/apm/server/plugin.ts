@@ -12,6 +12,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server';
 import { makeApmUsageCollector } from './lib/apm_telemetry';
 import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
+import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
 import { createApmApi } from './routes/create_apm_api';
 import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
 import { APMConfig, mergeConfigs, APMXPackConfig } from '.';
@@ -62,6 +63,12 @@ export class APMPlugin implements Plugin<APMPluginContract> {
 
     // create agent configuration index without blocking setup lifecycle
     createApmAgentConfigurationIndex({
+      esClient: core.elasticsearch.dataClient,
+      config: currentConfig,
+      logger
+    });
+    // create custom action index without blocking setup lifecycle
+    createApmCustomLinkIndex({
       esClient: core.elasticsearch.dataClient,
       config: currentConfig,
       logger

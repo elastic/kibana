@@ -8,7 +8,7 @@ import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
 import { MlDependencies } from './application/app';
 
 export class MlPlugin implements Plugin<Setup, Start> {
-  setup(core: CoreSetup, { data, security, licensing, __LEGACY }: MlDependencies) {
+  setup(core: CoreSetup, { data, security, licensing }: MlDependencies) {
     core.application.register({
       id: 'ml',
       title: 'Machine learning',
@@ -21,7 +21,6 @@ export class MlPlugin implements Plugin<Setup, Start> {
           onAppLeave: params.onAppLeave,
           history: params.history,
           data,
-          __LEGACY,
           security,
           licensing,
         });
