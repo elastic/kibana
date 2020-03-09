@@ -25,13 +25,13 @@ export interface OpenFlyoutAddDrilldownParams {
 export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_ADD_DRILLDOWN> {
   public readonly type = OPEN_FLYOUT_ADD_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_ADD_DRILLDOWN;
-  public order = 5;
+  public order = 100;
 
   constructor(protected readonly params: OpenFlyoutAddDrilldownParams) {}
 
   public getDisplayName() {
     return i18n.translate('xpack.drilldowns.FlyoutCreateDrilldownAction.displayName', {
-      defaultMessage: 'Create Drilldown',
+      defaultMessage: 'Create drilldown',
     });
   }
 
@@ -40,7 +40,7 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
   }
 
   public async isCompatible({ embeddable }: FlyoutCreateDrilldownActionContext) {
-    return true;
+    return embeddable.getInput().viewMode === 'edit';
   }
 
   public async execute(context: FlyoutCreateDrilldownActionContext) {

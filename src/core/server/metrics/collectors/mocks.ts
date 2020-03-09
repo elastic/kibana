@@ -17,12 +17,19 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { MetricsCollector } from './types';
 
-export const defaultFeedbackMessage = i18n.translate('visualizations.defaultFeedbackMessage', {
-  defaultMessage: 'Have feedback? Please create an issue in {link}.',
-  values: {
-    link:
-      '<a href="https://github.com/elastic/kibana/issues/new/choose" rel="noopener noreferrer" target="_blank">GitHub</a>',
-  },
-});
+const createMock = () => {
+  const mocked: jest.Mocked<MetricsCollector<any>> = {
+    collect: jest.fn(),
+    reset: jest.fn(),
+  };
+
+  mocked.collect.mockResolvedValue({});
+
+  return mocked;
+};
+
+export const collectorMock = {
+  create: createMock,
+};
