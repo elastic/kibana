@@ -42,6 +42,7 @@ export const updatePrepackagedRules = async (
       threat,
       references,
       version,
+      throttle,
     } = rule;
 
     // Note: we do not pass down enabled as we do not want to suddenly disable
@@ -75,6 +76,7 @@ export const updatePrepackagedRules = async (
       threat,
       references,
       version,
+      throttle,
     });
   });
 };

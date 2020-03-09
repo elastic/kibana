@@ -275,7 +275,7 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                             <EuiFlexItem grow={false}>
                               <EuiButton
                                 href={getEditRuleUrl(ruleId ?? '')}
-                                iconType="visControls"
+                                iconType="controlsHorizontal"
                                 isDisabled={(userHasNoPermissions || rule?.immutable) ?? true}
                               >
                                 {ruleI18n.EDIT_RULE_SETTINGS}

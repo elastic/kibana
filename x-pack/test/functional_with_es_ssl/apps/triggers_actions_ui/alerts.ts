@@ -18,20 +18,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const find = getService('find');
 
-  async function createAlert() {
+  async function createAlert(alertTypeId?: string, name?: string, params?: any) {
     const { body: createdAlert } = await supertest
       .post(`/api/alert`)
       .set('kbn-xsrf', 'foo')
       .send({
         enabled: true,
-        name: generateUniqueKey(),
+        name: name ?? generateUniqueKey(),
         tags: ['foo', 'bar'],
-        alertTypeId: 'test.noop',
+        alertTypeId: alertTypeId ?? 'test.noop',
         consumer: 'test',
         schedule: { interval: '1m' },
         throttle: '1m',
         actions: [],
-        params: {},
+        params: params ?? {},
       })
       .expect(200);
     return createdAlert;
@@ -60,6 +60,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('thresholdAlertTimeFieldSelect');
       const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
       await fieldOptions[1].click();
+      // need this two out of popup clicks to close them
+      await nameInput.click();
+      await testSubjects.click('intervalInput');
+
       await testSubjects.click('.slack-ActionTypeSelectOption');
       await testSubjects.click('createActionConnectorButton');
       const connectorNameInput = await testSubjects.find('nameInput');
@@ -84,8 +88,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Saved '${alertName}'`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
-      const searchResultsAfterEdit = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterEdit).to.eql([
+      const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResultsAfterSave).to.eql([
         {
           name: alertName,
           tagsText: '',
@@ -106,6 +110,57 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           name: createdAlert.name,
           tagsText: 'foo, bar',
           alertType: 'Test: Noop',
+          interval: '1m',
+        },
+      ]);
+    });
+
+    it('should edit an alert', async () => {
+      const createdAlert = await createAlert('.index-threshold', 'new alert', {
+        aggType: 'count',
+        termSize: 5,
+        thresholdComparator: '>',
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        groupBy: 'all',
+        threshold: [1000, 5000],
+        index: ['.kibana_1'],
+        timeField: 'alert',
+      });
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResults).to.eql([
+        {
+          name: createdAlert.name,
+          tagsText: 'foo, bar',
+          alertType: 'Index Threshold',
+          interval: '1m',
+        },
+      ]);
+      const editLink = await testSubjects.findAll('alertsTableCell-editLink');
+      await editLink[0].click();
+
+      const updatedAlertName = 'Changed Alert Name';
+      const nameInputToUpdate = await testSubjects.find('alertNameInput');
+      await nameInputToUpdate.click();
+      await nameInputToUpdate.clearValue();
+      await nameInputToUpdate.type(updatedAlertName);
+
+      await find.clickByCssSelector('[data-test-subj="saveEditedAlertButton"]:not(disabled)');
+
+      const toastTitle = await pageObjects.common.closeToast();
+      expect(toastTitle).to.eql(`Updated '${updatedAlertName}'`);
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(updatedAlertName);
+
+      const searchResultsAfterEdit = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResultsAfterEdit).to.eql([
+        {
+          name: updatedAlertName,
+          tagsText: 'foo, bar',
+          alertType: 'Index Threshold',
           interval: '1m',
         },
       ]);
