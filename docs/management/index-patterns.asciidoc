@@ -67,9 +67,6 @@ use a comma to separate the names, with no space after the comma.
 For specific fields, the data in a rollup index includes only summarized metrics.
 From the original raw data, you are unable to search any other field.
 
-[role="screenshot"]
-image::images/management_create_rollup_menu.png[Create index pattern menu]
-
 [float]
 [[management-cross-cluster-search]]
 ==== {ccs-cap} index pattern

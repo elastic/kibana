@@ -56,6 +56,7 @@ job&mdash;reusing the same name can lead to problems with mismatched job configu
 You can read more at {ref}/rollup-job-config.html[rollup job configuration].
 
 [float]
+[[rollup-data-tutorial]]
 === Try it: Create and visualize rolled up data
 
 This example creates a rollup job to capture log data from sample web logs.

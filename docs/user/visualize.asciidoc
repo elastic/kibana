@@ -13,46 +13,46 @@ To begin, open *Visualize*, then click *Create new visualization*.
 [[visualization-types]]
 == Types of visualizations
 
-To help you choose the best visualization for your data, {kib} supports many types of visualizations.
+{kib} supports several types of visualizations.
 
 <<lens,Lens>>::
 Quickly build several types of basic visualizations by simply dragging and dropping the data fields you want to display.
 
 <<most-frequent,Most frequently used visualizations>>::
 
-* *Line, area, and bar charts* &mdash; Compare different series in X/Y charts.
+* *Line, area, and bar charts* &mdash; Compares different series in X/Y charts.
 
-* *Pie chart* &mdash; Display each source contribution to a total.
+* *Pie chart* &mdash; Displays each source contribution to a total.
 
 * *Data table* &mdash; Flattens aggregations into table format.
 
-* *Metric* &mdash; Display a single number.
+* *Metric* &mdash; Displays a single number.
 
-* *Goal and gauge* &mdash; Display a number with progress indicators.
+* *Goal and gauge* &mdash; Displays a number with progress indicators.
 
-* *Tag cloud* &mdash; Display words in a cloud, where the size of the word corresponds to its importance.
+* *Tag cloud* &mdash; Displays words in a cloud, where the size of the word corresponds to its importance.
 
-<<TSVB,TSVB>>:: Visualize time series data using pipeline aggregations.
+<<TSVB,TSVB>>:: Visualizes time series data using pipeline aggregations.
 
-<<timelion,Timelion>>:: Compute and combine data from multiple time series
+<<timelion,Timelion>>:: Computes and combine data from multiple time series
 data sets.
 
 <<visualize-maps, Maps>>::
-* *<<maps,Elastic Maps>>* &mdash; The most powerful way of visualizing map data in {kib}.
+* *<<maps,Elastic Maps>>* &mdash; Displays geospatial data in {kib}.
 
 * *Coordinate map* &mdash; Displays points on a map using a geohash aggregation.
 
-* *Region map* &mdash; Merge any structured map data onto a shape.
+* *Region map* &mdash; Merges any structured map data onto a shape.
 
-* *Heat map* &mdash; Display shaded cells within a matrix.
+* *Heat map* &mdash; Displays shaded cells within a matrix.
 
 <<for-dashboard,Dashboard tools>>::
 
-* *Markdown widget* &mdash; Display free-form information or instructions.
+* *Markdown widget* &mdash; Displays free-form information or instructions.
 
-* *Controls* &mdash; Add interactive inputs to a Dashboard.
+* *Controls* &mdash; Adds interactive inputs to a dashboard.
 
-<<vega-graph,Vega>>:: Complete control over query and display.
+<<vega-graph,Vega>>:: Completes control over query and display.
 
 [float]
 [[choose-your-data]]
@@ -71,14 +71,14 @@ selected query.
 +
 NOTE: When you build a visualization from a saved search, any subsequent
 modifications to the saved search are reflected in the
-visualization. To disable automatic updates, disconnect the visualization
-from the saved search.
+visualization. To disable automatic updates, delete the visualization
+on the *Saved Object* page.
 
-* Visualize <<rollup-index-pattern,rolled up data>>. Data is summarized into
+* To build a visualization using <<rollup-index-pattern,rolled up data>>, select
+the index pattern that includes the data. Rolled up data is summarized into
 time buckets that can be split into sub buckets for numeric field values or
 terms. To lower granularity, use a time aggregation that uses and combines
-several time buckets. For example, if the rollup job is aggregated by hours,
-bucket by days.
+several time buckets. For an example, refer to <<rollup-data-tutorial,Create and visualize rolled up data>>.
 
 [float]
 [[vis-inspector]]
