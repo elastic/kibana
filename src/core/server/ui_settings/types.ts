@@ -41,7 +41,7 @@ export interface IUiSettingsClient {
   /**
    * Returns registered uiSettings values {@link UiSettingsParams}
    */
-  getRegistered: () => Readonly<Record<string, UiSettingsParams>>;
+  getRegistered: () => Readonly<Record<string, Omit<UiSettingsParams, 'schema'>>>;
   /**
    * Retrieves uiSettings values set by the user with fallbacks to default values if not specified.
    */
