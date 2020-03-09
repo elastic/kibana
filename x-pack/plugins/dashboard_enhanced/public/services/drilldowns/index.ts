@@ -4,12 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export class DrilldownService {
-  /**
-   * Convenience method to register a drilldown. (It should set-up all the
-   * necessary triggers and actions.)
-   */
-  registerDrilldown = (): void => {
-    throw new Error('not implemented');
-  };
-}
+export * from './dashboard_drilldowns_services';

@@ -6,40 +6,33 @@
 
 import { CoreStart, CoreSetup, Plugin } from 'src/core/public';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import { DashboardDrilldownsService } from './services';
 
-export interface DashboardEnhancedSetupDependencies {
+export interface SetupDependencies {
   uiActions: UiActionsSetup;
 }
 
-export interface DashboardEnhancedStartDependencies {
+export interface StartDependencies {
   uiActions: UiActionsStart;
 }
 
 // eslint-disable-next-line
-export interface DashboardEnhancedSetupContract {}
+export interface SetupContract {}
 
 // eslint-disable-next-line
-export interface DashboardEnhancedStartContract {}
+export interface StartContract {}
 
 export class DashboardEnhancedPlugin
-  implements
-    Plugin<
-      DashboardEnhancedSetupContract,
-      DashboardEnhancedStartContract,
-      DashboardEnhancedSetupDependencies,
-      DashboardEnhancedStartDependencies
-    > {
-  public setup(
-    core: CoreSetup,
-    plugins: DashboardEnhancedSetupDependencies
-  ): DashboardEnhancedSetupContract {
+  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
+  public readonly drilldowns = new DashboardDrilldownsService();
+
+  public setup(core: CoreSetup, plugins: SetupDependencies): SetupContract {
+    this.drilldowns.bootstrap(core, plugins);
+
     return {};
   }
 
-  public start(
-    core: CoreStart,
-    plugins: DashboardEnhancedStartDependencies
-  ): DashboardEnhancedStartContract {
+  public start(core: CoreStart, plugins: StartDependencies): StartContract {
     return {};
   }
 

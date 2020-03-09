@@ -7,10 +7,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
-import { ActionByType } from '../../../../../../src/plugins/ui_actions/public';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
-import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
-import { FlyoutDrilldownWizard } from '../../components/flyout_drilldown_wizard';
+import { ActionByType } from '../../../../../../../../src/plugins/ui_actions/public';
+import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
+import { IEmbeddable } from '../../../../../../../../src/plugins/embeddable/public';
+
+const FlyoutDrilldownWizard: React.FC<{ onClose: any }> = () => <div>FormDrilldownWizard</div>;
 
 export const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
 

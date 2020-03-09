@@ -7,10 +7,10 @@
 import { DashboardEnhancedPlugin } from './plugin';
 
 export {
-  DashboardEnhancedSetupContract,
-  DashboardEnhancedSetupDependencies,
-  DashboardEnhancedStartContract,
-  DashboardEnhancedStartDependencies,
+  SetupContract as DashboardEnhancedSetupContract,
+  SetupDependencies as DashboardEnhancedSetupDependencies,
+  StartContract as DashboardEnhancedStartContract,
+  StartDependencies as DashboardEnhancedStartDependencies,
 } from './plugin';
 
 export function plugin() {

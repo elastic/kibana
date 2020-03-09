@@ -8,13 +8,14 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
 import { EuiNotificationBadge } from '@elastic/eui';
-import { ActionByType } from '../../../../../../src/plugins/ui_actions/public';
+import { ActionByType } from '../../../../../../../../src/plugins/ui_actions/public';
 import {
   toMountPoint,
   reactToUiComponent,
-} from '../../../../../../src/plugins/kibana_react/public';
-import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
-import { FormDrilldownWizard } from '../../components/form_drilldown_wizard';
+} from '../../../../../../../../src/plugins/kibana_react/public';
+import { IEmbeddable } from '../../../../../../../../src/plugins/embeddable/public';
+
+const FormDrilldownWizard = () => <div>FormDrilldownWizard</div>;
 
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 
