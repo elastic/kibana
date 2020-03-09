@@ -23,6 +23,7 @@ import { IAggConfig, IndexPattern } from '../../../../../../plugins/data/public'
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getSearchService } from '../../../../../../plugins/data/public/services';
 
+/** @internal */
 export const serializeAggConfig = (aggConfig: IAggConfig): KibanaDatatableColumnMeta => {
   return {
     type: aggConfig.type.name,
@@ -37,6 +38,7 @@ interface DeserializeAggConfigParams {
   indexPattern: IndexPattern;
 }
 
+/** @internal */
 export const deserializeAggConfig = ({
   type,
   aggConfigParams,

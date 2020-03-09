@@ -18,24 +18,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '../../../../../plugins/kibana_react/public';
+import { toMountPoint } from '../../../../plugins/kibana_react/public';
 import {
   ActionByType,
   createAction,
   IncompatibleActionError,
-} from '../../../../../plugins/ui_actions/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getOverlays, getIndexPatterns } from '../../../../../plugins/data/public/services';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { applyFiltersPopover } from '../../../../../plugins/data/public/ui/apply_filters';
-// @ts-ignore
+} from '../../../../plugins/ui_actions/public';
+import { getOverlays, getIndexPatterns } from '../services';
+import { applyFiltersPopover } from '../ui/apply_filters';
 import { createFiltersFromEvent } from './filters/create_filters_from_event';
-import {
-  Filter,
-  FilterManager,
-  TimefilterContract,
-  esFilters,
-} from '../../../../../plugins/data/public';
+import { Filter, FilterManager, TimefilterContract, esFilters } from '..';
 
 export const ACTION_VALUE_CLICK = 'ACTION_VALUE_CLICK';
 

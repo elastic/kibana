@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import { KibanaDatatable } from '../../../../../../plugins/expressions/public';
-import { esFilters, Filter } from '../../../../../../plugins/data/public';
+import { KibanaDatatable } from '../../../../../plugins/expressions/public';
+import { esFilters, Filter } from '../../../../../plugins/data/public';
 import { deserializeAggConfig } from '../../search/expressions/utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getIndexPatterns } from '../../../../../../plugins/data/public/services';
+import { getIndexPatterns } from '../../../public/services';
 
 export interface EventData {
   table: Pick<KibanaDatatable, 'rows' | 'columns'>;
@@ -113,7 +112,8 @@ const createFilter = async (table: EventData['table'], columnIndex: number, rowI
   return filter;
 };
 
-const createFiltersFromEvent = async (dataPoints: EventData[], negate?: boolean) => {
+/** @public */
+export const createFiltersFromEvent = async (dataPoints: EventData[], negate?: boolean) => {
   const filters: Filter[] = [];
 
   await Promise.all(
@@ -135,5 +135,3 @@ const createFiltersFromEvent = async (dataPoints: EventData[], negate?: boolean)
 
   return filters;
 };
-
-export { createFilter, createFiltersFromEvent };

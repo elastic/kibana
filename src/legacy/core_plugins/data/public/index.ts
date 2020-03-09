@@ -17,13 +17,10 @@
  * under the License.
  */
 
-// /// Define plugin function
 import { DataPlugin as Plugin } from './plugin';
 
 export function plugin() {
   return new Plugin();
 }
 
-// /// Export types & static code
-/** @public types */
 export { DataSetup, DataStart } from './plugin';

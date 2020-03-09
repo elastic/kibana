@@ -21,12 +21,10 @@ import moment from 'moment';
 
 import { onBrushEvent, BrushEvent } from './brush_event';
 
-import { IndexPatternsContract } from '../../../../../../plugins/data/public';
-import { dataPluginMock } from '../../../../../../plugins/data/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { mockDataServices } from '../../../../../../plugins/data/public/search/aggs/test_helpers';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setIndexPatterns } from '../../../../../../plugins/data/public/services';
+import { IndexPatternsContract } from '../../../public';
+import { dataPluginMock } from '../../../public/mocks';
+import { setIndexPatterns } from '../../../public/services';
+import { mockDataServices } from '../../../public/search/aggs/test_helpers';
 
 describe('brushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;

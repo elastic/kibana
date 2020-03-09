@@ -43,7 +43,7 @@ const getOtherBucketFilterTerms = (table: TabbedTable, columnIndex: number, rowI
   ];
 };
 
-const createFilter = (
+export const createFilter = (
   aggConfigs: IAggConfig[],
   table: TabbedTable,
   columnIndex: number,
@@ -74,5 +74,3 @@ const createFilter = (
 
   return filter;
 };
-
-export { createFilter };

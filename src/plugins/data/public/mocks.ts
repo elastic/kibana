@@ -53,6 +53,9 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   const queryStartMock = queryServiceMock.createStartContract();
   const startContract = {
+    actions: {
+      createFiltersFromEvent: jest.fn().mockResolvedValue(['yes']),
+    },
     autocomplete: autocompleteMock,
     getSuggestions: jest.fn(),
     search: {

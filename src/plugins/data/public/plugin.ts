@@ -38,20 +38,39 @@ import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
 import { IndexPatternsService } from './index_patterns';
 import {
-  setNotifications,
   setFieldFormats,
-  setOverlays,
   setIndexPatterns,
+  setInjectedMetadata,
+  setNotifications,
+  setOverlays,
+  setQueryService,
+  setSearchService,
   setUiSettings,
 } from './services';
-import { createFilterAction, ACTION_GLOBAL_APPLY_FILTER } from './actions';
-import { APPLY_FILTER_TRIGGER } from '../../embeddable/public';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
+import {
+  APPLY_FILTER_TRIGGER,
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+} from '../../embeddable/public';
+import { ACTION_GLOBAL_APPLY_FILTER, createFilterAction, createFiltersFromEvent } from './actions';
 import { ApplyGlobalFilterActionContext } from './actions/apply_filter_action';
+import {
+  selectRangeAction,
+  SelectRangeActionContext,
+  ACTION_SELECT_RANGE,
+} from './actions/select_range_action';
+import {
+  valueClickAction,
+  ACTION_VALUE_CLICK,
+  ValueClickActionContext,
+} from './actions/value_click_action';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
     [ACTION_GLOBAL_APPLY_FILTER]: ApplyGlobalFilterActionContext;
+    [ACTION_SELECT_RANGE]: SelectRangeActionContext;
+    [ACTION_VALUE_CLICK]: ValueClickActionContext;
   }
 }
 
@@ -72,6 +91,8 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
   }
 
   public setup(core: CoreSetup, { uiActions }: DataSetupDependencies): DataPublicPluginSetup {
+    setInjectedMetadata(core.injectedMetadata);
+
     const queryService = this.queryService.setup({
       uiSettings: core.uiSettings,
       storage: this.storage,
@@ -79,6 +100,16 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
     uiActions.registerAction(
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
+    );
+
+    uiActions.attachAction(
+      SELECT_RANGE_TRIGGER,
+      selectRangeAction(queryService.filterManager, queryService.timefilter.timefilter)
+    );
+
+    uiActions.attachAction(
+      VALUE_CLICK_TRIGGER,
+      valueClickAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
     return {
@@ -91,23 +122,33 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
   public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
     const { uiSettings, http, notifications, savedObjects, overlays } = core;
-    const fieldFormats = this.fieldFormatsService.start();
     setNotifications(notifications);
-    setFieldFormats(fieldFormats);
     setOverlays(overlays);
-    setUiSettings(core.uiSettings);
+    setUiSettings(uiSettings);
 
-    const indexPatternsService = new IndexPatternsService(uiSettings, savedObjects.client, http);
-    setIndexPatterns(indexPatternsService);
+    const fieldFormats = this.fieldFormatsService.start();
+    setFieldFormats(fieldFormats);
+
+    const indexPatterns = new IndexPatternsService(uiSettings, savedObjects.client, http);
+    setIndexPatterns(indexPatterns);
+
+    const query = this.queryService.start(savedObjects);
+    setQueryService(query);
+
+    const search = this.searchService.start(core);
+    setSearchService(search);
 
     uiActions.attachAction(APPLY_FILTER_TRIGGER, uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER));
 
     const dataServices = {
+      actions: {
+        createFiltersFromEvent,
+      },
       autocomplete: this.autocomplete.start(),
-      search: this.searchService.start(core),
       fieldFormats,
-      query: this.queryService.start(core.savedObjects),
-      indexPatterns: indexPatternsService,
+      indexPatterns,
+      query,
+      search,
     };
 
     const SearchBar = createSearchBar({

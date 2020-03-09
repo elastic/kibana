@@ -26,19 +26,15 @@ import { createFilterTerms } from './create_filter/terms';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
 import { IAggConfigs } from '../agg_configs';
 
-// TODO: Need to stop importing this from legacy
-import {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-} from '../../../../../../../src/legacy/core_plugins/data/public';
-
 import { Adapters } from '../../../../../inspector/public';
 import {
   ISearchSource,
   IFieldFormat,
   FieldFormatsContentType,
   KBN_FIELD_TYPES,
+  search,
 } from '../../../../public';
+const { getRequestInspectorStats, getResponseInspectorStats } = search;
 
 import {
   buildOtherBucketAgg,

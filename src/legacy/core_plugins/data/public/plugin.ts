@@ -18,44 +18,6 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { DataPublicPluginStart, DataPublicPluginSetup } from '../../../../plugins/data/public';
-import { ExpressionsSetup } from '../../../../plugins/expressions/public';
-import { UiActionsSetup } from '../../../../plugins/ui_actions/public';
-import {
-  setIndexPatterns,
-  setQueryService,
-  setUiSettings,
-  setInjectedMetadata,
-  setFieldFormats,
-  setSearchService,
-  setOverlays,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../plugins/data/public/services';
-
-import {
-  selectRangeAction,
-  SelectRangeActionContext,
-  ACTION_SELECT_RANGE,
-} from './actions/select_range_action';
-import {
-  valueClickAction,
-  ACTION_VALUE_CLICK,
-  ValueClickActionContext,
-} from './actions/value_click_action';
-import {
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../plugins/embeddable/public/lib/triggers';
-
-export interface DataPluginSetupDependencies {
-  data: DataPublicPluginSetup;
-  uiActions: UiActionsSetup;
-}
-
-export interface DataPluginStartDependencies {
-  data: DataPublicPluginStart;
-}
 
 /**
  * Interface for this plugin's returned `setup` contract.
@@ -71,13 +33,6 @@ export interface DataSetup {} // eslint-disable-line @typescript-eslint/no-empty
  */
 export interface DataStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
-declare module '../../../../plugins/ui_actions/public' {
-  export interface ActionContextMapping {
-    [ACTION_SELECT_RANGE]: SelectRangeActionContext;
-    [ACTION_VALUE_CLICK]: ValueClickActionContext;
-  }
-}
-
 /**
  * Data Plugin - public
  *
@@ -90,33 +45,12 @@ declare module '../../../../plugins/ui_actions/public' {
  * or static code.
  */
 
-export class DataPlugin
-  implements
-    Plugin<DataSetup, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
-  public setup(core: CoreSetup, { data, uiActions }: DataPluginSetupDependencies) {
-    setInjectedMetadata(core.injectedMetadata);
-
-    uiActions.attachAction(
-      SELECT_RANGE_TRIGGER,
-      selectRangeAction(data.query.filterManager, data.query.timefilter.timefilter)
-    );
-
-    uiActions.attachAction(
-      VALUE_CLICK_TRIGGER,
-      valueClickAction(data.query.filterManager, data.query.timefilter.timefilter)
-    );
-
+export class DataPlugin implements Plugin<DataSetup, DataStart> {
+  public setup(core: CoreSetup) {
     return {};
   }
 
-  public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
-    setUiSettings(core.uiSettings);
-    setQueryService(data.query);
-    setIndexPatterns(data.indexPatterns);
-    setFieldFormats(data.fieldFormats);
-    setSearchService(data.search);
-    setOverlays(core.overlays);
-
+  public start(core: CoreStart): DataStart {
     return {};
   }
 

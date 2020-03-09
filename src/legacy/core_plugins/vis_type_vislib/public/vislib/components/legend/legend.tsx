@@ -24,13 +24,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiPopoverProps, EuiIcon, keyCodes, htmlIdGenerator } from '@elastic/eui';
 
 import { IAggConfig } from '../../../../../../../plugins/data/public';
-import { createFiltersFromEvent } from '../../../../../data/public/actions/filters/create_filters_from_event';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
 import { VisLegendItem } from './legend_item';
 import { getPieNames } from './pie_utils';
 
 import { Vis } from '../../../../../visualizations/public';
-import { tabifyGetColumns } from '../../../legacy_imports';
+import { createFiltersFromEvent, tabifyGetColumns } from '../../../legacy_imports';
 
 const getTableAggs = (vis: Vis): IAggConfig[] => {
   if (!vis.aggs || !vis.aggs.getResponseAggs) {

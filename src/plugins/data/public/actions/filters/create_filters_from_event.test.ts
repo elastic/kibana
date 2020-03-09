@@ -22,13 +22,11 @@ import {
   FieldFormatsGetConfigFn,
   esFilters,
   IndexPatternsContract,
-} from '../../../../../../plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setIndexPatterns } from '../../../../../../plugins/data/public/services';
-import { dataPluginMock } from '../../../../../../plugins/data/public/mocks';
+} from '../../../public';
+import { dataPluginMock } from '../../../public/mocks';
+import { setIndexPatterns } from '../../../public/services';
+import { mockDataServices } from '../../../public/search/aggs/test_helpers';
 import { createFiltersFromEvent, EventData } from './create_filters_from_event';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { mockDataServices } from '../../../../../../plugins/data/public/search/aggs/test_helpers';
 
 jest.mock('ui/new_platform');
 

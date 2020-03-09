@@ -22,9 +22,9 @@ import {
   createAction,
   IncompatibleActionError,
   ActionByType,
-} from '../../../../../plugins/ui_actions/public';
+} from '../../../../plugins/ui_actions/public';
 import { onBrushEvent } from './filters/brush_event';
-import { FilterManager, TimefilterContract, esFilters } from '../../../../../plugins/data/public';
+import { FilterManager, TimefilterContract, esFilters } from '..';
 
 export const ACTION_SELECT_RANGE = 'ACTION_SELECT_RANGE';
 
