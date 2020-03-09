@@ -135,6 +135,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
       labelType="label"
     >
       <EuiComboBox
+        async={false}
         compressed={false}
         fullWidth={false}
         isClearable={true}
@@ -334,6 +335,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
       labelType="label"
     >
       <EuiComboBox
+        async={false}
         compressed={false}
         fullWidth={false}
         isClearable={true}
@@ -571,6 +573,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
       labelType="label"
     >
       <EuiComboBox
+        async={false}
         compressed={false}
         fullWidth={false}
         isClearable={true}
@@ -808,6 +811,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
       labelType="label"
     >
       <EuiComboBox
+        async={false}
         compressed={false}
         fullWidth={false}
         isClearable={true}
