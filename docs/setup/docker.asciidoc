@@ -7,11 +7,11 @@ A list of all published Docker images and tags is available at
 https://www.docker.elastic.co[www.docker.elastic.co]. The source code is in
 https://github.com/elastic/kibana-docker/tree/{branch}[GitHub].
 
-These images are free to use under the Elastic license. They contain open source 
-and free commercial features and access to paid commercial features.  
-{stack-ov}/license-management.html[Start a 30-day trial] to try out all of the 
-paid commercial features. See the 
-https://www.elastic.co/subscriptions[Subscriptions] page for information about 
+These images are free to use under the Elastic license. They contain open source
+and free commercial features and access to paid commercial features.
+{stack-ov}/license-management.html[Start a 30-day trial] to try out all of the
+paid commercial features. See the
+https://www.elastic.co/subscriptions[Subscriptions] page for information about
 Elastic license levels.
 
 [float]
@@ -35,8 +35,8 @@ ifeval::["{release-state}"!="unreleased"]
 docker pull {docker-repo}:{version}
 --------------------------------------------
 
-Alternatively, you can download other Docker images that contain only features 
-available under the Apache 2.0 license. To download the images, go to 
+Alternatively, you can download other Docker images that contain only features
+available under the Apache 2.0 license. To download the images, go to
 https://www.docker.elastic.co[www.docker.elastic.co].
 
 [float]
@@ -96,7 +96,7 @@ Some example translations are shown here:
 `KIBANA_DEFAULTAPPID`:: `kibana.defaultAppId`
 `XPACK_MONITORING_ENABLED`:: `xpack.monitoring.enabled`
 
-In general, any setting listed in <<settings>> can be 
+In general, any setting listed in <<settings>> can be
 configured with this technique.
 
 These variables can be set with +docker-compose+ like this:
@@ -135,5 +135,5 @@ with a <<bind-mount-config,custom `kibana.yml`>> or via
 <<environment-variable-config,environment variables>>.
 
 IMPORTANT: If replacing `kibana.yml` with a custom version, be sure to copy the
-above defaults to the custom file if you want to retain them. If not, they will
+defaults to the custom file if you want to retain them. If not, they will
 be "masked" by the new file.
