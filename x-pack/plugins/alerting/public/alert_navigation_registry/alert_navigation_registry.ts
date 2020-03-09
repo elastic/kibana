@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
-import { AlertType } from '../types';
+import { AlertType } from '../../common';
 import { AlertNavigationHandler } from './types';
 
 export class AlertNavigationRegistry {

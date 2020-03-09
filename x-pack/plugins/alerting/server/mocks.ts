@@ -12,7 +12,6 @@ export { alertsClientMock };
 const createSetupMock = () => {
   const mock: jest.Mocked<PluginSetupContract> = {
     registerType: jest.fn(),
-    registerNavigation: jest.fn(),
   };
   return mock;
 };

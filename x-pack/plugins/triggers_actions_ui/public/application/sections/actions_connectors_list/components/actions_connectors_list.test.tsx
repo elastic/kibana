@@ -13,6 +13,7 @@ import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { AppContextProvider } from '../../../app_context';
 import { chartPluginMock } from '../../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
+import { alertingPluginMock } from '../../../../../../alerting/public/mocks';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
@@ -57,6 +58,7 @@ describe('actions_connectors_list component empty', () => {
       docLinks,
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
+      alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
       injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
@@ -155,6 +157,7 @@ describe('actions_connectors_list component with items', () => {
       docLinks,
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
+      alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
       injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
@@ -240,6 +243,7 @@ describe('actions_connectors_list component empty with show only capability', ()
       docLinks,
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
+      alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
       injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
@@ -330,6 +334,7 @@ describe('actions_connectors_list with show only capability', () => {
       docLinks,
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
+      alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
       injectedMetadata: mockes.injectedMetadata,
       http: mockes.http,
