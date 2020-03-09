@@ -10,10 +10,12 @@ import { DrilldownService } from './service';
 
 export interface DrilldownsSetupDependencies {
   uiActions: UiActionsSetup;
+  advancedUiActions: AdvancedUiActionsSetup;
 }
 
 export interface DrilldownsStartDependencies {
   uiActions: UiActionsStart;
+  advancedUiActions: AdvancedUiActionsStart;
 }
 
 export type DrilldownsSetupContract = Pick<DrilldownService, 'registerDrilldown'>;

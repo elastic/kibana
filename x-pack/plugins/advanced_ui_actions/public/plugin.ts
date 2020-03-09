@@ -30,6 +30,7 @@ import {
   TimeBadgeActionContext,
 } from './custom_time_range_badge';
 import { CommonlyUsedRange } from './types';
+import { UiActionsFactoryService } from './ui_actions_factory';
 
 interface SetupDependencies {
   embeddable: IEmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
@@ -41,8 +42,12 @@ interface StartDependencies {
   uiActions: UiActionsStart;
 }
 
-export type Setup = void;
-export type Start = void;
+export interface AdvancedUiActionsSetup {
+  actionFactory: Pick<UiActionsFactoryService, 'register' | 'getAll'>;
+}
+export interface AdvancedUiActionsStart {
+  actionFactory: Pick<UiActionsFactoryService, 'register' | 'getAll'>;
+}
 
 declare module '../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
@@ -52,12 +57,19 @@ declare module '../../../../src/plugins/ui_actions/public' {
 }
 
 export class AdvancedUiActionsPublicPlugin
-  implements Plugin<Setup, Start, SetupDependencies, StartDependencies> {
+  implements
+    Plugin<AdvancedUiActionsSetup, AdvancedUiActionsStart, SetupDependencies, StartDependencies> {
+  private readonly actionFactoryService = new UiActionsFactoryService();
+
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { uiActions }: SetupDependencies): Setup {}
+  public setup(core: CoreSetup, { uiActions }: SetupDependencies): AdvancedUiActionsSetup {
+    return {
+      actionFactory: this.actionFactoryService,
+    };
+  }
 
-  public start(core: CoreStart, { uiActions }: StartDependencies): Start {
+  public start(core: CoreStart, { uiActions }: StartDependencies): AdvancedUiActionsStart {
     const dateFormat = core.uiSettings.get('dateFormat') as string;
     const commonlyUsedRanges = core.uiSettings.get('timepicker:quickRanges') as CommonlyUsedRange[];
     const { openModal } = createReactOverlays(core);
@@ -76,7 +88,13 @@ export class AdvancedUiActionsPublicPlugin
     });
     uiActions.registerAction(timeRangeBadge);
     uiActions.attachAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
+
+    return {
+      actionFactory: this.actionFactoryService,
+    };
   }
 
-  public stop() {}
+  public stop() {
+    this.actionFactoryService.clear();
+  }
 }

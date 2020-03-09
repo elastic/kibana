@@ -34,8 +34,9 @@ export {
   ActionInternal as UiActionsActionInternal,
   ActionContract as UiActionsActionContract,
 } from './actions';
-export { CollectConfigProps as UiActionsCollectConfigProps } from './util';
 export { buildContextMenuForActions, contextMenuSeparatorAction } from './context_menu';
+export { CollectConfigProps, Presentable, Configurable, ConfigurableBaseConfig } from './util';
+export { buildContextMenuForActions } from './context_menu';
 export { Trigger, TriggerContext } from './triggers';
 export { TriggerContextMapping, TriggerId, ActionContextMapping, ActionType } from './types';
 export { ActionByType } from './actions';

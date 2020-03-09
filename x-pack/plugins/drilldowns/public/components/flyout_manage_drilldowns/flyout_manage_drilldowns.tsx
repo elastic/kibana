@@ -8,9 +8,12 @@ import React, { useState } from 'react';
 import { DrilldownListItem } from '../list_manage_drilldowns';
 import { FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
 import { FlyoutListManageDrilldowns } from '../flyout_list_manage_drilldowns';
+import { ActionFactory } from '../../../../advanced_ui_actions/public';
 
 export interface FlyoutManageDrilldownsProps {
   drilldowns: DrilldownListItem[];
+  drilldownActionFactories: Array<ActionFactory<any>>;
+
   onClose?: () => void;
   showWelcomeMessage?: boolean;
   onHideWelcomeMessage?: () => void;
@@ -27,6 +30,7 @@ export function FlyoutManageDrilldowns({
   onClose = () => {},
   showWelcomeMessage = true,
   onHideWelcomeMessage,
+  drilldownActionFactories,
 }: FlyoutManageDrilldownsProps) {
   const [viewState, setViewState] = useState<ViewState>(ViewState.List);
 
@@ -37,6 +41,7 @@ export function FlyoutManageDrilldowns({
     case ViewState.Edit:
       return (
         <FlyoutDrilldownWizard
+          drilldownActionFactories={drilldownActionFactories}
           mode={viewState === ViewState.Create ? 'create' : 'edit'}
           onSubmit={() => setViewState(ViewState.List)}
           onDelete={() => {

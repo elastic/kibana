@@ -16,11 +16,6 @@ import {
   txtEditDrilldownTitle,
 } from './i18n';
 import { ActionBaseConfig, ActionFactory } from '../../../../advanced_ui_actions/public';
-import {
-  dashboardDrilldownActionFactory,
-  urlDrilldownActionFactory,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../advanced_ui_actions/public/components/action_wizard/test_data';
 import { DrilldownHelloBar } from '../drilldown_hello_bar';
 
 export interface DrilldownWizardConfig<ActionConfig extends ActionBaseConfig = ActionBaseConfig> {
@@ -32,6 +27,8 @@ export interface DrilldownWizardConfig<ActionConfig extends ActionBaseConfig = A
 export interface FlyoutDrilldownWizardProps<
   CurrentActionConfig extends ActionBaseConfig = ActionBaseConfig
 > {
+  drilldownActionFactories: Array<ActionFactory<any>>;
+
   onSubmit?: (drilldownWizardConfig: DrilldownWizardConfig) => void;
   onDelete?: () => void;
   onClose?: () => void;
@@ -55,6 +52,7 @@ export function FlyoutDrilldownWizard<
   onDelete = () => {},
   showWelcomeMessage = false,
   onWelcomeHideClick,
+  drilldownActionFactories,
 }: FlyoutDrilldownWizardProps<CurrentActionConfig>) {
   const [wizardConfig, setWizardConfig] = useState<DrilldownWizardConfig>(
     () =>
@@ -68,7 +66,7 @@ export function FlyoutDrilldownWizard<
     if (!wizardConfig.actionFactory) return false;
     if (!wizardConfig.actionConfig) return false;
 
-    return wizardConfig.actionFactory.isValid(wizardConfig.actionConfig);
+    return wizardConfig.actionFactory.isConfigValid(wizardConfig.actionConfig);
   };
 
   const footer = (
@@ -124,7 +122,7 @@ export function FlyoutDrilldownWizard<
             });
           }
         }}
-        actionFactories={[dashboardDrilldownActionFactory, urlDrilldownActionFactory]}
+        actionFactories={drilldownActionFactories}
       />
       {mode === 'edit' && (
         <>

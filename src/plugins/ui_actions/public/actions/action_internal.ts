@@ -19,7 +19,7 @@
 
 import { Action, ActionContext, AnyActionDefinition } from './action';
 import { Presentable } from '../util/presentable';
-import { createActionStateContainer, ActionState } from './action_state_container';
+// import { ActionState } from './action_state_container';
 import { uiToReactComponent } from '../../../kibana_react/public';
 import { ActionContract } from './action_contract';
 import { ActionType } from '../types';
@@ -33,19 +33,10 @@ export class ActionInternal<A extends AnyActionDefinition>
   public readonly order: number = this.definition.order || 0;
   public readonly MenuItem? = this.definition.MenuItem;
   public readonly ReactMenuItem? = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
-  public readonly CollectConfig? = this.definition.CollectConfig;
-  public readonly ReactCollectConfig? = this.CollectConfig
-    ? uiToReactComponent(this.CollectConfig)
-    : undefined;
 
   public get contract(): ActionContract<A> {
     return this;
   }
-
-  public readonly state = createActionStateContainer({
-    name: '',
-    config: this.definition.defaultConfig || {},
-  });
 
   public execute(context: ActionContext<A>) {
     return this.definition.execute(context);
@@ -72,19 +63,15 @@ export class ActionInternal<A extends AnyActionDefinition>
   }
 
   serialize(): SerializedAction {
-    const state = this.state.get();
     const serialized: SerializedAction = {
       id: this.id,
       type: this.type || '',
-      state,
     };
 
     return serialized;
   }
 
-  deserialize({ state }: SerializedAction) {
-    this.state.set(state);
-  }
+  deserialize() {}
 }
 
 export type AnyActionInternal = ActionInternal<any>;
@@ -92,5 +79,5 @@ export type AnyActionInternal = ActionInternal<any>;
 export interface SerializedAction<Config extends object = object> {
   readonly id: string;
   readonly type: string;
-  readonly state: ActionState<Config>;
+  // readonly state: ActionState<Config>;
 }

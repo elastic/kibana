@@ -46,8 +46,23 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
 
   public async execute(context: FlyoutCreateDrilldownActionContext) {
     const overlays = await this.params.overlays();
+
+    /*
+    const drilldownActionFactories = this.params.getDrilldownActionFactories();
+    const compatibleDrilldownActionFactories = await Promise.all(
+      drilldownActionFactories.map(factory => factory.isCompatible(context))
+    ).then(compatibilityList =>
+      drilldownActionFactories.filter((factory, index) => compatibilityList[index])
+    );
+    */
+
     const handle = overlays.openFlyout(
-      toMountPoint(<FlyoutDrilldownWizard onClose={() => handle.close()} />)
+      toMountPoint(
+        <FlyoutDrilldownWizard
+          onClose={() => handle.close()}
+          // drilldownActionFactories={compatibleDrilldownActionFactories}
+        />
+      )
     );
   }
 }

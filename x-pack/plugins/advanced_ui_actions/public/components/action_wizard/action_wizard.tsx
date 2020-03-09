@@ -16,28 +16,8 @@ import {
 } from '@elastic/eui';
 import { txtChangeButton } from './i18n';
 import './action_wizard.scss';
-
-// TODO: this interface is temporary for just moving forward with the component
-// and it will be imported from the ../ui_actions when implemented properly
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type ActionBaseConfig = {};
-export interface ActionFactory<Config extends ActionBaseConfig = ActionBaseConfig> {
-  type: string; // TODO: type should be tied to Action and ActionByType
-  displayName: string;
-  iconType?: string;
-  wizard: React.FC<ActionFactoryWizardProps<Config>>;
-  createConfig: () => Config;
-  isValid: (config: Config) => boolean;
-}
-
-export interface ActionFactoryWizardProps<Config extends ActionBaseConfig> {
-  config?: Config;
-
-  /**
-   * Callback called when user updates the config in UI.
-   */
-  onConfig: (config: Config) => void;
-}
+import { ActionBaseConfig, ActionFactory } from '../../ui_actions_factory';
+import { uiToReactComponent } from '../../../../../../src/plugins/kibana_react/public';
 
 export interface ActionWizardProps {
   /**
@@ -130,14 +110,14 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
     >
       <header>
         <EuiFlexGroup alignItems="center" gutterSize="s">
-          {actionFactory.iconType && (
+          {actionFactory.getIconType() && (
             <EuiFlexItem grow={false}>
-              <EuiIcon type={actionFactory.iconType} size="m" />
+              <EuiIcon type={actionFactory.getIconType()!} size="m" />
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={true}>
             <EuiText>
-              <h4>{actionFactory.displayName}</h4>
+              <h4>{actionFactory.getDisplayName()}</h4>
             </EuiText>
           </EuiFlexItem>
           {showDeselect && (
@@ -151,7 +131,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
       </header>
       <EuiSpacer size="m" />
       <div>
-        {actionFactory.wizard({
+        {uiToReactComponent(actionFactory.CollectConfig)({
           config,
           onConfig: onConfigChange,
         })}
@@ -182,13 +162,13 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
       {actionFactories.map(actionFactory => (
         <EuiKeyPadMenuItemButton
           className="auaActionWizard__actionFactoryItem"
-          key={actionFactory.type}
-          label={actionFactory.displayName}
+          key={actionFactory.id}
+          label={actionFactory.getDisplayName()}
           data-testid={TEST_SUBJ_ACTION_FACTORY_ITEM}
           data-test-subj={TEST_SUBJ_ACTION_FACTORY_ITEM}
           onClick={() => onActionFactorySelected(actionFactory)}
         >
-          {actionFactory.iconType && <EuiIcon type={actionFactory.iconType} size="m" />}
+          {actionFactory.getIconType() && <EuiIcon type={actionFactory.getIconType()!} size="m" />}
         </EuiKeyPadMenuItemButton>
       ))}
     </EuiFlexGroup>
