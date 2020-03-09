@@ -13,13 +13,15 @@ import {
   EuiTextArea,
   EuiCallOut,
   EuiSpacer,
+  EuiLink,
+  EuiText,
 } from '@elastic/eui';
 import { getSimpleArg, setSimpleArg } from '../../lib/arg_helpers';
 import { ESFieldsSelect } from '../../components/es_fields_select';
 import { ESFieldSelect } from '../../components/es_field_select';
 import { ESIndexSelect } from '../../components/es_index_select';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
-import { ExpressionDataSourceStrings } from '../../../i18n';
+import { ExpressionDataSourceStrings, LUCENE_QUERY_URL } from '../../../i18n';
 
 const { ESDocs: strings } = ExpressionDataSourceStrings;
 
@@ -127,7 +129,13 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
 
         <EuiFormRow
           label={strings.getQueryTitle()}
-          helpText={strings.getQueryLabel()}
+          labelAppend={
+            <EuiText size="xs">
+              <EuiLink href={LUCENE_QUERY_URL} target="_blank">
+                {strings.getQueryLabel()}
+              </EuiLink>
+            </EuiText>
+          }
           display="rowCompressed"
         >
           <EuiTextArea

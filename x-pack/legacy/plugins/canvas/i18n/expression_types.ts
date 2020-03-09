@@ -145,7 +145,7 @@ export const ArgTypesStrings = {
 };
 
 export const ExpressionDataSourceStrings = {
-  // Elasticsearch documents
+  // Elasticsearch documents datasource/Elasticsearch basic datasource
   ESDocs: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocsTitle', {

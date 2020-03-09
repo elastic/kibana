@@ -25,6 +25,7 @@ export const JS = 'JavaScript';
 export const JSON = 'JSON';
 export const KIBANA = 'Kibana';
 export const LUCENE = 'Lucene';
+export const LUCENE_QUERY_URL = 'https://www.elastic.co/guide/en/kibana/current/lucene-query.html';
 export const MARKDOWN = 'Markdown';
 export const MOMENTJS = 'MomentJS';
 export const MOMENTJS_TIMEZONE_URL = 'https://momentjs.com/timezone/';
