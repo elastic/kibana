@@ -3,16 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useCallback, ChangeEvent } from 'react';
 import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiFieldPassword,
+  EuiSpacer,
 } from '@elastic/eui';
 
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, get } from 'lodash/fp';
 
 import {
   ActionConnectorFieldsProps,
@@ -32,7 +33,7 @@ import { isUrlInvalid } from './validators';
 import { connectors, defaultMapping } from './config';
 import { CasesConfigurationMapping } from '../../containers/case/configure/types';
 
-const serviceNowDefinition = connectors.get('.servicenow')!;
+const serviceNowDefinition = connectors['.servicenow'];
 
 interface ServiceNowActionParams {
   message: string;
@@ -45,7 +46,6 @@ export function getActionType(): ActionTypeModel {
     selectMessage: i18n.SERVICENOW_DESC,
     actionTypeTitle: i18n.SERVICENOW_TITLE,
     validateConnector: (action: ServiceNowActionConnector): ValidationResult => {
-      const validationResult = { errors: {} };
       const errors = {
         apiUrl: [] as string[],
         username: [] as string[],
@@ -53,31 +53,28 @@ export function getActionType(): ActionTypeModel {
       };
 
       if (!action.config.apiUrl) {
-        errors.apiUrl.push(i18n.SERVICENOW_API_URL_REQUIRED);
+        errors.apiUrl = [...errors.apiUrl, i18n.SERVICENOW_API_URL_REQUIRED];
       }
 
       if (isUrlInvalid(action.config.apiUrl)) {
-        errors.apiUrl.push(i18n.SERVICENOW_API_URL_INVALID);
+        errors.apiUrl = [...errors.apiUrl, i18n.SERVICENOW_API_URL_INVALID];
       }
 
       if (!action.secrets.username) {
-        errors.username.push(i18n.SERVICENOW_USERNAME_REQUIRED);
+        errors.username = [...errors.username, i18n.SERVICENOW_USERNAME_REQUIRED];
       }
 
       if (!action.secrets.password) {
-        errors.password.push(i18n.SERVICENOW_PASSWORD_REQUIRED);
+        errors.password = [...errors.password, i18n.SERVICENOW_PASSWORD_REQUIRED];
       }
 
-      validationResult.errors = errors;
-      return validationResult;
+      return { errors };
     },
     validateParams: (actionParams: ServiceNowActionParams): ValidationResult => {
-      const validationResult = { errors: {} };
       const errors = {
         message: [] as string[],
       };
-      validationResult.errors = errors;
-      return validationResult;
+      return { errors };
     },
     actionConnectorFields: ServiceNowConnectorFields,
     actionParamsFields: ServiceNowParamsFields,
@@ -87,12 +84,15 @@ export function getActionType(): ActionTypeModel {
 const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
   ServiceNowActionConnector
 >> = ({ action, editActionConfig, editActionSecrets, errors }) => {
-  const { apiUrl, casesConfiguration: { mapping = [] } = {} } = action.config;
+  const {
+    apiUrl,
+    casesConfiguration: { mapping = [] },
+  } = action.config;
   const { username, password } = action.secrets;
 
-  const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl !== undefined;
-  const isUsernameInvalid: boolean = errors.username.length > 0 && username !== undefined;
-  const isPasswordInvalid: boolean = errors.password.length > 0 && password !== undefined;
+  const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl != null;
+  const isUsernameInvalid: boolean = errors.username.length > 0 && username != null;
+  const isPasswordInvalid: boolean = errors.password.length > 0 && password != null;
 
   if (isEmpty(mapping)) {
     editActionConfig('casesConfiguration', {
@@ -100,6 +100,43 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
       mapping: defaultMapping,
     });
   }
+
+  const handleOnChangeActionConfig = useCallback(
+    (key: string, evt: ChangeEvent<HTMLInputElement>) => editActionConfig(key, evt.target.value),
+    []
+  );
+
+  const handleOnBlurActionConfig = useCallback(
+    (key: string) => {
+      if (key === 'apiUrl' && action.config[key] != null) {
+        editActionConfig(key, '');
+      }
+    },
+    [action.config]
+  );
+
+  const handleOnChangeSecretConfig = useCallback(
+    (key: string, evt: ChangeEvent<HTMLInputElement>) => editActionSecrets(key, evt.target.value),
+    []
+  );
+
+  const handleOnBlurSecretConfig = useCallback(
+    (key: string) => {
+      if (['username', 'password'].includes(key) && get(key, action.secrets) != null) {
+        editActionSecrets(key, '');
+      }
+    },
+    [action.secrets]
+  );
+
+  const handleOnChangeMappingConfig = useCallback(
+    (newMapping: CasesConfigurationMapping[]) =>
+      editActionConfig('casesConfiguration', {
+        ...action.config.casesConfiguration,
+        mapping: newMapping,
+      }),
+    [action.config]
+  );
 
   return (
     <>
@@ -119,14 +156,8 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
               value={apiUrl}
               data-test-subj="apiUrlFromInput"
               placeholder="https://<instance>.service-now.com"
-              onChange={e => {
-                editActionConfig('apiUrl', e.target.value);
-              }}
-              onBlur={() => {
-                if (!apiUrl) {
-                  editActionConfig('apiUrl', '');
-                }
-              }}
+              onChange={handleOnChangeActionConfig.bind(null, 'apiUrl')}
+              onBlur={handleOnBlurActionConfig.bind(null, 'apiUrl')}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -146,14 +177,8 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
               name="username"
               value={username}
               data-test-subj="usernameFromInput"
-              onChange={e => {
-                editActionSecrets('username', e.target.value);
-              }}
-              onBlur={() => {
-                if (!username) {
-                  editActionSecrets('username', '');
-                }
-              }}
+              onChange={handleOnChangeSecretConfig.bind(null, 'username')}
+              onBlur={handleOnBlurSecretConfig.bind(null, 'username')}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -173,29 +198,19 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
               name="password"
               value={password}
               data-test-subj="passwordFromInput"
-              onChange={e => {
-                editActionSecrets('password', e.target.value);
-              }}
-              onBlur={() => {
-                if (!password) {
-                  editActionSecrets('password', '');
-                }
-              }}
+              onChange={handleOnChangeSecretConfig.bind(null, 'password')}
+              onBlur={handleOnBlurSecretConfig.bind(null, 'password')}
             />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup>
         <EuiFlexItem>
+          <EuiSpacer size="xs" />
           <FieldMapping
             disabled={false}
             mappings={mapping as CasesConfigurationMapping[]}
-            onChangeMappings={newMapping => {
-              editActionConfig('casesConfiguration', {
-                ...action.config.casesConfiguration,
-                mapping: newMapping,
-              });
-            }}
+            onChangeMappings={handleOnChangeMappingConfig}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

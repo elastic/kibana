@@ -4,17 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Connector } from './types';
+import { CasesConfigurationMapping } from '../../containers/case/configure/types';
 import serviceNowLogo from './logos/servicenow.svg';
+import { Connector } from './types';
 
-const connectors = new Map<string, Connector>();
+const connectors: Record<string, Connector> = {
+  '.servicenow': {
+    actionTypeId: '.servicenow',
+    logo: serviceNowLogo,
+  },
+};
 
-connectors.set('.servicenow', {
-  actionTypeId: '.servicenow',
-  logo: serviceNowLogo,
-});
-
-const defaultMapping = [
+const defaultMapping: CasesConfigurationMapping[] = [
   {
     source: 'title',
     target: 'short_description',
