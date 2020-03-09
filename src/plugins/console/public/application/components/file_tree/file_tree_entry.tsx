@@ -19,7 +19,14 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiButtonIcon, EuiFieldText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiButtonIcon,
+  EuiFieldText,
+  EuiIcon,
+} from '@elastic/eui';
 
 export interface EditHandlerArg {
   id: string;
@@ -29,14 +36,15 @@ export interface EditHandlerArg {
 export interface Props {
   id: string;
   name: string;
-  displayName?: React.ReactNode;
-  ariaLabel?: string;
   onSelect: (id: string) => void;
   onDelete: (id: string) => void;
   onEdit: (props: EditHandlerArg) => void;
   className?: string;
   canDelete?: boolean;
   canEdit?: boolean;
+  displayName?: React.ReactNode;
+  ariaLabel?: string;
+  error?: string;
 }
 
 export const FileTreeEntry: FunctionComponent<Props> = ({
@@ -50,6 +58,7 @@ export const FileTreeEntry: FunctionComponent<Props> = ({
   onEdit,
   id,
   ariaLabel,
+  error,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [nameValue, setNameValue] = useState<undefined | string>(undefined);
@@ -99,6 +108,7 @@ export const FileTreeEntry: FunctionComponent<Props> = ({
             }
           }}
         >
+          {error && <EuiIcon type="alert" color="warning" />}
           {displayName ?? name}
         </span>
       </EuiText>

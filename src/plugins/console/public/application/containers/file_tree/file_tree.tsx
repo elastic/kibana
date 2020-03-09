@@ -54,7 +54,7 @@ export const FileTree: FunctionComponent = () => {
   const [showFileSearchBar, setShowFileSearchBar] = useState(false);
 
   const textObjectsCRUD = useTextObjectsCRUD();
-  const { textObjects, currentTextObjectId } = useTextObjectsReadContext();
+  const { textObjects, currentTextObjectId, textObjectsSaveError } = useTextObjectsReadContext();
   const dispatch = useTextObjectsActionContext();
 
   const prepareData = flow(addDefaultValues, searchAndSort(searchFilter));
@@ -116,6 +116,7 @@ export const FileTree: FunctionComponent = () => {
                   'conApp__fileTree__entry--selected': id === currentTextObjectId,
                 }),
                 name: entryName,
+                error: textObjectsSaveError[id],
                 displayName,
                 onSelect: () => {
                   dispatch({

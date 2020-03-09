@@ -46,7 +46,9 @@ export type Action =
   | { type: 'upsertMany'; payload: Array<Partial<TextObject> & IdObject> }
   | { type: 'upsert'; payload: Partial<TextObject> & IdObject }
   | { type: 'upsertAndSetCurrent'; payload: TextObjectWithId }
-  | { type: 'delete'; payload: string };
+  | { type: 'delete'; payload: string }
+  | { type: 'saveError'; payload: { textObjectId: string; error: Error | string } }
+  | { type: 'clearSaveError'; payload: { textObjectId: string } };
 
 export const reducer: Reducer<Store, Action> = (state, action) =>
   produce<Store>(state, draft => {
@@ -75,7 +77,7 @@ export const reducer: Reducer<Store, Action> = (state, action) =>
               delete draft.textObjectsSaveError[object.id];
             }
           } catch (e) {
-            draft.textObjectsSaveError[object.id] = e.message;
+            draft.textObjectsSaveError[object.id] = e;
           }
         }
       }
@@ -90,6 +92,18 @@ export const reducer: Reducer<Store, Action> = (state, action) =>
         draft.currentTextObjectId = scratchPad.id;
       }
       delete draft.textObjects[action.payload];
+    }
+
+    if (action.type === 'saveError') {
+      const { error, textObjectId } = action.payload;
+      draft.textObjectsSaveError[textObjectId] = typeof error === 'string' ? error : error.message;
+      return;
+    }
+
+    if (action.type === 'clearSaveError') {
+      const { textObjectId } = action.payload;
+      delete draft.textObjectsSaveError[textObjectId];
+      return;
     }
 
     return draft;
