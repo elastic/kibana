@@ -17,10 +17,12 @@ import {
   createGetStatusBarRoute,
 } from './monitors';
 import { createGetPingHistogramRoute } from './pings/get_ping_histogram';
+import { createGetMonitorDurationRoute } from './monitors/monitors_durations';
 
 export * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';
 export { uptimeRouteWrapper } from './uptime_route_wrapper';
+
 export const restApiRoutes: UMRestApiRouteFactory[] = [
   createGetOverviewFilters,
   createGetPingsRoute,
@@ -33,4 +35,5 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   createLogMonitorPageRoute,
   createLogOverviewPageRoute,
   createGetPingHistogramRoute,
+  createGetMonitorDurationRoute,
 ];

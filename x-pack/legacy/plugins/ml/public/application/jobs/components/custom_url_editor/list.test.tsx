@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { Job } from '../../new_job/common/job_creator/configs';
+import { Job } from '../../../../../common/types/anomaly_detection_jobs';
 
 import { CustomUrlList, CustomUrlListProps } from './list';
 

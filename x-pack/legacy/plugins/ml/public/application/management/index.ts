@@ -15,6 +15,7 @@ import { management } from 'ui/management';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import { metadata } from 'ui/metadata';
+import { take } from 'rxjs/operators';
 import { JOBS_LIST_PATH } from './management_urls';
 import { setDependencyCache } from '../util/dependency_cache';
 import './jobs_list';
@@ -31,11 +32,11 @@ type PluginsSetupExtended = typeof npSetup.plugins & {
 };
 
 const plugins = npSetup.plugins as PluginsSetupExtended;
-const licencingSubscription = plugins.licensing.license$.subscribe(license => {
+// only need to register once
+const licensing = plugins.licensing.license$.pipe(take(1));
+licensing.subscribe(license => {
   if (license.check(PLUGIN_ID, MINIMUM_FULL_LICENSE).state === LICENSE_CHECK_STATE.Valid) {
     initManagementSection();
-    // unsubscribe, we only want to register the plugin once.
-    licencingSubscription.unsubscribe();
   }
 });
 
@@ -53,7 +54,6 @@ function initManagementSection() {
   setDependencyCache({
     docLinks: legacyDocLinks as any,
     basePath: legacyBasePath as any,
-    XSRF: chrome.getXsrfToken(),
   });
 
   management.register('ml', {
