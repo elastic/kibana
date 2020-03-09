@@ -19,6 +19,7 @@ import {
 import { times, random } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { ViewInApp } from './view_in_app';
 
 jest.mock('../../../app_context', () => ({
   useAppDependencies: jest.fn(() => ({
@@ -247,16 +248,34 @@ describe('alert_details', () => {
       expect(
         shallow(
           <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
-        ).containsMatchingElement(
-          <EuiButtonEmpty disabled={true} iconType="popout">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertDetails.viewAlertInAppButtonLabel"
-              defaultMessage="View in app"
-            />
-          </EuiButtonEmpty>
-        )
+        ).containsMatchingElement(<ViewInApp alert={alert} />)
       ).toBeTruthy();
     });
+
+    // it('links to the app that created the alert', () => {
+    //   const alert = mockAlert();
+
+    //   const alertType = {
+    //     id: '.noop',
+    //     name: 'No Op',
+    //     actionGroups: [{ id: 'default', name: 'Default' }],
+    //     defaultActionGroupId: 'default',
+    //     actionVariables: [],
+    //   };
+
+    //   expect(
+    //     shallow(
+    //       <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
+    //     ).containsMatchingElement(
+    //       <EuiButtonEmpty disabled={true} iconType="popout">
+    //         <FormattedMessage
+    //           id="xpack.triggersActionsUI.sections.alertDetails.viewAlertInAppButtonLabel"
+    //           defaultMessage="View in app"
+    //         />
+    //       </EuiButtonEmpty>
+    //     )
+    //   ).toBeTruthy();
+    // });
 
     it('links to the activity log', () => {
       const alert = mockAlert();
