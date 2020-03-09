@@ -7,6 +7,7 @@
     ng-show="isVisible"
     app-name="'dashboard'"
     config="topNavMenu"
+    is-loading="isLoading"
 
     show-search-bar="isVisible"
     show-filter-bar="showFilterBar()"
@@ -47,6 +48,9 @@
     on-filters-updated="onFiltersUpdated"
   >
   </kbn-top-nav>
+
+  <!-- TODO: Remove -->
+  <button ng-click="cancelPending()">Cancel Pending</button>
 
   <h1 class="euiScreenReaderOnly">{{screenTitle}}</h1>
   <div id="dashboardViewport"></div>

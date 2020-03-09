@@ -109,7 +109,7 @@ export class DashboardAppController {
     share,
     dashboardCapabilities,
     embeddableCapabilities: { visualizeCapabilities, mapsCapabilities },
-    data: { query: queryService },
+    data: { query: queryService, search: searchService },
     core: {
       notifications,
       overlays,
@@ -123,6 +123,12 @@ export class DashboardAppController {
     history,
     kbnUrlStateStorage,
   }: DashboardAppControllerDependencies) {
+    // TODO: Remove these few lines
+    searchService.getPendingSearchesCount$().subscribe(count => {
+      $scope.$evalAsync(() => ($scope.isLoading = count > 0));
+    });
+    $scope.cancelPending = () => searchService.cancelPendingSearches();
+
     const filterManager = queryService.filterManager;
     const queryFilter = filterManager;
     const timefilter = queryService.timefilter.timefilter;

@@ -12,7 +12,8 @@
 
     query="state.query"
     on-query-submit="updateQuery"
-	
+    is-loading="isLoading"
+
     show-save-query="showSaveQuery"
     saved-query-id="state.savedQuery"
     on-saved-query-id-change="updateSavedQueryId"
@@ -20,6 +21,9 @@
     use-default-behaviors="true"
   >
   </kbn-top-nav>
+
+  <!-- TODO: Remove -->
+  <button ng-click="cancelPending()">Cancel Pending</button>
 
   <main class="container-fluid">
     <div class="row">

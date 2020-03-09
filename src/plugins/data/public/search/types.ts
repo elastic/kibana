@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Observable } from 'rxjs';
 import { CoreStart } from 'kibana/public';
 import { TimeRange } from '../../common';
 import { ISearch, ISearchGeneric } from './i_search';
@@ -90,6 +91,8 @@ export interface ISearchSetup {
 
 export interface ISearchStart {
   aggs: SearchAggsStart;
+  cancelPendingSearches: () => void;
+  getPendingSearchesCount$: () => Observable<number>;
   search: ISearchGeneric;
   __LEGACY: {
     esClient: LegacyApiCaller;

@@ -59,4 +59,6 @@ export {
   SortDirection,
 } from './search_source';
 
+export { SearchInterceptor } from './search_interceptor';
+
 export { FetchOptions } from './fetch';

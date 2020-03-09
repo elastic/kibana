@@ -205,6 +205,13 @@ function discoverController(
 
   const subscriptions = new Subscription();
 
+  // TODO: Remove these few lines
+  const searchService = getServices().data.search;
+  searchService.getPendingSearchesCount$().subscribe(count => {
+    $scope.$evalAsync(() => ($scope.isLoading = count > 0));
+  });
+  $scope.cancelPending = () => searchService.cancelPendingSearches();
+
   $scope.timefilterUpdateHandler = ranges => {
     timefilter.setTime({
       from: moment(ranges.from).toISOString(),
