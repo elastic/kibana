@@ -8,7 +8,6 @@
 import React, { Component, ReactElement } from 'react';
 import { EuiButtonIcon, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { VECTOR_STYLES } from '../vector_style_defaults';
 
 type Props = {
   children: ReactElement<any>;

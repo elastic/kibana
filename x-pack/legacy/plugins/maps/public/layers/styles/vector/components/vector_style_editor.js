@@ -18,12 +18,12 @@ import { OrientationEditor } from './orientation/orientation_editor';
 import {
   getDefaultDynamicProperties,
   getDefaultStaticProperties,
-  LABEL_BORDER_SIZES,
   VECTOR_STYLES,
 } from '../vector_style_defaults';
 import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_utils';
 import { VECTOR_SHAPE_TYPES } from '../../../sources/vector_feature_types';
 import { i18n } from '@kbn/i18n';
+import { LABEL_BORDER_SIZES } from '../../../../../common/constants';
 
 import { EuiSpacer, EuiButtonGroup, EuiFormRow, EuiSwitch } from '@elastic/eui';
 

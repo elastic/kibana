@@ -5,13 +5,14 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import { EuiFormRow, EuiRange, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+// @ts-ignore
 import { VECTOR_STYLES } from '../../vector_style_defaults';
 import { FieldMetaPopover } from './field_meta_popover';
 
-function getIsEnableToggleLabel(styleName) {
+function getIsEnableToggleLabel(styleName: string) {
   switch (styleName) {
     case VECTOR_STYLES.FILL_COLOR:
     case VECTOR_STYLES.LINE_COLOR:
@@ -35,18 +36,18 @@ function getIsEnableToggleLabel(styleName) {
 
 type Props = {
   styleProperty: unknown;
-  onChange: (unknown) => void;
+  onChange: (fieldMetaOptions: unknown) => void;
 };
 
 export function OrdinalFieldMetaPopover(props: Props) {
-  const onIsEnabledChange = event => {
+  const onIsEnabledChange = (event: ChangeEvent<HTMLInputElement>) => {
     props.onChange({
       ...props.styleProperty.getFieldMetaOptions(),
       isEnabled: event.target.checked,
     });
   };
 
-  const onSigmaChange = event => {
+  const onSigmaChange = (event: ChangeEvent<HTMLInputElement>) => {
     props.onChange({
       ...props.styleProperty.getFieldMetaOptions(),
       sigma: event.target.value,
