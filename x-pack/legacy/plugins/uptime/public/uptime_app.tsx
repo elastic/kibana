@@ -24,7 +24,6 @@ import { store } from './state';
 import { setBasePath } from './state/actions';
 import { PageRouter } from './routes';
 import {
-  ToggleAlertFlyoutButton,
   UptimeAlertsContextProvider,
   UptimeAlertsFlyoutWrapper,
 } from './components/functional/alerts';
@@ -104,7 +103,6 @@ const Application = (props: UptimeAppProps) => {
                       <UptimeAlertsContextProvider>
                         <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
                           <main>
-                            <ToggleAlertFlyoutButton />
                             <UptimeAlertsFlyoutWrapper />
                             <PageRouter autocomplete={plugins.data.autocomplete} />
                           </main>

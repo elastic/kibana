@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
@@ -16,14 +16,17 @@ export const ToggleAlertFlyoutButton = () => {
   return (
     <EuiPopover
       button={
-        <EuiButton
+        <EuiButtonEmpty
           data-test-subj="xpack.uptime.alertsPopover.toggleButton"
           iconType="arrowDown"
           iconSide="right"
           onClick={() => setIsOpen(!isOpen)}
         >
-          Manage alerts
-        </EuiButton>
+          <FormattedMessage
+            id="xpack.uptime.alerts.toggleAlertFlyoutButtonText"
+            defaultMessage="Manage alerts"
+          />
+        </EuiButtonEmpty>
       }
       closePopover={() => setIsOpen(false)}
       isOpen={isOpen}

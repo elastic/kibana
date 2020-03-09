@@ -13,6 +13,7 @@ import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useUrlParams } from '../hooks';
 import { UptimeUrlParams } from '../lib/helper';
+import { ToggleAlertFlyoutButton } from '../components/functional/alerts';
 
 interface PageHeaderProps {
   headingText: string;
@@ -59,6 +60,9 @@ export const PageHeader = ({ headingText, breadcrumbs, datePicker = true }: Page
           <EuiTitle>
             <h1>{headingText}</h1>
           </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ToggleAlertFlyoutButton />
         </EuiFlexItem>
         {datePickerComponent}
       </EuiFlexGroup>
