@@ -11,7 +11,7 @@ import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 
-import { MlJobWithTimeRange } from '../../../../common/types/jobs';
+import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
 import { getDateFormatTz, TimeRangeBounds } from '../../explorer/explorer_utils';

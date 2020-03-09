@@ -25,7 +25,7 @@ export interface LicenseCheckResult {
 
 export interface SystemRouteDeps {
   cloud: CloudSetup;
-  spacesPlugin: SpacesPluginSetup;
+  spaces?: SpacesPluginSetup;
 }
 
 export interface PluginsSetup {
@@ -33,8 +33,8 @@ export interface PluginsSetup {
   features: FeaturesPluginSetup;
   home: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
-  security: SecurityPluginSetup;
-  spaces: SpacesPluginSetup;
+  security?: SecurityPluginSetup;
+  spaces?: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
 }
 
