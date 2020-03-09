@@ -93,7 +93,7 @@ describe('ML - BucketSpanEstimator', () => {
       );
 
       estimateBucketSpan(formConfig).catch(catchData => {
-        expect(catchData).to.be('Unable to retrieve cluster setting search.max_buckets');
+        expect(catchData).to.be('Unable to retrieve cluster settings');
         mockCallWithInternalUserFactory.verify();
         done();
       });
