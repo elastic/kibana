@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SavedObject } from 'kibana/server';
-import { IndexPatternAttributes } from 'src/plugins/data/public';
+import { IIndexPattern, IndexPatternAttributes } from 'src/plugins/data/public';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import { IndexPatternRef } from './types';
@@ -31,7 +31,7 @@ export interface DiscoverIndexPatternProps {
   /**
    * currently selected index pattern, due to angular issues it's undefined at first rendering
    */
-  selectedIndexPattern: SavedObject<IndexPatternAttributes>;
+  selectedIndexPattern: IIndexPattern;
   /**
    * triggered when user selects a new index pattern
    */
@@ -50,12 +50,16 @@ export function DiscoverIndexPattern({
     id: entity.id,
     title: entity.attributes!.title,
   }));
-  const { id: selectedId, attributes } = selectedIndexPattern || {};
+  const { id: selectedId, title: selectedTitle } = selectedIndexPattern || {};
 
   const [selected, setSelected] = useState({
     id: selectedId,
-    title: attributes?.title || '',
+    title: selectedTitle || '',
   });
+  useEffect(() => {
+    const { id, title } = selectedIndexPattern;
+    setSelected({ id, title });
+  }, [selectedIndexPattern]);
   if (!selectedId) {
     return null;
   }
