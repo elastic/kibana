@@ -37,11 +37,18 @@ import { TimelineRefetch } from './refetch_timeline';
 import { ManageTimelineContext } from './timeline_context';
 import { esQuery, Filter, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
-const WrappedByAutoSizer = styled.div`
-  width: 100%;
-`; // required by AutoSizer
+const TimelineContainer = styled.div`
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+`;
 
-WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
+const TimelineHeaderContainer = styled.div`
+  margin-top: 6px;
+  width: 100%;
+`;
+
+TimelineHeaderContainer.displayName = 'TimelineHeaderContainer';
 
 export const isCompactFooter = (width: number): boolean => width < 600;
 
@@ -50,7 +57,7 @@ const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   box-shadow: none;
   display: flex;
   flex-direction: column;
-  padding: 5px 0 0 10px;
+  padding: 14px 10px 0 12px;
 `;
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
@@ -69,7 +76,7 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
 
 const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
   background: none;
-  padding: 0 10px 0 12px;
+  padding: 0 10px 5px 12px;
 `;
 
 export interface Props {
@@ -157,14 +164,14 @@ export const TimelineComponent: React.FC<Props> = ({
   };
 
   return (
-    <div data-test-subj="timeline">
+    <TimelineContainer data-test-subj="timeline">
       <StyledEuiFlyoutHeader data-test-subj="eui-flyout-header" hasBorder={false}>
         <FlyoutHeaderWithCloseButton
           onClose={onClose}
           timelineId={id}
           usersViewing={usersViewing}
         />
-        <WrappedByAutoSizer ref={measureRef as React.RefObject<HTMLDivElement>}>
+        <TimelineHeaderContainer ref={measureRef}>
           <TimelineHeader
             browserFields={browserFields}
             id={id}
@@ -180,7 +187,7 @@ export const TimelineComponent: React.FC<Props> = ({
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
             sort={sort}
           />
-        </WrappedByAutoSizer>
+        </TimelineHeaderContainer>
       </StyledEuiFlyoutHeader>
       <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
       {combinedQueries !== null && (
@@ -249,7 +256,7 @@ export const TimelineComponent: React.FC<Props> = ({
           )}
         </TimelineQuery>
       )}
-    </div>
+    </TimelineContainer>
   );
 };
 

@@ -49,7 +49,7 @@ const starIconWidth = 30;
 const nameWidth = 155;
 const descriptionWidth = 165;
 const noteWidth = 130;
-const settingsWidth = 50;
+const settingsWidth = 55;
 
 /** Displays the properties of a timeline, i.e. name, description, notes, etc */
 export const Properties = React.memo<Props>(
