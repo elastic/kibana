@@ -83,7 +83,6 @@ export const signalRulesAlertType = ({
     },
     // fun fact: previousStartedAt is not actually a Date but a String of a date
     async executor({ previousStartedAt, alertId, services, params }) {
-      // console.log('params', params);
       const {
         from,
         ruleId,
@@ -99,9 +98,6 @@ export const signalRulesAlertType = ({
       } = params;
       // TODO: Remove this hard extraction of name once this is fixed: https://github.com/elastic/kibana/issues/50522
       const savedObject = await services.savedObjectsClient.get<AlertAttributes>('alert', alertId);
-      // if (savedObject.attributes.name === 'Query with a rule id') {
-      //   console.log('saved', savedObject);
-      // }
       const ruleStatusSavedObjects = await services.savedObjectsClient.find<
         IRuleSavedAttributesSavedObjectAttributes
       >({
@@ -219,10 +215,6 @@ export const signalRulesAlertType = ({
           const noReIndexResult = await services.callCluster('search', noReIndex);
 
           if (noReIndexResult.hits.total.value !== 0) {
-            // if (savedObject.attributes.name === 'Query with a rule id') {
-            //   console.log('noReIndexResult', noReIndexResult.hits.hits[0]);
-            // }
-
             const inputIndexes = inputIndex.join(', ');
 
             if (throttle && throttle !== 'no_actions') {
@@ -236,17 +228,13 @@ export const signalRulesAlertType = ({
                 .replaceState({
                   signalsCount,
                 })
-                .scheduleActions(
-                  'default',
-                  {
-                    inputIndexes,
-                    outputIndex,
-                    name,
-                    alertId,
-                    ruleId,
-                  },
-                  true // clears state after the throttled rule has been executed
-                );
+                .scheduleActions('default', {
+                  inputIndexes,
+                  outputIndex,
+                  name,
+                  alertId,
+                  ruleId,
+                });
             }
 
             logger.info(

@@ -4,6 +4,5 @@
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "siem"],
   "server": true,
-  "ui": false,
-  "requiredPlugins": ["triggers_actions_ui"]
+  "ui": false
 }

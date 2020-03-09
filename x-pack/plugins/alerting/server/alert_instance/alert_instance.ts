@@ -63,11 +63,11 @@ export class AlertInstance {
     return this.state;
   }
 
-  scheduleActions(actionGroup: string, context: Context = {}, clearState: boolean = false) {
+  scheduleActions(actionGroup: string, context: Context = {}) {
     if (this.hasScheduledActions()) {
       throw new Error('Alert instance execution has already been scheduled, cannot schedule twice');
     }
-    this.scheduledExecutionOptions = { actionGroup, context, state: this.state, clearState };
+    this.scheduledExecutionOptions = { actionGroup, context, state: this.state };
     return this;
   }
 
