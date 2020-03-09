@@ -7,26 +7,6 @@
 
 import { FIELD_ORIGIN, LABEL_BORDER_SIZES, SYMBOLIZE_AS_TYPES } from './constants';
 
-export type StylePropertyOptions =
-  | LableBorderSizeOptions
-  | SymbolizeAsOptions
-  | DynamicStylePropertyOptions
-  | StaticStylePropertyOptions;
-
-export type StaticStylePropertyOptions =
-  | ColorStaticOptions
-  | IconStaticOptions
-  | LabelStaticOptions
-  | OrientationStaticOptions
-  | SizeStaticOptions;
-
-export type DynamicStylePropertyOptions =
-  | ColorDynamicOptions
-  | IconDynamicOptions
-  | LabelDynamicOptions
-  | OrientationDynamicOptions
-  | SizeDynamicOptions;
-
 // Non-static/dynamic options
 export type SymbolizeAsOptions = {
   value: SYMBOLIZE_AS_TYPES;
@@ -121,3 +101,23 @@ export type SizeDynamicOptions = {
 export type SizeStaticOptions = {
   size: number;
 };
+
+export type StylePropertyOptions =
+  | LableBorderSizeOptions
+  | SymbolizeAsOptions
+  | DynamicStylePropertyOptions
+  | StaticStylePropertyOptions;
+
+export type StaticStylePropertyOptions =
+  | ColorStaticOptions
+  | IconStaticOptions
+  | LabelStaticOptions
+  | OrientationStaticOptions
+  | SizeStaticOptions;
+
+export type DynamicStylePropertyOptions =
+  | ColorDynamicOptions
+  | IconDynamicOptions
+  | LabelDynamicOptions
+  | OrientationDynamicOptions
+  | SizeDynamicOptions;

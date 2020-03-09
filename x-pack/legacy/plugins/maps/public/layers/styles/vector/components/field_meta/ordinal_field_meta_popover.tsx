@@ -5,11 +5,12 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import _ from 'lodash';
 import React, { ChangeEvent } from 'react';
-import { EuiFormRow, EuiRange, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiRange, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
-import { VECTOR_STYLES } from '../../vector_style_defaults';
+import { DEFAULT_SIGMA, VECTOR_STYLES } from '../../vector_style_defaults';
 import { FieldMetaPopover } from './field_meta_popover';
 import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
 import { FieldMetaOptions } from '../../../../../../common/style_property_descriptor_types';
@@ -42,7 +43,7 @@ type Props = {
 };
 
 export function OrdinalFieldMetaPopover(props: Props) {
-  const onIsEnabledChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const onIsEnabledChange = (event: EuiSwitchEvent) => {
     props.onChange({
       ...props.styleProperty.getFieldMetaOptions(),
       isEnabled: event.target.checked,
@@ -52,7 +53,7 @@ export function OrdinalFieldMetaPopover(props: Props) {
   const onSigmaChange = (event: ChangeEvent<HTMLInputElement>) => {
     props.onChange({
       ...props.styleProperty.getFieldMetaOptions(),
-      sigma: event.target.value,
+      sigma: parseInt(event.target.value, 10),
     });
   };
 
@@ -77,7 +78,7 @@ export function OrdinalFieldMetaPopover(props: Props) {
           min={1}
           max={5}
           step={0.25}
-          value={props.styleProperty.getFieldMetaOptions().sigma}
+          value={_.get(props.styleProperty.getFieldMetaOptions(), 'sigma', DEFAULT_SIGMA)}
           onChange={onSigmaChange}
           disabled={!props.styleProperty.getFieldMetaOptions().isEnabled}
           showTicks

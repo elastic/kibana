@@ -8,12 +8,19 @@
 import { AbstractLayer } from './layer';
 import { IVectorSource } from './sources/vector_source';
 import { VectorLayerDescriptor } from '../../common/descriptor_types';
+import { ILayer } from './layer';
 
 type VectorLayerArguments = {
   source: IVectorSource;
   layerDescriptor: VectorLayerDescriptor;
 };
 
-export class VectorLayer extends AbstractLayer {
+export interface IVectorLayer extends ILayer {
+  getValidJoins(): unknown[];
+}
+
+export class VectorLayer extends AbstractLayer implements IVectorLayer {
   constructor(options: VectorLayerArguments);
+
+  getValidJoins(): unknown[];
 }

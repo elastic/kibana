@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
+// @ts-ignore
 import { getVectorStyleLabel } from '../components/get_vector_style_label';
-import { FieldMetaOptions, StylePropertyOptions } from '../../../../../common/style_property_descriptor_types';
+import { StylePropertyOptions } from '../../../../../common/style_property_descriptor_types';
 
 export interface IStyleProperty {
   isDynamic(): boolean;
@@ -44,7 +45,8 @@ export class AbstractStyleProperty implements IStyleProperty {
   }
 
   formatField(value: string | undefined): string {
-    return value;
+    // eslint-disable-next-line eqeqeq
+    return value == undefined ? '' : value;
   }
 
   getStyleName(): string {
