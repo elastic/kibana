@@ -10,10 +10,10 @@ in Kibana.
 # Basic example
 
 ```ts
-core.status.set({
-  level: ServiceStatusLevel.degraded,
-  summary: `APM indices cannot be created`,
-});
+// Override default behavior and only elevate severity when elasticsearch is not available
+core.status.set(
+  core.status.core$.pipe(core => core.elasticsearch);
+)
 ```
 
 # Motivation
@@ -217,6 +217,35 @@ interface StatusSetup {
     ): RouteHandler<P, Q, B>;
   }
 }
+```
+
+## Additional Examples
+
+### Combine inherited status with check against external dependency
+```ts
+const getExternalDepHealth = async () => {
+  const resp = await window.fetch('https://myexternaldep.com/_healthz');
+  return resp.json();
+}
+
+// Create an observable that checks the status of an external service every every 10s 
+const myExternalDependency$: Observable<ServiceStatusLevel> = interval(10000).pipe(
+  mergeMap(() => of(getExternalDepHealth())),
+  map(health => health.ok ? ServiceStatusLevel.available : ServiceStatusLevel.unavailable),
+  catchError(() => of(ServiceStatusLevel.unavailable))
+);
+
+// Merge the inherited status with the external check
+core.status.set(
+  combineLatest(
+    core.status.inherited$,
+    myExternalDependency$
+  ).pipe(
+    map(([inherited, external]) => ({
+      level: Math.max(inherited.level, external)
+    }))
+  )
+);
 ```
 
 # Drawbacks
