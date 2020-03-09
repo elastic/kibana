@@ -11,14 +11,27 @@ import {
 } from '../../../../../legacy/plugins/ml/common/constants/states';
 
 const REQUEST_TIMEOUT = 'RequestTimeout';
+type ACTION_STATE = DATAFEED_STATE | JOB_STATE;
 
-export function isRequestTimeout(error) {
+export function isRequestTimeout(error: { displayName: string }) {
   return error.displayName === REQUEST_TIMEOUT;
+}
+
+interface Results {
+  [id: string]: {
+    [status: string]: any;
+    error?: any;
+  };
 }
 
 // populate a results object with timeout errors
 // for the ids which haven't already been set
-export function fillResultsWithTimeouts(results, id, ids, status) {
+export function fillResultsWithTimeouts(
+  results: Results,
+  id: string,
+  ids: string[],
+  status: ACTION_STATE
+) {
   const action = getAction(status);
   const extra =
     ids.length - Object.keys(results).length > 1
@@ -49,20 +62,20 @@ export function fillResultsWithTimeouts(results, id, ids, status) {
     },
   };
 
-  return ids.reduce((p, c) => {
-    if (results[c] === undefined) {
-      p[c] = {
+  return ids.reduce((acc, cur) => {
+    if (results[cur] === undefined) {
+      acc[cur] = {
         [status]: false,
         error,
       };
     } else {
-      p[c] = results[c];
+      acc[cur] = results[cur];
     }
-    return p;
-  }, {});
+    return acc;
+  }, {} as Results);
 }
 
-function getAction(status) {
+function getAction(status: ACTION_STATE) {
   let action = '';
   if (status === DATAFEED_STATE.STARTED) {
     action = 'start';

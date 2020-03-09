@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { APICaller } from 'src/core/server';
 import { datafeedsProvider } from './datafeeds';
 import { jobsProvider } from './jobs';
 import { groupsProvider } from './groups';
 import { newJobCapsProvider } from './new_job_caps';
 import { newJobChartsProvider, topCategoriesProvider } from './new_job';
 
-export function jobServiceProvider(callAsCurrentUser) {
+export function jobServiceProvider(callAsCurrentUser: APICaller) {
   return {
     ...datafeedsProvider(callAsCurrentUser),
     ...jobsProvider(callAsCurrentUser),
