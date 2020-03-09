@@ -36,6 +36,11 @@ const EuiBadgeWrap = styled(EuiBadge)`
   }
 `;
 
+const NoteDescriptionContainer = styled(EuiFlexItem)`
+  height: 105px;
+  overflow-y: hidden;
+`;
+
 export const buildQueryBarDescription = ({
   field,
   filters,
@@ -247,6 +252,24 @@ export const buildUrlsDescription = (label: string, values: string[]): ListItems
               )
             )}
           </EuiFlexGroup>
+        ),
+      },
+    ];
+  }
+  return [];
+};
+
+export const buildNoteDescription = (label: string, note: string): ListItems[] => {
+  if (note) {
+    return [
+      {
+        title: label,
+        description: (
+          <NoteDescriptionContainer>
+            <div data-test-subj="noteDescriptionItem" className="eui-yScrollWithShadows">
+              {note}
+            </div>
+          </NoteDescriptionContainer>
         ),
       },
     ];

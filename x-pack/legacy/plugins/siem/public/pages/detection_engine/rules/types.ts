@@ -36,7 +36,7 @@ export interface RuleStepData {
 
 export interface RuleStepProps {
   addPadding?: boolean;
-  descriptionDirection?: 'row' | 'column';
+  descriptionColumns?: 'multi' | 'single' | 'singleSplit';
   setStepData?: (step: RuleStep, data: unknown, isValid: boolean) => void;
   isReadOnlyView: boolean;
   isUpdateView?: boolean;
@@ -51,7 +51,7 @@ interface StepRuleData {
 export interface AboutStepRule extends StepRuleData {
   name: string;
   description: string;
-  documentation: string;
+  note: string;
   severity: string;
   riskScore: number;
   references: string[];
@@ -59,6 +59,10 @@ export interface AboutStepRule extends StepRuleData {
   tags: string[];
   timeline: FieldValueTimeline;
   threat: IMitreEnterpriseAttack[];
+}
+
+export interface AboutStepRuleDetails extends AboutStepRule {
+  descriptionDetails: string;
 }
 
 export interface DefineStepRule extends StepRuleData {
@@ -84,7 +88,7 @@ export interface DefineStepRuleJson {
 export interface AboutStepRuleJson {
   name: string;
   description: string;
-  documentation: string;
+  note: string;
   severity: string;
   risk_score: number;
   references: string[];

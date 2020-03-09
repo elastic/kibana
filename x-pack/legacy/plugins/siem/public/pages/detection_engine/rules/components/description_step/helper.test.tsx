@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { coreMock } from '../../../../../../../../../../src/core/public/mocks';
 import { esFilters, FilterManager } from '../../../../../../../../../../src/plugins/data/public';
@@ -20,6 +21,7 @@ import {
   buildStringArrayDescription,
   buildSeverityDescription,
   buildUrlsDescription,
+  buildNoteDescription,
 } from './helpers';
 import { ListItems } from './types';
 
@@ -130,9 +132,10 @@ describe('helpers', () => {
         query: mockQueryBarWithFilters.query,
         savedId: mockQueryBarWithFilters.saved_id,
       });
+      const wrapper = shallow(result[0].description);
 
       expect(result[0].title).toEqual(<>{i18n.FILTERS_LABEL} </>);
-      expect(result[0].description).toMatchSnapshot();
+      expect(wrapper.find(EuiLoadingSpinner).exists()).toBeTruthy();
     });
 
     test('returns expected array of ListItems when filters AND indexPatterns exist', () => {
@@ -152,9 +155,12 @@ describe('helpers', () => {
         savedId: mockQueryBarWithFilters.saved_id,
         indexPatterns: { fields: [{ name: 'test name', type: 'test type' }], title: 'test title' },
       });
+      const wrapper = shallow(result[0].description);
+      const filterLabelComponent = wrapper.find(esFilters.FilterLabel).at(0);
 
       expect(result[0].title).toEqual(<>{i18n.FILTERS_LABEL} </>);
-      expect(result[0].description).toMatchSnapshot();
+      expect(filterLabelComponent.prop('valueLabel')).toEqual('file');
+      expect(filterLabelComponent.prop('filter')).toEqual(mockQueryBar.filters[0]);
     });
 
     test('returns expected array of ListItems when `query.query` exists', () => {
@@ -213,10 +219,10 @@ describe('helpers', () => {
           },
         ],
       });
-      const resultingComponent = shallow(result[0].description);
+      const wrapper = shallow(result[0].description);
       expect(result[0].title).toEqual('Mitre Attack');
-      expect(resultingComponent.find('[data-test-subj="threatTacticLink"]').text()).toEqual('');
-      expect(resultingComponent.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual(
+      expect(wrapper.find('[data-test-subj="threatTacticLink"]').text()).toEqual('');
+      expect(wrapper.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual(
         'Audio Capture (T1123)'
       );
     });
@@ -233,12 +239,12 @@ describe('helpers', () => {
           },
         ],
       });
-      const resultingComponent = shallow(result[0].description);
+      const wrapper = shallow(result[0].description);
       expect(result[0].title).toEqual('Mitre Attack');
-      expect(resultingComponent.find('[data-test-subj="threatTacticLink"]').text()).toEqual(
+      expect(wrapper.find('[data-test-subj="threatTacticLink"]').text()).toEqual(
         'Collection (TA0009)'
       );
-      expect(resultingComponent.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual('');
+      expect(wrapper.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual('');
     });
 
     test('returns with corresponding tactic and technique link text', () => {
@@ -252,13 +258,12 @@ describe('helpers', () => {
           },
         ],
       });
-      const resultingComponent = shallow(result[0].description);
+      const wrapper = shallow(result[0].description);
       expect(result[0].title).toEqual('Mitre Attack');
-      expect(resultingComponent).toMatchSnapshot();
-      expect(resultingComponent.find('[data-test-subj="threatTacticLink"]').text()).toEqual(
+      expect(wrapper.find('[data-test-subj="threatTacticLink"]').text()).toEqual(
         'Collection (TA0009)'
       );
-      expect(resultingComponent.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual(
+      expect(wrapper.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual(
         'Audio Capture (T1123)'
       );
     });
@@ -284,10 +289,10 @@ describe('helpers', () => {
           },
         ],
       });
-      const resultingComponent = shallow(result[0].description);
+      const wrapper = shallow(result[0].description);
 
-      expect(resultingComponent.find('[data-test-subj="threatTacticLink"]')).toHaveLength(2);
-      expect(resultingComponent.find('[data-test-subj="threatTechniqueLink"]')).toHaveLength(3);
+      expect(wrapper.find('[data-test-subj="threatTacticLink"]')).toHaveLength(2);
+      expect(wrapper.find('[data-test-subj="threatTechniqueLink"]')).toHaveLength(3);
     });
   });
 
@@ -307,13 +312,10 @@ describe('helpers', () => {
         'falsePositives',
         ['', 'falsePositive1', 'falsePositive2']
       );
-      const resultingComponent = shallow(result[0].description);
+      const wrapper = shallow(result[0].description);
 
       expect(result[0].title).toEqual('Test label');
-      expect(resultingComponent).toMatchSnapshot();
-      expect(
-        resultingComponent.find('[data-test-subj="unorderedListArrayDescriptionItem"]')
-      ).toHaveLength(2);
+      expect(wrapper.find('[data-test-subj="unorderedListArrayDescriptionItem"]')).toHaveLength(2);
     });
   });
 
@@ -329,21 +331,18 @@ describe('helpers', () => {
         'tag1',
         'tag2',
       ]);
-      const resultingComponent = shallow(result[0].description);
+      const wrapper = shallow(result[0].description);
 
       expect(result[0].title).toEqual('Test label');
-      expect(resultingComponent).toMatchSnapshot();
+      expect(wrapper.find('[data-test-subj="stringArrayDescriptionBadgeItem"]')).toHaveLength(2);
       expect(
-        resultingComponent.find('[data-test-subj="stringArrayDescriptionBadgeItem"]')
-      ).toHaveLength(2);
-      expect(
-        resultingComponent
+        wrapper
           .find('[data-test-subj="stringArrayDescriptionBadgeItem"]')
           .first()
           .text()
       ).toEqual('tag1');
       expect(
-        resultingComponent
+        wrapper
           .find('[data-test-subj="stringArrayDescriptionBadgeItem"]')
           .at(1)
           .text()
@@ -354,10 +353,8 @@ describe('helpers', () => {
   describe('buildSeverityDescription', () => {
     test('returns ListItem with passed in label and SeverityBadge component', () => {
       const result: ListItems[] = buildSeverityDescription('Test label', 'Test description value');
-      const resultingComponent = shallow(result[0].description);
 
       expect(result[0].title).toEqual('Test label');
-      expect(resultingComponent).toMatchSnapshot();
       expect(result[0].description).toEqual(<SeverityBadge value="Test description value" />);
     });
   });
@@ -374,25 +371,36 @@ describe('helpers', () => {
         'www.test.com',
         'www.test2.com',
       ]);
-      const resultingComponent = shallow(result[0].description);
+      const wrapper = shallow(result[0].description);
 
       expect(result[0].title).toEqual('Test label');
-      expect(resultingComponent).toMatchSnapshot();
+      expect(wrapper.find('[data-test-subj="urlsDescriptionReferenceLinkItem"]')).toHaveLength(2);
       expect(
-        resultingComponent.find('[data-test-subj="urlsDescriptionReferenceLinkItem"]')
-      ).toHaveLength(2);
-      expect(
-        resultingComponent
+        wrapper
           .find('[data-test-subj="urlsDescriptionReferenceLinkItem"]')
           .first()
           .text()
       ).toEqual('www.test.com');
       expect(
-        resultingComponent
+        wrapper
           .find('[data-test-subj="urlsDescriptionReferenceLinkItem"]')
           .at(1)
           .text()
       ).toEqual('www.test2.com');
+    });
+  });
+
+  describe('buildNoteDescription', () => {
+    test('returns ListItem with passed in label and SeverityBadge component', () => {
+      const noteSample =
+        'Cras mattism. [Pellentesque](https://elastic.co). ### Malesuada adipiscing tristique';
+      const result: ListItems[] = buildNoteDescription('Test label', noteSample);
+      const wrapper = shallow(result[0].description);
+      const noteElement = wrapper.find('[data-test-subj="noteDescriptionItem"]').at(0);
+
+      expect(result[0].title).toEqual('Test label');
+      expect(noteElement.exists()).toBeTruthy();
+      expect(noteElement.text()).toEqual(noteSample);
     });
   });
 });

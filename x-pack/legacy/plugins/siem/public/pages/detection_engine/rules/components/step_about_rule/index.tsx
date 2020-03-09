@@ -80,7 +80,7 @@ const AdvancedSettingsAccordionButton = (
 const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   addPadding = false,
   defaultValues,
-  descriptionDirection = 'row',
+  descriptionColumns = 'singleSplit',
   isReadOnlyView,
   isUpdateView = false,
   isLoading,
@@ -126,7 +126,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
 
   return isReadOnlyView && myStepData.name != null ? (
     <StepContentWrapper addPadding={addPadding}>
-      <StepRuleDescription direction={descriptionDirection} schema={schema} data={myStepData} />
+      <StepRuleDescription columns={descriptionColumns} schema={schema} data={myStepData} />
     </StepContentWrapper>
   ) : (
     <>
@@ -208,20 +208,15 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             buttonContent={AdvancedSettingsAccordionButton}
           >
             <EuiSpacer size="m" />
-            <ThreeQuartersContainer>
-              <UseField
-                path="timeline"
-                component={PickTimeline}
-                componentProps={{
-                  idAria: 'detectionEngineStepAboutRuleTimeline',
-                  isDisabled: isLoading,
-                  dataTestSubj: 'detectionEngineStepAboutRuleTimeline',
-                  euiFieldProps: {
-                    fullWidth: true,
-                  },
-                }}
-              />
-            </ThreeQuartersContainer>
+            <UseField
+              path="timeline"
+              component={PickTimeline}
+              componentProps={{
+                idAria: 'detectionEngineStepAboutRuleTimeline',
+                isDisabled: isLoading,
+                dataTestSubj: 'detectionEngineStepAboutRuleTimeline',
+              }}
+            />
             <EuiSpacer size="m" />
             <UseField
               path="references"
@@ -256,13 +251,13 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             <EuiSpacer size="m" />
             <ThreeQuartersContainer>
               <UseField
-                path="documentation"
+                path="note"
                 component={MarkdownEditorForm}
                 componentProps={{
-                  idAria: 'detectionEngineStepAboutRuleDocumentation',
+                  idAria: 'detectionEngineStepAboutRuleNote',
                   isDisabled: isLoading,
-                  dataTestSubj: 'detectionEngineStepAboutRuleDocumentation',
-                  placeholder: I18n.ADD_DOCUMENTATION_HELP_TEXT,
+                  dataTestSubj: 'detectionEngineStepAboutRuleNote',
+                  placeholder: I18n.ADD_RULE_NOTE_HELP_TEXT,
                 }}
               />
             </ThreeQuartersContainer>
@@ -294,7 +289,12 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             responsive={false}
           >
             <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
+              <EuiButton
+                data-test-subj="detectionEngineStepAboutRuleContinueButton"
+                fill
+                onClick={onSubmit}
+                isDisabled={isLoading}
+              >
                 {RuleI18n.CONTINUE}
               </EuiButton>
             </EuiFlexItem>

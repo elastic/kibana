@@ -5,7 +5,7 @@
  */
 
 import { Rule, RuleError } from '../../../../../containers/detection_engine/rules';
-import { AboutStepRule } from '../../types';
+import { AboutStepRuleDetails } from '../../types';
 
 export const mockRule = (id: string): Rule => ({
   created_at: '2020-01-10T21:11:45.839Z',
@@ -41,11 +41,12 @@ export const mockRule = (id: string): Rule => ({
   version: 1,
 });
 
-export const mockAboutStepRule: AboutStepRule = {
+export const mockAboutStepRule: AboutStepRuleDetails = {
   isNew: false,
   name: 'Query with rule-id',
   description: '24/7',
-  documentation: '# test documentation',
+  descriptionDetails: '24/7',
+  note: '# test documentation',
   severity: 'low',
   riskScore: 1,
   references: ['www.test.co'],

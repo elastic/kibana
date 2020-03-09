@@ -17,10 +17,3 @@ export const QUERY_LABEL = i18n.translate('xpack.siem.detectionEngine.createRule
 export const SAVED_ID_LABEL = i18n.translate('xpack.siem.detectionEngine.createRule.savedIdLabel', {
   defaultMessage: 'Saved query name',
 });
-
-export const DOCUMENTATION_PREVIEW_DESCRIPTION = i18n.translate(
-  'xpack.siem.detectionEngine.createRule.documentationPreviewDescription',
-  {
-    defaultMessage: 'Markdown preview unavailable',
-  }
-);

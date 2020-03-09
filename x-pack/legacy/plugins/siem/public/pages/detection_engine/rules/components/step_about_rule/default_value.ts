@@ -18,7 +18,7 @@ export const threatDefault = [
 export const stepAboutDefaultValue: AboutStepRule = {
   name: '',
   description: '',
-  documentation: '',
+  note: '',
   isNew: true,
   severity: 'low',
   riskScore: 50,

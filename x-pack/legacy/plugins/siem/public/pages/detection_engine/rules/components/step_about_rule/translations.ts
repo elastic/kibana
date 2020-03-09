@@ -69,9 +69,9 @@ export const URL_FORMAT_INVALID = i18n.translate(
   }
 );
 
-export const ADD_DOCUMENTATION_HELP_TEXT = i18n.translate(
-  'xpack.siem.detectionEngine.createRule.stepAboutrule.documentationHelpText',
+export const ADD_RULE_NOTE_HELP_TEXT = i18n.translate(
+  'xpack.siem.detectionEngine.createRule.stepAboutrule.noteHelpText',
   {
-    defaultMessage: 'Add rule documentation...',
+    defaultMessage: 'Add rule investigation notes...',
   }
 );

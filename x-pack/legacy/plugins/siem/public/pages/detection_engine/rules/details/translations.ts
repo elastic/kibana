@@ -83,17 +83,3 @@ export const TYPE_FAILED = i18n.translate(
     defaultMessage: 'Failed',
   }
 );
-
-export const DOCUMENTATION_TAB = i18n.translate(
-  'xpack.siem.detectionEngine.ruleDetails.documentationTab',
-  {
-    defaultMessage: 'Documentation',
-  }
-);
-
-export const NO_DOCUMENTATION_TEXT = i18n.translate(
-  'xpack.siem.detectionEngine.ruleDetails.noDocumentationText',
-  {
-    defaultMessage: 'To add documentation, visit the Advanced Settings section under About',
-  }
-);

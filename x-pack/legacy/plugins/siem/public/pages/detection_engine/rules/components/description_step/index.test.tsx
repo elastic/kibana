@@ -46,32 +46,38 @@ jest.mock('react', () => {
 
 describe('description_step', () => {
   describe('StepRuleDescriptionComponent', () => {
-    test('renders correctly against snapshot when direction is `row`', () => {
+    test('renders correctly against snapshot when columns is `multi`', () => {
       const wrapper = shallow(
-        <StepRuleDescriptionComponent direction="row" data={mockAboutStepRule} schema={schema} />
+        <StepRuleDescriptionComponent columns="multi" data={mockAboutStepRule} schema={schema} />
       );
       expect(wrapper).toMatchSnapshot();
-    });
-
-    test('renders 2 columns when direction is `row`', () => {
-      const wrapper = shallow(
-        <StepRuleDescriptionComponent direction="row" data={mockAboutStepRule} schema={schema} />
-      );
       expect(wrapper.find('[data-test-subj="listItemColumnStepRuleDescription"]')).toHaveLength(2);
     });
 
-    test('renders correctly against snapshot when direction is NOT `row`', () => {
+    test('renders correctly against snapshot when columns is `single`', () => {
       const wrapper = shallow(
-        <StepRuleDescriptionComponent direction="column" data={mockAboutStepRule} schema={schema} />
+        <StepRuleDescriptionComponent columns="single" data={mockAboutStepRule} schema={schema} />
       );
       expect(wrapper).toMatchSnapshot();
+      expect(wrapper.find('[data-test-subj="listItemColumnStepRuleDescription"]')).toHaveLength(1);
     });
 
-    test('renders 1 column when direction is NOT `row`', () => {
+    test('renders correctly against snapshot when columns is `singleSplit', () => {
       const wrapper = shallow(
-        <StepRuleDescriptionComponent direction="column" data={mockAboutStepRule} schema={schema} />
+        <StepRuleDescriptionComponent
+          columns="singleSplit"
+          data={mockAboutStepRule}
+          schema={schema}
+        />
       );
+      expect(wrapper).toMatchSnapshot();
       expect(wrapper.find('[data-test-subj="listItemColumnStepRuleDescription"]')).toHaveLength(1);
+      expect(
+        wrapper
+          .find('[data-test-subj="singleSplitStepRuleDescriptionList"]')
+          .at(0)
+          .prop('type')
+      ).toEqual('column');
     });
   });
 
@@ -451,17 +457,17 @@ describe('description_step', () => {
       });
     });
 
-    describe('documentation', () => {
-      test('returns default documentation description', () => {
+    describe('note', () => {
+      test('returns default `note` description', () => {
         const result: ListItems[] = getDescriptionItem(
-          'documentation',
-          'Documentation label',
+          'note',
+          'Investigation notes',
           mockAboutStepRule,
           mockFilterManager
         );
 
-        expect(result[0].title).toEqual('Documentation label');
-        expect(result[0].description).toEqual(i18n.DOCUMENTATION_PREVIEW_DESCRIPTION);
+        expect(result[0].title).toEqual('Investigation notes');
+        expect(React.isValidElement(result[0].description)).toBeTruthy();
       });
     });
   });

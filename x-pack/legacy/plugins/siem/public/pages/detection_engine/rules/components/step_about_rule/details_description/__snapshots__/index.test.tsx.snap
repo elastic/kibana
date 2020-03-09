@@ -1,0 +1,1350 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StepAboutRuleToggleDetails note value does exist it displays notes markdown when user toggles to \`notes\` 1`] = `
+.c1 {
+  margin-bottom: 24px;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+.c6 .euiBadge__text {
+  white-space: pre-wrap !important;
+}
+
+.c7 {
+  height: 105px;
+  overflow-y: hidden;
+}
+
+.c4 .euiFlexItem {
+  margin-bottom: 0px;
+}
+
+.c5 .euiIcon {
+  width: 8px;
+  height: 8px;
+}
+
+.c3 .euiIcon {
+  width: 12px;
+  height: 12px;
+}
+
+.c2.euiDescriptionList--column .euiDescriptionList__title {
+  width: 25%;
+}
+
+.c2.euiDescriptionList--column .euiDescriptionList__description {
+  width: 75%;
+}
+
+.c0 {
+  position: relative;
+}
+
+<ThemeProvider
+  theme={[Function]}
+>
+  <StepAboutRuleToggleDetailsComponent
+    loading={false}
+    stepData={
+      Object {
+        "description": "24/7",
+        "descriptionDetails": "24/7",
+        "falsePositives": Array [
+          "test",
+        ],
+        "isNew": false,
+        "name": "Query with rule-id",
+        "note": "# test documentation",
+        "references": Array [
+          "www.test.co",
+        ],
+        "riskScore": 1,
+        "severity": "low",
+        "tags": Array [
+          "tag1",
+          "tag2",
+        ],
+        "threat": Array [
+          Object {
+            "framework": "mockFramework",
+            "tactic": Object {
+              "id": "1234",
+              "name": "tactic1",
+              "reference": "reference1",
+            },
+            "technique": Array [
+              Object {
+                "id": "456",
+                "name": "technique1",
+                "reference": "technique reference",
+              },
+            ],
+          },
+        ],
+        "timeline": Object {
+          "id": "86aa74d0-2136-11ea-9864-ebc8cc1cb8c2",
+          "title": "Titled timeline",
+        },
+      }
+    }
+  >
+    <Styled(EuiPanel)>
+      <EuiPanel
+        className="c0"
+      >
+        <div
+          className="euiPanel euiPanel--paddingMedium c0"
+        >
+          <HeaderSectionComponent
+            title="About"
+          >
+            <Header>
+              <header
+                className="c1 siemHeaderSection"
+              >
+                <EuiFlexGroup
+                  alignItems="center"
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <EuiFlexItem>
+                      <div
+                        className="euiFlexItem"
+                      >
+                        <EuiFlexGroup
+                          alignItems="center"
+                          responsive={false}
+                        >
+                          <div
+                            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                          >
+                            <EuiFlexItem>
+                              <div
+                                className="euiFlexItem"
+                              >
+                                <EuiTitle>
+                                  <h2
+                                    className="euiTitle euiTitle--medium"
+                                    data-test-subj="header-section-title"
+                                  >
+                                    About
+                                  </h2>
+                                </EuiTitle>
+                              </div>
+                            </EuiFlexItem>
+                          </div>
+                        </EuiFlexGroup>
+                      </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem
+                      data-test-subj="header-section-supplements"
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                        data-test-subj="header-section-supplements"
+                      >
+                        <EuiButtonGroup
+                          idSelected="about"
+                          onChange={[Function]}
+                          options={
+                            Array [
+                              Object {
+                                "id": "about",
+                                "label": "Details",
+                              },
+                              Object {
+                                "id": "notes",
+                                "label": "Notes",
+                              },
+                            ]
+                          }
+                        >
+                          <fieldset
+                            className="euiButtonGroup__fieldset"
+                          >
+                            <div
+                              className="euiButtonGroup euiButtonGroup--s"
+                            >
+                              <EuiButtonToggle
+                                className="euiButtonGroup__button euiButtonGroup__button--selected"
+                                color="text"
+                                fill={true}
+                                id="about"
+                                isSelected={true}
+                                key="0"
+                                label="Details"
+                                onChange={[Function]}
+                                size="s"
+                                toggleClassName="euiButtonGroup__toggle"
+                                type="single"
+                              >
+                                <EuiToggle
+                                  checked={true}
+                                  className="euiButtonToggle__wrapper euiButtonGroup__toggle"
+                                  inputClassName="euiButtonToggle__input"
+                                  label="Details"
+                                  onChange={[Function]}
+                                  title="Details"
+                                  type="single"
+                                >
+                                  <div
+                                    className="euiToggle euiToggle--checked euiButtonToggle__wrapper euiButtonGroup__toggle"
+                                  >
+                                    <input
+                                      aria-label="Details"
+                                      checked={true}
+                                      className="euiToggle__input euiButtonToggle__input"
+                                      onChange={[Function]}
+                                      title="Details"
+                                      type="radio"
+                                    />
+                                    <EuiButton
+                                      className="euiButtonToggle euiButtonGroup__button euiButtonGroup__button--selected"
+                                      color="text"
+                                      fill={true}
+                                      id="about"
+                                      size="s"
+                                      tabIndex={-1}
+                                    >
+                                      <button
+                                        className="euiButton euiButton--text euiButton--small euiButtonToggle euiButtonGroup__button euiButtonGroup__button--selected euiButton--fill"
+                                        id="about"
+                                        tabIndex={-1}
+                                        type="button"
+                                      >
+                                        <span
+                                          className="euiButton__content"
+                                        >
+                                          <span
+                                            className="euiButton__text"
+                                          >
+                                            Details
+                                          </span>
+                                        </span>
+                                      </button>
+                                    </EuiButton>
+                                  </div>
+                                </EuiToggle>
+                              </EuiButtonToggle>
+                              <EuiButtonToggle
+                                className="euiButtonGroup__button"
+                                color="text"
+                                fill={false}
+                                id="notes"
+                                isSelected={false}
+                                key="1"
+                                label="Notes"
+                                onChange={[Function]}
+                                size="s"
+                                toggleClassName="euiButtonGroup__toggle"
+                                type="single"
+                              >
+                                <EuiToggle
+                                  checked={false}
+                                  className="euiButtonToggle__wrapper euiButtonGroup__toggle"
+                                  inputClassName="euiButtonToggle__input"
+                                  label="Notes"
+                                  onChange={[Function]}
+                                  title="Notes"
+                                  type="single"
+                                >
+                                  <div
+                                    className="euiToggle euiButtonToggle__wrapper euiButtonGroup__toggle"
+                                  >
+                                    <input
+                                      aria-label="Notes"
+                                      checked={false}
+                                      className="euiToggle__input euiButtonToggle__input"
+                                      onChange={[Function]}
+                                      title="Notes"
+                                      type="radio"
+                                    />
+                                    <EuiButton
+                                      className="euiButtonToggle euiButtonGroup__button"
+                                      color="text"
+                                      fill={false}
+                                      id="notes"
+                                      size="s"
+                                      tabIndex={-1}
+                                    >
+                                      <button
+                                        className="euiButton euiButton--text euiButton--small euiButtonToggle euiButtonGroup__button"
+                                        id="notes"
+                                        tabIndex={-1}
+                                        type="button"
+                                      >
+                                        <span
+                                          className="euiButton__content"
+                                        >
+                                          <span
+                                            className="euiButton__text"
+                                          >
+                                            Notes
+                                          </span>
+                                        </span>
+                                      </button>
+                                    </EuiButton>
+                                  </div>
+                                </EuiToggle>
+                              </EuiButtonToggle>
+                            </div>
+                          </fieldset>
+                        </EuiButtonGroup>
+                      </div>
+                    </EuiFlexItem>
+                  </div>
+                </EuiFlexGroup>
+              </header>
+            </Header>
+          </HeaderSectionComponent>
+          <div
+            data-test-subj="stepAboutRuleDetailsToggleDescriptionText"
+          >
+            24/7
+          </div>
+          <EuiSpacer
+            size="m"
+          >
+            <div
+              className="euiSpacer euiSpacer--m"
+            />
+          </EuiSpacer>
+          <StepAboutRuleComponent
+            defaultValues={
+              Object {
+                "description": "24/7",
+                "descriptionDetails": "24/7",
+                "falsePositives": Array [
+                  "test",
+                ],
+                "isNew": false,
+                "name": "Query with rule-id",
+                "note": "# test documentation",
+                "references": Array [
+                  "www.test.co",
+                ],
+                "riskScore": 1,
+                "severity": "low",
+                "tags": Array [
+                  "tag1",
+                  "tag2",
+                ],
+                "threat": Array [
+                  Object {
+                    "framework": "mockFramework",
+                    "tactic": Object {
+                      "id": "1234",
+                      "name": "tactic1",
+                      "reference": "reference1",
+                    },
+                    "technique": Array [
+                      Object {
+                        "id": "456",
+                        "name": "technique1",
+                        "reference": "technique reference",
+                      },
+                    ],
+                  },
+                ],
+                "timeline": Object {
+                  "id": "86aa74d0-2136-11ea-9864-ebc8cc1cb8c2",
+                  "title": "Titled timeline",
+                },
+              }
+            }
+            descriptionColumns="singleSplit"
+            isLoading={false}
+            isReadOnlyView={true}
+          >
+            <styled.div
+              addPadding={false}
+            >
+              <div
+                className=""
+              >
+                <StepRuleDescriptionComponent
+                  columns="singleSplit"
+                  data={
+                    Object {
+                      "description": "24/7",
+                      "descriptionDetails": "24/7",
+                      "falsePositives": Array [
+                        "test",
+                      ],
+                      "isNew": false,
+                      "name": "Query with rule-id",
+                      "note": "# test documentation",
+                      "references": Array [
+                        "www.test.co",
+                      ],
+                      "riskScore": 1,
+                      "severity": "low",
+                      "tags": Array [
+                        "tag1",
+                        "tag2",
+                      ],
+                      "threat": Array [
+                        Object {
+                          "framework": "mockFramework",
+                          "tactic": Object {
+                            "id": "1234",
+                            "name": "tactic1",
+                            "reference": "reference1",
+                          },
+                          "technique": Array [
+                            Object {
+                              "id": "456",
+                              "name": "technique1",
+                              "reference": "technique reference",
+                            },
+                          ],
+                        },
+                      ],
+                      "timeline": Object {
+                        "id": "86aa74d0-2136-11ea-9864-ebc8cc1cb8c2",
+                        "title": "Titled timeline",
+                      },
+                    }
+                  }
+                  schema={
+                    Object {
+                      "description": Object {
+                        "label": "Description",
+                        "type": "textarea",
+                        "validations": Array [
+                          Object {
+                            "validator": [Function],
+                          },
+                        ],
+                      },
+                      "falsePositives": Object {
+                        "label": "False positive examples",
+                        "labelAppend": <EuiText
+                          color="subdued"
+                          size="xs"
+                        >
+                          Optional
+                        </EuiText>,
+                      },
+                      "name": Object {
+                        "label": "Name",
+                        "type": "text",
+                        "validations": Array [
+                          Object {
+                            "validator": [Function],
+                          },
+                        ],
+                      },
+                      "note": Object {
+                        "helpText": "Provide helpful information for analysts that are performing a signal investigation. Documentation will appear on both the rule details page and timelines created signals generated by this rule.",
+                        "label": "Investigation notes",
+                        "labelAppend": <EuiText
+                          color="subdued"
+                          size="xs"
+                        >
+                          Optional
+                        </EuiText>,
+                        "type": "textarea",
+                      },
+                      "references": Object {
+                        "label": "Reference URLs",
+                        "labelAppend": <EuiText
+                          color="subdued"
+                          size="xs"
+                        >
+                          Optional
+                        </EuiText>,
+                        "validations": Array [
+                          Object {
+                            "validator": [Function],
+                          },
+                        ],
+                      },
+                      "riskScore": Object {
+                        "label": "Risk score",
+                        "type": "range",
+                      },
+                      "severity": Object {
+                        "label": "Severity",
+                        "type": "superSelect",
+                        "validations": Array [
+                          Object {
+                            "validator": [Function],
+                          },
+                        ],
+                      },
+                      "tags": Object {
+                        "helpText": "Type one or more custom identifying tags for this rule. Press enter after each tag to begin a new one.",
+                        "label": "Tags",
+                        "labelAppend": <EuiText
+                          color="subdued"
+                          size="xs"
+                        >
+                          Optional
+                        </EuiText>,
+                        "type": "comboBox",
+                      },
+                      "threat": Object {
+                        "label": "MITRE ATT&CK™",
+                        "labelAppend": <EuiText
+                          color="subdued"
+                          size="xs"
+                        >
+                          Optional
+                        </EuiText>,
+                        "validations": Array [
+                          Object {
+                            "validator": [Function],
+                          },
+                        ],
+                      },
+                      "timeline": Object {
+                        "helpText": "Select an existing timeline to use as a template when investigating generated signals.",
+                        "label": "Timeline template",
+                      },
+                    }
+                  }
+                >
+                  <EuiFlexGroup>
+                    <div
+                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    >
+                      <EuiFlexItem
+                        data-test-subj="listItemColumnStepRuleDescription"
+                      >
+                        <div
+                          className="euiFlexItem"
+                          data-test-subj="listItemColumnStepRuleDescription"
+                        >
+                          <Styled(EuiDescriptionList)
+                            data-test-subj="singleSplitStepRuleDescriptionList"
+                            listItems={
+                              Array [
+                                Object {
+                                  "description": "Query with rule-id",
+                                  "title": "Name",
+                                },
+                                Object {
+                                  "description": "24/7",
+                                  "title": "Description",
+                                },
+                                Object {
+                                  "description": <SeverityBadgeComponent
+                                    value="low"
+                                  />,
+                                  "title": "Severity",
+                                },
+                                Object {
+                                  "description": 1,
+                                  "title": "Risk score",
+                                },
+                                Object {
+                                  "description": "Titled timeline",
+                                  "title": "Timeline template",
+                                },
+                                Object {
+                                  "description": <ForwardRef
+                                    alignItems="flexStart"
+                                    direction="column"
+                                    gutterSize="none"
+                                  >
+                                    <EuiFlexItem>
+                                      <ForwardRef(Styled(EuiButtonEmpty))
+                                        data-test-subj="urlsDescriptionReferenceLinkItem"
+                                        flush="left"
+                                        href="www.test.co"
+                                        iconType="link"
+                                        size="xs"
+                                        target="_blank"
+                                      >
+                                        www.test.co
+                                      </ForwardRef(Styled(EuiButtonEmpty))>
+                                    </EuiFlexItem>
+                                  </ForwardRef>,
+                                  "title": "Reference URLs",
+                                },
+                                Object {
+                                  "description": <ul>
+                                    <li
+                                      data-test-subj="unorderedListArrayDescriptionItem"
+                                    >
+                                      test
+                                    </li>
+                                  </ul>,
+                                  "title": "False positive examples",
+                                },
+                                Object {
+                                  "description": <ForwardRef(Styled(EuiFlexGroup))
+                                    direction="column"
+                                  >
+                                    <EuiFlexItem>
+                                      <ForwardRef
+                                        data-test-subj="threatTacticLink"
+                                        href="reference1"
+                                        target="_blank"
+                                      >
+                                        
+                                      </ForwardRef>
+                                      <ForwardRef
+                                        alignItems="flexStart"
+                                        direction="column"
+                                        gutterSize="none"
+                                      >
+                                        <EuiFlexItem>
+                                          <ForwardRef(Styled(EuiButtonEmpty))
+                                            data-test-subj="threatTechniqueLink"
+                                            flush="left"
+                                            href="technique reference"
+                                            iconType="test-file-stub"
+                                            size="xs"
+                                            target="_blank"
+                                          >
+                                            
+                                          </ForwardRef(Styled(EuiButtonEmpty))>
+                                        </EuiFlexItem>
+                                      </ForwardRef>
+                                    </EuiFlexItem>
+                                    <EuiSpacer />
+                                  </ForwardRef(Styled(EuiFlexGroup))>,
+                                  "title": "MITRE ATT&CK™",
+                                },
+                                Object {
+                                  "description": <ForwardRef
+                                    gutterSize="xs"
+                                    responsive={false}
+                                    wrap={true}
+                                  >
+                                    <EuiFlexItem
+                                      grow={false}
+                                    >
+                                      <ForwardRef(Styled(EuiBadge))
+                                        color="hollow"
+                                        data-test-subj="stringArrayDescriptionBadgeItem"
+                                      >
+                                        tag1
+                                      </ForwardRef(Styled(EuiBadge))>
+                                    </EuiFlexItem>
+                                    <EuiFlexItem
+                                      grow={false}
+                                    >
+                                      <ForwardRef(Styled(EuiBadge))
+                                        color="hollow"
+                                        data-test-subj="stringArrayDescriptionBadgeItem"
+                                      >
+                                        tag2
+                                      </ForwardRef(Styled(EuiBadge))>
+                                    </EuiFlexItem>
+                                  </ForwardRef>,
+                                  "title": "Tags",
+                                },
+                                Object {
+                                  "description": <ForwardRef(Styled(EuiFlexItem))>
+                                    <div
+                                      className="eui-yScrollWithShadows"
+                                      data-test-subj="noteDescriptionItem"
+                                    >
+                                      # test documentation
+                                    </div>
+                                  </ForwardRef(Styled(EuiFlexItem))>,
+                                  "title": "Investigation notes",
+                                },
+                              ]
+                            }
+                            type="column"
+                          >
+                            <EuiDescriptionList
+                              className="c2"
+                              data-test-subj="singleSplitStepRuleDescriptionList"
+                              listItems={
+                                Array [
+                                  Object {
+                                    "description": "Query with rule-id",
+                                    "title": "Name",
+                                  },
+                                  Object {
+                                    "description": "24/7",
+                                    "title": "Description",
+                                  },
+                                  Object {
+                                    "description": <SeverityBadgeComponent
+                                      value="low"
+                                    />,
+                                    "title": "Severity",
+                                  },
+                                  Object {
+                                    "description": 1,
+                                    "title": "Risk score",
+                                  },
+                                  Object {
+                                    "description": "Titled timeline",
+                                    "title": "Timeline template",
+                                  },
+                                  Object {
+                                    "description": <ForwardRef
+                                      alignItems="flexStart"
+                                      direction="column"
+                                      gutterSize="none"
+                                    >
+                                      <EuiFlexItem>
+                                        <ForwardRef(Styled(EuiButtonEmpty))
+                                          data-test-subj="urlsDescriptionReferenceLinkItem"
+                                          flush="left"
+                                          href="www.test.co"
+                                          iconType="link"
+                                          size="xs"
+                                          target="_blank"
+                                        >
+                                          www.test.co
+                                        </ForwardRef(Styled(EuiButtonEmpty))>
+                                      </EuiFlexItem>
+                                    </ForwardRef>,
+                                    "title": "Reference URLs",
+                                  },
+                                  Object {
+                                    "description": <ul>
+                                      <li
+                                        data-test-subj="unorderedListArrayDescriptionItem"
+                                      >
+                                        test
+                                      </li>
+                                    </ul>,
+                                    "title": "False positive examples",
+                                  },
+                                  Object {
+                                    "description": <ForwardRef(Styled(EuiFlexGroup))
+                                      direction="column"
+                                    >
+                                      <EuiFlexItem>
+                                        <ForwardRef
+                                          data-test-subj="threatTacticLink"
+                                          href="reference1"
+                                          target="_blank"
+                                        >
+                                          
+                                        </ForwardRef>
+                                        <ForwardRef
+                                          alignItems="flexStart"
+                                          direction="column"
+                                          gutterSize="none"
+                                        >
+                                          <EuiFlexItem>
+                                            <ForwardRef(Styled(EuiButtonEmpty))
+                                              data-test-subj="threatTechniqueLink"
+                                              flush="left"
+                                              href="technique reference"
+                                              iconType="test-file-stub"
+                                              size="xs"
+                                              target="_blank"
+                                            >
+                                              
+                                            </ForwardRef(Styled(EuiButtonEmpty))>
+                                          </EuiFlexItem>
+                                        </ForwardRef>
+                                      </EuiFlexItem>
+                                      <EuiSpacer />
+                                    </ForwardRef(Styled(EuiFlexGroup))>,
+                                    "title": "MITRE ATT&CK™",
+                                  },
+                                  Object {
+                                    "description": <ForwardRef
+                                      gutterSize="xs"
+                                      responsive={false}
+                                      wrap={true}
+                                    >
+                                      <EuiFlexItem
+                                        grow={false}
+                                      >
+                                        <ForwardRef(Styled(EuiBadge))
+                                          color="hollow"
+                                          data-test-subj="stringArrayDescriptionBadgeItem"
+                                        >
+                                          tag1
+                                        </ForwardRef(Styled(EuiBadge))>
+                                      </EuiFlexItem>
+                                      <EuiFlexItem
+                                        grow={false}
+                                      >
+                                        <ForwardRef(Styled(EuiBadge))
+                                          color="hollow"
+                                          data-test-subj="stringArrayDescriptionBadgeItem"
+                                        >
+                                          tag2
+                                        </ForwardRef(Styled(EuiBadge))>
+                                      </EuiFlexItem>
+                                    </ForwardRef>,
+                                    "title": "Tags",
+                                  },
+                                  Object {
+                                    "description": <ForwardRef(Styled(EuiFlexItem))>
+                                      <div
+                                        className="eui-yScrollWithShadows"
+                                        data-test-subj="noteDescriptionItem"
+                                      >
+                                        # test documentation
+                                      </div>
+                                    </ForwardRef(Styled(EuiFlexItem))>,
+                                    "title": "Investigation notes",
+                                  },
+                                ]
+                              }
+                              type="column"
+                            >
+                              <dl
+                                className="euiDescriptionList euiDescriptionList--column c2"
+                                data-test-subj="singleSplitStepRuleDescriptionList"
+                              >
+                                <EuiDescriptionListTitle
+                                  key="title-0"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    Name
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-0"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    Query with rule-id
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                                <EuiDescriptionListTitle
+                                  key="title-1"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    Description
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-1"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    24/7
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                                <EuiDescriptionListTitle
+                                  key="title-2"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    Severity
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-2"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    <SeverityBadgeComponent
+                                      value="low"
+                                    >
+                                      <EuiHealth
+                                        color="#54b399"
+                                      >
+                                        <div
+                                          className="euiHealth"
+                                        >
+                                          <EuiFlexGroup
+                                            alignItems="center"
+                                            gutterSize="xs"
+                                            responsive={false}
+                                          >
+                                            <div
+                                              className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                                            >
+                                              <EuiFlexItem
+                                                grow={false}
+                                              >
+                                                <div
+                                                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                                                >
+                                                  <EuiIcon
+                                                    color="#54b399"
+                                                    type="dot"
+                                                  >
+                                                    <EuiIconEmpty
+                                                      aria-hidden={true}
+                                                      className="euiIcon euiIcon--medium euiIcon-isLoading"
+                                                      focusable="false"
+                                                      role="img"
+                                                      style={
+                                                        Object {
+                                                          "fill": "#54b399",
+                                                        }
+                                                      }
+                                                    >
+                                                      <svg
+                                                        aria-hidden={true}
+                                                        className="euiIcon euiIcon--medium euiIcon-isLoading"
+                                                        focusable="false"
+                                                        height={16}
+                                                        role="img"
+                                                        style={
+                                                          Object {
+                                                            "fill": "#54b399",
+                                                          }
+                                                        }
+                                                        viewBox="0 0 16 16"
+                                                        width={16}
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                      />
+                                                    </EuiIconEmpty>
+                                                  </EuiIcon>
+                                                </div>
+                                              </EuiFlexItem>
+                                              <EuiFlexItem
+                                                grow={false}
+                                              >
+                                                <div
+                                                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                                                >
+                                                  Low
+                                                </div>
+                                              </EuiFlexItem>
+                                            </div>
+                                          </EuiFlexGroup>
+                                        </div>
+                                      </EuiHealth>
+                                    </SeverityBadgeComponent>
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                                <EuiDescriptionListTitle
+                                  key="title-3"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    Risk score
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-3"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    1
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                                <EuiDescriptionListTitle
+                                  key="title-4"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    Timeline template
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-4"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    Titled timeline
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                                <EuiDescriptionListTitle
+                                  key="title-5"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    Reference URLs
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-5"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    <EuiFlexGroup
+                                      alignItems="flexStart"
+                                      direction="column"
+                                      gutterSize="none"
+                                    >
+                                      <div
+                                        className="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                                      >
+                                        <EuiFlexItem>
+                                          <div
+                                            className="euiFlexItem"
+                                          >
+                                            <Styled(EuiButtonEmpty)
+                                              data-test-subj="urlsDescriptionReferenceLinkItem"
+                                              flush="left"
+                                              href="www.test.co"
+                                              iconType="link"
+                                              size="xs"
+                                              target="_blank"
+                                            >
+                                              <EuiButtonEmpty
+                                                className="c3"
+                                                data-test-subj="urlsDescriptionReferenceLinkItem"
+                                                flush="left"
+                                                href="www.test.co"
+                                                iconType="link"
+                                                size="xs"
+                                                target="_blank"
+                                              >
+                                                <a
+                                                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft c3"
+                                                  data-test-subj="urlsDescriptionReferenceLinkItem"
+                                                  href="www.test.co"
+                                                  rel="noopener noreferrer"
+                                                  target="_blank"
+                                                >
+                                                  <span
+                                                    className="euiButtonEmpty__content"
+                                                  >
+                                                    <EuiIcon
+                                                      aria-hidden="true"
+                                                      className="euiButtonEmpty__icon"
+                                                      size="m"
+                                                      type="link"
+                                                    >
+                                                      <EuiIconEmpty
+                                                        aria-hidden={true}
+                                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
+                                                        focusable="false"
+                                                        role="img"
+                                                        style={null}
+                                                      >
+                                                        <svg
+                                                          aria-hidden={true}
+                                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
+                                                          focusable="false"
+                                                          height={16}
+                                                          role="img"
+                                                          style={null}
+                                                          viewBox="0 0 16 16"
+                                                          width={16}
+                                                          xmlns="http://www.w3.org/2000/svg"
+                                                        />
+                                                      </EuiIconEmpty>
+                                                    </EuiIcon>
+                                                    <span
+                                                      className="euiButtonEmpty__text"
+                                                    >
+                                                      www.test.co
+                                                    </span>
+                                                  </span>
+                                                </a>
+                                              </EuiButtonEmpty>
+                                            </Styled(EuiButtonEmpty)>
+                                          </div>
+                                        </EuiFlexItem>
+                                      </div>
+                                    </EuiFlexGroup>
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                                <EuiDescriptionListTitle
+                                  key="title-6"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    False positive examples
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-6"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    <ul>
+                                      <li
+                                        data-test-subj="unorderedListArrayDescriptionItem"
+                                        key="falsePositives-test"
+                                      >
+                                        test
+                                      </li>
+                                    </ul>
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                                <EuiDescriptionListTitle
+                                  key="title-7"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    MITRE ATT&CK™
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-7"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    <Styled(EuiFlexGroup)
+                                      direction="column"
+                                    >
+                                      <EuiFlexGroup
+                                        className="c4"
+                                        direction="column"
+                                      >
+                                        <div
+                                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive c4"
+                                        >
+                                          <EuiFlexItem
+                                            key="tactic1-0"
+                                          >
+                                            <div
+                                              className="euiFlexItem"
+                                            >
+                                              <EuiLink
+                                                data-test-subj="threatTacticLink"
+                                                href="reference1"
+                                                target="_blank"
+                                              >
+                                                <a
+                                                  className="euiLink euiLink--primary"
+                                                  data-test-subj="threatTacticLink"
+                                                  href="reference1"
+                                                  rel="noopener noreferrer"
+                                                  target="_blank"
+                                                />
+                                              </EuiLink>
+                                              <EuiFlexGroup
+                                                alignItems="flexStart"
+                                                direction="column"
+                                                gutterSize="none"
+                                              >
+                                                <div
+                                                  className="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                                                >
+                                                  <EuiFlexItem>
+                                                    <div
+                                                      className="euiFlexItem"
+                                                    >
+                                                      <Styled(EuiButtonEmpty)
+                                                        data-test-subj="threatTechniqueLink"
+                                                        flush="left"
+                                                        href="technique reference"
+                                                        iconType="test-file-stub"
+                                                        size="xs"
+                                                        target="_blank"
+                                                      >
+                                                        <EuiButtonEmpty
+                                                          className="c5"
+                                                          data-test-subj="threatTechniqueLink"
+                                                          flush="left"
+                                                          href="technique reference"
+                                                          iconType="test-file-stub"
+                                                          size="xs"
+                                                          target="_blank"
+                                                        >
+                                                          <a
+                                                            className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft c5"
+                                                            data-test-subj="threatTechniqueLink"
+                                                            href="technique reference"
+                                                            rel="noopener noreferrer"
+                                                            target="_blank"
+                                                          >
+                                                            <span
+                                                              className="euiButtonEmpty__content"
+                                                            >
+                                                              <EuiIcon
+                                                                aria-hidden="true"
+                                                                className="euiButtonEmpty__icon"
+                                                                size="m"
+                                                                type="test-file-stub"
+                                                              >
+                                                                <img
+                                                                  aria-hidden="true"
+                                                                  className="euiIcon euiIcon--medium euiIcon-isLoaded euiButtonEmpty__icon"
+                                                                  src="test-file-stub"
+                                                                />
+                                                              </EuiIcon>
+                                                              <span
+                                                                className="euiButtonEmpty__text"
+                                                              />
+                                                            </span>
+                                                          </a>
+                                                        </EuiButtonEmpty>
+                                                      </Styled(EuiButtonEmpty)>
+                                                    </div>
+                                                  </EuiFlexItem>
+                                                </div>
+                                              </EuiFlexGroup>
+                                            </div>
+                                          </EuiFlexItem>
+                                          <EuiSpacer>
+                                            <div
+                                              className="euiSpacer euiSpacer--l"
+                                            />
+                                          </EuiSpacer>
+                                        </div>
+                                      </EuiFlexGroup>
+                                    </Styled(EuiFlexGroup)>
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                                <EuiDescriptionListTitle
+                                  key="title-8"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    Tags
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-8"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    <EuiFlexGroup
+                                      gutterSize="xs"
+                                      responsive={false}
+                                      wrap={true}
+                                    >
+                                      <div
+                                        className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--directionRow euiFlexGroup--wrap"
+                                      >
+                                        <EuiFlexItem
+                                          grow={false}
+                                          key="tags-tag1"
+                                        >
+                                          <div
+                                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                                          >
+                                            <Styled(EuiBadge)
+                                              color="hollow"
+                                              data-test-subj="stringArrayDescriptionBadgeItem"
+                                            >
+                                              <EuiBadge
+                                                className="c6"
+                                                color="hollow"
+                                                data-test-subj="stringArrayDescriptionBadgeItem"
+                                              >
+                                                <EuiInnerText>
+                                                  <span
+                                                    className="euiBadge euiBadge--hollow euiBadge--iconLeft c6"
+                                                    data-test-subj="stringArrayDescriptionBadgeItem"
+                                                    title="tag1"
+                                                  >
+                                                    <span
+                                                      className="euiBadge__content"
+                                                    >
+                                                      <span
+                                                        className="euiBadge__text"
+                                                      >
+                                                        tag1
+                                                      </span>
+                                                    </span>
+                                                  </span>
+                                                </EuiInnerText>
+                                              </EuiBadge>
+                                            </Styled(EuiBadge)>
+                                          </div>
+                                        </EuiFlexItem>
+                                        <EuiFlexItem
+                                          grow={false}
+                                          key="tags-tag2"
+                                        >
+                                          <div
+                                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                                          >
+                                            <Styled(EuiBadge)
+                                              color="hollow"
+                                              data-test-subj="stringArrayDescriptionBadgeItem"
+                                            >
+                                              <EuiBadge
+                                                className="c6"
+                                                color="hollow"
+                                                data-test-subj="stringArrayDescriptionBadgeItem"
+                                              >
+                                                <EuiInnerText>
+                                                  <span
+                                                    className="euiBadge euiBadge--hollow euiBadge--iconLeft c6"
+                                                    data-test-subj="stringArrayDescriptionBadgeItem"
+                                                    title="tag2"
+                                                  >
+                                                    <span
+                                                      className="euiBadge__content"
+                                                    >
+                                                      <span
+                                                        className="euiBadge__text"
+                                                      >
+                                                        tag2
+                                                      </span>
+                                                    </span>
+                                                  </span>
+                                                </EuiInnerText>
+                                              </EuiBadge>
+                                            </Styled(EuiBadge)>
+                                          </div>
+                                        </EuiFlexItem>
+                                      </div>
+                                    </EuiFlexGroup>
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                                <EuiDescriptionListTitle
+                                  key="title-9"
+                                >
+                                  <dt
+                                    className="euiDescriptionList__title"
+                                  >
+                                    Investigation notes
+                                  </dt>
+                                </EuiDescriptionListTitle>
+                                <EuiDescriptionListDescription
+                                  key="description-9"
+                                >
+                                  <dd
+                                    className="euiDescriptionList__description"
+                                  >
+                                    <Styled(EuiFlexItem)>
+                                      <EuiFlexItem
+                                        className="c7"
+                                      >
+                                        <div
+                                          className="euiFlexItem c7"
+                                        >
+                                          <div
+                                            className="eui-yScrollWithShadows"
+                                            data-test-subj="noteDescriptionItem"
+                                          >
+                                            # test documentation
+                                          </div>
+                                        </div>
+                                      </EuiFlexItem>
+                                    </Styled(EuiFlexItem)>
+                                  </dd>
+                                </EuiDescriptionListDescription>
+                              </dl>
+                            </EuiDescriptionList>
+                          </Styled(EuiDescriptionList)>
+                        </div>
+                      </EuiFlexItem>
+                    </div>
+                  </EuiFlexGroup>
+                </StepRuleDescriptionComponent>
+              </div>
+            </styled.div>
+          </StepAboutRuleComponent>
+        </div>
+      </EuiPanel>
+    </Styled(EuiPanel)>
+  </StepAboutRuleToggleDetailsComponent>
+</ThemeProvider>
+`;

@@ -22,7 +22,7 @@ export const NewRuleSchema = t.intersection([
   }),
   t.partial({
     created_by: t.string,
-    documentation: t.string,
+    note: t.string,
     false_positives: t.array(t.string),
     from: t.string,
     id: t.string,
@@ -78,7 +78,7 @@ export const RuleSchema = t.intersection([
     updated_by: t.string,
   }),
   t.partial({
-    documentation: t.string,
+    note: t.string,
     last_failure_at: t.string,
     last_failure_message: t.string,
     meta: MetaRule,

@@ -7,6 +7,7 @@
 import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty, chunk, get, pick } from 'lodash/fp';
 import React, { memo, useState } from 'react';
+import styled from 'styled-components';
 
 import {
   IIndexPattern,
@@ -28,11 +29,21 @@ import {
   buildThreatDescription,
   buildUnorderedListArrayDescription,
   buildUrlsDescription,
+  buildNoteDescription,
 } from './helpers';
-import { DOCUMENTATION_PREVIEW_DESCRIPTION } from './translations';
+
+const DescriptionListContainer = styled(EuiDescriptionList)`
+  &.euiDescriptionList--column .euiDescriptionList__title {
+    width: 25%;
+  }
+
+  &.euiDescriptionList--column .euiDescriptionList__description {
+    width: 75%;
+  }
+`;
 
 interface StepRuleDescriptionProps {
-  direction?: 'row' | 'column';
+  columns?: 'multi' | 'single' | 'singleSplit';
   data: unknown;
   indexPatterns?: IIndexPattern;
   schema: FormSchema;
@@ -40,7 +51,7 @@ interface StepRuleDescriptionProps {
 
 export const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
   data,
-  direction = 'row',
+  columns = 'multi',
   indexPatterns,
   schema,
 }) => {
@@ -56,7 +67,7 @@ export const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = 
     []
   );
 
-  if (direction === 'row') {
+  if (columns === 'multi') {
     return (
       <EuiFlexGroup>
         {chunk(Math.ceil(listItems.length / 2), listItems).map((chunkListItems, index) => (
@@ -74,7 +85,15 @@ export const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = 
   return (
     <EuiFlexGroup>
       <EuiFlexItem data-test-subj="listItemColumnStepRuleDescription">
-        <EuiDescriptionList listItems={listItems} />
+        {columns === 'single' ? (
+          <EuiDescriptionList listItems={listItems} />
+        ) : (
+          <DescriptionListContainer
+            data-test-subj="singleSplitStepRuleDescriptionList"
+            type="column"
+            listItems={listItems}
+          />
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -163,13 +182,9 @@ export const getDescriptionItem = (
         description: timeline.title ?? DEFAULT_TIMELINE_TITLE,
       },
     ];
-  } else if (field === 'documentation') {
-    return [
-      {
-        title: label,
-        description: DOCUMENTATION_PREVIEW_DESCRIPTION,
-      },
-    ];
+  } else if (field === 'note') {
+    const val: string = get(field, value);
+    return buildNoteDescription(label, val);
   }
   const description: string = get(field, value);
   if (!isEmpty(description)) {

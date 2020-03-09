@@ -12,10 +12,16 @@ import { useLocation } from 'react-router-dom';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
 import { Rule } from '../../../containers/detection_engine/rules';
 import { FormData, FormHook, FormSchema } from '../../../shared_imports';
-import { AboutStepRule, DefineStepRule, IMitreEnterpriseAttack, ScheduleStepRule } from './types';
+import {
+  AboutStepRule,
+  DefineStepRule,
+  IMitreEnterpriseAttack,
+  ScheduleStepRule,
+  AboutStepRuleDetails,
+} from './types';
 
 interface GetStepsData {
-  aboutRuleData: AboutStepRule | null;
+  aboutRuleData: AboutStepRule | AboutStepRuleDetails | null;
   defineRuleData: DefineStepRule | null;
   scheduleRuleData: ScheduleStepRule | null;
 }
@@ -39,12 +45,14 @@ export const getStepsData = ({
           },
         }
       : null;
-  const aboutRuleData: AboutStepRule | null =
+  const aboutRuleData: AboutStepRuleDetails | null =
     rule != null
       ? {
           isNew: false,
           ...pick(['description', 'name', 'references', 'severity', 'tags', 'threat'], rule),
-          ...(detailsView ? { name: '' } : {}),
+          ...(detailsView
+            ? { name: '', description: '', descriptionDetails: rule.description }
+            : {}),
           threat: rule.threat as IMitreEnterpriseAttack[],
           falsePositives: rule.false_positives,
           riskScore: rule.risk_score,
@@ -52,7 +60,7 @@ export const getStepsData = ({
             id: rule.timeline_id ?? null,
             title: rule.timeline_title ?? null,
           },
-          documentation: rule.documentation,
+          note: rule.note ?? '',
         }
       : null;
 

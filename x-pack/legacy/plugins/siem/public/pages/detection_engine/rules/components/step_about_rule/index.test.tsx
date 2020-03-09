@@ -5,6 +5,8 @@
  */
 import React from 'react';
 import { mount, shallow } from 'enzyme';
+import { ThemeProvider } from 'styled-components';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { StepAboutRule } from './';
 import { mockAboutStepRule } from '../../all/__mocks__/mock';
@@ -18,6 +20,7 @@ jest.mock('react', () => {
 });
 
 describe('StepAboutRuleComponent', () => {
+  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   test('it renders StepRuleDescription if isReadOnlyView is true and `name` property exists', () => {
     // see mockAboutStepRule for name property
     // Note: is the name check for old rules? It's required so no rules should ever not include it
@@ -25,7 +28,7 @@ describe('StepAboutRuleComponent', () => {
       <StepAboutRule
         addPadding={false}
         defaultValues={mockAboutStepRule}
-        descriptionDirection="row"
+        descriptionColumns="multi"
         isReadOnlyView={true}
         isLoading={false}
       />
@@ -34,80 +37,111 @@ describe('StepAboutRuleComponent', () => {
     expect(wrapper.find(StepRuleDescription).exists()).toBeTruthy();
   });
 
-  test('renders inputs disabled initially when isReadOnly is false and isLoading is true', () => {
+  test('it prevents user from clicking continue if no `description` defined', () => {
     const wrapper = mount(
-      <StepAboutRule
-        addPadding={true}
-        defaultValues={stepAboutDefaultValue}
-        descriptionDirection="row"
-        isReadOnlyView={false}
-        isLoading={true}
-        setForm={jest.fn()}
-        setStepData={jest.fn()}
-      />
+      <ThemeProvider theme={theme}>
+        <StepAboutRule
+          addPadding={true}
+          defaultValues={stepAboutDefaultValue}
+          descriptionColumns="multi"
+          isReadOnlyView={false}
+          isLoading={false}
+          setForm={jest.fn()}
+          setStepData={jest.fn()}
+        />
+      </ThemeProvider>
     );
 
-    const nameInput = wrapper.find('input[aria-describedby="detectionEngineStepAboutRuleName"]');
-    expect(nameInput.exists()).toBeTruthy();
-    expect(nameInput.get(0).props.disabled).toBeTruthy();
+    const nameInput = wrapper
+      .find('input[aria-describedby="detectionEngineStepAboutRuleName"]')
+      .at(0);
+    nameInput.simulate('change', { target: { value: 'Test name text' } });
 
-    const descriptionInput = wrapper.find(
-      'textarea[aria-describedby="detectionEngineStepAboutRuleDescription"]'
-    );
-    expect(descriptionInput.exists()).toBeTruthy();
-    expect(descriptionInput.get(0).props.disabled).toBeTruthy();
+    const descriptionInput = wrapper
+      .find('textarea[aria-describedby="detectionEngineStepAboutRuleDescription"]')
+      .at(0);
+    const nextButton = wrapper
+      .find('button[data-test-subj="detectionEngineStepAboutRuleContinueButton"]')
+      .at(0);
 
-    const severityInput = wrapper.find(
-      'EuiSuperSelectControl[aria-describedby="detectionEngineStepAboutRuleSeverity"]'
-    );
-    expect(severityInput.exists()).toBeTruthy();
-    expect(severityInput.get(0).props.disabled).toBeTruthy();
-
-    const riskScoreInput = wrapper.find(
-      'EuiRange[aria-describedby="detectionEngineStepAboutRuleRiskScore"]'
-    );
-    expect(riskScoreInput.exists()).toBeTruthy();
-    expect(riskScoreInput.get(0).props.disabled).toBeTruthy();
-
-    const tagsInput = wrapper.find('EuiComboBox input'); // TODO find better way to do this
-    expect(tagsInput.exists()).toBeTruthy();
-    expect(tagsInput.get(0).props.disabled).toBeTruthy();
-
-    const timelineInput = wrapper.find(
-      'SearchTimelineSuperSelectComponent[aria-describedby="detectionEngineStepAboutRuleTimeline"]'
-    );
-    expect(timelineInput.exists()).toBeTruthy();
-    expect(timelineInput.get(0).props.isDisabled).toBeTruthy();
-
-    const referenceUrlsInput = wrapper.find(
-      'EuiFormRow[data-test-subj="detectionEngineStepAboutRuleReferenceUrls"] input'
-    );
-    expect(referenceUrlsInput.exists()).toBeTruthy();
-    expect(referenceUrlsInput.get(0).props.disabled).toBeTruthy();
-
-    const falsePositivesInput = wrapper.find(
-      'EuiFormRow[data-test-subj="detectionEngineStepAboutRuleFalsePositives"] input'
-    );
-    expect(falsePositivesInput.exists()).toBeTruthy();
-    expect(falsePositivesInput.get(0).props.disabled).toBeTruthy();
-
-    const documentationInput = wrapper.find(
-      'NewNote[aria-describedby="detectionEngineStepAboutRuleDocumentation"] textarea'
-    );
-    expect(documentationInput.exists()).toBeTruthy();
-    expect(documentationInput.get(0).props.disabled).toBeTruthy();
+    expect(
+      wrapper
+        .find('input[aria-describedby="detectionEngineStepAboutRuleName"]')
+        .at(0)
+        .props().value
+    ).toEqual('Test name text');
+    expect(descriptionInput.props().value).toEqual('');
+    expect(nextButton.prop('disabled')).toBeTruthy();
   });
 
-  test('it prevents user from clicking into other steps if no name defined', () => {
-    // test clicking other step headers
-    // test clicking continue
-    // test that error messages show about required field
+  test('it prevents user from clicking continue if no `name` defined', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={theme}>
+        <StepAboutRule
+          addPadding={true}
+          defaultValues={stepAboutDefaultValue}
+          descriptionColumns="multi"
+          isReadOnlyView={false}
+          isLoading={false}
+          setForm={jest.fn()}
+          setStepData={jest.fn()}
+        />
+      </ThemeProvider>
+    );
+
+    const descriptionInput = wrapper
+      .find('textarea[aria-describedby="detectionEngineStepAboutRuleDescription"]')
+      .at(0);
+    descriptionInput.simulate('change', { target: { value: 'Test description text' } });
+
+    const nameInput = wrapper
+      .find('input[aria-describedby="detectionEngineStepAboutRuleName"]')
+      .at(0);
+    const nextButton = wrapper
+      .find('button[data-test-subj="detectionEngineStepAboutRuleContinueButton"]')
+      .at(0);
+
+    expect(
+      wrapper
+        .find('textarea[aria-describedby="detectionEngineStepAboutRuleDescription"]')
+        .at(0)
+        .props().value
+    ).toEqual('Test description text');
+    expect(nameInput.props().value).toEqual('');
+    expect(nextButton.prop('disabled')).toBeTruthy();
   });
 
-  test('it prevents user from clicking into other steps if no description defined', () => {
-    // test clicking other step headers
-    // test clicking continue
-    // test that error messages show about required field
+  test('it allows user to click continue if `name` and `description` are defined', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={theme}>
+        <StepAboutRule
+          addPadding={true}
+          defaultValues={stepAboutDefaultValue}
+          descriptionColumns="multi"
+          isReadOnlyView={false}
+          isLoading={false}
+          setForm={jest.fn()}
+          setStepData={jest.fn()}
+        />
+      </ThemeProvider>
+    );
+
+    const descriptionInput = wrapper
+      .find('textarea[aria-describedby="detectionEngineStepAboutRuleDescription"]')
+      .at(0);
+    descriptionInput.simulate('change', { target: { value: 'Test description text' } });
+
+    const nameInput = wrapper
+      .find('input[aria-describedby="detectionEngineStepAboutRuleName"]')
+      .at(0);
+    nameInput.simulate('change', { target: { value: 'Test name text' } });
+
+    const nextButton = wrapper
+      .find('button[data-test-subj="detectionEngineStepAboutRuleContinueButton"]')
+      .at(0);
+    nextButton.simulate('click');
+
+    expect(wrapper).toMatchSnapshot();
   });
 
   describe('advanced settings', () => {

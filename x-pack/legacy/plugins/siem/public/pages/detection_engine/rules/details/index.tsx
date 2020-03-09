@@ -63,15 +63,14 @@ import { State } from '../../../../store';
 import { InputsRange } from '../../../../store/inputs/model';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../../../store/inputs/actions';
 import { RuleActionsOverflow } from '../components/rule_actions_overflow';
+import { StepAboutRuleToggleDetails } from '../components/step_about_rule/details_description/';
 import { RuleStatusFailedCallOut } from './status_failed_callout';
 import { FailureHistory } from './failure_history';
 import { RuleStatus } from '../components/rule_status';
-import { Documentation } from './documentation';
 
 enum RuleDetailTabs {
   signals = 'signals',
   failures = 'failures',
-  documentation = 'documentation',
 }
 
 const ruleDetailTabs = [
@@ -83,11 +82,6 @@ const ruleDetailTabs = [
   {
     id: RuleDetailTabs.failures,
     name: i18n.FAILURE_HISTORY_TAB,
-    disabled: false,
-  },
-  {
-    id: RuleDetailTabs.documentation,
-    name: i18n.DOCUMENTATION_TAB,
     disabled: false,
   },
 ];
@@ -304,36 +298,30 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                       <>
                         <EuiFlexGroup>
                           <EuiFlexItem component="section" grow={1}>
+                            {aboutRuleData != null && (
+                              <StepAboutRuleToggleDetails
+                                loading={isLoading}
+                                stepData={aboutRuleData}
+                              />
+                            )}
+                          </EuiFlexItem>
+
+                          <EuiFlexItem component="section" grow={1}>
                             <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
                               {defineRuleData != null && (
                                 <StepDefineRule
-                                  descriptionDirection="column"
+                                  descriptionColumns="singleSplit"
                                   isReadOnlyView={true}
                                   isLoading={false}
                                   defaultValues={defineRuleData}
                                 />
                               )}
                             </StepPanel>
-                          </EuiFlexItem>
-
-                          <EuiFlexItem component="section" grow={2}>
-                            <StepPanel loading={isLoading} title={ruleI18n.ABOUT}>
-                              {aboutRuleData != null && (
-                                <StepAboutRule
-                                  descriptionDirection="row"
-                                  isReadOnlyView={true}
-                                  isLoading={false}
-                                  defaultValues={aboutRuleData}
-                                />
-                              )}
-                            </StepPanel>
-                          </EuiFlexItem>
-
-                          <EuiFlexItem component="section" grow={1}>
+                            <EuiSpacer />
                             <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
                               {scheduleRuleData != null && (
                                 <StepScheduleRule
-                                  descriptionDirection="column"
+                                  descriptionColumns="singleSplit"
                                   isReadOnlyView={true}
                                   isLoading={false}
                                   defaultValues={scheduleRuleData}
@@ -369,9 +357,6 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                       </>
                     )}
                     {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
-                    {ruleDetailTab === RuleDetailTabs.documentation && (
-                      <Documentation content={rule?.documentation} />
-                    )}
                   </WrapperPage>
                 </StickyContainer>
               )}
