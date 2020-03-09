@@ -21,8 +21,7 @@ import React, { useState, FunctionComponent } from 'react';
 import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { sortTextObjectsAsc } from '../../../../common/text_object';
-import { Store } from '../../stores/text_object';
+import { sortTextObjectsAsc, TextObjectWithId } from '../../../../common/text_object';
 
 import { useTextObjectsCRUD } from '../../hooks/text_objects';
 import {
@@ -33,13 +32,20 @@ import {
 } from '../../components';
 import { useTextObjectsActionContext, useTextObjectsReadContext } from '../../contexts';
 
-import { filterTextObjects } from './filter_text_objects';
+import { filterTextObjects, EnhancedTextObjectWithId } from './filter_text_objects';
 
-const prepareData = flow(
-  (searchFilter: string | undefined, textObjects: Store['textObjects']) =>
-    searchFilter ? filterTextObjects(searchFilter, textObjects) : Object.values(textObjects),
-  sortTextObjectsAsc
-);
+const addDefaultValues = (textObjects: TextObjectWithId[]) =>
+  textObjects.map(textObject => ({
+    ...textObject,
+    name: textObject.isScratchPad ? 'Default' : textObject.name ?? `Untitled`,
+  }));
+
+const searchAndSort = (searchTerm: string | undefined) =>
+  flow(
+    (textObjects: TextObjectWithId[]) =>
+      searchTerm ? filterTextObjects(searchTerm, textObjects) : textObjects,
+    sortTextObjectsAsc
+  );
 
 export const FileTree: FunctionComponent = () => {
   const [searchFilter, setSearchFilter] = useState<string | undefined>(undefined);
@@ -51,7 +57,11 @@ export const FileTree: FunctionComponent = () => {
   const { textObjects, currentTextObjectId } = useTextObjectsReadContext();
   const dispatch = useTextObjectsActionContext();
 
-  const filteredTextObjects = prepareData(searchFilter, textObjects);
+  const prepareData = flow(addDefaultValues, searchAndSort(searchFilter));
+
+  const filteredTextObjects: EnhancedTextObjectWithId[] = prepareData(
+    Object.values(textObjects).filter(Boolean)
+  );
 
   return (
     <>
@@ -97,44 +107,42 @@ export const FileTree: FunctionComponent = () => {
         {/* File Tree */}
         <EuiFlexItem grow={false}>
           <FileTreeComponent
-            entries={filteredTextObjects
-              .sort((a, b) =>
-                a.isScratchPad ? -1 : b.isScratchPad ? 1 : a.createdAt - b.createdAt
-              )
-              .map(({ isScratchPad, name, id }) => {
-                return {
-                  id,
-                  className: classNames({
-                    conApp__fileTree__scratchPadEntry: isScratchPad,
-                    'conApp__fileTree__entry--selected': id === currentTextObjectId,
-                  }),
-                  name: isScratchPad ? 'Default' : name ?? `Untitled`,
-                  onSelect: () => {
-                    dispatch({
-                      type: 'setCurrent',
-                      payload: id,
+            entries={filteredTextObjects.map(({ isScratchPad, name, id, displayName }) => {
+              const entryName = isScratchPad ? 'Default' : name ?? `Untitled`;
+              return {
+                id,
+                className: classNames({
+                  conApp__fileTree__scratchPadEntry: isScratchPad,
+                  'conApp__fileTree__entry--selected': id === currentTextObjectId,
+                }),
+                name: entryName,
+                displayName,
+                onSelect: () => {
+                  dispatch({
+                    type: 'setCurrent',
+                    payload: id,
+                  });
+                },
+                canDelete: !isScratchPad,
+                onDelete: deleteId => {
+                  setIdToDelete(deleteId);
+                },
+                canEdit: !isScratchPad,
+                onEdit: ({ name: fileName, id: idToEdit }) => {
+                  setIsFileActionInProgress(true);
+                  textObjectsCRUD
+                    .update({
+                      textObject: {
+                        id: idToEdit,
+                        name: fileName,
+                      },
+                    })
+                    .finally(() => {
+                      setIsFileActionInProgress(false);
                     });
-                  },
-                  canDelete: !isScratchPad,
-                  onDelete: deleteId => {
-                    setIdToDelete(deleteId);
-                  },
-                  canEdit: !isScratchPad,
-                  onEdit: ({ name: fileName, id: idToEdit }) => {
-                    setIsFileActionInProgress(true);
-                    textObjectsCRUD
-                      .update({
-                        textObject: {
-                          id: idToEdit,
-                          name: fileName,
-                        },
-                      })
-                      .finally(() => {
-                        setIsFileActionInProgress(false);
-                      });
-                  },
-                };
-              })}
+                },
+              };
+            })}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

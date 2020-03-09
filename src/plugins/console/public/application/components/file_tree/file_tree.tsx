@@ -19,21 +19,10 @@
 
 import React, { FunctionComponent } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FileTreeEntry, EditHandlerArg } from './file_tree_entry';
-
-export interface Entries {
-  name: string;
-  id: string;
-  onSelect: (id: string) => void;
-  onDelete: (id: string) => void;
-  onEdit: (arg: EditHandlerArg) => void;
-  className?: string;
-  canDelete?: boolean;
-  canEdit?: boolean;
-}
+import { FileTreeEntry, Props as FileEntryProps } from './file_tree_entry';
 
 export interface Props {
-  entries: Entries[];
+  entries: FileEntryProps[];
   editingDisabled?: boolean;
 }
 
@@ -45,22 +34,15 @@ export const FileTree: FunctionComponent<Props> = ({ entries, editingDisabled })
       responsive={false}
       direction="column"
     >
-      {entries.map(
-        ({ name, id, className, canDelete, onDelete, onSelect, onEdit, canEdit }, idx) => (
-          <EuiFlexItem key={idx} grow={false}>
-            <FileTreeEntry
-              id={id}
-              canDelete={canDelete && !editingDisabled}
-              canEdit={canEdit && !editingDisabled}
-              name={name}
-              className={className}
-              onDelete={onDelete}
-              onSelect={onSelect}
-              onEdit={onEdit}
-            />
-          </EuiFlexItem>
-        )
-      )}
+      {entries.map((props, idx) => (
+        <EuiFlexItem key={idx} grow={false}>
+          <FileTreeEntry
+            {...props}
+            canDelete={props.canDelete && !editingDisabled}
+            canEdit={props.canEdit && !editingDisabled}
+          />
+        </EuiFlexItem>
+      ))}
     </EuiFlexGroup>
   );
 };

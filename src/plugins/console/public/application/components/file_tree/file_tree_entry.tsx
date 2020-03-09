@@ -29,6 +29,8 @@ export interface EditHandlerArg {
 export interface Props {
   id: string;
   name: string;
+  displayName?: React.ReactNode;
+  ariaLabel?: string;
   onSelect: (id: string) => void;
   onDelete: (id: string) => void;
   onEdit: (props: EditHandlerArg) => void;
@@ -39,6 +41,7 @@ export interface Props {
 
 export const FileTreeEntry: FunctionComponent<Props> = ({
   name,
+  displayName,
   className,
   onSelect,
   canDelete,
@@ -46,6 +49,7 @@ export const FileTreeEntry: FunctionComponent<Props> = ({
   canEdit,
   onEdit,
   id,
+  ariaLabel,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [nameValue, setNameValue] = useState<undefined | string>(undefined);
@@ -81,8 +85,8 @@ export const FileTreeEntry: FunctionComponent<Props> = ({
       <EuiText
         className="conApp__fileTree__entry__fileName"
         aria-label={i18n.translate('console.fileTree.fileEntryName', {
-          defaultMessage: '{name}',
-          values: { name },
+          defaultMessage: '{ariaLabel}',
+          values: { ariaLabel: ariaLabel ?? name },
         })}
         size="s"
       >
@@ -95,7 +99,7 @@ export const FileTreeEntry: FunctionComponent<Props> = ({
             }
           }}
         >
-          {name}
+          {displayName ?? name}
         </span>
       </EuiText>
     </EuiFlexItem>
@@ -118,8 +122,8 @@ export const FileTreeEntry: FunctionComponent<Props> = ({
               <EuiButtonIcon
                 tabIndex={0}
                 aria-label={i18n.translate('console.fileTree.editButtonLabel', {
-                  defaultMessage: 'Edit {name}',
-                  values: { name },
+                  defaultMessage: 'Edit {ariaLabel}',
+                  values: { ariaLabel: ariaLabel ?? name },
                 })}
                 className="conApp__fileTree__entry__actionButton"
                 onClick={(event: React.MouseEvent) => {

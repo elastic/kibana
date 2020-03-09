@@ -26,7 +26,7 @@ export const textObjectTypeName = 'text-object';
  * Takes an array of text objects and sorts them according to date created and places
  * scratch pad at as the first element, if one exists in the array.
  */
-export const sortTextObjectsAsc = (textObjects: TextObjectWithId[]) =>
+export const sortTextObjectsAsc = (textObjects: TextObjectWithId[]): TextObjectWithId[] =>
   textObjects.sort((a, b) =>
     a.isScratchPad ? -1 : b.isScratchPad ? 1 : a.createdAt - b.createdAt
   );
