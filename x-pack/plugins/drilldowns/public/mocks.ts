@@ -17,7 +17,9 @@ const createSetupContract = (): Setup => {
 };
 
 const createStartContract = (): Start => {
-  const startContract: Start = {};
+  const startContract: Start = {
+    FlyoutManageDrilldowns: jest.fn(),
+  };
 
   return startContract;
 };
