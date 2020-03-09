@@ -81,7 +81,7 @@ export function serializeCluster(deserializedClusterObject: any): any {
         remote: {
           [name]: {
             skip_unavailable: skipUnavailable !== undefined ? skipUnavailable : null,
-            mode,
+            mode: mode ?? null,
             proxy_address: proxyAddress ?? null,
             proxy_socket_connections: proxySocketConnections ?? null,
             server_name: serverName ?? null,
