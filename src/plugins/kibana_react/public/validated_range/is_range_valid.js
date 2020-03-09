@@ -39,7 +39,7 @@ export function isRangeValid(value, min, max, allowEmptyRange) {
   let errorMessage = '';
 
   const bothMustBeSetErrorMessage = i18n.translate(
-    'common.ui.dualRangeControl.mustSetBothErrorMessage',
+    'kibana-react.dualRangeControl.mustSetBothErrorMessage',
     {
       defaultMessage: 'Both lower and upper values must be set',
     }
@@ -55,13 +55,13 @@ export function isRangeValid(value, min, max, allowEmptyRange) {
     errorMessage = bothMustBeSetErrorMessage;
   } else if ((isLowerValueValid && lowerValue < min) || (isUpperValueValid && upperValue > max)) {
     isValid = false;
-    errorMessage = i18n.translate('common.ui.dualRangeControl.outsideOfRangeErrorMessage', {
+    errorMessage = i18n.translate('kibana-react.dualRangeControl.outsideOfRangeErrorMessage', {
       defaultMessage: 'Values must be on or between {min} and {max}',
       values: { min, max },
     });
   } else if (isLowerValueValid && isUpperValueValid && upperValue < lowerValue) {
     isValid = false;
-    errorMessage = i18n.translate('common.ui.dualRangeControl.upperValidErrorMessage', {
+    errorMessage = i18n.translate('kibana-react.dualRangeControl.upperValidErrorMessage', {
       defaultMessage: 'Upper value must be greater or equal to lower value',
     });
   }
