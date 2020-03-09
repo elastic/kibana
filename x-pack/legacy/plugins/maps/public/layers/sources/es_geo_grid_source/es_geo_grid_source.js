@@ -35,7 +35,7 @@ import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_sty
 import { StaticStyleProperty } from '../../styles/vector/properties/static_style_property';
 import { DataRequestAbortError } from '../../util/data_request';
 
-const MAX_GEOTILE_LEVEL = 29;
+export const MAX_GEOTILE_LEVEL = 29;
 
 export class ESGeoGridSource extends AbstractESAggSource {
   static type = ES_GEO_GRID;

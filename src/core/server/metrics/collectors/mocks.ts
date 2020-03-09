@@ -17,24 +17,19 @@
  * under the License.
  */
 
-import { getDefaultFormat } from '../get_default_format';
-import { fieldFormats } from '../../../../../../plugins/data/public';
+import { MetricsCollector } from './types';
 
-const getConfig = () => {
-  return '0,0.[000]';
+const createMock = () => {
+  const mocked: jest.Mocked<MetricsCollector<any>> = {
+    collect: jest.fn(),
+    reset: jest.fn(),
+  };
+
+  mocked.collect.mockResolvedValue({});
+
+  return mocked;
 };
 
-describe('getDefaultFormat', () => {
-  it('should create default format', () => {
-    const DefaultFormat = getDefaultFormat(fieldFormats.NumberFormat);
-    const defaultFormatObject = new DefaultFormat(null, getConfig);
-    const formatObject = new fieldFormats.NumberFormat(null, getConfig);
-
-    expect(DefaultFormat.id).toEqual('');
-    expect(DefaultFormat.resolvedTitle).toEqual(fieldFormats.NumberFormat.title);
-    expect(DefaultFormat.title).toEqual('- Default -');
-    expect(JSON.stringify(defaultFormatObject.params())).toEqual(
-      JSON.stringify(formatObject.params())
-    );
-  });
-});
+export const collectorMock = {
+  create: createMock,
+};
