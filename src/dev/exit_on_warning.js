@@ -17,7 +17,11 @@
  * under the License.
  */
 
-require('../src/dev/exit_on_warning');
-require('../src/apm')(process.env.ELASTIC_APM_PROXY_SERVICE_NAME || 'kibana-proxy');
-require('../src/setup_node_env');
-require('../src/cli/cli');
+process.on('warning', function(warn) {
+  console.error('Node.js process-warning detected:');
+  console.error();
+  console.error(warn.stack);
+  console.error();
+  console.error('Terminating process...');
+  process.exit(1);
+});
