@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment-timezone';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -54,8 +54,6 @@ interface Props {
   query: PivotQuery;
 }
 
-const defaultPagination = { pageIndex: 0, pageSize: 5 };
-
 export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, query }) => {
   const allFields = indexPattern.fields.map(f => f.name);
   const indexPatternFields: string[] = allFields.filter(f => {
@@ -75,17 +73,18 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<EsFieldName[]>(indexPatternFields);
 
-  const [pagination, setPagination] = useState(defaultPagination);
+  const {
+    errorMessage,
+    pagination,
+    setPagination,
+    setSortingColumns,
+    rowCount,
+    sortingColumns,
+    status,
+    tableItems: data,
+  } = useSourceIndexData(indexPattern, query);
 
-  useEffect(() => {
-    setPagination(defaultPagination);
-  }, [query]);
-
-  const { errorMessage, status, rowCount, tableItems: data } = useSourceIndexData(
-    indexPattern,
-    query,
-    pagination
-  );
+  const onSort = useCallback(sc => setSortingColumns(sc), [setSortingColumns]);
 
   // EuiDataGrid State
   const dataGridColumns = indexPatternFields.map(id => {
@@ -123,10 +122,6 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
   const onChangePage = useCallback(pageIndex => setPagination(p => ({ ...p, pageIndex })), [
     setPagination,
   ]);
-
-  // ** Sorting config
-  const [sortingColumns, setSortingColumns] = useState([]);
-  const onSort = useCallback(sc => setSortingColumns(sc), [setSortingColumns]);
 
   const renderCellValue = useMemo(() => {
     return ({
