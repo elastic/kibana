@@ -102,7 +102,6 @@ const getMetric: (
                 groupBy: {
                   terms: {
                     field: groupBy,
-                    order: 'asc',
                   },
                 },
               },
