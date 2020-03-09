@@ -13,13 +13,16 @@ import {
   OPEN_FLYOUT_ADD_DRILLDOWN,
   OPEN_FLYOUT_EDIT_DRILLDOWN,
 } from './actions';
+import { AdvancedUiActionsSetup, AdvancedUiActionsStart } from '../../advanced_ui_actions/public';
 
 export interface DrilldownsSetupDependencies {
   uiActions: UiActionsSetup;
+  advancedUiActions: AdvancedUiActionsSetup;
 }
 
 export interface DrilldownsStartDependencies {
   uiActions: UiActionsStart;
+  advancedUiActions: AdvancedUiActionsStart;
 }
 
 export type DrilldownsSetupContract = Pick<DrilldownService, 'registerDrilldown'>;

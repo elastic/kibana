@@ -11,6 +11,7 @@ import { ActionByType } from '../../../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
 import { FlyoutDrilldownWizard } from '../../components/flyout_drilldown_wizard';
+import { ActionFactory } from '../../../../advanced_ui_actions/public';
 
 export const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
 
@@ -20,6 +21,7 @@ export interface FlyoutCreateDrilldownActionContext {
 
 export interface OpenFlyoutAddDrilldownParams {
   overlays: () => Promise<CoreStart['overlays']>;
+  getDrilldownActionFactories: () => Array<ActionFactory<any>>;
 }
 
 export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_ADD_DRILLDOWN> {
@@ -45,8 +47,21 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
 
   public async execute(context: FlyoutCreateDrilldownActionContext) {
     const overlays = await this.params.overlays();
+
+    const drilldownActionFactories = this.params.getDrilldownActionFactories();
+    const compatibleDrilldownActionFactories = await Promise.all(
+      drilldownActionFactories.map(factory => factory.isCompatible(context))
+    ).then(compatibilityList =>
+      drilldownActionFactories.filter((factory, index) => compatibilityList[index])
+    );
+
     const handle = overlays.openFlyout(
-      toMountPoint(<FlyoutDrilldownWizard onClose={() => handle.close()} />)
+      toMountPoint(
+        <FlyoutDrilldownWizard
+          onClose={() => handle.close()}
+          drilldownActionFactories={compatibleDrilldownActionFactories}
+        />
+      )
     );
   }
 }

@@ -19,30 +19,33 @@
 
 import { UiComponent } from 'src/plugins/kibana_utils/common';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ConfigurableBaseConfig {}
+
 /**
  * Represents something that can be configured by user using UI.
  */
-export interface Configurable<Config, Context = void> {
+export interface Configurable<Config extends ConfigurableBaseConfig> {
   /**
-   * Default config for this item, used when item is created for the first time.
+   * Create default config for this item, used when item is created for the first time.
    */
-  readonly defaultConfig?: Config;
+  readonly createConfig: () => Config;
+
+  /**
+   * Is this config valid. Used to validate user's input before saving
+   */
+  readonly isConfigValid: (config: Config) => boolean;
 
   /**
    * `UiComponent` to be rendered when collecting configuration for this item.
    */
-  readonly CollectConfig?: UiComponent<CollectConfigProps<Config, Context>>;
+  readonly CollectConfig: UiComponent<CollectConfigProps<Config>>;
 }
 
 /**
  * Props provided to `CollectConfig` component on every re-render.
  */
-export interface CollectConfigProps<Config, Context = void> {
-  /**
-   * Context represents environment where this component is being rendered.
-   */
-  context: Context;
-
+export interface CollectConfigProps<Config> {
   /**
    * Current (latest) config of the item.
    */

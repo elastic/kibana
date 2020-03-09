@@ -20,7 +20,6 @@
 import { UiComponent } from 'src/plugins/kibana_utils/common';
 import { ActionType, ActionContextMapping } from '../types';
 import { Presentable } from '../util/presentable';
-import { Configurable } from '../util/configurable';
 
 export type ActionByType<T extends ActionType> = Action<ActionContextMapping[T], T>;
 
@@ -82,7 +81,7 @@ export interface Action<Context extends {} = {}, T = ActionType>
 export interface ActionDefinition<
   Context extends object = object,
   Config extends object | undefined = undefined
-> extends Partial<Presentable<Context>>, Partial<Configurable<Config, Context>> {
+> extends Partial<Presentable<Context>> {
   /**
    * ID of the action that uniquely identifies this action in the actions registry.
    */
@@ -116,7 +115,6 @@ export type ActionConfig<A> = A extends ActionDefinition<any, infer Config> ? Co
 export type DynamicActionDefinition<
   Context extends object = object,
   Config extends object | undefined = undefined
-> = ActionDefinition<Context, Config> &
-  Required<Pick<ActionDefinition<Context, Config>, 'CollectConfig' | 'defaultConfig' | 'type'>>;
+> = ActionDefinition<Context, Config>;
 
 export type AnyDynamicActionDefinition = DynamicActionDefinition<any, any>;

@@ -10,11 +10,14 @@ import { CoreStart } from 'src/core/public';
 import { EuiNotificationBadge } from '@elastic/eui';
 import { ActionByType } from '../../../../../../src/plugins/ui_actions/public';
 import {
-  toMountPoint,
   reactToUiComponent,
+  toMountPoint,
 } from '../../../../../../src/plugins/kibana_react/public';
 import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
-import { FormDrilldownWizard } from '../../components/form_drilldown_wizard';
+import { FlyoutManageDrilldowns } from '../../components/flyout_manage_drilldowns';
+// TODO: MOCK DATA
+import { drilldowns } from '../../components/list_manage_drilldowns/test_data';
+import { ActionFactory } from '../../../../advanced_ui_actions/public';
 
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 
@@ -24,14 +27,12 @@ export interface FlyoutEditDrilldownActionContext {
 
 export interface FlyoutEditDrilldownParams {
   overlays: () => Promise<CoreStart['overlays']>;
+  getDrilldownActionFactories: () => Array<ActionFactory<any>>;
 }
 
 const displayName = i18n.translate('xpack.drilldowns.panel.openFlyoutEditDrilldown.displayName', {
   defaultMessage: 'Manage drilldowns',
 });
-
-// mocked data
-const drilldrownCount = 2;
 
 export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_EDIT_DRILLDOWN> {
   public readonly type = OPEN_FLYOUT_EDIT_DRILLDOWN;
@@ -53,7 +54,7 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
       <>
         {displayName}{' '}
         <EuiNotificationBadge color="subdued" style={{ float: 'right' }}>
-          {drilldrownCount}
+          {drilldowns.length}
         </EuiNotificationBadge>
       </>
     );
@@ -62,11 +63,27 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
   MenuItem = reactToUiComponent(this.ReactComp);
 
   public async isCompatible({ embeddable }: FlyoutEditDrilldownActionContext) {
-    return embeddable.getInput().viewMode === 'edit' && drilldrownCount > 0;
+    return embeddable.getInput().viewMode === 'edit' && drilldowns.length > 0;
   }
 
-  public async execute({ embeddable }: FlyoutEditDrilldownActionContext) {
+  public async execute(context: FlyoutEditDrilldownActionContext) {
     const overlays = await this.params.overlays();
-    overlays.openFlyout(toMountPoint(<FormDrilldownWizard />));
+
+    const drilldownActionFactories = this.params.getDrilldownActionFactories();
+    const compatibleDrilldownActionFactories = await Promise.all(
+      drilldownActionFactories.map(factory => factory.isCompatible(context))
+    ).then(compatibilityList =>
+      drilldownActionFactories.filter((factory, index) => compatibilityList[index])
+    );
+
+    const handle = overlays.openFlyout(
+      toMountPoint(
+        <FlyoutManageDrilldowns
+          onClose={() => handle.close()}
+          drilldowns={drilldowns}
+          drilldownActionFactories={compatibleDrilldownActionFactories}
+        />
+      )
+    );
   }
 }
