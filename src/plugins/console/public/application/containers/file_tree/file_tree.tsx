@@ -34,7 +34,7 @@ import { useTextObjectsActionContext, useTextObjectsReadContext } from '../../co
 
 import { filterTextObjects, EnhancedTextObjectWithId } from './filter_text_objects';
 
-const addDefaultValues = (textObjects: TextObjectWithId[]) =>
+export const addDefaultValues = (textObjects: TextObjectWithId[]): TextObjectWithId[] =>
   textObjects.map(textObject => ({
     ...textObject,
     name: textObject.isScratchPad ? 'Default' : textObject.name ?? `Untitled`,

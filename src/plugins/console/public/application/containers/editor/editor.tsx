@@ -19,7 +19,7 @@
 
 import React, { useCallback, memo } from 'react';
 import { debounce } from 'lodash';
-import { EuiProgress } from '@elastic/eui';
+import { EuiProgress, EuiControlBar, EuiText } from '@elastic/eui';
 
 import { Panel, PanelsContainer } from '../../../../../kibana_react/public';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
@@ -30,6 +30,8 @@ import {
   useTextObjectsReadContext,
 } from '../../contexts';
 
+import { addDefaultValues } from '../file_tree/file_tree';
+
 const INITIAL_PANEL_WIDTH = 50;
 const PANEL_MIN_WIDTH = '100px';
 
@@ -38,7 +40,7 @@ export const Editor = memo(() => {
     services: { storage },
   } = useServicesContext();
 
-  const { textObjects, currentTextObjectId } = useTextObjectsReadContext();
+  const { textObjects, currentTextObjectId, saving } = useTextObjectsReadContext();
   const { requestInFlight } = useRequestReadContext();
   const currentTextObject = textObjects[currentTextObjectId];
 
@@ -66,7 +68,41 @@ export const Editor = memo(() => {
           style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
           initialWidth={firstPanelWidth}
         >
-          {currentTextObject && <EditorUI textObject={currentTextObject} />}
+          {currentTextObject && (
+            <>
+              <EditorUI textObject={currentTextObject} />
+              <EuiControlBar
+                size="s"
+                position="absolute"
+                controls={[
+                  {
+                    iconType: 'document',
+                    id: 'root_icon',
+                    controlType: 'icon',
+                    'aria-label': 'Project Root',
+                  },
+                  {
+                    controlType: 'breadcrumbs',
+                    id: 'current_file_path',
+                    responsive: true,
+                    breadcrumbs: [
+                      {
+                        text: addDefaultValues([currentTextObject])[0].name,
+                      },
+                    ],
+                  },
+                  {
+                    controlType: 'spacer',
+                  },
+                  {
+                    controlType: 'text',
+                    id: 'saving_status',
+                    text: saving ? 'Saving...' : 'Saved.',
+                  },
+                ]}
+              />
+            </>
+          )}
         </Panel>
         <Panel
           style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}

@@ -30,18 +30,21 @@ import { IdObject } from '../../../common/id_object';
 const exactTextObjectSchema = exact(textObjectSchemaWithId);
 
 export interface Store {
+  saving: boolean;
   currentTextObjectId: string;
   textObjects: Record<string, TextObjectWithId>;
   textObjectsSaveError: Record<string, Error | string>;
 }
 
 export const initialValue: Store = {
+  saving: false,
   currentTextObjectId: '',
   textObjects: {},
   textObjectsSaveError: {},
 };
 
 export type Action =
+  | { type: 'setSaving'; payload: boolean }
   | { type: 'setCurrent'; payload: string }
   | { type: 'upsertMany'; payload: Array<Partial<TextObject> & IdObject> }
   | { type: 'upsert'; payload: Partial<TextObject> & IdObject }
@@ -52,6 +55,11 @@ export type Action =
 
 export const reducer: Reducer<Store, Action> = (state, action) =>
   produce<Store>(state, draft => {
+    if (action.type === 'setSaving') {
+      draft.saving = action.payload;
+      return;
+    }
+
     if (action.type === 'setCurrent') {
       draft.currentTextObjectId = action.payload;
       return;
