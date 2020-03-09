@@ -17,11 +17,9 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaDatatableColumnMeta } from '../../../../../../plugins/expressions/common/expression_types';
-import { IAggConfig, IndexPattern } from '../../../../../../plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getSearchService } from '../../../../../../plugins/data/public/services';
+import { KibanaDatatableColumnMeta } from '../../../../../../plugins/expressions/public';
+import { IAggConfig, IndexPattern } from '../../../../public';
+import { getSearchService } from '../../../../public/services';
 
 /** @internal */
 export const serializeAggConfig = (aggConfig: IAggConfig): KibanaDatatableColumnMeta => {

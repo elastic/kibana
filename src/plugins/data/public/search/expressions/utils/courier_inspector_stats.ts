@@ -26,9 +26,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { SearchResponse } from 'elasticsearch';
-import { RequestInspectorStats } from '../types';
-import { ISearchSource } from '../../../../../../plugins/data/public';
+import { RequestInspectorStats } from './types';
+import { ISearchSource } from '../../../../public';
 
+/** @public */
 export function getRequestInspectorStats(searchSource: ISearchSource) {
   const stats: RequestInspectorStats = {};
   const index = searchSource.getField('index');
@@ -58,6 +59,7 @@ export function getRequestInspectorStats(searchSource: ISearchSource) {
   return stats;
 }
 
+/** @public */
 export function getResponseInspectorStats(
   searchSource: ISearchSource,
   resp: SearchResponse<unknown>

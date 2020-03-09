@@ -19,34 +19,31 @@
 
 import { get, has } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { createAggConfigs } from 'ui/agg_types';
-import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import {
   KibanaContext,
   KibanaDatatable,
   ExpressionFunctionDefinition,
   KibanaDatatableColumn,
-} from 'src/plugins/expressions/public';
+} from '../../../../../plugins/expressions/public';
+import { calculateObjectHash } from '../../../../../plugins/kibana_utils/public';
+import { PersistedState } from '../../../../../plugins/visualizations/public';
+import { Adapters } from '../../../../../plugins/inspector/public';
+
 import {
   IAggConfigs,
   ISearchSource,
   SearchSource,
   Query,
   TimeRange,
+  fieldFormats,
   Filter,
   getTime,
   FilterManager,
   search,
-} from '../../../../../../plugins/data/public';
-
+} from '../../../public';
+import { getSearchService, getQueryService, getIndexPatterns } from '../../services';
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
-import { calculateObjectHash } from '../../../../../../plugins/kibana_utils/public';
-import { PersistedState } from '../../../../../../plugins/visualizations/public';
-import { Adapters } from '../../../../../../plugins/inspector/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getQueryService, getIndexPatterns } from '../../../../../../plugins/data/public/services';
-import { getRequestInspectorStats, getResponseInspectorStats } from '../..';
-import { serializeAggConfig } from './utils';
+import { getRequestInspectorStats, getResponseInspectorStats, serializeAggConfig } from './utils';
 
 export interface RequestHandlerParams {
   searchSource: ISearchSource;
@@ -256,10 +253,11 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
   async fn(input, args, { inspectorAdapters, abortSignal }) {
     const indexPatterns = getIndexPatterns();
     const { filterManager } = getQueryService();
+    const searchService = getSearchService();
 
     const aggConfigsState = JSON.parse(args.aggConfigs);
     const indexPattern = await indexPatterns.get(args.index);
-    const aggs = createAggConfigs(indexPattern, aggConfigsState);
+    const aggs = searchService.aggs.createAggConfigs(indexPattern, aggConfigsState);
 
     // we should move searchSource creation inside courier request handler
     const searchSource = new SearchSource();
@@ -290,7 +288,7 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
           meta: serializeAggConfig(column.aggConfig),
         };
         if (args.includeFormatHints) {
-          cleanedColumn.formatHint = createFormat(column.aggConfig);
+          cleanedColumn.formatHint = fieldFormats.serialize(column.aggConfig);
         }
         return cleanedColumn;
       }),

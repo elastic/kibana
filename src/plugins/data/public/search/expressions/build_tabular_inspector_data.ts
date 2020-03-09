@@ -18,8 +18,8 @@
  */
 
 import { set } from 'lodash';
-import { FormattedData } from '../../../../../../plugins/inspector/public';
-import { TabbedTable } from '../../../../../../plugins/data/public';
+import { FormattedData } from '../../../../../plugins/inspector/public';
+import { TabbedTable } from '../../../public';
 import { createFilter } from './create_filter';
 
 /**

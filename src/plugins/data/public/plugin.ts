@@ -48,6 +48,7 @@ import {
   setUiSettings,
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
+import { esaggs } from './search/expressions';
 import {
   APPLY_FILTER_TRIGGER,
   SELECT_RANGE_TRIGGER,
@@ -90,8 +91,13 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     this.packageInfo = initializerContext.env.packageInfo;
   }
 
-  public setup(core: CoreSetup, { uiActions }: DataSetupDependencies): DataPublicPluginSetup {
+  public setup(
+    core: CoreSetup,
+    { expressions, uiActions }: DataSetupDependencies
+  ): DataPublicPluginSetup {
     setInjectedMetadata(core.injectedMetadata);
+
+    expressions.registerFunction(esaggs);
 
     const queryService = this.queryService.setup({
       uiSettings: core.uiSettings,

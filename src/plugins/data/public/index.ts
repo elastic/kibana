@@ -287,6 +287,7 @@ export {
  */
 
 import {
+  // aggs
   AggConfigs,
   aggTypeFilters,
   aggGroupNamesMap,
@@ -303,10 +304,16 @@ import {
   propFilter,
   siblingPipelineType,
   termsAggFilter,
-} from './search/aggs';
-import { tabifyAggResponse, tabifyGetColumns } from './search/tabify';
+  // expressions utils
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  // tabify
+  tabifyAggResponse,
+  tabifyGetColumns,
+} from './search';
 
 export {
+  // aggs
   AggGroupNames,
   AggParam, // only the type is used externally, only in vis editor
   AggParamOption, // only the type is used externally
@@ -324,10 +331,7 @@ export {
   OptionedParamEditorProps, // only type is used externally
   OptionedParamType,
   OptionedValueProp, // only type is used externally
-} from './search/aggs';
-export { TabbedTable, TabbedAggRow, TabbedAggColumn } from './search/tabify/types';
-
-export {
+  // search
   ES_SEARCH_STRATEGY,
   SYNC_SEARCH_STRATEGY,
   getEsPreference,
@@ -355,6 +359,10 @@ export {
   EsQuerySortValue,
   SortDirection,
   FetchOptions,
+  // tabify
+  TabbedAggColumn,
+  TabbedAggRow,
+  TabbedTable,
 } from './search';
 
 // Search namespace
@@ -380,6 +388,8 @@ export const search = {
     termsAggFilter,
     toAbsoluteDates,
   },
+  getRequestInspectorStats,
+  getResponseInspectorStats,
   tabifyAggResponse,
   tabifyGetColumns,
 };

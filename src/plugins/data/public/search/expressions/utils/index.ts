@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export * from './courier_inspector_utils';
+export * from './courier_inspector_stats';
+export * from './serialize_agg_config';

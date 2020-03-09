@@ -18,8 +18,8 @@
  */
 
 import { KibanaDatatable } from '../../../../../plugins/expressions/public';
-import { esFilters, Filter } from '../../../../../plugins/data/public';
-import { deserializeAggConfig } from '../../search/expressions/utils';
+import { deserializeAggConfig } from '../../search/expressions';
+import { esFilters, Filter } from '../../../public';
 import { getIndexPatterns } from '../../../public/services';
 
 export interface EventData {

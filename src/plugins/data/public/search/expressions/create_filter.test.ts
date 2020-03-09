@@ -24,14 +24,9 @@ import {
   FieldFormatsGetConfigFn,
   IAggConfig,
   TabbedTable,
-} from '../../../../../../plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AggConfigs } from '../../../../../../plugins/data/public/search/aggs';
-import {
-  mockDataServices,
-  mockAggTypesRegistry,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../plugins/data/public/search/aggs/test_helpers';
+} from '../../../public';
+import { AggConfigs } from '../aggs';
+import { mockDataServices, mockAggTypesRegistry } from '../aggs/test_helpers';
 
 describe('createFilter', () => {
   let table: TabbedTable;

@@ -17,7 +17,18 @@
  * under the License.
  */
 
-import { npSetup } from 'ui/new_platform';
-import { esaggs } from './esaggs';
+interface InspectorStat {
+  label: string;
+  value: string;
+  description: string;
+}
 
-npSetup.plugins.expressions.registerFunction(esaggs);
+/** @internal */
+export interface RequestInspectorStats {
+  indexPattern?: InspectorStat;
+  indexPatternId?: InspectorStat;
+  queryTime?: InspectorStat;
+  hitsTotal?: InspectorStat;
+  hits?: InspectorStat;
+  requestTime?: InspectorStat;
+}

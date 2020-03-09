@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export * from './utils/types';
+export * from './esaggs';
+export * from './utils';
