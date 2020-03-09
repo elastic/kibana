@@ -56,16 +56,16 @@ npSetup.plugins.devTools.register({
   async mount(context, { element }) {
     registerPainless();
 
-    const licenseCheck = {
-      showPage: xpackInfo.get('features.painlessLab.enableLink'),
-      message: xpackInfo.get('features.painlessLab.message'),
-    };
+    // const licenseCheck = {
+    //   showPage: xpackInfo.get('features.painlessLab.enableLink'),
+    //   message: xpackInfo.get('features.painlessLab.message'),
+    // };
 
-    if (!licenseCheck.showPage) {
-      npStart.core.notifications.toasts.addDanger(licenseCheck.message);
-      window.location.hash = '/dev_tools';
-      return () => {};
-    }
+    // if (!licenseCheck.showPage) {
+    //   npStart.core.notifications.toasts.addDanger(licenseCheck.message);
+    //   window.location.hash = '/dev_tools';
+    //   return () => {};
+    // }
 
     const { renderApp } = await import('./render_app');
     return renderApp(element, npStart.core);

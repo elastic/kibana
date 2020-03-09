@@ -6,10 +6,6 @@
 import { resolve } from 'path';
 import { PLUGIN_ID } from './common/constants';
 
-import { registerLicenseChecker } from './server/register_license_checker';
-import { registerExecuteRoute } from './server/register_execute_route';
-import { Legacy } from '../../../../kibana';
-
 export const painlessLab = (kibana: any) =>
   new kibana.Plugin({
     id: PLUGIN_ID,
@@ -25,8 +21,5 @@ export const painlessLab = (kibana: any) =>
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       devTools: [resolve(__dirname, 'public/register')],
     },
-    init: (server: Legacy.Server) => {
-      registerLicenseChecker(server);
-      registerExecuteRoute(server);
-    },
+    init: () => {},
   });
