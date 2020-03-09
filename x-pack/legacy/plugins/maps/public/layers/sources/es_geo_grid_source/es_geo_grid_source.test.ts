@@ -7,32 +7,15 @@ jest.mock('../../../kibana_services', () => {});
 jest.mock('ui/new_platform');
 
 import { ESGeoGridSource } from './es_geo_grid_source';
-import { AGG_TYPE, ES_GEO_GRID, GRID_RESOLUTION, RENDER_AS } from '../../../../common/constants';
+import { ES_GEO_GRID, GRID_RESOLUTION, RENDER_AS } from '../../../../common/constants';
 
 describe('ESGeoGridSource', () => {
-  const metricExamples = [
-    {
-      type: AGG_TYPE.SUM,
-      field: 'myFieldGettingSummed',
-      label: 'my custom label',
-    },
-    {
-      // metric config is invalid beause field is missing
-      type: AGG_TYPE.MAX,
-    },
-    {
-      // metric config is valid because "count" metric does not need to provide field
-      type: AGG_TYPE.COUNT,
-      label: '', // should ignore empty label fields
-    },
-  ];
-
   const geogridSource = new ESGeoGridSource(
     {
       id: 'foobar',
       indexPatternId: 'fooIp',
       geoField: 'bar',
-      metrics: metricExamples,
+      metrics: [],
       resolution: GRID_RESOLUTION.COARSE,
       type: ES_GEO_GRID,
       requestType: RENDER_AS.HEATMAP,
@@ -40,8 +23,10 @@ describe('ESGeoGridSource', () => {
     {}
   );
 
-  it('should echo gridResoltuion', () => {
-    expect(geogridSource.getGridResolution()).toBe(GRID_RESOLUTION.COARSE);
+  describe('getGridResolution', () => {
+    it('should echo gridResoltuion', () => {
+      expect(geogridSource.getGridResolution()).toBe(GRID_RESOLUTION.COARSE);
+    });
   });
 
   describe('getGeoGridPrecision', () => {
