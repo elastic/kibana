@@ -10,9 +10,9 @@ To create a workpad, choose one of the following options:
 
 * <<canvas-template-workpad,Choose from a set of preconfigured workpad templates>>
 
-* <<import-canvas-workpad,Import a workpad that someone else has already started>>
-
 * <<sample-data-workpad,Gather inspiration from the {kib} sample data workpads>>
+
+* <<import-canvas-workpad,Import a workpad that someone else has already started>>
 
 [float]
 [[blank-canvas-workpad]]
@@ -52,16 +52,6 @@ If you're unsure about where to start, you can use one of the preconfigured temp
 . Add your own *Name* to the workpad.
 
 [float]
-[[sample-data-workpad]]
-=== Use a sample data workpad
-
-Each of the sample data sets comes with a Canvas workpad that you can use for your own workpad inspiration.
-
-. Add a {kibana-ref}/add-sample-data.html[sample data set].
-
-. On the *Add Data* page, click the *View data* dropdown list, then select *Canvas*.
-
-[float]
 [[import-canvas-workpad]]
 === Import an existing workpad
 
@@ -70,6 +60,16 @@ When you want to use a workpad that someone else has already started, import the
 . Open *Canvas*.
 
 . On the *Canvas workpads* view, click and drag the file to the *Import workpad JSON file* field.
+
+[float]
+[[sample-data-workpad]]
+=== Use a sample data workpad
+
+Each of the sample data sets comes with a Canvas workpad that you can use for your own workpad inspiration.
+
+. Add a {kibana-ref}/add-sample-data.html[sample data set].
+
+. On the *Add Data* page, click the *View data* dropdown list, then select *Canvas*.
 
 [float]
 [[apply-workpad-styles]]
