@@ -6,14 +6,17 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
+import { Query } from 'react-apollo';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { GetKpiNetworkQueryComponent, KpiNetworkData } from '../../graphql/types';
+import { GetKpiNetworkQuery, KpiNetworkData } from '../../graphql/types';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { useUiSetting } from '../../lib/kibana';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
+
+import { kpiNetworkQuery } from './index.gql_query';
 
 const ID = 'kpiNetworkQuery';
 
@@ -26,12 +29,13 @@ export interface KpiNetworkArgs {
 }
 
 export interface KpiNetworkProps extends QueryTemplateProps {
-  children: (args: KpiNetworkArgs) => React.ReactElement;
+  children: (args: KpiNetworkArgs) => React.ReactNode;
 }
 
 const KpiNetworkComponentQuery = React.memo<KpiNetworkProps & PropsFromRedux>(
   ({ id = ID, children, filterQuery, isInspected, skip, sourceId, startDate, endDate }) => (
-    <GetKpiNetworkQueryComponent
+    <Query<GetKpiNetworkQuery.Query, GetKpiNetworkQuery.Variables>
+      query={kpiNetworkQuery}
       fetchPolicy={getDefaultFetchPolicy()}
       notifyOnNetworkStatusChange
       skip={skip}
@@ -57,7 +61,7 @@ const KpiNetworkComponentQuery = React.memo<KpiNetworkProps & PropsFromRedux>(
           refetch,
         });
       }}
-    </GetKpiNetworkQueryComponent>
+    </Query>
   )
 );
 

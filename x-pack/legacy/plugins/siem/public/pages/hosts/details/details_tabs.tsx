@@ -85,6 +85,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.anomalies})`}>
           <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesHostTable} />
         </Route>
+
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.events})`}>
           <EventsQueryTabBody {...tabProps} pageFilters={pageFilters} />
         </Route>

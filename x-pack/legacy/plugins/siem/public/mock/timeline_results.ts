@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MockedResponse } from '@apollo/client/testing';
 import { OpenTimelineResult } from '../components/open_timeline/types';
-import { SortFieldTimeline, TimelineResult, Direction } from '../graphql/types';
+import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '../graphql/types';
 import { allTimelinesQuery } from '../containers/timeline/all/index.gql_query';
 
-export interface MockedProvidedQuery extends MockedResponse {
+export interface MockedProvidedQuery {
+  request: {
+    query: GetAllTimeline.Query;
+    variables: GetAllTimeline.Variables;
+  };
   result: {
     data: {
       getAllTimeline: {
@@ -19,7 +22,6 @@ export interface MockedProvidedQuery extends MockedResponse {
     };
   };
 }
-
 /** Mocks results of a query run by the `OpenTimeline` component */
 export const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
   {
