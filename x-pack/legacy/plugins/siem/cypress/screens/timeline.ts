@@ -24,8 +24,9 @@ export const TIMELINE_DATA_PROVIDERS = '[data-test-subj="dataProviders"]';
 export const TIMELINE_DATA_PROVIDERS_EMPTY =
   '[data-test-subj="dataProviders"] [data-test-subj="empty"]';
 
-export const TIMELINE_DROPPED_DATA_PROVIDERS =
-  '[data-test-subj="dataProviders"] [data-test-subj="providerContainer"]';
+export const TIMELINE_DESCRIPTION = '[data-test-subj="timeline-description"]';
+
+export const TIMELINE_DROPPED_DATA_PROVIDERS = '[data-test-subj="providerContainer"]';
 
 export const TIMELINE_FIELDS_BUTTON =
   '[data-test-subj="timeline"] [data-test-subj="show-field-browser"]';
@@ -42,8 +43,6 @@ export const TIMELINE_SETTINGS_ICON = '[data-test-subj="settings-gear"]';
 export const TIMELINE_TITLE = '[data-test-subj="timeline-title"]';
 
 export const TIMESTAMP_HEADER_FIELD = '[data-test-subj="header-text-@timestamp"]';
-
-export const TIMELINE_TOGGLE_BUTTON = '[data-test-subj="flyoutOverlay"]';
 
 export const TIMESTAMP_TOGGLE_FIELD = '[data-test-subj="toggle-field-@timestamp"]';
 

@@ -34,6 +34,7 @@ import { Logger, LoggerFactory } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService } from '../server/saved_objects';
+import { MetricsService, opsConfig } from './metrics';
 
 import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
@@ -67,6 +68,7 @@ export class Server {
   private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
   private readonly uuid: UuidService;
+  private readonly metrics: MetricsService;
 
   private coreStart?: InternalCoreStart;
 
@@ -89,6 +91,7 @@ export class Server {
     this.uiSettings = new UiSettingsService(core);
     this.capabilities = new CapabilitiesService(core);
     this.uuid = new UuidService(core);
+    this.metrics = new MetricsService(core);
   }
 
   public async setup() {
@@ -137,6 +140,8 @@ export class Server {
       legacyPlugins,
     });
 
+    const metricsSetup = await this.metrics.setup({ http: httpSetup });
+
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
@@ -145,6 +150,7 @@ export class Server {
       uiSettings: uiSettingsSetup,
       savedObjects: savedObjectsSetup,
       uuid: uuidSetup,
+      metrics: metricsSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -193,6 +199,7 @@ export class Server {
 
     await this.http.start();
     await this.rendering.start();
+    await this.metrics.start();
 
     return this.coreStart;
   }
@@ -207,6 +214,7 @@ export class Server {
     await this.http.stop();
     await this.uiSettings.stop();
     await this.rendering.stop();
+    await this.metrics.stop();
   }
 
   private registerDefaultRoute(httpSetup: InternalHttpServiceSetup) {
@@ -260,6 +268,7 @@ export class Server {
       [savedObjectsConfig.path, savedObjectsConfig.schema],
       [savedObjectsMigrationConfig.path, savedObjectsMigrationConfig.schema],
       [uiSettingsConfig.path, uiSettingsConfig.schema],
+      [opsConfig.path, opsConfig.schema],
     ];
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);

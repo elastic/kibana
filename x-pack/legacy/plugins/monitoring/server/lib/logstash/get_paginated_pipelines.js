@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get, cloneDeep, last } from 'lodash';
 import { filter } from '../pagination/filter';
 import { getLogstashPipelineIds } from './get_pipeline_ids';
 import { sortPipelines } from './sort_pipelines';
@@ -31,11 +31,12 @@ export async function getPaginatedPipelines(
   req,
   lsIndexPattern,
   { clusterUuid, logstashUuid },
-  metricSet,
+  { throughputMetric, nodesCountMetric },
   pagination,
   sort,
   queryText
 ) {
+  const sortField = sort.field;
   const config = req.server.config();
   const size = config.get('monitoring.ui.max_bucket_size');
   const pipelines = await getLogstashPipelineIds(
@@ -45,49 +46,11 @@ export async function getPaginatedPipelines(
     size
   );
 
-  // `metricSet` defines a list of metrics that are sortable in the UI
-  // but we don't need to fetch all the data for these metrics to perform
-  // the necessary sort - we only need the last bucket of data so we
-  // fetch the last two buckets of data (to ensure we have a single full bucekt),
-  // then return the value from that last bucket
-  const metricSeriesData = Object.values(
-    await Promise.all(
-      pipelines.map(pipeline => {
-        return new Promise(async resolve => {
-          const data = await getMetrics(
-            req,
-            lsIndexPattern,
-            metricSet,
-            [],
-            {
-              pipeline,
-            },
-            2
-          );
-
-          resolve({
-            id: pipeline.id,
-            metrics: Object.keys(data).reduce((accum, metricName) => {
-              accum[metricName] = data[metricName][0];
-              return accum;
-            }, {}),
-          });
-        });
-      })
-    )
-  );
-  for (const pipelineAggregationData of metricSeriesData) {
-    for (const pipeline of pipelines) {
-      if (pipelineAggregationData.id === pipeline.id) {
-        for (const metric of metricSet) {
-          const dataSeries = get(pipelineAggregationData, `metrics.${metric}.data`, [[]]);
-          pipeline[metric] = dataSeries[dataSeries.length - 1][1];
-        }
-      }
-    }
+  if (sortField === throughputMetric) {
+    await getPaginatedThroughputData(pipelines, req, lsIndexPattern, throughputMetric);
+  } else if (sortField === nodesCountMetric) {
+    await getPaginatedNodesData(pipelines, req, lsIndexPattern, nodesCountMetric);
   }
-
-  // Manually apply pagination/sorting/filtering concerns
 
   // Filtering
   const filteredPipelines = filter(pipelines, queryText, ['id']); // We only support filtering by id right now
@@ -98,8 +61,150 @@ export async function getPaginatedPipelines(
   // Pagination
   const pageOfPipelines = paginate(pagination, sortedPipelines);
 
-  return {
-    pageOfPipelines,
+  const response = {
+    pipelines: await getPipelines(
+      req,
+      lsIndexPattern,
+      pageOfPipelines,
+      throughputMetric,
+      nodesCountMetric
+    ),
     totalPipelineCount: filteredPipelines.length,
+  };
+
+  return processPipelinesAPIResponse(response, throughputMetric, nodesCountMetric);
+}
+
+function processPipelinesAPIResponse(response, throughputMetricKey, nodesCountMetricKey) {
+  // Clone to avoid mutating original response
+  const processedResponse = cloneDeep(response);
+
+  // Normalize metric names for shared component code
+  // Calculate latest throughput and node count for each pipeline
+  processedResponse.pipelines.forEach(pipeline => {
+    pipeline.metrics = {
+      throughput: pipeline.metrics[throughputMetricKey],
+      nodesCount: pipeline.metrics[nodesCountMetricKey],
+    };
+
+    pipeline.latestThroughput = (last(pipeline.metrics.throughput.data) || [])[1];
+    pipeline.latestNodesCount = (last(pipeline.metrics.nodesCount.data) || [])[1];
+  });
+  return processedResponse;
+}
+
+async function getPaginatedThroughputData(pipelines, req, lsIndexPattern, throughputMetric) {
+  const metricSeriesData = Object.values(
+    await Promise.all(
+      pipelines.map(pipeline => {
+        return new Promise(async resolve => {
+          const data = await getMetrics(
+            req,
+            lsIndexPattern,
+            [throughputMetric],
+            [],
+            {
+              pipeline,
+            },
+            2
+          );
+          resolve(reduceData(pipeline, data));
+        });
+      })
+    )
+  );
+
+  for (const pipelineAggregationData of metricSeriesData) {
+    for (const pipeline of pipelines) {
+      if (pipelineAggregationData.id === pipeline.id) {
+        const dataSeries = get(pipelineAggregationData, `metrics.${throughputMetric}.data`, [[]]);
+        pipeline[throughputMetric] = dataSeries.pop()[1];
+      }
+    }
+  }
+}
+
+async function getPaginatedNodesData(pipelines, req, lsIndexPattern, nodesCountMetric) {
+  const metricSeriesData = await getMetrics(
+    req,
+    lsIndexPattern,
+    [nodesCountMetric],
+    [],
+    { pageOfPipelines: pipelines },
+    2
+  );
+  const { data } = metricSeriesData[nodesCountMetric][0] || [[]];
+  const pipelinesMap = (data.pop() || [])[1] || {};
+  if (!Object.keys(pipelinesMap).length) {
+    return;
+  }
+  pipelines.forEach(pipeline => void (pipeline[nodesCountMetric] = pipelinesMap[pipeline.id]));
+}
+
+async function getPipelines(req, lsIndexPattern, pipelines, throughputMetric, nodesCountMetric) {
+  const throughputPipelines = await getThroughputPipelines(
+    req,
+    lsIndexPattern,
+    pipelines,
+    throughputMetric
+  );
+  const nodePipelines = await getNodePipelines(req, lsIndexPattern, pipelines, nodesCountMetric);
+  const finalPipelines = pipelines.map(({ id }) => {
+    const pipeline = {
+      id,
+      metrics: {
+        [throughputMetric]: throughputPipelines.find(p => p.id === id).metrics[throughputMetric],
+        [nodesCountMetric]: nodePipelines.find(p => p.id === id).metrics[nodesCountMetric],
+      },
+    };
+    return pipeline;
+  });
+  return finalPipelines;
+}
+
+async function getThroughputPipelines(req, lsIndexPattern, pipelines, throughputMetric) {
+  const metricsResponse = await Promise.all(
+    pipelines.map(pipeline => {
+      return new Promise(async resolve => {
+        const data = await getMetrics(req, lsIndexPattern, [throughputMetric], [], {
+          pipeline,
+        });
+
+        resolve(reduceData(pipeline, data));
+      });
+    })
+  );
+
+  return Object.values(metricsResponse);
+}
+
+async function getNodePipelines(req, lsIndexPattern, pipelines, nodesCountMetric) {
+  const metricData = await getMetrics(req, lsIndexPattern, [nodesCountMetric], [], {
+    pageOfPipelines: pipelines,
+  });
+
+  const metricObject = metricData[nodesCountMetric][0];
+  const pipelinesData = pipelines.map(({ id }) => {
+    return {
+      id,
+      metrics: {
+        [nodesCountMetric]: {
+          ...metricObject,
+          data: metricObject.data.map(([timestamp, valueMap]) => [timestamp, valueMap[id]]),
+        },
+      },
+    };
+  });
+
+  return pipelinesData;
+}
+
+function reduceData({ id }, data) {
+  return {
+    id,
+    metrics: Object.keys(data).reduce((accum, metricName) => {
+      accum[metricName] = data[metricName][0];
+      return accum;
+    }, {}),
   };
 }

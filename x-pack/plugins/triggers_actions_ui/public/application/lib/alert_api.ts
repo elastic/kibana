@@ -8,6 +8,7 @@ import { HttpSetup } from 'kibana/public';
 import * as t from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
+import { pick } from 'lodash';
 import { alertStateSchema, AlertNavigation } from '../../../../alerting/common';
 import { BASE_ALERT_API_PATH } from '../constants';
 import { Alert, AlertType, AlertWithoutId, AlertTaskState } from '../../types';
@@ -136,7 +137,9 @@ export async function updateAlert({
   id: string;
 }): Promise<Alert> {
   return await http.put(`${BASE_ALERT_API_PATH}/${id}`, {
-    body: JSON.stringify(alert),
+    body: JSON.stringify(
+      pick(alert, ['throttle', 'name', 'tags', 'schedule', 'params', 'actions'])
+    ),
   });
 }
 
