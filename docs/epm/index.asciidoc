@@ -15,21 +15,24 @@ xpack.epm.registryUrl: 'http://localhost:8080'
 
 === API
 
-The Package Manager offers an API. The two simplest API endpoints are install and delete.
-Here an example on how they can be used:
+The Package Manager offers an API. Here an example on how they can be used.
+
+List installed packages:
+
+```
+curl localhost:5601/api/ingest_manager/epm/packages
+```
 
 Install a package:
 
 ```
-curl --user elastic:changeme localhost:5601/api/ingest_manager/epm/install/iptables-1.0.4
-curl --user elastic:changeme localhost:5601/api/ingest_manager/epm/install/coredns-1.0.1
+curl -X POST localhost:5601/api/ingest_manager/epm/packages/iptables-1.0.4
 ```
 
 Delete a package:
 
 ```
-curl --user elastic:changeme localhost:5601/api/ingest_manager/epm/delete/iptables-1.0.4
-curl --user elastic:changeme localhost:5601/api/ingest_manager/epm/delete/coredns-1.0.1
+curl -X DELETE localhost:5601/api/ingest_manager/epm/packages/iptables-1.0.4
 ```
 
 === Definitions
