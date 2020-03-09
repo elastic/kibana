@@ -54,6 +54,7 @@ import { SavedObjectsClientContract } from './saved_objects/types';
 import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { UuidServiceSetup } from './uuid';
+import { MetricsServiceSetup } from './metrics';
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
@@ -99,9 +100,12 @@ export {
   AuthResultParams,
   AuthStatus,
   AuthToolkit,
+  AuthRedirected,
+  AuthRedirectedParams,
   AuthResult,
   AuthResultType,
   Authenticated,
+  AuthNotHandled,
   BasePath,
   IBasePath,
   CustomHttpResponseOptions,
@@ -159,6 +163,8 @@ export {
   SessionStorageCookieOptions,
   SessionCookieValidationResult,
   SessionStorageFactory,
+  DestructiveRouteMethod,
+  SafeRouteMethod,
 } from './http';
 export { RenderingServiceSetup, IRenderOptions } from './rendering';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
@@ -229,6 +235,9 @@ export {
   SavedObjectsType,
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
+  exportSavedObjectsToStream,
+  importSavedObjectsFromStream,
+  resolveSavedObjectsImportErrors,
 } from './saved_objects';
 
 export {
@@ -244,6 +253,14 @@ export {
   StringValidationRegex,
   StringValidationRegexString,
 } from './ui_settings';
+
+export {
+  OpsMetrics,
+  OpsOsMetrics,
+  OpsServerMetrics,
+  OpsProcessMetrics,
+  MetricsServiceSetup,
+} from './metrics';
 
 export { RecursiveReadonly } from '../utils';
 
@@ -322,6 +339,8 @@ export interface CoreSetup<TPluginsStart extends object = object> {
   uiSettings: UiSettingsServiceSetup;
   /** {@link UuidServiceSetup} */
   uuid: UuidServiceSetup;
+  /** {@link MetricsServiceSetup} */
+  metrics: MetricsServiceSetup;
   /**
    * Allows plugins to get access to APIs available in start inside async handlers.
    * Promise will not resolve until Core and plugin dependencies have completed `start`.

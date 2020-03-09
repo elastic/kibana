@@ -17,7 +17,7 @@ export const ParamsSchema = schema.object(
   {
     ...CoreQueryParamsSchemaProperties,
     // the comparison function to use to determine if the threshold as been met
-    comparator: schema.string({ validate: validateComparator }),
+    thresholdComparator: schema.string({ validate: validateComparator }),
     // the values to use as the threshold; `between` and `notBetween` require
     // two values, the others require one.
     threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
@@ -35,26 +35,16 @@ function validateParams(anyParams: any): string | undefined {
   const coreQueryValidated = validateCoreQueryBody(anyParams);
   if (coreQueryValidated) return coreQueryValidated;
 
-  const { comparator, threshold }: Params = anyParams;
+  const { thresholdComparator, threshold }: Params = anyParams;
 
-  if (betweenComparators.has(comparator)) {
-    if (threshold.length === 1) {
-      return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidThreshold2ErrorMessage', {
-        defaultMessage: '[threshold]: must have two elements for the "{comparator}" comparator',
-        values: {
-          comparator,
-        },
-      });
-    }
-  } else {
-    if (threshold.length === 2) {
-      return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidThreshold1ErrorMessage', {
-        defaultMessage: '[threshold]: must have one element for the "{comparator}" comparator',
-        values: {
-          comparator,
-        },
-      });
-    }
+  if (betweenComparators.has(thresholdComparator) && threshold.length === 1) {
+    return i18n.translate('xpack.alertingBuiltins.indexThreshold.invalidThreshold2ErrorMessage', {
+      defaultMessage:
+        '[threshold]: must have two elements for the "{thresholdComparator}" comparator',
+      values: {
+        thresholdComparator,
+      },
+    });
   }
 }
 

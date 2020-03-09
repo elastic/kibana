@@ -137,7 +137,7 @@ export function createTileMapTypeDefinition(dependencies) {
           title: i18n.translate('tileMap.vis.map.editorConfig.schemas.geoCoordinatesTitle', {
             defaultMessage: 'Geo coordinates',
           }),
-          aggFilter: 'geohash_grid',
+          aggFilter: ['geohash_grid'],
           min: 1,
           max: 1,
         },

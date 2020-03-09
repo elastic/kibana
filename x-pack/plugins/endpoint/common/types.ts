@@ -31,9 +31,9 @@ export enum Direction {
 
 export class EndpointAppConstants {
   static BASE_API_URL = '/api/endpoint';
-  static ALERT_INDEX_NAME = 'my-index';
   static ENDPOINT_INDEX_NAME = 'endpoint-agent*';
-  static EVENT_INDEX_NAME = 'endpoint-events-*';
+  static ALERT_INDEX_NAME = 'events-endpoint-1';
+  static EVENT_INDEX_NAME = 'events-endpoint-*';
   static DEFAULT_TOTAL_HITS = 10000;
   /**
    * Legacy events are stored in indices with endgame-* prefix
@@ -253,6 +253,7 @@ interface AlertMetadata {
 export type AlertData = AlertEvent & AlertMetadata;
 
 export interface EndpointMetadata {
+  '@timestamp': string;
   event: {
     created: Date;
   };
@@ -264,7 +265,6 @@ export interface EndpointMetadata {
   agent: {
     version: string;
     id: string;
-    name: string;
   };
   host: HostFields;
 }
