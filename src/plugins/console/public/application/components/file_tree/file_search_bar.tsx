@@ -30,6 +30,7 @@ export const FileSearchBar: FunctionComponent<Props> = ({ searchValue, onChange 
     <EuiFlexGroup gutterSize="none" justifyContent="center" responsive={false}>
       <EuiFlexItem>
         <EuiFieldSearch
+          inputRef={ref => ref?.focus()}
           compressed
           placeholder={i18n.translate('console.fileTree.searchBarPlaceholderText', {
             defaultMessage: 'Enter a file name',
