@@ -91,6 +91,7 @@ export class Plugin {
   private monitoringCore?: MonitoringCore;
   private setupPlugins?: PluginsSetup;
   private config?: MonitoringConfig;
+  private needToSetupLegacy: boolean = true;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
@@ -148,6 +149,9 @@ export class Plugin {
     return {
       registerLegacyAPI: (legacyAPI: LegacyAPI) => {
         this.legacyAPI = legacyAPI;
+        if (this.needToSetupLegacy) {
+          this.setupLegacy();
+        }
       },
     };
   }
@@ -179,7 +183,10 @@ export class Plugin {
     }
 
     this.uiSettingsService = core.uiSettings;
-    this.setupLegacy();
+    if (this.legacyAPI) {
+      this.setupLegacy();
+      this.needToSetupLegacy = false;
+    }
   }
 
   stop() {
