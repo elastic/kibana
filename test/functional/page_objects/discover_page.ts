@@ -249,7 +249,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async expectMissingFieldListItemVisualize(field: string) {
-      await testSubjects.missingOrFail(`fieldVisualize-${field}`, { allowHidden: true });
+      await testSubjects.missingOrFail(`fieldVisualize-${field}`);
     }
 
     public async clickFieldListPlusFilter(field: string, value: string) {
