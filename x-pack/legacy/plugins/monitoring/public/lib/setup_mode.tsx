@@ -7,10 +7,10 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { get, contains } from 'lodash';
-import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { npSetup } from 'ui/new_platform';
 import { PluginsSetup } from 'ui/new_platform/new_platform';
+import { toastNotifications } from '../np_imports/ui/shims';
 import chrome from '../np_imports/ui/chrome';
 import { CloudSetup } from '../../../../../plugins/cloud/public';
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';

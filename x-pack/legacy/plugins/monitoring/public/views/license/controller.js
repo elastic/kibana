@@ -13,7 +13,6 @@ import { formatDateTimeLocal } from '../../../common/formatting';
 import { MANAGEMENT_BASE_PATH } from 'plugins/xpack_main/components';
 import { License } from 'plugins/monitoring/components';
 import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
-import { I18nContext } from 'ui/i18n';
 
 const REACT_NODE_ID = 'licenseReact';
 
@@ -65,16 +64,14 @@ export class LicenseViewController {
 
       // Mount the React component to the template
       render(
-        <I18nContext>
-          <License
-            isPrimaryCluster={isPrimaryCluster}
-            status={license.status}
-            type={license.type}
-            isExpired={isExpired}
-            expiryDate={expiryDate}
-            uploadLicensePath={uploadLicensePath}
-          />
-        </I18nContext>,
+        <License
+          isPrimaryCluster={isPrimaryCluster}
+          status={license.status}
+          type={license.type}
+          isExpired={isExpired}
+          expiryDate={expiryDate}
+          uploadLicensePath={uploadLicensePath}
+        />,
         document.getElementById(REACT_NODE_ID)
       );
     });

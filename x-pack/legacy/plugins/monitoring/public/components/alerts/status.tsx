@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment } from 'react';
-import { kfetch } from 'ui/kfetch';
 import {
   EuiSpacer,
   EuiCallOut,
@@ -18,7 +17,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
+import { kfetch } from '../../np_imports/ui/kfetch';
+import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from '../../np_imports/ui/shims';
 import { Alert } from '../../../../../../plugins/alerting/common';
 import { getSetupModeState, addSetupModeCallback, toggleSetupMode } from '../../lib/setup_mode';
 import { NUMBER_OF_MIGRATED_ALERTS, ALERT_TYPE_PREFIX } from '../../../common/constants';

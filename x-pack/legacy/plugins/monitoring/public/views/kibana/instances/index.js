@@ -12,7 +12,6 @@ import { getPageData } from './get_page_data';
 import template from './index.html';
 import { KibanaInstances } from 'plugins/monitoring/components/kibana/instances';
 import { SetupModeRenderer } from '../../../components/renderers';
-import { I18nContext } from 'ui/i18n';
 import { KIBANA_SYSTEM_ID, CODE_PATH_KIBANA } from '../../../../common/constants';
 
 uiRoutes.when('/kibana/instances', {
@@ -40,31 +39,29 @@ uiRoutes.when('/kibana/instances', {
 
       const renderReact = () => {
         this.renderReact(
-          <I18nContext>
-            <SetupModeRenderer
-              scope={$scope}
-              injector={$injector}
-              productName={KIBANA_SYSTEM_ID}
-              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
-                <Fragment>
-                  {flyoutComponent}
-                  <KibanaInstances
-                    instances={this.data.kibanas}
-                    setupMode={setupMode}
-                    sorting={this.sorting}
-                    pagination={this.pagination}
-                    onTableChange={this.onTableChange}
-                    clusterStatus={this.data.clusterStatus}
-                    angular={{
-                      $scope,
-                      kbnUrl,
-                    }}
-                  />
-                  {bottomBarComponent}
-                </Fragment>
-              )}
-            />
-          </I18nContext>
+          <SetupModeRenderer
+            scope={$scope}
+            injector={$injector}
+            productName={KIBANA_SYSTEM_ID}
+            render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+              <Fragment>
+                {flyoutComponent}
+                <KibanaInstances
+                  instances={this.data.kibanas}
+                  setupMode={setupMode}
+                  sorting={this.sorting}
+                  pagination={this.pagination}
+                  onTableChange={this.onTableChange}
+                  clusterStatus={this.data.clusterStatus}
+                  angular={{
+                    $scope,
+                    kbnUrl,
+                  }}
+                />
+                {bottomBarComponent}
+              </Fragment>
+            )}
+          />
         );
       };
 

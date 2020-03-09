@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
+import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from '../../np_imports/ui/shims';
 import { Monospace } from '../metricbeat_migration/instruction_steps/components/monospace/monospace';
 
 export const Reason = ({ reason }) => {

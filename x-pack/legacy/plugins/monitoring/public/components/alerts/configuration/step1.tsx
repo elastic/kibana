@@ -16,9 +16,9 @@ import {
   EuiToolTip,
   EuiCallOut,
 } from '@elastic/eui';
-import { kfetch } from 'ui/kfetch';
 import { omit, pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { kfetch } from '../../../np_imports/ui/kfetch';
 import { ActionResult } from '../../../../../../../plugins/actions/common';
 import { ManageEmailAction, EmailActionData } from '../manage_email_action';
 import { ALERT_ACTION_TYPE_EMAIL } from '../../../../common/constants';

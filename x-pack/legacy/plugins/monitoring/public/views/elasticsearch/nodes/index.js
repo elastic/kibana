@@ -13,7 +13,6 @@ import template from './index.html';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { ElasticsearchNodes } from '../../../components';
-import { I18nContext } from 'ui/i18n';
 import { ajaxErrorHandlersProvider } from '../../../lib/ajax_error_handler';
 import { SetupModeRenderer } from '../../../components/renderers';
 import { ELASTICSEARCH_SYSTEM_ID, CODE_PATH_ELASTICSEARCH } from '../../../../common/constants';
@@ -91,27 +90,25 @@ uiRoutes.when('/elasticsearch/nodes', {
         };
 
         super.renderReact(
-          <I18nContext>
-            <SetupModeRenderer
-              scope={$scope}
-              injector={$injector}
-              productName={ELASTICSEARCH_SYSTEM_ID}
-              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
-                <Fragment>
-                  {flyoutComponent}
-                  <ElasticsearchNodes
-                    clusterStatus={clusterStatus}
-                    clusterUuid={globalState.cluster_uuid}
-                    setupMode={setupMode}
-                    nodes={nodes}
-                    showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
-                    {...this.getPaginationTableProps(pagination)}
-                  />
-                  {bottomBarComponent}
-                </Fragment>
-              )}
-            />
-          </I18nContext>
+          <SetupModeRenderer
+            scope={$scope}
+            injector={$injector}
+            productName={ELASTICSEARCH_SYSTEM_ID}
+            render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+              <Fragment>
+                {flyoutComponent}
+                <ElasticsearchNodes
+                  clusterStatus={clusterStatus}
+                  clusterUuid={globalState.cluster_uuid}
+                  setupMode={setupMode}
+                  nodes={nodes}
+                  showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
+                  {...this.getPaginationTableProps(pagination)}
+                />
+                {bottomBarComponent}
+              </Fragment>
+            )}
+          />
         );
       };
     }

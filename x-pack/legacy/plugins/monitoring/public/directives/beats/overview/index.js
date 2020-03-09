@@ -8,7 +8,6 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'plugins/monitoring/np_imports/ui/modules';
 import { BeatsOverview } from 'plugins/monitoring/components/beats/overview';
-import { I18nContext } from 'ui/i18n';
 
 const uiModule = uiModules.get('monitoring/directives', []);
 uiModule.directive('monitoringBeatsOverview', () => {
@@ -24,9 +23,7 @@ uiModule.directive('monitoringBeatsOverview', () => {
 
       scope.$watch('data', (data = {}) => {
         render(
-          <I18nContext>
-            <BeatsOverview {...data} onBrush={scope.onBrush} zoomInfo={scope.zoomInfo} />
-          </I18nContext>,
+          <BeatsOverview {...data} onBrush={scope.onBrush} zoomInfo={scope.zoomInfo} />,
           $el[0]
         );
       });

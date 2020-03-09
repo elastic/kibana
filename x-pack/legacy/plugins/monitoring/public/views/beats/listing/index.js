@@ -12,7 +12,6 @@ import { MonitoringViewBaseEuiTableController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';
 import React, { Fragment } from 'react';
-import { I18nContext } from 'ui/i18n';
 import { Listing } from '../../../components/beats/listing/listing';
 import { SetupModeRenderer } from '../../../components/renderers';
 import { CODE_PATH_BEATS, BEATS_SYSTEM_ID } from '../../../../common/constants';
@@ -62,31 +61,29 @@ uiRoutes.when('/beats/beats', {
     renderComponent() {
       const { sorting, pagination, onTableChange } = this.scope.beats;
       this.renderReact(
-        <I18nContext>
-          <SetupModeRenderer
-            scope={this.scope}
-            injector={this.injector}
-            productName={BEATS_SYSTEM_ID}
-            render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
-              <Fragment>
-                {flyoutComponent}
-                <Listing
-                  stats={this.data.stats}
-                  data={this.data.listing}
-                  setupMode={setupMode}
-                  sorting={this.sorting || sorting}
-                  pagination={this.pagination || pagination}
-                  onTableChange={this.onTableChange || onTableChange}
-                  angular={{
-                    kbnUrl: this.kbnUrl,
-                    scope: this.scope,
-                  }}
-                />
-                {bottomBarComponent}
-              </Fragment>
-            )}
-          />
-        </I18nContext>
+        <SetupModeRenderer
+          scope={this.scope}
+          injector={this.injector}
+          productName={BEATS_SYSTEM_ID}
+          render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+            <Fragment>
+              {flyoutComponent}
+              <Listing
+                stats={this.data.stats}
+                data={this.data.listing}
+                setupMode={setupMode}
+                sorting={this.sorting || sorting}
+                pagination={this.pagination || pagination}
+                onTableChange={this.onTableChange || onTableChange}
+                angular={{
+                  kbnUrl: this.kbnUrl,
+                  scope: this.scope,
+                }}
+              />
+              {bottomBarComponent}
+            </Fragment>
+          )}
+        />
       );
     }
   },

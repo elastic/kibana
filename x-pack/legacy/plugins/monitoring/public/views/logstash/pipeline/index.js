@@ -22,7 +22,6 @@ import { PipelineViewer } from 'plugins/monitoring/components/logstash/pipeline_
 import { Pipeline } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/pipeline';
 import { vertexFactory } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/graph/vertex_factory';
 import { MonitoringViewBaseController } from '../../base_controller';
-import { I18nContext } from 'ui/i18n';
 import { EuiPageBody, EuiPage, EuiPageContent } from '@elastic/eui';
 
 let previousPipelineHash = undefined;
@@ -146,22 +145,20 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
           this.pipelineState = new PipelineState(data.pipeline);
           this.detailVertex = data.vertex ? vertexFactory(null, data.vertex) : null;
           this.renderReact(
-            <I18nContext>
-              <EuiPage>
-                <EuiPageBody>
-                  <EuiPageContent>
-                    <PipelineViewer
-                      pipeline={List.fromPipeline(
-                        Pipeline.fromPipelineGraph(this.pipelineState.config.graph)
-                      )}
-                      timeseriesTooltipXValueFormatter={timeseriesTooltipXValueFormatter}
-                      setDetailVertexId={setDetailVertexId}
-                      detailVertex={this.detailVertex}
-                    />
-                  </EuiPageContent>
-                </EuiPageBody>
-              </EuiPage>
-            </I18nContext>
+            <EuiPage>
+              <EuiPageBody>
+                <EuiPageContent>
+                  <PipelineViewer
+                    pipeline={List.fromPipeline(
+                      Pipeline.fromPipelineGraph(this.pipelineState.config.graph)
+                    )}
+                    timeseriesTooltipXValueFormatter={timeseriesTooltipXValueFormatter}
+                    setDetailVertexId={setDetailVertexId}
+                    detailVertex={this.detailVertex}
+                  />
+                </EuiPageContent>
+              </EuiPageBody>
+            </EuiPage>
           );
         }
       );

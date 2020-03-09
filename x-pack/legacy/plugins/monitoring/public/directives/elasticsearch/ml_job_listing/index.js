@@ -8,7 +8,6 @@ import { capitalize } from 'lodash';
 import numeral from '@elastic/numeral';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'plugins/monitoring/np_imports/ui/modules';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
 import { MachineLearningJobStatusIcon } from 'plugins/monitoring/components/elasticsearch/ml_job_listing/status_icon';
@@ -117,48 +116,46 @@ uiModule.directive('monitoringMlListing', kbnUrl => {
 
       scope.$watch('jobs', (jobs = []) => {
         const mlTable = (
-          <I18nContext>
-            <EuiPage>
-              <EuiPageBody>
-                <EuiPanel>
-                  <ClusterStatus stats={scope.status} />
-                </EuiPanel>
-                <EuiSpacer size="m" />
-                <EuiPageContent>
-                  <EuiMonitoringTable
-                    className="mlJobsTable"
-                    rows={jobs}
-                    columns={columns}
-                    sorting={{
-                      ...scope.sorting,
-                      sort: {
-                        ...scope.sorting.sort,
-                        field: 'job_id',
-                      },
-                    }}
-                    pagination={scope.paginationSettings}
-                    message={i18n.translate(
-                      'xpack.monitoring.elasticsearch.mlJobListing.noJobsDescription',
-                      {
-                        defaultMessage:
-                          'There are no Machine Learning Jobs that match your query. Try changing the time range selection.',
-                      }
-                    )}
-                    search={{
-                      box: {
-                        incremental: true,
-                        placeholder: filterJobsPlaceholder,
-                      },
-                    }}
-                    onTableChange={scope.onTableChange}
-                    executeQueryOptions={{
-                      defaultFields: ['job_id'],
-                    }}
-                  />
-                </EuiPageContent>
-              </EuiPageBody>
-            </EuiPage>
-          </I18nContext>
+          <EuiPage>
+            <EuiPageBody>
+              <EuiPanel>
+                <ClusterStatus stats={scope.status} />
+              </EuiPanel>
+              <EuiSpacer size="m" />
+              <EuiPageContent>
+                <EuiMonitoringTable
+                  className="mlJobsTable"
+                  rows={jobs}
+                  columns={columns}
+                  sorting={{
+                    ...scope.sorting,
+                    sort: {
+                      ...scope.sorting.sort,
+                      field: 'job_id',
+                    },
+                  }}
+                  pagination={scope.paginationSettings}
+                  message={i18n.translate(
+                    'xpack.monitoring.elasticsearch.mlJobListing.noJobsDescription',
+                    {
+                      defaultMessage:
+                        'There are no Machine Learning Jobs that match your query. Try changing the time range selection.',
+                    }
+                  )}
+                  search={{
+                    box: {
+                      incremental: true,
+                      placeholder: filterJobsPlaceholder,
+                    },
+                  }}
+                  onTableChange={scope.onTableChange}
+                  executeQueryOptions={{
+                    defaultFields: ['job_id'],
+                  }}
+                />
+              </EuiPageContent>
+            </EuiPageBody>
+          </EuiPage>
         );
         render(mlTable, $el[0]);
       });

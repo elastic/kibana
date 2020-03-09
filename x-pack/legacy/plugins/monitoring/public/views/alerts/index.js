@@ -12,7 +12,6 @@ import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
 import template from './index.html';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
-import { I18nContext } from 'ui/i18n';
 import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
 import { Alerts } from '../../components/alerts';
 import { MonitoringViewBaseEuiTableController } from '../base_eui_table_controller';
@@ -91,22 +90,20 @@ uiRoutes.when('/alerts', {
         );
 
         render(
-          <I18nContext>
-            <EuiPage>
-              <EuiPageBody>
-                <EuiPageContent>
-                  {app}
-                  <EuiSpacer size="m" />
-                  <EuiLink href="#/overview">
-                    <FormattedMessage
-                      id="xpack.monitoring.alerts.clusterOverviewLinkLabel"
-                      defaultMessage="« Cluster Overview"
-                    />
-                  </EuiLink>
-                </EuiPageContent>
-              </EuiPageBody>
-            </EuiPage>
-          </I18nContext>,
+          <EuiPage>
+            <EuiPageBody>
+              <EuiPageContent>
+                {app}
+                <EuiSpacer size="m" />
+                <EuiLink href="#/overview">
+                  <FormattedMessage
+                    id="xpack.monitoring.alerts.clusterOverviewLinkLabel"
+                    defaultMessage="« Cluster Overview"
+                  />
+                </EuiLink>
+              </EuiPageContent>
+            </EuiPageBody>
+          </EuiPage>,
           document.getElementById('monitoringAlertsApp')
         );
       };

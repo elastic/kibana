@@ -12,7 +12,6 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { ApmServerInstances } from '../../../components/apm/instances';
 import { MonitoringViewBaseEuiTableController } from '../..';
-import { I18nContext } from 'ui/i18n';
 import { SetupModeRenderer } from '../../../components/renderers';
 import { APM_SYSTEM_ID, CODE_PATH_APM } from '../../../../common/constants';
 
@@ -62,28 +61,26 @@ uiRoutes.when('/apm/instances', {
       const { pagination, sorting, onTableChange } = this;
 
       const component = (
-        <I18nContext>
-          <SetupModeRenderer
-            scope={this.scope}
-            injector={this.injector}
-            productName={APM_SYSTEM_ID}
-            render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
-              <Fragment>
-                {flyoutComponent}
-                <ApmServerInstances
-                  setupMode={setupMode}
-                  apms={{
-                    pagination,
-                    sorting,
-                    onTableChange,
-                    data,
-                  }}
-                />
-                {bottomBarComponent}
-              </Fragment>
-            )}
-          />
-        </I18nContext>
+        <SetupModeRenderer
+          scope={this.scope}
+          injector={this.injector}
+          productName={APM_SYSTEM_ID}
+          render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+            <Fragment>
+              {flyoutComponent}
+              <ApmServerInstances
+                setupMode={setupMode}
+                apms={{
+                  pagination,
+                  sorting,
+                  onTableChange,
+                  data,
+                }}
+              />
+              {bottomBarComponent}
+            </Fragment>
+          )}
+        />
       );
       super.renderReact(component);
     }

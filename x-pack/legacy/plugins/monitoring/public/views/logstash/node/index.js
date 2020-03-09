@@ -25,7 +25,6 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
-import { I18nContext } from 'ui/i18n';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { CODE_PATH_LOGSTASH } from '../../../../common/constants';
 
@@ -98,31 +97,29 @@ uiRoutes.when('/logstash/node/:uuid', {
           ];
 
           this.renderReact(
-            <I18nContext>
-              <EuiPage>
-                <EuiPageBody>
-                  <EuiPanel>
-                    <DetailStatus stats={data.nodeSummary} />
-                  </EuiPanel>
-                  <EuiSpacer size="m" />
-                  <EuiPageContent>
-                    <EuiFlexGrid columns={2} gutterSize="s">
-                      {metricsToShow.map((metric, index) => (
-                        <EuiFlexItem key={index}>
-                          <MonitoringTimeseriesContainer
-                            series={metric}
-                            onBrush={this.onBrush}
-                            zoomInfo={this.zoomInfo}
-                            {...data}
-                          />
-                          <EuiSpacer />
-                        </EuiFlexItem>
-                      ))}
-                    </EuiFlexGrid>
-                  </EuiPageContent>
-                </EuiPageBody>
-              </EuiPage>
-            </I18nContext>
+            <EuiPage>
+              <EuiPageBody>
+                <EuiPanel>
+                  <DetailStatus stats={data.nodeSummary} />
+                </EuiPanel>
+                <EuiSpacer size="m" />
+                <EuiPageContent>
+                  <EuiFlexGrid columns={2} gutterSize="s">
+                    {metricsToShow.map((metric, index) => (
+                      <EuiFlexItem key={index}>
+                        <MonitoringTimeseriesContainer
+                          series={metric}
+                          onBrush={this.onBrush}
+                          zoomInfo={this.zoomInfo}
+                          {...data}
+                        />
+                        <EuiSpacer />
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGrid>
+                </EuiPageContent>
+              </EuiPageBody>
+            </EuiPage>
           );
         }
       );

@@ -6,11 +6,11 @@
 
 import React from 'react';
 import { contains } from 'lodash';
-import { toastNotifications } from 'ui/notify';
-// @ts-ignore
-import { formatMsg } from '../../../../../../src/plugins/kibana_legacy/public'; // eslint-disable-line import/order
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { toastNotifications } from '../np_imports/ui/shims';
+// @ts-ignore
+import { formatMsg } from '../../../../../../src/plugins/kibana_legacy/public'; // eslint-disable-line import/order
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 
 export function formatMonitoringError(err: any) {

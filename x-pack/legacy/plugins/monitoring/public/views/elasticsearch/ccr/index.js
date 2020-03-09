@@ -12,7 +12,6 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { Ccr } from '../../../components/elasticsearch/ccr';
 import { MonitoringViewBaseController } from '../../base_controller';
-import { I18nContext } from 'ui/i18n';
 import { CODE_PATH_ELASTICSEARCH } from '../../../../common/constants';
 
 uiRoutes.when('/elasticsearch/ccr', {
@@ -45,11 +44,7 @@ uiRoutes.when('/elasticsearch/ccr', {
       );
 
       this.renderReact = ({ data }) => {
-        super.renderReact(
-          <I18nContext>
-            <Ccr data={data} />
-          </I18nContext>
-        );
+        super.renderReact(<Ccr data={data} />);
       };
     }
   },

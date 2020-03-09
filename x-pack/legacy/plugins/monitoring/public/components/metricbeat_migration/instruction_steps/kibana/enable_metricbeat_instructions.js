@@ -8,7 +8,7 @@ import React, { Fragment } from 'react';
 import { EuiSpacer, EuiCodeBlock, EuiLink, EuiText } from '@elastic/eui';
 import { Monospace } from '../components/monospace';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
+import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from '../../../../np_imports/ui/shims';
 import { getMigrationStatusStep, getSecurityStep } from '../common_instructions';
 
 export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, { esMonitoringUrl }) {

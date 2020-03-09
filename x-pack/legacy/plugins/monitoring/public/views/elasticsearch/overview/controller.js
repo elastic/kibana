@@ -8,7 +8,6 @@ import React from 'react';
 import { find } from 'lodash';
 import { MonitoringViewBaseController } from '../../';
 import { ElasticsearchOverview } from 'plugins/monitoring/components';
-import { I18nContext } from 'ui/i18n';
 
 export class ElasticsearchOverviewController extends MonitoringViewBaseController {
   constructor($injector, $scope) {
@@ -78,19 +77,17 @@ export class ElasticsearchOverviewController extends MonitoringViewBaseControlle
     const { clusterStatus, metrics, shardActivity, logs } = data;
     const shardActivityData = shardActivity && this.filterShardActivityData(shardActivity); // no filter on data = null
     const component = (
-      <I18nContext>
-        <ElasticsearchOverview
-          clusterStatus={clusterStatus}
-          metrics={metrics}
-          logs={logs}
-          cluster={cluster}
-          shardActivity={shardActivityData}
-          onBrush={this.onBrush}
-          showShardActivityHistory={this.showShardActivityHistory}
-          toggleShardActivityHistory={this.toggleShardActivityHistory}
-          zoomInfo={this.zoomInfo}
-        />
-      </I18nContext>
+      <ElasticsearchOverview
+        clusterStatus={clusterStatus}
+        metrics={metrics}
+        logs={logs}
+        cluster={cluster}
+        shardActivity={shardActivityData}
+        onBrush={this.onBrush}
+        showShardActivityHistory={this.showShardActivityHistory}
+        toggleShardActivityHistory={this.toggleShardActivityHistory}
+        zoomInfo={this.zoomInfo}
+      />
     );
 
     super.renderReact(component);

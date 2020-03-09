@@ -10,7 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { getPageData } from '../lib/get_page_data';
 import { PageLoading } from 'plugins/monitoring/components';
 import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
-import { I18nContext } from 'ui/i18n';
+import { I18nContext } from '../np_imports/ui/shims';
 import { PromiseWithCancel } from '../../common/cancel_promise';
 import { updateSetupModeData, getSetupModeState } from '../lib/setup_mode';
 
@@ -193,16 +193,10 @@ export class MonitoringViewBaseController {
       console.warn(`"#${this.reactNodeId}" element has not been added to the DOM yet`);
       return;
     }
-    if (this._isDataInitialized === false) {
-      render(
-        <I18nContext>
-          <PageLoading />
-        </I18nContext>,
-        renderElement
-      );
-    } else {
-      render(component, renderElement);
-    }
+    const wrappedComponent = (
+      <I18nContext>{!this._isDataInitialized ? <PageLoading /> : component}</I18nContext>
+    );
+    render(wrappedComponent, renderElement);
   }
 
   getPaginationRouteOptions() {

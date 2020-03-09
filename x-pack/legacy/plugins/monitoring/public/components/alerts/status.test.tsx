@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { kfetch } from 'ui/kfetch';
+import { kfetch } from '../../np_imports/ui/kfetch';
 import { AlertsStatus, AlertsStatusProps } from './status';
 import { ALERT_TYPE_PREFIX } from '../../../common/constants';
 import { getSetupModeState } from '../../lib/setup_mode';
@@ -18,7 +18,7 @@ jest.mock('../../lib/setup_mode', () => ({
   toggleSetupMode: jest.fn(),
 }));
 
-jest.mock('ui/kfetch', () => ({
+jest.mock('../../np_imports/ui/kfetch', () => ({
   kfetch: jest.fn(),
 }));
 

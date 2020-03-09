@@ -13,7 +13,6 @@ import {
 } from 'plugins/monitoring/lib/elasticsearch_settings';
 import { ModelUpdater } from './model_updater';
 import { NoData } from 'plugins/monitoring/components';
-import { I18nContext } from 'ui/i18n';
 import { CODE_PATH_LICENSE } from '../../../common/constants';
 import { MonitoringViewBaseController } from '../base_controller';
 import { i18n } from '@kbn/i18n';
@@ -103,14 +102,12 @@ export class NoDataController extends MonitoringViewBaseController {
     const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
 
     this.renderReact(
-      <I18nContext>
-        <NoData
-          {...props}
-          enabler={enabler}
-          changePath={this.changePath}
-          isCloudEnabled={isCloudEnabled}
-        />
-      </I18nContext>
+      <NoData
+        {...props}
+        enabler={enabler}
+        changePath={this.changePath}
+        isCloudEnabled={isCloudEnabled}
+      />
     );
   }
 }

@@ -186,7 +186,7 @@ describe('setup_mode', () => {
           hasPermissions: true,
         },
       };
-      jest.doMock('ui/notify', () => ({
+      jest.doMock('../np_imports/ui/shims', () => ({
         toastNotifications: {
           addDanger,
         },
@@ -207,7 +207,7 @@ describe('setup_mode', () => {
 
     it('should not fetch data if the user does not have sufficient permissions', async done => {
       const addDanger = jest.fn();
-      jest.doMock('ui/notify', () => ({
+      jest.doMock('../np_imports/ui/shims', () => ({
         toastNotifications: {
           addDanger,
         },
