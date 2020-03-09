@@ -22,6 +22,7 @@ export declare class KibanaRequest<Params = unknown, Query = unknown, Body = unk
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
+|  [auth](./kibana-plugin-server.kibanarequest.auth.md) |  | <code>{</code><br/><code>        isAuthenticated: boolean;</code><br/><code>    }</code> |  |
 |  [body](./kibana-plugin-server.kibanarequest.body.md) |  | <code>Body</code> |  |
 |  [events](./kibana-plugin-server.kibanarequest.events.md) |  | <code>KibanaRequestEvents</code> | Request events [KibanaRequestEvents](./kibana-plugin-server.kibanarequestevents.md) |
 |  [headers](./kibana-plugin-server.kibanarequest.headers.md) |  | <code>Headers</code> | Readonly copy of incoming request headers. |
