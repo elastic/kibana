@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObjectAttributes } from 'src/core/public';
-import { Datafeed, Job } from '../../public/application/jobs/new_job/common/job_creator/configs';
+import { Datafeed, Job } from '../types/anomaly_detection_jobs';
 
 export interface ModuleJob {
   id: string;
