@@ -30,11 +30,22 @@ In order to provide the user with as much detail as possible about any systems t
 /**
  * The current status of a service at a point in time.
  */
-interface ServiceStatus {
+type ServiceStatus = {
+  /** The current availability level of the service. */
+  level: ServiceStatusLevel.available;
+  /** A high-level summary of the service status. */
+  summary?: string;
+  /** A more detailed description of the service status. */
+  detail?: string;
+  /** A URL to open in a new tab about how to resolve or troubleshoot the problem */
+  documentationUrl?: string;
+  /** Any JSON-serializable data to be included in the HTTP API response. */
+  meta?: object;
+} | {
   /** The current availability level of the service. */
   level: ServiceStatusLevel;
   /** A high-level summary of the service status. */
-  summary?: string;
+  summary: string; // required when level !== available
   /** A more detailed description of the service status. */
   detail?: string;
   /** A URL to open in a new tab about how to resolve or troubleshoot the problem */
@@ -61,6 +72,7 @@ interface CoreStatus {
   http: ServiceStatus;
   savedObjects: ServiceStatus;
   uiSettings: ServiceStatus;
+  metrics: ServiceStatus;
 }
 ```
 
@@ -75,7 +87,7 @@ interface CoreStatus {
 interface StatusSetup {
   /**
    * Allows a plugin to specify a custom status dependent on its own criteria.
-   * Overrides the default inherited status.
+   * Completely overrides the default inherited status.
    */
   set(status$: Observable<ServiceStatus>): Observable<ServiceStatus>;
 
@@ -142,7 +154,7 @@ Each member of the `ServiceStatusLevel` enum has specific behaviors associated w
   - All endpoints and apps are available by default
   - Some APIs may return `503 Unavailable` responses. This must be implemented directly by the service.
 - **`unavailable`**:
-  - All endpoints return `503 Unavailable` responses by default. This is automatic.
+  - All endpoints (with some exceptions in Core) in Kibana return a `503 Unavailable` responses by default. This is automatic.
   - When trying to access any app associated with the unavailable service, the user is presented with an error UI with detail about the outage.
 - **`fatal`**:
   - All endpoints (with some exceptions in Core) in Kibana return a `503 Unavailable` response by default. This is automatic.
@@ -162,7 +174,11 @@ By default, plugins inherit their status from all Core services and their depend
 - If any optional dependency is `fatal`, the plugin's status is `degraded`.
 - Otherwise, the plugin's status is `available`.
 
-If a plugin never calls the `StatusSetup#set` API, the plugin's statud defaults to the inherited status. This inherited status is also exposed on `StatusSetup#inherited$` in order to allow plugins to leverage this inheritance logic while also providing custom status detail on top of the defaults.
+If a plugin calls the `StatusSetup#set` API, the inherited status is completely overridden. They status the plugin specifies is the source of truth. If a plugin wishes to "merge" its custom status with the inherited status calculated by Core, it may do so by using the `StatusSetup#inherited$` property in its calculated status.
+
+If a plugin never calls the `StatusSetup#set` API, the plugin's status defaults to the inherited status.
+
+_Disabled_ plugins, that is plugins that are explicitly disabled in Kibana's configuration, do not have any status. They are not present in any status APIs and are **not** considered `unavailable`. Disabled plugins are excluded from the status inheritance calculation, even if a plugin has a optional dependency on a disabled plugin. In summary, if a plugin has an optional dependency on a disabled plugin, the plugin will not be considered `degraded` just because that optional dependency is disabled.
 
 ### HTTP responses
 
@@ -252,7 +268,7 @@ core.status.set(
 
 1. **The default behaviors and inheritance of statuses may appear to be "magic" to developers who do not read the documentation about how this works.** Compared to the legacy status mechanism, these defaults are much more opinionated and the resulting status is less explicit in plugin code compared to the legacy `mirrorPluginStatus` mechanism.
 2. **The default behaviors and inheritance may not fit real-world status very well.** If many plugins must customize their status in order to opt-out of the defaults, this would be a step backwards from the legacy mechanism.
-3. **Supporting the legacy status API and the new mechansim may be tricky.** We are removing fields from the legacy API's response in the new API and must make sure we can easily translate this, or consider making a breaking change to this API.
+3. **Supporting the legacy status API and the new mechansim may be tricky.** We are removing fields from the legacy API's response (`uiColor` and `icon`) in the new API and must make sure we can easily translate this, or consider making a breaking change to this API.
 
 # Alternatives
 
@@ -274,7 +290,7 @@ This should be taught using the same channels we've leveraged for other Kibana P
 
 # Unresolved questions
 
-1. Are the default behaviors too perscriptive? Do we know of many plugins whose status would not fall in line with these behaviors?
+1. Are the default behaviors too prescriptive? Do we know of many plugins whose status would not fall in line with these behaviors?
 2. Should we provide a status for every core service or only the services that we expect to have a status?
 3. Should the `meta` field be more structured?
 4. Should the hierarchy of the plugins be expressed in the response from the status API and/or UI of the status page?
