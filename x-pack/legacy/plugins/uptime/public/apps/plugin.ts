@@ -36,6 +36,7 @@ export class Plugin {
   public setup(setup: SetupObject) {
     const { core, plugins } = setup;
     const { home } = plugins;
+
     home.featureCatalogue.register({
       category: FeatureCatalogueCategory.DATA,
       description: PLUGIN.DESCRIPTION,
