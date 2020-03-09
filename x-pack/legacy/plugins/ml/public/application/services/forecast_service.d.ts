@@ -5,7 +5,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { Job } from '../jobs/new_job/common/job_creator/configs';
+import { Job } from '../../../common/types/anomaly_detection_jobs';
 
 export interface ForecastData {
   success: boolean;

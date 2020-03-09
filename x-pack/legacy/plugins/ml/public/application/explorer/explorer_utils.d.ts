@@ -6,7 +6,7 @@
 
 import { Moment } from 'moment';
 
-import { CombinedJob } from '../jobs/new_job/common/job_creator/configs';
+import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 
 import { TimeBucketsInterval } from '../util/time_buckets';
 

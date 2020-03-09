@@ -10,7 +10,7 @@ import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { getToastNotifications } from '../../util/dependency_cache';
-import { MlJobWithTimeRange } from '../../../../common/types/jobs';
+import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
 import { useUrlState } from '../../util/url_state';
 
