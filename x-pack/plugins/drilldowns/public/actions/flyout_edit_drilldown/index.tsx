@@ -36,7 +36,7 @@ const drilldrownCount = 2;
 export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_EDIT_DRILLDOWN> {
   public readonly type = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_EDIT_DRILLDOWN;
-  public order = 100;
+  public order = 1;
 
   constructor(protected readonly params: FlyoutEditDrilldownParams) {}
 
