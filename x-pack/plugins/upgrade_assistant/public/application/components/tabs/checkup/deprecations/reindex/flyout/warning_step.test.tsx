@@ -16,6 +16,7 @@ describe('WarningsFlyoutStep', () => {
     advanceNextStep: jest.fn(),
     warnings: [ReindexWarning.allField, ReindexWarning.booleanFields],
     closeFlyout: jest.fn(),
+    renderGlobalCallouts: jest.fn(),
   };
 
   it('renders', () => {
