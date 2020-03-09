@@ -1274,4 +1274,61 @@ describe('add prepackaged rules schema', () => {
       'child "severity" fails because ["severity" must be one of [low, medium, high, critical]]'
     );
   });
+
+  test('You cannot set the throttle to a value other than no_actions, rule, 1h, 1d, or 7d', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+        throttle: '1w',
+      }).error.message
+    ).toEqual(
+      'child "throttle" fails because ["throttle" must be one of [no_actions, rule, 1h, 1d, 7d]]'
+    );
+  });
+
+  test('The default for "actions" will be an empty array', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).value.actions
+    ).toEqual([]);
+  });
+
+  test('The default for "throttle" will be no_actions', () => {
+    expect(
+      addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).value.throttle
+    ).toEqual('no_actions');
+  });
 });

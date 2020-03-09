@@ -73,3 +73,14 @@ export const calculateName = ({
     return 'untitled';
   }
 };
+
+/*
+  Alert throttle has to be null in case there are no actions or actions are exectured per rule exectution
+*/
+export const getAlertThrottle = (throttle: string | null | undefined): null | string => {
+  if (!throttle || ['no_actions', 'rule'].includes(throttle)) {
+    return null;
+  }
+
+  return throttle;
+};

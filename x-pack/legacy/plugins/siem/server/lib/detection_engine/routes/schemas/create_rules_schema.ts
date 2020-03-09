@@ -41,7 +41,7 @@ import {
 import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
 
 export const createRulesSchema = Joi.object({
-  actions: actions.default([]),
+  actions,
   description: description.required(),
   enabled: enabled.default(true),
   false_positives: false_positives.default([]),
@@ -69,7 +69,7 @@ export const createRulesSchema = Joi.object({
   to: to.default('now'),
   type: type.required(),
   threat: threat.default([]),
-  throttle: throttle.default(null),
+  throttle,
   references: references.default([]),
   version: version.default(1),
 });
