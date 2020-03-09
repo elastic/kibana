@@ -38,7 +38,7 @@ test('test setup ok', t => {
 
 // TODO: fork() has been omitted as it doesn't validate its arguments in
 // Node.js 10 and will throw an internal error asynchronously. This is fixed in
-// newer versions.
+// newer versions. See https://github.com/elastic/kibana/issues/59628
 const functions = ['exec', 'execFile', 'spawn', 'execFileSync', 'execSync', 'spawnSync'];
 for (const name of functions) {
   test(`${name}()`, t => {
@@ -222,12 +222,12 @@ for (const name of functions) {
 {
   const modulePath = path.join('test', 'harden', '_fork.js');
 
-  // TODO: Forked processes don't have any stdout we can monitor without providing options
+  // NOTE: Forked processes don't have any stdout we can monitor without providing options
   test.skip('fork(modulePath)', t => {
     assertProcess(t, cp.fork(modulePath));
   });
 
-  // TODO: Forked processes don't have any stdout we can monitor without providing options
+  // NOTE: Forked processes don't have any stdout we can monitor without providing options
   test.skip('execFile(file, args)', t => {
     assertProcess(t, cp.fork(modulePath, []));
   });
@@ -273,12 +273,12 @@ for (const name of functions) {
   });
 
   for (const unset of notSet) {
-    // TODO: Forked processes don't have any stdout we can monitor without providing options
+    // NOTE: Forked processes don't have any stdout we can monitor without providing options
     test.skip(`fork(modulePath, ${unset})`, t => {
       assertProcess(t, cp.fork(modulePath, unset));
     });
 
-    // TODO: Forked processes don't have any stdout we can monitor without providing options
+    // NOTE: Forked processes don't have any stdout we can monitor without providing options
     test.skip(`fork(modulePath, ${unset}, ${unset})`, t => {
       assertProcess(t, cp.fork(modulePath, unset, unset));
     });
