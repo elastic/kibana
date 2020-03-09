@@ -23,7 +23,10 @@ interface ReindexHandlerArgs {
   licensing: LicensingPluginSetup;
   headers: Record<string, any>;
   credentialStore: CredentialStore;
-  enqueue?: boolean;
+  reindexOptions?: {
+    openAndClose?: boolean;
+    enqueue?: boolean;
+  };
 }
 
 export const reindexHandler = async ({
@@ -34,7 +37,7 @@ export const reindexHandler = async ({
   licensing,
   log,
   savedObjects,
-  enqueue,
+  reindexOptions,
 }: ReindexHandlerArgs): Promise<ReindexOperation> => {
   const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
   const reindexActions = reindexActionsFactory(savedObjects, callAsCurrentUser);
@@ -51,8 +54,11 @@ export const reindexHandler = async ({
 
   const existingOp = await reindexService.findReindexOperation(indexName);
 
-  const opts: ReindexOptions | undefined = enqueue
-    ? { queueSettings: { queuedAt: Date.now() } }
+  const opts: ReindexOptions | undefined = reindexOptions
+    ? {
+        openAndClose: reindexOptions.openAndClose,
+        queueSettings: reindexOptions.enqueue ? { queuedAt: Date.now() } : undefined,
+      }
     : undefined;
 
   // If the reindexOp already exists and it's paused, resume it. Otherwise create a new one.
