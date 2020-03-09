@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { noop } from 'lodash';
-import { exposeClient, hasMonitoringCluster } from '../instantiate_client';
+import { instantiateClient, hasMonitoringCluster } from '../instantiate_client';
 
 function getMockServerFromConnectionUrl(monitoringClusterUrl) {
   const server = {
@@ -50,7 +50,7 @@ describe('Instantiate Client', () => {
     it('logs that the config was sourced from the production options', () => {
       const server = getMockServerFromConnectionUrl(null); // pass null for URL to create the client using prod config
 
-      exposeClient(server);
+      instantiateClient(server);
 
       expect(server.log.getCall(0).args).to.eql([
         ['monitoring', 'es-client'],
@@ -60,7 +60,7 @@ describe('Instantiate Client', () => {
 
     it('logs that the config was sourced from the monitoring options', () => {
       const server = getMockServerFromConnectionUrl('monitoring-cluster.test:9200');
-      exposeClient(server);
+      instantiateClient(server);
 
       expect(server.log.getCall(0).args).to.eql([
         ['monitoring', 'es-client'],
@@ -73,7 +73,7 @@ describe('Instantiate Client', () => {
     it('Does not add xpack.monitoring.elasticsearch.customHeaders if connected to production cluster', () => {
       const server = getMockServerFromConnectionUrl(null); // pass null for URL to create the client using prod config
 
-      exposeClient(server);
+      instantiateClient(server);
 
       const createCluster = server.elasticsearchPlugin.createCluster;
       const createClusterCall = createCluster.getCall(0);
@@ -86,7 +86,7 @@ describe('Instantiate Client', () => {
     it('Adds xpack.monitoring.elasticsearch.customHeaders if connected to monitoring cluster', () => {
       const server = getMockServerFromConnectionUrl('http://monitoring-cluster.test:9200'); // pass null for URL to create the client using prod config
 
-      exposeClient(server);
+      instantiateClient(server);
 
       const createCluster = server.elasticsearchPlugin.createCluster;
       const createClusterCall = createCluster.getCall(0);
@@ -102,7 +102,7 @@ describe('Instantiate Client', () => {
   describe('Use a connection to production cluster', () => {
     it('exposes an authenticated client using production host settings', () => {
       const server = getMockServerFromConnectionUrl(null); // pass null for URL to create the client using prod config
-      exposeClient(server);
+      instantiateClient(server);
 
       const createCluster = server.elasticsearchPlugin.createCluster;
       const createClusterCall = createCluster.getCall(0);
@@ -117,7 +117,7 @@ describe('Instantiate Client', () => {
   describe('Use a connection to monitoring cluster', () => {
     it('exposes an authenticated client using monitoring host settings', () => {
       const server = getMockServerFromConnectionUrl('http://monitoring-cluster.test:9200');
-      exposeClient(server);
+      instantiateClient(server);
 
       const createCluster = server.elasticsearchPlugin.createCluster;
       const createClusterCall = createCluster.getCall(0);
