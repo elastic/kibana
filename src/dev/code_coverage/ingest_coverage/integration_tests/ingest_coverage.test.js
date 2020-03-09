@@ -52,6 +52,7 @@ describe('Ingesting Coverage to Cluster', () => {
 
   const justTotalPath = 'jest-combined/coverage-summary-just-total.json';
   const noTotalsPath = 'jest-combined/coverage-summary-NO-total.json';
+  const bothIndexesPath = 'jest-combined/coverage-summary-manual-mix.json';
 
   describe(`to the [${TOTALS_INDEX}] index`, () => {
     const mutableTotalsIndexLoggingChunks = [];
@@ -63,8 +64,8 @@ describe('Ingesting Coverage to Cluster', () => {
       verboseIngestAndMutateAsyncWithPath(mutableTotalsIndexLoggingChunks);
     });
 
-    it.skip(`should say it's not sending to the totals index: [${TOTALS_INDEX}]`, () => {
-      // mutableTotalsIndexLoggingChunks.forEach(x => console.log(green(x)))
+    it(`should say it's NOT sending to the totals index: [${TOTALS_INDEX}]`, () => {
+      mutableTotalsIndexLoggingChunks.forEach(x => console.log(green(x)))
       expect(mutableTotalsIndexLoggingChunks.some(x => x.includes(`debg ### Just Logging, NOT actually sending to ${TOTALS_INDEX}`)))
         .to.be(true);
     });
@@ -118,6 +119,20 @@ describe('Ingesting Coverage to Cluster', () => {
         });
       });
     });
+  });
+  describe(`to both indexes in the same push`, () => {
+    const mutableBothIndexesChunks = [];
+
+    beforeAll(done => {
+      const ingestAndMutateAsync = ingestAndMutate(done);
+      const ingestAndMutateAsyncWithPath = ingestAndMutateAsync(bothIndexesPath);
+      const verboseIngestAndMutateAsyncWithPath = ingestAndMutateAsyncWithPath(verboseArgs);
+      verboseIngestAndMutateAsyncWithPath(mutableBothIndexesChunks);
+    });
+
+    it('should result in every posted item having a site url that meets all regex assertions',
+      F(siteUrlsSplitByNewLineWithoutBlanks(mutableBothIndexesChunks)
+        .forEach(expectAllRegexesToPass(regexes))));
   });
 
 });
