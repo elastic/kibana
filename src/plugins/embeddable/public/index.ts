@@ -33,6 +33,7 @@ export {
   ContainerInput,
   ContainerOutput,
   CONTEXT_MENU_TRIGGER,
+  CONTEXT_MENU_DRILLDOWNS_TRIGGER,
   contextMenuTrigger,
   ACTION_EDIT_PANEL,
   EditPanelAction,

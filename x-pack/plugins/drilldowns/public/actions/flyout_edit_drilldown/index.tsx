@@ -14,7 +14,7 @@ import {
   reactToUiComponent,
 } from '../../../../../../src/plugins/kibana_react/public';
 import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
-import { FormCreateDrilldown } from '../../components/form_create_drilldown';
+import { FormDrilldownWizard } from '../../components/form_drilldown_wizard';
 
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 
@@ -36,7 +36,7 @@ const drilldrownCount = 2;
 export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_EDIT_DRILLDOWN> {
   public readonly type = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_EDIT_DRILLDOWN;
-  public order = 100;
+  public order = 1;
 
   constructor(protected readonly params: FlyoutEditDrilldownParams) {}
 
@@ -67,6 +67,6 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
 
   public async execute({ embeddable }: FlyoutEditDrilldownActionContext) {
     const overlays = await this.params.overlays();
-    overlays.openFlyout(toMountPoint(<FormCreateDrilldown />));
+    overlays.openFlyout(toMountPoint(<FormDrilldownWizard />));
   }
 }

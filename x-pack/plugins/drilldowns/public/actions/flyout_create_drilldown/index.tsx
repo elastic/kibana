@@ -25,7 +25,7 @@ export interface OpenFlyoutAddDrilldownParams {
 export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_ADD_DRILLDOWN> {
   public readonly type = OPEN_FLYOUT_ADD_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_ADD_DRILLDOWN;
-  public order = 100;
+  public order = 2;
 
   constructor(protected readonly params: OpenFlyoutAddDrilldownParams) {}
 

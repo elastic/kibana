@@ -21,6 +21,7 @@ import { Filter } from '../../data/public';
 import {
   applyFilterTrigger,
   contextMenuTrigger,
+  contextMenuDrilldownsTrigger,
   createFilterAction,
   panelBadgeTrigger,
   selectRangeTrigger,
@@ -32,6 +33,7 @@ import {
   VALUE_CLICK_TRIGGER,
   SELECT_RANGE_TRIGGER,
   CONTEXT_MENU_TRIGGER,
+  CONTEXT_MENU_DRILLDOWNS_TRIGGER,
   PANEL_BADGE_TRIGGER,
   ACTION_ADD_PANEL,
   ACTION_CUSTOMIZE_PANEL,
@@ -51,6 +53,7 @@ declare module '../../ui_actions/public' {
       filters: Filter[];
     };
     [CONTEXT_MENU_TRIGGER]: EmbeddableContext;
+    [CONTEXT_MENU_DRILLDOWNS_TRIGGER]: EmbeddableContext;
     [PANEL_BADGE_TRIGGER]: EmbeddableContext;
   }
 
@@ -70,6 +73,7 @@ declare module '../../ui_actions/public' {
  */
 export const bootstrap = (uiActions: UiActionsSetup) => {
   uiActions.registerTrigger(contextMenuTrigger);
+  uiActions.registerTrigger(contextMenuDrilldownsTrigger);
   uiActions.registerTrigger(applyFilterTrigger);
   uiActions.registerTrigger(panelBadgeTrigger);
   uiActions.registerTrigger(selectRangeTrigger);

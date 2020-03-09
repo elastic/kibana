@@ -21,8 +21,23 @@ import * as React from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { uiToReactComponent } from '../../../kibana_react/public';
-import { Action } from '../actions';
+import { uiToReactComponent, reactToUiComponent } from '../../../kibana_react/public';
+import { Action, ActionInternal } from '../actions';
+
+export const contextMenuSeparatorAction = new ActionInternal({
+  id: 'CONTEXT_MENU_SEPARATOR',
+  getDisplayName: () => 'separator',
+  MenuItem: reactToUiComponent(() => (
+    <div
+      style={{
+        width: '100%',
+        height: '1px',
+        background: 'red',
+      }}
+    />
+  )),
+  execute: () => Promise.resolve(),
+});
 
 /**
  * Transforms an array of Actions to the shape EuiContextMenuPanel expects.
@@ -63,33 +78,25 @@ async function buildEuiContextMenuPanelItems<Context extends object>({
   actionContext: Context;
   closeMenu: () => void;
 }) {
-  const items: EuiContextMenuPanelItemDescriptor[] = [];
-  const promises = actions.map(async action => {
+  const items: EuiContextMenuPanelItemDescriptor[] = new Array(actions.length);
+  const promises = actions.map(async (action, index) => {
     const isCompatible = await action.isCompatible(actionContext);
     if (!isCompatible) {
       return;
     }
 
-    items.push(
-      convertPanelActionToContextMenuItem({
-        action,
-        actionContext,
-        closeMenu,
-      })
-    );
+    items[index] = convertPanelActionToContextMenuItem({
+      action,
+      actionContext,
+      closeMenu,
+    });
   });
 
   await Promise.all(promises);
 
-  return items;
+  return items.filter(Boolean);
 }
 
-/**
- *
- * @param {ContextMenuAction} action
- * @param {Embeddable} embeddable
- * @return {EuiContextMenuPanelItemDescriptor}
- */
 function convertPanelActionToContextMenuItem<Context extends object>({
   action,
   actionContext,
@@ -115,8 +122,11 @@ function convertPanelActionToContextMenuItem<Context extends object>({
     closeMenu();
   };
 
-  if (action.getHref && action.getHref(actionContext)) {
-    menuPanelItem.href = action.getHref(actionContext);
+  if (action.getHref) {
+    const href = action.getHref(actionContext);
+    if (href) {
+      menuPanelItem.href = action.getHref(actionContext);
+    }
   }
 
   return menuPanelItem;
