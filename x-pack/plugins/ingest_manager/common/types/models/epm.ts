@@ -76,15 +76,15 @@ export interface RegistryDatasource {
 
 export interface RegistryInput {
   type: string;
-  vars?: VarsEntry[];
+  vars?: RegistryVarsEntry[];
   description?: string;
   streams: RegistryStream[];
 }
 
 export interface RegistryStream {
   input: string;
-  vars?: VarsEntry[];
-  dataset?: string;
+  dataset: string;
+  vars?: RegistryVarsEntry[];
   description?: string;
 }
 
@@ -101,7 +101,17 @@ export type RegistrySearchResults = RegistrySearchResult[];
 // from getPackageOutput at https://github.com/elastic/package-registry/blob/master/search.go
 export type RegistrySearchResult = Pick<
   RegistryPackage,
-  'name' | 'title' | 'version' | 'description' | 'type' | 'icons' | 'internal' | 'download' | 'path'
+  | 'name'
+  | 'title'
+  | 'version'
+  | 'description'
+  | 'type'
+  | 'icons'
+  | 'internal'
+  | 'download'
+  | 'path'
+  | 'datasets'
+  | 'datasources'
 >;
 
 export interface ScreenshotItem {
@@ -156,7 +166,7 @@ export interface Dataset {
   id: string;
   release: string;
   ingest_pipeline: string;
-  vars?: VarsEntry[];
+  vars?: RegistryVarsEntry[];
   type: string;
   streams?: RegistryStream[];
   package: string;
@@ -165,7 +175,7 @@ export interface Dataset {
 // EPR types this as `[]map[string]interface{}`
 // which means the official/possible type is Record<string, any>
 // but we effectively only see this shape
-export interface VarsEntry {
+export interface RegistryVarsEntry {
   name: string;
   description?: string;
   type: string;

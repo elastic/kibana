@@ -5,11 +5,6 @@
  */
 
 export interface DatasourcePackage {
-  assets: Array<{
-    id: string;
-    type: string;
-  }>;
-  description: string;
   name: string;
   title: string;
   version: string;
@@ -32,6 +27,7 @@ export interface DatasourceInput {
 
 export interface NewDatasource {
   name: string;
+  description?: string;
   namespace?: string;
   config_id: string;
   enabled: boolean;

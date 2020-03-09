@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiCard, EuiIcon, ICON_TYPES } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import { EuiCard } from '@elastic/eui';
 import { PackageInfo, PackageListItem } from '../../../types';
 import { useLinks } from '../hooks';
+import { PackageIcon } from './package_icon';
 
 export interface BadgeProps {
   showInstalledBadge?: boolean;
@@ -32,18 +33,13 @@ export function PackageCard({
   const { toDetailView } = useLinks();
   const url = toDetailView({ name, version });
 
-  // try to find a logo in EUI
-  // TODO: first try to find icon in `icons` property
-  const iconType = ICON_TYPES.find(key => key.toLowerCase() === `logo${name}`);
-  const optionalIcon = iconType ? <EuiIcon type={iconType} size="l" /> : undefined;
-
   return (
     <Card
       betaBadgeLabel={showInstalledBadge && status === 'installed' ? 'Installed' : ''}
       layout="horizontal"
       title={title || ''}
       description={description}
-      icon={optionalIcon}
+      icon={<PackageIcon packageName={name} size="l" />}
       href={url}
     />
   );

@@ -45,18 +45,31 @@ export async function ensureInstalledDefaultPackages(
 ): Promise<void> {
   for (const pkgName in DefaultPackages) {
     if (!DefaultPackages.hasOwnProperty(pkgName)) continue;
-    const installedPackage = await findInstalledPackageByName({ savedObjectsClient, pkgName });
-    // if the requested packaged was not found to be installed, try installing
-    if (!installedPackage) {
-      try {
-        await installLatestPackage({
-          savedObjectsClient,
-          pkgName,
-          callCluster,
-        });
-      } catch (err) {
-        throw new Error(err.message);
-      }
+    await ensureInstalledPackage({
+      savedObjectsClient,
+      pkgName,
+      callCluster,
+    });
+  }
+}
+
+export async function ensureInstalledPackage(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+  callCluster: CallESAsCurrentUser;
+}): Promise<void> {
+  const { savedObjectsClient, pkgName, callCluster } = options;
+  const installedPackage = await findInstalledPackageByName({ savedObjectsClient, pkgName });
+  // if the requested packaged was not found to be installed, try installing
+  if (!installedPackage) {
+    try {
+      await installLatestPackage({
+        savedObjectsClient,
+        pkgName,
+        callCluster,
+      });
+    } catch (err) {
+      throw new Error(err.message);
     }
   }
 }

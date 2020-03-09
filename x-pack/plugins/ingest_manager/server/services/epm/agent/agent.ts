@@ -5,14 +5,14 @@
  */
 
 import Handlebars from 'handlebars';
-import { VarsEntry } from '../../../types';
+import { RegistryVarsEntry } from '../../../types';
 
 /**
  * This takes a dataset object as input and merges it with the input template.
  * It returns the resolved template as a string.
  */
-export function createInput(vars: VarsEntry[], inputTemplate: string): string {
-  const view: Record<VarsEntry['name'], VarsEntry['default']> = {};
+export function createInput(vars: RegistryVarsEntry[], inputTemplate: string): string {
+  const view: Record<RegistryVarsEntry['name'], RegistryVarsEntry['default']> = {};
 
   for (const v of vars) {
     view[v.name] = v.default;

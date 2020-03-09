@@ -8,18 +8,12 @@ export { Datasource, NewDatasource } from '../../../common';
 
 const DatasourceBaseSchema = {
   name: schema.string(),
+  description: schema.maybe(schema.string()),
   namespace: schema.maybe(schema.string()),
   config_id: schema.string(),
   enabled: schema.boolean(),
   package: schema.maybe(
     schema.object({
-      assets: schema.arrayOf(
-        schema.object({
-          id: schema.string(),
-          type: schema.string(),
-        })
-      ),
-      description: schema.string(),
       name: schema.string(),
       title: schema.string(),
       version: schema.string(),

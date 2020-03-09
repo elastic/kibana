@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useState } from 'react';
+import { Redirect, useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -19,26 +20,20 @@ import {
   EuiEmptyPrompt,
   EuiBadge,
 } from '@elastic/eui';
-import { Redirect, useRouteMatch } from 'react-router-dom';
-import { ConfigRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
-import {
-  DatasourcesTable,
-  DonutChart,
-  EditConfigFlyout,
-  AssignDatasourcesFlyout,
-} from './components';
-import { sendRequest, useCore, useGetOneAgentConfig } from '../../../hooks';
+import { useGetOneAgentConfig, useLink } from '../../../hooks';
+import { AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
 import { Datasource } from '../../../types';
 import { Loading } from '../../../components';
 import { ConnectedLink } from '../../fleet/components';
 import { WithHeaderLayout } from '../../../layouts';
 import { AgentConfigDeleteProvider } from '../components';
+import { ConfigRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
+import { DatasourcesTable, DonutChart, EditConfigFlyout } from './components';
 
 export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   const {
     params: { configId },
   } = useRouteMatch<{ configId: string }>();
-  const core = useCore();
   const agentConfigRequest = useGetOneAgentConfig(configId);
   const agentConfig = agentConfigRequest.data ? agentConfigRequest.data.item : null;
   const { isLoading, error, sendRequest: refreshAgentConfig } = agentConfigRequest;
@@ -51,58 +46,14 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   } = agentStatusRequest;
   const agentStatus = agentStatusRequest.data?.results;
 
-  // Unassign data sources states
-  const [isUnassignLoading, setIsUnassignLoading] = useState<boolean>(false);
-  const [selectedDatasources, setSelectedDatasources] = useState<string[]>([]);
+  const ADD_DATASOURCE_URI = useLink(`${AGENT_CONFIG_DETAILS_PATH}${configId}/add-datasource`);
 
   // Flyout states
   const [isEditConfigFlyoutOpen, setIsEditConfigFlyoutOpen] = useState<boolean>(false);
-  const [isDatasourcesFlyoutOpen, setIsDatasourcesFlyoutOpen] = useState<boolean>(false);
 
   const refreshData = () => {
     refreshAgentConfig();
     refreshAgentStatus();
-  };
-
-  const unassignSelectedDatasources = async () => {
-    setIsUnassignLoading(true);
-    const { error: unassignError } = await sendRequest({
-      path: `/api/ingest_manager/agent_configs/${configId}/removeDatasources`,
-      method: 'post',
-      body: {
-        datasources: selectedDatasources,
-      },
-    });
-    setIsUnassignLoading(false);
-    if (unassignError) {
-      core.notifications.toasts.addDanger(
-        i18n.translate(
-          'xpack.ingestManager.configDetails.unassignDatasources.errorNotificationTitle',
-          {
-            defaultMessage:
-              'Error unassigning {count, plural, one {data source} other {# data sources}}',
-            values: {
-              count: selectedDatasources.length,
-            },
-          }
-        )
-      );
-    } else {
-      core.notifications.toasts.addSuccess(
-        i18n.translate(
-          'xpack.ingestManager.configDetails.unassignDatasources.successNotificationTitle',
-          {
-            defaultMessage:
-              'Successfully unassigned {count, plural, one {data source} other {# data sources}}',
-            values: {
-              count: selectedDatasources.length,
-            },
-          }
-        )
-      );
-      setSelectedDatasources([]);
-      refreshData();
-    }
   };
 
   if (redirectToAgentConfigList) {
@@ -226,17 +177,6 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
                 refreshData();
               }}
               agentConfig={agentConfig}
-            />
-          ) : null}
-          {isDatasourcesFlyoutOpen ? (
-            <AssignDatasourcesFlyout
-              configId={agentConfig.id}
-              // @ts-ignore
-              existingDatasources={(agentConfig.datasources || []).map((ds: any) => ds.id)}
-              onClose={() => {
-                setIsDatasourcesFlyoutOpen(false);
-                refreshData();
-              }}
             />
           ) : null}
           <EuiTitle size="m">
@@ -369,7 +309,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
             <h3>
               <FormattedMessage
                 id="xpack.ingestManager.configDetails.datasourcesTableTitle"
-                defaultMessage="Assigned data sources"
+                defaultMessage="Data sources"
               />
             </h3>
           </EuiTitle>
@@ -388,14 +328,10 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
                     </h2>
                   }
                   actions={
-                    <EuiButton
-                      fill
-                      iconType="plusInCircle"
-                      onClick={() => setIsDatasourcesFlyoutOpen(true)}
-                    >
+                    <EuiButton fill iconType="plusInCircle" href={ADD_DATASOURCE_URI}>
                       <FormattedMessage
-                        id="xpack.ingestManager.configDetails.assignDatasourcesButtonText"
-                        defaultMessage="Assign data sources"
+                        id="xpack.ingestManager.configDetails.addDatasourceButtonText"
+                        defaultMessage="Add a data source"
                       />
                     </EuiButton>
                   }
@@ -404,45 +340,19 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
             }
             search={{
               toolsRight: [
-                <EuiButton
-                  fill
-                  iconType="plusInCircle"
-                  onClick={() => setIsDatasourcesFlyoutOpen(true)}
-                >
+                <EuiButton fill iconType="plusInCircle" href={ADD_DATASOURCE_URI}>
                   <FormattedMessage
-                    id="xpack.ingestManager.configDetails.assignDatasourcesButtonText"
-                    defaultMessage="Assign data sources"
+                    id="xpack.ingestManager.configDetails.addDatasourceButtonText"
+                    defaultMessage="Add a data source"
                   />
                 </EuiButton>,
               ],
-              toolsLeft: selectedDatasources.length
-                ? [
-                    <EuiButton
-                      color="danger"
-                      disabled={isUnassignLoading}
-                      isLoading={isUnassignLoading}
-                      onClick={unassignSelectedDatasources}
-                    >
-                      <FormattedMessage
-                        id="xpack.ingestManager.configDetails.unassignDatasourcesButtonLabel"
-                        defaultMessage="Unassign {count, plural, one {# data source} other {# data sources}}"
-                        values={{
-                          count: selectedDatasources.length,
-                        }}
-                      />
-                    </EuiButton>,
-                  ]
-                : null,
               box: {
                 incremental: true,
                 schema: true,
               },
             }}
-            selection={{
-              onSelectionChange: (selection: Array<{ id: string }>) =>
-                setSelectedDatasources(selection.map(ds => ds.id)),
-            }}
-            isSelectable={true}
+            isSelectable={false}
           />
         </WithHeaderLayout>
       </AgentStatusRefreshContext.Provider>

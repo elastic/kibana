@@ -6,9 +6,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiInMemoryTable, EuiInMemoryTableProps, EuiLink, EuiBadge } from '@elastic/eui';
+import { EuiInMemoryTable, EuiInMemoryTableProps, EuiBadge } from '@elastic/eui';
 import { Datasource } from '../../../../types';
-import { useCore } from '../../../../hooks';
 
 type DatasourceWithConfig = Datasource & { configs?: string[] };
 
@@ -19,7 +18,6 @@ interface InMemoryDatasource {
   packageName?: string;
   packageTitle?: string;
   packageVersion?: string;
-  packageDescription?: string;
   configs: number;
 }
 
@@ -39,18 +37,20 @@ export const DatasourcesTable: React.FunctionComponent<Props> = (
     withConfigsCount: false,
   }
 ) => {
-  const core = useCore();
-
   // Flatten some values so that they can be searched via in-memory table search
   const datasources =
     originalDatasources?.map(({ id, name, inputs, package: datasourcePackage, configs }) => ({
       id,
       name,
-      streams: inputs.reduce((streamsCount, input) => streamsCount + input.streams.length, 0),
+      streams: inputs.reduce(
+        (streamsCount, input) =>
+          streamsCount +
+          (input.enabled ? input.streams.filter(stream => stream.enabled).length : 0),
+        0
+      ),
       packageName: datasourcePackage?.name,
       packageTitle: datasourcePackage?.title,
       packageVersion: datasourcePackage?.version,
-      packageDescription: datasourcePackage?.description,
       configs: configs?.length || 0,
     })) || [];
 
@@ -87,36 +87,6 @@ export const DatasourcesTable: React.FunctionComponent<Props> = (
           defaultMessage: 'Streams',
         }
       ),
-    },
-    {
-      name: i18n.translate(
-        'xpack.ingestManager.configDetails.datasourcesTable.actionsColumnTitle',
-        {
-          defaultMessage: 'Actions',
-        }
-      ),
-      actions: [
-        {
-          render: ({ packageName, packageVersion }: any) => {
-            return (
-              <EuiLink
-                color="primary"
-                external
-                target="_blank"
-                href={`${
-                  window.location.origin
-                }${core.http.basePath.get()}/app/epm#/detail/${packageName}-${packageVersion}`}
-              >
-                <FormattedMessage
-                  id="xpack.ingestManager.configDetails.datasourcesTable.viewActionLinkText"
-                  defaultMessage="view"
-                />
-              </EuiLink>
-            );
-          },
-        },
-      ],
-      width: '100px',
     },
   ];
 

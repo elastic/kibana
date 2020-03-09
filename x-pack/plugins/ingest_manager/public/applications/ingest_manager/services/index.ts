@@ -6,9 +6,11 @@
 
 export {
   agentConfigRouteService,
+  datasourceRouteService,
   fleetSetupRouteService,
   agentRouteService,
   enrollmentAPIKeyRouteService,
   epmRouteService,
   setupRouteService,
+  packageToConfigDatasourceInputs,
 } from '../../../../common';

@@ -29,7 +29,7 @@ export {
   Installation,
   InstallationStatus,
   PackageInfo,
-  VarsEntry,
+  RegistryVarsEntry,
   Dataset,
   AssetReference,
   ElasticsearchAssetType,

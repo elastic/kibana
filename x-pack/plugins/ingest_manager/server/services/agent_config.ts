@@ -88,7 +88,11 @@ class AgentConfigService {
     };
   }
 
-  public async get(soClient: SavedObjectsClientContract, id: string): Promise<AgentConfig | null> {
+  public async get(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    withDatasources: boolean = true
+  ): Promise<AgentConfig | null> {
     const agentConfigSO = await soClient.get<AgentConfig>(SAVED_OBJECT_TYPE, id);
     if (!agentConfigSO) {
       return null;
@@ -98,15 +102,20 @@ class AgentConfigService {
       throw new Error(agentConfigSO.error.message);
     }
 
-    return {
+    const agentConfig: AgentConfig = {
       id: agentConfigSO.id,
       ...agentConfigSO.attributes,
-      datasources:
+    };
+
+    if (withDatasources) {
+      agentConfig.datasources =
         (await datasourceService.getByIDs(
           soClient,
           (agentConfigSO.attributes.datasources as string[]) || []
-        )) || [],
-    };
+        )) || [];
+    }
+
+    return agentConfig;
   }
 
   public async list(
@@ -171,7 +180,7 @@ class AgentConfigService {
     datasourceIds: string[],
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentConfig> {
-    const oldAgentConfig = await this.get(soClient, id);
+    const oldAgentConfig = await this.get(soClient, id, false);
 
     if (!oldAgentConfig) {
       throw new Error('Agent config not found');
@@ -194,7 +203,7 @@ class AgentConfigService {
     datasourceIds: string[],
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentConfig> {
-    const oldAgentConfig = await this.get(soClient, id);
+    const oldAgentConfig = await this.get(soClient, id, false);
 
     if (!oldAgentConfig) {
       throw new Error('Agent config not found');

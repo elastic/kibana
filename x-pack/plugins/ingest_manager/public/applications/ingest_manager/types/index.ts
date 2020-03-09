@@ -13,8 +13,12 @@ export {
   AgentEvent,
   EnrollmentAPIKey,
   Datasource,
+  NewDatasource,
+  DatasourceInput,
+  DatasourceInputStream,
   // API schemas - Agent Config
   GetAgentConfigsResponse,
+  GetAgentConfigsResponseItem,
   GetOneAgentConfigResponse,
   CreateAgentConfigRequest,
   CreateAgentConfigResponse,
@@ -22,6 +26,9 @@ export {
   UpdateAgentConfigResponse,
   DeleteAgentConfigsRequest,
   DeleteAgentConfigsResponse,
+  // API schemas - Datasource
+  CreateDatasourceRequest,
+  CreateDatasourceResponse,
   // API schemas - Agents
   GetAgentsResponse,
   GetAgentsRequest,
@@ -44,6 +51,9 @@ export {
   ElasticsearchAssetType,
   KibanaAssetType,
   PackageInfo,
+  RegistryVarsEntry,
+  RegistryInput,
+  RegistryStream,
   PackageList,
   PackageListItem,
   PackagesGroupedByStatus,

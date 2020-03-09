@@ -6,12 +6,14 @@
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler } from 'kibana/server';
 import { appContextService, datasourceService, agentConfigService } from '../../services';
+import { ensureInstalledPackage } from '../../services/epm/packages';
 import {
   GetDatasourcesRequestSchema,
   GetOneDatasourceRequestSchema,
   CreateDatasourceRequestSchema,
   UpdateDatasourceRequestSchema,
 } from '../../types';
+import { CreateDatasourceResponse } from '../../../common';
 
 export const getDatasourcesHandler: RequestHandler<
   undefined,
@@ -70,14 +72,28 @@ export const createDatasourceHandler: RequestHandler<
   TypeOf<typeof CreateDatasourceRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   try {
+    // Make sure the datasource package is installed
+    if (request.body.package?.name) {
+      await ensureInstalledPackage({
+        savedObjectsClient: soClient,
+        pkgName: request.body.package.name,
+        callCluster,
+      });
+    }
+
+    // Create datasource
     const datasource = await datasourceService.create(soClient, request.body);
+
+    // Assign it to the given agent config
     await agentConfigService.assignDatasources(soClient, datasource.config_id, [datasource.id], {
       user,
     });
+    const body: CreateDatasourceResponse = { item: datasource, success: true };
     return response.ok({
-      body: { item: datasource, success: true },
+      body,
     });
   } catch (e) {
     return response.customError({

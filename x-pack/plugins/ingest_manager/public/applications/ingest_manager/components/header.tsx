@@ -36,7 +36,7 @@ export interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ leftColumn, rightColumn, tabs }) => (
   <Container>
     <Wrapper>
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="center">
         {leftColumn ? <EuiFlexItem>{leftColumn}</EuiFlexItem> : null}
         {rightColumn ? <EuiFlexItem>{rightColumn}</EuiFlexItem> : null}
       </EuiFlexGroup>
