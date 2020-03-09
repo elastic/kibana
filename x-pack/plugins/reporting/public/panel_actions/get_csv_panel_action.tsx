@@ -33,7 +33,7 @@ interface ActionContext {
 
 export class GetCsvReportPanelAction implements Action<ActionContext> {
   private isDownloading: boolean;
-  public readonly type = CSV_REPORTING_ACTION;
+  public readonly type = '';
   public readonly id = CSV_REPORTING_ACTION;
   private core: CoreSetup;
 
