@@ -35,6 +35,7 @@ export const getKibanaFrameworkAdapter = (
   } = core;
   const {
     data: { autocomplete },
+    // TODO: after NP migration we can likely fix this typing problem
     // @ts-ignore we don't control this type
     triggers_actions_ui,
   } = plugins;
