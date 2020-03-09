@@ -19,7 +19,6 @@
 
 import { resolve } from 'path';
 import { Legacy } from '../../../../kibana';
-import { mappings } from './mappings';
 import { SavedQuery } from '../../../plugins/data/public';
 
 // eslint-disable-next-line import/no-default-export
@@ -37,7 +36,6 @@ export default function DataPlugin(kibana: any) {
     uiExports: {
       interpreter: ['plugins/data/search/expressions/boot'],
       injectDefaultVars: () => ({}),
-      mappings,
       savedObjectsManagement: {
         query: {
           icon: 'search',

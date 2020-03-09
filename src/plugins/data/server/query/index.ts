@@ -17,34 +17,4 @@
  * under the License.
  */
 
-export const mappings = {
-  query: {
-    properties: {
-      title: {
-        type: 'text',
-      },
-      description: {
-        type: 'text',
-      },
-      query: {
-        properties: {
-          language: {
-            type: 'keyword',
-          },
-          query: {
-            type: 'keyword',
-            index: false,
-          },
-        },
-      },
-      filters: {
-        type: 'object',
-        enabled: false,
-      },
-      timefilter: {
-        type: 'object',
-        enabled: false,
-      },
-    },
-  },
-};
+export { QueryService } from './query_service';
