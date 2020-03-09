@@ -5,16 +5,25 @@
  */
 import React from 'react';
 import { useRequest } from '../../../../hooks';
+import { GetAgentStatusResponse } from '../../../../types';
+import { agentRouteService } from '../../../../services';
+import { UseRequestConfig } from '../../../../hooks/use_request/use_request';
 
-export function useGetAgentStatus(configId: string) {
-  const agentStatusRequest = useRequest({
-    path: `/api/ingest_manager/fleet/config/${configId}/agent-status`,
+type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
+
+export function useGetAgentStatus(configId?: string, options?: RequestOptions) {
+  const agentStatusRequest = useRequest<GetAgentStatusResponse>({
+    path: agentRouteService.getStatusPath(),
+    query: {
+      configId,
+    },
     method: 'get',
+    ...options,
   });
 
   return {
     isLoading: agentStatusRequest.isLoading,
-    result: agentStatusRequest.data ? agentStatusRequest.data.result : {},
+    data: agentStatusRequest.data,
     error: agentStatusRequest.error,
     refreshAgentStatus: () => agentStatusRequest.sendRequest,
   };

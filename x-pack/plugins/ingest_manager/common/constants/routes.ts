@@ -48,7 +48,7 @@ export const AGENT_API_ROUTES = {
   ACKS_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/acks`,
   ENROLL_PATTERN: `${FLEET_API_ROOT}/agents/enroll`,
   UNENROLL_PATTERN: `${FLEET_API_ROOT}/agents/unenroll`,
-  STATUS_FOR_CONFIG_PATTERN: `${FLEET_API_ROOT}/config/{configId}/agent-status`,
+  STATUS_PATTERN: `${FLEET_API_ROOT}/agent-status`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {

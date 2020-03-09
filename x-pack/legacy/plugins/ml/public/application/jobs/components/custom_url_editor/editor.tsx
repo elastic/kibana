@@ -8,6 +8,7 @@ import React, { ChangeEvent, FC } from 'react';
 
 import {
   EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -61,11 +62,6 @@ interface CustomUrlEditorProps {
   queryEntityFieldNames: string[];
 }
 
-interface EuiComboBoxOption {
-  label?: string;
-  value?: string;
-}
-
 /*
  * React component for the form for editing a custom URL.
  */
@@ -117,7 +113,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
     });
   };
 
-  const onQueryEntitiesChange = (selectedOptions: EuiComboBoxOption[]) => {
+  const onQueryEntitiesChange = (selectedOptions: EuiComboBoxOptionOption[]) => {
     const selectedFieldNames = selectedOptions.map(option => option.label);
 
     const kibanaSettings = customUrl.kibanaSettings;
@@ -172,7 +168,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
   });
 
   const entityOptions = queryEntityFieldNames.map(fieldName => ({ label: fieldName }));
-  let selectedEntityOptions: EuiComboBoxOption[] = [];
+  let selectedEntityOptions: EuiComboBoxOptionOption[] = [];
   if (kibanaSettings !== undefined && kibanaSettings.queryFieldNames !== undefined) {
     const queryFieldNames: string[] = kibanaSettings.queryFieldNames;
     selectedEntityOptions = queryFieldNames.map(fieldName => ({ label: fieldName }));

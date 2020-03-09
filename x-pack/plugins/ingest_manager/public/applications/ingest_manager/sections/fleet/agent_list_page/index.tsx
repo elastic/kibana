@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState } from 'react';
+import styled from 'styled-components';
 import {
   EuiBasicTable,
   EuiButton,
@@ -20,6 +21,9 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
+  EuiStat,
+  EuiI18nNumber,
+  EuiHealth,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -31,6 +35,17 @@ import { ConnectedLink } from '../components';
 import { SearchBar } from '../../../components/search_bar';
 import { AgentHealth } from '../components/agent_health';
 import { AgentUnenrollProvider } from '../components/agent_unenroll_provider';
+import { DonutChart } from './components/donut_chart';
+import { useGetAgentStatus } from '../../agent_config/details_page/hooks';
+
+const Divider = styled.div`
+  width: 0;
+  height: 100%;
+  border-left: ${props => props.theme.eui.euiBorderThin};
+  height: 45px;
+`;
+
+const REFRESH_INTERVAL_MS = 5000;
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
   const core = useCore();
@@ -70,6 +85,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       .join(' or ')})`;
   }
 
+  const agentStatusRequest = useGetAgentStatus(undefined, {
+    pollIntervalMs: REFRESH_INTERVAL_MS,
+  });
+  const agentStatus = agentStatusRequest.data?.results;
+
   const agentsRequest = useGetAgents(
     {
       page: pagination.currentPage,
@@ -78,7 +98,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       showInactive,
     },
     {
-      pollIntervalMs: 5000,
+      pollIntervalMs: REFRESH_INTERVAL_MS,
     }
   );
 
@@ -211,30 +231,107 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       }
     />
   );
+  const headerRightColumn = (
+    <EuiFlexGroup justifyContent={'flexEnd'} direction="row">
+      <EuiFlexItem grow={false}>
+        <EuiStat
+          titleSize="xs"
+          textAlign="right"
+          title={<EuiI18nNumber value={agentStatus?.total ?? 0} />}
+          description={i18n.translate('xpack.ingestManager.agentListStatus.totalLabel', {
+            defaultMessage: 'Agents',
+          })}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <DonutChart
+          width={40}
+          height={40}
+          data={{
+            online: agentStatus?.online || 0,
+            offline: agentStatus?.offline || 0,
+            error: agentStatus?.error || 0,
+          }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiStat
+          textAlign="right"
+          titleSize="xs"
+          title={
+            <EuiHealth color="success">
+              {' '}
+              <EuiI18nNumber value={agentStatus?.online ?? 0} />
+            </EuiHealth>
+          }
+          description={i18n.translate('xpack.ingestManager.agentListStatus.onlineLabel', {
+            defaultMessage: 'Online',
+          })}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiStat
+          textAlign="right"
+          titleSize="xs"
+          title={<EuiI18nNumber value={agentStatus?.offline ?? 0} />}
+          description={i18n.translate('xpack.ingestManager.agentListStatus.offlineLabel', {
+            defaultMessage: 'Offline',
+          })}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiStat
+          textAlign="right"
+          titleSize="xs"
+          title={<EuiI18nNumber value={agentStatus?.error ?? 0} />}
+          description={i18n.translate('xpack.ingestManager.agentListStatus.errorLabel', {
+            defaultMessage: 'Error',
+          })}
+        />
+      </EuiFlexItem>
+      {core.application.capabilities.ingestManager.write && (
+        <>
+          <EuiFlexItem grow={false}>
+            <Divider />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
+              <FormattedMessage
+                id="xpack.ingestManager.agentList.enrollButton"
+                defaultMessage="Enroll new agents"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </>
+      )}
+    </EuiFlexGroup>
+  );
+  const headerLeftColumn = (
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem>
+        <EuiText>
+          <h1>
+            <FormattedMessage id="xpack.ingestManager.fleet.pageTitle" defaultMessage="Fleet" />
+          </h1>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText color="subdued">
+          <p>
+            <FormattedMessage
+              id="xpack.ingestManager.fleet.pageSubtitle"
+              defaultMessage="Manage and deploy configuration updates to a group of agents of any size."
+            />
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 
   return (
     <WithHeaderLayout
-      leftColumn={
-        <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiFlexItem>
-            <EuiText>
-              <h1>
-                <FormattedMessage id="xpack.ingestManager.fleet.pageTitle" defaultMessage="Fleet" />
-              </h1>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText color="subdued">
-              <p>
-                <FormattedMessage
-                  id="xpack.ingestManager.fleet.pageSubtitle"
-                  defaultMessage="Manage and deploy configuration updates to a group of agents of any size."
-                />
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
+      leftColumn={headerLeftColumn}
+      rightColumn={headerRightColumn}
       tabs={[
         {
           id: 'agents',
@@ -383,16 +480,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        {core.application.capabilities.ingestManager.write && (
-          <EuiFlexItem grow={false}>
-            <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
-              <FormattedMessage
-                id="xpack.ingestManager.agentList.addButton"
-                defaultMessage="Install new agent"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
