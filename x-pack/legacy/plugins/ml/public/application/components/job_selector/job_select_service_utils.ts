@@ -9,7 +9,7 @@ import moment from 'moment';
 import d3 from 'd3';
 
 import { Dictionary } from '../../../../common/types/common';
-import { MlJobWithTimeRange } from '../../../../common/types/jobs';
+import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
 export function getGroupsFromJobs(jobs: MlJobWithTimeRange[]) {
   const groups: Dictionary<any> = {};

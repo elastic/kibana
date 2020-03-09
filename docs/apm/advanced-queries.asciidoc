@@ -5,7 +5,7 @@ When querying in the APM app, you're simply searching and selecting data from fi
 Queries entered into the query bar are also added as parameters to the URL,
 so it's easy to share a specific query or view with others.
 
-In the screenshot below, you can begin to see some of the transaction fields available for filtering on:  
+In the screenshot below, you can begin to see some of the transaction fields available for filtering on:
 
 [role="screenshot"]
 image::apm/images/apm-query-bar.png[Example of the Kibana Query bar in APM app in Kibana]
@@ -25,7 +25,7 @@ TIP: Read the {kibana-ref}/kuery-query.html[Kibana Query Language Enhancements] 
 
 It may also be helpful to view your APM data in the {kibana-ref}/discover.html[Discover app].
 Querying documents in Discover works the same way as querying in the APM app,
-and all of the example queries listed above can also be used in the Discover app.
+and all of the example APM app queries can also be used in the Discover app.
 
 [float]
 ==== Example Discover app query
