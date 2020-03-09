@@ -55,7 +55,7 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
           }),
         ]);
 
-        const totalSummaryCount = indexStatus?.docCount;
+        const totalSummaryCount = indexStatus?.docCount ?? 0;
 
         return {
           summaries,
