@@ -81,7 +81,17 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     }
   }, [form]);
 
-  // console.error('ss', myStepData, form.getFormData());
+  // useEffect(() => {
+  //   if (!form) return;
+
+  //   const subscription = form.subscribe(updatedData => {
+  //     setMyStepData({ ...updatedData.data.raw, ...stepActionsDefaultValue });
+  //   });
+
+  //   return subscription.unsubscribe;
+  // }, [form]);
+
+  console.error('ss', myStepData, form.getFormData());
 
   return isReadOnlyView && myStepData != null ? (
     <StepContentWrapper addPadding={addPadding}>
@@ -104,7 +114,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
               },
             }}
           />
-          {form.getFormData().throttle !== stepActionsDefaultValue.throttle && (
+          {myStepData.throttle !== stepActionsDefaultValue.throttle && (
             <>
               <EuiSpacer />
               <UseField

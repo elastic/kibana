@@ -219,14 +219,11 @@ export const signalRulesAlertType = ({
 
             if (throttle && throttle !== 'no_actions') {
               const alertInstance = services.alertInstanceFactory(ruleId!);
-
               const newSignalsCount = noReIndexResult.hits.total.value;
-              const currentSignalsCount = alertInstance.getState().signalsCount ?? 0;
-              const signalsCount = currentSignalsCount + newSignalsCount;
 
               alertInstance
                 .replaceState({
-                  signalsCount,
+                  signalsCount: newSignalsCount,
                 })
                 .scheduleActions('default', {
                   inputIndexes,

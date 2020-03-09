@@ -17,15 +17,11 @@ import { AlertAction } from '../../../../../../../../../plugins/triggers_actions
 
 type ThrottleSelectField = typeof SelectField;
 
-const ACTION_TYPES = [
+const SUPPORTED_ACTION_TYPES = [
   { id: '.email', name: 'Email', enabled: true },
-  { id: '.index', name: 'Index', enabled: false },
   { id: '.pagerduty', name: 'PagerDuty', enabled: true },
-  { id: '.server-log', name: 'Server log', enabled: false },
-  { id: '.servicenow', name: 'servicenow', enabled: false },
   { id: '.slack', name: 'Slack', enabled: true },
-  { id: '.webhook', name: 'Webhook', enabled: false },
-  { id: '.example-action', name: 'Example Action', enabled: false },
+  { id: '.webhook', name: 'Webhook', enabled: true },
 ];
 
 const DEFAULT_ACTION_GROUP_ID = 'default';
@@ -49,7 +45,7 @@ const getMessageVariables = memoizeOne(() => {
 });
 
 export const RuleActionsField: ThrottleSelectField = ({ field }) => {
-  const { http, toastNotifications, triggers_actions_ui } = useKibana().services;
+  const { http, triggers_actions_ui } = useKibana().services;
   const actionTypeRegistry = triggers_actions_ui.actionTypeRegistry;
   const messageVariables = getMessageVariables();
 
@@ -79,7 +75,6 @@ export const RuleActionsField: ThrottleSelectField = ({ field }) => {
 
   return (
     <ActionForm
-      toastNotifications={toastNotifications}
       actions={field.value as AlertAction[]}
       messageVariables={messageVariables}
       defaultActionGroupId={DEFAULT_ACTION_GROUP_ID}
@@ -88,7 +83,7 @@ export const RuleActionsField: ThrottleSelectField = ({ field }) => {
       setActionParamsProperty={setActionParamsProperty}
       http={http}
       actionTypeRegistry={actionTypeRegistry}
-      actionTypes={ACTION_TYPES}
+      actionTypes={SUPPORTED_ACTION_TYPES}
       defaultActionMessage={DEFAULT_ACTION_MESSAGE}
     />
   );

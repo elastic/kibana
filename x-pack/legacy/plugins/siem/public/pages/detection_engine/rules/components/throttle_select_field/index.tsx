@@ -10,11 +10,10 @@ import { SelectField } from '../../../../../shared_imports';
 
 export const THROTTLE_OPTIONS = [
   { value: 'no_actions', text: 'Perform no actions' },
-  { value: 'signal', text: 'On each signal detected' },
   { value: 'rule', text: 'On each rule execution' },
-  { value: '5m', text: '5 minutes' },
-  { value: '1h', text: 'Hourly' },
-  { value: '1d', text: 'Daily' },
+  // { value: '5m', text: '5 minutes' },
+  // { value: '1h', text: 'Hourly' },
+  // { value: '1d', text: 'Daily' },
 ];
 
 type ThrottleSelectField = typeof SelectField;
