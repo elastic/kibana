@@ -19,7 +19,7 @@
 
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiPageContent } from '@elastic/eui';
 import {
   Capabilities,
   SavedObjectsClientContract,
@@ -93,10 +93,7 @@ export class SavedObjectEdition extends Component<
     const service = serviceRegistry.get(serviceName)!.service;
 
     return (
-      <div
-        className="kuiViewContent kuiViewContent--constrainedWidth"
-        data-test-subj="savedObjectsEdit"
-      >
+      <EuiPageContent horizontalPosition="center" data-test-subj="savedObjectsEdit">
         <Header
           canEdit={canEdit}
           canDelete={canDelete}
@@ -129,7 +126,7 @@ export class SavedObjectEdition extends Component<
             />
           </>
         )}
-      </div>
+      </EuiPageContent>
     );
   }
 

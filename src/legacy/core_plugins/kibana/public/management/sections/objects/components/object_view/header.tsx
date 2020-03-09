@@ -18,7 +18,14 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiButton } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiButton,
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 interface HeaderProps {
@@ -39,10 +46,10 @@ export const Header = ({
   onDeleteClick,
 }: HeaderProps) => {
   return (
-    <EuiFlexGroup justifyContent="spaceBetween">
-      <EuiFlexItem>
-        {canEdit ? (
-          <EuiTitle>
+    <EuiPageContentHeader>
+      <EuiPageContentHeaderSection>
+        <EuiTitle>
+          {canEdit ? (
             <h1>
               <FormattedMessage
                 id="kbn.management.objects.view.editItemTitle"
@@ -50,9 +57,7 @@ export const Header = ({
                 values={{ title: type }}
               />
             </h1>
-          </EuiTitle>
-        ) : (
-          <EuiTitle>
+          ) : (
             <h1>
               <FormattedMessage
                 id="kbn.management.objects.view.viewItemTitle"
@@ -60,13 +65,13 @@ export const Header = ({
                 values={{ title: type }}
               />
             </h1>
-          </EuiTitle>
-        )}
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup>
+          )}
+        </EuiTitle>
+      </EuiPageContentHeaderSection>
+      <EuiPageContentHeaderSection>
+        <EuiFlexGroup responsive={false}>
           {canViewInApp && (
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiButton size="s" href={viewUrl} iconType="eye">
                 <FormattedMessage
                   id="kbn.management.objects.view.viewItemButtonLabel"
@@ -77,7 +82,7 @@ export const Header = ({
             </EuiFlexItem>
           )}
           {canDelete && (
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiButton
                 color="danger"
                 size="s"
@@ -94,7 +99,7 @@ export const Header = ({
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </EuiPageContentHeaderSection>
+    </EuiPageContentHeader>
   );
 };

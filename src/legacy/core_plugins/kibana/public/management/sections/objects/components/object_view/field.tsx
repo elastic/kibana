@@ -123,7 +123,6 @@ export class Field extends PureComponent<FieldProps> {
         return (
           <div data-test-subj={`savedObjects-editField-${name}`}>
             <EuiCodeEditor
-              className="form-control"
               mode="json"
               theme="textmate"
               value={currentValue}
