@@ -21,22 +21,12 @@ export const WHITE_LISTED_ERROR = (message: string) =>
     },
   });
 
-export const NO_USERNAME = i18n.translate(
-  'xpack.actions.builtin.servicenow.servicenowApiUserError',
-  {
-    defaultMessage: 'error configuring servicenow action: no secrets [username] provided',
-  }
-);
-
-export const NO_PASSWORD = i18n.translate(
-  'xpack.actions.builtin.servicenow.servicenowApiPasswordError',
-  {
-    defaultMessage: 'error configuring servicenow action: no secrets [password] provided',
-  }
-);
-
 export const NAME = i18n.translate('xpack.actions.builtin.servicenowTitle', {
   defaultMessage: 'ServiceNow',
+});
+
+export const MAPPING_EMPTY = i18n.translate('xpack.actions.builtin.servicenow.emptyMapping', {
+  defaultMessage: '[casesConfiguration.mapping]: expected non-empty but got empty',
 });
 
 export const ERROR_POSTING = i18n.translate(

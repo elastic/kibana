@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { curry } from 'lodash';
+import { curry, isEmpty } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import {
   ActionType,
@@ -30,6 +30,10 @@ function validateConfig(
   configObject: ConfigType
 ) {
   try {
+    if (isEmpty(configObject.casesConfiguration.mapping)) {
+      return i18n.MAPPING_EMPTY;
+    }
+
     configurationUtilities.ensureWhitelistedUri(configObject.apiUrl);
   } catch (whitelistError) {
     return i18n.WHITE_LISTED_ERROR(whitelistError.message);
@@ -39,14 +43,7 @@ function validateConfig(
 function validateSecrets(
   configurationUtilities: ActionsConfigurationUtilities,
   secrets: SecretsType
-) {
-  if (secrets.username == null) {
-    return i18n.NO_USERNAME;
-  }
-  if (secrets.password == null) {
-    return i18n.NO_PASSWORD;
-  }
-}
+) {}
 
 // action type definition
 export function getActionType({
