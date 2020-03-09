@@ -132,6 +132,7 @@ describe('get()', () => {
 
 describe('list()', () => {
   test('returns list of action types', () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
     const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
       id: 'my-action-type',
@@ -145,8 +146,12 @@ describe('list()', () => {
         id: 'my-action-type',
         name: 'My action type',
         enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
       },
     ]);
+    expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
+    expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalled();
   });
 });
 

@@ -58,6 +58,8 @@ describe('connector_add_modal', () => {
       id: 'my-action-type',
       name: 'test',
       enabled: true,
+      enabledInConfig: true,
+      enabledInLicense: true,
     };
 
     const wrapper = deps

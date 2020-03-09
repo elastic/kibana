@@ -92,8 +92,20 @@ describe('action_form', () => {
           actionTypeRegistry={deps!.actionTypeRegistry}
           defaultActionMessage={'Alert [{{ctx.metadata.name}}] has exceeded the threshold'}
           actionTypes={[
-            { id: actionType.id, name: 'Test', enabled: true },
-            { id: '.index', name: 'Index', enabled: true },
+            {
+              id: actionType.id,
+              name: 'Test',
+              enabled: true,
+              enabledInConfig: true,
+              enabledInLicense: true,
+            },
+            {
+              id: '.index',
+              name: 'Index',
+              enabled: true,
+              enabledInConfig: true,
+              enabledInLicense: true,
+            },
           ]}
           toastNotifications={deps!.toastNotifications}
         />
