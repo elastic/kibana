@@ -19,6 +19,9 @@
 
 import { find } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { createHashHistory } from 'history';
+
+import { createKbnUrlStateStorage } from '../../../../../../plugins/kibana_utils/public';
 
 import editorTemplate from './editor/editor.html';
 import visualizeListingTemplate from './listing/visualize_listing.html';
@@ -26,11 +29,7 @@ import visualizeListingTemplate from './listing/visualize_listing.html';
 import { initVisualizeAppDirective } from './visualize_app';
 import { VisualizeConstants } from './visualize_constants';
 import { VisualizeListingController } from './listing/visualize_listing';
-import {
-  ensureDefaultIndexPattern,
-  registerTimefilterWithGlobalStateFactory,
-} from '../legacy_imports';
-import { syncOnMount } from './global_state_sync';
+import { ensureDefaultIndexPattern } from '../legacy_imports';
 
 import {
   getLandingBreadcrumbs,
@@ -42,17 +41,13 @@ import {
 export function initVisualizeApp(app, deps) {
   initVisualizeAppDirective(app, deps);
 
-  app.run(globalState => {
-    syncOnMount(globalState, deps.data);
-  });
-
-  app.run((globalState, $rootScope) => {
-    registerTimefilterWithGlobalStateFactory(
-      deps.data.query.timefilter.timefilter,
-      globalState,
-      $rootScope
-    );
-  });
+  app.factory('history', () => createHashHistory());
+  app.factory('kbnUrlStateStorage', history =>
+    createKbnUrlStateStorage({
+      history,
+      useHash: deps.uiSettings.get('state:storeInSessionStorage'),
+    })
+  );
 
   app.config(function($routeProvider) {
     const defaults = {
