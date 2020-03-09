@@ -4,7 +4,7 @@
 
 ## SavedObjectsType.management property
 
-An optional [management section](./kibana-plugin-server.savedobjectstypemanagementdefinition.md) definition for the type.
+An optional [saved objects management section](./kibana-plugin-server.savedobjectstypemanagementdefinition.md) definition for the type.
 
 <b>Signature:</b>
 

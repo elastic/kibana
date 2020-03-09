@@ -4,7 +4,7 @@
 
 ## SavedObjectsTypeManagementDefinition.getEditUrl property
 
-Function returning the url to use to redirect to the edition page of this object. If not defined, edition will not be allowed.
+Function returning the url to use to redirect to the editing page of this object. If not defined, editing will not be allowed.
 
 <b>Signature:</b>
 

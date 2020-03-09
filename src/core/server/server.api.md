@@ -2173,7 +2173,7 @@ export interface SavedObjectsTypeManagementDefinition {
 
 // @public
 export interface SavedObjectsTypeMappingDefinition {
-    dynamic?: false | 'strict';
+    dynamic?: boolean | 'strict';
     properties: SavedObjectsMappingProperties;
 }
 
