@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useRequest, UseRequestConfig } from './use_request';
+import { useRequest, UseRequestConfig, sendRequest } from './use_request';
 import { agentRouteService } from '../../services';
 import {
   GetOneAgentResponse,
@@ -12,6 +12,8 @@ import {
   GetOneAgentEventsRequest,
   GetAgentsRequest,
   GetAgentsResponse,
+  GetAgentStatusRequest,
+  GetAgentStatusResponse,
 } from '../../types';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
@@ -41,6 +43,18 @@ export function useGetAgents(query: GetAgentsRequest['query'], options?: Request
   return useRequest<GetAgentsResponse>({
     method: 'get',
     path: agentRouteService.getListPath(),
+    query,
+    ...options,
+  });
+}
+
+export function sendGetAgentStatus(
+  query: GetAgentStatusRequest['query'],
+  options?: RequestOptions
+) {
+  return sendRequest<GetAgentStatusResponse>({
+    method: 'get',
+    path: agentRouteService.getStatusPath(),
     query,
     ...options,
   });
