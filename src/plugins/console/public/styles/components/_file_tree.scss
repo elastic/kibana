@@ -10,11 +10,7 @@
   }
 
   &__actionBar {
-    top: 0;
-    right: 0;
-    z-index: $euiZLevel1;
     padding: 0 5px;
-    position: absolute;
     background-color: $euiColorMediumShade;
     color: $euiColorLightestShade;
   }

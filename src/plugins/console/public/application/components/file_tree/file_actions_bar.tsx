@@ -60,6 +60,7 @@ export const FileActionsBar: FunctionComponent<Props> = ({
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           disabled={disabled}
+          size="s"
           onClick={() => {
             setShowCreateFilePopover(false);
             onFilter();
@@ -79,6 +80,7 @@ export const FileActionsBar: FunctionComponent<Props> = ({
           closePopover={() => setShowCreateFilePopover(false)}
           button={
             <EuiButtonIcon
+              size="s"
               disabled={disabled}
               onClick={() => {
                 setShowCreateFilePopover(true);

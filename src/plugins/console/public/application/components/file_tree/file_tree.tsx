@@ -26,7 +26,7 @@ import { FileSearchBar } from './file_search_bar';
 export interface Props {
   entries: FileEntryProps[];
   onCreate: (fileName: string) => void;
-  onSearchFilter: (search: string) => void;
+  onSearchFilter: (search: string | undefined) => void;
   searchFilter?: string;
   disabled?: boolean;
 }
@@ -42,18 +42,25 @@ export const FileTree: FunctionComponent<Props> = ({
 
   return (
     <div className="conApp__fileTree">
-      {/* File Actions Bar */}
-      <FileActionsBar
-        disabled={disabled}
-        onCreate={onCreate}
-        onFilter={() => setShowFileSearchBar(!showFileSearchBar)}
-      />
       <EuiFlexGroup
         className="conApp__fileTree__entryContainer"
         gutterSize="none"
         responsive={false}
         direction="column"
       >
+        {/* File Action Bar */}
+        <EuiFlexItem grow={false}>
+          <FileActionsBar
+            disabled={disabled}
+            onCreate={onCreate}
+            onFilter={() => {
+              if (showFileSearchBar) {
+                onSearchFilter(undefined);
+              }
+              setShowFileSearchBar(!showFileSearchBar);
+            }}
+          />
+        </EuiFlexItem>
         {/* File Search Bar */}
         {showFileSearchBar && (
           <EuiFlexItem grow={false}>
