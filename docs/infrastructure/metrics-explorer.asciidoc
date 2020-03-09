@@ -44,7 +44,7 @@ In this step we'll leave the aggregation dropdown set to *Average* but you can t
 
 4. In the *graph per* dropdown, enter `host.name` and select this field.
 You will see a separate graph for each host you are monitoring.
-If you are collecting metrics for multiple hosts, you will see something like the screenshot above.
+If you are collecting metrics for multiple hosts, multiple graphics are displayed.
 If you only have metrics for a single host, you will see a single graph.
 Congratulations! Either way, you've explored your first metric.
 

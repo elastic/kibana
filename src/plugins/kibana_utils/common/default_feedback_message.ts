@@ -17,4 +17,12 @@
  * under the License.
  */
 
-export function calculateObjectHash(obj: object): string;
+import { i18n } from '@kbn/i18n';
+
+export const defaultFeedbackMessage = i18n.translate('kibana_utils.defaultFeedbackMessage', {
+  defaultMessage: 'Have feedback? Please create an issue in {link}.',
+  values: {
+    link:
+      '<a href="https://github.com/elastic/kibana/issues/new/choose" rel="noopener noreferrer" target="_blank">GitHub</a>',
+  },
+});
