@@ -5,28 +5,29 @@
  */
 
 import { EuiContextMenuItem } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import * as i18n from './translations';
 import { Case } from '../../../../containers/case/types';
 
 interface GetBulkItems {
   // cases: Case[];
   closePopover: () => void;
+  deleteCasesAction: (cases: string[]) => void;
   // dispatch: Dispatch<Action>;
   // dispatchToaster: Dispatch<ActionToaster>;
   // reFetchCases: (refreshPrePackagedCase?: boolean) => void;
-  selectedCases: Case[];
+  selectedCaseIds: string[];
   caseStatus: string;
 }
 
 export const getBulkItems = ({
-  // cases,
+  deleteCasesAction,
   closePopover,
   caseStatus,
   // dispatch,
   // dispatchToaster,
   // reFetchCases,
-  selectedCases,
+  selectedCaseIds,
 }: GetBulkItems) => {
   return [
     caseStatus === 'open' ? (
@@ -36,8 +37,6 @@ export const getBulkItems = ({
         disabled={true} // TO DO
         onClick={async () => {
           closePopover();
-          // await deleteCasesAction(selectedCases, dispatch, dispatchToaster);
-          // reFetchCases(true);
         }}
       >
         {i18n.BULK_ACTION_CLOSE_SELECTED}
@@ -47,9 +46,10 @@ export const getBulkItems = ({
         key={i18n.BULK_ACTION_OPEN_SELECTED}
         icon="magnet"
         disabled={true} // TO DO
-        onClick={async () => {
+        onClick={() => {
           closePopover();
-          // await deleteCasesAction(selectedCases, dispatch, dispatchToaster);
+
+          // deleteCasesAction(selectedCaseIds);
           // reFetchCases(true);
         }}
       >
@@ -59,11 +59,9 @@ export const getBulkItems = ({
     <EuiContextMenuItem
       key={i18n.BULK_ACTION_DELETE_SELECTED}
       icon="trash"
-      disabled={true} // TO DO
       onClick={async () => {
         closePopover();
-        // await deleteCasesAction(selectedCases, dispatch, dispatchToaster);
-        // reFetchCases(true);
+        deleteCasesAction(selectedCaseIds);
       }}
     >
       {i18n.BULK_ACTION_DELETE_SELECTED}

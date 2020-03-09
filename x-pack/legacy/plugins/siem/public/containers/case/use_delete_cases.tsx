@@ -67,7 +67,7 @@ interface UseDeleteCase extends DeleteState {
 export const useDeleteCases = (): UseDeleteCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isDisplayConfirmDeleteModal: false,
-    isLoading: true,
+    isLoading: false,
     isError: false,
     isDeleted: false,
   });

@@ -11,6 +11,7 @@ import * as i18n from './translations';
 interface ConfirmDeleteCaseModalProps {
   caseTitle: string;
   isModalVisible: boolean;
+  isPlural: boolean;
   onCancel: () => void;
   onConfirm: () => void;
 }
@@ -18,6 +19,7 @@ interface ConfirmDeleteCaseModalProps {
 const ConfirmDeleteCaseModalComp: React.FC<ConfirmDeleteCaseModalProps> = ({
   caseTitle,
   isModalVisible,
+  isPlural,
   onCancel,
   onConfirm,
 }) => {
@@ -33,9 +35,9 @@ const ConfirmDeleteCaseModalComp: React.FC<ConfirmDeleteCaseModalProps> = ({
         defaultFocusedButton="confirm"
         onCancel={onCancel}
         onConfirm={onConfirm}
-        title={i18n.DELETE_TITLE(caseTitle)}
+        title={isPlural ? i18n.DELETE_SELECTED_CASES : i18n.DELETE_TITLE(caseTitle)}
       >
-        {i18n.CONFIRM_QUESTION}
+        {isPlural ? i18n.CONFIRM_QUESTION_PLURAL : i18n.CONFIRM_QUESTION}
       </EuiConfirmModal>
     </EuiOverlayMask>
   );

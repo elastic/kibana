@@ -96,6 +96,7 @@ export const AllCases = React.memo(() => {
     dispatchResetIsDeleted,
     handleOnDeleteConfirm,
     handleToggleModal,
+    isLoading: isDeleting,
     isDeleted,
     isDisplayConfirmDeleteModal,
   } = useDeleteCases();
@@ -111,16 +112,21 @@ export const AllCases = React.memo(() => {
     title: '',
     id: '',
   });
+  const [deleteBulk, setDeleteBulk] = useState<string[]>([]);
   const confirmDeleteModal = useMemo(
     () => (
       <ConfirmDeleteCaseModal
         caseTitle={deleteThisCase.title}
         isModalVisible={isDisplayConfirmDeleteModal}
+        isPlural={deleteBulk.length > 0}
         onCancel={handleToggleModal}
-        onConfirm={handleOnDeleteConfirm.bind(null, [deleteThisCase.id])}
+        onConfirm={handleOnDeleteConfirm.bind(
+          null,
+          deleteBulk.length > 0 ? deleteBulk : [deleteThisCase.id]
+        )}
       />
     ),
-    [deleteThisCase, isDisplayConfirmDeleteModal]
+    [deleteBulk, deleteThisCase, isDisplayConfirmDeleteModal]
   );
 
   const toggleDeleteModal = useCallback(
@@ -131,6 +137,33 @@ export const AllCases = React.memo(() => {
     [isDisplayConfirmDeleteModal]
   );
 
+  const toggleBulkDeleteModal = useCallback(
+    (deleteCases: string[]) => {
+      handleToggleModal();
+      setDeleteBulk(deleteCases);
+    },
+    [isDisplayConfirmDeleteModal]
+  );
+
+  const selectedCaseIds = useMemo(
+    (): string[] =>
+      selectedCases.reduce((arr: string[], caseObj: Case) => [...arr, caseObj.id], []),
+    [selectedCases]
+  );
+
+  const getBulkItemsPopoverContent = useCallback(
+    (closePopover: () => void) => (
+      <EuiContextMenuPanel
+        items={getBulkItems({
+          closePopover,
+          deleteCasesAction: toggleBulkDeleteModal,
+          selectedCaseIds,
+          caseStatus: filterOptions.state,
+        })}
+      />
+    ),
+    [selectedCaseIds, filterOptions.state]
+  );
   const actions = useMemo(
     () =>
       getActions({
@@ -138,7 +171,7 @@ export const AllCases = React.memo(() => {
         deleteCaseOnClick: toggleDeleteModal,
         dispatchUpdate: dispatchUpdateCaseProperty,
       }),
-    [filterOptions.state, dispatchUpdateCaseProperty]
+    [filterOptions.state]
   );
 
   const tableOnChangeCallback = useCallback(
@@ -179,19 +212,6 @@ export const AllCases = React.memo(() => {
       pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
     }),
     [data, queryParams]
-  );
-
-  const getBulkItemsPopoverContent = useCallback(
-    (closePopover: () => void) => (
-      <EuiContextMenuPanel
-        items={getBulkItems({
-          closePopover,
-          selectedCases,
-          caseStatus: filterOptions.state,
-        })}
-      />
-    ),
-    [selectedCases, filterOptions.state]
   );
 
   const sorting: EuiTableSortingType<Case> = {
@@ -243,7 +263,9 @@ export const AllCases = React.memo(() => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </CaseHeaderPage>
-      {isCasesLoading && !isDataEmpty && <ProgressLoader size="xs" color="accent" />}
+      {(isCasesLoading || isDeleting) && !isDataEmpty && (
+        <ProgressLoader size="xs" color="accent" />
+      )}
       <Panel loading={isCasesLoading}>
         <CasesTableFilters
           onFilterChanged={onFilterChangedCallback}
@@ -268,7 +290,7 @@ export const AllCases = React.memo(() => {
                 </UtilityBarGroup>
                 <UtilityBarGroup>
                   <UtilityBarText data-test-subj="case-table-selected-case-count">
-                    {i18n.SELECTED_CASES(selectedCases.length)}
+                    {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
                   </UtilityBarText>
                   <UtilityBarAction
                     iconSide="right"
