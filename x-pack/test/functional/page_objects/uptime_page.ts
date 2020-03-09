@@ -124,7 +124,7 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       await alerts.setAlertInterval(alertInterval);
       await alerts.setAlertThrottleInterval(alertThrottleInterval);
       if (filters) {
-        await setKueryBarText('xpack.uptime.alert.monitorStatus.filterBar', filters);
+        await setKueryBarText('xpack.uptime.alerts.monitorStatus.filterBar', filters);
       }
       await alerts.setAlertStatusNumTimes(alertNumTimes);
       await alerts.setAlertTimerangeSelection(alertTimerangeSelection);

@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useSelector } from 'react-redux';
 import { KueryBar } from '../../connected';
-import { selectAlertStatus } from '../../../state/selectors';
+import { selectMonitorStatusAlert } from '../../../state/selectors';
 
 interface AlertNumberFieldProps {
   'data-test-subj': string;
@@ -96,6 +96,19 @@ const AlertExpressionPopover: React.FC<AlertExpressionPopoverProps> = ({
   );
 };
 
+export const selectedLocationsToString = (selectedLocations: any[]) =>
+  // create a nicely-formatted description string for all `on` locations
+  selectedLocations
+    .filter(({ checked }) => checked === 'on')
+    .map(({ label }) => label)
+    .sort()
+    .reduce((acc, cur) => {
+      if (acc === '') {
+        return cur;
+      }
+      return acc + `, ${cur}`;
+    }, '');
+
 interface AlertMonitorStatusProps {
   autocomplete: any;
   enabled: boolean;
@@ -108,7 +121,7 @@ interface AlertMonitorStatusProps {
 }
 
 export const AlertMonitorStatus: React.FC<AlertMonitorStatusProps> = props => {
-  const { filters, locations } = useSelector(selectAlertStatus);
+  const { filters, locations } = useSelector(selectMonitorStatusAlert);
   const [numTimes, setNumTimes] = useState<number>(5);
   const [numMins, setNumMins] = useState<number>(15);
   const [allLabels, setAllLabels] = useState<boolean>(true);
@@ -182,7 +195,7 @@ export const AlertMonitorStatus: React.FC<AlertMonitorStatusProps> = props => {
     <>
       <KueryBar
         autocomplete={props.autocomplete}
-        data-test-subj="xpack.uptime.alert.monitorStatus.filterBar"
+        data-test-subj="xpack.uptime.alerts.monitorStatus.filterBar"
       />
       <EuiSpacer size="s" />
       <AlertExpressionPopover
@@ -312,17 +325,7 @@ export const AlertMonitorStatus: React.FC<AlertMonitorStatusProps> = props => {
           value={
             selectedLocations.length === 0 || allLabels
               ? 'any location'
-              : // create a nicely-formatted description string for all `on` locations
-                selectedLocations
-                  .filter(({ checked }) => checked === 'on')
-                  .map(({ label }) => label)
-                  .sort()
-                  .reduce((acc, cur) => {
-                    if (acc === '') {
-                      return cur;
-                    }
-                    return acc + `, ${cur}`;
-                  }, '')
+              : selectedLocationsToString(selectedLocations)
           }
         />
       )}
