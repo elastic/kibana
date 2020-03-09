@@ -13,13 +13,16 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
+  EuiButtonIcon,
 } from '@elastic/eui';
-import { txtClose } from './i18n';
+import { txtClose, txtBack } from './i18n';
 
 export interface FlyoutFrameProps {
   title?: React.ReactNode;
   footer?: React.ReactNode;
+  banner?: React.ReactNode;
   onClose?: () => void;
+  onBack?: () => void;
 }
 
 /**
@@ -30,11 +33,41 @@ export const FlyoutFrame: React.FC<FlyoutFrameProps> = ({
   footer,
   onClose,
   children,
+  onBack,
+  banner,
 }) => {
-  const headerFragment = title && (
+  const headerFragment = (title || onBack) && (
     <EuiFlyoutHeader hasBorder>
-      <EuiTitle size="s">
-        <h1>{title}</h1>
+      <EuiTitle size="m">
+        <>
+          {/* just title */}
+          {title && !onBack && <h1>{title}</h1>}
+          {/* just back button */}
+          {!title && onBack && (
+            <EuiButtonIcon
+              color={'subdued'}
+              onClick={onBack}
+              iconType="arrowLeft"
+              aria-label={txtBack}
+            />
+          )}
+          {/* back button && title */}
+          {title && onBack && (
+            <EuiFlexGroup alignItems="center" gutterSize={'s'}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  color={'subdued'}
+                  onClick={onBack}
+                  iconType="arrowLeft"
+                  aria-label={txtBack}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={true}>
+                <h1>{title}</h1>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+        </>
       </EuiTitle>
     </EuiFlyoutHeader>
   );
@@ -64,7 +97,7 @@ export const FlyoutFrame: React.FC<FlyoutFrameProps> = ({
   return (
     <>
       {headerFragment}
-      <EuiFlyoutBody>{children}</EuiFlyoutBody>
+      <EuiFlyoutBody banner={banner}>{children}</EuiFlyoutBody>
       {footerFragment}
     </>
   );

@@ -4,4 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './drilldown_picker';
+import { i18n } from '@kbn/i18n';
+
+export const txtManageDrilldowns = i18n.translate(
+  'xpack.drilldowns.components.FlyoutListManageDrilldowns.manageDrilldownsTitle',
+  {
+    defaultMessage: 'Manage Drilldowns',
+  }
+);

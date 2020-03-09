@@ -4,10 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
-import { storiesOf } from '@storybook/react';
-import { DrilldownPicker } from '.';
-
-storiesOf('components/DrilldownPicker', module).add('default', () => {
-  return <DrilldownPicker />;
-});
+export * from './action_wizard';

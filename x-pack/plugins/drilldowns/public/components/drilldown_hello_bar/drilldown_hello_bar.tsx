@@ -5,22 +5,48 @@
  */
 
 import React from 'react';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTextColor,
+  EuiLink,
+  EuiSpacer,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+import './drilldown_hello_bar.scss';
+import { txtHideHelpButtonLabel, txtHelpText, txtViewDocsLinkLabel } from './i18n';
 
 export interface DrilldownHelloBarProps {
   docsLink?: string;
+  onHideClick?: () => void;
 }
 
-/**
- * @todo https://github.com/elastic/kibana/issues/55311
- */
-export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({ docsLink }) => {
+export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({
+  docsLink,
+  onHideClick = () => {},
+}) => {
   return (
-    <div>
-      <p>
-        Drilldowns provide the ability to define a new behavior when interacting with a panel. You
-        can add multiple options or simply override the default filtering behavior.
-      </p>
-      <a href={docsLink}>View docs</a>
-    </div>
+    <EuiCallOut
+      iconType="help"
+      title={
+        <EuiFlexGroup className="drdHelloBar__content">
+          <EuiFlexItem grow={true}>
+            <EuiTextColor color="subdued">{txtHelpText}</EuiTextColor>
+            {docsLink && (
+              <>
+                <EuiSpacer size={'xs'} />
+                <EuiLink href={docsLink}>{txtViewDocsLinkLabel}</EuiLink>
+              </>
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty size="xs" onClick={onHideClick}>
+              <EuiTextColor color="subdued">{txtHideHelpButtonLabel}</EuiTextColor>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    />
   );
 };

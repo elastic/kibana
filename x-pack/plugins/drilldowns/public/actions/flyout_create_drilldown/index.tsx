@@ -10,7 +10,7 @@ import { CoreStart } from 'src/core/public';
 import { ActionByType } from '../../../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
-import { FlyoutCreateDrilldown } from '../../components/flyout_create_drilldown';
+import { FlyoutDrilldownWizard } from '../../components/flyout_drilldown_wizard';
 
 export const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
 
@@ -46,7 +46,7 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
   public async execute(context: FlyoutCreateDrilldownActionContext) {
     const overlays = await this.params.overlays();
     const handle = overlays.openFlyout(
-      toMountPoint(<FlyoutCreateDrilldown context={context} onClose={() => handle.close()} />)
+      toMountPoint(<FlyoutDrilldownWizard onClose={() => handle.close()} />)
     );
   }
 }

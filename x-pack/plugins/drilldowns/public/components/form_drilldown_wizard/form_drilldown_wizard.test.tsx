@@ -6,21 +6,23 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { FormCreateDrilldown } from '.';
-import { render as renderTestingLibrary, fireEvent } from '@testing-library/react';
+import { FormDrilldownWizard } from './form_drilldown_wizard';
+import { render as renderTestingLibrary, fireEvent, cleanup } from '@testing-library/react/pure';
 import { txtNameOfDrilldown } from './i18n';
 
-describe('<FormCreateDrilldown>', () => {
+afterEach(cleanup);
+
+describe('<FormDrilldownWizard>', () => {
   test('renders without crashing', () => {
     const div = document.createElement('div');
-    render(<FormCreateDrilldown name={''} onNameChange={() => {}} />, div);
+    render(<FormDrilldownWizard onNameChange={() => {}} />, div);
   });
 
   describe('[name=]', () => {
     test('if name not provided, uses to empty string', () => {
       const div = document.createElement('div');
 
-      render(<FormCreateDrilldown />, div);
+      render(<FormDrilldownWizard />, div);
 
       const input = div.querySelector(
         '[data-test-subj="dynamicActionNameInput"]'
@@ -29,10 +31,10 @@ describe('<FormCreateDrilldown>', () => {
       expect(input?.value).toBe('');
     });
 
-    test('can set name input field value', () => {
+    test('can set initial name input field value', () => {
       const div = document.createElement('div');
 
-      render(<FormCreateDrilldown name={'foo'} />, div);
+      render(<FormDrilldownWizard name={'foo'} />, div);
 
       const input = div.querySelector(
         '[data-test-subj="dynamicActionNameInput"]'
@@ -40,7 +42,7 @@ describe('<FormCreateDrilldown>', () => {
 
       expect(input?.value).toBe('foo');
 
-      render(<FormCreateDrilldown name={'bar'} />, div);
+      render(<FormDrilldownWizard name={'bar'} />, div);
 
       expect(input?.value).toBe('bar');
     });
@@ -48,7 +50,7 @@ describe('<FormCreateDrilldown>', () => {
     test('fires onNameChange callback on name change', () => {
       const onNameChange = jest.fn();
       const utils = renderTestingLibrary(
-        <FormCreateDrilldown name={''} onNameChange={onNameChange} />
+        <FormDrilldownWizard name={''} onNameChange={onNameChange} />
       );
       const input = utils.getByLabelText(txtNameOfDrilldown);
 

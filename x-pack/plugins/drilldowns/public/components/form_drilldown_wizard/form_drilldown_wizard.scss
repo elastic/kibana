@@ -1,0 +1,4 @@
+.drdFormDrilldownWizard__formRow .euiFormRow__label {
+  font-size: #{$euiSize * 0.875}; // increase default euiFormRow label size
+  margin-bottom: $euiSizeS; // increase default euiFormRow label margin bottom
+}
