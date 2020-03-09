@@ -17,6 +17,7 @@
  * under the License.
  */
 import { BehaviorSubject } from 'rxjs';
+import { schema } from '@kbn/config-schema';
 
 import { MockUiSettingsClientConstructor } from './ui_settings_service.test.mock';
 
@@ -94,6 +95,45 @@ describe('uiSettings', () => {
   });
 
   describe('#start', () => {
+    describe('validation', () => {
+      it('validates registered definitions', async () => {
+        const service = new UiSettingsService(coreContext);
+        const { register } = await service.setup(setupDeps);
+        register({
+          custom: {
+            value: 42,
+            schema: schema.string(),
+          },
+        });
+
+        await expect(service.start()).rejects.toMatchInlineSnapshot(
+          `[Error: [ui settings defaults [custom]]: expected value of type [string] but got [number]]`
+        );
+      });
+
+      it('validates overrides', async () => {
+        coreContext.configService.atPath.mockReturnValueOnce(
+          new BehaviorSubject({
+            overrides: {
+              custom: 42,
+            },
+          })
+        );
+        const service = new UiSettingsService(coreContext);
+        const { register } = await service.setup(setupDeps);
+        register({
+          custom: {
+            value: '42',
+            schema: schema.string(),
+          },
+        });
+
+        await expect(service.start()).rejects.toMatchInlineSnapshot(
+          `[Error: [ui settings overrides [custom]]: expected value of type [string] but got [number]]`
+        );
+      });
+    });
+
     describe('#asScopedToClient', () => {
       it('passes saved object type "config" to UiSettingsClient', async () => {
         const service = new UiSettingsService(coreContext);
