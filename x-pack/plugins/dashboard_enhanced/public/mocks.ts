@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DrilldownsSetupContract, DrilldownsStartContract } from '.';
+import { DashboardEnhancedSetupContract, DashboardEnhancedStartContract } from '.';
 
-export type Setup = jest.Mocked<DrilldownsSetupContract>;
-export type Start = jest.Mocked<DrilldownsStartContract>;
+export type Setup = jest.Mocked<DashboardEnhancedSetupContract>;
+export type Start = jest.Mocked<DashboardEnhancedStartContract>;
 
 const createSetupContract = (): Setup => {
-  const setupContract: Setup = {
-    registerDrilldown: jest.fn(),
-  };
+  const setupContract: Setup = {};
+
   return setupContract;
 };
 
@@ -22,7 +21,7 @@ const createStartContract = (): Start => {
   return startContract;
 };
 
-export const drilldownsPluginMock = {
+export const dashboardEnhancedPluginMock = {
   createSetupContract,
   createStartContract,
 };
