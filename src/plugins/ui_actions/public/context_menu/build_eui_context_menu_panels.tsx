@@ -79,15 +79,9 @@ async function buildEuiContextMenuPanelItems<Context extends object>({
 
   await Promise.all(promises);
 
-  return items;
+  return items.filter(Boolean);
 }
 
-/**
- *
- * @param {ContextMenuAction} action
- * @param {Embeddable} embeddable
- * @return {EuiContextMenuPanelItemDescriptor}
- */
 function convertPanelActionToContextMenuItem<Context extends object>({
   action,
   actionContext,
@@ -113,8 +107,11 @@ function convertPanelActionToContextMenuItem<Context extends object>({
     closeMenu();
   };
 
-  if (action.getHref && action.getHref(actionContext)) {
-    menuPanelItem.href = action.getHref(actionContext);
+  if (action.getHref) {
+    const href = action.getHref(actionContext);
+    if (href) {
+      menuPanelItem.href = action.getHref(actionContext);
+    }
   }
 
   return menuPanelItem;
