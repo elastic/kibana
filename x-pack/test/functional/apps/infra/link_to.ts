@@ -7,13 +7,17 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+const ONE_HOUR = 60 * 60 * 1000;
+
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common']);
   const retry = getService('retry');
   const browser = getService('browser');
 
-  // Ensure the start/end range is kept
-  const timestamp = Date.now() - 60000;
+  const timestamp = Date.now();
+  const startDate = new Date(timestamp - ONE_HOUR).toISOString();
+  const endDate = new Date(timestamp + ONE_HOUR).toISOString();
+
   const traceId = '433b4651687e18be2c6c8e3b11f53d09';
 
   describe('Infra link-to', function() {
@@ -25,7 +29,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         search: `time=${timestamp}&filter=trace.id:${traceId}`,
         state: undefined,
       };
-      const expectedSearchString = `sourceId=default&logPosition=(end:now,position:(tiebreaker:0,time:${timestamp}),start:now-1d,streamLive:!f)&logFilter=(expression:'trace.id:${traceId}',kind:kuery)`;
+      const expectedSearchString = `sourceId=default&logPosition=(end:'${endDate}',position:(tiebreaker:0,time:${timestamp}),start:'${startDate}',streamLive:!f)&logFilter=(expression:'trace.id:${traceId}',kind:kuery)`;
       const expectedRedirectPath = '/logs/stream?';
 
       await pageObjects.common.navigateToUrlWithBrowserHistory(

@@ -14,14 +14,14 @@ import { isValidDatemath, datemathToEpochMillis } from '../../../utils/datemath'
 /**
  * Url State
  */
-interface LogPositionUrlState {
-  position: LogPositionStateParams['visibleMidpoint'] | undefined;
+export interface LogPositionUrlState {
+  position?: LogPositionStateParams['visibleMidpoint'];
   streamLive: boolean;
   start?: string;
   end?: string;
 }
 
-const ONE_HOUR = 86400000;
+const ONE_HOUR = 3600000;
 
 export const WithLogPositionUrlState = () => {
   const {
@@ -74,10 +74,13 @@ export const WithLogPositionUrlState = () => {
       onInitialize={(initialUrlState: LogPositionUrlState | undefined) => {
         if (initialUrlState) {
           const initialPosition = initialUrlState.position;
-          let initialStartDateExpression = initialUrlState.start || 'now-1d';
-          let initialEndDateExpression = initialUrlState.end || 'now';
+          let initialStartDateExpression = initialUrlState.start;
+          let initialEndDateExpression = initialUrlState.end;
 
-          if (initialPosition) {
+          if (!initialPosition) {
+            initialStartDateExpression = initialStartDateExpression || 'now-1d';
+            initialEndDateExpression = initialEndDateExpression || 'now';
+          } else {
             const initialStartTimestamp = initialStartDateExpression
               ? datemathToEpochMillis(initialStartDateExpression)
               : undefined;
@@ -85,11 +88,12 @@ export const WithLogPositionUrlState = () => {
               ? datemathToEpochMillis(initialEndDateExpression, 'up')
               : undefined;
 
-            // Adjust the start-end range if the target position falls outside
-            if (initialStartTimestamp && initialStartTimestamp > initialPosition.time) {
+            // Adjust the start-end range if the target position falls outside or if it's not set.
+            if (!initialStartTimestamp || initialStartTimestamp > initialPosition.time) {
               initialStartDateExpression = new Date(initialPosition.time - ONE_HOUR).toISOString();
             }
-            if (initialEndTimestamp && initialEndTimestamp < initialPosition.time) {
+
+            if (!initialEndTimestamp || initialEndTimestamp < initialPosition.time) {
               initialEndDateExpression = new Date(initialPosition.time + ONE_HOUR).toISOString();
             }
 
