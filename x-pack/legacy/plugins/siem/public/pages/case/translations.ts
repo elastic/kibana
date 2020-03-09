@@ -18,6 +18,10 @@ export const DELETE_CASE = i18n.translate('xpack.siem.case.confirmDeleteCase.del
   defaultMessage: 'Delete case',
 });
 
+export const DELETE_CASES = i18n.translate('xpack.siem.case.confirmDeleteCase.deleteCases', {
+  defaultMessage: 'Delete cases',
+});
+
 export const NAME = i18n.translate('xpack.siem.case.caseView.name', {
   defaultMessage: 'Name',
 });

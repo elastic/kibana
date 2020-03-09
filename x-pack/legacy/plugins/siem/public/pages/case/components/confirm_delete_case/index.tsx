@@ -31,7 +31,7 @@ const ConfirmDeleteCaseModalComp: React.FC<ConfirmDeleteCaseModalProps> = ({
       <EuiConfirmModal
         buttonColor="danger"
         cancelButtonText={i18n.CANCEL}
-        confirmButtonText={i18n.DELETE_CASE}
+        confirmButtonText={isPlural ? i18n.DELETE_CASES : i18n.DELETE_CASE}
         defaultFocusedButton="confirm"
         onCancel={onCancel}
         onConfirm={onConfirm}
