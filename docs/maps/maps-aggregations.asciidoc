@@ -10,17 +10,17 @@ Use metric aggregations for <<maps-vector-style-data-driven, data driven styling
 
 You can add the following metric aggregations:
 
-* *Average aggregation* computes the average of numeric values that are extracted from the aggregated documents.
+* *Average.* The mean of the values.
 
-* *Count aggregation* calculates the count of the number of aggregated documents.
+* *Count.* The number of documents.
 
-* *Max aggregation* keeps track and returns the maximum value among the numeric values extracted from the aggregated documents.
+* *Max.* The highest value.
 
-* *Min aggregation* keeps track and returns the minimum value among numeric values extracted from the aggregated documents.
+* *Min.* The lowest value.
 
-* *Sum aggregation* sums up numeric values that are extracted from the aggregated documents.
+* *Sum.* The total value.
 
-* *Unique count aggregation* calculates an approximate count of distinct values.
+* *Unique count.* The number of distinct values.
 
 Use aggregated layers with document layers to show aggregated views when the map shows larger
 amounts of the globe and individual documents when the map shows smaller regions.
