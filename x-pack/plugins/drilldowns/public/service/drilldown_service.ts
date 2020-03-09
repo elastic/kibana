@@ -6,17 +6,20 @@
 
 import { CoreSetup } from 'src/core/public';
 import { CONTEXT_MENU_TRIGGER } from '../../../../../src/plugins/embeddable/public';
-import { FlyoutCreateDrilldownAction } from '../actions';
+import { FlyoutCreateDrilldownAction, FlyoutEditDrilldownAction } from '../actions';
 import { DrilldownsSetupDependencies } from '../plugin';
 
 export class DrilldownService {
   bootstrap(core: CoreSetup, { uiActions }: DrilldownsSetupDependencies) {
-    const actionFlyoutCreateDrilldown = new FlyoutCreateDrilldownAction({
-      overlays: async () => (await core.getStartServices())[0].overlays,
-    });
+    const overlays = async () => (await core.getStartServices())[0].overlays;
 
+    const actionFlyoutCreateDrilldown = new FlyoutCreateDrilldownAction({ overlays });
     uiActions.registerAction(actionFlyoutCreateDrilldown);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, actionFlyoutCreateDrilldown);
+
+    const actionFlyoutEditDrilldown = new FlyoutEditDrilldownAction({ overlays });
+    uiActions.registerAction(actionFlyoutEditDrilldown);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, actionFlyoutEditDrilldown);
   }
 
   /**
