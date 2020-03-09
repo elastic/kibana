@@ -41,7 +41,6 @@ import '../components/fetch_error';
 import { getPainlessError } from './get_painless_error';
 import { discoverResponseHandler } from './response_handler';
 import {
-  buildVislibDimensions,
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
@@ -71,6 +70,7 @@ const {
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
 import {
   esFilters,
+  fieldFormats,
   indexPatterns as indexPatternsUtils,
   connectToQueryState,
   syncQueryStateWithUrl,
@@ -833,21 +833,45 @@ function discoverController(
     }
   };
 
+  function getDimensions(aggs, timeRange) {
+    const [metric, agg] = aggs;
+    agg.params.timeRange = timeRange;
+    const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
+    agg.buckets.setBounds(bounds);
+
+    const { esUnit, esValue } = agg.buckets.getInterval();
+    return {
+      x: {
+        accessor: 0,
+        label: agg.makeLabel(),
+        format: fieldFormats.serialize(agg),
+        params: {
+          date: true,
+          interval: moment.duration(esValue, esUnit),
+          intervalESValue: esValue,
+          intervalESUnit: esUnit,
+          format: agg.buckets.getScaledDateFormat(),
+          bounds: agg.buckets.getBounds(),
+        },
+      },
+      y: {
+        accessor: 1,
+        format: fieldFormats.serialize(metric),
+        label: metric.makeLabel(),
+      },
+    };
+  }
+
   function onResults(resp) {
     inspectorRequest.stats(getResponseInspectorStats($scope.searchSource, resp)).ok({ json: resp });
 
     if (getTimeField()) {
       const tabifiedData = tabifyAggResponse($scope.vis.aggs, resp);
       $scope.searchSource.rawResponse = resp;
-      Promise.resolve(
-        buildVislibDimensions($scope.vis, {
-          timefilter,
-          timeRange: $scope.timeRange,
-          searchSource: $scope.searchSource,
-        })
-      ).then(resp => {
-        $scope.histogramData = discoverResponseHandler(tabifiedData, resp);
-      });
+      $scope.histogramData = discoverResponseHandler(
+        tabifiedData,
+        getDimensions($scope.vis.aggs.aggs, $scope.timeRange)
+      );
     }
 
     $scope.hits = resp.hits.total;
@@ -1010,7 +1034,7 @@ function discoverController(
       },
     };
 
-    $scope.vis = new visualizations.Vis(
+    $scope.vis = visualizations.createVis(
       $scope.searchSource.getField('index'),
       visSavedObject.visState
     );
