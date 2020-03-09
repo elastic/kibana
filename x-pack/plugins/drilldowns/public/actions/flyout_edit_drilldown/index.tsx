@@ -14,7 +14,7 @@ import {
   reactToUiComponent,
 } from '../../../../../../src/plugins/kibana_react/public';
 import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
-import { FormCreateDrilldown } from '../../components/form_create_drilldown';
+import { FormDrilldownWizard } from '../../components/form_drilldown_wizard';
 
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 
@@ -67,6 +67,6 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
 
   public async execute({ embeddable }: FlyoutEditDrilldownActionContext) {
     const overlays = await this.params.overlays();
-    overlays.openFlyout(toMountPoint(<FormCreateDrilldown />));
+    overlays.openFlyout(toMountPoint(<FormDrilldownWizard />));
   }
 }
