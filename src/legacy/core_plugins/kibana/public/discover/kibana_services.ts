@@ -54,7 +54,6 @@ export { buildVislibDimensions } from '../../../visualizations/public';
 export { getRequestInspectorStats, getResponseInspectorStats } from '../../../data/public';
 // @ts-ignore
 export { intervalOptions } from 'ui/agg_types';
-export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
 export { timezoneProvider } from 'ui/vis/lib/timezone';
