@@ -10,6 +10,7 @@ import { TransactionActionMenu } from '../TransactionActionMenu';
 import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import * as Transactions from './mockData';
 import { MockApmPluginContextWrapper } from '../../../../utils/testHelpers';
+import * as hooks from '../../../../hooks/useFetcher';
 
 const renderTransaction = async (transaction: Record<string, any>) => {
   const rendered = render(
@@ -23,6 +24,15 @@ const renderTransaction = async (transaction: Record<string, any>) => {
 };
 
 describe('TransactionActionMenu component', () => {
+  beforeAll(() => {
+    spyOn(hooks, 'useFetcher').and.returnValue({
+      data: [],
+      status: 'success'
+    });
+  });
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
   it('should always render the discover link', async () => {
     const { queryByText } = await renderTransaction(
       Transactions.transactionWithMinimalData

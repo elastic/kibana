@@ -134,13 +134,13 @@ describe('CustomLink', () => {
 
     it('creates a custom link', async () => {
       const component = openFlyout();
-      const labelInput = component.getByLabelText('label');
+      const labelInput = component.getByTestId('label');
       act(() => {
         fireEvent.change(labelInput, {
           target: { value: 'foo' }
         });
       });
-      const urlInput = component.getByLabelText('url');
+      const urlInput = component.getByTestId('url');
       act(() => {
         fireEvent.change(urlInput, {
           target: { value: 'bar' }
@@ -204,9 +204,7 @@ describe('CustomLink', () => {
           if (addNewFilter) {
             addFilterField(component, 1);
           }
-          const field = component.getByLabelText(
-            fieldName
-          ) as HTMLSelectElement;
+          const field = component.getByTestId(fieldName) as HTMLSelectElement;
           const optionsAvailable = Object.values(field)
             .map(option => (option as HTMLOptionElement).text)
             .filter(option => option);

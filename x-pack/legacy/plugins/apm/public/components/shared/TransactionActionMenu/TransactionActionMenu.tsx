@@ -21,6 +21,7 @@ import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { getSections } from './sections';
+import { CustomLink } from '../CustomLink';
 
 interface Props {
   readonly transaction: Transaction;
@@ -83,6 +84,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
           </div>
         );
       })}
+      <CustomLink transaction={transaction} />
     </ActionMenu>
   );
 };
