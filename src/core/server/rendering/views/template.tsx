@@ -117,7 +117,7 @@ export const Template: FunctionComponent<Props> = ({
           data-test-subj="kbnLoadingMessage"
         >
           <div className="kbnLoaderWrap">
-            <div className="kbnLoader">{logo}</div>
+            {logo}
             <div
               className="kbnWelcomeText"
               data-error-message={i18n('core.ui.welcomeErrorMessage', {
@@ -125,8 +125,9 @@ export const Template: FunctionComponent<Props> = ({
                   'Elastic Kibana did not load properly. Check the server output for more information.',
               })}
             >
-              {i18n('core.ui.welcomeMessage', { defaultMessage: 'Loading' })}
+              {i18n('core.ui.welcomeMessage', { defaultMessage: 'Loading Elastic Kibana' })}
             </div>
+            <div className="kbnProgress" />
           </div>
         </div>
 

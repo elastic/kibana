@@ -33,36 +33,27 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
       dangerouslySetInnerHTML={{
         __html: `
 
-            @keyframes scaleElastic {
-              0% {
-                  transform: scale3d(0, 0, -0.7);
-                  opacity: 0;
-              }
-              40% {
-                  transform: scale3d(1, 1, 2);
-                  opacity: 1;
-              }
-              50%{
-                  transform: scale3d(.95, .95, 2);
-              }
-              70% {
-                  transform: scale3d(0.90, 0.90, -2.5);
-              }
-              100% {
-                  transform: scale3d(1, 1, 2);
-              }
-          }
-          * {
+          *, *:before, *:after {
             box-sizing: border-box;
+          }
+
+          html, body, div, span, svg {
+            margin: 0;
+            padding: 0;
+            border: none;
+            vertical-align: baseline;
           }
 
           body, html {
             width: 100%;
             height: 100%;
             margin: 0;
+            display: block;
           }
 
           .kbnWelcomeView {
+            line-height: 1.5;
+            background-color: #FFF;
             height: 100%;
             display: -webkit-box;
             display: -webkit-flex;
@@ -99,68 +90,70 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
           }
 
           .kbnWelcomeText {
-            font-size: 16px;
+            font-family:
+            display: inline-block;
+            font-size: 14px;
             font-family: sans-serif;
+            line-height: 40px !important;
+            height: 40px !important;
             color: #98a2b3;
-            animation: fadeIn 1s ease-in-out;
-            animation-fill-mode: forwards;
-            opacity: 0;
-            animation-delay: 1.0s;
           }
 
           .kbnLoaderWrap {
-            height: 128px;
-            width: 128px;
             text-align: center;
+            line-height: 1;
+            text-align: center;
+            font-faimily: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial !important;
+            letter-spacing: -.005em;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            font-kerning: normal;
+            font-weight: 400;
           }
 
-          .kbnLoader svg {
-            width: 128px;
-            height: 128px;
-            margin-bottom: 16px;
+          .kbnLoaderWrap svg {
+            width: 64px;
+            height: 64px;
+            margin: auto;
+            line-height: 1;
           }
 
           .kbnLoader path {
             stroke: white;
-            animation-name: scaleElastic;
-            animation-fill-mode: forwards;
-            animation-direction: alternate;
-            transform-style: preserve-3d;
-            animation-duration: 0.95s;
-            animation-timing-function: cubic-bezier(0, 0.63, 0.49, 1);
-            animation-iteration-count: infinite;
-            transform-origin: 50% 50%;
           }
 
-          .kbnLoader path:nth-of-type(1) {
-            animation-delay: 0s;
+          .kbnProgress {
+            display: inline-block;
+            position: relative;
+            width: 32px;
+            height: 4px;
+            overflow: hidden;
+            background-color: #D3DAE6;
+            line-height: 1;
           }
 
-
-          .kbnLoader path:nth-of-type(2) {
-            animation-delay: 0.035s;
+          .kbnProgress:before {
+            position: absolute;
+            content: '';
+            height: 4px;
+            width: 100%;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            transform: scaleX(0) translateX(0%);
+            animation: kbnProgress 1s cubic-bezier(.694, .0482, .335, 1) infinite;
+            background-color: #006DE4;
           }
 
+          @keyframes kbnProgress {
+            0% {
+              transform: scaleX(1) translateX(-100%);
+            }
 
-          .kbnLoader path:nth-of-type(3) {
-            animation-delay: 0.125s;
+            100% {
+              transform: scaleX(1) translateX(100%);
+            }
           }
-
-
-          .kbnLoader path:nth-of-type(4) {
-            animation-delay: 0.155s;
-          }
-
-
-          .kbnLoader path:nth-of-type(5) {
-            animation-delay: 0.075s;
-          }
-
-
-          .kbnLoader path:nth-of-type(6) {
-            animation-delay: 0.06s;
-          };
-
         `,
       }}
     />
