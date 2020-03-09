@@ -14,9 +14,6 @@ import { Document } from './persistence';
 import { DateRange } from '../../../../plugins/lens/common';
 import { Query, Filter } from '../../../../../src/plugins/data/public';
 
-// eslint-disable-next-line
-export interface EditorFrameOptions {}
-
 export type ErrorCallback = (e: { message: string }) => void;
 
 export interface PublicAPIProps<T> {
@@ -55,7 +52,7 @@ export interface EditorFrameSetup {
 }
 
 export interface EditorFrameStart {
-  createInstance: (options: EditorFrameOptions) => Promise<EditorFrameInstance>;
+  createInstance: () => Promise<EditorFrameInstance>;
 }
 
 // Hints the default nesting to the data source. 0 is the highest priority
@@ -140,6 +137,7 @@ export interface Datasource<T = unknown, P = unknown> {
   removeLayer: (state: T, layerId: string) => T;
   clearLayer: (state: T, layerId: string) => T;
   getLayers: (state: T) => string[];
+  removeColumn: (props: { prevState: T; layerId: string; columnId: string }) => T;
 
   renderDataPanel: (domElement: Element, props: DatasourceDataPanelProps<T>) => void;
   renderDimensionTrigger: (domElement: Element, props: DatasourceDimensionTriggerProps<T>) => void;
@@ -162,21 +160,12 @@ export interface Datasource<T = unknown, P = unknown> {
  */
 export interface DatasourcePublicAPI {
   datasourceId: string;
-  getTableSpec: () => TableSpec;
+  getTableSpec: () => Array<{ columnId: string }>;
   getOperationForColumnId: (columnId: string) => Operation | null;
 
   // Render can be called many times
-  // renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => void;
   renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps) => void;
 }
-
-export interface TableSpecColumn {
-  // Column IDs are the keys for internal state in data sources and visualizations
-  columnId: string;
-}
-
-// TableSpec is managed by visualizations
-export type TableSpec = TableSpecColumn[];
 
 export interface DatasourceDataPanelProps<T = unknown> {
   state: T;
@@ -188,16 +177,35 @@ export interface DatasourceDataPanelProps<T = unknown> {
   filters: Filter[];
 }
 
-// The only way a visualization has to restrict the query building
-export type DatasourceDimensionEditorProps<T = unknown> = FrameDimensionPanelProps & {
+export interface DatasourceDimensionProps<T> {
+  layerId: string;
+  columnId: string;
+
+  // Visualizations can restrict operations based on their own rules
+  filterOperations: (operation: OperationMetadata) => boolean;
+
+  // Visualizations can hint at the role this dimension would play, which
+  // affects the default ordering of the query
+  suggestedPriority?: DimensionPriority;
+
+  onRemove?: (accessor: string) => void;
+
+  // Some dimension editors will allow users to change the operation grouping
+  // from the panel, and this lets the visualization hint that it doesn't want
+  // users to have that level of control
+  hideGrouping?: boolean;
+
   state: T;
+}
+
+// The only way a visualization has to restrict the query building
+export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
   setState: StateSetter<T>;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   dateRange: DateRange;
 };
 
-export type DatasourceDimensionTriggerProps<T> = FrameDimensionPanelProps & {
-  state: T;
+export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T> & {
   dragDropContext: DragContextState;
   togglePopover: () => void;
 };
@@ -286,18 +294,6 @@ interface VisualizationDimensionConfig {
   required?: boolean;
 }
 
-export interface VisualizationLayerConfigResult<T = unknown> {
-  dimensions: VisualizationDimensionConfig[];
-}
-
-export interface VisualizationDimensionPanelProps<T = unknown> {
-  layerId: string;
-  // dragDropContext: DragContextState;
-  frame: FramePublicAPI;
-  state: T;
-  setState: (newState: T) => void;
-}
-
 /**
  * Object passed to `getSuggestions` of a visualization.
  * It contains a possible table the current datasource could
@@ -355,34 +351,12 @@ export interface VisualizationSuggestion<T = unknown> {
   previewIcon: IconType;
 }
 
-export interface FrameDimensionPanelProps {
-  layerId: string;
-  columnId: string;
-
-  // Visualizations can restrict operations based on their own rules
-  filterOperations: (operation: OperationMetadata) => boolean;
-
-  // Visualizations can hint at the role this dimension would play, which
-  // affects the default ordering of the query
-  suggestedPriority?: DimensionPriority;
-
-  onRemove?: (accessor: string) => void;
-
-  // Some dimension editors will allow users to change the operation grouping
-  // from the panel, and this lets the visualization hint that it doesn't want
-  // users to have that level of control
-  hideGrouping?: boolean;
-}
-
 export interface FramePublicAPI {
   datasourceLayers: Record<string, DatasourcePublicAPI>;
 
   dateRange: DateRange;
   query: Query;
   filters: Filter[];
-
-  // Render can be called many times
-  // renderDimensionPanel: (domElement: Element, props: FrameDimensionPanelProps) => void;
 
   // Adds a new layer. This has a side effect of updating the datasource state
   addNewLayer: () => string;
@@ -411,7 +385,9 @@ export interface Visualization<T = unknown, P = unknown> {
   getLayerContextMenuIcon?: (opts: { state: T; layerId: string }) => IconType | undefined;
   renderLayerContextMenu?: (domElement: Element, props: VisualizationLayerConfigProps<T>) => void;
 
-  getLayerOptions: (props: VisualizationLayerConfigProps<T>) => VisualizationLayerConfigResult;
+  getLayerOptions: (
+    props: VisualizationLayerConfigProps<T>
+  ) => { dimensions: VisualizationDimensionConfig[] };
 
   getDescription: (
     state: T

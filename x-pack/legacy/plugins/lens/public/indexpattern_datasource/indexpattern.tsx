@@ -44,6 +44,7 @@ import {
 } from './types';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Plugin as DataPlugin } from '../../../../../../src/plugins/data/public';
+import { deleteColumn } from './state_helpers';
 import { Datasource, StateSetter } from '..';
 
 export { OperationType, IndexPatternColumn } from './operations';
@@ -163,6 +164,14 @@ export function getIndexPatternDatasource({
 
     getLayers(state: IndexPatternPrivateState) {
       return Object.keys(state.layers);
+    },
+
+    removeColumn({ prevState, layerId, columnId }) {
+      return deleteColumn({
+        state: prevState,
+        layerId,
+        columnId,
+      });
     },
 
     toExpression,

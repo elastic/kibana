@@ -19,3 +19,13 @@
   box-shadow: none !important;
   border: 1px dashed currentColor;
 }
+
+.lnsConfigPanel__dimension {
+  @include euiFontSizeS;
+  background-color: $euiColorEmptyShade;
+  border-radius: $euiBorderRadius;
+  display: flex;
+  align-items: center;
+  margin-top: $euiSizeXS;
+  overflow: hidden;
+}

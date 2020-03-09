@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiToolTip,
-  EuiText,
   EuiButton,
   EuiForm,
   EuiFormRow,
@@ -129,7 +128,7 @@ function LayerPanels(
           updateDatasource={updateDatasource}
           frame={framePublicAPI}
           isOnlyLayer={layerIds.length === 1}
-          onRemove={() => {
+          onRemoveLayer={() => {
             dispatch({
               type: 'UPDATE_STATE',
               subType: 'REMOVE_OR_CLEAR_LAYER',
@@ -198,11 +197,11 @@ function LayerPanel(
     visualizationState: unknown;
     updateVisualization: StateSetter<unknown>;
     updateDatasource: (datasourceId: string, newState: unknown) => void;
-    onRemove: () => void;
+    onRemoveLayer: () => void;
   }
 ) {
   const dragDropContext = useContext(DragContext);
-  const { framePublicAPI, layerId, activeVisualization, isOnlyLayer, onRemove } = props;
+  const { framePublicAPI, layerId, activeVisualization, isOnlyLayer, onRemoveLayer } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
   if (!datasourcePublicAPI) {
     return <></>;
@@ -308,7 +307,7 @@ function LayerPanel(
                 {dimension.accessors.map(accessor => (
                   <DragDrop
                     key={accessor}
-                    className="lnsIndexPatternDimensionPanel"
+                    className="lnsConfigPanel__dimension"
                     data-test-subj="indexPattern-dropTarget"
                     droppable={
                       dragDropContext.dragging &&
@@ -375,6 +374,14 @@ function LayerPanel(
                       })}
                       onClick={() => {
                         trackUiEvent('indexpattern_dimension_removed');
+                        props.updateDatasource(
+                          datasourceId,
+                          layerDatasource.removeColumn({
+                            layerId,
+                            columnId: accessor,
+                            prevState: layerDatasourceState,
+                          })
+                        );
                         props.updateVisualization(
                           props.activeVisualization.removeDimension({
                             layerId,
@@ -498,7 +505,7 @@ function LayerPanel(
                   el.blur();
                 }
 
-                onRemove();
+                onRemoveLayer();
               }}
             >
               {isOnlyLayer

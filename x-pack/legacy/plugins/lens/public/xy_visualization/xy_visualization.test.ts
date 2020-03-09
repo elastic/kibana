@@ -172,9 +172,87 @@ describe('xy_visualization', () => {
     });
   });
 
-  describe('#setDimension', () => {});
+  describe('#setDimension', () => {
+    it('sets the x axis', () => {
+      expect(
+        xyVisualization.setDimension({
+          prevState: {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: [],
+              },
+            ],
+          },
+          layerId: 'first',
+          dimensionId: 'x',
+          columnId: 'newCol',
+        }).layers[0]
+      ).toEqual({
+        layerId: 'first',
+        seriesType: 'area',
+        xAccessor: 'newCol',
+        accessors: [],
+      });
+    });
 
-  describe('#removeDimension', () => {});
+    it('replaces the x axis', () => {
+      expect(
+        xyVisualization.setDimension({
+          prevState: {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: [],
+              },
+            ],
+          },
+          layerId: 'first',
+          dimensionId: 'x',
+          columnId: 'newCol',
+        }).layers[0]
+      ).toEqual({
+        layerId: 'first',
+        seriesType: 'area',
+        xAccessor: 'newCol',
+        accessors: [],
+      });
+    });
+  });
+
+  describe('#removeDimension', () => {
+    it('removes the x axis', () => {
+      expect(
+        xyVisualization.removeDimension({
+          prevState: {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: [],
+              },
+            ],
+          },
+          layerId: 'first',
+          dimensionId: 'x',
+          columnId: 'newCol',
+        }).layers[0]
+      ).toEqual({
+        layerId: 'first',
+        seriesType: 'area',
+        xAccessor: undefined,
+        accessors: [],
+      });
+    });
+  });
 
   describe('#toExpression', () => {
     let mockDatasource: ReturnType<typeof createMockDatasource>;
@@ -223,136 +301,102 @@ describe('xy_visualization', () => {
       ]);
     });
   });
+
+  describe('#getLayerOptions', () => {
+    let mockDatasource: ReturnType<typeof createMockDatasource>;
+    let frame: ReturnType<typeof createMockFramePublicAPI>;
+
+    beforeEach(() => {
+      frame = createMockFramePublicAPI();
+      mockDatasource = createMockDatasource('testDatasource');
+
+      mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'd' },
+        { columnId: 'a' },
+        { columnId: 'b' },
+        { columnId: 'c' },
+      ]);
+
+      // mockDatasource.publicAPIMock.getOperationForColumnId.mockImplementation(col => {
+      //   return { label: `col_${col}`, dataType: 'number' } as Operation;
+      // });
+
+      frame.datasourceLayers = {
+        first: mockDatasource.publicAPIMock,
+      };
+    });
+
+    it('should return options for 3 dimensions', () => {
+      const options = xyVisualization.getLayerOptions({
+        state: exampleState(),
+        frame,
+        layerId: 'first',
+        setState: jest.fn,
+      }).dimensions;
+      expect(options).toHaveLength(3);
+      expect(options.map(o => o.dimensionId)).toEqual(['x', 'y', 'breakdown']);
+    });
+
+    it('should only accept bucketed operations for x', () => {
+      const options = xyVisualization.getLayerOptions({
+        state: exampleState(),
+        frame,
+        layerId: 'first',
+        setState: jest.fn,
+      }).dimensions;
+      const filterOperations = options.find(o => o.dimensionId === 'x')!.filterOperations;
+
+      const exampleOperation: Operation = {
+        dataType: 'number',
+        isBucketed: false,
+        label: 'bar',
+      };
+      const bucketedOps: Operation[] = [
+        { ...exampleOperation, isBucketed: true, dataType: 'number' },
+        { ...exampleOperation, isBucketed: true, dataType: 'string' },
+        { ...exampleOperation, isBucketed: true, dataType: 'boolean' },
+        { ...exampleOperation, isBucketed: true, dataType: 'date' },
+      ];
+      const ops: Operation[] = [
+        ...bucketedOps,
+        { ...exampleOperation, dataType: 'number' },
+        { ...exampleOperation, dataType: 'string' },
+        { ...exampleOperation, dataType: 'boolean' },
+        { ...exampleOperation, dataType: 'date' },
+      ];
+      expect(ops.filter(filterOperations)).toEqual(bucketedOps);
+    });
+
+    it('should not allow anything to be added to x', () => {
+      const options = xyVisualization.getLayerOptions({
+        state: exampleState(),
+        frame,
+        layerId: 'first',
+        setState: jest.fn,
+      }).dimensions;
+      expect(options.find(o => o.dimensionId === 'x')?.supportsMoreColumns).toBe(false);
+    });
+
+    it('should allow number operations on y', () => {
+      const options = xyVisualization.getLayerOptions({
+        state: exampleState(),
+        frame,
+        layerId: 'first',
+        setState: jest.fn,
+      }).dimensions;
+      const filterOperations = options.find(o => o.dimensionId === 'y')!.filterOperations;
+      const exampleOperation: Operation = {
+        dataType: 'number',
+        isBucketed: false,
+        label: 'bar',
+      };
+      const ops: Operation[] = [
+        { ...exampleOperation, dataType: 'number' },
+        { ...exampleOperation, dataType: 'string' },
+        { ...exampleOperation, dataType: 'boolean' },
+        { ...exampleOperation, dataType: 'date' },
+      ];
+      expect(ops.filter(filterOperations).map(x => x.dataType)).toEqual(['number']);
+    });
+  });
 });
-
-// test('the x dimension panel accepts only bucketed operations', () => {
-//   // TODO: this should eventually also accept raw operation
-//   const state = testState();
-//   const component = mount(
-//     <XYConfigPanel
-//       layerId={state.layers[0].layerId}
-//       dragDropContext={dragDropContext}
-//       frame={frame}
-//       setState={jest.fn()}
-//       state={{ ...state, layers: [{ ...state.layers[0], xAccessor: 'shazm' }] }}
-//     />
-//   );
-
-//   const panel = testSubj(component, 'lnsXY_xDimensionPanel');
-//   const nativeProps = (panel as NativeRendererProps<DatasourceDimensionPanelProps>).nativeProps;
-//   const { columnId, filterOperations } = nativeProps;
-//   const exampleOperation: Operation = {
-//     dataType: 'number',
-//     isBucketed: false,
-//     label: 'bar',
-//   };
-//   const bucketedOps: Operation[] = [
-//     { ...exampleOperation, isBucketed: true, dataType: 'number' },
-//     { ...exampleOperation, isBucketed: true, dataType: 'string' },
-//     { ...exampleOperation, isBucketed: true, dataType: 'boolean' },
-//     { ...exampleOperation, isBucketed: true, dataType: 'date' },
-//   ];
-//   const ops: Operation[] = [
-//     ...bucketedOps,
-//     { ...exampleOperation, dataType: 'number' },
-//     { ...exampleOperation, dataType: 'string' },
-//     { ...exampleOperation, dataType: 'boolean' },
-//     { ...exampleOperation, dataType: 'date' },
-//   ];
-//   expect(columnId).toEqual('shazm');
-//   expect(ops.filter(filterOperations)).toEqual(bucketedOps);
-// });
-
-// test('the y dimension panel accepts numeric operations', () => {
-//   const state = testState();
-//   const component = mount(
-//     <XYConfigPanel
-//       layerId={state.layers[0].layerId}
-//       dragDropContext={dragDropContext}
-//       frame={frame}
-//       setState={jest.fn()}
-//       state={{ ...state, layers: [{ ...state.layers[0], accessors: ['a', 'b', 'c'] }] }}
-//     />
-//   );
-
-//   const filterOperations = component
-//     .find('[data-test-subj="lensXY_yDimensionPanel"]')
-//     .first()
-//     .prop('filterOperations') as (op: Operation) => boolean;
-
-//   const exampleOperation: Operation = {
-//     dataType: 'number',
-//     isBucketed: false,
-//     label: 'bar',
-//   };
-//   const ops: Operation[] = [
-//     { ...exampleOperation, dataType: 'number' },
-//     { ...exampleOperation, dataType: 'string' },
-//     { ...exampleOperation, dataType: 'boolean' },
-//     { ...exampleOperation, dataType: 'date' },
-//   ];
-//   expect(ops.filter(filterOperations).map(x => x.dataType)).toEqual(['number']);
-// });
-
-// test('allows removal of y dimensions', () => {
-//   const setState = jest.fn();
-//   const state = testState();
-//   const component = mount(
-//     <XYConfigPanel
-//       layerId={state.layers[0].layerId}
-//       dragDropContext={dragDropContext}
-//       frame={frame}
-//       setState={setState}
-//       state={{ ...state, layers: [{ ...state.layers[0], accessors: ['a', 'b', 'c'] }] }}
-//     />
-//   );
-
-//   const onRemove = component
-//     .find('[data-test-subj="lensXY_yDimensionPanel"]')
-//     .first()
-//     .prop('onRemove') as (accessor: string) => {};
-
-//   onRemove('b');
-
-//   expect(setState).toHaveBeenCalledTimes(1);
-//   expect(setState.mock.calls[0][0]).toMatchObject({
-//     layers: [
-//       {
-//         ...state.layers[0],
-//         accessors: ['a', 'c'],
-//       },
-//     ],
-//   });
-// });
-
-// test('allows adding a y axis dimension', () => {
-//   (generateId as jest.Mock).mockReturnValueOnce('zed');
-//   const setState = jest.fn();
-//   const state = testState();
-//   const component = mount(
-//     <XYConfigPanel
-//       layerId={state.layers[0].layerId}
-//       dragDropContext={dragDropContext}
-//       frame={frame}
-//       setState={setState}
-//       state={{ ...state, layers: [{ ...state.layers[0], accessors: ['a', 'b', 'c'] }] }}
-//     />
-//   );
-
-//   const onAdd = component
-//     .find('[data-test-subj="lensXY_yDimensionPanel"]')
-//     .first()
-//     .prop('onAdd') as () => {};
-
-//   onAdd();
-
-//   expect(setState).toHaveBeenCalledTimes(1);
-//   expect(setState.mock.calls[0][0]).toMatchObject({
-//     layers: [
-//       {
-//         ...state.layers[0],
-//         accessors: ['a', 'b', 'c', 'zed'],
-//       },
-//     ],
-//   });
-// });
