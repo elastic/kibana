@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPatternTitle } from '../../../../../../../common/types/kibana';
+import { IndexPatternTitle } from '../kibana';
 import { JobId } from './job';
 export type DatafeedId = string;
 
@@ -15,11 +15,8 @@ export interface Datafeed {
   chunking_config?: ChunkingConfig;
   frequency?: string;
   indices: IndexPatternTitle[];
-  /**
-   * The datafeed can contain indexes and indices
-   */
-  indexes?: IndexPatternTitle[];
-  job_id?: JobId;
+  indexes?: IndexPatternTitle[]; // The datafeed can contain indexes and indices
+  job_id: JobId;
   query: object;
   query_delay?: string;
   script_fields?: object;
