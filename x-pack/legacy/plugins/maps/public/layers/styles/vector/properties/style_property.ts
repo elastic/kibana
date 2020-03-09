@@ -3,11 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { ReactElement } from 'react';
 // @ts-ignore
 import { getVectorStyleLabel } from '../components/get_vector_style_label';
 import { StylePropertyOptions } from '../../../../../common/style_property_descriptor_types';
+
+type LegendProps = {
+  isPointsOnly: boolean;
+  isLinesOnly: boolean;
+  symbolId?: string;
+};
 
 export interface IStyleProperty {
   isDynamic(): boolean;
@@ -16,8 +23,10 @@ export interface IStyleProperty {
   getStyleName(): string;
   getOptions(): StylePropertyOptions;
   renderRangeLegendHeader(): ReactElement<any> | null;
-  renderLegendDetailRow(): ReactElement<any> | null;
-  renderFieldMetaPopover(): ReactElement<any> | null;
+  renderLegendDetailRow(legendProps: LegendProps): ReactElement<any> | null;
+  renderFieldMetaPopover(
+    onFieldMetaOptionsChange: (fieldMetaOptions: FieldMetaOptions) => void
+  ): ReactElement<any> | null;
   getDisplayStyleName(): string;
 }
 

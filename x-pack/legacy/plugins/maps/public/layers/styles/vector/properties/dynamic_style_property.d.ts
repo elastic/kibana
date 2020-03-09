@@ -5,7 +5,6 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { ReactElement } from 'react';
 import { IStyleProperty } from './style_property';
 import { FIELD_ORIGIN } from '../../../../../common/constants';
 import { FieldMetaOptions } from '../../../../../common/style_property_descriptor_types';
@@ -13,12 +12,6 @@ import { IField } from '../../../fields/field';
 import { IVectorLayer } from '../../../vector_layer';
 import { IVectorSource } from '../../../sources/vector_source';
 import { CategoryFieldMeta, RangeFieldMeta } from '../../../../../common/descriptor_types';
-
-type LegendProps = {
-  isPointsOnly: boolean;
-  isLinesOnly: boolean;
-  symbolId?: string;
-};
 
 export interface IDynamicStyleProperty extends IStyleProperty {
   getFieldMetaOptions(): FieldMetaOptions;
@@ -37,8 +30,4 @@ export interface IDynamicStyleProperty extends IStyleProperty {
   pluckCategoricalStyleMetaFromFeatures(features: unknown[]): CategoryFieldMeta;
   pluckOrdinalStyleMetaFromFieldMetaData(fieldMetaData: unknown): RangeFieldMeta;
   pluckCategoricalStyleMetaFromFieldMetaData(fieldMetaData: unknown): CategoryFieldMeta;
-  renderLegendDetailRow(legendProps: LegendProps): ReactElement<any> | null;
-  renderFieldMetaPopover(
-    onFieldMetaOptionsChange: (fieldMetaOptions: FieldMetaOptions) => void
-  ): ReactElement<any> | null;
 }

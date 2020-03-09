@@ -31,7 +31,7 @@ export function CategoricalFieldMetaPopover(props: Props) {
       <EuiFormRow display="columnCompressedSwitch">
         <EuiSwitch
           label={i18n.translate('xpack.maps.styles.fieldMetaOptions.isEnabled.categoricalLabel', {
-            defaultMessage: 'Fetch categories from indices',
+            defaultMessage: 'Get categories from indices',
           })}
           checked={props.styleProperty.getFieldMetaOptions().isEnabled}
           onChange={onIsEnabledChange}
