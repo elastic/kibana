@@ -5,10 +5,11 @@
  */
 
 import { Node } from './job_stats';
+import { DATAFEED_STATE } from '../../constants/states';
 
 export interface DatafeedStats {
   datafeed_id: string;
-  state: 'starting' | 'started' | 'stopping' | 'stopped';
+  state: DATAFEED_STATE;
   node: Node;
   assignment_explanation: string;
   timing_stats: TimingStats;

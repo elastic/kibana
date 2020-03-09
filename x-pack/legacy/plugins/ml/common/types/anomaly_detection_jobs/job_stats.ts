@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { JOB_STATE } from '../../constants/states';
+
 export interface JobStats {
   job_id: string;
   data_counts: DataCounts;
   model_size_stats: ModelSizeStats;
   forecasts_stats: ForecastsStats;
-  state: 'closed' | 'closing' | 'failed' | 'opened' | 'opening' | 'deleted';
+  state: JOB_STATE;
   node: Node;
   assignment_explanation: string;
   open_time: string;
