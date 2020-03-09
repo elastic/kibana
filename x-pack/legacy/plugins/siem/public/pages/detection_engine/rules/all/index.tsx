@@ -317,6 +317,7 @@ export const AllRules = React.memo<AllRulesProps>(
                   </UtilityBarSection>
                 </UtilityBar>
                 <MyEuiBasicTable
+                  data-test-subj="rules-table"
                   columns={columns}
                   isSelectable={!hasNoPermissions ?? false}
                   itemId="id"

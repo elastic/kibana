@@ -215,7 +215,7 @@ describe('reindexService', () => {
 
       await service.createReindexOperation('myIndex');
 
-      expect(actions.createReindexOp).toHaveBeenCalledWith('myIndex');
+      expect(actions.createReindexOp).toHaveBeenCalledWith('myIndex', undefined);
     });
 
     it('fails if index does not exist', async () => {
@@ -841,7 +841,11 @@ describe('reindexService', () => {
     describe('newIndexCreated', () => {
       const reindexOp = {
         id: '1',
-        attributes: { ...defaultAttributes, lastCompletedStep: ReindexStep.newIndexCreated },
+        attributes: {
+          ...defaultAttributes,
+          lastCompletedStep: ReindexStep.newIndexCreated,
+          reindexOptions: { openAndClose: false },
+        },
       } as ReindexSavedObject;
 
       beforeEach(() => {
@@ -957,7 +961,11 @@ describe('reindexService', () => {
     describe('reindexCompleted', () => {
       const reindexOp = {
         id: '1',
-        attributes: { ...defaultAttributes, lastCompletedStep: ReindexStep.reindexCompleted },
+        attributes: {
+          ...defaultAttributes,
+          lastCompletedStep: ReindexStep.reindexCompleted,
+          reindexOptions: { openAndClose: false },
+        },
       } as ReindexSavedObject;
 
       it('switches aliases, sets as complete, and updates lastCompletedStep', async () => {

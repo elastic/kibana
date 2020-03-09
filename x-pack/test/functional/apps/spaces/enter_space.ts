@@ -15,7 +15,10 @@ export default function enterSpaceFunctonalTests({
 
   describe('Enter Space', function() {
     this.tags('smoke');
-    before(async () => await esArchiver.load('spaces/enter_space'));
+    before(async () => {
+      await esArchiver.load('spaces/enter_space');
+      await PageObjects.security.forceLogout();
+    });
     after(async () => await esArchiver.unload('spaces/enter_space'));
 
     afterEach(async () => {
