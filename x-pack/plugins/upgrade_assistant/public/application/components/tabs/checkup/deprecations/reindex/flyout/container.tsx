@@ -7,7 +7,6 @@
 import React from 'react';
 
 import { HttpSetup } from 'src/core/public';
-import { EuiFlyout, EuiFlyoutHeader, EuiPortal, EuiTitle } from '@elastic/eui';
 import { DocLinksStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';

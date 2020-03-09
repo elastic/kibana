@@ -19,11 +19,8 @@ const PAGE_SIZES = [10, 25, 50, 100, 250, 500, 1000];
 export interface IndexDeprecationDetails {
   index: string;
   reindex: boolean;
-<<<<<<< HEAD
   needsDefaultFields: boolean;
-=======
   blockerForReindexing?: EnrichedDeprecationInfo['blockerForReindexing'];
->>>>>>> 492a97e288... [Upgrade Assistant] Better handling of closed indices (#58890)
   details?: string;
 }
 
@@ -159,16 +156,16 @@ export class IndexDeprecationTableUI extends React.Component<
             if (showReindexButton) {
               return (
                 <AppContext.Consumer>
-                {({ http, docLinks }) => {
-                  return (
-                    <ReindexButton
-                      docLinks={docLinks}
-                      reindexBlocker={indexDep.blockerForReindexing}
-                      indexName={indexDep.index!}
-                      http={http}
-                    />
-                  );
-                }}
+                  {({ http, docLinks }) => {
+                    return (
+                      <ReindexButton
+                        docLinks={docLinks}
+                        reindexBlocker={indexDep.blockerForReindexing}
+                        indexName={indexDep.index!}
+                        http={http}
+                      />
+                    );
+                  }}
                 </AppContext.Consumer>
               );
             } else {
