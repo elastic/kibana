@@ -5,16 +5,18 @@
  */
 
 import { get } from 'lodash/fp';
-import React, { useEffect, useState } from 'react';
+import { FetchPolicy } from '@apollo/client';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { GetLastEventTimeQuery, LastEventIndexKey, LastTimeDetails } from '../../../graphql/types';
+import {
+  LastEventIndexKey,
+  LastTimeDetails,
+  useGetLastEventTimeQueryQuery,
+} from '../../../graphql/types';
 import { inputsModel } from '../../../store';
-import { QueryTemplateProps } from '../../query_template';
 import { useUiSetting$ } from '../../../lib/kibana';
 
 import { LastEventTimeGqlQuery } from './last_event_time.gql_query';
-import { useApolloClient } from '../../../utils/apollo_context';
 
 export interface LastEventTimeArgs {
   id: string;
@@ -24,63 +26,29 @@ export interface LastEventTimeArgs {
   refetch: inputsModel.Refetch;
 }
 
-export interface OwnProps extends QueryTemplateProps {
-  children: (args: LastEventTimeArgs) => React.ReactNode;
-  indexKey: LastEventIndexKey;
-}
-
-export function useLastEventTimeQuery<TCache = object>(
+export const useLastEventTimeQuery = (
   indexKey: LastEventIndexKey,
   details: LastTimeDetails,
   sourceId: string
-) {
-  const [loading, updateLoading] = useState(false);
-  const [lastSeen, updateLastSeen] = useState<number | null>(null);
-  const [errorMessage, updateErrorMessage] = useState<string | null>(null);
-  const [currentIndexKey, updateCurrentIndexKey] = useState<LastEventIndexKey | null>(null);
+) => {
   const [defaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const apolloClient = useApolloClient();
-  async function fetchLastEventTime(signal: AbortSignal) {
-    updateLoading(true);
-    if (apolloClient) {
-      apolloClient
-        .query<GetLastEventTimeQuery.Query, GetLastEventTimeQuery.Variables>({
-          query: LastEventTimeGqlQuery,
-          fetchPolicy: 'cache-first',
-          variables: {
-            sourceId,
-            indexKey,
-            details,
-            defaultIndex,
-          },
-          context: {
-            fetchOptions: {
-              signal,
-            },
-          },
-        })
-        .then(
-          result => {
-            updateLoading(false);
-            updateLastSeen(get('data.source.LastEventTime.lastSeen', result));
-            updateErrorMessage(null);
-            updateCurrentIndexKey(currentIndexKey);
-          },
-          error => {
-            updateLoading(false);
-            updateLastSeen(null);
-            updateErrorMessage(error.message);
-          }
-        );
-    }
-  }
+  const options = {
+    query: LastEventTimeGqlQuery,
+    fetchPolicy: 'cache-first' as FetchPolicy,
+    variables: {
+      sourceId,
+      indexKey,
+      details,
+      defaultIndex,
+    },
+  };
 
-  useEffect(() => {
-    const abortCtrl = new AbortController();
-    const signal = abortCtrl.signal;
-    fetchLastEventTime(signal);
-    return () => abortCtrl.abort();
-  }, [apolloClient, indexKey, details.hostName, details.ip]);
+  const { data, loading, error } = useGetLastEventTimeQueryQuery(options);
+  const lastSeen = get('source.LastEventTime.lastSeen', data);
 
-  return { lastSeen, loading, errorMessage };
-}
+  return {
+    lastSeen,
+    loading,
+    errorMessage: error?.message,
+  };
+};

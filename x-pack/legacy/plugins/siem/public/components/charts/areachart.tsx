@@ -146,8 +146,4 @@ export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({ areaChar
   );
 };
 
-AreaChartComponent.displayName = 'AreaChartComponent';
-
 export const AreaChart = React.memo(AreaChartComponent);
-
-AreaChart.displayName = 'AreaChart';

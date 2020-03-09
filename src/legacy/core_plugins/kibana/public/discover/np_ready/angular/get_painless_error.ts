@@ -23,9 +23,9 @@ import { get } from 'lodash';
 export function getPainlessError(error: Error) {
   const rootCause: Array<{ lang: string; script: string }> | undefined = get(
     error,
-    'resp.error.root_cause'
+    'body.attributes.error.root_cause'
   );
-  const message: string = get(error, 'message');
+  const message: string = get(error, 'body.message');
 
   if (!rootCause) {
     return;

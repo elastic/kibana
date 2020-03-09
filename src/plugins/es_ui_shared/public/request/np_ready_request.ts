@@ -28,9 +28,9 @@ export interface SendRequestConfig {
   body?: any;
 }
 
-export interface SendRequestResponse {
-  data: any;
-  error: Error | null;
+export interface SendRequestResponse<D = any, E = Error> {
+  data: D | null;
+  error: E | null;
 }
 
 export interface UseRequestConfig extends SendRequestConfig {
@@ -39,20 +39,21 @@ export interface UseRequestConfig extends SendRequestConfig {
   deserializer?: (data: any) => any;
 }
 
-export interface UseRequestResponse {
+export interface UseRequestResponse<D = any, E = Error> {
   isInitialRequest: boolean;
   isLoading: boolean;
-  error: null | unknown;
-  data: any;
-  sendRequest: (...args: any[]) => Promise<SendRequestResponse>;
+  error: E | null;
+  data: D | null;
+  sendRequest: (...args: any[]) => Promise<SendRequestResponse<D, E>>;
 }
 
-export const sendRequest = async (
+export const sendRequest = async <D = any, E = Error>(
   httpClient: HttpSetup,
   { path, method, body, query }: SendRequestConfig
-): Promise<SendRequestResponse> => {
+): Promise<SendRequestResponse<D, E>> => {
   try {
-    const response = await httpClient[method](path, { body, query });
+    const stringifiedBody = typeof body === 'string' ? body : JSON.stringify(body);
+    const response = await httpClient[method](path, { body: stringifiedBody, query });
 
     return {
       data: response.data ? response.data : response,
@@ -66,7 +67,7 @@ export const sendRequest = async (
   }
 };
 
-export const useRequest = (
+export const useRequest = <D = any, E = Error>(
   httpClient: HttpSetup,
   {
     path,
@@ -77,9 +78,8 @@ export const useRequest = (
     initialData,
     deserializer = (data: any): any => data,
   }: UseRequestConfig
-): UseRequestResponse => {
-  const sendRequestRef = useRef<() => Promise<SendRequestResponse>>();
-
+): UseRequestResponse<D, E> => {
+  const sendRequestRef = useRef<() => Promise<SendRequestResponse<D, E>>>();
   // Main states for tracking request status and data
   const [error, setError] = useState<null | any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -123,7 +123,7 @@ export const useRequest = (
       body,
     };
 
-    const response = await sendRequest(httpClient, requestBody);
+    const response = await sendRequest<D, E>(httpClient, requestBody);
     const { data: serializedResponseData, error: responseError } = response;
 
     // If an outdated request has resolved, DON'T update state, but DO allow the processData handler

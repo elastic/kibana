@@ -21,10 +21,10 @@ import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { IUiSettingsClient, SavedObjectsStart } from 'kibana/public';
+import { IUiSettingsClient, SavedObjectsStart } from '../../../../../../../../core/public';
 
 import { SavedObjectFinderUi } from '../../../../../../../../plugins/saved_objects/public';
-import { VisType } from '../../types';
+import { VisType } from '../../vis_types';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;

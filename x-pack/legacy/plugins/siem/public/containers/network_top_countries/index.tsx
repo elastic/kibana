@@ -6,7 +6,6 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
@@ -14,6 +13,7 @@ import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   FlowTargetSourceDest,
   GetNetworkTopCountriesQuery,
+  GetNetworkTopCountriesQueryComponent,
   NetworkTopCountriesEdges,
   NetworkTopTablesSortField,
   PageInfoPaginated,
@@ -23,7 +23,6 @@ import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
-import { networkTopCountriesQuery } from './index.gql_query';
 
 const ID = 'networkTopCountriesQuery';
 
@@ -41,7 +40,7 @@ export interface NetworkTopCountriesArgs {
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
-  children: (args: NetworkTopCountriesArgs) => React.ReactNode;
+  children: (args: NetworkTopCountriesArgs) => React.ReactElement;
   flowTarget: FlowTargetSourceDest;
   ip?: string;
   type: networkModel.NetworkType;
@@ -94,10 +93,9 @@ class NetworkTopCountriesComponentQuery extends QueryTemplatePaginated<
       },
     };
     return (
-      <Query<GetNetworkTopCountriesQuery.Query, GetNetworkTopCountriesQuery.Variables>
+      <GetNetworkTopCountriesQueryComponent
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
-        query={networkTopCountriesQuery}
         skip={skip}
         variables={variables}
       >
@@ -137,7 +135,7 @@ class NetworkTopCountriesComponentQuery extends QueryTemplatePaginated<
             totalCount: getOr(-1, 'source.NetworkTopCountries.totalCount', data),
           });
         }}
-      </Query>
+      </GetNetworkTopCountriesQueryComponent>
     );
   }
 }

@@ -4,55 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
-import { mount } from 'enzyme';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
+import { MockedProvider } from '@apollo/client/testing';
+import { renderHook } from '@testing-library/react-hooks';
 
-import { wait } from '../../lib/helpers';
-
-import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '.';
+import { useWithSource, indicesExistOrDataTemporarilyUnavailable } from '.';
 import { mockBrowserFields, mockIndexFields, mocksSource } from './mock';
 
 jest.mock('../../lib/kibana');
 
 describe('Index Fields & Browser Fields', () => {
   test('Index Fields', async () => {
-    mount(
+    const wrapper: React.ComponentType = ({ children }) => (
       <MockedProvider mocks={mocksSource} addTypename={false}>
-        <WithSource sourceId="default">
-          {({ indexPattern }) => {
-            if (!isEqual(indexPattern.fields, [])) {
-              expect(indexPattern.fields).toEqual(mockIndexFields);
-            }
-
-            return null;
-          }}
-        </WithSource>
+        {(children as unknown) as undefined}
       </MockedProvider>
     );
+    const { result, waitForNextUpdate } = renderHook(() => useWithSource(), { wrapper });
 
-    // Why => https://github.com/apollographql/react-apollo/issues/1711
-    await wait();
+    await waitForNextUpdate();
+
+    expect(result.current.indexPattern.fields).toEqual(mockIndexFields);
   });
 
   test('Browser Fields', async () => {
-    mount(
+    const wrapper: React.ComponentType = ({ children }) => (
       <MockedProvider mocks={mocksSource} addTypename={false}>
-        <WithSource sourceId="default">
-          {({ browserFields }) => {
-            if (!isEqual(browserFields, {})) {
-              expect(browserFields).toEqual(mockBrowserFields);
-            }
-
-            return null;
-          }}
-        </WithSource>
+        {(children as unknown) as undefined}
       </MockedProvider>
     );
+    const { result, waitForNextUpdate } = renderHook(() => useWithSource(), { wrapper });
+    await waitForNextUpdate();
 
-    // Why => https://github.com/apollographql/react-apollo/issues/1711
-    await wait();
+    expect(result.current.browserFields).toEqual(mockBrowserFields);
   });
 
   describe('indicesExistOrDataTemporarilyUnavailable', () => {

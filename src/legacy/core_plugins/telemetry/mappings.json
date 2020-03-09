@@ -17,6 +17,13 @@
       },
       "userHasSeenNotice": {
         "type": "boolean"
+      },
+      "reportFailureCount": {
+        "type": "integer"
+      },
+      "reportFailureVersion": {
+        "ignore_above": 256,
+        "type": "keyword"
       }
     }
   }

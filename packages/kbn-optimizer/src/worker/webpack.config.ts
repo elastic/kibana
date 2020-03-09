@@ -30,6 +30,7 @@ import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import * as SharedDeps from '@kbn/ui-shared-deps';
 
 import { Bundle, WorkerConfig } from '../common';
+import { parseDirPath } from './parse_path';
 
 const PUBLIC_PATH_PLACEHOLDER = '__REPLACE_WITH_PUBLIC_PATH__';
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
@@ -133,7 +134,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
                       }
 
                       // manually force ui/* urls in legacy styles to resolve to ui/legacy/public
-                      if (uri.startsWith('ui/') && base.split(Path.sep).includes('legacy')) {
+                      if (uri.startsWith('ui/') && parseDirPath(base).dirs.includes('legacy')) {
                         return Path.resolve(
                           worker.repoRoot,
                           'src/legacy/ui/public',
@@ -148,7 +149,9 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
                 {
                   loader: 'sass-loader',
                   options: {
-                    sourceMap: !worker.dist,
+                    // must always be enabled as long as we're using the `resolve-url-loader` to
+                    // rewrite `ui/*` urls. They're dropped by subsequent loaders though
+                    sourceMap: true,
                     prependData(loaderContext: webpack.loader.LoaderContext) {
                       return `@import ${stringifyRequest(
                         loaderContext,
@@ -213,7 +216,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
     },
 
     resolve: {
-      extensions: ['.js', '.ts', '.tsx', '.json'],
+      extensions: ['.mjs', '.js', '.ts', '.tsx', '.json'],
       alias: {
         tinymath: require.resolve('tinymath/lib/tinymath.es5.js'),
       },
@@ -248,6 +251,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
           cache: false,
           sourceMap: false,
           extractComments: false,
+          parallel: false,
           terserOptions: {
             compress: false,
             mangle: false,

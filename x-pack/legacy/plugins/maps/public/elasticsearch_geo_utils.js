@@ -433,3 +433,21 @@ export function convertMapExtentToPolygon({ maxLat, maxLon, minLat, minLon }) {
 
   return formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon });
 }
+
+export function clampToLatBounds(lat) {
+  return clamp(lat, -89, 89);
+}
+
+export function clampToLonBounds(lon) {
+  return clamp(lon, -180, 180);
+}
+
+export function clamp(val, min, max) {
+  if (val > max) {
+    return max;
+  } else if (val < min) {
+    return min;
+  } else {
+    return val;
+  }
+}

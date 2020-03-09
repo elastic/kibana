@@ -4,13 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as t from 'io-ts';
 import Boom from 'boom';
+import * as t from 'io-ts';
+import {
+  invalidLicenseMessage,
+  isValidPlatinumLicense
+} from '../../common/service_map';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { createRoute } from './create_route';
-import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getServiceMap } from '../lib/service_map/get_service_map';
 import { getServiceMapServiceNodeInfo } from '../lib/service_map/get_service_map_service_node_info';
+import { createRoute } from './create_route';
+import { rangeRt, uiFiltersRt } from './default_api_types';
 
 export const serviceMapRoute = createRoute(() => ({
   path: '/api/apm/service-map',
@@ -26,6 +30,10 @@ export const serviceMapRoute = createRoute(() => ({
     if (!context.config['xpack.apm.serviceMapEnabled']) {
       throw Boom.notFound();
     }
+    if (!isValidPlatinumLicense(context.licensing.license)) {
+      throw Boom.forbidden(invalidLicenseMessage);
+    }
+
     const setup = await setupRequest(context, request);
     const {
       query: { serviceName, environment, after }
@@ -50,6 +58,9 @@ export const serviceMapServiceNodeRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     if (!context.config['xpack.apm.serviceMapEnabled']) {
       throw Boom.notFound();
+    }
+    if (!isValidPlatinumLicense(context.licensing.license)) {
+      throw Boom.forbidden(invalidLicenseMessage);
     }
     const setup = await setupRequest(context, request);
 

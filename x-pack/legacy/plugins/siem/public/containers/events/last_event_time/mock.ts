@@ -4,16 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { MockedResponse } from '@apollo/client/testing';
+
 import { defaultIndexPattern } from '../../../../default_index_pattern';
-import { GetLastEventTimeQuery, LastEventIndexKey } from '../../../graphql/types';
+import { LastEventIndexKey } from '../../../graphql/types';
 
 import { LastEventTimeGqlQuery } from './last_event_time.gql_query';
 
-interface MockLastEventTimeQuery {
-  request: {
-    query: GetLastEventTimeQuery.Query;
-    variables: GetLastEventTimeQuery.Variables;
-  };
+interface MockLastEventTimeQuery extends MockedResponse {
   result: {
     data?: {
       source: {
@@ -24,7 +22,6 @@ interface MockLastEventTimeQuery {
         };
       };
     };
-    errors?: [{ message: string }];
   };
 }
 

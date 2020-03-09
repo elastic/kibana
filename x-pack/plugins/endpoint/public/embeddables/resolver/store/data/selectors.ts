@@ -7,7 +7,6 @@
 import { createSelector } from 'reselect';
 import {
   DataState,
-  ProcessEvent,
   IndexedProcessTree,
   ProcessWidths,
   ProcessPositions,
@@ -15,6 +14,7 @@ import {
   ProcessWithWidthMetadata,
   Matrix3,
 } from '../../types';
+import { LegacyEndpointEvent } from '../../../../../common/types';
 import { Vector2 } from '../../types';
 import { add as vector2Add, applyMatrix3 } from '../../lib/vector2';
 import { isGraphableProcess } from '../../models/process_event';
@@ -28,6 +28,10 @@ import {
 
 const unit = 100;
 const distanceBetweenNodesInUnits = 1;
+
+export function isLoading(state: DataState) {
+  return state.isLoading;
+}
 
 /**
  * An isometric projection is a method for representing three dimensional objects in 2 dimensions.
@@ -108,7 +112,7 @@ export const graphableProcesses = createSelector(
  *
  */
 function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): ProcessWidths {
-  const widths = new Map<ProcessEvent, number>();
+  const widths = new Map<LegacyEndpointEvent, number>();
 
   if (size(indexedProcessTree) === 0) {
     return widths;
@@ -309,13 +313,13 @@ function processPositions(
   indexedProcessTree: IndexedProcessTree,
   widths: ProcessWidths
 ): ProcessPositions {
-  const positions = new Map<ProcessEvent, Vector2>();
+  const positions = new Map<LegacyEndpointEvent, Vector2>();
   /**
    * This algorithm iterates the tree in level order. It keeps counters that are reset for each parent.
    * By keeping track of the last parent node, we can know when we are dealing with a new set of siblings and
    * reset the counters.
    */
-  let lastProcessedParentNode: ProcessEvent | undefined;
+  let lastProcessedParentNode: LegacyEndpointEvent | undefined;
   /**
    * Nodes are positioned relative to their siblings. We walk this in level order, so we handle
    * children left -> right.
@@ -420,7 +424,7 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
      * Transform the positions of nodes and edges so they seem like they are on an isometric grid.
      */
     const transformedEdgeLineSegments: EdgeLineSegment[] = [];
-    const transformedPositions = new Map<ProcessEvent, Vector2>();
+    const transformedPositions = new Map<LegacyEndpointEvent, Vector2>();
 
     for (const [processEvent, position] of positions) {
       transformedPositions.set(processEvent, applyMatrix3(position, isometricTransformMatrix));

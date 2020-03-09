@@ -64,7 +64,6 @@ export const RuleSchema = t.intersection([
     language: t.string,
     name: t.string,
     max_signals: t.number,
-    meta: MetaRule,
     query: t.string,
     references: t.array(t.string),
     risk_score: t.number,
@@ -80,6 +79,7 @@ export const RuleSchema = t.intersection([
   t.partial({
     last_failure_at: t.string,
     last_failure_message: t.string,
+    meta: MetaRule,
     output_index: t.string,
     saved_id: t.string,
     status: t.string,

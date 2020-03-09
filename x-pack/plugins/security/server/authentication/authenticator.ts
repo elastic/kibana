@@ -27,6 +27,7 @@ import {
   TokenAuthenticationProvider,
   OIDCAuthenticationProvider,
   PKIAuthenticationProvider,
+  HTTPAuthenticationProvider,
   isSAMLRequestQuery,
 } from './providers';
 import { AuthenticationResult } from './authentication_result';
@@ -208,6 +209,8 @@ export class Authenticator {
           ? (this.options.config.authc as Record<string, any>)[providerType]
           : undefined;
 
+        this.logger.debug(`Enabling "${providerType}" authentication provider.`);
+
         return [
           providerType,
           instantiateProvider(
@@ -218,6 +221,17 @@ export class Authenticator {
         ] as [string, BaseAuthenticationProvider];
       })
     );
+
+    // For the BWC reasons we always include HTTP authentication provider unless it's explicitly disabled.
+    if (this.options.config.authc.http.enabled) {
+      this.setupHTTPAuthenticationProvider(
+        Object.freeze({
+          ...providerCommonOptions,
+          logger: options.loggers.get(HTTPAuthenticationProvider.type),
+        })
+      );
+    }
+
     this.serverBasePath = this.options.basePath.serverBasePath || '/';
 
     this.idleTimeout = this.options.config.session.idleTimeout;
@@ -385,6 +399,41 @@ export class Authenticator {
       };
     }
     return null;
+  }
+
+  /**
+   * Checks whether specified provider type is currently enabled.
+   * @param providerType Type of the provider (`basic`, `saml`, `pki` etc.).
+   */
+  isProviderEnabled(providerType: string) {
+    return this.providers.has(providerType);
+  }
+
+  /**
+   * Initializes HTTP Authentication provider and appends it to the end of the list of enabled
+   * authentication providers.
+   * @param options Common provider options.
+   */
+  private setupHTTPAuthenticationProvider(options: AuthenticationProviderOptions) {
+    const supportedSchemes = new Set(
+      this.options.config.authc.http.schemes.map(scheme => scheme.toLowerCase())
+    );
+
+    // If `autoSchemesEnabled` is set we should allow schemes that other providers use to
+    // authenticate requests with Elasticsearch.
+    if (this.options.config.authc.http.autoSchemesEnabled) {
+      for (const provider of this.providers.values()) {
+        const supportedScheme = provider.getHTTPAuthenticationScheme();
+        if (supportedScheme) {
+          supportedSchemes.add(supportedScheme.toLowerCase());
+        }
+      }
+    }
+
+    this.providers.set(
+      HTTPAuthenticationProvider.type,
+      new HTTPAuthenticationProvider(options, { supportedSchemes })
+    );
   }
 
   /**

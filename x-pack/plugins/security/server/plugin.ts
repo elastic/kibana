@@ -39,7 +39,6 @@ export type FeaturesService = Pick<FeaturesSetupContract, 'getFeatures'>;
  * to function properly.
  */
 export interface LegacyAPI {
-  serverConfig: { protocol: string; hostname: string; port: number };
   auditLogger: {
     log: (eventType: string, message: string, data?: Record<string, unknown>) => void;
   };
@@ -66,11 +65,7 @@ export interface SecurityPluginSetup {
     registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
     registerPrivilegesWithCluster: () => void;
     license: SecurityLicense;
-    config: RecursiveReadonly<{
-      secureCookies: boolean;
-      cookieName: string;
-      loginAssistanceMessage: string;
-    }>;
+    config: RecursiveReadonly<{ secureCookies: boolean }>;
   };
 }
 
@@ -132,7 +127,6 @@ export class Plugin {
       config,
       license,
       loggers: this.initializerContext.logger,
-      getLegacyAPI: this.getLegacyAPI,
     });
 
     const authz = await setupAuthorization({
@@ -163,6 +157,7 @@ export class Plugin {
       authc,
       authz,
       csp: core.http.csp,
+      license,
     });
 
     return deepFreeze<SecurityPluginSetup>({
@@ -189,13 +184,10 @@ export class Plugin {
 
         license,
 
-        // We should stop exposing this config as soon as only new platform plugin consumes it. The only
-        // exception may be `sessionTimeout` as other parts of the app may want to know it.
-        config: {
-          loginAssistanceMessage: config.loginAssistanceMessage,
-          secureCookies: config.secureCookies,
-          cookieName: config.cookieName,
-        },
+        // We should stop exposing this config as soon as only new platform plugin consumes it.
+        // This is only currently required because we use legacy code to inject this as metadata
+        // for consumption by public code in the new platform.
+        config: { secureCookies: config.secureCookies },
       },
     });
   }

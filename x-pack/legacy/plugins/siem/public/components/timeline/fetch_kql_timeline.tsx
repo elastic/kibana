@@ -7,6 +7,7 @@
 import { memo, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { IIndexPattern } from 'src/plugins/data/public';
+import deepEqual from 'fast-deep-equal';
 
 import { timelineSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
@@ -39,7 +40,14 @@ const TimelineKqlFetchComponent = memo<OwnProps>(
       });
     }, [kueryFilterQueryDraft, kueryFilterQuery, id]);
     return null;
-  }
+  },
+  (prevProps, nextProps) =>
+    prevProps.id === nextProps.id &&
+    deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
+    prevProps.inputId === nextProps.inputId &&
+    prevProps.kueryFilterQuery === nextProps.kueryFilterQuery &&
+    prevProps.kueryFilterQueryDraft === nextProps.kueryFilterQueryDraft &&
+    prevProps.setTimelineQuery === nextProps.setTimelineQuery
 );
 
 const makeMapStateToProps = () => {
@@ -58,7 +66,7 @@ const mapDispatchToProps = {
   setTimelineQuery: inputsActions.setQuery,
 };
 
-export const connector = connect(makeMapStateToProps, mapDispatchToProps);
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

@@ -7,7 +7,8 @@
 import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
+import { GraphQLRequest } from '@apollo/client';
+import { MockedProvider } from '@apollo/client/testing';
 import { MemoryRouter } from 'react-router-dom';
 
 import '../../mock/match_media';
@@ -34,7 +35,7 @@ jest.mock('../../components/query_bar', () => ({
 }));
 
 let localSource: Array<{
-  request: {};
+  request: GraphQLRequest;
   result: {
     data: {
       source: {

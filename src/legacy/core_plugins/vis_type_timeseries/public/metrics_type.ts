@@ -18,7 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { defaultFeedbackMessage } from './legacy_imports';
 
 // @ts-ignore
 import { metricsRequestHandler } from './request_handler';
@@ -26,6 +25,7 @@ import { metricsRequestHandler } from './request_handler';
 import { EditorController } from './editor_controller';
 // @ts-ignore
 import { PANEL_TYPES } from '../../../../plugins/vis_type_timeseries/common/panel_types';
+import { defaultFeedbackMessage } from '../../visualizations/public';
 
 export const metricsVisDefinition = {
   name: 'metrics',

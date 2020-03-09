@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { persistTimelineNoteMutation } from '../../../../../legacy/plugins/siem/public/containers/timeline/notes/persist.gql_query';

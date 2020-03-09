@@ -94,9 +94,12 @@ export class ClusterClientAdapter {
     return result as boolean;
   }
 
-  public async createIndex(name: string): Promise<void> {
+  public async createIndex(name: string, body: any = {}): Promise<void> {
     try {
-      await this.callEs('indices.create', { index: name });
+      await this.callEs('indices.create', {
+        index: name,
+        body,
+      });
     } catch (err) {
       if (err.body?.error?.type !== 'resource_already_exists_exception') {
         throw new Error(`error creating initial index: ${err.message}`);

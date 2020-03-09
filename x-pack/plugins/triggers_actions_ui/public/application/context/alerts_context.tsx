@@ -11,20 +11,19 @@ import { FieldFormatsRegistry } from 'src/plugins/data/common/field_formats';
 import { TypeRegistry } from '../type_registry';
 import { AlertTypeModel, ActionTypeModel } from '../../types';
 
-export interface AlertsContextValue {
-  addFlyoutVisible: boolean;
-  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+export interface AlertsContextValue<MetaData = Record<string, any>> {
   reloadAlerts?: () => Promise<void>;
   http: HttpSetup;
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  uiSettings?: IUiSettingsClient;
-  toastNotifications?: Pick<
+  toastNotifications: Pick<
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
+  uiSettings?: IUiSettingsClient;
   charts?: ChartsPluginSetup;
   dataFieldsFormats?: Pick<FieldFormatsRegistry, 'register'>;
+  metadata?: MetaData;
 }
 
 const AlertsContext = createContext<AlertsContextValue>(null as any);

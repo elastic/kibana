@@ -7,7 +7,6 @@
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React from 'react';
-import { Query } from 'react-apollo';
 import { compose, Dispatch } from 'redux';
 import { connect, ConnectedProps } from 'react-redux';
 
@@ -15,6 +14,7 @@ import { IIndexPattern } from '../../../../../../../src/plugins/data/common/inde
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetTimelineQuery,
+  GetTimelineQueryComponent,
   PageInfo,
   SortField,
   TimelineEdges,
@@ -25,7 +25,6 @@ import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 import { EventType } from '../../store/timeline/model';
-import { timelineQuery } from './index.gql_query';
 import { timelineActions } from '../../store/timeline';
 import { SIGNALS_PAGE_TIMELINE_ID } from '../../pages/detection_engine/components/signals';
 
@@ -41,12 +40,8 @@ export interface TimelineArgs {
   getUpdatedAt: () => number;
 }
 
-export interface CustomReduxProps {
-  clearSignalsState: ({ id }: { id?: string }) => void;
-}
-
 export interface OwnProps extends QueryTemplateProps {
-  children?: (args: TimelineArgs) => React.ReactNode;
+  children?: (args: TimelineArgs) => React.ReactElement;
   eventType?: EventType;
   id: string;
   indexPattern?: IIndexPattern;
@@ -56,7 +51,7 @@ export interface OwnProps extends QueryTemplateProps {
   fields: string[];
 }
 
-type TimelineQueryProps = OwnProps & PropsFromRedux & WithKibanaProps & CustomReduxProps;
+type TimelineQueryProps = OwnProps & PropsFromRedux & WithKibanaProps;
 
 class TimelineQueryComponent extends QueryTemplate<
   TimelineQueryProps,
@@ -106,8 +101,7 @@ class TimelineQueryComponent extends QueryTemplate<
     };
 
     return (
-      <Query<GetTimelineQuery.Query, GetTimelineQuery.Variables>
-        query={timelineQuery}
+      <GetTimelineQueryComponent
         fetchPolicy="network-only"
         notifyOnNetworkStatusChange
         variables={variables}
@@ -159,7 +153,7 @@ class TimelineQueryComponent extends QueryTemplate<
             getUpdatedAt: this.getUpdatedAt,
           });
         }}
-      </Query>
+      </GetTimelineQueryComponent>
     );
   }
 

@@ -5,7 +5,8 @@
  */
 
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
+import { MockedProvider } from '@apollo/client/testing';
+import { act } from '@testing-library/react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { mockIndexPattern, TestProviders } from '../../mock';
@@ -52,7 +53,7 @@ describe('EventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
+    await act(() => wait());
     wrapper.update();
 
     expect(
@@ -77,7 +78,7 @@ describe('EventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
+    await act(() => wait());
     wrapper.update();
 
     expect(
@@ -102,7 +103,7 @@ describe('EventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
+    await act(() => wait());
     wrapper.update();
 
     expect(
@@ -128,7 +129,7 @@ describe('EventsViewer', () => {
         </TestProviders>
       );
 
-      await wait();
+      await act(() => wait());
       wrapper.update();
 
       defaultHeaders.forEach(h =>

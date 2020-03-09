@@ -50,6 +50,9 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
   setQuery,
 }) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
+  const title = (
+    <FormattedMessage id="xpack.siem.overview.networkTitle" defaultMessage="Network events" />
+  );
 
   return (
     <EuiFlexItem>
@@ -89,12 +92,7 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
                         <>{''}</>
                       )
                     }
-                    title={
-                      <FormattedMessage
-                        id="xpack.siem.overview.networkTitle"
-                        defaultMessage="Network events"
-                      />
-                    }
+                    title={title}
                   >
                     <EuiButton href={getNetworkUrl()}>
                       <FormattedMessage

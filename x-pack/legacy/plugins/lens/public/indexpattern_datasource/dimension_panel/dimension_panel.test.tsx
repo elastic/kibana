@@ -7,7 +7,14 @@
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { EuiComboBox, EuiSideNav, EuiSideNavItemType, EuiPopover } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiSideNav,
+  EuiSideNavItemType,
+  EuiPopover,
+  EuiFieldNumber,
+} from '@elastic/eui';
+import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { changeColumn } from '../state_helpers';
 import {
   IndexPatternDimensionPanel,
@@ -139,6 +146,18 @@ describe('IndexPatternDimensionPanel', () => {
       uiSettings: {} as IUiSettingsClient,
       savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpSetup,
+      data: ({
+        fieldFormats: ({
+          getType: jest.fn().mockReturnValue({
+            id: 'number',
+            title: 'Number',
+          }),
+          getDefaultType: jest.fn().mockReturnValue({
+            id: 'bytes',
+            title: 'Bytes',
+          }),
+        } as unknown) as DataPublicPluginStart['fieldFormats'],
+      } as unknown) as DataPublicPluginStart,
     };
 
     jest.clearAllMocks();
@@ -175,7 +194,9 @@ describe('IndexPatternDimensionPanel', () => {
 
     openPopover();
 
-    expect(wrapper.find(EuiComboBox)).toHaveLength(1);
+    expect(
+      wrapper.find(EuiComboBox).filter('[data-test-subj="indexPattern-dimension-field"]')
+    ).toHaveLength(1);
   });
 
   it('should not show any choices if the filter returns false', () => {
@@ -189,7 +210,12 @@ describe('IndexPatternDimensionPanel', () => {
 
     openPopover();
 
-    expect(wrapper.find(EuiComboBox)!.prop('options')!).toHaveLength(0);
+    expect(
+      wrapper
+        .find(EuiComboBox)
+        .filter('[data-test-subj="indexPattern-dimension-field"]')!
+        .prop('options')!
+    ).toHaveLength(0);
   });
 
   it('should list all field names and document as a whole in prioritized order', () => {
@@ -197,7 +223,10 @@ describe('IndexPatternDimensionPanel', () => {
 
     openPopover();
 
-    const options = wrapper.find(EuiComboBox).prop('options');
+    const options = wrapper
+      .find(EuiComboBox)
+      .filter('[data-test-subj="indexPattern-dimension-field"]')
+      .prop('options');
 
     expect(options).toHaveLength(2);
 
@@ -228,7 +257,10 @@ describe('IndexPatternDimensionPanel', () => {
 
     openPopover();
 
-    const options = wrapper.find(EuiComboBox).prop('options');
+    const options = wrapper
+      .find(EuiComboBox)
+      .filter('[data-test-subj="indexPattern-dimension-field"]')
+      .prop('options');
 
     expect(options![1].options!.map(({ label }) => label)).toEqual(['timestamp', 'source']);
   });
@@ -262,7 +294,10 @@ describe('IndexPatternDimensionPanel', () => {
 
     openPopover();
 
-    const options = wrapper.find(EuiComboBox).prop('options');
+    const options = wrapper
+      .find(EuiComboBox)
+      .filter('[data-test-subj="indexPattern-dimension-field"]')
+      .prop('options');
 
     expect(options![0]['data-test-subj']).toEqual('lns-fieldOptionIncompatible-Records');
 
@@ -335,6 +370,7 @@ describe('IndexPatternDimensionPanel', () => {
               // Private
               operationType: 'max',
               sourceField: 'bytes',
+              params: { format: { id: 'bytes' } },
             },
           },
         },
@@ -345,7 +381,9 @@ describe('IndexPatternDimensionPanel', () => {
 
     openPopover();
 
-    const comboBox = wrapper.find(EuiComboBox)!;
+    const comboBox = wrapper
+      .find(EuiComboBox)
+      .filter('[data-test-subj="indexPattern-dimension-field"]')!;
     const option = comboBox.prop('options')![1].options!.find(({ label }) => label === 'memory')!;
 
     act(() => {
@@ -362,6 +400,7 @@ describe('IndexPatternDimensionPanel', () => {
             col1: expect.objectContaining({
               operationType: 'max',
               sourceField: 'memory',
+              params: { format: { id: 'bytes' } },
               // Other parts of this don't matter for this test
             }),
           },
@@ -375,7 +414,9 @@ describe('IndexPatternDimensionPanel', () => {
 
     openPopover();
 
-    const comboBox = wrapper.find(EuiComboBox)!;
+    const comboBox = wrapper
+      .find(EuiComboBox)
+      .filter('[data-test-subj="indexPattern-dimension-field"]')!;
     const option = comboBox.prop('options')![1].options!.find(({ label }) => label === 'source')!;
 
     act(() => {
@@ -419,6 +460,7 @@ describe('IndexPatternDimensionPanel', () => {
                   // Private
                   operationType: 'max',
                   sourceField: 'bytes',
+                  params: { format: { id: 'bytes' } },
                 },
               },
             },
@@ -443,6 +485,7 @@ describe('IndexPatternDimensionPanel', () => {
             col1: expect.objectContaining({
               operationType: 'min',
               sourceField: 'bytes',
+              params: { format: { id: 'bytes' } },
               // Other parts of this don't matter for this test
             }),
           },
@@ -565,7 +608,10 @@ describe('IndexPatternDimensionPanel', () => {
         .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-terms"]')
         .simulate('click');
 
-      const options = wrapper.find(EuiComboBox).prop('options');
+      const options = wrapper
+        .find(EuiComboBox)
+        .filter('[data-test-subj="indexPattern-dimension-field"]')
+        .prop('options');
 
       expect(options![0]['data-test-subj']).toContain('Incompatible');
 
@@ -584,7 +630,9 @@ describe('IndexPatternDimensionPanel', () => {
 
       wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
 
-      const comboBox = wrapper.find(EuiComboBox);
+      const comboBox = wrapper
+        .find(EuiComboBox)
+        .filter('[data-test-subj="indexPattern-dimension-field"]');
       const options = comboBox.prop('options');
 
       // options[1][2] is a `source` field of type `string` which doesn't support `avg` operation
@@ -674,7 +722,10 @@ describe('IndexPatternDimensionPanel', () => {
         .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-terms"]')
         .simulate('click');
 
-      const options = wrapper.find(EuiComboBox).prop('options');
+      const options = wrapper
+        .find(EuiComboBox)
+        .filter('[data-test-subj="indexPattern-dimension-field"]')
+        .prop('options');
 
       expect(options![0]['data-test-subj']).toContain('Incompatible');
 
@@ -697,7 +748,9 @@ describe('IndexPatternDimensionPanel', () => {
           .simulate('click');
       });
 
-      const comboBox = wrapper.find(EuiComboBox)!;
+      const comboBox = wrapper
+        .find(EuiComboBox)
+        .filter('[data-test-subj="indexPattern-dimension-field"]')!;
       const option = comboBox.prop('options')![1].options!.find(({ label }) => label === 'source')!;
 
       act(() => {
@@ -729,7 +782,9 @@ describe('IndexPatternDimensionPanel', () => {
 
     wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
 
-    const comboBox = wrapper.find(EuiComboBox);
+    const comboBox = wrapper
+      .find(EuiComboBox)
+      .filter('[data-test-subj="indexPattern-dimension-field"]');
     const options = comboBox.prop('options');
 
     act(() => {
@@ -825,7 +880,10 @@ describe('IndexPatternDimensionPanel', () => {
 
     wrapper.find('button[data-test-subj="lns-indexPatternDimension-avg"]').simulate('click');
 
-    const options = wrapper.find(EuiComboBox).prop('options');
+    const options = wrapper
+      .find(EuiComboBox)
+      .filter('[data-test-subj="indexPattern-dimension-field"]')
+      .prop('options');
 
     expect(options![0]['data-test-subj']).toContain('Incompatible');
 
@@ -865,7 +923,10 @@ describe('IndexPatternDimensionPanel', () => {
 
     openPopover();
 
-    const options = wrapper.find(EuiComboBox).prop('options');
+    const options = wrapper
+      .find(EuiComboBox)
+      .filter('[data-test-subj="indexPattern-dimension-field"]')
+      .prop('options');
 
     expect(options![0]['data-test-subj']).not.toContain('Incompatible');
 
@@ -905,7 +966,9 @@ describe('IndexPatternDimensionPanel', () => {
 
     openPopover();
 
-    const comboBox = wrapper.find(EuiComboBox)!;
+    const comboBox = wrapper
+      .find(EuiComboBox)
+      .filter('[data-test-subj="indexPattern-dimension-field"]')!;
     const option = comboBox.prop('options')![1].options![0];
 
     act(() => {
@@ -1002,7 +1065,10 @@ describe('IndexPatternDimensionPanel', () => {
     openPopover();
 
     act(() => {
-      wrapper.find(EuiComboBox).prop('onChange')!([]);
+      wrapper
+        .find(EuiComboBox)
+        .filter('[data-test-subj="indexPattern-dimension-field"]')
+        .prop('onChange')!([]);
     });
 
     expect(setState).toHaveBeenCalledWith({
@@ -1012,6 +1078,159 @@ describe('IndexPatternDimensionPanel', () => {
           indexPatternId: '1',
           columns: {},
           columnOrder: [],
+        },
+      },
+    });
+  });
+
+  it('allows custom format', () => {
+    const stateWithNumberCol: IndexPatternPrivateState = {
+      ...state,
+      layers: {
+        first: {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: {
+            col1: {
+              label: 'Average of bar',
+              dataType: 'number',
+              isBucketed: false,
+              // Private
+              operationType: 'avg',
+              sourceField: 'bar',
+            },
+          },
+        },
+      },
+    };
+
+    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} state={stateWithNumberCol} />);
+
+    openPopover();
+
+    act(() => {
+      wrapper
+        .find(EuiComboBox)
+        .filter('[data-test-subj="indexPattern-dimension-format"]')
+        .prop('onChange')!([{ value: 'bytes', label: 'Bytes' }]);
+    });
+
+    expect(setState).toHaveBeenCalledWith({
+      ...state,
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col1: expect.objectContaining({
+              params: {
+                format: { id: 'bytes', params: { decimals: 2 } },
+              },
+            }),
+          },
+        },
+      },
+    });
+  });
+
+  it('keeps decimal places while switching', () => {
+    const stateWithNumberCol: IndexPatternPrivateState = {
+      ...state,
+      layers: {
+        first: {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: {
+            col1: {
+              label: 'Average of bar',
+              dataType: 'number',
+              isBucketed: false,
+              // Private
+              operationType: 'avg',
+              sourceField: 'bar',
+              params: {
+                format: { id: 'bytes', params: { decimals: 0 } },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} state={stateWithNumberCol} />);
+
+    openPopover();
+
+    act(() => {
+      wrapper
+        .find(EuiComboBox)
+        .filter('[data-test-subj="indexPattern-dimension-format"]')
+        .prop('onChange')!([{ value: '', label: 'Default' }]);
+    });
+
+    act(() => {
+      wrapper
+        .find(EuiComboBox)
+        .filter('[data-test-subj="indexPattern-dimension-format"]')
+        .prop('onChange')!([{ value: 'number', label: 'Number' }]);
+    });
+
+    expect(
+      wrapper
+        .find(EuiFieldNumber)
+        .filter('[data-test-subj="indexPattern-dimension-formatDecimals"]')
+        .prop('value')
+    ).toEqual(0);
+  });
+
+  it('allows custom format with number of decimal places', () => {
+    const stateWithNumberCol: IndexPatternPrivateState = {
+      ...state,
+      layers: {
+        first: {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: {
+            col1: {
+              label: 'Average of bar',
+              dataType: 'number',
+              isBucketed: false,
+              // Private
+              operationType: 'avg',
+              sourceField: 'bar',
+              params: {
+                format: { id: 'bytes', params: { decimals: 2 } },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} state={stateWithNumberCol} />);
+
+    openPopover();
+
+    act(() => {
+      wrapper
+        .find(EuiFieldNumber)
+        .filter('[data-test-subj="indexPattern-dimension-formatDecimals"]')
+        .prop('onChange')!({ target: { value: '0' } });
+    });
+
+    expect(setState).toHaveBeenCalledWith({
+      ...state,
+      layers: {
+        first: {
+          ...state.layers.first,
+          columns: {
+            ...state.layers.first.columns,
+            col1: expect.objectContaining({
+              params: {
+                format: { id: 'bytes', params: { decimals: 0 } },
+              },
+            }),
+          },
         },
       },
     });

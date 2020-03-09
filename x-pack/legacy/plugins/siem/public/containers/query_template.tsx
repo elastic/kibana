@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ApolloQueryResult } from 'apollo-client';
+import {
+  ApolloQueryResult,
+  FetchMoreOptions,
+  FetchMoreQueryOptions,
+  OperationVariables,
+} from '@apollo/client';
 import React from 'react';
-import { FetchMoreOptions, FetchMoreQueryOptions, OperationVariables } from 'react-apollo';
 
 import { ESQuery } from '../../common/typed_json';
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import ApolloClient from 'apollo-client';
+import { ApolloClient } from '@apollo/client';
 
 import { Ecs } from '../../../../graphql/types';
 import { TimelineModel } from '../../../../store/timeline/model';
@@ -42,7 +42,7 @@ export interface UpdateSignalStatusActionProps {
 export type SendSignalsToTimeline = () => void;
 
 export interface SendSignalToTimelineActionProps {
-  apolloClient?: ApolloClient<{}>;
+  apolloClient?: ApolloClient<object>;
   createTimeline: CreateTimeline;
   ecsData: Ecs;
   updateTimelineIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) => void;

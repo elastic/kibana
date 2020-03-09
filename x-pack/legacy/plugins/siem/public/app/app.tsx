@@ -6,7 +6,7 @@
 
 import { createHashHistory, History } from 'history';
 import React, { memo, useMemo, FC } from 'react';
-import { ApolloProvider } from 'react-apollo';
+import { ApolloProvider } from '@apollo/client';
 import { Store } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
@@ -30,8 +30,6 @@ import { createStore, createInitialState } from '../store';
 import { GlobalToaster, ManageGlobalToaster } from '../components/toasters';
 import { MlCapabilitiesProvider } from '../components/ml/permissions/ml_capabilities_provider';
 
-import { ApolloClientContext } from '../utils/apollo_context';
-
 interface AppPluginRootComponentProps {
   apolloClient: AppApolloClient;
   history: History;
@@ -48,15 +46,13 @@ const AppPluginRootComponent: React.FC<AppPluginRootComponentProps> = ({
   <ManageGlobalToaster>
     <ReduxStoreProvider store={store}>
       <ApolloProvider client={apolloClient}>
-        <ApolloClientContext.Provider value={apolloClient}>
-          <ThemeProvider theme={theme}>
-            <MlCapabilitiesProvider>
-              <PageRouter history={history} />
-            </MlCapabilitiesProvider>
-          </ThemeProvider>
-          <ErrorToastDispatcher />
-          <GlobalToaster />
-        </ApolloClientContext.Provider>
+        <ThemeProvider theme={theme}>
+          <MlCapabilitiesProvider>
+            <PageRouter history={history} />
+          </MlCapabilitiesProvider>
+        </ThemeProvider>
+        <ErrorToastDispatcher />
+        <GlobalToaster />
       </ApolloProvider>
     </ReduxStoreProvider>
   </ManageGlobalToaster>

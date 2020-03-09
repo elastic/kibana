@@ -16,7 +16,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiComboBox,
-  EuiComboBoxOptionProps,
+  EuiComboBoxOptionOption,
   EuiFormRow,
   EuiCallOut,
 } from '@elastic/eui';
@@ -45,8 +45,6 @@ const DEFAULT_VALUES = {
   THRESHOLD_COMPARATOR: COMPARATORS.GREATER_THAN,
   TIME_WINDOW_SIZE: 5,
   TIME_WINDOW_UNIT: 'm',
-  TRIGGER_INTERVAL_SIZE: 1,
-  TRIGGER_INTERVAL_UNIT: 'm',
   THRESHOLD: [1000, 5000],
   GROUP_BY: 'all',
 };
@@ -64,6 +62,7 @@ const expressionFieldsWithValidation = [
 
 interface IndexThresholdProps {
   alertParams: IndexThresholdAlertParams;
+  alertInterval: string;
   setAlertParams: (property: string, value: any) => void;
   setAlertProperty: (key: string, value: any) => void;
   errors: { [key: string]: string[] };
@@ -72,6 +71,7 @@ interface IndexThresholdProps {
 
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThresholdProps> = ({
   alertParams,
+  alertInterval,
   setAlertParams,
   setAlertProperty,
   errors,
@@ -105,7 +105,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
   const [indexPopoverOpen, setIndexPopoverOpen] = useState(false);
   const [indexPatterns, setIndexPatterns] = useState([]);
   const [esFields, setEsFields] = useState<Record<string, any>>([]);
-  const [indexOptions, setIndexOptions] = useState<EuiComboBoxOptionProps[]>([]);
+  const [indexOptions, setIndexOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
 
@@ -133,17 +133,25 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
     }
   );
 
-  const setDefaultExpressionValues = () => {
+  const setDefaultExpressionValues = async () => {
     setAlertProperty('params', {
-      aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
-      termSize: DEFAULT_VALUES.TERM_SIZE,
-      thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-      timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
-      timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
-      triggerIntervalUnit: DEFAULT_VALUES.TRIGGER_INTERVAL_UNIT,
-      groupBy: DEFAULT_VALUES.GROUP_BY,
-      threshold: DEFAULT_VALUES.THRESHOLD,
+      ...alertParams,
+      aggType: aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
+      termSize: termSize ?? DEFAULT_VALUES.TERM_SIZE,
+      thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+      timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
+      timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
+      groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
+      threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
     });
+
+    if (index && index.length > 0) {
+      const currentEsFields = await getFields(index);
+      const timeFields = getTimeFieldOptions(currentEsFields as any);
+
+      setEsFields(currentEsFields);
+      setTimeFieldOptions([firstFieldOption, ...timeFields]);
+    }
   };
 
   const getFields = async (indexes: string[]) => {
@@ -250,7 +258,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
                   value: anIndex,
                 };
               })}
-              onChange={async (selected: EuiComboBoxOptionProps[]) => {
+              onChange={async (selected: EuiComboBoxOptionOption[]) => {
                 setAlertParams(
                   'index',
                   selected.map(aSelected => aSelected.value)
@@ -260,7 +268,17 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
                 // reset time field and expression fields if indices are deleted
                 if (indices.length === 0) {
                   setTimeFieldOptions([firstFieldOption]);
-                  setDefaultExpressionValues();
+                  setAlertProperty('params', {
+                    ...alertParams,
+                    index: indices,
+                    aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
+                    termSize: DEFAULT_VALUES.TERM_SIZE,
+                    thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+                    timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
+                    timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
+                    groupBy: DEFAULT_VALUES.GROUP_BY,
+                    threshold: DEFAULT_VALUES.THRESHOLD,
+                  });
                   return;
                 }
                 const currentEsFields = await getFields(indices);
@@ -438,6 +456,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
         <Fragment>
           <ThresholdVisualization
             alertParams={alertParams}
+            alertInterval={alertInterval}
             aggregationTypes={builtInAggregationTypes}
             comparators={builtInComparators}
             alertsContext={alertsContext}

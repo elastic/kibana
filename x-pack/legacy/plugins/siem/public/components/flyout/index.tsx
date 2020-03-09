@@ -6,9 +6,10 @@
 
 import { EuiBadge } from '@elastic/eui';
 import { defaultTo, getOr } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal';
 
 import { State, timelineSelectors } from '../../store';
 import { DataProvider } from '../timeline/data_providers/data_provider';
@@ -58,28 +59,49 @@ export const FlyoutComponent = React.memo<Props>(
     timelineId,
     usersViewing,
     width,
-  }) => (
-    <>
-      <Visible show={show}>
-        <Pane
-          flyoutHeight={flyoutHeight}
-          headerHeight={headerHeight}
-          onClose={() => showTimeline({ id: timelineId, show: false })}
+  }) => {
+    const handleClose = useCallback(() => showTimeline({ id: timelineId, show: false }), [
+      showTimeline,
+      timelineId,
+    ]);
+    const handleOpen = useCallback(() => showTimeline({ id: timelineId, show: true }), [
+      showTimeline,
+      timelineId,
+    ]);
+
+    return (
+      <>
+        <Visible show={show}>
+          <Pane
+            flyoutHeight={flyoutHeight}
+            headerHeight={headerHeight}
+            onClose={handleClose}
+            timelineId={timelineId}
+            usersViewing={usersViewing}
+            width={width}
+          >
+            {children}
+          </Pane>
+        </Visible>
+        <FlyoutButton
+          dataProviders={dataProviders!}
+          show={!show}
           timelineId={timelineId}
-          usersViewing={usersViewing}
-          width={width}
-        >
-          {children}
-        </Pane>
-      </Visible>
-      <FlyoutButton
-        dataProviders={dataProviders!}
-        show={!show}
-        timelineId={timelineId}
-        onOpen={() => showTimeline({ id: timelineId, show: true })}
-      />
-    </>
-  )
+          onOpen={handleOpen}
+        />
+      </>
+    );
+  },
+  (prevProps, nextProps) =>
+    prevProps.children === nextProps.children &&
+    deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
+    prevProps.flyoutHeight === nextProps.flyoutHeight &&
+    prevProps.headerHeight === nextProps.headerHeight &&
+    prevProps.show === nextProps.show &&
+    prevProps.showTimeline === nextProps.showTimeline &&
+    prevProps.timelineId === nextProps.timelineId &&
+    prevProps.usersViewing === nextProps.usersViewing &&
+    prevProps.width === nextProps.width
 );
 
 FlyoutComponent.displayName = 'FlyoutComponent';

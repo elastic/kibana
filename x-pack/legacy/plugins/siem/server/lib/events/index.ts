@@ -5,7 +5,7 @@
  */
 
 import { LastEventTimeData, TimelineData, TimelineDetailsData } from '../../graphql/types';
-import { FrameworkRequest, RequestBasicOptions } from '../framework';
+import { FrameworkRequest } from '../framework';
 export * from './elasticsearch_adapter';
 import {
   EventsAdapter,
@@ -13,7 +13,6 @@ import {
   LastEventTimeRequestOptions,
   RequestDetailsOptions,
 } from './types';
-import { EventsOverTimeData } from '../../../public/graphql/types';
 
 export class Events {
   constructor(private readonly adapter: EventsAdapter) {}
@@ -37,12 +36,5 @@ export class Events {
     options: LastEventTimeRequestOptions
   ): Promise<LastEventTimeData> {
     return this.adapter.getLastEventTimeData(req, options);
-  }
-
-  public async getEventsOverTime(
-    req: FrameworkRequest,
-    options: RequestBasicOptions
-  ): Promise<EventsOverTimeData> {
-    return this.adapter.getEventsOverTime(req, options);
   }
 }

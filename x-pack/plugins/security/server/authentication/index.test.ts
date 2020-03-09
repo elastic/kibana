@@ -32,7 +32,6 @@ import {
 } from '../../../../../src/core/server';
 import { AuthenticatedUser } from '../../common/model';
 import { ConfigType, createConfig$ } from '../config';
-import { LegacyAPI } from '../plugin';
 import { AuthenticationResult } from './authentication_result';
 import { setupAuthentication } from '.';
 import {
@@ -47,7 +46,6 @@ describe('setupAuthentication()', () => {
   let mockSetupAuthenticationParams: {
     config: ConfigType;
     loggers: LoggerFactory;
-    getLegacyAPI(): Pick<LegacyAPI, 'serverConfig'>;
     http: jest.Mocked<CoreSetup['http']>;
     clusterClient: jest.Mocked<IClusterClient>;
     license: jest.Mocked<SecurityLicense>;
@@ -63,7 +61,7 @@ describe('setupAuthentication()', () => {
           lifespan: null,
         },
         cookieName: 'my-sid-cookie',
-        authc: { providers: ['basic'] },
+        authc: { providers: ['basic'], http: { enabled: true } },
         public: {},
       }),
       true
@@ -74,7 +72,6 @@ describe('setupAuthentication()', () => {
       clusterClient: elasticsearchServiceMock.createClusterClient(),
       license: licenseMock.create(),
       loggers: loggingServiceMock.create(),
-      getLegacyAPI: jest.fn(),
     };
 
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -136,7 +133,7 @@ describe('setupAuthentication()', () => {
 
       expect(mockAuthToolkit.authenticated).toHaveBeenCalledTimes(1);
       expect(mockAuthToolkit.authenticated).toHaveBeenCalledWith();
-      expect(mockResponse.redirected).not.toHaveBeenCalled();
+      expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
       expect(mockResponse.internalError).not.toHaveBeenCalled();
 
       expect(authenticate).not.toHaveBeenCalled();
@@ -159,7 +156,7 @@ describe('setupAuthentication()', () => {
         state: mockUser,
         requestHeaders: mockAuthHeaders,
       });
-      expect(mockResponse.redirected).not.toHaveBeenCalled();
+      expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
       expect(mockResponse.internalError).not.toHaveBeenCalled();
 
       expect(authenticate).toHaveBeenCalledTimes(1);
@@ -188,7 +185,7 @@ describe('setupAuthentication()', () => {
         requestHeaders: mockAuthHeaders,
         responseHeaders: mockAuthResponseHeaders,
       });
-      expect(mockResponse.redirected).not.toHaveBeenCalled();
+      expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
       expect(mockResponse.internalError).not.toHaveBeenCalled();
 
       expect(authenticate).toHaveBeenCalledTimes(1);
@@ -201,9 +198,9 @@ describe('setupAuthentication()', () => {
 
       await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
 
-      expect(mockResponse.redirected).toHaveBeenCalledTimes(1);
-      expect(mockResponse.redirected).toHaveBeenCalledWith({
-        headers: { location: '/some/url' },
+      expect(mockAuthToolkit.redirected).toHaveBeenCalledTimes(1);
+      expect(mockAuthToolkit.redirected).toHaveBeenCalledWith({
+        location: '/some/url',
       });
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
       expect(mockResponse.internalError).not.toHaveBeenCalled();
@@ -220,7 +217,7 @@ describe('setupAuthentication()', () => {
       expect(error).toBeUndefined();
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
-      expect(mockResponse.redirected).not.toHaveBeenCalled();
+      expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
       expect(loggingServiceMock.collect(mockSetupAuthenticationParams.loggers).error)
         .toMatchInlineSnapshot(`
         Array [
@@ -243,7 +240,7 @@ describe('setupAuthentication()', () => {
       expect(response.body).toBe(esError);
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
-      expect(mockResponse.redirected).not.toHaveBeenCalled();
+      expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
     });
 
     it('includes `WWW-Authenticate` header if `authenticate` fails to authenticate user and provides challenges', async () => {
@@ -268,30 +265,30 @@ describe('setupAuthentication()', () => {
       expect(options!.headers).toEqual({ 'WWW-Authenticate': 'Negotiate' });
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
-      expect(mockResponse.redirected).not.toHaveBeenCalled();
+      expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
     });
 
-    it('returns `unauthorized` when authentication can not be handled', async () => {
+    it('returns `notHandled` when authentication can not be handled', async () => {
       const mockResponse = httpServerMock.createLifecycleResponseFactory();
       authenticate.mockResolvedValue(AuthenticationResult.notHandled());
 
       await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
 
-      expect(mockResponse.unauthorized).toHaveBeenCalledTimes(1);
-      const [[response]] = mockResponse.unauthorized.mock.calls;
-
-      expect(response!.body).toBeUndefined();
+      expect(mockAuthToolkit.notHandled).toHaveBeenCalledTimes(1);
 
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
-      expect(mockResponse.redirected).not.toHaveBeenCalled();
+      expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
     });
   });
 
   describe('getServerBaseURL()', () => {
     let getServerBaseURL: () => string;
     beforeEach(async () => {
-      (mockSetupAuthenticationParams.getLegacyAPI as jest.Mock).mockReturnValue({
-        serverConfig: { protocol: 'test-protocol', hostname: 'test-hostname', port: 1234 },
+      mockSetupAuthenticationParams.http.getServerInfo.mockReturnValue({
+        name: 'some-name',
+        protocol: 'socket',
+        host: 'test-hostname',
+        port: 1234,
       });
 
       await setupAuthentication(mockSetupAuthenticationParams);
@@ -301,7 +298,7 @@ describe('setupAuthentication()', () => {
     });
 
     it('falls back to legacy server config if `public` config is not specified', async () => {
-      expect(getServerBaseURL()).toBe('test-protocol://test-hostname:1234');
+      expect(getServerBaseURL()).toBe('socket://test-hostname:1234');
     });
 
     it('respects `public` config if it is specified', async () => {
@@ -313,12 +310,12 @@ describe('setupAuthentication()', () => {
       mockSetupAuthenticationParams.config.public = {
         hostname: 'elastic.co',
       } as ConfigType['public'];
-      expect(getServerBaseURL()).toBe('test-protocol://elastic.co:1234');
+      expect(getServerBaseURL()).toBe('socket://elastic.co:1234');
 
       mockSetupAuthenticationParams.config.public = {
         port: 4321,
       } as ConfigType['public'];
-      expect(getServerBaseURL()).toBe('test-protocol://test-hostname:4321');
+      expect(getServerBaseURL()).toBe('socket://test-hostname:4321');
 
       mockSetupAuthenticationParams.config.public = {
         protocol: 'https',

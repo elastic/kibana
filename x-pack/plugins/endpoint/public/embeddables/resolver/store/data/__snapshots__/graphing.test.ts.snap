@@ -12,17 +12,18 @@ Object {
   "edgeLineSegments": Array [],
   "processNodePositions": Map {
     Object {
-      "data_buffer": Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
         "event_subtype_full": "creation_event",
         "event_type_full": "process_event",
-        "node_id": 0,
         "process_name": "",
-        "process_path": "",
-        "timestamp_utc": "2019-09-24 01:47:47Z",
+        "unique_pid": 0,
       },
-      "event_timestamp": 1,
-      "event_type": 1,
-      "machine_id": "",
     } => Array [
       0,
       -0.8164965809277259,
@@ -167,136 +168,137 @@ Object {
   ],
   "processNodePositions": Map {
     Object {
-      "data_buffer": Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
         "event_subtype_full": "creation_event",
         "event_type_full": "process_event",
-        "node_id": 0,
         "process_name": "",
-        "process_path": "",
-        "timestamp_utc": "2019-09-24 01:47:47Z",
+        "unique_pid": 0,
       },
-      "event_timestamp": 1,
-      "event_type": 1,
-      "machine_id": "",
     } => Array [
       0,
       -0.8164965809277259,
     ],
     Object {
-      "data_buffer": Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
         "event_subtype_full": "already_running",
         "event_type_full": "process_event",
-        "node_id": 1,
-        "process_name": "",
-        "process_path": "",
-        "source_id": 0,
-        "timestamp_utc": "2019-09-24 01:47:47Z",
+        "unique_pid": 1,
+        "unique_ppid": 0,
       },
-      "event_timestamp": 1,
-      "event_type": 1,
-      "machine_id": "",
     } => Array [
       0,
       -82.46615467370032,
     ],
     Object {
-      "data_buffer": Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
         "event_subtype_full": "creation_event",
         "event_type_full": "process_event",
-        "node_id": 2,
-        "process_name": "",
-        "process_path": "",
-        "source_id": 0,
-        "timestamp_utc": "2019-09-24 01:47:47Z",
+        "unique_pid": 2,
+        "unique_ppid": 0,
       },
-      "event_timestamp": 1,
-      "event_type": 1,
-      "machine_id": "",
     } => Array [
       141.4213562373095,
       -0.8164965809277259,
     ],
     Object {
-      "data_buffer": Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
         "event_subtype_full": "creation_event",
         "event_type_full": "process_event",
-        "node_id": 3,
-        "process_name": "",
-        "process_path": "",
-        "source_id": 1,
-        "timestamp_utc": "2019-09-24 01:47:47Z",
+        "unique_pid": 3,
+        "unique_ppid": 1,
       },
-      "event_timestamp": 1,
-      "event_type": 1,
-      "machine_id": "",
     } => Array [
       35.35533905932738,
       -143.70339824327976,
     ],
     Object {
-      "data_buffer": Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
         "event_subtype_full": "creation_event",
         "event_type_full": "process_event",
-        "node_id": 4,
-        "process_name": "",
-        "process_path": "",
-        "source_id": 1,
-        "timestamp_utc": "2019-09-24 01:47:47Z",
+        "unique_pid": 4,
+        "unique_ppid": 1,
       },
-      "event_timestamp": 1,
-      "event_type": 1,
-      "machine_id": "",
     } => Array [
       106.06601717798213,
       -102.87856919689347,
     ],
     Object {
-      "data_buffer": Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
         "event_subtype_full": "creation_event",
         "event_type_full": "process_event",
-        "node_id": 5,
-        "process_name": "",
-        "process_path": "",
-        "source_id": 2,
-        "timestamp_utc": "2019-09-24 01:47:47Z",
+        "unique_pid": 5,
+        "unique_ppid": 2,
       },
-      "event_timestamp": 1,
-      "event_type": 1,
-      "machine_id": "",
     } => Array [
       176.7766952966369,
       -62.053740150507174,
     ],
     Object {
-      "data_buffer": Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
         "event_subtype_full": "creation_event",
         "event_type_full": "process_event",
-        "node_id": 6,
-        "process_name": "",
-        "process_path": "",
-        "source_id": 2,
-        "timestamp_utc": "2019-09-24 01:47:47Z",
+        "unique_pid": 6,
+        "unique_ppid": 2,
       },
-      "event_timestamp": 1,
-      "event_type": 1,
-      "machine_id": "",
     } => Array [
       247.48737341529164,
       -21.228911104120883,
     ],
     Object {
-      "data_buffer": Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
         "event_subtype_full": "creation_event",
         "event_type_full": "process_event",
-        "node_id": 7,
-        "process_name": "",
-        "process_path": "",
-        "source_id": 6,
-        "timestamp_utc": "2019-09-24 01:47:47Z",
+        "unique_pid": 7,
+        "unique_ppid": 6,
       },
-      "event_timestamp": 1,
-      "event_type": 1,
-      "machine_id": "",
     } => Array [
       318.1980515339464,
       -62.05374015050717,
@@ -321,34 +323,35 @@ Object {
   ],
   "processNodePositions": Map {
     Object {
-      "data_buffer": Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
         "event_subtype_full": "creation_event",
         "event_type_full": "process_event",
-        "node_id": 0,
         "process_name": "",
-        "process_path": "",
-        "timestamp_utc": "2019-09-24 01:47:47Z",
+        "unique_pid": 0,
       },
-      "event_timestamp": 1,
-      "event_type": 1,
-      "machine_id": "",
     } => Array [
       0,
       -0.8164965809277259,
     ],
     Object {
-      "data_buffer": Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
         "event_subtype_full": "already_running",
         "event_type_full": "process_event",
-        "node_id": 1,
-        "process_name": "",
-        "process_path": "",
-        "source_id": 0,
-        "timestamp_utc": "2019-09-24 01:47:47Z",
+        "unique_pid": 1,
+        "unique_ppid": 0,
       },
-      "event_timestamp": 1,
-      "event_type": 1,
-      "machine_id": "",
     } => Array [
       70.71067811865476,
       -41.641325627314025,

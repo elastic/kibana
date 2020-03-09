@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.6.1>>
 * <<release-notes-7.6.0>>
 * <<release-notes-7.5.2>>
 * <<release-notes-7.5.1>>
@@ -33,6 +34,82 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+[[release-notes-7.6.1]]
+== {kib} 7.6.1
+
+See <<breaking-changes-7.6,breaking changes in 7.6>>.
+
+[float]
+[[security-fix-7.6.1]]
+=== Security issues
+In {kib} 7.6.0 and earlier, Node.js contains the following security issues:
+
+* The TLS handling code for Node.js includes a Denial of Service (DoS) issue. Successful exploitation of the flaw could result in {kib} crashing. Refer to  https://www.elastic.co/community/security/, CVE-2019-15604.
++
+There are no known workarounds for this issue.
+
+* There are issues with how Node.js handles malformed HTTP headers. The malformed headers could result in an HTTP request smuggling attack when {kib} is running behind a proxy that is vulnerable to HTTP request smuggling attacks. Refer to https://www.elastic.co/community/security/, CVE-2019-15605 and CVE-2019-15606.
++
+For instructions on how to mitigate HTTP request smuggling attacks, contact your proxy vendor.
+
+Administrators running {kib} in an environment with untrusted users should upgrade to {kib} 7.6.1, which updates Node.js to 10.19.0.
+
+[float]
+[[enhancement-7.6.1]]
+=== Enhancements
+SIEM::
+* Imports rules unit tests {pull}57466[#57466]
+
+[float]
+[[bug-7.6.1]]
+=== Bug fixes
+APM::
+* Fixes cloud env in APM tutorial {pull}57817[#57817]
+* Adds `xpack.apm.enabled` key to config schema {pull}57539[#57539]
+* X-axis labels on Error occurrences chart are incorrect based on {kib} timezone {pull}55686[#55686]
+Canvas::
+*  Sanitizes workpad before sending to API {pull}57704[#57704]
+Lens and visualizations::
+* Fixes bugs in Lens filters (#56441) {pull}56648[#56648]
+* Makes field stats work for index patterns without time fields {pull}56759[#56759]
+* Fixes auto refresh in visualizations and Lens {pull}57667[#57667]
+Machine Learning::
+* Fixes Data Visualizer responsive layout  {pull}56372[#56372]
+* Fixes overall stats for saved search on the Data Visualizer page {pull}57312[#57312]
+* Fixes jobs list default refresh {pull}57086[#57086]
+* Updates schema definition for create route {pull}56979[#56979]
+* Fixes brush visibility. {pull}57564[#57564]
+* Fixes chart resize after browser refresh {pull}57578[#57578]
+* Fixes hiding date picker for settings pages {pull}57544[#57544]
+Management::
+* Allows support for nested multi-fields {pull}58203[#58203]
+* Fixes performance bottleneck for large JSON payloads {pull}57668[#57668]
+* Fixes filter deprecations search filter {pull}57541[#57541]
+Maps::
+* Sets filter.meta.key to geoFieldName so query passes filterMatchesIndex when ignoreFilterIfFieldNotInIndex is true {pull}56692[#56692]
+* Fixes document source top hits split by scripted field {pull}57481[#57481]
+* Only request field in docvalue_fields when the field supports doc values {pull}57372[#57372]
+Monitoring::
+* Fixes issue when index pattern has no fields {pull}58242[#58242]
+* Fixes inaccuracies in Logstash pipeline listing metrics {pull}55868[#55868]
+Platform::
+* Limits fetching index patterns {pull}56603[#56603]
+* Fixes browser date format {pull}57714[#57714]
+* Prepends basePath in getUrlForApp {pull}57316[#57316]
+* Uses app id instead of pluginId to generate navlink from legacy apps {pull}57542[#57542]
+* Retries ES API calls that fail with 410/Gone to prevent {kib} from crashing at startup {pull}56950[#56950]
+* Removes injected reference from home app {pull}57836[#57836]
+Security::
+* Logout should redirect to the login screen at the server base path {pull}56786[#56786]
+* Adds xpack.encryptedSavedObjects.encryptionKey to docker allow-list {pull}58291[#58291]
+* Fixes short url in spaces {pull}58313[#58313]
+SIEM::
+* Backend end-to-end tests {pull}57166[#57166]
+* Removes internal tags when copying signals from rules {pull}57744[#57744]
+* Fixes return codes where some were rule_id instead of id {pull}57939[#57939]
+* Fixes Host Details Events Table to only show events for specified Host {pull}57388[#57388]
+Uptime::
+* Uses scripted metric for snapshot calculation {pull}58247[#58247]
 
 [[release-notes-7.6.0]]
 == {kib} 7.6.0
@@ -317,6 +394,7 @@ Management::
 * Handle double quote special case {pull}54474[#54474]
 * Fixes handling of bad profile data and update tab behavior {pull}55806[#55806]
 * Fixes icon path in tutorial introduction {pull}49684[#49684]
+* Fixes index templates editor to support mappings types {pull}55804[#55804]
 Maps::
 * Fixes regression preventing maps telemetry from populating &amp; remove task manager logic {pull}52834[#52834]
 * Categorical palettes {pull}54918[#54918]

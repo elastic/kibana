@@ -1,7 +1,7 @@
 [[settings]]
-== Configuring Kibana
+== Configuring {kib}
 
-The Kibana server reads properties from the `kibana.yml` file on startup. The
+The {kib} server reads properties from the `kibana.yml` file on startup. The
 location of this file differs depending on how you installed {kib}. For example,
 if you installed {kib} from an archive distribution (`.tar.gz` or `.zip`), by
 default it is in `$KIBANA_HOME/config`. By default, with package distributions
@@ -26,16 +26,16 @@ in a manner that is inconsistent with `/proc/self/cgroup`
 `csp.rules:`:: A template
 https://w3c.github.io/webappsec-csp/[content-security-policy] that disables
 certain unnecessary and potentially insecure capabilities in the browser. We
-strongly recommend that you keep the default CSP rules that ship with Kibana.
+strongly recommend that you keep the default CSP rules that ship with {kib}.
 
-`csp.strict:`:: *Default: `false`* Blocks access to Kibana to any browser that
+`csp.strict:`:: *Default: `false`* Blocks access to {kib} to any browser that
 does not enforce even rudimentary CSP rules. In practice, this will disable
 support for older, less safe browsers like Internet Explorer.
 See <<csp-strict-mode, Content Security Policy>> for more information.
 
 `csp.warnLegacyBrowsers:`:: *Default: `true`* Shows a warning message after
-loading Kibana to any browser that does not enforce even rudimentary CSP rules,
-though Kibana is still accessible. This configuration is effectively ignored
+loading {kib} to any browser that does not enforce even rudimentary CSP rules,
+though {kib} is still accessible. This configuration is effectively ignored
 when `csp.strict` is enabled.
 
 `elasticsearch.customHeaders:`:: *Default: `{}`* Header names and values to send
@@ -54,34 +54,34 @@ inspector, for example Timelion and Monitoring.
 
 `elasticsearch.pingTimeout:`::
 *Default: the value of the `elasticsearch.requestTimeout` setting* Time in
-milliseconds to wait for Elasticsearch to respond to pings.
+milliseconds to wait for {es} to respond to pings.
 
 `elasticsearch.preserveHost:`:: *Default: true* When this setting’s value is
-true, Kibana uses the hostname specified in the `server.host` setting. When the
-value of this setting is `false`, Kibana uses the hostname of the host that
-connects to this Kibana instance.
+true, {kib} uses the hostname specified in the `server.host` setting. When the
+value of this setting is `false`, {kib} uses the hostname of the host that
+connects to this {kib} instance.
 
 `elasticsearch.requestHeadersWhitelist:`:: *Default: `[ 'authorization' ]`* List
-of Kibana client-side headers to send to Elasticsearch. To send *no* client-side
+of {kib} client-side headers to send to {es}. To send *no* client-side
 headers, set this value to [] (an empty list).
 Removing the `authorization` header from being whitelisted means that you cannot
-use <<basic-authentication, basic authentication>> in Kibana.
+use <<basic-authentication, basic authentication>> in {kib}.
 
 `elasticsearch.requestTimeout:`:: *Default: 30000* Time in milliseconds to wait
-for responses from the back end or Elasticsearch. This value must be a positive
+for responses from the back end or {es}. This value must be a positive
 integer.
 
 `elasticsearch.shardTimeout:`:: *Default: 30000* Time in milliseconds for
-Elasticsearch to wait for responses from shards. Set to 0 to disable.
+{es} to wait for responses from shards. Set to 0 to disable.
 
 `elasticsearch.sniffInterval:`:: *Default: false* Time in milliseconds between
-requests to check Elasticsearch for an updated list of nodes.
+requests to check {es} for an updated list of nodes.
 
 `elasticsearch.sniffOnConnectionFault:`:: *Default: false* Update the list of
-Elasticsearch nodes immediately following a connection fault.
+{es} nodes immediately following a connection fault.
 
 `elasticsearch.sniffOnStart:`:: *Default: false* Attempt to find other
-Elasticsearch nodes on startup.
+{es} nodes on startup.
 
 `elasticsearch.ssl.alwaysPresentCertificate:`:: *Default: false* Controls {kib}'s behavior in regard to presenting a client certificate when
 requested by {es}. This setting applies to all outbound SSL/TLS connections to {es}, including requests that are proxied for end users.
@@ -138,40 +138,40 @@ making an outbound SSL/TLS connection to {es}. Valid values are `"full"`, `"cert
 hostname verification, using `"certificate"` will skip hostname verification, and using `"none"` will skip verification entirely.
 
 `elasticsearch.startupTimeout:`:: *Default: 5000* Time in milliseconds to wait
-for Elasticsearch at Kibana startup before retrying.
+for {es} at {kib} startup before retrying.
 
-`elasticsearch.username:` and `elasticsearch.password:`:: If your Elasticsearch
+`elasticsearch.username:` and `elasticsearch.password:`:: When {es}
 is protected with basic authentication, these settings provide the username and
-password that the Kibana server uses to perform maintenance on the Kibana index
-at startup. Your Kibana users still need to authenticate with Elasticsearch,
-which is proxied through the Kibana server.
+password that the {kib} server uses to perform maintenance on the {kib} index
+at startup. Your {kib} users still need to authenticate with {es},
+which is proxied through the {kib} server.
 
 `interpreter.enableInVisualize`:: *Default: true* Enables use of interpreter in
 Visualize.
 
 `kibana.defaultAppId:`:: *Default: "home"* The default application to load.
 
-`kibana.index:`:: *Default: ".kibana"* Kibana uses an index in Elasticsearch to
-store saved searches, visualizations, and dashboards. Kibana creates a new index
+`kibana.index:`:: *Default: ".kibana"* {kib} uses an index in {es} to
+store saved searches, visualizations, and dashboards. {kib} creates a new index
 if the index doesn’t already exist. If you configure a custom index, the name must
 be lowercase, and conform to {es} {ref}/indices-create-index.html[index name limitations].
 +
-When running multiple tenants of {kib} by changing the `kibana.index` in your `kibana.yml`, 
-you cannot use the `kibana_user` or `kibana_dashboard_only_user` roles 
-to grant access to {kib}. 
-You must create custom roles that authorize the user for that specific tenant. 
-Although multi-tenant installations are supported, the recommended approach 
+When running multiple tenants of {kib} by changing the `kibana.index` in your `kibana.yml`,
+you cannot use the `kibana_user` or `kibana_dashboard_only_user` roles
+to grant access to {kib}.
+You must create custom roles that authorize the user for that specific tenant.
+Although multi-tenant installations are supported, the recommended approach
 to securing access to {kib} segments is to grant users access to specific spaces.
 
 `kibana.autocompleteTimeout:`:: *Default: "1000"* Time in milliseconds to wait
-for autocomplete suggestions from Elasticsearch. This value must be a whole number
+for autocomplete suggestions from {es}. This value must be a whole number
 greater than zero.
 
 `kibana.autocompleteTerminateAfter:`:: *Default: "100000"* Maximum number of
 documents loaded by each shard to generate autocomplete suggestions. This value
 must be a whole number greater than zero.
 
-`logging.dest:`:: *Default: `stdout`* Enables you specify a file where Kibana
+`logging.dest:`:: *Default: `stdout`* Enables you specify a file where {kib}
 stores log output.
 
 `logging.json:`:: *Default: false* Logs output as JSON. When set to `true`, the
@@ -225,23 +225,23 @@ setting to `true` to log all events, including system usage information and all
 requests. Supported on {ece}.
 
 `map.includeElasticMapsService:`:: *Default: true*
-Set to false to disable connections to Elastic Maps Service.
-When `includeElasticMapsService` is turned off, only the vector layers configured by `map.regionmap`
-and the tile layer configured by `map.tilemap.url` will be available in the <<maps, Maps application>>,
-<<tilemap, Coordinate map visualizations>>, and <<regionmap, Region map visualizations>>.
+To disable connections to Elastic Maps Service, set to `false`.
+When `includeElasticMapsService` is turned off, only the vector layers configured by `map.regionmap`,
+and the tile layer configured by `map.tilemap.url`, are available in the <<maps,Maps application>>,
+<<coordinate-map,Coordinate map visualizations>>, and <<region-map,Region map visualizations>>.
 
 `map.proxyElasticMapsServiceInMaps:`:: *Default: false*
-Set to true to proxy all <<maps, Maps application>> Elastic Maps Service requests through the Kibana server.
-This setting does not impact <<tilemap, Coordinate map visualizations>> and <<regionmap, Region map visualizations>>.
+Set to true to proxy all <<maps,Maps application>> Elastic Maps Service requests through the {kib} server.
+This setting does not impact <<coordinate-map,Coordinate map visualizations>> and <<region-map,Region map visualizations>>.
 
 [[regionmap-settings]] `map.regionmap:`:: Specifies additional vector layers for
-use in <<regionmap, Region Map>> visualizations. Supported on {ece}. Each layer
+use in <<region-map,Region Map>> visualizations. Supported on {ece}. Each layer
 object points to an external vector file that contains a geojson
 FeatureCollection. The file must use the
-https://en.wikipedia.org/wiki/World_Geodetic_System[WGS84 coordinate reference system]
+https://en.wikipedia.org/wiki/World_Geodetic_System[WGS84 coordinate reference system (ESPG:4326)]
 and only include polygons. If the file is hosted on a separate domain from
-Kibana, the server needs to be CORS-enabled so Kibana can download the file. The
-following example shows a valid regionmap configuration.
+{kib}, the server needs to be CORS-enabled so {kib} can download the file. The
+following example shows a valid region map configuration.
 +
 --
     map
@@ -258,11 +258,10 @@ following example shows a valid regionmap configuration.
                 description: "INSEE numeric identifier"
 --
 
-[[regionmap-ES-map]]`map.includeElasticMapsService:`:: Turns on or off
-whether layers from the Elastic Maps Service should be included in the vector
-layer option list. Supported on {ece}. By turning this off, only the layers that
-are configured here will be included. The default is `true`.
-This also affects whether tile-service from the Elastic Maps Service will be available.
+[[regionmap-ES-map]]`map.includeElasticMapsService:`:: Specifies
+the option to include layers from the Elastic Maps Service in the vector
+layer option list. Supported on {ece}. When off, only the configured layers are included.
+The default is `true`. This option also specifies if the tile-service from the Elastic Maps Service is available.
 
 [[regionmap-attribution]]`map.regionmap.layers[].attribution:`:: Optional.
 References the originating source of the geojson file. Supported on {ece}.
@@ -278,9 +277,9 @@ building the Region Map visualization. Supported on {ece}.
 
 [[regionmap-field-name]]`map.regionmap.layers[].fields[].name:`:: Mandatory.
 This value is used to do an inner-join between the document stored in
-Elasticsearch and the geojson file. For example, if the field in the geojson is
-called `Location` and has city names, there must be a field in Elasticsearch
-that holds the same values that Kibana can then use to lookup for the geoshape
+{es} and the geojson file. For example, if the field in the geojson is
+called `Location` and has city names, there must be a field in {es}
+that holds the same values that {kib} can then use to lookup for the geoshape
 data. Supported on {ece}.
 
 [[regionmap-name]]`map.regionmap.layers[].name:`:: Mandatory. A description of
@@ -303,9 +302,9 @@ zoom level. Supported on {ece}.
 used by the tile service. Specify the position of the subdomain the URL with the
 token `{s}`. Supported on {ece}.
 
-[[tilemap-url]]`map.tilemap.url:`:: The URL to the tileservice that Kibana uses
+[[tilemap-url]]`map.tilemap.url:`:: The URL to the tileservice that {kib} uses
 to display map tiles in tilemap visualizations. Supported on {ece}. By default,
-Kibana reads this url from an external metadata service, but users can still
+{kib} reads this url from an external metadata service, but users can still
 override this parameter to use their own Tile Map Service. For example:
 `"https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana"`
 
@@ -313,31 +312,27 @@ override this parameter to use their own Tile Map Service. For example:
 system and process performance metrics. The minimum value is 100.
 
 `newsfeed.enabled:` :: *Default: `true`* Controls whether to enable the newsfeed
-system for the Kibana UI notification center. Set to `false` to disable the
+system for the {kib} UI notification center. Set to `false` to disable the
 newsfeed system.
 
-`path.data:`:: *Default: `data`* The path where Kibana stores persistent data
-not saved in Elasticsearch.
+`path.data:`:: *Default: `data`* The path where {kib} stores persistent data
+not saved in {es}.
 
-`pid.file:`:: Specifies the path where Kibana creates the process ID file.
+`pid.file:`:: Specifies the path where {kib} creates the process ID file.
 
-`server.basePath:`:: Enables you to specify a path to mount Kibana at if you are
-running behind a proxy. Use the `server.rewriteBasePath` setting to tell Kibana
+`server.basePath:`:: Enables you to specify a path to mount {kib} at if you are
+running behind a proxy. Use the `server.rewriteBasePath` setting to tell {kib}
 if it should remove the basePath from requests it receives, and to prevent a
 deprecation warning at startup. This setting cannot end in a slash (`/`).
 
 [[server-compression]]`server.compression.enabled:`:: *Default: `true`* Set to `false` to disable HTTP compression for all responses.
 
-`server.compression.referrerWhitelist:`:: *Default: none* Specifies an array of trusted hostnames, such as the Kibana host, or a reverse
+`server.compression.referrerWhitelist:`:: *Default: none* Specifies an array of trusted hostnames, such as the {kib} host, or a reverse
 proxy sitting in front of it. This determines whether HTTP compression may be used for responses, based on the request's `Referer` header.
 This setting may not be used when `server.compression.enabled` is set to `false`.
 
-[[server-cors]]`server.cors:`:: *Default: `false`* Set to `true` to enable CORS support. This setting is required to configure `server.cors.origin`.
-
-`server.cors.origin:`:: *Default: none* Specifies origins. “origin” must be an array. To use this setting, you must set `server.cors` to `true`. To accept all origins, use `server.cors.origin: ["*"]`.
-
 `server.customResponseHeaders:`:: *Default: `{}`* Header names and values to
-  send on all responses to the client from the Kibana server.
+  send on all responses to the client from the {kib} server.
 
 `server.host:`:: *Default: "localhost"* This setting specifies the host of the
 back end server. To allow remote users to connect, set the value to the IP address or DNS name of the {kib} server.
@@ -349,12 +344,12 @@ the `server.socketTimeout` counter.
 for incoming server requests.
 
 `server.name:`:: *Default: "your-hostname"* A human-readable display name that
-identifies this Kibana instance.
+identifies this {kib} instance.
 
-`server.port:`:: *Default: 5601* Kibana is served by a back end server. This
+`server.port:`:: *Default: 5601* {kib} is served by a back end server. This
 setting specifies the port to use.
 
-`server.rewriteBasePath:`:: *Default: false* Deprecated setting that specifies if Kibana should
+`server.rewriteBasePath:`:: *Default: false* Deprecated setting that specifies if {kib} should
 rewrite requests that are prefixed with `server.basePath`, or require that they
 are rewritten by your reverse proxy.
 
@@ -414,7 +409,7 @@ In addition to this setting, trusted certificates may be specified via `server.s
 `server.ssl.truststore.password:`:: The password that will be used to decrypt the trust store specified via `server.ssl.truststore.path`. If
 the trust store has no password, leave this unset. If the trust store has an empty password, set this to `""`.
 
-`server.ssl.redirectHttpFromPort:`:: Kibana will bind to this port and redirect
+`server.ssl.redirectHttpFromPort:`:: {kib} binds to this port and redirects
 all http requests to https over the port configured as `server.port`.
 
 `server.ssl.supportedProtocols:`:: *Default: TLSv1.1, TLSv1.2*  An array of
@@ -433,7 +428,7 @@ The `server.xsrf.whitelist` setting requires the following format:
 ----
 
 `status.allowAnonymous:`:: *Default: false* If authentication is enabled,
-setting this to `true` enables unauthenticated users to access the Kibana server
+setting this to `true` enables unauthenticated users to access the {kib} server
 status API and status page.
 
 `telemetry.allowChangingOptInStatus`:: *Default: true*. If `true`,
@@ -453,7 +448,7 @@ us improve your user experience. Your data is never shared with anyone. Set to
 `false` to disable telemetry capabilities entirely. You can alternatively opt
 out through the *Advanced Settings* in {kib}.
 
-`vis_type_vega.enableExternalUrls:`:: *Default: false* Set this value to true to allow Vega to use any URL to access external data sources and images. If false, Vega can only get data from Elasticsearch.
+`vis_type_vega.enableExternalUrls:`:: *Default: false* Set this value to true to allow Vega to use any URL to access external data sources and images. If false, Vega can only get data from {es}.
 
 `xpack.license_management.enabled`:: *Default: true* Set this value to false to
 disable the License Management user interface.
@@ -461,7 +456,7 @@ disable the License Management user interface.
 `xpack.rollup.enabled:`:: *Default: true* Set this value to false to disable the
 Rollup user interface.
 
-`i18n.locale`:: *Default: en* Set this value to change the Kibana interface language. Valid locales are: `en`, `zh-CN`, `ja-JP`.
+`i18n.locale`:: *Default: en* Set this value to change the {kib} interface language. Valid locales are: `en`, `zh-CN`, `ja-JP`.
 
 include::{docdir}/settings/alert-action-settings.asciidoc[]
 include::{docdir}/settings/apm-settings.asciidoc[]

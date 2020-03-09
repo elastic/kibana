@@ -15,7 +15,6 @@ import {
   FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
   FIELDS_BROWSER_SELECTED_CATEGORY_COUNT,
   FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT,
-  FIELDS_BROWSER_TITLE,
 } from '../screens/fields_browser';
 
 import {
@@ -56,12 +55,6 @@ describe('Fields Browser', () => {
 
     afterEach(() => {
       clearFieldsBrowser();
-    });
-
-    it('renders the fields browser with the expected title when the Fields button is clicked', () => {
-      cy.get(FIELDS_BROWSER_TITLE)
-        .invoke('text')
-        .should('eq', 'Customize Columns');
     });
 
     it('displays the `default ECS` category (by default)', () => {

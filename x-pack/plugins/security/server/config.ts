@@ -24,58 +24,46 @@ const providerOptionsSchema = (providerType: string, optionsSchema: Type<any>) =
     schema.never()
   );
 
-export const ConfigSchema = schema.object(
-  {
-    loginAssistanceMessage: schema.string({ defaultValue: '' }),
-    cookieName: schema.string({ defaultValue: 'sid' }),
-    encryptionKey: schema.conditional(
-      schema.contextRef('dist'),
-      true,
-      schema.maybe(schema.string({ minLength: 32 })),
-      schema.string({ minLength: 32, defaultValue: 'a'.repeat(32) })
+export const ConfigSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+  loginAssistanceMessage: schema.string({ defaultValue: '' }),
+  cookieName: schema.string({ defaultValue: 'sid' }),
+  encryptionKey: schema.conditional(
+    schema.contextRef('dist'),
+    true,
+    schema.maybe(schema.string({ minLength: 32 })),
+    schema.string({ minLength: 32, defaultValue: 'a'.repeat(32) })
+  ),
+  session: schema.object({
+    idleTimeout: schema.nullable(schema.duration()),
+    lifespan: schema.nullable(schema.duration()),
+  }),
+  secureCookies: schema.boolean({ defaultValue: false }),
+  public: schema.object({
+    protocol: schema.maybe(schema.oneOf([schema.literal('http'), schema.literal('https')])),
+    hostname: schema.maybe(schema.string({ hostname: true })),
+    port: schema.maybe(schema.number({ min: 0, max: 65535 })),
+  }),
+  authc: schema.object({
+    providers: schema.arrayOf(schema.string(), { defaultValue: ['basic'], minSize: 1 }),
+    oidc: providerOptionsSchema('oidc', schema.object({ realm: schema.string() })),
+    saml: providerOptionsSchema(
+      'saml',
+      schema.object({
+        realm: schema.maybe(schema.string()),
+        maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
+      })
     ),
-    session: schema.object({
-      idleTimeout: schema.nullable(schema.duration()),
-      lifespan: schema.nullable(schema.duration()),
+    http: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+      autoSchemesEnabled: schema.boolean({ defaultValue: true }),
+      schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey'] }),
     }),
-    secureCookies: schema.boolean({ defaultValue: false }),
-    public: schema.object({
-      protocol: schema.maybe(schema.oneOf([schema.literal('http'), schema.literal('https')])),
-      hostname: schema.maybe(schema.string({ hostname: true })),
-      port: schema.maybe(schema.number({ min: 0, max: 65535 })),
-    }),
-    authc: schema.object({
-      providers: schema.arrayOf(schema.string(), { defaultValue: ['basic'], minSize: 1 }),
-      oidc: providerOptionsSchema('oidc', schema.object({ realm: schema.string() })),
-      saml: providerOptionsSchema(
-        'saml',
-        schema.object({
-          realm: schema.maybe(schema.string()),
-          maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
-        })
-      ),
-    }),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Security plugin.
-  { allowUnknowns: true }
-);
-
-// HACK: Since new platform doesn't support config deprecation transformations yet (e.g. `rename`), we have to handle
-// them manually here for the time being. Legacy platform config will log corresponding deprecation warnings.
-const origValidate = ConfigSchema.validate;
-ConfigSchema.validate = (value, context, namespace) => {
-  // Rename deprecated `xpack.security.authProviders` to `xpack.security.authc.providers`.
-  if (value && value.authProviders) {
-    value.authc = {
-      ...(value.authc || {}),
-      providers: value.authProviders,
-    };
-
-    delete value.authProviders;
-  }
-
-  return origValidate.call(ConfigSchema, value, context, namespace);
-};
+  }),
+  audit: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
+});
 
 export function createConfig$(context: PluginInitializerContext, isTLSEnabled: boolean) {
   return context.config.create<TypeOf<typeof ConfigSchema>>().pipe(

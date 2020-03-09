@@ -6,17 +6,14 @@
 
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Query } from 'react-apollo';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { GetKpiHostsQuery, KpiHostsData } from '../../graphql/types';
+import { GetKpiHostsQueryComponent, KpiHostsData } from '../../graphql/types';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { useUiSetting } from '../../lib/kibana';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
-
-import { kpiHostsQuery } from './index.gql_query';
 
 const ID = 'kpiHostsQuery';
 
@@ -29,13 +26,12 @@ export interface KpiHostsArgs {
 }
 
 export interface KpiHostsProps extends QueryTemplateProps {
-  children: (args: KpiHostsArgs) => React.ReactNode;
+  children: (args: KpiHostsArgs) => React.ReactElement;
 }
 
 const KpiHostsComponentQuery = React.memo<KpiHostsProps & PropsFromRedux>(
   ({ id = ID, children, endDate, filterQuery, isInspected, skip, sourceId, startDate }) => (
-    <Query<GetKpiHostsQuery.Query, GetKpiHostsQuery.Variables>
-      query={kpiHostsQuery}
+    <GetKpiHostsQueryComponent
       fetchPolicy={getDefaultFetchPolicy()}
       notifyOnNetworkStatusChange
       skip={skip}
@@ -61,7 +57,7 @@ const KpiHostsComponentQuery = React.memo<KpiHostsProps & PropsFromRedux>(
           refetch,
         });
       }}
-    </Query>
+    </GetKpiHostsQueryComponent>
   )
 );
 

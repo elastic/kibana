@@ -14,7 +14,6 @@ import { AuthenticatedUser } from '../../common/model';
 import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import { Authenticator, ProviderSession } from './authenticator';
-import { LegacyAPI } from '../plugin';
 import { APIKeys, CreateAPIKeyParams, InvalidateAPIKeyParams } from './api_keys';
 import { SecurityLicense } from '../../common/licensing';
 
@@ -36,7 +35,6 @@ interface SetupAuthenticationParams {
   config: ConfigType;
   license: SecurityLicense;
   loggers: LoggerFactory;
-  getLegacyAPI(): Pick<LegacyAPI, 'serverConfig'>;
 }
 
 export type Authentication = UnwrapPromise<ReturnType<typeof setupAuthentication>>;
@@ -47,7 +45,6 @@ export async function setupAuthentication({
   config,
   license,
   loggers,
-  getLegacyAPI,
 }: SetupAuthenticationParams) {
   const authLogger = loggers.get('authentication');
 
@@ -56,10 +53,8 @@ export async function setupAuthentication({
    * to construct a server base URL (deprecated, used by the SAML provider only).
    */
   const getServerBaseURL = () => {
-    const serverConfig = {
-      ...getLegacyAPI().serverConfig,
-      ...config.public,
-    };
+    const { protocol, host: hostname, port } = http.getServerInfo();
+    const serverConfig = { protocol, hostname, port, ...config.public };
 
     return `${serverConfig.protocol}://${serverConfig.hostname}:${serverConfig.port}`;
   };
@@ -144,10 +139,8 @@ export async function setupAuthentication({
       // authentication (username and password) or arbitrary external page managed by 3rd party
       // Identity Provider for SSO authentication mechanisms. Authentication provider is the one who
       // decides what location user should be redirected to.
-      return response.redirected({
-        headers: {
-          location: authenticationResult.redirectURL!,
-        },
+      return t.redirected({
+        location: authenticationResult.redirectURL!,
       });
     }
 
@@ -170,9 +163,7 @@ export async function setupAuthentication({
     }
 
     authLogger.debug('Could not handle authentication attempt');
-    return response.unauthorized({
-      headers: authenticationResult.authResponseHeaders,
-    });
+    return t.notHandled();
   });
 
   authLogger.debug('Successfully registered core authentication handler.');
@@ -186,6 +177,7 @@ export async function setupAuthentication({
     login: authenticator.login.bind(authenticator),
     logout: authenticator.logout.bind(authenticator),
     getSessionInfo: authenticator.getSessionInfo.bind(authenticator),
+    isProviderEnabled: authenticator.isProviderEnabled.bind(authenticator),
     getCurrentUser,
     createAPIKey: (request: KibanaRequest, params: CreateAPIKeyParams) =>
       apiKeys.create(request, params),

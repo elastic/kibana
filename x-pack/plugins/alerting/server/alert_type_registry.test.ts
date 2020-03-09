@@ -27,7 +27,13 @@ describe('has()', () => {
     registry.register({
       id: 'foo',
       name: 'Foo',
-      actionGroups: [],
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      defaultActionGroupId: 'default',
       executor: jest.fn(),
     });
     expect(registry.has('foo')).toEqual(true);
@@ -39,7 +45,13 @@ describe('register()', () => {
     const alertType = {
       id: 'test',
       name: 'Test',
-      actionGroups: [],
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      defaultActionGroupId: 'default',
       executor: jest.fn(),
     };
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -64,14 +76,26 @@ describe('register()', () => {
     registry.register({
       id: 'test',
       name: 'Test',
-      actionGroups: [],
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      defaultActionGroupId: 'default',
       executor: jest.fn(),
     });
     expect(() =>
       registry.register({
         id: 'test',
         name: 'Test',
-        actionGroups: [],
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
         executor: jest.fn(),
       })
     ).toThrowErrorMatchingInlineSnapshot(`"Alert type \\"test\\" is already registered."`);
@@ -84,13 +108,25 @@ describe('get()', () => {
     registry.register({
       id: 'test',
       name: 'Test',
-      actionGroups: [],
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      defaultActionGroupId: 'default',
       executor: jest.fn(),
     });
     const alertType = registry.get('test');
     expect(alertType).toMatchInlineSnapshot(`
       Object {
-        "actionGroups": Array [],
+        "actionGroups": Array [
+          Object {
+            "id": "default",
+            "name": "Default",
+          },
+        ],
+        "defaultActionGroupId": "default",
         "executor": [MockFunction],
         "id": "test",
         "name": "Test",
@@ -124,12 +160,20 @@ describe('list()', () => {
           name: 'Test Action Group',
         },
       ],
+      defaultActionGroupId: 'testActionGroup',
       executor: jest.fn(),
     });
     const result = registry.list();
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
+          "actionGroups": Array [
+            Object {
+              "id": "testActionGroup",
+              "name": "Test Action Group",
+            },
+          ],
+          "defaultActionGroupId": "testActionGroup",
           "id": "test",
           "name": "Test",
         },

@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { AggConfig } from '../agg_config';
+import { IAggConfig } from '../agg_config';
 import { BaseParamType } from './base';
 
 export interface OptionedValueProp {
   value: string;
   text: string;
   disabled?: boolean;
-  isCompatible: (agg: AggConfig) => boolean;
+  isCompatible: (agg: IAggConfig) => boolean;
 }
 
 export interface OptionedParamEditorProps<T = OptionedValueProp> {
@@ -40,7 +40,7 @@ export class OptionedParamType extends BaseParamType {
     super(config);
 
     if (!config.write) {
-      this.write = (aggConfig: AggConfig, output: Record<string, any>) => {
+      this.write = (aggConfig: IAggConfig, output: Record<string, any>) => {
         output.params[this.name] = aggConfig.params[this.name].value;
       };
     }
