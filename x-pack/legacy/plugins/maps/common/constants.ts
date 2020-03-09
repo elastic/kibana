@@ -125,6 +125,7 @@ export enum AGG_TYPE {
   SUM = 'sum',
   TERMS = 'terms',
   UNIQUE_COUNT = 'cardinality',
+  PERCENTAGE_KBN = 'percentage_kbn',
 }
 
 export enum RENDER_AS {

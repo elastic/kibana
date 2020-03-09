@@ -53,12 +53,10 @@ describe('getMetricFields', () => {
     const metrics = source.getMetricFields();
     expect(metrics.length).toBe(2);
 
-    expect(metrics[0].getAggType()).toEqual('sum');
     expect(metrics[0].getRootName()).toEqual(sumFieldName);
     expect(metrics[0].getName()).toEqual('sum_of_myFieldGettingSummed');
     expect(await metrics[0].getLabel()).toEqual('my custom label');
 
-    expect(metrics[1].getAggType()).toEqual('count');
     expect(metrics[1].getName()).toEqual('doc_count');
     expect(await metrics[1].getLabel()).toEqual('count');
   });
@@ -69,9 +67,8 @@ describe('getMetricFields', () => {
     const fields = await source.getFields();
 
     const getFieldMeta = async (field: IField) => {
-      const esAggField = field as IESAggField;
+      const esAggField = field as IESAggField; // this ensures we can downcast correctly.
       return {
-        aggType: esAggField.getAggType(),
         name: esAggField.getName(),
         label: await esAggField.getLabel(),
         esDoc: esAggField.getRootName(),
