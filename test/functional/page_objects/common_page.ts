@@ -299,10 +299,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
           // Browsers don't show the ':port' if it's 80 or 443 so we have to
           // remove that part so we can get a match in the tests.
-          const navSuccessful = new RegExp(
-            appUrl.replace(':80/', '/').replace(':443/', '/') +
-              `.{0,${maxAdditionalLengthOnNavUrl}}$`
-          ).test(currentUrl);
+
+          const navSuccessful = appUrl
+            .replace(':80/', '/')
+            .replace(':443/', '/')
+            .startsWith(currentUrl);
 
           if (!navSuccessful) {
             const msg = `App failed to load: ${appName} in ${defaultFindTimeout}ms appUrl=${appUrl} currentUrl=${currentUrl}`;
