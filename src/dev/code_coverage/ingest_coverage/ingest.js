@@ -30,11 +30,14 @@ const node = process.env.ES_HOST || 'http://localhost:9200';
 const redacted = redact(node);
 const client = new Client({ node });
 
+const indexName = body =>
+  body.isTotal ? TOTALS_INDEX : COVERAGE_INDEX;
+
 export const ingest = log => async body => {
-  const index = !body.staticSiteUrl ? TOTALS_INDEX : COVERAGE_INDEX;
+  const index = indexName(body);
 
   if (process.env.NODE_ENV === 'integration_test') {
-    log.debug(`### Just Logging, ${green('NOT actually sending')} to ${green(index)}`);
+    log.debug(`### Just Logging, ${green('NOT actually sending')} to [${index}]`);
     logSuccess(log, index, body);
   } else {
     try {

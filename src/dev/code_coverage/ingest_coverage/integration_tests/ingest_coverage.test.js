@@ -54,85 +54,91 @@ describe('Ingesting Coverage to Cluster', () => {
   const noTotalsPath = 'jest-combined/coverage-summary-NO-total.json';
   const bothIndexesPath = 'jest-combined/coverage-summary-manual-mix.json';
 
-  describe(`to the [${TOTALS_INDEX}] index`, () => {
-    const mutableTotalsIndexLoggingChunks = [];
-    beforeAll(done => {
-      const ingestAndMutateAsync = ingestAndMutate(done);
-      const ingestAndMutateAsyncWithPath = ingestAndMutateAsync(justTotalPath);
-      const verboseIngestAndMutateAsyncWithPath = ingestAndMutateAsyncWithPath(verboseArgs);
+  describe('with NODE_ENV set to "integration_test"', () => {
+    describe(`and debug || verbose turned on`, () => {
 
-      verboseIngestAndMutateAsyncWithPath(mutableTotalsIndexLoggingChunks);
-    });
+      describe(`to the [${TOTALS_INDEX}] index`, () => {
+        const mutableTotalsIndexLoggingChunks = [];
+        beforeAll(done => {
+          const ingestAndMutateAsync = ingestAndMutate(done);
+          const ingestAndMutateAsyncWithPath = ingestAndMutateAsync(justTotalPath);
+          const verboseIngestAndMutateAsyncWithPath = ingestAndMutateAsyncWithPath(verboseArgs);
 
-    it(`should say it's NOT sending to the totals index: [${TOTALS_INDEX}]`, () => {
-      mutableTotalsIndexLoggingChunks.forEach(x => console.log(green(x)))
-      expect(mutableTotalsIndexLoggingChunks.some(x => x.includes(`debg ### Just Logging, NOT actually sending to ${TOTALS_INDEX}`)))
-        .to.be(true);
-    });
-    it(`should have a link to the index page for the specific test runner`, () => {
-      // mutableTotalsIndexLoggingChunks.forEach(x => console.log(green(x)))
-      //
-      // expect(mutableTotalsIndexLoggingChunks.some(x => x.includes('debg ### Just Logging, NOT actually sending to kibana_code_coverage')))
-      //   .to.be(true);
+          verboseIngestAndMutateAsyncWithPath(mutableTotalsIndexLoggingChunks);
+        });
+
+        it(`should say it's Just Logging when sending to the totals index: [${TOTALS_INDEX}]`, () => {
+          const actual = mutableTotalsIndexLoggingChunks.filter(x => x.includes('debg ### Just Logging'));
+          const re = new RegExp(TOTALS_INDEX);
+          expect(re.test(actual)).to.be(true);
+        });
+
+        it(`should have a link to the index page for the specific test runner`, () => {
+          // mutableTotalsIndexLoggingChunks.forEach(x => console.log(green(x)))
+          //
+          // expect(mutableTotalsIndexLoggingChunks.some(x => x.includes('debg ### Just Logging, NOT actually sending to kibana_code_coverage')))
+          //   .to.be(true);
 
 
-      // siteUrlsSplitByNewLineWithoutBlanks(mutableTotalsIndexLoggingChunks)
-      //   .forEach(expectAllRegexesToPass(regexes))
-    });
-  });
-  describe(`to the [${COVERAGE_INDEX}] index`, () => {
-    const mutableCoverageIndexChunks = [];
+          // siteUrlsSplitByNewLineWithoutBlanks(mutableTotalsIndexLoggingChunks)
+          //   .forEach(expectAllRegexesToPass(regexes))
+        });
 
-    beforeAll(done => {
-      const ingestAndMutateAsync = ingestAndMutate(done);
-      const ingestAndMutateAsyncWithPath = ingestAndMutateAsync(noTotalsPath);
-      const verboseIngestAndMutateAsyncWithPath = ingestAndMutateAsyncWithPath(verboseArgs);
-      verboseIngestAndMutateAsyncWithPath(mutableCoverageIndexChunks);
-    });
-
-    it('should result in every posted item having a site url that meets all regex assertions',
-      F(siteUrlsSplitByNewLineWithoutBlanks(mutableCoverageIndexChunks)
-        .forEach(expectAllRegexesToPass(regexes))));
-
-    describe(`with a jsonSummaryPath containing the text 'combined'`, () => {
-      const combinedMsg = 'combined';
-
-      const because = 'currently, they are all combined, per how we merge them in ci using "nyc"';
-      it(`should always result in a distro of ${combinedMsg}, because: ${because}`, () => {
-        const includesDistroPredicate = x => x.includes('distro');
-        const distroLines = specificLinesOnly(includesDistroPredicate);
-        const distroLinesSplitByNewLine = distroLines(splitByNewLine);
-        const distroLinesSplitByNewLineWithoutBlanks = distroLinesSplitByNewLine(notBlankLines);
-
-        distroLinesSplitByNewLineWithoutBlanks(mutableCoverageIndexChunks)
-          .filter(includesDistroPredicate)
-          .forEach(x => expect(x).to.contain(combinedMsg));
       });
-    });
-    describe('with NODE_ENV set to "integration_test"', () => {
-      describe(`and debug || verbose turned on`, () => {
+      describe(`to the [${COVERAGE_INDEX}] index`, () => {
+        const mutableCoverageIndexChunks = [];
+
+        beforeAll(done => {
+          const ingestAndMutateAsync = ingestAndMutate(done);
+          const ingestAndMutateAsyncWithPath = ingestAndMutateAsync(noTotalsPath);
+          const verboseIngestAndMutateAsyncWithPath = ingestAndMutateAsyncWithPath(verboseArgs);
+          verboseIngestAndMutateAsyncWithPath(mutableCoverageIndexChunks);
+        });
+
+        it('should result in every posted item having a site url that meets all regex assertions',
+          F(siteUrlsSplitByNewLineWithoutBlanks(mutableCoverageIndexChunks)
+            .forEach(expectAllRegexesToPass(regexes))));
+
+        describe(`with a jsonSummaryPath containing the text 'combined'`, () => {
+          const combinedMsg = 'combined';
+
+          const because = 'currently, they are all combined, per how we merge them in ci using "nyc"';
+          it(`should always result in a distro of ${combinedMsg}, because: ${because}`, () => {
+            const includesDistroPredicate = x => x.includes('distro');
+            const distroLines = specificLinesOnly(includesDistroPredicate);
+            const distroLinesSplitByNewLine = distroLines(splitByNewLine);
+            const distroLinesSplitByNewLineWithoutBlanks = distroLinesSplitByNewLine(notBlankLines);
+
+            distroLinesSplitByNewLineWithoutBlanks(mutableCoverageIndexChunks)
+              .filter(includesDistroPredicate)
+              .forEach(x => expect(x).to.contain(combinedMsg));
+          });
+        });
+      });
+
+      describe(`to both indexes in the same push`, () => {
+        const mutableBothIndexesChunks = [];
+
+        beforeAll(done => {
+          const ingestAndMutateAsync = ingestAndMutate(done);
+          const ingestAndMutateAsyncWithPath = ingestAndMutateAsync(bothIndexesPath);
+          const verboseIngestAndMutateAsyncWithPath = ingestAndMutateAsyncWithPath(verboseArgs);
+          verboseIngestAndMutateAsyncWithPath(mutableBothIndexesChunks);
+        });
+
+        it('should result in every posted item having a site url that meets all regex assertions',
+          F(siteUrlsSplitByNewLineWithoutBlanks(mutableBothIndexesChunks)
+            .forEach(expectAllRegexesToPass(regexes))));
+
         it('should result in the "just logging" message being present in the log', () => {
-          expect(mutableCoverageIndexChunks.some(x => x.includes('Just Logging'))).to.be(true);
+          expect(mutableBothIndexesChunks.some(x => x.includes('Just Logging'))).to.be(true);
         });
         it('should result in the "actually sending" message NOT being present in the log', () => {
-          expect(mutableCoverageIndexChunks.every(x => !x.includes('Actually sending...'))).to.be(true);
+          expect(mutableBothIndexesChunks.every(x => !x.includes('Actually sending...'))).to.be(true);
         });
       });
-    });
-  });
-  describe(`to both indexes in the same push`, () => {
-    const mutableBothIndexesChunks = [];
 
-    beforeAll(done => {
-      const ingestAndMutateAsync = ingestAndMutate(done);
-      const ingestAndMutateAsyncWithPath = ingestAndMutateAsync(bothIndexesPath);
-      const verboseIngestAndMutateAsyncWithPath = ingestAndMutateAsyncWithPath(verboseArgs);
-      verboseIngestAndMutateAsyncWithPath(mutableBothIndexesChunks);
     });
-
-    it('should result in every posted item having a site url that meets all regex assertions',
-      F(siteUrlsSplitByNewLineWithoutBlanks(mutableBothIndexesChunks)
-        .forEach(expectAllRegexesToPass(regexes))));
   });
 
 });
@@ -161,6 +167,7 @@ function notBlankLines (acc, item) {
   if (item != '') return item;
   return acc;
 }
+
 function expectAllRegexesToPass (regexes) {
   return urlLine =>
     Object.entries(regexes)

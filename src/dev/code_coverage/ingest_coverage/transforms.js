@@ -95,12 +95,20 @@ export const staticSite = (urlBase, liveAppPath) => obj => {
 
   const url = maybeTotal(staticSiteUrl)
     .fold(
-      () => right(process.env.STATIC_SITE_URL_BASE).map(_ => joinParts('/index.html')).fold(noop, id)
-    , () => right(staticSiteUrl).map(fixFront).map(x => joinParts(suffix(x))).fold(noop, id)
+      () => right(process.env.STATIC_SITE_URL_BASE).map(_ => {
+        obj['isTotal'] = true;
+
+        return joinParts('/index.html');
+      }).fold(noop, id)
+    , () => {
+        obj['isTotal'] = false;
+
+          return right(staticSiteUrl).map(fixFront).map(x => joinParts(suffix(x))).fold(noop, id)
+      }
     );
 
   delete obj['staticSiteUrl'];
-  obj['staticSiteUrl'] = url
+  obj['staticSiteUrl'] = url;
 
   return obj;
 };
