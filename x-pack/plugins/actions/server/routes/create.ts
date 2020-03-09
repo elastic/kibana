@@ -13,8 +13,7 @@ import {
   KibanaResponseFactory,
 } from 'kibana/server';
 import { ActionResult } from '../types';
-import { ILicenseState } from '../lib/license_state';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { ActionTypeDisabledError, ILicenseState, verifyApiAccess } from '../lib';
 
 export const bodySchema = schema.object({
   name: schema.string(),
@@ -46,10 +45,17 @@ export const createActionRoute = (router: IRouter, licenseState: ILicenseState) 
       }
       const actionsClient = context.actions.getActionsClient();
       const action = req.body;
-      const actionRes: ActionResult = await actionsClient.create({ action });
-      return res.ok({
-        body: actionRes,
-      });
+      try {
+        const actionRes: ActionResult = await actionsClient.create({ action });
+        return res.ok({
+          body: actionRes,
+        });
+      } catch (e) {
+        if (e instanceof ActionTypeDisabledError) {
+          return e.sendResponse(res);
+        }
+        throw e;
+      }
     })
   );
 };

@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import { LicenseState } from './license_state';
+import { ActionType } from '../types';
+import { BehaviorSubject } from 'rxjs';
+import { LicenseState, ILicenseState } from './license_state';
 import { licensingMock } from '../../../licensing/server/mocks';
-import { LICENSE_CHECK_STATE } from '../../../licensing/server';
+import { LICENSE_CHECK_STATE, ILicense } from '../../../licensing/server';
 
-describe('license_state', () => {
+describe('checkLicense()', () => {
   let getRawLicense: any;
 
   beforeEach(() => {
@@ -29,7 +30,7 @@ describe('license_state', () => {
       const licensing = licensingMock.createSetup();
       const licenseState = new LicenseState(licensing.license$);
       const actionsLicenseInfo = licenseState.checkLicense(getRawLicense());
-      expect(actionsLicenseInfo.enableAppLink).to.be(false);
+      expect(actionsLicenseInfo.enableAppLink).toBe(false);
     });
   });
 
@@ -46,7 +47,70 @@ describe('license_state', () => {
       const licensing = licensingMock.createSetup();
       const licenseState = new LicenseState(licensing.license$);
       const actionsLicenseInfo = licenseState.checkLicense(getRawLicense());
-      expect(actionsLicenseInfo.showAppLink).to.be(true);
+      expect(actionsLicenseInfo.showAppLink).toBe(true);
     });
+  });
+});
+
+describe('ensureLicenseForActionType()', () => {
+  let license: BehaviorSubject<ILicense>;
+  let licenseState: ILicenseState;
+  const fooActionType: ActionType = {
+    id: 'foo',
+    name: 'Foo',
+    minimumLicenseRequired: 'gold',
+    executor: async () => {},
+  };
+
+  beforeEach(() => {
+    license = new BehaviorSubject(null as any);
+    licenseState = new LicenseState(license);
+  });
+
+  test('should throw when license not defined', () => {
+    expect(() =>
+      licenseState.ensureLicenseForActionType(fooActionType)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Action type foo is disabled because license information is not available at this time."`
+    );
+  });
+
+  test('should throw when license not available', () => {
+    license.next({ isAvailable: false } as any);
+    expect(() =>
+      licenseState.ensureLicenseForActionType(fooActionType)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Action type foo is disabled because license information is not available at this time."`
+    );
+  });
+
+  test('should throw when license is expired', () => {
+    const expiredLicense = licensingMock.createLicense({ license: { status: 'expired' } });
+    license.next(expiredLicense);
+    expect(() =>
+      licenseState.ensureLicenseForActionType(fooActionType)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Action type foo is disabled because your basic license has expired."`
+    );
+  });
+
+  test('should throw when license is invalid', () => {
+    const basicLicense = licensingMock.createLicense({
+      license: { status: 'active', type: 'basic' },
+    });
+    license.next(basicLicense);
+    expect(() =>
+      licenseState.ensureLicenseForActionType(fooActionType)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Action type foo is disabled because your basic license does not support it. Please upgrade your license."`
+    );
+  });
+
+  test('should not throw when license is valid', () => {
+    const goldLicense = licensingMock.createLicense({
+      license: { status: 'active', type: 'gold' },
+    });
+    license.next(goldLicense);
+    licenseState.ensureLicenseForActionType(fooActionType);
   });
 });

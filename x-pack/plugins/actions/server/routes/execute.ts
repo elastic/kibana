@@ -11,8 +11,7 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { ILicenseState } from '../lib/license_state';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { ILicenseState, verifyApiAccess, ActionTypeDisabledError } from '../lib';
 
 import { ActionExecutorContract } from '../lib';
 import { ActionTypeExecutorResult } from '../types';
@@ -49,16 +48,23 @@ export const executeActionRoute = (
       verifyApiAccess(licenseState);
       const { params } = req.body;
       const { id } = req.params;
-      const body: ActionTypeExecutorResult = await actionExecutor.execute({
-        params,
-        request: req,
-        actionId: id,
-      });
-      return body
-        ? res.ok({
-            body,
-          })
-        : res.noContent();
+      try {
+        const body: ActionTypeExecutorResult = await actionExecutor.execute({
+          params,
+          request: req,
+          actionId: id,
+        });
+        return body
+          ? res.ok({
+              body,
+            })
+          : res.noContent();
+      } catch (e) {
+        if (e instanceof ActionTypeDisabledError) {
+          return e.sendResponse(res);
+        }
+        throw e;
+      }
     })
   );
 };

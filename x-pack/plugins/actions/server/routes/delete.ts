@@ -17,8 +17,7 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { ILicenseState } from '../lib/license_state';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { ILicenseState, verifyApiAccess } from '../lib';
 
 const paramSchema = schema.object({
   id: schema.string(),

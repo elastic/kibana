@@ -30,7 +30,7 @@ import { SpacesPluginSetup, SpacesServiceSetup } from '../../spaces/server';
 
 import { ActionsConfig } from './config';
 import { Services, ActionType } from './types';
-import { ActionExecutor, TaskRunnerFactory } from './lib';
+import { ActionExecutor, TaskRunnerFactory, LicenseState, ILicenseState } from './lib';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import { ExecuteOptions } from './create_execute_function';
@@ -48,7 +48,6 @@ import {
   listActionTypesRoute,
   executeActionRoute,
 } from './routes';
-import { LicenseState, ILicenseState } from './lib/license_state';
 import { IEventLogger, IEventLogService } from '../../event_log/server';
 
 const EVENT_LOG_PROVIDER = 'actions';
@@ -110,6 +109,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   }
 
   public async setup(core: CoreSetup, plugins: ActionsPluginsSetup): Promise<PluginSetupContract> {
+    this.licenseState = new LicenseState(plugins.licensing.license$);
     this.isESOUsingEphemeralEncryptionKey =
       plugins.encryptedSavedObjects.usingEphemeralEncryptionKey;
 
@@ -149,6 +149,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       taskRunnerFactory,
       taskManager: plugins.taskManager,
       actionsConfigUtils,
+      licenseState: this.licenseState,
     });
     this.taskRunnerFactory = taskRunnerFactory;
     this.actionTypeRegistry = actionTypeRegistry;
@@ -169,7 +170,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     );
 
     // Routes
-    this.licenseState = new LicenseState(plugins.licensing.license$);
     const router = core.http.createRouter();
     createActionRoute(router, this.licenseState);
     deleteActionRoute(router, this.licenseState);

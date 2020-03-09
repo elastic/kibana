@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import {
   IScopedClusterClient,
   SavedObjectsClientContract,
@@ -93,11 +92,7 @@ export class ActionsClient {
     const validatedActionTypeConfig = validateConfig(actionType, config);
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
 
-    try {
-      this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
-    } catch (err) {
-      throw Boom.badRequest(err.message);
-    }
+    this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
     const result = await this.savedObjectsClient.create('action', {
       actionTypeId,
@@ -124,6 +119,8 @@ export class ActionsClient {
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const validatedActionTypeConfig = validateConfig(actionType, config);
     const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
+
+    this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
     const result = await this.savedObjectsClient.update('action', id, {
       actionTypeId,

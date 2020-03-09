@@ -13,8 +13,7 @@ import {
   KibanaResponseFactory,
 } from 'kibana/server';
 import { FindOptions } from '../../../alerting/server';
-import { ILicenseState } from '../lib/license_state';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { ILicenseState, verifyApiAccess } from '../lib';
 
 // config definition
 const querySchema = schema.object({

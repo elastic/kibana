@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createTestConfig } from '../common/config';
-
-// eslint-disable-next-line import/no-default-export
-export default createTestConfig('spaces_only', { disabledPlugins: ['security'], license: 'trial' });
+export { ActionTypeDisabledError, ActionTypeDisabledReason } from './action_type_disabled';
