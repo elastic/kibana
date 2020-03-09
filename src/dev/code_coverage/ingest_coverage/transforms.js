@@ -99,10 +99,9 @@ export const staticSite = (urlBase, liveAppPath) => obj => {
 
         return right(staticSiteUrl)
           .map(fixFront)
-          .map(x => {
-            const result = [...parts, '/coverage_data/', `${testRunnerType.toLowerCase()}-combined`, x, '.html'].join('')
-            return result;
-          })
+          .map(x =>
+            [...parts, '/coverage_data/', `${testRunnerType.toLowerCase()}-combined`, x, '.html'].join('')
+          )
           .fold(noop, id)
       }
     );
