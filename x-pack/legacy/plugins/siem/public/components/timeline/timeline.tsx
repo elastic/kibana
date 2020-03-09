@@ -6,7 +6,7 @@
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
@@ -121,12 +121,6 @@ export const TimelineComponent: React.FC<Props> = ({
   const { ref: measureRef, width = 0, height: timelineHeaderHeight = 0 } = useResizeObserver<
     HTMLDivElement
   >({});
-  const bodyHeight = calculateBodyHeight({
-    flyoutHeight,
-    flyoutHeaderHeight,
-    timelineHeaderHeight,
-    timelineFooterHeight: footerHeight,
-  });
   const kibana = useKibana();
   const combinedQueries = combineQueries({
     config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
@@ -139,14 +133,7 @@ export const TimelineComponent: React.FC<Props> = ({
     start,
     end,
   });
-  const sortField = {
-    sortFieldId: sort.columnId,
-    direction: sort.sortDirection as Direction,
-  };
-  const timelineQueryFields = useMemo(() => {
-    const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
-    return columnsHeader.map(c => c.id);
-  }, [columns]);
+  const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
 
   return (
     <TimelineContainer
@@ -178,11 +165,14 @@ export const TimelineComponent: React.FC<Props> = ({
           eventType={eventType}
           id={id}
           indexToAdd={indexToAdd}
-          fields={timelineQueryFields}
+          fields={columnsHeader.map(c => c.id)}
           sourceId="default"
           limit={itemsPerPage}
           filterQuery={combinedQueries.filterQuery}
-          sortField={sortField}
+          sortField={{
+            sortFieldId: sort.columnId,
+            direction: sort.sortDirection as Direction,
+          }}
         >
           {({
             events,
@@ -206,7 +196,12 @@ export const TimelineComponent: React.FC<Props> = ({
                 browserFields={browserFields}
                 data={events}
                 id={id}
-                height={bodyHeight}
+                height={calculateBodyHeight({
+                  flyoutHeight,
+                  flyoutHeaderHeight,
+                  timelineHeaderHeight,
+                  timelineFooterHeight: footerHeight,
+                })}
                 sort={sort}
                 toggleColumn={toggleColumn}
               />

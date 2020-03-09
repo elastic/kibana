@@ -331,54 +331,56 @@ export class Form extends PureComponent<FormProps> {
     });
     return (
       <EuiBottomBar className={bottomBarClasses} data-test-subj="advancedSetting-bottomBar">
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexGroup
+          justifyContent="spaceBetween"
+          alignItems="center"
+          responsive={false}
+          gutterSize="s"
+        >
           <EuiFlexItem grow={false} className="mgtAdvancedSettingsForm__unsavedCount">
             <p id="aria-describedby.countOfUnsavedSettings">{this.renderCountOfUnsaved()}</p>
           </EuiFlexItem>
+          <EuiFlexItem />
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  color="ghost"
-                  size="s"
-                  iconType="cross"
-                  onClick={this.clearAllUnsaved}
-                  aria-describedby="aria-describedby.countOfUnsavedSettings"
-                  data-test-subj="advancedSetting-cancelButton"
-                >
-                  {i18n.translate('advancedSettings.form.cancelButtonLabel', {
-                    defaultMessage: 'Cancel changes',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={
-                    areChangesInvalid &&
-                    i18n.translate('advancedSettings.form.saveButtonTooltipWithInvalidChanges', {
-                      defaultMessage: 'Fix invalid settings before saving.',
-                    })
-                  }
-                >
-                  <EuiButton
-                    className="mgtAdvancedSettingsForm__button"
-                    disabled={areChangesInvalid}
-                    color="secondary"
-                    fill
-                    size="s"
-                    iconType="check"
-                    onClick={this.saveAll}
-                    aria-describedby="aria-describedby.countOfUnsavedSettings"
-                    isLoading={this.state.loading}
-                    data-test-subj="advancedSetting-saveButton"
-                  >
-                    {i18n.translate('advancedSettings.form.saveButtonLabel', {
-                      defaultMessage: 'Save changes',
-                    })}
-                  </EuiButton>
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiButtonEmpty
+              color="ghost"
+              size="s"
+              iconType="cross"
+              onClick={this.clearAllUnsaved}
+              aria-describedby="aria-describedby.countOfUnsavedSettings"
+              data-test-subj="advancedSetting-cancelButton"
+            >
+              {i18n.translate('advancedSettings.form.cancelButtonLabel', {
+                defaultMessage: 'Cancel changes',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={
+                areChangesInvalid &&
+                i18n.translate('advancedSettings.form.saveButtonTooltipWithInvalidChanges', {
+                  defaultMessage: 'Fix invalid settings before saving.',
+                })
+              }
+            >
+              <EuiButton
+                className="mgtAdvancedSettingsForm__button"
+                disabled={areChangesInvalid}
+                color="secondary"
+                fill
+                size="s"
+                iconType="check"
+                onClick={this.saveAll}
+                aria-describedby="aria-describedby.countOfUnsavedSettings"
+                isLoading={this.state.loading}
+                data-test-subj="advancedSetting-saveButton"
+              >
+                {i18n.translate('advancedSettings.form.saveButtonLabel', {
+                  defaultMessage: 'Save changes',
+                })}
+              </EuiButton>
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiBottomBar>

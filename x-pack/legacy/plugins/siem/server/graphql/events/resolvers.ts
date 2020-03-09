@@ -7,21 +7,37 @@
 import { GraphQLScalarType, Kind } from 'graphql';
 
 import { Events } from '../../lib/events';
+import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { createOptions } from '../../utils/build_query/create_options';
+import { QuerySourceResolver } from '../sources/resolvers';
 import { SourceResolvers } from '../types';
 import { LastEventTimeRequestOptions } from '../../lib/events/types';
+
+type QueryTimelineResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.TimelineResolver>,
+  QuerySourceResolver
+>;
+
+type QueryTimelineDetailsResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.TimelineDetailsResolver>,
+  QuerySourceResolver
+>;
+
+type QueryLastEventTimeResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.LastEventTimeResolver>,
+  QuerySourceResolver
+>;
 
 export interface EventsResolversDeps {
   events: Events;
 }
-
 export const createEventsResolvers = (
   libs: EventsResolversDeps
 ): {
   Source: {
-    Timeline: SourceResolvers['Timeline'];
-    TimelineDetails: SourceResolvers['TimelineDetails'];
-    LastEventTime: SourceResolvers['LastEventTime'];
+    Timeline: QueryTimelineResolver;
+    TimelineDetails: QueryTimelineDetailsResolver;
+    LastEventTime: QueryLastEventTimeResolver;
   };
 } => ({
   Source: {

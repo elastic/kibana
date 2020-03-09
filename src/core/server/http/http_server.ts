@@ -26,8 +26,7 @@ import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { adoptToHapiOnPreAuthFormat, OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPreResponseFormat, OnPreResponseHandler } from './lifecycle/on_pre_response';
-
-import { IRouter } from './router';
+import { IRouter, RouteConfigOptions, KibanaRouteState, isSafeMethod } from './router';
 import {
   SessionStorageCookieOptions,
   createCookieSessionStorageFactory,
@@ -147,16 +146,21 @@ export class HttpServer {
       for (const route of router.getRoutes()) {
         this.log.debug(`registering route handler for [${route.path}]`);
         // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
-        const validate = ['head', 'get'].includes(route.method) ? undefined : { payload: true };
-        const { authRequired = true, tags, body = {} } = route.options;
+        const validate = isSafeMethod(route.method) ? undefined : { payload: true };
+        const { authRequired, tags, body = {} } = route.options;
         const { accepts: allow, maxBytes, output, parse } = body;
+
+        const kibanaRouteState: KibanaRouteState = {
+          xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
+        };
+
         this.server.route({
           handler: route.handler,
           method: route.method,
           path: route.path,
           options: {
-            // Enforcing the comparison with true because plugins could overwrite the auth strategy by doing `options: { authRequired: authStrategy as any }`
-            auth: authRequired === true ? undefined : false,
+            auth: this.getAuthOption(authRequired),
+            app: kibanaRouteState,
             tags: tags ? Array.from(tags) : undefined,
             // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
             // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
@@ -188,6 +192,22 @@ export class HttpServer {
     this.log.debug('stopping http server');
     await this.server.stop();
     this.server = undefined;
+  }
+
+  private getAuthOption(
+    authRequired: RouteConfigOptions<any>['authRequired'] = true
+  ): undefined | false | { mode: 'required' | 'optional' } {
+    if (this.authRegistered === false) return undefined;
+
+    if (authRequired === true) {
+      return { mode: 'required' };
+    }
+    if (authRequired === 'optional') {
+      return { mode: 'optional' };
+    }
+    if (authRequired === false) {
+      return false;
+    }
   }
 
   private setupBasePathRewrite(config: HttpConfig, basePathService: BasePath) {

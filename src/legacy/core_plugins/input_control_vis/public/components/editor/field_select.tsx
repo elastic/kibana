@@ -22,13 +22,13 @@ import React, { Component } from 'react';
 import { InjectedIntlProps } from 'react-intl';
 
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { EuiFormRow, EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { IIndexPattern, IFieldType } from '../../../../../../plugins/data/public';
 
 interface FieldSelectUiState {
   isLoading: boolean;
-  fields: Array<EuiComboBoxOptionProps<string>>;
+  fields: Array<EuiComboBoxOptionOption<string>>;
   indexPatternId: string;
 }
 
@@ -105,7 +105,7 @@ class FieldSelectUi extends Component<FieldSelectUiProps, FieldSelectUiState> {
     }
 
     const fieldsByTypeMap = new Map<string, string[]>();
-    const fields: Array<EuiComboBoxOptionProps<string>> = [];
+    const fields: Array<EuiComboBoxOptionOption<string>> = [];
     indexPattern.fields
       .filter(this.props.filterField ?? (() => true))
       .forEach((field: IFieldType) => {
@@ -135,7 +135,7 @@ class FieldSelectUi extends Component<FieldSelectUiProps, FieldSelectUiState> {
     });
   }, 300);
 
-  onChange = (selectedOptions: Array<EuiComboBoxOptionProps<any>>) => {
+  onChange = (selectedOptions: Array<EuiComboBoxOptionOption<any>>) => {
     this.props.onChange(_.get(selectedOptions, '0.value'));
   };
 
