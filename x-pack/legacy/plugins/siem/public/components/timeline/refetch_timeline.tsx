@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { inputsModel } from '../../store';
 import { inputsActions } from '../../store/actions';
@@ -19,9 +19,7 @@ export interface TimelineRefetchProps {
   refetch: inputsModel.Refetch;
 }
 
-type OwnProps = TimelineRefetchProps & PropsFromRedux;
-
-const TimelineRefetchComponent: React.FC<OwnProps> = ({
+const TimelineRefetchComponent: React.FC<TimelineRefetchProps> = ({
   id,
   inputId,
   inspect,
@@ -29,19 +27,13 @@ const TimelineRefetchComponent: React.FC<OwnProps> = ({
   refetch,
   setTimelineQuery,
 }) => {
+  const dispatch = useDispatch();
+
   useEffect(() => {
-    setTimelineQuery({ id, inputId, inspect, loading, refetch });
-  }, [id, inputId, loading, refetch, inspect]);
+    dispatch(inputsActions.setQuery({ id, inputId, inspect, loading, refetch }));
+  }, [dispatch, id, inputId, loading, refetch, inspect]);
 
   return null;
 };
 
-const mapDispatchToProps = {
-  setTimelineQuery: inputsActions.setQuery,
-};
-
-const connector = connect(null, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const TimelineRefetch = connector(React.memo(TimelineRefetchComponent));
+export const TimelineRefetch = React.memo(TimelineRefetchComponent);
