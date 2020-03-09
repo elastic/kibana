@@ -10,17 +10,22 @@ import { FIELD_ORIGIN, LABEL_BORDER_SIZES, SYMBOLIZE_AS_TYPES } from './constant
 export type StylePropertyOptions =
   | LableBorderSizeOptions
   | SymbolizeAsOptions
-  // static/dynamic options
-  | ColorDynamicOptions
+  | DynamicStylePropertyOptions
+  | StaticStylePropertyOptions;
+
+export type StaticStylePropertyOptions =
   | ColorStaticOptions
-  | IconDynamicOptions
   | IconStaticOptions
-  | LabelDynamicOptions
   | LabelStaticOptions
-  | OrientationDynamicOptions
   | OrientationStaticOptions
-  | SizeDynamicOptions
   | SizeStaticOptions;
+
+export type DynamicStylePropertyOptions =
+  | ColorDynamicOptions
+  | IconDynamicOptions
+  | LabelDynamicOptions
+  | OrientationDynamicOptions
+  | SizeDynamicOptions;
 
 // Non-static/dynamic options
 export type SymbolizeAsOptions = {

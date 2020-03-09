@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { VECTOR_STYLES } from '../../vector_style_defaults';
 import { FieldMetaPopover } from './field_meta_popover';
+import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
+import { FieldMetaOptions } from '../../../../../../common/style_property_descriptor_types';
 
 function getIsEnableToggleLabel(styleName: string) {
   switch (styleName) {
@@ -35,8 +37,8 @@ function getIsEnableToggleLabel(styleName: string) {
 }
 
 type Props = {
-  styleProperty: unknown;
-  onChange: (fieldMetaOptions: unknown) => void;
+  styleProperty: IDynamicStyleProperty;
+  onChange: (fieldMetaOptions: FieldMetaOptions) => void;
 };
 
 export function OrdinalFieldMetaPopover(props: Props) {

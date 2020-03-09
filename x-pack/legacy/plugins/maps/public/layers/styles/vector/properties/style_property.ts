@@ -6,13 +6,14 @@
 
 import React, { ReactElement } from 'react';
 import { getVectorStyleLabel } from '../components/get_vector_style_label';
+import { FieldMetaOptions, StylePropertyOptions } from '../../../../../common/style_property_descriptor_types';
 
 export interface IStyleProperty {
   isDynamic(): boolean;
   isComplete(): boolean;
   formatField(value: string | undefined): string;
   getStyleName(): string;
-  getOptions(): unknown;
+  getOptions(): StylePropertyOptions;
   renderRangeLegendHeader(): ReactElement<any> | null;
   renderLegendDetailRow(): ReactElement<any> | null;
   renderFieldMetaPopover(): ReactElement<any> | null;
@@ -20,10 +21,10 @@ export interface IStyleProperty {
 }
 
 export class AbstractStyleProperty implements IStyleProperty {
-  private _options: unknown;
+  private _options: StylePropertyOptions;
   private _styleName: string;
 
-  constructor(options: unknown, styleName: string) {
+  constructor(options: StylePropertyOptions, styleName: string) {
     this._options = options;
     this._styleName = styleName;
   }
@@ -50,7 +51,7 @@ export class AbstractStyleProperty implements IStyleProperty {
     return this._styleName;
   }
 
-  getOptions(): unknown {
+  getOptions(): StylePropertyOptions {
     return this._options || {};
   }
 

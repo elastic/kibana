@@ -13,29 +13,58 @@ import {
   SOURCE_META_ID_ORIGIN,
   FIELD_ORIGIN,
 } from '../../../../../common/constants';
+import { DynamicStylePropertyOptions, FieldMetaOptions } from '../../../../../common/style_property_descriptor_types';
 import { scaleValue, getComputedFieldName } from '../style_util';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { OrdinalLegend } from './components/ordinal_legend';
 import { CategoricalLegend } from './components/categorical_legend';
 import { OrdinalFieldMetaPopover } from '../components/field_meta/ordinal_field_meta_popover';
+import { IStyleProperty } from './style_property';
+import { IField } from '../../../fields/field';
+import { IVectorLayer } from '../../../vector_layer';
+import { IVectorSource } from '../../../sources/vector_source';
+import { CategoryFieldMeta, RangeFieldMeta } from '../../../../../common/descriptor_types';
 
-export class DynamicStyleProperty extends AbstractStyleProperty {
+export interface IDynamicStyleProperty extends IStyleProperty {
+  getFieldMetaOptions(): FieldMetaOptions;
+  getField(): IField | undefined;
+  getFieldName(): string;
+  getFieldOrigin(): FIELD_ORIGIN | undefined;
+  getComputedFieldName(): string | undefined;
+  getFieldSource(): IVectorSource | undefined;
+  getRangeFieldMeta(): RangeFieldMeta;
+  getCategoryFieldMeta(): CategoryFieldMeta;
+  isFieldMetaEnabled(): boolean;
+  supportsFieldMeta(): boolean;
+  getFieldMetaRequest(): Promise<unknown>;
+  supportsFeatureState(): boolean;
+  pluckOrdinalStyleMetaFromFeatures(features: unknown[]): RangeFieldMeta;
+  pluckCategoricalStyleMetaFromFeatures(features: unknown[]): CategoryFieldMeta;
+  pluckOrdinalStyleMetaFromFieldMetaData(fieldMetaData: unknown): RangeFieldMeta;
+  pluckCategoricalStyleMetaFromFieldMetaData(fieldMetaData: unknown): CategoryFieldMeta;
+}
+
+export class DynamicStyleProperty extends AbstractStyleProperty implements IDynamicStyleProperty {
   static type = STYLE_TYPE.DYNAMIC;
 
-  constructor(options, styleName, field, vectorLayer, getFieldFormatter) {
+  private _field: IField | undefined;
+  private _layer: IVectorLayer;
+  private _getFieldFormatter: (field: IField, query: string) => string[];
+
+  constructor(options: DynamicStylePropertyOptions, styleName: string, field: IField | undefined, vectorLayer: IVectorLayer, getFieldFormatter: unknown) {
     super(options, styleName);
     this._field = field;
     this._layer = vectorLayer;
     this._getFieldFormatter = getFieldFormatter;
   }
 
-  getValueSuggestions = query => {
+  getValueSuggestions = (query: string) => {
     const field = this.getField();
     const fieldSource = this.getFieldSource();
     return fieldSource && field ? fieldSource.getValueSuggestions(field, query) : [];
   };
 
-  _getStyleMetaDataRequestId(fieldName) {
+  _getStyleMetaDataRequestId(fieldName: string): string | null {
     if (this.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
       return SOURCE_META_ID_ORIGIN;
     }
@@ -46,7 +75,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return join ? join.getSourceMetaDataRequestId() : null;
   }
 
-  getRangeFieldMeta() {
+  getRangeFieldMeta(): RangeFieldMeta {
     const style = this._layer.getStyle();
     const styleMeta = style.getStyleMeta();
     const fieldName = this.getFieldName();
@@ -67,7 +96,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return rangeFieldMeta ? rangeFieldMeta : rangeFieldMetaFromLocalFeatures;
   }
 
-  getCategoryFieldMeta() {
+  getCategoryFieldMeta(): CategoryFieldMeta {
     const style = this._layer.getStyle();
     const styleMeta = style.getStyleMeta();
     const fieldName = this.getFieldName();
@@ -88,59 +117,59 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return rangeFieldMeta ? rangeFieldMeta : rangeFieldMetaFromLocalFeatures;
   }
 
-  getField() {
+  getField(): IField | undefined {
     return this._field;
   }
 
-  getFieldSource() {
-    return this._field ? this._field.getSource() : null;
+  getFieldSource(): IVectorSource | undefined {
+    return this._field ? this._field.getSource() : undefined;
   }
 
-  getFieldName() {
+  getFieldName(): string {
     return this._field ? this._field.getName() : '';
   }
 
-  getComputedFieldName() {
+  getComputedFieldName(): string | undefined {
     if (!this.isComplete()) {
-      return null;
+      return undefined;
     }
     return getComputedFieldName(this._styleName, this.getField().getName());
   }
 
-  isDynamic() {
+  isDynamic(): boolean {
     return true;
   }
 
-  isOrdinal() {
+  isOrdinal(): boolean {
     return true;
   }
 
-  isCategorical() {
+  isCategorical(): boolean {
     return false;
   }
 
-  hasOrdinalBreaks() {
+  hasOrdinalBreaks(): boolean {
     return false;
   }
 
-  isOrdinalRanged() {
+  isOrdinalRanged(): boolean {
     return true;
   }
 
-  isComplete() {
+  isComplete(): boolean {
     return !!this._field;
   }
 
-  getFieldOrigin() {
-    return this._field.getOrigin();
+  getFieldOrigin(): FIELD_ORIGIN | undefined {
+    return this._field ? this._field.getOrigin() | undefined;
   }
 
-  isFieldMetaEnabled() {
+  isFieldMetaEnabled(): boolean {
     const fieldMetaOptions = this.getFieldMetaOptions();
     return this.supportsFieldMeta() && _.get(fieldMetaOptions, 'isEnabled', true);
   }
 
-  supportsFieldMeta() {
+  supportsFieldMeta(): boolean {
     if (this.isOrdinal()) {
       return this.isComplete() && this.isOrdinalScaled() && this._field.supportsFieldMeta();
     } else if (this.isCategorical()) {
@@ -150,7 +179,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
   }
 
-  async getFieldMetaRequest() {
+  async getFieldMetaRequest(): Promise<unknown> {
     if (this.isOrdinal()) {
       return this._field.getOrdinalFieldMetaRequest();
     } else if (this.isCategorical()) {
@@ -160,7 +189,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
   }
 
-  supportsFeatureState() {
+  supportsFeatureState(): boolean {
     return true;
   }
 
@@ -168,11 +197,11 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return true;
   }
 
-  getFieldMetaOptions() {
+  getFieldMetaOptions(): FieldMetaOptions {
     return _.get(this.getOptions(), 'fieldMetaOptions', {});
   }
 
-  pluckOrdinalStyleMetaFromFeatures(features) {
+  pluckOrdinalStyleMetaFromFeatures(features: unknown[]): RangeFieldMeta {
     if (!this.isOrdinal()) {
       return null;
     }
@@ -198,7 +227,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
         };
   }
 
-  pluckCategoricalStyleMetaFromFeatures(features) {
+  pluckCategoricalStyleMetaFromFeatures(features: unknown[]): CategoryFieldMeta {
     if (!this.isCategorical()) {
       return null;
     }
@@ -232,7 +261,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     };
   }
 
-  pluckOrdinalStyleMetaFromFieldMetaData(fieldMetaData) {
+  pluckOrdinalStyleMetaFromFieldMetaData(fieldMetaData: unknown): RangeFieldMeta {
     if (!this.isOrdinal()) {
       return null;
     }
@@ -256,7 +285,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     };
   }
 
-  pluckCategoricalStyleMetaFromFieldMetaData(fieldMetaData) {
+  pluckCategoricalStyleMetaFromFieldMetaData(fieldMetaData: unknown): CategoryFieldMeta {
     if (!this.isCategorical()) {
       return null;
     }
@@ -277,7 +306,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     };
   }
 
-  formatField(value) {
+  formatField(value: string | undefined): string | undefined {
     if (this.getField()) {
       const fieldName = this.getField().getName();
       const fieldFormatter = this._getFieldFormatter(fieldName);
@@ -287,7 +316,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
   }
 
-  getMbValue(value) {
+  getMbValue(value: string | undefined): string | number | undefined {
     if (!this.isOrdinal()) {
       return this.formatField(value);
     }
@@ -302,11 +331,11 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return valueAsFloat;
   }
 
-  renderBreakedLegend() {
+  renderBreakedLegend(): ReactElement<any> | null {
     return null;
   }
 
-  _renderCategoricalLegend({ isPointsOnly, isLinesOnly, symbolId }) {
+  _renderCategoricalLegend({ isPointsOnly, isLinesOnly, symbolId }): ReactElement<any> {
     return (
       <CategoricalLegend
         style={this}
@@ -317,11 +346,11 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     );
   }
 
-  _renderRangeLegend() {
+  _renderRangeLegend(): ReactElement<any> {
     return <OrdinalLegend style={this} />;
   }
 
-  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }) {
+  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }): ReactElement<any> | null {
     if (this.isOrdinal()) {
       if (this.isOrdinalRanged()) {
         return this._renderRangeLegend();
@@ -337,7 +366,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
   }
 
-  renderFieldMetaPopover(onFieldMetaOptionsChange) {
+  renderFieldMetaPopover(onFieldMetaOptionsChange): ReactElement<any> | null {
     if (!this.supportsFieldMeta()) {
       return null;
     }
