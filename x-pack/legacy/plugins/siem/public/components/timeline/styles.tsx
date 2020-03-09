@@ -31,7 +31,7 @@ export const TimelineBodyGlobalStyle = createGlobalStyle`
 export const TimelineBody = styled.div.attrs(({ className = '' }) => ({
   className: `siemTimeline__body ${className}`,
 }))<{ bodyHeight?: number }>`
-  height: ${({ bodyHeight }) => `${bodyHeight}px`};
+  height: ${({ bodyHeight }) => (bodyHeight ? `${bodyHeight}px` : 'auto')};
   overflow: auto;
   scrollbar-width: thin;
   flex: 1;
