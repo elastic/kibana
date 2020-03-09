@@ -17,4 +17,30 @@
  * under the License.
  */
 
-export { config } from './config';
+import { SavedObjectsType } from '../../saved_objects';
+
+export const uiSettingsType: SavedObjectsType = {
+  name: 'config',
+  hidden: false,
+  namespaceAgnostic: false,
+  mappings: {
+    dynamic: true,
+    properties: {
+      buildNum: {
+        type: 'keyword',
+      },
+    },
+  },
+  management: {
+    importableAndExportable: true,
+    getInAppUrl() {
+      return {
+        path: `/app/kibana#/management/kibana/settings`,
+        uiCapabilitiesPath: 'advancedSettings.show',
+      };
+    },
+    getTitle(obj) {
+      return `Advanced Settings [${obj.id}]`;
+    },
+  },
+};

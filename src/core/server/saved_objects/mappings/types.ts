@@ -45,8 +45,8 @@
  * @public
  */
 export interface SavedObjectsTypeMappingDefinition {
-  /** The dynamic property of the mapping. either `false` or 'strict'. Defaults to strict */
-  dynamic?: false | 'strict';
+  /** The dynamic property of the mapping. either `true`, `false` or 'strict'. Defaults to `false` */
+  dynamic?: boolean | 'strict';
   /** The underlying properties of the type mapping */
   properties: SavedObjectsMappingProperties;
 }

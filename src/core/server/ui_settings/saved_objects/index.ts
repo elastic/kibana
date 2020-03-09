@@ -17,30 +17,4 @@
  * under the License.
  */
 
-import { SavedObjectsType } from '../types';
-
-export const config: SavedObjectsType = {
-  name: 'config',
-  hidden: false,
-  namespaceAgnostic: false,
-  mappings: {
-    dynamic: true as any, // TODO: check if can be switched to false, else adapt the type to allow true
-    properties: {
-      buildNum: {
-        type: 'keyword',
-      },
-    },
-  },
-  management: {
-    importableAndExportable: true,
-    getInAppUrl() {
-      return {
-        path: `/app/kibana#/management/kibana/settings`,
-        uiCapabilitiesPath: 'advancedSettings.show',
-      };
-    },
-    getTitle(obj) {
-      return `Advanced Settings [${obj.id}]`;
-    },
-  },
-};
+export { uiSettingsType } from './ui_settings';
