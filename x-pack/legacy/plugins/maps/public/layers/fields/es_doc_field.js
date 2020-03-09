@@ -59,11 +59,6 @@ export class ESDocField extends AbstractField {
 
   async getCategoricalFieldMetaRequest() {
     const field = await this._getField();
-    if (field.type !== 'string') {
-      //UX does not support categorical styling for number/date fields
-      return null;
-    }
-
     const topTerms = {
       size: COLOR_PALETTE_MAX_SIZE - 1, //need additional color for the "other"-value
     };
