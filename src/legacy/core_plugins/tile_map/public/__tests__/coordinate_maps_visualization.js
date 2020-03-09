@@ -124,7 +124,7 @@ describe('CoordinateMapsVisualizationTest', function() {
       setupDOM('512px', '512px');
 
       imageComparator = new ImageComparator();
-      vis = new visualizationsStart.Vis(indexPattern, {
+      vis = visualizationsStart.createVis(indexPattern, {
         type: 'tile_map',
       });
       vis.params = {
