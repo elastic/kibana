@@ -42,7 +42,9 @@ const getCurrentValueFromAggregations = (aggregations: Aggregation) => {
   return value;
 };
 
-const getParsedFilterQuery: (filterQuery: string) => Record<string, any> = filterQuery => {
+const getParsedFilterQuery: (
+  filterQuery: string | Record<string, any>
+) => Record<string, any> = filterQuery => {
   if (!filterQuery) return {};
   try {
     return JSON.parse(filterQuery).bool;
