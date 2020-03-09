@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { getToastNotifications } from '../../util/dependency_cache';
 
-import { MlJobWithTimeRange } from '../../../../common/types/jobs';
+import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
 import { getTimeRangeFromSelection } from '../../components/job_selector/job_select_service_utils';
 import { mlJobService } from '../../services/job_service';

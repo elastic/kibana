@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { ISearchStart } from 'src/plugins/data/public';
 import { IUiSettingsClient } from '../../../../../core/public';
+import { ISearchStart } from '../types';
 
 export interface FetchOptions {
   abortSignal?: AbortSignal;
