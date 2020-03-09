@@ -217,7 +217,6 @@ export const AlertForm = ({
           alertsContext={alertsContext}
         />
       ) : null}
-      <EuiSpacer size="xl" />
       {defaultActionGroupId ? (
         <ActionForm
           actions={alert.actions}
