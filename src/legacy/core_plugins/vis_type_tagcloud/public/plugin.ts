@@ -53,7 +53,7 @@ export class TagCloudPlugin implements Plugin<void, void> {
       colors: charts.colors,
     };
     expressions.registerFunction(createTagCloudFn);
-    visualizations.types.createBaseVisualization(
+    visualizations.createBaseVisualization(
       createTagCloudVisTypeDefinition(visualizationDependencies)
     );
   }
