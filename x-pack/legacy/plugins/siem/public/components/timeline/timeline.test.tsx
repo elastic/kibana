@@ -25,8 +25,6 @@ import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
-const testFlyoutHeight = 980;
-
 jest.mock('../../lib/kibana');
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
@@ -59,7 +57,6 @@ describe('Timeline', () => {
       end: endDate,
       eventType: 'raw' as TimelineComponentProps['eventType'],
       filters: [],
-      flyoutHeight: testFlyoutHeight,
       indexPattern,
       indexToAdd: [],
       isLive: false,

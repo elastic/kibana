@@ -25,7 +25,6 @@ const TimelineRefetchComponent: React.FC<TimelineRefetchProps> = ({
   inspect,
   loading,
   refetch,
-  setTimelineQuery,
 }) => {
   const dispatch = useDispatch();
 
