@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LUCENE, ELASTICSEARCH } from './constants';
 
 export const ArgTypesStrings = {
   Color: {
@@ -140,84 +139,6 @@ export const ArgTypesStrings = {
     getNoneOption: () =>
       i18n.translate('xpack.canvas.expressionTypes.argTypes.seriesStyle.noneDropDown', {
         defaultMessage: 'None',
-      }),
-  },
-};
-
-export const ExpressionDataSourceStrings = {
-  // Elasticsearch documents datasource/Elasticsearch basic datasource
-  ESDocs: {
-    getDisplayName: () =>
-      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocsTitle', {
-        defaultMessage: 'Elasticsearch documents',
-      }),
-    getHelp: () =>
-      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocsLabel', {
-        defaultMessage: 'Query documents from elasticsearch',
-      }),
-    getWarningTitle: () =>
-      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.warningTitle', {
-        defaultMessage: 'Query with caution',
-      }),
-    getWarning: () =>
-      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.warningDescription', {
-        defaultMessage: `
-        The Elasticsearch basic data source only retrieves non-aggregated data. Use with low volume data sets`,
-      }),
-    getIndexTitle: () =>
-      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.indexTitle', {
-        defaultMessage: 'Index',
-      }),
-    getIndexLabel: () =>
-      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.indexLabel', {
-        defaultMessage: 'Enter an index name or select an index pattern',
-      }),
-    getQueryTitle: () =>
-      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.queryTitle', {
-        defaultMessage: 'Query',
-      }),
-    getQueryLabel: () =>
-      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.queryLabel', {
-        defaultMessage: 'Lucene query string syntax',
-        values: {
-          lucene: LUCENE,
-        },
-      }),
-    getSortFieldTitle: () =>
-      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.sortFieldTitle', {
-        defaultMessage: 'Sort field',
-      }),
-    getSortFieldLabel: () =>
-      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.sortFieldLabel', {
-        defaultMessage: 'Document sort field',
-      }),
-    getSortOrderTitle: () =>
-      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.sortOrderTitle', {
-        defaultMessage: 'Sort order',
-      }),
-    getSortOrderLabel: () =>
-      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.sortOrderLabel', {
-        defaultMessage: 'Document sort order',
-      }),
-    getFieldsTitle: () =>
-      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.fieldsTitle', {
-        defaultMessage: 'Fields',
-      }),
-    getFieldsLabel: () =>
-      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.fieldsLabel', {
-        defaultMessage: 'Scripted fields are unavailable',
-      }),
-    getFieldsWarningLabel: () =>
-      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.fieldsWarningLabel', {
-        defaultMessage: 'This datasource performs best with 10 or fewer fields',
-      }),
-    getAscendingOption: () =>
-      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.ascendingDropDown', {
-        defaultMessage: 'Ascending',
-      }),
-    getDescendingOption: () =>
-      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.descendingDropDown', {
-        defaultMessage: 'Descending',
       }),
   },
 };

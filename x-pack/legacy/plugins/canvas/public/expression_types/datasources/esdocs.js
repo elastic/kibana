@@ -21,9 +21,9 @@ import { ESFieldsSelect } from '../../components/es_fields_select';
 import { ESFieldSelect } from '../../components/es_field_select';
 import { ESIndexSelect } from '../../components/es_index_select';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
-import { ExpressionDataSourceStrings, LUCENE_QUERY_URL } from '../../../i18n';
+import { DataSourceStrings, LUCENE_QUERY_URL } from '../../../i18n';
 
-const { ESDocs: strings } = ExpressionDataSourceStrings;
+const { ESDocs: strings } = DataSourceStrings;
 
 const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
   const setArg = (name, value) => {

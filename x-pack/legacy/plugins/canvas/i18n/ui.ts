@@ -320,7 +320,7 @@ export const DataSourceStrings = {
       }),
     getHelp: () =>
       i18n.translate('xpack.canvas.uis.dataSources.demoDataLabel', {
-        defaultMessage: 'Mock data set with usernames, prices, projects, countries, and phases',
+        defaultMessage: 'Sample data set used to populate default elements',
       }),
     getDescription: () =>
       i18n.translate('xpack.canvas.uis.dataSources.demoDataDescription', {
@@ -329,6 +329,81 @@ export const DataSourceStrings = {
         values: {
           canvas: CANVAS,
         },
+      }),
+  },
+  // Elasticsearch documents datasource
+  ESDocs: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocsTitle', {
+        defaultMessage: 'Elasticsearch documents',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocsLabel', {
+        defaultMessage: 'Select an index and field(s) to retrieve non-aggregated data',
+      }),
+    getWarningTitle: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.warningTitle', {
+        defaultMessage: 'Query with caution',
+      }),
+    getWarning: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.warningDescription', {
+        defaultMessage: `
+        The Elasticsearch basic data source only retrieves non-aggregated data. Use with low volume data sets`,
+      }),
+    getIndexTitle: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.indexTitle', {
+        defaultMessage: 'Index',
+      }),
+    getIndexLabel: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.indexLabel', {
+        defaultMessage: 'Enter an index name or select an index pattern',
+      }),
+    getQueryTitle: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.queryTitle', {
+        defaultMessage: 'Query',
+      }),
+    getQueryLabel: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.queryLabel', {
+        defaultMessage: 'Lucene query string syntax',
+        values: {
+          lucene: LUCENE,
+        },
+      }),
+    getSortFieldTitle: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.sortFieldTitle', {
+        defaultMessage: 'Sort field',
+      }),
+    getSortFieldLabel: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.sortFieldLabel', {
+        defaultMessage: 'Document sort field',
+      }),
+    getSortOrderTitle: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.sortOrderTitle', {
+        defaultMessage: 'Sort order',
+      }),
+    getSortOrderLabel: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.sortOrderLabel', {
+        defaultMessage: 'Document sort order',
+      }),
+    getFieldsTitle: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.fieldsTitle', {
+        defaultMessage: 'Fields',
+      }),
+    getFieldsLabel: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.fieldsLabel', {
+        defaultMessage: 'Scripted fields are unavailable',
+      }),
+    getFieldsWarningLabel: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.fieldsWarningLabel', {
+        defaultMessage: 'This datasource performs best with 10 or fewer fields',
+      }),
+    getAscendingOption: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.ascendingDropDown', {
+        defaultMessage: 'Ascending',
+      }),
+    getDescendingOption: () =>
+      i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.descendingDropDown', {
+        defaultMessage: 'Descending',
       }),
   },
   // Elasticsearch SQL data source
@@ -343,7 +418,7 @@ export const DataSourceStrings = {
       }),
     getHelp: () =>
       i18n.translate('xpack.canvas.uis.dataSources.essqlLabel', {
-        defaultMessage: 'Use {elasticsearch} {sql} to get a data table',
+        defaultMessage: 'Write an Elasticsearch SQL query to retrieve data',
         values: {
           elasticsearch: ELASTICSEARCH,
           sql: SQL,
@@ -355,7 +430,7 @@ export const DataSourceStrings = {
       }),
     getLabelAppend: () =>
       i18n.translate('xpack.canvas.uis.dataSources.essql.queryTitleAppend', {
-        defaultMessage: 'Learn {elasticsearchShort} {sql} syntax',
+        defaultMessage: 'Learn Elasticsearch SQL query syntax',
         values: {
           elasticsearchShort: ELASTICSEARCH_SHORT,
           sql: SQL,
@@ -366,8 +441,7 @@ export const DataSourceStrings = {
   Timelion: {
     getAbout: () =>
       i18n.translate('xpack.canvas.uis.dataSources.timelion.aboutDetail', {
-        defaultMessage:
-          'Use {timelion} queries to pull back timeseries data that can be used with {canvas} elements.',
+        defaultMessage: 'Use Timelion syntax to retrieve timeseries data',
         values: {
           timelion: TIMELION,
           canvas: CANVAS,
@@ -375,7 +449,7 @@ export const DataSourceStrings = {
       }),
     getHelp: () =>
       i18n.translate('xpack.canvas.uis.dataSources.timelionLabel', {
-        defaultMessage: 'Use {timelion} syntax to retrieve a timeseries',
+        defaultMessage: 'Use Timelion syntax to retrieve timeseries data',
         values: {
           timelion: TIMELION,
         },
