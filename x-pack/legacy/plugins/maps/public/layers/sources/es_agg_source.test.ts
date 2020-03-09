@@ -43,7 +43,6 @@ describe('getMetricFields', () => {
     const metrics = source.getMetricFields();
     expect(metrics.length).toBe(1);
 
-    expect(metrics[0].getAggType()).toEqual('count');
     expect(metrics[0].getName()).toEqual('doc_count');
     expect(await metrics[0].getLabel()).toEqual('count');
   });
