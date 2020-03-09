@@ -14,8 +14,9 @@ import {
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import { Redirect } from 'react-router-dom';
+
+import { CaseRequest } from '../../../../../../../../plugins/case/common/api';
 import { Field, Form, getUseField, useForm, UseField } from '../../../../shared_imports';
-import { NewCase } from '../../../../containers/case/types';
 import { usePostCase } from '../../../../containers/case/use_post_case';
 import { schema } from './schema';
 import * as i18n from '../../translations';
@@ -42,30 +43,37 @@ const MySpinner = styled(EuiLoadingSpinner)`
   z-index: 99;
 `;
 
+const initialCaseValue: CaseRequest = {
+  description: '',
+  state: 'open',
+  tags: [],
+  title: '',
+};
+
 export const Create = React.memo(() => {
-  const [{ data, isLoading, newCase }, setFormData] = usePostCase();
+  const { caseData, isLoading, postCase } = usePostCase();
   const [isCancel, setIsCancel] = useState(false);
-  const { form } = useForm({
-    defaultValue: data,
+  const { form } = useForm<CaseRequest>({
+    defaultValue: initialCaseValue,
     options: { stripEmptyFields: false },
     schema,
   });
 
   const onSubmit = useCallback(async () => {
-    const { isValid, data: newData } = await form.submit();
-    if (isValid && newData.description) {
-      setFormData({ ...newData, isNew: true } as NewCase);
-    } else if (isValid && data.description) {
-      setFormData({ ...data, ...newData, isNew: true } as NewCase);
+    const { isValid, data } = await form.submit();
+    if (isValid) {
+      await postCase(data);
     }
-  }, [form, data]);
+  }, [form]);
 
-  if (newCase && newCase.caseId) {
-    return <Redirect to={`/${SiemPageName.case}/${newCase.caseId}`} />;
+  if (caseData != null && caseData.id) {
+    return <Redirect to={`/${SiemPageName.case}/${caseData.id}`} />;
   }
+
   if (isCancel) {
     return <Redirect to={`/${SiemPageName.case}`} />;
   }
+
   return (
     <EuiPanel>
       {isLoading && <MySpinner size="xl" />}

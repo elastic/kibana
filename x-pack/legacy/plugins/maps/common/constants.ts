@@ -55,10 +55,10 @@ export const ES_SEARCH = 'ES_SEARCH';
 export const ES_PEW_PEW = 'ES_PEW_PEW';
 export const EMS_XYZ = 'EMS_XYZ'; // identifies a custom TMS source. Name is a little unfortunate.
 
-export const FIELD_ORIGIN = {
-  SOURCE: 'source',
-  JOIN: 'join',
-};
+export enum FIELD_ORIGIN {
+  SOURCE = 'source',
+  JOIN = 'join',
+}
 
 export const SOURCE_DATA_ID_ORIGIN = 'source';
 export const META_ID_ORIGIN_SUFFIX = 'meta';
@@ -139,6 +139,8 @@ export enum GRID_RESOLUTION {
   MOST_FINE = 'MOST_FINE',
 }
 
+export const TOP_TERM_PERCENTAGE_SUFFIX = '__percentage';
+
 export const COUNT_PROP_LABEL = i18n.translate('xpack.maps.aggs.defaultCountLabel', {
   defaultMessage: 'count',
 });
@@ -163,6 +165,7 @@ export const COLOR_MAP_TYPE = {
 export const COLOR_PALETTE_MAX_SIZE = 10;
 
 export const CATEGORICAL_DATA_TYPES = ['string', 'ip', 'boolean'];
+export const ORDINAL_DATA_TYPES = ['number', 'date'];
 
 export const SYMBOLIZE_AS_TYPES = {
   CIRCLE: 'circle',
