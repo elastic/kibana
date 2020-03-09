@@ -42,6 +42,12 @@
   flex: 1 1 1px;
 }
 
+.conApp__controlBar__saveSpinner {
+  display: flex;
+  justify-content: center;
+  padding: 0 5px;
+}
+
 .conApp__editorActions {
   button {
     line-height: inherit;

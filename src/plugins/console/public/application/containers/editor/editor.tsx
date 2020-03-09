@@ -19,7 +19,7 @@
 
 import React, { useCallback, memo } from 'react';
 import { debounce } from 'lodash';
-import { EuiProgress, EuiControlBar } from '@elastic/eui';
+import { EuiProgress, EuiControlBar, EuiLoadingSpinner, EuiIcon } from '@elastic/eui';
 
 import { Panel, PanelsContainer } from '../../../../../kibana_react/public';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
@@ -40,7 +40,12 @@ export const Editor = memo(() => {
     services: { storage },
   } = useServicesContext();
 
-  const { textObjects, currentTextObjectId, saving } = useTextObjectsReadContext();
+  const {
+    textObjects,
+    currentTextObjectId,
+    saving,
+    textObjectsSaveError,
+  } = useTextObjectsReadContext();
   const { requestInFlight } = useRequestReadContext();
   const currentTextObject = textObjects[currentTextObjectId];
 
@@ -97,7 +102,17 @@ export const Editor = memo(() => {
                   {
                     controlType: 'text',
                     id: 'saving_status',
-                    text: saving ? <span>Saving...</span> : <span>Saved.</span>,
+                    text: (
+                      <div className="conApp__controlBar__saveSpinner">
+                        {saving ? (
+                          <EuiLoadingSpinner size="m" />
+                        ) : textObjectsSaveError[currentTextObjectId] ? (
+                          <EuiIcon color="warning" type="alert" />
+                        ) : (
+                          <EuiIcon color="ghost" type="check" />
+                        )}
+                      </div>
+                    ),
                   },
                 ]}
               />
