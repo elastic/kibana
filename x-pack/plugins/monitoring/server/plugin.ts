@@ -46,15 +46,11 @@ import {
   PluginSetupContract as AlertingPluginSetupContract,
 } from '../../alerting/server';
 import { getLicenseExpiration } from './alerts/license_expiration';
+import { InfraPluginSetup } from '../../infra/server';
 
 export interface LegacyAPI {
   telemetryCollectionManager: TelemetryCollectionManager;
-  elasticsearch: any;
-  opsInterval: number;
-  getOSInfo: () => any;
-  hapiServer: any;
   getServerStatus: () => string;
-  serverEvents: any;
   infra: any;
 }
 
@@ -63,6 +59,7 @@ interface PluginsSetup {
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetupContract;
   alerting: AlertingPluginSetupContract;
+  infra: InfraPluginSetup;
 }
 
 interface PluginsStart {
@@ -180,6 +177,7 @@ export class Plugin {
 
     if (config.ui.enabled) {
       requireUIRoutes(this.monitoringCore);
+      initInfraSource(this.monitoringCore.config(), this.setupPlugins?.infra);
     }
 
     this.uiSettingsService = core.uiSettings;
@@ -235,12 +233,7 @@ export class Plugin {
     registerMonitoringCollection(this.cluster, this.legacyAPI.telemetryCollectionManager);
     // Register collector objects for stats to show up in the APIs
     registerCollectors(this.setupPlugins?.usageCollection, {
-      elasticsearchPlugin: this.legacyAPI.elasticsearch,
-      interval: this.legacyAPI.opsInterval,
-      log,
       config: legacyConfigWrapper,
-      getOSInfo: this.legacyAPI.getOSInfo,
-      hapiServer: this.legacyAPI.hapiServer,
       metrics$: this.coreSetup?.metrics.getOpsMetrics$(),
     });
 

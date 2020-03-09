@@ -21,7 +21,6 @@ if (KIBANA_ALERTING_ENABLED) {
   deps.push(...['alerting', 'actions']);
 }
 export const monitoring = kibana => {
-  let legacyApi = {};
   return new kibana.Plugin({
     require: deps,
     id: 'monitoring',
@@ -29,21 +28,14 @@ export const monitoring = kibana => {
     publicDir: resolve(__dirname, 'public'),
     init(server) {
       const serverConfig = server.config();
-      const elasticsearch = server.plugins.elasticsearch;
-      const getOSInfo = server.getOSInfo;
-      const hapiServer = server;
       const kbnServerStatus = this.kbnServer.status;
-      legacyApi = {
+      server.newPlatform.setup.plugins.monitoring.registerLegacyAPI({
         telemetryCollectionManager,
-        elasticsearch,
-        opsInterval: serverConfig.get('ops.interval'),
-        getOSInfo,
-        hapiServer,
         getServerStatus: () => {
           const status = kbnServerStatus.toJSON();
           return get(status, 'overall.state');
         },
-      };
+      });
 
       server.injectUiAppVars('monitoring', () => {
         return {
@@ -57,11 +49,6 @@ export const monitoring = kibana => {
           showCgroupMetricsLogstash: serverConfig.get('monitoring.ui.container.logstash.enabled'), // Note, not currently used, but see https://github.com/elastic/x-pack-kibana/issues/1559 part 2
         };
       });
-    },
-    postInit(server) {
-      legacyApi.infra = server.plugins.infra;
-      const monitoringPlugin = server.newPlatform.setup.plugins.monitoring;
-      monitoringPlugin.registerLegacyAPI(legacyApi);
     },
     config,
     uiExports: getUiExports(),
