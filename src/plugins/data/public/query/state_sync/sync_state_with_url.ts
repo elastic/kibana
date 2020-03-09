@@ -86,6 +86,7 @@ export const syncQueryStateWithUrl = (
       ...globalQueryStateContainer,
       set: state => {
         if (state) {
+          // syncState utils requires to handle incoming "null" value
           globalQueryStateContainer.set(state);
         }
       },

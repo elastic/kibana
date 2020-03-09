@@ -662,7 +662,7 @@ function discoverController(
         // no timefield, no vis, nothing to update
         if (!getTimeField() || !$scope.vis) return;
 
-        const buckets = $scope.vis.getAggConfig().bySchemaGroup('buckets');
+        const buckets = $scope.vis.getAggConfig().byTypeName('buckets');
 
         if (buckets && buckets.length === 1) {
           $scope.bucketInterval = buckets[0].buckets.getInterval();

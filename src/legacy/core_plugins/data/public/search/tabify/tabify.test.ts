@@ -19,7 +19,7 @@
 
 import { IndexPattern } from '../../../../../../plugins/data/public';
 import { tabifyAggResponse } from './tabify';
-import { IAggConfig, IAggConfigs, AggGroupNames, Schemas, AggConfigs } from '../aggs';
+import { IAggConfig, IAggConfigs, AggConfigs } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { metricOnly, threeTermBuckets } from 'fixtures/fake_hierarchical_data';
 
@@ -42,21 +42,13 @@ describe('tabifyAggResponse Integration', () => {
 
     return new AggConfigs(indexPattern, aggs, {
       typesRegistry,
-      schemas: new Schemas([
-        {
-          group: AggGroupNames.Metrics,
-          name: 'metric',
-          min: 1,
-          defaults: [{ schema: 'metric', type: 'count' }],
-        },
-      ]).all,
     });
   };
 
   const mockAggConfig = (agg: any): IAggConfig => (agg as unknown) as IAggConfig;
 
   test('transforms a simple response properly', () => {
-    const aggConfigs = createAggConfigs();
+    const aggConfigs = createAggConfigs([{ type: 'count' } as any]);
 
     const resp = tabifyAggResponse(aggConfigs, metricOnly, {
       metricsAtAllLevels: true,
