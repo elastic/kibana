@@ -5,3 +5,4 @@
  */
 
 export { usePartialState } from './use_partial_state';
+export { useXJsonMode, xJsonMode } from './use_x_json_mode';

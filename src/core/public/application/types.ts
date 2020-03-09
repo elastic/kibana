@@ -347,7 +347,6 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    *
    * export renderApp = ({ element, history }: AppMountParameters) => {
    *   ReactDOM.render(
-   *     // pass `appBasePath` to `basename`
    *     <Router history={history}>
    *       <Route path="/" exact component={HomePage} />
    *     </Router>,
@@ -429,7 +428,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * import { CoreStart, AppMountParams } from 'src/core/public';
    * import { MyPluginDepsStart } from './plugin';
    *
-   * export renderApp = ({ appBasePath, element, onAppLeave }: AppMountParams) => {
+   * export renderApp = ({ element, history, onAppLeave }: AppMountParams) => {
    *    const { renderApp, hasUnsavedChanges } = await import('./application');
    *    onAppLeave(actions => {
    *      if(hasUnsavedChanges()) {
@@ -437,7 +436,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    *      }
    *      return actions.default();
    *    });
-   *    return renderApp(params);
+   *    return renderApp({ element, history });
    * }
    * ```
    */

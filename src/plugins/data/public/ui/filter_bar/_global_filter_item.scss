@@ -32,6 +32,15 @@
   font-style: italic;
 }
 
+.globalFilterItem-isInvalid {
+  text-decoration: none;
+
+  .globalFilterLabel__value {
+    color: $euiColorDanger;
+    font-weight: $euiFontWeightBold;
+  }
+}
+
 .globalFilterItem-isPinned {
   position: relative;
 

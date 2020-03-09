@@ -26,7 +26,7 @@ import {
 } from '../../../../legacy/utils/streams';
 import { IRouter } from '../../http';
 import { SavedObjectConfig } from '../saved_objects_config';
-import { getSortedObjectsForExport } from '../export';
+import { exportSavedObjectsToStream } from '../export';
 
 export const registerExportRoute = (
   router: IRouter,
@@ -67,7 +67,7 @@ export const registerExportRoute = (
     router.handleLegacyErrors(async (context, req, res) => {
       const savedObjectsClient = context.core.savedObjects.client;
       const { type, objects, search, excludeExportDetails, includeReferencesDeep } = req.body;
-      const exportStream = await getSortedObjectsForExport({
+      const exportStream = await exportSavedObjectsToStream({
         savedObjectsClient,
         types: typeof type === 'string' ? [type] : type,
         search,

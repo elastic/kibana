@@ -9,12 +9,12 @@ import React from 'react';
 
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 
-import { MLJobEditor, EDITOR_MODE } from '../../../../jobs/jobs_list/components/ml_job_editor';
+import { MLJobEditor, ML_EDITOR_MODE } from '../../../../jobs/jobs_list/components/ml_job_editor';
 
 export function FileContents({ data, format, numberOfLines }) {
-  let mode = EDITOR_MODE.TEXT;
-  if (format === EDITOR_MODE.JSON) {
-    mode = EDITOR_MODE.JSON;
+  let mode = ML_EDITOR_MODE.TEXT;
+  if (format === ML_EDITOR_MODE.JSON) {
+    mode = ML_EDITOR_MODE.JSON;
   }
 
   const formattedData = limitByNumberOfLines(data, numberOfLines);

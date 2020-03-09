@@ -281,7 +281,7 @@ export function getColumns(
         defaultMessage: 'actions',
       }),
       render: item => {
-        if (showLinksMenuForItem(item) === true) {
+        if (showLinksMenuForItem(item, showViewSeriesLink) === true) {
           return (
             <LinksMenu
               anomaly={item}
