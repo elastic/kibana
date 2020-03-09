@@ -7,10 +7,10 @@
 import d3 from 'd3';
 
 import { Annotation } from '../../../../../common/types/annotations';
-import { MlJob } from '../../../../../common/types/jobs';
+import { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
 
 interface Props {
-  selectedJob: MlJob;
+  selectedJob: CombinedJob;
 }
 
 interface State {
