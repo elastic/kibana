@@ -64,8 +64,9 @@ export class ActionInternal<A extends AnyActionDefinition>
 
   serialize(): SerializedAction {
     const serialized: SerializedAction = {
-      id: this.id,
       type: this.type || '',
+      name: '',
+      config: {} as any,
     };
 
     return serialized;
@@ -77,7 +78,7 @@ export class ActionInternal<A extends AnyActionDefinition>
 export type AnyActionInternal = ActionInternal<any>;
 
 export interface SerializedAction<Config extends object = object> {
-  readonly id: string;
   readonly type: string;
-  // readonly state: ActionState<Config>;
+  readonly name: string;
+  readonly config: Config;
 }

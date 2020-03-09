@@ -33,6 +33,9 @@ export {
   ActionDefinition as UiActionsActionDefinition,
   ActionInternal as UiActionsActionInternal,
   ActionContract as UiActionsActionContract,
+  ActionStorage as UiActionsActionStorage,
+  SerializedEvent as UiActionsSerializedEvent,
+  SerializedAction as UiActionsSerializedAction,
 } from './actions';
 export { buildContextMenuForActions, contextMenuSeparatorAction } from './context_menu';
 export { CollectConfigProps, Presentable, Configurable } from './util';
