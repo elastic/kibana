@@ -9,7 +9,7 @@ import { CustomUrls } from '../../../../../../../../jobs_list/components/edit_jo
 import { UrlConfig } from '../../../../../../../../../../../common/types/custom_urls';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
-import { CombinedJob } from '../../../../../../../common/job_creator/configs';
+import { CombinedJob } from '../../../../../../../../../../../common/types/anomaly_detection_jobs';
 
 export const CustomUrlsSelection: FC = () => {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
