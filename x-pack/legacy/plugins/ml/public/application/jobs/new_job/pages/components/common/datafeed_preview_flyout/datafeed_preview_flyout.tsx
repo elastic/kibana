@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { CombinedJob } from '../../../../common/job_creator/configs';
+import { CombinedJob } from '../../../../../../../../common/types/anomaly_detection_jobs';
 import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { JobCreatorContext } from '../../job_creator_context';
 import { mlJobService } from '../../../../../../services/job_service';
