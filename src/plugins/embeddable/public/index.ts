@@ -39,6 +39,7 @@ export {
   Embeddable,
   EmbeddableChildPanel,
   EmbeddableChildPanelProps,
+  EmbeddableContext,
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
   EmbeddableFactoryRenderer,
