@@ -11,7 +11,6 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { assertNever } from '../../../../../src/core/utils';
 import { ILicenseState, verifyApiAccess, ActionTypeDisabledError } from '../lib';
 
 import { ActionExecutorContract } from '../lib';
@@ -62,16 +61,7 @@ export const executeActionRoute = (
           : res.noContent();
       } catch (e) {
         if (e instanceof ActionTypeDisabledError) {
-          switch (e.reason) {
-            case 'config':
-              return res.badRequest({ body: { message: e.message } });
-            case 'license_unavailable':
-            case 'license_invalid':
-            case 'license_expired':
-              return res.forbidden({ body: { message: e.message } });
-            default:
-              assertNever(e.reason);
-          }
+          return e.sendResponse(res);
         }
         throw e;
       }
