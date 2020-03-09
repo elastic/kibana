@@ -28,7 +28,7 @@ import { JsonCodeBlock } from './components/json_code_block/json_code_block';
 import { DocViewer } from './components/doc_viewer/doc_viewer';
 import { setDocViewsRegistry } from './services';
 
-import './_index.scss';
+import './index.scss';
 
 /**
  * @public

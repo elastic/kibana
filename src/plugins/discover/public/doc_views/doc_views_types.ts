@@ -21,7 +21,7 @@ import { IScope } from 'angular';
 import { IndexPattern } from '../../../data/public';
 
 export interface AngularDirective {
-  controller: (scope: AngularScope) => void;
+  controller: (...injectedServices: any[]) => void;
   template: string;
 }
 

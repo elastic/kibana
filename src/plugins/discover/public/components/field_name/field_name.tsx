@@ -20,8 +20,8 @@ import React from 'react';
 import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
-import { FieldIcon, FieldIconProps } from '../../../../../../../../../plugins/kibana_react/public';
-import { shortenDottedString } from '../../../../../../../../../plugins/data/common/utils';
+import { FieldIcon, FieldIconProps } from '../../../../kibana_react/public';
+import { shortenDottedString } from '../../../../data/common/utils';
 import { getFieldTypeName } from './field_type_name';
 
 // property field is provided at discover's field chooser

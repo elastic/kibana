@@ -16,13 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { PluginFunctionalProviderContext } from '../../services';
 
-export default function({ getService, loadTestFile }) {
+export default function({ getService, loadTestFile }: PluginFunctionalProviderContext) {
   const esArchiver = getService('esArchiver');
 
-  describe('custom visualizations', function() {
+  describe('doc views', function() {
     before(async () => {
-      await esArchiver.loadIfNeeded('discover');
+      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/discover');
     });
 
     loadTestFile(require.resolve('./doc_views'));

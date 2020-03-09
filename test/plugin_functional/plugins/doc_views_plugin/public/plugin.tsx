@@ -17,30 +17,41 @@
  * under the License.
  */
 
+import angular from 'angular';
 import React from 'react';
 import { Plugin, CoreSetup } from 'kibana/public';
 import { DiscoverSetup } from '../../../../../src/plugins/discover/public';
-import { AngularScope } from '../../../../../src/plugins/discover/public/doc_views/doc_views_types';
+
+angular.module('myDocView', []).directive('myHit', () => ({
+  restrict: 'E',
+  scope: {
+    hit: '=hit',
+  },
+  template: '<h1 data-test-subj="angular-docview">{{hit._index}}</h1>',
+}));
+
+function MyHit(props: { index: string }) {
+  return <h1 data-test-subj="react-docview">{props.index}</h1>;
+}
 
 export class DocViewsPlugin implements Plugin<void, void> {
   public setup(core: CoreSetup, { discover }: { discover: DiscoverSetup }) {
     discover.docViews.addDocView({
       directive: {
-        controller: function MyController($scope: AngularScope, $injector: any) {
-          debugger;
-          ($scope as any).abc = 123;
+        controller: function MyController($injector: any) {
+          $injector.loadNewModules(['myDocView']);
         },
-        template: `<h1>{{hit._id}} {{abc}}</h1>`,
+        template: `<my-hit hit="hit"></my-hit>`,
       },
-      order: 10,
+      order: 1,
       title: 'Angular doc view',
     });
 
     discover.docViews.addDocView({
       component: props => {
-        return <h1>Test</h1>;
+        return <MyHit index={props.hit._index as string} />;
       },
-      order: 11,
+      order: 2,
       title: 'React doc view',
     });
   }

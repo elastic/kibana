@@ -18,18 +18,13 @@
  */
 
 import expect from '@kbn/expect';
+import { PluginFunctionalProviderContext } from '../../services';
 
-export default function({ getService, getPageObjects }) {
+// eslint-disable-next-line import/no-default-export
+export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
-
-  async function getCounterValue() {
-    return await testSubjects.getVisibleText('counter');
-  }
-
-  async function getEditorValue() {
-    return await testSubjects.getAttribute('counterEditor', 'value');
-  }
 
   describe('custom doc views', function() {
     before(async () => {
@@ -38,7 +33,25 @@ export default function({ getService, getPageObjects }) {
     });
 
     it('should show custom doc views', async () => {
+      await testSubjects.click('docTableExpandToggleColumn');
+      const angularTab = await find.byButtonText('Angular doc view');
+      const reactTab = await find.byButtonText('React doc view');
+      expect(await angularTab.isDisplayed()).to.be(true);
+      expect(await reactTab.isDisplayed()).to.be(true);
+    });
 
+    it('should render angular doc view', async () => {
+      const angularTab = await find.byButtonText('Angular doc view');
+      await angularTab.click();
+      const angularContent = await testSubjects.find('angular-docview');
+      expect(await angularContent.getVisibleText()).to.be('logstash-2015.09.22');
+    });
+
+    it('should render react doc view', async () => {
+      const reactTab = await find.byButtonText('React doc view');
+      await reactTab.click();
+      const reactContent = await testSubjects.find('react-docview');
+      expect(await reactContent.getVisibleText()).to.be('logstash-2015.09.22');
     });
   });
 }
