@@ -222,6 +222,7 @@ export class Table extends PureComponent {
               'kbn.management.objects.objectsTable.table.columnActions.inspectActionName',
               { defaultMessage: 'Inspect' }
             ),
+            'data-test-subj': 'inspectSavedObject',
             description: i18n.translate(
               'kbn.management.objects.objectsTable.table.columnActions.inspectActionDescription',
               { defaultMessage: 'Inspect this saved object' }
@@ -236,6 +237,7 @@ export class Table extends PureComponent {
               'kbn.management.objects.objectsTable.table.columnActions.viewRelationshipsActionName',
               { defaultMessage: 'Relationships' }
             ),
+            'data-test-subj': 'savedObjectRelationship',
             description: i18n.translate(
               'kbn.management.objects.objectsTable.table.columnActions.viewRelationshipsActionDescription',
               {
