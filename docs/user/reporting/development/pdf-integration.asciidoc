@@ -51,8 +51,7 @@ should have their screenshot taken and when the Visualizations are done renderin
 
 The print layout takes a screenshot of every element with the `data-shared-item` attribute and includes the
 individual screenshots in the PDF. The print layout also uses the `data-title` and `data-description`
-attributes on the same HTMLElement as the `data-shared-item` to specify the title and description
-that appears right above the individual screenshots.
+attributes on the same HTMLElement as the `data-shared-item` to specify the title and description.
 
 The preserve layout takes a screenshot of the element with the `data-shared-items-container` attribute. Additionally,
 reporting will resize the element with the `data-shared-items-container` to be the size specified in the layout dimensions.
