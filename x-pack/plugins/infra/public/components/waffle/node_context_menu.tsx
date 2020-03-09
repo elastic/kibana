@@ -103,9 +103,7 @@ export const NodeContextMenu: React.FC<Props> = ({
       kuery: `${apmField}:"${node.id}"`,
     },
   });
-  const uptimeMenuItemLinkProps = useLinkProps({
-    ...createUptimeLink(options, nodeType, node),
-  });
+  const uptimeMenuItemLinkProps = useLinkProps(createUptimeLink(options, nodeType, node));
 
   const nodeLogsMenuItem: SectionLinkProps = {
     label: i18n.translate('xpack.infra.nodeContextMenu.viewLogsName', {

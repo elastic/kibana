@@ -47,6 +47,7 @@ describe('createUptimeLink()', () => {
       },
     };
     expect(createUptimeLink(options, 'host', node)).toStrictEqual({
+      app: 'uptime',
       hash: '/',
       search: { search: 'host.ip:"10.0.1.2"' },
     });
@@ -66,6 +67,7 @@ describe('createUptimeLink()', () => {
       },
     };
     expect(createUptimeLink(options, 'host', node)).toStrictEqual({
+      app: 'uptime',
       hash: '/',
       search: { search: 'host.name:"host-01"' },
     });
@@ -85,6 +87,7 @@ describe('createUptimeLink()', () => {
       },
     };
     expect(createUptimeLink(options, 'pod', node)).toStrictEqual({
+      app: 'uptime',
       hash: '/',
       search: { search: 'kubernetes.pod.uid:"29193-pod-02939"' },
     });
@@ -104,6 +107,7 @@ describe('createUptimeLink()', () => {
       },
     };
     expect(createUptimeLink(options, 'container', node)).toStrictEqual({
+      app: 'uptime',
       hash: '/',
       search: { search: 'container.id:"docker-1234"' },
     });

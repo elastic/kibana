@@ -153,6 +153,7 @@ describe('MetricsExplorerChartContextMenu', () => {
       const toDateStrig = '2019-01-01T12:00:00Z';
       const link = createNodeDetailLink('host', 'example-01', fromDateStrig, toDateStrig);
       expect(link).toStrictEqual({
+        app: 'metrics',
         pathname: 'link-to/host-detail/example-01',
         search: { from: '1546340400000', to: '1546344000000' },
       });

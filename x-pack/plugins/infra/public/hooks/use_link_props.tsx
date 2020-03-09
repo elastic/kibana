@@ -65,7 +65,7 @@ export const useLinkProps = ({ app, pathname, hash, search }: LinkDescriptor): L
   const onClick = useMemo(() => {
     // If these results are equal we know we're trying to navigate within the same application
     // that the current history instance is representing
-    if (linksAreEquivalent(externalLinkResult, internalLinkResult)) {
+    if (internalLinkResult && linksAreEquivalent(externalLinkResult, internalLinkResult)) {
       return (e: React.MouseEvent | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
         e.preventDefault();
         if (history) {
@@ -102,8 +102,8 @@ const validateParams = ({ app, pathname, hash, search }: LinkDescriptor) => {
   }
 };
 
-const linksAreEquivalent = (externalLink: string, internalLink: string | undefined): boolean => {
+const linksAreEquivalent = (externalLink: string, internalLink: string): boolean => {
   // Compares with trailing slashes removed. This handles the case where the pathname is '/'
   // and 'createHref' will include the '/' but Kibana's 'getUrlForApp' will remove it.
-  return internalLink ? externalLink.replace(/\/$/, '') === internalLink.replace(/\/$/, '') : false;
+  return externalLink.replace(/\/$/, '') === internalLink.replace(/\/$/, '');
 };
