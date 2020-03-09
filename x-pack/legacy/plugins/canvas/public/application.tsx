@@ -24,7 +24,7 @@ export const renderApp = (
   canvasStore: Store
 ) => {
   ReactDOM.render(
-    <KibanaContextProvider services={{ ...coreStart, ...plugins }}>
+    <KibanaContextProvider services={{ ...plugins, ...coreStart }}>
       <I18nProvider>
         <Provider store={canvasStore}>
           <App />
