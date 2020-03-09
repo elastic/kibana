@@ -8,7 +8,6 @@ import { noop } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React, { useCallback, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import deepEqual from 'fast-deep-equal';
 
 import { BrowserFields } from '../../../containers/source';
 import { TimelineItem } from '../../../graphql/types';
@@ -194,7 +193,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     return (
       prevProps.browserFields === nextProps.browserFields &&
       prevProps.columnHeaders === nextProps.columnHeaders &&
-      deepEqual(prevProps.data, nextProps.data) &&
+      prevProps.data === nextProps.data &&
       prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
       prevProps.notesById === nextProps.notesById &&
       prevProps.height === nextProps.height &&

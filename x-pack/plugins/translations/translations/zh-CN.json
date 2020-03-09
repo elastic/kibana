@@ -2850,7 +2850,6 @@
     "timelion.vis.intervalLabel": "时间间隔",
     "uiActions.actionPanel.title": "选项",
     "uiActions.errors.incompatibleAction": "操作不兼容",
-    "visualizations.defaultFeedbackMessage": "想反馈？请在“{link}中创建问题。",
     "visualizations.newVisWizard.betaDescription": "此可视化为公测版，可能会进行更改。设计和代码相对于正式发行版功能还不够成熟，将按原样提供，且不提供任何保证。公测版功能不受正式发行版功能支持 SLA 的约束",
     "visualizations.newVisWizard.betaTitle": "公测版",
     "visualizations.newVisWizard.chooseSourceTitle": "选择源",

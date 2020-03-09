@@ -7,9 +7,14 @@
 import { shallow } from 'enzyme';
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { MockedProvider } from '@apollo/client/testing';
+import { MockedProvider } from 'react-apollo/test-utils';
 
-import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../../mock';
+import {
+  apolloClientObservable,
+  mockIndexPattern,
+  mockGlobalState,
+  TestProviders,
+} from '../../../../mock';
 import { useMountAppended } from '../../../../utils/use_mount_appended';
 import { createStore, hostsModel, State } from '../../../../store';
 import { HostsTableType } from '../../../../store/hosts/model';
@@ -44,6 +49,7 @@ describe('Hosts Table', () => {
             data={mockData.Hosts.edges}
             id="hostsQuery"
             isInspect={false}
+            indexPattern={mockIndexPattern}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
             loading={false}
             loadPage={loadPage}
@@ -66,6 +72,7 @@ describe('Hosts Table', () => {
             <TestProviders store={store}>
               <HostsTable
                 id="hostsQuery"
+                indexPattern={mockIndexPattern}
                 isInspect={false}
                 loading={false}
                 data={mockData.Hosts.edges}

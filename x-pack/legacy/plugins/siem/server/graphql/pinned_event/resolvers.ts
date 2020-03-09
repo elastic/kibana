@@ -4,8 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AppResolverOf } from '../../lib/framework';
 import { MutationResolvers, QueryResolvers } from '../types';
 import { PinnedEvent } from '../../lib/pinned_event/saved_object';
+
+export type QueryAllPinnedEventsByTimelineIdResolver = AppResolverOf<
+  QueryResolvers.GetAllPinnedEventsByTimelineIdResolver
+>;
+
+export type MutationPinnedEventResolver = AppResolverOf<
+  MutationResolvers.PersistPinnedEventOnTimelineResolver
+>;
+
+export type MutationDeletePinnedEventOnTimelineResolver = AppResolverOf<
+  MutationResolvers.DeletePinnedEventOnTimelineResolver
+>;
+
+export type MutationDeleteAllPinnedEventsOnTimelineResolver = AppResolverOf<
+  MutationResolvers.DeleteAllPinnedEventsOnTimelineResolver
+>;
 
 interface TimelineResolversDeps {
   pinnedEvent: PinnedEvent;
@@ -15,12 +32,12 @@ export const createPinnedEventResolvers = (
   libs: TimelineResolversDeps
 ): {
   Query: {
-    getAllPinnedEventsByTimelineId: QueryResolvers['getAllPinnedEventsByTimelineId'];
+    getAllPinnedEventsByTimelineId: QueryAllPinnedEventsByTimelineIdResolver;
   };
   Mutation: {
-    persistPinnedEventOnTimeline: MutationResolvers['persistPinnedEventOnTimeline'];
-    deletePinnedEventOnTimeline: MutationResolvers['deletePinnedEventOnTimeline'];
-    deleteAllPinnedEventsOnTimeline: MutationResolvers['deleteAllPinnedEventsOnTimeline'];
+    persistPinnedEventOnTimeline: MutationPinnedEventResolver;
+    deletePinnedEventOnTimeline: MutationDeletePinnedEventOnTimelineResolver;
+    deleteAllPinnedEventsOnTimeline: MutationDeleteAllPinnedEventsOnTimelineResolver;
   };
 } => ({
   Query: {

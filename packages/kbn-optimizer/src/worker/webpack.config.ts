@@ -216,7 +216,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
     },
 
     resolve: {
-      extensions: ['.mjs', '.js', '.ts', '.tsx', '.json'],
+      extensions: ['.js', '.ts', '.tsx', '.json'],
       alias: {
         tinymath: require.resolve('tinymath/lib/tinymath.es5.js'),
       },

@@ -3,27 +3,28 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { i18n } from '@kbn/i18n';
+import del from 'del';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import {
   Browser,
-  Page,
-  LaunchOptions,
   ConsoleMessage,
+  LaunchOptions,
+  Page,
   Request as PuppeteerRequest,
 } from 'puppeteer';
-import del from 'del';
 import * as Rx from 'rxjs';
-import { ignoreElements, map, mergeMap, tap } from 'rxjs/operators';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
-
+import { ignoreElements, map, mergeMap, tap } from 'rxjs/operators';
 import { BrowserConfig, CaptureConfig } from '../../../../types';
 import { LevelLogger as Logger } from '../../../lib/level_logger';
-import { HeadlessChromiumDriver } from '../driver';
 import { safeChildProcess } from '../../safe_child_process';
-import { puppeteerLaunch } from '../puppeteer';
+import { HeadlessChromiumDriver } from '../driver';
 import { getChromeLogLocation } from '../paths';
+import { puppeteerLaunch } from '../puppeteer';
 import { args } from './args';
 
 type binaryPath = string;
@@ -216,17 +217,35 @@ export class HeadlessChromiumDriverFactory {
   }
 
   getPageExit(browser: Browser, page: Page) {
-    const pageError$ = Rx.fromEvent<Error>(page, 'error').pipe(mergeMap(err => Rx.throwError(err)));
+    const pageError$ = Rx.fromEvent<Error>(page, 'error').pipe(
+      mergeMap(err => {
+        return Rx.throwError(
+          i18n.translate('xpack.reporting.browsers.chromium.errorDetected', {
+            defaultMessage: 'Reporting detected an error: {err}',
+            values: { err: err.toString() },
+          })
+        );
+      })
+    );
 
     const uncaughtExceptionPageError$ = Rx.fromEvent<Error>(page, 'pageerror').pipe(
-      mergeMap(err => Rx.throwError(err))
+      mergeMap(err => {
+        return Rx.throwError(
+          i18n.translate('xpack.reporting.browsers.chromium.pageErrorDetected', {
+            defaultMessage: `Reporting detected an error on the page: {err}`,
+            values: { err: err.toString() },
+          })
+        );
+      })
     );
 
     const browserDisconnect$ = Rx.fromEvent(browser, 'disconnected').pipe(
       mergeMap(() =>
         Rx.throwError(
           new Error(
-            `Puppeteer was disconnected from the Chromium instance! Chromium has closed or crashed.`
+            i18n.translate('xpack.reporting.browsers.chromium.chromiumClosed', {
+              defaultMessage: `Reporting detected that Chromium has closed.`,
+            })
           )
         )
       )
