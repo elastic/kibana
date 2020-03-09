@@ -45,7 +45,7 @@ export class MetricVisPlugin implements Plugin<void, void> {
     { expressions, visualizations, charts }: MetricVisPluginSetupDependencies
   ) {
     expressions.registerFunction(createMetricVisFn);
-    visualizations.types.createReactVisualization(createMetricVisTypeDefinition());
+    visualizations.createReactVisualization(createMetricVisTypeDefinition());
   }
 
   public start(core: CoreStart) {

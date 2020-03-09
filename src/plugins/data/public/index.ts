@@ -339,6 +339,7 @@ export {
   QueryState,
   getTime,
   getQueryLog,
+  getDefaultQuery,
   FilterManager,
   SavedQuery,
   SavedQueryService,

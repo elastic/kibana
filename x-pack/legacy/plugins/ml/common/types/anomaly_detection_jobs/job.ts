@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UrlConfig } from '../../../../../../../common/types/custom_urls';
-import { CREATED_BY_LABEL } from '../../../../../../../common/constants/new_job';
+import { UrlConfig } from '../custom_urls';
+import { CREATED_BY_LABEL } from '../../constants/new_job';
 
 export type JobId = string;
 export type BucketSpan = string;
@@ -29,6 +29,14 @@ export interface Job {
   renormalization_window_days?: number;
   results_index_name?: string;
   results_retention_days?: number;
+
+  // optional properties added when the job has been created
+  create_time?: number;
+  finished_time?: number;
+  job_type?: 'anomaly_detector';
+  job_version?: string;
+  model_snapshot_id?: string;
+  deleting?: boolean;
 }
 
 export interface AnalysisConfig {
