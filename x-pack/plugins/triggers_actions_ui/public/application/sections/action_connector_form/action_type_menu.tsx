@@ -43,20 +43,28 @@ export const ActionTypeMenu = ({ onActionTypeChange, actionTypes }: Props) => {
   }, []);
 
   const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
-    .filter(([index]) => actionTypeRegistry.has(index))
-    .map(([index, actionType]) => {
-      const actionTypeModel = actionTypeRegistry.get(index);
+    .filter(([id, details]) => actionTypeRegistry.has(id) && details.enabledInConfig === true)
+    .map(([id, actionType]) => {
+      const actionTypeModel = actionTypeRegistry.get(id);
       return {
         iconClass: actionTypeModel ? actionTypeModel.iconClass : '',
         selectMessage: actionTypeModel ? actionTypeModel.selectMessage : '',
         actionType,
         name: actionType.name,
-        typeName: index.replace('.', ''),
+        typeName: id.replace('.', ''),
       };
     });
 
   const cardNodes = registeredActionTypes
-    .sort((a, b) => a.name.localeCompare(b.name))
+    .sort((a, b) => {
+      if (a.actionType.enabledInLicense === true && b.actionType.enabledInLicense === false) {
+        return -1;
+      }
+      if (a.actionType.enabledInLicense === false && b.actionType.enabledInLicense === true) {
+        return 1;
+      }
+      return a.name.localeCompare(b.name);
+    })
     .map((item, index) => {
       return (
         <EuiFlexItem key={index}>
@@ -65,6 +73,7 @@ export const ActionTypeMenu = ({ onActionTypeChange, actionTypes }: Props) => {
             icon={<EuiIcon size="xl" type={item.iconClass} />}
             title={item.name}
             description={item.selectMessage}
+            isDisabled={!item.actionType.enabledInLicense}
             onClick={() => onActionTypeChange(item.actionType)}
           />
         </EuiFlexItem>
