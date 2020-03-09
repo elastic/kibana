@@ -11,18 +11,19 @@ import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import { TypeRegistry } from '../type_registry';
 import { AlertTypeModel, ActionTypeModel } from '../../types';
 
-export interface AlertsContextValue {
+export interface AlertsContextValue<MetaData = Record<string, any>> {
   reloadAlerts?: () => Promise<void>;
   http: HttpSetup;
   alertTypeRegistry: TypeRegistry<AlertTypeModel>;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  uiSettings?: IUiSettingsClient;
-  toastNotifications?: Pick<
+  toastNotifications: Pick<
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
+  uiSettings?: IUiSettingsClient;
   charts?: ChartsPluginSetup;
   dataFieldsFormats?: DataPublicPluginSetup['fieldFormats'];
+  metadata?: MetaData;
 }
 
 const AlertsContext = createContext<AlertsContextValue>(null as any);

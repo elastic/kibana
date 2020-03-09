@@ -473,8 +473,6 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActi
         error={errors.body}
       >
         <EuiCodeEditor
-          fullWidth
-          isInvalid={errors.body.length > 0 && body !== undefined}
           mode="json"
           width="100%"
           height="200px"
