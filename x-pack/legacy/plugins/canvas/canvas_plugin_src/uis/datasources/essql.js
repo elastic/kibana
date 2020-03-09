@@ -95,6 +95,6 @@ export const essql = () => ({
   name: 'essql',
   displayName: strings.getDisplayName(),
   help: strings.getHelp(),
-  image: 'sqlApp',
+  image: 'database',
   template: templateFromReactComponent(EssqlDatasource),
 });

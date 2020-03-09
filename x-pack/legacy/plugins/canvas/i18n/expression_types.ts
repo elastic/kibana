@@ -185,7 +185,7 @@ export const ExpressionDataSourceStrings = {
       }),
     getSortFieldTitle: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.sortFieldTitle', {
-        defaultMessage: 'Sort Field',
+        defaultMessage: 'Sort field',
       }),
     getSortFieldLabel: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.sortFieldLabel', {
@@ -193,7 +193,7 @@ export const ExpressionDataSourceStrings = {
       }),
     getSortOrderTitle: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.sortOrderTitle', {
-        defaultMessage: 'Sort Order',
+        defaultMessage: 'Sort order',
       }),
     getSortOrderLabel: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.sortOrderLabel', {

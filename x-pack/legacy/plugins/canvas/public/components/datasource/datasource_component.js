@@ -164,20 +164,20 @@ export class DatasourceComponent extends PureComponent {
           ) : (
             datasourceRender
           )}
-          <EuiHorizontalRule margin="m" />
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" onClick={() => setPreviewing(true)}>
-                {strings.getPreviewButtonLabel()}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton disabled={isInvalid} size="s" onClick={this.save} fill color="secondary">
-                {strings.getSaveButtonLabel()}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
         </div>
+        <EuiHorizontalRule margin="m" />
+        <EuiFlexGroup justifyContent="flexEnd" className="canvasDataSource__sectionFooter">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty size="s" onClick={() => setPreviewing(true)}>
+              {strings.getPreviewButtonLabel()}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton disabled={isInvalid} size="s" onClick={this.save} fill color="secondary">
+              {strings.getSaveButtonLabel()}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
         {datasourcePreview}
       </Fragment>
