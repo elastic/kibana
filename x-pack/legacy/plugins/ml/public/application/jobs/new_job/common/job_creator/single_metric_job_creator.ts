@@ -8,7 +8,12 @@ import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { JobCreator } from './job_creator';
 import { Field, Aggregation, AggFieldPair } from '../../../../../../common/types/fields';
-import { Job, Datafeed, Detector, BucketSpan } from './configs';
+import {
+  Job,
+  Datafeed,
+  Detector,
+  BucketSpan,
+} from '../../../../../../common/types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
 import {
   ML_JOB_AGGREGATION,
