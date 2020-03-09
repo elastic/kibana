@@ -44,17 +44,6 @@ export const FileActionsBar: FunctionComponent<Props> = ({
 }) => {
   const [showCreateFilePopover, setShowCreateFilePopover] = useState(false);
 
-  const setShowPopover = (popover: 'create' | 'edit' | false) => {
-    switch (popover) {
-      case 'create':
-        setShowCreateFilePopover(true);
-        break;
-      case false:
-      default:
-        setShowCreateFilePopover(false);
-    }
-  };
-
   return (
     <EuiFlexGroup
       justifyContent="center"
@@ -77,7 +66,7 @@ export const FileActionsBar: FunctionComponent<Props> = ({
         <EuiButtonIcon
           disabled={disabled}
           onClick={() => {
-            setShowPopover(false);
+            setShowCreateFilePopover(false);
             onFilter();
           }}
           color="ghost"
@@ -92,12 +81,12 @@ export const FileActionsBar: FunctionComponent<Props> = ({
           ownFocus
           initialFocus={() => document.querySelector('.conAppFileNameTextField')! as HTMLElement}
           isOpen={showCreateFilePopover && !disabled}
-          closePopover={() => setShowPopover(false)}
+          closePopover={() => setShowCreateFilePopover(false)}
           button={
             <EuiButtonIcon
               disabled={disabled}
               onClick={() => {
-                setShowPopover('create');
+                setShowCreateFilePopover(true);
               }}
               color="ghost"
               aria-label={i18n.translate('console.fileTree.forms.createButtonAriaLabel', {
@@ -111,7 +100,7 @@ export const FileActionsBar: FunctionComponent<Props> = ({
             isSubmitting={Boolean(disabled)}
             onSubmit={(fileName: string) => {
               onCreate(fileName);
-              setShowPopover(false);
+              setShowCreateFilePopover(false);
             }}
           />
         </EuiPopover>
