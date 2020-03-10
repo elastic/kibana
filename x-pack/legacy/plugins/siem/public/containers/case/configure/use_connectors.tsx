@@ -53,6 +53,10 @@ export const useConnectors = (): ReturnConnectors => {
 
   const updateConnector = useCallback(
     async (connectorId: string, mappings: CasesConfigurationMapping[]) => {
+      if (connectorId === 'none') {
+        return;
+      }
+
       let didCancel = false;
       const abortCtrl = new AbortController();
       try {
