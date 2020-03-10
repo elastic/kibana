@@ -168,6 +168,17 @@ describe('Ingest Manager - packageToConfigDatasourceInputs', () => {
                   { dataset: 'bar2', vars: [{ default: 'bar2-var-value', name: 'var-name' }] },
                 ],
               },
+              {
+                type: 'with-disabled-streams',
+                streams: [
+                  {
+                    dataset: 'disabled',
+                    enabled: false,
+                    vars: [{ multi: true, name: 'var-name' }],
+                  },
+                  { dataset: 'disabled2', enabled: false },
+                ],
+              },
             ],
           },
         ],
@@ -213,6 +224,26 @@ describe('Ingest Manager - packageToConfigDatasourceInputs', () => {
               'bar-input-var-name': ['value1', 'value2'],
               'bar-input2-var-name': 123456,
             },
+          },
+        ],
+      },
+      {
+        type: 'with-disabled-streams',
+        enabled: false,
+        streams: [
+          {
+            id: 'with-disabled-streams-disabled',
+            enabled: false,
+            dataset: 'disabled',
+            config: {
+              'var-name': [],
+            },
+          },
+          {
+            id: 'with-disabled-streams-disabled2',
+            enabled: false,
+            dataset: 'disabled2',
+            config: {},
           },
         ],
       },
