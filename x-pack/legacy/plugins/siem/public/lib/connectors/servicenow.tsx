@@ -84,10 +84,7 @@ export function getActionType(): ActionTypeModel {
 const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
   ServiceNowActionConnector
 >> = ({ action, editActionConfig, editActionSecrets, errors }) => {
-  const {
-    apiUrl,
-    casesConfiguration: { mapping = [] },
-  } = action.config;
+  const { apiUrl, casesConfiguration: { mapping = [] } = {} } = action.config;
   const { username, password } = action.secrets;
 
   const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl != null;
@@ -108,7 +105,7 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
 
   const handleOnBlurActionConfig = useCallback(
     (key: string) => {
-      if (key === 'apiUrl' && action.config[key] != null) {
+      if (key === 'apiUrl' && action.config[key] == null) {
         editActionConfig(key, '');
       }
     },
@@ -122,7 +119,7 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
 
   const handleOnBlurSecretConfig = useCallback(
     (key: string) => {
-      if (['username', 'password'].includes(key) && get(key, action.secrets) != null) {
+      if (['username', 'password'].includes(key) && get(key, action.secrets) == null) {
         editActionSecrets(key, '');
       }
     },
@@ -209,8 +206,8 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
           <EuiSpacer size="xs" />
           <FieldMapping
             disabled={false}
-            mappings={mapping as CasesConfigurationMapping[]}
-            onChangeMappings={handleOnChangeMappingConfig}
+            mapping={mapping as CasesConfigurationMapping[]}
+            onChangeMapping={handleOnChangeMappingConfig}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
