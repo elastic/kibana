@@ -59,7 +59,7 @@ class AgentConfigService {
         ...DEFAULT_AGENT_CONFIG,
       };
 
-      return await this.create(soClient, newDefaultAgentConfig);
+      return this.create(soClient, newDefaultAgentConfig);
     }
 
     return {
