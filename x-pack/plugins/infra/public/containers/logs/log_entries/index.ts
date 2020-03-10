@@ -198,10 +198,8 @@ const useFetchEntriesEffect = (
     }
     const getEntriesBefore = direction === ShouldFetchMoreEntries.Before;
 
-    // Control cursors are correct
-    if (getEntriesBefore && !state.topCursor) {
-      return;
-    } else if (!state.bottomCursor) {
+    // Control that cursors are correct
+    if ((getEntriesBefore && !state.topCursor) || !state.bottomCursor) {
       return;
     }
 
@@ -301,11 +299,6 @@ const useFetchEntriesEffect = (
   };
 
   const expandRangeEffect = () => {
-    const shouldExpand = {
-      before: false,
-      after: false,
-    };
-
     if (!prevParams || !prevParams.startTimestamp || !prevParams.endTimestamp) {
       return;
     }
@@ -314,17 +307,17 @@ const useFetchEntriesEffect = (
       return;
     }
 
-    if (props.startTimestamp < prevParams.startTimestamp) {
-      shouldExpand.before = true;
-    }
-    if (props.endTimestamp > prevParams.endTimestamp) {
-      shouldExpand.after = true;
-    }
+    const shouldExpand = {
+      before: props.startTimestamp < prevParams.startTimestamp,
+      after: props.endTimestamp > prevParams.endTimestamp,
+    };
 
     dispatch({ type: Action.ExpandRange, payload: shouldExpand });
   };
 
   const expandRangeEffectDependencies = [
+    prevParams?.startTimestamp,
+    prevParams?.endTimestamp,
     props.startTimestamp,
     props.endTimestamp,
     props.timestampsLastUpdate,
