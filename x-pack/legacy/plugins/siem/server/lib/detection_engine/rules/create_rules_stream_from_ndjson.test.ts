@@ -69,6 +69,7 @@ describe('create_rules_stream_from_ndjson', () => {
           tags: [],
           threat: [],
           references: [],
+          note: '',
           version: 1,
         },
         {
@@ -92,6 +93,7 @@ describe('create_rules_stream_from_ndjson', () => {
           tags: [],
           threat: [],
           references: [],
+          note: '',
           version: 1,
         },
       ]);
@@ -153,6 +155,7 @@ describe('create_rules_stream_from_ndjson', () => {
           tags: [],
           threat: [],
           references: [],
+          note: '',
           version: 1,
         },
         {
@@ -176,6 +179,7 @@ describe('create_rules_stream_from_ndjson', () => {
           tags: [],
           threat: [],
           references: [],
+          note: '',
           version: 1,
         },
       ]);
@@ -220,6 +224,7 @@ describe('create_rules_stream_from_ndjson', () => {
           tags: [],
           threat: [],
           references: [],
+          note: '',
           version: 1,
         },
         {
@@ -243,6 +248,7 @@ describe('create_rules_stream_from_ndjson', () => {
           tags: [],
           threat: [],
           references: [],
+          note: '',
           version: 1,
         },
       ]);
@@ -287,6 +293,7 @@ describe('create_rules_stream_from_ndjson', () => {
         tags: [],
         threat: [],
         references: [],
+        note: '',
         version: 1,
       });
       expect(resultOrError[1].message).toEqual('Unexpected token , in JSON at position 1');
@@ -311,6 +318,7 @@ describe('create_rules_stream_from_ndjson', () => {
         tags: [],
         threat: [],
         references: [],
+        note: '',
         version: 1,
       });
     });
@@ -354,6 +362,7 @@ describe('create_rules_stream_from_ndjson', () => {
         tags: [],
         threat: [],
         references: [],
+        note: '',
         version: 1,
       });
       expect(resultOrError[1].message).toEqual(
@@ -380,6 +389,7 @@ describe('create_rules_stream_from_ndjson', () => {
         tags: [],
         threat: [],
         references: [],
+        note: '',
         version: 1,
       });
     });

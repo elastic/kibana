@@ -1243,4 +1243,54 @@ describe('create rules schema', () => {
       'child "severity" fails because ["severity" must be one of [low, medium, high, critical]]'
     );
   });
+
+  describe('note', () => {
+    test('You can set note to a string', () => {
+      expect(
+        updateRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          note: '# some documentation title',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You cannot set note as an object', () => {
+      expect(
+        updateRulesSchema.validate<Partial<Omit<RuleAlertParamsRest, 'note'> & { note: object }>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          note: {
+            somethingMadeUp: { somethingElse: true },
+          },
+        }).error.message
+      ).toEqual('child "note" fails because ["note" must be a string]');
+    });
+  });
 });
