@@ -6,10 +6,12 @@
 
 import React, { useState } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
-import { ActionWizard } from './action_wizard';
-import { ActionBaseConfig, ActionFactory } from '../../ui_actions_factory';
 import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
-import { CollectConfigProps } from '../../../../../../src/plugins/ui_actions/public';
+import { ActionWizard } from './action_wizard';
+import { ActionFactoryDefinition, AnyActionFactory, ActionFactory } from '../../services';
+import { CollectConfigProps } from '../../util';
+
+type ActionBaseConfig = object;
 
 export const dashboards = [
   { id: 'dashboard1', title: 'Dashboard 1' },
@@ -71,7 +73,11 @@ function DashboardDrilldownCollectConfig(props: CollectConfigProps<DashboardDril
   );
 }
 
-export const dashboardDrilldownActionFactory: ActionFactory<DashboardDrilldownConfig> = {
+export const dashboardDrilldownActionFactory: ActionFactoryDefinition<
+  DashboardDrilldownConfig,
+  any,
+  any
+> = {
   id: 'Dashboard',
   getDisplayName: () => 'Go to Dashboard',
   getIconType: () => 'dashboardApp',
@@ -92,7 +98,10 @@ export const dashboardDrilldownActionFactory: ActionFactory<DashboardDrilldownCo
     return Promise.resolve(true);
   },
   order: 0,
+  create: () => null as any,
 };
+
+export const dashboardFactory = new ActionFactory(dashboardDrilldownActionFactory);
 
 interface UrlDrilldownConfig {
   url: string;
@@ -124,7 +133,7 @@ function UrlDrilldownCollectConfig(props: CollectConfigProps<UrlDrilldownConfig>
     </>
   );
 }
-export const urlDrilldownActionFactory: ActionFactory<UrlDrilldownConfig> = {
+export const urlDrilldownActionFactory: ActionFactoryDefinition<UrlDrilldownConfig> = {
   id: 'Url',
   getDisplayName: () => 'Go to URL',
   getIconType: () => 'link',
@@ -144,15 +153,18 @@ export const urlDrilldownActionFactory: ActionFactory<UrlDrilldownConfig> = {
   isCompatible(context?: object): Promise<boolean> {
     return Promise.resolve(true);
   },
+  create: () => null as any,
 };
 
-export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory<any>> }) {
+export const urlFactory = new ActionFactory(urlDrilldownActionFactory);
+
+export function Demo({ actionFactories }: { actionFactories: AnyActionFactory[] }) {
   const [state, setState] = useState<{
-    currentActionFactory?: ActionFactory;
+    currentActionFactory?: AnyActionFactory;
     config?: ActionBaseConfig;
   }>({});
 
-  function changeActionFactory(newActionFactory: ActionFactory | null) {
+  function changeActionFactory(newActionFactory: AnyActionFactory | null) {
     if (!newActionFactory) {
       // removing action factory
       return setState({});

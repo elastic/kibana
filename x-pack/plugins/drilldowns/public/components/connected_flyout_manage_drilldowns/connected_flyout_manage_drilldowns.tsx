@@ -5,7 +5,10 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { ActionFactory, AdvancedUiActionsStart } from '../../../../advanced_ui_actions/public';
+import {
+  AdvancedUiActionsActionFactory as ActionFactory,
+  AdvancedUiActionsStart,
+} from '../../../../advanced_ui_actions/public';
 import { FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
 import { FlyoutListManageDrilldowns } from '../flyout_list_manage_drilldowns';
 import { IStorageWrapper } from '../../../../../../src/plugins/kibana_utils/public';

@@ -15,14 +15,14 @@ afterEach(cleanup);
 describe('<FormDrilldownWizard>', () => {
   test('renders without crashing', () => {
     const div = document.createElement('div');
-    render(<FormDrilldownWizard onNameChange={() => {}} />, div);
+    render(<FormDrilldownWizard onNameChange={() => {}} actionFactoryContext={{}} />, div);
   });
 
   describe('[name=]', () => {
     test('if name not provided, uses to empty string', () => {
       const div = document.createElement('div');
 
-      render(<FormDrilldownWizard />, div);
+      render(<FormDrilldownWizard actionFactoryContext={{}} />, div);
 
       const input = div.querySelector(
         '[data-test-subj="dynamicActionNameInput"]'
@@ -34,7 +34,7 @@ describe('<FormDrilldownWizard>', () => {
     test('can set initial name input field value', () => {
       const div = document.createElement('div');
 
-      render(<FormDrilldownWizard name={'foo'} />, div);
+      render(<FormDrilldownWizard name={'foo'} actionFactoryContext={{}} />, div);
 
       const input = div.querySelector(
         '[data-test-subj="dynamicActionNameInput"]'
@@ -42,7 +42,7 @@ describe('<FormDrilldownWizard>', () => {
 
       expect(input?.value).toBe('foo');
 
-      render(<FormDrilldownWizard name={'bar'} />, div);
+      render(<FormDrilldownWizard name={'bar'} actionFactoryContext={{}} />, div);
 
       expect(input?.value).toBe('bar');
     });
@@ -50,7 +50,7 @@ describe('<FormDrilldownWizard>', () => {
     test('fires onNameChange callback on name change', () => {
       const onNameChange = jest.fn();
       const utils = renderTestingLibrary(
-        <FormDrilldownWizard name={''} onNameChange={onNameChange} />
+        <FormDrilldownWizard name={''} onNameChange={onNameChange} actionFactoryContext={{}} />
       );
       const input = utils.getByLabelText(txtNameOfDrilldown);
 

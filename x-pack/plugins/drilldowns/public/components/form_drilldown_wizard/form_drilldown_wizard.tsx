@@ -9,11 +9,8 @@ import './form_drilldown_wizard.scss';
 import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { txtDrilldownAction, txtNameOfDrilldown, txtUntitledDrilldown } from './i18n';
 import {
-  ActionBaseConfig,
-  ActionFactory,
+  AdvancedUiActionsAnyActionFactory as AnyActionFactory,
   ActionWizard,
-  ActionFactoryList,
-  ActionFactoryBaseContext,
 } from '../../../../advanced_ui_actions/public';
 
 const noopFn = () => {};
@@ -22,14 +19,14 @@ export interface FormDrilldownWizardProps {
   name?: string;
   onNameChange?: (name: string) => void;
 
-  currentActionFactory?: ActionFactory;
-  onActionFactoryChange?: (actionFactory: ActionFactory | null) => void;
-  actionFactoryContext?: ActionFactoryBaseContext;
+  currentActionFactory?: AnyActionFactory;
+  onActionFactoryChange?: (actionFactory: AnyActionFactory | null) => void;
+  actionFactoryContext: object;
 
-  actionConfig?: ActionBaseConfig;
-  onActionConfigChange?: (config: ActionBaseConfig) => void;
+  actionConfig?: object;
+  onActionConfigChange?: (config: object) => void;
 
-  actionFactories?: ActionFactoryList;
+  actionFactories?: AnyActionFactory[];
 }
 
 export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
@@ -40,7 +37,7 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
   onActionConfigChange = noopFn,
   onActionFactoryChange = noopFn,
   actionFactories = [],
-  actionFactoryContext = {},
+  actionFactoryContext,
 }) => {
   const nameFragment = (
     <EuiFormRow label={txtNameOfDrilldown} className="drdFormDrilldownWizard__formRow">

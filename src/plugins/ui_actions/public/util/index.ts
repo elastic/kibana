@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export * from './configurable';
 export * from './presentable';

@@ -9,8 +9,8 @@ import { cleanup, fireEvent, render, wait } from '@testing-library/react/pure';
 import '@testing-library/jest-dom/extend-expect';
 import { createFlyoutManageDrilldowns } from './connected_flyout_manage_drilldowns';
 import {
-  dashboardDrilldownActionFactory,
-  urlDrilldownActionFactory,
+  dashboardFactory,
+  urlFactory,
 } from '../../../../advanced_ui_actions/public/components/action_wizard/test_data';
 import { StubBrowserStorage } from '../../../../../../src/test_utils/public/stub_browser_storage';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
@@ -20,7 +20,7 @@ const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
   advancedUiActions: {
     actionFactory: {
       getAll: () => {
-        return [dashboardDrilldownActionFactory, urlDrilldownActionFactory];
+        return [dashboardFactory, urlFactory];
       },
     },
   },

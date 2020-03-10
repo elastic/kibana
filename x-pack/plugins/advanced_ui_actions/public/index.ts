@@ -16,8 +16,11 @@ export { AdvancedUiActionsSetup, AdvancedUiActionsStart } from './plugin';
 
 export { ActionWizard } from './components';
 export {
-  ActionFactory,
-  ActionBaseConfig,
-  ActionFactoryBaseContext,
-  ActionFactoryList,
-} from './ui_actions_factory';
+  ActionFactoryDefinition as AdvancedUiActionsActionFactoryDefinition,
+  ActionFactory as AdvancedUiActionsActionFactory,
+  AnyActionFactory as AdvancedUiActionsAnyActionFactory,
+} from './services/action_factory_service';
+export {
+  Configurable as AdvancedUiActionsConfigurable,
+  CollectConfigProps as AdvancedUiActionsCollectConfigProps,
+} from './util';

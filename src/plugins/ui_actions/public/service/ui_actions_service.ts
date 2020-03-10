@@ -26,11 +26,11 @@ import {
   ActionType,
 } from '../types';
 import {
-  ActionDefinition,
   ActionInternal,
   AnyActionInternal,
   Action,
   ActionByType,
+  AnyActionDefinition,
 } from '../actions';
 import { Trigger, TriggerContext } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
@@ -82,7 +82,7 @@ export class UiActionsService {
     return trigger.contract;
   };
 
-  public readonly registerAction = <A extends ActionDefinition<any, any>>(definition: A) => {
+  public readonly registerAction = <A extends AnyActionDefinition>(definition: A) => {
     if (this.actions.has(definition.id)) {
       throw new Error(`Action [action.id = ${definition.id}] already registered.`);
     }
@@ -90,9 +90,7 @@ export class UiActionsService {
     this.actions.set(definition.id, new ActionInternal(definition));
   };
 
-  public readonly getAction = <T extends ActionDefinition<any, any>>(
-    id: string
-  ): ActionInternal<T> => {
+  public readonly getAction = <T extends AnyActionDefinition>(id: string): ActionInternal<T> => {
     if (!this.actions.has(id)) {
       throw new Error(`Action [action.id = ${id}] not registered.`);
     }
@@ -158,8 +156,7 @@ export class UiActionsService {
 
     const actions = actionIds!
       .map(actionId => this.actions.get(actionId) as AnyActionInternal)
-      .filter(Boolean)
-      .map(({ contract }) => contract) as Array<Action<TriggerContextMapping[T]>>;
+      .filter(Boolean);
 
     return actions as Array<Action<TriggerContext<T>>>;
   };

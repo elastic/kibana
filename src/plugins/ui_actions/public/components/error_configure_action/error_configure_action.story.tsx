@@ -20,10 +20,13 @@
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
 import { ErrorConfigureAction } from '.';
-import { createSampleGoToUrlAction } from '../../tests';
 import { ActionInternal } from '../../actions';
 
-const action = new ActionInternal(createSampleGoToUrlAction());
+const action = new ActionInternal({
+  id: 'TEST',
+  type: 'TEST_TYPE' as any,
+  execute: async () => {},
+});
 
 storiesOf('components/ErrorConfigureAction', module)
   .add('default', () => <ErrorConfigureAction />)

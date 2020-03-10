@@ -65,11 +65,6 @@ export interface Action<Context extends {} = {}, T = ActionType>
   isCompatible(context: Context): Promise<boolean>;
 
   /**
-   * If this returns something truthy, this is used in addition to the `execute` method when clicked.
-   */
-  getHref?(context: Context): string | undefined;
-
-  /**
    * Executes the action.
    */
   execute(context: Context): Promise<void>;
@@ -78,10 +73,8 @@ export interface Action<Context extends {} = {}, T = ActionType>
 /**
  * A convenience interface used to register an action.
  */
-export interface ActionDefinition<
-  Context extends object = object,
-  Config extends object | undefined = undefined
-> extends Partial<Presentable<Context>> {
+export interface ActionDefinition<Context extends object = object>
+  extends Partial<Presentable<Context>> {
   /**
    * ID of the action that uniquely identifies this action in the actions registry.
    */
@@ -92,29 +85,11 @@ export interface ActionDefinition<
    */
   readonly type?: ActionType;
 
-  getHref?(context: Context): string | undefined;
-
   /**
    * Executes the action.
    */
   execute(context: Context): Promise<void>;
 }
 
-export type AnyActionDefinition = ActionDefinition<any, any>;
-export type ActionContext<A> = A extends ActionDefinition<infer Context, any> ? Context : never;
-export type ActionConfig<A> = A extends ActionDefinition<any, infer Config> ? Config : never;
-
-/**
- * A convenience interface used to register a dynamic action.
- *
- * A dynamic action is one that can be create by user and registered into the
- * actions registry at runtime. User can also provide custom config for this
- * action. And dynamic actions can be serialized for storage and deserialized
- * back.
- */
-export type DynamicActionDefinition<
-  Context extends object = object,
-  Config extends object | undefined = undefined
-> = ActionDefinition<Context, Config>;
-
-export type AnyDynamicActionDefinition = DynamicActionDefinition<any, any>;
+export type AnyActionDefinition = ActionDefinition<any>;
+export type ActionContext<A> = A extends ActionDefinition<infer Context> ? Context : never;
