@@ -7,7 +7,7 @@
 import { IndexPatternsContract } from '../../../../../../../../../../src/plugins/data/public';
 import { mlJobService } from '../../../../services/job_service';
 import { loadIndexPatterns, getIndexPatternIdFromName } from '../../../../util/index_utils';
-import { CombinedJob } from '../../common/job_creator/configs';
+import { CombinedJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 export async function preConfiguredJobRedirect(indexPatterns: IndexPatternsContract) {

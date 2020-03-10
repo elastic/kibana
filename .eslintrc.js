@@ -515,6 +515,16 @@ module.exports = {
     },
 
     /**
+     * Harden specific rules
+     */
+    {
+      files: ['test/harden/*.js'],
+      rules: {
+        'mocha/handle-done-callback': 'off', // TODO: Find a way to disable all mocha rules
+      },
+    },
+
+    /**
      * APM overrides
      */
     {
