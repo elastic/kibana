@@ -26,7 +26,7 @@ import { CoreStart } from 'src/core/public';
 import { UiActionsService } from 'src/plugins/ui_actions/public';
 
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
-import { ErrorEmbeddable, Embeddable } from '../embeddables';
+import { ErrorEmbeddable, IEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from '../panel';
 import { IContainer } from './i_container';
 import { GetEmbeddableFactory, GetEmbeddableFactories } from '../types';
@@ -56,7 +56,7 @@ interface State {
 export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelProps, State> {
   [panel: string]: any;
   public mounted: boolean;
-  public embeddable!: Embeddable | ErrorEmbeddable;
+  public embeddable!: IEmbeddable | ErrorEmbeddable;
   private subscription?: Subscription;
 
   constructor(props: EmbeddableChildPanelProps) {
@@ -73,6 +73,7 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
     const { container } = this.props;
 
     this.embeddable = await container.untilEmbeddableLoaded(this.props.embeddableId);
+
     if (this.mounted) {
       this.setState({ loading: false });
     }

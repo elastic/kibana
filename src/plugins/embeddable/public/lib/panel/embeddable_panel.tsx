@@ -27,7 +27,6 @@ import { toMountPoint } from '../../../../kibana_react/public';
 import { Start as InspectorStartContract } from '../inspector';
 import { CONTEXT_MENU_TRIGGER, PANEL_BADGE_TRIGGER, EmbeddableContext } from '../triggers';
 import { IEmbeddable } from '../embeddables/i_embeddable';
-import { Embeddable } from '../embeddables';
 import { ViewMode, GetEmbeddableFactory, GetEmbeddableFactories } from '../types';
 
 import { RemovePanelAction } from './panel_header/panel_actions';
@@ -39,7 +38,7 @@ import { EditPanelAction } from '../actions';
 import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
 
 interface Props {
-  embeddable: Embeddable<any, any>;
+  embeddable: IEmbeddable<any, any>;
   getActions: UiActionsService['getTriggerCompatibleActions'];
   getEmbeddableFactory: GetEmbeddableFactory;
   getAllEmbeddableFactories: GetEmbeddableFactories;
@@ -190,9 +189,11 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     if (this.embeddableRoot.current) {
       this.props.embeddable.render(this.embeddableRoot.current);
     }
-    this.props.embeddable.actionStorage
-      .count()
-      .then(drilldownCount => this.setState({ drilldownCount }));
+    this.props.embeddable.actionStorage.count().then(drilldownCount => {
+      if (this.mounted) {
+        this.setState({ drilldownCount });
+      }
+    });
   }
 
   closeMyContextMenuPanel = () => {

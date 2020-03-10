@@ -150,7 +150,7 @@ export function PanelHeader({
         )}
         {renderBadges(badges, embeddable)}
       </h2>
-      {!isViewMode && drilldownCount && drilldownCount > 0 && (
+      {!isViewMode && drilldownCount && (
         <EuiNotificationBadge style={{ marginTop: '4px', marginRight: '4px' }}>
           A{drilldownCount}
         </EuiNotificationBadge>

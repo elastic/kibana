@@ -21,6 +21,7 @@ import { Observable } from 'rxjs';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { ViewMode } from '../types';
+import { EmbeddableActionStorage } from './embeddable_action_storage';
 
 export interface EmbeddableInput {
   viewMode?: ViewMode;
@@ -58,6 +59,7 @@ export interface IEmbeddable<
   I extends EmbeddableInput = EmbeddableInput,
   O extends EmbeddableOutput = EmbeddableOutput
 > {
+  actionStorage: EmbeddableActionStorage;
   /**
    * Is this embeddable an instance of a Container class, can it contain
    * nested embeddables?
