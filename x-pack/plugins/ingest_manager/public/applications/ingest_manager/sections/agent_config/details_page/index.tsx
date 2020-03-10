@@ -28,6 +28,7 @@ import { Loading } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
 import { ConfigRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
 import { DatasourcesTable, EditConfigFlyout } from './components';
+import { LinkedAgentCount } from '../components';
 
 export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   const {
@@ -125,7 +126,12 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
             label: i18n.translate('xpack.ingestManager.configDetails.summary.usedBy', {
               defaultMessage: 'Used by',
             }),
-            content: <EuiI18nNumber value={(agentStatus && agentStatus.total) || 0} />,
+            content: (
+              <LinkedAgentCount
+                count={(agentStatus && agentStatus.total) || 0}
+                agentConfigId={(agentConfig && agentConfig.id) || ''}
+              />
+            ),
           },
           {
             label: i18n.translate('xpack.ingestManager.configDetails.summary.lastUpdated', {

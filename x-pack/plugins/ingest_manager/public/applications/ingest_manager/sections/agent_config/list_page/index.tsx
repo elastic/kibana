@@ -28,7 +28,6 @@ import { useHistory } from 'react-router-dom';
 import { AgentConfig } from '../../../types';
 import {
   AGENT_CONFIG_DETAILS_PATH,
-  FLEET_AGENTS_PATH,
   AGENT_CONFIG_SAVED_OBJECT_TYPE,
   AGENT_CONFIG_PATH,
 } from '../../../constants';
@@ -43,6 +42,7 @@ import {
 import { AgentConfigDeleteProvider } from '../components';
 import { CreateAgentConfigFlyout } from './components';
 import { SearchBar } from '../../../components/search_bar';
+import { LinkedAgentCount } from '../components';
 
 const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
   overflow: 'hidden',
@@ -168,7 +168,6 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
 
   // Base URL paths
   const DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
-  const FLEET_URI = useLink(FLEET_AGENTS_PATH);
 
   // Table and search states
   const [search, setSearch] = useState<string>('');
@@ -271,22 +270,9 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
           defaultMessage: 'Agents',
         }),
         dataType: 'number',
-        render: (agents: number, config: AgentConfig) => {
-          const displayValue = (
-            <FormattedMessage
-              id="xpack.ingestManager.agentConfigList.agentsText"
-              defaultMessage="{agents, plural, one {# agent} other {# agents}}"
-              values={{ agents }}
-            />
-          );
-          return agents > 0 ? (
-            <EuiLink href={`${FLEET_URI}?kuery=agents.config_id : ${config.id}`}>
-              {displayValue}
-            </EuiLink>
-          ) : (
-            displayValue
-          );
-        },
+        render: (agents: number, config: AgentConfig) => (
+          <LinkedAgentCount count={agents} agentConfigId={config.id} />
+        ),
       },
       {
         field: 'datasources',
@@ -316,7 +302,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
     }
 
     return cols;
-  }, [DETAILS_URI, FLEET_URI, isFleetEnabled, sendRequest]);
+  }, [DETAILS_URI, isFleetEnabled, sendRequest]);
 
   const createAgentConfigButton = useMemo(
     () => (
