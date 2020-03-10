@@ -5,15 +5,22 @@
  */
 import React from 'react';
 import { ICON_TYPES, EuiIcon, EuiIconProps } from '@elastic/eui';
+import { PackageInfo, PackageListItem } from '../../../types';
+import { useLinks } from '../hooks';
 
-const DEFAULT_ICON_TYPE = 'savedObjectsApp';
+type Package = PackageInfo | PackageListItem;
 
 export const PackageIcon: React.FunctionComponent<{
   packageName: string;
-} & Omit<EuiIconProps, 'type'>> = ({ packageName, ...rest }) => {
+  icons?: Package['icons'];
+} & Omit<EuiIconProps, 'type'>> = ({ packageName, icons, ...euiIconProps }) => {
+  const { toImage } = useLinks();
   // try to find a logo in EUI
-  // TODO: first try to find icon in `icons` property
-  const iconType =
-    ICON_TYPES.find(key => key.toLowerCase() === `logo${packageName}`) || DEFAULT_ICON_TYPE;
-  return <EuiIcon type={iconType} {...rest} />;
+  const euiLogoIcon = ICON_TYPES.find(key => key.toLowerCase() === `logo${packageName}`);
+  const svgIcons = icons?.filter(icon => icon.type === 'image/svg+xml');
+  const localIcon = svgIcons && Array.isArray(svgIcons) && svgIcons[0];
+  const pathToLocal = localIcon && toImage(localIcon.src);
+  const euiIconType = pathToLocal || euiLogoIcon || 'savedObjectsApp';
+
+  return <EuiIcon size="s" type={euiIconType} {...euiIconProps} />;
 };
