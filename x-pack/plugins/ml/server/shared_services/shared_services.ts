@@ -12,6 +12,7 @@ import { licenseChecks } from './license_checks';
 import { MlSystemProvider, getMlSystemProvider } from './providers/system';
 import { JobServiceProvider, getJobServiceProvider } from './providers/job_service';
 import { ModulesProvider, getModulesProvider } from './providers/modules';
+import { ResultsServiceProvider, getResultsServiceProvider } from './providers/results_service';
 import {
   AnomalyDetectorsProvider,
   getAnomalyDetectorsProvider,
@@ -20,7 +21,8 @@ import {
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &
   MlSystemProvider &
-  ModulesProvider;
+  ModulesProvider &
+  ResultsServiceProvider;
 
 export function createSharedServices(
   mlLicense: MlServerLicense,
@@ -34,5 +36,6 @@ export function createSharedServices(
     ...getAnomalyDetectorsProvider(isFullLicense),
     ...getMlSystemProvider(isMinimumLicense, mlLicense, spaces, cloud),
     ...getModulesProvider(isFullLicense),
+    ...getResultsServiceProvider(isFullLicense),
   };
 }
