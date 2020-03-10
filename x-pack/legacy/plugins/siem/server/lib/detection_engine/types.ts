@@ -7,7 +7,7 @@
 import { AlertAction } from '../../../../../../plugins/alerting/common/alert';
 import { CallAPIOptions } from '../../../../../../../src/core/server';
 import { Filter } from '../../../../../../../src/plugins/data/server';
-import { IRuleStatusAttributes } from './rules/types';
+import { IRuleStatusAttributes, Throttle } from './rules/types';
 
 export type PartialFilter = Partial<Filter>;
 
@@ -51,7 +51,7 @@ export interface RuleAlertParams {
   threat: ThreatParams[] | undefined | null;
   type: 'query' | 'saved_query';
   version: number;
-  throttle: 'no_actions' | 'rule' | '1h' | '1d' | '7d' | undefined | null;
+  throttle: Throttle | undefined;
 }
 
 export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval' | 'tags'>;

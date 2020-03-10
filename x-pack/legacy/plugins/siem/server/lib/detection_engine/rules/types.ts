@@ -195,3 +195,5 @@ export const isRuleStatusFindTypes = (
 ): obj is Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>> => {
   return obj ? obj.every(ruleStatus => isRuleStatusFindType(ruleStatus)) : false;
 };
+
+export type Throttle = 'no_actions' | 'rule' | '1h' | '1d' | '7d' | null;

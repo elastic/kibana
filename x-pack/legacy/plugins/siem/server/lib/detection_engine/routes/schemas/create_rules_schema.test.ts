@@ -1239,7 +1239,7 @@ describe('create rules schema', () => {
         language: 'kuery',
         max_signals: 1,
         version: 1,
-        throttle: '1w',
+        throttle: '7d',
       }).error.message
     ).toEqual(
       'child "throttle" fails because ["throttle" must be one of [no_actions, rule, 1h, 1d, 7d]]'
