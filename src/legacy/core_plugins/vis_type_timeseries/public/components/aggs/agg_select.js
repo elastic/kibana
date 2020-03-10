@@ -115,6 +115,12 @@ const metricAggs = [
     }),
     value: 'variance',
   },
+  {
+    label: i18n.translate('visTypeTimeseries.aggSelect.metricsAggs.rateLabel', {
+      defaultMessage: 'Rate',
+    }),
+    value: 'rate',
+  },
 ];
 
 const pipelineAggs = [

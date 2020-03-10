@@ -70,6 +70,11 @@ export function calculateLabel(metric, metrics) {
       defaultMessage: 'Filter Ratio',
     });
   }
+  if (metric.type === 'rate') {
+    return i18n.translate('visTypeTimeseries.calculateLabel.rateLabel', {
+      defaultMessage: 'Rate',
+    });
+  }
   if (metric.type === 'static') {
     return i18n.translate('visTypeTimeseries.calculateLabel.staticValueLabel', {
       defaultMessage: 'Static Value of {metricValue}',

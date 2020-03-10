@@ -17,26 +17,19 @@
  * under the License.
  */
 
-import { pivot } from './pivot';
-import { query } from './query';
-import { splitByEverything } from './split_by_everything';
-import { splitByTerms } from './split_by_terms';
-import { dateHistogram } from './date_histogram';
-import { metricBuckets } from './metric_buckets';
-import { siblingBuckets } from './sibling_buckets';
-import { ratios as filterRatios } from './filter_ratios';
-import { normalizeQuery } from './normalize_query';
-import { rate } from './rate';
+import { getBucketSize } from '../../helpers/get_bucket_size';
+import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
+import { calculateAggRoot } from './calculate_agg_root';
+import { createRate, filter } from '../series/rate';
 
-export const processors = [
-  query,
-  pivot,
-  splitByTerms,
-  splitByEverything,
-  dateHistogram,
-  metricBuckets,
-  siblingBuckets,
-  filterRatios,
-  rate,
-  normalizeQuery,
-];
+export function rate(req, panel, esQueryConfig, indexPatternObject) {
+  return next => doc => {
+    const { interval } = getIntervalAndTimefield(panel, {}, indexPatternObject);
+    const { intervalString } = getBucketSize(req, interval);
+    panel.series.forEach(column => {
+      const aggRoot = calculateAggRoot(doc, column);
+      column.metrics.filter(filter).forEach(createRate(doc, intervalString, aggRoot));
+    });
+    return next(doc);
+  };
+}
