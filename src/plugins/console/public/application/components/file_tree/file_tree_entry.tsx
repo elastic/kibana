@@ -74,7 +74,9 @@ export const FileTreeEntry: FunctionComponent<Props> = ({
           className="conApp__fileTree__entry__nameInput"
           inputRef={(ref: HTMLInputElement) => ref?.focus()}
           compressed
-          onBlur={() => handleSubmit()}
+          onBlur={() => {
+            handleSubmit();
+          }}
           onChange={event => {
             setNameValue(event.target.value);
           }}
@@ -95,6 +97,7 @@ export const FileTreeEntry: FunctionComponent<Props> = ({
         size="s"
       >
         <span
+          data-test-subj={`consoleFileNameLabel-${name}`}
           tabIndex={0}
           onKeyDown={event => {
             if (event.keyCode === 13 /* Enter */) {
@@ -129,6 +132,7 @@ export const FileTreeEntry: FunctionComponent<Props> = ({
           {canEdit && (
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
+                data-test-subj={`consoleEditFileButton-${name}`}
                 tabIndex={0}
                 aria-label={i18n.translate('console.fileTree.editButtonLabel', {
                   defaultMessage: 'Edit {ariaLabel}',

@@ -24,12 +24,23 @@ import { ReactWrapper } from 'enzyme';
 
 export const createHelpers = (component: ReactWrapper) => {
   return {
-    createFile: async () => {
+    createTestFile: async () => {
       (findTestSubject(component, 'consoleCreateFileButton') as ReactWrapper).simulate('click');
       const textInput = component.find('.conAppFileNameTextField').last();
       textInput.simulate('change', { target: { value: 'test' } });
       await act(async () => {
         component.find('form').simulate('submit');
+      });
+    },
+
+    editFile: async (oldName: string, newName: string) => {
+      (findTestSubject(component, `consoleEditFileButton-${oldName}`) as ReactWrapper).simulate(
+        'click'
+      );
+      const textInput = component.find('.conApp__fileTree__entry__nameInput').last();
+      textInput.simulate('change', { target: { value: newName } });
+      await act(async () => {
+        textInput.simulate('blur');
       });
     },
   };

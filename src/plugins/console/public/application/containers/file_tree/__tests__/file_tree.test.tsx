@@ -16,9 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import '../../../models/legacy_core_editor/legacy_core_editor.test.mocks';
+// @ts-ignore
+import { findTestSubject } from '@elastic/eui/lib/test';
 import React from 'react';
 import { mount } from 'enzyme';
+
+import { FileTreeEntry } from '../../../components/file_tree/file_tree_entry';
 
 import { serviceContextMock } from '../../../contexts/services_context.mock';
 import {
@@ -38,6 +43,10 @@ describe('File Tree', () => {
     serviceContext = serviceContextMock.create();
   });
 
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   const doMount = () =>
     mount(
       <ServicesContextProvider value={serviceContext}>
@@ -52,15 +61,60 @@ describe('File Tree', () => {
   });
 
   it('creates a new file', async () => {
+    (serviceContext.services.objectStorageClient.text.create as jest.Mock)
+      .mockResolvedValueOnce({
+        id: 'test',
+        name: 'test',
+      })
+      .mockResolvedValueOnce({
+        id: 'test2',
+        name: 'test2',
+      });
+
+    const component = doMount();
+
+    expect(component.find(FileTreeEntry).length).toBe(0);
+
+    const { createTestFile } = createHelpers(component);
+    await createTestFile();
+
+    component.update();
+    expect(component.find(FileTreeEntry).length).toBe(1);
+
+    await createTestFile();
+
+    component.update();
+    expect(component.find(FileTreeEntry).length).toBe(2);
+  });
+
+  it('edits a file name', async () => {
+    const oldName = 'test';
+    const newName = 'test2';
     (serviceContext.services.objectStorageClient.text.create as jest.Mock).mockResolvedValue({
       id: 'test',
-      name: 'test',
+      name: oldName,
     });
+    (serviceContext.services.objectStorageClient.text.update as jest.Mock).mockResolvedValue({
+      id: 'test',
+      name: newName,
+    });
+
     const component = doMount();
-    expect(component.exists('.conApp__fileTree__entry')).toBe(false);
-    const { createFile } = createHelpers(component);
-    await createFile();
+
+    expect(component.find(FileTreeEntry).length).toBe(0);
+
+    const { createTestFile, editFile } = createHelpers(component);
+    await createTestFile();
     component.update();
-    expect(component.exists('.conApp__fileTree__entry')).toBe(true);
+
+    await editFile(oldName, newName);
+    component.update();
+
+    expect(component.find(FileTreeEntry).length).toBe(1);
+    expect(findTestSubject(component, `consoleFileNameLabel-${newName}`).text()).toBe(newName);
   });
+
+  it('deletes a file', async () => {});
+
+  it('shows errors', async () => {});
 });
