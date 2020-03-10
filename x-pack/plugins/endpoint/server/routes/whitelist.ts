@@ -7,11 +7,14 @@
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { SearchResponse } from 'elasticsearch';
-import { i18n } from '@kbn/i18n';
+import { createHash } from 'crypto';
+
+import lzma from 'lzma-native';
+import { WhitelistRule, WhitelistSet } from '../../common/types';
 import { EndpointAppContext } from '../types';
-import { WhitelistRule } from '../../common/types';
 
 const whitelistIdx = 'whitelist'; // TODO: change this
+let whitelistArtifactCache: Buffer = Buffer.from([]);
 
 /**
  * Registers the whitelist routes for the API
@@ -26,14 +29,31 @@ export function registerWhitelistRoutes(router: IRouter, endpointAppContext: End
     handleWhitelistGet
   );
 
-  const INVALID_UUID = "`alert_id` Must be a UUID.'";
+  router.get(
+    {
+      path: '/api/endpoint/manifest',
+      validate: {},
+      options: { authRequired: true },
+    },
+    handleWhitelistManifest
+  );
+
+  router.get(
+    {
+      path: '/api/endpoint/whitelist/download/{id}',
+      validate: {},
+      options: { authRequired: true },
+    },
+    handleWhitelistDownload // TODO
+  );
+
   router.post(
     {
       path: '/api/endpoint/whitelist',
       validate: {
         body: schema.object({
           comment: schema.maybe(schema.string()), // Optional comment explaining reason for whitelist
-          alert_id: schema.string(), // TODO: add beter validation when alert_id format is determined
+          event_types: schema.arrayOf(schema.string()),
           file_path: schema.maybe(schema.string()),
           signer: schema.maybe(schema.string()),
           sha256: schema.maybe(schema.string()),
@@ -51,12 +71,10 @@ export function registerWhitelistRoutes(router: IRouter, endpointAppContext: End
  */
 async function handleWhitelistPost(context, req, res) {
   try {
-    // TODO check if one of whitelist fields exists
-    const alertId: string = req.body.alert_id;
-
+    const eventTypes: string[] = req.body.eventTypes;
     const whitelistAttributeMap: Record<string, string> = {
       file_path: 'malware.file.path',
-      process_signer: 'actingProcess.file.signer',
+      acting_process_path: 'actingProcess.file.path',
       signer: 'malware.file.signer',
       sha256: 'malware.file.hashes.sha256',
     };
@@ -66,7 +84,7 @@ async function handleWhitelistPost(context, req, res) {
       if (req.body[k]) {
         newRules.push({
           comment: req.body.comment || '',
-          eventTypes: [], // TODO grab the alert and get eventTypes from alert details API
+          eventTypes,
           whitelistRuleType: 'simple',
           whitelistRule: {
             type: 'equality',
@@ -86,20 +104,9 @@ async function handleWhitelistPost(context, req, res) {
     if (errors) {
       return res.internalError({ error: 'unable to create whitelist rule.' });
     } else {
+      await hydrateWhitelistCache(context);
       return res.ok({ body: newRules });
     }
-  } catch (err) {
-    return res.internalError({ body: err });
-  }
-}
-
-/**
- * Handles the GET request for whitelist retrieval
- */
-async function handleWhitelistGet(context, req, res) {
-  try {
-    const whitelist: WhitelistRule[] = await getWhitelist(context);
-    return res.ok({ body: whitelist });
   } catch (err) {
     return res.internalError({ body: err });
   }
@@ -129,27 +136,109 @@ async function addWhitelistRule(ctx, whitelistRules: WhitelistRule[]): Promise<b
 }
 
 /**
+ * Handles the GET request for whitelist retrieval
+ */
+async function handleWhitelistGet(context, req, res) {
+  try {
+    const whitelist: WhitelistSet = await getWhitelist(context);
+    return res.ok({ body: whitelist });
+  } catch (err) {
+    return res.internalError({ body: err });
+  }
+}
+
+/**
  * Retrieve the global whitelist
  * @param ctx App context
  */
-async function getWhitelist(ctx): Promise<WhitelistRule[]> {
+async function getWhitelist(ctx): Promise<WhitelistSet> {
   const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser('search', {
     index: whitelistIdx,
     body: {},
+    size: 1000, // TODO
   })) as SearchResponse<WhitelistRule>;
 
   const resp: WhitelistRule[] = [];
   response.hits.hits.forEach(hit => {
-    resp.push(hit._source);
+    const whitelist = hit._source;
+    whitelist.id = hit._id;
+    resp.push(whitelist);
   });
 
-  return resp;
+  return { entries: resp };
 }
 
 /**
- * Determines whether a given string a valid UUID
- * @param str string to validate
+ * Handles the GET request for whitelist manifest
  */
-function validateUUID(str: string): boolean {
-  return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(str);
+async function handleWhitelistManifest(context, req, res) {
+  try {
+    const manifest = await getWhitelistManifest(context);
+    return res.ok({ body: manifest });
+  } catch (err) {
+    return res.internalError({ body: err });
+  }
+}
+
+/**
+ * Creates the manifest for the whitelist
+ */
+async function getWhitelistManifest(ctx) {
+  if (whitelistArtifactCache.length === 0) {
+    hydrateWhitelistCache(ctx);
+  }
+  const hash = createHash('sha256')
+    .update(whitelistArtifactCache.toString('utf8'), 'utf8')
+    .digest('hex');
+
+  const manifest = {
+    schemaVersion: '1.0.0',
+    manifestVersion: '1.0.0',
+    artifacts: {
+      'global-whitelist': {
+        url: `api/endpoint/whitelist/download/${hash}`,
+        sha256: hash,
+        size: whitelistArtifactCache.byteLength,
+        encoding: 'xz',
+      },
+    },
+  };
+  return manifest;
+}
+
+/**
+ * Compresses the whitelist and puts it into the in memory cache
+ */
+function cacheWhitelistArtifact(ctx, whitelist: WhitelistSet) {
+  // TODO time and log
+  lzma.compress(JSON.stringify(whitelist), (res: Buffer) => {
+    whitelistArtifactCache = res;
+  });
+}
+
+/**
+ * Hydrate the in memory whitelist cache
+ */
+function hydrateWhitelistCache(ctx) {
+  getWhitelist(ctx)
+    .then((wl: WhitelistSet) => {
+      cacheWhitelistArtifact(ctx, wl);
+    })
+    .catch(e => {
+      console.log(e);
+    });
+}
+
+/**
+ * Handles the GET request for downloading the whitelist
+ */
+async function handleWhitelistDownload(context, req, res) {
+  try {
+    if (whitelistArtifactCache.length === 0) {
+      hydrateWhitelistCache(context);
+    }
+    return res.ok({ body: whitelistArtifactCache }); // TODO
+  } catch (err) {
+    return res.internalError({ body: err });
+  }
 }

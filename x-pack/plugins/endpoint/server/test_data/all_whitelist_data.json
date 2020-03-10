@@ -15,7 +15,7 @@
       "max_score" : 1.0,
       "hits" : [
         {
-          "_index" : "whitelist-index",
+          "_index" : "whitelist",
           "_id" : "Kfg_iHAB-gfa6svCx2sL",
           "_score" : 1.0,
           "_source" : {
@@ -30,7 +30,7 @@
           }
         },
         {
-          "_index" : "whitelist-index",
+          "_index" : "whitelist",
           "_id" : "Kvg_iHAB-gfa6svCx2sM",
           "_score" : 1.0,
           "_source" : {

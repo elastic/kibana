@@ -225,6 +225,7 @@ export interface EndpointEvent {
  * https://github.com/elastic/endpoint-dev/issues/6532
  */
 export interface WhitelistRule {
+  id?: string; // WhitelistRules are given an id from ES
   comment: string;
   eventTypes: string[];
   whitelistRuleType: 'simple';
@@ -233,6 +234,10 @@ export interface WhitelistRule {
     value: string;
     applyTo: string;
   };
+}
+
+export interface WhitelistSet {
+  entries: WhitelistRule[];
 }
 
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;

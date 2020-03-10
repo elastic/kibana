@@ -18,7 +18,7 @@ import {
   httpServiceMock,
   loggingServiceMock,
 } from '../../../../../src/core/server/mocks';
-import { WhitelistRule } from '../../common/types';
+import { WhitelistRule, WhitelistSet } from '../../common/types';
 import { SearchResponse } from 'elasticsearch';
 import { registerWhitelistRoutes } from './whitelist';
 import { EndpointConfigSchema } from '../config';
@@ -85,7 +85,7 @@ describe('test whitelist route', () => {
     // Expect that this route requires authentication
     expect(routeConfig.options).toEqual({ authRequired: true });
     expect(mockResponse.ok).toBeCalled();
-    const resp = mockResponse.ok.mock.calls[0][0]?.body as WhitelistRule;
+    const resp = mockResponse.ok.mock.calls[0][0]?.body as WhitelistSet;
 
     // Excpect that one rule was created and that it is well formed
     expect(resp.length).toEqual(1);
@@ -220,7 +220,7 @@ describe('test whitelist route', () => {
       mockResponse
     );
 
-    // Expect that the ES client calls the `bulk` API
+    // Expect that the ES client does not call the `bulk` API
     expect(mockScopedClient.callAsCurrentUser).not.toBeCalled();
 
     // Expect that this route requires authentication
@@ -244,6 +244,8 @@ describe('test whitelist route', () => {
     [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/whitelist')
     )!;
+
+    // TODO mock other ES calls
 
     await routeHandler(
       ({
