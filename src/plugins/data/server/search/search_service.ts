@@ -60,6 +60,23 @@ export class SearchService implements Plugin<ISearchSetup, void> {
       name: 'search',
       hidden: false,
       namespaceAgnostic: false,
+      management: {
+        icon: 'discoverApp',
+        defaultSearchField: 'title',
+        importableAndExportable: true,
+        getTitle(obj) {
+          return obj.attributes.title;
+        },
+        getEditUrl(obj) {
+          return `/management/kibana/objects/savedSearches/${encodeURIComponent(obj.id)}`;
+        },
+        getInAppUrl(obj) {
+          return {
+            path: `/app/kibana#/discover/${encodeURIComponent(obj.id)}`,
+            uiCapabilitiesPath: 'discover.show',
+          };
+        },
+      },
       mappings: {
         properties: {
           columns: { type: 'keyword' },

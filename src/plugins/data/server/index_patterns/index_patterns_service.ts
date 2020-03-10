@@ -27,6 +27,23 @@ export class IndexPatternsService implements Plugin<void> {
       name: 'index-pattern',
       hidden: false,
       namespaceAgnostic: false,
+      management: {
+        icon: 'indexPatternApp',
+        defaultSearchField: 'title',
+        importableAndExportable: true,
+        getTitle(obj) {
+          return obj.attributes.title;
+        },
+        getEditUrl(obj) {
+          return `/management/kibana/index_patterns/${encodeURIComponent(obj.id)}`;
+        },
+        getInAppUrl(obj) {
+          return {
+            path: `/app/kibana#/management/kibana/index_patterns/${encodeURIComponent(obj.id)}`,
+            uiCapabilitiesPath: 'management.kibana.index_patterns',
+          };
+        },
+      },
       mappings: {
         properties: {
           fieldFormatMap: { type: 'text' },

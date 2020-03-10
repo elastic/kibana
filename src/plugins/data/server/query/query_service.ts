@@ -25,6 +25,20 @@ export class QueryService implements Plugin<void> {
       name: 'query',
       hidden: false,
       namespaceAgnostic: false,
+      management: {
+        icon: 'search',
+        defaultSearchField: 'title',
+        importableAndExportable: true,
+        getTitle(obj) {
+          return obj.attributes.title;
+        },
+        getInAppUrl(obj) {
+          return {
+            path: `/app/kibana#/discover?_a=(savedQuery:'${encodeURIComponent(obj.id)}')`,
+            uiCapabilitiesPath: 'discover.show',
+          };
+        },
+      },
       mappings: {
         properties: {
           title: { type: 'text' },

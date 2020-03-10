@@ -19,7 +19,6 @@
 
 import { resolve } from 'path';
 import { Legacy } from '../../../../kibana';
-import { SavedQuery } from '../../../plugins/data/public';
 
 // eslint-disable-next-line import/no-default-export
 export default function DataPlugin(kibana: any) {
@@ -36,22 +35,6 @@ export default function DataPlugin(kibana: any) {
     uiExports: {
       interpreter: ['plugins/data/search/expressions/boot'],
       injectDefaultVars: () => ({}),
-      savedObjectsManagement: {
-        query: {
-          icon: 'search',
-          defaultSearchField: 'title',
-          isImportableAndExportable: true,
-          getTitle(obj: SavedQuery) {
-            return obj.attributes.title;
-          },
-          getInAppUrl(obj: SavedQuery) {
-            return {
-              path: `/app/kibana#/discover?_a=(savedQuery:'${encodeURIComponent(obj.id)}')`,
-              uiCapabilitiesPath: 'discover.show',
-            };
-          },
-        },
-      },
     },
   };
 

@@ -45,6 +45,23 @@ export class VisualizationsPlugin
       name: 'visualization',
       hidden: false,
       namespaceAgnostic: false,
+      management: {
+        icon: 'visualizeApp',
+        defaultSearchField: 'title',
+        importableAndExportable: true,
+        getTitle(obj) {
+          return obj.attributes.title;
+        },
+        getEditUrl(obj) {
+          return `/management/kibana/objects/savedVisualizations/${encodeURIComponent(obj.id)}`;
+        },
+        getInAppUrl(obj) {
+          return {
+            path: `/app/kibana#/visualize/edit/${encodeURIComponent(obj.id)}`,
+            uiCapabilitiesPath: 'visualize.show',
+          };
+        },
+      },
       mappings: {
         properties: {
           description: { type: 'text' },
