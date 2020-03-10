@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './get_index_error';
-export * from './post_index_error';
-export * from './privilege_user_error';
+export { PivotPreview } from './pivot_preview';

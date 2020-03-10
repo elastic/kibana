@@ -5169,6 +5169,11 @@
     "@types/tough-cookie" "*"
     form-data "^2.5.0"
 
+"@types/seedrandom@>=2.0.0 <4.0.0":
+  version "2.4.28"
+  resolved "https://registry.yarnpkg.com/@types/seedrandom/-/seedrandom-2.4.28.tgz#9ce8fa048c1e8c85cb71d7fe4d704e000226036f"
+  integrity sha512-SMA+fUwULwK7sd/ZJicUztiPs8F1yCPwF3O23Z9uQ32ME5Ha0NmDK9+QTsYE4O2tHXChzXomSWWeIhCnoN1LqA==
+
 "@types/selenium-webdriver@^4.0.5":
   version "4.0.5"
   resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.0.5.tgz#23041a4948c82daf2df9836e4d2358fec10d3e24"
