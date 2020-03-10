@@ -5,6 +5,7 @@
  */
 
 import { isLegacyEvent, ResolverEvent } from '../../../../common/types';
+import { ResolverProcessType } from '../types';
 
 /**
  * Returns true if the process's eventType is either 'processCreated' or 'processRan'.
@@ -25,7 +26,7 @@ function isValue(field: string | string[], value: string) {
 /**
  * Returns a custom event type for a process event based on the event's metadata.
  */
-export function eventType(passedEvent: ResolverEvent) {
+export function eventType(passedEvent: ResolverEvent): ResolverProcessType {
   if (isLegacyEvent(passedEvent)) {
     const {
       endgame: { event_type_full: type, event_subtype_full: subType },
@@ -44,7 +45,6 @@ export function eventType(passedEvent: ResolverEvent) {
     } else if (type === 'alert_event') {
       return 'processCausedAlert';
     }
-    return 'unknownEvent';
   } else {
     const {
       event: { type, category, kind },
@@ -63,12 +63,13 @@ export function eventType(passedEvent: ResolverEvent) {
       return 'processCausedAlert';
     }
   }
+  return 'unknownEvent';
 }
 
 /**
  * Returns the process event's pid
  */
-export function uniquePidForProcess(event: ResolverEvent) {
+export function uniquePidForProcess(event: ResolverEvent): string {
   if (isLegacyEvent(event)) {
     return String(event.endgame.unique_pid);
   } else {
@@ -79,7 +80,7 @@ export function uniquePidForProcess(event: ResolverEvent) {
 /**
  * Returns the process event's parent pid
  */
-export function uniqueParentPidForProcess(event: ResolverEvent) {
+export function uniqueParentPidForProcess(event: ResolverEvent): string | undefined {
   if (isLegacyEvent(event)) {
     return String(event.endgame.unique_ppid);
   } else {
