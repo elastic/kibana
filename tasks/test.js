@@ -72,7 +72,7 @@ module.exports = function(grunt) {
         !grunt.option('quick') && 'run:eslint',
         !grunt.option('quick') && 'run:sasslint',
         !grunt.option('quick') && 'run:checkTsProjects',
-        !grunt.option('quick') && 'run:checkCoreApiChanges',
+        !grunt.option('quick') && 'run:checkDocApiChanges',
         !grunt.option('quick') && 'run:typeCheck',
         !grunt.option('quick') && 'run:i18nCheck',
         'run:checkFileCasing',
