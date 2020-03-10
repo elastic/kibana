@@ -9,5 +9,5 @@ Returns registered uiSettings values [UiSettingsParams](./kibana-plugin-server.u
 <b>Signature:</b>
 
 ```typescript
-getRegistered: () => Readonly<Record<string, UiSettingsParams>>;
+getRegistered: () => Readonly<Record<string, Omit<UiSettingsParams, 'schema'>>>;
 ```

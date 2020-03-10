@@ -9,7 +9,7 @@ UiSettings parameters defined by the plugins.
 <b>Signature:</b>
 
 ```typescript
-export interface UiSettingsParams 
+export interface UiSettingsParams<T = unknown> 
 ```
 
 ## Properties
@@ -24,7 +24,8 @@ export interface UiSettingsParams
 |  [options](./kibana-plugin-public.uisettingsparams.options.md) | <code>string[]</code> | array of permitted values for this setting |
 |  [readonly](./kibana-plugin-public.uisettingsparams.readonly.md) | <code>boolean</code> | a flag indicating that value cannot be changed |
 |  [requiresPageReload](./kibana-plugin-public.uisettingsparams.requirespagereload.md) | <code>boolean</code> | a flag indicating whether new value applying requires page reloading |
+|  [schema](./kibana-plugin-public.uisettingsparams.schema.md) | <code>Type&lt;T&gt;</code> |  |
 |  [type](./kibana-plugin-public.uisettingsparams.type.md) | <code>UiSettingsType</code> | defines a type of UI element [UiSettingsType](./kibana-plugin-public.uisettingstype.md) |
 |  [validation](./kibana-plugin-public.uisettingsparams.validation.md) | <code>ImageValidation &#124; StringValidation</code> |  |
-|  [value](./kibana-plugin-public.uisettingsparams.value.md) | <code>SavedObjectAttribute</code> | default value to fall back to if a user doesn't provide any |
+|  [value](./kibana-plugin-public.uisettingsparams.value.md) | <code>T</code> | default value to fall back to if a user doesn't provide any |
 

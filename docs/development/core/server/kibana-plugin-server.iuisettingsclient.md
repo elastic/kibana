@@ -18,7 +18,7 @@ export interface IUiSettingsClient
 |  --- | --- | --- |
 |  [get](./kibana-plugin-server.iuisettingsclient.get.md) | <code>&lt;T = any&gt;(key: string) =&gt; Promise&lt;T&gt;</code> | Retrieves uiSettings values set by the user with fallbacks to default values if not specified. |
 |  [getAll](./kibana-plugin-server.iuisettingsclient.getall.md) | <code>&lt;T = any&gt;() =&gt; Promise&lt;Record&lt;string, T&gt;&gt;</code> | Retrieves a set of all uiSettings values set by the user with fallbacks to default values if not specified. |
-|  [getRegistered](./kibana-plugin-server.iuisettingsclient.getregistered.md) | <code>() =&gt; Readonly&lt;Record&lt;string, UiSettingsParams&gt;&gt;</code> | Returns registered uiSettings values [UiSettingsParams](./kibana-plugin-server.uisettingsparams.md) |
+|  [getRegistered](./kibana-plugin-server.iuisettingsclient.getregistered.md) | <code>() =&gt; Readonly&lt;Record&lt;string, Omit&lt;UiSettingsParams, 'schema'&gt;&gt;&gt;</code> | Returns registered uiSettings values [UiSettingsParams](./kibana-plugin-server.uisettingsparams.md) |
 |  [getUserProvided](./kibana-plugin-server.iuisettingsclient.getuserprovided.md) | <code>&lt;T = any&gt;() =&gt; Promise&lt;Record&lt;string, UserProvidedValues&lt;T&gt;&gt;&gt;</code> | Retrieves a set of all uiSettings values set by the user. |
 |  [isOverridden](./kibana-plugin-server.iuisettingsclient.isoverridden.md) | <code>(key: string) =&gt; boolean</code> | Shows whether the uiSettings value set by the user. |
 |  [remove](./kibana-plugin-server.iuisettingsclient.remove.md) | <code>(key: string) =&gt; Promise&lt;void&gt;</code> | Removes uiSettings value by key. |

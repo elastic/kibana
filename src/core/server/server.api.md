@@ -982,7 +982,7 @@ export interface IScopedRenderingClient {
 export interface IUiSettingsClient {
     get: <T = any>(key: string) => Promise<T>;
     getAll: <T = any>() => Promise<Record<string, T>>;
-    getRegistered: () => Readonly<Record<string, UiSettingsParams>>;
+    getRegistered: () => Readonly<Record<string, Omit<UiSettingsParams, 'schema'>>>;
     getUserProvided: <T = any>() => Promise<Record<string, UserProvidedValues<T>>>;
     isOverridden: (key: string) => boolean;
     remove: (key: string) => Promise<void>;
@@ -2251,7 +2251,7 @@ export interface StringValidationRegexString {
 }
 
 // @public
-export interface UiSettingsParams {
+export interface UiSettingsParams<T = unknown> {
     category?: string[];
     deprecation?: DeprecationSettings;
     description?: string;
@@ -2260,10 +2260,12 @@ export interface UiSettingsParams {
     options?: string[];
     readonly?: boolean;
     requiresPageReload?: boolean;
+    // (undocumented)
+    schema?: Type<T>;
     type?: UiSettingsType;
     // (undocumented)
     validation?: ImageValidation | StringValidation;
-    value?: SavedObjectAttribute;
+    value?: T;
 }
 
 // @public (undocumented)
