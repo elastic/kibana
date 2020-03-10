@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { API_ROUTE_EXECUTE } from '../../common/constants';
+import './styles/_index.scss';
+import { PluginInitializerContext } from 'src/core/public';
+import { PainlessLabUIPlugin } from './plugin';
 
-export async function executeCode(http: any, payload: Record<string, any>) {
-  return await http.post(API_ROUTE_EXECUTE, {
-    body: JSON.stringify(payload),
-  });
+export function plugin(ctx: PluginInitializerContext) {
+  return new PainlessLabUIPlugin(ctx);
 }

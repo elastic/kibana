@@ -5,21 +5,34 @@
  */
 
 import React from 'react';
-import { CoreStart } from 'kibana/public';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { CoreSetup, CoreStart } from 'kibana/public';
 import { Main } from './components/main';
 import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
 
-export function renderApp(element: any, { http, i18n, uiSettings }: CoreStart) {
+interface AppDependencies {
+  http: CoreSetup['http'];
+  I18nContext: CoreStart['i18n']['Context'];
+  uiSettings: CoreSetup['uiSettings'];
+}
+
+export function renderApp(
+  element: HTMLElement | null,
+  { http, I18nContext, uiSettings }: AppDependencies
+) {
+  if (!element) {
+    return () => undefined;
+  }
+
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
     uiSettings,
   });
   render(
-    <i18n.Context>
+    <I18nContext>
       <KibanaReactContextProvider>
         <Main http={http} />
       </KibanaReactContextProvider>
-    </i18n.Context>,
+    </I18nContext>,
     element
   );
   return () => unmountComponentAtNode(element);

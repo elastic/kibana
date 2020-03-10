@@ -4,12 +4,13 @@
   "kibanaVersion": "kibana",
   "requiredPlugins": [
     "devTools",
-    "licensing"
+    "licensing",
+    "home"
   ],
   "configPath": [
     "xpack",
     "painless_lab"
   ],
   "server": true,
-  "ui": false
+  "ui": true
 }

@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const PLUGIN_ID = 'painlessLab';
+import { API_BASE_PATH } from '../../../common/constants';
 
-export const API_ROUTE_EXECUTE = '/api/painless_lab/execute';
+export async function executeCode(http: any, payload: Record<string, any>) {
+  return await http.post(`${API_BASE_PATH}/execute`, {
+    body: JSON.stringify(payload),
+  });
+}
