@@ -15,7 +15,6 @@ import {
 import { PluginsSetup, RouteInitialization } from './types';
 import { PLUGIN_ID } from '../../../legacy/plugins/ml/common/constants/app';
 
-// @ts-ignore: could not find declaration file for module
 import { elasticsearchJsPlugin } from './client/elasticsearch_ml';
 import { makeMlUsageCollector } from './lib/ml_telemetry';
 import { initMlServerLog } from './client/log';

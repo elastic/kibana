@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const elasticsearchJsPlugin = (Client, config, components) => {
+export const elasticsearchJsPlugin = (Client: any, config: any, components: any) => {
   const ca = components.clientAction.factory;
 
   Client.prototype.ml = components.clientAction.namespaceFactory();
