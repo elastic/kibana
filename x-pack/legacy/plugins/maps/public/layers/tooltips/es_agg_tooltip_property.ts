@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ESTooltipProperty } from './es_tooltip_property';
 
-import { npSetup } from 'ui/new_platform';
-import { renderFunctions } from '../canvas_plugin_src/renderers';
-
-renderFunctions.forEach(npSetup.plugins.expressions.registerRenderer);
-
-export default renderFunctions;
+export class ESAggTooltipProperty extends ESTooltipProperty {
+  isFilterable(): boolean {
+    return false;
+  }
+}

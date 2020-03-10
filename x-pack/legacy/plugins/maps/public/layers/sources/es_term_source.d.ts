@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { typesRegistry } from '../../../../../src/legacy/core_plugins/interpreter/public/registries';
-import { typeFunctions } from '../canvas_plugin_src/expression_types';
+import { IField } from '../fields/field';
+import { IESAggSource } from './es_agg_source';
 
-typeFunctions.forEach(r => {
-  typesRegistry.register(r);
-});
+export interface IESTermSource extends IESAggSource {
+  getTermField(): IField;
+}

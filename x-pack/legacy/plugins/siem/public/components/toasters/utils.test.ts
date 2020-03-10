@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isAnError, isToasterError, errorToToaster } from './error_to_toaster';
-import { ToasterErrors } from '../../../hooks/api/throw_if_not_ok';
+import { errorToToaster } from './utils';
+import { ToasterError } from './errors';
+
+const ApiError = class extends Error {
+  public body: {} = {};
+};
 
 describe('error_to_toaster', () => {
   let dispatchToaster = jest.fn();
@@ -15,8 +19,8 @@ describe('error_to_toaster', () => {
   });
 
   describe('#errorToToaster', () => {
-    test('adds a ToastError given multiple toaster errors', () => {
-      const error = new ToasterErrors(['some error 1', 'some error 2']);
+    test('dispatches an error toast given a ToasterError with multiple error messages', () => {
+      const error = new ToasterError(['some error 1', 'some error 2']);
       errorToToaster({ id: 'some-made-up-id', title: 'some title', error, dispatchToaster });
       expect(dispatchToaster.mock.calls[0]).toEqual([
         {
@@ -32,8 +36,8 @@ describe('error_to_toaster', () => {
       ]);
     });
 
-    test('adds a ToastError given a single toaster errors', () => {
-      const error = new ToasterErrors(['some error 1']);
+    test('dispatches an error toast given a ToasterError with a single error message', () => {
+      const error = new ToasterError(['some error 1']);
       errorToToaster({ id: 'some-made-up-id', title: 'some title', error, dispatchToaster });
       expect(dispatchToaster.mock.calls[0]).toEqual([
         {
@@ -49,7 +53,44 @@ describe('error_to_toaster', () => {
       ]);
     });
 
-    test('adds a regular Error given a single error', () => {
+    test('dispatches an error toast given an ApiError with a message', () => {
+      const error = new ApiError('Internal Server Error');
+      error.body = { message: 'something bad happened', status_code: 500 };
+
+      errorToToaster({ id: 'some-made-up-id', title: 'some title', error, dispatchToaster });
+      expect(dispatchToaster.mock.calls[0]).toEqual([
+        {
+          toast: {
+            color: 'danger',
+            errors: ['something bad happened'],
+            iconType: 'alert',
+            id: 'some-made-up-id',
+            title: 'some title',
+          },
+          type: 'addToaster',
+        },
+      ]);
+    });
+
+    test('dispatches an error toast given an ApiError with no message', () => {
+      const error = new ApiError('Internal Server Error');
+
+      errorToToaster({ id: 'some-made-up-id', title: 'some title', error, dispatchToaster });
+      expect(dispatchToaster.mock.calls[0]).toEqual([
+        {
+          toast: {
+            color: 'danger',
+            errors: ['Internal Server Error'],
+            iconType: 'alert',
+            id: 'some-made-up-id',
+            title: 'some title',
+          },
+          type: 'addToaster',
+        },
+      ]);
+    });
+
+    test('dispatches an error toast given a standard Error', () => {
       const error = new Error('some error 1');
       errorToToaster({ id: 'some-made-up-id', title: 'some title', error, dispatchToaster });
       expect(dispatchToaster.mock.calls[0]).toEqual([
@@ -81,46 +122,6 @@ describe('error_to_toaster', () => {
           type: 'addToaster',
         },
       ]);
-    });
-  });
-
-  describe('#isAnError', () => {
-    test('returns true if given an error object', () => {
-      const error = new Error('some error');
-      expect(isAnError(error)).toEqual(true);
-    });
-
-    test('returns false if given a regular object', () => {
-      expect(isAnError({})).toEqual(false);
-    });
-
-    test('returns false if given a string', () => {
-      expect(isAnError('som string')).toEqual(false);
-    });
-
-    test('returns true if given a toaster error', () => {
-      const error = new ToasterErrors(['some error']);
-      expect(isAnError(error)).toEqual(true);
-    });
-  });
-
-  describe('#isToasterError', () => {
-    test('returns true if given a ToasterErrors object', () => {
-      const error = new ToasterErrors(['some error']);
-      expect(isToasterError(error)).toEqual(true);
-    });
-
-    test('returns false if given a regular object', () => {
-      expect(isToasterError({})).toEqual(false);
-    });
-
-    test('returns false if given a string', () => {
-      expect(isToasterError('som string')).toEqual(false);
-    });
-
-    test('returns false if given a regular error', () => {
-      const error = new Error('some error');
-      expect(isToasterError(error)).toEqual(false);
     });
   });
 });
