@@ -8,7 +8,7 @@ import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
 
 export const transactionSampleRateRt = new t.Type<string, string, unknown>(
-  'TransactionSampleRate',
+  'transactionSampleRate',
   t.string.is,
   (input, context) => {
     return either.chain(t.string.validate(input, context), inputAsString => {
@@ -18,7 +18,9 @@ export const transactionSampleRateRt = new t.Type<string, string, unknown>(
       const isValid =
         inputAsFloat >= 0 && inputAsFloat <= 1 && maxThreeDecimals;
 
-      return isValid ? t.success(inputAsString) : t.failure(input, context);
+      return isValid
+        ? t.success(inputAsString)
+        : t.failure(input, context, 'Number must be between 0 and 1');
     });
   },
   t.identity

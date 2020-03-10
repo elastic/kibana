@@ -12,11 +12,12 @@ import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiStat,
-  EuiButtonEmpty
+  EuiStat
 } from '@elastic/eui';
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { history } from '../../../../../../utils/history';
+import { AgentConfigurationIntake } from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/configuration_types';
 import {
   settingDefinitions,
   isValid
@@ -24,9 +25,9 @@ import {
 import { saveConfig } from './saveConfig';
 import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext';
 import { useUiTracker } from '../../../../../../../../../../plugins/observability/public';
-import { FormRow } from './FormRow';
+import { SettingFormRow } from './SettingFormRow';
 import { getOptionLabel } from '../../../../../../../../../../plugins/apm/common/agent_configuration_constants';
-import { NewConfig } from '../NewConfig';
+import { CancelButton } from '../CancelButton';
 
 export function SettingsPage({
   newConfig,
@@ -34,8 +35,8 @@ export function SettingsPage({
   isEditMode,
   onClickEdit
 }: {
-  newConfig: NewConfig;
-  setNewConfig: React.Dispatch<React.SetStateAction<NewConfig>>;
+  newConfig: AgentConfigurationIntake;
+  setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
   isEditMode: boolean;
   onClickEdit: () => void;
 }) {
@@ -68,6 +69,12 @@ export function SettingsPage({
     setIsSaving(true);
     await saveConfig({ config, isEditMode, toasts });
     setIsSaving(false);
+
+    // go back to overview
+    history.push({
+      pathname: '/settings/agent-configuration',
+      search: history.location.search
+    });
   };
 
   return (
@@ -82,7 +89,7 @@ export function SettingsPage({
         <EuiPanel paddingSize="m">
           <EuiTitle size="s">
             <h3>
-              {i18n.translate('xpack.apm.settings.agentConf.editConfigTitle', {
+              {i18n.translate('xpack.apm.agentConfig.editConfigTitle', {
                 defaultMessage: 'Choose service'
               })}
             </h3>
@@ -94,7 +101,7 @@ export function SettingsPage({
             <EuiFlexItem>
               <EuiStat
                 titleSize="xs"
-                title={newConfig.service.name}
+                title={getOptionLabel(newConfig.service.name)}
                 description="Service name"
               />
             </EuiFlexItem>
@@ -108,7 +115,7 @@ export function SettingsPage({
             <EuiFlexItem grow={false}>
               {!isEditMode && (
                 <EuiButton onClick={onClickEdit} iconType="pencil">
-                  {i18n.translate('xpack.apm.settings.agentConf.editButton', {
+                  {i18n.translate('xpack.apm.agentConfig.editButton', {
                     defaultMessage: 'Edit'
                   })}
                 </EuiButton>
@@ -123,7 +130,7 @@ export function SettingsPage({
         <EuiPanel paddingSize="m">
           <EuiTitle size="s">
             <h3>
-              {i18n.translate('xpack.apm.settings.agentConf.settings.title', {
+              {i18n.translate('xpack.apm.agentConfig.settings.title', {
                 defaultMessage: 'Core configuration options'
               })}
             </h3>
@@ -132,7 +139,7 @@ export function SettingsPage({
           <EuiSpacer size="m" />
 
           {settingDefinitions.map(setting => (
-            <FormRow
+            <SettingFormRow
               key={setting.key}
               setting={setting}
               value={newConfig.settings[setting.key]}
@@ -152,14 +159,8 @@ export function SettingsPage({
 
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty>
-                {i18n.translate(
-                  'xpack.apm.settings.agentConf.saveConfigurationButtonLabel',
-                  { defaultMessage: 'Cancel' }
-                )}
-              </EuiButtonEmpty>
+              <CancelButton />
             </EuiFlexItem>
-
             <EuiFlexItem grow={false}>
               <EuiButton
                 type="submit"
@@ -168,7 +169,7 @@ export function SettingsPage({
                 isDisabled={!isFormValid}
               >
                 {i18n.translate(
-                  'xpack.apm.settings.agentConf.saveConfigurationButtonLabel',
+                  'xpack.apm.agentConfig.settingsPage.saveButton',
                   { defaultMessage: 'Save' }
                 )}
               </EuiButton>

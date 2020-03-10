@@ -16,13 +16,13 @@ import {
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { useFetcher } from '../../../../hooks/useFetcher';
-import { AgentConfigurationList } from './AgentConfigurationList';
+import { AgentConfigurationList } from './List';
 import { useTrackPageview } from '../../../../../../../../plugins/observability/public';
 import { getAPMHref } from '../../../shared/Links/apm/APMLink';
 import { useLocation } from '../../../../hooks/useLocation';
 
 export function AgentConfigurations() {
-  const { data = [], status } = useFetcher(
+  const { refetch, data = [], status } = useFetcher(
     callApmApi =>
       callApmApi({ pathname: '/api/apm/settings/agent-configuration' }),
     [],
@@ -42,7 +42,7 @@ export function AgentConfigurations() {
             <EuiTitle>
               <h2>
                 {i18n.translate(
-                  'xpack.apm.settings.agentConf.configurationsPanelTitle',
+                  'xpack.apm.agentConfig.configurationsPanelTitle',
                   { defaultMessage: 'Agent remote configuration' }
                 )}
               </h2>
@@ -54,7 +54,7 @@ export function AgentConfigurations() {
 
         <EuiSpacer size="m" />
 
-        <AgentConfigurationList status={status} data={data} />
+        <AgentConfigurationList status={status} data={data} refetch={refetch} />
       </EuiPanel>
     </>
   );
@@ -68,10 +68,9 @@ function CreateConfigurationButton() {
       <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButton color="primary" fill iconType="plusInCircle" href={href}>
-            {i18n.translate(
-              'xpack.apm.settings.agentConf.createConfigButtonLabel',
-              { defaultMessage: 'Create configuration' }
-            )}
+            {i18n.translate('xpack.apm.agentConfig.createConfigButtonLabel', {
+              defaultMessage: 'Create configuration'
+            })}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

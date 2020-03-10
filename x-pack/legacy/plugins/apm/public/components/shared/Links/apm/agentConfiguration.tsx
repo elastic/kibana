@@ -5,22 +5,21 @@
  */
 
 import { getAPMHref } from './APMLink';
-import { fromQuery, toQuery } from '../url_helpers';
-import { Config } from '../../../app/Settings/AgentConfigurations';
+import { AgentConfigurationIntake } from '../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/configuration_types';
+import { history } from '../../../../utils/history';
 
 export function editAgentConfigurationHref(
-  search: string,
-  configService: Config['service']
+  configService: AgentConfigurationIntake['service']
 ) {
-  const nextSearch = fromQuery({
-    ...toQuery(search),
+  const { search } = history.location;
+  return getAPMHref('/settings/agent-configuration/edit', search, {
+    // @ts-ignore
     name: configService.name,
     environment: configService.environment
   });
-
-  return getAPMHref('/settings/agent-configuration/create', nextSearch);
 }
 
-export function createAgentConfigurationHref(search: string) {
-  return editAgentConfigurationHref(search, {});
+export function createAgentConfigurationHref() {
+  const { search } = history.location;
+  return getAPMHref('/settings/agent-configuration/create', search);
 }

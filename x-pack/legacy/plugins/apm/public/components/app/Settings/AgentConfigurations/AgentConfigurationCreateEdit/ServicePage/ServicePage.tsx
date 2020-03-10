@@ -10,23 +10,23 @@ import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
-  EuiButtonEmpty
+  EuiButton
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
+import { AgentConfigurationIntake } from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/configuration_types';
 import {
   omitAllOption,
   getOptionLabel
 } from '../../../../../../../../../../plugins/apm/common/agent_configuration_constants';
 import { useFetcher } from '../../../../../../hooks/useFetcher';
-import { NewConfig } from '../NewConfig';
 import { FormRowSelect } from './FormRowSelect';
+import { CancelButton } from '../CancelButton';
 
 interface Props {
-  newConfig: NewConfig;
-  setNewConfig: React.Dispatch<React.SetStateAction<NewConfig>>;
+  newConfig: AgentConfigurationIntake;
+  setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
   onClickNext: () => void;
 }
 
@@ -77,7 +77,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
   );
 
   const ALREADY_CONFIGURED_TRANSLATED = i18n.translate(
-    'xpack.apm.settings.agentConf.servicePage.alreadyConfiguredOption',
+    'xpack.apm.agentConfig.servicePage.alreadyConfiguredOption',
     { defaultMessage: 'already configured' }
   );
 
@@ -99,7 +99,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
     <EuiPanel paddingSize="m">
       <EuiTitle size="xs">
         <h3>
-          {i18n.translate('xpack.apm.settings.agentConf.servicePage.title', {
+          {i18n.translate('xpack.apm.agentConfig.servicePage.title', {
             defaultMessage: 'Choose Service'
           })}
         </h3>
@@ -111,11 +111,11 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       <FormRowSelect
         title="Service"
         description={i18n.translate(
-          'xpack.apm.settings.agentConf.servicePage.serviceNameSelectHelpText',
+          'xpack.apm.agentConfig.servicePage.serviceNameSelectHelpText',
           { defaultMessage: 'Choose the service you want to configure.' }
         )}
         fieldLabel={i18n.translate(
-          'xpack.apm.settings.agentConf.servicePage.serviceNameSelectLabel',
+          'xpack.apm.agentConfig.servicePage.serviceNameSelectLabel',
           { defaultMessage: 'Service Name' }
         )}
         isLoading={serviceNamesStatus === 'loading'}
@@ -136,14 +136,14 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       <FormRowSelect
         title="Environment"
         description={i18n.translate(
-          'xpack.apm.settings.agentConf.servicePage.serviceEnvironmentSelectHelpText',
+          'xpack.apm.agentConfig.servicePage.serviceEnvironmentSelectHelpText',
           {
             defaultMessage:
               'Only a single environment per configuration is supported.'
           }
         )}
         fieldLabel={i18n.translate(
-          'xpack.apm.settings.agentConf.servicePage.serviceEnvironmentSelectLabel',
+          'xpack.apm.agentConfig.servicePage.serviceEnvironmentSelectLabel',
           { defaultMessage: 'Service Environment' }
         )}
         isLoading={environmentStatus === 'loading'}
@@ -165,12 +165,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       <EuiFlexGroup justifyContent="flexEnd">
         {/* Cancel button */}
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty>
-            {i18n.translate(
-              'xpack.apm.settings.agentConf.saveConfigurationButtonLabel',
-              { defaultMessage: 'Cancel' }
-            )}
-          </EuiButtonEmpty>
+          <CancelButton />
         </EuiFlexItem>
 
         {/* Next button */}
@@ -187,7 +182,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
             }
           >
             {i18n.translate(
-              'xpack.apm.settings.agentConf.saveConfigurationButtonLabel',
+              'xpack.apm.agentConfig.saveConfigurationButtonLabel',
               { defaultMessage: 'Next step' }
             )}
           </EuiButton>

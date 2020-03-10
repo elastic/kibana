@@ -12,7 +12,7 @@ export const ALL_OPTION_VALUE = 'ALL_OPTION_VALUE';
 // Everything else should be returned verbatim
 export function getOptionLabel(value: string | undefined) {
   if (value === undefined || value === ALL_OPTION_VALUE) {
-    return i18n.translate('xpack.apm.settings.agentConf.allOptionLabel', {
+    return i18n.translate('xpack.apm.agentConfig.allOptionLabel', {
       defaultMessage: 'All'
     });
   }
@@ -20,6 +20,6 @@ export function getOptionLabel(value: string | undefined) {
   return value;
 }
 
-export function omitAllOption(value: string) {
+export function omitAllOption(value?: string) {
   return value === ALL_OPTION_VALUE ? undefined : value;
 }

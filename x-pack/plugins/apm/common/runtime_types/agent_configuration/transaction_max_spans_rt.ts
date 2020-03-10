@@ -8,13 +8,15 @@ import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
 
 export const transactionMaxSpansRt = new t.Type<string, string, unknown>(
-  'transactionMaxSpans2',
+  'transactionMaxSpans',
   t.string.is,
   (input, context) => {
     return either.chain(t.string.validate(input, context), inputAsString => {
       const inputAsInt = parseInt(inputAsString, 10);
       const isValid = inputAsInt >= 0 && inputAsInt <= 32000;
-      return isValid ? t.success(inputAsString) : t.failure(input, context);
+      return isValid
+        ? t.success(inputAsString)
+        : t.failure(input, context, 'Number must be between 0 and 32000');
     });
   },
   t.identity

@@ -4,22 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { captureBodyRt } from './capture_body_rt';
+import { booleanRt } from './boolean_rt';
 import { isRight } from 'fp-ts/lib/Either';
 
-describe('captureBodyRt', () => {
+describe('booleanRt', () => {
   describe('it should not accept', () => {
     [undefined, null, '', 0, 'foo', true, false].map(input => {
       it(`${JSON.stringify(input)}`, () => {
-        expect(isRight(captureBodyRt.decode(input))).toBe(false);
+        expect(isRight(booleanRt.decode(input))).toBe(false);
       });
     });
   });
 
   describe('it should accept', () => {
-    ['off', 'errors', 'transactions', 'all'].map(input => {
+    ['true', 'false'].map(input => {
       it(`${JSON.stringify(input)}`, () => {
-        expect(isRight(captureBodyRt.decode(input))).toBe(true);
+        expect(isRight(booleanRt.decode(input))).toBe(true);
       });
     });
   });

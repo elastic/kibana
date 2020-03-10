@@ -10,9 +10,9 @@ import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 export const NO_SELECTION = '__NO_SELECTION__';
-const DEFAULT_PLACEHOLDER = `- ${i18n.translate('xpack.apm.selectPlaceholder', {
-  defaultMessage: 'Select'
-})} -`;
+const DEFAULT_PLACEHOLDER = i18n.translate('xpack.apm.selectPlaceholder', {
+  defaultMessage: 'Select option:'
+});
 
 /**
  * This component addresses some cross-browser inconsistencies of `EuiSelect`

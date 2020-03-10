@@ -6,9 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
-import { AgentConfigurationIntake } from '../../../../../../../../../plugins/apm/server/lib/settings/agent_configuration/configuration_types';
-import { getOptionLabel } from '../../../../../../../../../plugins/apm/common/agent_configuration_constants';
-import { callApmApi } from '../../../../../services/rest/createCallApmApi';
+import { AgentConfigurationIntake } from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/configuration_types';
+import {
+  getOptionLabel,
+  omitAllOption
+} from '../../../../../../../../../../plugins/apm/common/agent_configuration_constants';
+import { callApmApi } from '../../../../../../services/rest/createCallApmApi';
 
 export async function saveConfig({
   config,
@@ -26,41 +29,40 @@ export async function saveConfig({
       method: 'PUT',
       params: {
         query: { overwrite: isEditMode },
-        body: config
+        body: {
+          ...config,
+          service: {
+            name: omitAllOption(config.service.name),
+            environment: omitAllOption(config.service.environment)
+          }
+        }
       }
     });
 
     toasts.addSuccess({
       title: i18n.translate(
-        'xpack.apm.settings.agentConf.saveConfig.succeeded.title',
+        'xpack.apm.agentConfig.saveConfig.succeeded.title',
         { defaultMessage: 'Configuration saved' }
       ),
-      text: i18n.translate(
-        'xpack.apm.settings.agentConf.saveConfig.succeeded.text',
-        {
-          defaultMessage:
-            'The configuration for "{serviceName}" was saved. It will take some time to propagate to the agents.',
-          values: { serviceName: getOptionLabel(config.service.name) }
-        }
-      )
+      text: i18n.translate('xpack.apm.agentConfig.saveConfig.succeeded.text', {
+        defaultMessage:
+          'The configuration for "{serviceName}" was saved. It will take some time to propagate to the agents.',
+        values: { serviceName: getOptionLabel(config.service.name) }
+      })
     });
   } catch (error) {
     toasts.addDanger({
-      title: i18n.translate(
-        'xpack.apm.settings.agentConf.saveConfig.failed.title',
-        { defaultMessage: 'Configuration could not be saved' }
-      ),
-      text: i18n.translate(
-        'xpack.apm.settings.agentConf.saveConfig.failed.text',
-        {
-          defaultMessage:
-            'Something went wrong when saving the configuration for "{serviceName}". Error: "{errorMessage}"',
-          values: {
-            serviceName: getOptionLabel(config.service.name),
-            errorMessage: error.message
-          }
+      title: i18n.translate('xpack.apm.agentConfig.saveConfig.failed.title', {
+        defaultMessage: 'Configuration could not be saved'
+      }),
+      text: i18n.translate('xpack.apm.agentConfig.saveConfig.failed.text', {
+        defaultMessage:
+          'Something went wrong when saving the configuration for "{serviceName}". Error: "{errorMessage}"',
+        values: {
+          serviceName: getOptionLabel(config.service.name),
+          errorMessage: error.message
         }
-      )
+      })
     });
   }
 }

@@ -1,0 +1,104 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { useState } from 'react';
+import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { NotificationsStart } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AgentConfigurationListAPIResponse } from '../../../../../../../../../plugins/apm/server/lib/settings/agent_configuration/list_configurations';
+import { getOptionLabel } from '../../../../../../../../../plugins/apm/common/agent_configuration_constants';
+import { callApmApi } from '../../../../../services/rest/createCallApmApi';
+import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
+
+type Config = AgentConfigurationListAPIResponse[0];
+
+interface Props {
+  config: Config;
+  onCancel: () => void;
+  onConfirm: () => void;
+}
+
+export function ConfirmDeleteModal({ config, onCancel, onConfirm }: Props) {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { toasts } = useApmPluginContext().core.notifications;
+
+  return (
+    <EuiOverlayMask>
+      <EuiConfirmModal
+        title="Do this destructive thing"
+        onCancel={onCancel}
+        onConfirm={async () => {
+          setIsDeleting(true);
+          await deleteConfig(config, toasts);
+          setIsDeleting(false);
+          onConfirm();
+        }}
+        cancelButtonText="No, don't do it"
+        confirmButtonText="Yes, do it"
+        confirmButtonDisabled={isDeleting}
+        buttonColor="danger"
+        defaultFocusedButton="confirm"
+      >
+        <p>You&rsquo;re about to destroy something.</p>
+        <p>Are you sure you want to do this?</p>
+      </EuiConfirmModal>
+    </EuiOverlayMask>
+  );
+}
+
+async function deleteConfig(
+  config: Config,
+  toasts: NotificationsStart['toasts']
+) {
+  try {
+    await callApmApi({
+      pathname: '/api/apm/settings/agent-configuration',
+      method: 'DELETE',
+      params: {
+        body: {
+          service: {
+            name: config.service.name,
+            environment: config.service.environment
+          }
+        }
+      }
+    });
+
+    toasts.addSuccess({
+      title: i18n.translate(
+        'xpack.apm.agentConfig.deleteSection.deleteConfigSucceededTitle',
+        { defaultMessage: 'Configuration was deleted' }
+      ),
+      text: i18n.translate(
+        'xpack.apm.agentConfig.deleteSection.deleteConfigSucceededText',
+        {
+          defaultMessage:
+            'You have successfully deleted a configuration for "{serviceName}". It will take some time to propagate to the agents.',
+          values: { serviceName: getOptionLabel(config.service.name) }
+        }
+      )
+    });
+  } catch (error) {
+    toasts.addDanger({
+      title: i18n.translate(
+        'xpack.apm.agentConfig.deleteSection.deleteConfigFailedTitle',
+        { defaultMessage: 'Configuration could not be deleted' }
+      ),
+      text: i18n.translate(
+        'xpack.apm.agentConfig.deleteSection.deleteConfigFailedText',
+        {
+          defaultMessage:
+            'Something went wrong when deleting a configuration for "{serviceName}". Error: "{errorMessage}"',
+          values: {
+            serviceName: getOptionLabel(config.service.name),
+            errorMessage: error.message
+          }
+        }
+      )
+    });
+  }
+}

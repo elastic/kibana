@@ -8,10 +8,9 @@ import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { history } from '../../../../../utils/history';
-import { AgentConfigurationIntake } from '../../../../../../../../../plugins/apm/server/lib/settings/agent_configuration/configuration_types';
+import { AgentConfigurationIntake } from '../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/configuration_types';
 import { ServicePage } from './ServicePage/ServicePage';
 import { SettingsPage } from './SettingsPage/SettingsPage';
-import { NewConfig } from './NewConfig';
 import { fromQuery, toQuery } from '../../../../shared/Links/url_helpers';
 
 type PageStep = 'choose-service-step' | 'choose-settings-step' | 'review-step';
@@ -33,7 +32,7 @@ export function AgentConfigurationCreateEdit({
   pageStep: PageStep;
   existingConfig?: AgentConfigurationIntake;
 }) {
-  const [newConfig, setNewConfig] = useState<NewConfig>({
+  const [newConfig, setNewConfig] = useState<AgentConfigurationIntake>({
     agent_name: existingConfig?.agent_name,
     service: existingConfig?.service || {},
     settings: existingConfig?.settings || {}
@@ -44,13 +43,6 @@ export function AgentConfigurationCreateEdit({
     // the user tried to edit the service of an existing config
     if (pageStep === 'choose-service-step' && isEditMode) {
       setPage('choose-settings-step');
-
-      // the user tried to edit the settings before selecting a service
-    } else if (
-      pageStep === 'choose-settings-step' &&
-      newConfig.service.name == null
-    ) {
-      setPage('choose-service-step');
     }
   }, [isEditMode, newConfig, pageStep]);
 
@@ -59,10 +51,10 @@ export function AgentConfigurationCreateEdit({
       <EuiTitle>
         <h2>
           {isEditMode
-            ? i18n.translate('xpack.apm.settings.agentConf.editConfigTitle', {
+            ? i18n.translate('xpack.apm.agentConfig.editConfigTitle', {
                 defaultMessage: 'Edit configuration'
               })
-            : i18n.translate('xpack.apm.settings.agentConf.createConfigTitle', {
+            : i18n.translate('xpack.apm.agentConfig.createConfigTitle', {
                 defaultMessage: 'Create configuration'
               })}
         </h2>
@@ -75,6 +67,8 @@ export function AgentConfigurationCreateEdit({
       </EuiText>
 
       <EuiSpacer size="m" />
+
+      {JSON.stringify(newConfig, null, 2)}
 
       {pageStep === 'choose-service-step' && (
         <ServicePage

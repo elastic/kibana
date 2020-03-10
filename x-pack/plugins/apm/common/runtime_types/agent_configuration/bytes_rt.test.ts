@@ -4,24 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { transactionMaxSpansRt } from './transaction_max_spans_rt';
+import { bytesRt } from './bytes_rt';
 import { isRight } from 'fp-ts/lib/Either';
 
-describe('transactionMaxSpans', () => {
+describe('bytesRt', () => {
   describe('it should not accept', () => {
-    [undefined, null, '', 'foo', 0, 55, '-1', '-55', '33000', NaN].map(
+    [undefined, null, '', 0, 'foo', true, false, '100', 'mb', 'gb', '0kb'].map(
       input => {
         it(`${JSON.stringify(input)}`, () => {
-          expect(isRight(transactionMaxSpansRt.decode(input))).toBe(false);
+          expect(isRight(bytesRt.decode(input))).toBe(false);
         });
       }
     );
   });
 
   describe('it should accept', () => {
-    ['0', '1000', '32000'].map(input => {
+    ['1kb', '2mb', '3gb'].map(input => {
       it(`${JSON.stringify(input)}`, () => {
-        expect(isRight(transactionMaxSpansRt.decode(input))).toBe(true);
+        expect(isRight(bytesRt.decode(input))).toBe(true);
       });
     });
   });

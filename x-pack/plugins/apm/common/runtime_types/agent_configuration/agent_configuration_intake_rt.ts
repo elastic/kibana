@@ -7,11 +7,6 @@
 import * as t from 'io-ts';
 import { settingDefinitions } from './config_setting_definitions';
 
-export const serviceRt = t.partial({
-  name: t.string,
-  environment: t.string
-});
-
 // retrieve validation from config definitions settings and validate on the server
 const knownSettings = settingDefinitions.reduce<
   Record<string, t.Type<any, any, unknown>>
@@ -20,13 +15,20 @@ const knownSettings = settingDefinitions.reduce<
   return acc;
 }, {});
 
+export const serviceRt = t.partial({
+  name: t.string,
+  environment: t.string
+});
+
+export const settingsRt = t.intersection([
+  t.record(t.string, t.string),
+  t.partial(knownSettings)
+]);
+
 export const agentConfigurationIntakeRt = t.intersection([
   t.partial({ agent_name: t.string }),
   t.type({
     service: serviceRt,
-    settings: t.intersection([
-      t.record(t.string, t.string),
-      t.partial(knownSettings)
-    ])
+    settings: settingsRt
   })
 ]);

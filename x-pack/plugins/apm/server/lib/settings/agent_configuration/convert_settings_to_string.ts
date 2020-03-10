@@ -5,7 +5,7 @@
  */
 
 import { ESSearchHit } from '../../../../typings/elasticsearch';
-import { AgentConfiguration } from './configuration_types';
+import { AgentConfiguration } from '../../../../common/runtime_types/agent_configuration/configuration_types';
 
 // needed for backwards compatability
 // All settings except `transaction_sample_rate` and `transaction_max_spans` are stored as strings (they are stored as float and integer respectively)

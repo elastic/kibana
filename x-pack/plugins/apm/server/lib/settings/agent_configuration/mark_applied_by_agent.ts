@@ -5,7 +5,7 @@
  */
 
 import { Setup } from '../../helpers/setup_request';
-import { AgentConfiguration } from './configuration_types';
+import { AgentConfiguration } from '../../../../common/runtime_types/agent_configuration/configuration_types';
 
 export async function markAppliedByAgent({
   id,

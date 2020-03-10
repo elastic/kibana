@@ -39,12 +39,9 @@ export const Settings: React.FC = props => {
                 id: 0,
                 items: [
                   {
-                    name: i18n.translate(
-                      'xpack.apm.settings.agentConfiguration',
-                      {
-                        defaultMessage: 'Agent Configuration'
-                      }
-                    ),
+                    name: i18n.translate('xpack.apm.agentConfigiguration', {
+                      defaultMessage: 'Agent Configuration'
+                    }),
                     id: '1',
                     href: getAPMHref('/settings/agent-configuration', search),
                     isSelected: pathname === '/settings/agent-configuration'

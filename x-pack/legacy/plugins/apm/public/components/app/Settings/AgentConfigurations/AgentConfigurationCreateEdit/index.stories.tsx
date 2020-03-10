@@ -24,7 +24,7 @@ storiesOf(
   'app/Settings/AgentConfigurations/AgentConfigurationCreateEdit',
   module
 ).add(
-  'selectedConfig=null',
+  'with config',
   () => {
     const httpMock = {};
 
@@ -41,6 +41,7 @@ storiesOf(
         value={(contextMock as unknown) as ApmPluginContextValue}
       >
         <AgentConfigurationCreateEdit
+          pageStep="choose-settings-step"
           existingConfig={{
             service: { name: 'opbeans-node', environment: 'production' },
             settings: {}
