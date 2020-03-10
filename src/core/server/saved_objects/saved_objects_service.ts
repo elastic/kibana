@@ -38,7 +38,7 @@ import {
   SavedObjectConfig,
 } from './saved_objects_config';
 import { KibanaRequest, InternalHttpServiceSetup } from '../http';
-import { SavedObjectsClientContract, SavedObjectsType, SavedObjectsLegacyUiExports } from './types';
+import { SavedObjectsClientContract, SavedObjectsType } from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
   SavedObjectsClientFactoryProvider,
@@ -301,10 +301,6 @@ export class SavedObjectsService
     legacyTypes.forEach(type => this.typeRegistry.registerType(type));
     this.validations = setupDeps.legacyPlugins.uiExports.savedObjectValidations || {};
 
-    const importableExportableTypes = getImportableAndExportableTypes(
-      setupDeps.legacyPlugins.uiExports
-    );
-
     const savedObjectsConfig = await this.coreContext.configService
       .atPath<SavedObjectsConfigType>('savedObjects')
       .pipe(first())
@@ -320,7 +316,6 @@ export class SavedObjectsService
       logger: this.logger,
       config: this.config,
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
-      importableExportableTypes,
     });
 
     return {
@@ -497,17 +492,4 @@ export class SavedObjectsService
       ),
     });
   }
-}
-
-function getImportableAndExportableTypes({
-  savedObjectMappings = [],
-  savedObjectsManagement = {},
-}: SavedObjectsLegacyUiExports) {
-  const visibleTypes = savedObjectMappings.reduce(
-    (types, mapping) => [...types, ...Object.keys(mapping.properties)],
-    [] as string[]
-  );
-  return visibleTypes.filter(
-    type => savedObjectsManagement[type]?.isImportableAndExportable === true ?? false
-  );
 }

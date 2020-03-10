@@ -64,7 +64,6 @@ describe('IndexMigrator', () => {
             dynamic: 'strict',
             _meta: {
               migrationMappingPropertyHashes: {
-                config: '87aca8fdb053154f11383fce3dbf3edf',
                 foo: 'c4d03d4291be731efbef6989d911b956',
                 migrationVersion: '4a1746014a75ade3a714e1db5763276f',
                 namespace: '2f4316de49999235636386fe51dc06c1',
@@ -74,10 +73,6 @@ describe('IndexMigrator', () => {
               },
             },
             properties: {
-              config: {
-                dynamic: 'true',
-                properties: { buildNum: { type: 'keyword' } },
-              },
               foo: { properties: { title: { type: 'long' } } },
               migrationVersion: { dynamic: 'true', type: 'object' },
               namespace: { type: 'keyword' },
@@ -188,7 +183,6 @@ describe('IndexMigrator', () => {
           dynamic: 'strict',
           _meta: {
             migrationMappingPropertyHashes: {
-              config: '87aca8fdb053154f11383fce3dbf3edf',
               foo: '625b32086eb1d1203564cf85062dd22e',
               migrationVersion: '4a1746014a75ade3a714e1db5763276f',
               namespace: '2f4316de49999235636386fe51dc06c1',
@@ -199,10 +193,6 @@ describe('IndexMigrator', () => {
           },
           properties: {
             author: { type: 'text' },
-            config: {
-              dynamic: 'true',
-              properties: { buildNum: { type: 'keyword' } },
-            },
             foo: { type: 'text' },
             migrationVersion: { dynamic: 'true', type: 'object' },
             namespace: { type: 'keyword' },
