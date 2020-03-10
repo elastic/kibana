@@ -54,7 +54,7 @@ describe('ui settings service', () => {
       it('validates value', async () => {
         const response = await kbnTestServer.request
           .post(root, '/api/kibana/settings')
-          .send({ changes: { custom: 100 } })
+          .send({ changes: { custom: 100, foo: 'bar' } })
           .expect(400);
 
         expect(response.body.message).toBe(
