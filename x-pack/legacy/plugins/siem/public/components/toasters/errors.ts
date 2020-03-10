@@ -5,7 +5,7 @@
  */
 
 export class ToasterError extends Error {
-  public messages: string[];
+  public readonly messages: string[];
 
   constructor(messages: string[]) {
     super(messages[0]);
