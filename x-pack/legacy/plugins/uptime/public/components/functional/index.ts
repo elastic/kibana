@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { ToggleAlertFlyoutButtonComponent } from './alerts/toggle_alert_flyout_button';
 export { DonutChart } from './charts/donut_chart';
 export { EmptyState } from './empty_state';
 export { KueryBarComponent } from './kuery_bar/kuery_bar';

@@ -13,7 +13,7 @@ import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useUrlParams } from '../hooks';
 import { UptimeUrlParams } from '../lib/helper';
-import { ToggleAlertFlyoutButton } from '../components/functional/alerts';
+import { ToggleAlertFlyoutButton } from '../components/connected';
 
 interface PageHeaderProps {
   headingText: string;
