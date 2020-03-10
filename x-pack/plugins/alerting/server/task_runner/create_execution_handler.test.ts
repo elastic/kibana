@@ -119,9 +119,7 @@ test('limits actionsPlugin.execute per action group', async () => {
     context: {},
     alertInstanceId: '2',
   });
-  expect(createExecutionHandlerParams.actionsPlugin.execute).toMatchInlineSnapshot(
-    `[MockFunction]`
-  );
+  expect(createExecutionHandlerParams.actionsPlugin.execute).not.toHaveBeenCalled();
 });
 
 test('context attribute gets parameterized', async () => {
