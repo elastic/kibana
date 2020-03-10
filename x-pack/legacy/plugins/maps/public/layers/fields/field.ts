@@ -40,7 +40,7 @@ export class AbstractField implements IField {
   }
 
   canValueBeFormatted(): boolean {
-    return true;
+    return false;
   }
 
   getSource(): IVectorSource {

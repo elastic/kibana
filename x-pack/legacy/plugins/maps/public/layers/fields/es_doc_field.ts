@@ -8,19 +8,16 @@ import { FIELD_ORIGIN } from '../../../common/constants';
 import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
 import { COLOR_PALETTE_MAX_SIZE } from '../../../common/constants';
-// @ts-ignore
-import { indexPatternService } from '../../kibana_services';
+import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 import { IFieldType } from '../../../../../../../src/plugins/data/public';
-import { IField } from './field';
+import { IField, AbstractField } from './field';
 import { IESSource } from '../sources/es_source';
 import { IVectorSource } from '../sources/vector_source';
 
-export class ESDocField implements IField {
+export class ESDocField extends AbstractField implements IField {
   static type = 'ES_DOC';
 
-  private readonly _fieldName: string;
   private readonly _source: IESSource;
-  private readonly _origin: FIELD_ORIGIN;
 
   constructor({
     fieldName,
@@ -31,17 +28,8 @@ export class ESDocField implements IField {
     source: IESSource;
     origin: FIELD_ORIGIN;
   }) {
-    this._fieldName = fieldName;
+    super({ fieldName, origin });
     this._source = source;
-    this._origin = origin || FIELD_ORIGIN.SOURCE;
-  }
-
-  getName(): string {
-    return this._fieldName;
-  }
-
-  getRootName(): string {
-    return this.getName();
   }
 
   canValueBeFormatted(): boolean {
@@ -52,22 +40,10 @@ export class ESDocField implements IField {
     return this._source;
   }
 
-  isValid(): boolean {
-    return !!this._fieldName;
-  }
-
-  getOrigin(): FIELD_ORIGIN {
-    return this._origin;
-  }
-
-  async getLabel(): Promise<string> {
-    return this._fieldName;
-  }
-
   async _getIndexPatternField(): Promise<IFieldType | undefined> {
     const indexPattern = await this._source.getIndexPattern();
-    const indexPatternField = indexPattern.fields.getByName(this._fieldName);
-    return indexPatternField && indexPatternService.isNestedField(indexPatternField)
+    const indexPatternField = indexPattern.fields.getByName(this.getName());
+    return indexPatternField && indexPatterns.isNestedField(indexPatternField)
       ? undefined
       : indexPatternField;
   }
@@ -104,10 +80,10 @@ export class ESDocField implements IField {
         lang: indexPatternField.lang,
       };
     } else {
-      extendedStats.field = this._fieldName;
+      extendedStats.field = this.getName();
     }
     return {
-      [this._fieldName]: {
+      [this.getName()]: {
         extended_stats: extendedStats,
       },
     };
@@ -128,10 +104,10 @@ export class ESDocField implements IField {
         lang: indexPatternField.lang,
       };
     } else {
-      topTerms.field = this._fieldName;
+      topTerms.field = this.getName();
     }
     return {
-      [this._fieldName]: {
+      [this.getName()]: {
         terms: topTerms,
       },
     };
