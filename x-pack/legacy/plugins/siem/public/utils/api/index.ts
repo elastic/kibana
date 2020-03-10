@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { has } from 'lodash/fp';
+
 export interface KibanaApiError {
-  error: string;
+  message: string;
   body: {
     message: string;
     status_code: number;
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const isApiError = (error: any): error is KibanaApiError => error?.body?.message;
+export const isApiError = (error: unknown): error is KibanaApiError =>
+  has('message', error) && has('body.message', error) && has('body.status_code', error);
