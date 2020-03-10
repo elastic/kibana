@@ -645,6 +645,18 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       await testSubjects.click('euiFlyoutCloseButton');
     }
 
+    // async clickIndexPatternLogstash() {
+    //   await testSubjects.click('checkboxSelectRow-logstash-*');
+    // }
+
+    async clickRelationships() {
+      await testSubjects.click('savedObjectRelationship');
+    }
+
+    async clickSavedSearchBar() {
+      await testSubjects.click('savedObjectSearchBar');
+    }
+
     async checkNoneImported() {
       await testSubjects.existOrFail('importSavedObjectsSuccessNoneImported', { timeout: 20000 });
     }

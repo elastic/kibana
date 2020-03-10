@@ -52,14 +52,57 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
+    it('Click search bar', async () => {
+      await PageObjects.settings.clickSavedSearchBar();
+      await a11y.testAppSnapshot();
+    });
+
+    // it('Search for a saved search in saved objects table', async () => {
+    //
+    //   await a11y.testAppSnapshot();
+    // });
+    //
+    // it('View relationships on saved search', async () => {
+    //   await PageObjects.settings.clickRelationships();
+    //   await a11y.testAppSnapshot();
+    // });
+    //
+    // it('Close relationships page', async () => {
+    //   await PageObjects.settings.clickRelationships();
+    //   await a11y.testAppSnapshot();
+    // });
+    //
+    // it('Clear search item from searches on saved object table', async () => {
+    //   //await PageObjects.settings.clickIndexPatternLogstash();
+    //   await PageObjects.settings.clickRelationships();
+    //   await a11y.testAppSnapshot();
+    // });
+
     it('Click export all button', async () => {
       await PageObjects.settings.clickExportButton();
       await a11y.testAppSnapshot();
     });
 
-    it('Select a row in the saved objects table', async () => {
-      await PageObjects.settings.clickExportButton();
+    // it('Close export all button', async () => {
+    //           await PageObjects.settings.clickExportButton();
+    //           await a11y.testAppSnapshot();
+    // });
+
+    it('Inspect a saved object', async () => {
+      // await PageObjects.settings.clickIndexPatternLogstash();
+      await PageObjects.settings.clickRelationships();
       await a11y.testAppSnapshot();
     });
+
+    it('Close the inspect page', async () => {
+      // await PageObjects.settings.clickIndexPatternLogstash();
+      await PageObjects.settings.clickRelationships();
+      await a11y.testAppSnapshot();
+    });
+
+    // it('Delete saved search', async () => {
+    //   await PageObjects.settings.clickRelationships();
+    //   await a11y.testAppSnapshot();
+    // });
   });
 }
