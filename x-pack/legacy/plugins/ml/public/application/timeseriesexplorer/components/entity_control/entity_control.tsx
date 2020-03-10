@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import {
   EuiComboBox,
-  EuiComboBoxOptionProps,
+  EuiComboBoxOptionOption,
   EuiFlexItem,
   EuiFormRow,
   EuiToolTip,
@@ -29,13 +29,13 @@ interface EntityControlProps {
   isLoading: boolean;
   onSearchChange: (entity: Entity, queryTerm: string) => void;
   forceSelection: boolean;
-  options: EuiComboBoxOptionProps[];
+  options: EuiComboBoxOptionOption[];
 }
 
 interface EntityControlState {
-  selectedOptions: EuiComboBoxOptionProps[] | undefined;
+  selectedOptions: EuiComboBoxOptionOption[] | undefined;
   isLoading: boolean;
-  options: EuiComboBoxOptionProps[] | undefined;
+  options: EuiComboBoxOptionOption[] | undefined;
 }
 
 export class EntityControl extends Component<EntityControlProps, EntityControlState> {
@@ -53,7 +53,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
 
     const { fieldValue } = entity;
 
-    let selectedOptionsUpdate: EuiComboBoxOptionProps[] | undefined = selectedOptions;
+    let selectedOptionsUpdate: EuiComboBoxOptionOption[] | undefined = selectedOptions;
     if (
       (selectedOptions === undefined && fieldValue.length > 0) ||
       (Array.isArray(selectedOptions) &&
@@ -84,7 +84,7 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
     }
   }
 
-  onChange = (selectedOptions: EuiComboBoxOptionProps[]) => {
+  onChange = (selectedOptions: EuiComboBoxOptionOption[]) => {
     const options = selectedOptions.length > 0 ? selectedOptions : undefined;
     this.setState({
       selectedOptions: options,

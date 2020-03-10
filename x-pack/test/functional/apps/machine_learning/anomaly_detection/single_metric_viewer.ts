@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   Job,
   Datafeed,
-} from '../../../../..//legacy/plugins/ml/public/application/jobs/new_job/common/job_creator/configs';
+} from '../../../../..//legacy/plugins/ml/common/types/anomaly_detection_jobs';
 
 const JOB_CONFIG: Job = {
   job_id: `fq_single_1_smv`,
