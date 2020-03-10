@@ -283,7 +283,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         .post(`/api/action/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
-          params: { ...mockServiceNow.params },
+          params: { caseId: 'success' },
         })
         .expect(200);
 

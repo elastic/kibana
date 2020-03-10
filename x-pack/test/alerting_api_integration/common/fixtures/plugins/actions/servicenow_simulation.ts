@@ -6,11 +6,14 @@
 
 import Joi from 'joi';
 import Hapi from 'hapi';
+import { version } from 'bluebird';
 
 interface ServiceNowRequest extends Hapi.Request {
   payload: {
-    comments: string;
-    short_description: string;
+    caseId: string;
+    title?: string;
+    description?: string;
+    comments?: Array<{ commentId: string; version: string; comment: string }>;
   };
 }
 export function initPlugin(server: Hapi.Server, path: string) {
@@ -22,8 +25,16 @@ export function initPlugin(server: Hapi.Server, path: string) {
       validate: {
         options: { abortEarly: false },
         payload: Joi.object().keys({
-          comments: Joi.string(),
-          short_description: Joi.string(),
+          caseId: Joi.string(),
+          title: Joi.string(),
+          description: Joi.string(),
+          comments: Joi.array().items(
+            Joi.object({
+              commentId: Joi.string(),
+              version: Joi.string(),
+              comment: Joi.string(),
+            })
+          ),
         }),
       },
     },
@@ -32,14 +43,46 @@ export function initPlugin(server: Hapi.Server, path: string) {
 
   server.route({
     method: 'POST',
-    path: `${path}/api/now/v1/table/incident`,
+    path: `${path}/api/now/v2/table/incident`,
     options: {
       auth: false,
       validate: {
         options: { abortEarly: false },
         payload: Joi.object().keys({
-          comments: Joi.string(),
-          short_description: Joi.string(),
+          caseId: Joi.string(),
+          title: Joi.string(),
+          description: Joi.string(),
+          comments: Joi.array().items(
+            Joi.object({
+              commentId: Joi.string(),
+              version: Joi.string(),
+              comment: Joi.string(),
+            })
+          ),
+        }),
+      },
+    },
+    handler: servicenowHandler,
+  });
+
+  server.route({
+    method: 'PATCH',
+    path: `${path}/api/now/v2/table/incident`,
+    options: {
+      auth: false,
+      validate: {
+        options: { abortEarly: false },
+        payload: Joi.object().keys({
+          caseId: Joi.string(),
+          title: Joi.string(),
+          description: Joi.string(),
+          comments: Joi.array().items(
+            Joi.object({
+              commentId: Joi.string(),
+              version: Joi.string(),
+              comment: Joi.string(),
+            })
+          ),
         }),
       },
     },
@@ -52,60 +95,9 @@ export function initPlugin(server: Hapi.Server, path: string) {
 
 function servicenowHandler(request: ServiceNowRequest, h: any) {
   const body = request.payload;
-  const text = body && body.short_description;
-  if (text == null) {
-    return jsonResponse(h, 400, 'bad request to servicenow simulator');
-  }
+  const text = body && body.caseId;
 
-  switch (text) {
-    case 'success':
-      return jsonResponse(h, 200, 'Success');
-
-    case 'created':
-      return jsonResponse(h, 201, 'Created');
-
-    case 'no_text':
-      return jsonResponse(h, 204, 'Success');
-
-    case 'invalid_payload':
-      return jsonResponse(h, 400, 'Bad Request');
-
-    case 'unauthorized':
-      return jsonResponse(h, 401, 'Unauthorized');
-
-    case 'forbidden':
-      return jsonResponse(h, 403, 'Forbidden');
-
-    case 'not_found':
-      return jsonResponse(h, 404, 'Not found');
-
-    case 'not_allowed':
-      return jsonResponse(h, 405, 'Method not allowed');
-
-    case 'not_acceptable':
-      return jsonResponse(h, 406, 'Not acceptable');
-
-    case 'unsupported':
-      return jsonResponse(h, 415, 'Unsupported media type');
-
-    case 'status_500':
-      return jsonResponse(h, 500, 'simulated servicenow 500 response');
-
-    case 'rate_limit':
-      const response = {
-        retry_after: 1,
-        ok: false,
-        error: 'rate_limited',
-      };
-
-      return h
-        .response(response)
-        .type('application/json')
-        .header('retry-after', '1')
-        .code(429);
-  }
-
-  return jsonResponse(h, 400, 'unknown request to servicenow simulator');
+  return jsonResponse(h, 200, 'Success');
 }
 
 function jsonResponse(h: any, code: number, object?: any) {
