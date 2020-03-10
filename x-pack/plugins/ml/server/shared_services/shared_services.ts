@@ -8,26 +8,31 @@ import { MlServerLicense } from '../lib/license';
 
 import { SpacesPluginSetup } from '../../../spaces/server';
 import { CloudSetup } from '../../../cloud/server';
-import { getMlSystemProvider, MlSystemProvider } from './providers/system';
 import { licenseChecks } from './license_checks';
+import { MlSystemProvider, getMlSystemProvider } from './providers/system';
 import { JobServiceProvider, getJobServiceProvider } from './providers/job_service';
+import { ModulesProvider, getModulesProvider } from './providers/modules';
 import {
   AnomalyDetectorsProvider,
   getAnomalyDetectorsProvider,
 } from './providers/anomaly_detectors';
 
-export type SharedServices = JobServiceProvider & AnomalyDetectorsProvider & MlSystemProvider;
+export type SharedServices = JobServiceProvider &
+  AnomalyDetectorsProvider &
+  MlSystemProvider &
+  ModulesProvider;
 
 export function createSharedServices(
   mlLicense: MlServerLicense,
   spaces: SpacesPluginSetup | undefined,
   cloud: CloudSetup
 ): SharedServices {
-  const { checkFullLicense, isMinimumLicense } = licenseChecks(mlLicense);
+  const { isFullLicense, isMinimumLicense } = licenseChecks(mlLicense);
 
   return {
-    ...getJobServiceProvider(checkFullLicense),
-    ...getAnomalyDetectorsProvider(checkFullLicense),
+    ...getJobServiceProvider(isFullLicense),
+    ...getAnomalyDetectorsProvider(isFullLicense),
     ...getMlSystemProvider(isMinimumLicense, mlLicense, spaces, cloud),
+    ...getModulesProvider(isFullLicense),
   };
 }

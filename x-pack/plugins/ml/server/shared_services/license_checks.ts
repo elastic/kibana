@@ -6,9 +6,13 @@
 
 import { MlServerLicense } from '../lib/license';
 
-export function licenseChecks(mlLicense: MlServerLicense) {
+export type LicenseCheck = () => void;
+
+export function licenseChecks(
+  mlLicense: MlServerLicense
+): { isFullLicense: LicenseCheck; isMinimumLicense: LicenseCheck } {
   return {
-    checkFullLicense() {
+    isFullLicense() {
       if (mlLicense.isFullLicense() === false) {
         throw Error('Platinum, Enterprise or trial license needed');
       }

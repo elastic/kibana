@@ -40,7 +40,7 @@ import { resultsServiceRoutes } from './routes/results_service';
 import { systemRoutes } from './routes/system';
 import { MlLicense } from '../../../legacy/plugins/ml/common/license';
 import { MlServerLicense } from './lib/license';
-import { createSharedServices, SharedServices } from './shared';
+import { createSharedServices, SharedServices } from './shared_services';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {

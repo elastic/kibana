@@ -5,6 +5,7 @@
  */
 
 import { APICaller } from 'src/core/server';
+import { LicenseCheck } from '../license_checks';
 
 export interface AnomalyDetectorsProvider {
   anomalyDetectorsProvider(
@@ -14,12 +15,12 @@ export interface AnomalyDetectorsProvider {
   };
 }
 
-export function getAnomalyDetectorsProvider(checkLicense: () => void) {
+export function getAnomalyDetectorsProvider(isFullLicense: LicenseCheck): AnomalyDetectorsProvider {
   return {
     anomalyDetectorsProvider(callAsCurrentUser: APICaller) {
       return {
         jobs(jobId?: string) {
-          checkLicense();
+          isFullLicense();
           return callAsCurrentUser('ml.jobs', jobId !== undefined ? { jobId } : {});
         },
       };

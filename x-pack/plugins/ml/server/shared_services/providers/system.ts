@@ -7,6 +7,7 @@
 import { APICaller } from 'src/core/server';
 import { MlServerLicense } from '../../lib/license';
 import { CloudSetup } from '../../../../cloud/server';
+import { LicenseCheck } from '../license_checks';
 import { spacesUtilsProvider, RequestFacade } from '../../lib/spaces_utils';
 import { SpacesPluginSetup } from '../../../../spaces/server';
 import { privilegesProvider, MlCapabilities } from '../../lib/check_privileges';
@@ -23,11 +24,11 @@ export interface MlSystemProvider {
 }
 
 export function getMlSystemProvider(
-  isMinimumLicense: () => void,
+  isMinimumLicense: LicenseCheck,
   mlLicense: MlServerLicense,
   spaces: SpacesPluginSetup | undefined,
   cloud: CloudSetup
-) {
+): MlSystemProvider {
   return {
     mlSystemProvider(callAsCurrentUser: APICaller, request: RequestFacade) {
       return {

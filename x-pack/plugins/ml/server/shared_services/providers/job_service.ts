@@ -5,16 +5,17 @@
  */
 
 import { APICaller } from 'src/core/server';
+import { LicenseCheck } from '../license_checks';
 import { jobServiceProvider } from '../../models/job_service';
 
 export interface JobServiceProvider {
   jobServiceProvider(callAsCurrentUser: APICaller): ReturnType<typeof jobServiceProvider>;
 }
 
-export function getJobServiceProvider(checkLicense: () => void) {
+export function getJobServiceProvider(isFullLicense: LicenseCheck): JobServiceProvider {
   return {
     jobServiceProvider(callAsCurrentUser: APICaller) {
-      checkLicense();
+      isFullLicense();
       return jobServiceProvider(callAsCurrentUser);
     },
   };
