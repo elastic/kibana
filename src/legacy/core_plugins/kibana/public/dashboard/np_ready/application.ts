@@ -146,8 +146,7 @@ function createLocalIconModule() {
 function createLocalKbnUrlModule() {
   angular
     .module('app/dashboard/KbnUrl', ['app/dashboard/Private', 'ngRoute'])
-    .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider))
-    .service('redirectWhenMissing', (Private: IPrivate) => Private(RedirectWhenMissingProvider));
+    .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider));
 }
 
 function createLocalConfigModule(core: AppMountContext['core']) {
