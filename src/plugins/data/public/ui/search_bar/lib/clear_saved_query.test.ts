@@ -21,7 +21,7 @@ import { clearStateFromSavedQuery } from './clear_saved_query';
 
 import { dataPluginMock } from '../../../mocks';
 import { DataPublicPluginStart } from '../../../types';
-import { Query, SavedQuery } from '../../..';
+import { Query } from '../../..';
 import { getFilter } from '../../../query/filter_manager/test_helpers/get_stub_filter';
 import { FilterStateStore } from '../../../../common/es_query/filters';
 
