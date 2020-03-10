@@ -8,6 +8,7 @@ import Boom from 'boom';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusAttributes } from '../rules/types';
+import { BadRequestError } from '../errors/bad_request_error';
 import {
   transformError,
   transformBulkError,
@@ -70,8 +71,8 @@ describe('utils', () => {
       });
     });
 
-    test('it detects a TypeError and returns a status code of 400 from that particular error type', () => {
-      const error: TypeError = new TypeError('I have a type error');
+    test('it detects a BadRequestError and returns a status code of 400 from that particular error type', () => {
+      const error: BadRequestError = new BadRequestError('I have a type error');
       const transformed = transformError(error);
       expect(transformed).toEqual({
         message: 'I have a type error',
@@ -79,8 +80,8 @@ describe('utils', () => {
       });
     });
 
-    test('it detects a TypeError and returns a Boom status of 400', () => {
-      const error: TypeError = new TypeError('I have a type error');
+    test('it detects a BadRequestError and returns a Boom status of 400', () => {
+      const error: BadRequestError = new BadRequestError('I have a type error');
       const transformed = transformError(error);
       expect(transformed).toEqual({
         message: 'I have a type error',
@@ -127,8 +128,8 @@ describe('utils', () => {
       expect(transformed).toEqual(expected);
     });
 
-    test('it detects a TypeError and returns a Boom status of 400', () => {
-      const error: TypeError = new TypeError('I have a type error');
+    test('it detects a BadRequestError and returns a Boom status of 400', () => {
+      const error: BadRequestError = new BadRequestError('I have a type error');
       const transformed = transformBulkError('rule-1', error);
       const expected: BulkError = {
         rule_id: 'rule-1',
@@ -279,8 +280,8 @@ describe('utils', () => {
       expect(transformed).toEqual(expected);
     });
 
-    test('it detects a TypeError and returns a Boom status of 400', () => {
-      const error: TypeError = new TypeError('I have a type error');
+    test('it detects a BadRequestError and returns a Boom status of 400', () => {
+      const error: BadRequestError = new BadRequestError('I have a type error');
       const transformed = transformImportError('rule-1', error, {
         success_count: 1,
         success: false,
