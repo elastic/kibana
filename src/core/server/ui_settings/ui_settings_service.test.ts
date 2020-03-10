@@ -20,11 +20,12 @@ import { BehaviorSubject } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 
 import { MockUiSettingsClientConstructor } from './ui_settings_service.test.mock';
-
-import { UiSettingsService } from './ui_settings_service';
+import { UiSettingsService, SetupDeps } from './ui_settings_service';
 import { httpServiceMock } from '../http/http_service.mock';
 import { savedObjectsClientMock } from '../mocks';
+import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { mockCoreContext } from '../core_context.mock';
+import { uiSettingsType } from './saved_objects';
 
 const overrides = {
   overrideBaz: 'baz',
@@ -39,21 +40,34 @@ const defaults = {
   },
 };
 
-const coreContext = mockCoreContext.create();
-coreContext.configService.atPath.mockReturnValue(new BehaviorSubject({ overrides }));
-const httpSetup = httpServiceMock.createSetupContract();
-const setupDeps = { http: httpSetup };
-const savedObjectsClient = savedObjectsClientMock.create();
-
-afterEach(() => {
-  MockUiSettingsClientConstructor.mockClear();
-});
-
 describe('uiSettings', () => {
+  let service: UiSettingsService;
+  let setupDeps: SetupDeps;
+  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+
+  beforeEach(() => {
+    const coreContext = mockCoreContext.create();
+    coreContext.configService.atPath.mockReturnValue(new BehaviorSubject({ overrides }));
+    const httpSetup = httpServiceMock.createSetupContract();
+    const savedObjectsSetup = savedObjectsServiceMock.createInternalSetupContract();
+    setupDeps = { http: httpSetup, savedObjects: savedObjectsSetup };
+    savedObjectsClient = savedObjectsClientMock.create();
+    service = new UiSettingsService(coreContext);
+  });
+
+  afterEach(() => {
+    MockUiSettingsClientConstructor.mockClear();
+  });
+
   describe('#setup', () => {
+    it('registers the uiSettings type to the savedObjects registry', async () => {
+      await service.setup(setupDeps);
+      expect(setupDeps.savedObjects.registerType).toHaveBeenCalledTimes(1);
+      expect(setupDeps.savedObjects.registerType).toHaveBeenCalledWith(uiSettingsType);
+    });
+
     describe('#asScopedToClient', () => {
       it('passes saved object type "config" to UiSettingsClient', async () => {
-        const service = new UiSettingsService(coreContext);
         const setup = await service.setup(setupDeps);
         setup.asScopedToClient(savedObjectsClient);
         expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
@@ -61,7 +75,6 @@ describe('uiSettings', () => {
       });
 
       it('passes overrides to UiSettingsClient', async () => {
-        const service = new UiSettingsService(coreContext);
         const setup = await service.setup(setupDeps);
         setup.asScopedToClient(savedObjectsClient);
         expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
@@ -70,7 +83,6 @@ describe('uiSettings', () => {
       });
 
       it('passes a copy of set defaults to UiSettingsClient', async () => {
-        const service = new UiSettingsService(coreContext);
         const setup = await service.setup(setupDeps);
 
         setup.register(defaults);
@@ -84,7 +96,6 @@ describe('uiSettings', () => {
 
     describe('#register', () => {
       it('throws if registers the same key twice', async () => {
-        const service = new UiSettingsService(coreContext);
         const setup = await service.setup(setupDeps);
         setup.register(defaults);
         expect(() => setup.register(defaults)).toThrowErrorMatchingInlineSnapshot(
@@ -97,7 +108,6 @@ describe('uiSettings', () => {
   describe('#start', () => {
     describe('validation', () => {
       it('validates registered definitions', async () => {
-        const service = new UiSettingsService(coreContext);
         const { register } = await service.setup(setupDeps);
         register({
           custom: {
@@ -119,8 +129,8 @@ describe('uiSettings', () => {
             },
           })
         );
-        const service = new UiSettingsService(coreContext);
-        const { register } = await service.setup(setupDeps);
+        const customizedService = new UiSettingsService(coreContext);
+        const { register } = await customizedService.setup(setupDeps);
         register({
           custom: {
             value: '42',
@@ -128,7 +138,7 @@ describe('uiSettings', () => {
           },
         });
 
-        await expect(service.start()).rejects.toMatchInlineSnapshot(
+        await expect(customizedService.start()).rejects.toMatchInlineSnapshot(
           `[Error: [ui settings overrides [custom]]: expected value of type [string] but got [number]]`
         );
       });
@@ -136,7 +146,6 @@ describe('uiSettings', () => {
 
     describe('#asScopedToClient', () => {
       it('passes saved object type "config" to UiSettingsClient', async () => {
-        const service = new UiSettingsService(coreContext);
         await service.setup(setupDeps);
         const start = await service.start();
         start.asScopedToClient(savedObjectsClient);
@@ -146,7 +155,6 @@ describe('uiSettings', () => {
       });
 
       it('passes overrides to UiSettingsClient', async () => {
-        const service = new UiSettingsService(coreContext);
         await service.setup(setupDeps);
         const start = await service.start();
         start.asScopedToClient(savedObjectsClient);
@@ -156,7 +164,6 @@ describe('uiSettings', () => {
       });
 
       it('passes a copy of set defaults to UiSettingsClient', async () => {
-        const service = new UiSettingsService(coreContext);
         const setup = await service.setup(setupDeps);
         setup.register(defaults);
         const start = await service.start();

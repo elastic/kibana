@@ -128,14 +128,15 @@ export class Server {
       http: httpSetup,
     });
 
-    const uiSettingsSetup = await this.uiSettings.setup({
-      http: httpSetup,
-    });
-
     const savedObjectsSetup = await this.savedObjects.setup({
       http: httpSetup,
       elasticsearch: elasticsearchServiceSetup,
       legacyPlugins,
+    });
+
+    const uiSettingsSetup = await this.uiSettings.setup({
+      http: httpSetup,
+      savedObjects: savedObjectsSetup,
     });
 
     const metricsSetup = await this.metrics.setup({ http: httpSetup });
@@ -252,6 +253,7 @@ export class Server {
           },
           savedObjects: {
             client: savedObjectsClient,
+            typeRegistry: this.coreStart!.savedObjects.getTypeRegistry(),
           },
           elasticsearch: {
             adminClient: coreSetup.elasticsearch.adminClient.asScoped(req),

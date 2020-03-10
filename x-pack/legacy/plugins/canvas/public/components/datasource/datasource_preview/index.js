@@ -6,7 +6,7 @@
 
 import { pure, compose, lifecycle, withState, branch, renderComponent } from 'recompose';
 import { PropTypes } from 'prop-types';
-import { interpretAst } from 'plugins/interpreter/interpreter';
+import { interpretAst } from '../../../lib/run_interpreter';
 import { Loading } from '../../loading';
 import { DatasourcePreview as Component } from './datasource_preview';
 
