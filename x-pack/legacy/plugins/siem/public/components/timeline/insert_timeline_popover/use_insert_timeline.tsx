@@ -10,7 +10,7 @@ import { CursorPosition } from '../../markdown_editor';
 import { FormData, FormHook } from '../../../shared_imports';
 
 export const useInsertTimeline = <T extends FormData>(form: FormHook<T>, fieldName: string) => {
-  const basePath = useBasePath();
+  const basePath = window.location.origin + useBasePath();
   const [cursorPosition, setCursorPosition] = useState<CursorPosition>({
     start: 0,
     end: 0,
@@ -18,23 +18,14 @@ export const useInsertTimeline = <T extends FormData>(form: FormHook<T>, fieldNa
   const handleOnTimelineChange = useCallback(
     (title: string, id: string | null) => {
       const builtLink = `${basePath}/app/siem#/timelines?timeline=(id:${id},isOpen:!t)`;
-
       const currentValue = form.getFormData()[fieldName];
-      let newValue: string;
-      if (cursorPosition.start === cursorPosition.end) {
-        const b = `[${title}](${builtLink})`;
-        newValue = [
-          currentValue.slice(0, cursorPosition.start),
-          b,
-          currentValue.slice(cursorPosition.end),
-        ].join('');
-      } else {
-        newValue = [
-          currentValue.slice(0, cursorPosition.start),
-          `[${currentValue.slice(cursorPosition.start, cursorPosition.end)}](${builtLink})`,
-          currentValue.slice(cursorPosition.end),
-        ].join('');
-      }
+      const newValue: string = [
+        currentValue.slice(0, cursorPosition.start),
+        cursorPosition.start === cursorPosition.end
+          ? `[${title}](${builtLink})`
+          : `[${currentValue.slice(cursorPosition.start, cursorPosition.end)}](${builtLink})`,
+        currentValue.slice(cursorPosition.end),
+      ].join('');
       form.setFieldValue(fieldName, newValue);
     },
     [form]

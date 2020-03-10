@@ -90,14 +90,19 @@ export const MarkdownEditor = React.memo<{
     useEffect(() => {
       onChange(content);
     }, [content]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const setCursorPosition = useCallback((e: any) => {
+
+    const setCursorPosition = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       if (onCursorPositionUpdate) {
         onCursorPositionUpdate({
           start: e!.target!.selectionStart ?? 0,
           end: e!.target!.selectionEnd ?? 0,
         });
       }
+      return false;
+    };
+
+    const handleSetContent = useCallback(e => {
+      handleSetContent(e.target.value);
     }, []);
 
     useEffect(() => {
@@ -111,14 +116,8 @@ export const MarkdownEditor = React.memo<{
           name: i18n.MARKDOWN,
           content: (
             <TextArea
-              onChange={e => {
-                setContent(e.target.value);
-              }}
-              inputRef={x => {
-                if (x != null) {
-                  x.addEventListener('blur', setCursorPosition);
-                }
-              }}
+              onChange={handleSetContent}
+              onBlur={setCursorPosition}
               aria-label={`markdown-editor-comment`}
               fullWidth={true}
               disabled={isDisabled}
