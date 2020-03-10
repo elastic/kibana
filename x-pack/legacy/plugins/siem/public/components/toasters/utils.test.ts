@@ -55,7 +55,7 @@ describe('error_to_toaster', () => {
 
     test('dispatches an error toast given an ApiError with a message', () => {
       const error = new ApiError('Internal Server Error');
-      error.body = { message: 'something bad happened' };
+      error.body = { message: 'something bad happened', status_code: 500 };
 
       errorToToaster({ id: 'some-made-up-id', title: 'some title', error, dispatchToaster });
       expect(dispatchToaster.mock.calls[0]).toEqual([
