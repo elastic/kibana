@@ -67,19 +67,16 @@ export const distro = obj => {
 };
 
 const captureAfterJobNameAndRootFolder = /.*elastic\+kibana\+code-coverage\/kibana(.*$)/;
-const afterJobNameAndRootFolder = x =>
-  captureAfterJobNameAndRootFolder.exec(x)[1];
-const fixFront = x =>
-  afterJobNameAndRootFolder(x);
+const afterJobNameAndRootFolder = x => captureAfterJobNameAndRootFolder.exec(x)[1];
+const fixFront = x => afterJobNameAndRootFolder(x);
 
-export const staticSite = (urlBase, liveAppPath) => obj => {
+export const staticSite = urlBase => obj => {
   const { staticSiteUrl , testRunnerType } = obj;
   const ts = obj['@timestamp'];
 
   const parts = [
     `${urlBase}/`,
     ts,
-    `/${liveAppPath}`,
   ];
 
   const join = xs => x => `${xs.join('')}${x}`;
@@ -100,7 +97,12 @@ export const staticSite = (urlBase, liveAppPath) => obj => {
         return right(staticSiteUrl)
           .map(fixFront)
           .map(x =>
-            [...parts, '/coverage_data/', `${testRunnerType.toLowerCase()}-combined`, x, '.html'].join('')
+            [
+              ...parts,
+              `${testRunnerType.toLowerCase()}-combined`,
+              x,
+              '.html'
+            ].join('')
           )
           .fold(noop, id)
       }

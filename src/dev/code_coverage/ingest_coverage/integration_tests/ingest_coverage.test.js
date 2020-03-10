@@ -74,7 +74,6 @@ describe('Ingesting Coverage to Cluster', () => {
         it(`should have a link to the index page for the specific test runner`, () => {
           const totalsIndexRegexes = {
             ...staticSiteUrlRegexes,
-            folderStructureIncluded: /live_cc_app\//,
             endsInDotHtml: /.html$/,
           };
 
@@ -104,7 +103,7 @@ describe('Ingesting Coverage to Cluster', () => {
           F(siteUrlsSplitByNewLineWithoutBlanks(mutableCoverageIndexChunks)
             .forEach(expectAllRegexesToPass({
                 ...staticSiteUrlRegexes,
-                folderStructureIncluded: /live_cc_app\/coverage_data\/(?:.*|.*-combined)\//,
+                folderStructureIncluded: /\/(?:.*|.*-combined)\//,
                 endsInDotJsDotHtml: /.js.html$/,
               }),
             ),
@@ -190,6 +189,6 @@ function expectAllRegexesToPass (staticSiteUrlRegexes) {
     Object.entries(staticSiteUrlRegexes)
       .forEach(regexTuple => {
         if (!regexTuple[1].test(urlLine))
-          throw new Error(`\n### ${green('FAILED')} Asserting: [${regexTuple[0]}]\n\tAgainst: [\n${urlLine}\n]`);
+          throw new Error(`\n### ${green('FAILED')}\nAsserting: [\n\t${green(regexTuple[0])}\n]\nAgainst: [\n\t${urlLine}\n]`);
       });
 }
