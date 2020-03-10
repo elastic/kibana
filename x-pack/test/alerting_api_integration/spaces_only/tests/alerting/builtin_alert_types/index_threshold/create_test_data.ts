@@ -24,9 +24,9 @@ const DOCUMENT_SOURCE = 'queryDataEndpointTests';
 export async function createEsDocuments(
   es: any,
   esTestIndexTool: ESTestIndexTool,
-  startDate: string,
-  intervals: number,
-  intervalMillis: number
+  startDate: string = START_DATE,
+  intervals: number = 1,
+  intervalMillis: number = 1000
 ) {
   const totalDocuments = intervals * 2;
   const startDateMillis = Date.parse(startDate) - intervalMillis / 2;
