@@ -19,7 +19,7 @@ export function MachineLearningNavigationProvider({
     async navigateToMl() {
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('ml');
-        await testSubjects.existOrFail('mlPageOverview');
+        await testSubjects.existOrFail('mlPageOverview', { timeout: 2000 });
       });
     },
 
