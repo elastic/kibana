@@ -314,7 +314,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             <EuiFlexItem grow={true}>
               <EuiText color="subdued" size="xs" style={{ whiteSpace: 'nowrap' }}>
                 <FormattedMessage
-                  id="xpack.ingestManager.agentConfigList.revisionNumber"
+                  id="xpack.ingestManager.agentList.revisionNumber"
                   defaultMessage="rev. {revNumber}"
                   values={{ revNumber: '999' }} // TODO fix when we have revision
                 />
@@ -324,7 +324,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         );
         return configName ? (
           <ConnectedLink color="primary" path={`/configs/${configId}`}>
-            {configName}{' '}
+            {configName}
             <EuiFlexItem>
               <EuiText color="subdued" size="xs" style={{ whiteSpace: 'nowrap' }}>
                 <FormattedMessage
@@ -622,6 +622,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                   <div className="euiFilterSelect__items">
                     {statusFilters.map(({ label, status }, idx) => (
                       <EuiFilterSelectItem
+                        key={idx}
                         checked={selectedStatus.includes(status) ? 'on' : undefined}
                         onClick={() => {
                           if (selectedStatus.includes(status)) {
