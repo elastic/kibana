@@ -7,8 +7,9 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { useObservable } from 'react-use';
 import { HashRouter as Router, Redirect, Switch, Route, RouteProps } from 'react-router-dom';
-import { CoreStart, AppMountParameters } from 'kibana/public';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiErrorBoundary } from '@elastic/eui';
+import { CoreStart, AppMountParameters } from 'kibana/public';
 import { EuiThemeProvider } from '../../../../../legacy/common/eui_styled_components';
 import {
   IngestManagerSetupDeps,
@@ -16,16 +17,10 @@ import {
   IngestManagerStartDeps,
 } from '../../plugin';
 import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH } from './constants';
-import { DefaultLayout } from './layouts';
+import { DefaultLayout, WithoutHeaderLayout } from './layouts';
+import { Loading, Error } from './components';
 import { IngestManagerOverview, EPMApp, AgentConfigApp, FleetApp } from './sections';
-import {
-  CoreContext,
-  DepsContext,
-  ConfigContext,
-  setHttpClient,
-  useConfig,
-  useCore,
-} from './hooks';
+import { CoreContext, DepsContext, ConfigContext, setHttpClient, useConfig } from './hooks';
 import { PackageInstallProvider } from './sections/epm/hooks';
 import { sendSetup } from './hooks/use_request/setup';
 
@@ -44,29 +39,49 @@ export const ProtectedRoute: React.FunctionComponent<ProtectedRouteProps> = ({
 
 const IngestManagerRoutes = ({ ...rest }) => {
   const { epm, fleet } = useConfig();
-  const { notifications } = useCore();
 
-  const [isInitialized, setIsIntialized] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [initializationError, setInitializationError] = useState<Error | null>(null);
 
   useEffect(() => {
     (async () => {
+      setIsInitialized(false);
+      setInitializationError(null);
       try {
         const res = await sendSetup();
         if (res.error) {
-          throw res.error;
+          setInitializationError(res.error);
         }
-        setIsIntialized(true);
       } catch (err) {
-        notifications.toasts.addError(err, {
-          title: 'Unable to initialize Ingest Manager',
-        });
+        setInitializationError(err);
       }
+      setIsInitialized(true);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!isInitialized) {
-    return null;
+  if (!isInitialized || initializationError) {
+    return (
+      <EuiErrorBoundary>
+        <DefaultLayout>
+          <WithoutHeaderLayout>
+            {initializationError ? (
+              <Error
+                title={
+                  <FormattedMessage
+                    id="xpack.ingestManager.initializationErrorMessageTitle"
+                    defaultMessage="Unable to initialize Ingest Manager"
+                  />
+                }
+                error={initializationError}
+              />
+            ) : (
+              <Loading />
+            )}
+          </WithoutHeaderLayout>
+        </DefaultLayout>
+      </EuiErrorBoundary>
+    );
   }
 
   return (

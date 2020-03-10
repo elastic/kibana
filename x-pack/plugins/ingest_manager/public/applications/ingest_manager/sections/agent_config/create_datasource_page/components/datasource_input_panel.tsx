@@ -44,7 +44,7 @@ export const DatasourceInputPanel: React.FunctionComponent<{
           <EuiSwitch
             label={
               <EuiText>
-                <h4>{packageInput.description || packageInput.type}</h4>
+                <h4>{packageInput.title || packageInput.type}</h4>
               </EuiText>
             }
             checked={datasourceInput.enabled}

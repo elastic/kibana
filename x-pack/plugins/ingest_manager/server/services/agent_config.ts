@@ -11,11 +11,10 @@ import {
   NewAgentConfig,
   AgentConfig,
   FullAgentConfig,
-  FullAgentConfigDatasource,
   AgentConfigStatus,
   ListWithKuery,
 } from '../types';
-import { DeleteAgentConfigsResponse } from '../../common';
+import { DeleteAgentConfigsResponse, storedDatasourceToAgentDatasource } from '../../common';
 import { datasourceService } from './datasource';
 import { outputService } from './output';
 import { agentConfigUpdateEventHandler } from './agent_config_update';
@@ -265,34 +264,6 @@ class AgentConfigService {
     return result;
   }
 
-  private storedDatasourceToAgentDatasource = (
-    datasource: Datasource
-  ): FullAgentConfigDatasource => {
-    const { name, namespace, enabled, package: pkg, output_id, inputs } = datasource;
-    return {
-      name,
-      namespace,
-      enabled,
-      package: pkg
-        ? {
-            name: pkg.name,
-            version: pkg.version,
-          }
-        : undefined,
-      use_output: output_id,
-      inputs: inputs
-        .filter(input => input.enabled)
-        .map(input => ({
-          ...input,
-          streams: input.streams.map(stream => ({
-            ...stream,
-            config: undefined,
-            ...(stream.config || {}),
-          })),
-        })),
-    };
-  };
-
   public async getFullConfig(
     soClient: SavedObjectsClientContract,
     id: string
@@ -329,7 +300,7 @@ class AgentConfigService {
         }, {} as FullAgentConfig['outputs']),
       },
       datasources: (config.datasources as Datasource[]).map(ds =>
-        this.storedDatasourceToAgentDatasource(ds)
+        storedDatasourceToAgentDatasource(ds)
       ),
     };
 

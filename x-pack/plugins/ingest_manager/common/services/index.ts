@@ -5,3 +5,4 @@
  */
 export * from './routes';
 export { packageToConfigDatasourceInputs } from './package_to_config';
+export { storedDatasourceToAgentDatasource } from './datasource_to_agent_datasource';
