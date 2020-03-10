@@ -29,7 +29,7 @@ export interface FlyoutEditDrilldownParams {
   drilldowns: () => Promise<DrilldownsStartContract>;
 }
 
-const displayName = i18n.translate('xpack.drilldowns.panel.openFlyoutEditDrilldown.displayName', {
+const displayName = i18n.translate('xpack.dashboard.panel.openFlyoutEditDrilldown.displayName', {
   defaultMessage: 'Manage drilldowns',
 });
 

@@ -19,12 +19,10 @@
 
 import { UiComponent } from 'src/plugins/kibana_utils/common';
 
-export type PresentableBaseContext = object;
-
 /**
  * Represents something that can be displayed to user in UI.
  */
-export interface Presentable<Context extends PresentableBaseContext = PresentableBaseContext> {
+export interface Presentable<Context extends object = object> {
   /**
    * ID that uniquely identifies this object.
    */

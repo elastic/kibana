@@ -7,7 +7,7 @@
 import { CoreStart, CoreSetup, Plugin } from 'src/core/public';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { AdvancedUiActionsSetup, AdvancedUiActionsStart } from '../../advanced_ui_actions/public';
-import { DrilldownService, DrilldownServiceSetupContract } from './service';
+import { DrilldownService, DrilldownServiceSetupContract } from './services';
 import { createFlyoutManageDrilldowns } from './components/connected_flyout_manage_drilldowns';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 
