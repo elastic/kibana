@@ -59,7 +59,7 @@ describe('ServiceNow lib', () => {
     const res = await serviceNow.getUserID();
     const [url, { method }] = axiosMock.mock.calls[0];
 
-    expect(url).toEqual(prependInstanceUrl('api/now/v1/table/sys_user?user_name=username'));
+    expect(url).toEqual(prependInstanceUrl('api/now/v2/table/sys_user?user_name=username'));
     expect(method).toEqual('get');
     expect(res).toEqual('123');
   });
@@ -80,7 +80,7 @@ describe('ServiceNow lib', () => {
     });
     const [url, { method, data }] = axiosMock.mock.calls[0];
 
-    expect(url).toEqual(prependInstanceUrl('api/now/v1/table/incident'));
+    expect(url).toEqual(prependInstanceUrl('api/now/v2/table/incident'));
     expect(method).toEqual('post');
     expect(data).toEqual({
       short_description: 'A title',
@@ -109,7 +109,7 @@ describe('ServiceNow lib', () => {
     });
     const [url, { method, data }] = axiosMock.mock.calls[0];
 
-    expect(url).toEqual(prependInstanceUrl(`api/now/v1/table/incident/123`));
+    expect(url).toEqual(prependInstanceUrl(`api/now/v2/table/incident/123`));
     expect(method).toEqual('patch');
     expect(data).toEqual({ short_description: params.title });
     expect(res).toEqual({
@@ -139,7 +139,7 @@ describe('ServiceNow lib', () => {
 
     const [url, { method, data }] = axiosMock.mock.calls[0];
 
-    expect(url).toEqual(prependInstanceUrl(`api/now/v1/table/incident/123`));
+    expect(url).toEqual(prependInstanceUrl(`api/now/v2/table/incident/123`));
     expect(method).toEqual('patch');
     expect(data).toEqual({
       comments: 'A comment',
@@ -186,7 +186,7 @@ describe('ServiceNow lib', () => {
 
     comments.forEach((comment, index) => {
       const [url, { method, data }] = axiosMock.mock.calls[index];
-      expect(url).toEqual(prependInstanceUrl('api/now/v1/table/incident/000'));
+      expect(url).toEqual(prependInstanceUrl('api/now/v2/table/incident/000'));
       expect(method).toEqual('patch');
       expect(data).toEqual({
         comments: comment.comment,
