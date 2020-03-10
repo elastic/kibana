@@ -66,7 +66,7 @@ const dataFetchReducer = (state: CommentUpdateState, action: Action): CommentUpd
         isError: true,
       };
     default:
-      throw new Error();
+      return state;
   }
 };
 

@@ -58,7 +58,7 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
         updateKey: null,
       };
     default:
-      throw new Error();
+      return state;
   }
 };
 

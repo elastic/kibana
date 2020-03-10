@@ -42,7 +42,7 @@ const dataFetchReducer = (state: TagsState, action: Action): TagsState => {
         isError: true,
       };
     default:
-      throw new Error();
+      return state;
   }
 };
 const initialData: string[] = [];

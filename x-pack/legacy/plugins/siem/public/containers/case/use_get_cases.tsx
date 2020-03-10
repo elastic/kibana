@@ -96,7 +96,7 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
         selectedCases: action.payload,
       };
     default:
-      throw new Error();
+      return state;
   }
 };
 

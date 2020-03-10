@@ -52,7 +52,7 @@ const dataFetchReducer = (state: NewCommentState, action: Action): NewCommentSta
         isError: true,
       };
     default:
-      throw new Error();
+      return state;
   }
 };
 

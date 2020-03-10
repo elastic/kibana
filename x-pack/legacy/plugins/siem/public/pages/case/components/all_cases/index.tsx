@@ -59,11 +59,9 @@ const FlexItemDivider = styled(EuiFlexItem)`
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ theme }) => css`
-    .euiFlexGroup--gutterMedium > &.euiFlexItem {
-      top: 2px;
-      border-radius: ${theme.eui.euiBorderRadius};
-      z-index: ${theme.eui.euiZHeader};
-    }
+    top: 2px;
+    border-radius: ${theme.eui.euiBorderRadius};
+    z-index: ${theme.eui.euiZHeader};
   `}
 `;
 
@@ -264,7 +262,7 @@ export const AllCases = React.memo(() => {
         </EuiFlexGroup>
       </CaseHeaderPage>
       {(isCasesLoading || isDeleting) && !isDataEmpty && (
-        <ProgressLoader size="xs" color="accent" />
+        <ProgressLoader size="xs" color="accent" className="essentialAnimation" />
       )}
       <Panel loading={isCasesLoading}>
         <CasesTableFilters

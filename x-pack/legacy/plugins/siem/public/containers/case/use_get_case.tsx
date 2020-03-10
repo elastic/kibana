@@ -44,7 +44,7 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
         isError: true,
       };
     default:
-      throw new Error();
+      return state;
   }
 };
 const initialData: Case = {

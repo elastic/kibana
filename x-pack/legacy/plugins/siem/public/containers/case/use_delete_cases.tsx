@@ -54,7 +54,7 @@ const dataFetchReducer = (state: DeleteState, action: Action): DeleteState => {
         isDeleted: false,
       };
     default:
-      throw new Error();
+      return state;
   }
 };
 interface UseDeleteCase extends DeleteState {
@@ -72,24 +72,27 @@ export const useDeleteCases = (): UseDeleteCase => {
   });
   const [, dispatchToaster] = useStateToaster();
 
-  const dispatchDeleteCases = useCallback(async (caseIds: string[]) => {
+  const dispatchDeleteCases = useCallback((caseIds: string[]) => {
     let cancel = false;
-    try {
-      dispatch({ type: 'FETCH_INIT' });
-      await deleteCases(caseIds);
-      if (!cancel) {
-        dispatch({ type: 'FETCH_SUCCESS', payload: true });
+    const deleteData = async () => {
+      try {
+        dispatch({ type: 'FETCH_INIT' });
+        await deleteCases(caseIds);
+        if (!cancel) {
+          dispatch({ type: 'FETCH_SUCCESS', payload: true });
+        }
+      } catch (error) {
+        if (!cancel) {
+          errorToToaster({
+            title: i18n.ERROR_TITLE,
+            error: error.body && error.body.message ? new Error(error.body.message) : error,
+            dispatchToaster,
+          });
+          dispatch({ type: 'FETCH_FAILURE' });
+        }
       }
-    } catch (error) {
-      if (!cancel) {
-        errorToToaster({
-          title: i18n.ERROR_TITLE,
-          error: error.body && error.body.message ? new Error(error.body.message) : error,
-          dispatchToaster,
-        });
-        dispatch({ type: 'FETCH_FAILURE' });
-      }
-    }
+    };
+    deleteData();
     return () => {
       cancel = true;
     };
