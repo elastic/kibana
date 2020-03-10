@@ -1382,7 +1382,10 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance.find(DragDrop).prop('onDrop')!({
+        instance
+          .find(DragDrop)
+          .filter('[data-test-subj="indexPattern-dropTarget"]')
+          .prop('onDrop')!({
           indexPatternId: '1',
           field: {},
         });
@@ -1477,7 +1480,10 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance.find(DragDrop).prop('onDrop')!({
+        instance
+          .find(DragDrop)
+          .filter('[data-test-subj="lnsWorkspace"]')
+          .prop('onDrop')!({
           indexPatternId: '1',
           field: {},
         });
