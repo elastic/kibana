@@ -128,7 +128,7 @@ rollup index, or you can remove or archive it using <<creating-index-lifecycle-p
 Your next step is to visualize your rolled up data in a vertical bar chart.
 Most visualizations support rolled up data, with the exception of Timelion, TSVB, and Vega visualizations.
 
-Using the information from the example rollup configuration described above,
+Using the information from the example rollup configuration,
 you can use `rollup_logstash` to match the rolled up index pattern,
 and `kibana_sample_data_logs` to match the index pattern for raw data.
 The notation for a combination index pattern with both raw and rolled up data

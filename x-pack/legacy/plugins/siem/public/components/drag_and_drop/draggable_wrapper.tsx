@@ -30,6 +30,24 @@ DragEffects.displayName = 'DragEffects';
 export const DraggablePortalContext = createContext<boolean>(false);
 export const useDraggablePortalContext = () => useContext(DraggablePortalContext);
 
+/**
+ * Wraps the `react-beautiful-dnd` error boundary. See also:
+ * https://github.com/atlassian/react-beautiful-dnd/blob/v12.0.0/docs/guides/setup-problem-detection-and-error-recovery.md
+ *
+ * NOTE: This extends from `PureComponent` because, at the time of this
+ * writing, there's no hook equivalent for `componentDidCatch`, per
+ * https://reactjs.org/docs/hooks-faq.html#do-hooks-cover-all-use-cases-for-classes
+ */
+class DragDropErrorBoundary extends React.PureComponent {
+  componentDidCatch() {
+    this.forceUpdate(); // required for recovery
+  }
+
+  render() {
+    return this.props.children;
+  }
+}
+
 const Wrapper = styled.div`
   display: inline-block;
   max-width: 100%;
@@ -94,50 +112,52 @@ export const DraggableWrapper = React.memo<Props>(
 
     return (
       <Wrapper data-test-subj="draggableWrapperDiv">
-        <Droppable isDropDisabled={true} droppableId={getDroppableId(dataProvider.id)}>
-          {droppableProvided => (
-            <div ref={droppableProvided.innerRef} {...droppableProvided.droppableProps}>
-              <Draggable
-                draggableId={getDraggableId(dataProvider.id)}
-                index={0}
-                key={getDraggableId(dataProvider.id)}
-              >
-                {(provided, snapshot) => (
-                  <ConditionalPortal
-                    isDragging={snapshot.isDragging}
-                    registerProvider={registerProvider}
-                    usePortal={snapshot.isDragging && usePortal}
-                  >
-                    <ProviderContainer
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      ref={provided.innerRef}
-                      data-test-subj="providerContainer"
+        <DragDropErrorBoundary>
+          <Droppable isDropDisabled={true} droppableId={getDroppableId(dataProvider.id)}>
+            {droppableProvided => (
+              <div ref={droppableProvided.innerRef} {...droppableProvided.droppableProps}>
+                <Draggable
+                  draggableId={getDraggableId(dataProvider.id)}
+                  index={0}
+                  key={getDraggableId(dataProvider.id)}
+                >
+                  {(provided, snapshot) => (
+                    <ConditionalPortal
                       isDragging={snapshot.isDragging}
                       registerProvider={registerProvider}
-                      style={{
-                        ...provided.draggableProps.style,
-                      }}
+                      usePortal={snapshot.isDragging && usePortal}
                     >
-                      {truncate && !snapshot.isDragging ? (
-                        <TruncatableText data-test-subj="draggable-truncatable-content">
-                          {render(dataProvider, provided, snapshot)}
-                        </TruncatableText>
-                      ) : (
-                        <ProviderContentWrapper
-                          data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}
-                        >
-                          {render(dataProvider, provided, snapshot)}
-                        </ProviderContentWrapper>
-                      )}
-                    </ProviderContainer>
-                  </ConditionalPortal>
-                )}
-              </Draggable>
-              {droppableProvided.placeholder}
-            </div>
-          )}
-        </Droppable>
+                      <ProviderContainer
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        ref={provided.innerRef}
+                        data-test-subj="providerContainer"
+                        isDragging={snapshot.isDragging}
+                        registerProvider={registerProvider}
+                        style={{
+                          ...provided.draggableProps.style,
+                        }}
+                      >
+                        {truncate && !snapshot.isDragging ? (
+                          <TruncatableText data-test-subj="draggable-truncatable-content">
+                            {render(dataProvider, provided, snapshot)}
+                          </TruncatableText>
+                        ) : (
+                          <ProviderContentWrapper
+                            data-test-subj={`draggable-content-${dataProvider.queryMatch.field}`}
+                          >
+                            {render(dataProvider, provided, snapshot)}
+                          </ProviderContentWrapper>
+                        )}
+                      </ProviderContainer>
+                    </ConditionalPortal>
+                  )}
+                </Draggable>
+                {droppableProvided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropErrorBoundary>
       </Wrapper>
     );
   },

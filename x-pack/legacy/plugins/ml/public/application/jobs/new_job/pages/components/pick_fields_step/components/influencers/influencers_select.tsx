@@ -5,7 +5,7 @@
  */
 
 import React, { FC, useContext } from 'react';
-import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Field } from '../../../../../../../../../common/types/fields';
@@ -22,14 +22,14 @@ interface Props {
 
 export const InfluencersSelect: FC<Props> = ({ fields, changeHandler, selectedInfluencers }) => {
   const { jobCreator } = useContext(JobCreatorContext);
-  const options: EuiComboBoxOptionProps[] = [
+  const options: EuiComboBoxOptionOption[] = [
     ...createFieldOptions(fields, jobCreator.additionalFields),
     ...createMlcategoryFieldOption(jobCreator.categorizationFieldName),
   ];
 
-  const selection: EuiComboBoxOptionProps[] = selectedInfluencers.map(i => ({ label: i }));
+  const selection: EuiComboBoxOptionOption[] = selectedInfluencers.map(i => ({ label: i }));
 
-  function onChange(selectedOptions: EuiComboBoxOptionProps[]) {
+  function onChange(selectedOptions: EuiComboBoxOptionOption[]) {
     changeHandler(selectedOptions.map(o => o.label));
   }
 

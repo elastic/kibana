@@ -22,11 +22,6 @@ describe('when on the managing page', () => {
   let history: MemoryHistory<never>;
   let store: ReturnType<typeof appStoreFactory>;
 
-  let queryByTestSubjId: (
-    renderResult: reactTestingLibrary.RenderResult,
-    testSubjId: string
-  ) => Promise<Element | null>;
-
   beforeEach(async () => {
     history = createMemoryHistory<never>();
     store = appStoreFactory(coreMock.createStart(), true);
@@ -43,20 +38,11 @@ describe('when on the managing page', () => {
         </Provider>
       );
     };
-
-    queryByTestSubjId = async (renderResult, testSubjId) => {
-      return await reactTestingLibrary.waitForElement(
-        () => document.body.querySelector(`[data-test-subj="${testSubjId}"]`),
-        {
-          container: renderResult.container,
-        }
-      );
-    };
   });
 
   it('should show a table', async () => {
     const renderResult = render();
-    const table = await queryByTestSubjId(renderResult, 'managementListTable');
+    const table = await renderResult.findByTestId('managementListTable');
     expect(table).not.toBeNull();
   });
 
@@ -64,7 +50,7 @@ describe('when on the managing page', () => {
     it('should not show the flyout', () => {
       const renderResult = render();
       expect.assertions(1);
-      return queryByTestSubjId(renderResult, 'managementDetailsFlyout').catch(e => {
+      return renderResult.findByTestId('managementDetailsFlyout').catch(e => {
         expect(e).not.toBeNull();
       });
     });
@@ -89,14 +75,14 @@ describe('when on the managing page', () => {
         let renderResult: reactTestingLibrary.RenderResult;
         beforeEach(async () => {
           renderResult = render();
-          const detailsLink = await queryByTestSubjId(renderResult, 'hostnameCellLink');
+          const detailsLink = await renderResult.findByTestId('hostnameCellLink');
           if (detailsLink) {
             reactTestingLibrary.fireEvent.click(detailsLink);
           }
         });
 
         it('should show the flyout', () => {
-          return queryByTestSubjId(renderResult, 'managementDetailsFlyout').then(flyout => {
+          return renderResult.findByTestId('managementDetailsFlyout').then(flyout => {
             expect(flyout).not.toBeNull();
           });
         });
@@ -115,7 +101,7 @@ describe('when on the managing page', () => {
     });
     it('should show the flyout', () => {
       const renderResult = render();
-      return queryByTestSubjId(renderResult, 'managementDetailsFlyout').then(flyout => {
+      return renderResult.findByTestId('managementDetailsFlyout').then(flyout => {
         expect(flyout).not.toBeNull();
       });
     });

@@ -610,7 +610,7 @@ export interface HttpFetchOptionsWithPath extends HttpFetchOptions {
 // @public (undocumented)
 export interface HttpFetchQuery {
     // (undocumented)
-    [key: string]: string | number | boolean | undefined;
+    [key: string]: string | number | boolean | undefined | Array<string | number | boolean | undefined>;
 }
 
 // @public
