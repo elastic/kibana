@@ -12,7 +12,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
 
-  describe('Endpoint Host List', function() {
+  describe('Endpoint host list', function() {
     this.tags('ciGroup7');
     before(async () => {
       await esArchiver.load('endpoint/metadata/api_feature');
@@ -82,25 +82,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await esArchiver.load('endpoint/metadata/api_feature');
     });
 
-    after(async () => {
-      await esArchiver.unload('endpoint/metadata/api_feature');
-    });
-    describe('when on the details page', function() {
-      // details flyout is shown
-      // data matches mock
-      // clicking on the endpoint list changes/not
-      // navigating to a url with an id
-      this.tags('ciGroup7');
+    describe('when on the details page', () => {
       before(async () => {
+        await esArchiver.load('endpoint/metadata/api_feature');
         await pageObjects.common.navigateToUrlWithBrowserHistory(
           'endpoint',
-          '/hosts/?selected_host=de5bf078-c247-4944-a198-6e2bc27e0b7b'
+          '/hosts',
+          'selected_host=de5bf078-c247-4944-a198-6e2bc27e0b7b'
         );
       });
 
       it('displays shows a flyout', async () => {
-        return (flyout = await testSubjects.find('hostDetailsFlyout'));
+        await testSubjects.existOrFail('hostDetailsFlyout');
       });
+    });
+    after(async () => {
+      await esArchiver.unload('endpoint/metadata/api_feature');
     });
   });
 };
