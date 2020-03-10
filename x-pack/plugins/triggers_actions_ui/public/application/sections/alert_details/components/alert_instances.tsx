@@ -142,13 +142,12 @@ export function AlertInstances({
     size: DEFAULT_SEARCH_PAGE_SIZE,
   });
 
-  const durationSinceEpoch = durationSince(durationEpoch);
   const mergedAlertInstances = [
     ...Object.entries(alertInstances).map(([instanceId, instance]) =>
-      alertInstanceToListItem(durationSinceEpoch, alert, instanceId, instance)
+      alertInstanceToListItem(durationEpoch, alert, instanceId, instance)
     ),
     ...difference(alert.mutedInstanceIds, Object.keys(alertInstances)).map(instanceId =>
-      alertInstanceToListItem(durationSinceEpoch, alert, instanceId)
+      alertInstanceToListItem(durationEpoch, alert, instanceId)
     ),
   ];
   const pageOfAlertInstances = getPage(mergedAlertInstances, pagination);
@@ -218,11 +217,11 @@ const INACTIVE_LABEL = i18n.translate(
   { defaultMessage: 'Inactive' }
 );
 
-export const durationSince = (durationEpoch: number) => (startTime?: number) =>
+const durationSince = (durationEpoch: number, startTime?: number) =>
   startTime ? durationEpoch - startTime : 0;
 
 export function alertInstanceToListItem(
-  durationSinceEpoch: (startTime: number) => number,
+  durationEpoch: number,
   alert: Alert,
   instanceId: string,
   instance?: RawAlertInstance
@@ -234,7 +233,10 @@ export function alertInstanceToListItem(
       ? { label: ACTIVE_LABEL, healthColor: 'primary' }
       : { label: INACTIVE_LABEL, healthColor: 'subdued' },
     start: instance?.meta?.lastScheduledActions?.date,
-    duration: durationSinceEpoch(instance?.meta?.lastScheduledActions?.date?.getTime() ?? 0),
+    duration: durationSince(
+      durationEpoch,
+      instance?.meta?.lastScheduledActions?.date?.getTime() ?? 0
+    ),
     isMuted,
   };
 }

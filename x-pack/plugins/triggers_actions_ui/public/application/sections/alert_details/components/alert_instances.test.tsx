@@ -18,8 +18,6 @@ import { EuiBasicTable } from '@elastic/eui';
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 const fake2MinutesAgo = new Date('2020-02-09T23:13:41.941Z');
 
-const durationSinceEpoch = durationSince(fakeNow.getTime());
-
 const mockAPIs = {
   muteAlertInstance: jest.fn(),
   unmuteAlertInstance: jest.fn(),
@@ -45,13 +43,13 @@ describe('alert_instances', () => {
     const alertState = mockAlertState();
     const instances: AlertInstanceListItem[] = [
       alertInstanceToListItem(
-        durationSinceEpoch,
+        fakeNow.getTime(),
         alert,
         'first_instance',
         alertState.alertInstances!.first_instance
       ),
       alertInstanceToListItem(
-        durationSinceEpoch,
+        fakeNow.getTime(),
         alert,
         'second_instance',
         alertState.alertInstances!.second_instance
@@ -110,8 +108,8 @@ describe('alert_instances', () => {
         .find(EuiBasicTable)
         .prop('items')
     ).toEqual([
-      alertInstanceToListItem(durationSinceEpoch, alert, 'us-central', instances['us-central']),
-      alertInstanceToListItem(durationSinceEpoch, alert, 'us-east', instances['us-east']),
+      alertInstanceToListItem(fakeNow.getTime(), alert, 'us-central', instances['us-central']),
+      alertInstanceToListItem(fakeNow.getTime(), alert, 'us-east', instances['us-east']),
     ]);
   });
 
@@ -133,8 +131,8 @@ describe('alert_instances', () => {
         .find(EuiBasicTable)
         .prop('items')
     ).toEqual([
-      alertInstanceToListItem(durationSinceEpoch, alert, 'us-west'),
-      alertInstanceToListItem(durationSinceEpoch, alert, 'us-east'),
+      alertInstanceToListItem(fakeNow.getTime(), alert, 'us-west'),
+      alertInstanceToListItem(fakeNow.getTime(), alert, 'us-east'),
     ]);
   });
 });
@@ -152,7 +150,7 @@ describe('alertInstanceToListItem', () => {
       },
     };
 
-    expect(alertInstanceToListItem(durationSinceEpoch, alert, 'id', instance)).toEqual({
+    expect(alertInstanceToListItem(fakeNow.getTime(), alert, 'id', instance)).toEqual({
       instance: 'id',
       status: { label: 'Active', healthColor: 'primary' },
       start,
@@ -175,7 +173,7 @@ describe('alertInstanceToListItem', () => {
       },
     };
 
-    expect(alertInstanceToListItem(durationSinceEpoch, alert, 'id', instance)).toEqual({
+    expect(alertInstanceToListItem(fakeNow.getTime(), alert, 'id', instance)).toEqual({
       instance: 'id',
       status: { label: 'Active', healthColor: 'primary' },
       start,
@@ -188,7 +186,7 @@ describe('alertInstanceToListItem', () => {
     const alert = mockAlert();
     const instance: RawAlertInstance = {};
 
-    expect(alertInstanceToListItem(durationSinceEpoch, alert, 'id', instance)).toEqual({
+    expect(alertInstanceToListItem(fakeNow.getTime(), alert, 'id', instance)).toEqual({
       instance: 'id',
       status: { label: 'Active', healthColor: 'primary' },
       start: undefined,
@@ -203,7 +201,7 @@ describe('alertInstanceToListItem', () => {
       meta: {},
     };
 
-    expect(alertInstanceToListItem(durationSinceEpoch, alert, 'id', instance)).toEqual({
+    expect(alertInstanceToListItem(fakeNow.getTime(), alert, 'id', instance)).toEqual({
       instance: 'id',
       status: { label: 'Active', healthColor: 'primary' },
       start: undefined,
@@ -216,7 +214,7 @@ describe('alertInstanceToListItem', () => {
     const alert = mockAlert({
       mutedInstanceIds: ['id'],
     });
-    expect(alertInstanceToListItem(durationSinceEpoch, alert, 'id')).toEqual({
+    expect(alertInstanceToListItem(fakeNow.getTime(), alert, 'id')).toEqual({
       instance: 'id',
       status: { label: 'Inactive', healthColor: 'subdued' },
       start: undefined,
