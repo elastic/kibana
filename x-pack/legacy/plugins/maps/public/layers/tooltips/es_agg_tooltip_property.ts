@@ -3,7 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ESTooltipProperty } from './es_tooltip_property';
 
-export * from './get_index_error';
-export * from './post_index_error';
-export * from './privilege_user_error';
+export class ESAggTooltipProperty extends ESTooltipProperty {
+  isFilterable(): boolean {
+    return false;
+  }
+}

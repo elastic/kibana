@@ -12,6 +12,7 @@ import { injectI18n } from '@kbn/i18n/react';
 import { FixDefaultFieldsButton } from './default_fields/button';
 import { ReindexButton } from './reindex';
 import { AppContext } from '../../../../app_context';
+import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 
 const PAGE_SIZES = [10, 25, 50, 100, 250, 500, 1000];
 
@@ -19,6 +20,7 @@ export interface IndexDeprecationDetails {
   index: string;
   reindex: boolean;
   needsDefaultFields: boolean;
+  blockerForReindexing?: EnrichedDeprecationInfo['blockerForReindexing'];
   details?: string;
 }
 
@@ -70,9 +72,10 @@ export class IndexDeprecationTableUI extends React.Component<
       },
     ];
 
-    if (this.actionsColumn) {
-      // @ts-ignore
-      columns.push(this.actionsColumn);
+    const actionsColumn = this.generateActionsColumn();
+
+    if (actionsColumn) {
+      columns.push(actionsColumn as any);
     }
 
     const sorting = {
@@ -136,7 +139,7 @@ export class IndexDeprecationTableUI extends React.Component<
     return { totalItemCount, pageSizeOptions, hidePerPageOptions: false };
   }
 
-  private get actionsColumn() {
+  private generateActionsColumn() {
     // NOTE: this naive implementation assumes all indices in the table are
     // should show the reindex button. This should work for known usecases.
     const { indices } = this.props;
@@ -153,7 +156,16 @@ export class IndexDeprecationTableUI extends React.Component<
             if (showReindexButton) {
               return (
                 <AppContext.Consumer>
-                  {({ http }) => <ReindexButton indexName={indexDep.index!} http={http} />}
+                  {({ http, docLinks }) => {
+                    return (
+                      <ReindexButton
+                        docLinks={docLinks}
+                        reindexBlocker={indexDep.blockerForReindexing}
+                        indexName={indexDep.index!}
+                        http={http}
+                      />
+                    );
+                  }}
                 </AppContext.Consumer>
               );
             } else {

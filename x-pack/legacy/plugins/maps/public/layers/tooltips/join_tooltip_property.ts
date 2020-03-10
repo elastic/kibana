@@ -4,32 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TooltipProperty } from './tooltip_property';
+import { ITooltipProperty } from './tooltip_property';
+import { IJoin } from '../joins/join';
+import { PhraseFilter } from '../../../../../../../src/plugins/data/public';
 
-export class JoinTooltipProperty extends TooltipProperty {
-  constructor(tooltipProperty, leftInnerJoins) {
-    super();
+export class JoinTooltipProperty implements ITooltipProperty {
+  private readonly _tooltipProperty: ITooltipProperty;
+  private readonly _leftInnerJoins: IJoin[];
+
+  constructor(tooltipProperty: ITooltipProperty, leftInnerJoins: IJoin[]) {
     this._tooltipProperty = tooltipProperty;
     this._leftInnerJoins = leftInnerJoins;
   }
 
-  isFilterable() {
+  isFilterable(): boolean {
     return true;
   }
 
-  getPropertyKey() {
+  getPropertyKey(): string {
     return this._tooltipProperty.getPropertyKey();
   }
 
-  getPropertyName() {
+  getPropertyName(): string {
     return this._tooltipProperty.getPropertyName();
   }
 
-  getHtmlDisplayValue() {
+  getRawValue(): string | undefined {
+    return this._tooltipProperty.getRawValue();
+  }
+
+  getHtmlDisplayValue(): string {
     return this._tooltipProperty.getHtmlDisplayValue();
   }
 
-  async getESFilters() {
+  async getESFilters(): Promise<PhraseFilter[]> {
     const esFilters = [];
     if (this._tooltipProperty.isFilterable()) {
       esFilters.push(...(await this._tooltipProperty.getESFilters()));
@@ -46,6 +54,7 @@ export class JoinTooltipProperty extends TooltipProperty {
           esFilters.push(...(await esTooltipProperty.getESFilters()));
         }
       } catch (e) {
+        // eslint-disable-next-line no-console
         console.error('Cannot create joined filter', e);
       }
     }
