@@ -56,8 +56,8 @@ export interface RegistryPackage {
   type: string;
   categories: string[];
   requirement: RequirementsByServiceName;
-  screenshots?: ScreenshotItem[];
-  icons?: string[];
+  screenshots?: RegistryImage[];
+  icons?: RegistryImage[];
   assets?: string[];
   internal?: boolean;
   format_version: string;
@@ -67,6 +67,15 @@ export interface RegistryPackage {
   path: string;
 }
 
+interface RegistryImage {
+  // https://github.com/elastic/package-registry/blob/master/util/package.go#L74
+  // says src is potentially missing but I couldn't find any examples
+  // it seems like src should be required. How can you have an image with no reference to the content?
+  src: string;
+  title?: string;
+  size?: string;
+  type?: string;
+}
 export interface RegistryDatasource {
   name: string;
   title: string;
@@ -114,10 +123,7 @@ export type RegistrySearchResult = Pick<
   | 'datasources'
 >;
 
-export interface ScreenshotItem {
-  src: string;
-  title?: string;
-}
+export type ScreenshotItem = RegistryImage;
 
 // from /categories
 // https://github.com/elastic/package-registry/blob/master/docs/api/categories.json

@@ -29,6 +29,7 @@ export function PackageCard({
   version,
   showInstalledBadge,
   status,
+  icons,
 }: PackageCardProps) {
   const { toDetailView } = useLinks();
   const url = toDetailView({ name, version });
@@ -39,7 +40,7 @@ export function PackageCard({
       layout="horizontal"
       title={title || ''}
       description={description}
-      icon={<PackageIcon packageName={name} size="l" />}
+      icon={<PackageIcon icons={icons} packageName={name} size="l" />}
       href={url}
     />
   );
