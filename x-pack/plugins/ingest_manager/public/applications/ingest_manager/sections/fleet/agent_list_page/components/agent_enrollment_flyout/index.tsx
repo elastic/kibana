@@ -63,7 +63,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={onClose}>
+            <EuiButton fill onClick={onClose}>
               <FormattedMessage
                 id="xpack.ingestManager.agentEnrollment.continueButtonLabel"
                 defaultMessage="Continue"

@@ -34,7 +34,8 @@ export interface AgentConfig extends NewAgentConfig, SavedObjectAttributes {
   revision: number;
 }
 
-export type FullAgentConfigDatasource = Pick<Datasource, 'name' | 'namespace' | 'enabled'> & {
+export type FullAgentConfigDatasource = Pick<Datasource, 'namespace' | 'enabled'> & {
+  id: string;
   package?: Pick<DatasourcePackage, 'name' | 'version'>;
   use_output: string;
   inputs: Array<

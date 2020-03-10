@@ -107,10 +107,12 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
       <Redirect to={`${basePath}${CREATE_DATASOURCE_STEP_PATHS.selectConfig}`} />
     );
 
-  // Url to first step
+  // Url to first and second steps
   const SELECT_PACKAGE_URL = useLink(`${basePath}${CREATE_DATASOURCE_STEP_PATHS.selectPackage}`);
   const SELECT_CONFIG_URL = useLink(`${basePath}${CREATE_DATASOURCE_STEP_PATHS.selectConfig}`);
+  const CONFIGURE_DATASOURCE_URL = useLink(`${basePath}${CREATE_DATASOURCE_STEP_PATHS.configure}`);
   const firstStepUrl = from === 'config' ? SELECT_PACKAGE_URL : SELECT_CONFIG_URL;
+  const secondStepUrl = CONFIGURE_DATASOURCE_URL;
 
   // Redirect to second step
   const redirectToSecondStep = (
@@ -229,13 +231,22 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
         {/* (i.e. after full page reload) */}
         <Route path={`${matchPath}${CREATE_DATASOURCE_STEP_PATHS.review}`}>
           <CreateDatasourcePageLayout {...layoutProps} currentStep="review">
-            {!datasource.name ? (
+            {!agentConfig || !datasource.name ? (
               redirectToSecondStep
             ) : (
               <StepReviewDatasource
+                agentConfig={agentConfig}
                 datasource={datasource}
                 cancelUrl={cancelUrl}
                 isSubmitLoading={isSaving}
+                backLink={
+                  <EuiButtonEmpty href={secondStepUrl} iconType="arrowLeft" iconSide="left">
+                    <FormattedMessage
+                      id="xpack.ingestManager.createDatasource.editDatasourceLinkText"
+                      defaultMessage="Edit data source"
+                    />
+                  </EuiButtonEmpty>
+                }
                 onSubmit={async () => {
                   const { error } = await saveDatasource();
                   if (!error) {
