@@ -143,34 +143,37 @@ const getMetric: (
     aggs,
   };
 
-  if (groupBy) {
-    const bucketSelector = (
-      response: InfraDatabaseSearchResponse<{}, CompositeAggregationsResponse>
-    ) => response.aggregations?.groupings?.buckets || [];
-    const afterKeyHandler = createAfterKeyHandler(
-      'aggs.groupings.composite.after',
-      response => response.aggregations?.groupings?.after_key
-    );
-    const compositeBuckets = (await getAllCompositeData(
-      body => callCluster('search', { body, index: indexPattern }),
-      searchBody,
-      bucketSelector,
-      afterKeyHandler
-    )) as Array<Aggregation & { key: { groupBy: string } }>;
-    return compositeBuckets.reduce(
-      (result, bucket) => ({
-        ...result,
-        [bucket.key.groupBy]: getCurrentValueFromAggregations(bucket),
-      }),
-      {}
-    );
+  try {
+    if (groupBy) {
+      const bucketSelector = (
+        response: InfraDatabaseSearchResponse<{}, CompositeAggregationsResponse>
+      ) => response.aggregations?.groupings?.buckets || [];
+      const afterKeyHandler = createAfterKeyHandler(
+        'aggs.groupings.composite.after',
+        response => response.aggregations?.groupings?.after_key
+      );
+      const compositeBuckets = (await getAllCompositeData(
+        body => callCluster('search', { body, index: indexPattern }),
+        searchBody,
+        bucketSelector,
+        afterKeyHandler
+      )) as Array<Aggregation & { key: { groupBy: string } }>;
+      return compositeBuckets.reduce(
+        (result, bucket) => ({
+          ...result,
+          [bucket.key.groupBy]: getCurrentValueFromAggregations(bucket),
+        }),
+        {}
+      );
+    }
+    const result = await callCluster('search', {
+      body: searchBody,
+      index: indexPattern,
+    });
+    return { '*': getCurrentValueFromAggregations(result.aggregations) };
+  } catch (e) {
+    return { '*': undefined }; // Trigger an Error state
   }
-
-  const result = await callCluster('search', {
-    body: searchBody,
-    index: indexPattern,
-  });
-  return { '*': getCurrentValueFromAggregations(result.aggregations) };
 };
 
 const comparatorMap = {
