@@ -68,17 +68,19 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="arrowLeft"
-                  href={AGENT_CONFIG_LIST_URI}
-                  flush="left"
-                  size="xs"
-                >
-                  <FormattedMessage
-                    id="xpack.ingestManager.configDetails.viewAgentListTitle"
-                    defaultMessage="View all agent configurations"
-                  />
-                </EuiButtonEmpty>
+                <div>
+                  <EuiButtonEmpty
+                    iconType="arrowLeft"
+                    href={AGENT_CONFIG_LIST_URI}
+                    flush="left"
+                    size="xs"
+                  >
+                    <FormattedMessage
+                      id="xpack.ingestManager.configDetails.viewAgentListTitle"
+                      defaultMessage="View all agent configurations"
+                    />
+                  </EuiButtonEmpty>
+                </div>
                 <EuiTitle size="l">
                   <h1>
                     {(agentConfig && agentConfig.name) || (
