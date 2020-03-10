@@ -6,8 +6,7 @@
 
 import { useReducer, useCallback, Dispatch } from 'react';
 
-import { useStateToaster } from '../../components/toasters';
-import { errorToToaster } from '../../components/ml/api/error_to_toaster';
+import { errorToToaster, useStateToaster } from '../../components/toasters';
 
 import { patchComment } from './api';
 import * as i18n from './translations';

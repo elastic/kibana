@@ -220,7 +220,7 @@ export const CalendarForm = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
-            data-testid="ml_save_calendar_button"
+            data-test-subj="ml_save_calendar_button"
             fill
             onClick={isEdit ? onEdit : onCreate}
             isDisabled={saveButtonDisabled}
