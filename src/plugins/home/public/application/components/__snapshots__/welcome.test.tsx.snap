@@ -19,7 +19,7 @@ exports[`should render a Welcome screen with no telemetry disclaimer 1`] = `
         >
           <EuiIcon
             size="xxl"
-            type="logoKibana"
+            type="logoElastic"
           />
         </span>
         <EuiTitle
@@ -93,7 +93,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer 1`] = `
         >
           <EuiIcon
             size="xxl"
-            type="logoKibana"
+            type="logoElastic"
           />
         </span>
         <EuiTitle
@@ -205,7 +205,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
         >
           <EuiIcon
             size="xxl"
-            type="logoKibana"
+            type="logoElastic"
           />
         </span>
         <EuiTitle
@@ -317,7 +317,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
         >
           <EuiIcon
             size="xxl"
-            type="logoKibana"
+            type="logoElastic"
           />
         </span>
         <EuiTitle
