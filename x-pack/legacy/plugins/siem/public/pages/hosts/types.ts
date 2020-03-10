@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IIndexPattern } from 'src/plugins/data/public';
 import { ActionCreator } from 'typescript-fsa';
 
 import { SiemPageName } from '../home/types';
@@ -17,6 +18,7 @@ export const hostDetailsPagePath = `${hostsPagePath}/:detailName`;
 export type HostsTabsProps = HostsComponentProps & {
   filterQuery: string;
   type: hostsModel.HostsType;
+  indexPattern: IIndexPattern;
   setAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
     from: number;

@@ -78,6 +78,10 @@ export class AbstractESAggSource extends AbstractESSource {
     }
   }
 
+  async getFields() {
+    return this.getMetricFields();
+  }
+
   getValueAggsDsl(indexPattern) {
     const valueAggsDsl = {};
     this.getMetricFields().forEach(esAggMetric => {
@@ -87,10 +91,6 @@ export class AbstractESAggSource extends AbstractESSource {
       }
     });
     return valueAggsDsl;
-  }
-
-  async getNumberFields() {
-    return this.getMetricFields();
   }
 
   async filterAndFormatPropertiesToHtmlForMetricFields(properties) {
