@@ -143,7 +143,6 @@ describe('SavedObjectsService', () => {
         };
         setup.registerType(type);
 
-        // the config type is also registered during setup
         expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledTimes(1);
         expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledWith(type);
       });
