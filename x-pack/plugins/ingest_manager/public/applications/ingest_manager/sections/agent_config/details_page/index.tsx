@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import { Redirect, useRouteMatch, generatePath, Switch, Route } from 'react-router-dom';
+import React, { Fragment, memo, useCallback, useMemo, useState } from 'react';
+import { Redirect, useRouteMatch, Switch, Route } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import {
@@ -22,17 +22,15 @@ import {
 } from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import styled from 'styled-components';
-import { useGetOneAgentConfig, useLink } from '../../../hooks';
-import { AGENT_CONFIG_DETAILS_PATH, AGENT_CONFIG_PATH } from '../../../constants';
+import { useGetOneAgentConfig } from '../../../hooks';
 import { Datasource } from '../../../types';
 import { Loading } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
 import { ConfigRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
 import { DatasourcesTable, EditConfigFlyout } from './components';
 import { LinkedAgentCount } from '../components';
-
-const DETAILS_ROUTER_PATH = `${AGENT_CONFIG_DETAILS_PATH}:configId`;
-const DETAILS_ROUTER_SUB_PATH = ':configId/:tabId';
+import { useDetailsUri } from './hooks/use_details_uri';
+import { DETAILS_ROUTER_PATH, DETAILS_ROUTER_SUB_PATH } from './constants';
 
 const Divider = styled.div`
   width: 0;
@@ -40,7 +38,20 @@ const Divider = styled.div`
   border-left: ${props => props.theme.eui.euiBorderThin};
 `;
 
-export const AgentConfigDetailsPage: React.FunctionComponent = () => {
+export const AgentConfigDetailsPage = memo(() => {
+  return (
+    <Switch>
+      <Route path={DETAILS_ROUTER_SUB_PATH}>
+        <AgentConfigDetailsLayout />
+      </Route>
+      <Route path={DETAILS_ROUTER_PATH}>
+        <AgentConfigDetailsLayout />
+      </Route>
+    </Switch>
+  );
+});
+
+export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
   const {
     params: { configId, tabId = '' },
   } = useRouteMatch<{ configId: string; tabId?: string }>();
@@ -51,28 +62,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   const agentStatusRequest = useGetAgentStatus(configId);
   const { refreshAgentStatus } = agentStatusRequest;
   const agentStatus = agentStatusRequest.data?.results;
-  const BASE_URI = useLink('');
-  const URI = useMemo(() => {
-    return {
-      ADD_DATASOURCE: `${BASE_URI}${AGENT_CONFIG_DETAILS_PATH}${configId}/add-datasource`,
-      AGENT_CONFIG_LIST: `${BASE_URI}${AGENT_CONFIG_PATH}`,
-      AGENT_CONFIG_DETAILS: `${BASE_URI}${AGENT_CONFIG_DETAILS_PATH}${configId}`,
-      AGENT_CONFIG_DETAILS_YAML: `${BASE_URI}${AGENT_CONFIG_DETAILS_PATH}${generatePath(
-        DETAILS_ROUTER_SUB_PATH,
-        {
-          configId,
-          tabId: 'yaml',
-        }
-      )}`,
-      AGENT_CONFIG_DETAILS_SETTINGS: `${BASE_URI}${AGENT_CONFIG_DETAILS_PATH}${generatePath(
-        DETAILS_ROUTER_SUB_PATH,
-        {
-          configId,
-          tabId: 'settings',
-        }
-      )}`,
-    };
-  }, [BASE_URI, configId]);
+  const URI = useDetailsUri(configId);
 
   // Flyout states
   const [isEditConfigFlyoutOpen, setIsEditConfigFlyoutOpen] = useState<boolean>(false);
