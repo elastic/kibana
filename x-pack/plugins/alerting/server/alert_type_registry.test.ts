@@ -173,6 +173,10 @@ describe('list()', () => {
               "name": "Test Action Group",
             },
           ],
+          "actionVariables": Object {
+            "context": Array [],
+            "state": Array [],
+          },
           "defaultActionGroupId": "testActionGroup",
           "id": "test",
           "name": "Test",

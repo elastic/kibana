@@ -71,6 +71,14 @@ export class AlertTypeRegistry {
       name: alertType.name,
       actionGroups: alertType.actionGroups,
       defaultActionGroupId: alertType.defaultActionGroupId,
+      actionVariables: normalizedActionVariables(alertType.actionVariables),
     }));
   }
+}
+
+function normalizedActionVariables(actionVariables: any) {
+  return {
+    context: actionVariables?.context ?? [],
+    state: actionVariables?.state ?? [],
+  };
 }

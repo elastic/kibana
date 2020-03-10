@@ -54,7 +54,6 @@ describe('alert_details', () => {
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
-      actionVariables: [],
     };
 
     expect(
@@ -87,7 +86,6 @@ describe('alert_details', () => {
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
-      actionVariables: [],
     };
 
     expect(
@@ -115,7 +113,6 @@ describe('alert_details', () => {
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
-        actionVariables: [],
       };
 
       const actionTypes: ActionType[] = [
@@ -165,7 +162,6 @@ describe('alert_details', () => {
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
-        actionVariables: [],
       };
       const actionTypes: ActionType[] = [
         {
@@ -216,7 +212,6 @@ describe('alert_details', () => {
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
-        actionVariables: [],
       };
 
       expect(
@@ -241,7 +236,6 @@ describe('alert_details', () => {
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
-        actionVariables: [],
       };
 
       expect(
@@ -266,7 +260,6 @@ describe('alert_details', () => {
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
-        actionVariables: [],
       };
 
       expect(
@@ -296,7 +289,6 @@ describe('enable button', () => {
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
-      actionVariables: [],
     };
 
     const enableButton = shallow(
@@ -322,7 +314,6 @@ describe('enable button', () => {
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
-      actionVariables: [],
     };
 
     const enableButton = shallow(
@@ -348,7 +339,6 @@ describe('enable button', () => {
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
-      actionVariables: [],
     };
 
     const disableAlert = jest.fn();
@@ -383,7 +373,6 @@ describe('enable button', () => {
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
-      actionVariables: [],
     };
 
     const enableAlert = jest.fn();
@@ -421,7 +410,6 @@ describe('mute button', () => {
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
-      actionVariables: [],
     };
 
     const enableButton = shallow(
@@ -448,7 +436,6 @@ describe('mute button', () => {
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
-      actionVariables: [],
     };
 
     const enableButton = shallow(
@@ -475,7 +462,6 @@ describe('mute button', () => {
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
-      actionVariables: [],
     };
 
     const muteAlert = jest.fn();
@@ -511,7 +497,6 @@ describe('mute button', () => {
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
-      actionVariables: [],
     };
 
     const unmuteAlert = jest.fn();
@@ -547,7 +532,6 @@ describe('mute button', () => {
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
-      actionVariables: [],
     };
 
     const enableButton = shallow(
