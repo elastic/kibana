@@ -30,7 +30,6 @@ export const managementMiddlewareFactory: MiddlewareFactory<ManagementListState>
       const managementPageSize = pageSize(state);
       const body: MetadataIndexGetBodyInput = {
         paging_properties: [{ page_index: managementPageIndex }, { page_size: managementPageSize }],
-        filter: null,
       };
       const response = await coreStart.http.post('/api/endpoint/metadata', {
         body: JSON.stringify(body),

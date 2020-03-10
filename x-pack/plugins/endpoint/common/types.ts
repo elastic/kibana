@@ -411,6 +411,7 @@ export type AlertingIndexGetQueryResult = TypeOf<typeof alertingIndexGetQuerySch
  * Request body for the 'metadata' API index
  */
 export type MetadataIndexGetBodyInput = KbnConfigSchemaInputTypeOf<
-  typeof metadataIndexGetBodySchema
+  TypeOf<typeof metadataIndexGetBodySchema>
 >;
+
 export type MetadataIndexGetBodyResult = TypeOf<typeof metadataIndexGetBodySchema>;
