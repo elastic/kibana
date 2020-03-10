@@ -50,7 +50,7 @@ export function FlyoutDrilldownWizard<
   initialDrilldownWizardConfig,
   mode = 'create',
   onDelete = () => {},
-  showWelcomeMessage = false,
+  showWelcomeMessage = true,
   onWelcomeHideClick,
   drilldownActionFactories,
 }: FlyoutDrilldownWizardProps<CurrentActionConfig>) {

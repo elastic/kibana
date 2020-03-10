@@ -7,19 +7,25 @@
 import * as React from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
-import { FlyoutManageDrilldowns } from './flyout_manage_drilldowns';
-import { drilldowns } from '../list_manage_drilldowns/test_data';
+import { createFlyoutManageDrilldowns } from './connected_flyout_manage_drilldowns';
 import {
   dashboardDrilldownActionFactory,
   urlDrilldownActionFactory,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../advanced_ui_actions/public/components/action_wizard/test_data';
 
+const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
+  advancedUiActions: {
+    actionFactory: {
+      getAll: () => {
+        return [dashboardDrilldownActionFactory, urlDrilldownActionFactory];
+      },
+    },
+  },
+});
+
 storiesOf('components/FlyoutManageDrilldowns', module).add('default', () => (
   <EuiFlyout onClose={() => {}}>
-    <FlyoutManageDrilldowns
-      drilldowns={drilldowns}
-      drilldownActionFactories={[urlDrilldownActionFactory, dashboardDrilldownActionFactory]}
-    />
+    <FlyoutManageDrilldowns context={{}} />
   </EuiFlyout>
 ));

@@ -5,9 +5,9 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { FlyoutManageDrilldowns } from '../flyout_manage_drilldowns';
 import { ActionFactory, AdvancedUiActionsStart } from '../../../../advanced_ui_actions/public';
 import { FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
+import { FlyoutListManageDrilldowns } from '../flyout_list_manage_drilldowns';
 
 interface ConnectedFlyoutManageDrilldownsProps<Context extends object = object> {
   context: Context;
@@ -15,47 +15,107 @@ interface ConnectedFlyoutManageDrilldownsProps<Context extends object = object> 
   onClose?: () => void;
 }
 
+/**
+ * Represent current state (route) of FlyoutManageDrilldowns
+ */
+enum Routes {
+  Manage = 'manage',
+  Create = 'create',
+  Edit = 'edit',
+}
+
 export function createFlyoutManageDrilldowns({
   advancedUiActions,
 }: {
   advancedUiActions: AdvancedUiActionsStart;
 }) {
+  // This is ok to assume this is static,
+  // because all action factories should be registerd in setup phase
+  const allActionFactories = advancedUiActions.actionFactory.getAll();
   return (props: ConnectedFlyoutManageDrilldownsProps) => {
-    const [compatibleActionFactories, setCompatibleActionFactories] = useState<
-      Array<ActionFactory<any>>
-    >();
-    useEffect(() => {
-      async function updateCompatibleFactoriesForContext() {
-        const allActionFactories = advancedUiActions.actionFactory.getAll();
-        const compatibility = await Promise.all(
-          allActionFactories.map(factory => factory.isCompatible(props.context))
-        );
-        setCompatibleActionFactories(allActionFactories.filter((_, i) => compatibility[i]));
-      }
-      updateCompatibleFactoriesForContext();
-    }, [props.context]);
+    const isCreateOnly = props.viewMode === 'create';
 
-    if (!compatibleActionFactories) return null;
+    const actionFactories = useCompatibleActionFactoriesForCurrentContext(
+      allActionFactories,
+      props.context
+    );
 
-    switch (props.viewMode) {
-      case 'create':
+    const [route, setRoute] = useState<Routes>(
+      () => (isCreateOnly ? Routes.Create : Routes.Manage) // initial state is different depending on `viewMode`
+    );
+
+    /**
+     * isCompatible promise is not yet resolved.
+     * Skip rendering until it is resolved
+     */
+    if (!actionFactories) return null;
+
+    switch (route) {
+      case Routes.Create:
+      case Routes.Edit:
         return (
           <FlyoutDrilldownWizard
-            drilldownActionFactories={compatibleActionFactories}
+            showWelcomeMessage={true}
+            drilldownActionFactories={actionFactories}
             onClose={props.onClose}
-            mode={'create'}
+            mode={Routes.Create ? 'create' : 'edit'}
+            onBack={isCreateOnly ? undefined : () => setRoute(Routes.Manage)}
+            onSubmit={() => {
+              if (isCreateOnly) {
+                if (props.onClose) {
+                  props.onClose();
+                }
+              } else {
+                setRoute(Routes.Manage);
+              }
+            }}
+            onDelete={() => {
+              setRoute(Routes.Manage);
+            }}
           />
         );
 
-      case 'manage':
+      case Routes.Manage:
       default:
         return (
-          <FlyoutManageDrilldowns
+          <FlyoutListManageDrilldowns
+            showWelcomeMessage={true}
             drilldowns={[]}
-            drilldownActionFactories={compatibleActionFactories}
+            onDelete={() => {}}
+            onEdit={() => {
+              setRoute(Routes.Edit);
+            }}
+            onCreate={() => {
+              setRoute(Routes.Create);
+            }}
             onClose={props.onClose}
           />
         );
     }
   };
+}
+
+function useCompatibleActionFactoriesForCurrentContext<Context extends object = object>(
+  actionFactories: Array<ActionFactory<any>>,
+  context: Context
+) {
+  const [compatibleActionFactories, setCompatibleActionFactories] = useState<
+    Array<ActionFactory<any>>
+  >();
+  useEffect(() => {
+    let canceled = false;
+    async function updateCompatibleFactoriesForContext() {
+      const compatibility = await Promise.all(
+        actionFactories.map(factory => factory.isCompatible(context))
+      );
+      if (canceled) return;
+      setCompatibleActionFactories(actionFactories.filter((_, i) => compatibility[i]));
+    }
+    updateCompatibleFactoriesForContext();
+    return () => {
+      canceled = true;
+    };
+  }, [context, actionFactories]);
+
+  return compatibleActionFactories;
 }
