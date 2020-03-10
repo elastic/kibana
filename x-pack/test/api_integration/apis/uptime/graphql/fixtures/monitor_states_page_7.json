@@ -2,197 +2,57 @@
   "monitorStates": {
     "prevPagePagination": "{\"cursorKey\":{\"monitor_id\":\"0060-intermittent\"},\"sortOrder\":\"ASC\",\"cursorDirection\":\"BEFORE\"}",
     "nextPagePagination": "{\"cursorDirection\":\"AFTER\",\"sortOrder\":\"ASC\",\"cursorKey\":{\"monitor_id\":\"0069-up\"}}",
-    "totalSummaryCount": {
-      "count": 2000
-    },
+    "totalSummaryCount": { "count": 2000 },
     "summaries": [
       {
         "monitor_id": "0060-intermittent",
         "histogram": {
           "count": 20,
           "points": [
-            {
-              "timestamp": 1568172657286,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172680087,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172702888,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172725689,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172748490,
-              "up": 0,
-              "down": 1
-            },
-            {
-              "timestamp": 1568172771291,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172794092,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172816893,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172839694,
-              "up": 0,
-              "down": 1
-            },
-            {
-              "timestamp": 1568172862495,
-              "up": 0,
-              "down": 1
-            },
-            {
-              "timestamp": 1568172885296,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172908097,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172930898,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172953699,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172976500,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172999301,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173022102,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173044903,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173067704,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173090505,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173113306,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173136107,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173158908,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173181709,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173204510,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173227311,
-              "up": 1,
-              "down": 0
-            }
+            { "timestamp": 1568172664000, "up": 1, "down": 0 },
+            { "timestamp": 1568172694000, "up": 1, "down": 0 },
+            { "timestamp": 1568172724000, "up": 1, "down": 0 },
+            { "timestamp": 1568172754000, "up": 0, "down": 1 },
+            { "timestamp": 1568172784000, "up": 1, "down": 0 },
+            { "timestamp": 1568172814000, "up": 1, "down": 0 },
+            { "timestamp": 1568172844000, "up": 0, "down": 1 },
+            { "timestamp": 1568172874000, "up": 0, "down": 1 },
+            { "timestamp": 1568172904000, "up": 1, "down": 0 },
+            { "timestamp": 1568172934000, "up": 1, "down": 0 },
+            { "timestamp": 1568172964000, "up": 1, "down": 0 },
+            { "timestamp": 1568172994000, "up": 1, "down": 0 },
+            { "timestamp": 1568173024000, "up": 1, "down": 0 },
+            { "timestamp": 1568173054000, "up": 1, "down": 0 },
+            { "timestamp": 1568173084000, "up": 1, "down": 0 },
+            { "timestamp": 1568173114000, "up": 1, "down": 0 },
+            { "timestamp": 1568173144000, "up": 1, "down": 0 },
+            { "timestamp": 1568173174000, "up": 1, "down": 0 },
+            { "timestamp": 1568173204000, "up": 1, "down": 0 },
+            { "timestamp": 1568173234000, "up": 1, "down": 0 }
           ]
         },
         "state": {
           "agent": null,
           "checks": [
             {
-              "agent": {
-                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
-              },
+              "agent": { "id": "04e1d082-65bc-4929-8d65-d0768a2621c4" },
               "container": null,
               "kubernetes": null,
-              "monitor": {
-                "ip": "127.0.0.1",
-                "name": "",
-                "status": "up"
-              },
+              "monitor": { "ip": "127.0.0.1", "name": "", "status": "up" },
               "observer": {
                 "geo": {
                   "name": "mpls",
-                  "location": {
-                    "lat": 37.926867976784706,
-                    "lon": -78.02490200847387
-                  }
+                  "location": { "lat": 37.926867976784706, "lon": -78.02490200847387 }
                 }
               },
               "timestamp": "1568173234372"
             }
           ],
           "geo": null,
-          "observer": {
-            "geo": {
-              "name": [
-                "mpls"
-              ],
-              "location": null
-            }
-          },
-          "monitor": {
-            "id": null,
-            "name": null,
-            "status": "up",
-            "type": null
-          },
-          "summary": {
-            "up": 1,
-            "down": 0,
-            "geo": null
-          },
-          "url": {
-            "full": "http://localhost:5678/pattern?r=200x5,500x1",
-            "domain": "localhost"
-          },
+          "observer": { "geo": { "name": ["mpls"], "location": null } },
+          "monitor": { "id": null, "name": null, "status": "up", "type": null },
+          "summary": { "up": 1, "down": 0, "geo": null },
+          "url": { "full": "http://localhost:5678/pattern?r=200x5,500x1", "domain": "localhost" },
           "timestamp": 1568173234372
         }
       },
@@ -201,188 +61,50 @@
         "histogram": {
           "count": 20,
           "points": [
-            {
-              "timestamp": 1568172657286,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172680087,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172702888,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172725689,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172748490,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172771291,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172794092,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172816893,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172839694,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172862495,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172885296,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172908097,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172930898,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172953699,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172976500,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172999301,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173022102,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173044903,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173067704,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173090505,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173113306,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173136107,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173158908,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173181709,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173204510,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173227311,
-              "up": 1,
-              "down": 0
-            }
+            { "timestamp": 1568172664000, "up": 1, "down": 0 },
+            { "timestamp": 1568172694000, "up": 1, "down": 0 },
+            { "timestamp": 1568172724000, "up": 1, "down": 0 },
+            { "timestamp": 1568172754000, "up": 1, "down": 0 },
+            { "timestamp": 1568172784000, "up": 1, "down": 0 },
+            { "timestamp": 1568172814000, "up": 1, "down": 0 },
+            { "timestamp": 1568172844000, "up": 1, "down": 0 },
+            { "timestamp": 1568172874000, "up": 1, "down": 0 },
+            { "timestamp": 1568172904000, "up": 1, "down": 0 },
+            { "timestamp": 1568172934000, "up": 1, "down": 0 },
+            { "timestamp": 1568172964000, "up": 1, "down": 0 },
+            { "timestamp": 1568172994000, "up": 1, "down": 0 },
+            { "timestamp": 1568173024000, "up": 1, "down": 0 },
+            { "timestamp": 1568173054000, "up": 1, "down": 0 },
+            { "timestamp": 1568173084000, "up": 1, "down": 0 },
+            { "timestamp": 1568173114000, "up": 1, "down": 0 },
+            { "timestamp": 1568173144000, "up": 1, "down": 0 },
+            { "timestamp": 1568173174000, "up": 1, "down": 0 },
+            { "timestamp": 1568173204000, "up": 1, "down": 0 },
+            { "timestamp": 1568173234000, "up": 1, "down": 0 }
           ]
         },
         "state": {
           "agent": null,
           "checks": [
             {
-              "agent": {
-                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
-              },
+              "agent": { "id": "04e1d082-65bc-4929-8d65-d0768a2621c4" },
               "container": null,
               "kubernetes": null,
-              "monitor": {
-                "ip": "127.0.0.1",
-                "name": "",
-                "status": "up"
-              },
+              "monitor": { "ip": "127.0.0.1", "name": "", "status": "up" },
               "observer": {
                 "geo": {
                   "name": "mpls",
-                  "location": {
-                    "lat": 37.926867976784706,
-                    "lon": -78.02490200847387
-                  }
+                  "location": { "lat": 37.926867976784706, "lon": -78.02490200847387 }
                 }
               },
               "timestamp": "1568173234373"
             }
           ],
           "geo": null,
-          "observer": {
-            "geo": {
-              "name": [
-                "mpls"
-              ],
-              "location": null
-            }
-          },
-          "monitor": {
-            "id": null,
-            "name": null,
-            "status": "up",
-            "type": null
-          },
-          "summary": {
-            "up": 1,
-            "down": 0,
-            "geo": null
-          },
-          "url": {
-            "full": "http://localhost:5678/pattern?r=200x1",
-            "domain": "localhost"
-          },
+          "observer": { "geo": { "name": ["mpls"], "location": null } },
+          "monitor": { "id": null, "name": null, "status": "up", "type": null },
+          "summary": { "up": 1, "down": 0, "geo": null },
+          "url": { "full": "http://localhost:5678/pattern?r=200x1", "domain": "localhost" },
           "timestamp": 1568173234373
         }
       },
@@ -391,188 +113,50 @@
         "histogram": {
           "count": 20,
           "points": [
-            {
-              "timestamp": 1568172657286,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172680087,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172702888,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172725689,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172748490,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172771291,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172794092,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172816893,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172839694,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172862495,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172885296,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172908097,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172930898,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172953699,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172976500,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172999301,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173022102,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173044903,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173067704,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173090505,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173113306,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173136107,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173158908,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173181709,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173204510,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173227311,
-              "up": 1,
-              "down": 0
-            }
+            { "timestamp": 1568172664000, "up": 1, "down": 0 },
+            { "timestamp": 1568172694000, "up": 1, "down": 0 },
+            { "timestamp": 1568172724000, "up": 1, "down": 0 },
+            { "timestamp": 1568172754000, "up": 1, "down": 0 },
+            { "timestamp": 1568172784000, "up": 1, "down": 0 },
+            { "timestamp": 1568172814000, "up": 1, "down": 0 },
+            { "timestamp": 1568172844000, "up": 1, "down": 0 },
+            { "timestamp": 1568172874000, "up": 1, "down": 0 },
+            { "timestamp": 1568172904000, "up": 1, "down": 0 },
+            { "timestamp": 1568172934000, "up": 1, "down": 0 },
+            { "timestamp": 1568172964000, "up": 1, "down": 0 },
+            { "timestamp": 1568172994000, "up": 1, "down": 0 },
+            { "timestamp": 1568173024000, "up": 1, "down": 0 },
+            { "timestamp": 1568173054000, "up": 1, "down": 0 },
+            { "timestamp": 1568173084000, "up": 1, "down": 0 },
+            { "timestamp": 1568173114000, "up": 1, "down": 0 },
+            { "timestamp": 1568173144000, "up": 1, "down": 0 },
+            { "timestamp": 1568173174000, "up": 1, "down": 0 },
+            { "timestamp": 1568173204000, "up": 1, "down": 0 },
+            { "timestamp": 1568173234000, "up": 1, "down": 0 }
           ]
         },
         "state": {
           "agent": null,
           "checks": [
             {
-              "agent": {
-                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
-              },
+              "agent": { "id": "04e1d082-65bc-4929-8d65-d0768a2621c4" },
               "container": null,
               "kubernetes": null,
-              "monitor": {
-                "ip": "127.0.0.1",
-                "name": "",
-                "status": "up"
-              },
+              "monitor": { "ip": "127.0.0.1", "name": "", "status": "up" },
               "observer": {
                 "geo": {
                   "name": "mpls",
-                  "location": {
-                    "lat": 37.926867976784706,
-                    "lon": -78.02490200847387
-                  }
+                  "location": { "lat": 37.926867976784706, "lon": -78.02490200847387 }
                 }
               },
               "timestamp": "1568173234373"
             }
           ],
           "geo": null,
-          "observer": {
-            "geo": {
-              "name": [
-                "mpls"
-              ],
-              "location": null
-            }
-          },
-          "monitor": {
-            "id": null,
-            "name": null,
-            "status": "up",
-            "type": null
-          },
-          "summary": {
-            "up": 1,
-            "down": 0,
-            "geo": null
-          },
-          "url": {
-            "full": "http://localhost:5678/pattern?r=200x1",
-            "domain": "localhost"
-          },
+          "observer": { "geo": { "name": ["mpls"], "location": null } },
+          "monitor": { "id": null, "name": null, "status": "up", "type": null },
+          "summary": { "up": 1, "down": 0, "geo": null },
+          "url": { "full": "http://localhost:5678/pattern?r=200x1", "domain": "localhost" },
           "timestamp": 1568173234373
         }
       },
@@ -581,188 +165,50 @@
         "histogram": {
           "count": 20,
           "points": [
-            {
-              "timestamp": 1568172657286,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172680087,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172702888,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172725689,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172748490,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172771291,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172794092,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172816893,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172839694,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172862495,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172885296,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172908097,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172930898,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172953699,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172976500,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172999301,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173022102,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173044903,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173067704,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173090505,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173113306,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173136107,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173158908,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173181709,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173204510,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173227311,
-              "up": 1,
-              "down": 0
-            }
+            { "timestamp": 1568172664000, "up": 1, "down": 0 },
+            { "timestamp": 1568172694000, "up": 1, "down": 0 },
+            { "timestamp": 1568172724000, "up": 1, "down": 0 },
+            { "timestamp": 1568172754000, "up": 1, "down": 0 },
+            { "timestamp": 1568172784000, "up": 1, "down": 0 },
+            { "timestamp": 1568172814000, "up": 1, "down": 0 },
+            { "timestamp": 1568172844000, "up": 1, "down": 0 },
+            { "timestamp": 1568172874000, "up": 1, "down": 0 },
+            { "timestamp": 1568172904000, "up": 1, "down": 0 },
+            { "timestamp": 1568172934000, "up": 1, "down": 0 },
+            { "timestamp": 1568172964000, "up": 1, "down": 0 },
+            { "timestamp": 1568172994000, "up": 1, "down": 0 },
+            { "timestamp": 1568173024000, "up": 1, "down": 0 },
+            { "timestamp": 1568173054000, "up": 1, "down": 0 },
+            { "timestamp": 1568173084000, "up": 1, "down": 0 },
+            { "timestamp": 1568173114000, "up": 1, "down": 0 },
+            { "timestamp": 1568173144000, "up": 1, "down": 0 },
+            { "timestamp": 1568173174000, "up": 1, "down": 0 },
+            { "timestamp": 1568173204000, "up": 1, "down": 0 },
+            { "timestamp": 1568173234000, "up": 1, "down": 0 }
           ]
         },
         "state": {
           "agent": null,
           "checks": [
             {
-              "agent": {
-                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
-              },
+              "agent": { "id": "04e1d082-65bc-4929-8d65-d0768a2621c4" },
               "container": null,
               "kubernetes": null,
-              "monitor": {
-                "ip": "127.0.0.1",
-                "name": "",
-                "status": "up"
-              },
+              "monitor": { "ip": "127.0.0.1", "name": "", "status": "up" },
               "observer": {
                 "geo": {
                   "name": "mpls",
-                  "location": {
-                    "lat": 37.926867976784706,
-                    "lon": -78.02490200847387
-                  }
+                  "location": { "lat": 37.926867976784706, "lon": -78.02490200847387 }
                 }
               },
               "timestamp": "1568173234373"
             }
           ],
           "geo": null,
-          "observer": {
-            "geo": {
-              "name": [
-                "mpls"
-              ],
-              "location": null
-            }
-          },
-          "monitor": {
-            "id": null,
-            "name": null,
-            "status": "up",
-            "type": null
-          },
-          "summary": {
-            "up": 1,
-            "down": 0,
-            "geo": null
-          },
-          "url": {
-            "full": "http://localhost:5678/pattern?r=200x1",
-            "domain": "localhost"
-          },
+          "observer": { "geo": { "name": ["mpls"], "location": null } },
+          "monitor": { "id": null, "name": null, "status": "up", "type": null },
+          "summary": { "up": 1, "down": 0, "geo": null },
+          "url": { "full": "http://localhost:5678/pattern?r=200x1", "domain": "localhost" },
           "timestamp": 1568173234373
         }
       },
@@ -771,188 +217,50 @@
         "histogram": {
           "count": 20,
           "points": [
-            {
-              "timestamp": 1568172657286,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172680087,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172702888,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172725689,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172748490,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172771291,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172794092,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172816893,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172839694,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172862495,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172885296,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172908097,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172930898,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172953699,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172976500,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172999301,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173022102,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173044903,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173067704,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173090505,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173113306,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173136107,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173158908,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173181709,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173204510,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173227311,
-              "up": 1,
-              "down": 0
-            }
+            { "timestamp": 1568172664000, "up": 1, "down": 0 },
+            { "timestamp": 1568172694000, "up": 1, "down": 0 },
+            { "timestamp": 1568172724000, "up": 1, "down": 0 },
+            { "timestamp": 1568172754000, "up": 1, "down": 0 },
+            { "timestamp": 1568172784000, "up": 1, "down": 0 },
+            { "timestamp": 1568172814000, "up": 1, "down": 0 },
+            { "timestamp": 1568172844000, "up": 1, "down": 0 },
+            { "timestamp": 1568172874000, "up": 1, "down": 0 },
+            { "timestamp": 1568172904000, "up": 1, "down": 0 },
+            { "timestamp": 1568172934000, "up": 1, "down": 0 },
+            { "timestamp": 1568172964000, "up": 1, "down": 0 },
+            { "timestamp": 1568172994000, "up": 1, "down": 0 },
+            { "timestamp": 1568173024000, "up": 1, "down": 0 },
+            { "timestamp": 1568173054000, "up": 1, "down": 0 },
+            { "timestamp": 1568173084000, "up": 1, "down": 0 },
+            { "timestamp": 1568173114000, "up": 1, "down": 0 },
+            { "timestamp": 1568173144000, "up": 1, "down": 0 },
+            { "timestamp": 1568173174000, "up": 1, "down": 0 },
+            { "timestamp": 1568173204000, "up": 1, "down": 0 },
+            { "timestamp": 1568173234000, "up": 1, "down": 0 }
           ]
         },
         "state": {
           "agent": null,
           "checks": [
             {
-              "agent": {
-                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
-              },
+              "agent": { "id": "04e1d082-65bc-4929-8d65-d0768a2621c4" },
               "container": null,
               "kubernetes": null,
-              "monitor": {
-                "ip": "127.0.0.1",
-                "name": "",
-                "status": "up"
-              },
+              "monitor": { "ip": "127.0.0.1", "name": "", "status": "up" },
               "observer": {
                 "geo": {
                   "name": "mpls",
-                  "location": {
-                    "lat": 37.926867976784706,
-                    "lon": -78.02490200847387
-                  }
+                  "location": { "lat": 37.926867976784706, "lon": -78.02490200847387 }
                 }
               },
               "timestamp": "1568173234373"
             }
           ],
           "geo": null,
-          "observer": {
-            "geo": {
-              "name": [
-                "mpls"
-              ],
-              "location": null
-            }
-          },
-          "monitor": {
-            "id": null,
-            "name": null,
-            "status": "up",
-            "type": null
-          },
-          "summary": {
-            "up": 1,
-            "down": 0,
-            "geo": null
-          },
-          "url": {
-            "full": "http://localhost:5678/pattern?r=200x1",
-            "domain": "localhost"
-          },
+          "observer": { "geo": { "name": ["mpls"], "location": null } },
+          "monitor": { "id": null, "name": null, "status": "up", "type": null },
+          "summary": { "up": 1, "down": 0, "geo": null },
+          "url": { "full": "http://localhost:5678/pattern?r=200x1", "domain": "localhost" },
           "timestamp": 1568173234373
         }
       },
@@ -961,188 +269,50 @@
         "histogram": {
           "count": 20,
           "points": [
-            {
-              "timestamp": 1568172657286,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172680087,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172702888,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172725689,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172748490,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172771291,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172794092,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172816893,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172839694,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172862495,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172885296,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172908097,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172930898,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172953699,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172976500,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172999301,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173022102,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173044903,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173067704,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173090505,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173113306,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173136107,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173158908,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173181709,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173204510,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173227311,
-              "up": 1,
-              "down": 0
-            }
+            { "timestamp": 1568172664000, "up": 1, "down": 0 },
+            { "timestamp": 1568172694000, "up": 1, "down": 0 },
+            { "timestamp": 1568172724000, "up": 1, "down": 0 },
+            { "timestamp": 1568172754000, "up": 1, "down": 0 },
+            { "timestamp": 1568172784000, "up": 1, "down": 0 },
+            { "timestamp": 1568172814000, "up": 1, "down": 0 },
+            { "timestamp": 1568172844000, "up": 1, "down": 0 },
+            { "timestamp": 1568172874000, "up": 1, "down": 0 },
+            { "timestamp": 1568172904000, "up": 1, "down": 0 },
+            { "timestamp": 1568172934000, "up": 1, "down": 0 },
+            { "timestamp": 1568172964000, "up": 1, "down": 0 },
+            { "timestamp": 1568172994000, "up": 1, "down": 0 },
+            { "timestamp": 1568173024000, "up": 1, "down": 0 },
+            { "timestamp": 1568173054000, "up": 1, "down": 0 },
+            { "timestamp": 1568173084000, "up": 1, "down": 0 },
+            { "timestamp": 1568173114000, "up": 1, "down": 0 },
+            { "timestamp": 1568173144000, "up": 1, "down": 0 },
+            { "timestamp": 1568173174000, "up": 1, "down": 0 },
+            { "timestamp": 1568173204000, "up": 1, "down": 0 },
+            { "timestamp": 1568173234000, "up": 1, "down": 0 }
           ]
         },
         "state": {
           "agent": null,
           "checks": [
             {
-              "agent": {
-                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
-              },
+              "agent": { "id": "04e1d082-65bc-4929-8d65-d0768a2621c4" },
               "container": null,
               "kubernetes": null,
-              "monitor": {
-                "ip": "127.0.0.1",
-                "name": "",
-                "status": "up"
-              },
+              "monitor": { "ip": "127.0.0.1", "name": "", "status": "up" },
               "observer": {
                 "geo": {
                   "name": "mpls",
-                  "location": {
-                    "lat": 37.926867976784706,
-                    "lon": -78.02490200847387
-                  }
+                  "location": { "lat": 37.926867976784706, "lon": -78.02490200847387 }
                 }
               },
               "timestamp": "1568173234373"
             }
           ],
           "geo": null,
-          "observer": {
-            "geo": {
-              "name": [
-                "mpls"
-              ],
-              "location": null
-            }
-          },
-          "monitor": {
-            "id": null,
-            "name": null,
-            "status": "up",
-            "type": null
-          },
-          "summary": {
-            "up": 1,
-            "down": 0,
-            "geo": null
-          },
-          "url": {
-            "full": "http://localhost:5678/pattern?r=200x1",
-            "domain": "localhost"
-          },
+          "observer": { "geo": { "name": ["mpls"], "location": null } },
+          "monitor": { "id": null, "name": null, "status": "up", "type": null },
+          "summary": { "up": 1, "down": 0, "geo": null },
+          "url": { "full": "http://localhost:5678/pattern?r=200x1", "domain": "localhost" },
           "timestamp": 1568173234373
         }
       },
@@ -1151,188 +321,50 @@
         "histogram": {
           "count": 20,
           "points": [
-            {
-              "timestamp": 1568172657286,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172680087,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172702888,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172725689,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172748490,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172771291,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172794092,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172816893,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172839694,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172862495,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172885296,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172908097,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172930898,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172953699,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172976500,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172999301,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173022102,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173044903,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173067704,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173090505,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173113306,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173136107,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173158908,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173181709,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173204510,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173227311,
-              "up": 1,
-              "down": 0
-            }
+            { "timestamp": 1568172664000, "up": 1, "down": 0 },
+            { "timestamp": 1568172694000, "up": 1, "down": 0 },
+            { "timestamp": 1568172724000, "up": 1, "down": 0 },
+            { "timestamp": 1568172754000, "up": 1, "down": 0 },
+            { "timestamp": 1568172784000, "up": 1, "down": 0 },
+            { "timestamp": 1568172814000, "up": 1, "down": 0 },
+            { "timestamp": 1568172844000, "up": 1, "down": 0 },
+            { "timestamp": 1568172874000, "up": 1, "down": 0 },
+            { "timestamp": 1568172904000, "up": 1, "down": 0 },
+            { "timestamp": 1568172934000, "up": 1, "down": 0 },
+            { "timestamp": 1568172964000, "up": 1, "down": 0 },
+            { "timestamp": 1568172994000, "up": 1, "down": 0 },
+            { "timestamp": 1568173024000, "up": 1, "down": 0 },
+            { "timestamp": 1568173054000, "up": 1, "down": 0 },
+            { "timestamp": 1568173084000, "up": 1, "down": 0 },
+            { "timestamp": 1568173114000, "up": 1, "down": 0 },
+            { "timestamp": 1568173144000, "up": 1, "down": 0 },
+            { "timestamp": 1568173174000, "up": 1, "down": 0 },
+            { "timestamp": 1568173204000, "up": 1, "down": 0 },
+            { "timestamp": 1568173234000, "up": 1, "down": 0 }
           ]
         },
         "state": {
           "agent": null,
           "checks": [
             {
-              "agent": {
-                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
-              },
+              "agent": { "id": "04e1d082-65bc-4929-8d65-d0768a2621c4" },
               "container": null,
               "kubernetes": null,
-              "monitor": {
-                "ip": "127.0.0.1",
-                "name": "",
-                "status": "up"
-              },
+              "monitor": { "ip": "127.0.0.1", "name": "", "status": "up" },
               "observer": {
                 "geo": {
                   "name": "mpls",
-                  "location": {
-                    "lat": 37.926867976784706,
-                    "lon": -78.02490200847387
-                  }
+                  "location": { "lat": 37.926867976784706, "lon": -78.02490200847387 }
                 }
               },
               "timestamp": "1568173234374"
             }
           ],
           "geo": null,
-          "observer": {
-            "geo": {
-              "name": [
-                "mpls"
-              ],
-              "location": null
-            }
-          },
-          "monitor": {
-            "id": null,
-            "name": null,
-            "status": "up",
-            "type": null
-          },
-          "summary": {
-            "up": 1,
-            "down": 0,
-            "geo": null
-          },
-          "url": {
-            "full": "http://localhost:5678/pattern?r=200x1",
-            "domain": "localhost"
-          },
+          "observer": { "geo": { "name": ["mpls"], "location": null } },
+          "monitor": { "id": null, "name": null, "status": "up", "type": null },
+          "summary": { "up": 1, "down": 0, "geo": null },
+          "url": { "full": "http://localhost:5678/pattern?r=200x1", "domain": "localhost" },
           "timestamp": 1568173234374
         }
       },
@@ -1341,188 +373,50 @@
         "histogram": {
           "count": 20,
           "points": [
-            {
-              "timestamp": 1568172657286,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172680087,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172702888,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172725689,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172748490,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172771291,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172794092,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172816893,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172839694,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172862495,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172885296,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172908097,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172930898,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172953699,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172976500,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172999301,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173022102,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173044903,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173067704,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173090505,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173113306,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173136107,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173158908,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173181709,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173204510,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173227311,
-              "up": 1,
-              "down": 0
-            }
+            { "timestamp": 1568172664000, "up": 1, "down": 0 },
+            { "timestamp": 1568172694000, "up": 1, "down": 0 },
+            { "timestamp": 1568172724000, "up": 1, "down": 0 },
+            { "timestamp": 1568172754000, "up": 1, "down": 0 },
+            { "timestamp": 1568172784000, "up": 1, "down": 0 },
+            { "timestamp": 1568172814000, "up": 1, "down": 0 },
+            { "timestamp": 1568172844000, "up": 1, "down": 0 },
+            { "timestamp": 1568172874000, "up": 1, "down": 0 },
+            { "timestamp": 1568172904000, "up": 1, "down": 0 },
+            { "timestamp": 1568172934000, "up": 1, "down": 0 },
+            { "timestamp": 1568172964000, "up": 1, "down": 0 },
+            { "timestamp": 1568172994000, "up": 1, "down": 0 },
+            { "timestamp": 1568173024000, "up": 1, "down": 0 },
+            { "timestamp": 1568173054000, "up": 1, "down": 0 },
+            { "timestamp": 1568173084000, "up": 1, "down": 0 },
+            { "timestamp": 1568173114000, "up": 1, "down": 0 },
+            { "timestamp": 1568173144000, "up": 1, "down": 0 },
+            { "timestamp": 1568173174000, "up": 1, "down": 0 },
+            { "timestamp": 1568173204000, "up": 1, "down": 0 },
+            { "timestamp": 1568173234000, "up": 1, "down": 0 }
           ]
         },
         "state": {
           "agent": null,
           "checks": [
             {
-              "agent": {
-                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
-              },
+              "agent": { "id": "04e1d082-65bc-4929-8d65-d0768a2621c4" },
               "container": null,
               "kubernetes": null,
-              "monitor": {
-                "ip": "127.0.0.1",
-                "name": "",
-                "status": "up"
-              },
+              "monitor": { "ip": "127.0.0.1", "name": "", "status": "up" },
               "observer": {
                 "geo": {
                   "name": "mpls",
-                  "location": {
-                    "lat": 37.926867976784706,
-                    "lon": -78.02490200847387
-                  }
+                  "location": { "lat": 37.926867976784706, "lon": -78.02490200847387 }
                 }
               },
               "timestamp": "1568173234374"
             }
           ],
           "geo": null,
-          "observer": {
-            "geo": {
-              "name": [
-                "mpls"
-              ],
-              "location": null
-            }
-          },
-          "monitor": {
-            "id": null,
-            "name": null,
-            "status": "up",
-            "type": null
-          },
-          "summary": {
-            "up": 1,
-            "down": 0,
-            "geo": null
-          },
-          "url": {
-            "full": "http://localhost:5678/pattern?r=200x1",
-            "domain": "localhost"
-          },
+          "observer": { "geo": { "name": ["mpls"], "location": null } },
+          "monitor": { "id": null, "name": null, "status": "up", "type": null },
+          "summary": { "up": 1, "down": 0, "geo": null },
+          "url": { "full": "http://localhost:5678/pattern?r=200x1", "domain": "localhost" },
           "timestamp": 1568173234374
         }
       },
@@ -1531,188 +425,50 @@
         "histogram": {
           "count": 20,
           "points": [
-            {
-              "timestamp": 1568172657286,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172680087,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172702888,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172725689,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172748490,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172771291,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172794092,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172816893,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172839694,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172862495,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172885296,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172908097,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172930898,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172953699,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172976500,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172999301,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173022102,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173044903,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173067704,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173090505,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173113306,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173136107,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173158908,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173181709,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173204510,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173227311,
-              "up": 1,
-              "down": 0
-            }
+            { "timestamp": 1568172664000, "up": 1, "down": 0 },
+            { "timestamp": 1568172694000, "up": 1, "down": 0 },
+            { "timestamp": 1568172724000, "up": 1, "down": 0 },
+            { "timestamp": 1568172754000, "up": 1, "down": 0 },
+            { "timestamp": 1568172784000, "up": 1, "down": 0 },
+            { "timestamp": 1568172814000, "up": 1, "down": 0 },
+            { "timestamp": 1568172844000, "up": 1, "down": 0 },
+            { "timestamp": 1568172874000, "up": 1, "down": 0 },
+            { "timestamp": 1568172904000, "up": 1, "down": 0 },
+            { "timestamp": 1568172934000, "up": 1, "down": 0 },
+            { "timestamp": 1568172964000, "up": 1, "down": 0 },
+            { "timestamp": 1568172994000, "up": 1, "down": 0 },
+            { "timestamp": 1568173024000, "up": 1, "down": 0 },
+            { "timestamp": 1568173054000, "up": 1, "down": 0 },
+            { "timestamp": 1568173084000, "up": 1, "down": 0 },
+            { "timestamp": 1568173114000, "up": 1, "down": 0 },
+            { "timestamp": 1568173144000, "up": 1, "down": 0 },
+            { "timestamp": 1568173174000, "up": 1, "down": 0 },
+            { "timestamp": 1568173204000, "up": 1, "down": 0 },
+            { "timestamp": 1568173234000, "up": 1, "down": 0 }
           ]
         },
         "state": {
           "agent": null,
           "checks": [
             {
-              "agent": {
-                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
-              },
+              "agent": { "id": "04e1d082-65bc-4929-8d65-d0768a2621c4" },
               "container": null,
               "kubernetes": null,
-              "monitor": {
-                "ip": "127.0.0.1",
-                "name": "",
-                "status": "up"
-              },
+              "monitor": { "ip": "127.0.0.1", "name": "", "status": "up" },
               "observer": {
                 "geo": {
                   "name": "mpls",
-                  "location": {
-                    "lat": 37.926867976784706,
-                    "lon": -78.02490200847387
-                  }
+                  "location": { "lat": 37.926867976784706, "lon": -78.02490200847387 }
                 }
               },
               "timestamp": "1568173234374"
             }
           ],
           "geo": null,
-          "observer": {
-            "geo": {
-              "name": [
-                "mpls"
-              ],
-              "location": null
-            }
-          },
-          "monitor": {
-            "id": null,
-            "name": null,
-            "status": "up",
-            "type": null
-          },
-          "summary": {
-            "up": 1,
-            "down": 0,
-            "geo": null
-          },
-          "url": {
-            "full": "http://localhost:5678/pattern?r=200x1",
-            "domain": "localhost"
-          },
+          "observer": { "geo": { "name": ["mpls"], "location": null } },
+          "monitor": { "id": null, "name": null, "status": "up", "type": null },
+          "summary": { "up": 1, "down": 0, "geo": null },
+          "url": { "full": "http://localhost:5678/pattern?r=200x1", "domain": "localhost" },
           "timestamp": 1568173234374
         }
       },
@@ -1721,188 +477,50 @@
         "histogram": {
           "count": 20,
           "points": [
-            {
-              "timestamp": 1568172657286,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172680087,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172702888,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172725689,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172748490,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172771291,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172794092,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172816893,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172839694,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172862495,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172885296,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172908097,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172930898,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172953699,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172976500,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568172999301,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173022102,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173044903,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173067704,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173090505,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173113306,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173136107,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173158908,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173181709,
-              "up": 1,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173204510,
-              "up": 0,
-              "down": 0
-            },
-            {
-              "timestamp": 1568173227311,
-              "up": 1,
-              "down": 0
-            }
+            { "timestamp": 1568172664000, "up": 1, "down": 0 },
+            { "timestamp": 1568172694000, "up": 1, "down": 0 },
+            { "timestamp": 1568172724000, "up": 1, "down": 0 },
+            { "timestamp": 1568172754000, "up": 1, "down": 0 },
+            { "timestamp": 1568172784000, "up": 1, "down": 0 },
+            { "timestamp": 1568172814000, "up": 1, "down": 0 },
+            { "timestamp": 1568172844000, "up": 1, "down": 0 },
+            { "timestamp": 1568172874000, "up": 1, "down": 0 },
+            { "timestamp": 1568172904000, "up": 1, "down": 0 },
+            { "timestamp": 1568172934000, "up": 1, "down": 0 },
+            { "timestamp": 1568172964000, "up": 1, "down": 0 },
+            { "timestamp": 1568172994000, "up": 1, "down": 0 },
+            { "timestamp": 1568173024000, "up": 1, "down": 0 },
+            { "timestamp": 1568173054000, "up": 1, "down": 0 },
+            { "timestamp": 1568173084000, "up": 1, "down": 0 },
+            { "timestamp": 1568173114000, "up": 1, "down": 0 },
+            { "timestamp": 1568173144000, "up": 1, "down": 0 },
+            { "timestamp": 1568173174000, "up": 1, "down": 0 },
+            { "timestamp": 1568173204000, "up": 1, "down": 0 },
+            { "timestamp": 1568173234000, "up": 1, "down": 0 }
           ]
         },
         "state": {
           "agent": null,
           "checks": [
             {
-              "agent": {
-                "id": "04e1d082-65bc-4929-8d65-d0768a2621c4"
-              },
+              "agent": { "id": "04e1d082-65bc-4929-8d65-d0768a2621c4" },
               "container": null,
               "kubernetes": null,
-              "monitor": {
-                "ip": "127.0.0.1",
-                "name": "",
-                "status": "up"
-              },
+              "monitor": { "ip": "127.0.0.1", "name": "", "status": "up" },
               "observer": {
                 "geo": {
                   "name": "mpls",
-                  "location": {
-                    "lat": 37.926867976784706,
-                    "lon": -78.02490200847387
-                  }
+                  "location": { "lat": 37.926867976784706, "lon": -78.02490200847387 }
                 }
               },
               "timestamp": "1568173234375"
             }
           ],
           "geo": null,
-          "observer": {
-            "geo": {
-              "name": [
-                "mpls"
-              ],
-              "location": null
-            }
-          },
-          "monitor": {
-            "id": null,
-            "name": null,
-            "status": "up",
-            "type": null
-          },
-          "summary": {
-            "up": 1,
-            "down": 0,
-            "geo": null
-          },
-          "url": {
-            "full": "http://localhost:5678/pattern?r=200x1",
-            "domain": "localhost"
-          },
+          "observer": { "geo": { "name": ["mpls"], "location": null } },
+          "monitor": { "id": null, "name": null, "status": "up", "type": null },
+          "summary": { "up": 1, "down": 0, "geo": null },
+          "url": { "full": "http://localhost:5678/pattern?r=200x1", "domain": "localhost" },
           "timestamp": 1568173234375
         }
       }
