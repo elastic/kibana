@@ -169,7 +169,7 @@ describe('Timeline', () => {
         );
 
         wrapper
-          .find('[data-test-subj="providerBadge"] svg')
+          .find('[data-test-subj="providerBadge"] [data-euiicon-type]')
           .first()
           .simulate('click');
 
