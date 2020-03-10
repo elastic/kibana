@@ -16,12 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// @ts-ignore
-export { PromiseServiceCreator } from './promises';
-// @ts-ignore
-export { watchMultiDecorator } from './watch_multi';
-export * from './angular_config';
-export { ensureDefaultIndexPattern } from './ensure_default_index_pattern';
-// @ts-ignore
-export { createTopNavDirective, createTopNavHelper, loadKbnTopNavDirectives } from './kbn_top_nav';
-export { subscribeWithScope } from './subscribe_with_scope';
+import { FatalErrorsSetup } from '../../../../../core/public';
+import {
+  AngularHttpError,
+  formatAngularHttpError,
+  isAngularHttpError,
+} from './format_angular_http_error';
+
+export function addFatalErrorCallback(fatalErrors: FatalErrorsSetup, callback: () => void) {
+  fatalErrors.get$().subscribe(() => {
+    callback();
+  });
+}
+
+export function addFatalError(
+  fatalErrors: FatalErrorsSetup,
+  error: AngularHttpError | Error | string,
+  location?: string
+) {
+  // add support for angular http errors to newPlatformFatalErrors
+  if (isAngularHttpError(error)) {
+    error = formatAngularHttpError(error);
+  }
+
+  fatalErrors.add(error, location);
+}

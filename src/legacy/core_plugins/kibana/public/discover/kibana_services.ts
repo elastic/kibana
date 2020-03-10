@@ -53,7 +53,7 @@ export { wrapInI18nContext } from 'ui/i18n';
 export { getRequestInspectorStats, getResponseInspectorStats } from '../../../data/public';
 // @ts-ignore
 export { intervalOptions } from 'ui/agg_types';
-export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
+export { subscribeWithScope } from '../../../../../plugins/kibana_legacy/public';
 // @ts-ignore
 export { timezoneProvider } from 'ui/vis/lib/timezone';
 export { tabifyAggResponse } from '../../../data/public';
