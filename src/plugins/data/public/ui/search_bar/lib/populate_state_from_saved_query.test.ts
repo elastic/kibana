@@ -43,7 +43,7 @@ describe('populateStateFromSavedQuery', () => {
   beforeEach(() => {
     dataMock = dataPluginMock.createStartContract();
     dataMock.query.filterManager.setFilters = jest.fn();
-    dataMock.query.filterManager.getGlobalFilters = jest.fn().mockReturnValue([]);
+    dataMock.query.filterManager.getFilters = jest.fn().mockReturnValue([]);
   });
 
   it('should set query', async () => {
@@ -51,7 +51,7 @@ describe('populateStateFromSavedQuery', () => {
     const savedQuery: SavedQuery = {
       ...baseSavedQuery,
     };
-    populateStateFromSavedQuery(dataMock.query, setQueryState, savedQuery);
+    populateStateFromSavedQuery(dataMock.query, setQueryState, undefined, savedQuery);
     expect(setQueryState).toHaveBeenCalled();
   });
 
@@ -62,21 +62,35 @@ describe('populateStateFromSavedQuery', () => {
     };
     const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
     savedQuery.attributes.filters = [f1];
-    populateStateFromSavedQuery(dataMock.query, setQueryState, savedQuery);
+    populateStateFromSavedQuery(dataMock.query, setQueryState, undefined, savedQuery);
     expect(setQueryState).toHaveBeenCalled();
     expect(dataMock.query.filterManager.setFilters).toHaveBeenCalledWith([f1]);
   });
 
+  it('should preserve app filters', async () => {
+    const setQueryState = jest.fn();
+    const savedQuery: SavedQuery = {
+      ...baseSavedQuery,
+    };
+    const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
+    const f2 = getFilter(FilterStateStore.APP_STATE, false, false, 'banana', 1);
+    dataMock.query.filterManager.getFilters = jest.fn().mockReturnValue([f2]);
+    savedQuery.attributes.filters = [f1];
+    populateStateFromSavedQuery(dataMock.query, setQueryState, undefined, savedQuery);
+    expect(setQueryState).toHaveBeenCalled();
+    expect(dataMock.query.filterManager.setFilters).toHaveBeenCalledWith([f2, f1]);
+  });
+
   it('should preserve global filters', async () => {
     const globalFilter = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
-    dataMock.query.filterManager.getGlobalFilters = jest.fn().mockReturnValue([globalFilter]);
+    dataMock.query.filterManager.getFilters = jest.fn().mockReturnValue([globalFilter]);
     const setQueryState = jest.fn();
     const savedQuery: SavedQuery = {
       ...baseSavedQuery,
     };
     const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
     savedQuery.attributes.filters = [f1];
-    populateStateFromSavedQuery(dataMock.query, setQueryState, savedQuery);
+    populateStateFromSavedQuery(dataMock.query, setQueryState, undefined, savedQuery);
     expect(setQueryState).toHaveBeenCalled();
     expect(dataMock.query.filterManager.setFilters).toHaveBeenCalledWith([globalFilter, f1]);
   });
@@ -97,7 +111,7 @@ describe('populateStateFromSavedQuery', () => {
     dataMock.query.timefilter.timefilter.setTime = jest.fn();
     dataMock.query.timefilter.timefilter.setRefreshInterval = jest.fn();
 
-    populateStateFromSavedQuery(dataMock.query, jest.fn(), savedQuery);
+    populateStateFromSavedQuery(dataMock.query, jest.fn(), undefined, savedQuery);
 
     expect(dataMock.query.timefilter.timefilter.setTime).toHaveBeenCalledWith({
       from: savedQuery.attributes.timefilter.from,
