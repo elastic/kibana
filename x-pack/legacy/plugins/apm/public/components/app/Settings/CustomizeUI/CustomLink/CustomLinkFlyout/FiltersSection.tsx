@@ -40,7 +40,8 @@ export const FiltersSection = ({
 
   const onRemoveFilter = (idx: number) => {
     // remove without mutating original array
-    const newFilters = [...filters].splice(idx, 1);
+    const newFilters = [...filters];
+    newFilters.splice(idx, 1);
 
     // if there is only one item left it should not be removed
     // but reset to empty
@@ -128,7 +129,7 @@ export const FiltersSection = ({
               <EuiButtonEmpty
                 iconType="trash"
                 onClick={() => onRemoveFilter(idx)}
-                disabled={!key && filters.length === 1}
+                disabled={!value && !key && filters.length === 1}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

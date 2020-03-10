@@ -29,6 +29,7 @@ import { px } from '../../../style/variables';
 import { CustomLinkFlyout } from '../../app/Settings/CustomizeUI/CustomLink/CustomLinkFlyout';
 import { APMLink } from '../Links/apm/APMLink';
 import { LoadingStatePrompt } from '../LoadingStatePrompt';
+import { replaceVariableInUrl } from './helper';
 interface Props {
   transaction?: Transaction;
 }
@@ -54,15 +55,12 @@ export const CustomLink = ({ transaction }: Props) => {
   );
 
   const renderEmptyMessage = () => (
-    <>
-      <EuiSpacer size="s" />
-      <EuiText size="xs" grow={false} style={{ width: px(300) }}>
-        {i18n.translate('xpack.apm.customLink.empty', {
-          defaultMessage:
-            'No custom links found. Set up your own custom links i.e. a link to a specific Dashboard or external link.'
-        })}
-      </EuiText>
-    </>
+    <EuiText size="xs" grow={false} style={{ width: px(300) }}>
+      {i18n.translate('xpack.apm.customLink.empty', {
+        defaultMessage:
+          'No custom links found. Set up your own custom links i.e. a link to a specific Dashboard or external link.'
+      })}
+    </EuiText>
   );
 
   const renderLinks = () => (
@@ -72,7 +70,7 @@ export const CustomLink = ({ transaction }: Props) => {
           <SectionLink
             key={link.id}
             label={link.label}
-            href={link.url}
+            href={replaceVariableInUrl(link.url, transaction)}
             target="_blank"
           />
         );
@@ -146,7 +144,7 @@ export const CustomLink = ({ transaction }: Props) => {
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer />
+        <EuiSpacer size="s" />
         <SectionSubtitle>
           {i18n.translate('xpack.apm.customLink.subtitle', {
             defaultMessage: 'Links will always open in a new window/tab.'
