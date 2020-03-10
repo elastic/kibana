@@ -197,19 +197,6 @@ export class VectorLayer extends AbstractLayer {
     return joinFields;
   }
 
-  async getDateFields() {
-    return await this._source.getDateFields();
-  }
-
-  async getNumberFields() {
-    const numberFieldOptions = await this._source.getNumberFields();
-    return [...numberFieldOptions, ...this._getJoinFields()];
-  }
-
-  async getCategoricalFields() {
-    return await this._source.getCategoricalFields();
-  }
-
   async getFields() {
     const sourceFields = await this._source.getFields();
     return [...sourceFields, ...this._getJoinFields()];
