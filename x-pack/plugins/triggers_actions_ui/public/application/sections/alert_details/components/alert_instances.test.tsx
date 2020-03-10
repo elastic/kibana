@@ -65,7 +65,7 @@ describe('alert_instances', () => {
     ).toEqual(instances);
   });
 
-  it('render a hidden field with durtation epoch', () => {
+  it('render a hidden field with duration epoch', () => {
     const alert = mockAlert();
     const alertState = mockAlertState();
 
