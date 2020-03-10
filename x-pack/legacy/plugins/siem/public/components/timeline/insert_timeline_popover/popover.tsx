@@ -272,17 +272,18 @@ const InsertTimelinePopoverComponent: React.FC<InsertTimelinePopoverProps> = ({
               options={[
                 ...timelines
                   .filter(t => !hideUntitled || t.title !== '')
-                  .map((t, index) => {
-                    return {
-                      description: t.description,
-                      favorite: t.favorite,
-                      label: t.title,
-                      id: t.savedObjectId,
-                      key: `${t.title}-${index}`,
-                      title: t.title,
-                      checked: undefined,
-                    } as EuiSelectableOption;
-                  }),
+                  .map(
+                    (t, index) =>
+                      ({
+                        description: t.description,
+                        favorite: t.favorite,
+                        label: t.title,
+                        id: t.savedObjectId,
+                        key: `${t.title}-${index}`,
+                        title: t.title,
+                        checked: undefined,
+                      } as EuiSelectableOption)
+                  ),
               ]}
             >
               {(list, search) => (
