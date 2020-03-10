@@ -36,6 +36,7 @@ module.exports = function(grunt) {
     'run:test_jest_integration',
     'run:test_projects',
     'run:test_karma_ci',
+    'run:test_hardening',
     'run:apiIntegrationTests',
   ]);
 };

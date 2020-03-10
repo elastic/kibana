@@ -17,8 +17,25 @@
  * under the License.
  */
 
-require('./harden'); // this require MUST be executed before any others
-require('symbol-observable');
-require('./root');
-require('./node_version_validator');
-require('./babel_register');
+var execFileSync = require('child_process').execFileSync;
+var path = require('path');
+var syncGlob = require('glob').sync;
+var program = require('commander');
+
+program
+  .name('node scripts/test_hardening.js')
+  .arguments('[file...]')
+  .description(
+    'Run the tests in test/harden directory. If no files are provided, all files within the directory will be run.'
+  )
+  .action(function(globs) {
+    if (globs.length === 0) globs.push(path.join('test', 'harden', '*'));
+    globs.forEach(function(glob) {
+      syncGlob(glob).forEach(function(filename) {
+        if (path.basename(filename)[0] === '_') return;
+        console.log(process.argv[0], filename);
+        execFileSync(process.argv[0], [filename], { stdio: 'inherit' });
+      });
+    });
+  })
+  .parse(process.argv);
