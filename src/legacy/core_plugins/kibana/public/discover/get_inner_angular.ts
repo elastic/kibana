@@ -33,7 +33,7 @@ import { GlobalStateProvider } from 'ui/state_management/global_state';
 // @ts-ignore
 import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
 // @ts-ignore
-import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
+import { KbnUrlProvider } from 'ui/url';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
@@ -194,8 +194,7 @@ export function createLocalGlobalStateModule() {
 function createLocalKbnUrlModule() {
   angular
     .module('discoverKbnUrl', ['discoverPrivate', 'ngRoute'])
-    .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider))
-    .service('redirectWhenMissing', (Private: IPrivate) => Private(RedirectWhenMissingProvider));
+    .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider));
 }
 
 function createLocalConfigModule(uiSettings: IUiSettingsClient) {

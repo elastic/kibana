@@ -59,7 +59,7 @@ export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
 export { timezoneProvider } from 'ui/vis/lib/timezone';
 export { tabifyAggResponse } from '../../../data/public';
-export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
+export { unhashUrl, redirectWhenMissing } from '../../../../../plugins/kibana_utils/public';
 export {
   migrateLegacyQuery,
   ensureDefaultIndexPattern,

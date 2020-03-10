@@ -35,7 +35,6 @@ import {
   KbnUrlProvider,
   PrivateProvider,
   PromiseServiceCreator,
-  RedirectWhenMissingProvider,
 } from '../legacy_imports';
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';

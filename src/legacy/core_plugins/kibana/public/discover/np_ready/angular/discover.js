@@ -59,6 +59,7 @@ import {
   getAngularModule,
   ensureDefaultIndexPattern,
   registerTimefilterWithGlobalStateFactory,
+  redirectWhenMissing,
 } from '../../kibana_services';
 
 const {
@@ -119,7 +120,7 @@ app.config($routeProvider => {
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      savedObjects: function(redirectWhenMissing, $route, kbnUrl, Promise, $rootScope, State) {
+      savedObjects: function($route, kbnUrl, Promise, $rootScope, State) {
         const indexPatterns = getServices().indexPatterns;
         const savedSearchId = $route.current.params.id;
         return ensureDefaultIndexPattern(core, getServices().data, $rootScope, kbnUrl).then(() => {
@@ -162,9 +163,12 @@ app.config($routeProvider => {
               })
               .catch(
                 redirectWhenMissing({
-                  search: '/discover',
-                  'index-pattern':
-                    '/management/kibana/objects/savedSearches/' + $route.current.params.id,
+                  mapping: {
+                    search: '/discover',
+                    'index-pattern':
+                      '/management/kibana/objects/savedSearches/' + $route.current.params.id,
+                  },
+                  toastNotifications,
                 })
               ),
           });
