@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import apm from 'elastic-apm-node';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
@@ -38,6 +39,10 @@ export const executeJobFactory: QueuedPngExecutorFactory = async function execut
   const logger = parentLogger.clone([PNG_JOB_TYPE, 'execute']);
 
   return function executeJob(jobId: string, job: JobDocPayloadPNG, cancellationToken: any) {
+    const apmTrans = apm.startTransaction('reporting execute_job png', 'reporting');
+    const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
+    let apmGeneratePng: any;
+
     const jobLogger = logger.clone([jobId]);
     const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders({ server, job, logger })),
@@ -46,6 +51,9 @@ export const executeJobFactory: QueuedPngExecutorFactory = async function execut
       mergeMap(conditionalHeaders => {
         const urls = getFullUrls({ server, job });
         const hashUrl = urls[0];
+        if (apmGetAssets) apmGetAssets.end();
+
+        apmGeneratePng = apmTrans?.startSpan('generate_png_pipeline', 'execute');
         return generatePngObservable(
           jobLogger,
           hashUrl,
@@ -55,10 +63,12 @@ export const executeJobFactory: QueuedPngExecutorFactory = async function execut
         );
       }),
       map(({ buffer, warnings }) => {
+        if (apmGeneratePng) apmGeneratePng.end();
+
         return {
           content_type: 'image/png',
-          content: buffer.toString('base64'),
-          size: buffer.byteLength,
+          content: buffer,
+          size: buffer.length,
           warnings,
         };
       }),

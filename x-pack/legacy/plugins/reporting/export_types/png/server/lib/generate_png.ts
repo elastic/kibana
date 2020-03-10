@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { map } from 'rxjs/operators';
 import { LevelLogger } from '../../../../server/lib';
@@ -25,12 +26,16 @@ export function generatePngObservableFactory(
     browserTimezone: string,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams
-  ): Rx.Observable<{ buffer: Buffer; warnings: string[] }> {
+  ): Rx.Observable<{ buffer: string; warnings: string[] }> {
+    const apmTrans = apm.startTransaction('reporting generate_png', 'reporting');
+    const apmLayout = apmTrans?.startSpan('create_layout', 'setup');
     if (!layoutParams || !layoutParams.dimensions) {
       throw new Error(`LayoutParams.Dimensions is undefined.`);
     }
-
     const layout = new PreserveLayout(layoutParams.dimensions);
+    if (apmLayout) apmLayout.end();
+
+    const apmScreenshots = apmTrans?.startSpan('screenshots_pipeline', 'setup');
     const screenshots$ = screenshotsObservable({
       logger,
       urls: [url],
@@ -39,6 +44,8 @@ export function generatePngObservableFactory(
       browserTimezone,
     }).pipe(
       map((results: ScreenshotResults[]) => {
+        if (apmScreenshots) apmScreenshots.end();
+
         return {
           buffer: results[0].screenshots[0].base64EncodedData,
           warnings: results.reduce((found, current) => {
@@ -51,6 +58,7 @@ export function generatePngObservableFactory(
       })
     );
 
+    if (apmTrans) apmTrans.end();
     return screenshots$;
   };
 }

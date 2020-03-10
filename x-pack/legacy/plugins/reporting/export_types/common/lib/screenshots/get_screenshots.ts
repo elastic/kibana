@@ -7,29 +7,13 @@
 import { i18n } from '@kbn/i18n';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LevelLogger } from '../../../../server/lib';
-import { Screenshot, ElementsPositionAndAttribute } from './types';
-
-const getAsyncDurationLogger = (logger: LevelLogger) => {
-  return async (description: string, promise: Promise<any>) => {
-    const start = Date.now();
-    const result = await promise;
-    logger.debug(
-      i18n.translate('xpack.reporting.screencapture.asyncTook', {
-        defaultMessage: '{description} took {took}ms',
-        values: {
-          description,
-          took: Date.now() - start,
-        },
-      })
-    );
-    return result;
-  };
-};
+import { ApmTransaction, Screenshot, ElementsPositionAndAttribute } from './types';
 
 export const getScreenshots = async (
   browser: HeadlessBrowser,
   elementsPositionAndAttributes: ElementsPositionAndAttribute[],
-  logger: LevelLogger
+  logger: LevelLogger,
+  txn: ApmTransaction
 ): Promise<Screenshot[]> => {
   logger.info(
     i18n.translate('xpack.reporting.screencapture.takingScreenshots', {
@@ -37,21 +21,20 @@ export const getScreenshots = async (
     })
   );
 
-  const asyncDurationLogger = getAsyncDurationLogger(logger);
   const screenshots: Screenshot[] = [];
 
   for (let i = 0; i < elementsPositionAndAttributes.length; i++) {
+    const apmSpan = txn?.startSpan('get_screenshots', 'read');
     const item = elementsPositionAndAttributes[i];
-    const base64EncodedData = await asyncDurationLogger(
-      `screenshot #${i + 1}`,
-      browser.screenshot(item.position)
-    );
+    const base64EncodedData = (await browser.screenshot(item.position)).toString('base64');
 
     screenshots.push({
       base64EncodedData,
       title: item.attributes.title,
       description: item.attributes.description,
     });
+
+    if (apmSpan) apmSpan.end();
   }
 
   logger.info(

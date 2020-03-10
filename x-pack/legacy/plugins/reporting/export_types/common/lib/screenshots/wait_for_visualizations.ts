@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import apm from 'elastic-apm-node';
 import { i18n } from '@kbn/i18n';
 import { ServerFacade } from '../../../../types';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
 import { CONTEXT_WAITFORELEMENTSTOBEINDOM } from './constants';
+import { ApmTransaction } from './types';
 
 type SelectorArgs = Record<string, string>;
 
@@ -27,8 +29,10 @@ export const waitForVisualizations = async (
   browser: HeadlessBrowser,
   itemsCount: number,
   layout: LayoutInstance,
-  logger: LevelLogger
+  logger: LevelLogger,
+  txn: ApmTransaction
 ): Promise<void> => {
+  const apmSpan = txn?.startSpan('wait_for_visualizations', 'wait');
   const config = server.config();
   const { renderComplete: renderCompleteSelector } = layout.selectors;
 
@@ -53,6 +57,7 @@ export const waitForVisualizations = async (
 
     logger.debug(`found ${itemsCount} rendered elements in the DOM`);
   } catch (err) {
+    apm.captureError(err);
     throw new Error(
       i18n.translate('xpack.reporting.screencapture.couldntFinishRendering', {
         defaultMessage: `An error occurred when trying to wait for {count} visualizations to finish rendering. You may need to increase '{configKey}'. {error}`,
@@ -64,4 +69,6 @@ export const waitForVisualizations = async (
       })
     );
   }
+
+  if (apmSpan) apmSpan.end();
 };

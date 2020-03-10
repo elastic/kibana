@@ -5,17 +5,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import apm from 'elastic-apm-node';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
-import { LayoutInstance } from '../../layouts/layout';
-import { AttributesMap, ElementsPositionAndAttribute } from './types';
 import { Logger } from '../../../../types';
+import { LayoutInstance } from '../../layouts/layout';
 import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
+import { ApmTransaction, AttributesMap, ElementsPositionAndAttribute } from './types';
 
 export const getElementPositionAndAttributes = async (
   browser: HeadlessBrowser,
   layout: LayoutInstance,
-  logger: Logger
+  logger: Logger,
+  txn: ApmTransaction
 ): Promise<ElementsPositionAndAttribute[] | null> => {
+  const apmSpan = txn?.startSpan('get_element_position_data', 'read');
   const { screenshot: screenshotSelector } = layout.selectors; // data-shared-items-container
   let elementsPositionAndAttributes: ElementsPositionAndAttribute[] | null;
   try {
@@ -66,8 +69,10 @@ export const getElementPositionAndAttributes = async (
       );
     }
   } catch (err) {
+    apm.captureError(err);
     elementsPositionAndAttributes = null;
   }
 
+  if (apmSpan) apmSpan.end();
   return elementsPositionAndAttributes;
 };

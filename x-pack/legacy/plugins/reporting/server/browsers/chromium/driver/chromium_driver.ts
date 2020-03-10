@@ -183,7 +183,7 @@ export class HeadlessChromiumDriver {
     logger.info(`handled ${interceptedCount} page requests`);
   }
 
-  public async screenshot(elementPosition: ElementPosition): Promise<string> {
+  public async screenshot(elementPosition: ElementPosition): Promise<Buffer> {
     let clip;
     if (elementPosition) {
       const { boundingClientRect, scroll = { x: 0, y: 0 } } = elementPosition;
@@ -195,11 +195,7 @@ export class HeadlessChromiumDriver {
       };
     }
 
-    const screenshot = await this.page.screenshot({
-      clip,
-    });
-
-    return screenshot.toString('base64');
+    return await this.page.screenshot({ clip });
   }
 
   public async evaluate(

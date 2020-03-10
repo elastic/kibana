@@ -4,19 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
-import { catchError, concatMap, first, mergeMap, take, takeUntil, toArray } from 'rxjs/operators';
+import {
+  catchError,
+  concatMap,
+  first,
+  mergeMap,
+  take,
+  takeUntil,
+  tap,
+  toArray,
+} from 'rxjs/operators';
 import { CaptureConfig, HeadlessChromiumDriverFactory, ServerFacade } from '../../../../types';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
 import { getScreenshots } from './get_screenshots';
 import { getTimeRange } from './get_time_range';
+import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
 import { skipTelemetry } from './skip_telemetry';
 import { ScreenSetupData, ScreenshotObservableOpts, ScreenshotResults } from './types';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
-import { injectCustomCss } from './inject_css';
 
 export function screenshotsObservableFactory(
   server: ServerFacade,
@@ -32,48 +42,57 @@ export function screenshotsObservableFactory(
     layout,
     browserTimezone,
   }: ScreenshotObservableOpts): Rx.Observable<ScreenshotResults[]> {
+    const txn = apm.startTransaction(`reporting screenshot pipeline`, 'reporting');
+
+    const apmCreatePage = txn?.startSpan('create_page', 'wait');
     const create$ = browserDriverFactory.createPage(
       { viewport: layout.getBrowserViewport(), browserTimezone },
       logger
     );
+
     return Rx.from(urls).pipe(
       concatMap(url => {
         return create$.pipe(
           mergeMap(({ driver, exit$ }) => {
+            if (apmCreatePage) apmCreatePage.end();
+
             const setup$: Rx.Observable<ScreenSetupData> = Rx.of(1).pipe(
               takeUntil(exit$),
-              mergeMap(() => openUrl(server, driver, url, conditionalHeaders, logger)),
-              mergeMap(() => skipTelemetry(driver, logger)),
-              mergeMap(() => getNumberOfItems(server, driver, layout, logger)),
+              mergeMap(() => openUrl(server, driver, url, conditionalHeaders, logger, txn)),
+              mergeMap(() => skipTelemetry(driver, logger, txn)),
+              mergeMap(() => getNumberOfItems(server, driver, layout, logger, txn)),
               mergeMap(async itemsCount => {
                 const viewport = layout.getViewport(itemsCount);
                 await Promise.all([
                   driver.setViewport(viewport, logger),
-                  waitForVisualizations(server, driver, itemsCount, layout, logger),
+                  waitForVisualizations(server, driver, itemsCount, layout, logger, txn),
                 ]);
               }),
               mergeMap(async () => {
                 // Waiting till _after_ elements have rendered before injecting our CSS
                 // allows for them to be displayed properly in many cases
-                await injectCustomCss(driver, layout, logger);
+                await injectCustomCss(driver, layout, logger, txn);
 
+                const apmPositionElements = txn?.startSpan('position_elements', 'correction');
                 if (layout.positionElements) {
                   // position panel elements for print layout
                   await layout.positionElements(driver, logger);
                 }
+                if (apmPositionElements) apmPositionElements.end();
 
-                await waitForRenderComplete(driver, layout, captureConfig, logger);
+                await waitForRenderComplete(driver, layout, captureConfig, logger, txn);
               }),
               mergeMap(async () => {
                 return await Promise.all([
-                  getTimeRange(driver, layout, logger),
-                  getElementPositionAndAttributes(driver, layout, logger),
+                  getTimeRange(driver, layout, logger, txn),
+                  getElementPositionAndAttributes(driver, layout, logger, txn),
                 ]).then(([timeRange, elementsPositionAndAttributes]) => ({
                   elementsPositionAndAttributes,
                   timeRange,
                 }));
               }),
               catchError(err => {
+                apm.captureError(err);
                 logger.error(err);
                 return Rx.of({ elementsPositionAndAttributes: null, timeRange: null, error: err });
               })
@@ -85,7 +104,7 @@ export function screenshotsObservableFactory(
                   const elements = data.elementsPositionAndAttributes
                     ? data.elementsPositionAndAttributes
                     : getDefaultElementPosition(layout.getViewport(1));
-                  const screenshots = await getScreenshots(driver, elements, logger);
+                  const screenshots = await getScreenshots(driver, elements, logger, txn);
                   const { timeRange, error: setupError } = data;
                   return { timeRange, screenshots, error: setupError };
                 }
@@ -96,7 +115,10 @@ export function screenshotsObservableFactory(
         );
       }),
       take(urls.length),
-      toArray()
+      toArray(),
+      tap(() => {
+        if (txn) txn.end();
+      })
     );
   };
 }

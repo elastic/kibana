@@ -9,12 +9,15 @@ import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
 import { CONTEXT_GETTIMERANGE } from './constants';
 import { TimeRange } from './types';
+import { ApmTransaction } from './types';
 
 export const getTimeRange = async (
   browser: HeadlessBrowser,
   layout: LayoutInstance,
-  logger: LevelLogger
+  logger: LevelLogger,
+  txn: ApmTransaction
 ): Promise<TimeRange | null> => {
+  const apmSpan = txn?.startSpan('get_time_range', 'read');
   logger.debug('getting timeRange');
 
   const timeRange: TimeRange | null = await browser.evaluate(
@@ -45,5 +48,6 @@ export const getTimeRange = async (
     logger.debug('no timeRange');
   }
 
+  if (apmSpan) apmSpan.end();
   return timeRange;
 };

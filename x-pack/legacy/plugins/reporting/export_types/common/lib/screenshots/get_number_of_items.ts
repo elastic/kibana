@@ -4,19 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import apm from 'elastic-apm-node';
 import { i18n } from '@kbn/i18n';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LevelLogger } from '../../../../server/lib';
 import { ServerFacade } from '../../../../types';
 import { LayoutInstance } from '../../layouts/layout';
 import { CONTEXT_GETNUMBEROFITEMS, CONTEXT_READMETADATA } from './constants';
+import { ApmTransaction } from './types';
 
 export const getNumberOfItems = async (
   server: ServerFacade,
   browser: HeadlessBrowser,
   layout: LayoutInstance,
-  logger: LevelLogger
+  logger: LevelLogger,
+  txn: ApmTransaction | null
 ): Promise<number> => {
+  const apmSpan = txn?.startSpan('get_number_of_items', 'read');
   const config = server.config();
   const { renderComplete: renderCompleteSelector, itemsCountAttribute } = layout.selectors;
   let itemsCount: number;
@@ -59,6 +63,7 @@ export const getNumberOfItems = async (
       logger
     );
   } catch (err) {
+    apm.captureError(err);
     throw new Error(
       i18n.translate('xpack.reporting.screencapture.readVisualizationsError', {
         defaultMessage: `An error occurred when trying to read the page for visualization panel info. You may need to increase '{configKey}'. {error}`,
@@ -71,5 +76,6 @@ export const getNumberOfItems = async (
     itemsCount = 1;
   }
 
+  if (apmSpan) apmSpan.end();
   return itemsCount;
 };

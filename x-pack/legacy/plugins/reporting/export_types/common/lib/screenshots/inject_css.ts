@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import apm from 'elastic-apm-node';
 import { i18n } from '@kbn/i18n';
 import fs from 'fs';
 import { promisify } from 'util';
@@ -11,14 +12,17 @@ import { LevelLogger } from '../../../../server/lib';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { Layout } from '../../layouts/layout';
 import { CONTEXT_INJECTCSS } from './constants';
+import { ApmTransaction } from './types';
 
 const fsp = { readFile: promisify(fs.readFile) };
 
 export const injectCustomCss = async (
   browser: HeadlessBrowser,
   layout: Layout,
-  logger: LevelLogger
+  logger: LevelLogger,
+  txn: ApmTransaction
 ): Promise<void> => {
+  const apmSpan = txn?.startSpan('inject_css', 'correction');
   logger.debug(
     i18n.translate('xpack.reporting.screencapture.injectingCss', {
       defaultMessage: 'injecting custom css',
@@ -42,6 +46,7 @@ export const injectCustomCss = async (
       logger
     );
   } catch (err) {
+    apm.captureError(err);
     throw new Error(
       i18n.translate('xpack.reporting.screencapture.injectCss', {
         defaultMessage: `An error occurred when trying to update Kibana CSS for reporting. {error}`,
@@ -49,4 +54,6 @@ export const injectCustomCss = async (
       })
     );
   }
+
+  if (apmSpan) apmSpan.end();
 };

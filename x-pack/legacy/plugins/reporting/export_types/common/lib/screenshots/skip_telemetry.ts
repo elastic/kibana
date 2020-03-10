@@ -7,10 +7,16 @@
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
 import { LevelLogger } from '../../../../server/lib';
 import { CONTEXT_SKIPTELEMETRY } from './constants';
+import { ApmTransaction } from './types';
 
 const LAST_REPORT_STORAGE_KEY = 'xpack.data';
 
-export async function skipTelemetry(browser: HeadlessBrowser, logger: LevelLogger) {
+export async function skipTelemetry(
+  browser: HeadlessBrowser,
+  logger: LevelLogger,
+  txn: ApmTransaction
+) {
+  const apmSpan = txn?.startSpan('skip_telemetry', 'correction');
   const storageData = await browser.evaluate(
     {
       fn: storageKey => {
@@ -31,4 +37,6 @@ export async function skipTelemetry(browser: HeadlessBrowser, logger: LevelLogge
   );
 
   logger.debug(`added data to localStorage to skip telmetry: ${storageData}`);
+
+  if (apmSpan) apmSpan.end();
 }
