@@ -25,29 +25,29 @@ describe('DeprecationList', () => {
 
     test('shows simple messages when index field is not present', () => {
       expect(shallow(<DeprecationList {...defaultProps} />)).toMatchInlineSnapshot(`
-<div>
-  <SimpleMessageDeprecation
-    deprecation={
-      Object {
-        "level": "warning",
-        "message": "Issue 1",
-        "url": "",
-      }
-    }
-    key="Issue 1"
-  />
-  <SimpleMessageDeprecation
-    deprecation={
-      Object {
-        "level": "warning",
-        "message": "Issue 1",
-        "url": "",
-      }
-    }
-    key="Issue 1"
-  />
-</div>
-`);
+        <div>
+          <SimpleMessageDeprecation
+            deprecation={
+              Object {
+                "level": "warning",
+                "message": "Issue 1",
+                "url": "",
+              }
+            }
+            key="Issue 1"
+          />
+          <SimpleMessageDeprecation
+            deprecation={
+              Object {
+                "level": "warning",
+                "message": "Issue 1",
+                "url": "",
+              }
+            }
+            key="Issue 1"
+          />
+        </div>
+      `);
     });
 
     test('shows index deprecation when index field is present', () => {
@@ -61,33 +61,35 @@ describe('DeprecationList', () => {
       };
       const wrapper = shallow(<DeprecationList {...props} />);
       expect(wrapper).toMatchInlineSnapshot(`
-<IndexDeprecation
-  deprecation={
-    Object {
-      "index": "0",
-      "level": "warning",
-      "message": "Issue 1",
-      "url": "",
-    }
-  }
-  indices={
-    Array [
-      Object {
-        "details": undefined,
-        "index": "0",
-        "needsDefaultFields": false,
-        "reindex": false,
-      },
-      Object {
-        "details": undefined,
-        "index": "1",
-        "needsDefaultFields": false,
-        "reindex": false,
-      },
-    ]
-  }
-/>
-`);
+        <IndexDeprecation
+          deprecation={
+            Object {
+              "index": "0",
+              "level": "warning",
+              "message": "Issue 1",
+              "url": "",
+            }
+          }
+          indices={
+            Array [
+              Object {
+                "blockerForReindexing": undefined,
+                "details": undefined,
+                "index": "0",
+                "needsDefaultFields": false,
+                "reindex": false,
+              },
+              Object {
+                "blockerForReindexing": undefined,
+                "details": undefined,
+                "index": "1",
+                "needsDefaultFields": false,
+                "reindex": false,
+              },
+            ]
+          }
+        />
+      `);
     });
   });
 
@@ -102,31 +104,31 @@ describe('DeprecationList', () => {
 
     test('shows detailed messages', () => {
       expect(shallow(<DeprecationList {...defaultProps} />)).toMatchInlineSnapshot(`
-<div>
-  <MessageDeprecation
-    deprecation={
-      Object {
-        "index": "index1",
-        "level": "warning",
-        "message": "Issue 1",
-        "url": "",
-      }
-    }
-    key="Issue 1"
-  />
-  <MessageDeprecation
-    deprecation={
-      Object {
-        "index": "index1",
-        "level": "warning",
-        "message": "Issue 2",
-        "url": "",
-      }
-    }
-    key="Issue 2"
-  />
-</div>
-`);
+        <div>
+          <MessageDeprecation
+            deprecation={
+              Object {
+                "index": "index1",
+                "level": "warning",
+                "message": "Issue 1",
+                "url": "",
+              }
+            }
+            key="Issue 1"
+          />
+          <MessageDeprecation
+            deprecation={
+              Object {
+                "index": "index1",
+                "level": "warning",
+                "message": "Issue 2",
+                "url": "",
+              }
+            }
+            key="Issue 2"
+          />
+        </div>
+      `);
     });
   });
 });

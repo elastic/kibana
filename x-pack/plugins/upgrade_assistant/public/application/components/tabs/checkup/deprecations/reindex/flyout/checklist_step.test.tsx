@@ -26,6 +26,7 @@ describe('ChecklistFlyout', () => {
         prepend: jest.fn(),
       },
     } as any,
+    renderGlobalCallouts: jest.fn(),
     reindexState: {
       loadingState: LoadingState.Success,
       lastCompletedStep: undefined,
