@@ -61,10 +61,10 @@ describe('Editor Store', () => {
     it('prevents adding an unknown text object and reports the error', () => {
       const s1 = reducer(initialValue, {
         type: 'upsert',
-        payload: { id: '1', whoIs: 'this' } as any,
+        payload: { id: '1', who: 'dis' } as any,
       });
 
-      expect((s1.textObjectsSaveError['1'] as Error).message).toContain('Cannot assign');
+      expect(s1.textObjectsSaveError['1']).toContain('Cannot assign');
     });
 
     it('deletes and defaults back to existing file', () => {

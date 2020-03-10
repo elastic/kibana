@@ -85,7 +85,7 @@ export const reducer: Reducer<Store, Action> = (state, action) =>
               delete draft.textObjectsSaveError[object.id];
             }
           } catch (e) {
-            draft.textObjectsSaveError[object.id] = e;
+            draft.textObjectsSaveError[object.id] = e.message;
           }
         }
       }
