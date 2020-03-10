@@ -1,6 +1,9 @@
 ---
 name: Bug report
 about: Things break. Help us identify those things so we can fix them!
+title: ''
+labels: ''
+assignees: ''
 
 ---
 

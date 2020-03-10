@@ -1,6 +1,9 @@
 ---
 name: Question
 about: Who, what, when, where, and how?
+title: ''
+labels: ''
+assignees: ''
 
 ---
 

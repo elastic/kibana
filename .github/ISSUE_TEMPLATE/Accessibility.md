@@ -1,8 +1,11 @@
 ---
 name: Accessibility Issue
-about: Issues to help Kibana be as keyboard-navigable, screen-readable, and accessible to all, with a focus on WCAG / Section 508 compliance
+about: Issues to help Kibana be as keyboard-navigable, screen-readable, and accessible
+  to all, with a focus on WCAG / Section 508 compliance
+title: "(Accessibility)"
 labels: Project:Accessibility
-title: (Accessibility)
+assignees: ''
+
 ---
 
 [Please add a WCAG level label: WCAG A/AA/AAA]
