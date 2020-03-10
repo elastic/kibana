@@ -10,7 +10,6 @@ import Joi from 'joi';
 import {
   enabled,
   description,
-  documentation,
   false_positives,
   filters,
   from,
@@ -33,6 +32,7 @@ import {
   type,
   threat,
   references,
+  note,
   version,
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
@@ -41,7 +41,6 @@ import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
 
 export const createRulesSchema = Joi.object({
   description: description.required(),
-  documentation: documentation.allow('').default(''),
   enabled: enabled.default(true),
   false_positives: false_positives.default([]),
   filters,
@@ -69,5 +68,6 @@ export const createRulesSchema = Joi.object({
   type: type.required(),
   threat: threat.default([]),
   references: references.default([]),
+  note: note.allow('').default(''),
   version: version.default(1),
 });

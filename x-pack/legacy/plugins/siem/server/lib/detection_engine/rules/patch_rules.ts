@@ -17,7 +17,6 @@ export const patchRules = async ({
   actionsClient, // TODO: Use this whenever we add feature support for different action types
   savedObjectsClient,
   description,
-  documentation,
   falsePositives,
   enabled,
   query,
@@ -43,6 +42,7 @@ export const patchRules = async ({
   to,
   type,
   references,
+  note,
   version,
   throttle,
 }: PatchRuleParams): Promise<PartialAlert | null> => {
@@ -53,7 +53,6 @@ export const patchRules = async ({
 
   const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
     description,
-    documentation,
     falsePositives,
     query,
     language,
@@ -77,6 +76,7 @@ export const patchRules = async ({
     references,
     version,
     throttle,
+    note,
   });
 
   const nextParams = defaults(
@@ -85,7 +85,6 @@ export const patchRules = async ({
     },
     {
       description,
-      documentation,
       falsePositives,
       from,
       immutable,
@@ -105,6 +104,7 @@ export const patchRules = async ({
       to,
       type,
       references,
+      note,
       version: calculatedVersion,
     }
   );

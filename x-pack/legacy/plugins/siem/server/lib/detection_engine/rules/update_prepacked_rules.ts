@@ -20,7 +20,6 @@ export const updatePrepackagedRules = async (
   await rules.forEach(async rule => {
     const {
       description,
-      documentation,
       false_positives: falsePositives,
       from,
       immutable,
@@ -43,6 +42,7 @@ export const updatePrepackagedRules = async (
       references,
       version,
       throttle,
+      note,
     } = rule;
 
     // Note: we do not pass down enabled as we do not want to suddenly disable
@@ -51,7 +51,6 @@ export const updatePrepackagedRules = async (
       alertsClient,
       actionsClient,
       description,
-      documentation,
       falsePositives,
       from,
       immutable,
@@ -77,6 +76,7 @@ export const updatePrepackagedRules = async (
       references,
       version,
       throttle,
+      note,
     });
   });
 };

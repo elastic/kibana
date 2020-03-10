@@ -105,4 +105,4 @@ export const updated_by = Joi.string();
 export const version = Joi.number()
   .integer()
   .min(1);
-export const documentation = Joi.string();
+export const note = Joi.string();

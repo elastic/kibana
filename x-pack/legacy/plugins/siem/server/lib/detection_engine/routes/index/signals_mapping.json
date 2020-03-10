@@ -133,7 +133,7 @@
                   }
                 }
               },
-              "documentation": {
+              "note": {
                 "type": "text"
               },
               "type": {

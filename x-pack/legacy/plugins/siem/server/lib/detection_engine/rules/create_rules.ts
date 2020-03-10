@@ -13,7 +13,6 @@ export const createRules = ({
   alertsClient,
   actionsClient, // TODO: Use this actionsClient once we have actions such as email, etc...
   description,
-  documentation,
   enabled,
   falsePositives,
   from,
@@ -38,6 +37,7 @@ export const createRules = ({
   to,
   type,
   references,
+  note,
   version,
 }: CreateRuleParams): Promise<Alert> => {
   return alertsClient.create({
@@ -48,7 +48,6 @@ export const createRules = ({
       consumer: APP_ID,
       params: {
         description,
-        documentation,
         ruleId,
         index,
         falsePositives,
@@ -69,6 +68,7 @@ export const createRules = ({
         to,
         type,
         references,
+        note,
         version,
       },
       schedule: { interval },

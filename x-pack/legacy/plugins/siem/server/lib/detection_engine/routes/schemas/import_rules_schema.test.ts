@@ -1424,8 +1424,8 @@ describe('import rules schema', () => {
     );
   });
 
-  describe('documentation', () => {
-    test('You can set documentation to a string', () => {
+  describe('note', () => {
+    test('You can set note to a string', () => {
       expect(
         importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
           rule_id: 'rule-1',
@@ -1447,16 +1447,14 @@ describe('import rules schema', () => {
           meta: {
             somethingMadeUp: { somethingElse: true },
           },
-          documentation: '# test header',
+          note: '# test header',
         }).error
       ).toBeFalsy();
     });
 
-    test('You cannot create documentation as something other than a string', () => {
+    test('You can set note to an empty string', () => {
       expect(
-        importRulesSchema.validate<
-          Partial<Omit<ImportRuleAlertRest, 'documentation'> & { documentation: object }>
-        >({
+        importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
           rule_id: 'rule-1',
           output_index: '.siem-signals',
           risk_score: 50,
@@ -1476,11 +1474,38 @@ describe('import rules schema', () => {
           meta: {
             somethingMadeUp: { somethingElse: true },
           },
-          documentation: {
+          note: '',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You cannot create note as something other than a string', () => {
+      expect(
+        importRulesSchema.validate<Partial<Omit<ImportRuleAlertRest, 'note'> & { note: object }>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: false,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          meta: {
+            somethingMadeUp: { somethingElse: true },
+          },
+          note: {
             somethingMadeUp: { somethingElse: true },
           },
         }).error.message
-      ).toEqual('child "documentation" fails because ["documentation" must be a string]');
+      ).toEqual('child "note" fails because ["note" must be a string]');
     });
   });
 });

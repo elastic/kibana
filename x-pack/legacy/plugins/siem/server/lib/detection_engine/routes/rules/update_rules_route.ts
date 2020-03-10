@@ -31,7 +31,6 @@ export const updateRulesRoute = (router: IRouter) => {
     async (context, request, response) => {
       const {
         description,
-        documentation,
         enabled,
         false_positives: falsePositives,
         from,
@@ -56,6 +55,7 @@ export const updateRulesRoute = (router: IRouter) => {
         type,
         threat,
         references,
+        note,
         version,
       } = request.body;
       const siemResponse = buildSiemResponse(response);
@@ -78,7 +78,6 @@ export const updateRulesRoute = (router: IRouter) => {
           alertsClient,
           actionsClient,
           description,
-          documentation,
           enabled,
           falsePositives,
           from,
@@ -105,6 +104,7 @@ export const updateRulesRoute = (router: IRouter) => {
           type,
           threat,
           references,
+          note,
           version,
         });
         if (rule != null) {

@@ -1275,8 +1275,8 @@ describe('add prepackaged rules schema', () => {
     );
   });
 
-  describe('documentation', () => {
-    test('You can set documentation to any object you want', () => {
+  describe('note', () => {
+    test('You can set note to any string you want', () => {
       expect(
         addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({
           rule_id: 'rule-1',
@@ -1296,16 +1296,16 @@ describe('add prepackaged rules schema', () => {
           meta: {
             somethingMadeUp: { somethingElse: true },
           },
-          documentation: '# test header',
+          note: '# test header',
           version: 1,
         }).error
       ).toBeFalsy();
     });
 
-    test('You cannot create documentation as anything other than a string', () => {
+    test('You cannot create note as anything other than a string', () => {
       expect(
         addPrepackagedRulesSchema.validate<
-          Partial<Omit<PrepackagedRules, 'documentation'> & { documentation: object }>
+          Partial<Omit<PrepackagedRules, 'note'> & { note: object }>
         >({
           rule_id: 'rule-1',
           risk_score: 50,
@@ -1324,12 +1324,12 @@ describe('add prepackaged rules schema', () => {
           meta: {
             somethingMadeUp: { somethingElse: true },
           },
-          documentation: {
+          note: {
             somethingMadeUp: { somethingElse: true },
           },
           version: 1,
         }).error.message
-      ).toEqual('child "documentation" fails because ["documentation" must be a string]');
+      ).toEqual('child "note" fails because ["note" must be a string]');
     });
   });
 });

@@ -1244,8 +1244,8 @@ describe('create rules schema', () => {
     );
   });
 
-  describe('documentation', () => {
-    test('You can set description to a string', () => {
+  describe('note', () => {
+    test('You can set note to a string', () => {
       expect(
         updateRulesSchema.validate<Partial<RuleAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -1263,16 +1263,14 @@ describe('create rules schema', () => {
           query: 'some query',
           language: 'kuery',
           max_signals: 1,
-          documentation: '# some documentation title',
+          note: '# some documentation title',
         }).error
       ).toBeFalsy();
     });
 
-    test('You cannot set description as an object', () => {
+    test('You cannot set note as an object', () => {
       expect(
-        updateRulesSchema.validate<
-          Partial<Omit<RuleAlertParamsRest, 'documentation'> & { documentation: object }>
-        >({
+        updateRulesSchema.validate<Partial<Omit<RuleAlertParamsRest, 'note'> & { note: object }>>({
           rule_id: 'rule-1',
           output_index: '.siem-signals',
           risk_score: 50,
@@ -1288,11 +1286,11 @@ describe('create rules schema', () => {
           query: 'some query',
           language: 'kuery',
           max_signals: 1,
-          documentation: {
+          note: {
             somethingMadeUp: { somethingElse: true },
           },
         }).error.message
-      ).toEqual('child "documentation" fails because ["documentation" must be a string]');
+      ).toEqual('child "note" fails because ["note" must be a string]');
     });
   });
 });

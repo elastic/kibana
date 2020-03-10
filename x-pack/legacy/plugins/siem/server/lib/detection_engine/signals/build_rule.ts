@@ -44,7 +44,7 @@ export const buildRule = ({
     risk_score: ruleParams.riskScore,
     output_index: ruleParams.outputIndex,
     description: ruleParams.description,
-    documentation: ruleParams.documentation,
+    note: ruleParams.note,
     from: ruleParams.from,
     immutable: ruleParams.immutable,
     index: ruleParams.index,

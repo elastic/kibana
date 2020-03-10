@@ -28,7 +28,7 @@ export const sampleRuleAlertParams = (
   references: ['http://google.com'],
   riskScore: riskScore ? riskScore : 50,
   maxSignals: maxSignals ? maxSignals : 10000,
-  documentation: undefined,
+  note: '',
   filters: undefined,
   savedId: undefined,
   timelineId: undefined,
@@ -341,6 +341,7 @@ export const sampleRule = (): Partial<OutputRuleAlertRest> => {
     tags: ['some fake tag 1', 'some fake tag 2'],
     to: 'now',
     type: 'query',
+    note: '',
   };
 };
 

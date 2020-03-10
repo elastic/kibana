@@ -1225,8 +1225,8 @@ describe('create rules schema', () => {
     );
   });
 
-  describe('documentation', () => {
-    test('You can set documentation to a string', () => {
+  describe('note', () => {
+    test('You can set note to a string', () => {
       expect(
         createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -1244,16 +1244,14 @@ describe('create rules schema', () => {
           query: 'some query',
           language: 'kuery',
           max_signals: 1,
-          documentation: '# documentation markdown here',
+          note: '# documentation markdown here',
         }).error
       ).toBeFalsy();
     });
 
-    test('You cannot create documentation as an object', () => {
+    test('You cannot create note as an object', () => {
       expect(
-        createRulesSchema.validate<
-          Partial<Omit<RuleAlertParamsRest, 'documentation'> & { documentation: object }>
-        >({
+        createRulesSchema.validate<Partial<Omit<RuleAlertParamsRest, 'note'> & { note: object }>>({
           rule_id: 'rule-1',
           output_index: '.siem-signals',
           risk_score: 50,
@@ -1269,14 +1267,14 @@ describe('create rules schema', () => {
           query: 'some query',
           language: 'kuery',
           max_signals: 1,
-          documentation: {
+          note: {
             somethingHere: 'something else',
           },
         }).error.message
-      ).toEqual('child "documentation" fails because ["documentation" must be a string]');
+      ).toEqual('child "note" fails because ["note" must be a string]');
     });
 
-    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, documentation] does validate', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note] does validate', () => {
       expect(
         createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -1289,7 +1287,7 @@ describe('create rules schema', () => {
           interval: '5m',
           type: 'query',
           risk_score: 50,
-          documentation: '# some markdown',
+          note: '# some markdown',
         }).error
       ).toBeFalsy();
     });

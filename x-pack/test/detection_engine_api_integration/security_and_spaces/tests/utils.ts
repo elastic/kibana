@@ -132,6 +132,7 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertR
   tags: [],
   to: 'now',
   type: 'query',
+  note: '',
   threat: [],
   version: 1,
 });
@@ -370,6 +371,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlert
   timeline_id: 'timeline_id',
   timeline_title: 'timeline_title',
   updated_by: 'elastic',
+  note: '# some investigation documentation',
   version: 1,
   query: 'user.name: root or user.name: admin',
 });

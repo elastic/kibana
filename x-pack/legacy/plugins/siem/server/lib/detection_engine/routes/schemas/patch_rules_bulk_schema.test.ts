@@ -49,4 +49,41 @@ describe('patch_rules_bulk_schema', () => {
       ]).error
     ).toBeFalsy();
   });
+
+  test('can set "note" to be a string', () => {
+    expect(
+      patchRulesBulkSchema.validate<Array<Partial<PatchRuleAlertParamsRest>>>([
+        {
+          id: 'rule-1',
+          note: 'hi',
+        },
+      ]).error
+    ).toBeFalsy();
+  });
+
+  test('can set "note" to be an empty string', () => {
+    expect(
+      patchRulesBulkSchema.validate<Array<Partial<PatchRuleAlertParamsRest>>>([
+        {
+          id: 'rule-1',
+          note: '',
+        },
+      ]).error
+    ).toBeFalsy();
+  });
+
+  test('cannot set "note" to be anything other than a string', () => {
+    expect(
+      patchRulesBulkSchema.validate<
+        Array<Partial<Omit<PatchRuleAlertParamsRest, 'note'> & { note: object }>>
+      >([
+        {
+          id: 'rule-1',
+          note: {
+            someprop: 'some value here',
+          },
+        },
+      ]).error
+    ).toBeTruthy();
+  });
 });

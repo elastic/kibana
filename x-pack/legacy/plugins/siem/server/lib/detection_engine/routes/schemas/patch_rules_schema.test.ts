@@ -1013,8 +1013,8 @@ describe('patch rules schema', () => {
     );
   });
 
-  describe('documentation', () => {
-    test('[rule_id, description, from, to, index, name, severity, interval, type, documentation] does validate', () => {
+  describe('note', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, note] does validate', () => {
       expect(
         patchRulesSchema.validate<Partial<PatchRuleAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -1026,31 +1026,31 @@ describe('patch rules schema', () => {
           severity: 'low',
           interval: '5m',
           type: 'query',
-          documentation: '# some documentation markdown',
+          note: '# some documentation markdown',
         }).error
       ).toBeFalsy();
     });
 
-    test('documentation can be patched', () => {
+    test('note can be patched', () => {
       expect(
         patchRulesSchema.validate<Partial<PatchRuleAlertParamsRest>>({
           id: 'rule-1',
-          documentation: '# new documentation markdown',
+          note: '# new documentation markdown',
         }).error
       ).toBeFalsy();
     });
 
-    test('You cannot patch documentation as an object', () => {
+    test('You cannot patch note as an object', () => {
       expect(
         patchRulesSchema.validate<
-          Partial<Omit<PatchRuleAlertParamsRest, 'documentation'> & { documentation: object }>
+          Partial<Omit<PatchRuleAlertParamsRest, 'note'> & { note: object }>
         >({
           id: 'rule-1',
-          documentation: {
+          note: {
             someProperty: 'something else here',
           },
         }).error.message
-      ).toEqual('child "documentation" fails because ["documentation" must be a string]');
+      ).toEqual('child "note" fails because ["note" must be a string]');
     });
   });
 });

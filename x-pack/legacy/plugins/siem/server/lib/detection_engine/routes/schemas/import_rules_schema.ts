@@ -15,7 +15,6 @@ import {
   updated_by,
   enabled,
   description,
-  documentation,
   false_positives,
   filters,
   from,
@@ -39,6 +38,7 @@ import {
   type,
   threat,
   references,
+  note,
   version,
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
@@ -57,7 +57,6 @@ import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
 export const importRulesSchema = Joi.object({
   id,
   description: description.required(),
-  documentation,
   enabled: enabled.default(true),
   false_positives: false_positives.default([]),
   filters,
@@ -86,6 +85,7 @@ export const importRulesSchema = Joi.object({
   type: type.required(),
   threat: threat.default([]),
   references: references.default([]),
+  note: note.allow('').default(''),
   version: version.default(1),
   created_at,
   updated_at,

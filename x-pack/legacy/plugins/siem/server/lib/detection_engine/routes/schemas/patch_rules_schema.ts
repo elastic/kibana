@@ -10,7 +10,6 @@ import Joi from 'joi';
 import {
   enabled,
   description,
-  documentation,
   false_positives,
   filters,
   from,
@@ -33,6 +32,7 @@ import {
   type,
   threat,
   references,
+  note,
   id,
   version,
 } from './schemas';
@@ -40,7 +40,6 @@ import {
 
 export const patchRulesSchema = Joi.object({
   description,
-  documentation,
   enabled,
   false_positives,
   filters,
@@ -65,5 +64,6 @@ export const patchRulesSchema = Joi.object({
   type,
   threat,
   references,
+  note: note.allow(''),
   version,
 }).xor('id', 'rule_id');
