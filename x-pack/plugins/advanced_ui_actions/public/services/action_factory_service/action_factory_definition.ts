@@ -5,8 +5,8 @@
  */
 
 import {
-  UiActionsPresentable,
-  UiActionsActionDefinition,
+  UiActionsPresentable as Presentable,
+  UiActionsActionDefinition as ActionDefinition,
 } from '../../../../../../src/plugins/ui_actions/public';
 import { Configurable } from '../../util';
 
@@ -17,7 +17,7 @@ export interface ActionFactoryDefinition<
   Config extends object = object,
   FactoryContext extends object = object,
   ActionContext extends object = object
-> extends Partial<UiActionsPresentable<FactoryContext>>, Configurable<Config> {
+> extends Partial<Presentable<FactoryContext>>, Configurable<Config> {
   /**
    * Unique ID of the action factory. This ID is used to identify this action
    * factory in the registry as well as to construct actions of this ID and
@@ -29,7 +29,7 @@ export interface ActionFactoryDefinition<
    * This method should return a definition of a new action, normally used to
    * register it in `ui_actions` registry.
    */
-  create(): UiActionsActionDefinition<ActionContext>;
+  create(config: Config): ActionDefinition<ActionContext>;
 }
 
 export type AnyActionFactoryDefinition = ActionFactoryDefinition<any, any, any>;

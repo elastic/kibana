@@ -30,5 +30,5 @@ export function createAction<T extends ActionType>(action: ActionDefinition<T>):
     getDisplayName: () => '',
     getHref: () => undefined,
     ...action,
-  };
+  } as ActionByType<T>;
 }
