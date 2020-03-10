@@ -18,15 +18,9 @@ export interface AlertingExamplePublicSetupDeps {
 export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamplePublicSetupDeps> {
   public setup(core: CoreSetup, { alerting }: AlertingExamplePublicSetupDeps) {
     alerting.registerNavigation(
-      'test.noop',
       'consumer.noop',
-      (alert: SanitizedAlert, alertType: AlertType) => ({
-        state: {
-          // LOLs
-          alert: JSON.parse(JSON.stringify(alert)),
-          alertType: JSON.parse(JSON.stringify(alertType)),
-        },
-      })
+      'test.noop',
+      (alert: SanitizedAlert, alertType: AlertType) => `/alert/${alert.id}`
     );
   }
 

@@ -21,9 +21,9 @@ interface ViewInAppProps {
   alert: Alert;
 }
 
-const NO_NAVIGATION = 'NO_NAVIGATION';
+const NO_NAVIGATION = false;
 
-type AlertNavigationLoadingState = AlertNavigation | 'NO_NAVIGATION' | null;
+type AlertNavigationLoadingState = AlertNavigation | false | null;
 
 export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ alert }) => {
   const { navigateToApp, alerting } = useAppDependencies();
@@ -53,20 +53,12 @@ export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ alert }) =>
   );
 };
 
-function hasNavigation(alertNavigation: AlertNavigationLoadingState) {
-  return hasNavigationState(alertNavigation) || hasNavigationUrl(alertNavigation);
-}
-
-function hasNavigationState(
+function hasNavigation(
   alertNavigation: AlertNavigationLoadingState
-): alertNavigation is AlertStateNavigation {
-  return alertNavigation ? alertNavigation.hasOwnProperty('state') : false;
-}
-
-function hasNavigationUrl(
-  alertNavigation: AlertNavigationLoadingState
-): alertNavigation is AlertUrlNavigation {
-  return alertNavigation ? alertNavigation.hasOwnProperty('url') : false;
+): alertNavigation is AlertStateNavigation | AlertUrlNavigation {
+  return alertNavigation
+    ? alertNavigation.hasOwnProperty('state') || alertNavigation.hasOwnProperty('path')
+    : NO_NAVIGATION;
 }
 
 function getNavigationHandler(
@@ -74,15 +66,11 @@ function getNavigationHandler(
   alert: Alert,
   navigateToApp: CoreStart['application']['navigateToApp']
 ): object {
-  if (hasNavigationState(alertNavigation)) {
-    return {
-      onClick: () => {
-        navigateToApp(alert.consumer, { state: alertNavigation.state });
-      },
-    };
-  }
-  if (hasNavigationUrl(alertNavigation)) {
-    return { href: alertNavigation.url };
-  }
-  return {};
+  return hasNavigation(alertNavigation)
+    ? {
+        onClick: () => {
+          navigateToApp(alert.consumer, alertNavigation);
+        },
+      }
+    : {};
 }

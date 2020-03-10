@@ -31,7 +31,7 @@ import {
 } from '@elastic/eui';
 
 export const DocumentationPage = () => (
-  <EuiPageBody data-test-subj="dataPluginExplorerHome">
+  <EuiPageBody>
     <EuiPageHeader>
       <EuiPageHeaderSection>
         <EuiTitle size="l">

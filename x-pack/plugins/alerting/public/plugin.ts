@@ -48,7 +48,7 @@ export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginS
         if (this.alertNavigationRegistry!.has(alert.consumer, alertType)) {
           const navigationHandler = this.alertNavigationRegistry!.get(alert.consumer, alertType);
           const state = navigationHandler(alert, alertType);
-          return typeof state === 'string' ? { url: state } : { state };
+          return typeof state === 'string' ? { path: state } : { state };
         }
       },
     };

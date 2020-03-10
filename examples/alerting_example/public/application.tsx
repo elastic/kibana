@@ -20,16 +20,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, withRouter, RouteComponentProps } from 'react-router-dom';
-
-import {
-  EuiPage,
-  EuiPageSideBar,
-  // @ts-ignore
-  EuiSideNav,
-} from '@elastic/eui';
-
-import { JsonObject } from '../../../src/plugins/kibana_utils/common';
-import { AppMountParameters, CoreStart, ScopedHistory } from '../../../src/core/public';
+import { EuiPage, EuiPageSideBar, EuiSideNav } from '@elastic/eui';
+import { AppMountParameters, CoreStart } from '../../../src/core/public';
 import { Page } from './page';
 import { DocumentationPage } from './documentation';
 import { CreateAlertPage } from './create_alert';
@@ -66,22 +58,13 @@ const Nav = withRouter(({ history, pages }: NavProps) => {
   );
 });
 
-export interface NavState {
-  alert: JsonObject;
-  alertType: JsonObject;
-}
 export interface AlertingExampleComponentParams {
   application: CoreStart['application'];
   http: CoreStart['http'];
-  history: ScopedHistory<NavState>;
   basename: string;
 }
 
-const Home = withRouter(({ history }) => {
-  return history.location.state ? <ViewAlertPage /> : <DocumentationPage />;
-});
-
-const AlertingExampleApp = ({ basename, http, history }: AlertingExampleComponentParams) => {
+const AlertingExampleApp = ({ basename, http }: AlertingExampleComponentParams) => {
   const pages: PageDef[] = [
     {
       id: 'home',
@@ -93,20 +76,13 @@ const AlertingExampleApp = ({ basename, http, history }: AlertingExampleComponen
       title: 'Create',
       component: <CreateAlertPage http={http} />,
     },
-    {
-      id: 'view',
-      title: 'View Alert',
-      component: <ViewAlertPage />,
-    },
   ];
 
   const routes = pages.map((page, i) => (
     <Route
       key={i}
       path={`/${page.id}`}
-      render={props => {
-        return <Page title={page.title}>{page.component}</Page>;
-      }}
+      render={() => <Page title={page.title}>{page.component}</Page>}
     />
   ));
 
@@ -116,7 +92,17 @@ const AlertingExampleApp = ({ basename, http, history }: AlertingExampleComponen
         <EuiPageSideBar>
           <Nav pages={pages} />
         </EuiPageSideBar>
-        <Route path="/" exact component={Home} />
+        <Route path="/" exact render={DocumentationPage} />
+        <Route
+          path={`/alert/:id`}
+          render={(props: RouteComponentProps<{ id: string }>) => {
+            return (
+              <Page title={`View Alert ${props.match.params.id}`}>
+                <ViewAlertPage http={http} id={props.match.params.id} />
+              </Page>
+            );
+          }}
+        />
         {routes}
       </EuiPage>
     </Router>
@@ -126,12 +112,11 @@ const AlertingExampleApp = ({ basename, http, history }: AlertingExampleComponen
 export const renderApp = (
   coreStart: CoreStart,
   deps: any,
-  { appBasePath, element, history }: AppMountParameters<NavState>
+  { appBasePath, element }: AppMountParameters
 ) => {
   ReactDOM.render(
     <AlertingExampleApp
       basename={appBasePath}
-      history={history}
       application={coreStart.application}
       http={coreStart.http}
     />,

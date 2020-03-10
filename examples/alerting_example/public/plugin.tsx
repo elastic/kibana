@@ -18,7 +18,6 @@
  */
 
 import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
-import { NavState } from './application';
 import { PluginSetupContract as AlertingSetup } from '../../../x-pack/plugins/alerting/public';
 import { ALERTING_EXAMPLE_APP_ID } from '../common/constants';
 import { AlertType, SanitizedAlert } from '../../../x-pack/plugins/alerting/common';
@@ -35,7 +34,7 @@ export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamp
     core.application.register({
       id: 'AlertingExample',
       title: 'Alerting Example',
-      async mount(params: AppMountParameters<NavState>) {
+      async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./application');
         return renderApp(coreStart, depsStart, params);
@@ -45,13 +44,7 @@ export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamp
     alerting.registerNavigation(
       ALERTING_EXAMPLE_APP_ID,
       '.alerting-example',
-      (alert: SanitizedAlert, alertType: AlertType) => ({
-        state: {
-          // LOLs
-          alert: JSON.parse(JSON.stringify(alert)),
-          alertType: JSON.parse(JSON.stringify(alertType)),
-        },
-      })
+      (alert: SanitizedAlert, alertType: AlertType) => `/alert/${alert.id}`
     );
   }
 

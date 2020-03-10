@@ -6,7 +6,7 @@
 
 import { JsonObject } from '../../infra/common/typed_json';
 export interface AlertUrlNavigation {
-  url: string;
+  path: string;
 }
 export interface AlertStateNavigation {
   state: JsonObject;

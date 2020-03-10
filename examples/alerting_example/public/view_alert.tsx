@@ -16,48 +16,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
-import {
-  EuiText,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
-} from '@elastic/eui';
-import { withRouter } from 'react-router-dom';
+import { EuiText, EuiLoadingKibana } from '@elastic/eui';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { CoreStart } from 'kibana/public';
+import { Alert, AlertTaskState } from '../../../x-pack/plugins/alerting/common';
 
-export const ViewAlertPage = withRouter(({ history }) => (
-  <EuiPageBody data-test-subj="dataPluginExplorerHome">
-    <EuiPageHeader>
-      <EuiPageHeaderSection>
-        <EuiTitle size="l">
-          <h1>Welcome to the Alerting plugin example</h1>
-        </EuiTitle>
-      </EuiPageHeaderSection>
-    </EuiPageHeader>
-    <EuiPageContent>
-      <EuiPageContentHeader>
-        <EuiPageContentHeaderSection>
-          <EuiTitle>
-            <h2>Documentation links</h2>
-          </EuiTitle>
-        </EuiPageContentHeaderSection>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>
-        <EuiText>
-          <h2>Plugin Structure</h2>
-          <p>
-            This example solution has both `server` and a `public` plugins. The `server` handles
-            registration of the AlertType, while the `public` handles registration of the
-            navigation.
-          </p>
-        </EuiText>
-      </EuiPageContentBody>
-    </EuiPageContent>
-  </EuiPageBody>
-));
+type Props = RouteComponentProps & {
+  http: CoreStart['http'];
+  id: string;
+};
+export const ViewAlertPage = withRouter(({ http, id }: Props) => {
+  const [alert, setAlert] = useState<Alert | null>(null);
+  const [alertState, setAlertState] = useState<AlertTaskState | null>(null);
+
+  useEffect(() => {
+    if (!alert) {
+      http.get(`/api/alert/${id}`).then(setAlert);
+    }
+    if (!alertState) {
+      http.get(`/api/alert/${id}/state`).then(setAlertState);
+    }
+  }, [alert, alertState, http, id]);
+
+  return alert && alertState ? (
+    <EuiText>
+      <h2>Alert JSON</h2>
+      <p>{JSON.stringify(alert)}</p>
+      <p>{JSON.stringify(alertState)}</p>
+    </EuiText>
+  ) : (
+    <EuiLoadingKibana size="xl" />
+  );
+});
