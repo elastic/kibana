@@ -14,6 +14,8 @@ import { getCaseUrl } from '../../components/link_to';
 import { WhitePageWrapper, SectionWrapper } from './components/wrappers';
 import { Connectors } from './components/configure_cases/connectors';
 import * as i18n from './translations';
+import { ClosureOptions } from './components/configure_cases/closure_options';
+import { FieldMapping } from './components/configure_cases/field_mapping';
 
 const backOptions = {
   href: getCaseUrl(),
@@ -26,8 +28,12 @@ const wrapperPageStyle: Record<string, string> = {
   paddingBottom: '0',
 };
 
-export const FormWrapper = styled.div`
+const FormWrapper = styled.div`
   ${({ theme }) => css`
+    & > * {
+      margin-top 40px;
+    }
+
     padding-top: ${theme.eui.paddingSizes.l};
     padding-bottom: ${theme.eui.paddingSizes.l};
   `}
@@ -43,6 +49,12 @@ const ConfigureCasesPageComponent: React.FC = () => (
         <FormWrapper>
           <SectionWrapper>
             <Connectors />
+          </SectionWrapper>
+          <SectionWrapper>
+            <ClosureOptions />
+          </SectionWrapper>
+          <SectionWrapper>
+            <FieldMapping />
           </SectionWrapper>
         </FormWrapper>
       </WhitePageWrapper>

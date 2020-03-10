@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { Group, GroupsDictionary } from './anomaly_detection_panel';
-import { MlSummaryJobs, MlSummaryJob } from '../../../../../common/types/jobs';
+import { MlSummaryJobs, MlSummaryJob } from '../../../../../common/types/anomaly_detection_jobs';
 
 export function getGroupsFromJobs(
   jobs: MlSummaryJobs
@@ -43,7 +43,7 @@ export function getGroupsFromJobs(
           // if incoming job latest timestamp is greater than the last saved one, replace it
           if (groups[g].latest_timestamp === undefined) {
             groups[g].latest_timestamp = job.latestTimestampMs;
-          } else if (job.latestTimestampMs > groups[g].latest_timestamp) {
+          } else if (job.latestTimestampMs && job.latestTimestampMs > groups[g].latest_timestamp) {
             groups[g].latest_timestamp = job.latestTimestampMs;
           }
         }
@@ -53,7 +53,7 @@ export function getGroupsFromJobs(
       groups.ungrouped.docs_processed += job.processed_record_count;
       groups.ungrouped.jobs_in_group++;
       // if incoming job latest timestamp is greater than the last saved one, replace it
-      if (job.latestTimestampMs > groups.ungrouped.latest_timestamp) {
+      if (job.latestTimestampMs && job.latestTimestampMs > groups.ungrouped.latest_timestamp) {
         groups.ungrouped.latest_timestamp = job.latestTimestampMs;
       }
     }

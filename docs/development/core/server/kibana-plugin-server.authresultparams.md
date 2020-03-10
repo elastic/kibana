@@ -4,7 +4,7 @@
 
 ## AuthResultParams interface
 
-Result of an incoming request authentication.
+Result of successful authentication.
 
 <b>Signature:</b>
 
