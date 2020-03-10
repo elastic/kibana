@@ -25,20 +25,20 @@ import { encodeVersion } from '../version';
 
 let typeRegistry = typeRegistryMock.create();
 typeRegistry.isNamespaceAgnostic.mockReturnValue(true);
-typeRegistry.isNamespace.mockReturnValue(false);
-typeRegistry.isNamespaces.mockReturnValue(false);
+typeRegistry.isSingleNamespace.mockReturnValue(false);
+typeRegistry.isMultiNamespace.mockReturnValue(false);
 const namespaceAgnosticSerializer = new SavedObjectsSerializer(typeRegistry);
 
 typeRegistry = typeRegistryMock.create();
 typeRegistry.isNamespaceAgnostic.mockReturnValue(false);
-typeRegistry.isNamespace.mockReturnValue(true);
-typeRegistry.isNamespaces.mockReturnValue(false);
+typeRegistry.isSingleNamespace.mockReturnValue(true);
+typeRegistry.isMultiNamespace.mockReturnValue(false);
 const singleNamespaceSerializer = new SavedObjectsSerializer(typeRegistry);
 
 typeRegistry = typeRegistryMock.create();
 typeRegistry.isNamespaceAgnostic.mockReturnValue(false);
-typeRegistry.isNamespace.mockReturnValue(false);
-typeRegistry.isNamespaces.mockReturnValue(true);
+typeRegistry.isSingleNamespace.mockReturnValue(false);
+typeRegistry.isMultiNamespace.mockReturnValue(true);
 const multiNamespaceSerializer = new SavedObjectsSerializer(typeRegistry);
 
 const sampleTemplate = {

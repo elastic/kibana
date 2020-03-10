@@ -131,11 +131,11 @@ describe('SavedObjectsRepository', () => {
   });
   registry.registerType({
     ...createType(MULTI_NAMESPACE_TYPE),
-    namespaces: true,
+    multiNamespace: true,
   });
   registry.registerType({
     ...createType(MULTI_NAMESPACE_CUSTOM_INDEX_TYPE),
-    namespaces: true,
+    multiNamespace: true,
     indexPattern: 'custom',
   });
   registry.registerType({
@@ -147,11 +147,11 @@ describe('SavedObjectsRepository', () => {
   const getMockGetResponse = ({ type, id, references, namespace }) => ({
     // NOTE: Elasticsearch returns more fields (_index, _type) but the SavedObjectsRepository method ignores these
     found: true,
-    _id: `${registry.isNamespace(type) && namespace ? `${namespace}:` : ''}${type}:${id}`,
+    _id: `${registry.isSingleNamespace(type) && namespace ? `${namespace}:` : ''}${type}:${id}`,
     ...mockVersionProps,
     _source: {
-      ...(registry.isNamespace(type) && { namespace }),
-      ...(registry.isNamespaces(type) && { namespaces: [namespace ?? 'default'] }),
+      ...(registry.isSingleNamespace(type) && { namespace }),
+      ...(registry.isMultiNamespace(type) && { namespaces: [namespace ?? 'default'] }),
       type,
       [type]: { title: 'Testing' },
       references,
@@ -431,7 +431,8 @@ describe('SavedObjectsRepository', () => {
 
     const bulkCreateSuccess = async (objects, options) => {
       const multiNamespaceObjects =
-        options?.overwrite && objects.filter(({ type, id }) => registry.isNamespaces(type) && id);
+        options?.overwrite &&
+        objects.filter(({ type, id }) => registry.isMultiNamespace(type) && id);
       if (multiNamespaceObjects?.length) {
         const response = getMockMgetResponse(multiNamespaceObjects, options?.namespace);
         callAdminCluster.mockResolvedValueOnce(response); // this._callCluster('mget', ...)
@@ -1006,7 +1007,7 @@ describe('SavedObjectsRepository', () => {
       items: objects.map(({ type, id }) => ({
         update: {
           _id: `${
-            registry.isNamespace(type) && options?.namespace ? `${options?.namespace}:` : ''
+            registry.isSingleNamespace(type) && options?.namespace ? `${options?.namespace}:` : ''
           }${type}:${id}`,
           ...mockVersionProps,
           result: 'updated',
@@ -1015,7 +1016,7 @@ describe('SavedObjectsRepository', () => {
     });
 
     const bulkUpdateSuccess = async (objects, options) => {
-      const multiNamespaceObjects = objects.filter(({ type }) => registry.isNamespaces(type));
+      const multiNamespaceObjects = objects.filter(({ type }) => registry.isMultiNamespace(type));
       if (multiNamespaceObjects?.length) {
         const response = getMockMgetResponse(multiNamespaceObjects, options?.namespace);
         callAdminCluster.mockResolvedValueOnce(response); // this._callCluster('mget', ...)
@@ -1344,7 +1345,7 @@ describe('SavedObjectsRepository', () => {
     const createSuccess = async (type, attributes, options) => {
       const result = await savedObjectsRepository.create(type, attributes, options);
       expect(callAdminCluster).toHaveBeenCalledTimes(
-        registry.isNamespaces(type) && options.overwrite ? 2 : 1
+        registry.isMultiNamespace(type) && options.overwrite ? 2 : 1
       );
       return result;
     };
@@ -2295,7 +2296,7 @@ describe('SavedObjectsRepository', () => {
     const namespace = 'foo-namespace';
 
     const incrementCounterSuccess = async (type, id, field, options) => {
-      const isMultiNamespace = registry.isNamespaces(type);
+      const isMultiNamespace = registry.isMultiNamespace(type);
       if (isMultiNamespace) {
         const response = getMockGetResponse({ type, id, namespace: options?.namespace });
         callAdminCluster.mockResolvedValueOnce(response); // this._callCluster('get', ...)
@@ -2778,7 +2779,7 @@ describe('SavedObjectsRepository', () => {
           _id: `${type}:${id}`,
           ...mockVersionProps,
           result: 'updated',
-          ...(registry.isNamespaces(type) && {
+          ...(registry.isMultiNamespace(type) && {
             // don't need the rest of the source for test purposes, just the namespaces attribute
             get: { _source: { namespaces: [options?.namespace ?? 'default'] } },
           }),

@@ -248,9 +248,9 @@ export class SavedObjectsRepository {
     let savedObjectNamespace;
     let savedObjectNamespaces;
 
-    if (this._registry.isNamespace(type) && namespace) {
+    if (this._registry.isSingleNamespace(type) && namespace) {
       savedObjectNamespace = namespace;
-    } else if (this._registry.isNamespaces(type)) {
+    } else if (this._registry.isMultiNamespace(type)) {
       if (method === 'index') {
         const response = await this._callCluster('get', {
           id: this._serializer.generateRawId(undefined, type, id),
@@ -346,7 +346,7 @@ export class SavedObjectsRepository {
       // something   true        index           index
       // something   false       create          create
       const method = object.id && overwrite ? 'index' : 'create';
-      if (method === 'create' || !this._registry.isNamespaces(object.type)) {
+      if (method === 'create' || !this._registry.isMultiNamespace(object.type)) {
         return {
           tag: 'Right' as 'Right',
           value: {
@@ -411,9 +411,9 @@ export class SavedObjectsRepository {
             ? actualResult._source.namespaces
             : [namespace ?? 'default'];
         } else {
-          if (this._registry.isNamespace(object.type)) {
+          if (this._registry.isSingleNamespace(object.type)) {
             savedObjectNamespace = namespace;
-          } else if (this._registry.isNamespaces(object.type)) {
+          } else if (this._registry.isMultiNamespace(object.type)) {
             savedObjectNamespaces = [namespace ?? 'default'];
           }
         }
@@ -526,7 +526,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    if (this._registry.isNamespaces(type)) {
+    if (this._registry.isMultiNamespace(type)) {
       const existingNamespaces = getResponse._source.namespaces as string[];
       const remainingNamespaces = existingNamespaces.filter(x => x !== (namespace ?? 'default'));
 
@@ -949,7 +949,7 @@ export class SavedObjectsRepository {
       body: {
         doc,
       },
-      ...(this._registry.isNamespaces(type) && { _sourceIncludes: ['namespaces'] }),
+      ...(this._registry.isMultiNamespace(type) && { _sourceIncludes: ['namespaces'] }),
     });
 
     if (updateResponse.status === 404) {
@@ -962,7 +962,7 @@ export class SavedObjectsRepository {
       type,
       updated_at: time,
       version: encodeHitVersion(updateResponse),
-      ...(this._registry.isNamespaces(type) && {
+      ...(this._registry.isMultiNamespace(type) && {
         namespaces: updateResponse.get._source.namespaces,
       }),
       references,
@@ -980,7 +980,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    if (!this._registry.isNamespaces(type)) {
+    if (!this._registry.isMultiNamespace(type)) {
       throw SavedObjectsErrorHelpers.createBadRequestError(`${type} doesn't support namespaces`);
     }
 
@@ -1051,7 +1051,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    if (!this._registry.isNamespaces(type)) {
+    if (!this._registry.isMultiNamespace(type)) {
       throw SavedObjectsErrorHelpers.createBadRequestError(`${type} doesn't support namespaces`);
     }
 
@@ -1186,7 +1186,7 @@ export class SavedObjectsRepository {
         ...(Array.isArray(references) && { references }),
       };
 
-      if (!this._registry.isNamespaces(type)) {
+      if (!this._registry.isMultiNamespace(type)) {
         return {
           tag: 'Right' as 'Right',
           value: {
@@ -1348,9 +1348,9 @@ export class SavedObjectsRepository {
     let savedObjectNamespace;
     let savedObjectNamespaces;
 
-    if (this._registry.isNamespace(type) && namespace) {
+    if (this._registry.isSingleNamespace(type) && namespace) {
       savedObjectNamespace = namespace;
-    } else if (this._registry.isNamespaces(type)) {
+    } else if (this._registry.isMultiNamespace(type)) {
       const response = await this._callCluster('get', {
         id: this._serializer.generateRawId(undefined, type, id),
         index: this.getIndexForType(type),
@@ -1470,7 +1470,7 @@ export class SavedObjectsRepository {
 
     // if the type is namespace isolated, or namespace agnostic, we can continue to rely on the guarantees
     // of the document ID format and don't need to check this
-    if (!this._registry.isNamespaces(rawDocType)) {
+    if (!this._registry.isMultiNamespace(rawDocType)) {
       return true;
     }
 

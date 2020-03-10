@@ -52,7 +52,7 @@ export const convertLegacyTypes = (
           name: type,
           hidden: schema?.hidden ?? false,
           namespaceAgnostic: schema?.isNamespaceAgnostic,
-          namespaces: schema?.namespaces,
+          multiNamespace: schema?.multiNamespace,
           mappings,
           indexPattern:
             typeof schema?.indexPattern === 'function'
@@ -78,7 +78,7 @@ export const convertTypesToLegacySchema = (
       ...schema,
       [type.name]: {
         isNamespaceAgnostic: type.namespaceAgnostic,
-        namespaces: type.namespaces,
+        multiNamespace: type.multiNamespace,
         hidden: type.hidden,
         indexPattern: type.indexPattern,
         convertToAliasScript: type.convertToAliasScript,

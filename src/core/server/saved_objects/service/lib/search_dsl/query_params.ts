@@ -66,14 +66,14 @@ function getClauseForType(
   namespace: string | undefined,
   type: string
 ) {
-  if (registry.isNamespaces(type)) {
+  if (registry.isMultiNamespace(type)) {
     return {
       bool: {
         must: [{ term: { type } }, { term: { namespaces: namespace ?? 'default' } }],
         must_not: [{ exists: { field: 'namespace' } }],
       },
     };
-  } else if (namespace && registry.isNamespace(type)) {
+  } else if (namespace && registry.isSingleNamespace(type)) {
     return {
       bool: {
         must: [{ term: { type } }, { term: { namespace } }],

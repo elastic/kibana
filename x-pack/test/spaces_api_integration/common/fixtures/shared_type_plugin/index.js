@@ -14,7 +14,7 @@ export default function(kibana) {
       savedObjectsManagement: {},
       savedObjectSchemas: {
         sharedtype: {
-          namespaces: true,
+          multiNamespace: true,
         },
       },
       mappings,

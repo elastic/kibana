@@ -15,9 +15,9 @@ Array [
       },
     },
     "migrations": Object {},
+    "multiNamespace": undefined,
     "name": "typeA",
     "namespaceAgnostic": undefined,
-    "namespaces": undefined,
   },
   Object {
     "convertToAliasScript": undefined,
@@ -32,9 +32,9 @@ Array [
       },
     },
     "migrations": Object {},
+    "multiNamespace": undefined,
     "name": "typeB",
     "namespaceAgnostic": undefined,
-    "namespaces": undefined,
   },
   Object {
     "convertToAliasScript": undefined,
@@ -49,9 +49,9 @@ Array [
       },
     },
     "migrations": Object {},
+    "multiNamespace": undefined,
     "name": "typeC",
     "namespaceAgnostic": undefined,
-    "namespaces": undefined,
   },
 ]
 `;
@@ -74,9 +74,9 @@ Array [
       "1.0.0": [Function],
       "2.0.4": [Function],
     },
+    "multiNamespace": undefined,
     "name": "typeA",
     "namespaceAgnostic": true,
-    "namespaces": undefined,
   },
   Object {
     "convertToAliasScript": "some alias script",
@@ -94,9 +94,9 @@ Array [
       },
     },
     "migrations": Object {},
+    "multiNamespace": undefined,
     "name": "typeB",
     "namespaceAgnostic": undefined,
-    "namespaces": undefined,
   },
   Object {
     "convertToAliasScript": undefined,
@@ -113,9 +113,9 @@ Array [
     "migrations": Object {
       "1.5.3": [Function],
     },
+    "multiNamespace": undefined,
     "name": "typeC",
     "namespaceAgnostic": undefined,
-    "namespaces": undefined,
   },
 ]
 `;
@@ -135,9 +135,9 @@ Array [
       },
     },
     "migrations": Object {},
+    "multiNamespace": undefined,
     "name": "typeA",
     "namespaceAgnostic": true,
-    "namespaces": undefined,
   },
   Object {
     "convertToAliasScript": undefined,
@@ -152,9 +152,9 @@ Array [
       },
     },
     "migrations": Object {},
+    "multiNamespace": true,
     "name": "typeB",
     "namespaceAgnostic": undefined,
-    "namespaces": true,
   },
   Object {
     "convertToAliasScript": undefined,
@@ -169,9 +169,9 @@ Array [
       },
     },
     "migrations": Object {},
+    "multiNamespace": undefined,
     "name": "typeC",
     "namespaceAgnostic": undefined,
-    "namespaces": undefined,
   },
 ]
 `;

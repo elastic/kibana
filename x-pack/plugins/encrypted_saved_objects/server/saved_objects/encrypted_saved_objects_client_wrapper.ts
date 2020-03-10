@@ -47,7 +47,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
   // only include namespace in AAD descriptor if the specified type is single-namespace
   private getDescriptorNamespace = (type: string, namespace?: string) =>
-    this.options.baseTypeRegistry.isNamespace(type) ? namespace : undefined;
+    this.options.baseTypeRegistry.isSingleNamespace(type) ? namespace : undefined;
 
   public async create<T = unknown>(
     type: string,

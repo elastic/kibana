@@ -232,8 +232,9 @@ export interface SavedObjectsType {
   namespaceAgnostic?: boolean;
   /**
    * Is the type shareable (true), or not (false).
+   * Does not have any effect if `namespaceAgnostic` is true.
    */
-  namespaces?: boolean;
+  multiNamespace?: boolean;
   /**
    * If defined, the type instances will be stored in the given index instead of the default one.
    */
@@ -370,7 +371,7 @@ export type SavedObjectLegacyMigrationFn = (
  */
 interface SavedObjectsLegacyTypeSchema {
   isNamespaceAgnostic?: boolean;
-  namespaces?: boolean;
+  multiNamespace?: boolean;
   hidden?: boolean;
   indexPattern?: ((config: LegacyConfig) => string) | string;
   convertToAliasScript?: string;

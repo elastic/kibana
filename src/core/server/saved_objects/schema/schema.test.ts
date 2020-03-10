@@ -44,10 +44,10 @@ describe('#isNamespaceAgnostic', () => {
   });
 });
 
-describe('#isNamespace', () => {
+describe('#isSingleNamespace', () => {
   const expectResult = (expected: boolean, schemaDefinition?: SavedObjectsSchemaDefinition) => {
     const schema = new SavedObjectsSchema(schemaDefinition);
-    const result = schema.isNamespace('foo');
+    const result = schema.isSingleNamespace('foo');
     expect(result).toBe(expected);
   };
 
@@ -64,21 +64,21 @@ describe('#isNamespace', () => {
   });
 
   it(`returns false for explicitly multi-namespace type`, () => {
-    expectResult(false, { foo: { namespaces: true } });
+    expectResult(false, { foo: { multiNamespace: true } });
   });
 
   it(`returns true for non-namespace-agnostic and non-multi-namespace type`, () => {
-    expectResult(true, { foo: { isNamespaceAgnostic: false, namespaces: false } });
-    expectResult(true, { foo: { isNamespaceAgnostic: false, namespaces: undefined } });
-    expectResult(true, { foo: { isNamespaceAgnostic: undefined, namespaces: false } });
-    expectResult(true, { foo: { isNamespaceAgnostic: undefined, namespaces: undefined } });
+    expectResult(true, { foo: { isNamespaceAgnostic: false, multiNamespace: false } });
+    expectResult(true, { foo: { isNamespaceAgnostic: false, multiNamespace: undefined } });
+    expectResult(true, { foo: { isNamespaceAgnostic: undefined, multiNamespace: false } });
+    expectResult(true, { foo: { isNamespaceAgnostic: undefined, multiNamespace: undefined } });
   });
 });
 
-describe('#isNamespaces', () => {
+describe('#isMultiNamespace', () => {
   const expectResult = (expected: boolean, schemaDefinition?: SavedObjectsSchemaDefinition) => {
     const schema = new SavedObjectsSchema(schemaDefinition);
-    const result = schema.isNamespaces('foo');
+    const result = schema.isMultiNamespace('foo');
     expect(result).toBe(expected);
   };
 
@@ -95,12 +95,12 @@ describe('#isNamespaces', () => {
   });
 
   it(`returns false for non-multi-namespace type`, () => {
-    expectResult(false, { foo: { namespaces: false } });
-    expectResult(false, { foo: { namespaces: undefined } });
+    expectResult(false, { foo: { multiNamespace: false } });
+    expectResult(false, { foo: { multiNamespace: undefined } });
   });
 
   it(`returns true for non-namespace-agnostic and explicitly multi-namespace type`, () => {
-    expectResult(true, { foo: { isNamespaceAgnostic: false, namespaces: true } });
-    expectResult(true, { foo: { isNamespaceAgnostic: undefined, namespaces: true } });
+    expectResult(true, { foo: { isNamespaceAgnostic: false, multiNamespace: true } });
+    expectResult(true, { foo: { isNamespaceAgnostic: undefined, multiNamespace: true } });
   });
 });

@@ -79,16 +79,16 @@ export class SavedObjectTypeRegistry {
    * Returns whether the type is single-namespace (isolated);
    * resolves to `true` if the type is not registered
    */
-  public isNamespace(type: string) {
-    return !this.isNamespaceAgnostic(type) && !this.isNamespaces(type);
+  public isSingleNamespace(type: string) {
+    return !this.isNamespaceAgnostic(type) && !this.isMultiNamespace(type);
   }
 
   /**
    * Returns whether the type is multi-namespace (shareable);
    * resolves to `false` if the type is not registered
    */
-  public isNamespaces(type: string) {
-    return !this.isNamespaceAgnostic(type) && (this.types.get(type)?.namespaces ?? false);
+  public isMultiNamespace(type: string) {
+    return !this.isNamespaceAgnostic(type) && (this.types.get(type)?.multiNamespace ?? false);
   }
 
   /**

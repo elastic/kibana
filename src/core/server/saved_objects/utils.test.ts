@@ -113,7 +113,7 @@ describe('convertLegacyTypes', () => {
         typeB: {
           indexPattern: 'barBaz',
           hidden: false,
-          namespaces: true,
+          multiNamespace: true,
         },
       },
       savedObjectValidations: {},
@@ -400,7 +400,7 @@ describe('convertTypesToLegacySchema', () => {
       {
         name: 'typeC',
         hidden: false,
-        namespaces: true,
+        multiNamespace: true,
         mappings: { properties: {} },
       },
     ];
@@ -416,7 +416,7 @@ describe('convertTypesToLegacySchema', () => {
       },
       typeC: {
         hidden: false,
-        namespaces: true,
+        multiNamespace: true,
       },
     });
   });

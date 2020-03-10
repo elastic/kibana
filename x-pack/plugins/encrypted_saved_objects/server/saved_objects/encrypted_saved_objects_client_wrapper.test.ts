@@ -135,7 +135,7 @@ describe('#create', () => {
     });
 
     it('does not use `namespace` to encrypt attributes if it is specified when type is not single-namespace', async () => {
-      mockBaseTypeRegistry.isNamespace.mockReturnValue(false);
+      mockBaseTypeRegistry.isSingleNamespace.mockReturnValue(false);
       await doTest('some-namespace', false);
     });
   });
@@ -322,7 +322,7 @@ describe('#bulkCreate', () => {
     });
 
     it('does not use `namespace` to encrypt attributes if it is specified when type is not single-namespace', async () => {
-      mockBaseTypeRegistry.isNamespace.mockReturnValue(false);
+      mockBaseTypeRegistry.isSingleNamespace.mockReturnValue(false);
       await doTest('some-namespace', false);
     });
   });
@@ -537,7 +537,7 @@ describe('#bulkUpdate', () => {
     });
 
     it('does not use `namespace` to encrypt attributes if it is specified when type is not single-namespace', async () => {
-      mockBaseTypeRegistry.isNamespace.mockReturnValue(false);
+      mockBaseTypeRegistry.isSingleNamespace.mockReturnValue(false);
       await doTest('some-namespace', false);
     });
   });
@@ -931,7 +931,7 @@ describe('#update', () => {
     });
 
     it('does not use `namespace` to encrypt attributes if it is specified when type is not single-namespace', async () => {
-      mockBaseTypeRegistry.isNamespace.mockReturnValue(false);
+      mockBaseTypeRegistry.isSingleNamespace.mockReturnValue(false);
       await doTest('some-namespace', false);
     });
   });

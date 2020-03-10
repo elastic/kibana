@@ -34,7 +34,7 @@ const MAPPINGS = {
         obj: { properties: { key1: { type: 'text' } } },
       },
     },
-    // mock registry returns isNamespaces=true for 'shared' type
+    // mock registry returns isMultiNamespace=true for 'shared' type
     shared: { properties: { name: { type: 'keyword' } } },
     // mock registry returns isNamespaceAgnostic=true for 'global' type
     global: { properties: { name: { type: 'keyword' } } },
@@ -198,14 +198,14 @@ describe('#getQueryParams', () => {
 
     describe('`namespace` parameter', () => {
       const createTypeClause = (type: string, namespace?: string) => {
-        if (registry.isNamespaces(type)) {
+        if (registry.isMultiNamespace(type)) {
           return {
             bool: {
               must: expect.arrayContaining([{ term: { namespaces: namespace ?? 'default' } }]),
               must_not: [{ exists: { field: 'namespace' } }],
             },
           };
-        } else if (namespace && registry.isNamespace(type)) {
+        } else if (namespace && registry.isSingleNamespace(type)) {
           return {
             bool: {
               must: expect.arrayContaining([{ term: { namespace } }]),
