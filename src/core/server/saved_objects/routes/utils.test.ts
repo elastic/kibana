@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createSavedObjectsStreamFromNdJson } from './utils';
+import { createSavedObjectsStreamFromNdJson, validateTypes, validateObjects } from './utils';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '../../../../legacy/utils/streams';
 
@@ -102,5 +102,55 @@ describe('createSavedObjectsStreamFromNdJson', () => {
         type: 'bar-type',
       },
     ]);
+  });
+});
+
+describe('validateTypes', () => {
+  const allowedTypes = ['config', 'index-pattern', 'dashboard'];
+
+  it('returns an error message if some types are not allowed', () => {
+    expect(validateTypes(['config', 'not-allowed-type'], allowedTypes)).toMatchInlineSnapshot(
+      `"Trying to export non-exportable type(s): not-allowed-type"`
+    );
+    expect(
+      validateTypes(['index-pattern', 'not-allowed-type', 'not-allowed-type-2'], allowedTypes)
+    ).toMatchInlineSnapshot(
+      `"Trying to export non-exportable type(s): not-allowed-type, not-allowed-type-2"`
+    );
+  });
+  it('returns undefined if all types are allowed', () => {
+    expect(validateTypes(allowedTypes, allowedTypes)).toBeUndefined();
+    expect(validateTypes(['config'], allowedTypes)).toBeUndefined();
+  });
+});
+
+describe('validateObjects', () => {
+  const allowedTypes = ['config', 'index-pattern', 'dashboard'];
+
+  it('returns an error message if some objects have types that are not allowed', () => {
+    expect(
+      validateObjects(
+        [
+          { id: '1', type: 'config' },
+          { id: '1', type: 'not-allowed' },
+          { id: '42', type: 'not-allowed-either' },
+        ],
+        allowedTypes
+      )
+    ).toMatchInlineSnapshot(
+      `"Trying to export object(s) with non-exportable types: not-allowed:1, not-allowed-either:42"`
+    );
+  });
+  it('returns undefined if all objects have allowed types', () => {
+    expect(
+      validateObjects(
+        [
+          { id: '1', type: 'config' },
+          { id: '2', type: 'config' },
+          { id: '1', type: 'index-pattern' },
+        ],
+        allowedTypes
+      )
+    ).toBeUndefined();
   });
 });
