@@ -44,9 +44,9 @@ const mapFilter = (
 ) => {
   const cleaned: FilterMeta = omit(filter, excludedAttributes);
 
-  if (comparators.negate) cleaned.negate = filter?.meta && Boolean(filter?.meta.negate);
-  if (comparators.disabled) cleaned.disabled = filter?.meta && Boolean(filter?.meta.disabled);
-  if (comparators.disabled) cleaned.alias = filter?.meta?.alias;
+  if (comparators.negate) cleaned.negate = filter.meta && Boolean(filter.meta.negate);
+  if (comparators.disabled) cleaned.disabled = filter.meta && Boolean(filter.meta.disabled);
+  if (comparators.disabled) cleaned.alias = filter.meta?.alias;
 
   return cleaned;
 };
@@ -74,6 +74,8 @@ export const compareFilters = (
   second: Filter | Filter[],
   comparatorOptions: FilterCompareOptions = {}
 ) => {
+  if (first === null || second === null) return false;
+
   let comparators: FilterCompareOptions = {};
 
   const excludedAttributes: string[] = ['$$hashKey', 'meta'];

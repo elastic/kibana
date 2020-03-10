@@ -58,10 +58,10 @@ describe('filter manager utilities', () => {
       expect(compareFilters(f1, f2)).toBeFalsy();
     });
 
-    test('should compare different types of empty filters', () => {
+    test('should compare a null filter with an empty filter', () => {
       const f1 = null;
       const f2 = buildEmptyFilter(true);
-      expect(compareFilters(f1, f2)).toBeTruthy();
+      expect(compareFilters(f1, f2)).toBeFalsy();
     });
 
     test('should compare duplicates, ignoring meta attributes', () => {
