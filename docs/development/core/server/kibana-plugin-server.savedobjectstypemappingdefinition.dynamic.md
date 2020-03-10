@@ -4,10 +4,10 @@
 
 ## SavedObjectsTypeMappingDefinition.dynamic property
 
-The dynamic property of the mapping. either `true`<!-- -->, `false` or 'strict'. Defaults to `false`
+The dynamic property of the mapping. either `false` or 'strict'. Defaults to `false`
 
 <b>Signature:</b>
 
 ```typescript
-dynamic?: boolean | 'strict';
+dynamic?: false | 'strict';
 ```
