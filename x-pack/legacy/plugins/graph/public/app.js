@@ -32,6 +32,7 @@ import { asAngularSyncedObservable } from './helpers/as_observable';
 import { colorChoices } from './helpers/style_choices';
 import { createGraphStore, datasourceSelector, hasFieldsSelector } from './state_management';
 import { formatHttpError } from './helpers/format_http_error';
+import { findSW } from './helpers/saved_workspace_utils';
 
 export function initGraphApp(angularModule, deps) {
   const {
@@ -113,7 +114,11 @@ export function initGraphApp(angularModule, deps) {
             $location.url(getNewPath());
           };
           $scope.find = search => {
-            return savedWorkspaceLoader.find(search, $scope.listingLimit);
+            return findSW(
+              { savedObjectsClient, basePath: coreStart.http.basePath },
+              search,
+              $scope.listingLimit
+            );
           };
           $scope.editItem = workspace => {
             $location.url(getEditPath(workspace));
