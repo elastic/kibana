@@ -17,8 +17,4 @@
  * under the License.
  */
 
-require('./harden'); // this require MUST be executed before any others
-require('symbol-observable');
-require('./root');
-require('./node_version_validator');
-require('./babel_register');
+console.log(`${process.env.POLLUTED || ''}${process.env.custom || ''}`);
