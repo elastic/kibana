@@ -31,17 +31,22 @@ export async function setup(
   ]);
 
   // ensure default packages are added to the default conifg
-  const configWithDatasource = (await agentConfigService.get(
-    soClient,
-    config.id,
-    true
-  )) as AgentConfig;
+  const configWithDatasource = await agentConfigService.get(soClient, config.id, true);
+  if (!configWithDatasource) {
+    throw new Error('Config not found');
+  }
+  if (
+    configWithDatasource.datasources.length &&
+    typeof configWithDatasource.datasources[0] === 'string'
+  ) {
+    throw new Error('Config not found');
+  }
   for (const installedPackage of installedPackages) {
-    const datasource = (configWithDatasource.datasources as Datasource[]).find(
-      d => d.package?.name === installedPackage.name
-    );
+    const isInstalled = configWithDatasource.datasources.some((d: Datasource | string) => {
+      return typeof d !== 'string' && d.package?.name === installedPackage.name;
+    });
 
-    if (!datasource) {
+    if (!isInstalled) {
       await addPackageToConfig(soClient, installedPackage, configWithDatasource, defaultOutput);
     }
   }

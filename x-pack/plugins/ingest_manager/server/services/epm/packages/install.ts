@@ -43,7 +43,7 @@ export async function ensureInstalledDefaultPackages(
   savedObjectsClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ): Promise<Installation[]> {
-  const installations = [] as Installation[];
+  const installations: Installation[] = [];
   for (const pkgName in DefaultPackages) {
     if (!DefaultPackages.hasOwnProperty(pkgName)) continue;
     installations.push(
