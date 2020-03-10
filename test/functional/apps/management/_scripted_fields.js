@@ -65,11 +65,11 @@ export default function({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.update({});
     });
 
-    // after(async function afterAll() {
-    //   await PageObjects.settings.navigateTo();
-    //   await PageObjects.settings.clickKibanaIndexPatterns();
-    //   await PageObjects.settings.removeLogstashIndexPatternIfExist();
-    // });
+    after(async function afterAll() {
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.removeLogstashIndexPatternIfExist();
+    });
 
     it('should not allow saving of invalid scripts', async function() {
       await PageObjects.settings.navigateTo();
