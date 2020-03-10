@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { ReactExpressionRendererProps } from '../../../../../../../src/plugins/expressions/public';
 import { FramePublicAPI, TableSuggestion, Visualization } from '../../types';
 import {
@@ -22,7 +23,10 @@ import { Ast } from '@kbn/interpreter/common';
 import { coreMock } from 'src/core/public/mocks';
 import { esFilters, IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
-const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
+const waitForPromises = async () =>
+  act(async () => {
+    await new Promise(resolve => setTimeout(resolve));
+  });
 
 describe('workspace_panel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
