@@ -4,17 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { APICaller } from 'src/core/server';
 import { CalendarManager } from '../calendar';
 import { GLOBAL_CALENDAR } from '../../../../../legacy/plugins/ml/common/constants/calendars';
+import { Job } from '../../../../../legacy/plugins/ml/common/types/anomaly_detection_jobs';
+import { MlJobsResponse } from './jobs';
 
-export function groupsProvider(callWithRequest) {
-  const calMngr = new CalendarManager(callWithRequest);
+interface Group {
+  id: string;
+  jobIds: string[];
+  calendarIds: string[];
+}
+
+interface Results {
+  [id: string]: {
+    success: boolean;
+    error?: any;
+  };
+}
+
+export function groupsProvider(callAsCurrentUser: APICaller) {
+  const calMngr = new CalendarManager(callAsCurrentUser);
 
   async function getAllGroups() {
-    const groups = {};
-    const jobIds = {};
+    const groups: { [id: string]: Group } = {};
+    const jobIds: { [id: string]: undefined | null } = {};
     const [{ jobs }, calendars] = await Promise.all([
-      callWithRequest('ml.jobs'),
+      callAsCurrentUser<MlJobsResponse>('ml.jobs'),
       calMngr.getAllCalendars(),
     ]);
 
@@ -58,12 +74,12 @@ export function groupsProvider(callWithRequest) {
     return Object.keys(groups).map(g => groups[g]);
   }
 
-  async function updateGroups(jobs) {
-    const results = {};
+  async function updateGroups(jobs: Job[]) {
+    const results: Results = {};
     for (const job of jobs) {
       const { job_id: jobId, groups } = job;
       try {
-        await callWithRequest('ml.updateJob', { jobId, body: { groups } });
+        await callAsCurrentUser('ml.updateJob', { jobId, body: { groups } });
         results[jobId] = { success: true };
       } catch (error) {
         results[jobId] = { success: false, error };

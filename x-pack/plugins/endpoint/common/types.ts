@@ -5,6 +5,9 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
+import { TypeOf } from '@kbn/config-schema';
+import * as kbnConfigSchemaTypes from '@kbn/config-schema/target/types/types';
+import { alertingIndexGetQuerySchema } from './schema/alert_index';
 
 /**
  * A deep readonly type that will make all children of a given object readonly recursively
@@ -24,10 +27,7 @@ export type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
 export type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
 export type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
 
-export enum Direction {
-  asc = 'asc',
-  desc = 'desc',
-}
+export type Direction = 'asc' | 'desc';
 
 export class EndpointAppConstants {
   static BASE_API_URL = '/api/endpoint';
@@ -45,7 +45,6 @@ export class EndpointAppConstants {
    **/
   static ALERT_LIST_DEFAULT_PAGE_SIZE = 10;
   static ALERT_LIST_DEFAULT_SORT = '@timestamp';
-  static ALERT_LIST_DEFAULT_ORDER = Direction.desc;
 }
 
 export interface AlertResultList {
@@ -336,3 +335,72 @@ export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
  * The PageId type is used for the payload when firing userNavigatedToPage actions
  */
 export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';
+
+/**
+ * Takes a @kbn/config-schema 'schema' type and returns a type that represents valid inputs.
+ * Similar to `TypeOf`, but allows strings as input for `schema.number()` (which is inline
+ * with the behavior of the validator.) Also, for `schema.object`, when a value is a `schema.maybe`
+ * the key will be marked optional (via `?`) so that you can omit keys for optional values.
+ *
+ * Use this when creating a value that will be passed to the schema.
+ * e.g.
+ * ```ts
+ * const input: KbnConfigSchemaInputTypeOf<typeof schema> = value
+ * schema.validate(input) // should be valid
+ * ```
+ */
+type KbnConfigSchemaInputTypeOf<
+  T extends kbnConfigSchemaTypes.Type<unknown>
+> = T extends kbnConfigSchemaTypes.ObjectType
+  ? KbnConfigSchemaInputObjectTypeOf<
+      T
+    > /** `schema.number()` accepts strings, so this type should accept them as well. */
+  : kbnConfigSchemaTypes.Type<number> extends T
+  ? TypeOf<T> | string
+  : TypeOf<T>;
+
+/**
+ * Works like ObjectResultType, except that 'maybe' schema will create an optional key.
+ * This allows us to avoid passing 'maybeKey: undefined' when constructing such an object.
+ *
+ * Instead of using this directly, use `InputTypeOf`.
+ */
+type KbnConfigSchemaInputObjectTypeOf<
+  T extends kbnConfigSchemaTypes.ObjectType
+> = T extends kbnConfigSchemaTypes.ObjectType<infer P>
+  ? {
+      /** Use ? to make the field optional if the prop accepts undefined.
+       * This allows us to avoid writing `field: undefined` for optional fields.
+       */
+      [K in Exclude<
+        keyof P,
+        keyof KbnConfigSchemaNonOptionalProps<P>
+      >]?: KbnConfigSchemaInputTypeOf<P[K]>;
+    } &
+      { [K in keyof KbnConfigSchemaNonOptionalProps<P>]: KbnConfigSchemaInputTypeOf<P[K]> }
+  : never;
+
+/**
+ * Takes the props of a schema.object type, and returns a version that excludes
+ * optional values. Used by `InputObjectTypeOf`.
+ *
+ * Instead of using this directly, use `InputTypeOf`.
+ */
+type KbnConfigSchemaNonOptionalProps<Props extends kbnConfigSchemaTypes.Props> = Pick<
+  Props,
+  {
+    [Key in keyof Props]: undefined extends TypeOf<Props[Key]> ? never : Key;
+  }[keyof Props]
+>;
+
+/**
+ * Query params to pass to the alert API when fetching new data.
+ */
+export type AlertingIndexGetQueryInput = KbnConfigSchemaInputTypeOf<
+  typeof alertingIndexGetQuerySchema
+>;
+
+/**
+ * Result of the validated query params when handling alert index requests.
+ */
+export type AlertingIndexGetQueryResult = TypeOf<typeof alertingIndexGetQuerySchema>;
