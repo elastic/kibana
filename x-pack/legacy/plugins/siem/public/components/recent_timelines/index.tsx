@@ -22,10 +22,6 @@ import { RecentTimelines } from './recent_timelines';
 import * as i18n from './translations';
 import { FilterMode } from './types';
 
-export interface MeApiResponse {
-  username: string;
-}
-
 interface OwnProps {
   apolloClient: ApolloClient<{}>;
   filterBy: FilterMode;

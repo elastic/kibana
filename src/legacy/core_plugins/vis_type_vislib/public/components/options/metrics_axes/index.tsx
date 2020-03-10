@@ -304,7 +304,13 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
   return isTabSelected ? (
     <>
-      <SeriesPanel setParamByIndex={setParamByIndex} changeValueAxis={changeValueAxis} {...props} />
+      <SeriesPanel
+        changeValueAxis={changeValueAxis}
+        setParamByIndex={setParamByIndex}
+        seriesParams={stateParams.seriesParams}
+        valueAxes={stateParams.valueAxes}
+        vis={vis}
+      />
       <EuiSpacer size="s" />
       <ValueAxesPanel
         addValueAxis={addValueAxis}
@@ -312,14 +318,17 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
         removeValueAxis={removeValueAxis}
         onValueAxisPositionChanged={onValueAxisPositionChanged}
         setParamByIndex={setParamByIndex}
-        {...props}
+        setMultipleValidity={props.setMultipleValidity}
+        seriesParams={stateParams.seriesParams}
+        valueAxes={stateParams.valueAxes}
+        vis={vis}
       />
       <EuiSpacer size="s" />
       <CategoryAxisPanel
-        {...props}
         axis={stateParams.categoryAxes[0]}
         onPositionChanged={onCategoryAxisPositionChanged}
         setCategoryAxis={setCategoryAxis}
+        vis={vis}
       />
     </>
   ) : null;

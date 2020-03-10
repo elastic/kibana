@@ -25,8 +25,8 @@ import { createTSVBLink } from './helpers/create_tsvb_link';
 import { getNodeDetailUrl } from '../../pages/link_to/redirect_to_node_detail';
 import { SourceConfiguration } from '../../utils/source_configuration';
 import { InventoryItemType } from '../../../common/inventory_models/types';
-import { usePrefixPathWithBasepath } from '../../hooks/use_prefix_path_with_basepath';
 import { AlertFlyout } from '../alerting/metrics/alert_flyout';
+import { useLinkProps } from '../../hooks/use_link_props';
 
 export interface Props {
   derivedIndexPattern: IIndexPattern;
@@ -84,7 +84,6 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   uiCapabilities,
   chartOptions,
 }: Props) => {
-  const urlPrefixer = usePrefixPathWithBasepath();
   const [isPopoverOpen, setPopoverState] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const supportFiltering = options.groupBy != null && onFilter != null;
@@ -96,8 +95,6 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
     }
     setPopoverState(false);
   }, [supportFiltering, options.groupBy, series.id, onFilter]);
-
-  const tsvbUrl = createTSVBLink(source, options, series, timeRange, chartOptions);
 
   // Only display the "Add Filter" option if it's supported
   const filterByItem = supportFiltering
@@ -114,6 +111,13 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
     : [];
 
   const nodeType = source && options.groupBy && fieldToNodeType(source, options.groupBy);
+  const nodeDetailLinkProps = useLinkProps({
+    app: 'metrics',
+    ...(nodeType ? createNodeDetailLink(nodeType, series.id, timeRange.from, timeRange.to) : {}),
+  });
+  const tsvbLinkProps = useLinkProps({
+    ...createTSVBLink(source, options, series, timeRange, chartOptions),
+  });
   const viewNodeDetail = nodeType
     ? [
         {
@@ -122,10 +126,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
             values: { name: nodeType },
           }),
           icon: 'metricsApp',
-          href: urlPrefixer(
-            'metrics',
-            createNodeDetailLink(nodeType, series.id, timeRange.from, timeRange.to)
-          ),
+          ...(nodeType ? nodeDetailLinkProps : {}),
           'data-test-subj': 'metricsExplorerAction-ViewNodeMetrics',
         },
       ]
@@ -137,7 +138,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
           name: i18n.translate('xpack.infra.metricsExplorer.openInTSVB', {
             defaultMessage: 'Open in Visualize',
           }),
-          href: tsvbUrl,
+          ...tsvbLinkProps,
           icon: 'visualizeApp',
           disabled: options.metrics.length === 0,
           'data-test-subj': 'metricsExplorerAction-OpenInTSVB',
