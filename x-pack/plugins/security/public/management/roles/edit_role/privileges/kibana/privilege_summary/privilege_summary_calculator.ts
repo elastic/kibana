@@ -13,7 +13,7 @@ export interface EffectiveFeaturePrivileges {
   [featureId: string]: {
     primary?: PrimaryFeaturePrivilege;
     subFeature: string[];
-    hasNonSupersededSubFeaturePrivileges: boolean;
+    hasCustomizedSubFeaturePrivileges: boolean;
   };
 }
 export class PrivilegeSummaryCalculator {
@@ -34,19 +34,38 @@ export class PrivilegeSummaryCalculator {
         .getSubFeaturePrivileges()
         .filter(ap => assignedPrivileges.grantsPrivilege(ap));
 
-      const hasNonSupersededSubFeaturePrivileges = effectiveSubPrivileges.some(
-        esp => !displayedPrimaryFeaturePrivilege?.grantsPrivilege(esp)
+      const hasCustomizedSubFeaturePrivileges = this.hasCustomizedSubFeaturePrivileges(
+        feature,
+        displayedPrimaryFeaturePrivilege,
+        entry
       );
 
       return {
         ...acc,
         [feature.id]: {
           primary: displayedPrimaryFeaturePrivilege,
-          hasNonSupersededSubFeaturePrivileges,
+          hasCustomizedSubFeaturePrivileges,
           subFeature: effectiveSubPrivileges.map(p => p.id),
         },
       };
     }, {} as EffectiveFeaturePrivileges);
+  }
+
+  private hasCustomizedSubFeaturePrivileges(
+    feature: SecuredFeature,
+    displayedPrimaryFeaturePrivilege: PrimaryFeaturePrivilege | undefined,
+    entry: RoleKibanaPrivilege
+  ) {
+    const formPrivileges = this.collectAssignedPrivileges(entry);
+
+    return feature.getSubFeaturePrivileges().some(sfp => {
+      const isGranted = formPrivileges.grantsPrivilege(sfp);
+      const isGrantedByDisplayedPrimary =
+        displayedPrimaryFeaturePrivilege?.grantsPrivilege(sfp) ?? isGranted;
+
+      // if displayed primary is derived from base, then excluded sub-feature-privs should not count.
+      return isGranted !== isGrantedByDisplayedPrimary;
+    });
   }
 
   private getDisplayedPrimaryFeaturePrivilege(
@@ -61,11 +80,11 @@ export class PrivilegeSummaryCalculator {
     const effectivePrivilege = primaryFeaturePrivileges.find(pfp => {
       const isPrimaryGranted = assignedPrivileges.grantsPrivilege(pfp);
       if (!isPrimaryGranted && hasMinimalPrivileges) {
-        const correspindingMinimal = minimalPrimaryFeaturePrivileges.find(
-          mpfp => mpfp.id === pfp.getCorrespondingPrivilegeId()
+        const correspondingMinimal = minimalPrimaryFeaturePrivileges.find(
+          mpfp => mpfp.id === pfp.getMinimalPrivilegeId()
         )!;
 
-        return assignedPrivileges.grantsPrivilege(correspindingMinimal);
+        return assignedPrivileges.grantsPrivilege(correspondingMinimal);
       }
       return isPrimaryGranted;
     });

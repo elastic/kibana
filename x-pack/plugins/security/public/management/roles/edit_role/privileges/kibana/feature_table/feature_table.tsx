@@ -62,9 +62,9 @@ export class FeatureTable extends Component<Props, State> {
   }
 
   public render() {
-    const { role, privilegeCalculator } = this.props;
+    const { role, kibanaPrivileges } = this.props;
 
-    const featurePrivileges = privilegeCalculator.getSecuredFeatures();
+    const featurePrivileges = kibanaPrivileges.getSecuredFeatures();
 
     const items: TableRow[] = featurePrivileges
       .sort((feature1, feature2) => {
@@ -198,10 +198,10 @@ export class FeatureTable extends Component<Props, State> {
             return null;
           }
 
-          const selectedPrivilegeId = this.props.privilegeCalculator.getDisplayedPrimaryFeaturePrivilege(
+          const selectedPrivilegeId = this.props.privilegeCalculator.getDisplayedPrimaryFeaturePrivilegeId(
             feature.id,
             this.props.privilegeIndex
-          )?.id;
+          );
 
           const options = primaryFeaturePrivileges.map(privilege => {
             return {
@@ -219,7 +219,7 @@ export class FeatureTable extends Component<Props, State> {
 
           let warningIcon = <EuiIconTip type="empty" content={null} />;
           if (
-            this.props.privilegeCalculator.hasNonSupersededSubFeaturePrivileges(
+            this.props.privilegeCalculator.hasCustomizedSubFeaturePrivileges(
               feature.id,
               this.props.privilegeIndex
             )

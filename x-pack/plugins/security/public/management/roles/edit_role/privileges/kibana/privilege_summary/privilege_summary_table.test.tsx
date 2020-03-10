@@ -353,7 +353,7 @@ describe('PrivilegeSummaryTable', () => {
       },
       with_sub_features: {
         'default, space-1': {
-          hasCustomizedSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: true,
           primaryFeaturePrivilege: 'Read',
           subFeaturesPrivileges: {
             'Cool Sub Feature': [],
@@ -729,7 +729,7 @@ describe('PrivilegeSummaryTable', () => {
           no_sub_features: ['all'],
           excluded_from_base: ['minimal_all', 'cool_toggle_1'],
         },
-        spaces: ['space-1', 'space-2', 'unknown-space'],
+        spaces: ['space-1', 'space-2'],
       },
     ]);
 
@@ -738,6 +738,7 @@ describe('PrivilegeSummaryTable', () => {
     );
 
     const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+
     expect(displayedPrivileges).toEqual({
       excluded_from_base: {
         '*': {
@@ -749,16 +750,16 @@ describe('PrivilegeSummaryTable', () => {
         },
         default: {
           hasCustomizedSubFeaturePrivileges: false,
-          primaryFeaturePrivilege: 'All',
-          subFeaturesPrivileges: {
-            'Cool Sub Feature': ['Cool toggle 2'],
-          },
-        },
-        'space-1, space-2, unknown-space': {
-          hasCustomizedSubFeaturePrivileges: false,
           primaryFeaturePrivilege: 'None',
           subFeaturesPrivileges: {
             'Cool Sub Feature': [],
+          },
+        },
+        'space-1, space-2': {
+          hasCustomizedSubFeaturePrivileges: true,
+          primaryFeaturePrivilege: 'All',
+          subFeaturesPrivileges: {
+            'Cool Sub Feature': ['Cool toggle 2'],
           },
         },
       },
@@ -771,7 +772,7 @@ describe('PrivilegeSummaryTable', () => {
           hasCustomizedSubFeaturePrivileges: false,
           primaryFeaturePrivilege: 'All',
         },
-        'space-1, space-2, unknown-space': {
+        'space-1, space-2': {
           hasCustomizedSubFeaturePrivileges: false,
           primaryFeaturePrivilege: 'All',
         },
@@ -785,17 +786,17 @@ describe('PrivilegeSummaryTable', () => {
           },
         },
         default: {
-          hasCustomizedSubFeaturePrivileges: true,
-          primaryFeaturePrivilege: 'All',
-          subFeaturesPrivileges: {
-            'Excluded Sub Feature': ['Cool toggle 1'],
-          },
-        },
-        'space-1, space-2, unknown-space': {
           hasCustomizedSubFeaturePrivileges: false,
           primaryFeaturePrivilege: 'All',
           subFeaturesPrivileges: {
             'Excluded Sub Feature': [],
+          },
+        },
+        'space-1, space-2': {
+          hasCustomizedSubFeaturePrivileges: true,
+          primaryFeaturePrivilege: 'All',
+          subFeaturesPrivileges: {
+            'Excluded Sub Feature': ['Cool toggle 1'],
           },
         },
       },
@@ -809,16 +810,16 @@ describe('PrivilegeSummaryTable', () => {
         },
         default: {
           hasCustomizedSubFeaturePrivileges: false,
-          primaryFeaturePrivilege: 'Read',
-          subFeaturesPrivileges: {
-            'Cool Sub Feature': ['Cool toggle 2', 'Read'],
-          },
-        },
-        'space-1, space-2, unknown-space': {
-          hasCustomizedSubFeaturePrivileges: false,
           primaryFeaturePrivilege: 'All',
           subFeaturesPrivileges: {
             'Cool Sub Feature': ['Cool toggle 1', 'Cool toggle 2', 'All'],
+          },
+        },
+        'space-1, space-2': {
+          hasCustomizedSubFeaturePrivileges: false,
+          primaryFeaturePrivilege: 'Read',
+          subFeaturesPrivileges: {
+            'Cool Sub Feature': ['Cool toggle 2', 'Read'],
           },
         },
       },

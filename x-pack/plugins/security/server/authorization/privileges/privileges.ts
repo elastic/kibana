@@ -55,7 +55,7 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
           featurePrivileges[feature.id][featurePrivilege.privilegeId] = [
             actions.login,
             actions.version,
-            ...featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature),
+            ...uniq(featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature)),
           ];
         }
 
@@ -66,7 +66,7 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
             featurePrivileges[feature.id][`minimal_${featurePrivilege.privilegeId}`] = [
               actions.login,
               actions.version,
-              ...featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature),
+              ...uniq(featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature)),
             ];
           }
         }
@@ -75,7 +75,7 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
           featurePrivileges[feature.id][subFeaturePrivilege.id] = [
             actions.login,
             actions.version,
-            ...featurePrivilegeBuilder.getActions(subFeaturePrivilege, feature),
+            ...uniq(featurePrivilegeBuilder.getActions(subFeaturePrivilege, feature)),
           ];
         }
 

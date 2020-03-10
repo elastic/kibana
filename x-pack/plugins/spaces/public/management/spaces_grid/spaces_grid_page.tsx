@@ -47,7 +47,6 @@ interface State {
   loading: boolean;
   showConfirmDeleteModal: boolean;
   selectedSpace: Space | null;
-  error: Error | null;
 }
 
 export class SpacesGridPage extends Component<Props, State> {
@@ -59,7 +58,6 @@ export class SpacesGridPage extends Component<Props, State> {
       loading: true,
       showConfirmDeleteModal: false,
       selectedSpace: null,
-      error: null,
     };
   }
 
@@ -211,7 +209,7 @@ export class SpacesGridPage extends Component<Props, State> {
   };
 
   public loadGrid = async () => {
-    const { spacesManager, getFeatures } = this.props;
+    const { spacesManager, getFeatures, notifications } = this.props;
 
     this.setState({
       loading: true,
@@ -231,7 +229,11 @@ export class SpacesGridPage extends Component<Props, State> {
     } catch (error) {
       this.setState({
         loading: false,
-        error,
+      });
+      notifications.toasts.addError(error, {
+        title: i18n.translate('xpack.spaces.management.spacesGridPage.errorTitle', {
+          defaultMessage: 'Error loading spaces',
+        }),
       });
     }
   };

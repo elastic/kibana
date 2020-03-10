@@ -11,3 +11,4 @@ export { SubFeaturePrivilege } from './sub_feature_privilege';
 export { PrimaryFeaturePrivilege } from './primary_feature_privilege';
 export { KibanaPrivileges } from './kibana_privileges';
 export { KibanaPrivilege } from './kibana_privilege';
+export { PrivilegeCollection } from './privilege_collection';

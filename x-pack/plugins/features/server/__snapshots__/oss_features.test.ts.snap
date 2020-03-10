@@ -411,7 +411,6 @@ Array [
       "savedObject": Object {
         "all": Array [
           "visualization",
-          "url",
           "query",
           "lens",
           "url",
@@ -423,7 +422,6 @@ Array [
       },
       "ui": Array [
         "show",
-        "createShortUrl",
         "delete",
         "save",
         "saveQuery",

@@ -10,6 +10,7 @@ import { defineRoutes } from './index';
 import { httpServerMock, httpServiceMock } from '../../../../../src/core/server/mocks';
 import { XPackInfoLicense } from '../../../../legacy/plugins/xpack_main/server/lib/xpack_info_license';
 import { RequestHandler } from '../../../../../src/core/server';
+import { FeatureConfig } from '../../common';
 
 let currentLicenseLevel: string = 'gold';
 
@@ -71,47 +72,29 @@ describe('GET /api/features', () => {
     const mockResponse = httpServerMock.createResponseFactory();
     routeHandler(undefined as any, { query: {} } as any, mockResponse);
 
-    expect(mockResponse.ok.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "body": Array [
-              Object {
-                "app": Array [],
-                "id": "feature_3",
-                "name": "Feature 2",
-                "order": 1,
-                "privileges": null,
-              },
-              Object {
-                "app": Array [],
-                "id": "feature_2",
-                "name": "Feature 2",
-                "order": 2,
-                "privileges": null,
-              },
-              Object {
-                "app": Array [],
-                "id": "feature_1",
-                "name": "Feature 1",
-                "privileges": null,
-              },
-              Object {
-                "app": Array [
-                  "bar-app",
-                ],
-                "id": "licensed_feature",
-                "name": "Licensed Feature",
-                "privileges": null,
-                "validLicenses": Array [
-                  "gold",
-                ],
-              },
-            ],
-          },
-        ],
-      ]
-    `);
+    expect(mockResponse.ok).toHaveBeenCalledTimes(1);
+    const [call] = mockResponse.ok.mock.calls;
+    const body = call[0]!.body as FeatureConfig[];
+
+    const features = body.map(feature => ({ id: feature.id, order: feature.order }));
+    expect(features).toEqual([
+      {
+        id: 'feature_3',
+        order: 1,
+      },
+      {
+        id: 'feature_2',
+        order: 2,
+      },
+      {
+        id: 'feature_1',
+        order: undefined,
+      },
+      {
+        id: 'licensed_feature',
+        order: undefined,
+      },
+    ]);
   });
 
   it(`by default does not return features that arent allowed by current license`, async () => {
@@ -120,36 +103,26 @@ describe('GET /api/features', () => {
     const mockResponse = httpServerMock.createResponseFactory();
     routeHandler(undefined as any, { query: {} } as any, mockResponse);
 
-    expect(mockResponse.ok.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "body": Array [
-              Object {
-                "app": Array [],
-                "id": "feature_3",
-                "name": "Feature 2",
-                "order": 1,
-                "privileges": null,
-              },
-              Object {
-                "app": Array [],
-                "id": "feature_2",
-                "name": "Feature 2",
-                "order": 2,
-                "privileges": null,
-              },
-              Object {
-                "app": Array [],
-                "id": "feature_1",
-                "name": "Feature 1",
-                "privileges": null,
-              },
-            ],
-          },
-        ],
-      ]
-    `);
+    expect(mockResponse.ok).toHaveBeenCalledTimes(1);
+    const [call] = mockResponse.ok.mock.calls;
+    const body = call[0]!.body as FeatureConfig[];
+
+    const features = body.map(feature => ({ id: feature.id, order: feature.order }));
+
+    expect(features).toEqual([
+      {
+        id: 'feature_3',
+        order: 1,
+      },
+      {
+        id: 'feature_2',
+        order: 2,
+      },
+      {
+        id: 'feature_1',
+        order: undefined,
+      },
+    ]);
   });
 
   it(`ignoreValidLicenses=false does not return features that arent allowed by current license`, async () => {
@@ -158,36 +131,26 @@ describe('GET /api/features', () => {
     const mockResponse = httpServerMock.createResponseFactory();
     routeHandler(undefined as any, { query: { ignoreValidLicenses: false } } as any, mockResponse);
 
-    expect(mockResponse.ok.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "body": Array [
-              Object {
-                "app": Array [],
-                "id": "feature_3",
-                "name": "Feature 2",
-                "order": 1,
-                "privileges": null,
-              },
-              Object {
-                "app": Array [],
-                "id": "feature_2",
-                "name": "Feature 2",
-                "order": 2,
-                "privileges": null,
-              },
-              Object {
-                "app": Array [],
-                "id": "feature_1",
-                "name": "Feature 1",
-                "privileges": null,
-              },
-            ],
-          },
-        ],
-      ]
-    `);
+    expect(mockResponse.ok).toHaveBeenCalledTimes(1);
+    const [call] = mockResponse.ok.mock.calls;
+    const body = call[0]!.body as FeatureConfig[];
+
+    const features = body.map(feature => ({ id: feature.id, order: feature.order }));
+
+    expect(features).toEqual([
+      {
+        id: 'feature_3',
+        order: 1,
+      },
+      {
+        id: 'feature_2',
+        order: 2,
+      },
+      {
+        id: 'feature_1',
+        order: undefined,
+      },
+    ]);
   });
 
   it(`ignoreValidLicenses=true returns features that arent allowed by current license`, async () => {
@@ -196,46 +159,29 @@ describe('GET /api/features', () => {
     const mockResponse = httpServerMock.createResponseFactory();
     routeHandler(undefined as any, { query: { ignoreValidLicenses: true } } as any, mockResponse);
 
-    expect(mockResponse.ok.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "body": Array [
-              Object {
-                "app": Array [],
-                "id": "feature_3",
-                "name": "Feature 2",
-                "order": 1,
-                "privileges": null,
-              },
-              Object {
-                "app": Array [],
-                "id": "feature_2",
-                "name": "Feature 2",
-                "order": 2,
-                "privileges": null,
-              },
-              Object {
-                "app": Array [],
-                "id": "feature_1",
-                "name": "Feature 1",
-                "privileges": null,
-              },
-              Object {
-                "app": Array [
-                  "bar-app",
-                ],
-                "id": "licensed_feature",
-                "name": "Licensed Feature",
-                "privileges": null,
-                "validLicenses": Array [
-                  "gold",
-                ],
-              },
-            ],
-          },
-        ],
-      ]
-    `);
+    expect(mockResponse.ok).toHaveBeenCalledTimes(1);
+    const [call] = mockResponse.ok.mock.calls;
+    const body = call[0]!.body as FeatureConfig[];
+
+    const features = body.map(feature => ({ id: feature.id, order: feature.order }));
+
+    expect(features).toEqual([
+      {
+        id: 'feature_3',
+        order: 1,
+      },
+      {
+        id: 'feature_2',
+        order: 2,
+      },
+      {
+        id: 'feature_1',
+        order: undefined,
+      },
+      {
+        id: 'licensed_feature',
+        order: undefined,
+      },
+    ]);
   });
 });

@@ -137,6 +137,37 @@ describe('ManageSpacePage', () => {
     });
   });
 
+  it('notifies when there is an error retrieving features', async () => {
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+
+    const error = new Error('something awful happened');
+
+    const notifications = notificationServiceMock.createStartContract();
+
+    const wrapper = mountWithIntl(
+      <ManageSpacePage
+        spacesManager={(spacesManager as unknown) as SpacesManager}
+        getFeatures={() => Promise.reject(error)}
+        notifications={notifications}
+        securityEnabled={true}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+      />
+    );
+
+    await waitForDataLoad(wrapper);
+
+    expect(notifications.toasts.addError).toHaveBeenCalledWith(error, {
+      title: 'Error loading available features',
+    });
+  });
+
   it('warns when updating features in the active space', async () => {
     const spacesManager = spacesManagerMock.create();
     spacesManager.getSpace = jest.fn().mockResolvedValue({

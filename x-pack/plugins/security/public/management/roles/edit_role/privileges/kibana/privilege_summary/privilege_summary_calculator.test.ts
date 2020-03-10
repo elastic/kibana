@@ -33,22 +33,22 @@ describe('PrivilegeSummaryCalculator', () => {
       const calculator = new PrivilegeSummaryCalculator(kibanaPrivileges, role);
       expect(calculator.getEffectiveFeaturePrivileges(role.kibana[0])).toEqual({
         excluded_from_base: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: undefined,
           subFeature: [],
         },
         no_sub_features: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: undefined,
           subFeature: [],
         },
         with_excluded_sub_features: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: undefined,
           subFeature: [],
         },
         with_sub_features: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: undefined,
           subFeature: [],
         },
@@ -73,26 +73,26 @@ describe('PrivilegeSummaryCalculator', () => {
       const calculator = new PrivilegeSummaryCalculator(kibanaPrivileges, role);
       expect(calculator.getEffectiveFeaturePrivileges(role.kibana[0])).toEqual({
         excluded_from_base: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: undefined,
           subFeature: [],
         },
         no_sub_features: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: expect.objectContaining({
             id: 'all',
           }),
           subFeature: [],
         },
         with_excluded_sub_features: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: expect.objectContaining({
             id: 'all',
           }),
           subFeature: [],
         },
         with_sub_features: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: expect.objectContaining({
             id: 'all',
           }),
@@ -123,26 +123,26 @@ describe('PrivilegeSummaryCalculator', () => {
       const calculator = new PrivilegeSummaryCalculator(kibanaPrivileges, role);
       expect(calculator.getEffectiveFeaturePrivileges(role.kibana[0])).toEqual({
         excluded_from_base: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: undefined,
           subFeature: [],
         },
         no_sub_features: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: expect.objectContaining({
             id: 'all',
           }),
           subFeature: [],
         },
         with_excluded_sub_features: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: expect.objectContaining({
             id: 'all',
           }),
           subFeature: [],
         },
         with_sub_features: {
-          hasNonSupersededSubFeaturePrivileges: true,
+          hasCustomizedSubFeaturePrivileges: true,
           primary: expect.objectContaining({
             id: 'all',
           }),
@@ -180,28 +180,28 @@ describe('PrivilegeSummaryCalculator', () => {
       const calculator = new PrivilegeSummaryCalculator(kibanaPrivileges, role);
       expect(calculator.getEffectiveFeaturePrivileges(role.kibana[0])).toEqual({
         excluded_from_base: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: expect.objectContaining({
             id: 'all',
           }),
           subFeature: ['cool_all', 'cool_read', 'cool_toggle_1', 'cool_toggle_2'],
         },
         no_sub_features: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: expect.objectContaining({
             id: 'all',
           }),
           subFeature: [],
         },
         with_excluded_sub_features: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: expect.objectContaining({
             id: 'all',
           }),
           subFeature: [],
         },
         with_sub_features: {
-          hasNonSupersededSubFeaturePrivileges: true,
+          hasCustomizedSubFeaturePrivileges: true,
           primary: expect.objectContaining({
             id: 'all',
           }),
@@ -229,26 +229,26 @@ describe('PrivilegeSummaryCalculator', () => {
       const calculator = new PrivilegeSummaryCalculator(kibanaPrivileges, role);
       expect(calculator.getEffectiveFeaturePrivileges(role.kibana[0])).toEqual({
         excluded_from_base: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: undefined,
           subFeature: [],
         },
         no_sub_features: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: expect.objectContaining({
             id: 'all',
           }),
           subFeature: [],
         },
         with_excluded_sub_features: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: expect.objectContaining({
             id: 'all',
           }),
           subFeature: [],
         },
         with_sub_features: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: expect.objectContaining({
             id: 'all',
           }),
@@ -272,24 +272,24 @@ describe('PrivilegeSummaryCalculator', () => {
       const calculator = new PrivilegeSummaryCalculator(kibanaPrivileges, role);
       expect(calculator.getEffectiveFeaturePrivileges(role.kibana[0])).toEqual({
         excluded_from_base: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: undefined,
           subFeature: [],
         },
         no_sub_features: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: undefined,
           subFeature: [],
         },
         with_excluded_sub_features: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: expect.objectContaining({
             id: 'all',
           }),
           subFeature: [],
         },
         with_sub_features: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: undefined,
           subFeature: [],
         },
@@ -311,24 +311,24 @@ describe('PrivilegeSummaryCalculator', () => {
       const calculator = new PrivilegeSummaryCalculator(kibanaPrivileges, role);
       expect(calculator.getEffectiveFeaturePrivileges(role.kibana[0])).toEqual({
         excluded_from_base: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: undefined,
           subFeature: [],
         },
         no_sub_features: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: undefined,
           subFeature: [],
         },
         with_excluded_sub_features: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: expect.objectContaining({
             id: 'all',
           }),
           subFeature: [],
         },
         with_sub_features: {
-          hasNonSupersededSubFeaturePrivileges: false,
+          hasCustomizedSubFeaturePrivileges: false,
           primary: undefined,
           subFeature: [],
         },

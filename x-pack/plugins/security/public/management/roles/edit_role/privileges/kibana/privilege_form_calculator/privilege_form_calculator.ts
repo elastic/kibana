@@ -31,7 +31,7 @@ export class PrivilegeFormCalculator {
   }
 
   /**
-   * Returns the *displayed* Primary Feature KibanaPrivilege for the indicated feature and privilege index.
+   * Returns the ID of the *displayed* Primary Feature Privilege for the indicated feature and privilege index.
    * If the effective primary feature privilege is a "minimal" version, then this returns the corresponding non-minimal version.
    *
    * @example
@@ -48,45 +48,31 @@ export class PrivilegeFormCalculator {
    * @param featureId the feature id to get the Primary Feature KibanaPrivilege for.
    * @param privilegeIndex the index of the kibana privileges role component
    */
-  public getDisplayedPrimaryFeaturePrivilege(featureId: string, privilegeIndex: number) {
-    const feature = this.kibanaPrivileges.getSecuredFeature(featureId);
-
-    const basePrivilege = this.getBasePrivilege(privilegeIndex);
-
-    const selectedFeaturePrivileges = this.getSelectedFeaturePrivileges(featureId, privilegeIndex);
-
-    return feature.getPrimaryFeaturePrivileges().find(fp => {
-      const correspondingPrivilegeId = fp.getCorrespondingPrivilegeId();
-      const hasMinimalPrivileges = feature.subFeatures.length > 0;
-      return (
-        selectedFeaturePrivileges.includes(fp.id) ||
-        (hasMinimalPrivileges && selectedFeaturePrivileges.includes(correspondingPrivilegeId)) ||
-        basePrivilege?.grantsPrivilege(fp)
-      );
-    });
+  public getDisplayedPrimaryFeaturePrivilegeId(featureId: string, privilegeIndex: number) {
+    return this.getDisplayedPrimaryFeaturePrivilege(featureId, privilegeIndex)?.id;
   }
 
   /**
-   * Determines if the indicated feature has sub-feature privileges assigned which are not superseded
-   * by any other assigned privileges.
+   * Determines if the indicated feature has sub-feature privilege assignments which differ from the "displayed" primary feature privilege.
    *
    * @param featureId the feature id
    * @param privilegeIndex the index of the kibana privileges role component
    */
-  public hasNonSupersededSubFeaturePrivileges(featureId: string, privilegeIndex: number) {
-    // We don't want the true effective primary here.
-    // We want essentially the non-minimal version of whatever the primary happens to be.
+  public hasCustomizedSubFeaturePrivileges(featureId: string, privilegeIndex: number) {
+    const feature = this.kibanaPrivileges.getSecuredFeature(featureId);
+
     const displayedPrimary = this.getDisplayedPrimaryFeaturePrivilege(featureId, privilegeIndex);
 
     const formPrivileges = this.kibanaPrivileges.createCollectionFromRoleKibanaPrivileges([
       this.role.kibana[privilegeIndex],
     ]);
 
-    const feature = this.kibanaPrivileges.getSecuredFeature(featureId);
+    return feature.getSubFeaturePrivileges().some(sfp => {
+      const isGranted = formPrivileges.grantsPrivilege(sfp);
+      const isGrantedByDisplayedPrimary = displayedPrimary?.grantsPrivilege(sfp) ?? isGranted;
 
-    return feature
-      .getSubFeaturePrivileges()
-      .some(sfp => formPrivileges.grantsPrivilege(sfp) && !displayedPrimary?.grantsPrivilege(sfp));
+      return isGranted !== isGrantedByDisplayedPrimary;
+    });
   }
 
   /**
@@ -121,25 +107,18 @@ export class PrivilegeFormCalculator {
     privilegeId: string,
     privilegeIndex: number
   ) {
-    const primaryFeaturePrivilege = this.getEffectivePrimaryFeaturePrivilege(
-      featureId,
-      privilegeIndex
-    );
-    if (!primaryFeaturePrivilege) {
-      return false;
-    }
-    const selectedFeaturePrivileges = this.getSelectedFeaturePrivileges(featureId, privilegeIndex);
+    const kibanaPrivilege = this.role.kibana[privilegeIndex];
 
     const feature = this.kibanaPrivileges.getSecuredFeature(featureId);
-
     const subFeaturePrivilege = feature
       .getSubFeaturePrivileges()
       .find(ap => ap.id === privilegeId)!;
 
-    return Boolean(
-      primaryFeaturePrivilege.grantsPrivilege(subFeaturePrivilege) ||
-        selectedFeaturePrivileges.includes(subFeaturePrivilege.id)
-    );
+    const assignedPrivileges = this.kibanaPrivileges.createCollectionFromRoleKibanaPrivileges([
+      kibanaPrivilege,
+    ]);
+
+    return assignedPrivileges.grantsPrivilege(subFeaturePrivilege);
   }
 
   /**
@@ -154,18 +133,13 @@ export class PrivilegeFormCalculator {
     subFeatureGroup: SubFeaturePrivilegeGroup,
     privilegeIndex: number
   ) {
-    const primaryFeaturePrivilege = this.getEffectivePrimaryFeaturePrivilege(
-      featureId,
-      privilegeIndex
-    );
-    if (!primaryFeaturePrivilege) {
-      return undefined;
-    }
-
-    const selectedFeaturePrivileges = this.getSelectedFeaturePrivileges(featureId, privilegeIndex);
+    const kibanaPrivilege = this.role.kibana[privilegeIndex];
+    const assignedPrivileges = this.kibanaPrivileges.createCollectionFromRoleKibanaPrivileges([
+      kibanaPrivilege,
+    ]);
 
     return subFeatureGroup.privileges.find(p => {
-      return primaryFeaturePrivilege.grantsPrivilege(p) || selectedFeaturePrivileges.includes(p.id);
+      return assignedPrivileges.grantsPrivilege(p);
     });
   }
 
@@ -213,15 +187,7 @@ export class PrivilegeFormCalculator {
         .filter(ap => primary.grantsPrivilege(ap))
         .map(p => p.id);
 
-      const existingPrivileges = selectedFeaturePrivileges.filter(
-        sfp => sfp !== primary.id && sfp !== primary.getCorrespondingPrivilegeId()
-      );
-
-      nextPrivileges.push(
-        ...existingPrivileges,
-        primary.getCorrespondingPrivilegeId(),
-        ...startingPrivileges
-      );
+      nextPrivileges.push(primary.getMinimalPrivilegeId(), ...startingPrivileges);
     } else {
       nextPrivileges.push(primary.id);
     }
@@ -246,9 +212,7 @@ export class PrivilegeFormCalculator {
       global,
     ]);
 
-    const formPrivileges = this.kibanaPrivileges.createCollectionFromRoleKibanaPrivileges([
-      this.role.kibana[privilegeIndex],
-    ]);
+    const formPrivileges = this.kibanaPrivileges.createCollectionFromRoleKibanaPrivileges([entry]);
 
     const hasAssignedBasePrivileges = this.kibanaPrivileges
       .getBasePrivileges(entry)
@@ -281,8 +245,41 @@ export class PrivilegeFormCalculator {
     return hasSupersededBasePrivileges || hasSupersededFeaturePrivileges;
   }
 
-  public getSecuredFeatures() {
-    return this.kibanaPrivileges.getSecuredFeatures();
+  /**
+   * Returns the *displayed* Primary Feature Privilege for the indicated feature and privilege index.
+   * If the effective primary feature privilege is a "minimal" version, then this returns the corresponding non-minimal version.
+   *
+   * @example
+   * The following kibana privilege entry will return `read`:
+   * ```ts
+   * const entry = {
+   *    base: [],
+   *    feature: {
+   *       some_feature: ['minimal_read'],
+   *    }
+   * }
+   * ```
+   *
+   * @param featureId the feature id to get the Primary Feature KibanaPrivilege for.
+   * @param privilegeIndex the index of the kibana privileges role component
+   */
+  private getDisplayedPrimaryFeaturePrivilege(featureId: string, privilegeIndex: number) {
+    const feature = this.kibanaPrivileges.getSecuredFeature(featureId);
+
+    const basePrivilege = this.getBasePrivilege(privilegeIndex);
+
+    const selectedFeaturePrivileges = this.getSelectedFeaturePrivileges(featureId, privilegeIndex);
+
+    return feature.getPrimaryFeaturePrivileges().find(fp => {
+      const correspondingMinimalPrivilegeId = fp.getMinimalPrivilegeId();
+      const hasMinimalPrivileges = feature.subFeatures.length > 0;
+      return (
+        selectedFeaturePrivileges.includes(fp.id) ||
+        (hasMinimalPrivileges &&
+          selectedFeaturePrivileges.includes(correspondingMinimalPrivilegeId)) ||
+        basePrivilege?.grantsPrivilege(fp)
+      );
+    });
   }
 
   private getSelectedFeaturePrivileges(featureId: string, privilegeIndex: number) {

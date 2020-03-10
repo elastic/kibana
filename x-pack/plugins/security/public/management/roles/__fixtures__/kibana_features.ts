@@ -12,6 +12,7 @@ export const createFeature = (
     excludeFromBaseRead?: boolean;
   }
 ) => {
+  const { excludeFromBaseAll, excludeFromBaseRead, ...rest } = config;
   return new Feature({
     icon: 'discoverApp',
     navLinkId: 'kibana:discover',
@@ -19,7 +20,7 @@ export const createFeature = (
     catalogue: [],
     privileges: {
       all: {
-        excludeFromBasePrivileges: config.excludeFromBaseAll,
+        excludeFromBasePrivileges: excludeFromBaseAll,
         savedObject: {
           all: ['all-type'],
           read: ['read-type'],
@@ -27,7 +28,7 @@ export const createFeature = (
         ui: ['read-ui', 'all-ui', `read-${config.id}`, `all-${config.id}`],
       },
       read: {
-        excludeFromBasePrivileges: config.excludeFromBaseRead,
+        excludeFromBasePrivileges: excludeFromBaseRead,
         savedObject: {
           all: [],
           read: ['read-type'],
@@ -35,7 +36,7 @@ export const createFeature = (
         ui: ['read-ui', `read-${config.id}`],
       },
     },
-    ...config,
+    ...rest,
   });
 };
 

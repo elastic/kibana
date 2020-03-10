@@ -82,7 +82,7 @@ describe('PrivilegeFormCalculator', () => {
     });
   });
 
-  describe('#getDisplayedPrimaryFeaturePrivilege', () => {
+  describe('#getDisplayedPrimaryFeaturePrivilegeId', () => {
     it('returns undefined when no privileges are assigned', () => {
       const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
       const role = createRole([
@@ -97,11 +97,11 @@ describe('PrivilegeFormCalculator', () => {
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
       expect(
-        calculator.getDisplayedPrimaryFeaturePrivilege('with_sub_features', 0)
+        calculator.getDisplayedPrimaryFeaturePrivilegeId('with_sub_features', 0)
       ).toBeUndefined();
     });
 
-    it('returns the effective privilege when a base privilege is assigned', () => {
+    it('returns the effective privilege id when a base privilege is assigned', () => {
       const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
       const role = createRole([
         {
@@ -114,12 +114,12 @@ describe('PrivilegeFormCalculator', () => {
       ]);
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
-      expect(calculator.getDisplayedPrimaryFeaturePrivilege('with_sub_features', 0)).toMatchObject({
-        id: 'all',
-      });
+      expect(calculator.getDisplayedPrimaryFeaturePrivilegeId('with_sub_features', 0)).toEqual(
+        'all'
+      );
     });
 
-    it('returns the most permissive assigned primary feature privilege', () => {
+    it('returns the most permissive assigned primary feature privilege id', () => {
       const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
       const role = createRole([
         {
@@ -132,12 +132,12 @@ describe('PrivilegeFormCalculator', () => {
       ]);
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
-      expect(calculator.getDisplayedPrimaryFeaturePrivilege('with_sub_features', 0)).toMatchObject({
-        id: 'all',
-      });
+      expect(calculator.getDisplayedPrimaryFeaturePrivilegeId('with_sub_features', 0)).toEqual(
+        'all'
+      );
     });
 
-    it('returns the primary version of the minimal privilege when assigned', () => {
+    it('returns the primary version of the minimal privilege id when assigned', () => {
       const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
       const role = createRole([
         {
@@ -150,13 +150,13 @@ describe('PrivilegeFormCalculator', () => {
       ]);
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
-      expect(calculator.getDisplayedPrimaryFeaturePrivilege('with_sub_features', 0)).toMatchObject({
-        id: 'read',
-      });
+      expect(calculator.getDisplayedPrimaryFeaturePrivilegeId('with_sub_features', 0)).toEqual(
+        'read'
+      );
     });
   });
 
-  describe('#hasNonSupersededSubFeaturePrivileges', () => {
+  describe('#hasCustomizedSubFeaturePrivileges', () => {
     it('returns false when no privileges are assigned', () => {
       const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
       const role = createRole([
@@ -170,16 +170,14 @@ describe('PrivilegeFormCalculator', () => {
       ]);
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
-      expect(calculator.hasNonSupersededSubFeaturePrivileges('with_sub_features', 0)).toEqual(
-        false
-      );
+      expect(calculator.hasCustomizedSubFeaturePrivileges('with_sub_features', 0)).toEqual(false);
     });
 
     it('returns false when there are no sub-feature privileges assigned', () => {
       const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
       const role = createRole([
         {
-          base: ['all'],
+          base: [],
           feature: {
             with_sub_features: ['all'],
           },
@@ -188,9 +186,7 @@ describe('PrivilegeFormCalculator', () => {
       ]);
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
-      expect(calculator.hasNonSupersededSubFeaturePrivileges('with_sub_features', 0)).toEqual(
-        false
-      );
+      expect(calculator.hasCustomizedSubFeaturePrivileges('with_sub_features', 0)).toEqual(false);
     });
 
     it('returns false when the assigned sub-features are also granted by other assigned privileges', () => {
@@ -206,16 +202,14 @@ describe('PrivilegeFormCalculator', () => {
       ]);
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
-      expect(calculator.hasNonSupersededSubFeaturePrivileges('with_sub_features', 0)).toEqual(
-        false
-      );
+      expect(calculator.hasCustomizedSubFeaturePrivileges('with_sub_features', 0)).toEqual(false);
     });
 
     it('returns true when the assigned sub-features are not also granted by other assigned privileges', () => {
       const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
       const role = createRole([
         {
-          base: ['read'],
+          base: [],
           feature: {
             with_sub_features: ['read', 'cool_all'],
           },
@@ -224,7 +218,76 @@ describe('PrivilegeFormCalculator', () => {
       ]);
 
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
-      expect(calculator.hasNonSupersededSubFeaturePrivileges('with_sub_features', 0)).toEqual(true);
+      expect(calculator.hasCustomizedSubFeaturePrivileges('with_sub_features', 0)).toEqual(true);
+    });
+
+    it('returns true when a minimal primary feature privilege is assigned, whose corresponding primary grants sub-feature privileges which are not assigned ', () => {
+      const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+      const role = createRole([
+        {
+          base: [],
+          feature: {
+            with_sub_features: ['minimal_read'],
+          },
+          spaces: ['foo'],
+        },
+      ]);
+
+      const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
+      expect(calculator.hasCustomizedSubFeaturePrivileges('with_sub_features', 0)).toEqual(true);
+    });
+
+    it('returns false when a minimal primary feature privilege is assigned, whose corresponding primary grants sub-feature privileges which are all assigned ', () => {
+      const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+      const role = createRole([
+        {
+          base: [],
+          feature: {
+            with_sub_features: ['minimal_read', 'cool_read', 'cool_toggle_2'],
+          },
+          spaces: ['foo'],
+        },
+      ]);
+
+      const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
+      expect(calculator.hasCustomizedSubFeaturePrivileges('with_sub_features', 0)).toEqual(false);
+    });
+
+    it('returns true when a minimal primary feature privilege is assigned, whose corresponding primary does not grant all assigned sub-feature privileges', () => {
+      const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+      const role = createRole([
+        {
+          base: [],
+          feature: {
+            with_sub_features: [
+              'minimal_read',
+              'cool_read',
+              'cool_toggle_2',
+              'cool_excluded_toggle',
+            ],
+          },
+          spaces: ['foo'],
+        },
+      ]);
+
+      const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
+      expect(calculator.hasCustomizedSubFeaturePrivileges('with_sub_features', 0)).toEqual(true);
+    });
+
+    it('returns false when a base privilege is assigned', () => {
+      const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+      const role = createRole([
+        {
+          base: ['all'],
+          feature: {
+            with_sub_features: [],
+          },
+          spaces: ['foo'],
+        },
+      ]);
+
+      const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
+      expect(calculator.hasCustomizedSubFeaturePrivileges('with_sub_features', 0)).toEqual(false);
     });
   });
 
@@ -280,6 +343,24 @@ describe('PrivilegeFormCalculator', () => {
       const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
       expect(calculator.getEffectivePrimaryFeaturePrivilege('with_sub_features', 0)).toMatchObject({
         id: 'all',
+      });
+    });
+
+    it('prefers `read` primary over `mininal_all`', () => {
+      const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+      const role = createRole([
+        {
+          base: [],
+          feature: {
+            with_sub_features: ['minimal_all', 'read'],
+          },
+          spaces: ['foo'],
+        },
+      ]);
+
+      const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
+      expect(calculator.getEffectivePrimaryFeaturePrivilege('with_sub_features', 0)).toMatchObject({
+        id: 'read',
       });
     });
 

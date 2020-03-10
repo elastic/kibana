@@ -50,6 +50,7 @@ export class IngestManagerPlugin implements Plugin {
         app: [PLUGIN_ID, 'kibana'],
         privileges: {
           all: {
+            app: [PLUGIN_ID, 'kibana'],
             api: [PLUGIN_ID],
             savedObject: {
               all: [],
@@ -58,6 +59,7 @@ export class IngestManagerPlugin implements Plugin {
             ui: ['show'],
           },
           read: {
+            app: [PLUGIN_ID, 'kibana'],
             api: [PLUGIN_ID],
             savedObject: {
               all: [],

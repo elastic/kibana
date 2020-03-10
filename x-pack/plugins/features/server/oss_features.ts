@@ -88,10 +88,10 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           app: ['kibana', 'lens'],
           catalogue: ['visualize'],
           savedObject: {
-            all: ['visualization', 'url', 'query', 'lens'],
+            all: ['visualization', 'query', 'lens'],
             read: ['index-pattern', 'search'],
           },
-          ui: ['show', 'createShortUrl', 'delete', 'save', 'saveQuery'],
+          ui: ['show', 'delete', 'save', 'saveQuery'],
         },
         read: {
           app: ['kibana', 'lens'],

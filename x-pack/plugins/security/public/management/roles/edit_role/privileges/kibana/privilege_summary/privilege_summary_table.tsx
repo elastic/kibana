@@ -78,18 +78,24 @@ export const PrivilegeSummaryTable = (props: Props) => {
     },
   };
 
-  const rawKibanaPrivileges = [...props.role.kibana].sort(entry =>
-    isGlobalPrivilegeDefinition(entry) ? -1 : 1
-  );
+  const rawKibanaPrivileges = [...props.role.kibana].sort((entry1, entry2) => {
+    if (isGlobalPrivilegeDefinition(entry1)) {
+      return -1;
+    }
+    if (isGlobalPrivilegeDefinition(entry2)) {
+      return 1;
+    }
+    return 0;
+  });
   const privilegeColumns = rawKibanaPrivileges.map(entry => {
     const key = getColumnKey(entry);
     return {
       name: <SpaceColumnHeader entry={entry} spaces={props.spaces} />,
       field: key,
       render: (kibanaPrivilege: EffectiveFeaturePrivileges, record: { featureId: string }) => {
-        const { primary, hasNonSupersededSubFeaturePrivileges } = kibanaPrivilege[record.featureId];
+        const { primary, hasCustomizedSubFeaturePrivileges } = kibanaPrivilege[record.featureId];
         let iconTip = null;
-        if (hasNonSupersededSubFeaturePrivileges) {
+        if (hasCustomizedSubFeaturePrivileges) {
           iconTip = (
             <EuiIconTip
               size="s"
@@ -110,7 +116,7 @@ export const PrivilegeSummaryTable = (props: Props) => {
         return (
           <span
             data-test-subj={`privilegeColumn ${
-              hasNonSupersededSubFeaturePrivileges ? 'additionalPrivilegesGranted' : ''
+              hasCustomizedSubFeaturePrivileges ? 'additionalPrivilegesGranted' : ''
             }`}
           >
             {primary?.name ?? 'None'} {iconTip}

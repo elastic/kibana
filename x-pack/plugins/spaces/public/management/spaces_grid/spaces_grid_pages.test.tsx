@@ -100,4 +100,72 @@ describe('SpacesGridPage', () => {
     expect(wrapper.find(SpaceAvatar)).toHaveLength(spaces.length);
     expect(wrapper.find(SpaceAvatar)).toMatchSnapshot();
   });
+
+  it('notifies when spaces fail to load', async () => {
+    const httpStart = httpServiceMock.createStartContract();
+    httpStart.get.mockResolvedValue([]);
+
+    const error = new Error('something awful happened');
+    spacesManager.getSpaces.mockRejectedValue(error);
+
+    const notifications = notificationServiceMock.createStartContract();
+
+    const wrapper = mountWithIntl(
+      <SpacesGridPage
+        spacesManager={(spacesManager as unknown) as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notifications}
+        securityEnabled={true}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+      />
+    );
+
+    // allow spacesManager to load spaces
+    await nextTick();
+    wrapper.update();
+
+    expect(wrapper.find(SpaceAvatar)).toHaveLength(0);
+    expect(notifications.toasts.addError).toHaveBeenCalledWith(error, {
+      title: 'Error loading spaces',
+    });
+  });
+
+  it('notifies when features fail to load', async () => {
+    const httpStart = httpServiceMock.createStartContract();
+    httpStart.get.mockResolvedValue([]);
+
+    const error = new Error('something awful happened');
+
+    const notifications = notificationServiceMock.createStartContract();
+
+    const wrapper = mountWithIntl(
+      <SpacesGridPage
+        spacesManager={(spacesManager as unknown) as SpacesManager}
+        getFeatures={() => Promise.reject(error)}
+        notifications={notifications}
+        securityEnabled={true}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+      />
+    );
+
+    // allow spacesManager to load spaces
+    await nextTick();
+    wrapper.update();
+
+    expect(wrapper.find(SpaceAvatar)).toHaveLength(0);
+    // For end-users, the effect is that spaces won't load, even though this was a request to retrieve features.
+    expect(notifications.toasts.addError).toHaveBeenCalledWith(error, {
+      title: 'Error loading spaces',
+    });
+  });
 });

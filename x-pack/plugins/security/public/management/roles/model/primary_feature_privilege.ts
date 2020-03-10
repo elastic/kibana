@@ -20,9 +20,9 @@ export class PrimaryFeaturePrivilege extends KibanaPrivilege {
     return this.id.startsWith('minimal_');
   }
 
-  public getCorrespondingPrivilegeId() {
+  public getMinimalPrivilegeId() {
     if (this.isMinimalFeaturePrivilege()) {
-      return this.id.substr(`minimal_`.length);
+      return this.id;
     }
     return `minimal_${this.id}`;
   }

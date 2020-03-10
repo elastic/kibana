@@ -41,60 +41,10 @@ export function getDisplayedFeaturePrivileges(
   return rows.reduce((acc, row) => {
     const expandedRow = row.find(PrivilegeSummaryExpandedRow);
     if (expandedRow.length > 0) {
-      const { feature } = expandedRow.props();
-
-      const subFeatureEntries = findTestSubject(
-        expandedRow as ReactWrapper<any>,
-        'subFeatureEntry'
-      );
-
-      const featureResult = acc[feature.id] || {};
-      acc[feature.id] = featureResult;
-
-      subFeatureEntries.forEach(subFeatureEntry => {
-        const subFeatureName = findTestSubject(subFeatureEntry, 'subFeatureName').text();
-
-        const entryElements = findTestSubject(expandedRow as ReactWrapper<any>, 'entry', '|=');
-
-        expect(entryElements).toHaveLength(role.kibana.length);
-
-        entryElements.forEach((entry, index) => {
-          const key = getSpaceKey(role.kibana[index]);
-
-          const independentPrivileges = entry
-            .find('EuiFlexGroup[data-test-subj="independentPrivilege"]')
-            .reduce((acc2, flexGroup) => {
-              const privilegeName = findTestSubject(flexGroup, 'privilegeName').text();
-              const isGranted = flexGroup.exists('EuiIconTip[type="check"]');
-              if (isGranted) {
-                return [...acc2, privilegeName];
-              }
-              return acc2;
-            }, [] as string[]);
-
-          const mutuallyExclusivePrivileges = entry
-            .find('EuiFlexGroup[data-test-subj="mutexPrivilege"]')
-            .reduce((acc2, flexGroup) => {
-              const privilegeName = findTestSubject(flexGroup, 'privilegeName').text();
-              const isGranted = flexGroup.exists('EuiIconTip[type="check"]');
-
-              if (isGranted) {
-                return [...acc2, privilegeName];
-              }
-              return acc2;
-            }, [] as string[]);
-
-          featureResult[key] = {
-            ...featureResult[key],
-            subFeaturesPrivileges: {
-              ...featureResult[key].subFeaturesPrivileges,
-              [subFeatureName]: [...independentPrivileges, ...mutuallyExclusivePrivileges],
-            },
-          };
-        });
-      });
-
-      return acc;
+      return {
+        ...acc,
+        ...getDisplayedSubFeaturePrivileges(acc, expandedRow, role),
+      };
     } else {
       const feature = row.find(FeatureTableCell).props().feature;
 
@@ -102,22 +52,78 @@ export function getDisplayedFeaturePrivileges(
 
       expect(primaryFeaturePrivileges).toHaveLength(role.kibana.length);
 
-      const featureResult = acc[feature.id] || {};
+      acc[feature.id] = acc[feature.id] ?? {};
 
       primaryFeaturePrivileges.forEach((primary, index) => {
         const key = getSpaceKey(role.kibana[index]);
 
-        featureResult[key] = {
-          ...featureResult[key],
+        acc[feature.id][key] = {
+          ...acc[feature.id][key],
           primaryFeaturePrivilege: primary.text().trim(),
           hasCustomizedSubFeaturePrivileges:
             findTestSubject(primary, 'additionalPrivilegesGranted').length > 0,
         };
       });
 
-      acc[feature.id] = featureResult;
-
       return acc;
     }
   }, {} as DisplayedFeaturePrivileges);
+}
+
+function getDisplayedSubFeaturePrivileges(
+  displayedFeatures: DisplayedFeaturePrivileges,
+  expandedRow: ReactWrapper<any>,
+  role: Role
+) {
+  const { feature } = expandedRow.props();
+
+  const subFeatureEntries = findTestSubject(expandedRow as ReactWrapper<any>, 'subFeatureEntry');
+
+  displayedFeatures[feature.id] = displayedFeatures[feature.id] ?? {};
+
+  subFeatureEntries.forEach(subFeatureEntry => {
+    const subFeatureName = findTestSubject(subFeatureEntry, 'subFeatureName').text();
+
+    const entryElements = findTestSubject(subFeatureEntry as ReactWrapper<any>, 'entry', '|=');
+
+    expect(entryElements).toHaveLength(role.kibana.length);
+
+    role.kibana.forEach((entry, index) => {
+      const key = getSpaceKey(entry);
+      const element = findTestSubject(expandedRow as ReactWrapper<any>, `entry-${index}`);
+
+      const independentPrivileges = element
+        .find('EuiFlexGroup[data-test-subj="independentPrivilege"]')
+        .reduce((acc2, flexGroup) => {
+          const privilegeName = findTestSubject(flexGroup, 'privilegeName').text();
+          const isGranted = flexGroup.exists('EuiIconTip[type="check"]');
+          if (isGranted) {
+            return [...acc2, privilegeName];
+          }
+          return acc2;
+        }, [] as string[]);
+
+      const mutuallyExclusivePrivileges = element
+        .find('EuiFlexGroup[data-test-subj="mutexPrivilege"]')
+        .reduce((acc2, flexGroup) => {
+          const privilegeName = findTestSubject(flexGroup, 'privilegeName').text();
+          const isGranted = flexGroup.exists('EuiIconTip[type="check"]');
+
+          if (isGranted) {
+            return [...acc2, privilegeName];
+          }
+          return acc2;
+        }, [] as string[]);
+
+      displayedFeatures[feature.id][key] = {
+        ...displayedFeatures[feature.id][key],
+        subFeaturesPrivileges: {
+          ...displayedFeatures[feature.id][key].subFeaturesPrivileges,
+          [subFeatureName]: [...independentPrivileges, ...mutuallyExclusivePrivileges],
+        },
+      };
+    });
+  });
+
+  return displayedFeatures;
 }

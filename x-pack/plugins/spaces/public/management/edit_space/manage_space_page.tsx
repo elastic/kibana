@@ -75,13 +75,21 @@ export class ManageSpacePage extends Component<Props, State> {
       return;
     }
 
-    const { spaceId, getFeatures } = this.props;
+    const { spaceId, getFeatures, notifications } = this.props;
 
-    if (spaceId) {
-      await this.loadSpace(spaceId, getFeatures());
-    } else {
-      const features = await getFeatures();
-      this.setState({ isLoading: false, features });
+    try {
+      if (spaceId) {
+        await this.loadSpace(spaceId, getFeatures());
+      } else {
+        const features = await getFeatures();
+        this.setState({ isLoading: false, features });
+      }
+    } catch (e) {
+      notifications.toasts.addError(e, {
+        title: i18n.translate('xpack.spaces.management.manageSpacePage.loadErrorTitle', {
+          defaultMessage: 'Error loading available features',
+        }),
+      });
     }
   }
 
