@@ -39,8 +39,6 @@ export function renderApp(
   };
 }
 
-export const DepsStartContext = React.createContext<Partial<EndpointPluginStartDependencies>>({});
-
 interface RouterProps {
   basename: string;
   store: Store;
@@ -49,44 +47,42 @@ interface RouterProps {
 }
 
 const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
-  ({ basename, store, coreStart: { http, notifications }, depsStart }) => (
-    <DepsStartContext.Provider value={depsStart}>
-      <Provider store={store}>
-        <I18nProvider>
-          <KibanaContextProvider services={{ http, notifications }}>
-            <BrowserRouter basename={basename}>
-              <RouteCapture>
-                <HeaderNavigation basename={basename} />
-                <Switch>
-                  <Route
-                    exact
-                    path="/"
-                    render={() => (
-                      <h1 data-test-subj="welcomeTitle">
-                        <FormattedMessage
-                          id="xpack.endpoint.welcomeTitle"
-                          defaultMessage="Hello World"
-                        />
-                      </h1>
-                    )}
-                  />
-                  <Route path="/management" component={ManagementList} />
-                  <Route path="/alerts" component={AlertIndex} />
-                  <Route path="/policy" exact component={PolicyList} />
-                  <Route
-                    render={() => (
+  ({ basename, store, coreStart: { http, notifications }, depsStart: { data } }) => (
+    <Provider store={store}>
+      <I18nProvider>
+        <KibanaContextProvider services={{ http, notifications, data }}>
+          <BrowserRouter basename={basename}>
+            <RouteCapture>
+              <HeaderNavigation basename={basename} />
+              <Switch>
+                <Route
+                  exact
+                  path="/"
+                  render={() => (
+                    <h1 data-test-subj="welcomeTitle">
                       <FormattedMessage
-                        id="xpack.endpoint.notFound"
-                        defaultMessage="Page Not Found"
+                        id="xpack.endpoint.welcomeTitle"
+                        defaultMessage="Hello World"
                       />
-                    )}
-                  />
-                </Switch>
-              </RouteCapture>
-            </BrowserRouter>
-          </KibanaContextProvider>
-        </I18nProvider>
-      </Provider>
-    </DepsStartContext.Provider>
+                    </h1>
+                  )}
+                />
+                <Route path="/management" component={ManagementList} />
+                <Route path="/alerts" component={AlertIndex} />
+                <Route path="/policy" exact component={PolicyList} />
+                <Route
+                  render={() => (
+                    <FormattedMessage
+                      id="xpack.endpoint.notFound"
+                      defaultMessage="Page Not Found"
+                    />
+                  )}
+                />
+              </Switch>
+            </RouteCapture>
+          </BrowserRouter>
+        </KibanaContextProvider>
+      </I18nProvider>
+    </Provider>
   )
 );

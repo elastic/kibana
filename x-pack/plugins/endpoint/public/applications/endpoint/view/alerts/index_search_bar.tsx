@@ -5,14 +5,15 @@
  */
 
 import React from 'react';
-import { memo, useContext, useEffect, useCallback } from 'react';
+import { memo, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { encode, RisonValue } from 'rison-node';
 import { Query, TimeRange, Filter } from 'src/plugins/data/public';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { urlFromQueryParams } from './url_from_query_params';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
 import * as selectors from '../../store/alerts/selectors';
-import { DepsStartContext } from '../../../endpoint/index';
+import { EndpointPluginServices } from '../../../../plugin';
 
 export const AlertIndexSearchBar = memo(() => {
   const history = useHistory();
@@ -22,12 +23,11 @@ export const AlertIndexSearchBar = memo(() => {
   const searchBarDateRange = useAlertListSelector(selectors.searchBarDateRange);
   const searchBarFilters = useAlertListSelector(selectors.searchBarFilters);
 
-  // TODO: Can we import like `import { SearchBar } from '../data/public'`?
-  const depsStartContext = useContext(DepsStartContext);
+  const kibanaContext = useKibana<EndpointPluginServices>();
   const {
     ui: { SearchBar },
     query: { filterManager },
-  } = depsStartContext.data!;
+  } = kibanaContext.services.data;
 
   // Update the the filters in filterManager when the filters url value (searchBarFilters) changes
   useEffect(() => {

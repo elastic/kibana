@@ -27,6 +27,7 @@ export interface EndpointPluginServices extends Partial<CoreStart> {
   http: CoreStart['http'];
   overlays: CoreStart['overlays'] | undefined;
   notifications: CoreStart['notifications'] | undefined;
+  data: DataPublicPluginStart;
 }
 
 export class EndpointPlugin
