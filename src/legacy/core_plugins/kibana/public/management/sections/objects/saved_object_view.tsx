@@ -146,14 +146,18 @@ export class SavedObjectEdition extends Component<
           }
         ),
         title: i18n.translate('kbn.management.objects.confirmModalOptions.modalTitle', {
-          defaultMessage: 'Delete saved Kibana object?',
+          defaultMessage: 'Delete {title}?',
+          values: {
+            title: object?.attributes?.title || 'saved Kibana object',
+          },
         }),
+        buttonColor: 'danger',
       }
     );
     if (confirmed) {
       await savedObjectsClient.delete(type, id);
       notifications.toasts.addSuccess(`Deleted '${object!.attributes.title}' ${type} object`);
-      window.location.hash = '/management/kibana/objects';
+      this.redirectToListing();
     }
   }
 
@@ -163,6 +167,10 @@ export class SavedObjectEdition extends Component<
 
     await savedObjectsClient.update(object!.type, object!.id, attributes, { references });
     notifications.toasts.addSuccess(`Updated '${attributes.title}' ${type} object`);
-    window.location.hash = '/management/kibana/objects';
+    this.redirectToListing();
   };
+
+  redirectToListing() {
+    window.location.hash = '/management/kibana/objects';
+  }
 }
