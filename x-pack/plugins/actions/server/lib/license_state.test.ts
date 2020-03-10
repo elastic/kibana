@@ -52,6 +52,67 @@ describe('checkLicense()', () => {
   });
 });
 
+describe('isLicenseValidForActionType', () => {
+  let license: BehaviorSubject<ILicense>;
+  let licenseState: ILicenseState;
+  const fooActionType: ActionType = {
+    id: 'foo',
+    name: 'Foo',
+    minimumLicenseRequired: 'gold',
+    executor: async () => {},
+  };
+
+  beforeEach(() => {
+    license = new BehaviorSubject(null as any);
+    licenseState = new LicenseState(license);
+  });
+
+  test('should return false when license not defined', () => {
+    expect(licenseState.isLicenseValidForActionType(fooActionType)).toEqual({
+      isValid: false,
+      reason: 'unavailable',
+    });
+  });
+
+  test('should return false when license not available', () => {
+    license.next({ isAvailable: false } as any);
+    expect(licenseState.isLicenseValidForActionType(fooActionType)).toEqual({
+      isValid: false,
+      reason: 'unavailable',
+    });
+  });
+
+  test('should return false when license is expired', () => {
+    const expiredLicense = licensingMock.createLicense({ license: { status: 'expired' } });
+    license.next(expiredLicense);
+    expect(licenseState.isLicenseValidForActionType(fooActionType)).toEqual({
+      isValid: false,
+      reason: 'expired',
+    });
+  });
+
+  test('should return false when license is invalid', () => {
+    const basicLicense = licensingMock.createLicense({
+      license: { status: 'active', type: 'basic' },
+    });
+    license.next(basicLicense);
+    expect(licenseState.isLicenseValidForActionType(fooActionType)).toEqual({
+      isValid: false,
+      reason: 'invalid',
+    });
+  });
+
+  test('should return true when license is valid', () => {
+    const goldLicense = licensingMock.createLicense({
+      license: { status: 'active', type: 'gold' },
+    });
+    license.next(goldLicense);
+    expect(licenseState.isLicenseValidForActionType(fooActionType)).toEqual({
+      isValid: true,
+    });
+  });
+});
+
 describe('ensureLicenseForActionType()', () => {
   let license: BehaviorSubject<ILicense>;
   let licenseState: ILicenseState;
