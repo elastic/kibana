@@ -28,7 +28,7 @@ export const epmRouteService = {
   },
 
   getFilePath: (filePath: string) => {
-    return `${EPM_API_ROOT}${filePath}`;
+    return `${EPM_API_ROOT}${filePath.replace('/package', '/packages')}`;
   },
 
   getInstallPath: (pkgkey: string) => {
