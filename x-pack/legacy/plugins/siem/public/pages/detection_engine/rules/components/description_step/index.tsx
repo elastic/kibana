@@ -15,7 +15,7 @@ import {
   FilterManager,
   Query,
 } from '../../../../../../../../../../src/plugins/data/public';
-import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/search_super_select/translations';
+import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/translations';
 import { useKibana } from '../../../../../lib/kibana';
 import { IMitreEnterpriseAttack } from '../../types';
 import { FieldValueTimeline } from '../pick_timeline';
