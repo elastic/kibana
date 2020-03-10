@@ -17,7 +17,4 @@
  * under the License.
  */
 
-export { Registry } from './lib/registry';
-
-export { fromExpression, toExpression, Ast, ExpressionFunctionAST } from './lib/ast';
-export { getType } from './lib/get_type';
+export declare function getType(node: any): string;
