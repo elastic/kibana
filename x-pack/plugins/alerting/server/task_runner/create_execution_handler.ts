@@ -12,6 +12,8 @@ import { PluginStartContract as ActionsPluginStartContract } from '../../../../p
 
 interface CreateExecutionHandlerOptions {
   alertId: string;
+  alertName: string;
+  tags?: string[];
   executeAction: ActionsPluginStartContract['execute'];
   actions: AlertAction[];
   spaceId: string;
@@ -30,6 +32,8 @@ interface ExecutionHandlerOptions {
 export function createExecutionHandler({
   logger,
   alertId,
+  alertName,
+  tags,
   executeAction,
   actions: alertActions,
   spaceId,
@@ -49,9 +53,12 @@ export function createExecutionHandler({
           ...action,
           params: transformActionParams({
             alertId,
+            alertName,
+            spaceId,
+            tags,
             alertInstanceId,
             context,
-            params: action.params,
+            actionParams: action.params,
             state,
           }),
         };
