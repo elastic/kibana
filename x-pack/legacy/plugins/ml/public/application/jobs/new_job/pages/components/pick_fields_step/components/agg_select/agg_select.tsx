@@ -5,7 +5,7 @@
  */
 
 import React, { FC, useContext, useState, useEffect } from 'react';
-import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Field, Aggregation, AggFieldPair } from '../../../../../../../../../common/types/fields';
@@ -26,12 +26,12 @@ export interface DropDownOption {
   options: DropDownLabel[];
 }
 
-export type DropDownProps = DropDownLabel[] | EuiComboBoxOptionProps[];
+export type DropDownProps = DropDownLabel[] | EuiComboBoxOptionOption[];
 
 interface Props {
   fields: Field[];
-  changeHandler(d: EuiComboBoxOptionProps[]): void;
-  selectedOptions: EuiComboBoxOptionProps[];
+  changeHandler(d: EuiComboBoxOptionOption[]): void;
+  selectedOptions: EuiComboBoxOptionOption[];
   removeOptions: AggFieldPair[];
 }
 
@@ -42,7 +42,7 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
   // so they can be removed from the dropdown list
   const removeLabels = removeOptions.map(createLabel);
 
-  const options: EuiComboBoxOptionProps[] = fields.map(f => {
+  const options: EuiComboBoxOptionOption[] = fields.map(f => {
     const aggOption: DropDownOption = { label: f.name, options: [] };
     if (typeof f.aggs !== 'undefined') {
       aggOption.options = f.aggs
