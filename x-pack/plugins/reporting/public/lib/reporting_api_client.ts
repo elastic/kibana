@@ -39,6 +39,7 @@ export interface JobInfo {
   output: {
     content_type: string;
     size: number;
+    warnings: string[];
   };
   process_expiration: string;
   completed_at: string;

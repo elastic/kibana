@@ -87,6 +87,7 @@ export class ReportInfoButton extends Component<Props, State> {
     const maxAttempts = info.max_attempts ? info.max_attempts.toString() : NA;
     const priority = info.priority ? info.priority.toString() : NA;
     const timeout = info.timeout ? info.timeout.toString() : NA;
+    const warnings = info.output && info.output.warnings ? info.output.warnings.join(',') : null;
 
     const jobInfoParts: JobInfoMap = {
       datetimes: [
@@ -177,6 +178,13 @@ export class ReportInfoButton extends Component<Props, State> {
         },
       ],
     };
+
+    if (warnings) {
+      jobInfoParts.status.push({
+        title: 'Errors',
+        description: warnings,
+      });
+    }
 
     return (
       <Fragment>
