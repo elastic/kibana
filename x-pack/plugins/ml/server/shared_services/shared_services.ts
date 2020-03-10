@@ -34,7 +34,7 @@ export function createSharedServices(
   return {
     ...getJobServiceProvider(isFullLicense),
     ...getAnomalyDetectorsProvider(isFullLicense),
-    ...getMlSystemProvider(isMinimumLicense, mlLicense, spaces, cloud),
+    ...getMlSystemProvider(isMinimumLicense, isFullLicense, mlLicense, spaces, cloud),
     ...getModulesProvider(isFullLicense),
     ...getResultsServiceProvider(isFullLicense),
   };

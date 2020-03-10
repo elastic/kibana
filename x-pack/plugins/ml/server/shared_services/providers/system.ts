@@ -5,6 +5,7 @@
  */
 
 import { APICaller } from 'kibana/server';
+import { SearchResponse, SearchParams } from 'elasticsearch';
 import { MlServerLicense } from '../../lib/license';
 import { CloudSetup } from '../../../../cloud/server';
 import { LicenseCheck } from '../license_checks';
@@ -12,6 +13,7 @@ import { spacesUtilsProvider, RequestFacade } from '../../lib/spaces_utils';
 import { SpacesPluginSetup } from '../../../../spaces/server';
 import { privilegesProvider, MlCapabilities } from '../../lib/check_privileges';
 import { MlInfoResponse } from '../../../../../legacy/plugins/ml/common/types/ml_server_info';
+import { ML_RESULTS_INDEX_PATTERN } from '../../../../../legacy/plugins/ml/common/constants/index_patterns';
 
 export interface MlSystemProvider {
   mlSystemProvider(
@@ -20,11 +22,13 @@ export interface MlSystemProvider {
   ): {
     mlCapabilities(ignoreSpaces?: boolean): Promise<MlCapabilities>;
     mlInfo(): Promise<MlInfoResponse>;
+    mlSearch<T>(searchParams: SearchParams): Promise<SearchResponse<T>>;
   };
 }
 
 export function getMlSystemProvider(
   isMinimumLicense: LicenseCheck,
+  isFullLicense: LicenseCheck,
   mlLicense: MlServerLicense,
   spaces: SpacesPluginSetup | undefined,
   cloud: CloudSetup
@@ -56,6 +60,13 @@ export function getMlSystemProvider(
             ...info,
             cloudId,
           };
+        },
+        async mlSearch<T>(searchParams: SearchParams): Promise<SearchResponse<T>> {
+          isFullLicense();
+          return callAsCurrentUser('search', {
+            ...searchParams,
+            index: ML_RESULTS_INDEX_PATTERN,
+          });
         },
       };
     },
