@@ -23,7 +23,7 @@ export interface Document {
     query: Query;
     filters: Filter[];
   };
-  visible: boolean;
+  visible?: boolean;
 }
 
 export const DOC_TYPE = 'lens';
