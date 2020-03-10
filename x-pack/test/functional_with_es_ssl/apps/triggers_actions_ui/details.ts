@@ -267,13 +267,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             }),
           }))
           .forEach(({ id, duration }) => {
-            // make sure the duration is within a 30 second range which is
+            // make sure the duration is within a 10 second range which is
             // good enough as the alert interval is 1m, so we know it is a fresh value
             expect(duration.as('milliseconds')).to.greaterThan(
-              durationFromInstanceTillPageLoad[id].subtract(1000 * 30).as('milliseconds')
+              durationFromInstanceTillPageLoad[id].subtract(1000 * 10).as('milliseconds')
             );
             expect(duration.as('milliseconds')).to.lessThan(
-              durationFromInstanceTillPageLoad[id].add(1000 * 30).as('milliseconds')
+              durationFromInstanceTillPageLoad[id].add(1000 * 10).as('milliseconds')
             );
           });
       });
