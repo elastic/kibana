@@ -6,57 +6,18 @@
 
 /* eslint-disable react/display-name */
 
-import {
-  EuiIcon,
-  EuiToolTip,
-  EuiButtonIcon,
-  EuiPopover,
-  EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
-} from '@elastic/eui';
-import React, { useState, useCallback } from 'react';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import React from 'react';
 
 import { ACTION_COLUMN_WIDTH } from './common_styles';
 import { getNotesCount, getPinnedEventCount } from '../helpers';
 import * as i18n from '../translations';
 import { FavoriteTimelineResult, OpenTimelineResult } from '../types';
 
-const EditTimelineActions = React.memo<{
-  actionsColumns: EuiContextMenuPanelDescriptor[] | undefined;
-}>(({ actionsColumns }) => {
-  const [isPopoverOpen, setPopover] = useState(false);
-  const tooglePopover = useCallback(
-    (newState: boolean) => {
-      setPopover(newState);
-    },
-    [setPopover]
-  );
-  return (
-    <EuiPopover
-      anchorPosition="upCenter"
-      button={
-        <EuiButtonIcon
-          aria-label={'All Actions'}
-          data-test-subj="edit-timeline-all-actions"
-          iconType="boxesHorizontal"
-          onClick={tooglePopover.bind(null, !isPopoverOpen)}
-        />
-      }
-      isOpen={isPopoverOpen}
-      closePopover={tooglePopover.bind(null, false)}
-    >
-      <EuiContextMenu initialPanelId={0} panels={actionsColumns} />
-    </EuiPopover>
-  );
-});
-
-EditTimelineActions.displayName = 'EditTimelineActions';
 /**
  * Returns the columns that have icon headers
  */
-export const getIconHeaderColumns = (
-  actionsColumns: EuiContextMenuPanelDescriptor[] | undefined
-) => [
+export const getIconHeaderColumns = () => [
   {
     align: 'center',
     field: 'pinnedEventIds',
@@ -99,21 +60,6 @@ export const getIconHeaderColumns = (
       const fill = isFavorite ? 'starFilled' : 'starEmpty';
 
       return <EuiIcon data-test-subj={`favorite-${fill}-star`} type={fill} size="m" />;
-    },
-    sortable: false,
-    width: ACTION_COLUMN_WIDTH,
-  },
-  {
-    align: 'center',
-    field: 'visControls',
-    name: (
-      <EuiToolTip content={i18n.ALL_ACTIONS}>
-        <EuiIcon data-test-subj="all-timeline-actions-icon" size="m" type="visControls" />
-      </EuiToolTip>
-    ),
-    render: () => {
-      return <EditTimelineActions actionsColumns={actionsColumns} />;
-      // return <span>xxx</span>;
     },
     sortable: false,
     width: ACTION_COLUMN_WIDTH,

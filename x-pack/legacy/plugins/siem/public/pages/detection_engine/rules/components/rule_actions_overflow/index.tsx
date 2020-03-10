@@ -21,7 +21,7 @@ import * as i18n from './translations';
 import * as i18nActions from '../../../rules/translations';
 import { displaySuccessToast, useStateToaster } from '../../../../../components/toasters';
 import { deleteRulesAction, duplicateRulesAction } from '../../all/actions';
-import { RuleDownloader } from '../rule_downloader';
+import { GenericDownloader } from '../../../../../components/generic_downloader';
 import { DETECTION_ENGINE_PAGE_NAME } from '../../../../../components/link_to/redirect_to_detection_engine';
 
 const MyEuiButtonIcon = styled(EuiButtonIcon)`
@@ -129,7 +129,7 @@ const RuleActionsOverflowComponent = ({
       >
         <EuiContextMenuPanel items={actions} />
       </EuiPopover>
-      <RuleDownloader
+      <GenericDownloader
         filename={`${i18nActions.EXPORT_FILENAME}.ndjson`}
         ruleIds={rulesToExport}
         onExportComplete={exportCount => {

@@ -8,7 +8,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { RuleDownloaderComponent } from './index';
 
-describe('RuleDownloader', () => {
+describe('GenericDownloader', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <RuleDownloaderComponent filename={'export_rules.ndjson'} onExportComplete={jest.fn()} />

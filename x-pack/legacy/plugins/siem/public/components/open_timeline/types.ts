@@ -23,6 +23,17 @@ export interface TimelineResultNote {
   updatedBy?: string | null;
 }
 
+export interface TimelineActionsOverflowColumns {
+  width: string;
+  actions: Array<{
+    name: string;
+    icon?: string;
+    onClick?: (timeline: OpenTimelineResult) => void;
+    description: string;
+    render?: (timeline: OpenTimelineResult) => JSX.Element;
+  } | null>;
+}
+
 /** The results of the query run by the OpenTimeline component */
 export interface OpenTimelineResult {
   created?: number | null;
@@ -93,7 +104,7 @@ export interface OnTableChangeParams {
 /** Invoked by the EUI table implementation when the user interacts with the table */
 export type OnTableChange = (tableChange: OnTableChangeParams) => void;
 
-export type ActionTimelineToShow = 'duplicate' | 'delete' | 'selectable';
+export type ActionTimelineToShow = 'duplicate' | 'delete' | 'export' | 'selectable';
 
 export interface OpenTimelineProps {
   /** Invoked when the user clicks the delete (trash) icon on an individual timeline */

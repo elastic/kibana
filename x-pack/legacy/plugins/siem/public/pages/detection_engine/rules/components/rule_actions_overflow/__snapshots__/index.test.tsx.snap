@@ -55,7 +55,7 @@ exports[`RuleActionsOverflow renders correctly against snapshot 1`] = `
       }
     />
   </EuiPopover>
-  <RuleDownloader
+  <GenericDownloader
     filename="rules_export.ndjson"
     onExportComplete={[Function]}
     ids={Array []}

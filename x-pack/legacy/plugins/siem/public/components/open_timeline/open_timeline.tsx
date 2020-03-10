@@ -5,10 +5,9 @@
  */
 
 import { EuiPanel, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import uuid from 'uuid';
-import { keys } from 'lodash/fp';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { OpenTimelineProps } from './types';
 import { SearchRow } from './search_row';
@@ -30,15 +29,9 @@ import {
   EXPORT_FILENAME,
 } from '../../pages/detection_engine/rules/translations';
 import { useStateToaster } from '../toasters';
-import {
-  RuleDownloader,
-  ExportSelectedData,
-} from '../../pages/detection_engine/rules/components/rule_downloader';
-
-import { TIMELINE_EXPORT_URL } from '../../../common/constants';
-import { throwIfNotOk } from '../../hooks/api/api';
-import { KibanaServices } from '../../lib/kibana';
-
+import { GenericDownloader } from '../generic_downloader';
+import { useExportTimeline } from './export_timeline';
+import { TimelineDownloader } from './export_timeline/export_timeline';
 export interface ExportTimelineIds {
   timelineId: string | null | undefined;
   pinnedEventIds: string[] | null | undefined;
@@ -71,7 +64,6 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     totalSearchResultsCount,
   }) => {
     const [, dispatchToaster] = useStateToaster();
-    const [enableDownloader, setEnableDownloader] = useState(false);
 
     const text = useMemo(
       () => (
@@ -92,46 +84,21 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       [totalSearchResultsCount]
     );
 
-    const exportSelectedTimeline: ExportSelectedData = useCallback(
-      async ({
-        excludeExportDetails = false,
-        filename = `timelines_export.ndjson`,
-        ids = [],
-        signal,
-      }): Promise<Blob> => {
-        const body = ids.length > 0 ? JSON.stringify({ objects: ids }) : undefined;
-        const response = await KibanaServices.get().http.fetch<Blob>(`${TIMELINE_EXPORT_URL}`, {
-          method: 'POST',
-          body,
-          query: {
-            exclude_export_details: excludeExportDetails,
-            file_name: filename,
-          },
-          signal,
-          asResponse: true,
-        });
-
-        await throwIfNotOk(response.response);
-        return response.body!;
-      },
-      []
-    );
-
     const getBatchItemsPopoverContent = useCallback(
       (closePopover: () => void) => (
         <EuiContextMenuPanel
           items={[
             <EuiContextMenuItem
               key="ExportItemKey"
-              icon="exportAction"
               disabled={selectedItems.length === 0}
-              onClick={async () => {
-                closePopover();
-
-                setEnableDownloader(true);
-              }}
+              // onClick={() => {
+              //   closePopover();
+              // }}
             >
-              {BATCH_ACTION_EXPORT_SELECTED}
+              <TimelineDownloader
+                selectedTimelines={selectedItems}
+                onDownloadComplete={closePopover}
+              />
             </EuiContextMenuItem>,
             <EuiContextMenuItem
               key="DeleteItemKey"
@@ -150,25 +117,13 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       [selectedItems, dispatchToaster, history]
     );
 
-    const getSelectedItemsIds: ExportTimelineIds[] = useMemo(() => {
-      return selectedItems.map(item => ({
-        timelineId: item.savedObjectId,
-        pinnedEventIds:
-          item.pinnedEventIds != null ? keys(item.pinnedEventIds) : item.pinnedEventIds,
-        noteIds: item?.notes?.reduce(
-          (acc, note) => (note.noteId != null ? [...acc, note.noteId] : acc),
-          [] as string[]
-        ),
-      }));
-    }, [selectedItems]);
-
     return (
       <>
-        {enableDownloader && (
-          <RuleDownloader
+        {/* {enableDownloader && (
+          <GenericDownloader
             filename={`${EXPORT_FILENAME}.ndjson`}
-            ids={getSelectedItemsIds}
-            exportSelectedData={exportSelectedTimeline}
+            ids={exportedIds}
+            exportSelectedData={exportedData}
             onExportComplete={exportCount => {
               setEnableDownloader(false);
               dispatchToaster({
@@ -182,7 +137,8 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
               });
             }}
           />
-        )}
+        )} */}
+
         <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>
           <TitleRow
             data-test-subj="title-row"
@@ -225,8 +181,8 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           <TimelinesTable
             actionTimelineToShow={
               onDeleteSelected != null && deleteTimelines != null
-                ? ['delete', 'duplicate', 'selectable']
-                : ['duplicate', 'selectable']
+                ? ['delete', 'duplicate', 'export', 'selectable']
+                : ['duplicate', 'export', 'selectable']
             }
             data-test-subj="timelines-table"
             deleteTimelines={deleteTimelines}

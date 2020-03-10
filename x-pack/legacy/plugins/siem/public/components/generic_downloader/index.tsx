@@ -7,13 +7,10 @@
 import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { isFunction, isNil } from 'lodash/fp';
-import {
-  exportRules,
-  ExportDocumentsProps,
-} from '../../../../../containers/detection_engine/rules';
-import { displayErrorToast, useStateToaster } from '../../../../../components/toasters';
+import { exportRules, ExportDocumentsProps } from '../../containers/detection_engine/rules';
+import { displayErrorToast, useStateToaster } from '../toasters';
 import * as i18n from './translations';
-import { ExportTimelineIds } from '../../../../../components/open_timeline/open_timeline';
+import { ExportTimelineIds } from '../open_timeline/open_timeline';
 
 const InvisibleAnchor = styled.a`
   display: none;
@@ -114,6 +111,6 @@ export const RuleDownloaderComponent = ({
 
 RuleDownloaderComponent.displayName = 'RuleDownloaderComponent';
 
-export const RuleDownloader = React.memo(RuleDownloaderComponent);
+export const GenericDownloader = React.memo(RuleDownloaderComponent);
 
-RuleDownloader.displayName = 'RuleDownloader';
+GenericDownloader.displayName = 'GenericDownloader';

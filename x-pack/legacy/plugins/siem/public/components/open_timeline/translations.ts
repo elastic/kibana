@@ -38,6 +38,14 @@ export const EXPAND = i18n.translate('xpack.siem.open.timeline.expandButton', {
   defaultMessage: 'Expand',
 });
 
+export const EXPORT_FILENAME = i18n.translate('xpack.siem.open.timeline.exportFileNameTitle', {
+  defaultMessage: 'timelines_export',
+});
+
+export const EXPORT_SELECTED = i18n.translate('xpack.siem.open.timeline.exportSelectedButton', {
+  defaultMessage: 'Export selected',
+});
+
 export const FAVORITE_SELECTED = i18n.translate('xpack.siem.open.timeline.favoriteSelectedButton', {
   defaultMessage: 'Favorite selected',
 });
@@ -70,7 +78,7 @@ export const ONLY_FAVORITES = i18n.translate('xpack.siem.open.timeline.onlyFavor
 });
 
 export const OPEN_AS_DUPLICATE = i18n.translate('xpack.siem.open.timeline.openAsDuplicateTooltip', {
-  defaultMessage: 'Open as a duplicate timeline',
+  defaultMessage: 'Duplicate timeline',
 });
 
 export const OPEN_TIMELINE = i18n.translate('xpack.siem.open.timeline.openTimelineButton', {
