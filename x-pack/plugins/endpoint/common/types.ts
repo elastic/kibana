@@ -7,6 +7,7 @@
 import { SearchResponse } from 'elasticsearch';
 import { TypeOf } from '@kbn/config-schema';
 import { alertingIndexGetQuerySchema } from './schema/alert_index';
+import { metadataIndexGetBodySchema } from './schema/metadata_index';
 
 /**
  * A deep readonly type that will make all children of a given object readonly recursively
@@ -405,3 +406,9 @@ export type AlertingIndexGetQueryInput = KbnConfigSchemaInputTypeOf<
  * Result of the validated query params when handling alert index requests.
  */
 export type AlertingIndexGetQueryResult = TypeOf<typeof alertingIndexGetQuerySchema>;
+
+/**
+ * Request body for the 'metadata' API index
+ */
+export type MetadataIndexGetBodyInput = TypeOf<typeof metadataIndexGetBodySchema>;
+export type MetadataIndexGetBodyResult = TypeOf<typeof metadataIndexGetBodySchema>;

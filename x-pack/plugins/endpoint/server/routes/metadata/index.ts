@@ -7,13 +7,13 @@
 import { IRouter } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
-
+import { EndpointMetadata, EndpointResultList } from '../../../common/types';
+import { EndpointAppContext } from '../../types';
+import { metadataIndexGetBodySchema } from '../../../common/schema/metadata_index';
 import {
   kibanaRequestToMetadataListESQuery,
   kibanaRequestToMetadataGetESQuery,
-} from '../services/endpoint/metadata_query_builders';
-import { EndpointMetadata, EndpointResultList } from '../../common/types';
-import { EndpointAppContext } from '../types';
+} from './query_builders';
 
 interface HitSource {
   _source: EndpointMetadata;
@@ -24,40 +24,17 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     {
       path: '/api/endpoint/metadata',
       validate: {
-        body: schema.nullable(
-          schema.object({
-            paging_properties: schema.nullable(
-              schema.arrayOf(
-                schema.oneOf([
-                  /**
-                   * the number of results to return for this request per page
-                   */
-                  schema.object({
-                    page_size: schema.number({ defaultValue: 10, min: 1, max: 10000 }),
-                  }),
-                  /**
-                   * the zero based page index of the the total number of pages of page size
-                   */
-                  schema.object({ page_index: schema.number({ defaultValue: 0, min: 0 }) }),
-                ])
-              )
-            ),
-            /**
-             * filter to be applied, it could be a kql expression or discrete filter to be implemented
-             */
-            filter: schema.nullable(schema.oneOf([schema.string()])),
-          })
-        ),
+        body: metadataIndexGetBodySchema,
       },
       options: { authRequired: true },
     },
     async (context, req, res) => {
       try {
         const queryParams = await kibanaRequestToMetadataListESQuery(req, endpointAppContext);
-        const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
+        const response: SearchResponse<EndpointMetadata> = await context.core.elasticsearch.dataClient.callAsCurrentUser(
           'search',
           queryParams
-        )) as SearchResponse<EndpointMetadata>;
+        );
         return res.ok({ body: mapToEndpointResultList(queryParams, response) });
       } catch (err) {
         return res.internalError({ body: err });
@@ -75,11 +52,11 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       try {
-        const query = kibanaRequestToMetadataGetESQuery(req, endpointAppContext);
-        const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
+        const query = kibanaRequestToMetadataGetESQuery(req);
+        const response: SearchResponse<EndpointMetadata> = await context.core.elasticsearch.dataClient.callAsCurrentUser(
           'search',
           query
-        )) as SearchResponse<EndpointMetadata>;
+        );
 
         if (response.hits.hits.length === 0) {
           return res.notFound({ body: 'Endpoint Not Found' });
@@ -94,7 +71,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
 }
 
 function mapToEndpointResultList(
-  queryParams: Record<string, any>,
+  queryParams: { size: number; from: number },
   searchResponse: SearchResponse<EndpointMetadata>
 ): EndpointResultList {
   const totalNumberOfEndpoints = searchResponse?.aggregations?.total?.value || 0;

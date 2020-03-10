@@ -3,12 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { httpServerMock, loggingServiceMock } from '../../../../../../src/core/server/mocks';
-import { EndpointConfigSchema } from '../../config';
 import {
   kibanaRequestToMetadataListESQuery,
   kibanaRequestToMetadataGetESQuery,
-} from './metadata_query_builders';
+} from './query_builders';
+import { EndpointConfigSchema } from '../../config';
 import { EndpointAppConstants } from '../../../common/types';
 
 describe('query builder', () => {
@@ -123,10 +124,7 @@ describe('query builder', () => {
           id: mockID,
         },
       });
-      const query = kibanaRequestToMetadataGetESQuery(mockRequest, {
-        logFactory: loggingServiceMock.create(),
-        config: () => Promise.resolve(EndpointConfigSchema.validate({})),
-      });
+      const query = kibanaRequestToMetadataGetESQuery(mockRequest);
       expect(query).toEqual({
         body: {
           query: { match: { 'host.id.keyword': mockID } },

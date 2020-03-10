@@ -17,12 +17,12 @@ import {
   httpServerMock,
   httpServiceMock,
   loggingServiceMock,
-} from '../../../../../src/core/server/mocks';
-import { EndpointMetadata, EndpointResultList } from '../../common/types';
+} from '../../../../../../src/core/server/mocks';
+import { EndpointMetadata, EndpointResultList } from '../../../common/types';
 import { SearchResponse } from 'elasticsearch';
-import { registerEndpointRoutes } from './metadata';
-import { EndpointConfigSchema } from '../config';
-import * as data from '../test_data/all_metadata_data.json';
+import { registerEndpointRoutes } from '../metadata';
+import { EndpointConfigSchema } from '../../config';
+import * as data from '../../test_data/all_metadata_data.json';
 
 describe('test endpoint route', () => {
   let routerMock: jest.Mocked<IRouter>;
