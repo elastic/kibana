@@ -6,12 +6,19 @@
 import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
-import { AlertInstances, AlertInstanceListItem, alertInstanceToListItem } from './alert_instances';
+import {
+  AlertInstances,
+  AlertInstanceListItem,
+  alertInstanceToListItem,
+  durationSince,
+} from './alert_instances';
 import { Alert, AlertTaskState, RawAlertInstance } from '../../../../types';
 import { EuiBasicTable } from '@elastic/eui';
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 const fake2MinutesAgo = new Date('2020-02-09T23:13:41.941Z');
+
+const durationSinceEpoch = durationSince(fakeNow.getTime());
 
 const mockAPIs = {
   muteAlertInstance: jest.fn(),
@@ -37,8 +44,18 @@ describe('alert_instances', () => {
 
     const alertState = mockAlertState();
     const instances: AlertInstanceListItem[] = [
-      alertInstanceToListItem(alert, 'first_instance', alertState.alertInstances!.first_instance),
-      alertInstanceToListItem(alert, 'second_instance', alertState.alertInstances!.second_instance),
+      alertInstanceToListItem(
+        durationSinceEpoch,
+        alert,
+        'first_instance',
+        alertState.alertInstances!.first_instance
+      ),
+      alertInstanceToListItem(
+        durationSinceEpoch,
+        alert,
+        'second_instance',
+        alertState.alertInstances!.second_instance
+      ),
     ];
 
     expect(
@@ -46,6 +63,24 @@ describe('alert_instances', () => {
         .find(EuiBasicTable)
         .prop('items')
     ).toEqual(instances);
+  });
+
+  it('render a hidden field with durtation epoch', () => {
+    const alert = mockAlert();
+    const alertState = mockAlertState();
+
+    expect(
+      shallow(
+        <AlertInstances
+          durationEpoch={fake2MinutesAgo.getTime()}
+          {...mockAPIs}
+          alert={alert}
+          alertState={alertState}
+        />
+      )
+        .find('[name="alertInstancesDurationEpoch"]')
+        .prop('value')
+    ).toEqual(fake2MinutesAgo.getTime());
   });
 
   it('render all active alert instances', () => {
@@ -75,8 +110,8 @@ describe('alert_instances', () => {
         .find(EuiBasicTable)
         .prop('items')
     ).toEqual([
-      alertInstanceToListItem(alert, 'us-central', instances['us-central']),
-      alertInstanceToListItem(alert, 'us-east', instances['us-east']),
+      alertInstanceToListItem(durationSinceEpoch, alert, 'us-central', instances['us-central']),
+      alertInstanceToListItem(durationSinceEpoch, alert, 'us-east', instances['us-east']),
     ]);
   });
 
@@ -98,8 +133,8 @@ describe('alert_instances', () => {
         .find(EuiBasicTable)
         .prop('items')
     ).toEqual([
-      alertInstanceToListItem(alert, 'us-west'),
-      alertInstanceToListItem(alert, 'us-east'),
+      alertInstanceToListItem(durationSinceEpoch, alert, 'us-west'),
+      alertInstanceToListItem(durationSinceEpoch, alert, 'us-east'),
     ]);
   });
 });
@@ -117,7 +152,7 @@ describe('alertInstanceToListItem', () => {
       },
     };
 
-    expect(alertInstanceToListItem(alert, 'id', instance)).toEqual({
+    expect(alertInstanceToListItem(durationSinceEpoch, alert, 'id', instance)).toEqual({
       instance: 'id',
       status: { label: 'Active', healthColor: 'primary' },
       start,
@@ -140,7 +175,7 @@ describe('alertInstanceToListItem', () => {
       },
     };
 
-    expect(alertInstanceToListItem(alert, 'id', instance)).toEqual({
+    expect(alertInstanceToListItem(durationSinceEpoch, alert, 'id', instance)).toEqual({
       instance: 'id',
       status: { label: 'Active', healthColor: 'primary' },
       start,
@@ -153,7 +188,7 @@ describe('alertInstanceToListItem', () => {
     const alert = mockAlert();
     const instance: RawAlertInstance = {};
 
-    expect(alertInstanceToListItem(alert, 'id', instance)).toEqual({
+    expect(alertInstanceToListItem(durationSinceEpoch, alert, 'id', instance)).toEqual({
       instance: 'id',
       status: { label: 'Active', healthColor: 'primary' },
       start: undefined,
@@ -168,7 +203,7 @@ describe('alertInstanceToListItem', () => {
       meta: {},
     };
 
-    expect(alertInstanceToListItem(alert, 'id', instance)).toEqual({
+    expect(alertInstanceToListItem(durationSinceEpoch, alert, 'id', instance)).toEqual({
       instance: 'id',
       status: { label: 'Active', healthColor: 'primary' },
       start: undefined,
@@ -181,7 +216,7 @@ describe('alertInstanceToListItem', () => {
     const alert = mockAlert({
       mutedInstanceIds: ['id'],
     });
-    expect(alertInstanceToListItem(alert, 'id')).toEqual({
+    expect(alertInstanceToListItem(durationSinceEpoch, alert, 'id')).toEqual({
       instance: 'id',
       status: { label: 'Inactive', healthColor: 'subdued' },
       start: undefined,

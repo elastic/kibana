@@ -23,6 +23,7 @@ type AlertInstancesProps = {
   alert: Alert;
   alertState: AlertTaskState;
   requestRefresh: () => Promise<void>;
+  durationEpoch?: number;
 } & Pick<AlertApis, 'muteAlertInstance' | 'unmuteAlertInstance'>;
 
 export const alertInstancesTableColumns = (
@@ -134,18 +135,20 @@ export function AlertInstances({
   muteAlertInstance,
   unmuteAlertInstance,
   requestRefresh,
+  durationEpoch = Date.now(),
 }: AlertInstancesProps) {
   const [pagination, setPagination] = useState<Pagination>({
     index: 0,
     size: DEFAULT_SEARCH_PAGE_SIZE,
   });
 
+  const durationSinceEpoch = durationSince(durationEpoch);
   const mergedAlertInstances = [
     ...Object.entries(alertInstances).map(([instanceId, instance]) =>
-      alertInstanceToListItem(alert, instanceId, instance)
+      alertInstanceToListItem(durationSinceEpoch, alert, instanceId, instance)
     ),
     ...difference(alert.mutedInstanceIds, Object.keys(alertInstances)).map(instanceId =>
-      alertInstanceToListItem(alert, instanceId)
+      alertInstanceToListItem(durationSinceEpoch, alert, instanceId)
     ),
   ];
   const pageOfAlertInstances = getPage(mergedAlertInstances, pagination);
@@ -158,25 +161,33 @@ export function AlertInstances({
   };
 
   return (
-    <EuiBasicTable
-      items={pageOfAlertInstances}
-      pagination={{
-        pageIndex: pagination.index,
-        pageSize: pagination.size,
-        totalItemCount: mergedAlertInstances.length,
-      }}
-      onChange={({ page: changedPage }: { page: Pagination }) => {
-        setPagination(changedPage);
-      }}
-      rowProps={() => ({
-        'data-test-subj': 'alert-instance-row',
-      })}
-      cellProps={() => ({
-        'data-test-subj': 'cell',
-      })}
-      columns={alertInstancesTableColumns(onMuteAction)}
-      data-test-subj="alertInstancesList"
-    />
+    <Fragment>
+      <input
+        type="hidden"
+        data-test-subj="alertInstancesDurationEpoch"
+        name="alertInstancesDurationEpoch"
+        value={durationEpoch}
+      />
+      <EuiBasicTable
+        items={pageOfAlertInstances}
+        pagination={{
+          pageIndex: pagination.index,
+          pageSize: pagination.size,
+          totalItemCount: mergedAlertInstances.length,
+        }}
+        onChange={({ page: changedPage }: { page: Pagination }) => {
+          setPagination(changedPage);
+        }}
+        rowProps={() => ({
+          'data-test-subj': 'alert-instance-row',
+        })}
+        cellProps={() => ({
+          'data-test-subj': 'cell',
+        })}
+        columns={alertInstancesTableColumns(onMuteAction)}
+        data-test-subj="alertInstancesList"
+      />
+    </Fragment>
   );
 }
 export const AlertInstancesWithApi = withBulkAlertOperations(AlertInstances);
@@ -207,9 +218,11 @@ const INACTIVE_LABEL = i18n.translate(
   { defaultMessage: 'Inactive' }
 );
 
-const durationSince = (start?: Date) => (start ? Date.now() - start.getTime() : 0);
+export const durationSince = (durationEpoch: number) => (startTime?: number) =>
+  startTime ? durationEpoch - startTime : 0;
 
 export function alertInstanceToListItem(
+  durationSinceEpoch: (startTime: number) => number,
   alert: Alert,
   instanceId: string,
   instance?: RawAlertInstance
@@ -221,7 +234,7 @@ export function alertInstanceToListItem(
       ? { label: ACTIVE_LABEL, healthColor: 'primary' }
       : { label: INACTIVE_LABEL, healthColor: 'subdued' },
     start: instance?.meta?.lastScheduledActions?.date,
-    duration: durationSince(instance?.meta?.lastScheduledActions?.date),
+    duration: durationSinceEpoch(instance?.meta?.lastScheduledActions?.date?.getTime() ?? 0),
     isMuted,
   };
 }

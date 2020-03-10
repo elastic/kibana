@@ -205,8 +205,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the active alert instances', async () => {
-        const testBeganAt = moment().utc();
-
         // Verify content
         await testSubjects.existOrFail('alertInstancesList');
 
@@ -248,8 +246,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           },
         ]);
 
+        const durationEpoch = moment(
+          await pageObjects.alertDetailsUI.getAlertInstanceDurationEpoch()
+        ).utc();
+
         const durationFromInstanceTillPageLoad = mapValues(dateOnAllInstances, date =>
-          moment.duration(testBeganAt.diff(moment(date).utc()))
+          moment.duration(durationEpoch.diff(moment(date).utc()))
         );
         instancesList
           .map(alertInstance => ({
@@ -265,13 +267,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             }),
           }))
           .forEach(({ id, duration }) => {
-            // make sure the duration is within a 10 second range which is
+            // make sure the duration is within a 30 second range which is
             // good enough as the alert interval is 1m, so we know it is a fresh value
             expect(duration.as('milliseconds')).to.greaterThan(
-              durationFromInstanceTillPageLoad[id].subtract(1000 * 10).as('milliseconds')
+              durationFromInstanceTillPageLoad[id].subtract(1000 * 30).as('milliseconds')
             );
             expect(duration.as('milliseconds')).to.lessThan(
-              durationFromInstanceTillPageLoad[id].add(1000 * 10).as('milliseconds')
+              durationFromInstanceTillPageLoad[id].add(1000 * 30).as('milliseconds')
             );
           });
       });

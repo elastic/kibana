@@ -214,7 +214,6 @@ export class AlertsClient {
         await this.taskManager.get(alert.scheduledTaskId),
         alert
       );
-      this.logger.error(`GET ALERT STATE ${id}: ${JSON.stringify(state)}`);
       return state;
     }
   }
