@@ -54,7 +54,6 @@ describe('Ingesting Coverage to Cluster', () => {
 
   describe('with NODE_ENV set to "integration_test"', () => {
     describe(`and debug || verbose turned on`, () => {
-
       describe(`to the [${TOTALS_INDEX}] index`, () => {
         const mutableTotalsIndexLoggingChunks = [];
         beforeAll(done => {
@@ -153,10 +152,8 @@ describe('Ingesting Coverage to Cluster', () => {
           expect(mutableBothIndexesChunks.every(x => !x.includes('Actually sending...'))).to.be(true);
         });
       });
-
     });
   });
-
 });
 
 function ingestAndMutate (done) {
