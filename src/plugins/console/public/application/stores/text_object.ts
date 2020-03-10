@@ -30,14 +30,14 @@ import { IdObject } from '../../../common/id_object';
 const exactTextObjectSchema = exact(textObjectSchemaWithId);
 
 export interface Store {
-  persistingTextObject: string | undefined;
+  persistingTextObjectWithId: string | undefined;
   currentTextObjectId: string;
   textObjects: Record<string, TextObjectWithId>;
   textObjectsSaveError: Record<string, Error | string>;
 }
 
 export const initialValue: Store = {
-  persistingTextObject: undefined,
+  persistingTextObjectWithId: undefined,
   currentTextObjectId: '',
   textObjects: {},
   textObjectsSaveError: {},
@@ -56,7 +56,7 @@ export type Action =
 export const reducer: Reducer<Store, Action> = (state, action) =>
   produce<Store>(state, draft => {
     if (action.type === 'setSavingTextObject') {
-      draft.persistingTextObject = action.payload;
+      draft.persistingTextObjectWithId = action.payload;
       return;
     }
 

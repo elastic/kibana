@@ -94,9 +94,8 @@ export const useTextObjectsCRUD = () => {
           // Update local reference
           dispatch({ type: 'upsert', payload: textObject });
 
-          // Update persistance
+          // Update persistence
           dispatch({ type: 'setSavingTextObject', payload: textObject.id });
-          await new Promise(res => setTimeout(res, 1000));
           await objectStorageClient.text.update(
             throwIfUnknown(partialTextObjectSchema, textObject)
           );

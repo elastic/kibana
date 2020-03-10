@@ -44,7 +44,7 @@ export const Editor = memo(() => {
   const {
     textObjects,
     currentTextObjectId,
-    saving,
+    persistingTextObjectWithId,
     textObjectsSaveError,
   } = useTextObjectsReadContext();
 
@@ -111,7 +111,7 @@ export const Editor = memo(() => {
                     id: 'saving_status',
                     text: (
                       <div className="conApp__controlBar__saveSpinner">
-                        {saving ? (
+                        {persistingTextObjectWithId === currentTextObjectId ? (
                           <EuiLoadingSpinner size="m" />
                         ) : textObjectsSaveError[currentTextObjectId] ? (
                           <EuiIcon color="warning" type="alert" />
