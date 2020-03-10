@@ -12,7 +12,7 @@ import {
   EuiTabbedContent,
   EuiTextArea,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useCallback, ChangeEvent } from 'react';
 import styled, { css } from 'styled-components';
 
 import { Markdown } from '../markdown';
@@ -71,7 +71,7 @@ export interface CursorPosition {
 export const MarkdownEditor = React.memo<{
   bottomRightContent?: React.ReactNode;
   topRightContent?: React.ReactNode;
-  initialContent: string;
+  content: string;
   isDisabled?: boolean;
   onChange: (description: string) => void;
   onCursorPositionUpdate?: (cursorPosition: CursorPosition) => void;
@@ -80,16 +80,18 @@ export const MarkdownEditor = React.memo<{
   ({
     bottomRightContent,
     topRightContent,
-    initialContent,
+    content,
     isDisabled = false,
     onChange,
     placeholder,
     onCursorPositionUpdate,
   }) => {
-    const [content, setContent] = useState(initialContent);
-    useEffect(() => {
-      onChange(content);
-    }, [content]);
+    const handleOnChange = useCallback(
+      (evt: ChangeEvent<HTMLTextAreaElement>) => {
+        onChange(evt.target.value);
+      },
+      [onChange]
+    );
 
     const setCursorPosition = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       if (onCursorPositionUpdate) {
@@ -101,14 +103,6 @@ export const MarkdownEditor = React.memo<{
       return false;
     };
 
-    const handleSetContent = useCallback(e => {
-      handleSetContent(e.target.value);
-    }, []);
-
-    useEffect(() => {
-      setContent(initialContent);
-    }, [initialContent]);
-
     const tabs = useMemo(
       () => [
         {
@@ -116,7 +110,7 @@ export const MarkdownEditor = React.memo<{
           name: i18n.MARKDOWN,
           content: (
             <TextArea
-              onChange={handleSetContent}
+              onChange={handleOnChange}
               onBlur={setCursorPosition}
               aria-label={`markdown-editor-comment`}
               fullWidth={true}
