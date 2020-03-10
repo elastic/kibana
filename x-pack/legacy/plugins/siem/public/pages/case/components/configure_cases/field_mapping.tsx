@@ -44,35 +44,35 @@ const supportedThirdPartyFields: Array<EuiSuperSelectOption<ThirdPartyField>> = 
 
 interface FieldMappingProps {
   disabled: boolean;
-  mappings: CasesConfigurationMapping[] | null;
-  onChangeMappings: (newMappings: CasesConfigurationMapping[]) => void;
+  mapping: CasesConfigurationMapping[] | null;
+  onChangeMapping: (newMapping: CasesConfigurationMapping[]) => void;
 }
 
 const FieldMappingComponent: React.FC<FieldMappingProps> = ({
   disabled,
-  mappings,
-  onChangeMappings,
+  mapping,
+  onChangeMapping,
 }) => {
   const onChangeActionType = useCallback(
     (caseField: CaseField, newActionType: ActionType) => {
-      const myMappings = mappings ?? defaultMapping;
-      const findItemIndex = myMappings.findIndex(item => item.source === caseField);
+      const myMapping = mapping ?? defaultMapping;
+      const findItemIndex = myMapping.findIndex(item => item.source === caseField);
       if (findItemIndex >= 0) {
-        onChangeMappings([
-          ...myMappings.slice(0, findItemIndex),
-          { ...myMappings[findItemIndex], actionType: newActionType },
-          ...myMappings.slice(findItemIndex + 1),
+        onChangeMapping([
+          ...myMapping.slice(0, findItemIndex),
+          { ...myMapping[findItemIndex], actionType: newActionType },
+          ...myMapping.slice(findItemIndex + 1),
         ]);
       }
     },
-    [mappings]
+    [mapping]
   );
 
   const onChangeThirdParty = useCallback(
     (caseField: CaseField, newThirdPartyField: ThirdPartyField) => {
-      const myMappings = mappings ?? defaultMapping;
-      onChangeMappings(
-        myMappings.map(item => {
+      const myMapping = mapping ?? defaultMapping;
+      onChangeMapping(
+        myMapping.map(item => {
           if (item.source !== caseField && item.target === newThirdPartyField) {
             return { ...item, target: 'not_mapped' };
           } else if (item.source === caseField) {
@@ -82,7 +82,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
         })
       );
     },
-    [mappings]
+    [mapping]
   );
   return (
     <>
@@ -100,7 +100,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
         </EuiFlexGroup>
       </EuiFormRow>
       <FieldRowWrapper>
-        {(mappings ?? defaultMapping).map(item => (
+        {(mapping ?? defaultMapping).map(item => (
           <FieldMappingRow
             key={item.source}
             disabled={disabled}

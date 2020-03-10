@@ -143,3 +143,18 @@ export const CANCEL = i18n.translate('xpack.siem.case.configureCases.cancelButto
 export const SAVE_CHANGES = i18n.translate('xpack.siem.case.configureCases.saveChangesButton', {
   defaultMessage: 'Save Changes',
 });
+
+export const WARNING_NO_CONNETCTOR_TITLE = i18n.translate(
+  'xpack.siem.case.configureCases.warningTitle',
+  {
+    defaultMessage: 'Warning',
+  }
+);
+
+export const WARNING_NO_CONNETCTOR_MESSAGE = i18n.translate(
+  'xpack.siem.case.configureCases.warningMessage',
+  {
+    defaultMessage:
+      'Configuration seems to be invalid. The selected connector is missing. Did you delete it?',
+  }
+);

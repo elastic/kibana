@@ -14,17 +14,17 @@ import { CasesConfigurationMapping } from '../../../../containers/case/configure
 
 interface MappingProps {
   disabled: boolean;
-  mappings: CasesConfigurationMapping[] | null;
-  onChangeMappings: (newMappings: CasesConfigurationMapping[]) => void;
+  mapping: CasesConfigurationMapping[] | null;
+  onChangeMapping: (newMapping: CasesConfigurationMapping[]) => void;
 }
 
-const MappingComponent: React.FC<MappingProps> = ({ disabled, mappings, onChangeMappings }) => (
+const MappingComponent: React.FC<MappingProps> = ({ disabled, mapping, onChangeMapping }) => (
   <EuiDescribedFormGroup
     fullWidth
     title={<h3>{i18n.FIELD_MAPPING_TITLE}</h3>}
     description={i18n.FIELD_MAPPING_DESC}
   >
-    <FieldMapping disabled={disabled} mappings={mappings} onChangeMappings={onChangeMappings} />
+    <FieldMapping disabled={disabled} mapping={mapping} onChangeMapping={onChangeMapping} />
   </EuiDescribedFormGroup>
 );
 

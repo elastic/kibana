@@ -10,7 +10,7 @@ import {
 } from '../../../../containers/case/configure/types';
 
 export interface State {
-  mappings: CasesConfigurationMapping[] | null;
+  mapping: CasesConfigurationMapping[] | null;
   connectorId: string;
   closureType: CaseConfigureClosureType;
 }
@@ -25,8 +25,8 @@ export type Action =
       closureType: CaseConfigureClosureType;
     }
   | {
-      type: 'setMappings';
-      mappings: CasesConfigurationMapping[];
+      type: 'setMapping';
+      mapping: CasesConfigurationMapping[];
     };
 
 export const configureCasesReducer = () => (state: State, action: Action) => {
@@ -43,10 +43,10 @@ export const configureCasesReducer = () => (state: State, action: Action) => {
         closureType: action.closureType,
       };
     }
-    case 'setMappings': {
+    case 'setMapping': {
       return {
         ...state,
-        mappings: action.mappings,
+        mapping: action.mapping,
       };
     }
     default:

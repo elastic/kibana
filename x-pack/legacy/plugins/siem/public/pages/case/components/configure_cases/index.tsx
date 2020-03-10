@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useReducer, useCallback, useEffect } from 'react';
+import React, { useReducer, useCallback, useEffect, useState } from 'react';
 import styled, { css } from 'styled-components';
 
-import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { noop, isEmpty } from 'lodash/fp';
 import { useConnectors } from '../../../../containers/case/configure/use_connectors';
 import { useCaseConfigure } from '../../../../containers/case/configure/use_configure';
@@ -37,11 +37,13 @@ const FormWrapper = styled.div`
 const initialState: State = {
   connectorId: 'none',
   closureType: 'close-by-user',
-  mappings: null,
+  mapping: null,
 };
 
 const ConfigureCasesComponent: React.FC = () => {
   const [{ connectorId, closureType, mappings }, dispatch] = useReducer(
+
+  const [{ connectorId, closureType, mapping }, dispatch] = useReducer(
     configureCasesReducer(),
     initialState
   );
@@ -60,10 +62,10 @@ const ConfigureCasesComponent: React.FC = () => {
     });
   }, []);
 
-  const setMappings = useCallback((newMappings: CasesConfigurationMapping[]) => {
+  const setMapping = useCallback((newMapping: CasesConfigurationMapping[]) => {
     dispatch({
-      type: 'setMappings',
-      mappings: newMappings,
+      type: 'setMapping',
+      mapping: newMapping,
     });
   }, []);
 
@@ -84,9 +86,9 @@ const ConfigureCasesComponent: React.FC = () => {
       // eslint-disable-next-line no-return-await
       await Promise.all([
         persistCaseConfigure({ connectorId, closureType }),
-        updateConnector(connectorId, mappings ?? []),
+        updateConnector(connectorId, mapping ?? []),
       ]),
-    [connectorId, closureType, mappings]
+    [connectorId, closureType, mapping]
   );
 
   useEffect(() => {
@@ -96,9 +98,9 @@ const ConfigureCasesComponent: React.FC = () => {
       connectors.some(c => c.id === connectorId)
     ) {
       const myConnector = connectors.find(c => c.id === connectorId);
-      const myMappings = myConnector?.config?.casesConfiguration?.mapping ?? [];
-      setMappings(
-        myMappings.map((m: CasesConfigurationMaps) => ({
+      const myMapping = myConnector?.config?.casesConfiguration?.mapping ?? [];
+      setMapping(
+        myMapping.map((m: CasesConfigurationMaps) => ({
           source: m.source,
           target: m.target,
           actionType: m.action_type,
@@ -152,12 +154,12 @@ const ConfigureCasesComponent: React.FC = () => {
             persistLoading ||
             isLoadingConnectors
           }
-          mappings={mappings}
-          onChangeMappings={setMappings}
+          mapping={mapping}
+          onChangeMapping={setMapping}
         />
       </SectionWrapper>
-      <>
-        <EuiHorizontalRule margin="m" />
+      <SectionWrapper>
+        <EuiSpacer />
         <EuiFlexGroup
           alignItems="center"
           justifyContent="flexEnd"
@@ -186,7 +188,7 @@ const ConfigureCasesComponent: React.FC = () => {
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </>
+      </SectionWrapper>
     </FormWrapper>
   );
 };
