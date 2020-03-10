@@ -7,7 +7,7 @@
 /* eslint-disable react/display-name */
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { ApolloClient } from '@apollo/client';
+import ApolloClient from 'apollo-client';
 import React from 'react';
 
 import { Filter } from '../../../../../../../../../src/plugins/data/common/es_query';
@@ -191,7 +191,7 @@ export const getSignalsActions = ({
   status,
   updateTimelineIsLoading,
 }: {
-  apolloClient?: ApolloClient<object>;
+  apolloClient?: ApolloClient<{}>;
   canUserCRUD: boolean;
   hasIndexWrite: boolean;
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;

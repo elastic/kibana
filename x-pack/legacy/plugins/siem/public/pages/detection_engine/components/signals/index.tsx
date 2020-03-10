@@ -9,7 +9,6 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
-import { useApolloClient } from '@apollo/client';
 
 import { Filter, esQuery } from '../../../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../../containers/detection_engine/rules/fetch_index_patterns';
@@ -21,6 +20,7 @@ import { inputsSelectors, State, inputsModel } from '../../../../store';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { TimelineModel } from '../../../../store/timeline/model';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
+import { useApolloClient } from '../../../../utils/apollo_context';
 
 import { updateSignalStatusAction } from './actions';
 import {
@@ -290,7 +290,7 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
     return (
       <EuiPanel>
         <HeaderSection title={i18n.SIGNALS_TABLE_TITLE} />
-        <EuiLoadingContent />
+        <EuiLoadingContent data-test-subj="loading-signals-panel" />
       </EuiPanel>
     );
   }

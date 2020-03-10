@@ -19,7 +19,7 @@
 
 import { get, has } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { AggConfigs, IAggConfigs } from 'ui/agg_types';
+import { createAggConfigs, IAggConfigs } from 'ui/agg_types';
 import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import {
   KibanaContext,
@@ -38,7 +38,7 @@ import {
 } from '../../../../../../plugins/data/public';
 
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
-import { calculateObjectHash } from '../../../../visualizations/public';
+import { calculateObjectHash } from '../../../../../../plugins/kibana_utils/common';
 import { tabifyAggResponse } from '../../../../../core_plugins/data/public';
 import { PersistedState } from '../../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../../plugins/inspector/public';
@@ -258,7 +258,7 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
 
     const aggConfigsState = JSON.parse(args.aggConfigs);
     const indexPattern = await indexPatterns.get(args.index);
-    const aggs = new AggConfigs(indexPattern, aggConfigsState);
+    const aggs = createAggConfigs(indexPattern, aggConfigsState);
 
     // we should move searchSource creation inside courier request handler
     const searchSource = new SearchSource();

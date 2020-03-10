@@ -5,7 +5,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { CombinedJob } from '../jobs/new_job/common/job_creator/configs';
+import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { Calendar } from '../../../common/types/calendars';
 
 export interface ExistingJobsAndGroups {

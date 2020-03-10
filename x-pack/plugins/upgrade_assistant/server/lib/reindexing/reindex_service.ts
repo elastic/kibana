@@ -3,18 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import Boom from 'boom';
 import { APICaller, Logger } from 'src/core/server';
 import { first } from 'rxjs/operators';
 
 import {
   IndexGroup,
+  ReindexOptions,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
   ReindexWarning,
 } from '../../../common/types';
+
 import {
   generateNewIndexName,
   getReindexWarnings,
@@ -23,6 +23,8 @@ import {
 } from './index_settings';
 import { ReindexActions } from './reindex_actions';
 import { LicensingPluginSetup } from '../../../../licensing/server';
+
+import { error } from './error';
 
 const VERSION_REGEX = new RegExp(/^([1-9]+)\.([0-9]+)\.([0-9]+)/);
 const ML_INDICES = ['.ml-state', '.ml-anomalies', '.ml-config'];
@@ -51,8 +53,9 @@ export interface ReindexService {
   /**
    * Creates a new reindex operation for a given index.
    * @param indexName
+   * @param opts Additional options when creating a new reindex operation
    */
-  createReindexOperation(indexName: string): Promise<ReindexSavedObject>;
+  createReindexOperation(indexName: string, opts?: ReindexOptions): Promise<ReindexSavedObject>;
 
   /**
    * Retrieves all reindex operations that have the given status.
@@ -83,8 +86,9 @@ export interface ReindexService {
   /**
    * Resumes the paused reindex operation for a given index.
    * @param indexName
+   * @param opts As with {@link createReindexOperation} we support this setting.
    */
-  resumeReindexOperation(indexName: string): Promise<ReindexSavedObject>;
+  resumeReindexOperation(indexName: string, opts?: ReindexOptions): Promise<ReindexSavedObject>;
 
   /**
    * Cancel an in-progress reindex operation for a given index. Only allowed when the
@@ -284,7 +288,7 @@ export const reindexServiceFactory = (
 
     const flatSettings = await actions.getFlatSettings(indexName);
     if (!flatSettings) {
-      throw Boom.notFound(`Index ${indexName} does not exist.`);
+      throw error.indexNotFound(`Index ${indexName} does not exist.`);
     }
 
     const { settings, mappings } = transformFlatSettings(flatSettings);
@@ -298,7 +302,7 @@ export const reindexServiceFactory = (
     });
 
     if (!createIndex.acknowledged) {
-      throw Boom.badImplementation(`Index could not be created: ${newIndexName}`);
+      throw error.cannotCreateIndex(`Index could not be created: ${newIndexName}`);
     }
 
     return actions.updateReindexOp(reindexOp, {
@@ -311,7 +315,11 @@ export const reindexServiceFactory = (
    * @param reindexOp
    */
   const startReindexing = async (reindexOp: ReindexSavedObject) => {
-    const { indexName } = reindexOp.attributes;
+    const { indexName, reindexOptions } = reindexOp.attributes;
+
+    if (reindexOptions?.openAndClose === true) {
+      await callAsUser('indices.open', { index: indexName });
+    }
 
     const startReindex = (await callAsUser('reindex', {
       refresh: true,
@@ -363,7 +371,7 @@ export const reindexServiceFactory = (
       if (taskResponse.task.status.created < count) {
         // Include the entire task result in the error message. This should be guaranteed
         // to be JSON-serializable since it just came back from Elasticsearch.
-        throw Boom.badData(`Reindexing failed: ${JSON.stringify(taskResponse)}`);
+        throw error.reindexTaskFailed(`Reindexing failed: ${JSON.stringify(taskResponse)}`);
       }
 
       // Update the status
@@ -380,7 +388,7 @@ export const reindexServiceFactory = (
     });
 
     if (deleteTaskResp.result !== 'deleted') {
-      throw Boom.badImplementation(`Could not delete reindexing task ${taskId}`);
+      throw error.reindexTaskCannotBeDeleted(`Could not delete reindexing task ${taskId}`);
     }
 
     return reindexOp;
@@ -391,7 +399,7 @@ export const reindexServiceFactory = (
    * @param reindexOp
    */
   const switchAlias = async (reindexOp: ReindexSavedObject) => {
-    const { indexName, newIndexName } = reindexOp.attributes;
+    const { indexName, newIndexName, reindexOptions } = reindexOp.attributes;
 
     const existingAliases = (
       await callAsUser('indices.getAlias', {
@@ -414,7 +422,11 @@ export const reindexServiceFactory = (
     });
 
     if (!aliasResponse.acknowledged) {
-      throw Boom.badImplementation(`Index aliases could not be created.`);
+      throw error.cannotCreateIndex(`Index aliases could not be created.`);
+    }
+
+    if (reindexOptions?.openAndClose === true) {
+      await callAsUser('indices.close', { index: indexName });
     }
 
     return actions.updateReindexOp(reindexOp, {
@@ -517,10 +529,10 @@ export const reindexServiceFactory = (
       }
     },
 
-    async createReindexOperation(indexName: string) {
+    async createReindexOperation(indexName: string, opts?: ReindexOptions) {
       const indexExists = await callAsUser('indices.exists', { index: indexName });
       if (!indexExists) {
-        throw Boom.notFound(`Index ${indexName} does not exist in this cluster.`);
+        throw error.indexNotFound(`Index ${indexName} does not exist in this cluster.`);
       }
 
       const existingReindexOps = await actions.findReindexOperations(indexName);
@@ -533,11 +545,13 @@ export const reindexServiceFactory = (
           // Delete the existing one if it failed or was cancelled to give a chance to retry.
           await actions.deleteReindexOp(existingOp);
         } else {
-          throw Boom.badImplementation(`A reindex operation already in-progress for ${indexName}`);
+          throw error.reindexAlreadyInProgress(
+            `A reindex operation already in-progress for ${indexName}`
+          );
         }
       }
 
-      return actions.createReindexOp(indexName);
+      return actions.createReindexOp(indexName, opts);
     },
 
     async findReindexOperation(indexName: string) {
@@ -547,7 +561,9 @@ export const reindexServiceFactory = (
       if (findResponse.total === 0) {
         return null;
       } else if (findResponse.total > 1) {
-        throw Boom.badImplementation(`More than one reindex operation found for ${indexName}`);
+        throw error.multipleReindexJobsFound(
+          `More than one reindex operation found for ${indexName}`
+        );
       }
 
       return findResponse.saved_objects[0];
@@ -623,7 +639,7 @@ export const reindexServiceFactory = (
       });
     },
 
-    async resumeReindexOperation(indexName: string) {
+    async resumeReindexOperation(indexName: string, opts?: ReindexOptions) {
       const reindexOp = await this.findReindexOperation(indexName);
 
       if (!reindexOp) {
@@ -638,7 +654,10 @@ export const reindexServiceFactory = (
           throw new Error(`Reindex operation must be paused in order to be resumed.`);
         }
 
-        return actions.updateReindexOp(op, { status: ReindexStatus.inProgress });
+        return actions.updateReindexOp(op, {
+          status: ReindexStatus.inProgress,
+          reindexOptions: opts ?? op.attributes.reindexOptions,
+        });
       });
     },
 
@@ -646,11 +665,13 @@ export const reindexServiceFactory = (
       const reindexOp = await this.findReindexOperation(indexName);
 
       if (!reindexOp) {
-        throw new Error(`No reindex operation found for index ${indexName}`);
+        throw error.indexNotFound(`No reindex operation found for index ${indexName}`);
       } else if (reindexOp.attributes.status !== ReindexStatus.inProgress) {
-        throw new Error(`Reindex operation is not in progress`);
+        throw error.reindexCannotBeCancelled(`Reindex operation is not in progress`);
       } else if (reindexOp.attributes.lastCompletedStep !== ReindexStep.reindexStarted) {
-        throw new Error(`Reindex operation is not current waiting for reindex task to complete`);
+        throw error.reindexCannotBeCancelled(
+          `Reindex operation is not currently waiting for reindex task to complete`
+        );
       }
 
       const resp = await callAsUser('tasks.cancel', {
@@ -658,7 +679,7 @@ export const reindexServiceFactory = (
       });
 
       if (resp.node_failures && resp.node_failures.length > 0) {
-        throw new Error(`Could not cancel reindex.`);
+        throw error.reindexCannotBeCancelled(`Could not cancel reindex.`);
       }
 
       return reindexOp;

@@ -17,6 +17,7 @@
  * under the License.
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   hasPreviousPage: boolean;
@@ -33,6 +34,12 @@ export function ToolBarPagerButtons(props: Props) {
         onClick={() => props.onPagePrevious()}
         disabled={!props.hasPreviousPage}
         data-test-subj="btnPrevPage"
+        aria-label={i18n.translate(
+          'kbn.discover.docTable.pager.toolbarPagerButtons.previousButtonAriaLabel',
+          {
+            defaultMessage: 'Previous page in table',
+          }
+        )}
       >
         <span className="kuiButton__icon kuiIcon fa-chevron-left" />
       </button>
@@ -41,6 +48,12 @@ export function ToolBarPagerButtons(props: Props) {
         onClick={() => props.onPageNext()}
         disabled={!props.hasNextPage}
         data-test-subj="btnNextPage"
+        aria-label={i18n.translate(
+          'kbn.discover.docTable.pager.toolbarPagerButtons.nextButtonAriaLabel',
+          {
+            defaultMessage: 'Next page in table',
+          }
+        )}
       >
         <span className="kuiButton__icon kuiIcon fa-chevron-right" />
       </button>

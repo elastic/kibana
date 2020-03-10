@@ -5,7 +5,21 @@
  */
 
 import { camelCase, isArray, isObject, set } from 'lodash';
-import { AllCases, AllCasesSnake, Case, CaseSnake } from './types';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
+
+import {
+  CaseResponse,
+  CaseResponseRt,
+  CasesResponse,
+  CasesResponseRt,
+  throwErrors,
+  CommentResponse,
+  CommentResponseRt,
+} from '../../../../../../plugins/case/common/api';
+import { ToasterError } from '../../components/toasters';
+import { AllCases, Case } from './types';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
 
@@ -32,9 +46,20 @@ export const convertToCamelCase = <T, U extends {}>(snakeCase: T): U =>
     return acc;
   }, {} as U);
 
-export const convertAllCasesToCamel = (snakeCases: AllCasesSnake): AllCases => ({
-  cases: snakeCases.cases.map(snakeCase => convertToCamelCase<CaseSnake, Case>(snakeCase)),
+export const convertAllCasesToCamel = (snakeCases: CasesResponse): AllCases => ({
+  cases: snakeCases.cases.map(snakeCase => convertToCamelCase<CaseResponse, Case>(snakeCase)),
   page: snakeCases.page,
   perPage: snakeCases.per_page,
   total: snakeCases.total,
 });
+
+export const createToasterPlainError = (message: string) => new ToasterError([message]);
+
+export const decodeCaseResponse = (respCase?: CaseResponse) =>
+  pipe(CaseResponseRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
+
+export const decodeCasesResponse = (respCases?: CasesResponse) =>
+  pipe(CasesResponseRt.decode(respCases), fold(throwErrors(createToasterPlainError), identity));
+
+export const decodeCommentResponse = (respComment?: CommentResponse) =>
+  pipe(CommentResponseRt.decode(respComment), fold(throwErrors(createToasterPlainError), identity));

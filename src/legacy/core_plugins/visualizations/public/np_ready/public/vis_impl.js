@@ -30,9 +30,8 @@
 import { EventEmitter } from 'events';
 import _ from 'lodash';
 import { PersistedState } from '../../../../../../../src/plugins/visualizations/public';
-import { AggConfigs } from '../../legacy_imports';
 import { updateVisualizationConfig } from './legacy/vis_update';
-import { getTypes } from './services';
+import { getTypes, getAggs } from './services';
 
 class VisImpl extends EventEmitter {
   constructor(indexPattern, visState) {
@@ -62,6 +61,23 @@ class VisImpl extends EventEmitter {
     };
   }
 
+  initializeDefaultsFromSchemas(configStates, schemas) {
+    // Set the defaults for any schema which has them. If the defaults
+    // for some reason has more then the max only set the max number
+    // of defaults (not sure why a someone define more...
+    // but whatever). Also if a schema.name is already set then don't
+    // set anything.
+    const newConfigs = [...configStates];
+    schemas
+      .filter(schema => Array.isArray(schema.defaults) && schema.defaults.length > 0)
+      .filter(schema => !configStates.find(agg => agg.schema && agg.schema === schema.name))
+      .forEach(schema => {
+        const defaults = schema.defaults.slice(0, schema.max);
+        defaults.forEach(d => newConfigs.push(d));
+      });
+    return newConfigs;
+  }
+
   setCurrentState(state) {
     this.title = state.title || '';
     const type = state.type || this.type;
@@ -83,11 +99,9 @@ class VisImpl extends EventEmitter {
     updateVisualizationConfig(state.params, this.params);
 
     if (state.aggs || !this.aggs) {
-      this.aggs = new AggConfigs(
-        this.indexPattern,
-        state.aggs ? state.aggs.aggs || state.aggs : [],
-        this.type.schemas.all
-      );
+      let configStates = state.aggs ? state.aggs.aggs || state.aggs : [];
+      configStates = this.initializeDefaultsFromSchemas(configStates, this.type.schemas.all || []);
+      this.aggs = getAggs().createAggConfigs(this.indexPattern, configStates);
     }
   }
 
@@ -125,7 +139,7 @@ class VisImpl extends EventEmitter {
 
   copyCurrentState(includeDisabled = false) {
     const state = this.getCurrentState(includeDisabled);
-    state.aggs = new AggConfigs(
+    state.aggs = getAggs().createAggConfigs(
       this.indexPattern,
       state.aggs.aggs || state.aggs,
       this.type.schemas.all

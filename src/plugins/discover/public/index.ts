@@ -18,3 +18,4 @@
  */
 
 export { createSavedSearchesLoader } from './saved_searches/saved_searches';
+export { SavedSearchLoader, SavedSearch } from './saved_searches/types';

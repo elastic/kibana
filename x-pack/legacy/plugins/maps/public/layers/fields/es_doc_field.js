@@ -6,6 +6,7 @@
 
 import { AbstractField } from './field';
 import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
+import { TooltipProperty } from '../tooltips/tooltip_property';
 import { COLOR_PALETTE_MAX_SIZE } from '../../../common/constants';
 import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 
@@ -20,7 +21,8 @@ export class ESDocField extends AbstractField {
 
   async createTooltipProperty(value) {
     const indexPattern = await this._source.getIndexPattern();
-    return new ESTooltipProperty(this.getName(), this.getName(), value, indexPattern);
+    const tooltipProperty = new TooltipProperty(this.getName(), this.getName(), value);
+    return new ESTooltipProperty(tooltipProperty, indexPattern, this);
   }
 
   async getDataType() {
@@ -57,11 +59,6 @@ export class ESDocField extends AbstractField {
 
   async getCategoricalFieldMetaRequest() {
     const field = await this._getField();
-    if (field.type !== 'string') {
-      //UX does not support categorical styling for number/date fields
-      return null;
-    }
-
     const topTerms = {
       size: COLOR_PALETTE_MAX_SIZE - 1, //need additional color for the "other"-value
     };
