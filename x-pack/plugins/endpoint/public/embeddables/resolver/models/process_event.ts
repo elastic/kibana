@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isLegacyEvent, ResolverEvent } from '../../../../common/types';
+import { ResolverEvent } from '../../../../common/types';
+import { isLegacyEvent } from '../../../../common/models';
 import { ResolverProcessType } from '../types';
 
 /**

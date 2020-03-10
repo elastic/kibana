@@ -336,12 +336,6 @@ export interface EndpointEvent {
 
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
 
-export function isLegacyEvent(
-  event: EndpointEvent | LegacyEndpointEvent
-): event is LegacyEndpointEvent {
-  return (event as LegacyEndpointEvent).endgame !== undefined;
-}
-
 /**
  * The PageId type is used for the payload when firing userNavigatedToPage actions
  */

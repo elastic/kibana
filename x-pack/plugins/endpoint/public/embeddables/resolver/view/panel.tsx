@@ -11,7 +11,8 @@ import euiVars from '@elastic/eui/dist/eui_theme_light.json';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { SideEffectContext } from './side_effect_context';
-import { ResolverEvent, isLegacyEvent } from '../../../../common/types';
+import { ResolverEvent } from '../../../../common/types';
+import { eventTimestamp, eventName } from '../../../../common/models';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as selectors from '../store/selectors';
 
@@ -48,20 +49,16 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
     () =>
       [...processNodePositions.keys()].map(processEvent => {
         let dateTime;
-        const eventTimestamp = isLegacyEvent(processEvent)
-          ? processEvent.endgame.timestamp_utc
-          : processEvent['@timestamp'];
-        const name = isLegacyEvent(processEvent)
-          ? processEvent.endgame.process_name
-          : processEvent.process.name;
-        if (eventTimestamp) {
-          const date = new Date(eventTimestamp);
+        const eventTime = eventTimestamp(processEvent);
+        const name = eventName(processEvent);
+        if (eventTime) {
+          const date = new Date(eventTime);
           if (isFinite(date.getTime())) {
             dateTime = date;
           }
         }
         return {
-          name: name ? name : '',
+          name,
           timestamp: dateTime,
           event: processEvent,
         };
@@ -121,9 +118,9 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
         }),
         dataType: 'date',
         sortable: true,
-        render(eventTimestamp?: Date) {
-          return eventTimestamp ? (
-            formatter.format(eventTimestamp)
+        render(eventDate?: Date) {
+          return eventDate ? (
+            formatter.format(eventDate)
           ) : (
             <EuiBadge color="warning">
               {i18n.translate('xpack.endpoint.resolver.panel.tabel.row.timestampInvalidLabel', {

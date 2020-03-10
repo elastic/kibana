@@ -8,7 +8,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, Matrix3 } from '../types';
-import { ResolverEvent, isLegacyEvent } from '../../../../common/types';
+import { ResolverEvent } from '../../../../common/types';
+import { isLegacyEvent } from '../../../../common/models';
 
 /**
  * A placeholder view for a process node.

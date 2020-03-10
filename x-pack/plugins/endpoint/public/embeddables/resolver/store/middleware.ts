@@ -8,7 +8,8 @@ import { Dispatch, MiddlewareAPI } from 'redux';
 import { KibanaReactContextValue } from '../../../../../../../src/plugins/kibana_react/public';
 import { EndpointPluginServices } from '../../../plugin';
 import { ResolverState, ResolverAction } from '../types';
-import { isLegacyEvent, ResolverEvent } from '../../../../common/types';
+import { ResolverEvent } from '../../../../common/types';
+import { isLegacyEvent } from '../../../../common/models';
 
 type MiddlewareFactory<S = ResolverState> = (
   context?: KibanaReactContextValue<EndpointPluginServices>
