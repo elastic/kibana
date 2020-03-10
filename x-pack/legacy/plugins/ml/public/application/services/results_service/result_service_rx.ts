@@ -16,7 +16,7 @@ import { map } from 'rxjs/operators';
 import _ from 'lodash';
 import { Dictionary } from '../../../../common/types/common';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
-import { JobId } from '../../jobs/new_job/common/job_creator/configs';
+import { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { ml } from '../ml_api_service';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../common/constants/index_patterns';
 import { CriteriaField } from './index';
