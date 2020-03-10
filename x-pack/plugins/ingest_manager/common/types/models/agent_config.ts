@@ -57,4 +57,5 @@ export interface FullAgentConfig {
     };
   };
   datasources: FullAgentConfigDatasource[];
+  revision?: number;
 }

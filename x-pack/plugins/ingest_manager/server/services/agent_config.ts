@@ -304,6 +304,7 @@ class AgentConfigService {
       datasources: (config.datasources as Datasource[]).map(ds =>
         storedDatasourceToAgentDatasource(ds)
       ),
+      revision: config.revision,
     };
 
     return agentConfig;
