@@ -150,9 +150,10 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
     ...openInVisualize,
     ...viewNodeDetail,
     {
-      name: i18n.translate('xpack.infra.alerts.createAlertButton', {
+      name: i18n.translate('xpack.infra.metricsExplorer.alerts.createAlertButton', {
         defaultMessage: 'Create alert',
       }),
+      icon: 'bell',
       onClick() {
         setFlyoutVisible(true);
       },

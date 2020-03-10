@@ -25,7 +25,6 @@ import {
   SectionLink,
 } from '../../../../observability/public';
 import { usePrefixPathWithBasepath } from '../../hooks/use_prefix_path_with_basepath';
-import { AlertFlyout } from '../alerting/metrics/alert_flyout';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -64,8 +63,6 @@ export const NodeContextMenu: React.FC<Props> = ({
     inventoryModel.crosslinkSupport.apm && uiCapabilities?.apm && uiCapabilities?.apm.show;
   const showUptimeLink =
     inventoryModel.crosslinkSupport.uptime && (['pod', 'container'].includes(nodeType) || node.ip);
-
-  const [flyoutVisible, setFlyoutVisible] = useState(false);
 
   const inventoryId = useMemo(() => {
     if (nodeType === 'host') {
@@ -137,15 +134,6 @@ export const NodeContextMenu: React.FC<Props> = ({
     isDisabled: !showUptimeLink,
   };
 
-  const alertMenuItem: SectionLinkProps = {
-    label: i18n.translate('xpack.infra.alerts.createAlertButton', {
-      defaultMessage: 'Create alert',
-    }),
-    onClick() {
-      setFlyoutVisible(true);
-    },
-  };
-
   return (
     <ActionMenu
       closePopover={closePopover}
@@ -197,7 +185,6 @@ export const NodeContextMenu: React.FC<Props> = ({
               href={uptimeMenuItem.href}
               isDisabled={uptimeMenuItem.isDisabled}
             />
-            <SectionLink {...alertMenuItem} />
           </SectionLinks>
         </Section>
       </div>
