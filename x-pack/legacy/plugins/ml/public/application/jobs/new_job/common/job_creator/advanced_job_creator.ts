@@ -8,7 +8,12 @@ import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 
 import { JobCreator } from './job_creator';
 import { Field, Aggregation, SplitField } from '../../../../../../common/types/fields';
-import { Job, Datafeed, Detector, CustomRule } from './configs';
+import {
+  Job,
+  Datafeed,
+  Detector,
+  CustomRule,
+} from '../../../../../../common/types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
