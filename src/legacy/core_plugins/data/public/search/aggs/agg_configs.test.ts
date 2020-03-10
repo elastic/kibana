@@ -21,8 +21,6 @@ import { indexBy } from 'lodash';
 import { AggConfig } from './agg_config';
 import { AggConfigs } from './agg_configs';
 import { AggTypesRegistryStart } from './agg_types_registry';
-import { Schemas } from './schemas';
-import { AggGroupNames } from './agg_groups';
 import { mockDataServices, mockAggTypesRegistry } from './test_helpers';
 import { IndexPatternField, IndexPattern } from '../../../../../../plugins/data/public';
 import {
@@ -36,6 +34,7 @@ describe('AggConfigs', () => {
   let typesRegistry: AggTypesRegistryStart;
 
   beforeEach(() => {
+    mockDataServices();
     indexPattern = stubIndexPatternWithFields as IndexPattern;
     typesRegistry = mockAggTypesRegistry();
   });
@@ -79,67 +78,6 @@ describe('AggConfigs', () => {
       expect(spy).toHaveBeenCalledTimes(1);
       expect(spy.mock.calls[0]).toEqual([configStates]);
       spy.mockRestore();
-    });
-
-    describe('defaults', () => {
-      const schemas = new Schemas([
-        {
-          group: AggGroupNames.Metrics,
-          name: 'metric',
-          title: 'Simple',
-          min: 1,
-          max: 2,
-          defaults: [
-            { schema: 'metric', type: 'count' },
-            { schema: 'metric', type: 'avg' },
-            { schema: 'metric', type: 'sum' },
-          ],
-        },
-        {
-          group: AggGroupNames.Buckets,
-          name: 'segment',
-          title: 'Example',
-          min: 0,
-          max: 1,
-          defaults: [
-            { schema: 'segment', type: 'terms' },
-            { schema: 'segment', type: 'filters' },
-          ],
-        },
-      ]);
-
-      it('should only set the number of defaults defined by the max', () => {
-        const ac = new AggConfigs(indexPattern, [], {
-          schemas: schemas.all,
-          typesRegistry,
-        });
-        expect(ac.bySchemaName('metric')).toHaveLength(2);
-      });
-
-      it('should set the defaults defined in the schema when none exist', () => {
-        const ac = new AggConfigs(indexPattern, [], {
-          schemas: schemas.all,
-          typesRegistry,
-        });
-        expect(ac.aggs).toHaveLength(3);
-      });
-
-      it('should NOT set the defaults defined in the schema when some exist', () => {
-        const configStates = [
-          {
-            enabled: true,
-            type: 'date_histogram',
-            params: {},
-            schema: 'segment',
-          },
-        ];
-        const ac = new AggConfigs(indexPattern, configStates, {
-          schemas: schemas.all,
-          typesRegistry,
-        });
-        expect(ac.aggs).toHaveLength(3);
-        expect(ac.bySchemaName('segment')[0].type.name).toEqual('date_histogram');
-      });
     });
   });
 
@@ -284,19 +222,7 @@ describe('AggConfigs', () => {
   });
 
   describe('#toDsl', () => {
-    const schemas = new Schemas([
-      {
-        group: AggGroupNames.Buckets,
-        name: 'segment',
-      },
-      {
-        group: AggGroupNames.Buckets,
-        name: 'split',
-      },
-    ]);
-
     beforeEach(() => {
-      mockDataServices();
       indexPattern = stubIndexPattern as IndexPattern;
       indexPattern.fields.getByName = name => (name as unknown) as IndexPatternField;
     });
@@ -319,7 +245,6 @@ describe('AggConfigs', () => {
 
       const ac = new AggConfigs(indexPattern, configStates, {
         typesRegistry,
-        schemas: schemas.all,
       });
 
       const aggInfos = ac.aggs.map(aggConfig => {
@@ -390,11 +315,10 @@ describe('AggConfigs', () => {
 
       const ac = new AggConfigs(indexPattern, configStates, {
         typesRegistry,
-        schemas: schemas.all,
       });
       const dsl = ac.toDsl();
       const histo = ac.byName('date_histogram')[0];
-      const metrics = ac.bySchemaGroup('metrics');
+      const metrics = ac.bySchemaName('metrics');
 
       expect(dsl).toHaveProperty(histo.id);
       expect(typeof dsl[histo.id]).toBe('object');
@@ -418,8 +342,8 @@ describe('AggConfigs', () => {
 
       const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
       const topLevelDsl = ac.toDsl(true);
-      const buckets = ac.bySchemaGroup('buckets');
-      const metrics = ac.bySchemaGroup('metrics');
+      const buckets = ac.bySchemaName('buckets');
+      const metrics = ac.bySchemaName('metrics');
 
       (function checkLevel(dsl) {
         const bucket = buckets.shift();

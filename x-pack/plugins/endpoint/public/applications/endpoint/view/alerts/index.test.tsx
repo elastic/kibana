@@ -12,7 +12,7 @@ import { AlertIndex } from './index';
 import { appStoreFactory } from '../../store';
 import { coreMock } from 'src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
-import { fireEvent, waitForElement, act } from '@testing-library/react';
+import { fireEvent, act } from '@testing-library/react';
 import { RouteCapture } from '../route_capture';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
@@ -23,18 +23,6 @@ describe('when on the alerting page', () => {
   let render: () => reactTestingLibrary.RenderResult;
   let history: MemoryHistory<never>;
   let store: ReturnType<typeof appStoreFactory>;
-
-  /**
-   * @testing-library/react provides `queryByTestId`, but that uses the data attribute
-   * 'data-testid' whereas our FTR and EUI's tests all use 'data-test-subj'. While @testing-library/react
-   * could be configured to use 'data-test-subj', it is not currently configured that way.
-   *
-   * This provides an equivalent function to `queryByTestId` but that uses our 'data-test-subj' attribute.
-   */
-  let queryByTestSubjId: (
-    renderResult: reactTestingLibrary.RenderResult,
-    testSubjId: string
-  ) => Promise<Element | null>;
 
   beforeEach(async () => {
     /**
@@ -68,17 +56,6 @@ describe('when on the alerting page', () => {
             </I18nProvider>
           </KibanaContextProvider>
         </Provider>
-      );
-    };
-    queryByTestSubjId = async (renderResult, testSubjId) => {
-      return await waitForElement(
-        /**
-         * Use document.body instead of container because EUI renders things like popover out of the DOM heirarchy.
-         */
-        () => document.body.querySelector(`[data-test-subj="${testSubjId}"]`),
-        {
-          container: renderResult.container,
-        }
       );
     };
   });
@@ -140,9 +117,6 @@ describe('when on the alerting page', () => {
     it('should show the flyout', async () => {
       await render().findByTestId('alertDetailFlyout');
     });
-    it('should render resolver', async () => {
-      await render().findByTestId('alertResolver');
-    });
     describe('when the user clicks the close button on the flyout', () => {
       let renderResult: reactTestingLibrary.RenderResult;
       beforeEach(async () => {
@@ -150,7 +124,7 @@ describe('when on the alerting page', () => {
         /**
          * Use our helper function to find the flyout's close button, as it uses a different test ID attribute.
          */
-        const closeButton = await queryByTestSubjId(renderResult, 'euiFlyoutCloseButton');
+        const closeButton = await renderResult.findByTestId('euiFlyoutCloseButton');
         if (closeButton) {
           fireEvent.click(closeButton);
         }
@@ -172,16 +146,13 @@ describe('when on the alerting page', () => {
     describe('when the user changes page size to 10', () => {
       beforeEach(async () => {
         const renderResult = render();
-        const paginationButton = await queryByTestSubjId(
-          renderResult,
-          'tablePaginationPopoverButton'
-        );
+        const paginationButton = await renderResult.findByTestId('tablePaginationPopoverButton');
         if (paginationButton) {
           act(() => {
             fireEvent.click(paginationButton);
           });
         }
-        const show10RowsButton = await queryByTestSubjId(renderResult, 'tablePagination-10-rows');
+        const show10RowsButton = await renderResult.findByTestId('tablePagination-10-rows');
         if (show10RowsButton) {
           act(() => {
             fireEvent.click(show10RowsButton);

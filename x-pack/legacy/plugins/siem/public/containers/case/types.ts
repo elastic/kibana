@@ -4,30 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface FormData {
-  isNew?: boolean;
-}
-
-export interface NewCase extends FormData {
-  description: string;
-  tags: string[];
-  title: string;
-}
-
-export interface CaseSnake {
-  case_id: string;
-  created_at: string;
-  created_by: ElasticUserSnake;
-  description: string;
-  state: string;
-  tags: string[];
-  title: string;
-  updated_at: string;
-  version?: string;
+export interface Comment {
+  id: string;
+  createdAt: string;
+  createdBy: ElasticUser;
+  comment: string;
+  updatedAt: string;
+  version: string;
 }
 
 export interface Case {
-  caseId: string;
+  id: string;
+  comments: Comment[];
   createdAt: string;
   createdBy: ElasticUser;
   description: string;
@@ -35,7 +23,7 @@ export interface Case {
   tags: string[];
   title: string;
   updatedAt: string;
-  version?: string;
+  version: string;
 }
 
 export interface QueryParams {
@@ -47,14 +35,8 @@ export interface QueryParams {
 
 export interface FilterOptions {
   search: string;
+  state: string;
   tags: string[];
-}
-
-export interface AllCasesSnake {
-  cases: CaseSnake[];
-  page: number;
-  per_page: number;
-  total: number;
 }
 
 export interface AllCases {
@@ -63,15 +45,10 @@ export interface AllCases {
   perPage: number;
   total: number;
 }
+
 export enum SortFieldCase {
   createdAt = 'createdAt',
-  state = 'state',
   updatedAt = 'updatedAt',
-}
-
-export interface ElasticUserSnake {
-  readonly username: string;
-  readonly full_name?: string | null;
 }
 
 export interface ElasticUser {

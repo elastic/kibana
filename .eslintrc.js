@@ -77,12 +77,6 @@ module.exports = {
       },
     },
     {
-      files: ['src/legacy/core_plugins/vis_type_vislib/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: [
         'src/legacy/core_plugins/vis_default_editor/public/components/controls/**/*.{ts,tsx}',
       ],
@@ -517,6 +511,16 @@ module.exports = {
       files: ['**/*.test.{js,ts,tsx}'],
       rules: {
         'jest/valid-describe': 'error',
+      },
+    },
+
+    /**
+     * Harden specific rules
+     */
+    {
+      files: ['test/harden/*.js'],
+      rules: {
+        'mocha/handle-done-callback': 'off', // TODO: Find a way to disable all mocha rules
       },
     },
 

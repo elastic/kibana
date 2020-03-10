@@ -22,7 +22,7 @@ export interface Services {
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
-    actions: {
+    actions?: {
       getActionsClient: () => ActionsClient;
       listTypes: ActionTypeRegistry['list'];
     };

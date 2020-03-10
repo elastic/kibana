@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const DETECTIONS = 'app/siem#/detections';
 export const HOSTS_PAGE = '/app/siem#/hosts/allHosts';
 export const HOSTS_PAGE_TAB_URLS = {
   allHosts: '/app/siem#/hosts/allHosts',

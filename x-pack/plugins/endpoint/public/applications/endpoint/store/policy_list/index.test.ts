@@ -30,7 +30,8 @@ describe('policy list store concerns', () => {
     dispatch = store.dispatch;
   });
 
-  test('it sets `isLoading` when `userNavigatedToPage`', async () => {
+  // https://github.com/elastic/kibana/issues/58972
+  test.skip('it sets `isLoading` when `userNavigatedToPage`', async () => {
     expect(selectIsLoading(getState())).toBe(false);
     dispatch({ type: 'userNavigatedToPage', payload: 'policyListPage' });
     expect(selectIsLoading(getState())).toBe(true);
@@ -38,7 +39,8 @@ describe('policy list store concerns', () => {
     expect(selectIsLoading(getState())).toBe(false);
   });
 
-  test('it sets `isLoading` when `userPaginatedPolicyListTable`', async () => {
+  // https://github.com/elastic/kibana/issues/58896
+  test.skip('it sets `isLoading` when `userPaginatedPolicyListTable`', async () => {
     expect(selectIsLoading(getState())).toBe(false);
     dispatch({
       type: 'userPaginatedPolicyListTable',

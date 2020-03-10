@@ -7,7 +7,7 @@
 import React, { Fragment, FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 
-import { isFullLicense } from '../../license/check_license';
+import { isFullLicense } from '../../license';
 
 import { TopNav } from './top_nav';
 import { MainTabs } from './main_tabs';
