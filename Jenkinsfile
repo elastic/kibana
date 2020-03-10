@@ -3,6 +3,7 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
+env.KBN_ES_SNAPSHOT_USE_UNVERIFIED = 'true'
 kibanaPipeline(timeoutMinutes: 135) {
   githubPr.withDefaultPrComments {
     catchError {
