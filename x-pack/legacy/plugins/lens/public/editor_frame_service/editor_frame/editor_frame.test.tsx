@@ -1384,7 +1384,7 @@ describe('editor_frame', () => {
       act(() => {
         instance
           .find(DragDrop)
-          .filter('[data-test-subj="indexPattern-dropTarget"]')
+          .filter('[data-test-subj="mockVisA"]')
           .prop('onDrop')!({
           indexPatternId: '1',
           field: {},

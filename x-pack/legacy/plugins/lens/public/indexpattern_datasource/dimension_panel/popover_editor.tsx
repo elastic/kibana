@@ -14,16 +14,11 @@ import {
   EuiCallOut,
   EuiFormRow,
   EuiFieldText,
-  EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
-import {
-  IndexPatternDimensionTriggerProps,
-  IndexPatternDimensionEditorProps,
-  OperationFieldSupportMatrix,
-} from './dimension_panel';
+import { IndexPatternDimensionEditorProps, OperationFieldSupportMatrix } from './dimension_panel';
 import {
   operationDefinitionMap,
   getOperationDisplay,
@@ -39,12 +34,6 @@ import { trackUiEvent } from '../../lens_ui_telemetry';
 import { FormatSelector } from './format_selector';
 
 const operationPanels = getOperationDisplay();
-
-export interface PopoverTriggerProps extends IndexPatternDimensionTriggerProps {
-  selectedColumn?: IndexPatternColumn;
-  operationFieldSupportMatrix: OperationFieldSupportMatrix;
-  currentIndexPattern: IndexPattern;
-}
 
 export interface PopoverEditorProps extends IndexPatternDimensionEditorProps {
   selectedColumn?: IndexPatternColumn;
@@ -380,38 +369,6 @@ export function PopoverEditor(props: PopoverEditorProps) {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      )
-    </div>
-  );
-}
-
-export function PopoverTrigger(props: PopoverTriggerProps) {
-  const { selectedColumn, columnId, uniqueLabel } = props;
-  return (
-    <div
-      id={columnId}
-      className={[
-        'lnsPopoverEditor',
-        selectedColumn ? 'lnsPopoverEditor__anchor' : 'lnsPopoverEditor__link',
-      ].join(' ')}
-    >
-      {selectedColumn ? (
-        <EuiLink
-          className="lnsPopoverEditor__link"
-          onClick={() => {
-            props.togglePopover();
-          }}
-          data-test-subj="indexPattern-configure-dimension"
-          aria-label={i18n.translate('xpack.lens.configure.editConfig', {
-            defaultMessage: 'Edit configuration',
-          })}
-          title={i18n.translate('xpack.lens.configure.editConfig', {
-            defaultMessage: 'Edit configuration',
-          })}
-        >
-          {uniqueLabel}
-        </EuiLink>
-      ) : null}
     </div>
   );
 }

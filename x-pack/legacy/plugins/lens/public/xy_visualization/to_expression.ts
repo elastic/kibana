@@ -164,7 +164,7 @@ export const buildExpression = (
 
                     hide: [Boolean(layer.hide)],
 
-                    xAccessor: [layer.xAccessor],
+                    xAccessor: [layer.xAccessor!],
                     yScaleType: [
                       getScaleType(metadata[layer.layerId][layer.accessors[0]], ScaleType.Ordinal),
                     ],
@@ -172,7 +172,7 @@ export const buildExpression = (
                       getScaleType(metadata[layer.layerId][layer.xAccessor!], ScaleType.Linear),
                     ],
                     isHistogram: [isHistogramDimension],
-                    splitAccessor: [layer.splitAccessor],
+                    splitAccessor: [layer.splitAccessor!],
                     seriesType: [layer.seriesType],
                     accessors: layer.accessors,
                     columnToLabel: [JSON.stringify(columnToLabel)],

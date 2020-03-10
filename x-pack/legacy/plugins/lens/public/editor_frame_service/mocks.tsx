@@ -33,7 +33,7 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
     getPersistableState: jest.fn(_state => _state),
     getSuggestions: jest.fn(_options => []),
     initialize: jest.fn((_frame, _state?) => ({})),
-    getLayerOptions: jest.fn(() => ({
+    getLayerOptions: jest.fn(props => ({
       dimensions: [
         {
           layerId: 'layer1',
@@ -42,6 +42,7 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
           supportsMoreColumns: true,
           accessors: [],
           filterOperations: jest.fn(() => true),
+          dataTestSubj: 'mockVisA',
         },
       ],
     })),

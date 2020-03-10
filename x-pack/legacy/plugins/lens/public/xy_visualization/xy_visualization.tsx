@@ -160,6 +160,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
           suggestedPriority: 1,
           supportsMoreColumns: !layer.xAccessor,
           required: true,
+          dataTestSubj: 'lnsXY_xDimensionPanel',
         },
         {
           dimensionId: 'y',
@@ -170,6 +171,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
           filterOperations: isNumericMetric,
           supportsMoreColumns: true,
           required: true,
+          dataTestSubj: 'lnsXY_yDimensionPanel',
         },
         {
           dimensionId: 'breakdown',
@@ -180,6 +182,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
           filterOperations: isBucketed,
           suggestedPriority: 0,
           supportsMoreColumns: !layer.splitAccessor,
+          dataTestSubj: 'lnsXY_splitDimensionPanel',
         },
       ],
     };

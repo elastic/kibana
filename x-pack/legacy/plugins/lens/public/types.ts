@@ -292,6 +292,8 @@ interface VisualizationDimensionConfig {
   hideGrouping?: boolean;
 
   required?: boolean;
+
+  dataTestSubj?: string;
 }
 
 /**

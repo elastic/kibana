@@ -6,6 +6,8 @@
 
 import _ from 'lodash';
 import React, { memo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiLink } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import {
@@ -17,7 +19,7 @@ import {
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
-import { PopoverEditor, PopoverTrigger } from './popover_editor';
+import { PopoverEditor } from './popover_editor';
 import { changeColumn } from '../state_helpers';
 import { isDraggedField, hasField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
@@ -179,20 +181,37 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
   props: IndexPatternDimensionTriggerProps
 ) {
   const layerId = props.layerId;
-  const currentIndexPattern =
-    props.state.indexPatterns[props.state.layers[layerId]?.indexPatternId];
-  const operationFieldSupportMatrix = getOperationFieldSupportMatrix(props);
 
   const selectedColumn: IndexPatternColumn | null =
     props.state.layers[layerId].columns[props.columnId] || null;
 
+  const { columnId, uniqueLabel } = props;
   return (
-    <PopoverTrigger
-      {...props}
-      currentIndexPattern={currentIndexPattern}
-      selectedColumn={selectedColumn}
-      operationFieldSupportMatrix={operationFieldSupportMatrix}
-    />
+    <div
+      id={columnId}
+      className={[
+        'lnsPopoverEditor',
+        selectedColumn ? 'lnsPopoverEditor__anchor' : 'lnsPopoverEditor__link',
+      ].join(' ')}
+    >
+      {selectedColumn ? (
+        <EuiLink
+          className="lnsPopoverEditor__link"
+          onClick={() => {
+            props.togglePopover();
+          }}
+          data-test-subj="lns-dimensionTrigger"
+          aria-label={i18n.translate('xpack.lens.configure.editConfig', {
+            defaultMessage: 'Edit configuration',
+          })}
+          title={i18n.translate('xpack.lens.configure.editConfig', {
+            defaultMessage: 'Edit configuration',
+          })}
+        >
+          {uniqueLabel}
+        </EuiLink>
+      ) : null}
+    </div>
   );
 };
 

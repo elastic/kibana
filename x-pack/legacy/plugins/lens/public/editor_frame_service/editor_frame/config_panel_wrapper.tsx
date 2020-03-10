@@ -158,7 +158,7 @@ function LayerPanels(
               className="lnsConfigPanel__addLayerBtn"
               fullWidth
               size="s"
-              data-test-subj={`lnsXY_layer_add`}
+              data-test-subj="lnsXY_layer_add"
               aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
                 defaultMessage: 'Add layer',
               })}
@@ -236,20 +236,32 @@ function LayerPanel(
   const [popoverState, setPopoverState] = useState<{
     isOpen: boolean;
     openId: string | null;
+    addingToDimensionId: string | null;
   }>({
     isOpen: false,
     openId: null,
+    addingToDimensionId: null,
   });
 
   const { dimensions } = activeVisualization.getLayerOptions(layerVisualizationConfigProps);
   const isEmptyLayer = !dimensions.some(d => d.accessors.length > 0);
 
-  function wrapInPopover(id: string, trigger: React.ReactElement, panel: React.ReactElement) {
+  function wrapInPopover(
+    id: string,
+    dimensionId: string,
+    trigger: React.ReactElement,
+    panel: React.ReactElement
+  ) {
+    const noMatch = popoverState.isOpen ? !dimensions.some(d => d.accessors.includes(id)) : false;
     return (
       <EuiPopover
-        isOpen={popoverState.isOpen && popoverState.openId === id}
+        isOpen={
+          popoverState.isOpen &&
+          (popoverState.openId === id ||
+            (noMatch && popoverState.addingToDimensionId === dimensionId))
+        }
         closePopover={() => {
-          setPopoverState({ isOpen: false, openId: null });
+          setPopoverState({ isOpen: false, openId: null, addingToDimensionId: null });
         }}
         button={trigger}
         display="block"
@@ -308,7 +320,7 @@ function LayerPanel(
                   <DragDrop
                     key={accessor}
                     className="lnsConfigPanel__dimension"
-                    data-test-subj="indexPattern-dropTarget"
+                    data-test-subj={dimension.dataTestSubj}
                     droppable={
                       dragDropContext.dragging &&
                       layerDatasource.canHandleDrop({
@@ -328,22 +340,26 @@ function LayerPanel(
                   >
                     {wrapInPopover(
                       accessor,
+                      dimension.dimensionId,
                       <NativeRenderer
                         render={props.datasourceMap[datasourceId].renderDimensionTrigger}
                         nativeProps={{
                           ...layerDatasourceConfigProps,
                           columnId: accessor,
                           filterOperations: dimension.filterOperations,
+                          suggestedPriority: dimension.suggestedPriority,
                           togglePopover: () => {
                             if (popoverState.isOpen) {
                               setPopoverState({
                                 isOpen: false,
                                 openId: null,
+                                addingToDimensionId: null,
                               });
                             } else {
                               setPopoverState({
                                 isOpen: true,
                                 openId: accessor,
+                                addingToDimensionId: null, // not set for existing dimension
                               });
                             }
                           },
@@ -397,7 +413,7 @@ function LayerPanel(
                 {dimension.supportsMoreColumns ? (
                   <DragDrop
                     className="lnsIndexPatternDimensionPanel"
-                    data-test-subj="indexPattern-dropTarget"
+                    data-test-subj={dimension.dataTestSubj}
                     droppable={
                       dragDropContext.dragging &&
                       layerDatasource.canHandleDrop({
@@ -426,10 +442,11 @@ function LayerPanel(
                     }}
                   >
                     {wrapInPopover(
-                      dimension.dimensionLabel,
+                      newId,
+                      dimension.dimensionId,
                       <EuiButtonEmpty
                         iconType="plusInCircleFilled"
-                        data-test-subj="indexPattern-configure-dimension"
+                        data-test-subj="lns-empty-dimension"
                         aria-label={i18n.translate('xpack.lens.configure.addConfig', {
                           defaultMessage: 'Add a configuration',
                         })}
@@ -441,11 +458,13 @@ function LayerPanel(
                             setPopoverState({
                               isOpen: false,
                               openId: null,
+                              addingToDimensionId: null,
                             });
                           } else {
                             setPopoverState({
                               isOpen: true,
-                              openId: dimension.dimensionLabel,
+                              openId: newId,
+                              addingToDimensionId: dimension.dimensionId,
                             });
                           }
                         }}
@@ -463,6 +482,7 @@ function LayerPanel(
                           core: props.core,
                           columnId: newId,
                           filterOperations: dimension.filterOperations,
+                          suggestedPriority: dimension.suggestedPriority,
 
                           setState: (newState: unknown) => {
                             props.updateVisualization(
@@ -474,6 +494,11 @@ function LayerPanel(
                               })
                             );
                             props.updateDatasource(datasourceId, newState);
+                            setPopoverState({
+                              isOpen: true,
+                              openId: newId,
+                              addingToDimensionId: null, // clear now that dimension exists
+                            });
                           },
                         }}
                       />
