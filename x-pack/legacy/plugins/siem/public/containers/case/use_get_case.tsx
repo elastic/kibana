@@ -9,9 +9,8 @@ import { useEffect, useReducer } from 'react';
 import { Case } from './types';
 import { FETCH_INIT, FETCH_FAILURE, FETCH_SUCCESS } from './constants';
 import { getTypedPayload } from './utils';
-import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import * as i18n from './translations';
-import { useStateToaster } from '../../components/toasters';
+import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { getCase } from './api';
 
 interface CaseState {
@@ -50,7 +49,7 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
   }
 };
 const initialData: Case = {
-  caseId: '',
+  id: '',
   createdAt: '',
   comments: [],
   createdBy: {
@@ -83,7 +82,11 @@ export const useGetCase = (caseId: string): [CaseState] => {
         }
       } catch (error) {
         if (!didCancel) {
-          errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
+          errorToToaster({
+            title: i18n.ERROR_TITLE,
+            error: error.body && error.body.message ? new Error(error.body.message) : error,
+            dispatchToaster,
+          });
           dispatch({ type: FETCH_FAILURE });
         }
       }

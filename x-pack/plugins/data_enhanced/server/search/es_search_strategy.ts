@@ -64,7 +64,7 @@ function asyncSearch(
   request: IEnhancedEsSearchRequest,
   options?: ISearchOptions
 ) {
-  const { body = undefined, index, ...params } = request.id ? {} : request.params;
+  const { body = undefined, index = undefined, ...params } = request.id ? {} : request.params;
 
   // If we have an ID, then just poll for that ID, otherwise send the entire request body
   const method = request.id ? 'GET' : 'POST';
