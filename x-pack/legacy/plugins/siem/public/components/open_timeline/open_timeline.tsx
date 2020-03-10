@@ -7,7 +7,6 @@
 import { EuiPanel, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import React, { useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import uuid from 'uuid';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { OpenTimelineProps } from './types';
 import { SearchRow } from './search_row';
@@ -22,15 +21,7 @@ import {
 } from '../detection_engine/utility_bar';
 
 import * as i18n from './translations';
-import {
-  BATCH_ACTIONS,
-  BATCH_ACTION_EXPORT_SELECTED,
-  REFRESH,
-  EXPORT_FILENAME,
-} from '../../pages/detection_engine/rules/translations';
 import { useStateToaster } from '../toasters';
-import { GenericDownloader } from '../generic_downloader';
-import { useExportTimeline } from './export_timeline';
 import { TimelineDownloader } from './export_timeline/export_timeline';
 export interface ExportTimelineIds {
   timelineId: string | null | undefined;
@@ -56,6 +47,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     pageIndex,
     pageSize,
     query,
+    refetch,
     searchResults,
     selectedItems,
     sortDirection,
@@ -88,13 +80,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       (closePopover: () => void) => (
         <EuiContextMenuPanel
           items={[
-            <EuiContextMenuItem
-              key="ExportItemKey"
-              disabled={selectedItems.length === 0}
-              // onClick={() => {
-              //   closePopover();
-              // }}
-            >
+            <EuiContextMenuItem key="ExportItemKey" disabled={selectedItems.length === 0}>
               <TimelineDownloader
                 selectedTimelines={selectedItems}
                 onDownloadComplete={closePopover}
@@ -119,26 +105,6 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
 
     return (
       <>
-        {/* {enableDownloader && (
-          <GenericDownloader
-            filename={`${EXPORT_FILENAME}.ndjson`}
-            ids={exportedIds}
-            exportSelectedData={exportedData}
-            onExportComplete={exportCount => {
-              setEnableDownloader(false);
-              dispatchToaster({
-                type: 'addToaster',
-                toast: {
-                  id: uuid.v4(),
-                  title: i18n.SUCCESSFULLY_EXPORTED_TIMELINES(exportCount),
-                  color: 'success',
-                  iconType: 'check',
-                },
-              });
-            }}
-          />
-        )} */}
-
         <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>
           <TitleRow
             data-test-subj="title-row"
@@ -169,10 +135,16 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
                   iconType="arrowDown"
                   popoverContent={getBatchItemsPopoverContent}
                 >
-                  {BATCH_ACTIONS}
+                  {i18n.BATCH_ACTIONS}
                 </UtilityBarAction>
-                <UtilityBarAction iconSide="right" iconType="refresh" onClick={() => null}>
-                  {REFRESH}
+                <UtilityBarAction
+                  iconSide="right"
+                  iconType="refresh"
+                  onClick={() => {
+                    if (typeof refetch === 'function') refetch();
+                  }}
+                >
+                  {i18n.REFRESH}
                 </UtilityBarAction>
               </UtilityBarGroup>
             </UtilityBarSection>

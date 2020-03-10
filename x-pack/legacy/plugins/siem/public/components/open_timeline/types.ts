@@ -7,6 +7,7 @@
 import { AllTimelinesVariables } from '../../containers/timeline/all';
 import { TimelineModel } from '../../store/timeline/model';
 import { NoteResult } from '../../graphql/types';
+import { Refetch } from '../../store/inputs/model';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {
@@ -139,6 +140,8 @@ export interface OpenTimelineProps {
   pageSize: number;
   /** The currently applied search criteria */
   query: string;
+  /** Refetch timelines data */
+  refetch?: Refetch;
   /** The results of executing a search */
   searchResults: OpenTimelineResult[];
   /** the currently-selected timelines in the table */

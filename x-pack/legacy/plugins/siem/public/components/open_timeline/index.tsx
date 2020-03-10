@@ -256,7 +256,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         sort={{ sortField: sortField as SortFieldTimeline, sortOrder: sortDirection as Direction }}
         onlyUserFavorite={onlyFavorites}
       >
-        {({ timelines, loading, totalCount }) => {
+        {({ timelines, loading, totalCount, refetch }) => {
           return !isModal ? (
             <OpenTimeline
               data-test-subj={'open-timeline'}
@@ -276,6 +276,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
               pageIndex={pageIndex}
               pageSize={pageSize}
               query={search}
+              refetch={refetch}
               searchResults={timelines}
               selectedItems={selectedItems}
               sortDirection={sortDirection}

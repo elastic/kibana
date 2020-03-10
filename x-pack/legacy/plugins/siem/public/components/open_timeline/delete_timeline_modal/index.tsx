@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiModal, EuiOverlayMask, EuiIcon, EuiLinkProps } from '@elastic/eui';
+import { EuiModal, EuiOverlayMask, EuiIcon, EuiLinkAnchorProps } from '@elastic/eui';
 import React, { useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 
@@ -19,7 +19,9 @@ div.euiPopover__panel-isOpen {
 }
 `;
 
-export const CustomLink = React.forwardRef<HTMLAnchorElement | HTMLButtonElement, EuiLinkProps>(
+type CustomLinkType = EuiLinkAnchorProps & { disabled: boolean };
+
+export const CustomLink = React.forwardRef<HTMLAnchorElement, CustomLinkType>(
   (
     {
       children,

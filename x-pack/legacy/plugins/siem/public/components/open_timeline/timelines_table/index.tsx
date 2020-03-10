@@ -50,7 +50,6 @@ const getExtendedColumnsIfEnabled = (showExtendedColumns: boolean) =>
 const getTimelinesTableColumns = ({
   actionTimelineToShow,
   deleteTimelines,
-  exportTimelines,
   itemIdToExpandedNotesRowMap,
   onOpenTimeline,
   onToggleShowNotes,
@@ -73,7 +72,6 @@ const getTimelinesTableColumns = ({
     ...getIconHeaderColumns(),
     ...getActionsColumns({
       deleteTimelines,
-      exportTimelines,
       onOpenTimeline,
       actionTimelineToShow,
     }),
@@ -84,7 +82,6 @@ export interface TimelinesTableProps {
   actionTimelineToShow: ActionTimelineToShow[];
   deleteTimelines?: DeleteTimelines;
   defaultPageSize: number;
-  exportTimelines?: Dispatch<SetStateAction<boolean>>;
   loading: boolean;
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
   onOpenTimeline: OnOpenTimeline;

@@ -10,6 +10,10 @@ export const ALL_ACTIONS = i18n.translate('xpack.siem.open.timeline.allActionsTo
   defaultMessage: 'All actions',
 });
 
+export const BATCH_ACTIONS = i18n.translate('xpack.siem.open.timeline.batchActionsTitle', {
+  defaultMessage: 'Bulk actions',
+});
+
 export const CANCEL = i18n.translate('xpack.siem.open.timeline.cancelButton', {
   defaultMessage: 'Cancel',
 });
@@ -95,6 +99,10 @@ export const PINNED_EVENTS = i18n.translate('xpack.siem.open.timeline.pinnedEven
 
 export const POSTED = i18n.translate('xpack.siem.open.timeline.postedLabel', {
   defaultMessage: 'Posted:',
+});
+
+export const REFRESH = i18n.translate('xpack.siem.open.timeline.refreshTitle', {
+  defaultMessage: 'Refresh',
 });
 
 export const SEARCH_PLACEHOLDER = i18n.translate('xpack.siem.open.timeline.searchPlaceholder', {

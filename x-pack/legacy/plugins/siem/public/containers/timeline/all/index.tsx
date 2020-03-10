@@ -23,6 +23,7 @@ export interface AllTimelinesArgs {
   timelines: OpenTimelineResult[];
   loading: boolean;
   totalCount: number;
+  refetch: () => void;
 }
 
 export interface AllTimelinesVariables {
@@ -91,9 +92,10 @@ const AllTimelinesQueryComponent: React.FC<OwnProps> = ({
       notifyOnNetworkStatusChange
       variables={variables}
     >
-      {({ data, loading }) =>
+      {({ data, loading, refetch }) =>
         children!({
           loading,
+          refetch,
           totalCount: getOr(0, 'getAllTimeline.totalCount', data),
           timelines: getAllTimeline(
             JSON.stringify(variables),
