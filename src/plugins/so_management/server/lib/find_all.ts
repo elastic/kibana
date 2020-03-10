@@ -21,9 +21,16 @@ import { SavedObjectsClientContract, SavedObject, SavedObjectsFindOptions } from
 
 export const findAll = async (
   client: SavedObjectsClientContract,
+  findOptions: SavedObjectsFindOptions
+): Promise<SavedObject[]> => {
+  return recursiveFind(client, findOptions, 1, []);
+};
+
+const recursiveFind = async (
+  client: SavedObjectsClientContract,
   findOptions: SavedObjectsFindOptions,
-  page = 1,
-  allObjects: SavedObject[] = []
+  page: number,
+  allObjects: SavedObject[]
 ): Promise<SavedObject[]> => {
   const objects = await client.find({
     ...findOptions,
@@ -32,7 +39,7 @@ export const findAll = async (
 
   allObjects.push(...objects.saved_objects);
   if (allObjects.length < objects.total) {
-    return findAll(client, findOptions, page + 1, allObjects);
+    return recursiveFind(client, findOptions, page + 1, allObjects);
   }
 
   return allObjects;
