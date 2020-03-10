@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { CommentRequest } from '../../../../../../../../plugins/case/common/api';
@@ -14,6 +14,8 @@ import { MarkdownEditorForm } from '../../../../components/markdown_editor/form'
 import { Form, useForm, UseField } from '../../../../shared_imports';
 import * as i18n from '../../translations';
 import { schema } from './schema';
+import { InsertTimelinePopover } from '../../../../components/timeline/insert_timeline_popover';
+import { useInsertTimeline } from '../../../../components/timeline/insert_timeline_popover/use_insert_timeline';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
@@ -34,7 +36,10 @@ export const AddComment = React.memo<{
     options: { stripEmptyFields: false },
     schema,
   });
-
+  const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<CommentRequest>(
+    form,
+    'comment'
+  );
   const onSubmit = useCallback(async () => {
     const { isValid, data } = await form.submit();
     if (isValid) {
@@ -54,7 +59,8 @@ export const AddComment = React.memo<{
             isDisabled: isLoading,
             dataTestSubj: 'caseComment',
             placeholder: i18n.ADD_COMMENT_HELP_TEXT,
-            footerContentRight: (
+            onCursorPositionUpdate: handleCursorChange,
+            bottomRightContent: (
               <EuiButton
                 iconType="plusInCircle"
                 isDisabled={isLoading}
@@ -64,6 +70,13 @@ export const AddComment = React.memo<{
               >
                 {i18n.ADD_COMMENT}
               </EuiButton>
+            ),
+            topRightContent: (
+              <InsertTimelinePopover
+                hideUntitled={true}
+                isDisabled={isLoading}
+                onTimelineChange={handleOnTimelineChange}
+              />
             ),
           }}
         />

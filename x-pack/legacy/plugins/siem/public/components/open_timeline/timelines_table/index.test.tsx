@@ -152,7 +152,7 @@ describe('TimelinesTable', () => {
       wrapper
         .find('thead tr th')
         .at(5)
-        .find('svg[data-test-subj="notes-count-header-icon"]')
+        .find('[data-test-subj="notes-count-header-icon"]')
         .first()
         .exists()
     ).toBe(true);

@@ -75,20 +75,9 @@ Array [
       <div
         className="euiFlexItem euiFlexItem--flexGrowZero"
       >
-        <svg
-          aria-hidden={true}
-          className="euiIcon euiIcon--medium euiIcon-isLoading"
-          focusable="false"
-          height={16}
-          role="img"
-          style={
-            Object {
-              "fill": "#cc3b54",
-            }
-          }
-          viewBox="0 0 16 16"
-          width={16}
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          color="#cc3b54"
+          data-euiicon-type="dot"
         />
       </div>
       <div
@@ -107,20 +96,9 @@ Array [
       <div
         className="euiFlexItem euiFlexItem--flexGrowZero"
       >
-        <svg
-          aria-hidden={true}
-          className="euiIcon euiIcon--medium euiIcon-isLoading"
-          focusable="false"
-          height={16}
-          role="img"
-          style={
-            Object {
-              "fill": "#9b3067",
-            }
-          }
-          viewBox="0 0 16 16"
-          width={16}
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          color="#9b3067"
+          data-euiicon-type="dot"
         />
       </div>
       <div
@@ -139,20 +117,9 @@ Array [
       <div
         className="euiFlexItem euiFlexItem--flexGrowZero"
       >
-        <svg
-          aria-hidden={true}
-          className="euiIcon euiIcon--medium euiIcon-isLoading"
-          focusable="false"
-          height={16}
-          role="img"
-          style={
-            Object {
-              "fill": "#d41e93",
-            }
-          }
-          viewBox="0 0 16 16"
-          width={16}
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          color="#d41e93"
+          data-euiicon-type="dot"
         />
       </div>
       <div
