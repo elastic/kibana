@@ -1,7 +1,7 @@
 [[tutorial-discovering]]
 === Discover your data
 
-Using the Discover application, you can enter
+Using *Discover*, you can enter
 an {ref}/query-dsl-query-string-query.html#query-string-syntax[Elasticsearch
 query] to search your data and filter the results.
 
@@ -12,7 +12,7 @@ You might need to click *New* in the menu bar to refresh the data.
 
 . Click the caret to the right of the current index pattern, and select `ba*`.
 +
-By default, all fields are shown for each matching document. 
+By default, all fields are shown for each matching document.
 
 . In the search field, enter the following string:
 +
