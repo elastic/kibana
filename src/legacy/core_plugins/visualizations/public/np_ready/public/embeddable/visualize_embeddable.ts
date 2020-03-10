@@ -28,6 +28,7 @@ import {
   esFilters,
   Filter,
   TimefilterContract,
+  ISearchSource,
 } from '../../../../../../../plugins/data/public';
 import {
   EmbeddableInput,
@@ -47,12 +48,12 @@ import { PersistedState } from '../../../../../../../plugins/visualizations/publ
 import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
-import { VisSavedObject } from '../types';
+import { VisWithData } from '../saved_visualizations/_saved_vis';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
 export interface VisualizeEmbeddableConfiguration {
-  savedVisualization: VisSavedObject;
+  visWithData: VisWithData;
   indexPatterns?: IIndexPattern[];
   editUrl: string;
   editable: boolean;
@@ -74,7 +75,7 @@ export interface VisualizeInput extends EmbeddableInput {
 export interface VisualizeOutput extends EmbeddableOutput {
   editUrl: string;
   indexPatterns?: IIndexPattern[];
-  savedObjectId: string;
+  savedObjectId?: string;
   visTypeName: string;
 }
 
@@ -82,7 +83,7 @@ type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private handler?: ExpressionLoader;
-  private savedVisualization: VisSavedObject;
+  private searchSource: ISearchSource;
   private appState: { save(): void } | undefined;
   private uiState: PersistedState;
   private timefilter: TimefilterContract;
@@ -101,7 +102,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   constructor(
     timefilter: TimefilterContract,
     {
-      savedVisualization,
+      visWithData,
       editUrl,
       indexPatterns,
       editable,
@@ -114,19 +115,19 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     super(
       initialInput,
       {
-        defaultTitle: savedVisualization.title,
+        defaultTitle: visWithData.vis.title,
         editUrl,
         indexPatterns,
         editable,
-        savedObjectId: savedVisualization.id!,
-        visTypeName: savedVisualization.vis.type.name,
+        // savedObjectId: savedVisualization.id!,
+        visTypeName: visWithData.vis.type.name,
       },
       parent
     );
     this.timefilter = timefilter;
     this.appState = appState;
-    this.savedVisualization = savedVisualization;
-    this.vis = this.savedVisualization.vis;
+    this.vis = visWithData.vis;
+    this.searchSource = visWithData.searchSource;
 
     this.vis.on('update', this.handleVisUpdate);
     this.vis.on('reload', this.reload);
@@ -134,10 +135,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     if (uiState) {
       this.uiState = uiState;
     } else {
-      const parsedUiState = savedVisualization.uiStateJSON
-        ? JSON.parse(savedVisualization.uiStateJSON)
-        : {};
-      this.uiState = new PersistedState(parsedUiState);
+      this.uiState = this.vis.getUiState();
 
       this.uiState.on('change', this.uiStateChangeHandler);
     }
@@ -156,7 +154,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   }
 
   public getVisualizationDescription() {
-    return this.savedVisualization.description;
+    return this.vis.description;
   }
 
   public getInspectorAdapters = () => {
@@ -228,8 +226,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       }
     }
 
-    if (this.savedVisualization.description && this.domNode) {
-      this.domNode.setAttribute('data-description', this.savedVisualization.description);
+    if (this.vis.description && this.domNode) {
+      this.domNode.setAttribute('data-description', this.vis.description);
     }
 
     if (this.handler && dirty) {
@@ -245,9 +243,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.timeRange = _.cloneDeep(this.input.timeRange);
 
     this.transferCustomizationsToUiState();
-
-    this.savedVisualization.vis._setUiState(this.uiState);
-    this.uiState = this.savedVisualization.vis.getUiState();
 
     // this is a hack to make editor still work, will be removed once we clean up editor
     this.vis.hasInspector = () => {
@@ -309,8 +304,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     div.setAttribute('data-title', this.output.title || '');
 
-    if (this.savedVisualization.description) {
-      div.setAttribute('data-description', this.savedVisualization.description);
+    if (this.vis.description) {
+      div.setAttribute('data-description', this.vis.description);
     }
 
     div.setAttribute('data-test-subj', 'visualizationLoader');
@@ -341,9 +336,9 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     super.destroy();
     this.subscriptions.forEach(s => s.unsubscribe());
     this.uiState.off('change', this.uiStateChangeHandler);
-    this.savedVisualization.vis.removeListener('reload', this.reload);
-    this.savedVisualization.vis.removeListener('update', this.handleVisUpdate);
-    this.savedVisualization.destroy();
+    this.vis.removeListener('reload', this.reload);
+    this.vis.removeListener('update', this.handleVisUpdate);
+    // this.savedVisualization.destroy(); todo: check what this destroy did and if we still need it
     if (this.handler) {
       this.handler.destroy();
       this.handler.getElement().remove();
@@ -365,10 +360,9 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       uiState: this.uiState,
     };
     this.expression = await buildPipeline(this.vis, {
-      searchSource: this.savedVisualization.searchSource,
+      searchSource: this.searchSource,
       timefilter: this.timefilter,
       timeRange: this.timeRange,
-      savedObjectId: this.savedVisualization.id,
     });
 
     this.vis.filters = { timeRange: this.timeRange };

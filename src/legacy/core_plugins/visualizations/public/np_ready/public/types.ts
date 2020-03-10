@@ -18,21 +18,20 @@
  */
 
 import { SavedObject } from '../../../../../../plugins/saved_objects/public';
-import { Vis, VisState, VisParams, VisualizationController } from './vis';
+import { Vis, VisState, VisParams, VisualizationController, SerializedVisState } from './vis';
 import { ISearchSource } from '../../../../../../plugins/data/public/';
-import { SavedSearch } from '../../../../../../plugins/discover/public';
 
 export { Vis, VisState, VisParams, VisualizationController };
 
-export interface VisSavedObject extends SavedObject {
-  vis: Vis;
+export interface SerializedVisWithData {
+  title: string;
   description?: string;
   searchSource: ISearchSource;
-  title: string;
+  visState: SerializedVisState;
   uiStateJSON?: string;
-  destroy: () => void;
-  savedSearchRefName?: string;
   savedSearchId?: string;
-  savedSearch?: SavedSearch;
-  visState: VisState;
+  savedSearchRefName?: string;
 }
+
+// @ts-ignore
+export interface VisSavedObject extends SerializedVisWithData, SavedObject {}

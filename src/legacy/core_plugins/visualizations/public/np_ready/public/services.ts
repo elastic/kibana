@@ -18,10 +18,13 @@
  */
 
 import {
+  ApplicationStart,
   Capabilities,
+  ChromeStart,
   HttpStart,
   I18nStart,
   IUiSettingsClient,
+  OverlayStart,
   SavedObjectsStart,
 } from '../../../../../../core/public';
 import { TypesStart } from './vis_types';
@@ -76,3 +79,9 @@ export const [getSavedVisualizationsLoader, setSavedVisualizationsLoader] = crea
 export const [getAggs, setAggs] = createGetterSetter<LegacyDataStart['search']['aggs']>(
   'AggConfigs'
 );
+
+export const [getOverlays, setOverlays] = createGetterSetter<OverlayStart>('Overlays');
+
+export const [getChrome, setChrome] = createGetterSetter<ChromeStart>('Chrome');
+
+export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');

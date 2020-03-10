@@ -19,7 +19,7 @@
 
 import { VisType } from './vis_types';
 import { Status } from './legacy/update_status';
-import { IAggConfigs } from '../../../../data/public';
+import { IAggConfig, IAggConfigs } from '../../../../data/public';
 
 export interface Vis {
   type: VisType;
@@ -48,6 +48,13 @@ export interface VisState {
   type: VisType;
   params: VisParams;
   aggs: IAggConfigs;
+}
+
+export interface SerializedVisState {
+  title: string;
+  type: string;
+  params: VisParams;
+  aggs: IAggConfig[];
 }
 
 export interface VisualizationController {

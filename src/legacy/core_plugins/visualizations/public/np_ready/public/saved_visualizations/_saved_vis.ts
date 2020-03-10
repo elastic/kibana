@@ -26,71 +26,68 @@
  */
 import {
   createSavedObjectClass,
-  SavedObject,
   SavedObjectKibanaServices,
 } from '../../../../../../../plugins/saved_objects/public';
 // @ts-ignore
 import { updateOldState } from '../legacy/vis_update_state';
 import { extractReferences, injectReferences } from './saved_visualization_references';
-import { IIndexPattern } from '../../../../../../../plugins/data/public';
-import { VisSavedObject } from '../types';
+import {
+  IIndexPattern,
+  ISearchSource,
+  SearchSource,
+} from '../../../../../../../plugins/data/public';
+import { SerializedVisWithData } from '../types';
 import { VisImpl } from '../vis_impl';
 import { createSavedSearchesLoader } from '../../../../../../../plugins/discover/public';
+import { PersistedState } from '../../../../../../../plugins/visualizations/public';
+import { getSavedObjects, getIndexPatterns, getOverlays, getChrome } from '../services';
 
-async function _afterEsResp(savedVis: VisSavedObject, services: any) {
-  await _getLinkedSavedSearch(savedVis, services);
-  savedVis.searchSource!.setField('size', 0);
-  savedVis.vis = savedVis.vis ? _updateVis(savedVis) : await _createVis(savedVis);
-  return savedVis;
+export interface VisWithData {
+  vis: VisImpl;
+  searchSource: ISearchSource;
 }
 
-async function _getLinkedSavedSearch(savedVis: VisSavedObject, services: any) {
-  const linkedSearch = !!savedVis.savedSearchId;
-  const current = savedVis.savedSearch;
+export const getVisSavedObject = ({ vis, searchSource }: VisWithData): SerializedVisWithData => {
+  return {
+    title: '',
+    description: '',
+    visState: vis.getCurrentState(),
+    uiStateJSON: JSON.stringify(vis.getUiState().getChanges()),
+    savedSearchId: searchSource.getParent() ? searchSource.getParent()!.getId() : undefined,
+    searchSource,
+  };
+};
 
-  if (linkedSearch && current && current.id === savedVis.savedSearchId) {
-    return;
+export const getVisPanel = async ({
+  searchSource,
+  savedSearchId,
+  uiStateJSON,
+  visState,
+}: SerializedVisWithData): Promise<VisWithData> => {
+  const linkedSearchSource = await getSearchSource(searchSource, savedSearchId);
+  const uiState = new PersistedState(JSON.parse(uiStateJSON || '{}'));
+  const vis = new VisImpl(linkedSearchSource!.getField('index')!, visState);
+  vis._setUiState(uiState);
+
+  return { searchSource: linkedSearchSource, vis };
+};
+
+const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?: string) => {
+  const searchSource = inputSearchSource.createCopy
+    ? inputSearchSource.createCopy()
+    : new SearchSource({ ...(inputSearchSource as any).fields });
+  if (savedSearchId) {
+    const savedSearch = await createSavedSearchesLoader({
+      savedObjectsClient: getSavedObjects().client,
+      indexPatterns: getIndexPatterns(),
+      chrome: getChrome(),
+      overlays: getOverlays(),
+    }).get(savedSearchId);
+    searchSource.setParent(savedSearch);
   }
-
-  if (savedVis.savedSearch) {
-    savedVis.searchSource!.setParent(savedVis.savedSearch.searchSource.getParent());
-    savedVis.savedSearch.destroy();
-    delete savedVis.savedSearch;
-  }
-  const savedSearches = createSavedSearchesLoader(services);
-
-  if (linkedSearch) {
-    savedVis.savedSearch = await savedSearches.get(savedVis.savedSearchId!);
-    savedVis.searchSource!.setParent(savedVis.savedSearch!.searchSource);
-  }
-}
-
-async function _createVis(savedVis: VisSavedObject) {
-  savedVis.visState = updateOldState(savedVis.visState);
-
-  // visState doesn't yet exist when importing a visualization, so we can't
-  // assume that exists at this point. If it does exist, then we're not
-  // importing a visualization, so we want to sync the title.
-  if (savedVis.visState) {
-    savedVis.visState.title = savedVis.title;
-  }
-
-  savedVis.vis = new VisImpl(savedVis.searchSource!.getField('index')!, savedVis.visState);
-
-  savedVis.vis!.savedSearchId = savedVis.savedSearchId;
-
-  return savedVis.vis;
-}
-
-function _updateVis(savedVis: VisSavedObject) {
-  if (savedVis.vis && savedVis.searchSource) {
-    savedVis.vis.indexPattern = savedVis.searchSource.getField('index');
-    savedVis.visState.title = savedVis.title;
-    savedVis.vis.setState(savedVis.visState);
-    savedVis.vis.savedSearchId = savedVis.savedSearchId;
-  }
-  return savedVis.vis;
-}
+  searchSource!.setField('size', 0);
+  return searchSource;
+};
 
 export function createSavedVisClass(services: SavedObjectKibanaServices) {
   const SavedObjectClass = createSavedObjectClass(services);
@@ -130,9 +127,6 @@ export function createSavedVisClass(services: SavedObjectKibanaServices) {
           description: '',
           savedSearchId: opts.savedSearchId,
           version: 1,
-        },
-        afterESResp: (savedObject: SavedObject) => {
-          return _afterEsResp(savedObject as VisSavedObject, services) as Promise<SavedObject>;
         },
       });
       this.showInRecentlyAccessed = true;

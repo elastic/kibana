@@ -17,29 +17,27 @@
  * under the License.
  */
 
-import { VisSavedObject } from '../types';
 import {
   indexPatterns,
   IIndexPattern,
   IndexPatternAttributes,
 } from '../../../../../../../plugins/data/public';
 import { getUISettings, getSavedObjects } from '../services';
+import { VisImpl } from '../vis_impl';
 
-export async function getIndexPattern(
-  savedVis: VisSavedObject
-): Promise<IIndexPattern | undefined> {
-  if (savedVis.vis.type.name !== 'metrics') {
-    return savedVis.vis.indexPattern;
+export async function getIndexPattern(vis: VisImpl): Promise<IIndexPattern | undefined> {
+  if (vis.type.name !== 'metrics') {
+    return vis.indexPattern;
   }
 
   const savedObjectsClient = getSavedObjects().client;
   const defaultIndex = getUISettings().get('defaultIndex');
 
-  if (savedVis.vis.params.index_pattern) {
+  if (vis.params.index_pattern) {
     const indexPatternObjects = await savedObjectsClient.find<IndexPatternAttributes>({
       type: 'index-pattern',
       fields: ['title', 'fields'],
-      search: `"${savedVis.vis.params.index_pattern}"`,
+      search: `"${vis.params.index_pattern}"`,
       searchFields: ['title'],
     });
     const [indexPattern] = indexPatternObjects.savedObjects.map(indexPatterns.getFromSavedObject);

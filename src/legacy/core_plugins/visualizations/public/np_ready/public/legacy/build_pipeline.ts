@@ -488,7 +488,7 @@ export const buildPipeline = async (
     searchSource: ISearchSource;
     timefilter: TimefilterContract;
     timeRange?: any;
-    savedObjectId?: string;
+    savedObjectId?: string; // todo: this is no longer passed in and seems was needed by tsvb ?
   }
 ) => {
   const { searchSource } = params;

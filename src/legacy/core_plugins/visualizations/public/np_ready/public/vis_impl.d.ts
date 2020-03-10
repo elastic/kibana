@@ -17,24 +17,19 @@
  * under the License.
  */
 
-import { Vis, VisState, VisParams } from './vis';
+import { Vis, VisParams, SerializedVisState } from './vis';
 import { VisType } from './vis_types';
 import { IIndexPattern } from '../../../../../../plugins/data/common';
 import { Schema } from '../../../../vis_default_editor/public';
 import { IAggConfig } from '../../../../data/public/search/aggs';
 
-type InitVisStateType =
-  | Partial<VisState>
-  | Partial<Omit<VisState, 'type'> & { type: string }>
-  | string;
-
 export type VisImplConstructor = new (
   indexPattern: IIndexPattern,
-  visState?: InitVisStateType
+  visState?: SerializedVisState
 ) => VisImpl;
 
 export declare class VisImpl implements Vis {
-  constructor(indexPattern: IIndexPattern, visState?: InitVisStateType);
+  constructor(indexPattern: IIndexPattern, visState?: SerializedVisState);
 
   type: VisType;
   getCurrentState: (
@@ -43,7 +38,7 @@ export declare class VisImpl implements Vis {
     title: string;
     type: string;
     params: VisParams;
-    aggs: Array<{ [key: string]: any }>;
+    aggs: IAggConfig[];
   };
 
   private initializeDefaultsFromSchemas(configStates: IAggConfig[], schemas: Schema[]);

@@ -39,6 +39,9 @@ import {
   setSavedVisualizationsLoader,
   setTimeFilter,
   setAggs,
+  setOverlays,
+  setChrome,
+  setApplication,
 } from './services';
 import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeEmbeddableFactory } from './embeddable';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../../../plugins/expressions/public';
@@ -56,8 +59,8 @@ import { VisImpl } from './vis_impl';
 import { showNewVisModal } from './wizard';
 import { UiActionsStart } from '../../../../../../plugins/ui_actions/public';
 import { DataStart as LegacyDataStart } from '../../../../data/public';
-import { VisState } from './types';
-
+import { VisSavedObject, VisState } from './types';
+import { getVisPanel, VisWithData, getVisSavedObject } from './saved_visualizations/_saved_vis';
 /**
  * Interface for this plugin's returned setup/start contracts.
  *
@@ -69,6 +72,8 @@ export type VisualizationsSetup = TypesSetup;
 export interface VisualizationsStart extends TypesStart {
   savedVisualizationsLoader: SavedVisualizationsLoader;
   createVis: (indexPattern: IIndexPattern, visState?: VisState) => VisImpl;
+  createVisWithData: (savedVis: VisSavedObject) => Promise<VisWithData>;
+  serialize: ({ vis, searchSource }: VisWithData) => VisSavedObject;
   showNewVisModal: typeof showNewVisModal;
 }
 
@@ -142,6 +147,10 @@ export class VisualizationsPlugin
     setUiActions(uiActions);
     setTimeFilter(data.query.timefilter.timefilter);
     setAggs(aggs);
+    setChrome(core.chrome);
+    setOverlays(core.overlays);
+    setApplication(core.application);
+
     const savedVisualizationsLoader = createSavedVisLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: data.indexPatterns,
@@ -161,6 +170,9 @@ export class VisualizationsPlugin
        */
       createVis: (indexPattern: IIndexPattern, visState?: VisState) =>
         new VisImpl(indexPattern, visState),
+      createVisWithData: getVisPanel,
+      serialize: getVisSavedObject,
+
       savedVisualizationsLoader,
     };
   }
