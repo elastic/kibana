@@ -7,8 +7,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getCaseConfigure, patchCaseConfigure, postCaseConfigure } from './api';
 
-import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
-import { useStateToaster } from '../../../components/toasters';
+import { useStateToaster, errorToToaster } from '../../../components/toasters';
 import * as i18n from '../translations';
 import { ClosureType } from './types';
 

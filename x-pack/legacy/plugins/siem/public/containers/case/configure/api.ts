@@ -12,7 +12,6 @@ import {
   CasesConfigureRequest,
 } from '../../../../../../../plugins/case/common/api';
 import { KibanaServices } from '../../../lib/kibana';
-import { throwIfNotOk } from '../../../hooks/api/api';
 
 import { CASES_CONFIGURE_URL } from '../constants';
 import { ApiProps } from '../types';
@@ -24,13 +23,11 @@ export const fetchConnectors = async ({ signal }: ApiProps): Promise<CasesConnec
     `${CASES_CONFIGURE_URL}/connectors/_find`,
     {
       method: 'GET',
-      asResponse: true,
       signal,
     }
   );
 
-  await throwIfNotOk(response.response);
-  return response.body!;
+  return response;
 };
 
 export const getCaseConfigure = async ({ signal }: ApiProps): Promise<CaseConfigure | null> => {
@@ -38,15 +35,13 @@ export const getCaseConfigure = async ({ signal }: ApiProps): Promise<CaseConfig
     CASES_CONFIGURE_URL,
     {
       method: 'GET',
-      asResponse: true,
       signal,
     }
   );
 
-  await throwIfNotOk(response.response);
-  return !isEmpty(response.body)
+  return !isEmpty(response)
     ? convertToCamelCase<CasesConfigureResponse, CaseConfigure>(
-        decodeCaseConfigureResponse(response.body)
+        decodeCaseConfigureResponse(response)
       )
     : null;
 };
@@ -59,14 +54,12 @@ export const postCaseConfigure = async (
     CASES_CONFIGURE_URL,
     {
       method: 'POST',
-      asResponse: true,
       body: JSON.stringify(caseConfiguration),
       signal,
     }
   );
-  await throwIfNotOk(response.response);
   return convertToCamelCase<CasesConfigureResponse, CaseConfigure>(
-    decodeCaseConfigureResponse(response.body)
+    decodeCaseConfigureResponse(response)
   );
 };
 
@@ -78,14 +71,12 @@ export const patchCaseConfigure = async (
     CASES_CONFIGURE_URL,
     {
       method: 'PATCH',
-      asResponse: true,
       body: JSON.stringify(caseConfiguration),
       signal,
     }
   );
-  await throwIfNotOk(response.response);
   return convertToCamelCase<CasesConfigureResponse, CaseConfigure>(
-    decodeCaseConfigureResponse(response.body)
+    decodeCaseConfigureResponse(response)
   );
 };
 
@@ -98,12 +89,10 @@ export const patchConfigConnector = async ({
     `${CASES_CONFIGURE_URL}/connectors/${connectorId}`,
     {
       method: 'PATCH',
-      asResponse: true,
       body: JSON.stringify(config),
       signal,
     }
   );
 
-  await throwIfNotOk(response.response);
-  return response.body!;
+  return response;
 };

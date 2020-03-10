@@ -6,8 +6,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
-import { useStateToaster } from '../../../components/toasters';
+import { useStateToaster, errorToToaster } from '../../../components/toasters';
 import * as i18n from '../translations';
 import { fetchConnectors, patchConfigConnector } from './api';
 import { CasesConfigurationMapping, Connector } from './types';
