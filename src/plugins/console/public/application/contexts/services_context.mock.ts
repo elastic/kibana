@@ -35,7 +35,14 @@ export const serviceContextMock = {
         settings: new SettingsMock(storage),
         history: new HistoryMock(storage),
         notifications: notificationServiceMock.createSetupContract(),
-        objectStorageClient: {} as any,
+        objectStorageClient: {
+          text: {
+            create: jest.fn(),
+            findAll: jest.fn(),
+            update: jest.fn(),
+            delete: jest.fn(),
+          },
+        },
       },
       docLinkVersion: 'NA',
     };

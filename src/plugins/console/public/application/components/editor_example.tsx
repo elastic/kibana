@@ -18,10 +18,10 @@
  */
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import exampleText from 'raw-loader!../constants/help_example.txt';
 import React, { useEffect } from 'react';
+
 import { createReadOnlyAceEditor } from '../models/legacy_core_editor';
+import { exampleText } from '../constants/help_example';
 
 interface EditorExampleProps {
   panel: string;

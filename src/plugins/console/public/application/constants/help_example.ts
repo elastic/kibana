@@ -16,16 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
-import { EuiToolTip, EuiIcon } from '@elastic/eui';
 
-export const FileSavedIcon: FunctionComponent = () => (
-  <EuiToolTip
-    content={i18n.translate('console.file.savedIconToolTip', {
-      defaultMessage: 'File saved.',
-    })}
-  >
-    <EuiIcon type="check" />
-  </EuiToolTip>
-);
+export const exampleText = `# index a doc
+PUT index/1
+{
+  "body": "here"
+}
+
+# and get it ...
+GET index/1`;

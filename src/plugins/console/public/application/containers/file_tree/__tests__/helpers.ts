@@ -16,16 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
-import { EuiToolTip, EuiIcon } from '@elastic/eui';
 
-export const FileSavedIcon: FunctionComponent = () => (
-  <EuiToolTip
-    content={i18n.translate('console.file.savedIconToolTip', {
-      defaultMessage: 'File saved.',
-    })}
-  >
-    <EuiIcon type="check" />
-  </EuiToolTip>
-);
+import { act } from 'react-dom/test-utils';
+// @ts-ignore
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { ReactWrapper } from 'enzyme';
+
+export const createHelpers = (component: ReactWrapper) => {
+  return {
+    createFile: async () => {
+      (findTestSubject(component, 'consoleCreateFileButton') as ReactWrapper).simulate('click');
+      const textInput = component.find('.conAppFileNameTextField').last();
+      textInput.simulate('change', { target: { value: 'test' } });
+      await act(async () => {
+        component.find('form').simulate('submit');
+      });
+    },
+  };
+};

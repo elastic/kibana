@@ -30,6 +30,10 @@
     overflow: auto;
   }
 
+  &__errorIconContainer {
+    margin-right: 5px;
+  }
+
   &__entry {
     font-size: $euiSizeM;
     padding: 2px 5px;

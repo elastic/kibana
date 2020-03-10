@@ -103,7 +103,11 @@ export const FileTreeEntry: FunctionComponent<Props> = ({
             }
           }}
         >
-          {error && <FileSaveErrorIcon errorMessage={error} />}
+          {error && (
+            <span className="conApp__fileTree__errorIconContainer">
+              <FileSaveErrorIcon errorMessage={error} />
+            </span>
+          )}
           {displayName ?? name}
         </span>
       </EuiText>

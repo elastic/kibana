@@ -90,6 +90,7 @@ export const FileActionsBar: FunctionComponent<Props> = ({
                 defaultMessage: 'Create a file',
               })}
               iconType="plusInCircle"
+              data-test-subj="consoleCreateFileButton"
             />
           }
         >

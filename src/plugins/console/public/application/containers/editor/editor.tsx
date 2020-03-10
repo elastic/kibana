@@ -19,7 +19,7 @@
 
 import React, { useCallback, memo } from 'react';
 import { debounce } from 'lodash';
-import { EuiProgress, EuiControlBar, EuiLoadingSpinner, EuiIcon } from '@elastic/eui';
+import { EuiProgress, EuiControlBar, EuiLoadingSpinner } from '@elastic/eui';
 
 import { Panel, PanelsContainer } from '../../../../../kibana_react/public';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
