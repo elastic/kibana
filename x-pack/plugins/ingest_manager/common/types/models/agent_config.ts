@@ -20,7 +20,7 @@ export enum AgentConfigStatus {
 
 export interface NewAgentConfig {
   name: string;
-  namespace: string;
+  namespace?: string;
   description?: string;
   is_default?: boolean;
 }
@@ -31,6 +31,7 @@ export interface AgentConfig extends NewAgentConfig, SavedObjectAttributes {
   datasources: string[] | Datasource[];
   updated_on: string;
   updated_by: string;
+  revision: number;
 }
 
 export type FullAgentConfigDatasource = Pick<Datasource, 'name' | 'namespace' | 'enabled'> & {

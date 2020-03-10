@@ -28,6 +28,7 @@ export const DATASOURCE_API_ROUTES = {
   INFO_PATTERN: `${DATASOURCE_API_ROOT}/{datasourceId}`,
   CREATE_PATTERN: `${DATASOURCE_API_ROOT}`,
   UPDATE_PATTERN: `${DATASOURCE_API_ROOT}/{datasourceId}`,
+  DELETE_PATTERN: `${DATASOURCE_API_ROOT}/delete`,
 };
 
 // Agent config API routes

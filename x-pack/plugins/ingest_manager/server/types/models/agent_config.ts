@@ -9,7 +9,7 @@ import { AgentConfigStatus } from '../../../common';
 
 const AgentConfigBaseSchema = {
   name: schema.string(),
-  namespace: schema.string(),
+  namespace: schema.maybe(schema.string()),
   description: schema.maybe(schema.string()),
 };
 

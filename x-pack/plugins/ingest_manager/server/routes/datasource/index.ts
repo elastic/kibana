@@ -10,12 +10,14 @@ import {
   GetOneDatasourceRequestSchema,
   CreateDatasourceRequestSchema,
   UpdateDatasourceRequestSchema,
+  DeleteDatasourcesRequestSchema,
 } from '../../types';
 import {
   getDatasourcesHandler,
   getOneDatasourceHandler,
   createDatasourceHandler,
   updateDatasourceHandler,
+  deleteDatasourceHandler,
 } from './handlers';
 
 export const registerRoutes = (router: IRouter) => {
@@ -57,5 +59,15 @@ export const registerRoutes = (router: IRouter) => {
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
     updateDatasourceHandler
+  );
+
+  // Delete
+  router.post(
+    {
+      path: DATASOURCE_API_ROUTES.DELETE_PATTERN,
+      validate: DeleteDatasourcesRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}`] },
+    },
+    deleteDatasourceHandler
   );
 };
