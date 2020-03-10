@@ -37,7 +37,7 @@ export const ingest = log => async body => {
   const index = indexName(body);
 
   if (process.env.NODE_ENV === 'integration_test') {
-    log.debug(`### Just Logging, ${green('NOT actually sending')} to [${index}]`);
+    log.debug(`### Just Logging, ${green('NOT actually sending')} to [${green(index)}]`);
     logSuccess(log, index, body);
   } else {
     try {

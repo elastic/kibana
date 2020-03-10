@@ -69,44 +69,34 @@ export const distro = obj => {
 const captureAfterJobNameAndRootFolder = /.*elastic\+kibana\+code-coverage\/kibana(.*$)/;
 const afterJobNameAndRootFolder = x => captureAfterJobNameAndRootFolder.exec(x)[1];
 const fixFront = x => afterJobNameAndRootFolder(x);
+const setTotal = x => obj =>
+  obj['isTotal'] = x;
+const totalTrue = setTotal(true);
+const totalFalse = setTotal(false);
+
+const prokForTotalsIndex = urlBase => ts => obj =>
+  right(obj)
+    .map(totalTrue)
+    .map(_ => `${urlBase}/${ts}/index.html`)
+    .fold(noop, id);
 
 export const staticSite = urlBase => obj => {
-  const { staticSiteUrl , testRunnerType } = obj;
+  const { staticSiteUrl, testRunnerType } = obj;
   const ts = obj['@timestamp'];
+  const prokForTotalsIndexWithUrlBaseAndTimeStamp = prokForTotalsIndex(urlBase)(ts)
 
-  const parts = [
-    `${urlBase}/`,
-    ts,
-  ];
-
-  const join = xs => x => `${xs.join('')}${x}`;
-  const joinParts = join(parts);
+  const prokForCoverageIndex = obj => siteUrl =>
+    right(siteUrl)
+      .map(x => {
+        totalFalse(obj);
+        return x;
+      })
+      .map(fixFront)
+      .map(x => `${urlBase}/${ts}/${testRunnerType.toLowerCase()}-combined${x}.html`)
+      .fold(noop, id);
 
   const url = maybeTotal(staticSiteUrl)
-    .fold(
-      () => right(process.env.STATIC_SITE_URL_BASE).map(_ => {
-
-        obj['isTotal'] = true;
-
-        return joinParts('/index.html');
-      }).fold(noop, id)
-    , () => {
-
-        obj['isTotal'] = false;
-
-        return right(staticSiteUrl)
-          .map(fixFront)
-          .map(x =>
-            [
-              ...parts,
-              `${testRunnerType.toLowerCase()}-combined`,
-              x,
-              '.html'
-            ].join('')
-          )
-          .fold(noop, id)
-      }
-    );
+    .fold(_ => prokForTotalsIndexWithUrlBaseAndTimeStamp(obj), prokForCoverageIndex(obj));
 
   delete obj['staticSiteUrl'];
   obj['staticSiteUrl'] = url;
