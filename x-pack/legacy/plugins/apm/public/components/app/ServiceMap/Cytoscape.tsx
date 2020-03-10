@@ -63,7 +63,7 @@ function getLayoutOptions(
 ): cytoscape.LayoutOptions {
   return {
     name: 'breadthfirst',
-    roots: selectedRoots,
+    roots: selectedRoots.length ? selectedRoots : undefined,
     fit: true,
     padding: nodeHeight,
     spacingFactor: 0.85,
@@ -112,6 +112,12 @@ export function Cytoscape({
     event => {
       if (cy) {
         cy.edges().removeClass('highlight');
+
+        if (serviceName) {
+          const focusedNode = cy.getElementById(serviceName);
+          focusedNode.connectedEdges().addClass('highlight');
+        }
+
         // Add the "primary" class to the node if its id matches the serviceName.
         if (cy.nodes().length > 0 && serviceName) {
           cy.nodes().removeClass('primary');
@@ -126,7 +132,6 @@ export function Cytoscape({
             if (serviceName) {
               const focusedNode = cy.getElementById(serviceName);
               cy.center(focusedNode);
-              focusedNode.connectedEdges().addClass('highlight');
             }
             // show elements after layout is applied
             cy.elements().removeClass('invisible');

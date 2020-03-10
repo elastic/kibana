@@ -11,26 +11,27 @@ import { i18n } from '@kbn/i18n';
 import React, { MouseEvent } from 'react';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { getAPMHref } from '../../../shared/Links/apm/APMLink';
+import { APMQueryParams } from '../../../shared/Links/url_helpers';
 
 interface ButtonsProps {
-  focusedServiceName?: string;
   onFocusClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
   selectedNodeServiceName: string;
 }
 
 export function Buttons({
-  focusedServiceName,
   onFocusClick = () => {},
   selectedNodeServiceName
 }: ButtonsProps) {
-  const currentSearch = useUrlParams().urlParams.kuery ?? '';
+  const urlParams = useUrlParams().urlParams as APMQueryParams;
   const detailsUrl = getAPMHref(
     `/services/${selectedNodeServiceName}/transactions`,
-    currentSearch
+    '',
+    urlParams
   );
   const focusUrl = getAPMHref(
     `/services/${selectedNodeServiceName}/service-map`,
-    currentSearch
+    '',
+    urlParams
   );
 
   return (
