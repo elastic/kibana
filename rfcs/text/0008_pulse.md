@@ -74,7 +74,7 @@ This design is going to be tackled by introducing some common concepts to be use
 1. Remote Pulse Service (RPS)
 2. Local Pulse Service (LPS)
 
-After that, it explains how we invision the architecture and design of each of those components.
+After that, it explains how we envision the architecture and design of each of those components.
 
 ## Concepts
 
@@ -209,7 +209,7 @@ In the same effort, we could even provide some _dashboards_ in Kibana for specif
 
 Only those specific roles (admin?) should have access to these local indices, unless they grant permissions to other users they want to share this information with.
 
-The users should be able to control how long they want to keep that information for (via ILM?).
+The users should be able to control how long they want to keep that information for via ILM. A default ILM policy will be setup during the startup if it doesn't exist.
 
 #### Sending telemetry
 
@@ -234,7 +234,7 @@ Depending on the subscriptions to the channels by the plugins, the polling will 
 
 #### Exposing channels to the plugins
 
-The channels will be exposed to the channels as part of the `coreContext` in the `setup` and `start` lifecycle methods in a fashion like (types to be properly defined when implementing it):
+The plugins will be able to send messages and/or consume instructions for any channel by using the methods provided as part of the `coreContext` in the `setup` and `start` lifecycle methods in a fashion like (types to be properly defined when implementing it):
 
 ```typescript
 const coreContext: CoreSetup | CoreStart = {
@@ -257,6 +257,12 @@ core.pulse.instructionsFromChannel$('ui_behaviour_tracking')
 ```
 
 Internally in those methods we should append the `pluginId` to know who is sending/receiving the info.
+
+##### The _legacy_ collection
+
+The current telemetry collection via the `UsageCollector` service will be maintained until all the current telemetry is fully migrated into their own channels. In the meantime, the current existing telemetry will be sent to Pulse as the `legacy` channel. This way we can maintain the same architecture for the old and new telemetry to come. At this stage, there is no need for any plugin to update their logic unless they want to send more granular data using other (even specific to that plugin) channels.
+
+The mapping for this `legacy` channel will be kept `dynamic: false` instead of `strict` to ensure compatibility.
 
 # Drawbacks
 
