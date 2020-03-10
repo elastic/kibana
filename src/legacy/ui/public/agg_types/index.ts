@@ -73,7 +73,6 @@ export {
   isStringType,
   isType,
   isValidInterval,
-  isValidJson,
   OptionedParamType,
   parentPipelineType,
   propFilter,
