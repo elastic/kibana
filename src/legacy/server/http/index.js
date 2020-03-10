@@ -24,14 +24,11 @@ import Boom from 'boom';
 
 import { registerHapiPlugins } from './register_hapi_plugins';
 import { setupBasePathProvider } from './setup_base_path_provider';
-import { setupDefaultRouteProvider } from './setup_default_route_provider';
 
 export default async function(kbnServer, server, config) {
   server = kbnServer.server;
 
   setupBasePathProvider(kbnServer);
-
-  setupDefaultRouteProvider(server);
 
   await registerHapiPlugins(server);
 
