@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { SavedObjectsManagement } from './management';
+export { uiSettingsType } from './ui_settings';
