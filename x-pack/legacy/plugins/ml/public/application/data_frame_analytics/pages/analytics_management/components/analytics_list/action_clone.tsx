@@ -22,7 +22,6 @@ export const CloneAction: FC<CloneActionProps> = ({ item, actions }) => {
 
   const onClick = async () => {
     await actions.openModal();
-
     actions.setFormState(getCloneFormStateFromJobConfig(item!.config));
   };
 
