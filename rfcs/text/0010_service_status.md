@@ -1,6 +1,6 @@
 - Start Date: 2020-03-07
-- RFC PR: (leave this empty)
-- Kibana Issue: (leave this empty)
+- RFC PR: https://github.com/elastic/kibana/pull/59621
+- Kibana Issue: https://github.com/elastic/kibana/issues/41983
 
 # Summary
 
