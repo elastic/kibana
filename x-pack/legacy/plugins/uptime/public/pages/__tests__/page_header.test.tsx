@@ -12,6 +12,7 @@ import { OVERVIEW_ROUTE } from '../../../common/constants';
 import { ChromeBreadcrumb } from 'kibana/public';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { UptimeUrlParams, getSupportedUrlParams } from '../../lib/helper';
+import { Provider } from 'react-redux';
 
 describe('PageHeader', () => {
   const simpleBreadcrumbs: ChromeBreadcrumb[] = [
@@ -21,22 +22,26 @@ describe('PageHeader', () => {
 
   it('shallow renders with breadcrumbs and the date picker', () => {
     const component = renderWithRouter(
-      <PageHeader
-        headingText={'TestingHeading'}
-        breadcrumbs={simpleBreadcrumbs}
-        datePicker={true}
-      />
+      <MockReduxProvider>
+        <PageHeader
+          headingText={'TestingHeading'}
+          breadcrumbs={simpleBreadcrumbs}
+          datePicker={true}
+        />
+      </MockReduxProvider>
     );
     expect(component).toMatchSnapshot('page_header_with_date_picker');
   });
 
   it('shallow renders with breadcrumbs without the date picker', () => {
     const component = renderWithRouter(
-      <PageHeader
-        headingText={'TestingHeading'}
-        breadcrumbs={simpleBreadcrumbs}
-        datePicker={false}
-      />
+      <MockReduxProvider>
+        <PageHeader
+          headingText={'TestingHeading'}
+          breadcrumbs={simpleBreadcrumbs}
+          datePicker={false}
+        />
+      </MockReduxProvider>
     );
     expect(component).toMatchSnapshot('page_header_no_date_picker');
   });
@@ -45,13 +50,15 @@ describe('PageHeader', () => {
     const [getBreadcrumbs, core] = mockCore();
     mountWithRouter(
       <KibanaContextProvider services={{ ...core }}>
-        <Route path={OVERVIEW_ROUTE}>
-          <PageHeader
-            headingText={'TestingHeading'}
-            breadcrumbs={simpleBreadcrumbs}
-            datePicker={false}
-          />
-        </Route>
+        <MockReduxProvider>
+          <Route path={OVERVIEW_ROUTE}>
+            <PageHeader
+              headingText={'TestingHeading'}
+              breadcrumbs={simpleBreadcrumbs}
+              datePicker={false}
+            />
+          </Route>
+        </MockReduxProvider>
       </KibanaContextProvider>
     );
 
@@ -61,6 +68,19 @@ describe('PageHeader', () => {
     );
   });
 });
+
+const MockReduxProvider = ({ children }: { children: React.ReactElement }) => (
+  <Provider
+    store={{
+      dispatch: jest.fn(),
+      getState: jest.fn(),
+      subscribe: jest.fn(),
+      replaceReducer: jest.fn(),
+    }}
+  >
+    {children}
+  </Provider>
+);
 
 const mockCore: () => [() => ChromeBreadcrumb[], any] = () => {
   let breadcrumbObj: ChromeBreadcrumb[] = [];

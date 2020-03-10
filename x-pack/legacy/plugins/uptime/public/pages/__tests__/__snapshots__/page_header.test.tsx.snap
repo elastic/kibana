@@ -18,6 +18,43 @@ Array [
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
+        class="euiPopover euiPopover--anchorDownCenter"
+      >
+        <div
+          class="euiPopover__anchor"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--iconRight"
+            data-test-subj="xpack.uptime.alertsPopover.toggleButton"
+            type="button"
+          >
+            <span
+              class="euiButtonEmpty__content"
+            >
+              <svg
+                aria-hidden="true"
+                class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
+                focusable="false"
+                height="16"
+                role="img"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Manage alerts
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiSuperDatePicker__flexWrapper"
       >
         <div
@@ -146,6 +183,43 @@ Array [
       >
         TestingHeading
       </h1>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        class="euiPopover euiPopover--anchorDownCenter"
+      >
+        <div
+          class="euiPopover__anchor"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--iconRight"
+            data-test-subj="xpack.uptime.alertsPopover.toggleButton"
+            type="button"
+          >
+            <span
+              class="euiButtonEmpty__content"
+            >
+              <svg
+                aria-hidden="true"
+                class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
+                focusable="false"
+                height="16"
+                role="img"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Manage alerts
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>,
   <div
