@@ -1,9 +1,10 @@
 ---
 name: 8.0 Breaking change
 about: Breaking changes from 7.x -> 8.0
-title: [Breaking change]
-labels:
-    - "Team:Elasticsearch UI"
+title: "[Breaking change]"
+labels: Team:Elasticsearch UI
+assignees: ''
+
 ---
 
 ## Change description
