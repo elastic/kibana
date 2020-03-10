@@ -18,23 +18,14 @@
  */
 
 import { SavedObject } from 'src/core/server';
-import { ISavedObjectsManagement } from '../services';
-import { SavedObjectWithMetadata } from '../types';
 
-export function injectMetaAttributes<T = unknown>(
-  savedObject: SavedObject<T> | SavedObjectWithMetadata<T>,
-  savedObjectsManagement: ISavedObjectsManagement
-): SavedObjectWithMetadata<T> {
-  const result = {
-    ...savedObject,
-    meta: (savedObject as SavedObjectWithMetadata).meta || {},
-  };
-
-  // Add extra meta information
-  result.meta.icon = savedObjectsManagement.getIcon(savedObject.type);
-  result.meta.title = savedObjectsManagement.getTitle(savedObject);
-  result.meta.editUrl = savedObjectsManagement.getEditUrl(savedObject);
-  result.meta.inAppUrl = savedObjectsManagement.getInAppUrl(savedObject);
-
-  return result;
+export interface SavedObjectMetadata {
+  icon?: string;
+  title?: string;
+  editUrl?: string;
+  inAppUrl?: { path: string; uiCapabilitiesPath: string };
 }
+
+export type SavedObjectWithMetadata<T = unknown> = SavedObject<T> & {
+  meta: SavedObjectMetadata;
+};
