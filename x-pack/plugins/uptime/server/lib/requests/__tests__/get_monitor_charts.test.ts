@@ -4,31 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set } from 'lodash';
+import { set } from 'lodash';
 import mockChartsData from './monitor_charts_mock.json';
 import { getMonitorDurationChart } from '../get_monitor_duration';
 
 describe('ElasticsearchMonitorsAdapter', () => {
-  it('getMonitorChartsData will run expected parameters when no location is specified', async () => {
-    expect.assertions(2);
-    const searchMock = jest.fn();
-    const search = searchMock.bind({});
-    await getMonitorDurationChart({
-      callES: search,
-      monitorId: 'fooID',
-      dateStart: 'now-15m',
-      dateEnd: 'now',
-    });
-    expect(searchMock).toHaveBeenCalledTimes(1);
-
-    set(
-      searchMock.mock.calls[0][1],
-      'body.aggs.timeseries.date_histogram.fixed_interval',
-      '36000ms'
-    );
-    expect(searchMock.mock.calls[0]).toMatchSnapshot();
-  });
-
   it('getMonitorChartsData will provide expected filters', async () => {
     expect.assertions(2);
     const searchMock = jest.fn();
@@ -41,14 +21,6 @@ describe('ElasticsearchMonitorsAdapter', () => {
     });
     expect(searchMock).toHaveBeenCalledTimes(1);
     // protect against possible rounding errors polluting the snapshot comparison
-    const fixedInterval = parseInt(
-      get(
-        searchMock.mock.calls[0][1],
-        'body.aggs.timeseries.date_histogram.fixed_interval',
-        ''
-      ).split('ms')[0],
-      10
-    );
 
     set(
       searchMock.mock.calls[0][1],
