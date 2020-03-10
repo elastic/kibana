@@ -6,11 +6,11 @@
 
 import { useEffect, useState } from 'react';
 
-import { dictionaryToArray } from '../../../../../../common/types/common';
-import { useApi } from '../../../../hooks/use_api';
+import { dictionaryToArray } from '../../../../common/types/common';
+import { useApi } from '../../hooks/use_api';
 
-import { Dictionary } from '../../../../../../common/types/common';
-import { IndexPattern, ES_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/public';
+import { Dictionary } from '../../../../common/types/common';
+import { IndexPattern, ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 
 import {
   getPreviewRequestBody,
@@ -18,7 +18,7 @@ import {
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
   PivotQuery,
-} from '../../../../common';
+} from '../../common';
 
 export enum PIVOT_PREVIEW_STATUS {
   UNUSED,
@@ -51,7 +51,7 @@ export interface GetTransformsResponse {
 }
 
 export const usePivotPreviewData = (
-  indexPattern: IndexPattern,
+  indexPatternTitle: IndexPattern['title'],
   query: PivotQuery,
   aggs: PivotAggsConfigDict,
   groupBy: PivotGroupByConfigDict
@@ -65,7 +65,7 @@ export const usePivotPreviewData = (
   const aggsArr = dictionaryToArray(aggs);
   const groupByArr = dictionaryToArray(groupBy);
 
-  const previewRequest = getPreviewRequestBody(indexPattern.title, query, groupByArr, aggsArr);
+  const previewRequest = getPreviewRequestBody(indexPatternTitle, query, groupByArr, aggsArr);
 
   const getPreviewData = async () => {
     if (aggsArr.length === 0 || groupByArr.length === 0) {
@@ -94,7 +94,7 @@ export const usePivotPreviewData = (
     // custom comparison
     /* eslint-disable react-hooks/exhaustive-deps */
   }, [
-    indexPattern.title,
+    indexPatternTitle,
     JSON.stringify(aggsArr),
     JSON.stringify(groupByArr),
     JSON.stringify(query),
