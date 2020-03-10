@@ -21,6 +21,7 @@ import {
   EuiStat,
 } from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
+import styled from 'styled-components';
 import { useGetOneAgentConfig, useLink } from '../../../hooks';
 import { AGENT_CONFIG_DETAILS_PATH, AGENT_CONFIG_PATH } from '../../../constants';
 import { Datasource } from '../../../types';
@@ -32,6 +33,12 @@ import { LinkedAgentCount } from '../components';
 
 const DETAILS_ROUTER_PATH = `${AGENT_CONFIG_DETAILS_PATH}:configId`;
 const DETAILS_ROUTER_SUB_PATH = ':configId/:tabId';
+
+const Divider = styled.div`
+  width: 0;
+  height: 100%;
+  border-left: ${props => props.theme.eui.euiBorderThin};
+`;
 
 export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   const {
@@ -136,6 +143,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
             }),
             content: '999', // FIXME: implement version - see: https://github.com/elastic/kibana/issues/56750
           },
+          { isDivider: true },
           {
             label: i18n.translate('xpack.ingestManager.configDetails.summary.datasources', {
               defaultMessage: 'Data sources',
@@ -148,6 +156,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
               />
             ),
           },
+          { isDivider: true },
           {
             label: i18n.translate('xpack.ingestManager.configDetails.summary.usedBy', {
               defaultMessage: 'Used by',
@@ -159,6 +168,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
               />
             ),
           },
+          { isDivider: true },
           {
             label: i18n.translate('xpack.ingestManager.configDetails.summary.lastUpdated', {
               defaultMessage: 'Last updated on',
@@ -176,12 +186,16 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
           },
         ].map((item, index) => (
           <EuiFlexItem grow={false} key={index}>
-            <EuiStat
-              titleSize="xxs"
-              textAlign="right"
-              title={item.content}
-              description={item.label}
-            />
+            {item.isDivider ?? false ? (
+              <Divider />
+            ) : (
+              <EuiStat
+                titleSize="xxs"
+                textAlign="right"
+                title={item.content}
+                description={item.label}
+              />
+            )}
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
