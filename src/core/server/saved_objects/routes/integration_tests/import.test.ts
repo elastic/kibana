@@ -22,7 +22,7 @@ import { UnwrapPromise } from '@kbn/utility-types';
 import { registerImportRoute } from '../import';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { SavedObjectConfig } from '../../saved_objects_config';
-import { setupServer } from './test_utils';
+import { setupServer, createExportableType } from './test_utils';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -47,12 +47,15 @@ describe('POST /internal/saved_objects/_import', () => {
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
-    savedObjectsClient = handlerContext.savedObjects.client;
+    handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
+      allowedTypes.map(createExportableType)
+    );
 
+    savedObjectsClient = handlerContext.savedObjects.client;
     savedObjectsClient.find.mockResolvedValue(emptyResponse);
 
     const router = httpSetup.createRouter('/internal/saved_objects/');
-    registerImportRoute(router, config, allowedTypes);
+    registerImportRoute(router, config);
 
     await server.start();
   });

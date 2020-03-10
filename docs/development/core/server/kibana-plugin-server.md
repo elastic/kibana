@@ -53,7 +53,10 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AssistanceAPIResponse](./kibana-plugin-server.assistanceapiresponse.md) |  |
 |  [AssistantAPIClientParams](./kibana-plugin-server.assistantapiclientparams.md) |  |
 |  [Authenticated](./kibana-plugin-server.authenticated.md) |  |
-|  [AuthResultParams](./kibana-plugin-server.authresultparams.md) | Result of an incoming request authentication. |
+|  [AuthNotHandled](./kibana-plugin-server.authnothandled.md) |  |
+|  [AuthRedirected](./kibana-plugin-server.authredirected.md) |  |
+|  [AuthRedirectedParams](./kibana-plugin-server.authredirectedparams.md) | Result of auth redirection. |
+|  [AuthResultParams](./kibana-plugin-server.authresultparams.md) | Result of successful authentication. |
 |  [AuthToolkit](./kibana-plugin-server.authtoolkit.md) | A tool set defining an outcome of Auth interceptor for incoming request. |
 |  [CallAPIOptions](./kibana-plugin-server.callapioptions.md) | The set of options that defines how API call should be made and result be processed. |
 |  [Capabilities](./kibana-plugin-server.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
@@ -113,7 +116,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [PluginManifest](./kibana-plugin-server.pluginmanifest.md) | Describes the set of required and optional properties plugin can define in its mandatory JSON manifest file. |
 |  [PluginsServiceSetup](./kibana-plugin-server.pluginsservicesetup.md) |  |
 |  [PluginsServiceStart](./kibana-plugin-server.pluginsservicestart.md) |  |
-|  [RequestHandlerContext](./kibana-plugin-server.requesthandlercontext.md) | Plugin specific context passed to a route handler.<!-- -->Provides the following clients: - [rendering](./kibana-plugin-server.iscopedrenderingclient.md) - Rendering client which uses the data of the incoming request - [savedObjects.client](./kibana-plugin-server.savedobjectsclient.md) - Saved Objects client which uses the credentials of the incoming request - [elasticsearch.dataClient](./kibana-plugin-server.scopedclusterclient.md) - Elasticsearch data client which uses the credentials of the incoming request - [elasticsearch.adminClient](./kibana-plugin-server.scopedclusterclient.md) - Elasticsearch admin client which uses the credentials of the incoming request - [uiSettings.client](./kibana-plugin-server.iuisettingsclient.md) - uiSettings client which uses the credentials of the incoming request |
+|  [RequestHandlerContext](./kibana-plugin-server.requesthandlercontext.md) | Plugin specific context passed to a route handler.<!-- -->Provides the following clients and services: - [rendering](./kibana-plugin-server.iscopedrenderingclient.md) - Rendering client which uses the data of the incoming request - [savedObjects.client](./kibana-plugin-server.savedobjectsclient.md) - Saved Objects client which uses the credentials of the incoming request - [savedObjects.typeRegistry](./kibana-plugin-server.isavedobjecttyperegistry.md) - Type registry containing all the registered types. - [elasticsearch.dataClient](./kibana-plugin-server.scopedclusterclient.md) - Elasticsearch data client which uses the credentials of the incoming request - [elasticsearch.adminClient](./kibana-plugin-server.scopedclusterclient.md) - Elasticsearch admin client which uses the credentials of the incoming request - [uiSettings.client](./kibana-plugin-server.iuisettingsclient.md) - uiSettings client which uses the credentials of the incoming request |
 |  [RouteConfig](./kibana-plugin-server.routeconfig.md) | Route specific configuration. |
 |  [RouteConfigOptions](./kibana-plugin-server.routeconfigoptions.md) | Additional route options. |
 |  [RouteConfigOptionsBody](./kibana-plugin-server.routeconfigoptionsbody.md) | Additional body options for a route |
@@ -161,6 +164,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsServiceSetup](./kibana-plugin-server.savedobjectsservicesetup.md) | Saved Objects is Kibana's data persistence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods for registering Saved Object types, creating and registering Saved Object client wrappers and factories. |
 |  [SavedObjectsServiceStart](./kibana-plugin-server.savedobjectsservicestart.md) | Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceStart API provides a scoped Saved Objects client for interacting with Saved Objects. |
 |  [SavedObjectsType](./kibana-plugin-server.savedobjectstype.md) |  |
+|  [SavedObjectsTypeManagementDefinition](./kibana-plugin-server.savedobjectstypemanagementdefinition.md) | Configuration options for the [type](./kibana-plugin-server.savedobjectstype.md)<!-- -->'s management section. |
 |  [SavedObjectsTypeMappingDefinition](./kibana-plugin-server.savedobjectstypemappingdefinition.md) | Describe a saved object type mapping. |
 |  [SavedObjectsUpdateOptions](./kibana-plugin-server.savedobjectsupdateoptions.md) |  |
 |  [SavedObjectsUpdateResponse](./kibana-plugin-server.savedobjectsupdateresponse.md) |  |

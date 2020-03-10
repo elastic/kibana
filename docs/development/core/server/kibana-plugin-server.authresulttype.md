@@ -16,4 +16,6 @@ export declare enum AuthResultType
 |  Member | Value | Description |
 |  --- | --- | --- |
 |  authenticated | <code>&quot;authenticated&quot;</code> |  |
+|  notHandled | <code>&quot;notHandled&quot;</code> |  |
+|  redirected | <code>&quot;redirected&quot;</code> |  |
 
