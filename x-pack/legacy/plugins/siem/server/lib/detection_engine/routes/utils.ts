@@ -13,6 +13,7 @@ import {
   KibanaResponseFactory,
   CustomHttpResponseOptions,
 } from '../../../../../../../../src/core/server';
+import { BadRequestError } from '../errors/bad_request_error';
 
 export interface OutputError {
   message: string;
@@ -31,9 +32,8 @@ export const transformError = (err: Error & { statusCode?: number }): OutputErro
         message: err.message,
         statusCode: err.statusCode,
       };
-    } else if (err instanceof TypeError) {
-      // allows us to throw type errors instead of booms in some conditions
-      // where we don't want to mingle Boom with the rest of the code
+    } else if (err instanceof BadRequestError) {
+      // allows us to throw request validation errors in the absence of Boom
       return {
         message: err.message,
         statusCode: 400,
@@ -178,7 +178,7 @@ export const transformImportError = (
       message: err.message,
       existingImportSuccessError,
     });
-  } else if (err instanceof TypeError) {
+  } else if (err instanceof BadRequestError) {
     return createImportErrorObject({
       ruleId,
       statusCode: 400,
@@ -205,7 +205,7 @@ export const transformBulkError = (
       statusCode: err.output.statusCode,
       message: err.message,
     });
-  } else if (err instanceof TypeError) {
+  } else if (err instanceof BadRequestError) {
     return createBulkErrorObject({
       ruleId,
       statusCode: 400,

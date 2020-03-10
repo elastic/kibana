@@ -28,9 +28,9 @@ export function KeyValueTable({
         {keyValuePairs.map(({ key, value }) => (
           <EuiTableRow key={key}>
             <EuiTableRowCell>
-              <strong data-testid="dot-key">{key}</strong>
+              <strong data-test-subj="dot-key">{key}</strong>
             </EuiTableRowCell>
-            <EuiTableRowCell data-testid="value">
+            <EuiTableRowCell data-test-subj="value">
               <FormattedValue value={value} />
             </EuiTableRowCell>
           </EuiTableRow>

@@ -28,6 +28,33 @@ import { getDocumentationLinks } from './lib/documentation_links';
 // @ts-ignore: untyped local
 import { initClipboard } from './lib/clipboard';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
+import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/expressions/public';
+// @ts-ignore untyped local
+import { datasourceSpecs } from './expression_types/datasources';
+// @ts-ignore untyped local
+import { argTypeSpecs } from './expression_types/arg_types';
+import { transitions } from './transitions';
+import { registerLanguage } from './lib/monaco_language_def';
+
+import { initInterpreter } from './lib/run_interpreter';
+import { legacyRegistries } from './legacy_plugin_support';
+import { getPluginApi, CanvasApi, SetupRegistries } from './plugin_api';
+import {
+  initRegistries,
+  addElements,
+  addTransformUIs,
+  addDatasourceUIs,
+  addModelUIs,
+  addViewUIs,
+  addArgumentUIs,
+  addTagUIs,
+  addTemplates,
+  addTransitions,
+} from './registries';
+
+import { initFunctions } from './functions';
+
+import { CanvasSrcPlugin } from '../canvas_plugin_src/plugin';
 
 export { CoreStart };
 /**
@@ -36,9 +63,12 @@ export { CoreStart };
  */
 // This interface will be built out as we require other plugins for setup
 export interface CanvasSetupDeps {
+  expressions: ExpressionsSetup;
   home: HomePublicPluginSetup;
 }
+
 export interface CanvasStartDeps {
+  expressions: ExpressionsStart;
   __LEGACY: {
     absoluteToParsedUrl: (url: string, basePath: string) => any;
     formatMsg: any;
@@ -53,16 +83,18 @@ export interface CanvasStartDeps {
  */
 // These interfaces are empty for now but will be populate as we need to export
 // things for other plugins to use at startup or runtime
-export interface CanvasSetup {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export type CanvasSetup = CanvasApi;
 export interface CanvasStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 /** @internal */
 export class CanvasPlugin
   implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps> {
-  public setup(core: CoreSetup, plugins: CanvasSetupDeps) {
-    // This is where any setup actions need to occur.
-    // Things like registering functions to the interpreter that need
-    // to be available everywhere, not just in Canvas
+  private expressionSetup: CanvasSetupDeps['expressions'] | undefined;
+  private registries: SetupRegistries | undefined;
+
+  public setup(core: CoreSetup<CanvasStartDeps>, plugins: CanvasSetupDeps) {
+    const { api: canvasApi, registries } = getPluginApi(plugins.expressions);
+    this.registries = registries;
 
     core.application.register({
       id: 'canvas',
@@ -82,15 +114,51 @@ export class CanvasPlugin
     });
 
     plugins.home.featureCatalogue.register(featureCatalogueEntry);
+    this.expressionSetup = plugins.expressions;
 
-    return {};
+    // Register Legacy plugin stuff
+    canvasApi.addFunctions(legacyRegistries.browserFunctions.getOriginalFns());
+    canvasApi.addElements(legacyRegistries.elements.getOriginalFns());
+
+    // TODO: Do we want to completely move canvas_plugin_src into it's own plugin?
+    const srcPlugin = new CanvasSrcPlugin();
+    srcPlugin.setup(core, { canvas: canvasApi });
+
+    // Register core canvas stuff
+    canvasApi.addFunctions(initFunctions({ typesRegistry: plugins.expressions.__LEGACY.types }));
+    canvasApi.addDatasourceUIs(datasourceSpecs);
+    canvasApi.addArgumentUIs(argTypeSpecs);
+    canvasApi.addTransitions(transitions);
+
+    return {
+      ...canvasApi,
+    };
   }
 
   public start(core: CoreStart, plugins: CanvasStartDeps) {
-    loadExpressionTypes();
-    loadTransitions();
-
     initLoadingIndicator(core.http.addLoadingCountSource);
+    initRegistries();
+
+    if (this.expressionSetup) {
+      const expressionSetup = this.expressionSetup;
+      initInterpreter(plugins.expressions, expressionSetup).then(() => {
+        registerLanguage(Object.values(plugins.expressions.getFunctions()));
+      });
+    }
+
+    if (this.registries) {
+      addElements(this.registries.elements);
+      addTransformUIs(this.registries.transformUIs);
+      addDatasourceUIs(this.registries.datasourceUIs);
+      addModelUIs(this.registries.modelUIs);
+      addViewUIs(this.registries.viewUIs);
+      addArgumentUIs(this.registries.argumentUIs);
+      addTemplates(this.registries.templates);
+      addTagUIs(this.registries.tagUIs);
+      addTransitions(this.registries.transitions);
+    } else {
+      throw new Error('Unable to initialize Canvas registries');
+    }
 
     core.chrome.setBadge(
       core.application.capabilities.canvas && core.application.capabilities.canvas.save
