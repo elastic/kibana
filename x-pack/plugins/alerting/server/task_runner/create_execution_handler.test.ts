@@ -74,6 +74,7 @@ test('calls actionsPlugin.execute per selected action', async () => {
 });
 
 test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => {
+  // Mock two calls, one for check against actions[0] and the second for actions[1]
   createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValueOnce(false);
   createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValueOnce(true);
   const executionHandler = createExecutionHandler({
