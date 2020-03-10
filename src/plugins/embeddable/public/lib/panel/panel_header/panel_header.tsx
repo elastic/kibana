@@ -152,7 +152,7 @@ export function PanelHeader({
       </h2>
       {!isViewMode && drilldownCount && (
         <EuiNotificationBadge style={{ marginTop: '4px', marginRight: '4px' }}>
-          A{drilldownCount}
+          {drilldownCount}
         </EuiNotificationBadge>
       )}
       <PanelOptionsMenu
