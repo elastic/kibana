@@ -18,6 +18,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
+  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -87,27 +88,29 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
   } = useSourceIndexData(indexPattern, query);
 
   // EuiDataGrid State
-  const dataGridColumns = indexPatternFields.map(id => {
-    const field = indexPattern.fields.getByName(id);
+  const dataGridColumns = [
+    ...indexPatternFields.map(id => {
+      const field = indexPattern.fields.getByName(id);
 
-    // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
-    // To fall back to the default string schema it needs to be undefined.
-    let schema;
+      // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
+      // To fall back to the default string schema it needs to be undefined.
+      let schema;
 
-    switch (field?.type) {
-      case 'date':
-        schema = 'datetime';
-        break;
-      case 'geo_point':
-        schema = 'json';
-        break;
-      case 'number':
-        schema = 'numeric';
-        break;
-    }
+      switch (field?.type) {
+        case 'date':
+          schema = 'datetime';
+          break;
+        case 'geo_point':
+          schema = 'json';
+          break;
+        case 'number':
+          schema = 'numeric';
+          break;
+      }
 
-    return { id, schema };
-  });
+      return { id, schema };
+    }),
+  ];
 
   const onSort = useCallback(
     (sc: Array<{ id: string; direction: 'asc' | 'desc' }>) => {
@@ -179,25 +182,6 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
     };
   }, [data, indexPattern.fields, pagination.pageIndex, pagination.pageSize]);
 
-  if (status === SOURCE_INDEX_STATUS.ERROR) {
-    return (
-      <div data-test-subj="transformSourceIndexPreview error">
-        <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
-        <EuiCallOut
-          title={i18n.translate('xpack.transform.sourceIndexPreview.sourceIndexPatternError', {
-            defaultMessage: 'An error occurred loading the source index data.',
-          })}
-          color="danger"
-          iconType="cross"
-        >
-          <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable>
-            {errorMessage}
-          </EuiCodeBlock>
-        </EuiCallOut>
-      </div>
-    );
-  }
-
   if (status === SOURCE_INDEX_STATUS.LOADED && data.length === 0) {
     return (
       <div data-test-subj="transformSourceIndexPreview empty">
@@ -227,7 +211,11 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
   });
 
   return (
-    <div data-test-subj="transformSourceIndexPreview loaded">
+    <div
+      data-test-subj={`transformSourceIndexPreview ${
+        status === SOURCE_INDEX_STATUS.ERROR ? 'error' : 'loaded'
+      }`}
+    >
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem>
           <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
@@ -249,24 +237,38 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
           <EuiProgress size="xs" color="accent" max={1} value={0} />
         )}
       </div>
-      {dataGridColumns.length > 0 && data.length > 0 && (
-        <EuiDataGrid
-          aria-label="Source index preview"
-          columns={dataGridColumns}
-          columnVisibility={{ visibleColumns, setVisibleColumns }}
-          gridStyle={euiDataGridStyle}
-          rowCount={rowCount}
-          renderCellValue={renderCellValue}
-          sorting={{ columns: sortingColumns, onSort }}
-          toolbarVisibility={euiDataGridToolbarSettings}
-          pagination={{
-            ...pagination,
-            pageSizeOptions: [5, 10, 25],
-            onChangeItemsPerPage,
-            onChangePage,
-          }}
-        />
+      {status === SOURCE_INDEX_STATUS.ERROR && (
+        <div data-test-subj="transformSourceIndexPreview error">
+          <EuiCallOut
+            title={i18n.translate('xpack.transform.sourceIndexPreview.sourceIndexPatternError', {
+              defaultMessage: 'An error occurred loading the source index data.',
+            })}
+            color="danger"
+            iconType="cross"
+          >
+            <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable>
+              {errorMessage}
+            </EuiCodeBlock>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </div>
       )}
+      <EuiDataGrid
+        aria-label="Source index preview"
+        columns={dataGridColumns}
+        columnVisibility={{ visibleColumns, setVisibleColumns }}
+        gridStyle={euiDataGridStyle}
+        rowCount={rowCount}
+        renderCellValue={renderCellValue}
+        sorting={{ columns: sortingColumns, onSort }}
+        toolbarVisibility={euiDataGridToolbarSettings}
+        pagination={{
+          ...pagination,
+          pageSizeOptions: [5, 10, 25],
+          onChangeItemsPerPage,
+          onChangePage,
+        }}
+      />
     </div>
   );
 });

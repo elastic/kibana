@@ -121,7 +121,6 @@ export const useSourceIndexData = (
       } else {
         setErrorMessage(JSON.stringify(e, null, 2));
       }
-      setTableItems([]);
       setStatus(SOURCE_INDEX_STATUS.ERROR);
     }
   };
