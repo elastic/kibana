@@ -41,7 +41,7 @@ import { ModuleJobs } from './components/module_jobs';
 import { checkForSavedObjects } from './resolvers';
 import { JobSettingsForm, JobSettingsFormValues } from './components/job_settings_form';
 import { TimeRange } from '../common/components';
-import { JobId } from '../common/job_creator/configs';
+import { JobId } from '../../../../../common/types/anomaly_detection_jobs';
 
 export interface ModuleJobUI extends ModuleJob {
   datafeedResult?: DatafeedResponse;

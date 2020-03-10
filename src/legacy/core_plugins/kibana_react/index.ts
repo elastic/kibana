@@ -25,7 +25,6 @@ export default function DataPlugin(kibana: any) {
   const config: Legacy.PluginSpecOptions = {
     id: 'kibana_react',
     require: [],
-    publicDir: resolve(__dirname, 'public'),
     config: (Joi: any) => {
       return Joi.object({
         enabled: Joi.boolean().default(true),

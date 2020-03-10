@@ -79,3 +79,9 @@ export const mockUuidService = uuidServiceMock.create();
 jest.doMock('./uuid/uuid_service', () => ({
   UuidService: jest.fn(() => mockUuidService),
 }));
+
+import { metricsServiceMock } from './metrics/metrics_service.mock';
+export const mockMetricsService = metricsServiceMock.create();
+jest.doMock('./metrics/metrics_service', () => ({
+  MetricsService: jest.fn(() => mockMetricsService),
+}));
