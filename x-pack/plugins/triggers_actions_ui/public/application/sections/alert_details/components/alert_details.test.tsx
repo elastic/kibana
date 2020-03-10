@@ -125,6 +125,7 @@ describe('alert_details', () => {
           enabled: true,
           enabledInConfig: true,
           enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
         },
       ];
 
@@ -176,6 +177,7 @@ describe('alert_details', () => {
           enabled: true,
           enabledInConfig: true,
           enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
         },
         {
           id: '.email',
@@ -183,6 +185,7 @@ describe('alert_details', () => {
           enabled: true,
           enabledInConfig: true,
           enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
         },
       ];
 

@@ -27,6 +27,7 @@ describe('loadActionTypes', () => {
         enabled: true,
         enabledInConfig: true,
         enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
       },
     ];
     http.get.mockResolvedValueOnce(resolvedValue);

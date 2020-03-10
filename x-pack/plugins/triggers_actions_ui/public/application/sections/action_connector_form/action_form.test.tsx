@@ -98,6 +98,7 @@ describe('action_form', () => {
               enabled: true,
               enabledInConfig: true,
               enabledInLicense: true,
+              minimumLicenseRequired: 'basic',
             },
             {
               id: '.index',
@@ -105,6 +106,7 @@ describe('action_form', () => {
               enabled: true,
               enabledInConfig: true,
               enabledInLicense: true,
+              minimumLicenseRequired: 'basic',
             },
           ]}
           toastNotifications={deps!.toastNotifications}

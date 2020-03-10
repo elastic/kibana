@@ -81,6 +81,7 @@ describe('connector_add_flyout', () => {
               name: 'Test',
               enabledInConfig: true,
               enabledInLicense: true,
+              minimumLicenseRequired: 'basic',
             },
           ]}
         />
