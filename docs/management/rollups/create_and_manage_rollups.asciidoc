@@ -56,6 +56,7 @@ job&mdash;reusing the same name can lead to problems with mismatched job configu
 You can read more at {ref}/rollup-job-config.html[rollup job configuration].
 
 [float]
+[[rollup-data-tutorial]]
 === Try it: Create and visualize rolled up data
 
 This example creates a rollup job to capture log data from sample web logs.
@@ -138,8 +139,7 @@ is `rollup_logstash,kibana_sample_data_logs`.
 image::images/management_rollup_job_vis.png[][Visualization of rolled up data]
 
 You can then create a dashboard that contains visualizations of the rolled up
-data, raw data, or both.  See <<visualize-rollup-data, Using rolled up data in a visualization>>
-for more information.
+data, raw data, or both. For more information, refer to <<rollup-index-pattern,rolled up data>>.
 
 [role="screenshot"]
 image::images/management_rollup_job_dashboard.png[][Dashboard with rolled up data]
