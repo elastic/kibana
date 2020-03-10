@@ -106,7 +106,6 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
     <div
       className="auaActionWizard__selectedActionFactoryContainer"
       data-test-subj={TEST_SUBJ_SELECTED_ACTION_FACTORY}
-      data-testid={TEST_SUBJ_SELECTED_ACTION_FACTORY}
     >
       <header>
         <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -164,7 +163,6 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
           className="auaActionWizard__actionFactoryItem"
           key={actionFactory.id}
           label={actionFactory.getDisplayName()}
-          data-testid={TEST_SUBJ_ACTION_FACTORY_ITEM}
           data-test-subj={TEST_SUBJ_ACTION_FACTORY_ITEM}
           onClick={() => onActionFactorySelected(actionFactory)}
         >
