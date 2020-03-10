@@ -271,8 +271,7 @@ export default function({ getService }: FtrProviderContext) {
     },
   ];
 
-  // eslint-disable-next-line ban/ban
-  describe.only('saved search', function() {
+  describe('saved search', function() {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('ml/farequote');
