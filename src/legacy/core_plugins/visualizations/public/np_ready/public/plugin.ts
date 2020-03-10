@@ -58,6 +58,8 @@ import { UiActionsStart } from '../../../../../../plugins/ui_actions/public';
 import { DataStart as LegacyDataStart } from '../../../../data/public';
 import { VisState } from './types';
 
+import './index.scss';
+
 /**
  * Interface for this plugin's returned setup/start contracts.
  *

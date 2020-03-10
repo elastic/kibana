@@ -29,8 +29,6 @@
  * either types, or static code.
  */
 
-import './index.scss';
-
 import { PublicContract } from '@kbn/utility-types';
 import { PluginInitializerContext } from '../../../../../../core/public';
 import { VisualizationsPlugin, VisualizationsSetup, VisualizationsStart } from './plugin';

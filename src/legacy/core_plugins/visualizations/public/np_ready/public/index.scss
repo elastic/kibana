@@ -1,2 +1,6 @@
+// Due the plugin is located on the old platform we should leave import of constants.
+// It will be removed when "visualizations" will migrate to the new platform
+@import 'src/legacy/ui/public/styles/styling_constants';
+
 @import './wizard/index';
 @import './embeddable/index';
