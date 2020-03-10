@@ -15,6 +15,9 @@ export const AgentConfigApp: React.FunctionComponent = () => (
       <Route path="/configs/:configId/add-datasource">
         <CreateDatasourcePage />
       </Route>
+      <Route path="/configs/:configId/:tabId">
+        <AgentConfigDetailsPage />
+      </Route>
       <Route path="/configs/:configId">
         <AgentConfigDetailsPage />
       </Route>

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import { Redirect, useRouteMatch } from 'react-router-dom';
+import { Redirect, useRouteMatch, generatePath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import {
@@ -30,11 +30,13 @@ import { ConfigRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } fr
 import { DatasourcesTable, EditConfigFlyout } from './components';
 import { LinkedAgentCount } from '../components';
 
+const DETAILS_ROUTER_PATH = ':configId/:tabId';
+
 export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   const {
-    params: { configId },
+    params: { configId, tabId = '' },
     // path: currentRoutePath,
-  } = useRouteMatch<{ configId: string }>();
+  } = useRouteMatch<{ configId: string; tabId?: string }>();
   const agentConfigRequest = useGetOneAgentConfig(configId);
   const agentConfig = agentConfigRequest.data ? agentConfigRequest.data.item : null;
   const { isLoading, error, sendRequest: refreshAgentConfig } = agentConfigRequest;
@@ -49,6 +51,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
 
   const ADD_DATASOURCE_URI = useLink(`${AGENT_CONFIG_DETAILS_PATH}${configId}/add-datasource`);
   const AGENT_CONFIG_LIST_URI = useLink(AGENT_CONFIG_PATH);
+  const AGENT_CONFIG_DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
 
   // Flyout states
   const [isEditConfigFlyoutOpen, setIsEditConfigFlyoutOpen] = useState<boolean>(false);
@@ -163,29 +166,40 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
     [agentConfig, agentStatus]
   );
 
-  const headerTabs = useMemo((): EuiTabProps[] => {
+  const headerTabs = useMemo(() => {
     return [
       {
         id: 'datasources',
         name: i18n.translate('xpack.ingestManager.configDetails.subTabs.datasouces', {
           defaultMessage: 'Data sources',
         }),
-        isSelected: true,
+        href: `${AGENT_CONFIG_DETAILS_URI}${configId}`,
+        isSelected: tabId === '',
       },
       {
-        id: 'yamlFile',
+        id: 'yaml',
         name: i18n.translate('xpack.ingestManager.configDetails.subTabs.yamlFile', {
           defaultMessage: 'YAML File',
         }),
+        href: `${AGENT_CONFIG_DETAILS_URI}${generatePath(DETAILS_ROUTER_PATH, {
+          configId,
+          tabId: 'yaml',
+        })}`,
+        isSelected: tabId === 'yaml',
       },
       {
         id: 'settings',
         name: i18n.translate('xpack.ingestManager.configDetails.subTabs.settings', {
           defaultMessage: 'Settings',
         }),
+        href: `${AGENT_CONFIG_DETAILS_URI}${generatePath(DETAILS_ROUTER_PATH, {
+          configId,
+          tabId: 'settings',
+        })}`,
+        isSelected: tabId === 'settings',
       },
     ];
-  }, []);
+  }, [AGENT_CONFIG_DETAILS_URI, configId, tabId]);
 
   if (redirectToAgentConfigList) {
     return <Redirect to="/" />;
@@ -198,7 +212,6 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   if (error) {
     return (
       <WithHeaderLayout>
-        {/* TODO: use Error component from top-level `components/` */}
         <EuiCallOut
           title={i18n.translate('xpack.ingestManager.configDetails.unexceptedErrorTitle', {
             defaultMessage: 'An error happened while loading the config',
@@ -234,7 +247,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
         <WithHeaderLayout
           leftColumn={headerLeftContent}
           rightColumn={headerRightContent}
-          tabs={headerTabs}
+          tabs={(headerTabs as unknown) as EuiTabProps[]}
         >
           {isEditConfigFlyoutOpen ? (
             <EditConfigFlyout
