@@ -33,7 +33,7 @@ export interface Store {
   persistingTextObjectWithId: string | undefined;
   currentTextObjectId: string;
   textObjects: Record<string, TextObjectWithId>;
-  textObjectsSaveError: Record<string, Error | string>;
+  textObjectsSaveError: Record<string, string>;
 }
 
 export const initialValue: Store = {

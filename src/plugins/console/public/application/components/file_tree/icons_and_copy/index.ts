@@ -17,9 +17,5 @@
  * under the License.
  */
 
-export { FileForm } from './forms';
-export { FileActionsBar } from './file_actions_bar';
-export { DeleteFileModal } from './delete_file_modal';
-export { FileSearchBar } from './file_search_bar';
-export { FileTree } from './file_tree';
-export * from './icons_and_copy';
+export { FileSaveErrorIcon } from './save_error';
+export { FileSavedIcon } from './saved';

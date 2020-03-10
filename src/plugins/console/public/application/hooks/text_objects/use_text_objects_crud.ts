@@ -92,24 +92,26 @@ export const useTextObjectsCRUD = () => {
 
     update: useCallback(
       async ({ textObject }: UpdateTextObjectArgs) => {
+        let timeoutHandle: any;
         try {
           // Update local reference
           dispatch({ type: 'upsert', payload: textObject });
 
           // Update persistence
 
-          const timeoutHandle = setTimeout(() => {
+          timeoutHandle = setTimeout(() => {
             // Prevent UI flashes.
             dispatch({ type: 'setSavingTextObject', payload: textObject.id });
           }, PREVENT_UI_FLASHES_DELAY);
           await objectStorageClient.text.update(
             throwIfUnknown(partialTextObjectSchema, textObject)
           );
-          clearTimeout(timeoutHandle);
           dispatch({ type: 'clearSaveError', payload: { textObjectId: textObject.id } });
         } catch (e) {
           dispatch({ type: 'saveError', payload: { textObjectId: textObject.id, error: e } });
         } finally {
+          // Cleanup state and resources
+          clearTimeout(timeoutHandle);
           dispatch({ type: 'setSavingTextObject', payload: undefined });
         }
       },

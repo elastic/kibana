@@ -19,14 +19,9 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiButtonIcon,
-  EuiFieldText,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiButtonIcon, EuiFieldText } from '@elastic/eui';
+
+import { FileSaveErrorIcon } from './icons_and_copy';
 
 export interface EditHandlerArg {
   id: string;
@@ -44,7 +39,7 @@ export interface Props {
   canEdit?: boolean;
   displayName?: React.ReactNode;
   ariaLabel?: string;
-  error?: string | Error;
+  error?: string;
 }
 
 export const FileTreeEntry: FunctionComponent<Props> = ({
@@ -108,7 +103,7 @@ export const FileTreeEntry: FunctionComponent<Props> = ({
             }
           }}
         >
-          {error && <EuiIcon type="alert" color="warning" />}
+          {error && <FileSaveErrorIcon errorMessage={error} />}
           {displayName ?? name}
         </span>
       </EuiText>

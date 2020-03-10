@@ -31,7 +31,7 @@ import {
 } from '../../contexts';
 
 import { addDefaultValues } from '../file_tree/file_tree';
-import { NetworkRequestStatusBar } from '../../components/network_request_status_bar';
+import { NetworkRequestStatusBar, FileSaveErrorIcon, FileSavedIcon } from '../../components';
 
 const INITIAL_PANEL_WIDTH = 50;
 const PANEL_MIN_WIDTH = '100px';
@@ -114,9 +114,11 @@ export const Editor = memo(() => {
                         {persistingTextObjectWithId === currentTextObjectId ? (
                           <EuiLoadingSpinner size="m" />
                         ) : textObjectsSaveError[currentTextObjectId] ? (
-                          <EuiIcon className="conApp__noTransition" color="warning" type="alert" />
+                          <FileSaveErrorIcon
+                            errorMessage={textObjectsSaveError[currentTextObjectId]}
+                          />
                         ) : (
-                          <EuiIcon className="conApp__noTransition" color="ghost" type="check" />
+                          <FileSavedIcon />
                         )}
                       </div>
                     ),
