@@ -22,23 +22,12 @@
 // They can stay even after NP cutover
 import angular from 'angular';
 import { EuiIcon } from '@elastic/eui';
-// @ts-ignore
-import { StateProvider } from 'ui/state_management/state';
-// @ts-ignore
-import { EventsProvider } from 'ui/events';
-import { PersistedState } from 'ui/persisted_state';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
-// @ts-ignore
-import { AppStateProvider } from 'ui/state_management/app_state';
-// @ts-ignore
-import { GlobalStateProvider } from 'ui/state_management/global_state';
 // @ts-ignore
 import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
 // @ts-ignore
 import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
-// @ts-ignore
-import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
@@ -64,7 +53,6 @@ import { createFieldChooserDirective } from './np_ready/components/field_chooser
 import { createDiscoverFieldDirective } from './np_ready/components/field_chooser/discover_field';
 import { CollapsibleSidebarProvider } from './np_ready/angular/directives/collapsible_sidebar/collapsible_sidebar';
 import { DiscoverStartPlugins } from './plugin';
-import { initAngularBootstrap } from '../../../../../plugins/kibana_legacy/public';
 import { createCssTruncateDirective } from './np_ready/angular/directives/css_truncate';
 // @ts-ignore
 import { FixedScrollProvider } from './np_ready/angular/directives/fixed_scroll';
@@ -72,6 +60,7 @@ import { FixedScrollProvider } from './np_ready/angular/directives/fixed_scroll'
 import { DebounceProviderTimeout } from './np_ready/angular/directives/debounce/debounce';
 import { createRenderCompleteDirective } from './np_ready/angular/directives/render_complete';
 import {
+  initAngularBootstrap,
   configureAppAngularModule,
   IPrivate,
   KbnAccessibleClickProvider,
@@ -79,6 +68,8 @@ import {
   PromiseServiceCreator,
   registerListenEventListener,
   watchMultiDecorator,
+  createTopNavDirective,
+  createTopNavHelper,
 } from '../../../../../plugins/kibana_legacy/public';
 
 /**
@@ -120,10 +111,7 @@ export function initializeInnerAngularModule(
     createLocalPromiseModule();
     createLocalConfigModule(core.uiSettings);
     createLocalKbnUrlModule();
-    createLocalPersistedStateModule();
     createLocalTopNavModule(navigation);
-    createLocalGlobalStateModule();
-    createLocalAppStateModule();
     createLocalStorageModule();
     createElasticSearchModule(data);
     createPagerFactoryModule();
@@ -141,7 +129,7 @@ export function initializeInnerAngularModule(
         'discoverPrivate',
         'discoverDocTable',
         'discoverPagerFactory',
-        'discoverPersistedState',
+        'discoverPromise',
       ])
       .config(watchMultiDecorator)
       .directive('icon', reactDirective => reactDirective(EuiIcon))
@@ -159,10 +147,8 @@ export function initializeInnerAngularModule(
       'discoverConfig',
       'discoverI18n',
       'discoverPrivate',
-      'discoverPersistedState',
+      'discoverPromise',
       'discoverTopNav',
-      'discoverGlobalState',
-      'discoverAppState',
       'discoverLocalStorageProvider',
       'discoverEs',
       'discoverDocTable',
@@ -183,32 +169,6 @@ export function initializeInnerAngularModule(
     .directive('discoverField', createDiscoverFieldDirective)
     .directive('discFieldChooser', createFieldChooserDirective)
     .service('debounce', ['$timeout', DebounceProviderTimeout]);
-}
-
-export function createLocalGlobalStateModule() {
-  angular
-    .module('discoverGlobalState', [
-      'discoverPrivate',
-      'discoverConfig',
-      'discoverKbnUrl',
-      'discoverPromise',
-    ])
-    .service('globalState', function(Private: IPrivate) {
-      return Private(GlobalStateProvider);
-    });
-}
-
-function createLocalPersistedStateModule() {
-  angular
-    .module('discoverPersistedState', ['discoverPrivate', 'discoverPromise'])
-    .factory('PersistedState', (Private: IPrivate) => {
-      const Events = Private(EventsProvider);
-      return class AngularPersistedState extends PersistedState {
-        constructor(value: any, path: any) {
-          super(value, path, Events);
-        }
-      };
-    });
 }
 
 function createLocalKbnUrlModule() {
@@ -256,26 +216,6 @@ function createLocalI18nModule() {
     .directive('i18nId', i18nDirective);
 }
 
-function createLocalAppStateModule() {
-  angular
-    .module('discoverAppState', [
-      'discoverGlobalState',
-      'discoverPrivate',
-      'discoverConfig',
-      'discoverKbnUrl',
-      'discoverPromise',
-    ])
-    .service('AppState', function(Private: IPrivate) {
-      return Private(AppStateProvider);
-    })
-    .service('getAppState', function(Private: any) {
-      return Private(AppStateProvider).getAppState;
-    })
-    .service('State', function(Private: any) {
-      return Private(StateProvider);
-    });
-}
-
 function createLocalStorageModule() {
   angular
     .module('discoverLocalStorageProvider', ['discoverPrivate'])
@@ -307,7 +247,6 @@ function createDocTableModule() {
     .module('discoverDocTable', [
       'discoverKbnUrl',
       'discoverConfig',
-      'discoverAppState',
       'discoverPagerFactory',
       'react',
     ])

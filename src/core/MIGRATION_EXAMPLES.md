@@ -19,6 +19,7 @@ APIs to their New Platform equivalents.
     - [Updating an application navlink](#updating-application-navlink)
   - [Chromeless Applications](#chromeless-applications)
   - [Render HTML Content](#render-html-content)
+  - [Saved Objects types](#saved-objects-types)
 
 ## Configuration
 
@@ -737,3 +738,189 @@ router.get(
   }
 );
 ```
+
+## Saved Objects types
+
+In the legacy platform, saved object types were registered using static definitions in the `uiExports` part of
+the plugin manifest.
+
+In the new platform, all these registration are to be performed programmatically during your plugin's `setup` phase,
+using the core `savedObjects`'s `registerType` setup API.
+
+The most notable difference is that in the new platform, the type registration is performed in a single call to 
+`registerType`, passing a new `SavedObjectsType` structure that is a superset of the legacy `schema`, `migrations` 
+and `mappings`.
+
+### Concrete example
+
+Let say we have the following in a legacy plugin:
+
+```js
+// src/legacy/core_plugins/my_plugin/index.js
+import mappings from './mappings.json';
+import { migrations } from './migrations';
+
+new kibana.Plugin({
+  init(server){
+    // [...]
+  },
+  uiExports: {
+    mappings,
+    migrations,
+    savedObjectSchemas: {
+      'first-type': {
+        isNamespaceAgnostic: true,
+      },
+      'second-type': {
+        isHidden: true,
+      },
+    },
+  },
+})
+```
+
+```json
+// src/legacy/core_plugins/my_plugin/mappings.json
+{
+  "first-type": {
+    "properties": {
+      "someField": {
+        "type": "text"
+      },
+      "anotherField": {
+        "type": "text"
+      }
+    }
+  },
+  "second-type": {
+    "properties": {
+      "textField": {
+        "type": "text"
+      },
+      "boolField": {
+        "type": "boolean"
+      }
+    }
+  }
+}
+```
+
+```js
+// src/legacy/core_plugins/my_plugin/migrations.js
+export const migrations = {
+  'first-type': {
+    '1.0.0': migrateFirstTypeToV1,
+    '2.0.0': migrateFirstTypeToV2,
+  },
+  'second-type': {
+    '1.5.0': migrateSecondTypeToV15,
+  }
+}
+```
+
+To migrate this, we will have to regroup the declaration per-type. That would become:
+
+First type:
+ 
+```typescript
+// src/plugins/my_plugin/server/saved_objects/first_type.ts
+import { SavedObjectsType } from 'src/core/server';
+
+export const firstType: SavedObjectsType = {
+  name: 'first-type',
+  hidden: false,
+  namespaceAgnostic: true,
+  mappings: {
+    properties: {
+      someField: {
+        type: 'text',
+      },
+      anotherField: {
+        type: 'text',
+      },
+    },
+  },
+  migrations: {
+    '1.0.0': migrateFirstTypeToV1,
+    '2.0.0': migrateFirstTypeToV2,
+  },
+};
+```
+
+Second type:
+
+```typescript
+// src/plugins/my_plugin/server/saved_objects/second_type.ts
+import { SavedObjectsType } from 'src/core/server';
+
+export const secondType: SavedObjectsType = {
+  name: 'second-type',
+  hidden: true,
+  namespaceAgnostic: false,
+  mappings: {
+    properties: {
+      textField: {
+        type: 'text',
+      },
+      boolField: {
+        type: 'boolean',
+      },
+    },
+  },
+  migrations: {
+    '1.5.0': migrateSecondTypeToV15,
+  },
+};
+```
+
+Registration in the plugin's setup phase:
+
+```typescript
+// src/plugins/my_plugin/server/plugin.ts
+import { firstType, secondType } from './saved_objects';
+
+export class MyPlugin implements Plugin {
+  setup({ savedObjects }) {
+    savedObjects.registerType(firstType);
+    savedObjects.registerType(secondType);
+  }
+}
+```
+
+### Changes in structure compared to legacy
+
+The NP `registerType` expected input is very close to the legacy format. However, there are some minor changes:
+
+- The `schema.isNamespaceAgnostic` property has been renamed: `SavedObjectsType.namespaceAgnostic`
+
+- The `schema.indexPattern` was accepting either a `string` or a `(config: LegacyConfig) => string`. `SavedObjectsType.indexPattern` only accepts a string, as you can access the configuration during your plugin's setup phase.
+
+- The migration function signature has changed:
+In legacy, it was `(doc: SavedObjectUnsanitizedDoc, log: SavedObjectsMigrationLogger) => SavedObjectUnsanitizedDoc;`
+In new platform, it is now `(doc: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc;`
+
+With context being:
+
+```typescript
+export interface SavedObjectMigrationContext {
+  log: SavedObjectsMigrationLogger;
+}
+```
+
+The changes is very minor though. The legacy migration:
+
+```js
+const migration = (doc, log) => {...}
+```
+
+Would be converted to:
+
+```typescript
+const migration: SavedObjectMigrationFn = (doc, { log }) => {...}
+```
+
+### Remarks
+
+The `registerType` API will throw if called after the service has started, and therefor cannot be used from 
+legacy plugin code. Legacy plugins should use the legacy savedObjects service and the legacy way to register
+saved object types until migrated.

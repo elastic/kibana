@@ -6,8 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SUBMIT = i18n.translate('xpack.siem.header.editableTitle.submit', {
-  defaultMessage: 'Submit',
+export const SAVE = i18n.translate('xpack.siem.header.editableTitle.save', {
+  defaultMessage: 'Save',
 });
 
 export const CANCEL = i18n.translate('xpack.siem.header.editableTitle.cancel', {

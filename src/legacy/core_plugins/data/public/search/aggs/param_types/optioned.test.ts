@@ -20,8 +20,6 @@
 import { BaseParamType } from './base';
 import { OptionedParamType } from './optioned';
 
-jest.mock('ui/new_platform');
-
 describe('Optioned', () => {
   describe('constructor', () => {
     it('it is an instance of BaseParamType', () => {

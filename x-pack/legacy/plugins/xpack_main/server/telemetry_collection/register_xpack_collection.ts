@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getLocalLicense } from '../../../../../../src/legacy/core_plugins/telemetry/server/telemetry_collection/get_local_license';
 import { telemetryCollectionManager } from '../../../../../../src/legacy/core_plugins/telemetry/server';
 import { getClusterUuids } from '../../../../../../src/legacy/core_plugins/telemetry/server/telemetry_collection';
 import { getStatsWithXpack } from './get_stats_with_xpack';
@@ -15,5 +16,6 @@ export function registerMonitoringCollection() {
     priority: 1,
     statsGetter: getStatsWithXpack,
     clusterDetailsGetter: getClusterUuids,
+    licenseGetter: getLocalLicense,
   });
 }

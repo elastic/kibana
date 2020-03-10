@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './open_flyout_add_drilldown';
+export * from './flyout_create_drilldown';
+export * from './flyout_edit_drilldown';

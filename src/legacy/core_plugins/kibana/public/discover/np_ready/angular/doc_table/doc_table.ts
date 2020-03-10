@@ -17,15 +17,9 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { IUiSettingsClient } from 'kibana/public';
 import html from './doc_table.html';
-import './infinite_scroll';
-import './components/table_header';
-import './components/table_row';
 import { dispatchRenderComplete } from '../../../../../../../../plugins/kibana_utils/public';
-import './components/pager';
-import './lib/pager';
 // @ts-ignore
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
@@ -35,7 +29,6 @@ interface LazyScope extends ng.IScope {
 
 export function createDocTableDirective(
   config: IUiSettingsClient,
-  getAppState: any,
   pagerFactory: any,
   $filter: any
 ) {
@@ -51,7 +44,6 @@ export function createDocTableDirective(
       isLoading: '=?',
       infiniteScroll: '=?',
       filter: '=?',
-      filters: '=?',
       minimumVisibleRows: '=?',
       onAddColumn: '=?',
       onChangeSortOrder: '=?',

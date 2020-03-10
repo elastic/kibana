@@ -32,12 +32,12 @@ const MyFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const renderUsers = (users: ElasticUser[]) => {
-  return users.map(({ username }, key) => (
+  return users.map(({ fullName, username }, key) => (
     <MyFlexGroup key={key} justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs">
           <EuiFlexItem>
-            <MyAvatar name={username} />
+            <MyAvatar name={fullName ? fullName : username} />
           </EuiFlexItem>
           <EuiFlexItem>
             <p>

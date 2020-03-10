@@ -16,12 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-
-// @ts-ignore
-import { percentilesMetricAgg } from './percentiles';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
 const medianTitle = i18n.translate('data.search.aggs.metrics.medianTitle', {
@@ -43,17 +41,13 @@ export const medianMetricAgg = new MetricAggType({
       name: 'field',
       type: 'field',
       filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.DATE],
-    },
-    {
-      name: 'percents',
-      default: [50],
-    },
-    {
       write(agg, output) {
-        output.params.keyed = false;
+        output.params.field = agg.getParam('field').name;
+        output.params.percents = [50];
       },
     },
   ],
-  getResponseAggs: percentilesMetricAgg.getResponseAggs,
-  getValue: percentilesMetricAgg.getValue,
+  getValue(agg, bucket) {
+    return bucket[agg.id].values['50.0'];
+  },
 });

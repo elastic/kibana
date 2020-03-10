@@ -10,9 +10,11 @@ import {
   useKibana,
   KibanaReactContextValue,
 } from '../../../../../../../../src/plugins/kibana_react/public';
+import { SecurityPluginSetup } from '../../../../../../../plugins/security/public';
 
 interface StartPlugins {
   data: DataPublicPluginStart;
+  security: SecurityPluginSetup;
 }
 export type StartServices = CoreStart & StartPlugins;
 // eslint-disable-next-line react-hooks/rules-of-hooks

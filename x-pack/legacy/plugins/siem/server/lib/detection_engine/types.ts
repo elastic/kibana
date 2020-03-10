@@ -39,7 +39,7 @@ export interface RuleAlertParams {
   name: string;
   query: string | undefined | null;
   references: string[];
-  savedId: string | undefined | null;
+  savedId?: string | undefined | null;
   meta: Record<string, {}> | undefined | null;
   severity: string;
   tags: string[];
@@ -49,6 +49,7 @@ export interface RuleAlertParams {
   threat: ThreatParams[] | undefined | null;
   type: 'query' | 'saved_query';
   version: number;
+  throttle?: string;
 }
 
 export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval' | 'tags'>;
@@ -77,7 +78,7 @@ export type RuleAlertParamsRest = Omit<
   > & {
     rule_id: RuleAlertParams['ruleId'];
     false_positives: RuleAlertParams['falsePositives'];
-    saved_id: RuleAlertParams['savedId'];
+    saved_id?: RuleAlertParams['savedId'];
     timeline_id: RuleAlertParams['timelineId'];
     timeline_title: RuleAlertParams['timelineTitle'];
     max_signals: RuleAlertParams['maxSignals'];

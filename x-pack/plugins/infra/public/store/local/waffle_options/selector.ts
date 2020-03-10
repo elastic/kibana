@@ -15,3 +15,4 @@ export const selectBoundsOverride = (state: WaffleOptionsState) => state.boundsO
 export const selectAutoBounds = (state: WaffleOptionsState) => state.autoBounds;
 export const selectAccountId = (state: WaffleOptionsState) => state.accountId;
 export const selectRegion = (state: WaffleOptionsState) => state.region;
+export const selectCustomMetrics = (state: WaffleOptionsState) => state.customMetrics;

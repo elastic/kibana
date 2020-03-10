@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useMemo } from 'react';
 import { Route, RouteComponentProps, Router, Switch } from 'react-router-dom';
 import { History } from 'history';
 import { Observable } from 'rxjs';
@@ -25,6 +25,7 @@ import { useObservable } from 'react-use';
 
 import { AppLeaveHandler, AppStatus, Mounter } from '../types';
 import { AppContainer } from './app_container';
+import { ScopedHistory } from '../scoped_history';
 
 interface Props {
   mounters: Map<string, Mounter>;
@@ -44,6 +45,11 @@ export const AppRouter: FunctionComponent<Props> = ({
   appStatuses$,
 }) => {
   const appStatuses = useObservable(appStatuses$, new Map());
+  const createScopedHistory = useMemo(
+    () => (appPath: string) => new ScopedHistory(history, appPath),
+    [history]
+  );
+
   return (
     <Router history={history}>
       <Switch>
@@ -56,12 +62,12 @@ export const AppRouter: FunctionComponent<Props> = ({
                 <Route
                   key={mounter.appRoute}
                   path={mounter.appRoute}
-                  render={() => (
+                  render={({ match: { url } }) => (
                     <AppContainer
-                      mounter={mounter}
-                      appId={appId}
+                      appPath={url}
                       appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
-                      setAppLeaveHandler={setAppLeaveHandler}
+                      createScopedHistory={createScopedHistory}
+                      {...{ appId, mounter, setAppLeaveHandler }}
                     />
                   )}
                 />,
@@ -72,6 +78,7 @@ export const AppRouter: FunctionComponent<Props> = ({
           render={({
             match: {
               params: { appId },
+              url,
             },
           }: RouteComponentProps<Params>) => {
             // Find the mounter including legacy mounters with subapps:
@@ -81,10 +88,11 @@ export const AppRouter: FunctionComponent<Props> = ({
 
             return (
               <AppContainer
-                mounter={mounter}
+                appPath={url}
                 appId={id}
                 appStatus={appStatuses.get(id) ?? AppStatus.inaccessible}
-                setAppLeaveHandler={setAppLeaveHandler}
+                createScopedHistory={createScopedHistory}
+                {...{ mounter, setAppLeaveHandler }}
               />
             );
           }}

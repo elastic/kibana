@@ -12,8 +12,8 @@ import {
   EuiLoadingSpinner,
   EuiText,
 } from '@elastic/eui';
-import { isEqual } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useState } from 'react';
+import deepEqual from 'fast-deep-equal';
 
 import { useRuleStatus, RuleInfoStatus } from '../../../../../containers/detection_engine/rules';
 import { FormattedDate } from '../../../../../components/formatted_date';
@@ -43,7 +43,7 @@ const RuleStatusComponent: React.FC<RuleStatusProps> = ({ ruleId, ruleEnabled })
   }, [fetchRuleStatus, myRuleEnabled, ruleId, ruleEnabled, setMyRuleEnabled]);
 
   useEffect(() => {
-    if (!isEqual(currentStatus, ruleStatus?.current_status)) {
+    if (!deepEqual(currentStatus, ruleStatus?.current_status)) {
       setCurrentStatus(ruleStatus?.current_status ?? null);
     }
   }, [currentStatus, ruleStatus, setCurrentStatus]);

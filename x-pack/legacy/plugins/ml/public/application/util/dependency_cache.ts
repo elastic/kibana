@@ -20,6 +20,7 @@ import {
   ChromeRecentlyAccessed,
   IBasePath,
 } from 'kibana/public';
+import { SecurityPluginSetup } from '../../../../../../plugins/security/public';
 
 export interface DependencyCache {
   timefilter: TimefilterSetup | null;
@@ -34,10 +35,9 @@ export interface DependencyCache {
   autocomplete: DataPublicPluginStart['autocomplete'] | null;
   basePath: IBasePath | null;
   savedObjectsClient: SavedObjectsClientContract | null;
-  XSRF: string | null;
-  APP_URL: string | null;
   application: ApplicationStart | null;
   http: HttpStart | null;
+  security: SecurityPluginSetup | null;
 }
 
 const cache: DependencyCache = {
@@ -53,10 +53,9 @@ const cache: DependencyCache = {
   autocomplete: null,
   basePath: null,
   savedObjectsClient: null,
-  XSRF: null,
-  APP_URL: null,
   application: null,
   http: null,
+  security: null,
 };
 
 export function setDependencyCache(deps: Partial<DependencyCache>) {
@@ -72,10 +71,9 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.autocomplete = deps.autocomplete || null;
   cache.basePath = deps.basePath || null;
   cache.savedObjectsClient = deps.savedObjectsClient || null;
-  cache.XSRF = deps.XSRF || null;
-  cache.APP_URL = deps.APP_URL || null;
   cache.application = deps.application || null;
   cache.http = deps.http || null;
+  cache.security = deps.security || null;
 }
 
 export function getTimefilter() {
@@ -161,20 +159,6 @@ export function getSavedObjectsClient() {
   return cache.savedObjectsClient;
 }
 
-export function getXSRF() {
-  if (cache.XSRF === null) {
-    throw new Error("xsrf hasn't been initialized");
-  }
-  return cache.XSRF;
-}
-
-export function getAppUrl() {
-  if (cache.APP_URL === null) {
-    throw new Error("app url hasn't been initialized");
-  }
-  return cache.APP_URL;
-}
-
 export function getApplication() {
   if (cache.application === null) {
     throw new Error("application hasn't been initialized");
@@ -187,6 +171,13 @@ export function getHttp() {
     throw new Error("http hasn't been initialized");
   }
   return cache.http;
+}
+
+export function getSecurity() {
+  if (cache.security === null) {
+    throw new Error("security hasn't been initialized");
+  }
+  return cache.security;
 }
 
 export function clearCache() {

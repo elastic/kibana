@@ -10,10 +10,7 @@ import { identity } from 'fp-ts/lib/function';
 import React from 'react';
 
 import { NoIndices } from '../../../components/empty_states/no_indices';
-import {
-  ViewSourceConfigurationButton,
-  ViewSourceConfigurationButtonHrefBase,
-} from '../../../components/source_configuration';
+import { ViewSourceConfigurationButton } from '../../../components/source_configuration';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export const LogsPageNoIndicesContent = () => {
@@ -49,10 +46,7 @@ export const LogsPageNoIndicesContent = () => {
           </EuiFlexItem>
           {canConfigureSource ? (
             <EuiFlexItem>
-              <ViewSourceConfigurationButton
-                data-test-subj="configureSourceButton"
-                hrefBase={ViewSourceConfigurationButtonHrefBase.logs}
-              >
+              <ViewSourceConfigurationButton data-test-subj="configureSourceButton">
                 {i18n.translate('xpack.infra.configureSourceActionLabel', {
                   defaultMessage: 'Change source configuration',
                 })}

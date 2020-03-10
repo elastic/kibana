@@ -21,6 +21,8 @@ import { App, CoreSetup, Plugin } from 'kibana/public';
 import { sortBy } from 'lodash';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 
+import './index.scss';
+
 export interface DevToolsSetup {
   /**
    * Register a developer tool. It will be available

@@ -21,7 +21,7 @@ import { keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
-import { Defer } from '../../../kibana_utils/common';
+import { Defer, now } from '../../../kibana_utils/common';
 import { RequestAdapter, DataAdapter } from '../../../inspector/common';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
@@ -211,11 +211,11 @@ export class Execution<
         // actually have a `then` function which would be treated as a `Promise`.
         const { resolvedArgs } = await this.resolveArgs(fn, input, fnArgs);
         args = resolvedArgs;
-        timeStart = this.params.debug ? performance.now() : 0;
+        timeStart = this.params.debug ? now() : 0;
         const output = await this.invokeFunction(fn, input, resolvedArgs);
 
         if (this.params.debug) {
-          const timeEnd: number = performance.now();
+          const timeEnd: number = now();
           (link as ExpressionAstFunction).debug = {
             success: true,
             fn,
@@ -229,9 +229,9 @@ export class Execution<
         if (getType(output) === 'error') return output;
         input = output;
       } catch (rawError) {
-        const timeEnd: number = this.params.debug ? performance.now() : 0;
-        rawError.message = `[${fnName}] > ${rawError.message}`;
+        const timeEnd: number = this.params.debug ? now() : 0;
         const error = createError(rawError) as ExpressionValueError;
+        error.error.message = `[${fnName}] > ${error.error.message}`;
 
         if (this.params.debug) {
           (link as ExpressionAstFunction).debug = {

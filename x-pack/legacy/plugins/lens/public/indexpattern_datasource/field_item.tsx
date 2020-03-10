@@ -177,6 +177,7 @@ export function FieldItem(props: FieldItemProps) {
       container={document.querySelector<HTMLElement>('.application') || undefined}
       button={
         <DragDrop
+          label={field.name}
           value={{ field, indexPatternId: indexPattern.id } as DraggedField}
           data-test-subj="lnsFieldListPanelField"
           draggable
