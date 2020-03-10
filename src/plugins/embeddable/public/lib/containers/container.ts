@@ -19,6 +19,7 @@
 
 import uuid from 'uuid';
 import { merge, Subscription } from 'rxjs';
+import { SavedObjectReference } from 'kibana/server';
 import {
   Embeddable,
   EmbeddableInput,
@@ -30,6 +31,7 @@ import {
 import { IContainer, ContainerInput, ContainerOutput, PanelState } from './i_container';
 import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
+import { isSavedObjectEmbeddableInput } from '../embeddables/saved_object_embeddable';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -41,7 +43,7 @@ export abstract class Container<
   implements IContainer<TChildInput, TContainerInput, TContainerOutput> {
   public readonly isContainer: boolean = true;
   protected readonly children: {
-    [key: string]: IEmbeddable<any, any> | ErrorEmbeddable;
+    [key: string]: IEmbeddable | ErrorEmbeddable;
   } = {};
 
   private subscription: Subscription;
@@ -94,17 +96,6 @@ export abstract class Container<
     }
 
     const panelState = this.createNewPanelState<EEI, E>(factory, explicitInput);
-
-    return this.createAndSaveEmbeddable(type, panelState);
-  }
-
-  public async addSavedObjectEmbeddable<
-    TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
-    TEmbeddable extends IEmbeddable<TEmbeddableInput> = IEmbeddable<TEmbeddableInput>
-  >(type: string, savedObjectId: string): Promise<TEmbeddable | ErrorEmbeddable> {
-    const factory = this.getFactory(type) as EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>;
-    const panelState = this.createNewPanelState(factory);
-    panelState.savedObjectId = savedObjectId;
 
     return this.createAndSaveEmbeddable(type, panelState);
   }
@@ -279,6 +270,8 @@ export abstract class Container<
 
       // Remove references.
       delete this.children[id];
+
+      this.updateChildrenReferences();
     }
 
     this.updateOutput({
@@ -298,15 +291,19 @@ export abstract class Container<
     } as Partial<TContainerOutput>);
     let embeddable: IEmbeddable | ErrorEmbeddable | undefined;
     const inputForChild = this.getInputForChild(panel.explicitInput.id);
+
     try {
       const factory = this.getFactory(panel.type);
       if (!factory) {
         throw new EmbeddableFactoryNotFoundError(panel.type);
       }
 
-      embeddable = panel.savedObjectId
-        ? await factory.createFromSavedObject(panel.savedObjectId, inputForChild, this)
-        : await factory.create(inputForChild, this);
+      // TODO: lets get rid of this distinction with factories, I don't think it will be needed
+      // anymore after this change.
+      embeddable =
+        isSavedObjectEmbeddableInput(inputForChild) && inputForChild.savedObjectId
+          ? await factory.createFromSavedObject(inputForChild.savedObjectId, inputForChild, this)
+          : await factory.create(inputForChild, this);
     } catch (e) {
       embeddable = new ErrorEmbeddable(e, { id: panel.explicitInput.id }, this);
     }
@@ -323,24 +320,9 @@ export abstract class Container<
         return;
       }
 
-      if (embeddable.getOutput().savedObjectId) {
-        this.updateInput({
-          panels: {
-            ...this.input.panels,
-            [panel.explicitInput.id]: {
-              ...this.input.panels[panel.explicitInput.id],
-              ...(embeddable.getOutput().savedObjectId
-                ? { savedObjectId: embeddable.getOutput().savedObjectId }
-                : undefined),
-              explicitInput: {
-                ...this.input.panels[panel.explicitInput.id].explicitInput,
-              },
-            },
-          },
-        } as Partial<TContainerInput>);
-      }
-
       this.children[embeddable.id] = embeddable;
+
+      this.updateChildrenReferences();
       this.updateOutput({
         embeddableLoaded: {
           ...this.output.embeddableLoaded,
@@ -353,6 +335,33 @@ export abstract class Container<
     return embeddable;
   }
 
+  private updateChildrenReferences() {
+    const savedObjectReferences: SavedObjectReference[] = [];
+    Object.values(this.children).forEach(child => {
+      savedObjectReferences.concat(child.getOutput().savedObjectReferences ?? []);
+      const input = child.getInput();
+      const factory = this.getFactory(child.type);
+      if (
+        isSavedObjectEmbeddableInput(input) &&
+        input.savedObjectId &&
+        factory &&
+        factory.savedObjectMetaData
+      ) {
+        const { savedObjectId, savedObjectRefName } = input;
+        savedObjectReferences.push({
+          type: factory.savedObjectMetaData.type,
+          id: savedObjectId,
+          name: savedObjectRefName || '',
+        });
+      }
+    });
+    this.updateOutput({ savedObjectReferences } as Partial<TContainerOutput>);
+  }
+
+  public replaceSavedObjectReferences(replacements: SavedObjectReference[]) {
+    Object.values(this.children).forEach(child => child.replaceSavedObjectReferences(replacements));
+  }
+
   private maybeUpdateChildren() {
     const allIds = Object.keys({ ...this.input.panels, ...this.output.embeddableLoaded });
     allIds.forEach(id => {
@@ -363,6 +372,9 @@ export abstract class Container<
         this.output.embeddableLoaded[id] !== undefined
       ) {
         this.onPanelRemoved(id);
+      } else {
+        // the other two cases will be handled elsewhere.
+        this.updateChildrenReferences();
       }
     });
   }

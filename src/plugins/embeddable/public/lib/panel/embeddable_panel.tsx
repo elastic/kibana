@@ -19,7 +19,7 @@
 import { EuiContextMenuPanelDescriptor, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
-import { Subscription } from 'rxjs';
+import { Subscription, merge } from 'rxjs';
 import { buildContextMenuForActions, UiActionsService, Action } from '../ui_actions';
 import { CoreStart, OverlayStart } from '../../../../../core/public';
 import { toMountPoint } from '../../../../kibana_react/public';
@@ -57,6 +57,7 @@ interface State {
   hidePanelTitles: boolean;
   closeContextMenu: boolean;
   badges: Array<Action<EmbeddableContext>>;
+  displayTitle?: string;
 }
 
 export class EmbeddablePanel extends React.Component<Props, State> {
@@ -82,6 +83,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       hidePanelTitles,
       closeContextMenu: false,
       badges: [],
+      displayTitle: embeddable.getTitle(),
     };
 
     this.embeddableRoot = React.createRef();
@@ -108,15 +110,20 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     const { embeddable } = this.props;
     const { parent } = embeddable;
 
-    this.subscription = embeddable.getInput$().subscribe(async () => {
-      if (this.mounted) {
-        this.setState({
-          viewMode: embeddable.getInput().viewMode ? embeddable.getInput().viewMode : ViewMode.EDIT,
-        });
+    this.subscription = merge(embeddable.getOutput$(), embeddable.getInput$()).subscribe(
+      async () => {
+        if (this.mounted) {
+          this.setState({
+            viewMode: embeddable.getInput().viewMode
+              ? embeddable.getInput().viewMode
+              : ViewMode.EDIT,
+            displayTitle: embeddable.getTitle(),
+          });
 
-        this.refreshBadges();
+          this.refreshBadges();
+        }
       }
-    });
+    );
 
     if (parent) {
       this.parentSubscription = parent.getInput$().subscribe(async () => {
@@ -204,7 +211,6 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     let actions = await this.props.getActions(CONTEXT_MENU_TRIGGER, {
       embeddable: this.props.embeddable,
     });
-
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {
       actions = actions.filter(action => disabledActions.indexOf(action.id) === -1);

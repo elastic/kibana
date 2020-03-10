@@ -152,6 +152,7 @@ export class DashboardEmbeddableContainerPublicPlugin
       indexPatterns,
       chrome: core.chrome,
       overlays: core.overlays,
+      embeddable: plugins.embeddable,
     });
     return {
       getSavedDashboardLoader: () => savedDashboardLoader,

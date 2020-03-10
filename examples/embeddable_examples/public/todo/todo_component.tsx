@@ -27,7 +27,7 @@ import {
   withEmbeddableSubscription,
   EmbeddableOutput,
 } from '../../../../src/plugins/embeddable/public';
-import { TodoEmbeddable, TodoInput } from './todo_embeddable';
+import { TodoEmbeddable, TodoInput, TodoOutput } from './todo_embeddable';
 
 interface Props {
   embeddable: TodoEmbeddable;
@@ -51,7 +51,7 @@ function wrapSearchTerms(task: string, search?: string) {
 
 export function TodoEmbeddableComponentInner({ input: { icon, title, task, search } }: Props) {
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup gutterSize="none">
       <EuiFlexItem grow={false}>
         {icon ? <EuiIcon type={icon} size="l" /> : <EuiAvatar name={title || task} size="l" />}
       </EuiFlexItem>
@@ -71,4 +71,9 @@ export function TodoEmbeddableComponentInner({ input: { icon, title, task, searc
   );
 }
 
-export const TodoEmbeddableComponent = withEmbeddableSubscription(TodoEmbeddableComponentInner);
+export const TodoEmbeddableComponent = withEmbeddableSubscription<
+  TodoInput,
+  TodoOutput,
+  TodoEmbeddable,
+  {}
+>(TodoEmbeddableComponentInner);

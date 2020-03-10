@@ -106,6 +106,7 @@ export function PanelHeader({
           isViewMode={isViewMode}
           closeContextMenu={closeContextMenu}
           title={title}
+          embeddable={embeddable}
         />
       </div>
     );
@@ -153,6 +154,7 @@ export function PanelHeader({
         getActionContextMenuPanel={getActionContextMenuPanel}
         closeContextMenu={closeContextMenu}
         title={title}
+        embeddable={embeddable}
       />
     </figcaption>
   );

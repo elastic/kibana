@@ -18,33 +18,59 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { SavedObjectReference } from 'kibana/server';
+import { merge, Subscription } from 'rxjs';
+import { SearchableListSavedObjectAttributes } from 'examples/embeddable_examples/common';
 import {
   Container,
-  ContainerInput,
-  EmbeddableStart,
+  SavedObjectContainerInput,
   EmbeddableInput,
+  PanelState,
+  ContainerOutput,
 } from '../../../../src/plugins/embeddable/public';
 import { SearchableListContainerComponent } from './searchable_list_container_component';
+import { StartServices } from './searchable_list_container_factory';
 
 export const SEARCHABLE_LIST_CONTAINER = 'SEARCHABLE_LIST_CONTAINER';
 
-export interface SearchableContainerInput extends ContainerInput {
+export interface SearchableContainerInput extends SavedObjectContainerInput {
   search?: string;
+}
+
+export interface SearchableContainerOutput extends ContainerOutput {
+  savedPanels?: {
+    [key: string]: PanelState<{ [id: string]: unknown } & { id: string }>;
+  };
+  savedTitle?: string;
+  savedSearch?: string;
 }
 
 interface ChildInput extends EmbeddableInput {
   search?: string;
 }
 
-export class SearchableListContainer extends Container<ChildInput, SearchableContainerInput> {
+export class SearchableListContainer extends Container<
+  ChildInput,
+  SearchableContainerInput,
+  SearchableContainerOutput
+> {
   public readonly type = SEARCHABLE_LIST_CONTAINER;
   private node?: HTMLElement;
+  private mySubscription: Subscription;
+  private savedObjectId?: string;
 
-  constructor(
-    input: SearchableContainerInput,
-    getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory']
-  ) {
-    super(input, { embeddableLoaded: {} }, getEmbeddableFactory);
+  constructor(input: SearchableContainerInput, private services: StartServices) {
+    super({ panels: {}, ...input }, { embeddableLoaded: {} }, services.getEmbeddableFactory);
+
+    this.mySubscription = merge(this.getOutput$(), this.getInput$()).subscribe(async () => {
+      const { savedObjectId } = this.getInput();
+      if (this.savedObjectId !== savedObjectId) {
+        this.savedObjectId = savedObjectId;
+        if (savedObjectId !== undefined) {
+          this.reload();
+        }
+      }
+    });
   }
 
   // TODO: add a more advanced example here where inherited child input is derived from container
@@ -53,7 +79,32 @@ export class SearchableListContainer extends Container<ChildInput, SearchableCon
     return {
       id,
       search: this.getInput().search,
+      viewMode: this.getInput().viewMode,
     };
+  }
+
+  public isDirty() {
+    return (
+      !_.isEqual(this.input.panels, this.output.savedPanels) ||
+      this.input.title !== this.output.savedTitle
+    );
+  }
+
+  public async reload() {
+    if (this.savedObjectId !== undefined) {
+      const savedObject = await this.services.savedObject.client.get<
+        SearchableListSavedObjectAttributes
+      >('list', this.savedObjectId);
+      const panels = JSON.parse(savedObject.attributes.panelsJSON);
+      this.updateOutput({
+        savedPanels: panels,
+        savedTitle: savedObject.attributes.title,
+        defaultTitle: savedObject.attributes.title,
+        savedSearch: savedObject.attributes.search,
+        title: this.input.hidePanelTitles ? '' : savedObject.attributes.title,
+      });
+      this.updateInput({ panels });
+    }
   }
 
   public render(node: HTMLElement) {
@@ -61,7 +112,10 @@ export class SearchableListContainer extends Container<ChildInput, SearchableCon
       ReactDOM.unmountComponentAtNode(this.node);
     }
     this.node = node;
-    ReactDOM.render(<SearchableListContainerComponent embeddable={this} />, node);
+    ReactDOM.render(
+      <SearchableListContainerComponent embeddable={this} services={this.services} />,
+      node
+    );
   }
 
   public destroy() {
@@ -69,5 +123,6 @@ export class SearchableListContainer extends Container<ChildInput, SearchableCon
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
     }
+    this.mySubscription.unsubscribe();
   }
 }

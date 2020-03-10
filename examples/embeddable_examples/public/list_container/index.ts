@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { ListContainer, LIST_CONTAINER } from './list_container';
-export { ListContainerFactory } from './list_container_factory';
+export * from './list_container';
+export * from './list_container_factory';

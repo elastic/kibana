@@ -17,28 +17,81 @@
  * under the License.
  */
 
-import { EmbeddableSetup, EmbeddableStart } from '../../../src/plugins/embeddable/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { Start as InspectorStart } from 'src/plugins/inspector/public';
+import {
+  EmbeddableSetup,
+  EmbeddableStart,
+  EmbeddableOutput,
+  CONTEXT_MENU_TRIGGER,
+} from '../../../src/plugins/embeddable/public';
 import { Plugin, CoreSetup, CoreStart } from '../../../src/core/public';
 import { HelloWorldEmbeddableFactory, HELLO_WORLD_EMBEDDABLE } from './hello_world';
+import {
+  TODO_SO_EMBEDDABLE,
+  TodoSoEmbeddableFactory,
+  TodoSoEmbeddableInput,
+  createEditTodoAction,
+  TodoSoEmbeddable,
+  EDIT_TODO_ACTION,
+} from './todo_saved_object';
 import { TODO_EMBEDDABLE, TodoEmbeddableFactory, TodoInput, TodoOutput } from './todo';
-import { MULTI_TASK_TODO_EMBEDDABLE, MultiTaskTodoEmbeddableFactory } from './multi_task_todo';
+
+import {
+  MULTI_TASK_TODO_EMBEDDABLE,
+  MultiTaskTodoEmbeddableFactory,
+  MultiTaskTodoInput,
+  MultiTaskTodoOutput,
+} from './multi_task_todo';
 import {
   SEARCHABLE_LIST_CONTAINER,
   SearchableListContainerFactory,
 } from './searchable_list_container';
 import { LIST_CONTAINER, ListContainerFactory } from './list_container';
+import { createSampleData } from './create_sample_data';
+import { StartServices } from './list_container/list_container_factory';
+import {
+  createSaveListContainerAction,
+  ACTION_SAVE_LIST_CONTAINER,
+  SaveListContainerActionContext,
+} from './searchable_list_container/save_list_container_action';
+import {
+  createCheckReferencesAction,
+  CheckRefsActionContext,
+  ACTION_CHECK_SO_REFERENCES,
+} from './actions';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
+  uiActions: UiActionsStart;
 }
 
 export interface EmbeddableExamplesStartDependencies {
   embeddable: EmbeddableStart;
+  uiActions: UiActionsStart;
+  inspector: InspectorStart;
+}
+
+export interface EmbeddableExamplesStart {
+  createSampleData: (overwrite: boolean) => Promise<void>;
+}
+
+declare module '../../../src/plugins/ui_actions/public' {
+  export interface ActionContextMapping {
+    [EDIT_TODO_ACTION]: { embeddable: TodoSoEmbeddable };
+    [ACTION_CHECK_SO_REFERENCES]: CheckRefsActionContext;
+    [ACTION_SAVE_LIST_CONTAINER]: SaveListContainerActionContext;
+  }
 }
 
 export class EmbeddableExamplesPlugin
   implements
-    Plugin<void, void, EmbeddableExamplesSetupDependencies, EmbeddableExamplesStartDependencies> {
+    Plugin<
+      void,
+      EmbeddableExamplesStart,
+      EmbeddableExamplesSetupDependencies,
+      EmbeddableExamplesStartDependencies
+    > {
   public setup(
     core: CoreSetup<EmbeddableExamplesStartDependencies>,
     deps: EmbeddableExamplesSetupDependencies
@@ -48,26 +101,9 @@ export class EmbeddableExamplesPlugin
       new HelloWorldEmbeddableFactory()
     );
 
-    deps.embeddable.registerEmbeddableFactory(
+    deps.embeddable.registerEmbeddableFactory<MultiTaskTodoInput, MultiTaskTodoOutput>(
       MULTI_TASK_TODO_EMBEDDABLE,
       new MultiTaskTodoEmbeddableFactory()
-    );
-
-    // These are registered in the start method because `getEmbeddableFactory `
-    // is only available in start. We could reconsider this I think and make it
-    // available in both.
-    deps.embeddable.registerEmbeddableFactory(
-      SEARCHABLE_LIST_CONTAINER,
-      new SearchableListContainerFactory(async () => ({
-        getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
-      }))
-    );
-
-    deps.embeddable.registerEmbeddableFactory(
-      LIST_CONTAINER,
-      new ListContainerFactory(async () => ({
-        getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
-      }))
     );
 
     deps.embeddable.registerEmbeddableFactory<TodoInput, TodoOutput>(
@@ -76,9 +112,79 @@ export class EmbeddableExamplesPlugin
         openModal: (await core.getStartServices())[0].overlays.openModal,
       }))
     );
+
+    deps.embeddable.registerEmbeddableFactory(
+      SEARCHABLE_LIST_CONTAINER,
+      new SearchableListContainerFactory(async () => ({
+        getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
+        getAllEmbeddableFactories: (await core.getStartServices())[1].embeddable
+          .getEmbeddableFactories,
+        uiActionsApi: (await core.getStartServices())[1].uiActions,
+        inspector: (await core.getStartServices())[1].inspector,
+        uiSettingsClient: (await core.getStartServices())[0].uiSettings,
+        notifications: (await core.getStartServices())[0].notifications,
+        overlays: (await core.getStartServices())[0].overlays,
+        savedObject: (await core.getStartServices())[0].savedObjects,
+      }))
+    );
+
+    deps.embeddable.registerEmbeddableFactory(
+      LIST_CONTAINER,
+      new ListContainerFactory(
+        async (): Promise<StartServices> => ({
+          getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
+          getAllEmbeddableFactories: (await core.getStartServices())[1].embeddable
+            .getEmbeddableFactories,
+          uiActionsApi: (await core.getStartServices())[1].uiActions,
+          inspector: (await core.getStartServices())[1].inspector,
+          uiSettingsClient: (await core.getStartServices())[0].uiSettings,
+          notifications: (await core.getStartServices())[0].notifications,
+          overlays: (await core.getStartServices())[0].overlays,
+          savedObject: (await core.getStartServices())[0].savedObjects,
+        })
+      )
+    );
+
+    /**
+     * This embeddable is a version of the Todo embeddable, but one that is backed, optionally,
+     * off a saved object.
+     */
+    deps.embeddable.registerEmbeddableFactory<TodoSoEmbeddableInput, EmbeddableOutput>(
+      TODO_SO_EMBEDDABLE,
+      new TodoSoEmbeddableFactory(async () => ({
+        openModal: (await core.getStartServices())[0].overlays.openModal,
+        savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
+        getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
+      }))
+    );
+
+    const editTodoAction = createEditTodoAction(async () => ({
+      openModal: (await core.getStartServices())[0].overlays.openModal,
+      savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
+      getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
+    }));
+    deps.uiActions.registerAction(editTodoAction);
+    deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, editTodoAction);
+
+    const saveListContainer = createSaveListContainerAction(async () => ({
+      savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
+    }));
+    deps.uiActions.registerAction(saveListContainer);
+    deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, saveListContainer);
+
+    const checkRefsAction = createCheckReferencesAction(async () => ({
+      openModal: (await core.getStartServices())[0].overlays.openModal,
+    }));
+    deps.uiActions.registerAction(checkRefsAction);
+    deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, checkRefsAction);
   }
 
-  public start(core: CoreStart, deps: EmbeddableExamplesStartDependencies) {}
+  public start(core: CoreStart, deps: EmbeddableExamplesStartDependencies) {
+    return {
+      createSampleData: (overwrite: boolean) =>
+        createSampleData(core.savedObjects.client, overwrite),
+    };
+  }
 
   public stop() {}
 }

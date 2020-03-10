@@ -26,12 +26,14 @@ import {
   EuiContextMenuPanelDescriptor,
   EuiPopover,
 } from '@elastic/eui';
+import { IEmbeddable } from '../..';
 
 export interface PanelOptionsMenuProps {
   getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor>;
   isViewMode: boolean;
   closeContextMenu: boolean;
   title?: string;
+  embeddable: IEmbeddable;
 }
 
 interface State {
@@ -62,6 +64,14 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
 
   public async componentDidMount() {
     this.mounted = true;
+    this.setState({ actionContextMenuPanel: undefined });
+    const actionContextMenuPanel = await this.props.getActionContextMenuPanel();
+    if (this.mounted) {
+      this.setState({ actionContextMenuPanel });
+    }
+  }
+
+  public async componentWillReceiveProps() {
     this.setState({ actionContextMenuPanel: undefined });
     const actionContextMenuPanel = await this.props.getActionContextMenuPanel();
     if (this.mounted) {

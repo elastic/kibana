@@ -18,6 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
+import { SavedObjectReference } from 'kibana/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { ViewMode } from '../types';
@@ -26,6 +27,11 @@ import { TriggerContextMapping } from '../../../../ui_actions/public';
 export interface EmbeddableInput {
   viewMode?: ViewMode;
   title?: string;
+  /**
+   * Note this is not a saved object id. It is used to uniquely identify this
+   * Embeddable instance from others (e.g. inside a container).  It's possible to
+   * have two Embeddables where everything else is the same but the id.
+   */
   id: string;
   lastReloadRequestTime?: number;
   hidePanelTitles?: boolean;
@@ -44,6 +50,8 @@ export interface EmbeddableInput {
    * Whether this embeddable should not execute triggers.
    */
   disableTriggers?: boolean;
+
+  [key: string]: unknown;
 }
 
 export interface EmbeddableOutput {
@@ -52,6 +60,7 @@ export interface EmbeddableOutput {
   title?: string;
   editable?: boolean;
   savedObjectId?: string;
+  savedObjectReferences?: SavedObjectReference[];
 }
 
 export interface IEmbeddable<
@@ -81,6 +90,8 @@ export interface IEmbeddable<
    * Panel States to a child embeddable instance.
    **/
   readonly id: string;
+
+  replaceSavedObjectReferences(replacements: SavedObjectReference[]): void;
 
   /**
    * A functional representation of the isContainer variable, but helpful for typescript to
