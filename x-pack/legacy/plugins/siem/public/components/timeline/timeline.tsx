@@ -65,6 +65,7 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
 
   .euiFlyoutBody__overflow {
     overflow: hidden;
+    mask-image: none;
   }
 
   .euiFlyoutBody__overflowContent {

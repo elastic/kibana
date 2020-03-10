@@ -58,10 +58,19 @@ TimelineBody.displayName = 'TimelineBody';
  * EVENTS TABLE
  */
 
-export const EventsTable = styled.div.attrs(({ className = '' }) => ({
-  className: `siemEventsTable ${className}`,
-  role: 'table',
-}))``;
+interface EventsTableProps {
+  columnWidths: number;
+}
+
+export const EventsTable = styled.div.attrs<EventsTableProps>(
+  ({ className = '', columnWidths }) => ({
+    className: `siemEventsTable ${className}`,
+    role: 'table',
+    style: {
+      minWidth: `${columnWidths}px`,
+    },
+  })
+)<EventsTableProps>``;
 
 /* EVENTS HEAD */
 

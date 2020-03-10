@@ -47,11 +47,15 @@ const StyledEuiPanel = styled(EuiPanel)`
   max-width: 100%;
 `;
 
-const EventsContainerLoading = styled.div.attrs(({ width }: { width: number }) => ({
+interface EventsContainerLoadingProps {
+  width: number;
+}
+
+const EventsContainerLoading = styled.div.attrs<EventsContainerLoadingProps>(({ width }) => ({
   style: {
     width: `${width}px`,
   },
-}))`
+}))<EventsContainerLoadingProps>`
   overflow: auto;
 `;
 
