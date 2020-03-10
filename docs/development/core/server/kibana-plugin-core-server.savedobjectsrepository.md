@@ -15,6 +15,7 @@ export declare class SavedObjectsRepository
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
+|  [addNamespaces(type, id, namespaces, options)](./kibana-plugin-core-server.savedobjectsrepository.addnamespaces.md) |  |  |
 |  [bulkCreate(objects, options)](./kibana-plugin-core-server.savedobjectsrepository.bulkcreate.md) |  | Creates multiple documents at once |
 |  [bulkGet(objects, options)](./kibana-plugin-core-server.savedobjectsrepository.bulkget.md) |  | Returns an array of objects by id |
 |  [bulkUpdate(objects, options)](./kibana-plugin-core-server.savedobjectsrepository.bulkupdate.md) |  | Updates multiple objects in bulk |
@@ -24,5 +25,6 @@ export declare class SavedObjectsRepository
 |  [find({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, })](./kibana-plugin-core-server.savedobjectsrepository.find.md) |  |  |
 |  [get(type, id, options)](./kibana-plugin-core-server.savedobjectsrepository.get.md) |  | Gets a single object |
 |  [incrementCounter(type, id, counterFieldName, options)](./kibana-plugin-core-server.savedobjectsrepository.incrementcounter.md) |  | Increases a counter field by one. Creates the document if one doesn't exist for the given id. |
+|  [removeNamespaces(type, id, namespaces, options)](./kibana-plugin-core-server.savedobjectsrepository.removenamespaces.md) |  |  |
 |  [update(type, id, attributes, options)](./kibana-plugin-core-server.savedobjectsrepository.update.md) |  | Updates an object |
 

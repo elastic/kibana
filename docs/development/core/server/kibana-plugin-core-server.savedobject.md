@@ -19,6 +19,7 @@ export interface SavedObject<T = unknown>
 |  [error](./kibana-plugin-core-server.savedobject.error.md) | <code>{</code><br/><code>        message: string;</code><br/><code>        statusCode: number;</code><br/><code>    }</code> |  |
 |  [id](./kibana-plugin-core-server.savedobject.id.md) | <code>string</code> | The ID of this Saved Object, guaranteed to be unique for all objects of the same <code>type</code> |
 |  [migrationVersion](./kibana-plugin-core-server.savedobject.migrationversion.md) | <code>SavedObjectsMigrationVersion</code> | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
+|  [namespaces](./kibana-plugin-core-server.savedobject.namespaces.md) | <code>string[]</code> |  |
 |  [references](./kibana-plugin-core-server.savedobject.references.md) | <code>SavedObjectReference[]</code> | A reference to another saved object. |
 |  [type](./kibana-plugin-core-server.savedobject.type.md) | <code>string</code> | The type of Saved Object. Each plugin can define it's own custom Saved Object types. |
 |  [updated\_at](./kibana-plugin-core-server.savedobject.updated_at.md) | <code>string</code> | Timestamp of the last time this document had been updated. |

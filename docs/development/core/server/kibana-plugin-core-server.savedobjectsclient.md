@@ -25,6 +25,7 @@ The constructor for this class is marked as internal. Third-party code should no
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
+|  [addNamespaces(type, id, namespaces, options)](./kibana-plugin-core-server.savedobjectsclient.addnamespaces.md) |  | Adds namespaces to a SavedObject |
 |  [bulkCreate(objects, options)](./kibana-plugin-core-server.savedobjectsclient.bulkcreate.md) |  | Persists multiple documents batched together as a single request |
 |  [bulkGet(objects, options)](./kibana-plugin-core-server.savedobjectsclient.bulkget.md) |  | Returns an array of objects by id |
 |  [bulkUpdate(objects, options)](./kibana-plugin-core-server.savedobjectsclient.bulkupdate.md) |  | Bulk Updates multiple SavedObject at once |
@@ -32,5 +33,6 @@ The constructor for this class is marked as internal. Third-party code should no
 |  [delete(type, id, options)](./kibana-plugin-core-server.savedobjectsclient.delete.md) |  | Deletes a SavedObject |
 |  [find(options)](./kibana-plugin-core-server.savedobjectsclient.find.md) |  | Find all SavedObjects matching the search query |
 |  [get(type, id, options)](./kibana-plugin-core-server.savedobjectsclient.get.md) |  | Retrieves a single object |
+|  [removeNamespaces(type, id, namespaces, options)](./kibana-plugin-core-server.savedobjectsclient.removenamespaces.md) |  | Removes namespaces from a SavedObject |
 |  [update(type, id, attributes, options)](./kibana-plugin-core-server.savedobjectsclient.update.md) |  | Updates an SavedObject |
 

@@ -4,10 +4,10 @@
 
 ## SavedObjectsType.namespaceAgnostic property
 
-Is the type global (true), or namespaced (false).
+Is the type global (true), or not (false).
 
 <b>Signature:</b>
 
 ```typescript
-namespaceAgnostic: boolean;
+namespaceAgnostic?: boolean;
 ```

@@ -948,6 +948,8 @@ export interface SavedObject<T = unknown> {
     };
     id: string;
     migrationVersion?: SavedObjectsMigrationVersion;
+    // (undocumented)
+    namespaces?: string[];
     references: SavedObjectReference[];
     type: string;
     updated_at?: string;

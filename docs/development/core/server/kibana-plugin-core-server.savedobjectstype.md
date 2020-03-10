@@ -24,6 +24,7 @@ This is only internal for now, and will only be public when we expose the regist
 |  [management](./kibana-plugin-core-server.savedobjectstype.management.md) | <code>SavedObjectsTypeManagementDefinition</code> | An optional [saved objects management section](./kibana-plugin-core-server.savedobjectstypemanagementdefinition.md) definition for the type. |
 |  [mappings](./kibana-plugin-core-server.savedobjectstype.mappings.md) | <code>SavedObjectsTypeMappingDefinition</code> | The [mapping definition](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) for the type. |
 |  [migrations](./kibana-plugin-core-server.savedobjectstype.migrations.md) | <code>SavedObjectMigrationMap</code> | An optional map of [migrations](./kibana-plugin-core-server.savedobjectmigrationfn.md) to be used to migrate the type. |
+|  [multiNamespace](./kibana-plugin-core-server.savedobjectstype.multinamespace.md) | <code>boolean</code> | Is the type shareable (true), or not (false). Does not have any effect if <code>namespaceAgnostic</code> is true. |
 |  [name](./kibana-plugin-core-server.savedobjectstype.name.md) | <code>string</code> | The name of the type, which is also used as the internal id. |
-|  [namespaceAgnostic](./kibana-plugin-core-server.savedobjectstype.namespaceagnostic.md) | <code>boolean</code> | Is the type global (true), or namespaced (false). |
+|  [namespaceAgnostic](./kibana-plugin-core-server.savedobjectstype.namespaceagnostic.md) | <code>boolean</code> | Is the type global (true), or not (false). |
 

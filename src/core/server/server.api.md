@@ -968,7 +968,7 @@ export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolea
 export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
 
 // @public
-export type ISavedObjectTypeRegistry = Pick<SavedObjectTypeRegistry, 'getType' | 'getAllTypes' | 'getIndex' | 'isNamespaceAgnostic' | 'isHidden' | 'getImportableAndExportableTypes' | 'isImportableAndExportable'>;
+export type ISavedObjectTypeRegistry = Omit<SavedObjectTypeRegistry, 'registerType'>;
 
 // @public
 export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
@@ -1586,6 +1586,8 @@ export interface SavedObject<T = unknown> {
     };
     id: string;
     migrationVersion?: SavedObjectsMigrationVersion;
+    // (undocumented)
+    namespaces?: string[];
     references: SavedObjectReference[];
     type: string;
     updated_at?: string;
@@ -1628,6 +1630,12 @@ export interface SavedObjectReference {
     name: string;
     // (undocumented)
     type: string;
+}
+
+// @public (undocumented)
+export interface SavedObjectsAddNamespacesOptions {
+    refresh?: MutatingOperationRefreshSetting;
+    version?: string;
 }
 
 // Warning: (ae-forgotten-export) The symbol "SavedObjectDoc" needs to be exported by the entry point index.d.ts
@@ -1697,6 +1705,7 @@ export interface SavedObjectsBulkUpdateResponse<T = unknown> {
 export class SavedObjectsClient {
     // @internal
     constructor(repository: ISavedObjectsRepository);
+    addNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsAddNamespacesOptions): Promise<{}>;
     bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
@@ -1708,6 +1717,7 @@ export class SavedObjectsClient {
     errors: typeof SavedObjectsErrorHelpers;
     find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
+    removeNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsRemoveNamespacesOptions): Promise<{}>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
 }
 
@@ -1791,6 +1801,8 @@ export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
 export class SavedObjectsErrorHelpers {
     // (undocumented)
     static createBadRequestError(reason?: string): DecoratedError;
+    // (undocumented)
+    static createConflictError(type: string, id: string): DecoratedError;
     // (undocumented)
     static createEsAutoCreateIndexError(): DecoratedError;
     // (undocumented)
@@ -2064,7 +2076,14 @@ export interface SavedObjectsRawDoc {
 }
 
 // @public (undocumented)
+export interface SavedObjectsRemoveNamespacesOptions {
+    refresh?: MutatingOperationRefreshSetting;
+}
+
+// @public (undocumented)
 export class SavedObjectsRepository {
+    // (undocumented)
+    addNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsAddNamespacesOptions): Promise<{}>;
     bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
@@ -2086,6 +2105,8 @@ export class SavedObjectsRepository {
         version: string;
         attributes: any;
     }>;
+    // (undocumented)
+    removeNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsRemoveNamespacesOptions): Promise<{}>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
     }
 
@@ -2116,7 +2137,11 @@ export class SavedObjectsSchema {
     // (undocumented)
     isHiddenType(type: string): boolean;
     // (undocumented)
+    isMultiNamespace(type: string): boolean;
+    // (undocumented)
     isNamespaceAgnostic(type: string): boolean;
+    // (undocumented)
+    isSingleNamespace(type: string): boolean;
 }
 
 // @public
@@ -2154,8 +2179,9 @@ export interface SavedObjectsType {
     management?: SavedObjectsTypeManagementDefinition;
     mappings: SavedObjectsTypeMappingDefinition;
     migrations?: SavedObjectMigrationMap;
+    multiNamespace?: boolean;
     name: string;
-    namespaceAgnostic: boolean;
+    namespaceAgnostic?: boolean;
 }
 
 // @public
@@ -2200,7 +2226,9 @@ export class SavedObjectTypeRegistry {
     getType(type: string): SavedObjectsType | undefined;
     isHidden(type: string): boolean;
     isImportableAndExportable(type: string): boolean;
+    isMultiNamespace(type: string): boolean;
     isNamespaceAgnostic(type: string): boolean;
+    isSingleNamespace(type: string): boolean;
     registerType(type: SavedObjectsType): void;
     }
 
