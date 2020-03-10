@@ -25,7 +25,7 @@ export function getAlertType(): AlertTypeModel {
   return {
     id: 'example.no-expression',
     name: 'No Expression',
-    iconClass: 'visControls',
+    iconClass: 'minusInCircle',
     alertParamsExpression: CustomExpression,
     validate: () => ({ errors: {} }),
   };

@@ -140,8 +140,6 @@ export const AlertExampleApp = ({
               </EuiPageContent>
               <AlertsContextProvider
                 value={{
-                  addFlyoutVisible: alertFlyoutVisible,
-                  setAddFlyoutVisibility: setAlertFlyoutVisibility,
                   http,
                   actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
                   alertTypeRegistry: triggers_actions_ui.alertTypeRegistry,
@@ -151,7 +149,11 @@ export const AlertExampleApp = ({
                   dataFieldsFormats: dataPlugin.fieldFormats,
                 }}
               >
-                <AlertAdd consumer={'workbench'} />
+                <AlertAdd
+                  consumer={'workbench'}
+                  addFlyoutVisible={alertFlyoutVisible}
+                  setAddFlyoutVisibility={setAlertFlyoutVisibility}
+                />
               </AlertsContextProvider>
             </EuiPageBody>
           </EuiPage>
