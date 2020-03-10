@@ -22,8 +22,8 @@ function xyTitles(layer: LayerConfig, frame: FramePublicAPI) {
   if (!datasource) {
     return defaults;
   }
-  const x = datasource.getOperationForColumnId(layer.xAccessor);
-  const y = datasource.getOperationForColumnId(layer.accessors[0]);
+  const x = layer.xAccessor ? datasource.getOperationForColumnId(layer.xAccessor) : null;
+  const y = layer.accessors[0] ? datasource.getOperationForColumnId(layer.accessors[0]) : null;
 
   return {
     xTitle: x ? x.label : defaults.xTitle,
@@ -35,26 +35,6 @@ export const toExpression = (state: State, frame: FramePublicAPI): Ast | null =>
   if (!state || !state.layers.length) {
     return null;
   }
-
-  const stateWithValidAccessors = {
-    ...state,
-    layers: state.layers.map(layer => {
-      const datasource = frame.datasourceLayers[layer.layerId];
-
-      const newLayer = { ...layer };
-
-      if (!datasource.getOperationForColumnId(layer.splitAccessor)) {
-        delete newLayer.splitAccessor;
-      }
-
-      return {
-        ...newLayer,
-        accessors: layer.accessors.filter(accessor =>
-          Boolean(datasource.getOperationForColumnId(accessor))
-        ),
-      };
-    }),
-  };
 
   const metadata: Record<string, Record<string, OperationMetadata | null>> = {};
   state.layers.forEach(layer => {
@@ -68,12 +48,7 @@ export const toExpression = (state: State, frame: FramePublicAPI): Ast | null =>
     });
   });
 
-  return buildExpression(
-    stateWithValidAccessors,
-    metadata,
-    frame,
-    xyTitles(state.layers[0], frame)
-  );
+  return buildExpression(state, metadata, frame, xyTitles(state.layers[0], frame));
 };
 
 export function toPreviewExpression(state: State, frame: FramePublicAPI) {

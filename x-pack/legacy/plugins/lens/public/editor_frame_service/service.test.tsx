@@ -43,7 +43,7 @@ describe('editor_frame service', () => {
       (async () => {
         pluginInstance.setup(coreMock.createSetup(), pluginSetupDependencies);
         const publicAPI = pluginInstance.start(coreMock.createStart(), pluginStartDependencies);
-        const instance = await publicAPI.createInstance({});
+        const instance = await publicAPI.createInstance();
         instance.mount(mountpoint, {
           onError: jest.fn(),
           onChange: jest.fn(),
@@ -59,7 +59,7 @@ describe('editor_frame service', () => {
   it('should not have child nodes after unmount', async () => {
     pluginInstance.setup(coreMock.createSetup(), pluginSetupDependencies);
     const publicAPI = pluginInstance.start(coreMock.createStart(), pluginStartDependencies);
-    const instance = await publicAPI.createInstance({});
+    const instance = await publicAPI.createInstance();
     instance.mount(mountpoint, {
       onError: jest.fn(),
       onChange: jest.fn(),

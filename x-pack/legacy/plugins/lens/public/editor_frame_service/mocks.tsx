@@ -35,14 +35,14 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
     initialize: jest.fn((_frame, _state?) => ({})),
     getLayerOptions: jest.fn(() => ({
       dimensions: [
-        // {
-        //   layerId: 'layer1',
-        //   dimensionId: 'a',
-        //   dimensionLabel: 'a',
-        //   supportsMoreColumns: true,
-        //   accessors: [],
-        //   filterOperations: jest.fn(() => true),
-        // },
+        {
+          layerId: 'layer1',
+          dimensionId: 'a',
+          dimensionLabel: 'a',
+          supportsMoreColumns: true,
+          accessors: [],
+          filterOperations: jest.fn(() => true),
+        },
       ],
     })),
     toExpression: jest.fn((_state, _frame) => null),
@@ -77,6 +77,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     toExpression: jest.fn((_frame, _state) => null),
     insertLayer: jest.fn((_state, _newLayerId) => {}),
     removeLayer: jest.fn((_state, _layerId) => {}),
+    removeColumn: jest.fn(props => {}),
     getLayers: jest.fn(_state => []),
     getMetaData: jest.fn(_state => ({ filterableIndexPatterns: [] })),
 

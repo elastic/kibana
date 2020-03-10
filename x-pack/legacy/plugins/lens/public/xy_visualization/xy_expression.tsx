@@ -248,7 +248,7 @@ export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYC
           }
 
           const columnToLabelMap = columnToLabel ? JSON.parse(columnToLabel) : {};
-          const splitAccessorLabel = columnToLabelMap[splitAccessor];
+          const splitAccessorLabel = splitAccessor ? columnToLabelMap[splitAccessor] : '';
           const yAccessors = accessors.map(accessor => columnToLabelMap[accessor] || accessor);
           const idForLegend = splitAccessorLabel || yAccessors;
           const sanitized = sanitizeRows({
