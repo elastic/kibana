@@ -58,9 +58,7 @@ export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 export { timezoneProvider } from 'ui/vis/lib/timezone';
 export { tabifyAggResponse } from '../../../data/public';
 export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
-export {
-  ensureDefaultIndexPattern,
-} from '../../../../../plugins/kibana_legacy/public';
+export { ensureDefaultIndexPattern } from '../../../../../plugins/kibana_legacy/public';
 
 // EXPORT types
 export {

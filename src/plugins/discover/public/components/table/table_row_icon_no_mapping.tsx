@@ -21,12 +21,9 @@ import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export function DocViewTableRowIconNoMapping() {
-  const ariaLabel = i18n.translate(
-    'discover.docViews.table.noCachedMappingForThisFieldAriaLabel',
-    {
-      defaultMessage: 'Warning',
-    }
-  );
+  const ariaLabel = i18n.translate('discover.docViews.table.noCachedMappingForThisFieldAriaLabel', {
+    defaultMessage: 'Warning',
+  });
   const tooltipContent = i18n.translate(
     'discover.docViews.table.noCachedMappingForThisFieldTooltip',
     {
