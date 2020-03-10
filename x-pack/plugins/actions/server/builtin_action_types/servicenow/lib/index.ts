@@ -12,11 +12,6 @@ import { CommentType } from '../types';
 
 const validStatusCodes = [200, 201];
 
-const commentTemplate = {
-  name: 'incident',
-  element: 'comments',
-};
-
 class ServiceNow {
   private readonly incidentUrl: string;
   private readonly commentUrl: string;
@@ -69,6 +64,10 @@ class ServiceNow {
     });
   }
 
+  private _addTimeZoneToDate(date: string, timezone = 'GMT'): string {
+    return `${date} GMT`;
+  }
+
   async getUserID(): Promise<string> {
     const res = await this._request({ url: `${this.userUrl}${this.instance.username}` });
     return res.data.result[0].sys_id;
@@ -81,7 +80,11 @@ class ServiceNow {
       data: { ...incident },
     });
 
-    return { number: res.data.result.number, incidentId: res.data.result.sys_id };
+    return {
+      number: res.data.result.number,
+      incidentId: res.data.result.sys_id,
+      pushedDate: new Date(this._addTimeZoneToDate(res.data.result.sys_created_on)).toISOString(),
+    };
   }
 
   async updateIncident(incidentId: string, incident: UpdateIncident): Promise<IncidentResponse> {
@@ -90,7 +93,11 @@ class ServiceNow {
       data: { ...incident },
     });
 
-    return { number: res.data.result.number, incidentId: res.data.result.sys_id };
+    return {
+      number: res.data.result.number,
+      incidentId: res.data.result.sys_id,
+      pushedDate: new Date(this._addTimeZoneToDate(res.data.result.sys_updated_on)).toISOString(),
+    };
   }
 
   async batchCreateComments(
@@ -102,32 +109,20 @@ class ServiceNow {
     return res;
   }
 
-  async batchUpdateComments(comments: CommentType[]): Promise<CommentResponse[]> {
-    const res = await Promise.all(comments.map(c => this.updateComment(c)));
-    return res;
-  }
-
   async createComment(
     incidentId: string,
     comment: CommentType,
     field: string
   ): Promise<CommentResponse> {
-    const res = await this._request({
-      url: this.commentUrl,
-      method: 'post',
-      data: { ...commentTemplate, element_id: incidentId, value: comment.comment, element: field },
-    });
-
-    return { commentId: res.data.result.sys_id };
-  }
-
-  async updateComment(comment: CommentType): Promise<CommentResponse> {
     const res = await this._patch({
-      url: `${this.commentUrl}/${comment.incidentCommentId}`,
-      data: { value: comment.comment },
+      url: `${this.commentUrl}/${incidentId}`,
+      data: { [field]: comment.comment },
     });
 
-    return { commentId: res.data.result.sys_id };
+    return {
+      commentId: comment.commentId,
+      pushedDate: new Date(this._addTimeZoneToDate(res.data.result.sys_updated_on)).toISOString(),
+    };
   }
 }
 

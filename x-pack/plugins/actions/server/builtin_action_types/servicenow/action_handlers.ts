@@ -14,6 +14,21 @@ import {
   CommentType,
   CommentsZipped,
 } from './types';
+import { ServiceNow } from './lib';
+
+const createComments = async (
+  serviceNow: ServiceNow,
+  incidentId: string,
+  key: string,
+  comments: CommentType[]
+): Promise<CommentsZipped[]> => {
+  const createdComments = await serviceNow.batchCreateComments(incidentId, comments, key);
+
+  return zipWith(comments, createdComments, (a: CommentType, b: CommentResponse) => ({
+    commentId: a.commentId,
+    pushedDate: b.pushedDate,
+  }));
+};
 
 export const handleCreateIncident = async ({
   serviceNow,
@@ -23,23 +38,16 @@ export const handleCreateIncident = async ({
 }: ActionHandlerArguments): Promise<IncidentCreationResponse> => {
   const paramsAsIncident = params as Incident;
 
-  const { incidentId, number } = await serviceNow.createIncident({
+  const { incidentId, number, pushedDate } = await serviceNow.createIncident({
     ...paramsAsIncident,
   });
 
-  const res: IncidentCreationResponse = { incidentId, number };
+  const res: IncidentCreationResponse = { incidentId, number, pushedDate };
 
   if (comments && Array.isArray(comments) && comments.length > 0) {
-    const commentResponse = await serviceNow.batchCreateComments(
-      incidentId,
-      comments,
-      mapping.get('comments').target
-    );
-
-    res.comments = zipWith(comments, commentResponse, (a: CommentType, b: CommentResponse) => ({
-      commentId: a.commentId,
-      incidentCommentId: b.commentId,
-    }));
+    res.comments = [
+      ...(await createComments(serviceNow, incidentId, mapping.get('comments').target, comments)),
+    ];
   }
 
   return { ...res };
@@ -51,53 +59,19 @@ export const handleUpdateIncident = async ({
   params,
   comments,
   mapping,
-}: UpdateActionHandlerArguments) => {
+}: UpdateActionHandlerArguments): Promise<IncidentCreationResponse> => {
   const paramsAsIncident = params as UpdateParamsType;
 
-  const { number } = await serviceNow.updateIncident(incidentId, {
+  const { number, pushedDate } = await serviceNow.updateIncident(incidentId, {
     ...paramsAsIncident,
   });
 
-  const res: IncidentCreationResponse = { incidentId, number };
+  const res: IncidentCreationResponse = { incidentId, number, pushedDate };
 
   if (comments && Array.isArray(comments) && comments.length > 0) {
-    const commentsToCreate = comments.filter(c => !c.incidentCommentId);
-    const commentsToUpdate = comments.filter(c => c.incidentCommentId);
-
-    let createRes: CommentsZipped[] = [];
-    let updateRes: CommentsZipped[] = [];
-
-    if (commentsToCreate.length > 0) {
-      const commentCreationResponse = await serviceNow.batchCreateComments(
-        incidentId,
-        commentsToCreate,
-        mapping.get('comments').target
-      );
-
-      createRes = zipWith(
-        commentsToCreate,
-        commentCreationResponse,
-        (a: CommentType, b: CommentResponse) => ({
-          commentId: a.commentId,
-          incidentCommentId: b.commentId,
-        })
-      );
-    }
-
-    if (commentsToUpdate.length > 0) {
-      const commentUpdateResponse = await serviceNow.batchUpdateComments(commentsToUpdate);
-
-      updateRes = zipWith(
-        commentsToUpdate,
-        commentUpdateResponse,
-        (a: CommentType, b: CommentResponse) => ({
-          commentId: a.commentId,
-          incidentCommentId: b.commentId,
-        })
-      );
-    }
-
-    res.comments = [...createRes, ...updateRes];
+    res.comments = [
+      ...(await createComments(serviceNow, incidentId, mapping.get('comments').target, comments)),
+    ];
   }
 
   return { ...res };

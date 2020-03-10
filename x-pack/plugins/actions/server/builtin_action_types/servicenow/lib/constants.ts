@@ -7,4 +7,4 @@
 export const API_VERSION = 'v1';
 export const INCIDENT_URL = `api/now/${API_VERSION}/table/incident`;
 export const USER_URL = `api/now/${API_VERSION}/table/sys_user?user_name=`;
-export const COMMENT_URL = `api/now/${API_VERSION}/table/sys_journal_field`;
+export const COMMENT_URL = `api/now/${API_VERSION}/table/incident`;

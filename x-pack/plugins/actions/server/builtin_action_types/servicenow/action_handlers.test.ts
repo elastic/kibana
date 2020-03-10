@@ -18,21 +18,12 @@ const incident: Incident = {
   description: 'A description',
 };
 
-const commentsToCreate = [
+const comments = [
   {
-    commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
+    commentId: '456',
     version: 'WzU3LDFd',
     comment: 'A comment',
     incidentCommentId: undefined,
-  },
-];
-
-const commentsToUpdate = [
-  {
-    commentId: '3e869fc0-4d1a-11ea-bace-d9629f4c49ff',
-    version: 'WzU3LDFd',
-    comment: 'A comment',
-    incidentCommentId: '333c0583075f00100e48fbbf7c1ed05d',
   },
 ];
 
@@ -42,14 +33,22 @@ describe('handleCreateIncident', () => {
       return {
         serviceNow: {
           getUserID: jest.fn().mockResolvedValue('1234'),
-          createIncident: jest.fn().mockResolvedValue({ incidentId: '123', number: 'INC01' }),
-          updateIncident: jest.fn().mockResolvedValue({ incidentId: '123', number: 'INC01' }),
+          createIncident: jest.fn().mockResolvedValue({
+            incidentId: '123',
+            number: 'INC01',
+            pushedDate: '2020-03-10T12:24:20.000Z',
+          }),
+          updateIncident: jest.fn().mockResolvedValue({
+            incidentId: '123',
+            number: 'INC01',
+            pushedDate: '2020-03-10T12:24:20.000Z',
+          }),
           batchCreateComments: jest
             .fn()
-            .mockResolvedValue([{ commentId: '133c78cf071f00100e48fbbf7c1ed0f2' }]),
+            .mockResolvedValue([{ commentId: '456', pushedDate: '2020-03-10T12:24:20.000Z' }]),
           batchUpdateComments: jest
             .fn()
-            .mockResolvedValue([{ commentId: '333c0583075f00100e48fbbf7c1ed05d' }]),
+            .mockResolvedValue([{ commentId: '456', pushedDate: '2020-03-10T12:24:20.000Z' }]),
         },
       };
     });
@@ -69,7 +68,11 @@ describe('handleCreateIncident', () => {
     expect(serviceNow.createIncident).toHaveBeenCalledWith(incident);
     expect(serviceNow.createIncident).toHaveReturned();
     expect(serviceNow.batchCreateComments).not.toHaveBeenCalled();
-    expect(res).toEqual({ incidentId: '123', number: 'INC01' });
+    expect(res).toEqual({
+      incidentId: '123',
+      number: 'INC01',
+      pushedDate: '2020-03-10T12:24:20.000Z',
+    });
   });
 
   test('create an incident with comments', async () => {
@@ -78,7 +81,7 @@ describe('handleCreateIncident', () => {
     const res = await handleCreateIncident({
       serviceNow,
       params: incident,
-      comments: commentsToCreate,
+      comments,
       mapping: finalMapping,
     });
 
@@ -86,18 +89,15 @@ describe('handleCreateIncident', () => {
     expect(serviceNow.createIncident).toHaveBeenCalledWith(incident);
     expect(serviceNow.createIncident).toHaveReturned();
     expect(serviceNow.batchCreateComments).toHaveBeenCalled();
-    expect(serviceNow.batchCreateComments).toHaveBeenCalledWith(
-      '123',
-      commentsToCreate,
-      'comments'
-    );
+    expect(serviceNow.batchCreateComments).toHaveBeenCalledWith('123', comments, 'comments');
     expect(res).toEqual({
       incidentId: '123',
       number: 'INC01',
+      pushedDate: '2020-03-10T12:24:20.000Z',
       comments: [
         {
-          commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-          incidentCommentId: '133c78cf071f00100e48fbbf7c1ed0f2',
+          commentId: '456',
+          pushedDate: '2020-03-10T12:24:20.000Z',
         },
       ],
     });
@@ -118,7 +118,11 @@ describe('handleCreateIncident', () => {
     expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', incident);
     expect(serviceNow.updateIncident).toHaveReturned();
     expect(serviceNow.batchUpdateComments).not.toHaveBeenCalled();
-    expect(res).toEqual({ incidentId: '123', number: 'INC01' });
+    expect(res).toEqual({
+      incidentId: '123',
+      number: 'INC01',
+      pushedDate: '2020-03-10T12:24:20.000Z',
+    });
   });
 
   test('update an incident and create new comments', async () => {
@@ -128,7 +132,7 @@ describe('handleCreateIncident', () => {
       incidentId: '123',
       serviceNow,
       params: incident,
-      comments: commentsToCreate,
+      comments,
       mapping: finalMapping,
     });
 
@@ -136,85 +140,16 @@ describe('handleCreateIncident', () => {
     expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', incident);
     expect(serviceNow.updateIncident).toHaveReturned();
     expect(serviceNow.batchUpdateComments).not.toHaveBeenCalled();
-    expect(serviceNow.batchCreateComments).toHaveBeenCalledWith(
-      '123',
-      commentsToCreate,
-      'comments'
-    );
+    expect(serviceNow.batchCreateComments).toHaveBeenCalledWith('123', comments, 'comments');
 
     expect(res).toEqual({
       incidentId: '123',
       number: 'INC01',
+      pushedDate: '2020-03-10T12:24:20.000Z',
       comments: [
         {
-          commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-          incidentCommentId: '133c78cf071f00100e48fbbf7c1ed0f2',
-        },
-      ],
-    });
-  });
-
-  test('update an incident and update comments', async () => {
-    const { serviceNow } = new ServiceNowMock();
-
-    const res = await handleUpdateIncident({
-      incidentId: '123',
-      serviceNow,
-      params: incident,
-      comments: commentsToUpdate,
-      mapping: finalMapping,
-    });
-
-    expect(serviceNow.updateIncident).toHaveBeenCalled();
-    expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', incident);
-    expect(serviceNow.updateIncident).toHaveReturned();
-    expect(serviceNow.batchCreateComments).not.toHaveBeenCalled();
-    expect(serviceNow.batchUpdateComments).toHaveBeenCalledWith(commentsToUpdate);
-
-    expect(res).toEqual({
-      incidentId: '123',
-      number: 'INC01',
-      comments: [
-        {
-          commentId: '3e869fc0-4d1a-11ea-bace-d9629f4c49ff',
-          incidentCommentId: '333c0583075f00100e48fbbf7c1ed05d',
-        },
-      ],
-    });
-  });
-
-  test('update an incident, create and update comments', async () => {
-    const { serviceNow } = new ServiceNowMock();
-
-    const res = await handleUpdateIncident({
-      incidentId: '123',
-      serviceNow,
-      params: incident,
-      comments: [...commentsToCreate, ...commentsToUpdate],
-      mapping: finalMapping,
-    });
-
-    expect(serviceNow.updateIncident).toHaveBeenCalled();
-    expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', incident);
-    expect(serviceNow.updateIncident).toHaveReturned();
-    expect(serviceNow.batchCreateComments).toHaveBeenCalledWith(
-      '123',
-      commentsToCreate,
-      'comments'
-    );
-    expect(serviceNow.batchUpdateComments).toHaveBeenCalledWith(commentsToUpdate);
-
-    expect(res).toEqual({
-      incidentId: '123',
-      number: 'INC01',
-      comments: [
-        {
-          commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-          incidentCommentId: '133c78cf071f00100e48fbbf7c1ed0f2',
-        },
-        {
-          commentId: '3e869fc0-4d1a-11ea-bace-d9629f4c49ff',
-          incidentCommentId: '333c0583075f00100e48fbbf7c1ed05d',
+          commentId: '456',
+          pushedDate: '2020-03-10T12:24:20.000Z',
         },
       ],
     });

@@ -19,10 +19,12 @@ export interface Incident {
 export interface IncidentResponse {
   number: string;
   incidentId: string;
+  pushedDate: string;
 }
 
 export interface CommentResponse {
   commentId: string;
+  pushedDate: string;
 }
 
 export type UpdateIncident = Partial<Incident>;

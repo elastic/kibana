@@ -70,7 +70,7 @@ describe('ServiceNow lib', () => {
       headers: {
         'content-type': 'application/json',
       },
-      data: { result: { sys_id: '123', number: 'INC01' } },
+      data: { result: { sys_id: '123', number: 'INC01', sys_created_on: '2020-03-10 12:24:20' } },
     });
 
     const res = await serviceNow.createIncident({
@@ -91,6 +91,7 @@ describe('ServiceNow lib', () => {
     expect(res).toEqual({
       incidentId: '123',
       number: 'INC01',
+      pushedDate: '2020-03-10T12:24:20.000Z',
     });
   });
 
@@ -100,7 +101,7 @@ describe('ServiceNow lib', () => {
       headers: {
         'content-type': 'application/json',
       },
-      data: { result: { sys_id: '123', number: 'INC01' } },
+      data: { result: { sys_id: '123', number: 'INC01', sys_updated_on: '2020-03-10 12:24:20' } },
     });
 
     const res = await serviceNow.updateIncident('123', {
@@ -114,20 +115,21 @@ describe('ServiceNow lib', () => {
     expect(res).toEqual({
       incidentId: '123',
       number: 'INC01',
+      pushedDate: '2020-03-10T12:24:20.000Z',
     });
   });
 
-  test('add comment', async () => {
+  test('create comment', async () => {
     axiosMock.mockResolvedValue({
       status: 200,
       headers: {
         'content-type': 'application/json',
       },
-      data: { result: { sys_id: '456' } },
+      data: { result: { sys_updated_on: '2020-03-10 12:24:20' } },
     });
 
     const comment = {
-      commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
+      commentId: '456',
       version: 'WzU3LDFd',
       comment: 'A comment',
       incidentCommentId: undefined,
@@ -137,59 +139,35 @@ describe('ServiceNow lib', () => {
 
     const [url, { method, data }] = axiosMock.mock.calls[0];
 
-    expect(url).toEqual(prependInstanceUrl(`api/now/v1/table/sys_journal_field`));
-    expect(method).toEqual('post');
-    expect(data).toEqual({
-      name: 'incident',
-      element: 'comments',
-      element_id: '123',
-      value: 'A comment',
-    });
-
-    expect(res).toEqual({
-      commentId: '456',
-    });
-  });
-
-  test('update comment', async () => {
-    axiosMock.mockResolvedValue({
-      status: 200,
-      headers: {
-        'content-type': 'application/json',
-      },
-      data: { result: { sys_id: '456' } },
-    });
-
-    const comment = {
-      commentId: '123',
-      version: 'WzU3LDFd',
-      comment: 'A comment',
-      incidentCommentId: '456',
-    };
-
-    const res = await serviceNow.updateComment(comment);
-
-    const [url, { method, data }] = axiosMock.mock.calls[0];
-
-    expect(url).toEqual(prependInstanceUrl(`api/now/v1/table/sys_journal_field/456`));
+    expect(url).toEqual(prependInstanceUrl(`api/now/v1/table/incident/123`));
     expect(method).toEqual('patch');
     expect(data).toEqual({
-      value: 'A comment',
+      comments: 'A comment',
     });
 
     expect(res).toEqual({
       commentId: '456',
+      pushedDate: '2020-03-10T12:24:20.000Z',
     });
   });
 
   test('create batch comment', async () => {
-    axiosMock.mockResolvedValue({
+    axiosMock.mockReturnValueOnce({
       status: 200,
       headers: {
         'content-type': 'application/json',
       },
-      data: { result: { sys_id: '789' } },
+      data: { result: { sys_updated_on: '2020-03-10 12:24:20' } },
     });
+
+    axiosMock.mockReturnValueOnce({
+      status: 200,
+      headers: {
+        'content-type': 'application/json',
+      },
+      data: { result: { sys_updated_on: '2020-03-10 12:25:20' } },
+    });
+
     const comments = [
       {
         commentId: '123',
@@ -208,52 +186,15 @@ describe('ServiceNow lib', () => {
 
     comments.forEach((comment, index) => {
       const [url, { method, data }] = axiosMock.mock.calls[index];
-      expect(url).toEqual(prependInstanceUrl('api/now/v1/table/sys_journal_field'));
-      expect(method).toEqual('post');
-      expect(data).toEqual({
-        name: 'incident',
-        element: 'comments',
-        element_id: '000',
-        value: comment.comment,
-      });
-      expect(res).toEqual([{ commentId: '789' }, { commentId: '789' }]);
-    });
-  });
-
-  test('update batch comment', async () => {
-    axiosMock.mockResolvedValue({
-      status: 200,
-      headers: {
-        'content-type': 'application/json',
-      },
-      data: { result: { sys_id: '789' } },
-    });
-    const comments = [
-      {
-        commentId: '123',
-        version: 'WzU3LDFd',
-        comment: 'A comment',
-        incidentCommentId: '001',
-      },
-      {
-        commentId: '456',
-        version: 'WzU3LDFd',
-        comment: 'A second comment',
-        incidentCommentId: '002',
-      },
-    ];
-    const res = await serviceNow.batchUpdateComments(comments);
-
-    comments.forEach((comment, index) => {
-      const [url, { method, data }] = axiosMock.mock.calls[index];
-      expect(url).toEqual(
-        prependInstanceUrl(`api/now/v1/table/sys_journal_field/${comment.incidentCommentId}`)
-      );
+      expect(url).toEqual(prependInstanceUrl('api/now/v1/table/incident/000'));
       expect(method).toEqual('patch');
       expect(data).toEqual({
-        value: comment.comment,
+        comments: comment.comment,
       });
-      expect(res).toEqual([{ commentId: '789' }, { commentId: '789' }]);
+      expect(res).toEqual([
+        { commentId: '123', pushedDate: '2020-03-10T12:24:20.000Z' },
+        { commentId: '456', pushedDate: '2020-03-10T12:25:20.000Z' },
+      ]);
     });
   });
 

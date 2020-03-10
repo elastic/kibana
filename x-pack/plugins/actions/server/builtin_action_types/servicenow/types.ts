@@ -47,9 +47,10 @@ export interface IncidentCreationResponse {
   incidentId: string;
   number: string;
   comments?: CommentsZipped[];
+  pushedDate: string;
 }
 
 export interface CommentsZipped {
   commentId: string;
-  incidentCommentId: string;
+  pushedDate: string;
 }
