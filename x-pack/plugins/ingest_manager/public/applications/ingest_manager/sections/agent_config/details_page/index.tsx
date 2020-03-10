@@ -18,7 +18,9 @@ import {
   EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiI18nNumber,
-  EuiStat,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
 } from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { useGetOneAgentConfig, useLink } from '../../../hooks';
@@ -162,12 +164,10 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
           },
         ].map(item => (
           <EuiFlexItem grow={false}>
-            <EuiStat
-              titleSize="xxs"
-              textAlign="right"
-              title={item.content}
-              description={item.label}
-            />
+            <EuiDescriptionList compressed textStyle="reverse" style={{ textAlign: 'right' }}>
+              <EuiDescriptionListTitle>{item.label}</EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>{item.content}</EuiDescriptionListDescription>
+            </EuiDescriptionList>
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
