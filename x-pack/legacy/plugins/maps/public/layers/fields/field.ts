@@ -6,7 +6,7 @@
 
 import { FIELD_ORIGIN } from '../../../common/constants';
 import { IVectorSource } from '../sources/vector_source';
-import { ITooltipProperty } from '../tooltips/tooltip_property';
+import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
 
 export interface IField {
   getName(): string;
@@ -20,4 +20,63 @@ export interface IField {
   isValid(): boolean;
   getOrdinalFieldMetaRequest(): Promise<unknown>;
   getCategoricalFieldMetaRequest(): Promise<unknown>;
+}
+
+export class AbstractField implements IField {
+  private readonly _fieldName: string;
+  private readonly _origin: FIELD_ORIGIN;
+
+  constructor({ fieldName, origin }: { fieldName: string; origin: FIELD_ORIGIN }) {
+    this._fieldName = fieldName;
+    this._origin = origin || FIELD_ORIGIN.SOURCE;
+  }
+
+  getName(): string {
+    return this._fieldName;
+  }
+
+  getRootName(): string {
+    return this.getName();
+  }
+
+  canValueBeFormatted(): boolean {
+    return true;
+  }
+
+  getSource(): IVectorSource {
+    throw new Error('must implement Field#getSource');
+  }
+
+  isValid(): boolean {
+    return !!this._fieldName;
+  }
+
+  async getDataType(): Promise<string> {
+    return 'string';
+  }
+
+  async getLabel(): Promise<string> {
+    return this._fieldName;
+  }
+
+  async createTooltipProperty(value: string | undefined): Promise<ITooltipProperty> {
+    const label = await this.getLabel();
+    return new TooltipProperty(this.getName(), label, value);
+  }
+
+  getOrigin(): FIELD_ORIGIN {
+    return this._origin;
+  }
+
+  supportsFieldMeta(): boolean {
+    return false;
+  }
+
+  async getOrdinalFieldMetaRequest(): Promise<unknown> {
+    return null;
+  }
+
+  async getCategoricalFieldMetaRequest(): Promise<unknown> {
+    return null;
+  }
 }
