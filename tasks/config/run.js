@@ -118,10 +118,10 @@ module.exports = function(grunt) {
 
     // used by the test tasks
     //    runs the check_core_api_changes script to ensure API changes are explictily accepted
-    checkCoreApiChanges: scriptWithGithubChecks({
+    checkDocApiChanges: scriptWithGithubChecks({
       title: 'Check core API changes',
       cmd: NODE,
-      args: ['scripts/check_core_api_changes'],
+      args: ['scripts/check_published_api_changes'],
     }),
 
     // used by the test and jenkins:unit tasks
@@ -208,6 +208,12 @@ module.exports = function(grunt) {
       },
       cmd: NODE,
       args: ['scripts/notice', '--validate'],
+    }),
+
+    test_hardening: scriptWithGithubChecks({
+      title: 'Node.js hardening tests',
+      cmd: NODE,
+      args: ['scripts/test_hardening.js'],
     }),
 
     apiIntegrationTests: scriptWithGithubChecks({
