@@ -4,34 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { get } from 'lodash';
-import moment from 'moment';
-import React, { Component } from 'react';
-import { Subscription } from 'rxjs';
-
 import {
   EuiBasicTable,
-  EuiButtonIcon,
+  EuiLoadingSpinner,
   EuiPageContent,
   EuiSpacer,
   EuiText,
   EuiTextColor,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
-
-import { ToastsSetup, ApplicationStart } from 'src/core/public';
-import { LicensingPluginSetup, ILicense } from '../../../licensing/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { get } from 'lodash';
+import moment from 'moment';
+import React, { Component, default as React, default as React } from 'react';
+import { Subscription } from 'rxjs';
+import { ApplicationStart, ToastsSetup } from 'src/core/public';
+import { ILicense, LicensingPluginSetup } from '../../../licensing/public';
 import { Poller } from '../../common/poller';
 import { JobStatuses, JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG } from '../../constants';
-import { ReportingAPIClient, JobQueueEntry } from '../lib/reporting_api_client';
 import { checkLicense } from '../lib/license_check';
-import { ReportErrorButton } from './report_error_button';
-import { ReportInfoButton } from './report_info_button';
+import { JobQueueEntry, ReportingAPIClient } from '../lib/reporting_api_client';
+import {
+  renderDeleteButton,
+  renderDownloadButton,
+  renderInfoButton,
+  renderReportErrorButton,
+} from './buttons';
 
-interface Job {
+export interface Job {
   id: string;
   type: string;
   object_type: string;
@@ -47,9 +48,10 @@ interface Job {
   max_attempts: number;
   csv_contains_formulas: boolean;
   warnings: string[];
+  is_deleting: boolean;
 }
 
-interface Props {
+export interface Props {
   intl: InjectedIntl;
   apiClient: ReportingAPIClient;
   license$: LicensingPluginSetup['license$'];
@@ -180,6 +182,44 @@ class ReportListingUi extends Component<Props, State> {
       showLinks,
       badLicenseMessage,
     });
+  };
+
+  private removeRecord = (record: Job) => {
+    const { jobs } = this.state;
+    const filtered = jobs.filter(j => j.id !== record.id);
+    this.setState(current => ({ ...current, jobs: filtered }));
+  };
+
+  private renderDeleteButton = (record: Job) => {
+    const handleDelete = async () => {
+      try {
+        // TODO present a modal to verify: this can not be undone
+        this.setState(current => ({ ...current, is_deleting: true }));
+        await this.props.apiClient.deleteReport(record.id);
+        this.removeRecord(record);
+        this.props.toasts.addSuccess(
+          this.props.intl.formatMessage(
+            {
+              id: 'xpack.reporting.listing.table.deleteConfim',
+              defaultMessage: `The {reportTitle} report was deleted`,
+            },
+            { reportTitle: record.object_title }
+          )
+        );
+      } catch (error) {
+        this.props.toasts.addDanger(
+          this.props.intl.formatMessage(
+            {
+              id: 'xpack.reporting.listing.table.deleteFailedErrorMessage',
+              defaultMessage: `The report was not deleted: {error}`,
+            },
+            { error }
+          )
+        );
+        throw error;
+      }
+    };
+    return renderDeleteButton(this.props, handleDelete, record); // FIXME react component
   };
 
   private renderTable() {
@@ -315,11 +355,13 @@ class ReportListingUi extends Component<Props, State> {
         actions: [
           {
             render: (record: Job) => {
+              const canDelete = !record.is_deleting;
               return (
                 <div>
                   {this.renderDownloadButton(record)}
                   {this.renderReportErrorButton(record)}
                   {this.renderInfoButton(record)}
+                  {canDelete ? this.renderDeleteButton(record) : <EuiLoadingSpinner size="m" />}
                 </div>
               );
             },
@@ -360,64 +402,15 @@ class ReportListingUi extends Component<Props, State> {
   }
 
   private renderDownloadButton = (record: Job) => {
-    if (record.status !== JobStatuses.COMPLETED) {
-      return;
-    }
-
-    const { intl } = this.props;
-    const button = (
-      <EuiButtonIcon
-        onClick={() => this.props.apiClient.downloadReport(record.id)}
-        iconType="importAction"
-        aria-label={intl.formatMessage({
-          id: 'xpack.reporting.listing.table.downloadReportAriaLabel',
-          defaultMessage: 'Download report',
-        })}
-      />
-    );
-
-    if (record.csv_contains_formulas) {
-      return (
-        <EuiToolTip
-          position="top"
-          content={intl.formatMessage({
-            id: 'xpack.reporting.listing.table.csvContainsFormulas',
-            defaultMessage:
-              'Your CSV contains characters which spreadsheet applications can interpret as formulas.',
-          })}
-        >
-          {button}
-        </EuiToolTip>
-      );
-    }
-
-    if (record.max_size_reached) {
-      return (
-        <EuiToolTip
-          position="top"
-          content={intl.formatMessage({
-            id: 'xpack.reporting.listing.table.maxSizeReachedTooltip',
-            defaultMessage: 'Max size reached, contains partial data.',
-          })}
-        >
-          {button}
-        </EuiToolTip>
-      );
-    }
-
-    return button;
+    return renderDownloadButton(this.props, record); // FIXME react component
   };
 
   private renderReportErrorButton = (record: Job) => {
-    if (record.status !== JobStatuses.FAILED) {
-      return;
-    }
-
-    return <ReportErrorButton apiClient={this.props.apiClient} jobId={record.id} />;
+    return renderReportErrorButton(this.props, record); // FIXME react component
   };
 
   private renderInfoButton = (record: Job) => {
-    return <ReportInfoButton apiClient={this.props.apiClient} jobId={record.id} />;
+    return renderInfoButton(this.props, record); // FIXME react component
   };
 
   private onTableChange = ({ page }: { page: { index: number } }) => {
@@ -482,6 +475,7 @@ class ReportListingUi extends Component<Props, State> {
               max_attempts: source.max_attempts,
               csv_contains_formulas: get(source, 'output.csv_contains_formulas'),
               warnings: source.output ? source.output.warnings : undefined,
+              is_deleting: false,
             };
           }
         ),

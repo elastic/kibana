@@ -20,7 +20,7 @@ interface JobResponseHandlerOpts {
   excludeContent?: boolean;
 }
 
-export function jobResponseHandlerFactory(
+export function downloadJobResponseHandlerFactory(
   server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
   exportTypesRegistry: ExportTypesRegistry
@@ -36,6 +36,7 @@ export function jobResponseHandlerFactory(
     opts: JobResponseHandlerOpts = {}
   ) {
     const { docId } = params;
+    // TODO: async/await
     return jobsQuery.get(user, docId, { includeContent: !opts.excludeContent }).then(doc => {
       if (!doc) return Boom.notFound();
 
@@ -65,5 +66,36 @@ export function jobResponseHandlerFactory(
 
       return response; // Hapi
     });
+  };
+}
+
+export function deleteJobResponseHandlerFactory(
+  server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup
+) {
+  const jobsQuery = jobsQueryFactory(server, elasticsearch);
+
+  return async function deleteJobResponseHander(
+    validJobTypes: string[],
+    user: any,
+    h: ResponseToolkit,
+    params: JobResponseHandlerParams
+  ) {
+    const { docId } = params;
+    const doc = await jobsQuery.get(user, docId, { includeContent: false });
+    if (!doc) return Boom.notFound();
+
+    const { jobtype: jobType } = doc._source;
+    if (!validJobTypes.includes(jobType)) {
+      return Boom.unauthorized(`Sorry, you are not authorized to delete ${jobType} reports`);
+    }
+
+    try {
+      const docIndex = doc._index;
+      await jobsQuery.delete(docIndex, docId);
+      return h.response({ deleted: true });
+    } catch (error) {
+      return Boom.boomify(error, { statusCode: error.statusCode });
+    }
   };
 }
