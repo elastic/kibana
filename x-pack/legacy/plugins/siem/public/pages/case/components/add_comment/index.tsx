@@ -14,6 +14,8 @@ import { MarkdownEditorForm } from '../../../../components/markdown_editor/form'
 import { Form, useForm, UseField } from '../../../../shared_imports';
 import * as i18n from '../../translations';
 import { schema } from './schema';
+import { InsertTimelinePopover } from '../../../../components/timeline/insert_timeline_popover';
+import { useInsertTimeline } from '../../../../components/timeline/insert_timeline_popover/use_insert_timeline';
 import { Comment } from '../../../../containers/case/types';
 
 const MySpinner = styled(EuiLoadingSpinner)`
@@ -38,6 +40,10 @@ export const AddComment = React.memo<AddCommentProps>(({ caseId, onCommentPosted
     options: { stripEmptyFields: false },
     schema,
   });
+  const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<CommentRequest>(
+    form,
+    'comment'
+  );
 
   useEffect(() => {
     if (commentData !== null) {
@@ -66,7 +72,8 @@ export const AddComment = React.memo<AddCommentProps>(({ caseId, onCommentPosted
             isDisabled: isLoading,
             dataTestSubj: 'caseComment',
             placeholder: i18n.ADD_COMMENT_HELP_TEXT,
-            footerContentRight: (
+            onCursorPositionUpdate: handleCursorChange,
+            bottomRightContent: (
               <EuiButton
                 iconType="plusInCircle"
                 isDisabled={isLoading}
@@ -77,11 +84,16 @@ export const AddComment = React.memo<AddCommentProps>(({ caseId, onCommentPosted
                 {i18n.ADD_COMMENT}
               </EuiButton>
             ),
+            topRightContent: (
+              <InsertTimelinePopover
+                hideUntitled={true}
+                isDisabled={isLoading}
+                onTimelineChange={handleOnTimelineChange}
+              />
+            ),
           }}
         />
       </Form>
-      {commentData != null &&
-        'TO DO new comment got added but we didnt update the UI yet. Refresh the page to see your comment ;)'}
     </>
   );
 });

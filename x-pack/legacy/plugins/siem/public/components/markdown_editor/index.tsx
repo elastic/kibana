@@ -12,7 +12,7 @@ import {
   EuiTabbedContent,
   EuiTextArea,
 } from '@elastic/eui';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useCallback, ChangeEvent } from 'react';
 import styled, { css } from 'styled-components';
 
 import { Markdown } from '../markdown';
@@ -28,8 +28,24 @@ const Container = styled(EuiPanel)`
     padding: 0;
     background: ${theme.eui.euiColorLightestShade};
     position: relative;
+    .markdown-tabs-header {
+      position: absolute;
+      top: ${theme.eui.euiSizeS};
+      right: ${theme.eui.euiSizeS};
+      z-index: ${theme.eui.euiZContentMenu};
+    }
     .euiTab {
       padding: 10px;
+    }
+    .markdown-tabs {
+      width: 100%;
+    }
+    .markdown-tabs-footer {
+      height: 41px;
+      padding: 0 ${theme.eui.euiSizeM};
+      .euiLink {
+        font-size: ${theme.eui.euiSizeM};
+      }
     }
     .euiFormRow__labelWrapper {
       position: absolute;
@@ -41,84 +57,108 @@ const Container = styled(EuiPanel)`
   `}
 `;
 
-const Tabs = styled(EuiTabbedContent)`
-  width: 100%;
-`;
-
-const Footer = styled(EuiFlexGroup)`
-  ${({ theme }) => css`
-    height: 41px;
-    padding: 0 ${theme.eui.euiSizeM};
-    .euiLink {
-      font-size: ${theme.eui.euiSizeM};
-    }
-  `}
-`;
-
 const MarkdownContainer = styled(EuiPanel)`
   min-height: 150px;
   overflow: auto;
 `;
 
+export interface CursorPosition {
+  start: number;
+  end: number;
+}
+
 /** An input for entering a new case description  */
 export const MarkdownEditor = React.memo<{
-  placeholder?: string;
-  footerContentRight?: React.ReactNode;
-  initialContent: string;
+  bottomRightContent?: React.ReactNode;
+  topRightContent?: React.ReactNode;
+  content: string;
   isDisabled?: boolean;
   onChange: (description: string) => void;
-}>(({ placeholder, footerContentRight, initialContent, isDisabled = false, onChange }) => {
-  const [content, setContent] = useState(initialContent);
-  useEffect(() => {
-    onChange(content);
-  }, [content]);
-  useEffect(() => {
-    setContent(initialContent);
-  }, [initialContent]);
-  const tabs = useMemo(
-    () => [
-      {
-        id: 'comment',
-        name: i18n.MARKDOWN,
-        content: (
-          <TextArea
-            onChange={e => {
-              setContent(e.target.value);
-            }}
-            aria-label={`markdown-editor-comment`}
-            fullWidth={true}
-            disabled={isDisabled}
-            placeholder={placeholder ?? ''}
-            spellCheck={false}
-            value={content}
-          />
-        ),
+  onCursorPositionUpdate?: (cursorPosition: CursorPosition) => void;
+  placeholder?: string;
+}>(
+  ({
+    bottomRightContent,
+    topRightContent,
+    content,
+    isDisabled = false,
+    onChange,
+    placeholder,
+    onCursorPositionUpdate,
+  }) => {
+    const handleOnChange = useCallback(
+      (evt: ChangeEvent<HTMLTextAreaElement>) => {
+        onChange(evt.target.value);
       },
-      {
-        id: 'preview',
-        name: i18n.PREVIEW,
-        content: (
-          <MarkdownContainer data-test-subj="markdown-container" paddingSize="s">
-            <Markdown raw={content} />
-          </MarkdownContainer>
-        ),
-      },
-    ],
-    [content, isDisabled, placeholder]
-  );
-  return (
-    <Container>
-      <Tabs data-test-subj={`markdown-tabs`} size="s" tabs={tabs} initialSelectedTab={tabs[0]} />
-      <Footer alignItems="center" gutterSize="none" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiLink href={MARKDOWN_HELP_LINK} external target="_blank">
-            {i18n.MARKDOWN_SYNTAX_HELP}
-          </EuiLink>
-        </EuiFlexItem>
-        {footerContentRight && <EuiFlexItem grow={false}>{footerContentRight}</EuiFlexItem>}
-      </Footer>
-    </Container>
-  );
-});
+      [onChange]
+    );
+
+    const setCursorPosition = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      if (onCursorPositionUpdate) {
+        onCursorPositionUpdate({
+          start: e!.target!.selectionStart ?? 0,
+          end: e!.target!.selectionEnd ?? 0,
+        });
+      }
+      return false;
+    };
+
+    const tabs = useMemo(
+      () => [
+        {
+          id: 'comment',
+          name: i18n.MARKDOWN,
+          content: (
+            <TextArea
+              onChange={handleOnChange}
+              onBlur={setCursorPosition}
+              aria-label={`markdown-editor-comment`}
+              fullWidth={true}
+              disabled={isDisabled}
+              placeholder={placeholder ?? ''}
+              spellCheck={false}
+              value={content}
+            />
+          ),
+        },
+        {
+          id: 'preview',
+          name: i18n.PREVIEW,
+          content: (
+            <MarkdownContainer data-test-subj="markdown-container" paddingSize="s">
+              <Markdown raw={content} />
+            </MarkdownContainer>
+          ),
+        },
+      ],
+      [content, isDisabled, placeholder]
+    );
+    return (
+      <Container>
+        {topRightContent && <div className={`markdown-tabs-header`}>{topRightContent}</div>}
+        <EuiTabbedContent
+          className={`markdown-tabs`}
+          data-test-subj={`markdown-tabs`}
+          size="s"
+          tabs={tabs}
+          initialSelectedTab={tabs[0]}
+        />
+        <EuiFlexGroup
+          className={`markdown-tabs-footer`}
+          alignItems="center"
+          gutterSize="none"
+          justifyContent="spaceBetween"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiLink href={MARKDOWN_HELP_LINK} external target="_blank">
+              {i18n.MARKDOWN_SYNTAX_HELP}
+            </EuiLink>
+          </EuiFlexItem>
+          {bottomRightContent && <EuiFlexItem grow={false}>{bottomRightContent}</EuiFlexItem>}
+        </EuiFlexGroup>
+      </Container>
+    );
+  }
+);
 
 MarkdownEditor.displayName = 'MarkdownEditor';
