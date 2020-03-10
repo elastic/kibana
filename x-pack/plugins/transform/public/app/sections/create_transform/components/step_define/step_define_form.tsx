@@ -20,13 +20,18 @@ import {
   EuiHorizontalRule,
   EuiLink,
   EuiPanel,
-  // @ts-ignore
-  EuiSearchBar,
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
 
+import {
+  esKuery,
+  Query,
+  QueryStringInput,
+} from '../../../../../../../../../src/plugins/data/public';
+
 import { PivotPreview } from '../../../../components/pivot_preview';
+
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { SavedSearchQuery, SearchItems } from '../../../../hooks/use_search_items';
 import { useXJsonMode, xJsonMode } from '../../../../hooks/use_x_json_mode';
@@ -37,7 +42,6 @@ import { DropDown } from '../aggregation_dropdown';
 import { AggListForm } from '../aggregation_list';
 import { GroupByListForm } from '../group_by_list';
 import { SourceIndexPreview } from '../source_index_preview';
-import { KqlFilterBar } from '../../../../../shared_imports';
 import { SwitchModal } from './switch_modal';
 
 import {
@@ -73,6 +77,11 @@ export interface StepDefineExposedState {
 
 const defaultSearch = '*';
 const emptySearch = '';
+
+enum QUERY_LANGUAGE {
+  KUERY = 'kuery',
+  LUCENE = 'lucene',
+}
 
 export function getDefaultStepDefineState(searchItems: SearchItems): StepDefineExposedState {
   return {
@@ -244,22 +253,40 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
   const defaults = { ...getDefaultStepDefineState(searchItems), ...overrides };
 
   // The search filter
+  const [searchInput, setSearchInput] = useState<Query>({
+    query: '',
+    language: QUERY_LANGUAGE.KUERY as string,
+  });
   const [searchString, setSearchString] = useState(defaults.searchString);
   const [searchQuery, setSearchQuery] = useState(defaults.searchQuery);
   const [useKQL] = useState(true);
 
-  const searchHandler = (d: Record<string, any>) => {
-    const { filterQuery, queryString } = d;
-    const newSearch = queryString === emptySearch ? defaultSearch : queryString;
+  const { indexPattern } = searchItems;
+
+  const searchChangeHandler = (query: Query) => setSearchInput(query);
+  const searchSubmitHandler = (query: Query) => {
+    let queryString = '';
+    let filterQuery = { match_all: {} } as Dictionary<any>;
+
+    if (query.language === QUERY_LANGUAGE.KUERY && typeof query.query === 'string') {
+      filterQuery = esKuery.toElasticsearchQuery(
+        esKuery.fromKueryExpression(query.query as string),
+        indexPattern
+      );
+    } else if (typeof query.query === 'string') {
+      queryString = query.query;
+    } else {
+      filterQuery = query.query;
+    }
+
+    const newSearchString = queryString === emptySearch ? defaultSearch : queryString;
     const newSearchQuery = isMatchAllQuery(filterQuery) ? defaultSearch : filterQuery;
-    setSearchString(newSearch);
+    setSearchString(newSearchString);
     setSearchQuery(newSearchQuery);
   };
 
   // The list of selected group by fields
   const [groupByList, setGroupByList] = useState(defaults.groupByList);
-
-  const { indexPattern } = searchItems;
 
   const {
     groupByOptions,
@@ -592,18 +619,32 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
                           defaultMessage: 'Use a query to filter the source data (optional).',
                         })}
                       >
-                        <KqlFilterBar
-                          indexPattern={indexPattern}
-                          onSubmit={searchHandler}
-                          initialValue={searchString === defaultSearch ? emptySearch : searchString}
-                          placeholder={i18n.translate(
-                            'xpack.transform.stepDefineForm.queryPlaceholder',
-                            {
-                              defaultMessage: 'e.g. {example}',
-                              values: { example: 'method : "GET" or status : "404"' },
-                            }
-                          )}
-                          testSubj="tarnsformQueryInput"
+                        <QueryStringInput
+                          bubbleSubmitEvent={true}
+                          query={searchInput}
+                          indexPatterns={[indexPattern]}
+                          onChange={searchChangeHandler}
+                          onSubmit={searchSubmitHandler}
+                          placeholder={
+                            searchInput.language === QUERY_LANGUAGE.KUERY
+                              ? i18n.translate(
+                                  'xpack.transform.stepDefineForm.queryPlaceholderKql',
+                                  {
+                                    defaultMessage: 'e.g. {example}',
+                                    values: { example: 'method : "GET" or status : "404"' },
+                                  }
+                                )
+                              : i18n.translate(
+                                  'xpack.transform.stepDefineForm.queryPlaceholderLucene',
+                                  {
+                                    defaultMessage: 'e.g. {example}',
+                                    values: { example: 'sample lucene query' },
+                                  }
+                                )
+                          }
+                          disableAutoFocus={true}
+                          dataTestSubj="transformQueryInput"
+                          languageSwitcherPopoverAnchorPosition="rightDown"
                         />
                       </EuiFormRow>
                     )}

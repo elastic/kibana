@@ -10,10 +10,14 @@ import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+
+import { API_BASE_PATH } from '../../common/constants';
+
 import { SectionError } from './components';
 import { CLIENT_BASE_PATH, SECTION_SLUG } from './constants';
-import { getAppProviders } from './app_dependencies';
-import { AuthorizationContext } from './lib/authorization';
+import { AuthorizationContext, AuthorizationProvider } from './lib/authorization';
 import { AppDependencies } from './app_dependencies';
 
 import { CloneTransformSection } from './sections/clone_transform';
@@ -60,13 +64,21 @@ export const App: FC = () => {
   );
 };
 
+const localStorage = new Storage(window.localStorage);
+
 export const renderApp = (element: HTMLElement, appDependencies: AppDependencies) => {
-  const Providers = getAppProviders(appDependencies);
+  const I18nContext = appDependencies.i18n.Context;
 
   render(
-    <Providers>
-      <App />
-    </Providers>,
+    <KibanaContextProvider services={{ ...appDependencies, storage: localStorage }}>
+      <AuthorizationProvider privilegesEndpoint={`${API_BASE_PATH}privileges`}>
+        <I18nContext>
+          <HashRouter>
+            <App />
+          </HashRouter>
+        </I18nContext>
+      </AuthorizationProvider>
+    </KibanaContextProvider>,
     element
   );
 
