@@ -19,10 +19,8 @@ import { CaseRequest } from '../../../../../../../../plugins/case/common/api';
 import { Field, Form, getUseField, useForm, UseField } from '../../../../shared_imports';
 import { usePostCase } from '../../../../containers/case/use_post_case';
 import { schema } from './schema';
-import {
-  InsertTimelinePopover,
-  useInsertTimeline,
-} from '../../../../components/timeline/insert_timeline_popover';
+import { SearchTimelineSuperSelect } from '../../../../components/timeline/search_super_select';
+import { useInsertTimeline } from '../../../../components/timeline/search_super_select/use_insert_timeline';
 import * as i18n from '../../translations';
 import { SiemPageName } from '../../../home/types';
 import { MarkdownEditorForm } from '../../../../components/markdown_editor/form';
@@ -121,8 +119,9 @@ export const Create = React.memo(() => {
               isDisabled: isLoading,
               onCursorPositionUpdate: handleCursorChange,
               topRightContent: (
-                <InsertTimelinePopover
+                <SearchTimelineSuperSelect
                   hideUntitled={true}
+                  isInsertTimeline={true}
                   isDisabled={isLoading}
                   onTimelineChange={handleOnTimelineChange}
                 />

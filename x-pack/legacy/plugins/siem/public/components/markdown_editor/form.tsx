@@ -52,7 +52,7 @@ export const MarkdownEditorForm = ({
     >
       <MarkdownEditor
         bottomRightContent={bottomRightContent}
-        initialContent={field.value as string}
+        content={field.value as string}
         isDisabled={isDisabled}
         onChange={handleContentChange}
         onCursorPositionUpdate={onCursorPositionUpdate}

@@ -12,10 +12,8 @@ import * as i18n from '../case_view/translations';
 import { Markdown } from '../../../../components/markdown';
 import { Form, useForm, UseField } from '../../../../shared_imports';
 import { schema, Content } from './schema';
-import {
-  InsertTimelinePopover,
-  useInsertTimeline,
-} from '../../../../components/timeline/insert_timeline_popover';
+import { SearchTimelineSuperSelect } from '../../../../components/timeline/search_super_select';
+import { useInsertTimeline } from '../../../../components/timeline/search_super_select/use_insert_timeline';
 import { MarkdownEditorForm } from '../../../../components/markdown_editor/form';
 
 const ContentWrapper = styled.div`
@@ -90,9 +88,10 @@ export const UserActionMarkdown = ({
           }),
           onCursorPositionUpdate: handleCursorChange,
           topRightContent: (
-            <InsertTimelinePopover
+            <SearchTimelineSuperSelect
               hideUntitled={true}
               isDisabled={false}
+              isInsertTimeline={true}
               onTimelineChange={handleOnTimelineChange}
             />
           ),
