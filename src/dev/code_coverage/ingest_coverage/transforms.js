@@ -96,11 +96,8 @@ export const staticSite = urlBase => obj => {
   const prokTotal = prokForTotalsIndex(urlBase)(ts);
   const prokCoverage = prokForCoverageIndex(urlBase)(ts)(testRunnerType)(obj);
 
-  const url = maybeTotal(staticSiteUrl)
-    .fold(always(prokTotal(obj)), prokCoverage);
-
   delete obj['staticSiteUrl'];
-  obj['staticSiteUrl'] = url;
+  obj['staticSiteUrl'] = maybeTotal(staticSiteUrl).fold(always(prokTotal(obj)), prokCoverage);
 
   return obj;
 };
