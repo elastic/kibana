@@ -87,6 +87,7 @@ export interface RegistryStream {
   dataset: string;
   title: string;
   description?: string;
+  enabled?: boolean;
   vars?: RegistryVarsEntry[];
 }
 

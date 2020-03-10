@@ -26,37 +26,39 @@ export const packageToConfigDatasourceInputs = (packageInfo: PackageInfo): Datas
   if (packageDatasource?.inputs?.length) {
     // Map each package datasource input to agent config datasource input
     packageDatasource.inputs.forEach(packageInput => {
+      // Map each package input stream into datasource input stream
+      const streams: DatasourceInputStream[] = packageInput.streams
+        ? packageInput.streams.map(packageStream => {
+            // Copy input vars into each stream's vars
+            const streamVars: RegistryVarsEntry[] = [
+              ...(packageInput.vars || []),
+              ...(packageStream.vars || []),
+            ];
+            const streamConfig = {};
+            const streamVarsReducer = (
+              configObject: DatasourceInputStream['config'],
+              streamVar: RegistryVarsEntry
+            ): DatasourceInputStream['config'] => {
+              if (!streamVar.default && streamVar.multi) {
+                configObject![streamVar.name] = [];
+              } else {
+                configObject![streamVar.name] = streamVar.default;
+              }
+              return configObject;
+            };
+            return {
+              id: `${packageInput.type}-${packageStream.dataset}`,
+              enabled: packageStream.enabled === false ? false : true,
+              dataset: packageStream.dataset,
+              config: streamVars.reduce(streamVarsReducer, streamConfig),
+            };
+          })
+        : [];
+
       const input: DatasourceInput = {
         type: packageInput.type,
-        enabled: true,
-        // Map each package input stream into datasource input stream
-        streams: packageInput.streams
-          ? packageInput.streams.map(packageStream => {
-              // Copy input vars into each stream's vars
-              const streamVars: RegistryVarsEntry[] = [
-                ...(packageInput.vars || []),
-                ...(packageStream.vars || []),
-              ];
-              const streamConfig = {};
-              const streamVarsReducer = (
-                configObject: DatasourceInputStream['config'],
-                streamVar: RegistryVarsEntry
-              ): DatasourceInputStream['config'] => {
-                if (!streamVar.default && streamVar.multi) {
-                  configObject![streamVar.name] = [];
-                } else {
-                  configObject![streamVar.name] = streamVar.default;
-                }
-                return configObject;
-              };
-              return {
-                id: `${packageInput.type}-${packageStream.dataset}`,
-                enabled: true,
-                dataset: packageStream.dataset,
-                config: streamVars.reduce(streamVarsReducer, streamConfig),
-              };
-            })
-          : [],
+        enabled: streams.length ? !!streams.find(stream => stream.enabled) : true,
+        streams,
       };
 
       inputs.push(input);
