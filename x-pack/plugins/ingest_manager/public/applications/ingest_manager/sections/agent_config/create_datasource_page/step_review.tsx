@@ -83,7 +83,7 @@ export const StepReviewDatasource: React.FunctionComponent<{
             title={
               <FormattedMessage
                 id="xpack.ingestManager.createDatasource.stepReview.agentsAffectedCalloutTitle"
-                defaultMessage="This action will affect {count, plural, one {# agemt} other {# agents}}"
+                defaultMessage="This action will affect {count, plural, one {# agent} other {# agents}}"
                 values={{
                   count: agentCount,
                 }}
