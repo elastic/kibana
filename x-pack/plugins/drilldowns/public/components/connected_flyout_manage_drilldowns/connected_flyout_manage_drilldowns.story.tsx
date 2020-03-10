@@ -13,6 +13,8 @@ import {
   urlDrilldownActionFactory,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../advanced_ui_actions/public/components/action_wizard/test_data';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { StubBrowserStorage } from '../../../../../../src/test_utils/public/stub_browser_storage';
 
 const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
   advancedUiActions: {
@@ -22,6 +24,7 @@ const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
       },
     },
   },
+  storage: new Storage(new StubBrowserStorage()),
 });
 
 storiesOf('components/FlyoutManageDrilldowns', module).add('default', () => (

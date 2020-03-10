@@ -69,7 +69,6 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
 
   return (
     <>
-      <EuiSpacer size={'l'} />
       <EuiForm>
         {nameFragment}
         <EuiSpacer size={'xl'} />

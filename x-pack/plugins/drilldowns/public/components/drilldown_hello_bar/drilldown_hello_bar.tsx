@@ -29,6 +29,7 @@ export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({
   return (
     <EuiCallOut
       iconType="help"
+      data-test-subj={'drilldowns-welcome-message-test-subj'}
       title={
         <EuiFlexGroup className="drdHelloBar__content">
           <EuiFlexItem grow={true}>
