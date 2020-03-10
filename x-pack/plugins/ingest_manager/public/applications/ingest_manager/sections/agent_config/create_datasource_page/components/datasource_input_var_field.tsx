@@ -34,11 +34,9 @@ export const DatasourceInputVarField: React.FunctionComponent<{
           noSuggestions
           selectedOptions={value.map((val: string) => ({ label: val }))}
           onCreateOption={(newVal: any) => {
-            // debugger;
             onChange([...value, newVal]);
           }}
           onChange={(newVals: any[]) => {
-            // debugger;
             onChange(newVals.map(val => val.label));
           }}
         />
