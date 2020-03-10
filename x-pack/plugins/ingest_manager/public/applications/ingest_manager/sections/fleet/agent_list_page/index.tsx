@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState, useCallback } from 'react';
-import styled from 'styled-components';
+import styled, { CSSProperties } from 'styled-components';
 import {
   EuiBasicTable,
   EuiButton,
@@ -48,7 +48,7 @@ import { AgentUnenrollProvider } from '../components/agent_unenroll_provider';
 import { DonutChart } from './components/donut_chart';
 import { useGetAgentStatus } from '../../agent_config/details_page/hooks';
 import { AgentStatusKueryHelper } from '../../../services';
-import { FLEET_AGENT_DETAIL_PATH } from '../../../constants';
+import { FLEET_AGENT_DETAIL_PATH, AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
 
 const Divider = styled.div`
   width: 0;
@@ -56,7 +56,11 @@ const Divider = styled.div`
   border-left: ${props => props.theme.eui.euiBorderThin};
   height: 45px;
 `;
-
+const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
 const REFRESH_INTERVAL_MS = 5000;
 
 const statusFilters = [
@@ -115,7 +119,6 @@ const RowActions = React.memo<{ agent: Agent; refresh: () => void }>(({ agent, r
           <AgentUnenrollProvider>
             {unenrollAgentsPrompt => (
               <EuiContextMenuItem
-                color="danger"
                 icon="cross"
                 onClick={() => {
                   unenrollAgentsPrompt([agent.id], 1, () => {
@@ -125,7 +128,7 @@ const RowActions = React.memo<{ agent: Agent; refresh: () => void }>(({ agent, r
               >
                 <FormattedMessage
                   id="xpack.ingestManager.agentList.unenrollOneButton"
-                  defaultMessage="unenroll"
+                  defaultMessage="Unenroll"
                 />
               </EuiContextMenuItem>
             )}
@@ -137,7 +140,7 @@ const RowActions = React.memo<{ agent: Agent; refresh: () => void }>(({ agent, r
 });
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
-  const defaultKuery: string = (useUrlParams().kuery as string) || '';
+  const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
   const core = useCore();
   // Agent data states
   const [showInactive, setShowInactive] = useState<boolean>(false);
@@ -228,6 +231,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const agentConfigs = agentConfigsRequest.data ? agentConfigsRequest.data.items : [];
   const { isLoading: isAgentConfigsLoading } = agentConfigsRequest;
 
+  const CONFIG_DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
+
   const columns = [
     {
       field: 'local_metadata.host',
@@ -235,7 +240,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Host',
       }),
       render: (host: string, agent: Agent) => (
-        <ConnectedLink color="primary" path={`/fleet/agents/${agent.id}`}>
+        <ConnectedLink color="primary" path={`${FLEET_AGENT_DETAIL_PATH}${agent.id}`}>
           {host}
         </ConnectedLink>
       ),
@@ -286,7 +291,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       name: i18n.translate('xpack.ingestManager.agentList.statusColumnTitle', {
         defaultMessage: 'Status',
       }),
-      truncateText: true,
       render: (active: boolean, agent: any) => <AgentHealth agent={agent} />,
     },
     {
@@ -294,13 +298,42 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       name: i18n.translate('xpack.ingestManager.agentList.configColumnTitle', {
         defaultMessage: 'Configuration',
       }),
-      truncateText: true,
       render: (configId: string) => {
         const configName = agentConfigs.find(p => p.id === configId)?.name;
+        return (
+          <EuiFlexGroup gutterSize="s" alignItems="baseline" style={{ minWidth: 0 }}>
+            <EuiFlexItem grow={false} style={NO_WRAP_TRUNCATE_STYLE}>
+              <EuiLink
+                href={`${CONFIG_DETAILS_URI}${configId}`}
+                style={NO_WRAP_TRUNCATE_STYLE}
+                title={configName || configId}
+              >
+                {configName || configId}
+              </EuiLink>
+            </EuiFlexItem>
+            <EuiFlexItem grow={true}>
+              <EuiText color="subdued" size="xs" style={{ whiteSpace: 'nowrap' }}>
+                <FormattedMessage
+                  id="xpack.ingestManager.agentConfigList.revisionNumber"
+                  defaultMessage="rev. {revNumber}"
+                  values={{ revNumber: '999' }} // TODO fix when we have revision
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
         return configName ? (
           <ConnectedLink color="primary" path={`/configs/${configId}`}>
             {configName}{' '}
-            <EuiTextColor color="subdued">{/* TODO Fix with revision */}v1</EuiTextColor>
+            <EuiFlexItem>
+              <EuiText color="subdued" size="xs" style={{ whiteSpace: 'nowrap' }}>
+                <FormattedMessage
+                  id="xpack.ingestManager.agentList.revisionNumber"
+                  defaultMessage="rev. {revNumber}"
+                  values={{ revNumber: '999' }}
+                />
+              </EuiText>
+            </EuiFlexItem>
           </ConnectedLink>
         ) : (
           <EuiTextColor color="subdued">{configId}</EuiTextColor>
@@ -312,15 +345,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       name: i18n.translate('xpack.ingestManager.agentList.versionTitle', {
         defaultMessage: 'Version',
       }),
-      truncateText: true,
-      render: (version: string, agent: any) => <EuiText>{version}</EuiText>,
     },
     {
       field: 'last_checkin',
       name: i18n.translate('xpack.ingestManager.agentList.lastCheckinTitle', {
         defaultMessage: 'Last activity',
       }),
-      truncateText: true,
       render: (lastCheckin: string, agent: any) =>
         lastCheckin ? <FormattedRelative value={lastCheckin} /> : null,
     },
