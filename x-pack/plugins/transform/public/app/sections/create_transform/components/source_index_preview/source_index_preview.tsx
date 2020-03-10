@@ -31,6 +31,7 @@ import {
   PivotQuery,
 } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
+import { useToastNotifications } from '../../../../app_dependencies';
 
 import { getSourceIndexDevConsoleStatement } from './common';
 import { SOURCE_INDEX_STATUS, useSourceIndexData } from './use_source_index_data';
@@ -55,6 +56,7 @@ interface Props {
 }
 
 export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, query }) => {
+  const toastNotifications = useToastNotifications();
   const allFields = indexPattern.fields.map(f => f.name);
   const indexPatternFields: string[] = allFields.filter(f => {
     if (indexPattern.metaFields.includes(f)) {
@@ -84,8 +86,6 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
     tableItems: data,
   } = useSourceIndexData(indexPattern, query);
 
-  const onSort = useCallback(sc => setSortingColumns(sc), [setSortingColumns]);
-
   // EuiDataGrid State
   const dataGridColumns = indexPatternFields.map(id => {
     const field = indexPattern.fields.getByName(id);
@@ -108,6 +108,29 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
 
     return { id, schema };
   });
+
+  const onSort = useCallback(
+    (sc: Array<{ id: string; direction: 'asc' | 'desc' }>) => {
+      const valid = sc.reduce((v, c) => {
+        if (v === false) return v;
+        const columnType = dataGridColumns.find(dgc => dgc.id === c.id);
+        const validSortingType = columnType?.schema !== 'json';
+        if (validSortingType === false) {
+          toastNotifications.addDanger(
+            i18n.translate('xpack.transform.sourceIndexPreview.invalidSortingColumnError', {
+              defaultMessage: `The column '{columnId}' cannot be used for sorting.`,
+              values: { columnId: c.id },
+            })
+          );
+        }
+        return validSortingType;
+      }, true);
+      if (valid) {
+        setSortingColumns(sc);
+      }
+    },
+    [dataGridColumns, setSortingColumns, toastNotifications]
+  );
 
   const onChangeItemsPerPage = useCallback(
     pageSize => {

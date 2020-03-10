@@ -29,18 +29,20 @@ type EsSorting = Dictionary<{
 }>;
 
 interface ErrorResponse {
-  error: {
-    body: string;
-    msg: string;
-    path: string;
-    query: any;
-    response: string;
+  request: Dictionary<any>;
+  response: Dictionary<any>;
+  body: {
     statusCode: number;
+    error: string;
+    message: string;
   };
+  name: string;
+  req: Dictionary<any>;
+  res: Dictionary<any>;
 }
 
 const isErrorResponse = (arg: any): arg is ErrorResponse => {
-  return arg.error !== undefined;
+  return arg?.body?.error !== undefined && arg?.body?.message !== undefined;
 };
 
 // The types specified in `@types/elasticsearch` are out of date and still have `total: number`.
@@ -53,7 +55,7 @@ interface SearchResponse7 extends SearchResponse<any> {
   };
 }
 
-type SourceIndexSearchResponse = ErrorResponse | SearchResponse7;
+type SourceIndexSearchResponse = SearchResponse7;
 
 type SourceIndexPagination = Pick<EuiDataGridPaginationProps, 'pageIndex' | 'pageSize'>;
 const defaultPagination: SourceIndexPagination = { pageIndex: 0, pageSize: 5 };
@@ -108,18 +110,14 @@ export const useSourceIndexData = (
     try {
       const resp: SourceIndexSearchResponse = await api.esSearch(esSearchRequest);
 
-      if (isErrorResponse(resp)) {
-        throw resp.error;
-      }
-
       const docs = resp.hits.hits.map(d => d._source);
 
       setRowCount(resp.hits.total.value);
       setTableItems(docs);
       setStatus(SOURCE_INDEX_STATUS.LOADED);
     } catch (e) {
-      if (e.message !== undefined) {
-        setErrorMessage(e.message);
+      if (isErrorResponse(e)) {
+        setErrorMessage(`${e.body.error}: ${e.body.message}`);
       } else {
         setErrorMessage(JSON.stringify(e, null, 2));
       }
