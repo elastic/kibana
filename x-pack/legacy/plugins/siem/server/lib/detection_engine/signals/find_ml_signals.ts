@@ -3,8 +3,29 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { getAnomaliesTableData } from '../../machine_learning';
 
-export const findMlSignals = () => {
-  return [];
+import dateMath from '@elastic/datemath';
+
+import { AlertServices } from '../../../../../../../plugins/alerting/server';
+
+import { anomaliesTableData } from '../../machine_learning';
+
+export const findMlSignals = async (
+  jobId: string,
+  anomalyThreshold: number,
+  from: string,
+  to: string,
+  callCluster: AlertServices['callCluster']
+) => {
+  const params = {
+    jobIds: [jobId],
+    threshold: anomalyThreshold,
+    // earliestMs: dateMath.parse(from)!.valueOf(),
+    // latestMs: dateMath.parse(to)!.valueOf(),
+    earliestMs: 1583431900000,
+    latestMs: 1583431900000 + 86400000,
+  };
+  const relevantAnomalies = await anomaliesTableData(params, callCluster);
+
+  return relevantAnomalies;
 };
