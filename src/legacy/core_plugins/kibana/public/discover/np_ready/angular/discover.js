@@ -823,10 +823,6 @@ function discoverController(
       //reset filters and query string, remove savedQuery from state
       const state = {
         ...appStateContainer.getState(),
-        query: getDefaultQuery(
-          localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
-        ),
-        filters: [],
       };
       delete state.savedQuery;
       appStateContainer.set(state);

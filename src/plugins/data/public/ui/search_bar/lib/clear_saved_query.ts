@@ -16,14 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { QueryStart } from '../../../query';
+
+import { each } from 'lodash';
+import { QueryStart, SavedQuery } from '../../../query';
+import { Filter } from '../../../../common';
 
 export const clearStateFromSavedQuery = (
   queryService: QueryStart,
   setQueryStringState: Function,
-  defaultLanguage: string
+  defaultLanguage: string,
+  prevSavedQuery?: SavedQuery
 ) => {
-  queryService.filterManager.removeAll();
+  each(prevSavedQuery?.attributes.filters || [], (filter: Filter) => {
+    queryService.filterManager.removeFilter(filter);
+  });
   setQueryStringState({
     query: '',
     language: defaultLanguage,

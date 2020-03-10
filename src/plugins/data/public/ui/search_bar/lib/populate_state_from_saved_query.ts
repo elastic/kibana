@@ -17,11 +17,14 @@
  * under the License.
  */
 
-import { QueryStart, SavedQuery } from '../../../query';
+import _ from 'lodash';
+import { QueryStart, SavedQuery, compareFilters, COMPARE_ALL_OPTIONS } from '../../../query';
+import { Filter } from '../../../../common';
 
 export const populateStateFromSavedQuery = (
   queryService: QueryStart,
   setQueryStringState: Function,
+  prevQuery: SavedQuery | undefined,
   savedQuery: SavedQuery
 ) => {
   const {
@@ -43,7 +46,16 @@ export const populateStateFromSavedQuery = (
   setQueryStringState(savedQuery.attributes.query);
 
   // filters
+  const prevSavedQueryFilters = prevQuery?.attributes.filters || [];
   const savedQueryFilters = savedQuery.attributes.filters || [];
-  const globalFilters = filterManager.getGlobalFilters();
-  filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
+  const curFilters = filterManager.getFilters();
+
+  // Remove filters added by the previous saved query
+  const filtersToKeep = curFilters.filter((fmFilter: Filter) => {
+    return !_.find(prevSavedQueryFilters, (prevSavedQueryFilter: Filter) => {
+      return compareFilters(fmFilter, prevSavedQueryFilter, COMPARE_ALL_OPTIONS);
+    });
+  });
+
+  filterManager.setFilters([...filtersToKeep, ...savedQueryFilters]);
 };
