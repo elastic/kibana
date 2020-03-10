@@ -19,7 +19,6 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  EuiTextColor,
   EuiTitle,
   EuiStat,
   EuiI18nNumber,
@@ -321,22 +320,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
-        );
-        return configName ? (
-          <ConnectedLink color="primary" path={`/configs/${configId}`}>
-            {configName}
-            <EuiFlexItem>
-              <EuiText color="subdued" size="xs" style={{ whiteSpace: 'nowrap' }}>
-                <FormattedMessage
-                  id="xpack.ingestManager.agentList.revisionNumber"
-                  defaultMessage="rev. {revNumber}"
-                  values={{ revNumber: '999' }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-          </ConnectedLink>
-        ) : (
-          <EuiTextColor color="subdued">{configId}</EuiTextColor>
         );
       },
     },
