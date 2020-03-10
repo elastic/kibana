@@ -22,11 +22,21 @@ import { i18n } from '@kbn/i18n';
 const LOWER_VALUE_INDEX = 0;
 const UPPER_VALUE_INDEX = 1;
 
-// @ts-ignore
-export function isRangeValid(value, min, max, allowEmptyRange) {
+type RangeValue = string | number;
+
+export function isRangeValid(
+  value: RangeValue[] = [0, 0],
+  min: RangeValue = 0,
+  max: RangeValue = 0,
+  allowEmptyRange?: boolean
+) {
   allowEmptyRange = typeof allowEmptyRange === 'boolean' ? allowEmptyRange : true; // cannot use default props since that uses falsy check
-  let lowerValue = isNaN(value[LOWER_VALUE_INDEX]) ? '' : value[LOWER_VALUE_INDEX];
-  let upperValue = isNaN(value[UPPER_VALUE_INDEX]) ? '' : value[UPPER_VALUE_INDEX];
+  let lowerValue: RangeValue = isNaN(value[LOWER_VALUE_INDEX] as number)
+    ? ''
+    : `${value[LOWER_VALUE_INDEX]}`;
+  let upperValue: RangeValue = isNaN(value[UPPER_VALUE_INDEX] as number)
+    ? ''
+    : `${value[UPPER_VALUE_INDEX]}`;
 
   const isLowerValueValid = lowerValue.toString() !== '';
   const isUpperValueValid = upperValue.toString() !== '';

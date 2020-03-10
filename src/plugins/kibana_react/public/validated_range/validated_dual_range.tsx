@@ -20,19 +20,37 @@
 import React, { Component } from 'react';
 import PropTypes, { ReactNodeLike, Requireable } from 'prop-types';
 import { EuiFormRow, EuiDualRange } from '@elastic/eui';
+import { EuiFormRowDisplayKeys } from '@elastic/eui/src/components/form/form_row/form_row';
 import { isRangeValid } from './is_range_valid';
 
 // Wrapper around EuiDualRange that ensures onChange callback is only called when range value
 // is valid and within min/max
 
 interface ValidatedRangeValues {
-  value: number[];
-  min: number;
-  max: number;
-  allowEmptyRange: boolean;
+  id?: string | number | undefined;
+  value?: [number | string, number | string] | undefined;
+  min?: number;
+  max?: number;
+  allowEmptyRange?: boolean;
+  onChange?: Function;
+  compressed?: boolean;
+  fullWidth?: boolean;
+  label?: string;
+  formRowDisplay?: EuiFormRowDisplayKeys;
+  disabled?: boolean;
+  showInput?: boolean;
+  showRange?: boolean;
+  showTicks?: boolean;
+  ticks?: object[];
 }
 
-export class ValidatedDualRange extends Component {
+interface ValidateDualRangeState {
+  isValid?: boolean;
+  errorMessage?: string;
+  value: [number | string, number | string];
+}
+
+export class ValidatedDualRange extends Component<ValidatedRangeValues> {
   static defaultProps: { fullWidth: boolean; allowEmptyRange: boolean; compressed: boolean };
   static propTypes: {
     fullWidth: Requireable<boolean>;
@@ -61,18 +79,15 @@ export class ValidatedDualRange extends Component {
     return null;
   }
 
-  state = {};
+  state: ValidateDualRangeState = {
+    value: ['0', '0'],
+  };
 
   _onChange = (value: any) => {
-    // @ts-ignore
     const { isValid, errorMessage } = isRangeValid(
-      // @ts-ignore
       value,
-      // @ts-ignore
       this.props.min,
-      // @ts-ignore
       this.props.max,
-      // @ts-ignore
       this.props.allowEmptyRange
     );
 
@@ -82,27 +97,19 @@ export class ValidatedDualRange extends Component {
       errorMessage,
     });
 
-    if (isValid) {
-      // @ts-ignore
+    if (isValid && this.props.onChange) {
       this.props.onChange(value);
     }
   };
 
   render() {
     const {
-      // @ts-ignore
       compressed,
-      // @ts-ignore
       fullWidth,
-      // @ts-ignore
       label,
-      // @ts-ignore
       formRowDisplay,
-      // @ts-ignore
       value, // eslint-disable-line no-unused-vars
-      // @ts-ignore
       onChange, // eslint-disable-line no-unused-vars
-      // @ts-ignore
       allowEmptyRange, // eslint-disable-line no-unused-vars
       // @ts-ignore
       ...rest
@@ -112,9 +119,7 @@ export class ValidatedDualRange extends Component {
       <EuiFormRow
         compressed={compressed}
         fullWidth={fullWidth}
-        // @ts-ignore
         isInvalid={!this.state.isValid}
-        // @ts-ignore
         error={this.state.errorMessage ? [this.state.errorMessage] : []}
         label={label}
         display={formRowDisplay}
@@ -122,7 +127,6 @@ export class ValidatedDualRange extends Component {
         <EuiDualRange
           compressed={compressed}
           fullWidth={fullWidth}
-          // @ts-ignore
           value={this.state.value}
           onChange={this._onChange}
           // @ts-ignore
