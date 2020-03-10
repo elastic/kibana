@@ -21,10 +21,11 @@ import { isApiError } from '../../utils/api';
 export const displayErrorToast = (
   errorTitle: string,
   errorMessages: string[],
-  dispatchToaster: React.Dispatch<ActionToaster>
+  dispatchToaster: React.Dispatch<ActionToaster>,
+  id: string = uuid.v4()
 ): void => {
   const toast: AppToast = {
-    id: uuid.v4(),
+    id,
     title: errorTitle,
     color: 'danger',
     iconType: 'alert',
@@ -44,10 +45,11 @@ export const displayErrorToast = (
  */
 export const displaySuccessToast = (
   title: string,
-  dispatchToaster: React.Dispatch<ActionToaster>
+  dispatchToaster: React.Dispatch<ActionToaster>,
+  id: string = uuid.v4()
 ): void => {
   const toast: AppToast = {
-    id: uuid.v4(),
+    id,
     title,
     color: 'success',
     iconType: 'check',

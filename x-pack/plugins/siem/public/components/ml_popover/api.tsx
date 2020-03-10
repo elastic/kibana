@@ -25,12 +25,14 @@ import { KibanaServices } from '../../lib/kibana';
  *
  * @param indexPatternName ES index pattern to check for compatible modules
  * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
  */
 export const checkRecognizer = async ({
   indexPatternName,
   signal,
-}: CheckRecognizerProps): Promise<RecognizerModule[]> => {
-  return KibanaServices.get().http.fetch<RecognizerModule[]>(
+}: CheckRecognizerProps): Promise<RecognizerModule[]> =>
+  KibanaServices.get().http.fetch<RecognizerModule[]>(
     `/api/ml/modules/recognize/${indexPatternName}`,
     {
       method: 'GET',
@@ -38,21 +40,21 @@ export const checkRecognizer = async ({
       signal,
     }
   );
-};
 
 /**
  * Returns ML Module for given moduleId. Returns all modules if no moduleId specified
  *
  * @param moduleId id of the module to retrieve
  * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
  */
-export const getModules = async ({ moduleId = '', signal }: GetModulesProps): Promise<Module[]> => {
-  return KibanaServices.get().http.fetch<Module[]>(`/api/ml/modules/get_module/${moduleId}`, {
+export const getModules = async ({ moduleId = '', signal }: GetModulesProps): Promise<Module[]> =>
+  KibanaServices.get().http.fetch<Module[]>(`/api/ml/modules/get_module/${moduleId}`, {
     method: 'GET',
     asSystemRequest: true,
     signal,
   });
-};
 
 /**
  * Creates ML Jobs + Datafeeds for the given configTemplate + indexPatternName
@@ -62,6 +64,8 @@ export const getModules = async ({ moduleId = '', signal }: GetModulesProps): Pr
  * @param jobIdErrorFilter - if provided, filters all errors except for given jobIds
  * @param groups - list of groups to add to jobs being installed
  * @param prefix - prefix to be added to job name
+ *
+ * @throws An error if response is not OK
  */
 export const setupMlJob = async ({
   configTemplate,
@@ -94,6 +98,8 @@ export const setupMlJob = async ({
  *
  * @param datafeedIds
  * @param start
+ *
+ * @throws An error if response is not OK
  */
 export const startDatafeeds = async ({
   datafeedIds,
@@ -122,6 +128,8 @@ export const startDatafeeds = async ({
  * Stops the given dataFeedIds and sets the corresponding Job's jobState to closed
  *
  * @param datafeedIds
+ *
+ * @throws An error if response is not OK
  */
 export const stopDatafeeds = async ({
   datafeedIds,
@@ -165,12 +173,13 @@ export const stopDatafeeds = async ({
  * return a 500
  *
  * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
  */
-export const getJobsSummary = async (signal: AbortSignal): Promise<JobSummary[]> => {
-  return KibanaServices.get().http.fetch<JobSummary[]>('/api/ml/jobs/jobs_summary', {
+export const getJobsSummary = async (signal: AbortSignal): Promise<JobSummary[]> =>
+  KibanaServices.get().http.fetch<JobSummary[]>('/api/ml/jobs/jobs_summary', {
     method: 'POST',
     body: JSON.stringify({}),
     asSystemRequest: true,
     signal,
   });
-};

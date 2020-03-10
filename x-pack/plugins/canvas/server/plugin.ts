@@ -6,17 +6,20 @@
 
 import { first } from 'rxjs/operators';
 import { CoreSetup, PluginInitializerContext, Plugin, Logger } from 'src/core/server';
+import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { initRoutes } from './routes';
 import { registerCanvasUsageCollector } from './collectors';
 import { loadSampleData } from './sample_data';
+import { setupInterpreter } from './setup_interpreter';
 
 interface PluginsSetup {
-  usageCollection?: UsageCollectionSetup;
+  expressions: ExpressionsServerSetup;
   features: FeaturesPluginSetup;
   home: HomeServerPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export class CanvasPlugin implements Plugin {
@@ -65,6 +68,8 @@ export class CanvasPlugin implements Plugin {
       .pipe(first())
       .toPromise();
     registerCanvasUsageCollector(plugins.usageCollection, globalConfig.kibana.index);
+
+    setupInterpreter(plugins.expressions);
   }
 
   public start() {}

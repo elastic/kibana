@@ -40,13 +40,12 @@ import * as i18n from '../../../pages/detection_engine/rules/translations';
  *
  * @throws An error if response is not OK
  */
-export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule> => {
-  return KibanaServices.get().http.fetch<NewRule>(DETECTION_ENGINE_RULES_URL, {
+export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule> =>
+  KibanaServices.get().http.fetch<NewRule>(DETECTION_ENGINE_RULES_URL, {
     method: rule.id != null ? 'PUT' : 'POST',
     body: JSON.stringify(rule),
     signal,
   });
-};
 
 /**
  * Fetches all rules from the Detection Engine API
@@ -110,13 +109,12 @@ export const fetchRules = async ({
  *
  * @throws An error if response is not OK
  */
-export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rule> => {
-  return KibanaServices.get().http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
+export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rule> =>
+  KibanaServices.get().http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
     method: 'GET',
     query: { id },
     signal,
   });
-};
 
 /**
  * Enables/Disables provided Rule ID's
@@ -126,18 +124,11 @@ export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rul
  *
  * @throws An error if response is not OK
  */
-export const enableRules = async ({
-  ids,
-  enabled,
-}: EnableRulesProps): Promise<BulkRuleResponse> => {
-  return KibanaServices.get().http.fetch<BulkRuleResponse>(
-    `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-    {
-      method: 'PATCH',
-      body: JSON.stringify(ids.map(id => ({ id, enabled }))),
-    }
-  );
-};
+export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<BulkRuleResponse> =>
+  KibanaServices.get().http.fetch<BulkRuleResponse>(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`, {
+    method: 'PATCH',
+    body: JSON.stringify(ids.map(id => ({ id, enabled }))),
+  });
 
 /**
  * Deletes provided Rule ID's
@@ -146,12 +137,11 @@ export const enableRules = async ({
  *
  * @throws An error if response is not OK
  */
-export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<BulkRuleResponse> => {
-  return KibanaServices.get().http.fetch<Rule[]>(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`, {
+export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<BulkRuleResponse> =>
+  KibanaServices.get().http.fetch<Rule[]>(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`, {
     method: 'DELETE',
     body: JSON.stringify(ids.map(id => ({ id }))),
   });
-};
 
 /**
  * Duplicates provided Rules
@@ -160,8 +150,8 @@ export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<BulkRuleRe
  *
  * @throws An error if response is not OK
  */
-export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<BulkRuleResponse> => {
-  return KibanaServices.get().http.fetch<Rule[]>(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`, {
+export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<BulkRuleResponse> =>
+  KibanaServices.get().http.fetch<Rule[]>(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`, {
     method: 'POST',
     body: JSON.stringify(
       rules.map(rule => ({
@@ -184,7 +174,6 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Bu
       }))
     ),
   });
-};
 
 /**
  * Create Prepackaged Rules
@@ -277,13 +266,12 @@ export const getRuleStatusById = async ({
 }: {
   id: string;
   signal: AbortSignal;
-}): Promise<RuleStatusResponse> => {
-  return KibanaServices.get().http.fetch<RuleStatusResponse>(DETECTION_ENGINE_RULES_STATUS_URL, {
+}): Promise<RuleStatusResponse> =>
+  KibanaServices.get().http.fetch<RuleStatusResponse>(DETECTION_ENGINE_RULES_STATUS_URL, {
     method: 'GET',
     query: { ids: JSON.stringify([id]) },
     signal,
   });
-};
 
 /**
  * Fetch all unique Tags used by Rules
@@ -292,12 +280,11 @@ export const getRuleStatusById = async ({
  *
  * @throws An error if response is not OK
  */
-export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<string[]> => {
-  return KibanaServices.get().http.fetch<string[]>(DETECTION_ENGINE_TAGS_URL, {
+export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<string[]> =>
+  KibanaServices.get().http.fetch<string[]>(DETECTION_ENGINE_TAGS_URL, {
     method: 'GET',
     signal,
   });
-};
 
 /**
  * Get pre packaged rules Status
@@ -310,12 +297,11 @@ export const getPrePackagedRulesStatus = async ({
   signal,
 }: {
   signal: AbortSignal;
-}): Promise<PrePackagedRulesStatusResponse> => {
-  return KibanaServices.get().http.fetch<PrePackagedRulesStatusResponse>(
+}): Promise<PrePackagedRulesStatusResponse> =>
+  KibanaServices.get().http.fetch<PrePackagedRulesStatusResponse>(
     DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
     {
       method: 'GET',
       signal,
     }
   );
-};
