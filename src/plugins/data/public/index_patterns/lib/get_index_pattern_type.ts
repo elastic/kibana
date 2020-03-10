@@ -19,6 +19,6 @@
 
 import { IIndexPattern } from '../../../common/index_patterns';
 
-export function getIndexPatternType(indexPattern: IIndexPattern) {
-  return indexPattern.type || (indexPattern.get && indexPattern.get('type'));
+export function getIndexPatternType(indexPattern?: IIndexPattern) {
+  return indexPattern?.type || (indexPattern?.get && indexPattern?.get('type'));
 }
