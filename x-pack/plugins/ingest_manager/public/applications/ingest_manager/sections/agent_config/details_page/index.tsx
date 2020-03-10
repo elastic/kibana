@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import { Redirect, useRouteMatch, generatePath } from 'react-router-dom';
+import { Redirect, useRouteMatch, generatePath, Switch, Route } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import {
@@ -30,7 +30,8 @@ import { ConfigRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } fr
 import { DatasourcesTable, EditConfigFlyout } from './components';
 import { LinkedAgentCount } from '../components';
 
-const DETAILS_ROUTER_PATH = ':configId/:tabId';
+const DETAILS_ROUTER_PATH = `${AGENT_CONFIG_DETAILS_PATH}:configId`;
+const DETAILS_ROUTER_SUB_PATH = ':configId/:tabId';
 
 export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   const {
@@ -43,21 +44,21 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   const agentStatusRequest = useGetAgentStatus(configId);
   const { refreshAgentStatus } = agentStatusRequest;
   const agentStatus = agentStatusRequest.data?.results;
-  const BASE_URI = useLink();
+  const BASE_URI = useLink('');
   const URI = useMemo(() => {
     return {
       ADD_DATASOURCE: `${BASE_URI}${AGENT_CONFIG_DETAILS_PATH}${configId}/add-datasource`,
       AGENT_CONFIG_LIST: `${BASE_URI}${AGENT_CONFIG_PATH}`,
-      AGENT_CONFIG_DETAILS: `${BASE_URI}${AGENT_CONFIG_DETAILS_PATH}/${configId}`,
+      AGENT_CONFIG_DETAILS: `${BASE_URI}${AGENT_CONFIG_DETAILS_PATH}${configId}`,
       AGENT_CONFIG_DETAILS_YAML: `${BASE_URI}${AGENT_CONFIG_DETAILS_PATH}${generatePath(
-        DETAILS_ROUTER_PATH,
+        DETAILS_ROUTER_SUB_PATH,
         {
           configId,
           tabId: 'yaml',
         }
       )}`,
       AGENT_CONFIG_DETAILS_SETTINGS: `${BASE_URI}${AGENT_CONFIG_DETAILS_PATH}${generatePath(
-        DETAILS_ROUTER_PATH,
+        DETAILS_ROUTER_SUB_PATH,
         {
           configId,
           tabId: 'settings',
@@ -280,54 +281,69 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
             />
           ) : null}
 
-          {tabId === '' && (
-            <DatasourcesTable
-              datasources={agentConfig.datasources as Datasource[]}
-              message={
-                !agentConfig.datasources || agentConfig.datasources.length === 0 ? (
-                  <EuiEmptyPrompt
-                    title={
-                      <h2>
-                        <FormattedMessage
-                          id="xpack.ingestManager.configDetails.noDatasourcesPrompt"
-                          defaultMessage="Config has no data sources"
-                        />
-                      </h2>
-                    }
-                    actions={
-                      <EuiButton fill iconType="plusInCircle" href={URI.ADD_DATASOURCE}>
-                        <FormattedMessage
-                          id="xpack.ingestManager.configDetails.addDatasourceButtonText"
-                          defaultMessage="Create data source"
-                        />
-                      </EuiButton>
-                    }
-                  />
-                ) : null
-              }
-              search={{
-                toolsRight: [
-                  <EuiButton iconType="plusInCircle" href={URI.ADD_DATASOURCE}>
-                    <FormattedMessage
-                      id="xpack.ingestManager.configDetails.addDatasourceButtonText"
-                      defaultMessage="Create data source"
-                    />
-                  </EuiButton>,
-                ],
-                box: {
-                  incremental: true,
-                  schema: true,
-                },
+          <Switch>
+            <Route
+              path={`${DETAILS_ROUTER_PATH}/yaml`}
+              render={() => {
+                // TODO: YAML implementation tracked via https://github.com/elastic/kibana/issues/57958
+                return <div>YAML placeholder</div>;
               }}
-              isSelectable={false}
             />
-          )}
-
-          {/* TODO: YAML implementation tracked via https://github.com/elastic/kibana/issues/57958 */}
-          {tabId === 'yaml' && <div>YAML placeholder</div>}
-
-          {/* TODO: Settings implementation tracked via: https://github.com/elastic/kibana/issues/57959 */}
-          {tabId === 'settings' && <div>Settings placeholder</div>}
+            <Route
+              path={`${DETAILS_ROUTER_PATH}/settings`}
+              render={() => {
+                // TODO: Settings implementation tracked via: https://github.com/elastic/kibana/issues/57959
+                return <div>Settings placeholder</div>;
+              }}
+            />
+            <Route
+              path={`${DETAILS_ROUTER_PATH}`}
+              render={() => {
+                return (
+                  <DatasourcesTable
+                    datasources={agentConfig.datasources as Datasource[]}
+                    message={
+                      !agentConfig.datasources || agentConfig.datasources.length === 0 ? (
+                        <EuiEmptyPrompt
+                          title={
+                            <h2>
+                              <FormattedMessage
+                                id="xpack.ingestManager.configDetails.noDatasourcesPrompt"
+                                defaultMessage="Config has no data sources"
+                              />
+                            </h2>
+                          }
+                          actions={
+                            <EuiButton fill iconType="plusInCircle" href={URI.ADD_DATASOURCE}>
+                              <FormattedMessage
+                                id="xpack.ingestManager.configDetails.addDatasourceButtonText"
+                                defaultMessage="Create data source"
+                              />
+                            </EuiButton>
+                          }
+                        />
+                      ) : null
+                    }
+                    search={{
+                      toolsRight: [
+                        <EuiButton iconType="plusInCircle" href={URI.ADD_DATASOURCE}>
+                          <FormattedMessage
+                            id="xpack.ingestManager.configDetails.addDatasourceButtonText"
+                            defaultMessage="Create data source"
+                          />
+                        </EuiButton>,
+                      ],
+                      box: {
+                        incremental: true,
+                        schema: true,
+                      },
+                    }}
+                    isSelectable={false}
+                  />
+                );
+              }}
+            />
+          </Switch>
         </WithHeaderLayout>
       </AgentStatusRefreshContext.Provider>
     </ConfigRefreshContext.Provider>
