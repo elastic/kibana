@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { Spaces } from '../../../../scenarios';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME, getUrlPrefix } from '../../../../../common/lib';
-import { TimeSeriesQuery } from '../../../../../../../plugins/alerting_builtins/server/alert_types/index_threshold/routes';
+import { TimeSeriesQuery } from '../../../../../../../plugins/alerting_builtins/server/alert_types/index_threshold/lib/time_series_query';
 
 import { createEsDocuments } from './create_test_data';
 
@@ -48,13 +48,13 @@ const START_DATE_MINUS_2INTERVALS = getStartDate(-2 * INTERVAL_MILLIS);
 */
 
 // eslint-disable-next-line import/no-default-export
-export default function queryDataEndpointTests({ getService }: FtrProviderContext) {
+export default function timeSeriesQueryEndpointTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
   const es = getService('legacyEs');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
-  describe('query_data endpoint', () => {
+  describe('time_series_query endpoint', () => {
     before(async () => {
       await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
