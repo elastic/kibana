@@ -16,7 +16,7 @@ export interface AppDependencies {
   docLinks: CoreStart['docLinks'];
   http: CoreSetup['http'];
   i18n: CoreStart['i18n'];
-  notifications: CoreStart['notifications'];
+  notifications: CoreSetup['notifications'];
   uiSettings: CoreStart['uiSettings'];
   savedObjects: CoreStart['savedObjects'];
   storage: Storage;

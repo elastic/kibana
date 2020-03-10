@@ -11,7 +11,6 @@ import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import { API_BASE_PATH } from '../../common/constants';
 
@@ -64,18 +63,14 @@ export const App: FC = () => {
   );
 };
 
-const localStorage = new Storage(window.localStorage);
-
 export const renderApp = (element: HTMLElement, appDependencies: AppDependencies) => {
   const I18nContext = appDependencies.i18n.Context;
 
   render(
-    <KibanaContextProvider services={{ ...appDependencies, storage: localStorage }}>
+    <KibanaContextProvider services={appDependencies}>
       <AuthorizationProvider privilegesEndpoint={`${API_BASE_PATH}privileges`}>
         <I18nContext>
-          <HashRouter>
-            <App />
-          </HashRouter>
+          <App />
         </I18nContext>
       </AuthorizationProvider>
     </KibanaContextProvider>,
