@@ -90,8 +90,22 @@ export const useTextObjectsCRUD = () => {
 
     update: useCallback(
       async ({ textObject }: UpdateTextObjectArgs) => {
-        await objectStorageClient.text.update(throwIfUnknown(partialTextObjectSchema, textObject));
-        dispatch({ payload: textObject, type: 'upsert' });
+        try {
+          // Update local reference
+          dispatch({ type: 'upsert', payload: textObject });
+
+          // Update persistance
+          dispatch({ type: 'setSavingTextObject', payload: textObject.id });
+          await new Promise(res => setTimeout(res, 1000));
+          await objectStorageClient.text.update(
+            throwIfUnknown(partialTextObjectSchema, textObject)
+          );
+          dispatch({ type: 'clearSaveError', payload: { textObjectId: textObject.id } });
+        } catch (e) {
+          dispatch({ type: 'saveError', payload: { textObjectId: textObject.id, error: e } });
+        } finally {
+          dispatch({ type: 'setSavingTextObject', payload: undefined });
+        }
       },
       [objectStorageClient, dispatch]
     ),

@@ -18,9 +18,9 @@
  */
 
 import { SenseEditor } from '../../../../models/sense_editor';
-import { useSequencedSaveTextObject } from '../../../../hooks/text_objects';
+import { useSequencedSaveTextObjectText } from '../../../../hooks/text_objects';
 
-type SaveTextObject = ReturnType<typeof useSequencedSaveTextObject>;
+type SaveTextObject = ReturnType<typeof useSequencedSaveTextObjectText>;
 
 function saveCurrentState(editor: SenseEditor, saveTextObject: SaveTextObject) {
   try {

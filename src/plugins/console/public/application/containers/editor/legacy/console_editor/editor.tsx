@@ -41,7 +41,7 @@ import { TextObjectWithId } from '../../../../../../common/text_object';
 import {
   useSendCurrentRequestToES,
   useSetInputEditor,
-  useSequencedSaveTextObject,
+  useSequencedSaveTextObjectText,
 } from '../../../../hooks';
 
 import { autoIndent, getDocumentation } from '../console_menu_actions';
@@ -111,7 +111,7 @@ export const Editor: FunctionComponent<EditorProps> = memo(
     const [{ settings }] = useEditorContext();
     const setInputEditor = useSetInputEditor();
     const sendCurrentRequestToES = useSendCurrentRequestToES();
-    const saveTextObject = useSequencedSaveTextObject(textObject);
+    const saveTextObject = useSequencedSaveTextObjectText(textObject);
 
     const [editorInstance, setEditorInstance] = useState<senseEditor.SenseEditor | null>(null);
 
