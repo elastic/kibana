@@ -42,7 +42,7 @@
     "xpack.transform": "plugins/transform",
     "xpack.triggersActionsUI": "plugins/triggers_actions_ui",
     "xpack.upgradeAssistant": "plugins/upgrade_assistant",
-    "xpack.uptime": "legacy/plugins/uptime",
+    "xpack.uptime": ["plugins/uptime", "legacy/plugins/uptime"],
     "xpack.watcher": "plugins/watcher"
   },
   "translations": [
