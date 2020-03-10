@@ -19,4 +19,3 @@
 
 export { useVisualizeAppState } from './visualize_app_state';
 export { makeStateful } from './make_stateful';
-export { handleSavedSearch } from './handle_saved_search';

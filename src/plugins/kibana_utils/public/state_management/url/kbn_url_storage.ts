@@ -97,13 +97,6 @@ export function setStateToKbnUrl<State>(
 }
 
 /**
- * Removes passed key from the url and returns a new url string.
- */
-export function removeStateFromKbnUrl(key: string, rawUrl = window.location.href): string {
-  return replaceUrlHashQuery(rawUrl, ({ [key]: value, ...query }) => query);
-}
-
-/**
  * A tiny wrapper around history library to listen for url changes and update url
  * History library handles a bunch of cross browser edge cases
  */

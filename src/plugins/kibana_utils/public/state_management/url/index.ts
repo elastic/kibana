@@ -23,7 +23,6 @@ export {
   setStateToKbnUrl,
   getStateFromKbnUrl,
   getStatesFromKbnUrl,
-  removeStateFromKbnUrl,
   IKbnUrlControls,
 } from './kbn_url_storage';
 export { createKbnUrlTracker } from './kbn_url_tracker';
