@@ -6,8 +6,6 @@ Display graphical representations of data where the individual values are repres
 [role="screenshot"]
 image::images/visualize_heat_map_example.png[]
 
-NOTE: The maps in Visualize have been replaced with <<maps>>, which offers more functionality.
-
 [float]
 [[build-heat-map]]
 === Build a heat map
