@@ -6,16 +6,21 @@
 
 import {
   Presentable,
+  PresentableBaseContext,
   Configurable,
   ConfigurableBaseConfig,
 } from '../../../../../src/plugins/ui_actions/public';
 
 export type ActionBaseConfig = ConfigurableBaseConfig;
-export interface ActionFactory<ActionConfig extends ActionBaseConfig = ActionBaseConfig>
-  extends Presentable,
-    Configurable<ActionConfig> {}
+export type ActionFactoryBaseContext = PresentableBaseContext;
+export interface ActionFactory<
+  ActionConfig extends ActionBaseConfig = ActionBaseConfig,
+  ActionFactoryContext extends ActionFactoryBaseContext = ActionFactoryBaseContext
+> extends Presentable<ActionFactoryContext>, Configurable<ActionConfig> {}
 
-type ActionFactoryRegistry = Map<string, ActionFactory<any>>;
+export type ActionFactoryList = Array<ActionFactory<any, any>>;
+
+type ActionFactoryRegistry = Map<string, ActionFactory<any, any>>;
 
 export class UiActionsFactoryService {
   protected readonly actionFactories: ActionFactoryRegistry;
@@ -24,7 +29,7 @@ export class UiActionsFactoryService {
     this.actionFactories = actionFactories;
   }
 
-  public readonly register = (actionFactory: ActionFactory<any>) => {
+  public readonly register = (actionFactory: ActionFactory) => {
     if (this.actionFactories.has(actionFactory.id)) {
       throw new Error(`ActionFactory [actionFactory.id = ${actionFactory.id}] already registered.`);
     }
@@ -32,7 +37,7 @@ export class UiActionsFactoryService {
     this.actionFactories.set(actionFactory.id, actionFactory);
   };
 
-  public readonly getAll = (): Array<ActionFactory<any>> => {
+  public readonly getAll = (): Array<ActionFactory<any, any>> => {
     return Array.from(this.actionFactories.values());
   };
 

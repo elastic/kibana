@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { ActionFactory, AdvancedUiActionsStart } from '../../../../advanced_ui_actions/public';
 import { FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
 import { FlyoutListManageDrilldowns } from '../flyout_list_manage_drilldowns';
+import { IStorageWrapper } from '../../../../../../src/plugins/kibana_utils/public';
 
 interface ConnectedFlyoutManageDrilldownsProps<Context extends object = object> {
   context: Context;
@@ -26,12 +27,15 @@ enum Routes {
 
 export function createFlyoutManageDrilldowns({
   advancedUiActions,
+  storage,
 }: {
   advancedUiActions: AdvancedUiActionsStart;
+  storage: IStorageWrapper;
 }) {
   // This is ok to assume this is static,
   // because all action factories should be registerd in setup phase
   const allActionFactories = advancedUiActions.actionFactory.getAll();
+
   return (props: ConnectedFlyoutManageDrilldownsProps) => {
     const isCreateOnly = props.viewMode === 'create';
 
@@ -44,6 +48,8 @@ export function createFlyoutManageDrilldowns({
       () => (isCreateOnly ? Routes.Create : Routes.Manage) // initial state is different depending on `viewMode`
     );
 
+    const [shouldShowWelcomeMessage, onHideWelcomeMessage] = useWelcomeMessage(storage);
+
     /**
      * isCompatible promise is not yet resolved.
      * Skip rendering until it is resolved
@@ -55,7 +61,8 @@ export function createFlyoutManageDrilldowns({
       case Routes.Edit:
         return (
           <FlyoutDrilldownWizard
-            showWelcomeMessage={true}
+            showWelcomeMessage={shouldShowWelcomeMessage}
+            onWelcomeHideClick={onHideWelcomeMessage}
             drilldownActionFactories={actionFactories}
             onClose={props.onClose}
             mode={Routes.Create ? 'create' : 'edit'}
@@ -72,6 +79,7 @@ export function createFlyoutManageDrilldowns({
             onDelete={() => {
               setRoute(Routes.Manage);
             }}
+            actionFactoryContext={props.context}
           />
         );
 
@@ -79,7 +87,8 @@ export function createFlyoutManageDrilldowns({
       default:
         return (
           <FlyoutListManageDrilldowns
-            showWelcomeMessage={true}
+            showWelcomeMessage={shouldShowWelcomeMessage}
+            onWelcomeHideClick={onHideWelcomeMessage}
             drilldowns={[]}
             onDelete={() => {}}
             onEdit={() => {
@@ -89,6 +98,7 @@ export function createFlyoutManageDrilldowns({
               setRoute(Routes.Create);
             }}
             onClose={props.onClose}
+            context={props.context}
           />
         );
     }
@@ -118,4 +128,18 @@ function useCompatibleActionFactoriesForCurrentContext<Context extends object = 
   }, [context, actionFactories]);
 
   return compatibleActionFactories;
+}
+
+function useWelcomeMessage(storage: IStorageWrapper): [boolean, () => void] {
+  const key = `drilldowns:hidWelcomeMessage`;
+  const [hidWelcomeMessage, setHidWelcomeMessage] = useState<boolean>(storage.get(key) ?? false);
+
+  return [
+    !hidWelcomeMessage,
+    () => {
+      if (hidWelcomeMessage) return;
+      setHidWelcomeMessage(true);
+      storage.set(key, true);
+    },
+  ];
 }

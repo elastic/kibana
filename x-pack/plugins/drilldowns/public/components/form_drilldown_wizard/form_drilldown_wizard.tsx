@@ -12,9 +12,11 @@ import {
   ActionBaseConfig,
   ActionFactory,
   ActionWizard,
+  ActionFactoryList,
+  ActionFactoryBaseContext,
 } from '../../../../advanced_ui_actions/public';
 
-const noop = () => {};
+const noopFn = () => {};
 
 export interface FormDrilldownWizardProps {
   name?: string;
@@ -22,21 +24,23 @@ export interface FormDrilldownWizardProps {
 
   currentActionFactory?: ActionFactory;
   onActionFactoryChange?: (actionFactory: ActionFactory | null) => void;
+  actionFactoryContext?: ActionFactoryBaseContext;
 
   actionConfig?: ActionBaseConfig;
   onActionConfigChange?: (config: ActionBaseConfig) => void;
 
-  actionFactories?: Array<ActionFactory<any>>;
+  actionFactories?: ActionFactoryList;
 }
 
 export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
   name = '',
   actionConfig,
   currentActionFactory,
-  onNameChange = noop,
-  onActionConfigChange = noop,
-  onActionFactoryChange = noop,
+  onNameChange = noopFn,
+  onActionConfigChange = noopFn,
+  onActionFactoryChange = noopFn,
   actionFactories = [],
+  actionFactoryContext = {},
 }) => {
   const nameFragment = (
     <EuiFormRow label={txtNameOfDrilldown} className="drdFormDrilldownWizard__formRow">
@@ -44,7 +48,7 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
         name="drilldown_name"
         placeholder={txtUntitledDrilldown}
         value={name}
-        disabled={onNameChange === noop}
+        disabled={onNameChange === noopFn}
         onChange={event => onNameChange(event.target.value)}
         data-test-subj="dynamicActionNameInput"
       />
@@ -63,13 +67,13 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
         config={actionConfig}
         onActionFactoryChange={actionFactory => onActionFactoryChange(actionFactory)}
         onConfigChange={config => onActionConfigChange(config)}
+        context={actionFactoryContext}
       />
     </EuiFormRow>
   );
 
   return (
     <>
-      <EuiSpacer size={'l'} />
       <EuiForm>
         {nameFragment}
         <EuiSpacer size={'xl'} />

@@ -179,6 +179,7 @@ export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory
           changeActionFactory(newActionFactory);
         }}
         currentActionFactory={state.currentActionFactory}
+        context={{}}
       />
       <div style={{ marginTop: '44px' }} />
       <hr />

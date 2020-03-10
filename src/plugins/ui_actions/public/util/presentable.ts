@@ -19,10 +19,12 @@
 
 import { UiComponent } from 'src/plugins/kibana_utils/common';
 
+export type PresentableBaseContext = object;
+
 /**
  * Represents something that can be displayed to user in UI.
  */
-export interface Presentable<Context extends object = object> {
+export interface Presentable<Context extends PresentableBaseContext = PresentableBaseContext> {
   /**
    * ID that uniquely identifies this object.
    */
@@ -43,16 +45,16 @@ export interface Presentable<Context extends object = object> {
   /**
    * Optional EUI icon type that can be displayed along with the title.
    */
-  getIconType(context?: Context): string | undefined;
+  getIconType(context: Context): string | undefined;
 
   /**
    * Returns a title to be displayed to the user.
    */
-  getDisplayName(context?: Context): string;
+  getDisplayName(context: Context): string;
 
   /**
    * Returns a promise that resolves to true if this item is compatible given
    * the context and should be displayed to user, otherwise resolves to false.
    */
-  isCompatible(context?: Context): Promise<boolean>;
+  isCompatible(context: Context): Promise<boolean>;
 }

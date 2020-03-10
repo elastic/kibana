@@ -32,6 +32,8 @@ export interface ListManageDrilldownsProps {
   onEdit?: (id: string) => void;
   onCreate?: () => void;
   onDelete?: (ids: string[]) => void;
+
+  context?: object; // TODO DrilldownBaseContext? ActionBaseContext?
 }
 
 const noop = () => {};
@@ -43,6 +45,7 @@ export function ListManageDrilldowns({
   onEdit = noop,
   onCreate = noop,
   onDelete = noop,
+  context = {},
 }: ListManageDrilldownsProps) {
   const [selectedDrilldowns, setSelectedDrilldowns] = useState<string[]>([]);
 

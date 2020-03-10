@@ -9,6 +9,7 @@ import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actio
 import { AdvancedUiActionsSetup, AdvancedUiActionsStart } from '../../advanced_ui_actions/public';
 import { DrilldownService, DrilldownServiceSetupContract } from './service';
 import { createFlyoutManageDrilldowns } from './components/connected_flyout_manage_drilldowns';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
 
 export interface SetupDependencies {
   uiActions: UiActionsSetup;
@@ -39,7 +40,10 @@ export class DrilldownsPlugin
 
   public start(core: CoreStart, plugins: StartDependencies): StartContract {
     return {
-      FlyoutManageDrilldowns: createFlyoutManageDrilldowns(plugins),
+      FlyoutManageDrilldowns: createFlyoutManageDrilldowns({
+        advancedUiActions: plugins.advancedUiActions,
+        storage: new Storage(localStorage),
+      }),
     };
   }
 
