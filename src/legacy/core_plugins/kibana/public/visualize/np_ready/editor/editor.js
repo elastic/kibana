@@ -30,7 +30,7 @@ import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
-import { unhashUrl } from '../../../../../../../plugins/kibana_utils/public';
+import { unhashUrl, redirectWhenMissing } from '../../../../../../../plugins/kibana_utils/public';
 import { kbnBaseUrl } from '../../../../../../../plugins/kibana_legacy/public';
 import {
   SavedObjectSaveModal,
@@ -75,7 +75,6 @@ function VisualizeAppController(
   $injector,
   $timeout,
   kbnUrl,
-  redirectWhenMissing,
   kbnUrlStateStorage,
   history
 ) {
@@ -319,10 +318,16 @@ function VisualizeAppController(
   if (!_.isEqual(stateContainer.getState().vis, stateDefaults.vis)) {
     try {
       vis.setState(stateContainer.getState().vis);
-    } catch {
-      redirectWhenMissing({
-        'index-pattern-field': '/visualize',
+    } catch (error) {
+      const redirect = redirectWhenMissing({
+        history,
+        mapping: {
+          'index-pattern-field': '/visualize',
+        },
+        toastNotifications,
       });
+
+      redirect(error);
     }
   }
 
