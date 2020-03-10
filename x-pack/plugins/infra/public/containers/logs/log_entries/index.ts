@@ -11,9 +11,7 @@ import {
   LogEntriesResponse,
   LogEntry,
   LogEntriesRequest,
-  LogEntriesCenteredRequest,
-  LogEntriesBeforeRequest,
-  LogEntriesAfterRequest,
+  LogEntriesBaseRequest,
 } from '../../../../common/http_api';
 import { fetchLogEntries } from './api/fetch_log_entries';
 
@@ -155,18 +153,22 @@ const useFetchEntriesEffect = (
     dispatch({ type: Action.FetchingNewEntries });
 
     try {
-      const fetchArgs: LogEntriesRequest = {
+      const commonFetchArgs: LogEntriesBaseRequest = {
         sourceId: overrides.sourceId || props.sourceId,
         startTimestamp: overrides.startTimestamp || props.startTimestamp,
         endTimestamp: overrides.endTimestamp || props.endTimestamp,
         query: overrides.filterQuery || props.filterQuery || undefined, // FIXME
       };
 
-      if (props.timeKey) {
-        (fetchArgs as LogEntriesCenteredRequest).center = props.timeKey;
-      } else {
-        (fetchArgs as LogEntriesBeforeRequest).before = 'last';
-      }
+      const fetchArgs: LogEntriesRequest = props.timeKey
+        ? {
+            ...commonFetchArgs,
+            center: props.timeKey,
+          }
+        : {
+            ...commonFetchArgs,
+            before: 'last',
+          };
 
       const { data: payload } = await fetchLogEntries(fetchArgs);
       dispatch({ type: Action.ReceiveNewEntries, payload });
@@ -206,18 +208,22 @@ const useFetchEntriesEffect = (
     dispatch({ type: Action.FetchingMoreEntries });
 
     try {
-      const fetchArgs: LogEntriesRequest = {
+      const commonFetchArgs: LogEntriesBaseRequest = {
         sourceId: props.sourceId,
         startTimestamp: props.startTimestamp,
         endTimestamp: props.endTimestamp,
         query: props.filterQuery || undefined, // FIXME
       };
 
-      if (getEntriesBefore) {
-        (fetchArgs as LogEntriesBeforeRequest).before = state.topCursor!; // We check for nullity above already
-      } else {
-        (fetchArgs as LogEntriesAfterRequest).after = state.bottomCursor;
-      }
+      const fetchArgs: LogEntriesRequest = getEntriesBefore
+        ? {
+            ...commonFetchArgs,
+            before: state.topCursor!, // We already check for nullity above
+          }
+        : {
+            ...commonFetchArgs,
+            after: state.bottomCursor,
+          };
 
       const { data: payload } = await fetchLogEntries(fetchArgs);
 
