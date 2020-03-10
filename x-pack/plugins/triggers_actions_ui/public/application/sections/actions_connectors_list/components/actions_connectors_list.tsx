@@ -15,6 +15,7 @@ import {
   EuiTitle,
   EuiLink,
   EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -139,10 +140,48 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       sortable: false,
       truncateText: true,
       render: (value: string, item: ActionConnectorTableItem) => {
-        return (
-          <EuiLink data-test-subj={`edit${item.id}`} onClick={() => editItem(item)} key={item.id}>
+        let actionTypeDisabledMessage = null;
+        if (actionTypesIndex && actionTypesIndex[item.actionTypeId].enabledInLicense === false) {
+          actionTypeDisabledMessage = i18n.translate(
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.actionTypeDisabledByLicenseMessage',
+            {
+              defaultMessage:
+                'Connector is disabled because it requires a {minimumLicenseRequired} license.',
+              values: {
+                minimumLicenseRequired: actionTypesIndex[item.actionTypeId].minimumLicenseRequired,
+              },
+            }
+          );
+        } else if (
+          actionTypesIndex &&
+          actionTypesIndex[item.actionTypeId].enabledInConfig === false
+        ) {
+          actionTypeDisabledMessage = i18n.translate(
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.actionTypeDisabledByConfigMessage',
+            { defaultMessage: 'Connector is disabled by the Kibana configuration.' }
+          );
+        }
+
+        const link = (
+          <EuiLink
+            data-test-subj={`edit${item.id}`}
+            onClick={() => editItem(item)}
+            key={item.id}
+            disabled={actionTypesIndex ? !actionTypesIndex[item.actionTypeId].enabled : true}
+          >
             {value}
           </EuiLink>
+        );
+
+        return actionTypeDisabledMessage ? (
+          <EuiToolTip position="top" content={actionTypeDisabledMessage}>
+            <Fragment>
+              {link}
+              <EuiIcon type="questionInCircle" />
+            </Fragment>
+          </EuiToolTip>
+        ) : (
+          link
         );
       },
     },
@@ -211,7 +250,8 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       sorting={true}
       itemId="id"
       columns={actionsTableColumns}
-      rowProps={() => ({
+      rowProps={(item: ActionConnectorTableItem) => ({
+        disabled: actionTypesIndex ? !actionTypesIndex[item.actionTypeId].enabled : true,
         'data-test-subj': 'connectors-row',
       })}
       cellProps={() => ({

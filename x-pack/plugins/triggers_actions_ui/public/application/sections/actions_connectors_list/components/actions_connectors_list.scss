@@ -1,3 +1,13 @@
 .actConnectorsList__logo + .actConnectorsList__logo {
   margin-left: $euiSize;
 }
+
+.euiTableRow[disabled] {
+  background-color:#F5F7FA;
+  .euiTableCellContent__text, .euiLink {
+    color:#69707D;
+  }
+  .euiLink + .euiIcon {
+    margin-left: 5px;
+  }
+}
