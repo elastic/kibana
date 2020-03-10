@@ -163,16 +163,24 @@ Each member of the `ServiceStatusLevel` enum has specific behaviors associated w
 ### Status inheritance
 
 By default, plugins inherit their status from all Core services and their dependencies on other plugins. The default status for a plugin follows this algorithm:
-- If any Core service is `degraded`, the plugin's status is `degraded`.
-- If any Core service is `unavailable`, the plugin's status is `unavailable`.
-- If any Core service is `fatal`, the plugin's status is `fatal`.
-- If any required dependency is `degraded`, the plugin's status is `degraded`.
-- If any required dependency is `unavailable`, the plugin's status is `unavailable`.
-- If any required dependency is `fatal`, the plugin's status is `fatal`.
-- If any optional dependency is `degraded`, the plugin's status is `degraded`.
-- If any optional dependency is `unavailable`, the plugin's status is `degraded`.
-- If any optional dependency is `fatal`, the plugin's status is `degraded`.
-- Otherwise, the plugin's status is `available`.
+```js
+// pseudo-code
+function getPluginStatus() {
+  if any core service is `fatal`, return `fatal`
+  else if any core service is `unavailable`, return `unavailable`
+  else if any core service is `degraded`, return `degraded`
+
+  if any required dep is `fatal`, return `fatal`
+  else if any required dep is `unavailable`, return `unavailable`
+  else if any required dep is `degraded`, return `degraded`
+
+  if any optional dep is `fatal`, return `degraded`
+  else if any optional dep is `unavailable`, return `degraded`
+  else if any optional dep is `degraded`, return `degraded`
+
+  return 'available'
+}
+```
 
 If a plugin calls the `StatusSetup#set` API, the inherited status is completely overridden. They status the plugin specifies is the source of truth. If a plugin wishes to "merge" its custom status with the inherited status calculated by Core, it may do so by using the `StatusSetup#inherited$` property in its calculated status.
 
