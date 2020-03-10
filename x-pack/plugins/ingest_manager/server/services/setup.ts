@@ -15,6 +15,7 @@ import {
   AgentConfig,
   Installation,
   Output,
+  DEFAULT_AGENT_CONFIGS_PACKAGES,
 } from '../../common';
 import { getPackageInfo } from './epm/packages';
 import { datasourceService } from './datasource';
@@ -42,6 +43,13 @@ export async function setup(
     throw new Error('Config not found');
   }
   for (const installedPackage of installedPackages) {
+    const packageShouldBeInstalled = !DEFAULT_AGENT_CONFIGS_PACKAGES.some(
+      packageName => installedPackage.name === packageName
+    );
+    if (packageShouldBeInstalled) {
+      continue;
+    }
+
     const isInstalled = configWithDatasource.datasources.some((d: Datasource | string) => {
       return typeof d !== 'string' && d.package?.name === installedPackage.name;
     });
