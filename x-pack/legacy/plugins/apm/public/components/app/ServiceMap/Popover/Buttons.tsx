@@ -33,8 +33,6 @@ export function Buttons({
     currentSearch
   );
 
-  const isAlreadyFocused = focusedServiceName === selectedNodeServiceName;
-
   return (
     <>
       <EuiFlexItem>
@@ -45,19 +43,7 @@ export function Buttons({
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiButton
-          isDisabled={isAlreadyFocused}
-          color="secondary"
-          href={focusUrl}
-          onClick={onFocusClick}
-          title={
-            isAlreadyFocused
-              ? i18n.translate('xpack.apm.serviceMap.alreadyFocusedTitleText', {
-                  defaultMessage: 'Map is already focused'
-                })
-              : undefined
-          }
-        >
+        <EuiButton color="secondary" href={focusUrl} onClick={onFocusClick}>
           {i18n.translate('xpack.apm.serviceMap.focusMapButtonText', {
             defaultMessage: 'Focus map'
           })}
