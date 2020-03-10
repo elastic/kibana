@@ -5,7 +5,7 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { AdvancedUiActionsSetup, ActionFactory } from '../../../advanced_ui_actions/public';
+import { AdvancedUiActionsSetup } from '../../../advanced_ui_actions/public';
 
 // TODO: MOCK DATA
 import {

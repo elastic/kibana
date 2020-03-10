@@ -37,7 +37,7 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
   onActionConfigChange = noopFn,
   onActionFactoryChange = noopFn,
   actionFactories = [],
-  actionFactoryContext = {},
+  actionFactoryContext,
 }) => {
   const nameFragment = (
     <EuiFormRow label={txtNameOfDrilldown} className="drdFormDrilldownWizard__formRow">

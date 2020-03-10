@@ -9,8 +9,8 @@ import { EuiFlyout } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
 import { createFlyoutManageDrilldowns } from './connected_flyout_manage_drilldowns';
 import {
-  dashboardDrilldownActionFactory,
-  urlDrilldownActionFactory,
+  dashboardFactory,
+  urlFactory,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../advanced_ui_actions/public/components/action_wizard/test_data';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
@@ -20,7 +20,7 @@ const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
   advancedUiActions: {
     actionFactory: {
       getAll: () => {
-        return [dashboardDrilldownActionFactory, urlDrilldownActionFactory];
+        return [dashboardFactory, urlFactory];
       },
     },
   },

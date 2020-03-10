@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
 import { ActionWizard } from './action_wizard';
-import { ActionFactoryDefinition, AnyActionFactory } from '../../services';
+import { ActionFactoryDefinition, AnyActionFactory, ActionFactory } from '../../services';
 import { CollectConfigProps } from '../../util';
 
 type ActionBaseConfig = object;
@@ -101,6 +101,8 @@ export const dashboardDrilldownActionFactory: ActionFactoryDefinition<
   create: () => null as any,
 };
 
+export const dashboardFactory = new ActionFactory(dashboardDrilldownActionFactory);
+
 interface UrlDrilldownConfig {
   url: string;
   openInNewTab: boolean;
@@ -153,6 +155,8 @@ export const urlDrilldownActionFactory: ActionFactoryDefinition<UrlDrilldownConf
   },
   create: () => null as any,
 };
+
+export const urlFactory = new ActionFactory(urlDrilldownActionFactory);
 
 export function Demo({ actionFactories }: { actionFactories: AnyActionFactory[] }) {
   const [state, setState] = useState<{

@@ -11,25 +11,21 @@ import { EuiFlyout } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
 import { FlyoutDrilldownWizard } from '.';
 import {
-  urlDrilldownActionFactory,
-  dashboardDrilldownActionFactory,
+  dashboardFactory,
+  urlFactory,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../advanced_ui_actions/public/components/action_wizard/test_data';
 
 storiesOf('components/FlyoutDrilldownWizard', module)
   .add('default', () => {
-    return (
-      <FlyoutDrilldownWizard
-        drilldownActionFactories={[urlDrilldownActionFactory, dashboardDrilldownActionFactory]}
-      />
-    );
+    return <FlyoutDrilldownWizard drilldownActionFactories={[urlFactory, dashboardFactory]} />;
   })
   .add('open in flyout - create', () => {
     return (
       <EuiFlyout onClose={() => {}}>
         <FlyoutDrilldownWizard
           onClose={() => {}}
-          drilldownActionFactories={[urlDrilldownActionFactory, dashboardDrilldownActionFactory]}
+          drilldownActionFactories={[urlFactory, dashboardFactory]}
         />
       </EuiFlyout>
     );
@@ -39,10 +35,10 @@ storiesOf('components/FlyoutDrilldownWizard', module)
       <EuiFlyout onClose={() => {}}>
         <FlyoutDrilldownWizard
           onClose={() => {}}
-          drilldownActionFactories={[urlDrilldownActionFactory, dashboardDrilldownActionFactory]}
+          drilldownActionFactories={[urlFactory, dashboardFactory]}
           initialDrilldownWizardConfig={{
             name: 'My fancy drilldown',
-            actionFactory: urlDrilldownActionFactory,
+            actionFactory: urlFactory,
             actionConfig: {
               url: 'https://elastic.co',
               openInNewTab: true,

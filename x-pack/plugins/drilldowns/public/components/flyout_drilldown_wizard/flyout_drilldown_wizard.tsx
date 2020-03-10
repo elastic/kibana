@@ -23,7 +23,6 @@ import {
 } from '../../../../advanced_ui_actions/public';
 
 type ActionBaseConfig = object;
-type ActionFactoryBaseContext = object;
 
 export interface DrilldownWizardConfig<ActionConfig extends object = object> {
   name: string;
@@ -47,7 +46,7 @@ export interface FlyoutDrilldownWizardProps<
   showWelcomeMessage?: boolean;
   onWelcomeHideClick?: () => void;
 
-  actionFactoryContext?: ActionFactoryBaseContext;
+  actionFactoryContext?: object;
 }
 
 export function FlyoutDrilldownWizard<
@@ -133,7 +132,7 @@ export function FlyoutDrilldownWizard<
           }
         }}
         actionFactories={drilldownActionFactories}
-        actionFactoryContext={actionFactoryContext}
+        actionFactoryContext={actionFactoryContext!}
       />
       {mode === 'edit' && (
         <>
