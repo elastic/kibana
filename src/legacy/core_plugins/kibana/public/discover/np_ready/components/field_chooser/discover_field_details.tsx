@@ -37,6 +37,9 @@ export interface Field {
   name: string;
   filterable: boolean;
   visualizable: boolean;
+  aggregatable: boolean;
+  searchable: boolean;
+  rowCount: number;
   type: string;
   /**
    * determines if a field is selected and displayed in the doc table
@@ -61,12 +64,12 @@ export function DiscoverFieldDetails({ field, details, onAddFilter }: Props) {
             id="kbn.discover.fieldChooser.detailViews.topValuesInRecordsDescription"
             defaultMessage="Top 5 values in"
           />{' '}
-          {field.indexPattern.metaFields.includes(field.name) && !field.scripted && (
+          {!field.indexPattern.metaFields.includes(field.name) && !field.scripted && (
             <EuiLink className="kuiLink" onClick={() => onAddFilter('_exists_', field.name, '+')}>
               {details.exists}
             </EuiLink>
           )}{' '}
-          {field.indexPattern.metaFields.includes(field.name) && field.scripted && (
+          {!field.indexPattern.metaFields.includes(field.name) && field.scripted && (
             <span>{details.exists}</span>
           )}
           / {details.total}{' '}

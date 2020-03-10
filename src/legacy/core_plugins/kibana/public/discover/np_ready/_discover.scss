@@ -134,25 +134,6 @@ discover-app {
   font-weight: bold;
 }
 
-/**
- * 1. Truncate long text so it doesn't push the actions outside of the container.
- */
-.dscSidebarItem__label {
-  overflow: hidden; /* 1 */
-  text-overflow: ellipsis; /* 1 */
-}
-
-/**
- * 1. Only visually hide the action, so that it's still accessible to screen readers.
- * 2. When tabbed to, this element needs to be visible for keyboard accessibility.
- */
-.dscSidebarItem__action {
-  opacity: 0; /* 1 */
-
-  &:focus {
-    opacity: 1; /* 2 */
-  }
-}
 
 .dscFieldSearch {
   padding: $euiSizeS;

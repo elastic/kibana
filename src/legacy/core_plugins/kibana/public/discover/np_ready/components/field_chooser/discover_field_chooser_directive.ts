@@ -16,25 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
 import { wrapInI18nContext } from '../../../kibana_services';
-import { DiscoverIndexPattern, DiscoverIndexPatternProps } from './discover_index_pattern';
+import { DiscoverFieldChooser } from './discover_field_chooser';
 
-/**
- * At initial rendering the angular directive the selectedIndexPattern prop is undefined
- * This wrapper catches this, had to be introduced to satisfy eslint
- */
-export function DiscoverIndexPatternWrapper(props: DiscoverIndexPatternProps) {
-  if (!props.selectedIndexPattern || !Array.isArray(props.indexPatternList)) {
-    return null;
-  }
-  return <DiscoverIndexPattern {...props} />;
-}
-
-export function createIndexPatternSelectDirective(reactDirective: any) {
-  return reactDirective(wrapInI18nContext(DiscoverIndexPatternWrapper), [
+export function createDiscoverFieldChooserDirective(reactDirective: any) {
+  return reactDirective(wrapInI18nContext(DiscoverFieldChooser), [
+    ['computeDetails', { watchDepth: 'reference' }],
+    ['fields', { watchDepth: 'reference' }],
+    ['fieldTypes', { watchDepth: 'reference' }],
+    ['filter', { watchDepth: 'reference' }],
+    ['groupedFields', { watchDepth: 'reference' }],
     ['indexPatternList', { watchDepth: 'reference' }],
+    ['onAddField', { watchDepth: 'reference' }],
+    ['onAddFilter', { watchDepth: 'reference' }],
+    ['onRemoveField', { watchDepth: 'reference' }],
+    ['onShowDetails', { watchDepth: 'reference' }],
+    ['onShowFields', { watchDepth: 'reference' }],
+    ['openFields', { watchDepth: 'reference' }],
+    ['popularFields', { watchDepth: 'reference' }],
     ['selectedIndexPattern', { watchDepth: 'reference' }],
+    ['setFilterValue', { watchDepth: 'reference' }],
     ['setIndexPattern', { watchDepth: 'reference' }],
+    ['showDetails', { watchDepth: 'reference' }],
+    ['showFields', { watchDepth: 'reference' }],
+    ['unpopularFields', { watchDepth: 'reference' }],
   ]);
 }

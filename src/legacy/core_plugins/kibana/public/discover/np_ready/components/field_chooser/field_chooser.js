@@ -20,9 +20,6 @@ import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
 import { fieldCalculator } from './lib/field_calculator';
-import './discover_field';
-import './discover_field_search_directive';
-import './discover_index_pattern_directive';
 import fieldChooserTemplate from './field_chooser.html';
 import {
   IndexPatternFieldList,
@@ -80,18 +77,6 @@ export function createFieldChooserDirective($location, config, $route) {
         reset: function() {
           filter.vals = _.clone(filter.defaults);
         },
-        /**
-         * filter for fields that are displayed / selected for the data table
-         */
-        isFieldFilteredAndDisplayed: function(field) {
-          return field.display && isFieldFiltered(field);
-        },
-        /**
-         * filter for fields that are not displayed / selected for the data table
-         */
-        isFieldFilteredAndNotDisplayed: function(field) {
-          return !field.display && isFieldFiltered(field) && field.type !== '_source';
-        },
         getActive: function() {
           return _.some(filter.props, function(prop) {
             return filter.vals[prop] !== filter.defaults[prop];
@@ -99,44 +84,15 @@ export function createFieldChooserDirective($location, config, $route) {
         },
       });
 
-      function isFieldFiltered(field) {
-        const matchFilter = filter.vals.type === 'any' || field.type === filter.vals.type;
-        const isAggregatable =
-          filter.vals.aggregatable == null || field.aggregatable === filter.vals.aggregatable;
-        const isSearchable =
-          filter.vals.searchable == null || field.searchable === filter.vals.searchable;
-        const scriptedOrMissing =
-          !filter.vals.missing || field.type === '_source' || field.scripted || field.rowCount > 0;
-        const matchName = !filter.vals.name || field.name.indexOf(filter.vals.name) !== -1;
-
-        return matchFilter && isAggregatable && isSearchable && scriptedOrMissing && matchName;
-      }
-
       $scope.setFilterValue = (name, value) => {
         filter.vals[name] = value;
+        $scope.filter = { ...filter };
       };
 
       $scope.filtersActive = 0;
 
       // set the initial values to the defaults
       filter.reset();
-
-      $scope.$watchCollection('filter.vals', function() {
-        filter.active = filter.getActive();
-        if (filter.vals) {
-          let count = 0;
-          Object.keys(filter.vals).forEach(key => {
-            if (key === 'missing' || key === 'name') {
-              return;
-            }
-            const value = filter.vals[key];
-            if ((value && value !== 'any') || value === false) {
-              count++;
-            }
-          });
-          $scope.filtersActive = count;
-        }
-      });
 
       $scope.$watchMulti(['[]fieldCounts', '[]columns', '[]hits'], function(cur, prev) {
         const newHits = cur[2] !== prev[2];
@@ -173,6 +129,7 @@ export function createFieldChooserDirective($location, config, $route) {
             // move excess popular fields to un-popular list
             const extras = groups.popular.splice(config.get('fields:popularLimit'));
             groups.unpopular = extras.concat(groups.unpopular);
+            $scope.groupedFields = groups;
           })
           .each(function(group, name) {
             $scope[name + 'Fields'] = _.sortBy(group, name === 'selected' ? 'display' : 'name');
@@ -275,10 +232,8 @@ export function createFieldChooserDirective($location, config, $route) {
       $scope.computeDetails = function(show, field) {
         if (show) {
           field.details = getDetails(field);
-          $scope.openFields.set(field.name, true);
           $scope.increaseFieldCounter(field, 1);
         } else {
-          $scope.openFields.set(field.name, false);
           delete field.details;
         }
         return field.details;

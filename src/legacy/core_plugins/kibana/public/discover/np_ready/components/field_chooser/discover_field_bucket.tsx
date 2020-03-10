@@ -72,6 +72,8 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
                 style={{
                   minHeight: 'auto',
                   minWidth: 'auto',
+                  paddingRight: 2,
+                  paddingLeft: 2,
                   paddingTop: 0,
                   paddingBottom: 0,
                 }}
@@ -87,6 +89,8 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
                   minWidth: 'auto',
                   paddingTop: 0,
                   paddingBottom: 0,
+                  paddingRight: 2,
+                  paddingLeft: 2,
                 }}
               />
             </div>

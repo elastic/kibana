@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverFieldDetails, Field } from './discover_field_details';
 import { FieldIcon } from '../../../../../../../../plugins/kibana_react/public';
@@ -58,7 +58,12 @@ export function DiscoverField({
 
   return (
     <div className={`${showDetails ? 'dscSidebarItemExpanded' : ''}`}>
-      <div className="dscSidebarField sidebar-item-title dscSidebarItem">
+      <div
+        className="dscSidebarField sidebar-item-title dscSidebarItem"
+        tabIndex={0}
+        onClick={() => onShowDetails(!showDetails, field, true)}
+        onKeyPress={() => onShowDetails(!showDetails, field, true)}
+      >
         <span className="dscSidebarField__fieldIcon">
           <FieldIcon type={field.type} label={field.name} />
         </span>
@@ -69,25 +74,22 @@ export function DiscoverField({
             delay="long"
             anchorClassName="eui-textTruncate"
           >
-            <EuiButtonEmpty
-              color="text"
-              size="xs"
-              data-test-subj={`field-${field.name}`}
-              onClick={() => onShowDetails(!showDetails, field, true)}
-              flush="left"
-              style={{ textAlign: 'left' }}
-            >
+            <EuiText size="xs" data-test-subj={`field-${field.name}`} className="eui-textTruncate">
               {field.name}
-            </EuiButtonEmpty>
+            </EuiText>
           </EuiToolTip>
         </span>
-        <span className="dscSidebarField__infoIcon">
+        <span>
           {field.name !== '_source' && !field.display && (
             <EuiToolTip position="top" content={addLabel}>
               <EuiButtonIcon
                 className="dscSidebarItem__action"
                 iconType="plusInCircleFilled"
-                onClick={() => toggleDisplay(field)}
+                onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                  toggleDisplay(field);
+                }}
                 data-test-subj={`fieldToggle-${field.name}`}
                 aria-label={addLabel}
               />
@@ -98,7 +100,11 @@ export function DiscoverField({
               <EuiButtonIcon
                 className="dscSidebarItem__action"
                 iconType="minusInCircleFilled"
-                onClick={() => toggleDisplay(field)}
+                onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                  toggleDisplay(field);
+                }}
                 data-test-subj={`fieldToggle-${field.name}`}
                 aria-label={removeLabel}
               />

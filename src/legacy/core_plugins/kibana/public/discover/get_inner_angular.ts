@@ -47,10 +47,6 @@ import { createTableRowDirective } from './np_ready/angular/doc_table/components
 import { createPagerFactory } from './np_ready/angular/doc_table/lib/pager/pager_factory';
 import { createInfiniteScrollDirective } from './np_ready/angular/doc_table/infinite_scroll';
 import { createDocViewerDirective } from './np_ready/angular/doc_viewer';
-import { createFieldSearchDirective } from './np_ready/components/field_chooser/discover_field_search_directive';
-import { createIndexPatternSelectDirective } from './np_ready/components/field_chooser/discover_index_pattern_directive';
-// @ts-ignore
-import { FieldNameDirectiveProvider } from './np_ready/angular/directives/field_name';
 // @ts-ignore
 import { createFieldChooserDirective } from './np_ready/components/field_chooser/field_chooser';
 // @ts-ignore
@@ -75,6 +71,7 @@ import {
   createTopNavDirective,
   createTopNavHelper,
 } from '../../../../../plugins/kibana_legacy/public';
+import { createDiscoverFieldChooserDirective } from './np_ready/components/field_chooser/discover_field_chooser_directive';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
@@ -138,7 +135,6 @@ export function initializeInnerAngularModule(
       ])
       .config(watchMultiDecorator)
       .directive('icon', reactDirective => reactDirective(EuiIcon))
-      .directive('fieldName', FieldNameDirectiveProvider)
       .directive('renderComplete', createRenderCompleteDirective)
       .service('debounce', ['$timeout', DebounceProviderTimeout]);
   }
@@ -169,10 +165,9 @@ export function initializeInnerAngularModule(
     .directive('cssTruncate', createCssTruncateDirective)
     .directive('fixedScroll', FixedScrollProvider)
     .directive('renderComplete', createRenderCompleteDirective)
-    .directive('discoverFieldSearch', createFieldSearchDirective)
-    .directive('discoverIndexPatternSelect', createIndexPatternSelectDirective)
     .directive('discoverField', createDiscoverFieldDirective)
     .directive('discFieldChooser', createFieldChooserDirective)
+    .directive('discoverFieldChooser', createDiscoverFieldChooserDirective)
     .service('debounce', ['$timeout', DebounceProviderTimeout]);
 }
 
