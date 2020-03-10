@@ -287,7 +287,11 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(result).to.eql('ok');
+      expect(result).to.eql({
+        status: 'ok',
+        actionId: simulatedActionId,
+        data: { incidentId: '123', number: 'INC01', pushedDate: '2020-03-10T12:24:20.000Z' },
+      });
     });
 
     it('should handle failing with a simulated success without caseId', async () => {

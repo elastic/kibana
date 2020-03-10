@@ -6,7 +6,6 @@
 
 import Joi from 'joi';
 import Hapi from 'hapi';
-import { version } from 'bluebird';
 
 interface ServiceNowRequest extends Hapi.Request {
   payload: {
@@ -94,10 +93,9 @@ export function initPlugin(server: Hapi.Server, path: string) {
 // more info.
 
 function servicenowHandler(request: ServiceNowRequest, h: any) {
-  const body = request.payload;
-  const text = body && body.caseId;
-
-  return jsonResponse(h, 200, 'Success');
+  return jsonResponse(h, 200, {
+    result: { sys_id: '123', number: 'INC01', sys_created_on: '2020-03-10 12:24:20' },
+  });
 }
 
 function jsonResponse(h: any, code: number, object?: any) {
