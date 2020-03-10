@@ -51,7 +51,7 @@ export interface RuleAlertParams {
   threat: ThreatParams[] | undefined | null;
   type: 'query' | 'saved_query';
   version: number;
-  throttle: string | undefined | null;
+  throttle: 'no_actions' | 'rule' | '1h' | '1d' | '7d' | undefined | null;
 }
 
 export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval' | 'tags'>;

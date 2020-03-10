@@ -214,6 +214,7 @@ export const ruleToNdjson = (rule: Partial<OutputRuleAlertRest>): Buffer => {
  * @param ruleId The ruleId to set which is optional and defaults to rule-1
  */
 export const getComplexRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+  actions: [],
   name: 'Complex Rule Query',
   description: 'Complex Rule Query',
   false_positives: [
@@ -281,6 +282,7 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> 
       ],
     },
   ],
+  throttle: 'no_actions',
   references: [
     'http://www.example.com/some-article-about-attack',
     'Some plain text string here explaining why this is a valid thing to look out for',
@@ -296,6 +298,7 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> 
  * @param ruleId The ruleId to set which is optional and defaults to rule-1
  */
 export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+  actions: [],
   created_by: 'elastic',
   name: 'Complex Rule Query',
   description: 'Complex Rule Query',
@@ -365,6 +368,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlert
       ],
     },
   ],
+  throttle: 'no_actions',
   references: [
     'http://www.example.com/some-article-about-attack',
     'Some plain text string here explaining why this is a valid thing to look out for',
