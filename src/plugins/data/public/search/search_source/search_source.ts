@@ -353,7 +353,7 @@ export class SearchSource {
 
     searchRequest.body = searchRequest.body || {};
     const { body, index, fields, query, filters, highlightAll } = searchRequest;
-    searchRequest.type = this.getIndexType(index);
+    searchRequest.indexType = this.getIndexType(index);
 
     const computedFields = index ? index.getComputedFields() : {};
 

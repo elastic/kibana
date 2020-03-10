@@ -74,16 +74,15 @@ function search({
 }: SearchStrategySearchParams) {
   const abortController = new AbortController();
   const searchParams = getSearchParams(config, esShardTimeout);
-  const promises = searchRequests.map(({ index, type, body }) => {
+  const promises = searchRequests.map(({ index, indexType, body }) => {
     const params = {
       index: index.title || index,
-      type,
       body,
       ...searchParams,
     };
     const { signal } = abortController;
     return searchService
-      .search({ params }, { signal })
+      .search({ params, indexType }, { signal })
       .toPromise()
       .then(({ rawResponse }) => rawResponse);
   });
