@@ -4,7 +4,7 @@
 
 ## SavedObjectsTypeMappingDefinition.dynamic property
 
-The dynamic property of the mapping. either `false` or 'strict'. Defaults to strict
+The dynamic property of the mapping. either `false` or 'strict'. Defaults to `false`
 
 <b>Signature:</b>
 
