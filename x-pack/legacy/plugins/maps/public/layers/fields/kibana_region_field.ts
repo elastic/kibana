@@ -5,11 +5,14 @@
  */
 
 import { IField, AbstractField } from './field';
+import { IKibanaRegionSource } from '../sources/kibana_regionmap_source/kibana_regionmap_source';
+import { FIELD_ORIGIN } from '../../../common/constants';
+import { IVectorSource } from '../sources/vector_source';
 
 export class KibanaRegionField extends AbstractField implements IField {
   static type = 'KIBANA_REGION';
 
-  private readonly _source: IEmsFileSource;
+  private readonly _source: IKibanaRegionSource;
 
   constructor({
     fieldName,
@@ -17,7 +20,7 @@ export class KibanaRegionField extends AbstractField implements IField {
     origin,
   }: {
     fieldName: string;
-    source: IEmsFileSource;
+    source: IKibanaRegionSource;
     origin: FIELD_ORIGIN;
   }) {
     super({ fieldName, origin });
@@ -33,6 +36,6 @@ export class KibanaRegionField extends AbstractField implements IField {
     // TODO remove any and @ts-ignore when vectorFileMeta type defined
     // @ts-ignore
     const field: any = meta.fields.find(f => f.name === this._fieldName);
-    return field ? field.description : this._fieldName;
+    return field ? field.description : this.getName();
   }
 }
