@@ -25,6 +25,7 @@ export interface ThreatParams {
 export type RuleType = 'query' | 'saved_query' | 'machine_learning';
 
 export interface RuleAlertParams {
+  anomalyThreshold?: number;
   description: string;
   note: string | undefined | null;
   enabled: boolean;
@@ -37,6 +38,7 @@ export interface RuleAlertParams {
   ruleId: string | undefined | null;
   language: string | undefined | null;
   maxSignals: number;
+  mlJobId?: string;
   riskScore: number;
   outputIndex: string;
   name: string;

@@ -147,6 +147,11 @@ export interface Clients {
   actionsClient: ActionsClient;
 }
 
+export interface MlRuleParams {
+  anomalyThreshold: number;
+  mlJobId: string;
+}
+
 export type PatchRuleParams = Partial<RuleAlertParams> & {
   id: string | undefined | null;
   savedObjectsClient: SavedObjectsClientContract;
@@ -162,7 +167,8 @@ export type DeleteRuleParams = Clients & {
   ruleId: string | undefined | null;
 };
 
-export type CreateRuleParams = Omit<RuleAlertParams, 'ruleId'> & { ruleId: string } & Clients;
+export type CreateRuleParams = Omit<RuleAlertParams, 'ruleId'> & { ruleId: string } & Clients &
+  Partial<MlRuleParams>;
 
 export interface ReadRuleParams {
   alertsClient: AlertsClient;
@@ -195,3 +201,15 @@ export const isRuleStatusFindTypes = (
 ): obj is Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>> => {
   return obj ? obj.every(ruleStatus => isRuleStatusFindType(ruleStatus)) : false;
 };
+
+export interface RuleAlertAttributes {
+  enabled: boolean;
+  name: string;
+  tags: string[];
+  createdBy: string;
+  createdAt: string;
+  updatedBy: string;
+  schedule: {
+    interval: string;
+  };
+}

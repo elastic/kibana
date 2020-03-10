@@ -21,20 +21,8 @@ import { getFilter } from './get_filter';
 import { SignalRuleAlertTypeDefinition } from './types';
 import { getGapBetweenRuns } from './utils';
 import { ruleStatusSavedObjectType } from '../rules/saved_object_mappings';
-import { IRuleSavedAttributesSavedObjectAttributes } from '../rules/types';
+import { IRuleSavedAttributesSavedObjectAttributes, RuleAlertAttributes } from '../rules/types';
 import { findMlSignals } from './find_ml_signals';
-
-interface AlertAttributes {
-  enabled: boolean;
-  name: string;
-  tags: string[];
-  createdBy: string;
-  createdAt: string;
-  updatedBy: string;
-  schedule: {
-    interval: string;
-  };
-}
 
 export const signalRulesAlertType = ({
   logger,
@@ -57,6 +45,7 @@ export const signalRulesAlertType = ({
     defaultActionGroupId: 'default',
     validate: {
       params: schema.object({
+        anomalyThreshold: schema.nullable(schema.number()),
         description: schema.string(),
         note: schema.nullable(schema.string()),
         falsePositives: schema.arrayOf(schema.string(), { defaultValue: [] }),
@@ -73,6 +62,7 @@ export const signalRulesAlertType = ({
         query: schema.nullable(schema.string()),
         filters: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
         maxSignals: schema.number({ defaultValue: DEFAULT_MAX_SIGNALS }),
+        mlJobId: schema.nullable(schema.string()),
         riskScore: schema.number(),
         severity: schema.string(),
         threat: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
@@ -85,11 +75,13 @@ export const signalRulesAlertType = ({
     // fun fact: previousStartedAt is not actually a Date but a String of a date
     async executor({ previousStartedAt, alertId, services, params }) {
       const {
+        anomalyThreshold,
         from,
         ruleId,
         index,
         filters,
         language,
+        mlJobId,
         outputIndex,
         savedId,
         query,
@@ -97,7 +89,10 @@ export const signalRulesAlertType = ({
         type,
       } = params;
       // TODO: Remove this hard extraction of name once this is fixed: https://github.com/elastic/kibana/issues/50522
-      const savedObject = await services.savedObjectsClient.get<AlertAttributes>('alert', alertId);
+      const savedObject = await services.savedObjectsClient.get<RuleAlertAttributes>(
+        'alert',
+        alertId
+      );
       const ruleStatusSavedObjects = await services.savedObjectsClient.find<
         IRuleSavedAttributesSavedObjectAttributes
       >({

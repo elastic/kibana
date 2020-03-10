@@ -12,6 +12,7 @@ import { addTags } from './add_tags';
 export const createRules = ({
   alertsClient,
   actionsClient, // TODO: Use this actionsClient once we have actions such as email, etc...
+  anomalyThreshold,
   description,
   enabled,
   falsePositives,
@@ -22,6 +23,7 @@ export const createRules = ({
   timelineId,
   timelineTitle,
   meta,
+  mlJobId,
   filters,
   ruleId,
   immutable,
@@ -47,6 +49,7 @@ export const createRules = ({
       alertTypeId: SIGNALS_ID,
       consumer: APP_ID,
       params: {
+        anomalyThreshold,
         description,
         ruleId,
         index,
@@ -60,6 +63,7 @@ export const createRules = ({
         timelineId,
         timelineTitle,
         meta,
+        mlJobId,
         filters,
         maxSignals,
         riskScore,

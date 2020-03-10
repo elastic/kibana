@@ -31,6 +31,7 @@ export const createRulesRoute = (router: IRouter): void => {
     },
     async (context, request, response) => {
       const {
+        anomaly_threshold: anomalyThreshold,
         description,
         enabled,
         false_positives: falsePositives,
@@ -42,6 +43,7 @@ export const createRulesRoute = (router: IRouter): void => {
         timeline_id: timelineId,
         timeline_title: timelineTitle,
         meta,
+        ml_job_id: mlJobId,
         filters,
         rule_id: ruleId,
         index,
@@ -93,6 +95,7 @@ export const createRulesRoute = (router: IRouter): void => {
         const createdRule = await createRules({
           alertsClient,
           actionsClient,
+          anomalyThreshold,
           description,
           enabled,
           falsePositives,
@@ -105,6 +108,7 @@ export const createRulesRoute = (router: IRouter): void => {
           timelineId,
           timelineTitle,
           meta,
+          mlJobId,
           filters,
           ruleId: ruleId ?? uuid.v4(),
           index,

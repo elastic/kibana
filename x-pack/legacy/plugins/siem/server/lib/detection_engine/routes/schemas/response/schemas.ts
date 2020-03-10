@@ -64,7 +64,7 @@ export const job_status = t.keyof({ succeeded: null, failed: null, 'going to run
 // TODO: Create a regular expression type or custom date math part type here
 export const to = t.string;
 
-export const type = t.keyof({ query: null, saved_query: null });
+export const type = t.keyof({ machine_learning: null, query: null, saved_query: null });
 export const queryFilter = t.string;
 export const references = t.array(t.string);
 export const per_page = PositiveInteger;
