@@ -81,7 +81,6 @@ export function ListManageDrilldowns({
         }}
         rowProps={{
           'data-test-subj': TEST_SUBJ_DRILLDOWN_ITEM,
-          'data-testid': TEST_SUBJ_DRILLDOWN_ITEM,
         }}
         hasActions={true}
       />
