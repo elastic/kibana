@@ -41,7 +41,7 @@ const initialState: State = {
 };
 
 const ConfigureCasesComponent: React.FC = () => {
-  const [{ connectorId, closureType, mappings }, dispatch] = useReducer(
+  const [connectorIsValid, setConnectorIsValid] = useState(true);
 
   const [{ connectorId, closureType, mapping }, dispatch] = useReducer(
     configureCasesReducer(),
@@ -116,10 +116,12 @@ const ConfigureCasesComponent: React.FC = () => {
         connectorId !== 'none' &&
         !connectors.some(c => c.id === connectorId)
       ) {
-        await persistCaseConfigure({
-          connectorId: initialState.connectorId,
-          closureType: initialState.closureType,
-        });
+        setConnectorIsValid(false);
+      } else if (
+        !isLoadingConnectors &&
+        (connectorId === 'none' || connectors.some(c => c.id === connectorId))
+      ) {
+        setConnectorIsValid(true);
       }
     };
 
@@ -128,6 +130,13 @@ const ConfigureCasesComponent: React.FC = () => {
 
   return (
     <FormWrapper>
+      {!connectorIsValid && (
+        <SectionWrapper style={{ marginTop: 0 }}>
+          <EuiCallOut title={i18n.WARNING_NO_CONNETCTOR_TITLE} color="warning" iconType="help">
+            {i18n.WARNING_NO_CONNETCTOR_MESSAGE}
+          </EuiCallOut>
+        </SectionWrapper>
+      )}
       <SectionWrapper>
         <Connectors
           connectors={connectors ?? []}
