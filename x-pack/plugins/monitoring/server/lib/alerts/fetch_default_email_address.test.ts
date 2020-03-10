@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { fetchDefaultEmailAddress } from './fetch_default_email_address';
-import { uiSettingsServiceMock } from '../../../../../../../src/core/server/mocks';
+import { uiSettingsServiceMock } from '../../../../../../src/core/server/mocks';
 
 describe('fetchDefaultEmailAddress', () => {
   it('get the email address', async () => {

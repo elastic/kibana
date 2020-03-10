@@ -11,7 +11,7 @@ import {
   MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
 } from '../../common/constants';
 import { Logger } from 'src/core/server';
-import { AlertServices, AlertInstance } from '../../../../../plugins/alerting/server';
+import { AlertServices, AlertInstance } from '../../../alerting/server';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import {
   AlertState,
@@ -69,18 +69,12 @@ const alertExecutorOptions: LicenseExpirationAlertExecutorOptions = {
 
 describe('getLicenseExpiration', () => {
   const emailAddress = 'foo@foo.com';
-  const server: any = {
-    newPlatform: {
-      __internals: {
-        uiSettings: {
-          asScopedToClient: (): any => ({
-            get: () => new Promise(resolve => resolve(emailAddress)),
-          }),
-        },
-      },
-    },
-  };
-  const getMonitoringCluster: () => void = jest.fn();
+  const getUiSettingsService: any = () => ({
+    asScopedToClient: (): any => ({
+      get: () => new Promise(resolve => resolve(emailAddress)),
+    }),
+  });
+  const monitoringCluster: any = null;
   const logger: Logger = {
     warn: jest.fn(),
     log: jest.fn(),
@@ -99,13 +93,23 @@ describe('getLicenseExpiration', () => {
   });
 
   it('should have the right id and actionGroups', () => {
-    const alert = getLicenseExpiration(server, getMonitoringCluster, getLogger, ccrEnabled);
+    const alert = getLicenseExpiration(
+      getUiSettingsService,
+      monitoringCluster,
+      getLogger,
+      ccrEnabled
+    );
     expect(alert.id).toBe(ALERT_TYPE_LICENSE_EXPIRATION);
     expect(alert.actionGroups).toEqual([{ id: 'default', name: 'Default' }]);
   });
 
   it('should return the state if no license is provided', async () => {
-    const alert = getLicenseExpiration(server, getMonitoringCluster, getLogger, ccrEnabled);
+    const alert = getLicenseExpiration(
+      getUiSettingsService,
+      monitoringCluster,
+      getLogger,
+      ccrEnabled
+    );
 
     const services: MockServices | AlertServices = {
       callCluster: jest.fn(),
@@ -125,18 +129,17 @@ describe('getLicenseExpiration', () => {
   });
 
   it('should log a warning if no email is provided', async () => {
-    const customServer: any = {
-      newPlatform: {
-        __internals: {
-          uiSettings: {
-            asScopedToClient: () => ({
-              get: () => null,
-            }),
-          },
-        },
-      },
-    };
-    const alert = getLicenseExpiration(customServer, getMonitoringCluster, getLogger, ccrEnabled);
+    const customGetUiSettingsService: any = () => ({
+      asScopedToClient: () => ({
+        get: () => null,
+      }),
+    });
+    const alert = getLicenseExpiration(
+      customGetUiSettingsService,
+      monitoringCluster,
+      getLogger,
+      ccrEnabled
+    );
 
     const services = {
       callCluster: jest.fn(
@@ -186,7 +189,12 @@ describe('getLicenseExpiration', () => {
       }
     );
 
-    const alert = getLicenseExpiration(server, getMonitoringCluster, getLogger, ccrEnabled);
+    const alert = getLicenseExpiration(
+      getUiSettingsService,
+      monitoringCluster,
+      getLogger,
+      ccrEnabled
+    );
 
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
@@ -256,7 +264,12 @@ describe('getLicenseExpiration', () => {
         return instance;
       }
     );
-    const alert = getLicenseExpiration(server, getMonitoringCluster, getLogger, ccrEnabled);
+    const alert = getLicenseExpiration(
+      getUiSettingsService,
+      monitoringCluster,
+      getLogger,
+      ccrEnabled
+    );
 
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
@@ -332,7 +345,12 @@ describe('getLicenseExpiration', () => {
         return instance;
       }
     );
-    const alert = getLicenseExpiration(server, getMonitoringCluster, getLogger, ccrEnabled);
+    const alert = getLicenseExpiration(
+      getUiSettingsService,
+      monitoringCluster,
+      getLogger,
+      ccrEnabled
+    );
 
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
@@ -396,7 +414,12 @@ describe('getLicenseExpiration', () => {
         return instance;
       }
     );
-    const alert = getLicenseExpiration(server, getMonitoringCluster, getLogger, ccrEnabled);
+    const alert = getLicenseExpiration(
+      getUiSettingsService,
+      monitoringCluster,
+      getLogger,
+      ccrEnabled
+    );
 
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
