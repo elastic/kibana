@@ -7,35 +7,39 @@
 // @ts-ignore untyped Elastic library
 import { castProvider } from '@kbn/interpreter/common';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
-import { npStart } from 'ui/new_platform';
 import { getFunctionHelp, getFunctionErrors } from '../../i18n';
+import { InitializeArguments } from '.';
 
 interface Arguments {
   type: string[];
 }
 
-export function to(): ExpressionFunctionDefinition<'to', any, Arguments, any> {
-  const { help, args: argHelp } = getFunctionHelp().to;
-  const errors = getFunctionErrors().to;
+type ToFunction = ExpressionFunctionDefinition<'to', any, Arguments, any>;
 
-  return {
-    name: 'to',
-    aliases: [],
-    help,
-    args: {
-      type: {
-        types: ['string'],
-        help: argHelp.type,
-        aliases: ['_'],
-        multi: true,
+export function toFunctionFactory(initialize: InitializeArguments): () => ToFunction {
+  return function to(): ToFunction {
+    const { help, args: argHelp } = getFunctionHelp().to;
+    const errors = getFunctionErrors().to;
+
+    return {
+      name: 'to',
+      aliases: [],
+      help,
+      args: {
+        type: {
+          types: ['string'],
+          help: argHelp.type,
+          aliases: ['_'],
+          multi: true,
+        },
       },
-    },
-    fn: (input, args) => {
-      if (!args.type) {
-        throw errors.missingType();
-      }
+      fn: (input, args) => {
+        if (!args.type) {
+          throw errors.missingType();
+        }
 
-      return castProvider(npStart.plugins.expressions.getTypes())(input, args.type);
-    },
+        return castProvider(initialize.typesRegistry.toJS())(input, args.type);
+      },
+    };
   };
 }
