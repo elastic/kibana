@@ -5,100 +5,48 @@
  */
 
 import { SPACES } from '../../common/lib/spaces';
+import { testCaseFailures, getTestScenarios } from '../../common/lib/space_test_utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { deleteTestSuiteFactory } from '../../common/suites/delete';
+import { deleteTestSuiteFactory, TEST_CASES as CASES } from '../../common/suites/delete';
+
+const {
+  DEFAULT: { spaceId: DEFAULT_SPACE_ID },
+  SPACE_1: { spaceId: SPACE_1_ID },
+  SPACE_2: { spaceId: SPACE_2_ID },
+} = SPACES;
+const { fail404 } = testCaseFailures;
+
+const createTestCases = (spaceId: string) => [
+  // for each outcome, if failure !== undefined then we expect to receive
+  // an error; otherwise, we expect to receive a success result
+  { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, ...fail404(spaceId !== DEFAULT_SPACE_ID) },
+  { ...CASES.SINGLE_NAMESPACE_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },
+  { ...CASES.SINGLE_NAMESPACE_SPACE_2, ...fail404(spaceId !== SPACE_2_ID) },
+  {
+    ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
+    ...fail404(spaceId !== DEFAULT_SPACE_ID && spaceId !== SPACE_1_ID),
+  },
+  { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },
+  { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...fail404(spaceId !== SPACE_2_ID) },
+  CASES.NAMESPACE_AGNOSTIC,
+  { ...CASES.HIDDEN, ...fail404() },
+  { ...CASES.DOES_NOT_EXIST, ...fail404() },
+];
 
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('delete', () => {
-    const {
-      createExpectSpaceAwareNotFound,
-      createExpectUnknownDocNotFound,
-      deleteTest,
-      expectEmpty,
-      expectGenericNotFound,
-      expectSharedTypeNotFound,
-    } = deleteTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions } = deleteTestSuiteFactory(esArchiver, supertest);
+  const createTests = (spaceId: string) => {
+    const testCases = createTestCases(spaceId);
+    return createTestDefinitions(testCases, false, { spaceId });
+  };
 
-    deleteTest(`in the default space`, {
-      ...SPACES.DEFAULT,
-      tests: {
-        spaceAware: {
-          statusCode: 200,
-          response: expectEmpty,
-        },
-        notSpaceAware: {
-          statusCode: 200,
-          response: expectEmpty,
-        },
-        hiddenType: {
-          statusCode: 404,
-          response: expectGenericNotFound,
-        },
-        sharedType: {
-          statusCode: 200,
-          response: expectEmpty,
-        },
-        invalidId: {
-          statusCode: 404,
-          response: createExpectUnknownDocNotFound(SPACES.DEFAULT.spaceId),
-        },
-      },
-    });
-
-    deleteTest(`in the current space (space_1)`, {
-      ...SPACES.SPACE_1,
-      tests: {
-        spaceAware: {
-          statusCode: 200,
-          response: expectEmpty,
-        },
-        notSpaceAware: {
-          statusCode: 200,
-          response: expectEmpty,
-        },
-        hiddenType: {
-          statusCode: 404,
-          response: expectGenericNotFound,
-        },
-        sharedType: {
-          statusCode: 200,
-          response: expectEmpty,
-        },
-        invalidId: {
-          statusCode: 404,
-          response: createExpectUnknownDocNotFound(SPACES.SPACE_1.spaceId),
-        },
-      },
-    });
-
-    deleteTest(`in another space (in space_2 deleting object in space_1)`, {
-      spaceId: SPACES.SPACE_2.spaceId,
-      otherSpaceId: SPACES.SPACE_1.spaceId,
-      tests: {
-        spaceAware: {
-          statusCode: 404,
-          response: createExpectSpaceAwareNotFound(SPACES.SPACE_1.spaceId),
-        },
-        notSpaceAware: {
-          statusCode: 200,
-          response: expectEmpty,
-        },
-        hiddenType: {
-          statusCode: 404,
-          response: expectGenericNotFound,
-        },
-        sharedType: {
-          statusCode: 404,
-          response: expectSharedTypeNotFound,
-        },
-        invalidId: {
-          statusCode: 404,
-          response: createExpectUnknownDocNotFound(SPACES.SPACE_1.spaceId),
-        },
-      },
+  describe('_delete', () => {
+    getTestScenarios().spaces.forEach(({ spaceId }) => {
+      const tests = createTests(spaceId);
+      addTests(`within the ${spaceId} space`, { spaceId, tests });
     });
   });
 }

@@ -16,7 +16,8 @@ Array [
     },
     "migrations": Object {},
     "name": "typeA",
-    "namespaceAgnostic": false,
+    "namespaceAgnostic": undefined,
+    "namespaces": undefined,
   },
   Object {
     "convertToAliasScript": undefined,
@@ -32,7 +33,8 @@ Array [
     },
     "migrations": Object {},
     "name": "typeB",
-    "namespaceAgnostic": false,
+    "namespaceAgnostic": undefined,
+    "namespaces": undefined,
   },
   Object {
     "convertToAliasScript": undefined,
@@ -48,7 +50,8 @@ Array [
     },
     "migrations": Object {},
     "name": "typeC",
-    "namespaceAgnostic": false,
+    "namespaceAgnostic": undefined,
+    "namespaces": undefined,
   },
 ]
 `;
@@ -73,6 +76,7 @@ Array [
     },
     "name": "typeA",
     "namespaceAgnostic": true,
+    "namespaces": undefined,
   },
   Object {
     "convertToAliasScript": "some alias script",
@@ -91,7 +95,8 @@ Array [
     },
     "migrations": Object {},
     "name": "typeB",
-    "namespaceAgnostic": false,
+    "namespaceAgnostic": undefined,
+    "namespaces": undefined,
   },
   Object {
     "convertToAliasScript": undefined,
@@ -109,7 +114,8 @@ Array [
       "1.5.3": [Function],
     },
     "name": "typeC",
-    "namespaceAgnostic": false,
+    "namespaceAgnostic": undefined,
+    "namespaces": undefined,
   },
 ]
 `;
@@ -131,6 +137,24 @@ Array [
     "migrations": Object {},
     "name": "typeA",
     "namespaceAgnostic": true,
+    "namespaces": undefined,
+  },
+  Object {
+    "convertToAliasScript": undefined,
+    "hidden": false,
+    "indexPattern": "barBaz",
+    "management": undefined,
+    "mappings": Object {
+      "properties": Object {
+        "fieldB": Object {
+          "type": "text",
+        },
+      },
+    },
+    "migrations": Object {},
+    "name": "typeB",
+    "namespaceAgnostic": undefined,
+    "namespaces": true,
   },
   Object {
     "convertToAliasScript": undefined,
@@ -146,7 +170,8 @@ Array [
     },
     "migrations": Object {},
     "name": "typeC",
-    "namespaceAgnostic": false,
+    "namespaceAgnostic": undefined,
+    "namespaces": undefined,
   },
 ]
 `;

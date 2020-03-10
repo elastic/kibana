@@ -9,12 +9,11 @@ import mappings from './mappings.json';
 export default function(kibana) {
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch', 'xpack_main'],
-    name: 'shared_type_plugin',
+    name: 'isolated_type_plugin',
     uiExports: {
-      savedObjectsManagement: {},
-      savedObjectSchemas: {
-        sharedtype: {
-          namespaces: true,
+      savedObjectsManagement: {
+        isolatedtype: {
+          isImportableAndExportable: true,
         },
       },
       mappings,

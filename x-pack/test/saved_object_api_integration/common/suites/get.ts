@@ -3,225 +3,89 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
-import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
-import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
+import { SPACES } from '../lib/spaces';
+import { SAVED_OBJECT_TEST_CASES as CASES } from '../../common/lib/saved_object_test_cases';
+import {
+  createRequest,
+  expectResponses,
+  getUrlPrefix,
+  getTestTitle,
+} from '../lib/space_test_utils';
+import { DescribeFn, ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 
-interface GetTest {
-  statusCode: number;
-  response: (resp: { [key: string]: any }) => void;
+export interface GetTestDefinition extends TestDefinition {
+  request: { type: string; id: string };
 }
+export type GetTestSuite = TestSuite<GetTestDefinition>;
+export type GetTestCase = TestCase;
 
-interface GetTests {
-  spaceAware: GetTest;
-  notSpaceAware: GetTest;
-  hiddenType: GetTest;
-  sharedTypeOnlySpace1: GetTest;
-  doesntExist: GetTest;
-}
-
-interface GetTestDefinition {
-  user?: TestDefinitionAuthentication;
-  spaceId?: string;
-  otherSpaceId?: string;
-  tests: GetTests;
-}
-
-const spaceAwareId = 'dd7caf20-9efd-11e7-acb3-3dab96693fab';
-const notSpaceAwareId = '8121a00-8efd-21e7-1cb3-34ab966434445';
-const sharedTypeOnlySpace1Id = 'only_space_1';
-const doesntExistId = 'foobar';
+const DOES_NOT_EXIST = Object.freeze({ type: 'dashboard', id: 'does-not-exist' });
+export const TEST_CASES = Object.freeze({ ...CASES, DOES_NOT_EXIST });
 
 export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectDoesntExistNotFound = (spaceId = DEFAULT_SPACE_ID) => {
-    return createExpectNotFound('visualization', doesntExistId, spaceId);
+  const expectForbidden = expectResponses.forbidden('get');
+  const expectResponseBody = (testCase: GetTestCase): ExpectResponseBody => async (
+    response: Record<string, any>
+  ) => {
+    if (testCase.failure === 403) {
+      await expectForbidden(testCase.type)(response);
+    } else {
+      // permitted
+      const object = response.body;
+      await expectResponses.permitted(object, testCase);
+    }
   };
-
-  const createExpectNotFound = (type: string, id: string, spaceId = DEFAULT_SPACE_ID) => (resp: {
-    [key: string]: any;
-  }) => {
-    expect(resp.body).to.eql({
-      error: 'Not Found',
-      message: `Saved object [${type}/${getIdPrefix(spaceId)}${id}] not found`,
-      statusCode: 404,
-    });
-  };
-
-  const expectHiddenTypeNotFound = createExpectNotFound(
-    'hiddentype',
-    'hiddentype_1',
-    DEFAULT_SPACE_ID
-  );
-
-  const expectSharedTypeOnlyInSpace1NotFound = createExpectNotFound(
-    'sharedtype',
-    'only_space_1',
-    undefined
-  );
-
-  const createExpectNotSpaceAwareRbacForbidden = () => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      error: 'Forbidden',
-      message: `Unable to get globaltype`,
-      statusCode: 403,
-    });
-  };
-
-  const createExpectNotSpaceAwareResults = (spaceId = DEFAULT_SPACE_ID) => (resp: {
-    [key: string]: any;
-  }) => {
-    expect(resp.body).to.eql({
-      id: `${notSpaceAwareId}`,
-      type: 'globaltype',
-      updated_at: '2017-09-21T18:59:16.270Z',
-      version: resp.body.version,
-      attributes: {
-        name: 'My favorite global object',
-      },
-      references: [],
-    });
-  };
-
-  const expectSharedTypeOnlyInSpace1Results = (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      id: sharedTypeOnlySpace1Id,
-      type: 'sharedtype',
-      namespaces: ['space_1'],
-      updated_at: '2017-09-21T18:59:16.270Z',
-      version: resp.body.version,
-      attributes: {
-        name: 'A shared saved-object only in space_1',
-      },
-      references: [],
-    });
-  };
-
-  const createExpectRbacForbidden = (type: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      error: 'Forbidden',
-      message: `Unable to get ${type}`,
-      statusCode: 403,
-    });
-  };
-
-  const createExpectSpaceAwareNotFound = (spaceId = DEFAULT_SPACE_ID) => {
-    return createExpectNotFound('visualization', spaceAwareId, spaceId);
-  };
-
-  const expectSpaceAwareRbacForbidden = createExpectRbacForbidden('visualization');
-  const expectNotSpaceAwareRbacForbidden = createExpectRbacForbidden('globaltype');
-  const expectHiddenTypeRbacForbidden = createExpectRbacForbidden('hiddentype');
-  const expectDoesntExistRbacForbidden = createExpectRbacForbidden('visualization');
-
-  const createExpectSpaceAwareResults = (spaceId = DEFAULT_SPACE_ID) => (resp: {
-    [key: string]: any;
-  }) => {
-    expect(resp.body).to.eql({
-      id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
-      type: 'visualization',
-      migrationVersion: resp.body.migrationVersion,
-      updated_at: '2017-09-21T18:51:23.794Z',
-      version: resp.body.version,
-      attributes: {
-        title: 'Count of requests',
-        description: '',
-        version: 1,
-        // cheat for some of the more complex attributes
-        visState: resp.body.attributes.visState,
-        uiStateJSON: resp.body.attributes.uiStateJSON,
-        kibanaSavedObjectMeta: resp.body.attributes.kibanaSavedObjectMeta,
-      },
-      references: [
-        {
-          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-          type: 'index-pattern',
-          id: `${getIdPrefix(spaceId)}91200a00-9efd-11e7-acb3-3dab96693fab`,
-        },
-      ],
-    });
+  const createTestDefinitions = (
+    testCases: GetTestCase | GetTestCase[],
+    forbidden: boolean,
+    options?: {
+      spaceId?: string;
+      responseBodyOverride?: ExpectResponseBody;
+    }
+  ): GetTestDefinition[] => {
+    let cases = Array.isArray(testCases) ? testCases : [testCases];
+    if (forbidden) {
+      // override the expected result in each test case
+      cases = cases.map(x => ({ ...x, failure: 403 }));
+    }
+    return cases.map(x => ({
+      title: getTestTitle(x),
+      responseStatusCode: x.failure ?? 200,
+      request: createRequest(x),
+      responseBody: options?.responseBodyOverride || expectResponseBody(x),
+    }));
   };
 
   const makeGetTest = (describeFn: DescribeFn) => (
     description: string,
-    definition: GetTestDefinition
+    definition: GetTestSuite
   ) => {
-    const { user = {}, spaceId = DEFAULT_SPACE_ID, otherSpaceId, tests } = definition;
+    const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
     describeFn(description, () => {
       before(() => esArchiver.load('saved_objects/spaces'));
       after(() => esArchiver.unload('saved_objects/spaces'));
 
-      it(`should return ${tests.spaceAware.statusCode} when getting a space aware doc`, async () => {
-        await supertest
-          .get(
-            `${getUrlPrefix(spaceId)}/api/saved_objects/visualization/${getIdPrefix(
-              otherSpaceId || spaceId
-            )}${spaceAwareId}`
-          )
-          .auth(user.username, user.password)
-          .expect(tests.spaceAware.statusCode)
-          .then(tests.spaceAware.response);
-      });
-
-      it(`should return ${tests.notSpaceAware.statusCode} when getting a non-space-aware doc`, async () => {
-        await supertest
-          .get(`${getUrlPrefix(spaceId)}/api/saved_objects/globaltype/${notSpaceAwareId}`)
-          .auth(user.username, user.password)
-          .expect(tests.notSpaceAware.statusCode)
-          .then(tests.notSpaceAware.response);
-      });
-
-      it(`should return ${tests.sharedTypeOnlySpace1.statusCode} when getting a sharedtype doc`, async () => {
-        await supertest
-          .get(`${getUrlPrefix(spaceId)}/api/saved_objects/sharedtype/${sharedTypeOnlySpace1Id}`)
-          .auth(user.username, user.password)
-          .expect(tests.sharedTypeOnlySpace1.statusCode)
-          .then(tests.sharedTypeOnlySpace1.response);
-      });
-
-      it(`should return ${tests.hiddenType.statusCode} when getting a hiddentype doc`, async () => {
-        await supertest
-          .get(`${getUrlPrefix(spaceId)}/api/saved_objects/hiddentype/hiddentype_1`)
-          .auth(user.username, user.password)
-          .expect(tests.hiddenType.statusCode)
-          .then(tests.hiddenType.response);
-      });
-
-      describe('document does not exist', () => {
-        it(`should return ${tests.doesntExist.statusCode}`, async () => {
+      for (const test of tests) {
+        it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
+          const { type, id } = test.request;
           await supertest
-            .get(
-              `${getUrlPrefix(spaceId)}/api/saved_objects/visualization/${getIdPrefix(
-                otherSpaceId || spaceId
-              )}${doesntExistId}`
-            )
-            .auth(user.username, user.password)
-            .expect(tests.doesntExist.statusCode)
-            .then(tests.doesntExist.response);
+            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/${type}/${id}`)
+            .auth(user?.username, user?.password)
+            .expect(test.responseStatusCode)
+            .then(test.responseBody);
         });
-      });
+      }
     });
   };
 
-  const getTest = makeGetTest(describe);
+  const addTests = makeGetTest(describe);
   // @ts-ignore
-  getTest.only = makeGetTest(describe.only);
+  addTests.only = makeGetTest(describe.only);
 
   return {
-    createExpectDoesntExistNotFound,
-    createExpectNotSpaceAwareRbacForbidden,
-    createExpectNotSpaceAwareResults,
-    createExpectSpaceAwareNotFound,
-    createExpectSpaceAwareResults,
-    expectSharedTypeOnlyInSpace1Results,
-    expectHiddenTypeNotFound,
-    expectSharedTypeOnlyInSpace1NotFound,
-    expectSpaceAwareRbacForbidden,
-    expectNotSpaceAwareRbacForbidden,
-    expectDoesntExistRbacForbidden,
-    expectHiddenTypeRbacForbidden,
-    getTest,
+    addTests,
+    createTestDefinitions,
   };
 }

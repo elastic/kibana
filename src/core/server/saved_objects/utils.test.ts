@@ -85,6 +85,16 @@ describe('convertLegacyTypes', () => {
         {
           pluginId: 'pluginB',
           properties: {
+            typeB: {
+              properties: {
+                fieldB: { type: 'text' },
+              },
+            },
+          },
+        },
+        {
+          pluginId: 'pluginC',
+          properties: {
             typeC: {
               properties: {
                 fieldC: { type: 'text' },
@@ -99,6 +109,11 @@ describe('convertLegacyTypes', () => {
           indexPattern: 'fooBar',
           hidden: true,
           isNamespaceAgnostic: true,
+        },
+        typeB: {
+          indexPattern: 'barBaz',
+          hidden: false,
+          namespaces: true,
         },
       },
       savedObjectValidations: {},
@@ -379,8 +394,13 @@ describe('convertTypesToLegacySchema', () => {
       {
         name: 'typeB',
         hidden: true,
-        namespaceAgnostic: false,
         indexPattern: 'myIndex',
+        mappings: { properties: {} },
+      },
+      {
+        name: 'typeC',
+        hidden: false,
+        namespaces: true,
         mappings: { properties: {} },
       },
     ];
@@ -392,8 +412,11 @@ describe('convertTypesToLegacySchema', () => {
       },
       typeB: {
         hidden: true,
-        isNamespaceAgnostic: false,
         indexPattern: 'myIndex',
+      },
+      typeC: {
+        hidden: false,
+        namespaces: true,
       },
     });
   });
