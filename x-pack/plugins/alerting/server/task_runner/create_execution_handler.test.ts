@@ -74,6 +74,7 @@ test('calls actionsPlugin.execute per selected action', async () => {
 });
 
 test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => {
+  // Mock two calls, one for check against actions[0] and the second for actions[1]
   createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValueOnce(false);
   createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValueOnce(true);
   const executionHandler = createExecutionHandler({
@@ -119,9 +120,7 @@ test('limits actionsPlugin.execute per action group', async () => {
     context: {},
     alertInstanceId: '2',
   });
-  expect(createExecutionHandlerParams.actionsPlugin.execute).toMatchInlineSnapshot(
-    `[MockFunction]`
-  );
+  expect(createExecutionHandlerParams.actionsPlugin.execute).not.toHaveBeenCalled();
 });
 
 test('context attribute gets parameterized', async () => {

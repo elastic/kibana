@@ -64,6 +64,10 @@ export function createExecutionHandler({
           spaceId,
           apiKey,
         });
+      } else {
+        logger.warn(
+          `Alert "${alertId}" skipped scheduling action "${action.id}" because it is disabled`
+        );
       }
     }
   };

@@ -54,20 +54,9 @@ exports[`Storyshots components/Tags/Tag as health 1`] = `
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
-      <svg
-        aria-hidden={true}
-        className="euiIcon euiIcon--medium euiIcon-isLoading"
-        focusable="false"
-        height={16}
-        role="img"
-        style={
-          Object {
-            "fill": "#666666",
-          }
-        }
-        viewBox="0 0 16 16"
-        width={16}
-        xmlns="http://www.w3.org/2000/svg"
+      <div
+        color="#666666"
+        data-euiicon-type="dot"
       />
     </div>
     <div
@@ -89,20 +78,9 @@ exports[`Storyshots components/Tags/Tag as health with color 1`] = `
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
-      <svg
-        aria-hidden={true}
-        className="euiIcon euiIcon--medium euiIcon-isLoading"
-        focusable="false"
-        height={16}
-        role="img"
-        style={
-          Object {
-            "fill": "#9b3067",
-          }
-        }
-        viewBox="0 0 16 16"
-        width={16}
-        xmlns="http://www.w3.org/2000/svg"
+      <div
+        color="#9b3067"
+        data-euiicon-type="dot"
       />
     </div>
     <div
