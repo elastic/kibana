@@ -30,11 +30,13 @@ import { getOptionLabel } from '../../../../../../../../../../plugins/apm/common
 import { CancelButton } from '../CancelButton';
 
 export function SettingsPage({
+  unsavedChanges,
   newConfig,
   setNewConfig,
   isEditMode,
   onClickEdit
 }: {
+  unsavedChanges: Record<string, string>;
   newConfig: AgentConfigurationIntake;
   setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
   isEditMode: boolean;
@@ -140,6 +142,7 @@ export function SettingsPage({
 
           {settingDefinitions.map(setting => (
             <SettingFormRow
+              isUnsaved={unsavedChanges.hasOwnProperty(setting.key)}
               key={setting.key}
               setting={setting}
               value={newConfig.settings[setting.key]}

@@ -13,9 +13,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCode,
-  EuiSpacer
+  EuiSpacer,
+  EuiHealth,
+  EuiIconTip
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import {
   amountAndUnitToString,
   amountAndUnitToObject
@@ -54,7 +57,7 @@ function FormRow({
       );
     }
 
-    case 'number': {
+    case 'integer': {
       return (
         <EuiFieldNumber
           placeholder={setting.placeholder || defaultInputPlaceholder}
@@ -131,10 +134,12 @@ function FormRow({
 }
 
 export function SettingFormRow({
+  isUnsaved,
   setting,
   value,
   onChange
 }: {
+  isUnsaved: boolean;
   setting: SettingDefinition;
   value?: string;
   onChange: (key: string, value: string) => void;
@@ -144,7 +149,14 @@ export function SettingFormRow({
   return (
     <EuiDescribedFormGroup
       fullWidth
-      title={<h3>{setting.label}</h3>}
+      title={
+        <h3>
+          {setting.label}{' '}
+          {isUnsaved && (
+            <EuiIconTip type={'dot'} color={'warning'} content={'Unsaved'} />
+          )}
+        </h3>
+      }
       description={
         <>
           {setting.helpText}

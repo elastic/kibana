@@ -28,10 +28,10 @@ interface TextSetting extends BaseSetting {
   type: 'text';
 }
 
-interface NumberSetting extends BaseSetting {
-  type: 'number';
-  min: number;
-  max: number;
+interface IntegerSetting extends BaseSetting {
+  type: 'integer';
+  min?: number;
+  max?: number;
 }
 
 interface SelectSetting extends BaseSetting {
@@ -50,7 +50,7 @@ interface AmountAndUnit extends BaseSetting {
 
 export type SettingDefinition =
   | TextSetting
-  | NumberSetting
+  | IntegerSetting
   | SelectSetting
   | BooleanSetting
   | AmountAndUnit;
@@ -189,6 +189,47 @@ export const settingDefinitions: SettingDefinition[] = [
     })
   },
 
+  // STACK_TRACE_LIMIT
+  {
+    key: 'stack_trace_limit',
+    type: 'integer',
+    validation: transactionMaxSpansRt,
+    validationError: i18n.translate(
+      'apm.agentConfig.stackTraceLimit.errorText',
+      { defaultMessage: 'Invalid input' }
+    ),
+    defaultValue: '50',
+    label: i18n.translate('apm.agentConfig.stackTraceLimit.label', {
+      defaultMessage: 'Stack trace limit'
+    }),
+    helpText: i18n.translate('apm.agentConfig.stackTraceLimit.helpText', {
+      defaultMessage: 'abc'
+    })
+  },
+
+  // TRACE_METHODS_DURATION_THRESHOLD
+  {
+    key: 'trace_methods_duration_threshold',
+    type: 'integer',
+    validation: transactionMaxSpansRt,
+    validationError: i18n.translate(
+      'apm.agentConfig.traceMethodsDurationThreshold.errorText',
+      { defaultMessage: 'Invalid input' }
+    ),
+    label: i18n.translate(
+      'apm.agentConfig.traceMethodsDurationThreshold.label',
+      {
+        defaultMessage: 'Trace methods duration threshold'
+      }
+    ),
+    helpText: i18n.translate(
+      'apm.agentConfig.traceMethodsDurationThreshold.helpText',
+      {
+        defaultMessage: 'abc'
+      }
+    )
+  },
+
   /*
    *
    *
@@ -242,7 +283,7 @@ export const settingDefinitions: SettingDefinition[] = [
   // Transaction max spans
   {
     key: 'transaction_max_spans',
-    type: 'number',
+    type: 'integer',
     validation: transactionMaxSpansRt,
     validationError: i18n.translate(
       'apm.agentConfig.transactionMaxSpans.errorText',

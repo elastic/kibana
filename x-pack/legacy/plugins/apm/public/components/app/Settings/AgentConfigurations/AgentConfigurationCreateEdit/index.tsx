@@ -25,6 +25,27 @@ function setPage(pageStep: PageStep) {
   });
 }
 
+function getUnsavedChanges({
+  newConfig,
+  existingConfig
+}: {
+  newConfig: AgentConfigurationIntake;
+  existingConfig?: AgentConfigurationIntake;
+}) {
+  return Object.fromEntries(
+    Object.entries(newConfig.settings).filter(([key, value]) => {
+      const existingValue = existingConfig?.settings?.[key];
+
+      // don't highlight changes that were added and removed
+      if (value === '' && existingValue == null) {
+        return false;
+      }
+
+      return existingValue !== value;
+    })
+  );
+}
+
 export function AgentConfigurationCreateEdit({
   pageStep,
   existingConfig
@@ -45,6 +66,8 @@ export function AgentConfigurationCreateEdit({
       setPage('choose-settings-step');
     }
   }, [isEditMode, newConfig, pageStep]);
+
+  const unsavedChanges = getUnsavedChanges({ newConfig, existingConfig });
 
   return (
     <>
@@ -68,8 +91,6 @@ export function AgentConfigurationCreateEdit({
 
       <EuiSpacer size="m" />
 
-      {JSON.stringify(newConfig, null, 2)}
-
       {pageStep === 'choose-service-step' && (
         <ServicePage
           newConfig={newConfig}
@@ -80,6 +101,7 @@ export function AgentConfigurationCreateEdit({
 
       {pageStep === 'choose-settings-step' && (
         <SettingsPage
+          unsavedChanges={unsavedChanges}
           onClickEdit={() => setPage('choose-service-step')}
           newConfig={newConfig}
           setNewConfig={setNewConfig}
