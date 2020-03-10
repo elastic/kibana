@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState, Fragment } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGrid,
@@ -42,7 +43,7 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
     <EuiFlexGrid columns={2}>
       <EuiFlexItem>
         <EuiSwitch
-          label={packageInputStream.dataset}
+          label={packageInputStream.title || packageInputStream.dataset}
           checked={datasourceInputStream.enabled}
           onChange={e => {
             const enabled = e.target.checked;
@@ -55,7 +56,7 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
           <Fragment>
             <EuiSpacer size="s" />
             <EuiText size="s" color="subdued">
-              <p>{packageInputStream.description}</p>
+              <ReactMarkdown source={packageInputStream.description} />
             </EuiText>
           </Fragment>
         ) : null}
