@@ -50,7 +50,9 @@ const ELASTIC_LICENSE_HEADER = `
 `;
 
 const allMochaRules = {};
-Object.keys(require('eslint-plugin-mocha').rules).forEach(k => (allMochaRules[k] = 'off'));
+Object.keys(require('eslint-plugin-mocha').rules).forEach(k => {
+  allMochaRules['mocha/' + k] = 'off';
+});
 
 module.exports = {
   root: true,
