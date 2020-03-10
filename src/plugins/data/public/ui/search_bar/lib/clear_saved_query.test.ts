@@ -21,7 +21,9 @@ import { clearStateFromSavedQuery } from './clear_saved_query';
 
 import { dataPluginMock } from '../../../mocks';
 import { DataPublicPluginStart } from '../../../types';
-import { Query } from '../../..';
+import { Query, SavedQuery } from '../../..';
+import { getFilter } from '../../../query/filter_manager/test_helpers/get_stub_filter';
+import { FilterStateStore } from '../../../../common/es_query/filters';
 
 describe('clearStateFromSavedQuery', () => {
   const DEFAULT_LANGUAGE = 'banana';
@@ -29,22 +31,35 @@ describe('clearStateFromSavedQuery', () => {
 
   beforeEach(() => {
     dataMock = dataPluginMock.createStartContract();
+    dataMock.query.filterManager.removeFilter = jest.fn();
   });
 
-  it('should clear filters and query', async () => {
+  it('should clear only query', async () => {
     const setQueryState = jest.fn();
-    dataMock.query.filterManager.removeAll = jest.fn();
     clearStateFromSavedQuery(dataMock.query, setQueryState, DEFAULT_LANGUAGE);
     expect(setQueryState).toHaveBeenCalled();
-    expect(dataMock.query.filterManager.removeAll).toHaveBeenCalled();
+    expect(dataMock.query.filterManager.removeFilter).toBeCalledTimes(0);
+  });
+
+  it('should clear query and filters', async () => {
+    const setQueryState = jest.fn();
+    const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
+    const prevSavedQuery = {
+      attributes: {
+        filters: [f1],
+      },
+    } as any;
+
+    clearStateFromSavedQuery(dataMock.query, setQueryState, DEFAULT_LANGUAGE, prevSavedQuery);
+    expect(setQueryState).toHaveBeenCalled();
+    expect(dataMock.query.filterManager.removeFilter).toBeCalledTimes(1);
   });
 
   it('should use search:queryLanguage', async () => {
     const setQueryState = jest.fn();
-    dataMock.query.filterManager.removeAll = jest.fn();
     clearStateFromSavedQuery(dataMock.query, setQueryState, DEFAULT_LANGUAGE);
     expect(setQueryState).toHaveBeenCalled();
     expect((setQueryState.mock.calls[0][0] as Query).language).toBe(DEFAULT_LANGUAGE);
-    expect(dataMock.query.filterManager.removeAll).toHaveBeenCalled();
+    expect(dataMock.query.filterManager.removeFilter).toBeCalledTimes(0);
   });
 });
