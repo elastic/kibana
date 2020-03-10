@@ -429,20 +429,42 @@ export const ActionForm = ({
     }
   }
 
-  const actionTypeNodes = actionTypesIndex
-    ? actionTypeRegistry.list().map(function(item, index) {
-        return actionTypesIndex[item.id] ? (
+  let actionTypeNodes = null;
+  if (actionTypesIndex) {
+    actionTypeNodes = actionTypeRegistry
+      .list()
+      .filter(
+        item => actionTypesIndex[item.id] && actionTypesIndex[item.id].enabledInConfig === true
+      )
+      .sort((a, b) => {
+        if (
+          actionTypesIndex[a.id].enabledInLicense === true &&
+          actionTypesIndex[b.id].enabledInLicense === false
+        ) {
+          return -1;
+        }
+        if (
+          actionTypesIndex[a.id].enabledInLicense === false &&
+          actionTypesIndex[b.id].enabledInLicense === true
+        ) {
+          return 1;
+        }
+        return 0;
+      })
+      .map(function(item, index) {
+        return (
           <EuiKeyPadMenuItem
             key={index}
+            isDisabled={!actionTypesIndex[item.id].enabledInLicense}
             data-test-subj={`${item.id}-ActionTypeSelectOption`}
             label={actionTypesIndex[item.id].name}
             onClick={() => addActionType(item)}
           >
             <EuiIcon size="xl" type={item.iconClass} />
           </EuiKeyPadMenuItem>
-        ) : null;
-      })
-    : null;
+        );
+      });
+  }
 
   return (
     <Fragment>
