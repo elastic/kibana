@@ -17,14 +17,22 @@
  * under the License.
  */
 
-const ignore = ['MaxListenersExceededWarning'];
+if (process.noProcessWarnings === false) {
+  var ignore = ['MaxListenersExceededWarning'];
 
-process.on('warning', function(warn) {
-  if (ignore.includes(warn.name)) return;
-  console.error('Node.js process-warning detected:');
-  console.error();
-  console.error(warn.stack);
-  console.error();
-  console.error('Terminating process...');
-  process.exit(1);
-});
+  process.on('warning', function(warn) {
+    if (ignore.includes(warn.name)) return;
+
+    if (process.traceProcessWarnings === true) {
+      console.error('Node.js process-warning detected - Terminating process...');
+    } else {
+      console.error('Node.js process-warning detected:');
+      console.error();
+      console.error(warn.stack);
+      console.error();
+      console.error('Terminating process...');
+    }
+
+    process.exit(1);
+  });
+}

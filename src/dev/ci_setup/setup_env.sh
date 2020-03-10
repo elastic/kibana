@@ -14,7 +14,7 @@ cacheDir="$HOME/.kibana"
 RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
 
-export NODE_OPTIONS="$NODE_OPTIONS --require $dir/src/dev/exit_on_warning.js --max-old-space-size=4096"
+export NODE_OPTIONS="$NODE_OPTIONS --max-old-space-size=4096"
 
 ###
 ### Since the Jenkins logging output collector doesn't look like a TTY
