@@ -804,7 +804,7 @@ function discoverController(
             title: i18n.translate('kbn.discover.errorLoadingData', {
               defaultMessage: 'Error loading data',
             }),
-            toastMessage: error.shortMessage,
+            toastMessage: error.shortMessage || error.body?.message,
           });
         }
       });

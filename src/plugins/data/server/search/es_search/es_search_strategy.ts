@@ -36,7 +36,7 @@ export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_
 
       // Only default index pattern type is supported here.
       // See data_enhanced for other type support.
-      if (!type) {
+      if (!!type) {
         throw new Error(`Unsupported index pattern type ${type}`);
       }
 

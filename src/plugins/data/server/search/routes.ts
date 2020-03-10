@@ -43,11 +43,11 @@ export function registerSearchRoute(router: IRouter): void {
         return res.ok({ body: response });
       } catch (err) {
         return res.customError({
-          statusCode: err.statusCode,
+          statusCode: err.statusCode || 500,
           body: {
             message: err.message,
             attributes: {
-              error: err.body.error,
+              error: err.body?.error || err.message,
             },
           },
         });
