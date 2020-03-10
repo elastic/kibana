@@ -29,7 +29,7 @@ export class AppSearchPlugin implements Plugin {
     const config = this.config;
 
     core.application.register({
-      id: 'appsearch',
+      id: 'app_search',
       title: 'App Search',
       euiIconType: 'logoAppSearch', // TODO: Temporary - App Search will likely no longer need an icon once the nav structure changes.
       category: DEFAULT_APP_CATEGORIES.management, // TODO - This is likely not final/correct
