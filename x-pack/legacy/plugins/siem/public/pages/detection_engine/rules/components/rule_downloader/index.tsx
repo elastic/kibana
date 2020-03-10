@@ -8,7 +8,7 @@ import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { isFunction } from 'lodash/fp';
 import { exportRules } from '../../../../../containers/detection_engine/rules';
-import { displayErrorToast, useStateToaster } from '../../../../../components/toasters';
+import { useStateToaster, errorToToaster } from '../../../../../components/toasters';
 import * as i18n from './translations';
 
 const InvisibleAnchor = styled.a`
@@ -65,7 +65,7 @@ export const RuleDownloaderComponent = ({
           }
         } catch (error) {
           if (isSubscribed) {
-            displayErrorToast(i18n.EXPORT_FAILURE, [error.message], dispatchToaster);
+            errorToToaster({ title: i18n.EXPORT_FAILURE, error, dispatchToaster });
           }
         }
       }
