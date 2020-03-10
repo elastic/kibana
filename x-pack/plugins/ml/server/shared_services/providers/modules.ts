@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller, SavedObjectsClientContract } from 'src/core/server';
+import { APICaller, SavedObjectsClientContract } from 'kibana/server';
 import { LicenseCheck } from '../license_checks';
 import { DataRecognizer, RecognizeResult } from '../../models/data_recognizer';
 import {

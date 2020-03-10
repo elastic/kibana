@@ -11,7 +11,7 @@ import {
   IScopedClusterClient,
   Logger,
   PluginInitializerContext,
-} from 'src/core/server';
+} from 'kibana/server';
 import { PluginsSetup, RouteInitialization } from './types';
 import { PLUGIN_ID } from '../../../legacy/plugins/ml/common/constants/app';
 
