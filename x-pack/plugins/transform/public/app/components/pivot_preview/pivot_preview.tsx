@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment-timezone';
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -21,8 +22,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { dictionaryToArray } from '../../../../../../common/types/common';
-import { getNestedProperty } from '../../../../../../common/utils/object_utils';
+import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
+
+import { dictionaryToArray } from '../../../../common/types/common';
+import { formatHumanReadableDateTimeSeconds } from '../../../../common/utils/date_utils';
+import { getNestedProperty } from '../../../../common/utils/object_utils';
 
 import {
   euiDataGridStyle,
@@ -33,8 +37,8 @@ import {
   PivotGroupByConfig,
   PivotGroupByConfigDict,
   PivotQuery,
-} from '../../../../common';
-import { SearchItems } from '../../../../hooks/use_search_items';
+} from '../../common';
+import { SearchItems } from '../../hooks/use_search_items';
 
 import { getPivotPreviewDevConsoleStatement, multiColumnSortFactory } from './common';
 import { PIVOT_PREVIEW_STATUS, usePivotPreviewData } from './use_pivot_preview_data';
@@ -102,21 +106,22 @@ const ErrorMessage: FC<ErrorMessageProps> = ({ message }) => (
 interface PivotPreviewProps {
   aggs: PivotAggsConfigDict;
   groupBy: PivotGroupByConfigDict;
-  indexPattern: SearchItems['indexPattern'];
+  indexPatternTitle: SearchItems['indexPattern']['title'];
   query: PivotQuery;
+  showHeader?: boolean;
 }
 
 const defaultPagination = { pageIndex: 0, pageSize: 5 };
 
 export const PivotPreview: FC<PivotPreviewProps> = React.memo(
-  ({ aggs, groupBy, indexPattern, query }) => {
+  ({ aggs, groupBy, indexPatternTitle, query, showHeader = true }) => {
     const {
       previewData: data,
       previewMappings,
       errorMessage,
       previewRequest,
       status,
-    } = usePivotPreviewData(indexPattern, query, aggs, groupBy);
+    } = usePivotPreviewData(indexPatternTitle, query, aggs, groupBy);
     const groupByArr = dictionaryToArray(groupBy);
 
     // Filters mapping properties of type `object`, which get returned for nested field parents.
@@ -142,7 +147,42 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(
     }, [data.length]);
 
     // EuiDataGrid State
-    const dataGridColumns = columnKeys.map(id => ({ id }));
+    const dataGridColumns = columnKeys.map(id => {
+      const field = previewMappings.properties[id];
+
+      // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
+      // To fall back to the default string schema it needs to be undefined.
+      let schema;
+
+      switch (field?.type) {
+        case ES_FIELD_TYPES.GEO_POINT:
+        case ES_FIELD_TYPES.GEO_SHAPE:
+          schema = 'json';
+          break;
+        case ES_FIELD_TYPES.BOOLEAN:
+          schema = 'boolean';
+          break;
+        case ES_FIELD_TYPES.DATE:
+          schema = 'datetime';
+          break;
+        case ES_FIELD_TYPES.BYTE:
+        case ES_FIELD_TYPES.DOUBLE:
+        case ES_FIELD_TYPES.FLOAT:
+        case ES_FIELD_TYPES.HALF_FLOAT:
+        case ES_FIELD_TYPES.INTEGER:
+        case ES_FIELD_TYPES.LONG:
+        case ES_FIELD_TYPES.SCALED_FLOAT:
+        case ES_FIELD_TYPES.SHORT:
+          schema = 'numeric';
+          break;
+        // keep schema undefined for text based columns
+        case ES_FIELD_TYPES.KEYWORD:
+        case ES_FIELD_TYPES.TEXT:
+          break;
+      }
+
+      return { id, schema };
+    });
 
     const onChangeItemsPerPage = useCallback(
       pageSize => {
@@ -191,13 +231,17 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(
           return JSON.stringify(cellValue);
         }
 
-        if (cellValue === undefined) {
+        if (cellValue === undefined || cellValue === null) {
           return null;
+        }
+
+        if (previewMappings.properties[columnId].type === ES_FIELD_TYPES.DATE) {
+          return formatHumanReadableDateTimeSeconds(moment(cellValue).unix() * 1000);
         }
 
         return cellValue;
       };
-    }, [pageData, pagination.pageIndex, pagination.pageSize]);
+    }, [pageData, pagination.pageIndex, pagination.pageSize, previewMappings.properties]);
 
     if (status === PIVOT_PREVIEW_STATUS.ERROR) {
       return (
@@ -256,13 +300,17 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(
 
     return (
       <div data-test-subj="transformPivotPreview loaded">
-        <PreviewTitle previewRequest={previewRequest} />
-        <div className="transform__progress">
-          {status === PIVOT_PREVIEW_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
-          {status !== PIVOT_PREVIEW_STATUS.LOADING && (
-            <EuiProgress size="xs" color="accent" max={1} value={0} />
-          )}
-        </div>
+        {showHeader && (
+          <>
+            <PreviewTitle previewRequest={previewRequest} />
+            <div className="transform__progress">
+              {status === PIVOT_PREVIEW_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
+              {status !== PIVOT_PREVIEW_STATUS.LOADING && (
+                <EuiProgress size="xs" color="accent" max={1} value={0} />
+              )}
+            </div>
+          </>
+        )}
         {dataGridColumns.length > 0 && data.length > 0 && (
           <EuiDataGrid
             aria-label="Source index preview"
