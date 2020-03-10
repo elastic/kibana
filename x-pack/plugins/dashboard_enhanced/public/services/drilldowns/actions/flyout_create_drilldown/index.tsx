@@ -31,7 +31,7 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
   constructor(protected readonly params: OpenFlyoutAddDrilldownParams) {}
 
   public getDisplayName() {
-    return i18n.translate('xpack.drilldowns.FlyoutCreateDrilldownAction.displayName', {
+    return i18n.translate('xpack.dashboard.FlyoutCreateDrilldownAction.displayName', {
       defaultMessage: 'Create drilldown',
     });
   }
