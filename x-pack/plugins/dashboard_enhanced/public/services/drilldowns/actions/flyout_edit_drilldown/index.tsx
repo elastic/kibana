@@ -14,13 +14,7 @@ import {
   toMountPoint,
 } from '../../../../../../../../src/plugins/kibana_react/public';
 import { IEmbeddable } from '../../../../../../../../src/plugins/embeddable/public';
-
-const FlyoutManageDrilldowns: React.FC<{ onClose: () => {} }> = () => (
-  <div>FormDrilldownWizard</div>
-);
-
-// Mock data
-const drilldowns: any = [];
+import { DrilldownsStartContract } from '../../../../../../drilldowns/public';
 
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 
@@ -28,8 +22,11 @@ export interface FlyoutEditDrilldownActionContext {
   embeddable: IEmbeddable;
 }
 
+const drilldownsData = [{}, {}];
+
 export interface FlyoutEditDrilldownParams {
   overlays: () => Promise<CoreStart['overlays']>;
+  drilldowns: () => Promise<DrilldownsStartContract>;
 }
 
 const displayName = i18n.translate('xpack.drilldowns.panel.openFlyoutEditDrilldown.displayName', {
@@ -56,7 +53,7 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
       <>
         {displayName}{' '}
         <EuiNotificationBadge color="subdued" style={{ float: 'right' }}>
-          {drilldowns.length}
+          {drilldownsData.length}
         </EuiNotificationBadge>
       </>
     );
@@ -65,14 +62,21 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
   MenuItem = reactToUiComponent(this.ReactComp);
 
   public async isCompatible({ embeddable }: FlyoutEditDrilldownActionContext) {
-    return embeddable.getInput().viewMode === 'edit' && drilldowns.length > 0;
+    return embeddable.getInput().viewMode === 'edit' && drilldownsData.length > 0;
   }
 
   public async execute(context: FlyoutEditDrilldownActionContext) {
     const overlays = await this.params.overlays();
+    const drilldowns = await this.params.drilldowns();
 
     const handle = overlays.openFlyout(
-      toMountPoint(<FlyoutManageDrilldowns onClose={() => handle.close()} />)
+      toMountPoint(
+        <drilldowns.FlyoutManageDrilldowns
+          onClose={() => handle.close()}
+          context={context}
+          viewMode={'manage'}
+        />
+      )
     );
   }
 }

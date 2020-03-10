@@ -7,13 +7,16 @@
 import { CoreStart, CoreSetup, Plugin } from 'src/core/public';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { DashboardDrilldownsService } from './services';
+import { DrilldownsSetupContract, DrilldownsStartContract } from '../../drilldowns/public';
 
 export interface SetupDependencies {
   uiActions: UiActionsSetup;
+  drilldowns: DrilldownsSetupContract;
 }
 
 export interface StartDependencies {
   uiActions: UiActionsStart;
+  drilldowns: DrilldownsStartContract;
 }
 
 // eslint-disable-next-line
@@ -26,7 +29,7 @@ export class DashboardEnhancedPlugin
   implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
   public readonly drilldowns = new DashboardDrilldownsService();
 
-  public setup(core: CoreSetup, plugins: SetupDependencies): SetupContract {
+  public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
     this.drilldowns.bootstrap(core, plugins);
 
     return {};

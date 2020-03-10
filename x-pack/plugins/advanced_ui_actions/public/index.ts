@@ -14,5 +14,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { AdvancedUiActionsPublicPlugin as Plugin };
 export { AdvancedUiActionsSetup, AdvancedUiActionsStart } from './plugin';
 
-export * from './components';
-export * from './ui_actions_factory';
+export { ActionWizard } from './components';
+export { ActionFactory, ActionBaseConfig } from './ui_actions_factory';

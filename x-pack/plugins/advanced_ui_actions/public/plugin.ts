@@ -43,10 +43,10 @@ interface StartDependencies {
 }
 
 export interface AdvancedUiActionsSetup {
-  actionFactory: Pick<UiActionsFactoryService, 'register' | 'getAll'>;
+  actionFactory: Pick<UiActionsFactoryService, 'register'>;
 }
 export interface AdvancedUiActionsStart {
-  actionFactory: Pick<UiActionsFactoryService, 'register' | 'getAll'>;
+  actionFactory: Pick<UiActionsFactoryService, 'getAll'>;
 }
 
 declare module '../../../../src/plugins/ui_actions/public' {

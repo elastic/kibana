@@ -19,13 +19,12 @@
 
 import { UiComponent } from 'src/plugins/kibana_utils/common';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ConfigurableBaseConfig {}
+export type ConfigurableBaseConfig = object;
 
 /**
  * Represents something that can be configured by user using UI.
  */
-export interface Configurable<Config extends ConfigurableBaseConfig> {
+export interface Configurable<Config extends ConfigurableBaseConfig = ConfigurableBaseConfig> {
   /**
    * Create default config for this item, used when item is created for the first time.
    */
@@ -45,7 +44,9 @@ export interface Configurable<Config extends ConfigurableBaseConfig> {
 /**
  * Props provided to `CollectConfig` component on every re-render.
  */
-export interface CollectConfigProps<Config> {
+export interface CollectConfigProps<
+  Config extends ConfigurableBaseConfig = ConfigurableBaseConfig
+> {
   /**
    * Current (latest) config of the item.
    */

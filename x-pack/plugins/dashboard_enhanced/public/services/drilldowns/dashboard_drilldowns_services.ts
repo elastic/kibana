@@ -15,6 +15,7 @@ import {
   OPEN_FLYOUT_ADD_DRILLDOWN,
   OPEN_FLYOUT_EDIT_DRILLDOWN,
 } from './actions';
+import { DrilldownsStartContract } from '../../../../drilldowns/public';
 
 declare module '../../../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
@@ -24,14 +25,18 @@ declare module '../../../../../../src/plugins/ui_actions/public' {
 }
 
 export class DashboardDrilldownsService {
-  bootstrap(core: CoreSetup, { uiActions }: Pick<SetupDependencies, 'uiActions'>) {
+  bootstrap(
+    core: CoreSetup<{ drilldowns: DrilldownsStartContract }>,
+    { uiActions }: Pick<SetupDependencies, 'uiActions'>
+  ) {
     const overlays = async () => (await core.getStartServices())[0].overlays;
+    const drilldowns = async () => (await core.getStartServices())[1].drilldowns;
 
-    const actionFlyoutCreateDrilldown = new FlyoutCreateDrilldownAction({ overlays });
+    const actionFlyoutCreateDrilldown = new FlyoutCreateDrilldownAction({ overlays, drilldowns });
     uiActions.registerAction(actionFlyoutCreateDrilldown);
     uiActions.attachAction(CONTEXT_MENU_DRILLDOWNS_TRIGGER, actionFlyoutCreateDrilldown);
 
-    const actionFlyoutEditDrilldown = new FlyoutEditDrilldownAction({ overlays });
+    const actionFlyoutEditDrilldown = new FlyoutEditDrilldownAction({ overlays, drilldowns });
     uiActions.registerAction(actionFlyoutEditDrilldown);
     uiActions.attachAction(CONTEXT_MENU_DRILLDOWNS_TRIGGER, actionFlyoutEditDrilldown);
   }

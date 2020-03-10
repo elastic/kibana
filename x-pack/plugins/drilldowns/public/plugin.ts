@@ -8,6 +8,7 @@ import { CoreStart, CoreSetup, Plugin } from 'src/core/public';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { AdvancedUiActionsSetup, AdvancedUiActionsStart } from '../../advanced_ui_actions/public';
 import { DrilldownService, DrilldownServiceSetupContract } from './service';
+import { createFlyoutManageDrilldowns } from './components/connected_flyout_manage_drilldowns';
 
 export interface SetupDependencies {
   uiActions: UiActionsSetup;
@@ -22,7 +23,9 @@ export interface StartDependencies {
 export type SetupContract = DrilldownServiceSetupContract;
 
 // eslint-disable-next-line
-export interface StartContract {}
+export interface StartContract {
+  FlyoutManageDrilldowns: ReturnType<typeof createFlyoutManageDrilldowns>;
+}
 
 export class DrilldownsPlugin
   implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
@@ -35,7 +38,9 @@ export class DrilldownsPlugin
   }
 
   public start(core: CoreStart, plugins: StartDependencies): StartContract {
-    return {};
+    return {
+      FlyoutManageDrilldowns: createFlyoutManageDrilldowns(plugins),
+    };
   }
 
   public stop() {}

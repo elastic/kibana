@@ -10,8 +10,7 @@ import { CoreStart } from 'src/core/public';
 import { ActionByType } from '../../../../../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { IEmbeddable } from '../../../../../../../../src/plugins/embeddable/public';
-
-const FlyoutDrilldownWizard: React.FC<{ onClose: any }> = () => <div>FormDrilldownWizard</div>;
+import { DrilldownsStartContract } from '../../../../../../drilldowns/public';
 
 export const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
 
@@ -21,6 +20,7 @@ export interface FlyoutCreateDrilldownActionContext {
 
 export interface OpenFlyoutAddDrilldownParams {
   overlays: () => Promise<CoreStart['overlays']>;
+  drilldowns: () => Promise<DrilldownsStartContract>;
 }
 
 export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_ADD_DRILLDOWN> {
@@ -46,21 +46,14 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
 
   public async execute(context: FlyoutCreateDrilldownActionContext) {
     const overlays = await this.params.overlays();
-
-    /*
-    const drilldownActionFactories = this.params.getDrilldownActionFactories();
-    const compatibleDrilldownActionFactories = await Promise.all(
-      drilldownActionFactories.map(factory => factory.isCompatible(context))
-    ).then(compatibilityList =>
-      drilldownActionFactories.filter((factory, index) => compatibilityList[index])
-    );
-    */
+    const drilldowns = await this.params.drilldowns();
 
     const handle = overlays.openFlyout(
       toMountPoint(
-        <FlyoutDrilldownWizard
+        <drilldowns.FlyoutManageDrilldowns
           onClose={() => handle.close()}
-          // drilldownActionFactories={compatibleDrilldownActionFactories}
+          context={context}
+          viewMode={'create'}
         />
       )
     );
