@@ -33,6 +33,5 @@ export const AlertDetailResolver = styled(
   width: 100%;
   display: flex;
   flex-grow: 1;
-  // ugly demo hack until can play nice with eui
-  min-height: 1000px;
+  min-height: 500px;
 `;
