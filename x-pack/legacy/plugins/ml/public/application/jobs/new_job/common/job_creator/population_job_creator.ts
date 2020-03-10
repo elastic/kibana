@@ -12,7 +12,7 @@ import {
   SplitField,
   AggFieldPair,
 } from '../../../../../../common/types/fields';
-import { Job, Datafeed, Detector } from './configs';
+import { Job, Datafeed, Detector } from '../../../../../../common/types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
