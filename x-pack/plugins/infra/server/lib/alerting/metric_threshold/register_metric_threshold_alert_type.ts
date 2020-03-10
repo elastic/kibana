@@ -37,9 +37,13 @@ const FIRED_ACTIONS = {
 };
 
 const getCurrentValueFromAggregations = (aggregations: Aggregation) => {
-  const { buckets } = aggregations.aggregatedIntervals;
-  const { value } = buckets[buckets.length - 1].aggregatedValue;
-  return value;
+  try {
+    const { buckets } = aggregations.aggregatedIntervals;
+    const { value } = buckets[buckets.length - 1].aggregatedValue;
+    return value;
+  } catch (e) {
+    return null;
+  }
 };
 
 const getParsedFilterQuery: (
@@ -226,8 +230,9 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
             const comparisonFunction = comparatorMap[comparator];
 
             return mapValues(currentValues, value => ({
-              shouldFire: comparisonFunction(value, threshold),
+              shouldFire: value !== null && comparisonFunction(value, threshold),
               currentValue: value,
+              isNoData: value === null,
             }));
           })()
         )
@@ -237,7 +242,11 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
       for (const group of groups) {
         const alertInstance = services.alertInstanceFactory(`${alertUUID}-${group}`);
 
+        // AND logic; all criteria must be across the threshold
         const shouldAlertFire = alertResults.every(result => result[group].shouldFire);
+        // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
+        // whole alert is in a No Data state
+        const isNoData = alertResults.some(result => result[group].isNoData);
 
         if (shouldAlertFire) {
           alertInstance.scheduleActions(FIRED_ACTIONS.id, {
@@ -248,7 +257,11 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
 
         // Future use: ability to fetch display current alert state
         alertInstance.replaceState({
-          alertState: shouldAlertFire ? AlertStates.ALERT : AlertStates.OK,
+          alertState: isNoData
+            ? AlertStates.NO_DATA
+            : shouldAlertFire
+            ? AlertStates.ALERT
+            : AlertStates.OK,
         });
       }
     },

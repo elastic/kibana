@@ -19,6 +19,7 @@ export enum Comparator {
 export enum AlertStates {
   OK,
   ALERT,
+  NO_DATA,
 }
 
 export type TimeUnit = 's' | 'm' | 'h' | 'd';
