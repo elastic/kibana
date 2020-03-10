@@ -15,4 +15,9 @@ export { AdvancedUiActionsPublicPlugin as Plugin };
 export { AdvancedUiActionsSetup, AdvancedUiActionsStart } from './plugin';
 
 export { ActionWizard } from './components';
-export { ActionFactory, ActionBaseConfig } from './ui_actions_factory';
+export {
+  ActionFactory,
+  ActionBaseConfig,
+  ActionFactoryBaseContext,
+  ActionFactoryList,
+} from './ui_actions_factory';

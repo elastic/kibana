@@ -35,7 +35,13 @@ export {
   ActionContract as UiActionsActionContract,
 } from './actions';
 export { buildContextMenuForActions, contextMenuSeparatorAction } from './context_menu';
-export { CollectConfigProps, Presentable, Configurable, ConfigurableBaseConfig } from './util';
+export {
+  CollectConfigProps,
+  Presentable,
+  Configurable,
+  ConfigurableBaseConfig,
+  PresentableBaseContext,
+} from './util';
 export { Trigger, TriggerContext } from './triggers';
 export { TriggerContextMapping, TriggerId, ActionContextMapping, ActionType } from './types';
 export { ActionByType } from './actions';

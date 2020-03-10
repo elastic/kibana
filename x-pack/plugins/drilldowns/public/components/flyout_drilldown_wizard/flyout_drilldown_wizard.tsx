@@ -15,7 +15,12 @@ import {
   txtEditDrilldownButtonLabel,
   txtEditDrilldownTitle,
 } from './i18n';
-import { ActionBaseConfig, ActionFactory } from '../../../../advanced_ui_actions/public';
+import {
+  ActionBaseConfig,
+  ActionFactory,
+  ActionFactoryBaseContext,
+  ActionFactoryList,
+} from '../../../../advanced_ui_actions/public';
 import { DrilldownHelloBar } from '../drilldown_hello_bar';
 
 export interface DrilldownWizardConfig<ActionConfig extends ActionBaseConfig = ActionBaseConfig> {
@@ -27,7 +32,7 @@ export interface DrilldownWizardConfig<ActionConfig extends ActionBaseConfig = A
 export interface FlyoutDrilldownWizardProps<
   CurrentActionConfig extends ActionBaseConfig = ActionBaseConfig
 > {
-  drilldownActionFactories: Array<ActionFactory<any>>;
+  drilldownActionFactories: ActionFactoryList;
 
   onSubmit?: (drilldownWizardConfig: DrilldownWizardConfig) => void;
   onDelete?: () => void;
@@ -39,6 +44,8 @@ export interface FlyoutDrilldownWizardProps<
 
   showWelcomeMessage?: boolean;
   onWelcomeHideClick?: () => void;
+
+  actionFactoryContext?: ActionFactoryBaseContext;
 }
 
 export function FlyoutDrilldownWizard<
@@ -53,6 +60,7 @@ export function FlyoutDrilldownWizard<
   showWelcomeMessage = true,
   onWelcomeHideClick,
   drilldownActionFactories,
+  actionFactoryContext,
 }: FlyoutDrilldownWizardProps<CurrentActionConfig>) {
   const [wizardConfig, setWizardConfig] = useState<DrilldownWizardConfig>(
     () =>
@@ -123,6 +131,7 @@ export function FlyoutDrilldownWizard<
           }
         }}
         actionFactories={drilldownActionFactories}
+        actionFactoryContext={actionFactoryContext}
       />
       {mode === 'edit' && (
         <>

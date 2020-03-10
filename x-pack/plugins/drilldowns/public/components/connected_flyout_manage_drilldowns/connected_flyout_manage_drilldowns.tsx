@@ -79,6 +79,7 @@ export function createFlyoutManageDrilldowns({
             onDelete={() => {
               setRoute(Routes.Manage);
             }}
+            actionFactoryContext={props.context}
           />
         );
 
@@ -97,6 +98,7 @@ export function createFlyoutManageDrilldowns({
               setRoute(Routes.Create);
             }}
             onClose={props.onClose}
+            context={props.context}
           />
         );
     }
