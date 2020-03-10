@@ -52,9 +52,8 @@ If {kib} detects an index with a timestamp, you’re asked to choose a field to
 filter your data by time. If you don’t specify a field, you won’t be able
 to use the time filter.
 
-
-
 [float]
+[[rollup-index-pattern]]
 ==== Rollup index pattern
 
 If a rollup index is detected in the cluster, clicking *Create index pattern*
@@ -62,7 +61,11 @@ includes an item for creating a rollup index pattern.
 You can match an index pattern to only rolled up data, or mix both rolled
 up and raw data to explore and visualize all data together.
 An index pattern can match
-only one rollup index.
+only one rollup index. When matching multiple indices,
+use a comma to separate the names, with no space after the comma.
+
+For specific fields, the data in a rollup index includes only summarized metrics.
+From the original raw data, you are unable to search any other field.
 
 [float]
 [[management-cross-cluster-search]]
