@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { UptimeAlertsFlyoutWrapper } from './alerts/uptime_alerts_flyout_wrapper';
-export { ToggleAlertFlyoutButton } from './alerts/toggle_alert_flyout_button';
+export { AlertMonitorStatus, ToggleAlertFlyoutButton, UptimeAlertsFlyoutWrapper } from './alerts';
 export { PingHistogram } from './charts/ping_histogram';
 export { Snapshot } from './charts/snapshot_container';
 export { KueryBar } from './kuerybar/kuery_bar_container';
