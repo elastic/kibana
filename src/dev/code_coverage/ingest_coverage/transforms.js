@@ -71,32 +71,33 @@ const afterJobNameAndRootFolder = x => captureAfterJobNameAndRootFolder.exec(x)[
 const fixFront = x => afterJobNameAndRootFolder(x);
 const setTotal = x => obj =>
   obj['isTotal'] = x;
-const totalTrue = setTotal(true);
-const totalFalse = setTotal(false);
+const mutateTrue = setTotal(true);
+const mutateFalse = setTotal(false);
 
 const prokForTotalsIndex = urlBase => ts => obj =>
   right(obj)
-    .map(totalTrue)
-    .map(_ => `${urlBase}/${ts}/index.html`)
+    .map(mutateTrue)
+    .map(always(`${urlBase}/${ts}/index.html`))
+    .fold(noop, id);
+
+const prokForCoverageIndex = urlBase => ts => testRunnerType => obj => siteUrl =>
+  right(siteUrl)
+    .map(x => {
+      mutateFalse(obj);
+      return x;
+    })
+    .map(fixFront)
+    .map(x => `${urlBase}/${ts}/${testRunnerType.toLowerCase()}-combined${x}.html`)
     .fold(noop, id);
 
 export const staticSite = urlBase => obj => {
   const { staticSiteUrl, testRunnerType } = obj;
   const ts = obj['@timestamp'];
-  const prokForTotalsIndexWithUrlBaseAndTimeStamp = prokForTotalsIndex(urlBase)(ts)
-
-  const prokForCoverageIndex = obj => siteUrl =>
-    right(siteUrl)
-      .map(x => {
-        totalFalse(obj);
-        return x;
-      })
-      .map(fixFront)
-      .map(x => `${urlBase}/${ts}/${testRunnerType.toLowerCase()}-combined${x}.html`)
-      .fold(noop, id);
+  const prokTotal = prokForTotalsIndex(urlBase)(ts);
+  const prokCoverage = prokForCoverageIndex(urlBase)(ts)(testRunnerType)(obj);
 
   const url = maybeTotal(staticSiteUrl)
-    .fold(_ => prokForTotalsIndexWithUrlBaseAndTimeStamp(obj), prokForCoverageIndex(obj));
+    .fold(always(prokTotal(obj)), prokCoverage);
 
   delete obj['staticSiteUrl'];
   obj['staticSiteUrl'] = url;
