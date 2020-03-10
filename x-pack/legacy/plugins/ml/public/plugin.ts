@@ -8,14 +8,14 @@ import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
 import { MlDependencies } from './application/app';
 
 export class MlPlugin implements Plugin<Setup, Start> {
-  setup(core: CoreSetup, { data, security, licensing }: MlDependencies) {
+  setup(core: CoreSetup, { data, security, licensing, management }: MlDependencies) {
     core.application.register({
       id: 'ml',
       title: 'Machine learning',
       async mount(context, params) {
         const [coreStart, depsStart] = await core.getStartServices();
-        const { renderApp } = await import('./application/app');
-        return renderApp(coreStart, depsStart, {
+        const { renderApp: renderMlApp } = await import('./application/app');
+        return renderMlApp(coreStart, depsStart, {
           element: params.element,
           appBasePath: params.appBasePath,
           onAppLeave: params.onAppLeave,
@@ -23,6 +23,7 @@ export class MlPlugin implements Plugin<Setup, Start> {
           data,
           security,
           licensing,
+          management,
         });
       },
     });
