@@ -114,9 +114,9 @@ export const Editor = memo(() => {
                         {persistingTextObjectWithId === currentTextObjectId ? (
                           <EuiLoadingSpinner size="m" />
                         ) : textObjectsSaveError[currentTextObjectId] ? (
-                          <EuiIcon color="warning" type="alert" />
+                          <EuiIcon className="conApp__noTransition" color="warning" type="alert" />
                         ) : (
-                          <EuiIcon color="ghost" type="check" />
+                          <EuiIcon className="conApp__noTransition" color="ghost" type="check" />
                         )}
                       </div>
                     ),

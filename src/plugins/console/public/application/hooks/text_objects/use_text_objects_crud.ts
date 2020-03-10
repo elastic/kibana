@@ -38,6 +38,8 @@ const partialTextObjectSchema = t.exact(
   ])
 );
 
+const PREVENT_UI_FLASHES_DELAY = 100;
+
 export interface CreateTextObjectsArgs {
   textObject: TextObject;
 
@@ -95,10 +97,15 @@ export const useTextObjectsCRUD = () => {
           dispatch({ type: 'upsert', payload: textObject });
 
           // Update persistence
-          dispatch({ type: 'setSavingTextObject', payload: textObject.id });
+
+          const timeoutHandle = setTimeout(() => {
+            // Prevent UI flashes.
+            dispatch({ type: 'setSavingTextObject', payload: textObject.id });
+          }, PREVENT_UI_FLASHES_DELAY);
           await objectStorageClient.text.update(
             throwIfUnknown(partialTextObjectSchema, textObject)
           );
+          clearTimeout(timeoutHandle);
           dispatch({ type: 'clearSaveError', payload: { textObjectId: textObject.id } });
         } catch (e) {
           dispatch({ type: 'saveError', payload: { textObjectId: textObject.id, error: e } });
