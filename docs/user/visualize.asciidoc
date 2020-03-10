@@ -45,11 +45,7 @@ data sets.
 [horizontal]
 <<maps,Elastic Maps>>:: The most powerful way of visualizing map data in {kib}.
 
-<<visualize-maps,Coordinate map>>:: Displays points on a map using a geohash aggregation.
-
-<<visualize-maps,Region map>>:: Merge any structured map data onto a shape.
-
-<<visualize-maps,Heat map>>:: Display shaded cells within a matrix.
+<<heat-map,Heat map>>:: Display shaded cells within a matrix.
 
 * *<<for-dashboard,Dashboard tools>>*
 [horizontal]

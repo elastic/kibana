@@ -64,4 +64,4 @@ This page has moved. Please see <<get-data-in>>.
 [role="exclude",id="tilemap"]
 == Coordinate map
 
-This page has moved. Please see <<coordinate-map>>.
+This page has moved. Please see <<maps>>.
