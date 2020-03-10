@@ -17,14 +17,13 @@
  * under the License.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { EuiContextMenuPanel } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { ViewMode } from '../../../../../../../plugins/embeddable/public';
 import { TopNavIds } from './top_nav_ids';
 import { NavAction } from '../types';
+import { AddPanelPopover } from './add_panel_popover';
 
 /**
  * @param actions - A mapping of TopNavIds to an action function that should run when the
@@ -157,24 +156,7 @@ function getAddConfig(addExistingAction: NavAction, addNewAction: NavAction) {
     iconType: 'arrowDown',
     iconRight: true,
     id: 'add',
-    popOverContents: (
-      <EuiContextMenuPanel
-        items={[
-          <EuiContextMenuItem key="addExisting" icon="folderOpen" onClick={addExistingAction}>
-            <FormattedMessage
-              id="kbn.dashboard.topNav.addPopover.addExisting"
-              defaultMessage="Select Existing"
-            />
-          </EuiContextMenuItem>,
-          <EuiContextMenuItem key="addNewAction" icon="plusInCircle" onClick={addNewAction}>
-            <FormattedMessage
-              id="kbn.dashboard.topNav.addPopover.addNew"
-              defaultMessage="Create New"
-            />
-          </EuiContextMenuItem>,
-        ]}
-      />
-    ),
+    popOverContents: AddPanelPopover({ addExistingAction, addNewAction }),
     label: i18n.translate('kbn.dashboard.topNave.addButtonAriaLabel', {
       defaultMessage: 'Add Panel',
     }),
