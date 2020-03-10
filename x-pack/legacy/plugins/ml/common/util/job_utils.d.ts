@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Job } from '../../public/application/jobs/new_job/common/job_creator/configs';
+import { Job } from '../types/anomaly_detection_jobs';
 
 export interface ValidationMessage {
   id: string;

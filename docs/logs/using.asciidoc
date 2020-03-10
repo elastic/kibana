@@ -31,9 +31,7 @@ If so, <<xpack-logs-configuring, configure the logs source data>> to change the 
 
 Click image:images/time-filter-calendar.png[time filter calendar], then choose the time range for the logs.
 
-Log entries for the specified time appear in the middle of the page, with the earlier entries above and the later entries below.
-
-To quickly jump to a nearby point in time, click the minimap timeline to the right.
+Log entries for the specified time appear in the middle of the page. To quickly jump to a nearby point in time, click the minimap timeline to the right.
 // ++ what's this thing called? It's minimap in the UI. Would timeline be better?
 
 [float]

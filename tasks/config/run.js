@@ -210,6 +210,12 @@ module.exports = function(grunt) {
       args: ['scripts/notice', '--validate'],
     }),
 
+    test_hardening: scriptWithGithubChecks({
+      title: 'Node.js hardening tests',
+      cmd: NODE,
+      args: ['scripts/test_hardening.js'],
+    }),
+
     apiIntegrationTests: scriptWithGithubChecks({
       title: 'API integration tests',
       cmd: NODE,
