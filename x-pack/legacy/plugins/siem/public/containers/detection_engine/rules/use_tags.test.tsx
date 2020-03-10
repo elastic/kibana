@@ -12,7 +12,7 @@ jest.mock('./api');
 describe('useTags', () => {
   test('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnTags>(() => useTags());
+      const { result, waitForNextUpdate } = renderHook<void, ReturnTags>(() => useTags());
       await waitForNextUpdate();
       expect(result.current).toEqual([true, [], result.current[2]]);
     });
@@ -20,7 +20,7 @@ describe('useTags', () => {
 
   test('fetch tags', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnTags>(() => useTags());
+      const { result, waitForNextUpdate } = renderHook<void, ReturnTags>(() => useTags());
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual([
