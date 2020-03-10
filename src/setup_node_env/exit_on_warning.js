@@ -17,7 +17,7 @@
  * under the License.
  */
 
-if (process.noProcessWarnings === false) {
+if (process.noProcessWarnings !== true) {
   var ignore = ['MaxListenersExceededWarning'];
 
   process.on('warning', function(warn) {
