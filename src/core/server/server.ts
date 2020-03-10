@@ -165,7 +165,7 @@ export class Server {
     });
 
     this.registerCoreContext(coreSetup, renderingSetup);
-    this.registerDefaultRoute(httpSetup);
+    this.registerDefaultRoutes(httpSetup);
 
     return coreSetup;
   }
@@ -216,7 +216,7 @@ export class Server {
     await this.metrics.stop();
   }
 
-  private registerDefaultRoute(httpSetup: InternalHttpServiceSetup) {
+  private registerDefaultRoutes(httpSetup: InternalHttpServiceSetup) {
     const router = httpSetup.createRouter('/');
     router.get({ path: '/', validate: false }, async (context, req, res) => {
       const defaultRoute = await context.core.uiSettings.client.get<string>('defaultRoute');

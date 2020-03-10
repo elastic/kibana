@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function enterSpaceFunctonalTests({
@@ -46,8 +47,12 @@ export default function enterSpaceFunctonalTests({
     });
 
     it('falls back to the default home page when the configured default route is malformed', async () => {
-      await kibanaServer.uiSettings.replace({ defaultRoute: 'http://example.com/evil' });
+      const result = await kibanaServer.uiSettings
+        .replace({ defaultRoute: 'http://example.com/evil' }, { retries: 0 })
+        .then(() => 'ok')
+        .catch(() => 'failed');
 
+      expect(result).to.be('failed');
       // This test only works with the default space, as other spaces have an enforced relative url of `${serverBasePath}/s/space-id/${defaultRoute}`
       const spaceId = 'default';
 
@@ -57,7 +62,7 @@ export default function enterSpaceFunctonalTests({
 
       await PageObjects.spaceSelector.clickSpaceCard(spaceId);
 
-      await PageObjects.spaceSelector.expectHomePage(spaceId);
+      await PageObjects.spaceSelector.expectRoute('default', '/app/canvas');
     });
   });
 }
