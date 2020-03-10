@@ -12,15 +12,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
 
-  describe('Endpoint Management List', function() {
+  describe('Endpoint Host List', function() {
     this.tags('ciGroup7');
     before(async () => {
       await esArchiver.load('endpoint/metadata/api_feature');
-      await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/management');
+      await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/hosts');
     });
 
     it('finds title', async () => {
-      const title = await testSubjects.getVisibleText('managementViewTitle');
+      const title = await testSubjects.getVisibleText('hostListTitle');
       expect(title).to.equal('Hosts');
     });
 
@@ -67,16 +67,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           'xxxx',
         ],
       ];
-      const tableData = await pageObjects.endpoint.getEndpointAppTableData('managementListTable');
+      const tableData = await pageObjects.endpoint.getEndpointAppTableData('hostListTable');
       expect(tableData).to.eql(expectedData);
     });
 
     it('displays no items found', async () => {
       // clear out the data and reload the page
       await esArchiver.unload('endpoint/metadata/api_feature');
-      await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/management');
+      await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/hosts');
       // get the table data and verify no entries appear
-      const tableData = await pageObjects.endpoint.getEndpointAppTableData('managementListTable');
+      const tableData = await pageObjects.endpoint.getEndpointAppTableData('hostListTable');
       expect(tableData[1][0]).to.equal('No items found');
       // reload the data so the other tests continue to pass
       await esArchiver.load('endpoint/metadata/api_feature');
@@ -84,6 +84,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload('endpoint/metadata/api_feature');
+    });
+    describe('when on the details page', function() {
+      // details flyout is shown
+      // data matches mock
+      // clicking on the endpoint list changes/not
+      // navigating to a url with an id
+      this.tags('ciGroup7');
+      before(async () => {
+        await pageObjects.common.navigateToUrlWithBrowserHistory(
+          'endpoint',
+          '/hosts/?selected_host=de5bf078-c247-4944-a198-6e2bc27e0b7b'
+        );
+      });
+
+      it('displays shows a flyout', async () => {
+        return (flyout = await testSubjects.find('hostDetailsFlyout'));
+      });
     });
   });
 };
