@@ -68,7 +68,12 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="arrowLeft" href={AGENT_CONFIG_LIST_URI} flush="left">
+                <EuiButtonEmpty
+                  iconType="arrowLeft"
+                  href={AGENT_CONFIG_LIST_URI}
+                  flush="left"
+                  size="xs"
+                >
                   <FormattedMessage
                     id="xpack.ingestManager.configDetails.viewAgentListTitle"
                     defaultMessage="View all agent configurations"
@@ -92,7 +97,9 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
             {agentConfig && agentConfig.description ? (
               <Fragment>
                 <EuiSpacer size="s" />
-                <EuiText color="subdued">{agentConfig.description}</EuiText>
+                <EuiText color="subdued" size="s">
+                  {agentConfig.description}
+                </EuiText>
               </Fragment>
             ) : null}
           </EuiFlexItem>
@@ -154,7 +161,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
         ].map(item => (
           <EuiFlexItem grow={false}>
             <EuiStat
-              titleSize="xs"
+              titleSize="xxs"
               textAlign="right"
               title={item.content}
               description={item.label}
@@ -258,46 +265,55 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
               agentConfig={agentConfig}
             />
           ) : null}
-          <DatasourcesTable
-            datasources={agentConfig.datasources as Datasource[]}
-            message={
-              !agentConfig.datasources || agentConfig.datasources.length === 0 ? (
-                <EuiEmptyPrompt
-                  title={
-                    <h2>
-                      <FormattedMessage
-                        id="xpack.ingestManager.configDetails.noDatasourcesPrompt"
-                        defaultMessage="Config has no data sources"
-                      />
-                    </h2>
-                  }
-                  actions={
-                    <EuiButton fill iconType="plusInCircle" href={ADD_DATASOURCE_URI}>
-                      <FormattedMessage
-                        id="xpack.ingestManager.configDetails.addDatasourceButtonText"
-                        defaultMessage="Create data source"
-                      />
-                    </EuiButton>
-                  }
-                />
-              ) : null
-            }
-            search={{
-              toolsRight: [
-                <EuiButton iconType="plusInCircle" href={ADD_DATASOURCE_URI}>
-                  <FormattedMessage
-                    id="xpack.ingestManager.configDetails.addDatasourceButtonText"
-                    defaultMessage="Create data source"
+
+          {tabId === '' && (
+            <DatasourcesTable
+              datasources={agentConfig.datasources as Datasource[]}
+              message={
+                !agentConfig.datasources || agentConfig.datasources.length === 0 ? (
+                  <EuiEmptyPrompt
+                    title={
+                      <h2>
+                        <FormattedMessage
+                          id="xpack.ingestManager.configDetails.noDatasourcesPrompt"
+                          defaultMessage="Config has no data sources"
+                        />
+                      </h2>
+                    }
+                    actions={
+                      <EuiButton fill iconType="plusInCircle" href={ADD_DATASOURCE_URI}>
+                        <FormattedMessage
+                          id="xpack.ingestManager.configDetails.addDatasourceButtonText"
+                          defaultMessage="Create data source"
+                        />
+                      </EuiButton>
+                    }
                   />
-                </EuiButton>,
-              ],
-              box: {
-                incremental: true,
-                schema: true,
-              },
-            }}
-            isSelectable={false}
-          />
+                ) : null
+              }
+              search={{
+                toolsRight: [
+                  <EuiButton iconType="plusInCircle" href={ADD_DATASOURCE_URI}>
+                    <FormattedMessage
+                      id="xpack.ingestManager.configDetails.addDatasourceButtonText"
+                      defaultMessage="Create data source"
+                    />
+                  </EuiButton>,
+                ],
+                box: {
+                  incremental: true,
+                  schema: true,
+                },
+              }}
+              isSelectable={false}
+            />
+          )}
+
+          {/* TODO: YAML implementation tracked via https://github.com/elastic/kibana/issues/57958 */}
+          {tabId === 'yaml' && <div>YAML placeholder</div>}
+
+          {/* TODO: Settings implementation tracked via: https://github.com/elastic/kibana/issues/57959 */}
+          {tabId === 'settings' && <div>Settings placeholder</div>}
         </WithHeaderLayout>
       </AgentStatusRefreshContext.Provider>
     </ConfigRefreshContext.Provider>
