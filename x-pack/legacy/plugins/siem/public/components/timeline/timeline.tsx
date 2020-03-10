@@ -62,6 +62,7 @@ const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;
+  flex: 1;
 
   .euiFlyoutBody__overflow {
     overflow: hidden;
