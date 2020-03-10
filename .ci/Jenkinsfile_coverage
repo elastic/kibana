@@ -73,9 +73,6 @@ kibanaPipeline(timeoutMinutes: 180) {
 
             . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${BUILD_NUMBER} ${env.BUILD_URL}
 
-            # Bootstrap, Populate, Build and Deploy the CC App
-            . src/dev/code_coverage/shell_scripts/deploy_cc_app.sh
-
           """,
             "### Run `yarn kbn bootstrap && merge coverage` AND Ingest Code Coverage to ES Cluster AND Boot Coverage App"
           )
