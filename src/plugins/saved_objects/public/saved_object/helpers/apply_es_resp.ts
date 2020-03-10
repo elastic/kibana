@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _ from 'lodash';
+import _, { cloneDeep } from 'lodash';
 import { EsResponse, SavedObject, SavedObjectConfig } from '../../types';
 import { parseSearchSource } from './parse_search_source';
+import { hydrateIndexPattern } from './hydrate_index_pattern';
 import { expandShorthand, SavedObjectNotFound } from '../../../../kibana_utils/public';
 import { IndexPattern } from '../../../../data/public';
 
@@ -66,6 +67,55 @@ export async function applyESResp(
 
   await parseSearchSource(savedObject, esType, meta.searchSourceJSON, resp.references);
   await hydrateIndexPattern();
+  if (injectReferences && resp.references && resp.references.length > 0) {
+    injectReferences(savedObject, resp.references);
+  }
+  if (typeof config.afterESResp === 'function') {
+    savedObject = await config.afterESResp(savedObject);
+  }
+  return savedObject;
+}
+
+export async function applyESRespTo(
+  indexPatterns: any,
+  resp: EsResponse,
+  config: SavedObjectConfig
+) {
+  const savedObject: Record<string, any> = { id: config.id };
+  const mapping = expandShorthand(config.mapping);
+  const esType = config.type || '';
+  savedObject._source = cloneDeep(resp._source);
+  const injectReferences = config.injectReferences;
+  if (typeof resp.found === 'boolean' && !resp.found) {
+    throw new SavedObjectNotFound(esType, config.id || '');
+  }
+
+  const meta = resp._source.kibanaSavedObjectMeta || {};
+  delete resp._source.kibanaSavedObjectMeta;
+
+  if (!config.indexPattern && savedObject._source.indexPattern) {
+    config.indexPattern = savedObject._source.indexPattern as IndexPattern;
+    delete savedObject._source.indexPattern;
+  }
+
+  // assign the defaults to the response
+  _.defaults(savedObject._source, config.defaults);
+
+  // transform the source using _deserializers
+  _.forOwn(mapping, (fieldMapping, fieldName) => {
+    if (fieldMapping._deserialize && typeof fieldName === 'string') {
+      savedObject._source[fieldName] = fieldMapping._deserialize(
+        savedObject._source[fieldName] as string
+      );
+    }
+  });
+
+  // Give obj all of the values in _source.fields
+  _.assign(savedObject, savedObject._source);
+  savedObject.lastSavedTitle = savedObject.title;
+
+  await parseSearchSource(savedObject, esType, meta.searchSourceJSON, resp.references);
+  await hydrateIndexPattern(id || '', savedObject, indexPatterns, config);
   if (injectReferences && resp.references && resp.references.length > 0) {
     injectReferences(savedObject, resp.references);
   }

@@ -19,3 +19,4 @@
 
 export { createSavedObjectClass } from './saved_object';
 export { SavedObjectLoader } from './saved_object_loader';
+export { applyESRespTo } from './helpers/apply_es_resp';

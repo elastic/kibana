@@ -32,7 +32,7 @@ import { asAngularSyncedObservable } from './helpers/as_observable';
 import { colorChoices } from './helpers/style_choices';
 import { createGraphStore, datasourceSelector, hasFieldsSelector } from './state_management';
 import { formatHttpError } from './helpers/format_http_error';
-import { findSW } from './helpers/saved_workspace_utils';
+import { findSW, getSW } from './helpers/saved_workspace_utils';
 
 export function initGraphApp(angularModule, deps) {
   const {
@@ -139,19 +139,21 @@ export function initGraphApp(angularModule, deps) {
         resolve: {
           savedWorkspace: function($rootScope, $route, $location) {
             return $route.current.params.id
-              ? savedWorkspaceLoader.get($route.current.params.id).catch(function(e) {
-                  toastNotifications.addError(e, {
-                    title: i18n.translate('xpack.graph.missingWorkspaceErrorMessage', {
-                      defaultMessage: "Couldn't load graph with ID",
-                    }),
-                  });
-                  $rootScope.$eval(() => {
-                    $location.path('/home');
-                    $location.replace();
-                  });
-                  // return promise that never returns to prevent the controller from loading
-                  return new Promise();
-                })
+              ? getSW({ savedObjectsClient, indexPatterns }, $route.current.params.id).catch(
+                  function(e) {
+                    toastNotifications.addError(e, {
+                      title: i18n.translate('xpack.graph.missingWorkspaceErrorMessage', {
+                        defaultMessage: "Couldn't load graph with ID",
+                      }),
+                    });
+                    $rootScope.$eval(() => {
+                      $location.path('/home');
+                      $location.replace();
+                    });
+                    // return promise that never returns to prevent the controller from loading
+                    return new Promise();
+                  }
+                )
               : savedWorkspaceLoader.get();
           },
           indexPatterns: function() {
