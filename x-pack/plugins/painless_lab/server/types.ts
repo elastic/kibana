@@ -15,5 +15,3 @@ export interface RouteDependencies {
 export interface Dependencies {
   licensing: LicensingPluginSetup;
 }
-
-export type CallAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];
