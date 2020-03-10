@@ -17,8 +17,8 @@
  * under the License.
  */
 
-require('./harden'); // this require MUST be executed before any others
-require('symbol-observable');
-require('./root');
-require('./node_version_validator');
-require('./babel_register');
+var hook = require('require-in-the-middle');
+
+hook(['child_process'], function(exports, name) {
+  return require(`./patches/${name}`)(exports); // eslint-disable-line import/no-dynamic-require
+});
