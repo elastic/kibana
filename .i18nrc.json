@@ -8,6 +8,7 @@
       "src/legacy/core_plugins/data",
       "src/plugins/data"
     ],
+    "discover": "src/plugins/discover",
     "embeddableApi": "src/plugins/embeddable",
     "embeddableExamples": "examples/embeddable_examples",
     "share": "src/plugins/share",

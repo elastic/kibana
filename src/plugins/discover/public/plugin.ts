@@ -76,14 +76,14 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
     this.docViewsRegistry = new DocViewsRegistry();
     setDocViewsRegistry(this.docViewsRegistry);
     this.docViewsRegistry.addDocView({
-      title: i18n.translate('kbn.discover.docViews.table.tableTitle', {
+      title: i18n.translate('discover.docViews.table.tableTitle', {
         defaultMessage: 'Table',
       }),
       order: 10,
       component: DocViewTable,
     });
     this.docViewsRegistry.addDocView({
-      title: i18n.translate('kbn.discover.docViews.json.jsonTitle', {
+      title: i18n.translate('discover.docViews.json.jsonTitle', {
         defaultMessage: 'JSON',
       }),
       order: 20,

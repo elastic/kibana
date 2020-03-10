@@ -29,12 +29,12 @@ export interface Props {
 export function DocViewTableRowBtnFilterAdd({ onClick, disabled = false }: Props) {
   const tooltipContent = disabled ? (
     <FormattedMessage
-      id="kbn.discover.docViews.table.unindexedFieldsCanNotBeSearchedTooltip"
+      id="discover.docViews.table.unindexedFieldsCanNotBeSearchedTooltip"
       defaultMessage="Unindexed fields can not be searched"
     />
   ) : (
     <FormattedMessage
-      id="kbn.discover.docViews.table.filterForValueButtonTooltip"
+      id="discover.docViews.table.filterForValueButtonTooltip"
       defaultMessage="Filter for value"
     />
   );
@@ -42,7 +42,7 @@ export function DocViewTableRowBtnFilterAdd({ onClick, disabled = false }: Props
   return (
     <EuiToolTip content={tooltipContent}>
       <EuiButtonIcon
-        aria-label={i18n.translate('kbn.discover.docViews.table.filterForValueButtonAriaLabel', {
+        aria-label={i18n.translate('discover.docViews.table.filterForValueButtonAriaLabel', {
           defaultMessage: 'Filter for value',
         })}
         className="kbnDocViewer__actionButton"

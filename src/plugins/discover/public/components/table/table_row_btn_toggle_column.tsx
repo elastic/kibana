@@ -32,7 +32,7 @@ export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = fal
     return (
       <EuiButtonIcon
         aria-label={i18n.translate(
-          'kbn.discover.docViews.table.toggleColumnInTableButtonAriaLabel',
+          'discover.docViews.table.toggleColumnInTableButtonAriaLabel',
           {
             defaultMessage: 'Toggle column in table',
           }
@@ -49,14 +49,14 @@ export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = fal
     <EuiToolTip
       content={
         <FormattedMessage
-          id="kbn.discover.docViews.table.toggleColumnInTableButtonTooltip"
+          id="discover.docViews.table.toggleColumnInTableButtonTooltip"
           defaultMessage="Toggle column in table"
         />
       }
     >
       <EuiButtonIcon
         aria-label={i18n.translate(
-          'kbn.discover.docViews.table.toggleColumnInTableButtonAriaLabel',
+          'discover.docViews.table.toggleColumnInTableButtonAriaLabel',
           {
             defaultMessage: 'Toggle column in table',
           }
