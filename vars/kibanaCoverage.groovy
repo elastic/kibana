@@ -1,12 +1,29 @@
 
-def uploadCoverageStaticSite(timestamp, liveAppPath) {
-  def uploadPrefix = "gs://elastic-bekitzur-kibana-coverage-live/jobs/${env.JOB_NAME}/${timestamp}/"
+def uploadCoverageStaticSite(timestamp) {
+  def uploadPrefix = "gs://elastic-bekitzur-kibana-coverage-live/"
+  def uploadPrefixWithTimeStamp = "${uploadPrefix}${timestamp}/"
 
-  uploadWithVault(uploadPrefix, 'src/dev/code_coverage/404.html')
-  uploadWithVault(uploadPrefix, 'src/dev/code_coverage/' + liveAppPath)
+  uploadBaseWebsiteFiles(uploadPrefix)
+  uploadCoverageHtmls(uploadPrefixWithTimeStamp)
+}
 
-  def dataUploadPrefix = uploadPrefix + liveAppPath + '/coverage_data/'
-  uploadCoverageHtml(dataUploadPrefix)
+def uploadBaseWebsiteFiles(prefix) {
+  [
+    'src/dev/code_coverage/www/index.html',
+    'src/dev/code_coverage/www/404.html'
+  ].each { x ->
+    uploadWithVault(prefix, x)
+  }
+}
+
+def uploadCoverageHtmls(prefix) {
+  [
+    'target/kibana-coverage/functional-combined',
+    'target/kibana-coverage/jest-combined',
+    'target/kibana-coverage/mocha-combined',
+  ].each { x ->
+    uploadWithVault(prefix, x)
+  }
 }
 
 def uploadWithVault(prefix, x) {
@@ -18,16 +35,3 @@ def uploadWithVault(prefix, x) {
       """
   }
 }
-
-def uploadCoverageHtml(prefix) {
-  def coverageHtmlPaths = [
-    'target/kibana-coverage/functional-combined',
-    'target/kibana-coverage/jest-combined',
-    'target/kibana-coverage/mocha-combined',
-  ]
-
-  coverageHtmlPaths.each { x ->
-    uploadWithVault(prefix, x)
-  }
-}
-

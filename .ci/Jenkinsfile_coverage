@@ -50,7 +50,7 @@ kibanaPipeline(timeoutMinutes: 180) {
         def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
         withEnv([
           "TIME_STAMP=${timestamp}",
-          "LIVE_APP_PATH=live_cc_app"
+          "QA_TEAM_ROCKS=true"
         ]) {
           kibanaPipeline.bash(
             """
@@ -83,7 +83,7 @@ kibanaPipeline(timeoutMinutes: 180) {
             """,
             "### About to Upload Code Coverage Static Site"
           )
-          kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP, LIVE_APP_PATH)
+          kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP)
         }
 
         sh 'tar -czf kibana-jest-coverage.tar.gz target/kibana-coverage/jest-combined/*'
