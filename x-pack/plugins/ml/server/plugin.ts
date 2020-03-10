@@ -5,7 +5,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, IScopedClusterClient, Logger, PluginInitializerContext } from 'src/core/server';
+import {
+  CoreSetup,
+  Plugin,
+  IScopedClusterClient,
+  Logger,
+  PluginInitializerContext,
+} from 'src/core/server';
 import { PluginsSetup, RouteInitialization } from './types';
 import { PLUGIN_ID } from '../../../legacy/plugins/ml/common/constants/app';
 
@@ -34,6 +40,7 @@ import { resultsServiceRoutes } from './routes/results_service';
 import { systemRoutes } from './routes/system';
 import { MlLicense } from '../../../legacy/plugins/ml/common/license';
 import { MlServerLicense } from './lib/license';
+import { createSharedServices, SharedServices } from './shared';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
@@ -43,7 +50,10 @@ declare module 'kibana/server' {
   }
 }
 
-export class MlServerPlugin {
+export type MlSetupContract = SharedServices;
+export type MlStartContract = void;
+
+export class MlServerPlugin implements Plugin<MlSetupContract, MlStartContract, PluginsSetup> {
   private log: Logger;
   private version: string;
   private mlLicense: MlServerLicense;
@@ -54,7 +64,7 @@ export class MlServerPlugin {
     this.mlLicense = new MlServerLicense();
   }
 
-  public setup(coreSetup: CoreSetup, plugins: PluginsSetup) {
+  public setup(coreSetup: CoreSetup, plugins: PluginsSetup): MlSetupContract {
     plugins.features.registerFeature({
       id: PLUGIN_ID,
       name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
@@ -124,9 +134,11 @@ export class MlServerPlugin {
     coreSetup.getStartServices().then(([core]) => {
       makeMlUsageCollector(plugins.usageCollection, core.savedObjects);
     });
+
+    return createSharedServices(this.mlLicense, plugins.spaces, plugins.cloud);
   }
 
-  public start() {}
+  public start(): MlStartContract {}
 
   public stop() {
     this.mlLicense.unsubscribe();
