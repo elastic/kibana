@@ -104,11 +104,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     });
   }
 
-  public async UNSAFE_componentWillMount() {
+  public UNSAFE_componentWillMount() {
     this.mounted = true;
     const { embeddable } = this.props;
     const { parent } = embeddable;
-    embeddable.actionStorage.count().then(drilldownCount => this.setState({ drilldownCount }));
 
     this.subscription = embeddable.getInput$().subscribe(async () => {
       if (this.mounted) {
@@ -191,6 +190,9 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     if (this.embeddableRoot.current) {
       this.props.embeddable.render(this.embeddableRoot.current);
     }
+    this.props.embeddable.actionStorage
+      .count()
+      .then(drilldownCount => this.setState({ drilldownCount }));
   }
 
   closeMyContextMenuPanel = () => {
