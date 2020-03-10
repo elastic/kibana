@@ -18,13 +18,12 @@
  */
 import React, { BaseSyntheticEvent, KeyboardEvent, PureComponent } from 'react';
 import classNames from 'classnames';
-import { compact, uniq, map } from 'lodash';
+import { compact, uniq, map, every, isUndefined } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { EuiPopoverProps, EuiIcon, keyCodes, htmlIdGenerator } from '@elastic/eui';
 import { IAggConfig } from '../../../../../data/public';
 
-// @ts-ignore
 import { createFiltersFromEvent } from '../../../../../data/public/actions/filters/create_filters_from_event';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
 import { VisLegendItem } from './legend_item';
@@ -111,7 +110,12 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
     if (CUSTOM_LEGEND_VIS_TYPES.includes(this.props.vislibVis.visConfigArgs.type)) {
       return false;
     }
-    const filters = await createFiltersFromEvent({ data: item.values });
+
+    if (item.values && every(item.values, isUndefined)) {
+      return false;
+    }
+
+    const filters = await createFiltersFromEvent(item.values);
     return Boolean(filters.length);
   };
 

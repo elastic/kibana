@@ -17,7 +17,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../../reducers/util';
-import { ES_GEO_FIELD_TYPE, AGG_TYPE } from '../../../common/constants';
+import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
 import { DataRequestAbortError } from '../util/data_request';
 import { expandToTileBoundaries } from './es_geo_grid_source/geo_tile_utils';
 
@@ -70,10 +70,6 @@ export class AbstractESSource extends AbstractVectorSource {
     // id used as uuid to track requests in inspector
     clonedDescriptor.id = uuid();
     return clonedDescriptor;
-  }
-
-  getMetricFields() {
-    return [];
   }
 
   async _runEsQuery({
@@ -254,23 +250,7 @@ export class AbstractESSource extends AbstractVectorSource {
     return this._descriptor.id;
   }
 
-  async getFieldFormatter(fieldName) {
-    const metricField = this.getMetricFields().find(field => field.getName() === fieldName);
-
-    // Do not use field formatters for counting metrics
-    if (
-      metricField &&
-      (metricField.type === AGG_TYPE.COUNT || metricField.type === AGG_TYPE.UNIQUE_COUNT)
-    ) {
-      return null;
-    }
-
-    // fieldName could be an aggregation so it needs to be unpacked to expose raw field.
-    const realFieldName = metricField ? metricField.getESDocFieldName() : fieldName;
-    if (!realFieldName) {
-      return null;
-    }
-
+  async createFieldFormatter(field) {
     let indexPattern;
     try {
       indexPattern = await this.getIndexPattern();
@@ -278,7 +258,7 @@ export class AbstractESSource extends AbstractVectorSource {
       return null;
     }
 
-    const fieldFromIndexPattern = indexPattern.fields.getByName(realFieldName);
+    const fieldFromIndexPattern = indexPattern.fields.getByName(field.getRootName());
     if (!fieldFromIndexPattern) {
       return null;
     }
@@ -336,25 +316,19 @@ export class AbstractESSource extends AbstractVectorSource {
     return resp.aggregations;
   }
 
-  getValueSuggestions = async (fieldName, query) => {
-    // fieldName could be an aggregation so it needs to be unpacked to expose raw field.
-    const metricField = this.getMetricFields().find(field => field.getName() === fieldName);
-    const realFieldName = metricField ? metricField.getESDocFieldName() : fieldName;
-    if (!realFieldName) {
-      return [];
-    }
-
+  getValueSuggestions = async (field, query) => {
     try {
       const indexPattern = await this.getIndexPattern();
-      const field = indexPattern.fields.getByName(realFieldName);
       return await autocompleteService.getValueSuggestions({
         indexPattern,
-        field,
+        field: indexPattern.fields.getByName(field.getRootName()),
         query,
       });
     } catch (error) {
       console.warn(
-        `Unable to fetch suggestions for field: ${fieldName}, query: ${query}, error: ${error.message}`
+        `Unable to fetch suggestions for field: ${field.getRootName()}, query: ${query}, error: ${
+          error.message
+        }`
       );
       return [];
     }

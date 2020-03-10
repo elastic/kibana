@@ -37,6 +37,14 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AuthResultType](./kibana-plugin-server.authresulttype.md) |  |
 |  [AuthStatus](./kibana-plugin-server.authstatus.md) | Status indicating an outcome of the authentication. |
 
+## Functions
+
+|  Function | Description |
+|  --- | --- |
+|  [exportSavedObjectsToStream({ types, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, })](./kibana-plugin-server.exportsavedobjectstostream.md) | Generates sorted saved object stream to be used for export. See the [options](./kibana-plugin-server.savedobjectsexportoptions.md) for more detailed information. |
+|  [importSavedObjectsFromStream({ readStream, objectLimit, overwrite, savedObjectsClient, supportedTypes, namespace, })](./kibana-plugin-server.importsavedobjectsfromstream.md) | Import saved objects from given stream. See the [options](./kibana-plugin-server.savedobjectsimportoptions.md) for more detailed information. |
+|  [resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, supportedTypes, namespace, })](./kibana-plugin-server.resolvesavedobjectsimporterrors.md) | Resolve and return saved object import errors. See the [options](./kibana-plugin-server.savedobjectsresolveimporterrorsoptions.md) for more detailed informations. |
+
 ## Interfaces
 
 |  Interface | Description |
@@ -45,7 +53,10 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AssistanceAPIResponse](./kibana-plugin-server.assistanceapiresponse.md) |  |
 |  [AssistantAPIClientParams](./kibana-plugin-server.assistantapiclientparams.md) |  |
 |  [Authenticated](./kibana-plugin-server.authenticated.md) |  |
-|  [AuthResultParams](./kibana-plugin-server.authresultparams.md) | Result of an incoming request authentication. |
+|  [AuthNotHandled](./kibana-plugin-server.authnothandled.md) |  |
+|  [AuthRedirected](./kibana-plugin-server.authredirected.md) |  |
+|  [AuthRedirectedParams](./kibana-plugin-server.authredirectedparams.md) | Result of auth redirection. |
+|  [AuthResultParams](./kibana-plugin-server.authresultparams.md) | Result of successful authentication. |
 |  [AuthToolkit](./kibana-plugin-server.authtoolkit.md) | A tool set defining an outcome of Auth interceptor for incoming request. |
 |  [CallAPIOptions](./kibana-plugin-server.callapioptions.md) | The set of options that defines how API call should be made and result be processed. |
 |  [Capabilities](./kibana-plugin-server.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
@@ -88,11 +99,16 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [Logger](./kibana-plugin-server.logger.md) | Logger exposes all the necessary methods to log any type of information and this is the interface used by the logging consumers including plugins. |
 |  [LoggerFactory](./kibana-plugin-server.loggerfactory.md) | The single purpose of <code>LoggerFactory</code> interface is to define a way to retrieve a context-based logger instance. |
 |  [LogMeta](./kibana-plugin-server.logmeta.md) | Contextual metadata |
+|  [MetricsServiceSetup](./kibana-plugin-server.metricsservicesetup.md) | APIs to retrieves metrics gathered and exposed by the core platform. |
 |  [OnPostAuthToolkit](./kibana-plugin-server.onpostauthtoolkit.md) | A tool set defining an outcome of OnPostAuth interceptor for incoming request. |
 |  [OnPreAuthToolkit](./kibana-plugin-server.onpreauthtoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |
 |  [OnPreResponseExtensions](./kibana-plugin-server.onpreresponseextensions.md) | Additional data to extend a response. |
 |  [OnPreResponseInfo](./kibana-plugin-server.onpreresponseinfo.md) | Response status code. |
 |  [OnPreResponseToolkit](./kibana-plugin-server.onpreresponsetoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |
+|  [OpsMetrics](./kibana-plugin-server.opsmetrics.md) | Regroups metrics gathered by all the collectors. This contains metrics about the os/runtime, the kibana process and the http server. |
+|  [OpsOsMetrics](./kibana-plugin-server.opsosmetrics.md) | OS related metrics |
+|  [OpsProcessMetrics](./kibana-plugin-server.opsprocessmetrics.md) | Process related metrics |
+|  [OpsServerMetrics](./kibana-plugin-server.opsservermetrics.md) | server related metrics |
 |  [PackageInfo](./kibana-plugin-server.packageinfo.md) |  |
 |  [Plugin](./kibana-plugin-server.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginConfigDescriptor](./kibana-plugin-server.pluginconfigdescriptor.md) | Describes a plugin configuration properties. |
@@ -100,7 +116,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [PluginManifest](./kibana-plugin-server.pluginmanifest.md) | Describes the set of required and optional properties plugin can define in its mandatory JSON manifest file. |
 |  [PluginsServiceSetup](./kibana-plugin-server.pluginsservicesetup.md) |  |
 |  [PluginsServiceStart](./kibana-plugin-server.pluginsservicestart.md) |  |
-|  [RequestHandlerContext](./kibana-plugin-server.requesthandlercontext.md) | Plugin specific context passed to a route handler.<!-- -->Provides the following clients: - [rendering](./kibana-plugin-server.iscopedrenderingclient.md) - Rendering client which uses the data of the incoming request - [savedObjects.client](./kibana-plugin-server.savedobjectsclient.md) - Saved Objects client which uses the credentials of the incoming request - [elasticsearch.dataClient](./kibana-plugin-server.scopedclusterclient.md) - Elasticsearch data client which uses the credentials of the incoming request - [elasticsearch.adminClient](./kibana-plugin-server.scopedclusterclient.md) - Elasticsearch admin client which uses the credentials of the incoming request - [uiSettings.client](./kibana-plugin-server.iuisettingsclient.md) - uiSettings client which uses the credentials of the incoming request |
+|  [RequestHandlerContext](./kibana-plugin-server.requesthandlercontext.md) | Plugin specific context passed to a route handler.<!-- -->Provides the following clients and services: - [rendering](./kibana-plugin-server.iscopedrenderingclient.md) - Rendering client which uses the data of the incoming request - [savedObjects.client](./kibana-plugin-server.savedobjectsclient.md) - Saved Objects client which uses the credentials of the incoming request - [savedObjects.typeRegistry](./kibana-plugin-server.isavedobjecttyperegistry.md) - Type registry containing all the registered types. - [elasticsearch.dataClient](./kibana-plugin-server.scopedclusterclient.md) - Elasticsearch data client which uses the credentials of the incoming request - [elasticsearch.adminClient](./kibana-plugin-server.scopedclusterclient.md) - Elasticsearch admin client which uses the credentials of the incoming request - [uiSettings.client](./kibana-plugin-server.iuisettingsclient.md) - uiSettings client which uses the credentials of the incoming request |
 |  [RouteConfig](./kibana-plugin-server.routeconfig.md) | Route specific configuration. |
 |  [RouteConfigOptions](./kibana-plugin-server.routeconfigoptions.md) | Additional route options. |
 |  [RouteConfigOptionsBody](./kibana-plugin-server.routeconfigoptionsbody.md) | Additional body options for a route |
@@ -148,6 +164,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsServiceSetup](./kibana-plugin-server.savedobjectsservicesetup.md) | Saved Objects is Kibana's data persistence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods for registering Saved Object types, creating and registering Saved Object client wrappers and factories. |
 |  [SavedObjectsServiceStart](./kibana-plugin-server.savedobjectsservicestart.md) | Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceStart API provides a scoped Saved Objects client for interacting with Saved Objects. |
 |  [SavedObjectsType](./kibana-plugin-server.savedobjectstype.md) |  |
+|  [SavedObjectsTypeManagementDefinition](./kibana-plugin-server.savedobjectstypemanagementdefinition.md) | Configuration options for the [type](./kibana-plugin-server.savedobjectstype.md)<!-- -->'s management section. |
 |  [SavedObjectsTypeMappingDefinition](./kibana-plugin-server.savedobjectstypemappingdefinition.md) | Describe a saved object type mapping. |
 |  [SavedObjectsUpdateOptions](./kibana-plugin-server.savedobjectsupdateoptions.md) |  |
 |  [SavedObjectsUpdateResponse](./kibana-plugin-server.savedobjectsupdateresponse.md) |  |
@@ -183,6 +200,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ConfigDeprecationLogger](./kibana-plugin-server.configdeprecationlogger.md) | Logger interface used when invoking a [ConfigDeprecation](./kibana-plugin-server.configdeprecation.md) |
 |  [ConfigDeprecationProvider](./kibana-plugin-server.configdeprecationprovider.md) | A provider that should returns a list of [ConfigDeprecation](./kibana-plugin-server.configdeprecation.md)<!-- -->.<!-- -->See [ConfigDeprecationFactory](./kibana-plugin-server.configdeprecationfactory.md) for more usage examples. |
 |  [ConfigPath](./kibana-plugin-server.configpath.md) |  |
+|  [DestructiveRouteMethod](./kibana-plugin-server.destructiveroutemethod.md) | Set of HTTP methods changing the state of the server. |
 |  [ElasticsearchClientConfig](./kibana-plugin-server.elasticsearchclientconfig.md) |  |
 |  [GetAuthHeaders](./kibana-plugin-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |
 |  [GetAuthState](./kibana-plugin-server.getauthstate.md) | Gets authentication state for a request. Returned by <code>auth</code> interceptor. |
@@ -227,6 +245,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [RouteValidationFunction](./kibana-plugin-server.routevalidationfunction.md) | The custom validation function if @<!-- -->kbn/config-schema is not a valid solution for your specific plugin requirements. |
 |  [RouteValidationSpec](./kibana-plugin-server.routevalidationspec.md) | Allowed property validation options: either @<!-- -->kbn/config-schema validations or custom validation functions<!-- -->See [RouteValidationFunction](./kibana-plugin-server.routevalidationfunction.md) for custom validation. |
 |  [RouteValidatorFullConfig](./kibana-plugin-server.routevalidatorfullconfig.md) | Route validations config and options merged into one object |
+|  [SafeRouteMethod](./kibana-plugin-server.saferoutemethod.md) | Set of HTTP methods not changing the state of the server. |
 |  [SavedObjectAttribute](./kibana-plugin-server.savedobjectattribute.md) | Type definition for a Saved Object attribute value |
 |  [SavedObjectAttributeSingle](./kibana-plugin-server.savedobjectattributesingle.md) | Don't use this type, it's simply a helper type for [SavedObjectAttribute](./kibana-plugin-server.savedobjectattribute.md) |
 |  [SavedObjectMigrationFn](./kibana-plugin-server.savedobjectmigrationfn.md) | A migration function for a [saved object type](./kibana-plugin-server.savedobjectstype.md) used to migrate it to a given version |

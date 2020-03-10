@@ -41,5 +41,6 @@ const typeDefinition: SavedObjectsTypeMappingDefinition = {
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [properties](./kibana-plugin-server.savedobjectstypemappingdefinition.properties.md) | <code>SavedObjectsMappingProperties</code> |  |
+|  [dynamic](./kibana-plugin-server.savedobjectstypemappingdefinition.dynamic.md) | <code>false &#124; 'strict'</code> | The dynamic property of the mapping. either <code>false</code> or 'strict'. Defaults to <code>false</code> |
+|  [properties](./kibana-plugin-server.savedobjectstypemappingdefinition.properties.md) | <code>SavedObjectsMappingProperties</code> | The underlying properties of the type mapping |
 

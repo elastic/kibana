@@ -5,6 +5,9 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
+import { TypeOf } from '@kbn/config-schema';
+import * as kbnConfigSchemaTypes from '@kbn/config-schema/target/types/types';
+import { alertingIndexGetQuerySchema } from './schema/alert_index';
 
 /**
  * A deep readonly type that will make all children of a given object readonly recursively
@@ -24,16 +27,13 @@ export type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
 export type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
 export type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
 
-export enum Direction {
-  asc = 'asc',
-  desc = 'desc',
-}
+export type Direction = 'asc' | 'desc';
 
 export class EndpointAppConstants {
   static BASE_API_URL = '/api/endpoint';
-  static ALERT_INDEX_NAME = 'my-index';
   static ENDPOINT_INDEX_NAME = 'endpoint-agent*';
-  static EVENT_INDEX_NAME = 'endpoint-events-*';
+  static ALERT_INDEX_NAME = 'events-endpoint-1';
+  static EVENT_INDEX_NAME = 'events-endpoint-*';
   static DEFAULT_TOTAL_HITS = 10000;
   /**
    * Legacy events are stored in indices with endgame-* prefix
@@ -45,7 +45,6 @@ export class EndpointAppConstants {
    **/
   static ALERT_LIST_DEFAULT_PAGE_SIZE = 10;
   static ALERT_LIST_DEFAULT_SORT = '@timestamp';
-  static ALERT_LIST_DEFAULT_ORDER = Direction.desc;
 }
 
 export interface AlertResultList {
@@ -96,6 +95,59 @@ export interface EndpointResultList {
   request_page_index: number;
 }
 
+export interface OSFields {
+  full: string;
+  name: string;
+  version: string;
+  variant: string;
+}
+export interface HostFields {
+  id: string;
+  hostname: string;
+  ip: string[];
+  mac: string[];
+  os: OSFields;
+}
+export interface HashFields {
+  md5: string;
+  sha1: string;
+  sha256: string;
+}
+export interface MalwareClassifierFields {
+  identifier: string;
+  score: number;
+  threshold: number;
+  version: string;
+}
+export interface PrivilegesFields {
+  description: string;
+  name: string;
+  enabled: boolean;
+}
+export interface ThreadFields {
+  id: number;
+  service_name: string;
+  start: number;
+  start_address: number;
+  start_address_module: string;
+}
+export interface DllFields {
+  pe: {
+    architecture: string;
+    imphash: string;
+  };
+  code_signature: {
+    subject_name: string;
+    trusted: boolean;
+  };
+  compile_time: number;
+  hash: HashFields;
+  malware_classifier: MalwareClassifierFields;
+  mapped_address: number;
+  mapped_size: number;
+  path: string;
+}
+
 /**
  * Describes an Alert Event.
  * Should be in line with ECS schema.
@@ -109,28 +161,76 @@ export type AlertEvent = Immutable<{
   event: {
     id: string;
     action: string;
+    category: string;
+    kind: string;
+    dataset: string;
+    module: string;
+    type: string;
   };
-  file_classification: {
-    malware_classification: {
-      score: number;
-    };
-  };
-  host: {
-    hostname: string;
-    ip: string;
-    os: {
-      name: string;
+  endpoint: {
+    policy: {
+      id: string;
     };
   };
   process: {
+    code_signature: {
+      subject_name: string;
+      trusted: boolean;
+    };
+    command_line?: string;
+    domain?: string;
     pid: number;
+    ppid?: number;
+    entity_id: string;
+    parent?: {
+      pid: number;
+      entity_id: string;
+    };
+    name: string;
+    hash: HashFields;
+    pe?: {
+      imphash: string;
+    };
+    executable: string;
+    sid?: string;
+    start: number;
+    malware_classifier?: MalwareClassifierFields;
+    token: {
+      domain: string;
+      type: string;
+      user: string;
+      sid: string;
+      integrity_level: number;
+      integrity_level_name: string;
+      privileges?: PrivilegesFields[];
+    };
+    thread?: ThreadFields[];
+    uptime: number;
+    user: string;
   };
-  thread: {};
+  file: {
+    owner: string;
+    name: string;
+    path: string;
+    accessed: number;
+    mtime: number;
+    created: number;
+    size: number;
+    hash: HashFields;
+    pe?: {
+      imphash: string;
+    };
+    code_signature: {
+      trusted: boolean;
+      subject_name: string;
+    };
+    malware_classifier: MalwareClassifierFields;
+    temp_file_path: string;
+  };
+  host: HostFields;
+  dll?: DllFields[];
 }>;
 
-/**
- * Metadata associated with an alert event.
- */
 interface AlertMetadata {
   id: string;
 
@@ -145,8 +245,9 @@ interface AlertMetadata {
 export type AlertData = AlertEvent & AlertMetadata;
 
 export interface EndpointMetadata {
+  '@timestamp': number;
   event: {
-    created: Date;
+    created: number;
   };
   endpoint: {
     policy: {
@@ -154,22 +255,10 @@ export interface EndpointMetadata {
     };
   };
   agent: {
+    id: string;
     version: string;
-    id: string;
-    name: string;
   };
-  host: {
-    id: string;
-    hostname: string;
-    ip: string[];
-    mac: string[];
-    os: {
-      name: string;
-      full: string;
-      version: string;
-      variant: string;
-    };
-  };
+  host: HostFields;
 }
 
 /**
@@ -186,37 +275,60 @@ export interface ESTotal {
 export type AlertHits = SearchResponse<AlertEvent>['hits']['hits'];
 
 export interface LegacyEndpointEvent {
-  '@timestamp': Date;
+  '@timestamp': number;
   endgame: {
-    event_type_full: string;
-    event_subtype_full: string;
+    pid?: number;
+    ppid?: number;
+    event_type_full?: string;
+    event_subtype_full?: string;
+    event_timestamp?: number;
+    event_type?: number;
     unique_pid: number;
-    unique_ppid: number;
-    serial_event_id: number;
+    unique_ppid?: number;
+    machine_id?: string;
+    process_name?: string;
+    process_path?: string;
+    timestamp_utc?: string;
+    serial_event_id?: number;
   };
   agent: {
     id: string;
     type: string;
+    version: string;
   };
+  process?: object;
+  rule?: object;
+  user?: object;
 }
 
 export interface EndpointEvent {
-  '@timestamp': Date;
+  '@timestamp': number;
+  agent: {
+    id: string;
+    version: string;
+    type: string;
+  };
+  ecs: {
+    version: string;
+  };
   event: {
     category: string;
     type: string;
     id: string;
+    kind: string;
   };
-  endpoint: {
-    process: {
+  host: {
+    id: string;
+    hostname: string;
+    ip: string[];
+    mac: string[];
+    os: OSFields;
+  };
+  process: {
+    entity_id: string;
+    parent?: {
       entity_id: string;
-      parent: {
-        entity_id: string;
-      };
     };
-  };
-  agent: {
-    type: string;
   };
 }
 
@@ -246,3 +358,72 @@ export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
  * The PageId type is used for the payload when firing userNavigatedToPage actions
  */
 export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';
+
+/**
+ * Takes a @kbn/config-schema 'schema' type and returns a type that represents valid inputs.
+ * Similar to `TypeOf`, but allows strings as input for `schema.number()` (which is inline
+ * with the behavior of the validator.) Also, for `schema.object`, when a value is a `schema.maybe`
+ * the key will be marked optional (via `?`) so that you can omit keys for optional values.
+ *
+ * Use this when creating a value that will be passed to the schema.
+ * e.g.
+ * ```ts
+ * const input: KbnConfigSchemaInputTypeOf<typeof schema> = value
+ * schema.validate(input) // should be valid
+ * ```
+ */
+type KbnConfigSchemaInputTypeOf<
+  T extends kbnConfigSchemaTypes.Type<unknown>
+> = T extends kbnConfigSchemaTypes.ObjectType
+  ? KbnConfigSchemaInputObjectTypeOf<
+      T
+    > /** `schema.number()` accepts strings, so this type should accept them as well. */
+  : kbnConfigSchemaTypes.Type<number> extends T
+  ? TypeOf<T> | string
+  : TypeOf<T>;
+
+/**
+ * Works like ObjectResultType, except that 'maybe' schema will create an optional key.
+ * This allows us to avoid passing 'maybeKey: undefined' when constructing such an object.
+ *
+ * Instead of using this directly, use `InputTypeOf`.
+ */
+type KbnConfigSchemaInputObjectTypeOf<
+  T extends kbnConfigSchemaTypes.ObjectType
+> = T extends kbnConfigSchemaTypes.ObjectType<infer P>
+  ? {
+      /** Use ? to make the field optional if the prop accepts undefined.
+       * This allows us to avoid writing `field: undefined` for optional fields.
+       */
+      [K in Exclude<
+        keyof P,
+        keyof KbnConfigSchemaNonOptionalProps<P>
+      >]?: KbnConfigSchemaInputTypeOf<P[K]>;
+    } &
+      { [K in keyof KbnConfigSchemaNonOptionalProps<P>]: KbnConfigSchemaInputTypeOf<P[K]> }
+  : never;
+
+/**
+ * Takes the props of a schema.object type, and returns a version that excludes
+ * optional values. Used by `InputObjectTypeOf`.
+ *
+ * Instead of using this directly, use `InputTypeOf`.
+ */
+type KbnConfigSchemaNonOptionalProps<Props extends kbnConfigSchemaTypes.Props> = Pick<
+  Props,
+  {
+    [Key in keyof Props]: undefined extends TypeOf<Props[Key]> ? never : Key;
+  }[keyof Props]
+>;
+
+/**
+ * Query params to pass to the alert API when fetching new data.
+ */
+export type AlertingIndexGetQueryInput = KbnConfigSchemaInputTypeOf<
+  typeof alertingIndexGetQuerySchema
+>;
+
+/**
+ * Result of the validated query params when handling alert index requests.
+ */
+export type AlertingIndexGetQueryResult = TypeOf<typeof alertingIndexGetQuerySchema>;

@@ -20,7 +20,8 @@
 import { TimedItemBuffer } from '../timed_item_buffer';
 import { runItemBufferTests } from './run_item_buffer_tests';
 
-describe('TimedItemBuffer', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/58662
+describe.skip('TimedItemBuffer', () => {
   runItemBufferTests(TimedItemBuffer);
 
   test('does not do unnecessary flushes', async () => {

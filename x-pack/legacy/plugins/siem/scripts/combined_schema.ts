@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { buildSchemaFromTypeDefinitions } from '@kamilkisiela/graphql-tools';
+import { buildSchemaFromTypeDefinitions } from 'graphql-tools';
 
 import { schemas as serverSchemas } from '../server/graphql';
 

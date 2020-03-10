@@ -38,7 +38,7 @@ import {
   SavedObjectConfig,
 } from './saved_objects_config';
 import { KibanaRequest, InternalHttpServiceSetup } from '../http';
-import { SavedObjectsClientContract, SavedObjectsType, SavedObjectsLegacyUiExports } from './types';
+import { SavedObjectsClientContract, SavedObjectsType } from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
   SavedObjectsClientFactoryProvider,
@@ -60,6 +60,9 @@ import { registerRoutes } from './routes';
  * When plugins access the Saved Objects client, a new client is created using
  * the factory provided to `setClientFactory` and wrapped by all wrappers
  * registered through `addClientWrapper`.
+ *
+ * All the setup APIs will throw if called after the service has started, and therefor cannot be used
+ * from legacy plugin code. Legacy plugins should use the legacy savedObject service until migrated.
  *
  * @example
  * ```ts
@@ -151,6 +154,11 @@ export interface SavedObjectsServiceSetup {
    * This API is the single entry point to register saved object types in the new platform.
    */
   registerType: (type: SavedObjectsType) => void;
+
+  /**
+   * Returns the maximum number of objects allowed for import or export operations.
+   */
+  getImportExportObjectLimit: () => number;
 }
 
 /**
@@ -275,6 +283,7 @@ export class SavedObjectsService
   private migrator$ = new Subject<KibanaMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
   private validations: PropertyValidators = {};
+  private started = false;
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
@@ -292,10 +301,6 @@ export class SavedObjectsService
     legacyTypes.forEach(type => this.typeRegistry.registerType(type));
     this.validations = setupDeps.legacyPlugins.uiExports.savedObjectValidations || {};
 
-    const importableExportableTypes = getImportableAndExportableTypes(
-      setupDeps.legacyPlugins.uiExports
-    );
-
     const savedObjectsConfig = await this.coreContext.configService
       .atPath<SavedObjectsConfigType>('savedObjects')
       .pipe(first())
@@ -311,17 +316,22 @@ export class SavedObjectsService
       logger: this.logger,
       config: this.config,
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
-      importableExportableTypes,
     });
 
     return {
       setClientFactoryProvider: provider => {
+        if (this.started) {
+          throw new Error('cannot call `setClientFactoryProvider` after service startup.');
+        }
         if (this.clientFactoryProvider) {
           throw new Error('custom client factory is already set, and can only be set once');
         }
         this.clientFactoryProvider = provider;
       },
       addClientWrapper: (priority, id, factory) => {
+        if (this.started) {
+          throw new Error('cannot call `addClientWrapper` after service startup.');
+        }
         this.clientFactoryWrappers.push({
           priority,
           id,
@@ -329,8 +339,12 @@ export class SavedObjectsService
         });
       },
       registerType: type => {
+        if (this.started) {
+          throw new Error('cannot call `registerType` after service startup.');
+        }
         this.typeRegistry.registerType(type);
       },
+      getImportExportObjectLimit: () => this.config!.maxImportExportSize,
     };
   }
 
@@ -374,6 +388,14 @@ export class SavedObjectsService
       this.logger.info(
         'Waiting until all Elasticsearch nodes are compatible with Kibana before starting saved objects migrations...'
       );
+
+      // TODO: Move to Status Service https://github.com/elastic/kibana/issues/41983
+      this.setupDeps!.elasticsearch.esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
+        if (!isCompatible && message) {
+          this.logger.error(message);
+        }
+      });
+
       await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
         filter(nodes => nodes.isCompatible),
         take(1)
@@ -415,6 +437,8 @@ export class SavedObjectsService
       clientProvider.addClientWrapperFactory(priority, id, factory);
     });
 
+    this.started = true;
+
     return {
       migrator,
       clientProvider,
@@ -449,17 +473,4 @@ export class SavedObjectsService
       ),
     });
   }
-}
-
-function getImportableAndExportableTypes({
-  savedObjectMappings = [],
-  savedObjectsManagement = {},
-}: SavedObjectsLegacyUiExports) {
-  const visibleTypes = savedObjectMappings.reduce(
-    (types, mapping) => [...types, ...Object.keys(mapping.properties)],
-    [] as string[]
-  );
-  return visibleTypes.filter(
-    type => savedObjectsManagement[type]?.isImportableAndExportable === true ?? false
-  );
 }

@@ -23,7 +23,7 @@ import {
   clientProviderInstanceMock,
   typeRegistryInstanceMock,
 } from './saved_objects_service.test.mocks';
-
+import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { SavedObjectsService } from './saved_objects_service';
 import { mockCoreContext } from '../core_context.mock';
@@ -34,7 +34,6 @@ import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service
 import { legacyServiceMock } from '../legacy/legacy_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { SavedObjectsClientFactoryProvider } from './service/lib';
-import { BehaviorSubject } from 'rxjs';
 import { NodesVersionCompatibility } from '../elasticsearch/version_check/ensure_es_version';
 
 describe('SavedObjectsService', () => {
@@ -230,6 +229,36 @@ describe('SavedObjectsService', () => {
       const startContract = await soService.start({});
       expect(startContract.migrator).toBe(migratorInstanceMock);
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
+    });
+
+    it('throws when calling setup APIs once started', async () => {
+      const coreContext = createCoreContext({ skipMigration: false });
+      const soService = new SavedObjectsService(coreContext);
+      const setup = await soService.setup(createSetupDeps());
+      await soService.start({});
+
+      expect(() => {
+        setup.setClientFactoryProvider(jest.fn());
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"cannot call \`setClientFactoryProvider\` after service startup."`
+      );
+
+      expect(() => {
+        setup.addClientWrapper(0, 'dummy', jest.fn());
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"cannot call \`addClientWrapper\` after service startup."`
+      );
+
+      expect(() => {
+        setup.registerType({
+          name: 'someType',
+          hidden: false,
+          namespaceAgnostic: false,
+          mappings: { properties: {} },
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"cannot call \`registerType\` after service startup."`
+      );
     });
 
     describe('#getTypeRegistry', () => {

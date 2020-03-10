@@ -20,6 +20,7 @@
 import angular from 'angular';
 import _ from 'lodash';
 import { Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 
 import React from 'react';
@@ -29,13 +30,17 @@ import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
-import { FilterStateManager } from '../../../../../data/public';
 import { unhashUrl } from '../../../../../../../plugins/kibana_utils/public';
 import { kbnBaseUrl } from '../../../../../../../plugins/kibana_legacy/public';
 import {
   SavedObjectSaveModal,
   showSaveModal,
 } from '../../../../../../../plugins/saved_objects/public';
+import {
+  esFilters,
+  connectToQueryState,
+  syncQueryStateWithUrl,
+} from '../../../../../../../plugins/data/public';
 
 import { initVisEditorDirective } from './visualization_editor';
 import { initVisualizationDirective } from './visualization';
@@ -65,28 +70,21 @@ export function initEditorDirective(app, deps) {
 
 function VisualizeAppController(
   $scope,
-  $element,
   $route,
   $window,
   $injector,
   $timeout,
   kbnUrl,
   redirectWhenMissing,
-  Promise,
-  globalState,
-  config
+  kbnUrlStateStorage,
+  history
 ) {
   const {
     indexPatterns,
     localStorage,
     visualizeCapabilities,
     share,
-    data: {
-      query: {
-        filterManager,
-        timefilter: { timefilter },
-      },
-    },
+    data: { query: queryService },
     toastNotifications,
     chrome,
     getBasePath,
@@ -96,6 +94,17 @@ function VisualizeAppController(
     I18nContext,
     setActiveUrl,
   } = getServices();
+
+  const {
+    filterManager,
+    timefilter: { timefilter },
+  } = queryService;
+
+  // starts syncing `_g` portion of url with query services
+  const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
+    queryService,
+    kbnUrlStateStorage
+  );
 
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
@@ -189,6 +198,7 @@ function VisualizeAppController(
                   objectType="visualization"
                   confirmButtonLabel={confirmButtonLabel}
                   description={savedVis.description}
+                  showDescription={true}
                 />
               );
               showSaveModal(saveModal, I18nContext);
@@ -283,26 +293,24 @@ function VisualizeAppController(
     linked: !!savedVis.savedSearchId,
   };
 
-  const useHash = config.get('state:storeInSessionStorage');
   const { stateContainer, stopStateSync } = useVisualizeAppState({
-    useHash,
     stateDefaults,
+    kbnUrlStateStorage,
   });
 
-  const filterStateManager = new FilterStateManager(
-    globalState,
-    () => {
-      // Temporary AppState replacement
-      return {
-        set filters(_filters) {
-          stateContainer.transitions.set('filters', _filters);
-        },
-        get filters() {
-          return stateContainer.getState().filters;
-        },
-      };
+  // sync initial app filters from state to filterManager
+  filterManager.setAppFilters(_.cloneDeep(stateContainer.getState().filters));
+  // setup syncing of app filters between appState and filterManager
+  const stopSyncingAppFilters = connectToQueryState(
+    queryService,
+    {
+      set: ({ filters }) => stateContainer.transitions.set('filters', filters),
+      get: () => ({ filters: stateContainer.getState().filters }),
+      state$: stateContainer.state$.pipe(map(state => ({ filters: state.filters }))),
     },
-    filterManager
+    {
+      filters: esFilters.FilterStateStore.APP_STATE,
+    }
   );
 
   // The savedVis is pulled from elasticsearch, but the appState is pulled from the url, with the
@@ -333,6 +341,24 @@ function VisualizeAppController(
       $scope.showSaveQuery = newCapability;
     }
   );
+
+  const updateSavedQueryFromUrl = savedQueryId => {
+    if (!savedQueryId) {
+      delete $scope.savedQuery;
+
+      return;
+    }
+
+    if ($scope.savedQuery && $scope.savedQuery.id === savedQueryId) {
+      return;
+    }
+
+    savedQueryService.getSavedQuery(savedQueryId).then(savedQuery => {
+      $scope.$evalAsync(() => {
+        $scope.updateSavedQuery(savedQuery);
+      });
+    });
+  };
 
   function init() {
     if (vis.indexPattern) {
@@ -382,12 +408,11 @@ function VisualizeAppController(
     $scope.showQueryBarTimePicker = () => {
       // tsvb loads without an indexPattern initially (TODO investigate).
       // hide timefilter only if timeFieldName is explicitly undefined.
-      const hasTimeField = $scope.indexPattern ? !!$scope.indexPattern.timeFieldName : true;
+      const hasTimeField = vis.indexPattern ? !!vis.indexPattern.timeFieldName : true;
       return vis.type.options.showTimePicker && hasTimeField;
     };
 
     $scope.timeRange = timefilter.getTime();
-    $scope.opts = _.pick($scope, 'savedVis', 'isAddToDashMode');
 
     const unsubscribeStateUpdates = stateContainer.subscribe(state => {
       const newQuery = migrateLegacyQuery(state.query);
@@ -395,6 +420,7 @@ function VisualizeAppController(
         stateContainer.transitions.set('query', newQuery);
       }
       persistOnChange(state);
+      updateSavedQueryFromUrl(state.savedQuery);
 
       // if the browser history was changed manually we need to reflect changes in the editor
       if (!_.isEqual(vis.getState(), state.vis)) {
@@ -411,6 +437,9 @@ function VisualizeAppController(
       $scope.timeRange = timefilter.getTime();
       $scope.$broadcast('render');
     };
+
+    // update the query if savedQuery is stored
+    updateSavedQueryFromUrl(initialState.savedQuery);
 
     const subscriptions = new Subscription();
 
@@ -437,7 +466,7 @@ function VisualizeAppController(
 
     // update the searchSource when query updates
     $scope.fetch = function() {
-      const { query, filters, linked } = stateContainer.getState();
+      const { query, linked, filters } = stateContainer.getState();
       $scope.query = query;
       $scope.linked = linked;
       savedVis.searchSource.setField('query', query);
@@ -450,7 +479,6 @@ function VisualizeAppController(
       subscribeWithScope($scope, filterManager.getUpdates$(), {
         next: () => {
           $scope.filters = filterManager.getFilters();
-          $scope.globalFilters = filterManager.getGlobalFilters();
         },
       })
     );
@@ -465,13 +493,14 @@ function VisualizeAppController(
         $scope._handler.destroy();
       }
       savedVis.destroy();
-      filterStateManager.destroy();
       subscriptions.unsubscribe();
       $scope.vis.off('apply', _applyVis);
 
       unsubscribePersisted();
       unsubscribeStateUpdates();
       stopStateSync();
+      stopSyncingQueryServiceStateWithUrl();
+      stopSyncingAppFilters();
     });
 
     $timeout(() => {
@@ -500,23 +529,14 @@ function VisualizeAppController(
     });
   };
 
-  $scope.onQuerySaved = savedQuery => {
-    $scope.savedQuery = savedQuery;
-  };
-
-  $scope.onSavedQueryUpdated = savedQuery => {
-    $scope.savedQuery = { ...savedQuery };
-  };
-
   $scope.onClearSavedQuery = () => {
     delete $scope.savedQuery;
     stateContainer.transitions.removeSavedQuery(defaultQuery);
     filterManager.setFilters(filterManager.getGlobalFilters());
-    $scope.fetch();
   };
 
   const updateStateFromSavedQuery = savedQuery => {
-    stateContainer.transitions.set('query', savedQuery.attributes.query);
+    stateContainer.transitions.updateFromSavedQuery(savedQuery);
 
     const savedQueryFilters = savedQuery.attributes.filters || [];
     const globalFilters = filterManager.getGlobalFilters();
@@ -531,24 +551,25 @@ function VisualizeAppController(
         timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
       }
     }
-
-    $scope.fetch();
   };
 
-  // update the query if savedQuery is stored
-  if (stateContainer.getState().savedQuery) {
-    savedQueryService.getSavedQuery(stateContainer.getState().savedQuery).then(savedQuery => {
-      $scope.$evalAsync(() => {
-        $scope.savedQuery = savedQuery;
-      });
-    });
-  }
+  $scope.updateSavedQuery = savedQuery => {
+    $scope.savedQuery = savedQuery;
+    updateStateFromSavedQuery(savedQuery);
+  };
 
-  $scope.$watch('savedQuery', newSavedQuery => {
-    if (!newSavedQuery) return;
-    stateContainer.transitions.set('savedQuery', newSavedQuery.id);
+  $scope.$watch('linked', linked => {
+    if (linked && !savedVis.savedSearchId) {
+      savedVis.savedSearchId = savedVis.searchSource.id;
+      vis.savedSearchId = savedVis.searchSource.id;
 
-    updateStateFromSavedQuery(newSavedQuery);
+      $scope.$broadcast('render');
+    } else if (!linked && savedVis.savedSearchId) {
+      delete savedVis.savedSearchId;
+      delete vis.savedSearchId;
+
+      $scope.$broadcast('render');
+    }
   });
 
   /**
@@ -611,7 +632,10 @@ function VisualizeAppController(
               savedVis.vis.title = savedVis.title;
               savedVis.vis.description = savedVis.description;
             } else {
-              kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });
+              history.replace({
+                ...history.location,
+                pathname: `${VisualizeConstants.EDIT_PATH}/${savedVis.id}`,
+              });
             }
           }
         });
@@ -638,9 +662,7 @@ function VisualizeAppController(
     );
   }
 
-  $scope.unlink = function() {
-    if (!$scope.linked) return;
-
+  const unlinkFromSavedSearch = () => {
     const searchSourceParent = searchSource.getParent();
     const searchSourceGrandparent = searchSourceParent.getParent();
 
@@ -680,6 +702,8 @@ function VisualizeAppController(
       vis.type.feedbackMessage
     );
   };
+
+  vis.on('unlinkFromSavedSearch', unlinkFromSavedSearch);
 
   addHelpMenuToAppChrome(chrome, docLinks);
 

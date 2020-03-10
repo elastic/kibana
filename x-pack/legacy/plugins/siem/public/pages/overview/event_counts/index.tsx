@@ -53,26 +53,17 @@ const EventCountsComponent: React.FC<Props> = ({
 }) => {
   const kibana = useKibana();
 
-  const hostFilterQuery = convertToBuildEsQuery({
-    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-    indexPattern,
-    queries: [query],
-    filters: [...filters, ...filterHostData],
-  });
-
-  const networkFilterQuery = convertToBuildEsQuery({
-    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-    indexPattern,
-    queries: [query],
-    filters: [...filters, ...filterNetworkData],
-  });
-
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
       <EuiFlexItem grow={true}>
         <OverviewHost
           endDate={to}
-          filterQuery={hostFilterQuery}
+          filterQuery={convertToBuildEsQuery({
+            config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+            indexPattern,
+            queries: [query],
+            filters: [...filters, ...filterHostData],
+          })}
           startDate={from}
           setQuery={setQuery}
         />
@@ -83,7 +74,12 @@ const EventCountsComponent: React.FC<Props> = ({
       <EuiFlexItem grow={true}>
         <OverviewNetwork
           endDate={to}
-          filterQuery={networkFilterQuery}
+          filterQuery={convertToBuildEsQuery({
+            config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+            indexPattern,
+            queries: [query],
+            filters: [...filters, ...filterNetworkData],
+          })}
           startDate={from}
           setQuery={setQuery}
         />

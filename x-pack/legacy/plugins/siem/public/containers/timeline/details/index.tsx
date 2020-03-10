@@ -7,14 +7,13 @@
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React from 'react';
+import { Query } from 'react-apollo';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import {
-  DetailItem,
-  GetTimelineDetailsQuery,
-  GetTimelineDetailsQueryComponent,
-} from '../../../graphql/types';
+import { DetailItem, GetTimelineDetailsQuery } from '../../../graphql/types';
 import { useUiSetting } from '../../../lib/kibana';
+
+import { timelineDetailsQuery } from './index.gql_query';
 
 export interface EventsArgs {
   detailsData: DetailItem[] | null;
@@ -47,7 +46,8 @@ const TimelineDetailsQueryComponent: React.FC<TimelineDetailsProps> = ({
     defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
   };
   return executeQuery ? (
-    <GetTimelineDetailsQueryComponent
+    <Query<GetTimelineDetailsQuery.Query, GetTimelineDetailsQuery.Variables>
+      query={timelineDetailsQuery}
       fetchPolicy="network-only"
       notifyOnNetworkStatusChange
       variables={variables}
@@ -61,7 +61,7 @@ const TimelineDetailsQueryComponent: React.FC<TimelineDetailsProps> = ({
           ),
         })
       }
-    </GetTimelineDetailsQueryComponent>
+    </Query>
   ) : (
     children!({ loading: false, detailsData: null })
   );

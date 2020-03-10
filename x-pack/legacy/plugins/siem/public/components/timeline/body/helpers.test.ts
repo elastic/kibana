@@ -11,7 +11,7 @@ import { eventHasNotes, eventIsPinned, getPinTooltip, stringifyEvent } from './h
 describe('helpers', () => {
   describe('stringifyEvent', () => {
     test('it omits __typename when it appears at arbitrary levels', () => {
-      const toStringify: Ecs = ({
+      const toStringify: Ecs = {
         __typename: 'level 0',
         _id: '4',
         timestamp: '2018-11-08T19:03:25.937Z',
@@ -54,7 +54,7 @@ describe('helpers', () => {
           region_name: ['neither'],
           country_iso_code: ['sasquatch'],
         },
-      } as unknown) as Ecs; // as cast so that `__typename` can be added for the tests even though it is not part of ECS
+      } as Ecs; // as cast so that `__typename` can be added for the tests even though it is not part of ECS
       const expected: Ecs = {
         _id: '4',
         timestamp: '2018-11-08T19:03:25.937Z',
