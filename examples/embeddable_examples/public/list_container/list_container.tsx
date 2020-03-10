@@ -18,12 +18,9 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {
-  Container,
-  ContainerInput,
-  EmbeddableStart,
-} from '../../../../src/plugins/embeddable/public';
+import { Container, ContainerInput } from '../../../../src/plugins/embeddable/public';
 import { ListContainerComponent } from './list_container_component';
+import { StartServices } from './list_container_factory';
 
 export const LIST_CONTAINER = 'LIST_CONTAINER';
 
@@ -31,11 +28,8 @@ export class ListContainer extends Container<{}, ContainerInput> {
   public readonly type = LIST_CONTAINER;
   private node?: HTMLElement;
 
-  constructor(
-    input: ContainerInput,
-    getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory']
-  ) {
-    super(input, { embeddableLoaded: {} }, getEmbeddableFactory);
+  constructor(input: ContainerInput, private services: StartServices) {
+    super(input, { embeddableLoaded: {} }, services.getEmbeddableFactory);
   }
 
   // This container has no input itself.
@@ -48,7 +42,7 @@ export class ListContainer extends Container<{}, ContainerInput> {
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
     }
-    ReactDOM.render(<ListContainerComponent embeddable={this} />, node);
+    ReactDOM.render(<ListContainerComponent embeddable={this} services={this.services} />, node);
   }
 
   public destroy() {

@@ -20,7 +20,7 @@ import { UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { EmbeddableFactoryRegistry } from './types';
 import { bootstrap } from './bootstrap';
-import { EmbeddableFactory, EmbeddableInput, EmbeddableOutput } from './lib';
+import { EmbeddableFactory, EmbeddableInput, EmbeddableOutput, IEmbeddable } from './lib';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -35,10 +35,11 @@ export interface EmbeddableSetup {
 export interface EmbeddableStart {
   getEmbeddableFactory: <
     I extends EmbeddableInput = EmbeddableInput,
-    O extends EmbeddableOutput = EmbeddableOutput
+    O extends EmbeddableOutput = EmbeddableOutput,
+    E extends IEmbeddable<I, O> = IEmbeddable<I, O>
   >(
     embeddableFactoryId: string
-  ) => EmbeddableFactory<I, O> | undefined;
+  ) => EmbeddableFactory<I, O, E> | undefined;
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
 }
 
@@ -48,7 +49,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { uiActions }: EmbeddableSetupDependencies) {
-    bootstrap(uiActions);
+    bootstrap(uiActions, this.getEmbeddableFactory);
 
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
@@ -76,7 +77,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
   private getEmbeddableFactory = <
     I extends EmbeddableInput = EmbeddableInput,
-    O extends EmbeddableOutput = EmbeddableOutput
+    O extends EmbeddableOutput = EmbeddableOutput,
+    E extends IEmbeddable<I, O> = IEmbeddable<I, O>
   >(
     embeddableFactoryId: string
   ) => {
@@ -88,6 +90,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       );
     }
 
-    return factory as EmbeddableFactory<I, O>;
+    return factory as EmbeddableFactory<I, O, E>;
   };
 }

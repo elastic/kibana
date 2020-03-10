@@ -38,6 +38,7 @@ import { HelloWorldEmbeddableExample } from './hello_world_embeddable_example';
 import { TodoEmbeddableExample } from './todo_embeddable_example';
 import { ListContainerExample } from './list_container_example';
 import { EmbeddablePanelExample } from './embeddable_panel_example';
+import { SavedObjectEmbeddableExample } from './saved_object_embeddable_example';
 
 interface PageDef {
   title: string;
@@ -119,6 +120,22 @@ const EmbeddableExplorerApp = ({
       id: 'embeddablePanelExamplae',
       component: (
         <EmbeddablePanelExample
+          uiActionsApi={uiActionsApi}
+          getAllEmbeddableFactories={embeddableApi.getEmbeddableFactories}
+          getEmbeddableFactory={embeddableApi.getEmbeddableFactory}
+          overlays={overlays}
+          uiSettingsClient={uiSettingsClient}
+          savedObject={savedObject}
+          notifications={notifications}
+          inspector={inspector}
+        />
+      ),
+    },
+    {
+      title: 'Embeddables backed by saved objects',
+      id: 'savedObjectSection',
+      component: (
+        <SavedObjectEmbeddableExample
           uiActionsApi={uiActionsApi}
           getAllEmbeddableFactories={embeddableApi.getEmbeddableFactories}
           getEmbeddableFactory={embeddableApi.getEmbeddableFactory}

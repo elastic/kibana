@@ -21,10 +21,10 @@ import ReactDOM from 'react-dom';
 import {
   Container,
   ContainerInput,
-  EmbeddableStart,
   EmbeddableInput,
 } from '../../../../src/plugins/embeddable/public';
 import { SearchableListContainerComponent } from './searchable_list_container_component';
+import { StartServices } from './searchable_list_container_factory';
 
 export const SEARCHABLE_LIST_CONTAINER = 'SEARCHABLE_LIST_CONTAINER';
 
@@ -40,11 +40,8 @@ export class SearchableListContainer extends Container<ChildInput, SearchableCon
   public readonly type = SEARCHABLE_LIST_CONTAINER;
   private node?: HTMLElement;
 
-  constructor(
-    input: SearchableContainerInput,
-    getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory']
-  ) {
-    super(input, { embeddableLoaded: {} }, getEmbeddableFactory);
+  constructor(input: SearchableContainerInput, private services: StartServices) {
+    super(input, { embeddableLoaded: {} }, services.getEmbeddableFactory);
   }
 
   // TODO: add a more advanced example here where inherited child input is derived from container
@@ -53,6 +50,7 @@ export class SearchableListContainer extends Container<ChildInput, SearchableCon
     return {
       id,
       search: this.getInput().search,
+      viewMode: this.getInput().viewMode,
     };
   }
 
@@ -61,7 +59,10 @@ export class SearchableListContainer extends Container<ChildInput, SearchableCon
       ReactDOM.unmountComponentAtNode(this.node);
     }
     this.node = node;
-    ReactDOM.render(<SearchableListContainerComponent embeddable={this} />, node);
+    ReactDOM.render(
+      <SearchableListContainerComponent embeddable={this} services={this.services} />,
+      node
+    );
   }
 
   public destroy() {

@@ -19,10 +19,26 @@
 
 import React from 'react';
 import { EuiPanel, EuiLoadingSpinner, EuiFlexItem } from '@elastic/eui';
-import { IEmbeddable } from '../../../../src/plugins/embeddable/public';
+import { CoreStart, IUiSettingsClient, SavedObjectsStart } from 'kibana/public';
+import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
+import { getSavedObjectFinder } from '../../../../src/plugins/saved_objects/public';
+import {
+  IEmbeddable,
+  EmbeddableStart,
+  EmbeddablePanel,
+} from '../../../../src/plugins/embeddable/public';
 
 interface Props {
   embeddable: IEmbeddable;
+  uiActionsApi: UiActionsStart;
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
+  overlays: CoreStart['overlays'];
+  notifications: CoreStart['notifications'];
+  inspector: InspectorStart;
+  savedObject: SavedObjectsStart;
+  uiSettingsClient: IUiSettingsClient;
 }
 
 export class EmbeddableListItem extends React.Component<Props> {
@@ -49,11 +65,31 @@ export class EmbeddableListItem extends React.Component<Props> {
   }
 
   public render() {
+    const {
+      embeddable,
+      uiActionsApi,
+      getAllEmbeddableFactories,
+      getEmbeddableFactory,
+      savedObject,
+      uiSettingsClient,
+      notifications,
+      inspector,
+      overlays,
+    } = this.props;
     return (
       <EuiFlexItem>
-        <EuiPanel>
-          {this.props.embeddable ? (
-            <div ref={this.embeddableRoot} />
+        <EuiPanel data-test-subj="embeddedPanelExample" paddingSize="none" role="figure">
+          {embeddable ? (
+            <EmbeddablePanel
+              embeddable={embeddable}
+              getActions={uiActionsApi.getTriggerCompatibleActions}
+              getEmbeddableFactory={getEmbeddableFactory}
+              getAllEmbeddableFactories={getAllEmbeddableFactories}
+              overlays={overlays}
+              notifications={notifications}
+              inspector={inspector}
+              SavedObjectFinder={getSavedObjectFinder(savedObject, uiSettingsClient)}
+            />
           ) : (
             <EuiLoadingSpinner size="s" />
           )}

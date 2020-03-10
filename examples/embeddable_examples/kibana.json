@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "kibanaVersion": "kibana",
   "configPath": ["embeddable_examples"],
-  "server": false,
+  "server": true,
   "ui": true,
-  "requiredPlugins": ["embeddable"],
+  "requiredPlugins": ["embeddable", "uiActions", "inspector"],
   "optionalPlugins": []
 }

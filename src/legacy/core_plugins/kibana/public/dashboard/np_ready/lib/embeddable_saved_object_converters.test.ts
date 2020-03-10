@@ -24,11 +24,16 @@ import {
 } from './embeddable_saved_object_converters';
 import { SavedDashboardPanel } from '../types';
 import { DashboardPanelState } from 'src/plugins/dashboard/public';
-import { EmbeddableInput } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import {
+  EmbeddableInput,
+  SavedObjectEmbeddableInput,
+} from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 
 interface CustomInput extends EmbeddableInput {
   something: string;
 }
+
+type CustomSavedObjectInput = CustomInput & SavedObjectEmbeddableInput;
 
 test('convertSavedDashboardPanelToPanelState', () => {
   const savedDashboardPanel: SavedDashboardPanel = {
@@ -59,8 +64,8 @@ test('convertSavedDashboardPanelToPanelState', () => {
     explicitInput: {
       something: 'hi!',
       id: '123',
+      savedObjectId: 'savedObjectId',
     },
-    savedObjectId: 'savedObjectId',
     type: 'search',
   });
 });
@@ -87,7 +92,7 @@ test('convertSavedDashboardPanelToPanelState does not include undefined id', () 
 });
 
 test('convertPanelStateToSavedDashboardPanel', () => {
-  const dashboardPanel: DashboardPanelState<CustomInput> = {
+  const dashboardPanel: DashboardPanelState<CustomSavedObjectInput> = {
     gridData: {
       x: 0,
       y: 0,
@@ -95,10 +100,10 @@ test('convertPanelStateToSavedDashboardPanel', () => {
       w: 15,
       i: '123',
     },
-    savedObjectId: 'savedObjectId',
     explicitInput: {
       something: 'hi!',
       id: '123',
+      savedObjectId: 'savedObjectId',
     },
     type: 'search',
   };

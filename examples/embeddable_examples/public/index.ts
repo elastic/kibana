@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { PluginInitializer } from 'kibana/public';
 export {
   HELLO_WORLD_EMBEDDABLE,
   HelloWorldEmbeddable,
@@ -26,18 +25,10 @@ export {
 export { ListContainer, LIST_CONTAINER } from './list_container';
 export { TODO_EMBEDDABLE } from './todo';
 
-import {
-  EmbeddableExamplesPlugin,
-  EmbeddableExamplesSetupDependencies,
-  EmbeddableExamplesStartDependencies,
-} from './plugin';
+import { EmbeddableExamplesPlugin } from './plugin';
 
 export { SearchableListContainer, SEARCHABLE_LIST_CONTAINER } from './searchable_list_container';
-export { MULTI_TASK_TODO_EMBEDDABLE } from './multi_task_todo';
+export { TODO_SO_EMBEDDABLE } from './todo_saved_object';
 
-export const plugin: PluginInitializer<
-  void,
-  void,
-  EmbeddableExamplesSetupDependencies,
-  EmbeddableExamplesStartDependencies
-> = () => new EmbeddableExamplesPlugin();
+export { MULTI_TASK_TODO_EMBEDDABLE } from './multi_task_todo';
+export const plugin = () => new EmbeddableExamplesPlugin();

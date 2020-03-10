@@ -136,6 +136,16 @@ export abstract class Embeddable<
     }
   }
 
+  /**
+   * Implement replaceReferences if your Embeddable contains any references to saved objects (be sure
+   * also to propagate this call down to any nested Embeddable references, or other implementations that may have
+   * nested references, like expressions).  This supports functionality like "copy to space", when we want
+   * the copy to create copies of nested saved objects - we need to replace the ids.  It also supports saved object
+   * id migrations although that should be very rare.
+   * @param references
+   */
+  public replaceReferences(references: Array<{ oldId: string; type: string; newId: string }>) {}
+
   public render(domNode: HTMLElement | Element): void {
     if (this.destoyed) {
       throw new Error('Embeddable has been destroyed');

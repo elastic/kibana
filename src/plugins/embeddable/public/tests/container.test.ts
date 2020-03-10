@@ -640,8 +640,7 @@ test('container stores ErrorEmbeddables when a saved object cannot be found', as
     panels: {
       '123': {
         type: 'vis',
-        explicitInput: { id: '123' },
-        savedObjectId: '456',
+        explicitInput: { id: '123', savedObjectId: '456' },
       },
     },
     viewMode: ViewMode.EDIT,
@@ -662,8 +661,7 @@ test('ErrorEmbeddables get updated when parent does', async done => {
     panels: {
       '123': {
         type: 'vis',
-        explicitInput: { id: '123' },
-        savedObjectId: '456',
+        explicitInput: { id: '123', savedObjectId: '456' },
       },
     },
     viewMode: ViewMode.EDIT,

@@ -89,6 +89,8 @@ export function MultiTaskTodoEmbeddableComponentInner({
   );
 }
 
-export const MultiTaskTodoEmbeddableComponent = withEmbeddableSubscription(
-  MultiTaskTodoEmbeddableComponentInner
-);
+export const MultiTaskTodoEmbeddableComponent = withEmbeddableSubscription<
+  MultiTaskTodoInput,
+  MultiTaskTodoOutput,
+  MultiTaskTodoEmbeddable
+>(MultiTaskTodoEmbeddableComponentInner);

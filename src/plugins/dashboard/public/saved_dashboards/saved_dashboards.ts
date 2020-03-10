@@ -18,21 +18,23 @@
  */
 
 import { SavedObjectsClientContract, ChromeStart, OverlayStart } from 'kibana/public';
+import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import { IndexPatternsContract } from '../../../../plugins/data/public';
 import { SavedObjectLoader } from '../../../../plugins/saved_objects/public';
 import { createSavedDashboardClass } from './saved_dashboard';
 
-interface Services {
+export interface CreateSavedDashboardServices {
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
   chrome: ChromeStart;
   overlays: OverlayStart;
+  embeddable: EmbeddableStart;
 }
 
 /**
  * @param services
  */
-export function createSavedDashboardLoader(services: Services) {
+export function createSavedDashboardLoader(services: CreateSavedDashboardServices) {
   const SavedDashboard = createSavedDashboardClass(services);
   return new SavedObjectLoader(SavedDashboard, services.savedObjectsClient, services.chrome);
 }

@@ -204,7 +204,6 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     let actions = await this.props.getActions(CONTEXT_MENU_TRIGGER, {
       embeddable: this.props.embeddable,
     });
-
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {
       actions = actions.filter(action => disabledActions.indexOf(action.id) === -1);

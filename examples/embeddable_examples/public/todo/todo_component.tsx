@@ -27,7 +27,7 @@ import {
   withEmbeddableSubscription,
   EmbeddableOutput,
 } from '../../../../src/plugins/embeddable/public';
-import { TodoEmbeddable, TodoInput } from './todo_embeddable';
+import { TodoEmbeddable, TodoInput, TodoOutput } from './todo_embeddable';
 
 interface Props {
   embeddable: TodoEmbeddable;
@@ -71,4 +71,9 @@ export function TodoEmbeddableComponentInner({ input: { icon, title, task, searc
   );
 }
 
-export const TodoEmbeddableComponent = withEmbeddableSubscription(TodoEmbeddableComponentInner);
+export const TodoEmbeddableComponent = withEmbeddableSubscription<
+  TodoInput,
+  TodoOutput,
+  TodoEmbeddable,
+  {}
+>(TodoEmbeddableComponentInner);

@@ -37,11 +37,13 @@ import {
 } from '../../../../src/plugins/embeddable/public';
 import { EmbeddableListItem } from '../list_container/embeddable_list_item';
 import { SearchableListContainer, SearchableContainerInput } from './searchable_list_container';
+import { StartServices } from './searchable_list_container_factory';
 
 interface Props {
   embeddable: SearchableListContainer;
   input: SearchableContainerInput;
   output: ContainerOutput;
+  services: StartServices;
 }
 
 interface State {
@@ -171,7 +173,7 @@ export class SearchableListContainerComponentInner extends Component<Props, Stat
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EmbeddableListItem embeddable={embeddable} />
+              <EmbeddableListItem embeddable={embeddable} {...this.props.services} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
@@ -183,6 +185,9 @@ export class SearchableListContainerComponentInner extends Component<Props, Stat
   }
 }
 
-export const SearchableListContainerComponent = withEmbeddableSubscription(
-  SearchableListContainerComponentInner
-);
+export const SearchableListContainerComponent = withEmbeddableSubscription<
+  SearchableContainerInput,
+  ContainerOutput,
+  SearchableListContainer,
+  { services: StartServices }
+>(SearchableListContainerComponentInner);

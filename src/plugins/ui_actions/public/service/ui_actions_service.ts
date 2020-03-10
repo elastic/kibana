@@ -103,7 +103,7 @@ export class UiActionsService {
     } else {
       const registeredAction = this.actions.get(action.id);
       if (registeredAction !== action) {
-        throw new Error(`A different action instance with this id is already registered.`);
+        throw new Error(`An action with the id ${action.id} is already registered.`);
       }
     }
 

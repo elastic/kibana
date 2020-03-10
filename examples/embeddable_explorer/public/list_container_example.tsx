@@ -35,7 +35,7 @@ import {
   TODO_EMBEDDABLE,
   MULTI_TASK_TODO_EMBEDDABLE,
   SEARCHABLE_LIST_CONTAINER,
-  LIST_CONTAINER,
+  LIST_CONTAINER_EMBEDDABLE,
 } from '../../embeddable_examples/public';
 
 interface Props {
@@ -57,17 +57,22 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
         type: TODO_EMBEDDABLE,
         explicitInput: {
           id: '2',
-          task: 'Goes out on Wednesdays!',
-          icon: 'broom',
-          title: 'Take out the trash',
+          attributes: {
+            task: 'Goes out on Wednesdays!',
+            icon: 'broom',
+            title: 'Take out the trash',
+          },
         },
       },
       '3': {
         type: TODO_EMBEDDABLE,
         explicitInput: {
           id: '3',
-          icon: 'broom',
-          title: 'Vaccum the floor',
+          attributes: {
+            icon: 'broom',
+            title: 'Vaccum',
+            task: 'Vaccum the floor',
+          },
         },
       },
     },
@@ -88,9 +93,11 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
         type: TODO_EMBEDDABLE,
         explicitInput: {
           id: '2',
-          task: 'Goes out on Wednesdays!',
-          icon: 'broom',
-          title: 'Take out the trash',
+          attributes: {
+            task: 'Goes out on Wednesdays!',
+            icon: 'broom',
+            title: 'Take out the trash',
+          },
         },
       },
       '3': {
@@ -123,7 +130,7 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
           <EuiPanel data-test-subj="listContainerEmbeddablePanel" paddingSize="none" role="figure">
             <EmbeddableFactoryRenderer
               getEmbeddableFactory={getEmbeddableFactory}
-              type={LIST_CONTAINER}
+              type={LIST_CONTAINER_EMBEDDABLE}
               input={listInput}
             />
           </EuiPanel>

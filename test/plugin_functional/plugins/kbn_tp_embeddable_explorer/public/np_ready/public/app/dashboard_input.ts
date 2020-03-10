@@ -47,7 +47,7 @@ export const dashboardInput: DashboardContainerInput = {
       explicitInput: {
         id: '2',
         firstName: 'Sue',
-      } as any,
+      },
     },
     '822cd0f0-ce7c-419d-aeaa-1171cf452745': {
       gridData: {
@@ -60,8 +60,8 @@ export const dashboardInput: DashboardContainerInput = {
       type: 'visualization',
       explicitInput: {
         id: '822cd0f0-ce7c-419d-aeaa-1171cf452745',
+        savedObjectId: '3fe22200-3dcb-11e8-8660-4d65aa086b3c',
       },
-      savedObjectId: '3fe22200-3dcb-11e8-8660-4d65aa086b3c',
     },
     '66f0a265-7b06-4974-accd-d05f74f7aa82': {
       gridData: {
@@ -74,8 +74,8 @@ export const dashboardInput: DashboardContainerInput = {
       type: 'visualization',
       explicitInput: {
         id: '66f0a265-7b06-4974-accd-d05f74f7aa82',
+        savedObjectId: '4c0f47e0-3dcd-11e8-8660-4d65aa086b3c',
       },
-      savedObjectId: '4c0f47e0-3dcd-11e8-8660-4d65aa086b3c',
     },
     'b2861741-40b9-4dc8-b82b-080c6e29a551': {
       gridData: {
@@ -88,8 +88,8 @@ export const dashboardInput: DashboardContainerInput = {
       type: 'search',
       explicitInput: {
         id: 'b2861741-40b9-4dc8-b82b-080c6e29a551',
+        savedObjectId: 'be5accf0-3dca-11e8-8660-4d65aa086b3c',
       },
-      savedObjectId: 'be5accf0-3dca-11e8-8660-4d65aa086b3c',
     },
   },
   isFullScreenMode: false,

@@ -23,18 +23,19 @@ import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 export const withEmbeddableSubscription = <
   I extends EmbeddableInput,
   O extends EmbeddableOutput,
-  E extends IEmbeddable<I, O> = IEmbeddable<I, O>
+  E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
+  P = {}
 >(
-  WrappedComponent: React.ComponentType<{ input: I; output: O; embeddable: E }>
-): React.ComponentType<{ embeddable: E }> =>
+  WrappedComponent: React.ComponentType<{ input: I; output: O; embeddable: E } & P>
+): React.ComponentType<{ embeddable: E } & P> =>
   class WithEmbeddableSubscription extends React.Component<
-    { embeddable: E },
+    { embeddable: E } & P,
     { input: I; output: O }
   > {
     private subscription?: Rx.Subscription;
     private mounted: boolean = false;
 
-    constructor(props: { embeddable: E }) {
+    constructor(props: { embeddable: E } & P) {
       super(props);
       this.state = {
         input: this.props.embeddable.getInput(),
@@ -71,6 +72,7 @@ export const withEmbeddableSubscription = <
           input={this.state.input}
           output={this.state.output}
           embeddable={this.props.embeddable}
+          {...this.props}
         />
       );
     }

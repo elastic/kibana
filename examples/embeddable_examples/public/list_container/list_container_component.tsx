@@ -26,14 +26,20 @@ import {
   ContainerOutput,
 } from '../../../../src/plugins/embeddable/public';
 import { EmbeddableListItem } from './embeddable_list_item';
+import { StartServices } from './list_container_factory';
 
 interface Props {
   embeddable: IContainer;
   input: ContainerInput;
   output: ContainerOutput;
+  services: StartServices;
 }
 
-function renderList(embeddable: IContainer, panels: ContainerInput['panels']) {
+function renderList(
+  embeddable: IContainer,
+  panels: ContainerInput['panels'],
+  services: StartServices
+) {
   let number = 0;
   const list = Object.values(panels).map(panel => {
     const child = embeddable.getChild(panel.explicitInput.id);
@@ -47,7 +53,7 @@ function renderList(embeddable: IContainer, panels: ContainerInput['panels']) {
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EmbeddableListItem embeddable={child} />
+            <EmbeddableListItem embeddable={child} {...services} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
@@ -61,7 +67,7 @@ export function ListContainerComponentInner(props: Props) {
     <div>
       <h2 data-test-subj="listContainerTitle">{props.embeddable.getTitle()}</h2>
       <EuiSpacer size="l" />
-      {renderList(props.embeddable, props.input.panels)}
+      {renderList(props.embeddable, props.input.panels, props.services)}
     </div>
   );
 }
@@ -71,4 +77,9 @@ export function ListContainerComponentInner(props: Props) {
 // anything on input or output state changes.  If you don't want that to happen (for example
 // if you expect something on input or output state to change frequently that your react
 // component does not care about, then you should probably hook this up manually).
-export const ListContainerComponent = withEmbeddableSubscription(ListContainerComponentInner);
+export const ListContainerComponent = withEmbeddableSubscription<
+  ContainerInput,
+  ContainerOutput,
+  IContainer,
+  { services: StartServices }
+>(ListContainerComponentInner);

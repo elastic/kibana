@@ -82,6 +82,11 @@ export type DashboardDocPre700 = DocPre700<DashboardAttributesTo720>;
 // embedded in the panels. The reason this is stored at the top level is so the references can be uniformly
 // updated across all saved object types that have references.
 
+/**
+ * This should always represent the latest dashboard panel shape, after all possible migrations.
+ */
+export type RawSavedDashboardPanel = RawSavedDashboardPanel730ToLatest;
+
 // Starting in 7.3 we introduced the possibility of embeddables existing without an id
 // parameter.  If there was no id, then type remains on the panel.  So it either will have a name,
 // or a type property.
