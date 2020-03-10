@@ -35,7 +35,6 @@ async function getConnectionData({
 }: IEnvOptions) {
   const { traceIds, after: nextAfter } = await getTraceSampleIds({
     setup,
-    serviceName,
     environment,
     after
   });

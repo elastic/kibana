@@ -26,12 +26,10 @@ const MAX_TRACES_TO_INSPECT = 1000;
 
 export async function getTraceSampleIds({
   after,
-  serviceName,
   environment,
   setup
 }: {
   after?: string;
-  serviceName?: string;
   environment?: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
@@ -56,10 +54,6 @@ export async function getTraceSampleIds({
       ] as ESFilter[]
     }
   } as { bool: { filter: ESFilter[]; must_not?: ESFilter[] | ESFilter } };
-
-  if (serviceName) {
-    query.bool.filter.push({ term: { [SERVICE_NAME]: serviceName } });
-  }
 
   if (environment) {
     query.bool.filter.push({ term: { [SERVICE_ENVIRONMENT]: environment } });
