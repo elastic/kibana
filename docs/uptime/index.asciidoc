@@ -8,6 +8,9 @@ Uptime allows you to monitor the status of network endpoints via HTTP/S, TCP, an
 You can explore endpoint status over time, drill down into specific monitors,
 and easily view a high-level snapshot of your environment at any point in time.
 
+* <<uptime-overview>>
+* <<uptime-monitor>>
+
 [float]
 == Get Started
 
