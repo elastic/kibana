@@ -7,69 +7,74 @@ _Visualize_ enables you to create visualizations of the data from your {es} indi
 
 {kib} visualizations are based on {es} queries. By using a series of {es} {ref}/search-aggregations.html[aggregations] to extract and process your data, you can create charts that show you the trends, spikes, and dips you need to know about.
 
-[float]
-[[create-a-visualization]]
-== Create visualizations
+To begin, open *Visualize*, then click *Create new visualization*.
 
-. Open *Visualize*.
-. Click *Create new visualization*.
-. Choose the visualization type:
-+
-* Basic charts
-[horizontal]
+[float]
+[[visualization-types]]
+== Types of visualizations
+
+{kib} supports several types of visualizations.
+
 <<lens,Lens>>::
 Quickly build several types of basic visualizations by simply dragging and dropping the data fields you want to display.
 
-* *<<most-frequent,Most frequently used visualizations>>*
-[horizontal]
-Line&comma; area, and bar charts:: Compare different series in X/Y charts.
+<<most-frequent,Most frequently used visualizations>>::
 
-Pie chart:: Display each source contribution to a total.
+* *Line, area, and bar charts* &mdash; Compares different series in X/Y charts.
 
-Data table:: Flattens aggregations into table format.
+* *Pie chart* &mdash; Displays each source contribution to a total.
 
-Metric:: Display a single number.
+* *Data table* &mdash; Flattens aggregations into table format.
 
-Goal and gauge:: Display a number with progress indicators.
+* *Metric* &mdash; Displays a single number.
 
-Tag cloud:: Display words in a cloud, where the size of the word corresponds to its importance.
+* *Goal and gauge* &mdash; Displays a number with progress indicators.
 
-* *Time series optimized*
-[horizontal]
-<<TSVB,TSVB>>:: Visualize time series data using pipeline aggregations.
+* *Tag cloud* &mdash; Displays words in a cloud, where the size of the word corresponds to its importance.
 
-<<timelion,Timelion>>:: Compute and combine data from multiple time series
+<<TSVB,TSVB>>:: Visualizes time series data using pipeline aggregations.
+
+<<timelion,Timelion>>:: Computes and combine data from multiple time series
 data sets.
 
-* *Maps*
-[horizontal]
-<<maps,Elastic Maps>>:: The most powerful way of visualizing map data in {kib}.
+<<visualize-maps, Maps>>::
+* *<<maps,Elastic Maps>>* &mdash; Displays geospatial data in {kib}.
 
-<<heat-map,Heat map>>:: Display shaded cells within a matrix.
+* <<heat-map,Heat map>>:: Display shaded cells within a matrix.
 
-* *<<for-dashboard,Dashboard tools>>*
-[horizontal]
-Controls:: Adds interactive inputs to a Dashboard.
+<<for-dashboard,Dashboard tools>>::
 
-Markdown widget:: Display free-form information or instructions.
+* *Markdown widget* &mdash; Displays free-form information or instructions.
 
-* *For developers*
-[horizontal]
-<<vega-graph,Vega>>:: Complete control over query and display.
+* *Controls* &mdash; Adds interactive inputs to a dashboard.
 
-. Specify a search query to retrieve the data for your visualization:
-** To enter new search criteria, select the <<index-patterns, index pattern>> for the indices that
+<<vega-graph,Vega>>:: Completes control over query and display.
+
+[float]
+[[choose-your-data]]
+== Choose your data
+
+Specify a search query to retrieve the data for your visualization, or used rolled up data.
+
+* To enter new search criteria, select the <<index-patterns, index pattern>> for the indices that
 contain the data you want to visualize. The visualization builder opens
 with a wildcard query that matches all of the documents in the selected
 indices.
-** To build a visualization from a saved search, click the name of the saved
+
+* To build a visualization from a saved search, click the name of the saved
 search you want to use. The visualization builder opens and loads the
 selected query.
 +
 NOTE: When you build a visualization from a saved search, any subsequent
-modifications to the saved search are automatically reflected in the
-visualization. To disable automatic updates, you can disconnect a visualization
-from the saved search.
+modifications to the saved search are reflected in the
+visualization. To disable automatic updates, delete the visualization
+on the *Saved Object* page.
+
+* To build a visualization using <<rollup-index-pattern,rolled up data>>, select
+the index pattern that includes the data. Rolled up data is summarized into
+time buckets that can be split into sub buckets for numeric field values or
+terms. To lower granularity, use a time aggregation that uses and combines
+several time buckets. For an example, refer to <<rollup-data-tutorial,Create and visualize rolled up data>>.
 
 [float]
 [[vis-inspector]]
@@ -120,8 +125,6 @@ to view an embedded visualization.
 * Generate a PNG report.
 
 --
-include::{kib-repo-dir}/visualize/visualize_rollup_data.asciidoc[]
-
 include::{kib-repo-dir}/visualize/aggregations.asciidoc[]
 
 include::{kib-repo-dir}/visualize/lens.asciidoc[]
