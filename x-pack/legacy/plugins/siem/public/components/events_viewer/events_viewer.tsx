@@ -47,6 +47,14 @@ const StyledEuiPanel = styled(EuiPanel)`
   max-width: 100%;
 `;
 
+const EventsContainerLoading = styled.div.attrs(({ width }: { width: number }) => ({
+  style: {
+    width: `${width}px`,
+  },
+}))`
+  overflow: auto;
+`;
+
 interface Props {
   browserFields: BrowserFields;
   columns: ColumnHeaderOptions[];
@@ -169,9 +177,9 @@ const EventsViewerComponent: React.FC<Props> = ({
 
                   {utilityBar?.(refetch, totalCountMinusDeleted)}
 
-                  <div
+                  <EventsContainerLoading
                     data-test-subj={`events-container-loading-${loading}`}
-                    style={{ width: `${width}px` }}
+                    width={width}
                   >
                     <ManageTimelineContext
                       loading={loading}
@@ -213,7 +221,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                         tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
                       />
                     </ManageTimelineContext>
-                  </div>
+                  </EventsContainerLoading>
                 </>
               );
             }}

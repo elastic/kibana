@@ -46,7 +46,6 @@ FooterContainer.displayName = 'FooterContainer';
 
 const FooterFlexGroup = styled(EuiFlexGroup)`
   height: 35px;
-  padding-bottom: 5px;
   width: 100%;
 `;
 
