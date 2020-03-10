@@ -32,7 +32,6 @@ export {
   IncompatibleActionError,
   ActionDefinition as UiActionsActionDefinition,
   ActionInternal as UiActionsActionInternal,
-  ActionContract as UiActionsActionContract,
   ActionStorage as UiActionsActionStorage,
   SerializedEvent as UiActionsSerializedEvent,
   SerializedAction as UiActionsSerializedAction,

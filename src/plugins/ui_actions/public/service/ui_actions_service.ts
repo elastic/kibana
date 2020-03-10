@@ -158,8 +158,7 @@ export class UiActionsService {
 
     const actions = actionIds!
       .map(actionId => this.actions.get(actionId) as AnyActionInternal)
-      .filter(Boolean)
-      .map(({ contract }) => contract) as Array<Action<TriggerContextMapping[T]>>;
+      .filter(Boolean);
 
     return actions as Array<Action<TriggerContext<T>>>;
   };

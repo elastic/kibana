@@ -19,9 +19,7 @@
 
 import { Action, ActionContext, AnyActionDefinition } from './action';
 import { Presentable } from '../util/presentable';
-// import { ActionState } from './action_state_container';
 import { uiToReactComponent } from '../../../kibana_react/public';
-import { ActionContract } from './action_contract';
 import { ActionType } from '../types';
 
 export class ActionInternal<A extends AnyActionDefinition>
@@ -33,10 +31,6 @@ export class ActionInternal<A extends AnyActionDefinition>
   public readonly order: number = this.definition.order || 0;
   public readonly MenuItem? = this.definition.MenuItem;
   public readonly ReactMenuItem? = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
-
-  public get contract(): ActionContract<A> {
-    return this;
-  }
 
   public execute(context: ActionContext<A>) {
     return this.definition.execute(context);
@@ -61,18 +55,6 @@ export class ActionInternal<A extends AnyActionDefinition>
     if (!this.definition.getHref) return undefined;
     return this.definition.getHref(context);
   }
-
-  serialize(): SerializedAction {
-    const serialized: SerializedAction = {
-      type: this.type || '',
-      name: '',
-      config: {} as any,
-    };
-
-    return serialized;
-  }
-
-  deserialize() {}
 }
 
 export type AnyActionInternal = ActionInternal<any>;

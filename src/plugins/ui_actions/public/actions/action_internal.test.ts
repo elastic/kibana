@@ -19,7 +19,6 @@
 
 import { ActionDefinition } from './action';
 import { ActionInternal } from './action_internal';
-import { ActionType } from '../types';
 
 const defaultActionDef: ActionDefinition = {
   id: 'test-action',
@@ -30,75 +29,5 @@ describe('ActionInternal', () => {
   test('can instantiate from action definition', () => {
     const action = new ActionInternal(defaultActionDef);
     expect(action.id).toBe('test-action');
-  });
-
-  describe('serialize()', () => {
-    test('can serialize very simple action', () => {
-      const action = new ActionInternal(defaultActionDef);
-      const serialized = action.serialize();
-
-      expect(serialized).toMatchObject({
-        id: 'test-action',
-        state: expect.any(Object),
-      });
-    });
-
-    test('can serialize action with modified state', () => {
-      const action = new ActionInternal({
-        ...defaultActionDef,
-        type: 'ACTION_TYPE' as ActionType,
-        order: 11,
-      });
-      action.state.transitions.setConfig({ foo: 'bar' });
-      action.state.transitions.setName('qux');
-
-      const serialized = action.serialize();
-
-      expect(serialized).toMatchObject({
-        id: 'test-action',
-        type: 'ACTION_TYPE',
-        state: {
-          name: 'qux',
-          config: {
-            foo: 'bar',
-          },
-        },
-      });
-    });
-  });
-
-  describe('deserialize', () => {
-    const serialized = {
-      id: 'id',
-      type: 'type',
-      state: {
-        name: 'name',
-        order: 0,
-        config: {
-          foo: 'foo',
-        },
-      },
-    };
-
-    test('can deserialize action state', () => {
-      const action = new ActionInternal({
-        ...defaultActionDef,
-      });
-
-      action.deserialize(serialized);
-
-      expect(action.state.get()).toMatchObject(serialized.state);
-    });
-
-    test('does not overwrite action id and type', () => {
-      const action = new ActionInternal({
-        ...defaultActionDef,
-      });
-
-      action.deserialize(serialized);
-
-      expect(action.id).toBe('test-action');
-      expect(action.type).toBe('');
-    });
   });
 });
