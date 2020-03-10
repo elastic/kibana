@@ -39,10 +39,11 @@ const FIRED_ACTIONS = {
 const getCurrentValueFromAggregations = (aggregations: Aggregation) => {
   try {
     const { buckets } = aggregations.aggregatedIntervals;
+    if (!buckets.length) return null; // No Data state
     const { value } = buckets[buckets.length - 1].aggregatedValue;
     return value;
   } catch (e) {
-    return null;
+    return undefined; // Error state
   }
 };
 
@@ -224,15 +225,15 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
         criteria.map(criterion =>
           (async () => {
             const currentValues = await getMetric(services, criterion, groupBy, filterQuery);
-            if (typeof currentValues === 'undefined')
-              throw new Error('Could not get current value of metric');
             const { threshold, comparator } = criterion;
             const comparisonFunction = comparatorMap[comparator];
 
             return mapValues(currentValues, value => ({
-              shouldFire: value !== null && comparisonFunction(value, threshold),
+              shouldFire:
+                value !== undefined && value !== null && comparisonFunction(value, threshold),
               currentValue: value,
               isNoData: value === null,
+              isError: value === undefined,
             }));
           })()
         )
@@ -245,9 +246,9 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
         // AND logic; all criteria must be across the threshold
         const shouldAlertFire = alertResults.every(result => result[group].shouldFire);
         // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
-        // whole alert is in a No Data state
+        // whole alert is in a No Data/Error state
         const isNoData = alertResults.some(result => result[group].isNoData);
-
+        const isError = alertResults.some(result => result[group].isError);
         if (shouldAlertFire) {
           alertInstance.scheduleActions(FIRED_ACTIONS.id, {
             group,
@@ -257,7 +258,9 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
 
         // Future use: ability to fetch display current alert state
         alertInstance.replaceState({
-          alertState: isNoData
+          alertState: isError
+            ? AlertStates.ERROR
+            : isNoData
             ? AlertStates.NO_DATA
             : shouldAlertFire
             ? AlertStates.ALERT
