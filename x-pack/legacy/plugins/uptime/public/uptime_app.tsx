@@ -23,10 +23,8 @@ import { CommonlyUsedRange } from './components/functional/uptime_date_picker';
 import { store } from './state';
 import { setBasePath } from './state/actions';
 import { PageRouter } from './routes';
-import {
-  UptimeAlertsContextProvider,
-  UptimeAlertsFlyoutWrapper,
-} from './components/functional/alerts';
+import { UptimeAlertsFlyoutWrapper } from './components/connected';
+import { UptimeAlertsContextProvider } from './components/functional/alerts';
 
 export interface UptimeAppColors {
   danger: string;
