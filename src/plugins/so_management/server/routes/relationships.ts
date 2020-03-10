@@ -28,7 +28,7 @@ export const registerRelationshipsRoute = (
 ) => {
   router.get(
     {
-      path: '/api/kibana/management/saved_objects/relationships/{type}/{id}', // TODO: change
+      path: '/api/kibana/management/saved_objects/relationships/{type}/{id}',
       validate: {
         params: schema.object({
           type: schema.string(),

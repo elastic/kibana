@@ -28,7 +28,7 @@ export const registerFindRoute = (
 ) => {
   router.get(
     {
-      path: '/api/kibana/management/saved_objects/_find', // TODO: change
+      path: '/api/kibana/management/saved_objects/_find',
       validate: {
         query: schema.object({
           perPage: schema.number({ min: 0, defaultValue: 20 }),

@@ -24,7 +24,7 @@ import { findAll } from '../lib';
 export const registerScrollForCountRoute = (router: IRouter) => {
   router.post(
     {
-      path: '/api/kibana/management/saved_objects/scroll/counts', // TODO: change
+      path: '/api/kibana/management/saved_objects/scroll/counts',
       validate: {
         body: schema.object({
           typesToInclude: schema.arrayOf(schema.string()),

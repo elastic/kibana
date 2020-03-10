@@ -24,7 +24,7 @@ import { findAll } from '../lib';
 export const registerScrollForExportRoute = (router: IRouter) => {
   router.post(
     {
-      path: '/api/kibana/management/saved_objects/scroll/export', // TODO: change
+      path: '/api/kibana/management/saved_objects/scroll/export',
       validate: {
         body: schema.object({
           typesToInclude: schema.arrayOf(schema.string()),

@@ -79,9 +79,8 @@ export function savedObjectsMixin(kbnServer, server) {
   const provider = kbnServer.newPlatform.__internals.savedObjectsClientProvider;
 
   const importAndExportableTypes = typeRegistry
-    .getAllTypes()
-    .map(type => type.name)
-    .filter(type => typeRegistry.isImportableAndExportable(type));
+    .getImportableAndExportableTypes()
+    .map(type => type.name);
 
   const service = {
     types: visibleTypes,
