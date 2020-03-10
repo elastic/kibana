@@ -29,10 +29,12 @@ Array [
               },
             },
           },
-          "date_histogram": Object {
+          "auto_date_histogram": Object {
+            "buckets": 25,
             "field": "@timestamp",
+          },
+          "date_histogram": Object {
             "fixed_interval": "36000ms",
-            "min_doc_count": 0,
           },
         },
       },
@@ -96,10 +98,12 @@ Array [
               },
             },
           },
-          "date_histogram": Object {
+          "auto_date_histogram": Object {
+            "buckets": 25,
             "field": "@timestamp",
+          },
+          "date_histogram": Object {
             "fixed_interval": "36000ms",
-            "min_doc_count": 0,
           },
         },
       },
