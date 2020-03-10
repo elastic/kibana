@@ -105,13 +105,17 @@ export const postComment = async (newComment: CommentRequest, caseId: string): P
 };
 
 export const patchComment = async (
+  caseId: string,
   commentId: string,
   commentUpdate: string,
   version: string
 ): Promise<Partial<Comment>> => {
-  const response = await KibanaServices.get().http.fetch<CommentResponse>(`${CASES_URL}/comments`, {
-    method: 'PATCH',
-    body: JSON.stringify({ comment: commentUpdate, id: commentId, version }),
-  });
+  const response = await KibanaServices.get().http.fetch<CommentResponse>(
+    `${CASES_URL}/${caseId}/comments`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ comment: commentUpdate, id: commentId, version }),
+    }
+  );
   return convertToCamelCase<CommentResponse, Comment>(decodeCommentResponse(response));
 };
