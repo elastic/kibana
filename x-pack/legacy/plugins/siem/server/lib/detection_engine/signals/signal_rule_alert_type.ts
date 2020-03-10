@@ -176,9 +176,19 @@ export const signalRulesAlertType = ({
       }
 
       if (type === 'machine_learning') {
-        const signals = await findMlSignals(savedObject);
-        if (signals.length) {
-          logger.debug(`Found ${signals.length} signals`);
+        const { anomalies, interval: _interval } = await findMlSignals(
+          mlJobId!,
+          anomalyThreshold!,
+          from,
+          to,
+          services.callCluster
+        );
+
+        console.log('foundMlSignals', anomalies);
+        if (anomalies.length) {
+          logger.info(
+            `Found ${anomalies.length} anomalies in interval ${_interval}; generating signals`
+          );
         }
 
         return;
