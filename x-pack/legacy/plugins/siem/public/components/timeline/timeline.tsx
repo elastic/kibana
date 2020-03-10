@@ -190,7 +190,7 @@ export const TimelineComponent: React.FC<Props> = ({
         </TimelineHeaderContainer>
       </StyledEuiFlyoutHeader>
       <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
-      {combinedQueries !== null && (
+      {combinedQueries != null ? (
         <TimelineQuery
           eventType={eventType}
           id={id}
@@ -198,7 +198,7 @@ export const TimelineComponent: React.FC<Props> = ({
           fields={timelineQueryFields}
           sourceId="default"
           limit={itemsPerPage}
-          filterQuery={combinedQueries?.filterQuery}
+          filterQuery={combinedQueries.filterQuery}
           sortField={timelineQuerySortField}
         >
           {({
@@ -255,7 +255,7 @@ export const TimelineComponent: React.FC<Props> = ({
             </ManageTimelineContext>
           )}
         </TimelineQuery>
-      )}
+      ) : null}
     </TimelineContainer>
   );
 };

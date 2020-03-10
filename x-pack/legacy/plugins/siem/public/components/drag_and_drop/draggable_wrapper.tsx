@@ -27,9 +27,6 @@ export const DragEffects = styled.div``;
 
 DragEffects.displayName = 'DragEffects';
 
-export const DraggablePortalContext = createContext<boolean>(false);
-export const useDraggablePortalContext = () => useContext(DraggablePortalContext);
-
 /**
  * Wraps the `react-beautiful-dnd` error boundary. See also:
  * https://github.com/atlassian/react-beautiful-dnd/blob/v12.0.0/docs/guides/setup-problem-detection-and-error-recovery.md
@@ -89,7 +86,6 @@ export const DraggableWrapper = React.memo<Props>(
   ({ dataProvider, render, truncate }) => {
     const [providerRegistered, setProviderRegistered] = useState(false);
     const dispatch = useDispatch();
-    const usePortal = useDraggablePortalContext();
 
     const registerProvider = useCallback(() => {
       if (!providerRegistered) {
@@ -125,7 +121,7 @@ export const DraggableWrapper = React.memo<Props>(
                     <ConditionalPortal
                       isDragging={snapshot.isDragging}
                       registerProvider={registerProvider}
-                      usePortal={snapshot.isDragging && usePortal}
+                      usePortal={snapshot.isDragging}
                     >
                       <ProviderContainer
                         {...provided.draggableProps}

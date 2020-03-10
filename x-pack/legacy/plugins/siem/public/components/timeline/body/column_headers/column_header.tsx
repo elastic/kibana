@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { Resizable, ResizeCallback } from 're-resizable';
 
@@ -41,33 +41,47 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
   sort,
 }) => {
   const [isDragging, setIsDragging] = React.useState(false);
-  const handleResizeStop: ResizeCallback = (e, direction, ref, delta) => {
-    onColumnResized({ columnId: header.id, delta: delta.width });
+  const resizableEnable = { right: true };
+  const resizableSize = {
+    width: header.width,
+    height: 'auto',
   };
+  const resizableStyle: {
+    position: 'absolute' | 'relative';
+  } = {
+    position: isDragging ? 'absolute' : 'relative',
+  };
+  const resizableHandleComponent = {
+    right: <EventsHeadingHandle />,
+  };
+  const handleResizeStop: ResizeCallback = useCallback(
+    (e, direction, ref, delta) => {
+      onColumnResized({ columnId: header.id, delta: delta.width });
+    },
+    [header.id]
+  );
+  const draggableId = useMemo(
+    () =>
+      getDraggableFieldId({
+        contextId: `timeline-column-headers-${timelineId}`,
+        fieldId: header.id,
+      }),
+    [timelineId, header.id]
+  );
 
   return (
     <Resizable
-      enable={{ right: true }}
-      size={{
-        width: header.width,
-        height: 'auto',
-      }}
-      style={{
-        position: isDragging ? 'absolute' : 'relative',
-      }}
-      handleComponent={{
-        right: <EventsHeadingHandle />,
-      }}
+      enable={resizableEnable}
+      size={resizableSize}
+      style={resizableStyle}
+      handleComponent={resizableHandleComponent}
       onResizeStop={handleResizeStop}
     >
       <Draggable
         data-test-subj="draggable"
         // Required for drag events while hovering the sort button to work: https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/api/draggable.md#interactive-child-elements-within-a-draggable-
         disableInteractiveElementBlocking
-        draggableId={getDraggableFieldId({
-          contextId: `timeline-column-headers-${timelineId}`,
-          fieldId: header.id,
-        })}
+        draggableId={draggableId}
         index={draggableIndex}
         key={header.id}
         type={DRAG_TYPE_FIELD}
