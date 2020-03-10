@@ -114,22 +114,25 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
 
   const onSort = useCallback(
     (sc: Array<{ id: string; direction: 'asc' | 'desc' }>) => {
-      const valid = sc.reduce((v, c) => {
-        if (v === false) return v;
-        const columnType = dataGridColumns.find(dgc => dgc.id === c.id);
-        const validSortingType = columnType?.schema !== 'json';
-        if (validSortingType === false) {
+      // Check if an unsupported column type for sorting was selected.
+      const invalidSortingColumnns = sc.reduce<string[]>((arr, current) => {
+        const columnType = dataGridColumns.find(dgc => dgc.id === current.id);
+        if (columnType?.schema === 'json') {
+          arr.push(current.id);
+        }
+        return arr;
+      }, []);
+      if (invalidSortingColumnns.length === 0) {
+        setSortingColumns(sc);
+      } else {
+        invalidSortingColumnns.forEach(columnId => {
           toastNotifications.addDanger(
             i18n.translate('xpack.transform.sourceIndexPreview.invalidSortingColumnError', {
               defaultMessage: `The column '{columnId}' cannot be used for sorting.`,
-              values: { columnId: c.id },
+              values: { columnId },
             })
           );
-        }
-        return validSortingType;
-      }, true);
-      if (valid) {
-        setSortingColumns(sc);
+        });
       }
     },
     [dataGridColumns, setSortingColumns, toastNotifications]
