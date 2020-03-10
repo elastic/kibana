@@ -53,6 +53,11 @@ export interface Presentable<Context extends PresentableBaseContext = Presentabl
   getDisplayName(context: Context): string;
 
   /**
+   * This method should return a link if this item can be clicked on.
+   */
+  getHref?(context: Context): string | undefined;
+
+  /**
    * Returns a promise that resolves to true if this item is compatible given
    * the context and should be displayed to user, otherwise resolves to false.
    */

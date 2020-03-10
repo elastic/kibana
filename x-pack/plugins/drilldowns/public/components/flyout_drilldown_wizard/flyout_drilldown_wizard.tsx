@@ -15,24 +15,26 @@ import {
   txtEditDrilldownButtonLabel,
   txtEditDrilldownTitle,
 } from './i18n';
-import {
-  ActionBaseConfig,
-  ActionFactory,
-  ActionFactoryBaseContext,
-  ActionFactoryList,
-} from '../../../../advanced_ui_actions/public';
 import { DrilldownHelloBar } from '../drilldown_hello_bar';
+import {
+  AdvancedUiActionsActionFactoryDefinition as ActionFactoryDefinition,
+  AdvancedUiActionsActionFactory as ActionFactory,
+  AdvancedUiActionsAnyActionFactory as AnyActionFactory,
+} from '../../../../advanced_ui_actions/public';
 
-export interface DrilldownWizardConfig<ActionConfig extends ActionBaseConfig = ActionBaseConfig> {
+type ActionBaseConfig = object;
+type ActionFactoryBaseContext = object;
+
+export interface DrilldownWizardConfig<ActionConfig extends object = object> {
   name: string;
-  actionFactory?: ActionFactory<ActionConfig>;
+  actionFactory?: ActionFactory<ActionFactoryDefinition<ActionConfig, any, any>>;
   actionConfig?: ActionConfig;
 }
 
 export interface FlyoutDrilldownWizardProps<
   CurrentActionConfig extends ActionBaseConfig = ActionBaseConfig
 > {
-  drilldownActionFactories: ActionFactoryList;
+  drilldownActionFactories: AnyActionFactory[];
 
   onSubmit?: (drilldownWizardConfig: DrilldownWizardConfig) => void;
   onDelete?: () => void;

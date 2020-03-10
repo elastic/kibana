@@ -16,30 +16,29 @@ import {
 } from '@elastic/eui';
 import { txtChangeButton } from './i18n';
 import './action_wizard.scss';
-import {
-  ActionBaseConfig,
-  ActionFactory,
-  ActionFactoryList,
-  ActionFactoryBaseContext,
-} from '../../ui_actions_factory';
+import { AnyActionFactory } from '../../services';
 import { uiToReactComponent } from '../../../../../../src/plugins/kibana_react/public';
+
+type ActionBaseConfig = object;
+type ActionFactoryBaseContext = object;
 
 export interface ActionWizardProps {
   /**
    * List of available action factories
    */
-  actionFactories: ActionFactoryList;
+  actionFactories: AnyActionFactory[];
 
   /**
    * Currently selected action factory
    * undefined - is allowed and means that non is selected
    */
-  currentActionFactory?: ActionFactory;
+  currentActionFactory?: AnyActionFactory;
+
   /**
    * Action factory selected changed
    * null - means user click "change" and removed action factory selection
    */
-  onActionFactoryChange: (actionFactory: ActionFactory | null) => void;
+  onActionFactoryChange: (actionFactory: AnyActionFactory | null) => void;
 
   /**
    * current config for currently selected action factory
@@ -99,7 +98,7 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
 };
 
 interface SelectedActionFactoryProps {
-  actionFactory: ActionFactory;
+  actionFactory: AnyActionFactory;
   config: ActionBaseConfig;
   context: ActionFactoryBaseContext;
   onConfigChange: (config: ActionBaseConfig) => void;
@@ -155,9 +154,9 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
 };
 
 interface ActionFactorySelectorProps {
-  actionFactories: ActionFactoryList;
+  actionFactories: AnyActionFactory[];
   context: ActionFactoryBaseContext;
-  onActionFactorySelected: (actionFactory: ActionFactory) => void;
+  onActionFactorySelected: (actionFactory: AnyActionFactory) => void;
 }
 
 export const TEST_SUBJ_ACTION_FACTORY_ITEM = 'action-factory-item';

@@ -30,7 +30,7 @@ import {
   TimeBadgeActionContext,
 } from './custom_time_range_badge';
 import { CommonlyUsedRange } from './types';
-import { UiActionsFactoryService } from './ui_actions_factory';
+import { ActionFactoryService } from './services';
 
 interface SetupDependencies {
   embeddable: IEmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
@@ -43,10 +43,10 @@ interface StartDependencies {
 }
 
 export interface AdvancedUiActionsSetup {
-  actionFactory: Pick<UiActionsFactoryService, 'register'>;
+  actionFactory: Pick<ActionFactoryService, 'register'>;
 }
 export interface AdvancedUiActionsStart {
-  actionFactory: Pick<UiActionsFactoryService, 'getAll'>;
+  actionFactory: Pick<ActionFactoryService, 'getAll'>;
 }
 
 declare module '../../../../src/plugins/ui_actions/public' {
@@ -59,13 +59,13 @@ declare module '../../../../src/plugins/ui_actions/public' {
 export class AdvancedUiActionsPublicPlugin
   implements
     Plugin<AdvancedUiActionsSetup, AdvancedUiActionsStart, SetupDependencies, StartDependencies> {
-  private readonly actionFactoryService = new UiActionsFactoryService();
+  private readonly actionFactory = new ActionFactoryService();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { uiActions }: SetupDependencies): AdvancedUiActionsSetup {
     return {
-      actionFactory: this.actionFactoryService,
+      actionFactory: this.actionFactory,
     };
   }
 
@@ -90,11 +90,11 @@ export class AdvancedUiActionsPublicPlugin
     uiActions.attachAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
 
     return {
-      actionFactory: this.actionFactoryService,
+      actionFactory: this.actionFactory,
     };
   }
 
   public stop() {
-    this.actionFactoryService.clear();
+    this.actionFactory.clear();
   }
 }
