@@ -31,7 +31,6 @@ export const AlertFlyout = (props: Props) => {
       {triggersActionsUI && (
         <AlertsContextProvider
           value={{
-            toastNotifications: {} as any,
             metadata: {
               source: props.source,
               derivedIndexPattern: props.derivedIndexPattern,
