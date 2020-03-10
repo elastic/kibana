@@ -18,6 +18,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { OverlayStart, CoreStart, SavedObjectsStart, IUiSettingsClient } from 'kibana/public';
+import { Start as InspectorStart } from 'src/plugins/inspector/public';
 import { EmbeddableFactory, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import {
   SEARCHABLE_LIST_CONTAINER,
@@ -25,8 +28,15 @@ import {
   SearchableContainerInput,
 } from './searchable_list_container';
 
-interface StartServices {
+export interface StartServices {
+  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
   getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  uiActionsApi: UiActionsStart;
+  overlays: OverlayStart;
+  notifications: CoreStart['notifications'];
+  inspector: InspectorStart;
+  savedObject: SavedObjectsStart;
+  uiSettingsClient: IUiSettingsClient;
 }
 
 export class SearchableListContainerFactory extends EmbeddableFactory {
@@ -42,8 +52,8 @@ export class SearchableListContainerFactory extends EmbeddableFactory {
   }
 
   public async create(initialInput: SearchableContainerInput) {
-    const { getEmbeddableFactory } = await this.getStartServices();
-    return new SearchableListContainer(initialInput, getEmbeddableFactory);
+    const services = await this.getStartServices();
+    return new SearchableListContainer(initialInput, services);
   }
 
   public getDisplayName() {

@@ -23,6 +23,7 @@ import { BrowserRouter as Router, Route, withRouter, RouteComponentProps } from 
 
 import { EuiPage, EuiPageSideBar, EuiSideNav } from '@elastic/eui';
 
+import { EmbeddableExamplesStart } from 'examples/embeddable_examples/public/plugin';
 import { EmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { Start as InspectorStartContract } from '../../../src/plugins/inspector/public';
@@ -38,6 +39,7 @@ import { HelloWorldEmbeddableExample } from './hello_world_embeddable_example';
 import { TodoEmbeddableExample } from './todo_embeddable_example';
 import { ListContainerExample } from './list_container_example';
 import { EmbeddablePanelExample } from './embeddable_panel_example';
+import { SavedObjectEmbeddableExample } from './saved_object_embeddable_example';
 
 interface PageDef {
   title: string;
@@ -81,6 +83,7 @@ interface Props {
   inspector: InspectorStartContract;
   savedObject: SavedObjectsStart;
   uiSettingsClient: IUiSettingsClient;
+  createSampleData: EmbeddableExamplesStart['createSampleData'];
 }
 
 const EmbeddableExplorerApp = ({
@@ -93,6 +96,7 @@ const EmbeddableExplorerApp = ({
   overlays,
   uiActionsApi,
   notifications,
+  createSampleData,
 }: Props) => {
   const pages: PageDef[] = [
     {
@@ -127,6 +131,23 @@ const EmbeddableExplorerApp = ({
           savedObject={savedObject}
           notifications={notifications}
           inspector={inspector}
+        />
+      ),
+    },
+    {
+      title: 'Embeddables backed by saved objects',
+      id: 'savedObjectSection',
+      component: (
+        <SavedObjectEmbeddableExample
+          uiActionsApi={uiActionsApi}
+          getAllEmbeddableFactories={embeddableApi.getEmbeddableFactories}
+          getEmbeddableFactory={embeddableApi.getEmbeddableFactory}
+          overlays={overlays}
+          uiSettingsClient={uiSettingsClient}
+          savedObject={savedObject}
+          notifications={notifications}
+          inspector={inspector}
+          createSampleData={createSampleData}
         />
       ),
     },

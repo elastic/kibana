@@ -19,29 +19,31 @@
 import React from 'react';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
+import { EuiText } from '@elastic/eui';
+import { EuiAvatar } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
+import { EuiFlexGrid } from '@elastic/eui';
 import {
-  EuiText,
-  EuiAvatar,
-  EuiIcon,
-  EuiFlexGrid,
-  EuiListGroup,
-  EuiListGroupItem,
-} from '@elastic/eui';
-import { withEmbeddableSubscription } from '../../../../src/plugins/embeddable/public';
+  withEmbeddableSubscription,
+  EmbeddableOutput,
+} from '../../../../src/plugins/embeddable/public';
 import {
-  MultiTaskTodoEmbeddable,
-  MultiTaskTodoOutput,
-  MultiTaskTodoInput,
-} from './multi_task_todo_embeddable';
+  TodoSoEmbeddable,
+  TodoSoEmbeddableInput,
+  getTask,
+  getTitle,
+  getIcon,
+  TodoSoEmbeddableOutput,
+} from './todo_so_embeddable';
 
 interface Props {
-  embeddable: MultiTaskTodoEmbeddable;
-  input: MultiTaskTodoInput;
-  output: MultiTaskTodoOutput;
+  embeddable: TodoSoEmbeddable;
+  input: TodoSoEmbeddableInput;
+  output: EmbeddableOutput;
 }
 
-function wrapSearchTerms(task: string, search?: string) {
-  if (!search) return task;
+function wrapSearchTerms(task?: string, search?: string) {
+  if (!search || !task) return task;
   const parts = task.split(new RegExp(`(${search})`, 'g'));
   return parts.map((part, i) =>
     part === search ? (
@@ -54,34 +56,28 @@ function wrapSearchTerms(task: string, search?: string) {
   );
 }
 
-function renderTasks(tasks: MultiTaskTodoOutput['tasks'], search?: string) {
-  return tasks.map(task => (
-    <EuiListGroupItem
-      key={task}
-      data-test-subj="multiTaskTodoTask"
-      label={wrapSearchTerms(task, search)}
-    />
-  ));
-}
-
-export function MultiTaskTodoEmbeddableComponentInner({
-  input: { title, icon, search },
-  output: { tasks },
-}: Props) {
+export function TodoSoEmbeddableComponentInner({ input: { search }, embeddable }: Props) {
+  const task = getTask(embeddable);
+  const title = getTitle(embeddable);
+  const icon = getIcon(embeddable);
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup gutterSize="none">
       <EuiFlexItem grow={false}>
-        {icon ? <EuiIcon type={icon} size="l" /> : <EuiAvatar name={title} size="l" />}
+        {icon ? (
+          <EuiIcon type={icon ?? ''} size="l" />
+        ) : (
+          <EuiAvatar name={title ?? task ?? ''} size="l" />
+        )}
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGrid columns={1}>
+        <EuiFlexGrid columns={1} gutterSize="none">
           <EuiFlexItem>
-            <EuiText data-test-subj="multiTaskTodoTitle">
-              <h3>{wrapSearchTerms(title, search)}</h3>
+            <EuiText data-test-subj="todoSoEmbeddableTitle">
+              <h3>{wrapSearchTerms(title || '', search)}</h3>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiListGroup bordered={true}>{renderTasks(tasks, search)}</EuiListGroup>
+            <EuiText data-test-subj="todoSoEmbeddableTask">{wrapSearchTerms(task, search)}</EuiText>
           </EuiFlexItem>
         </EuiFlexGrid>
       </EuiFlexItem>
@@ -89,8 +85,9 @@ export function MultiTaskTodoEmbeddableComponentInner({
   );
 }
 
-export const MultiTaskTodoEmbeddableComponent = withEmbeddableSubscription<
-  MultiTaskTodoInput,
-  MultiTaskTodoOutput,
-  MultiTaskTodoEmbeddable
->(MultiTaskTodoEmbeddableComponentInner);
+export const TodoSoEmbeddableComponent = withEmbeddableSubscription<
+  TodoSoEmbeddableInput,
+  TodoSoEmbeddableOutput,
+  TodoSoEmbeddable,
+  {}
+>(TodoSoEmbeddableComponentInner);

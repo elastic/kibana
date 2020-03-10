@@ -25,7 +25,7 @@ import { ViewMode } from '../types';
 import { TriggerContextMapping } from '../ui_actions';
 import { EmbeddableActionStorage } from './embeddable_action_storage';
 
-function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
+export function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
 }
 
@@ -135,6 +135,16 @@ export abstract class Embeddable<
       this.onInputChanged(changes);
     }
   }
+
+  /**
+   * Implement replaceReferences if your Embeddable contains any references to saved objects (be sure
+   * also to propagate this call down to any nested Embeddable references, or other implementations that may have
+   * nested references, like expressions).  This supports functionality like "copy to space", when we want
+   * the copy to create copies of nested saved objects - we need to replace the ids.  It also supports saved object
+   * id migrations although that should be very rare.
+   * @param references
+   */
+  public replaceReferences(references: Array<{ oldId: string; type: string; newId: string }>) {}
 
   public render(domNode: HTMLElement | Element): void {
     if (this.destoyed) {

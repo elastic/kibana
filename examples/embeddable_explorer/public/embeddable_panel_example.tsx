@@ -34,6 +34,7 @@ import {
   EmbeddablePanel,
   EmbeddableStart,
   IEmbeddable,
+  ViewMode,
 } from '../../../src/plugins/embeddable/public';
 import {
   HELLO_WORLD_EMBEDDABLE,
@@ -69,6 +70,7 @@ export function EmbeddablePanelExample({
   const searchableInput = {
     id: '1',
     title: 'My searchable todo list',
+    viewMode: ViewMode.EDIT,
     panels: {
       '1': {
         type: HELLO_WORLD_EMBEDDABLE,

@@ -32,6 +32,7 @@ import {
   FilterActionContext,
   ACTION_APPLY_FILTER,
 } from './lib';
+import { EmbeddableStart } from './plugin';
 
 declare module '../../ui_actions/public' {
   export interface TriggerContextMapping {
@@ -53,7 +54,10 @@ declare module '../../ui_actions/public' {
  * This method initializes Embeddable plugin with initial set of
  * triggers and actions.
  */
-export const bootstrap = (uiActions: UiActionsSetup) => {
+export const bootstrap = (
+  uiActions: UiActionsSetup,
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory']
+) => {
   uiActions.registerTrigger(contextMenuTrigger);
   uiActions.registerTrigger(panelBadgeTrigger);
 

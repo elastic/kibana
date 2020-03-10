@@ -16,21 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObjectEmbeddableInput } from 'src/plugins/embeddable/public';
-import { PanelState, EmbeddableInput } from '../embeddable_plugin';
-export type PanelId = string;
-export type SavedObjectId = string;
 
-export interface GridData {
-  w: number;
-  h: number;
-  x: number;
-  y: number;
-  i: string;
-}
+import { SavedObjectsType } from 'kibana/server';
 
-export interface DashboardPanelState<
-  TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
-> extends PanelState<TEmbeddableInput> {
-  readonly gridData: GridData;
-}
+export const todoSavedObject: SavedObjectsType = {
+  name: 'todo',
+  hidden: false,
+  namespaceAgnostic: true,
+  mappings: {
+    properties: {
+      title: {
+        type: 'keyword',
+      },
+      task: {
+        type: 'text',
+      },
+      icon: {
+        type: 'keyword',
+      },
+    },
+  },
+  migrations: {},
+};

@@ -113,7 +113,8 @@ export class TodoEmbeddableExample extends React.Component<Props, State> {
                 <code>
                   const &#123; task, title, icon &#125; = this.state;
                   <br />
-                  this.embeddable.updateInput(&#123; task, title, icon &#125;);
+                  this.embeddable.updateInput(&#123; attributes: &#123; task, title, icon &#125;
+                  &#125;);
                 </code>
               </pre>
               <p>

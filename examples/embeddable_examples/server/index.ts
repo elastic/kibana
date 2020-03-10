@@ -16,21 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObjectEmbeddableInput } from 'src/plugins/embeddable/public';
-import { PanelState, EmbeddableInput } from '../embeddable_plugin';
-export type PanelId = string;
-export type SavedObjectId = string;
 
-export interface GridData {
-  w: number;
-  h: number;
-  x: number;
-  y: number;
-  i: string;
-}
+import { PluginInitializer } from 'kibana/server';
 
-export interface DashboardPanelState<
-  TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
-> extends PanelState<TEmbeddableInput> {
-  readonly gridData: GridData;
-}
+import { EmbeddableExamplesPlugin } from './plugin';
+
+export const plugin: PluginInitializer<void, void> = () => new EmbeddableExamplesPlugin();

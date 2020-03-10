@@ -18,6 +18,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { OverlayStart, CoreStart, SavedObjectsStart, IUiSettingsClient } from 'kibana/public';
+import { Start as InspectorStart } from 'src/plugins/inspector/public';
 import {
   EmbeddableFactory,
   ContainerInput,
@@ -25,8 +28,15 @@ import {
 } from '../../../../src/plugins/embeddable/public';
 import { LIST_CONTAINER, ListContainer } from './list_container';
 
-interface StartServices {
+export interface StartServices {
+  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
   getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  uiActionsApi: UiActionsStart;
+  overlays: OverlayStart;
+  notifications: CoreStart['notifications'];
+  inspector: InspectorStart;
+  savedObject: SavedObjectsStart;
+  uiSettingsClient: IUiSettingsClient;
 }
 
 export class ListContainerFactory extends EmbeddableFactory {
@@ -42,8 +52,8 @@ export class ListContainerFactory extends EmbeddableFactory {
   }
 
   public async create(initialInput: ContainerInput) {
-    const { getEmbeddableFactory } = await this.getStartServices();
-    return new ListContainer(initialInput, getEmbeddableFactory);
+    const services = await this.getStartServices();
+    return new ListContainer(initialInput, services);
   }
 
   public getDisplayName() {
