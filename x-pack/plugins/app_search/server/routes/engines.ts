@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 export function registerEnginesRoute({ router, config }) {
   router.get(
     {
-      path: '/api/appsearch/engines',
+      path: '/api/app_search/engines',
       validate: {
         query: schema.object({
           type: schema.string(),

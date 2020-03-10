@@ -43,7 +43,7 @@ export const EngineOverview: ReactFC<IEngineOverviewProps> = ({ http, ...props }
   const [metaEnginesTotal, setMetaEnginesTotal] = useState(0);
 
   const getEnginesData = ({ type, pageIndex }) => {
-    return http.get('../api/appsearch/engines', {
+    return http.get('../api/app_search/engines', {
       query: { type, pageIndex },
     });
   };
