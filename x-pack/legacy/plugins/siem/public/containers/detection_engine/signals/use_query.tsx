@@ -11,7 +11,7 @@ import { SignalSearchResponse } from './types';
 
 type Func = () => void;
 
-interface Return<Hit, Aggs> {
+export interface ReturnQuerySignals<Hit, Aggs> {
   loading: boolean;
   data: SignalSearchResponse<Hit, Aggs> | null;
   setQuery: React.Dispatch<SetStateAction<object>>;
@@ -29,10 +29,10 @@ interface Return<Hit, Aggs> {
 export const useQuerySignals = <Hit, Aggs>(
   initialQuery: object,
   indexName?: string | null
-): Return<Hit, Aggs> => {
+): ReturnQuerySignals<Hit, Aggs> => {
   const [query, setQuery] = useState(initialQuery);
   const [signals, setSignals] = useState<
-    Pick<Return<Hit, Aggs>, 'data' | 'setQuery' | 'response' | 'request' | 'refetch'>
+    Pick<ReturnQuerySignals<Hit, Aggs>, 'data' | 'setQuery' | 'response' | 'request' | 'refetch'>
   >({
     data: null,
     response: '',

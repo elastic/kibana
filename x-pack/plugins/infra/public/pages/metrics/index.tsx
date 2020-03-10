@@ -19,6 +19,7 @@ import { NodeDetailsPage } from './components/node_details_page';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 import { useMetricsTimeContext } from './hooks/use_metrics_time';
+import { useLinkProps } from '../../hooks/use_link_props';
 
 const DetailPageContent = euiStyled(PageContent)`
   overflow: auto;
@@ -71,9 +72,14 @@ export const MetricDetail = withMetricPageProviders(
       [sideNav]
     );
 
+    const metricsLinkProps = useLinkProps({
+      app: 'metrics',
+      pathname: '/',
+    });
+
     const breadcrumbs = [
       {
-        href: '#/',
+        ...metricsLinkProps,
         text: i18n.translate('xpack.infra.header.infrastructureTitle', {
           defaultMessage: 'Metrics',
         }),
