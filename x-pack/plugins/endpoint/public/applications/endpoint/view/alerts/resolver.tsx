@@ -20,7 +20,7 @@ export const AlertDetailResolver = styled(
       const { store } = storeFactory(context);
 
       return (
-        <div className={className} data-test-subj="alertResolver" data-testid="alertResolver">
+        <div className={className} data-test-subj="alertResolver">
           <Provider store={store}>
             <Resolver selectedEvent={selectedEvent} />
           </Provider>
