@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { AlertMonitorStatusComponent } from './alerts/alert_monitor_status';
 export { UptimeAlertsFlyoutWrapperComponent } from './alerts/uptime_alerts_flyout_wrapper';
 export { ToggleAlertFlyoutButtonComponent } from './alerts/toggle_alert_flyout_button';
 export { DonutChart } from './charts/donut_chart';

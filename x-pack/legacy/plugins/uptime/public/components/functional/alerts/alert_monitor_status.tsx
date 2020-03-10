@@ -18,9 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useSelector } from 'react-redux';
 import { KueryBar } from '../../connected';
-import { selectMonitorStatusAlert } from '../../../state/selectors';
 
 interface AlertNumberFieldProps {
   'data-test-subj': string;
@@ -112,6 +110,8 @@ export const selectedLocationsToString = (selectedLocations: any[]) =>
 interface AlertMonitorStatusProps {
   autocomplete: any;
   enabled: boolean;
+  filters: string;
+  locations: string[];
   numTimes: number;
   setAlertParams: (key: string, value: any) => void;
   timerange: {
@@ -120,8 +120,8 @@ interface AlertMonitorStatusProps {
   };
 }
 
-export const AlertMonitorStatus: React.FC<AlertMonitorStatusProps> = props => {
-  const { filters, locations } = useSelector(selectMonitorStatusAlert);
+export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = props => {
+  const { filters, locations } = props;
   const [numTimes, setNumTimes] = useState<number>(5);
   const [numMins, setNumMins] = useState<number>(15);
   const [allLabels, setAllLabels] = useState<boolean>(true);

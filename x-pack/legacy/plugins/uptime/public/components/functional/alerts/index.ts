@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { AlertMonitorStatus } from './alert_monitor_status';
+export { AlertMonitorStatusComponent } from './alert_monitor_status';
 export { ToggleAlertFlyoutButtonComponent } from './toggle_alert_flyout_button';
 export { UptimeAlertsContextProvider } from './uptime_alerts_context_provider';
 export { UptimeAlertsFlyoutWrapperComponent } from './uptime_alerts_flyout_wrapper';
