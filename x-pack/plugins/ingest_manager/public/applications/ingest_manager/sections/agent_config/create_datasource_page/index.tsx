@@ -110,9 +110,9 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   // Url to first and second steps
   const SELECT_PACKAGE_URL = useLink(`${basePath}${CREATE_DATASOURCE_STEP_PATHS.selectPackage}`);
   const SELECT_CONFIG_URL = useLink(`${basePath}${CREATE_DATASOURCE_STEP_PATHS.selectConfig}`);
-  const REVIEW_URL = useLink(`${basePath}${CREATE_DATASOURCE_STEP_PATHS.review}`);
+  const CONFIGURE_DATASOURCE_URL = useLink(`${basePath}${CREATE_DATASOURCE_STEP_PATHS.configure}`);
   const firstStepUrl = from === 'config' ? SELECT_PACKAGE_URL : SELECT_CONFIG_URL;
-  const secondStepUrl = REVIEW_URL;
+  const secondStepUrl = CONFIGURE_DATASOURCE_URL;
 
   // Redirect to second step
   const redirectToSecondStep = (
