@@ -12,7 +12,7 @@ const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
 class OutputService {
   public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
-    const outputs = await soClient.find({
+    const outputs = await soClient.find<Output>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       filter: 'outputs.attributes.is_default:true',
     });
@@ -24,8 +24,13 @@ class OutputService {
         ca_sha256: appContextService.getConfig()!.fleet.elasticsearch.ca_sha256,
       } as NewOutput;
 
-      await this.create(soClient, newDefaultOutput);
+      return await this.create(soClient, newDefaultOutput);
     }
+
+    return {
+      id: outputs.saved_objects[0].id,
+      ...outputs.saved_objects[0].attributes,
+    };
   }
 
   public async updateOutput(

@@ -9,16 +9,66 @@ import { CallESAsCurrentUser } from '../types';
 import { agentConfigService } from './agent_config';
 import { outputService } from './output';
 import { ensureInstalledDefaultPackages } from './epm/packages/install';
+import {
+  packageToConfigDatasourceInputs,
+  Datasource,
+  AgentConfig,
+  Installation,
+  Output,
+} from '../../common';
+import { getPackageInfo } from './epm/packages';
+import { datasourceService } from './datasource';
 
 export async function setup(
   soClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ) {
-  await Promise.all([
-    outputService.ensureDefaultOutput(soClient),
-    agentConfigService.ensureDefaultAgentConfig(soClient),
-
+  const [installedPackages, defaultOutput, config] = await Promise.all([
     // packages installed by default
     ensureInstalledDefaultPackages(soClient, callCluster),
+    outputService.ensureDefaultOutput(soClient),
+    agentConfigService.ensureDefaultAgentConfig(soClient),
   ]);
+
+  // ensure default packages are added to the default conifg
+  const configWithDatasource = (await agentConfigService.get(
+    soClient,
+    config.id,
+    true
+  )) as AgentConfig;
+  for (const installedPackage of installedPackages) {
+    const datasource = (configWithDatasource.datasources as Datasource[]).find(
+      d => d.package?.name === installedPackage.name
+    );
+
+    if (!datasource) {
+      await addPackageToConfig(soClient, installedPackage, configWithDatasource, defaultOutput);
+    }
+  }
+}
+
+async function addPackageToConfig(
+  soClient: SavedObjectsClientContract,
+  packageToInstall: Installation,
+  config: AgentConfig,
+  defaultOutput: Output
+) {
+  const packageInfo = await getPackageInfo({
+    savedObjectsClient: soClient,
+    pkgkey: `${packageToInstall.name}-${packageToInstall.version}`,
+  });
+  const datasource = await datasourceService.create(soClient, {
+    name: `${packageInfo.name}-1`,
+    enabled: true,
+    package: {
+      name: packageInfo.name,
+      title: packageInfo.title,
+      version: packageInfo.version,
+    },
+    inputs: packageToConfigDatasourceInputs(packageInfo),
+    config_id: config.id,
+    output_id: defaultOutput.id,
+  });
+  // Assign it to the given agent config
+  await agentConfigService.assignDatasources(soClient, datasource.config_id, [datasource.id]);
 }
