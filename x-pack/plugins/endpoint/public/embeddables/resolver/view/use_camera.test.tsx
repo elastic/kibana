@@ -32,7 +32,7 @@ describe('useCamera on an unpainted element', () => {
       const camera = useCamera();
       const { ref, onMouseDown } = camera;
       projectionMatrix = camera.projectionMatrix;
-      return <div data-testid={testID} onMouseDown={onMouseDown} ref={ref} />;
+      return <div data-test-subj={testID} onMouseDown={onMouseDown} ref={ref} />;
     };
 
     simulator = sideEffectSimulator();
