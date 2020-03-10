@@ -9,6 +9,7 @@ import { EuiIcon, EuiSuperSelect } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { Connector } from '../../../../containers/case/configure/types';
+import { connectors as connectorsDefinition } from '../../../../lib/connectors/config';
 import * as i18n from './translations';
 
 interface Props {
@@ -52,7 +53,10 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
             value: connector.id,
             inputDisplay: (
               <>
-                <EuiIconExtended type="logoWebhook" size={ICON_SIZE} />
+                <EuiIconExtended
+                  type={connectorsDefinition[connector.actionTypeId].logo}
+                  size={ICON_SIZE}
+                />
                 <span>{connector.name}</span>
               </>
             ),
