@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Squeeze } from 'good-squeeze';
+import { Squeeze } from '@hapi/good-squeeze';
 import { createWriteStream as writeStr } from 'fs';
 
 import LogFormatJson from './log_format_json';
