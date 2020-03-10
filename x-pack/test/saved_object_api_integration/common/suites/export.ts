@@ -59,7 +59,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql({
       statusCode: 400,
       error: 'Bad Request',
-      message: `[request body.objects.0.type]: hiddentype is not exportable`,
+      message: `Trying to export object(s) with non-exportable types: hiddentype:hiddentype_1`,
     });
   };
 

@@ -31,23 +31,27 @@ export const LogsPageContent: React.FunctionComponent = () => {
   const logAnalysisCapabilities = useLogAnalysisCapabilitiesContext();
 
   const streamTab = {
+    app: 'logs',
     title: streamTabTitle,
-    path: '/stream',
+    pathname: '/stream',
   };
 
   const logRateTab = {
+    app: 'logs',
     title: logRateTabTitle,
-    path: '/log-rate',
+    pathname: '/log-rate',
   };
 
   const logCategoriesTab = {
+    app: 'logs',
     title: logCategoriesTabTitle,
-    path: '/log-categories',
+    pathname: '/log-categories',
   };
 
   const settingsTab = {
+    app: 'logs',
     title: settingsTabTitle,
-    path: '/settings',
+    pathname: '/settings',
   };
 
   return (
@@ -85,11 +89,11 @@ export const LogsPageContent: React.FunctionComponent = () => {
           </AppNavigation>
 
           <Switch>
-            <Route path={streamTab.path} component={StreamPage} />
-            <Route path={logRateTab.path} component={LogEntryRatePage} />
-            <Route path={logCategoriesTab.path} component={LogEntryCategoriesPage} />
-            <Route path={settingsTab.path} component={LogsSettingsPage} />
-            <RedirectWithQueryParams from={'/analysis'} to={logRateTab.path} exact />
+            <Route path={streamTab.pathname} component={StreamPage} />
+            <Route path={logRateTab.pathname} component={LogEntryRatePage} />
+            <Route path={logCategoriesTab.pathname} component={LogEntryCategoriesPage} />
+            <Route path={settingsTab.pathname} component={LogsSettingsPage} />
+            <RedirectWithQueryParams from={'/analysis'} to={logRateTab.pathname} exact />
           </Switch>
         </>
       )}
