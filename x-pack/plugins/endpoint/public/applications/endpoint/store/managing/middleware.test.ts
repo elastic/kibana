@@ -8,6 +8,7 @@ import { applyMiddleware, createStore, Dispatch, Store } from 'redux';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { managementListReducer, managementMiddlewareFactory } from './index';
 import { EndpointMetadata, EndpointResultList } from '../../../../../common/types';
+import { EndpointDocGenerator } from '../../../../../common/generate_data';
 import { ManagementListState } from '../../types';
 import { AppAction } from '../action';
 import { listData } from './selectors';
@@ -18,34 +19,14 @@ describe('endpoint list saga', () => {
   let store: Store<ManagementListState>;
   let getState: typeof store['getState'];
   let dispatch: Dispatch<AppAction>;
+
+  const generator = new EndpointDocGenerator();
   // https://github.com/elastic/endpoint-app-team/issues/131
   const generateEndpoint = (): EndpointMetadata => {
-    return {
-      event: {
-        created: new Date(0),
-      },
-      endpoint: {
-        policy: {
-          id: '',
-        },
-      },
-      agent: {
-        version: '',
-        id: '',
-      },
-      host: {
-        id: '',
-        hostname: '',
-        ip: [''],
-        mac: [''],
-        os: {
-          name: '',
-          full: '',
-          version: '',
-        },
-      },
-    };
+    return generator.generateEndpointMetadata(new Date().getTime());
   };
+
+  let history: History<never>;
   const getEndpointListApiResponse = (): EndpointResultList => {
     return {
       endpoints: [generateEndpoint()],

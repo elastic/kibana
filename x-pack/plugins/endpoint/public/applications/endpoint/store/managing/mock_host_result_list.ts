@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertResultList } from '../../../../../common/types';
+import { EndpointResultList } from '../../../../../common/types';
 import { EndpointDocGenerator } from '../../../../../common/generate_data';
 
-export const mockAlertResultList: (options?: {
+export const mockHostResultList: (options?: {
   total?: number;
   request_page_size?: number;
   request_page_index?: number;
-}) => AlertResultList = (options = {}) => {
+}) => EndpointResultList = (options = {}) => {
   const {
     total = 1,
     request_page_size: requestPageSize = 10,
@@ -24,26 +24,16 @@ export const mockAlertResultList: (options?: {
   // total - numberToSkip is the count of non-skipped ones, but return no more than a pageSize, and no less than 0
   const actualCountToReturn = Math.max(Math.min(total - numberToSkip, requestPageSize), 0);
 
-  const alerts = [];
-  const generator = new EndpointDocGenerator();
+  const endpoints = [];
   for (let index = 0; index < actualCountToReturn; index++) {
-    alerts.push({
-      ...generator.generateAlert(new Date().getTime() + index * 1000),
-      ...{
-        id: 'xDUYMHABAJk0XnHd8rrd' + index,
-        prev: null,
-        next: null,
-      },
-    });
+    const generator = new EndpointDocGenerator('seed');
+    endpoints.push(generator.generateEndpointMetadata());
   }
-  const mock: AlertResultList = {
-    alerts,
+  const mock: EndpointResultList = {
+    endpoints,
     total,
     request_page_size: requestPageSize,
     request_page_index: requestPageIndex,
-    next: '/api/endpoint/alerts?after=1542341895000&after=2f1c0928-3876-4e11-acbb-9199257c7b1c',
-    prev: '/api/endpoint/alerts?before=1542341895000&before=2f1c0928-3876-4e11-acbb-9199257c7b1c',
-    result_from_index: 0,
   };
   return mock;
 };
