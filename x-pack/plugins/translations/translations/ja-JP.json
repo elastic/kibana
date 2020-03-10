@@ -1345,7 +1345,7 @@
     "kbn.management.landing.text": "すべてのツールの一覧は、左のメニューにあります。",
     "kbn.management.objects.confirmModalOptions.deleteButtonLabel": "削除",
     "kbn.management.objects.confirmModalOptions.modalDescription": "削除されたオブジェクトは復元できません",
-    "kbn.management.objects.confirmModalOptions.modalTitle": "保存された Kibana オブジェクトを削除しますか？",
+    "kbn.management.objects.confirmModalOptions.modalTitle": "{title} を削除しますか？",
     "kbn.management.objects.deleteSavedObjectsConfirmModalDescription": "この操作は次の保存されたオブジェクトを削除します:",
     "kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel": "キャンセル",
     "kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel": "削除",

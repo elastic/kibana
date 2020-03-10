@@ -1345,7 +1345,7 @@
     "kbn.management.landing.text": "在左侧菜单中可找到完整工具列表",
     "kbn.management.objects.confirmModalOptions.deleteButtonLabel": "删除",
     "kbn.management.objects.confirmModalOptions.modalDescription": "您无法恢复删除的对象",
-    "kbn.management.objects.confirmModalOptions.modalTitle": "删除已保存 Kibana 对象？",
+    "kbn.management.objects.confirmModalOptions.modalTitle": "删除 {title}?",
     "kbn.management.objects.deleteSavedObjectsConfirmModalDescription": "此操作将删除以下已保存对象：",
     "kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel": "取消",
     "kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel": "删除",
