@@ -134,14 +134,15 @@ Invalid value undefined supplied to : (Partial<{ filters: string }> & { location
 
   describe('initMonitorStatusAlertType', () => {
     expect(initMonitorStatusAlertType({ autocomplete: {} })).toMatchInlineSnapshot(`
-        Object {
-          "alertParamsExpression": [Function],
-          "defaultActionMessage": "Monitor [{{ctx.metadata.name}}] is down",
-          "iconClass": "uptimeApp",
-          "id": "xpack.uptime.alerts.downMonitor",
-          "name": "Uptime Monitor Status",
-          "validate": [Function],
-        }
-      `);
+      Object {
+        "alertParamsExpression": [Function],
+        "defaultActionMessage": "{{context.message}}
+      {{context.completeIdList}}",
+        "iconClass": "uptimeApp",
+        "id": "xpack.uptime.alerts.downMonitor",
+        "name": "Uptime Monitor Status",
+        "validate": [Function],
+      }
+    `);
   });
 });
