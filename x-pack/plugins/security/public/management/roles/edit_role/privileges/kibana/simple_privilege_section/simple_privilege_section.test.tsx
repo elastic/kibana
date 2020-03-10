@@ -71,6 +71,7 @@ const buildProps = (customProps: any = {}) => {
     kibanaPrivileges,
     features,
     onChange: jest.fn(),
+    canCustomizeSubFeaturePrivileges: true,
     ...customProps,
     role,
   };

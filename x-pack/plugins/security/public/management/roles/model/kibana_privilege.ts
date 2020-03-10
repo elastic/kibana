@@ -20,7 +20,8 @@ export class KibanaPrivilege {
   private checkActions(knownActions: string[], candidateActions: string[]) {
     const missing = candidateActions.filter(action => !knownActions.includes(action));
 
-    const hasAllRequested = missing.length === 0;
+    const hasAllRequested =
+      knownActions.length > 0 && candidateActions.length > 0 && missing.length === 0;
 
     return {
       missing,

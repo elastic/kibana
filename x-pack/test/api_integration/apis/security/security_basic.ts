@@ -4,19 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ loadTestFile }) {
-  describe('security', function() {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function({ loadTestFile }: FtrProviderContext) {
+  describe('security (basic license)', function() {
     this.tags('ciGroup6');
 
-    // Updates here should be mirrored in `./secuirity_basic.ts` if tests
-    // should also run under a basic license.
+    // Updates here should be mirrored in `./index.js` if tests
+    // should also run under a trial/platinum license.
 
     loadTestFile(require.resolve('./basic_login'));
     loadTestFile(require.resolve('./builtin_es_privileges'));
     loadTestFile(require.resolve('./change_password'));
     loadTestFile(require.resolve('./index_fields'));
     loadTestFile(require.resolve('./roles'));
-    loadTestFile(require.resolve('./privileges'));
+    loadTestFile(require.resolve('./privileges_basic'));
     loadTestFile(require.resolve('./session'));
   });
 }

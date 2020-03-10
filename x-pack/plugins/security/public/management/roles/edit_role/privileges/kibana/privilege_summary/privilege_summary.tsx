@@ -25,6 +25,7 @@ interface Props {
   role: Role;
   spaces: Space[];
   kibanaPrivileges: KibanaPrivileges;
+  canCustomizeSubFeaturePrivileges: boolean;
 }
 export const PrivilegeSummary = (props: Props) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -53,6 +54,7 @@ export const PrivilegeSummary = (props: Props) => {
                 role={props.role}
                 spaces={props.spaces}
                 kibanaPrivileges={props.kibanaPrivileges}
+                canCustomizeSubFeaturePrivileges={props.canCustomizeSubFeaturePrivileges}
               />
             </EuiModalBody>
             <EuiModalFooter>

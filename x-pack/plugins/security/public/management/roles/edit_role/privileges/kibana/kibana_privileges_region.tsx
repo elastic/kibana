@@ -18,6 +18,7 @@ import { KibanaPrivileges } from '../../../model';
 interface Props {
   role: Role;
   spacesEnabled: boolean;
+  canCustomizeSubFeaturePrivileges: boolean;
   spaces?: Space[];
   uiCapabilities: Capabilities;
   editable: boolean;
@@ -40,6 +41,7 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
       kibanaPrivileges,
       role,
       spacesEnabled,
+      canCustomizeSubFeaturePrivileges,
       spaces = [],
       uiCapabilities,
       onChange,
@@ -60,6 +62,7 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
           uiCapabilities={uiCapabilities}
           onChange={onChange}
           editable={editable}
+          canCustomizeSubFeaturePrivileges={canCustomizeSubFeaturePrivileges}
           validator={validator}
         />
       );
@@ -70,6 +73,7 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
           role={role}
           onChange={onChange}
           editable={editable}
+          canCustomizeSubFeaturePrivileges={canCustomizeSubFeaturePrivileges}
         />
       );
     }

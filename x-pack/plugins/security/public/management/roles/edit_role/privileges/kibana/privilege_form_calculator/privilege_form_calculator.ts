@@ -272,7 +272,18 @@ export class PrivilegeFormCalculator {
 
     return feature.getPrimaryFeaturePrivileges().find(fp => {
       const correspondingMinimalPrivilegeId = fp.getMinimalPrivilegeId();
-      const hasMinimalPrivileges = feature.subFeatures.length > 0;
+
+      const correspendingMinimalPrivilege = feature
+        .getMinimalFeaturePrivileges()
+        .find(mp => mp.id === correspondingMinimalPrivilegeId)!;
+
+      // There are two cases where the minimal privileges aren't available:
+      // 1. The feature has no registered sub-features
+      // 2. Sub-feature privileges cannot be customized. When this is the case, the minimal privileges aren't registered with ES,
+      // so they end up represented in the UI as an empty privilege. Empty privileges cannot be granted other privileges, so if we
+      // encounter a minimal privilege that isn't granted by it's correspending primary, then we know we've encountered this scenario.
+      const hasMinimalPrivileges =
+        feature.subFeatures.length > 0 && fp.grantsPrivilege(correspendingMinimalPrivilege);
       return (
         selectedFeaturePrivileges.includes(fp.id) ||
         (hasMinimalPrivileges &&

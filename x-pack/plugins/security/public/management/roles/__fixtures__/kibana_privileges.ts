@@ -9,13 +9,33 @@ import { Actions } from '../../../../server/authorization';
 import { privilegesFactory } from '../../../../server/authorization/privileges';
 import { Feature } from '../../../../../features/public';
 import { KibanaPrivileges } from '../model';
+import { SecurityLicenseFeatures } from '../../..';
 
-export const createRawKibanaPrivileges = (features: Feature[]) => {
-  return privilegesFactory(new Actions('unit_test_version'), {
+export const createRawKibanaPrivileges = (
+  features: Feature[],
+  { allowSubFeaturePrivileges = true } = {}
+) => {
+  const featuresService = {
     getFeatures: () => features,
-  }).get();
+  };
+
+  const licensingService = {
+    getFeatures: () => ({ allowSubFeaturePrivileges } as SecurityLicenseFeatures),
+  };
+
+  return privilegesFactory(
+    new Actions('unit_test_version'),
+    featuresService,
+    licensingService
+  ).get();
 };
 
-export const createKibanaPrivileges = (features: Feature[]) => {
-  return new KibanaPrivileges(createRawKibanaPrivileges(features), features);
+export const createKibanaPrivileges = (
+  features: Feature[],
+  { allowSubFeaturePrivileges = true } = {}
+) => {
+  return new KibanaPrivileges(
+    createRawKibanaPrivileges(features, { allowSubFeaturePrivileges }),
+    features
+  );
 };

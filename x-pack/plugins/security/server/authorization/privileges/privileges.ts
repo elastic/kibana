@@ -5,6 +5,7 @@
  */
 
 import { uniq } from 'lodash';
+import { SecurityLicense } from '../../../common/licensing';
 import { Feature } from '../../../../features/server';
 import { RawKibanaPrivileges } from '../../../common/model';
 import { Actions } from '../actions';
@@ -19,12 +20,17 @@ export interface PrivilegesService {
   get(): RawKibanaPrivileges;
 }
 
-export function privilegesFactory(actions: Actions, featuresService: FeaturesService) {
+export function privilegesFactory(
+  actions: Actions,
+  featuresService: FeaturesService,
+  licenseService: Pick<SecurityLicense, 'getFeatures'>
+) {
   const featurePrivilegeBuilder = featurePrivilegeBuilderFactory(actions);
 
   return {
     get() {
       const features = featuresService.getFeatures();
+      const { allowSubFeaturePrivileges } = licenseService.getFeatures();
       const basePrivilegeFeatures = features.filter(feature => !feature.excludeFromBasePrivileges);
 
       let allActions: string[] = [];
@@ -59,7 +65,7 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
           ];
         }
 
-        if (feature.subFeatures?.length > 0) {
+        if (allowSubFeaturePrivileges && feature.subFeatures?.length > 0) {
           for (const featurePrivilege of featurePrivilegeIterator(feature, {
             augmentWithSubFeaturePrivileges: false,
           })) {
@@ -69,14 +75,14 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
               ...uniq(featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature)),
             ];
           }
-        }
 
-        for (const subFeaturePrivilege of subFeaturePrivilegeIterator(feature)) {
-          featurePrivileges[feature.id][subFeaturePrivilege.id] = [
-            actions.login,
-            actions.version,
-            ...uniq(featurePrivilegeBuilder.getActions(subFeaturePrivilege, feature)),
-          ];
+          for (const subFeaturePrivilege of subFeaturePrivilegeIterator(feature)) {
+            featurePrivileges[feature.id][subFeaturePrivilege.id] = [
+              actions.login,
+              actions.version,
+              ...uniq(featurePrivilegeBuilder.getActions(subFeaturePrivilege, feature)),
+            ];
+          }
         }
 
         if (Object.keys(featurePrivileges[feature.id]).length === 0) {

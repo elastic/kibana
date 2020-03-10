@@ -29,6 +29,7 @@ interface Props {
   role: Role;
   spaces: Space[];
   kibanaPrivileges: KibanaPrivileges;
+  canCustomizeSubFeaturePrivileges: boolean;
 }
 
 function getColumnKey(entry: RoleKibanaPrivilege) {
@@ -126,11 +127,11 @@ export const PrivilegeSummaryTable = (props: Props) => {
     };
   });
 
-  const columns: Array<EuiBasicTableColumn<any>> = [
-    rowExpanderColumn,
-    featureColumn,
-    ...privilegeColumns,
-  ];
+  const columns: Array<EuiBasicTableColumn<any>> = [];
+  if (props.canCustomizeSubFeaturePrivileges) {
+    columns.push(rowExpanderColumn);
+  }
+  columns.push(featureColumn, ...privilegeColumns);
 
   const privileges = rawKibanaPrivileges.reduce((acc, entry) => {
     return {

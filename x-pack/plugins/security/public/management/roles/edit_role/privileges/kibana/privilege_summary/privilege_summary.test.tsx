@@ -44,7 +44,12 @@ describe('PrivilegeSummary', () => {
     ]);
 
     const wrapper = mountWithIntl(
-      <PrivilegeSummary spaces={spaces} kibanaPrivileges={kibanaPrivileges} role={role} />
+      <PrivilegeSummary
+        spaces={spaces}
+        kibanaPrivileges={kibanaPrivileges}
+        role={role}
+        canCustomizeSubFeaturePrivileges={true}
+      />
     );
 
     expect(findTestSubject(wrapper, 'viewPrivilegeSummaryButton')).toHaveLength(1);
@@ -63,7 +68,12 @@ describe('PrivilegeSummary', () => {
     ]);
 
     const wrapper = mountWithIntl(
-      <PrivilegeSummary spaces={spaces} kibanaPrivileges={kibanaPrivileges} role={role} />
+      <PrivilegeSummary
+        spaces={spaces}
+        kibanaPrivileges={kibanaPrivileges}
+        role={role}
+        canCustomizeSubFeaturePrivileges={true}
+      />
     );
 
     findTestSubject(wrapper, 'viewPrivilegeSummaryButton').simulate('click');
