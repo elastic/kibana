@@ -31,6 +31,7 @@ import {
 } from '../../contexts';
 
 import { addDefaultValues } from '../file_tree/file_tree';
+import { NetworkRequestStatusBar } from '../../components/network_request_status_bar';
 
 const INITIAL_PANEL_WIDTH = 50;
 const PANEL_MIN_WIDTH = '100px';
@@ -46,7 +47,13 @@ export const Editor = memo(() => {
     saving,
     textObjectsSaveError,
   } = useTextObjectsReadContext();
-  const { requestInFlight } = useRequestReadContext();
+
+  const {
+    requestInFlight,
+    lastResult: { data: requestData, error: requestError },
+  } = useRequestReadContext();
+  const lastDatum = requestData?.[requestData.length - 1] ?? requestError;
+
   const currentTextObject = textObjects[currentTextObjectId];
 
   const [firstPanelWidth, secondPanelWidth] = storage.get(StorageKeys.WIDTH, [
@@ -123,7 +130,39 @@ export const Editor = memo(() => {
           style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
           initialWidth={secondPanelWidth}
         >
-          <EditorOutput />
+          <>
+            <EditorOutput />
+            <EuiControlBar
+              size="s"
+              position="absolute"
+              controls={[
+                {
+                  controlType: 'spacer',
+                },
+                {
+                  controlType: 'text',
+                  id: 'saving_status',
+                  text: (
+                    <NetworkRequestStatusBar
+                      className="conApp__networkRequestBar"
+                      requestInProgress={requestInFlight}
+                      requestResult={
+                        lastDatum
+                          ? {
+                              method: lastDatum.request.method.toUpperCase(),
+                              endpoint: lastDatum.request.path,
+                              statusCode: lastDatum.response.statusCode,
+                              statusText: lastDatum.response.statusText,
+                              timeElapsedMs: lastDatum.response.timeMs,
+                            }
+                          : undefined
+                      }
+                    />
+                  ),
+                },
+              ]}
+            />
+          </>
         </Panel>
       </PanelsContainer>
     </>

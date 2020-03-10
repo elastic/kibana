@@ -1,6 +1,11 @@
 // TODO: Move all of the styles here (should be modularised by, e.g., CSS-in-JS or CSS modules).
 @import '@elastic/eui/src/components/header/variables';
 
+@mixin fullHeightMinusControlBarSmall {
+  // Full height, minus the EuiControlBar height (size "s");
+  height: calc(100% - 40px);
+}
+
 #consoleRoot {
   height: calc(100vh - calc(#{$euiHeaderChildSize} * 2));
   display: flex;
@@ -16,8 +21,7 @@
 }
 
 .conApp__editor {
-  // Full height, minus the EuiControlBar height (size "s");
-  height: calc(100% - 40px);
+  @include fullHeightMinusControlBarSmall;
   width: 100%;
   display: flex;
   flex: 0 0 auto;
@@ -31,6 +35,7 @@
 }
 
 .conApp__output {
+  @include fullHeightMinusControlBarSmall;
   display: flex;
   flex: 1 1 1px;
 }
@@ -100,11 +105,7 @@
   z-index: $euiZLevel2;
 }
 
-.conApp__tabsExtension {
-  border-bottom: $euiBorderThin;
-}
-
 .conApp__networkRequestBar {
   // Add some space from the side of the viewport
-  margin-right: 12px;
+  //margin-right: 12px;
 }
