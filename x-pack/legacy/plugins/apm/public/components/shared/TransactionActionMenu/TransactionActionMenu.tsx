@@ -7,6 +7,7 @@
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useState } from 'react';
+import { Transaction } from '../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import {
   ActionMenu,
   ActionMenuDivider,
@@ -16,12 +17,10 @@ import {
   SectionSubtitle,
   SectionTitle
 } from '../../../../../../../plugins/observability/public';
-import { Transaction } from '../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { getSections } from './sections';
-import { CustomLink } from '../CustomLink';
 
 interface Props {
   readonly transaction: Transaction;
@@ -84,7 +83,6 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
           </div>
         );
       })}
-      <CustomLink transaction={transaction} />
     </ActionMenu>
   );
 };

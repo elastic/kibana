@@ -13,24 +13,22 @@ import {
   EuiToolTip
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { CustomLink as CustomLinkType } from '../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FilterOptions } from '../../../../../../../plugins/apm/server/routes/settings/custom_link';
 import { Transaction } from '../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import {
-  ActionMenuDivider,
   Section,
   SectionLink,
   SectionLinks,
-  SectionSubtitle,
-  SectionTitle
+  SectionSubtitle
 } from '../../../../../../../plugins/observability/public';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { px } from '../../../style/variables';
 import { CustomLinkFlyout } from '../../app/Settings/CustomizeUI/CustomLink/CustomLinkFlyout';
-import { LoadingStatePrompt } from '../LoadingStatePrompt';
 import { APMLink } from '../Links/apm/APMLink';
+import { LoadingStatePrompt } from '../LoadingStatePrompt';
 interface Props {
   transaction?: Transaction;
 }
@@ -102,15 +100,16 @@ export const CustomLink = ({ transaction }: Props) => {
           }}
         />
       )}
-      <ActionMenuDivider />
       <Section>
         <EuiFlexGroup>
-          <EuiFlexItem>
-            <SectionTitle>
-              {i18n.translate('xpack.apm.customLink.title', {
-                defaultMessage: 'Custom Links'
-              })}
-            </SectionTitle>
+          <EuiFlexItem style={{ justifyContent: 'center' }}>
+            <EuiText size={'s'} grow={false}>
+              <h5>
+                {i18n.translate('xpack.apm.customLink.title', {
+                  defaultMessage: 'Custom Links'
+                })}
+              </h5>
+            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
@@ -147,6 +146,7 @@ export const CustomLink = ({ transaction }: Props) => {
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer />
         <SectionSubtitle>
           {i18n.translate('xpack.apm.customLink.subtitle', {
             defaultMessage: 'Links will always open in a new window/tab.'

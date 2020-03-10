@@ -11,10 +11,13 @@ import { CustomLinkOverview } from '../';
 import * as hooks from '../../../../../../hooks/useFetcher';
 import {
   expectTextsInDocument,
-  MockApmPluginContextWrapper
+  MockApmPluginContextWrapper,
+  expectTextsNotInDocument
 } from '../../../../../../utils/testHelpers';
 import * as saveCustomLink from '../CustomLinkFlyout/saveCustomLink';
 import * as apmApi from '../../../../../../services/rest/createCallApmApi';
+import { License } from '../../../../../../../../../../plugins/licensing/common/license';
+import { LicenseContext } from '../../../../../../context/LicenseContext';
 
 const data = [
   {
@@ -32,6 +35,16 @@ const data = [
 ];
 
 describe('CustomLink', () => {
+  const goldLicense = new License({
+    signature: 'test signature',
+    license: {
+      expiryDateInMillis: 0,
+      mode: 'gold',
+      status: 'active',
+      type: 'gold',
+      uid: '1'
+    }
+  });
   describe('empty prompt', () => {
     beforeAll(() => {
       spyOn(hooks, 'useFetcher').and.returnValue({
@@ -44,14 +57,20 @@ describe('CustomLink', () => {
       jest.clearAllMocks();
     });
     it('shows when no link is available', () => {
-      const component = render(<CustomLinkOverview />);
+      const component = render(
+        <LicenseContext.Provider value={goldLicense}>
+          <CustomLinkOverview />
+        </LicenseContext.Provider>
+      );
       expectTextsInDocument(component, ['No links found.']);
     });
     it('opens flyout when click to create new link', () => {
       const { queryByText, getByText } = render(
-        <MockApmPluginContextWrapper>
-          <CustomLinkOverview />
-        </MockApmPluginContextWrapper>
+        <LicenseContext.Provider value={goldLicense}>
+          <MockApmPluginContextWrapper>
+            <CustomLinkOverview />
+          </MockApmPluginContextWrapper>
+        </LicenseContext.Provider>
       );
       expect(queryByText('Create link')).not.toBeInTheDocument();
       act(() => {
@@ -75,9 +94,11 @@ describe('CustomLink', () => {
 
     it('shows a table with all custom link', () => {
       const component = render(
-        <MockApmPluginContextWrapper>
-          <CustomLinkOverview />
-        </MockApmPluginContextWrapper>
+        <LicenseContext.Provider value={goldLicense}>
+          <MockApmPluginContextWrapper>
+            <CustomLinkOverview />
+          </MockApmPluginContextWrapper>
+        </LicenseContext.Provider>
       );
       expectTextsInDocument(component, [
         'label 1',
@@ -89,9 +110,11 @@ describe('CustomLink', () => {
 
     it('checks if create custom link button is available and working', () => {
       const { queryByText, getByText } = render(
-        <MockApmPluginContextWrapper>
-          <CustomLinkOverview />
-        </MockApmPluginContextWrapper>
+        <LicenseContext.Provider value={goldLicense}>
+          <MockApmPluginContextWrapper>
+            <CustomLinkOverview />
+          </MockApmPluginContextWrapper>
+        </LicenseContext.Provider>
       );
       expect(queryByText('Create link')).not.toBeInTheDocument();
       act(() => {
@@ -120,9 +143,11 @@ describe('CustomLink', () => {
 
     const openFlyout = () => {
       const component = render(
-        <MockApmPluginContextWrapper>
-          <CustomLinkOverview />
-        </MockApmPluginContextWrapper>
+        <LicenseContext.Provider value={goldLicense}>
+          <MockApmPluginContextWrapper>
+            <CustomLinkOverview />
+          </MockApmPluginContextWrapper>
+        </LicenseContext.Provider>
       );
       expect(component.queryByText('Create link')).not.toBeInTheDocument();
       act(() => {
@@ -154,9 +179,11 @@ describe('CustomLink', () => {
 
     it('deletes a custom link', async () => {
       const component = render(
-        <MockApmPluginContextWrapper>
-          <CustomLinkOverview />
-        </MockApmPluginContextWrapper>
+        <LicenseContext.Provider value={goldLicense}>
+          <MockApmPluginContextWrapper>
+            <CustomLinkOverview />
+          </MockApmPluginContextWrapper>
+        </LicenseContext.Provider>
       );
       expect(component.queryByText('Create link')).not.toBeInTheDocument();
       const editButtons = component.getAllByLabelText('Edit');
@@ -244,6 +271,95 @@ describe('CustomLink', () => {
           'service.environment'
         ]);
       });
+    });
+  });
+
+  describe('invalid license', () => {
+    beforeAll(() => {
+      spyOn(hooks, 'useFetcher').and.returnValue({
+        data: [],
+        status: 'success'
+      });
+    });
+    it('shows license prompt when user has a basic license', () => {
+      const license = new License({
+        signature: 'test signature',
+        license: {
+          expiryDateInMillis: 0,
+          mode: 'basic',
+          status: 'active',
+          type: 'basic',
+          uid: '1'
+        }
+      });
+      const component = render(
+        <LicenseContext.Provider value={license}>
+          <MockApmPluginContextWrapper>
+            <CustomLinkOverview />
+          </MockApmPluginContextWrapper>
+        </LicenseContext.Provider>
+      );
+      expectTextsInDocument(component, ['Start free 14-day trial']);
+    });
+    it('shows license prompt when user has an invalid gold license', () => {
+      const license = new License({
+        signature: 'test signature',
+        license: {
+          expiryDateInMillis: 0,
+          mode: 'gold',
+          status: 'invalid',
+          type: 'gold',
+          uid: '1'
+        }
+      });
+      const component = render(
+        <LicenseContext.Provider value={license}>
+          <MockApmPluginContextWrapper>
+            <CustomLinkOverview />
+          </MockApmPluginContextWrapper>
+        </LicenseContext.Provider>
+      );
+      expectTextsInDocument(component, ['Start free 14-day trial']);
+    });
+    it('shows license prompt when user has an invalid trial license', () => {
+      const license = new License({
+        signature: 'test signature',
+        license: {
+          expiryDateInMillis: 0,
+          mode: 'trial',
+          status: 'invalid',
+          type: 'trial',
+          uid: '1'
+        }
+      });
+      const component = render(
+        <LicenseContext.Provider value={license}>
+          <MockApmPluginContextWrapper>
+            <CustomLinkOverview />
+          </MockApmPluginContextWrapper>
+        </LicenseContext.Provider>
+      );
+      expectTextsInDocument(component, ['Start free 14-day trial']);
+    });
+    it('doesnt show license prompt when user has a trial license', () => {
+      const license = new License({
+        signature: 'test signature',
+        license: {
+          expiryDateInMillis: 0,
+          mode: 'trial',
+          status: 'active',
+          type: 'trial',
+          uid: '1'
+        }
+      });
+      const component = render(
+        <LicenseContext.Provider value={license}>
+          <MockApmPluginContextWrapper>
+            <CustomLinkOverview />
+          </MockApmPluginContextWrapper>
+        </LicenseContext.Provider>
+      );
+      expectTextsNotInDocument(component, ['Start free 14-day trial']);
     });
   });
 });

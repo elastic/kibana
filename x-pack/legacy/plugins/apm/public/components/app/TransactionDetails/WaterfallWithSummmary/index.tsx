@@ -24,6 +24,7 @@ import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { TransactionSummary } from '../../../shared/Summary/TransactionSummary';
 import { TransactionActionMenu } from '../../../shared/TransactionActionMenu/TransactionActionMenu';
+import { CustomLinkMenu } from '../../../shared/CustomLink/CustomLinkMenu';
 import { MaybeViewTraceLink } from './MaybeViewTraceLink';
 import { TransactionTabs } from './TransactionTabs';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
@@ -108,6 +109,9 @@ export const WaterfallWithSummmary: React.FC<Props> = ({
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <TransactionActionMenu transaction={entryTransaction} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <CustomLinkMenu transaction={entryTransaction} />
             </EuiFlexItem>
             <MaybeViewTraceLink
               transaction={entryTransaction}

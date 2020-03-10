@@ -7,6 +7,7 @@
 import { EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import React, { useEffect, useState } from 'react';
+import { useLicense } from '../../../../../hooks/useLicense';
 import { CustomLink } from '../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 import { useFetcher, FETCH_STATUS } from '../../../../../hooks/useFetcher';
 import { CustomLinkFlyout } from './CustomLinkFlyout';
@@ -14,8 +15,12 @@ import { CustomLinkTable } from './CustomLinkTable';
 import { EmptyPrompt } from './EmptyPrompt';
 import { Title } from './Title';
 import { CreateCustomLinkButton } from './CreateCustomLinkButton';
+import { LicensePrompt } from './LicensePrompt';
 
 export const CustomLinkOverview = () => {
+  const license = useLicense();
+  const hasValidLicense = license?.isActive && license?.hasAtLeast('gold');
+
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const [customLinkSelected, setCustomLinkSelected] = useState<
     CustomLink | undefined
@@ -65,7 +70,7 @@ export const CustomLinkOverview = () => {
           <EuiFlexItem grow={false}>
             <Title />
           </EuiFlexItem>
-          {!showEmptyPrompt && (
+          {hasValidLicense && !showEmptyPrompt && (
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
@@ -77,14 +82,17 @@ export const CustomLinkOverview = () => {
         </EuiFlexGroup>
 
         <EuiSpacer size="m" />
-
-        {showEmptyPrompt ? (
-          <EmptyPrompt onCreateCustomLinkClick={onCreateCustomLinkClick} />
+        {hasValidLicense ? (
+          showEmptyPrompt ? (
+            <EmptyPrompt onCreateCustomLinkClick={onCreateCustomLinkClick} />
+          ) : (
+            <CustomLinkTable
+              items={customLinks}
+              onCustomLinkSelected={setCustomLinkSelected}
+            />
+          )
         ) : (
-          <CustomLinkTable
-            items={customLinks}
-            onCustomLinkSelected={setCustomLinkSelected}
-          />
+          <LicensePrompt />
         )}
       </EuiPanel>
     </>
