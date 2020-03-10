@@ -17,7 +17,10 @@
  * under the License.
  */
 
+const ignore = ['MaxListenersExceededWarning'];
+
 process.on('warning', function(warn) {
+  if (ignore.includes(warn.name)) return;
   console.error('Node.js process-warning detected:');
   console.error();
   console.error(warn.stack);
