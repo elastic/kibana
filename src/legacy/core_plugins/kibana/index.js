@@ -201,18 +201,6 @@ export default function(kibana) {
             return `/goto/${encodeURIComponent(obj.id)}`;
           },
         },
-        config: {
-          isImportableAndExportable: true,
-          getInAppUrl() {
-            return {
-              path: `/app/kibana#/management/kibana/settings`,
-              uiCapabilitiesPath: 'advancedSettings.show',
-            };
-          },
-          getTitle(obj) {
-            return `Advanced Settings [${obj.id}]`;
-          },
-        },
       },
 
       savedObjectSchemas: {
