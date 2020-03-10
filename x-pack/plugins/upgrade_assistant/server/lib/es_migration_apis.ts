@@ -45,54 +45,7 @@ export async function getUpgradeAssistantStatus(
   return {
     readyForUpgrade: criticalWarnings.length === 0,
     cluster,
-    indices: indices.concat([
-      {
-        level: 'none',
-        message: 'none level test',
-        url: 'test/url',
-        details: 'test details',
-        index: 'test1',
-        reindex: true,
-        needsDefaultFields: false,
-        blockerForReindexing: 'index-closed', // Faking that test1 is closed!
-      },
-      {
-        level: 'info',
-        message: 'info level test',
-        url: 'test/url',
-        details: 'test details',
-        index: 'test2',
-        reindex: true,
-        needsDefaultFields: false,
-      },
-      {
-        level: 'warning',
-        message: 'warning level test2',
-        url: 'test/url',
-        details: 'test details',
-        index: 'test3',
-        reindex: true,
-        needsDefaultFields: false,
-      },
-      {
-        level: 'critical',
-        message: 'metricbeat-1 successful fix',
-        url: 'test/url',
-        details: 'test details',
-        index: 'metricbeat-1',
-        reindex: false,
-        needsDefaultFields: true,
-      },
-      {
-        level: 'critical',
-        message: 'metricbeat-2 failed fix',
-        url: 'test/url',
-        details: 'test details',
-        index: 'metricbeat-2',
-        reindex: false,
-        needsDefaultFields: true,
-      },
-    ]),
+    indices,
   };
 }
 
