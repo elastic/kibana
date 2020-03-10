@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import _ from 'lodash';
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent, Fragment, MouseEvent } from 'react';
 import { EuiFormRow, EuiRange, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
@@ -50,42 +50,44 @@ export function OrdinalFieldMetaPopover(props: Props) {
     });
   };
 
-  const onSigmaChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const onSigmaChange = (event: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) => {
     props.onChange({
       ...props.styleProperty.getFieldMetaOptions(),
-      sigma: parseInt(event.target.value, 10),
+      sigma: parseInt(event.currentTarget.value, 10),
     });
   };
 
   return (
     <FieldMetaPopover>
-      <EuiFormRow display="columnCompressedSwitch">
-        <EuiSwitch
-          label={getIsEnableToggleLabel(props.styleProperty.getStyleName())}
-          checked={props.styleProperty.getFieldMetaOptions().isEnabled}
-          onChange={onIsEnabledChange}
-          compressed
-        />
-      </EuiFormRow>
+      <Fragment>
+        <EuiFormRow display="columnCompressedSwitch">
+          <EuiSwitch
+            label={getIsEnableToggleLabel(props.styleProperty.getStyleName())}
+            checked={props.styleProperty.getFieldMetaOptions().isEnabled}
+            onChange={onIsEnabledChange}
+            compressed
+          />
+        </EuiFormRow>
 
-      <EuiFormRow
-        label={i18n.translate('xpack.maps.styles.fieldMetaOptions.sigmaLabel', {
-          defaultMessage: 'Sigma',
-        })}
-        display="columnCompressed"
-      >
-        <EuiRange
-          min={1}
-          max={5}
-          step={0.25}
-          value={_.get(props.styleProperty.getFieldMetaOptions(), 'sigma', DEFAULT_SIGMA)}
-          onChange={onSigmaChange}
-          disabled={!props.styleProperty.getFieldMetaOptions().isEnabled}
-          showTicks
-          tickInterval={1}
-          compressed
-        />
-      </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('xpack.maps.styles.fieldMetaOptions.sigmaLabel', {
+            defaultMessage: 'Sigma',
+          })}
+          display="columnCompressed"
+        >
+          <EuiRange
+            min={1}
+            max={5}
+            step={0.25}
+            value={_.get(props.styleProperty.getFieldMetaOptions(), 'sigma', DEFAULT_SIGMA)}
+            onChange={onSigmaChange}
+            disabled={!props.styleProperty.getFieldMetaOptions().isEnabled}
+            showTicks
+            tickInterval={1}
+            compressed
+          />
+        </EuiFormRow>
+      </Fragment>
     </FieldMetaPopover>
   );
 }

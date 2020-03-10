@@ -8,7 +8,10 @@
 import { ReactElement } from 'react';
 // @ts-ignore
 import { getVectorStyleLabel } from '../components/get_vector_style_label';
-import { StylePropertyOptions } from '../../../../../common/style_property_descriptor_types';
+import {
+  FieldMetaOptions,
+  StylePropertyOptions,
+} from '../../../../../common/style_property_descriptor_types';
 
 type LegendProps = {
   isPointsOnly: boolean;
