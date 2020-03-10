@@ -133,14 +133,24 @@ class SavedObjectFinderUi extends React.Component<
 
     const perPage = this.props.uiSettings.get('savedObjects:listingLimit');
     const types = Object.keys(metaDataMap);
-    const typesWithoutVisualization = types.filter(type => type !== 'visualization');
-    const containsVisualizationType =
-      types.length > 0 && types.length !== typesWithoutVisualization.length;
+    const containsVisualizationType = types.includes('visualization');
+    const containsLensType = types.includes('lens');
     let filter: string | undefined;
-    if (containsVisualizationType) {
-      const reducer = (filterExpression: string, savedObjectType: string) =>
-        filterExpression.concat(` OR ${savedObjectType}.type:${savedObjectType}`);
-      filter = typesWithoutVisualization.reduce(reducer, 'visualization.attributes.visible:true');
+
+    if (containsVisualizationType || containsLensType) {
+      types.forEach(type => {
+        filter = filter ? filter.concat(' OR ') : '';
+        switch (type) {
+          case 'lens':
+            filter = filter.concat('lens.attributes.visible:true');
+            break;
+          case 'visualization':
+            filter = filter.concat('visualization.attributes.visible:true');
+            break;
+          default:
+            filter = filter.concat(`${type}.type:${type}`);
+        }
+      });
     }
     const resp = await this.props.savedObjects.client.find<FinderAttributes>({
       type: types,

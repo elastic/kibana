@@ -326,6 +326,7 @@ describe('Lens App', () => {
       interface SaveProps {
         newCopyOnSave: boolean;
         newTitle: string;
+        visible?: boolean;
       }
 
       let defaultArgs: jest.Mocked<{
@@ -515,6 +516,7 @@ describe('Lens App', () => {
           id: undefined,
           title: 'hello there',
           expression: 'kibana 3',
+          visible: true,
         });
 
         expect(args.redirectTo).toHaveBeenCalledWith('aaa');
@@ -535,6 +537,7 @@ describe('Lens App', () => {
           id: undefined,
           title: 'hello there',
           expression: 'kibana 3',
+          visible: true,
         });
 
         expect(args.redirectTo).toHaveBeenCalledWith('aaa');
@@ -555,6 +558,7 @@ describe('Lens App', () => {
           id: '1234',
           title: 'hello there',
           expression: 'kibana 3',
+          visible: true,
         });
 
         expect(args.redirectTo).not.toHaveBeenCalled();
@@ -604,6 +608,7 @@ describe('Lens App', () => {
           expression: 'kibana 3',
           id: undefined,
           title: 'hello there',
+          visible: true,
         });
 
         expect(args.redirectTo).toHaveBeenCalledWith('aaa');
@@ -638,6 +643,7 @@ describe('Lens App', () => {
           state: {
             filters: [unpinned],
           },
+          visible: true,
         });
       });
     });

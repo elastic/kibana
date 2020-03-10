@@ -59,6 +59,12 @@ describe('SavedObjectsFinder', () => {
     attributes: { title: 'Hidden vis', visible: false },
   };
 
+  const doc5 = {
+    type: 'lens',
+    id: '5',
+    attributes: { title: 'Hidden Lens', visible: false },
+  };
+
   const searchMetaData = [
     {
       type: 'search',
@@ -406,7 +412,52 @@ describe('SavedObjectsFinder', () => {
       perPage: 10,
       searchFields: ['title^3', 'description'],
       defaultSearchOperator: 'AND',
-      filter: 'visualization.attributes.visible:true OR search.type:search OR vis.type:vis',
+      filter: 'search.type:search OR vis.type:vis OR visualization.attributes.visible:true',
+    });
+  });
+
+  it('should include lens visible filter', async () => {
+    const core = coreMock.createStart();
+    ((core.savedObjects.client.find as any) as jest.SpyInstance).mockImplementation(() =>
+      Promise.resolve({ savedObjects: [doc, doc4, doc5] })
+    );
+    core.uiSettings.get.mockImplementation(() => 10);
+
+    const wrapper = shallow(
+      <SavedObjectFinder
+        savedObjects={core.savedObjects}
+        uiSettings={core.uiSettings}
+        savedObjectMetaData={[
+          {
+            type: 'search',
+            name: 'Search',
+            getIconForSavedObject: () => 'search',
+          },
+          {
+            type: 'visualization',
+            name: 'Visualization',
+            getIconForSavedObject: () => 'visLine',
+          },
+          {
+            type: 'lens',
+            name: 'Lens',
+            getIconForSavedObject: () => 'visLine',
+          },
+        ]}
+      />
+    );
+    wrapper.instance().componentDidMount!();
+
+    expect(core.savedObjects.client.find).toHaveBeenCalledWith({
+      type: ['search', 'visualization', 'lens'],
+      fields: ['title'],
+      search: undefined,
+      page: 1,
+      perPage: 10,
+      searchFields: ['title^3', 'description'],
+      defaultSearchOperator: 'AND',
+      filter:
+        'search.type:search OR visualization.attributes.visible:true OR lens.attributes.visible:true',
     });
   });
 

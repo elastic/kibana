@@ -60,8 +60,11 @@ export async function findListItems({
       .uniq()
       .value() as string[];
   const types = Object.keys(extensionByType);
-  const reducer = (filterExpression: string, type: string) =>
-    filterExpression.concat(` OR ${type}.type:${type}`);
+  const reducer = (filterExpression: string, type: string) => {
+    const filterTerm =
+      type === 'lens' ? ' OR lens.attributes.visible:true' : ` OR ${type}.type:${type}`;
+    return filterExpression.concat(filterTerm);
+  };
   const filter = types.reduce(reducer, 'visualization.attributes.visible:true');
   const searchOptions = {
     type: searchOption('docTypes', 'visualization'),

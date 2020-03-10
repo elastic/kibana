@@ -13,6 +13,7 @@ import {
   getEditPath,
   NOT_INTERNATIONALIZED_PRODUCT_NAME,
 } from '../../../plugins/lens/common';
+import { migrations } from './migrations';
 
 export const lens: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
@@ -33,6 +34,7 @@ export const lens: LegacyPluginInitializer = kibana => {
       embeddableFactories: [`plugins/${PLUGIN_ID}/legacy`],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       mappings,
+      migrations,
       savedObjectsManagement: {
         lens: {
           defaultSearchField: 'title',

@@ -339,8 +339,8 @@ export function App({
                 ...lastDocWithoutPinned,
                 id: props.newCopyOnSave ? undefined : lastKnownDoc.id,
                 title: props.newTitle,
+                visible: lastKnownDoc.visible !== undefined ? lastKnownDoc.visible : true,
               };
-
               docStorage
                 .save(doc)
                 .then(({ id }) => {

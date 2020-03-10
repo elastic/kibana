@@ -13,6 +13,9 @@
       "expression": {
         "index": false,
         "type": "keyword"
+      },
+      "visible": {
+        "type": "boolean"
       }
     }
   },
