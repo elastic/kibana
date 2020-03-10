@@ -231,7 +231,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
         {/* (i.e. after full page reload) */}
         <Route path={`${matchPath}${CREATE_DATASOURCE_STEP_PATHS.review}`}>
           <CreateDatasourcePageLayout {...layoutProps} currentStep="review">
-            {!datasource.name ? (
+            {!agentConfig || !datasource.name ? (
               redirectToSecondStep
             ) : (
               <StepReviewDatasource

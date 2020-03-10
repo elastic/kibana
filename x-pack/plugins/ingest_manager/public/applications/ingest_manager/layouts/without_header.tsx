@@ -11,7 +11,7 @@ const Page = styled(EuiPage)`
   background: ${props => props.theme.eui.euiColorEmptyShade};
 `;
 
-interface Props extends HeaderProps {
+interface Props {
   restrictWidth?: number;
   children?: React.ReactNode;
 }
