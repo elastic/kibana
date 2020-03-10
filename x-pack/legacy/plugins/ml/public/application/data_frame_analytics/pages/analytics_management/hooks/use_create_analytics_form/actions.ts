@@ -67,7 +67,7 @@ export type Action =
 export interface ActionDispatchers {
   closeModal: () => void;
   createAnalyticsJob: () => void;
-  openModal: () => void;
+  openModal: () => Promise<void>;
   resetAdvancedEditorMessages: () => void;
   setAdvancedEditorRawString: (payload: State['advancedEditorRawString']) => void;
   setFormState: (payload: Partial<State['form']>) => void;

@@ -23,7 +23,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
-import { Field } from '../../../../../../../common/types/fields';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { useMlContext } from '../../../../../contexts/ml';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
@@ -31,6 +30,7 @@ import {
   JOB_TYPES,
   DEFAULT_MODEL_MEMORY_LIMIT,
   getJobConfigFromFormState,
+  State,
 } from '../../hooks/use_create_analytics_form/state';
 import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validation';
 import { Messages } from './messages';
@@ -210,11 +210,10 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     }
   }, 400);
 
-  const loadDepVarOptions = async () => {
+  const loadDepVarOptions = async (formState: State['form']) => {
     setFormState({
       loadingDepVarOptions: true,
       // clear when the source index changes
-      dependentVariable: '',
       maxDistinctValuesError: undefined,
       sourceIndexFieldsCheckFailed: false,
       sourceIndexContainsNumericalFields: true,
@@ -225,23 +224,39 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       );
 
       if (indexPattern !== undefined) {
+        const formStateUpdate: {
+          loadingDepVarOptions: boolean;
+          dependentVariableFetchFail: boolean;
+          dependentVariableOptions: State['form']['dependentVariableOptions'];
+          dependentVariable?: State['form']['dependentVariable'];
+        } = {
+          loadingDepVarOptions: false,
+          dependentVariableFetchFail: false,
+          dependentVariableOptions: [] as State['form']['dependentVariableOptions'],
+        };
+
         await newJobCapsService.initializeFromIndexPattern(indexPattern);
         // Get fields and filter for supported types for job type
         const { fields } = newJobCapsService;
 
-        const depVarOptions: EuiComboBoxOptionOption[] = [];
-
-        fields.forEach((field: Field) => {
+        let resetDependentVariable = true;
+        for (const field of fields) {
           if (shouldAddAsDepVarOption(field, jobType)) {
-            depVarOptions.push({ label: field.id });
-          }
-        });
+            formStateUpdate.dependentVariableOptions.push({
+              label: field.id,
+            });
 
-        setFormState({
-          dependentVariableOptions: depVarOptions,
-          loadingDepVarOptions: false,
-          dependentVariableFetchFail: false,
-        });
+            if (formState.dependentVariable === field.id) {
+              resetDependentVariable = false;
+            }
+          }
+        }
+
+        if (resetDependentVariable) {
+          formStateUpdate.dependentVariable = '';
+        }
+
+        setFormState(formStateUpdate);
       }
     } catch (e) {
       setFormState({ loadingDepVarOptions: false, dependentVariableFetchFail: true });
@@ -287,7 +302,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
 
   useEffect(() => {
     if (isJobTypeWithDepVar && sourceIndexNameEmpty === false) {
-      loadDepVarOptions();
+      loadDepVarOptions(form);
     }
 
     if (jobType === JOB_TYPES.OUTLIER_DETECTION && sourceIndexNameEmpty === false) {

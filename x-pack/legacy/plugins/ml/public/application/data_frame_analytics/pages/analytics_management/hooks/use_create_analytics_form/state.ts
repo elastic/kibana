@@ -187,3 +187,33 @@ export const getJobConfigFromFormState = (
 
   return jobConfig;
 };
+
+/**
+ * Extracts form state for a job clone from the analytics job configuration.
+ * For cloning we keep job id and destination index empty.
+ */
+export function getCloneFormStateFromJobConfig(
+  analyticsJobConfig: DataFrameAnalyticsConfig
+): Partial<State['form']> {
+  const jobType: string = Object.keys(analyticsJobConfig.analysis)[0];
+
+  const resultState: Partial<State['form']> = {
+    jobType: jobType as AnalyticsJobType,
+    description: analyticsJobConfig.description ?? '',
+    sourceIndex: Array.isArray(analyticsJobConfig.source.index)
+      ? analyticsJobConfig.source.index.join(',')
+      : analyticsJobConfig.source.index,
+    modelMemoryLimit: analyticsJobConfig.model_memory_limit,
+    excludes: analyticsJobConfig.analyzed_fields.excludes,
+  };
+
+  if (jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION) {
+    // @ts-ignore
+    const analysisConfig = analyticsJobConfig.analysis[jobType];
+
+    resultState.dependentVariable = analysisConfig!.dependent_variable;
+    resultState.trainingPercent = analysisConfig!.training_percent;
+  }
+
+  return resultState;
+}
