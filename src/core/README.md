@@ -32,7 +32,7 @@ well documented. To reduce the chance of regressions, development on the Core AP
 process described below. Changes to the API signature which have not been accepted will cause the build to fail.
 
 When changes to the Core API's signatures are made, the following process needs to be followed:
-1. After changes have been made, run `yarn core:acceptApiChanges` which performs the following:
+1. After changes have been made, run `yarn docs:acceptApiChanges` which performs the following:
    - Recompiles all typescript typings files
    - Updates the API review files `src/core/public/kibana.api.md` and `src/core/server/kibana.api.md`
    - Updates the Core API documentation in `docs/development/core/`

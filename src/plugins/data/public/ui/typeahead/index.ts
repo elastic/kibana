@@ -17,5 +17,4 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('../src/dev/run_check_core_api_changes');
+export { SuggestionsComponent } from './suggestions_component';
