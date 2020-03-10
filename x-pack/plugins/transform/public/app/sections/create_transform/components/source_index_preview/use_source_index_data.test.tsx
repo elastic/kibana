@@ -26,10 +26,7 @@ const query: SimpleQuery = {
 describe('useSourceIndexData', () => {
   test('indexPattern set triggers loading', async done => {
     const { result, waitForNextUpdate } = renderHook(() =>
-      useSourceIndexData({ id: 'the-id', title: 'the-title', fields: [] }, query, {
-        pageIndex: 0,
-        pageSize: 10,
-      })
+      useSourceIndexData({ id: 'the-id', title: 'the-title', fields: [] }, query)
     );
     const sourceIndexObj: UseSourceIndexDataReturnType = result.current;
 
