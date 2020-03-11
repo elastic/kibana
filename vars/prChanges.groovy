@@ -6,9 +6,6 @@ def getSkippablePaths() {
     /^.ci\/.+\.yml$/,
     /^\.github\//,
     /\.md$/,
-    // TODO remove below
-    /^vars\//,
-    /^Jenkinsfile$/,
   ]
 }
 
