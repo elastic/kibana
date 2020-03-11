@@ -547,6 +547,7 @@ exports[`Transform: <StepCreateForm /> Minimal initialization 1`] = `
                 "detachAction": [MockFunction],
                 "executeTriggerActions": [MockFunction],
                 "fork": [MockFunction],
+                "getAction": [MockFunction],
                 "getTrigger": [MockFunction],
                 "getTriggerActions": [MockFunction],
                 "getTriggerCompatibleActions": [MockFunction],
