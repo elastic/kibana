@@ -17,42 +17,50 @@
  * under the License.
  */
 
-import rison from 'rison-node';
-import _ from 'lodash';
-import React from 'react';
-import { Subscription, Subject, merge } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
-import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
-import { getState, splitState } from './discover_state';
-
+import _ from 'lodash';
+import moment from 'moment';
+import React from 'react';
+import rison from 'rison-node';
+import { merge, Subject, Subscription } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
+import {
+  connectToQueryState,
+  esFilters,
+  fieldFormats,
+  getDefaultQuery,
+  indexPatterns as indexPatternsUtils,
+  syncQueryStateWithUrl,
+} from '../../../../../../../plugins/data/public';
 import { RequestAdapter } from '../../../../../../../plugins/inspector/public';
 import {
   SavedObjectSaveModal,
   showSaveModal,
 } from '../../../../../../../plugins/saved_objects/public';
-import { getSortArray, getSortForSearchSource } from './doc_table';
-import * as columnActions from './doc_table/actions/columns';
-
-import indexTemplate from './discover.html';
-import { showOpenSearchPanel } from '../components/top_nav/show_open_search_panel';
-import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
-import '../components/fetch_error';
-import { getPainlessError } from './get_painless_error';
-import { discoverResponseHandler } from './response_handler';
 import {
+  ensureDefaultIndexPattern,
+  getAngularModule,
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
   hasSearchStategyForIndexPattern,
   intervalOptions,
-  unhashUrl,
   subscribeWithScope,
   tabifyAggResponse,
-  getAngularModule,
-  ensureDefaultIndexPattern,
+  unhashUrl,
 } from '../../kibana_services';
+import '../components/fetch_error';
+import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
+import { showOpenSearchPanel } from '../components/top_nav/show_open_search_panel';
+import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
+import { getIndexPatternId } from '../helpers/get_index_pattern_id';
+import indexTemplate from './discover.html';
+import { getState, splitState } from './discover_state';
+import { getSortArray, getSortForSearchSource } from './doc_table';
+import * as columnActions from './doc_table/actions/columns';
+import { getPainlessError } from './get_painless_error';
+import { discoverResponseHandler } from './response_handler';
 
 const {
   core,
@@ -67,17 +75,6 @@ const {
   uiSettings,
   visualizations,
 } = getServices();
-
-import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
-import {
-  esFilters,
-  fieldFormats,
-  indexPatterns as indexPatternsUtils,
-  connectToQueryState,
-  syncQueryStateWithUrl,
-  getDefaultQuery,
-} from '../../../../../../../plugins/data/public';
-import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -300,6 +297,7 @@ function discoverController(
   $scope.showSaveQuery = uiCapabilities.discover.saveQuery;
   $scope.useShortDots = config.get('shortDots:enable');
   $scope.useNewGrid = config.get('doc_table:legacyTable');
+  $scope.showTimeCol = !config.get('doc_table:hideTimeColumn') && $scope.indexPattern.timeFieldName;
 
   $scope.$watch(
     () => uiCapabilities.discover.saveQuery,
@@ -615,28 +613,6 @@ function discoverController(
       },
     });
   };
-
-  $scope.$watchCollection('state.columns', function(columns) {
-    const tableColumns = [...columns];
-    const { timeFieldName } = $scope.indexPattern;
-
-    // if (tableColumns.length > 1 && tableColumns.find(id => id === '_source')) {
-    //   $scope.state.columns = tableColumns.filter(id => id !== '_source');
-    //   // $state.replace();
-    // } else if (tableColumns.length === 0) {
-    //   $scope.state.columns = ['_source'];
-    //   // $state.replace();
-    // }
-
-    // setAppState({ columns: $scope.state.columns });
-
-    if (!config.get('doc_table:hideTimeColumn') && timeFieldName) {
-      tableColumns.unshift(timeFieldName);
-    }
-
-    $scope.tableColumns = tableColumns;
-    // $state.save();
-  });
 
   $scope.getContextAppHref = anchorId => {
     const path = kbnUrl.eval('#/context/{{ indexPattern }}/{{ anchorId }}', {

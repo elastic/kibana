@@ -161,7 +161,7 @@
             <discover-grid
               ng-if="rows && !useNewGrid"
               aria-labelled-by="'documentsAriaLabel'"
-              columns="tableColumns"
+              columns="state.columns"
               index-pattern="indexPattern"
               rows="rows"
               sort="state.sort"
@@ -169,6 +169,7 @@
               search-description="opts.savedSearch.description"
               search-title="opts.savedSearch.lastSavedTitle"
               use-short-dots="useShortDots"
+              show-time-col="showTimeCol"
               get-context-app-href="getContextAppHref"
               on-add-column="addColumn"
               on-filter="filterQuery"

@@ -29,6 +29,7 @@ export function createDiscoverGridDirective(reactDirective: any) {
     ['searchDescription', { watchDepth: 'reference' }],
     ['searchTitle', { watchDepth: 'reference' }],
     ['useShortDots', { watchDepth: 'value' }],
+    ['showTimeCol', { watchDepth: 'value' }],
     ['onFilter', { watchDepth: 'reference', wrapApply: false }],
     ['onRemoveColumn', { watchDepth: 'reference', wrapApply: false }],
     ['onAddColumn', { watchDepth: 'reference', wrapApply: false }],

@@ -63,6 +63,7 @@ interface Props {
   sampleSize: number;
   onFilter: DocViewFilterFn;
   useShortDots: boolean;
+  showTimeCol: boolean;
   onSort: Function;
   getContextAppHref: (id: string | number | Record<string, unknown>) => string;
   onRemoveColumn: (column: string) => void;
@@ -137,8 +138,8 @@ export const DiscoverGrid = React.memo(function DiscoverGridInner({
   getContextAppHref,
   onRemoveColumn,
   onAddColumn,
+  showTimeCol,
 }: Props) {
-  const actionColumnId = 'uniqueString'; // TODO should be guaranteed unique...
   const lowestPageSize = 50;
   const timeString = i18n.translate('kbn.discover.timeLabel', {
     defaultMessage: 'Time',
@@ -147,12 +148,6 @@ export const DiscoverGrid = React.memo(function DiscoverGridInner({
 
   const dataGridColumns = columns.map(
     (columnName, i): EuiDataGridColumn => {
-      // Discover always injects a Time column as the first item (unless advance settings turned it off)
-      // Have to guard against this to allow users to request the same column again later
-      if (columnName === indexPattern.timeFieldName && i === 0) {
-        return { id: timeString, schema: 'datetime', initialWidth: 172 };
-      }
-
       const column: EuiDataGridColumn = {
         id: columnName,
         schema: indexPattern.getFieldByName(columnName)?.type,
@@ -187,13 +182,11 @@ export const DiscoverGrid = React.memo(function DiscoverGridInner({
     }
   );
 
-  dataGridColumns.unshift({
-    id: actionColumnId,
-    isExpandable: false,
-    initialWidth: 24,
-    isResizable: false,
-    display: <></>,
-  });
+  // Discover always injects a Time column as the first item (unless advance settings turned it off)
+  // Have to guard against this to allow users to request the same column again later
+  if (showTimeCol) {
+    dataGridColumns.unshift({ id: timeString, schema: 'datetime', initialWidth: 172 });
+  }
 
   /**
    * Pagination
@@ -265,27 +258,10 @@ export const DiscoverGrid = React.memo(function DiscoverGridInner({
         return value;
       }
 
-      if (columnId === actionColumnId) {
-        const showFlyout = typeof flyoutRow === 'undefined';
-
-        return (
-          <button
-            aria-label={i18n.translate('kbn.discover.grid.viewDoc', {
-              defaultMessage: 'Toggle dialog with details',
-            })}
-            onClick={() => setFlyoutRow(row)}
-            className="dscTable__buttonToggle"
-          >
-            <EuiIcon type={showFlyout ? 'eye' : 'eyeClosed'} size="s" />
-          </button>
-        );
-      }
-
       const fieldName = columnId === timeString ? indexPattern.timeFieldName! : columnId;
       value = formattedField(row, fieldName);
 
       if (showFilterActions(isDetails, fieldName)) {
-        // console.log(dataGridColumns[fieldName].schema)
         return (
           <CellPopover
             value={value}
@@ -297,15 +273,7 @@ export const DiscoverGrid = React.memo(function DiscoverGridInner({
 
       return value;
     };
-  }, [
-    indexPattern,
-    onFilter,
-    pagination.pageIndex,
-    pagination.pageSize,
-    rows,
-    timeString,
-    flyoutRow,
-  ]);
+  }, [indexPattern, onFilter, pagination.pageIndex, pagination.pageSize, rows, timeString]);
 
   /**
    * Render variables
@@ -339,6 +307,32 @@ export const DiscoverGrid = React.memo(function DiscoverGridInner({
         rowCount={rows.length}
         columns={dataGridColumns}
         renderCellValue={renderCellValue}
+        leadingControlColumns={[
+          {
+            id: 'openDetails',
+            width: 31,
+            headerCellRender: () => (
+              <EuiScreenReaderOnly>
+                <span>
+                  {i18n.translate('kbn.discover.controlColumnHeader', {
+                    defaultMessage: 'Control column',
+                  })}
+                </span>
+              </EuiScreenReaderOnly>
+            ),
+            rowCellRender: ({ rowIndex }) => (
+              <button
+                aria-label={i18n.translate('kbn.discover.grid.viewDoc', {
+                  defaultMessage: 'Toggle dialog with details',
+                })}
+                onClick={() => setFlyoutRow(rows[rowIndex])}
+                className="dscTable__buttonToggle"
+              >
+                <EuiIcon type={typeof flyoutRow === 'undefined' ? 'eye' : 'eyeClosed'} size="s" />
+              </button>
+            ),
+          },
+        ]}
         columnVisibility={{
           visibleColumns,
           setVisibleColumns,
