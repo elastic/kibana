@@ -7,9 +7,10 @@
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { DeepPartial } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
-import { mlNodesAvailable } from '../../../../../ml_nodes_check/check_ml_nodes';
+import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 
 import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
+import { CloneDataFrameAnalyticsConfig } from '../../components/analytics_list/action_clone';
 
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',
@@ -194,7 +195,7 @@ export const getJobConfigFromFormState = (
  * For cloning we keep job id and destination index empty.
  */
 export function getCloneFormStateFromJobConfig(
-  analyticsJobConfig: DataFrameAnalyticsConfig
+  analyticsJobConfig: CloneDataFrameAnalyticsConfig
 ): Partial<State['form']> {
   const jobType: string = Object.keys(analyticsJobConfig.analysis)[0];
 

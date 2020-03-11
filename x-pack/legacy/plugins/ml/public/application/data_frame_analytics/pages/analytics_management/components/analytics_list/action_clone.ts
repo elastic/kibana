@@ -221,6 +221,27 @@ export function isAdvancedConfig(
   return false;
 }
 
+export type CloneDataFrameAnalyticsConfig = Omit<
+  DataFrameAnalyticsConfig,
+  'id' | 'version' | 'create_time'
+>;
+
+function extractCloningConfig(
+  originalConfig: DataFrameAnalyticsConfig
+): CloneDataFrameAnalyticsConfig {
+  const {
+    // Omit non-relevant props from the configuration
+    id,
+    version,
+    create_time,
+    ...config
+  } = originalConfig;
+
+  // Reset the destination index
+  config.dest.index = '';
+  return config;
+}
+
 export function getCloneAction(createAnalyticsForm: CreateAnalyticsFormProps) {
   const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.cloneJobButtonLabel', {
     defaultMessage: 'Clone job',
@@ -231,11 +252,13 @@ export function getCloneAction(createAnalyticsForm: CreateAnalyticsFormProps) {
   const onClick = async (item: DataFrameAnalyticsListRow) => {
     await actions.openModal();
 
-    if (isAdvancedConfig(item.config)) {
-      actions.setJobConfig(item.config);
+    const config = extractCloningConfig(item.config);
+
+    if (isAdvancedConfig(config)) {
+      actions.setJobConfig(config);
       actions.switchToAdvancedEditor();
     } else {
-      actions.setFormState(getCloneFormStateFromJobConfig(item.config));
+      actions.setFormState(getCloneFormStateFromJobConfig(config));
     }
   };
 
