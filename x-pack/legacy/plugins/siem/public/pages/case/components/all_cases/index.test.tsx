@@ -11,6 +11,8 @@ import { AllCases } from './';
 import { TestProviders } from '../../../../mock';
 import { useGetCasesMockState } from './__mock__';
 import * as apiHook from '../../../../containers/case/use_get_cases';
+import { act } from '@testing-library/react';
+import { wait } from '../../../../lib/helpers';
 
 describe('AllCases', () => {
   const setFilters = jest.fn();
@@ -30,18 +32,19 @@ describe('AllCases', () => {
     });
     moment.tz.setDefault('UTC');
   });
-  it('should render AllCases', () => {
+  it('should render AllCases', async () => {
     const wrapper = mount(
       <TestProviders>
         <AllCases />
       </TestProviders>
     );
+    await act(() => wait());
     expect(
       wrapper
         .find(`a[data-test-subj="case-details-link"]`)
         .first()
         .prop('href')
-    ).toEqual(`#/link-to/case/${useGetCasesMockState.data.cases[0].caseId}`);
+    ).toEqual(`#/link-to/case/${useGetCasesMockState.data.cases[0].id}`);
     expect(
       wrapper
         .find(`a[data-test-subj="case-details-link"]`)
@@ -73,12 +76,13 @@ describe('AllCases', () => {
         .text()
     ).toEqual('Showing 10 cases');
   });
-  it('should tableHeaderSortButton AllCases', () => {
+  it('should tableHeaderSortButton AllCases', async () => {
     const wrapper = mount(
       <TestProviders>
         <AllCases />
       </TestProviders>
     );
+    await act(() => wait());
     wrapper
       .find('[data-test-subj="tableHeaderSortButton"]')
       .first()

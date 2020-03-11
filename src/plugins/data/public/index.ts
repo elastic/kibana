@@ -283,8 +283,35 @@ export {
  * Search:
  */
 
-export { IRequestTypesMap, IResponseTypesMap } from './search';
-export * from './search';
+export {
+  ES_SEARCH_STRATEGY,
+  SYNC_SEARCH_STRATEGY,
+  getEsPreference,
+  getSearchErrorType,
+  ISearchContext,
+  TSearchStrategyProvider,
+  ISearchStrategy,
+  ISearch,
+  ISearchOptions,
+  IRequestTypesMap,
+  IResponseTypesMap,
+  ISearchGeneric,
+  IEsSearchResponse,
+  IEsSearchRequest,
+  ISyncSearchRequest,
+  IKibanaSearchResponse,
+  IKibanaSearchRequest,
+  SearchRequest,
+  SearchResponse,
+  SearchError,
+  SearchStrategyProvider,
+  ISearchSource,
+  SearchSource,
+  SearchSourceFields,
+  EsQuerySortValue,
+  SortDirection,
+  FetchOptions,
+} from './search';
 
 /*
  * UI components
@@ -312,13 +339,12 @@ export {
   QueryState,
   getTime,
   getQueryLog,
+  getDefaultQuery,
   FilterManager,
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,
-  SavedQueryAttributes,
   InputTimeRange,
-  TimefilterSetup,
   TimeHistory,
   TimefilterContract,
   TimeHistoryContract,
