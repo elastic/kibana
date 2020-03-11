@@ -115,8 +115,7 @@ function VisualizeAppController(
   savedVis.vis.on('apply', _applyVis);
   // vis is instance of src/legacy/ui/public/vis/vis.js.
   // SearchSource is a promise-based stream of search results that can inherit from other search sources.
-  const { vis, searchSource, savedSearchId } = savedVis;
-  const searchSourceParent = searchSource.getParent();
+  const { vis, searchSource, savedSearch } = savedVis;
 
   $scope.vis = vis;
 
@@ -381,14 +380,11 @@ function VisualizeAppController(
     };
 
     const handleLinkedSearch = linked => {
-      if (linked && !savedVis.savedSearchId) {
-        savedVis.savedSearchId = savedSearchId;
-        vis.savedSearchId = savedSearchId;
-
-        searchSource.setParent(searchSourceParent);
+      if (linked && !savedVis.savedSearchId && savedSearch) {
+        savedVis.savedSearchId = savedSearch.id;
+        searchSource.setParent(savedSearch.searchSource);
       } else if (!linked && savedVis.savedSearchId) {
         delete savedVis.savedSearchId;
-        delete vis.savedSearchId;
       }
     };
 
@@ -662,10 +658,7 @@ function VisualizeAppController(
   }
 
   const unlinkFromSavedSearch = () => {
-    if (!searchSourceParent) {
-      return;
-    }
-
+    const searchSourceParent = savedSearch.searchSource;
     const searchSourceGrandparent = searchSourceParent.getParent();
     const currentIndex = searchSourceParent.getField('index');
 
@@ -681,7 +674,7 @@ function VisualizeAppController(
       i18n.translate('kbn.visualize.linkedToSearch.unlinkSuccessNotificationText', {
         defaultMessage: `Unlinked from saved search '{searchTitle}'`,
         values: {
-          searchTitle: savedVis.savedSearch.title,
+          searchTitle: savedSearch.title,
         },
       })
     );
