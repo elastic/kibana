@@ -202,12 +202,20 @@ def runErrorReporter() {
 }
 
 def call(Map params = [:], Closure closure) {
-  def config = [timeoutMinutes: 135] + params
+  def config = [timeoutMinutes: 135, checkPrChanges: false] + params
 
   stage("Kibana Pipeline") {
     timeout(time: config.timeoutMinutes, unit: 'MINUTES') {
       timestamps {
         ansiColor('xterm') {
+          if (config.checkPrChanges && githubPr.isPr()) {
+            print "Checking PR for changes to determine if CI needs to be run..."
+
+            if (prChanges.areChangesSkippable()) {
+              print "No changes requiring CI found in PR, skipping."
+              return
+            }
+          }
           closure()
         }
       }
@@ -215,43 +223,5 @@ def call(Map params = [:], Closure closure) {
   }
 }
 
-def getSkippablePaths() {
-  return [
-    /^docs\//,
-    /^rfcs\//,
-    /^.ci\/.+\.yml$/,
-    /^\.github\//,
-    /\.md$/,
-    // TODO remove below
-    /^vars\//,
-    /^Jenkinsfile$/,
-  ]
-}
-
-def areChangesSkippable() {
-  if (!env.ghprbPullId) {
-    return false
-  }
-
-  try {
-    def skippablePaths = getSkippablePaths()
-    def files = githubPr.getChangedFiles()
-
-    // 3000 is the max files GH API will return
-    if (files.size() >= 3000) {
-      return false
-    }
-
-    files = files.findAll { file ->
-      return !skippablePaths.find { regex -> file =~ regex}
-    }
-
-    return files.size() < 1
-  } catch (ex) {
-    buildUtils.printStacktrace(ex)
-    print "Error while checking to see if CI is skippable based on changes. Will run CI."
-    return false
-  }
-}
 
 return this
