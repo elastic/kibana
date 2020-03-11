@@ -272,25 +272,13 @@ Array [
                     <span
                       class="euiSwitch__track"
                     >
-                      <svg
-                        aria-hidden="true"
-                        class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
-                        focusable="false"
-                        height="16"
-                        role="img"
-                        viewBox="0 0 16 16"
-                        width="16"
-                        xmlns="http://www.w3.org/2000/svg"
+                      <div
+                        class="euiSwitch__icon"
+                        data-euiicon-type="cross"
                       />
-                      <svg
-                        aria-hidden="true"
-                        class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
-                        focusable="false"
-                        height="16"
-                        role="img"
-                        viewBox="0 0 16 16"
-                        width="16"
-                        xmlns="http://www.w3.org/2000/svg"
+                      <div
+                        class="euiSwitch__icon euiSwitch__icon--checked"
+                        data-euiicon-type="check"
                       />
                     </span>
                   </span>
@@ -332,15 +320,10 @@ Array [
             <span
               class="euiButton__content"
             >
-              <svg
+              <div
                 aria-hidden="true"
-                class="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
-                focusable="false"
-                height="16"
-                role="img"
-                viewBox="0 0 16 16"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
+                class="euiButton__icon"
+                data-euiicon-type="check"
               />
               <span
                 class="euiButton__text"
@@ -540,25 +523,13 @@ Array [
             <span
               class="euiSwitch__track"
             >
-              <svg
-                aria-hidden="true"
-                class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
-                focusable="false"
-                height="16"
-                role="img"
-                viewBox="0 0 16 16"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
+              <div
+                class="euiSwitch__icon"
+                data-euiicon-type="cross"
               />
-              <svg
-                aria-hidden="true"
-                class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
-                focusable="false"
-                height="16"
-                role="img"
-                viewBox="0 0 16 16"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
+              <div
+                class="euiSwitch__icon euiSwitch__icon--checked"
+                data-euiicon-type="check"
               />
             </span>
           </span>
