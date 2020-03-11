@@ -5,7 +5,6 @@
  */
 
 import { InfluencerInput, MlCapabilities } from '../types';
-import { throwIfNotOk } from '../../../hooks/api/api';
 import { KibanaServices } from '../../../lib/kibana';
 
 export interface Body {
@@ -22,16 +21,9 @@ export interface Body {
 }
 
 export const getMlCapabilities = async (signal: AbortSignal): Promise<MlCapabilities> => {
-  const response = await KibanaServices.get().http.fetch<MlCapabilities>(
-    '/api/ml/ml_capabilities',
-    {
-      method: 'GET',
-      asResponse: true,
-      asSystemRequest: true,
-      signal,
-    }
-  );
-
-  await throwIfNotOk(response.response);
-  return response.body!;
+  return KibanaServices.get().http.fetch<MlCapabilities>('/api/ml/ml_capabilities', {
+    method: 'GET',
+    asSystemRequest: true,
+    signal,
+  });
 };

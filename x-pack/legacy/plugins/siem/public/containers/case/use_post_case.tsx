@@ -7,9 +7,7 @@
 import { useReducer, useCallback } from 'react';
 
 import { CaseRequest } from '../../../../../../plugins/case/common/api';
-import { useStateToaster } from '../../components/toasters';
-import { errorToToaster } from '../../components/ml/api/error_to_toaster';
-
+import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { postCase } from './api';
 import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
 import * as i18n from './translations';

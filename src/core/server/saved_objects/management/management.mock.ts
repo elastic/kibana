@@ -24,6 +24,7 @@ const createManagementMock = () => {
   const mocked: jest.Mocked<Management> = {
     isImportAndExportable: jest.fn().mockReturnValue(true),
     getDefaultSearchField: jest.fn(),
+    getImportableAndExportableTypes: jest.fn(),
     getIcon: jest.fn(),
     getTitle: jest.fn(),
     getEditUrl: jest.fn(),
