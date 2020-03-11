@@ -108,7 +108,12 @@ export abstract class Embeddable<
     }
 
     if (this.dynamicActions) {
-      this.dynamicActions.start();
+      this.dynamicActions.start().catch(error => {
+        /* eslint-disable */
+        console.log('Failed to start embeddable dynamic actions', this);
+        console.error(error);
+        /* eslint-enable */
+      });
     }
   }
 
@@ -188,6 +193,16 @@ export abstract class Embeddable<
    */
   public destroy(): void {
     this.destoyed = true;
+
+    if (this.dynamicActions) {
+      this.dynamicActions.stop().catch(error => {
+        /* eslint-disable */
+        console.log('Failed to stop embeddable dynamic actions', this);
+        console.error(error);
+        /* eslint-enable */
+      });
+    }
+
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();
     }

@@ -25,14 +25,17 @@ import { ActionDefinition } from './action';
 
 export interface DynamicActionManagerParams {
   storage: ActionStorage;
-  uiActions: Pick<UiActionsService, 'registerAction' | 'attachAction' | 'getActionFactory'>;
+  uiActions: Pick<
+    UiActionsService,
+    'addTriggerAction' | 'removeTriggerAction' | 'getActionFactory'
+  >;
   isCompatible: <C = unknown>(context: C) => Promise<boolean>;
 }
 
 export class DynamicActionManager {
   static idPrefixCounter = 0;
 
-  private readonly idPrefix = 'DYN_ACTION_' + DynamicActionManager.idPrefixCounter++;
+  private readonly idPrefix = `D_ACTION_${DynamicActionManager.idPrefixCounter++}_`;
 
   constructor(protected readonly params: DynamicActionManagerParams) {}
 
@@ -49,15 +52,11 @@ export class DynamicActionManager {
   }
 
   public async stop() {
-    /*
-    const { storage, uiActions } = this.params;
-    const events = await storage.list();
+    const events = await this.params.storage.list();
 
     for (const event of events) {
-      uiActions.detachAction(event.triggerId, event.action.id);
-      uiActions.unregisterAction(event.action.id);
+      this.killAction(event);
     }
-    */
   }
 
   public async createEvent(action: SerializedAction<unknown>, triggerId = 'VALUE_CLICK_TRIGGER') {
@@ -86,8 +85,12 @@ export class DynamicActionManager {
       getIconType: context => factory.getIconType(context),
     };
 
-    uiActions.attachAction(triggerId as any, actionDefinition as any);
+    uiActions.addTriggerAction(triggerId as any, actionDefinition);
   }
 
-  protected killAction(actionId: string) {}
+  protected killAction({ eventId, triggerId }: SerializedEvent) {
+    const { uiActions } = this.params;
+    const actionId = this.generateActionId(eventId);
+    uiActions.removeTriggerAction(triggerId as any, actionId);
+  }
 }
