@@ -49,8 +49,6 @@ jest.mock('../search_strategy', () => {
 describe('callClient', () => {
   beforeEach(() => {
     (handleResponse as jest.Mock).mockClear();
-    // mockSearchFn.mockClear();
-    // mockAbortFn.mockClear();
   });
 
   test('Passes the additional arguments it is given to the search strategy', () => {

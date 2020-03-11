@@ -80,7 +80,6 @@ import { fetchSoon, FetchOptions, RequestFailure } from '../fetch';
 import { getSearchService, getUiSettings, getInjectedMetadata } from '../../services';
 import { getEsQueryConfig, buildEsQuery, Filter } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
-import { getIndexPatternType } from '../../index_patterns';
 
 export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
 
@@ -344,7 +343,7 @@ export class SearchSource {
     if (this.searchStrategyId) {
       return this.searchStrategyId === 'default' ? undefined : this.searchStrategyId;
     } else {
-      return getIndexPatternType(index);
+      return index.type;
     }
   }
 
