@@ -22,13 +22,6 @@ import { ReactExpressionRendererType } from 'src/plugins/expressions/public';
 import { DragDrop } from '../../drag_drop';
 import { FrameLayout } from './frame_layout';
 
-// calling this function will wait for all pending Promises from mock
-// datasources to be processed by its callers.
-const waitForPromises = async () =>
-  act(async () => {
-    await new Promise(resolve => setTimeout(resolve));
-  });
-
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
     state,
@@ -103,7 +96,7 @@ describe('editor_frame', () => {
   describe('initialization', () => {
     it('should initialize initial datasource', async () => {
       mockVisualization.getLayerIds.mockReturnValue([]);
-      act(() => {
+      await act(async () => {
         mount(
           <EditorFrame
             {...getDefaultProps()}
@@ -119,7 +112,6 @@ describe('editor_frame', () => {
           />
         );
       });
-      await waitForPromises();
 
       expect(mockDatasource.initialize).toHaveBeenCalled();
     });
@@ -151,7 +143,7 @@ describe('editor_frame', () => {
       const datasource1State = { datasource1: '' };
       const datasource2State = { datasource2: '' };
 
-      act(() => {
+      await act(async () => {
         mount(
           <EditorFrame
             {...getDefaultProps()}
@@ -186,14 +178,13 @@ describe('editor_frame', () => {
           />
         );
       });
-      await waitForPromises();
       expect(mockDatasource.initialize).toHaveBeenCalledWith(datasource1State);
       expect(mockDatasource2.initialize).toHaveBeenCalledWith(datasource2State);
       expect(mockDatasource3.initialize).not.toHaveBeenCalled();
     });
 
     it('should not render something before all datasources are initialized', async () => {
-      act(() => {
+      await act(async () => {
         mount(
           <EditorFrame
             {...getDefaultProps()}
@@ -208,15 +199,15 @@ describe('editor_frame', () => {
             ExpressionRenderer={expressionRendererMock}
           />
         );
+        expect(mockVisualization.renderLayerConfigPanel).not.toHaveBeenCalled();
+        expect(mockDatasource.renderDataPanel).not.toHaveBeenCalled();
       });
-
       expect(mockVisualization.getLayerOptions).not.toHaveBeenCalled();
       expect(mockDatasource.renderDataPanel).not.toHaveBeenCalled();
-      await waitForPromises();
     });
 
     it('should not initialize visualization before datasource is initialized', async () => {
-      act(() => {
+      await act(async () => {
         mount(
           <EditorFrame
             {...getDefaultProps()}
@@ -231,17 +222,14 @@ describe('editor_frame', () => {
             ExpressionRenderer={expressionRendererMock}
           />
         );
+        expect(mockVisualization.initialize).not.toHaveBeenCalled();
       });
-
-      expect(mockVisualization.initialize).not.toHaveBeenCalled();
-
-      await waitForPromises();
 
       expect(mockVisualization.initialize).toHaveBeenCalled();
     });
 
     it('should pass the public frame api into visualization initialize', async () => {
-      act(() => {
+      await act(async () => {
         mount(
           <EditorFrame
             {...getDefaultProps()}
@@ -257,11 +245,8 @@ describe('editor_frame', () => {
             dateRange={{ fromDate: 'now-7d', toDate: 'now' }}
           />
         );
+        expect(mockVisualization.initialize).not.toHaveBeenCalled();
       });
-
-      expect(mockVisualization.initialize).not.toHaveBeenCalled();
-
-      await waitForPromises();
 
       expect(mockVisualization.initialize).toHaveBeenCalledWith({
         datasourceLayers: {},
@@ -276,7 +261,7 @@ describe('editor_frame', () => {
     it('should add new layer on active datasource on frame api call', async () => {
       const initialState = { datasource2: '' };
       mockDatasource2.initialize.mockReturnValue(Promise.resolve(initialState));
-      act(() => {
+      await act(async () => {
         mount(
           <EditorFrame
             {...getDefaultProps()}
@@ -293,8 +278,6 @@ describe('editor_frame', () => {
           />
         );
       });
-
-      await waitForPromises();
 
       act(() => {
         mockVisualization.initialize.mock.calls[0][0].addNewLayer();
@@ -310,7 +293,7 @@ describe('editor_frame', () => {
       mockDatasource2.getLayers.mockReturnValue(['abc', 'def']);
       mockDatasource2.removeLayer.mockReturnValue({ removed: true });
       mockVisualization.getLayerIds.mockReturnValue(['first', 'abc', 'def']);
-      act(() => {
+      await act(async () => {
         mount(
           <EditorFrame
             {...getDefaultProps()}
@@ -328,8 +311,6 @@ describe('editor_frame', () => {
         );
       });
 
-      await waitForPromises();
-
       act(() => {
         mockVisualization.initialize.mock.calls[0][0].removeLayers(['abc', 'def']);
       });
@@ -342,7 +323,7 @@ describe('editor_frame', () => {
       const initialState = {};
       let databaseInitialized: ({}) => void;
 
-      act(() => {
+      await act(async () => {
         mount(
           <EditorFrame
             {...getDefaultProps()}
@@ -364,10 +345,9 @@ describe('editor_frame', () => {
           />
         );
       });
-
-      databaseInitialized!(initialState);
-
-      await waitForPromises();
+      await act(async () => {
+        databaseInitialized!(initialState);
+      });
       expect(mockDatasource.renderDataPanel).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({ state: initialState })
@@ -377,53 +357,56 @@ describe('editor_frame', () => {
     it('should initialize visualization state and render config panel', async () => {
       const initialState = {};
       mockDatasource.getLayers.mockReturnValue(['first']);
-      mount(
-        <EditorFrame
-          {...getDefaultProps()}
-          visualizationMap={{
-            testVis: { ...mockVisualization, initialize: () => initialState },
-          }}
-          datasourceMap={{
-            testDatasource: {
-              ...mockDatasource,
-              initialize: () => Promise.resolve(),
-            },
-          }}
-          initialDatasourceId="testDatasource"
-          initialVisualizationId="testVis"
-          ExpressionRenderer={expressionRendererMock}
-        />
-      );
 
-      await waitForPromises();
+      await act(async () => {
+        mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{
+              testVis: { ...mockVisualization, initialize: () => initialState },
+            }}
+            datasourceMap={{
+              testDatasource: {
+                ...mockDatasource,
+                initialize: () => Promise.resolve(),
+              },
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
 
       expect(mockVisualization.getLayerOptions).toHaveBeenCalledWith(
         expect.objectContaining({ state: initialState })
       );
     });
 
+    let instance: ReactWrapper;
+
     it('should render the resulting expression using the expression renderer', async () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
 
-      const instance = mount(
-        <EditorFrame
-          {...getDefaultProps()}
-          visualizationMap={{
-            testVis: { ...mockVisualization, toExpression: () => 'vis' },
-          }}
-          datasourceMap={{
-            testDatasource: {
-              ...mockDatasource,
-              toExpression: () => 'datasource',
-            },
-          }}
-          initialDatasourceId="testDatasource"
-          initialVisualizationId="testVis"
-          ExpressionRenderer={expressionRendererMock}
-        />
-      );
-
-      await waitForPromises();
+      await act(async () => {
+        instance = mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{
+              testVis: { ...mockVisualization, toExpression: () => 'vis' },
+            }}
+            datasourceMap={{
+              testDatasource: {
+                ...mockDatasource,
+                toExpression: () => 'datasource',
+              },
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
 
       instance.update();
 
@@ -490,40 +473,40 @@ describe('editor_frame', () => {
       mockDatasource2.initialize.mockImplementation(initialState => Promise.resolve(initialState));
       mockDatasource2.getLayers.mockReturnValue(['second', 'third']);
 
-      const instance = mount(
-        <EditorFrame
-          {...getDefaultProps()}
-          visualizationMap={{
-            testVis: { ...mockVisualization, toExpression: () => 'vis' },
-          }}
-          datasourceMap={{
-            testDatasource: mockDatasource,
-            testDatasource2: mockDatasource2,
-          }}
-          initialDatasourceId="testDatasource"
-          initialVisualizationId="testVis"
-          ExpressionRenderer={expressionRendererMock}
-          doc={{
-            visualizationType: 'testVis',
-            title: '',
-            expression: '',
-            state: {
-              datasourceStates: {
-                testDatasource: {},
-                testDatasource2: {},
+      await act(async () => {
+        instance = mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{
+              testVis: { ...mockVisualization, toExpression: () => 'vis' },
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+              testDatasource2: mockDatasource2,
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+            doc={{
+              visualizationType: 'testVis',
+              title: '',
+              expression: '',
+              state: {
+                datasourceStates: {
+                  testDatasource: {},
+                  testDatasource2: {},
+                },
+                visualization: {},
+                datasourceMetaData: {
+                  filterableIndexPatterns: [],
+                },
+                query: { query: '', language: 'lucene' },
+                filters: [],
               },
-              visualization: {},
-              datasourceMetaData: {
-                filterableIndexPatterns: [],
-              },
-              query: { query: '', language: 'lucene' },
-              filters: [],
-            },
-          }}
-        />
-      );
-
-      await waitForPromises();
+            }}
+          />
+        );
+      });
 
       instance.update();
 
@@ -616,23 +599,23 @@ describe('editor_frame', () => {
   describe('state update', () => {
     it('should re-render config panel after state update', async () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
-      mount(
-        <EditorFrame
-          {...getDefaultProps()}
-          visualizationMap={{
-            testVis: mockVisualization,
-          }}
-          datasourceMap={{
-            testDatasource: mockDatasource,
-          }}
-          initialDatasourceId="testDatasource"
-          initialVisualizationId="testVis"
-          ExpressionRenderer={expressionRendererMock}
-        />
-      );
 
-      await waitForPromises();
-
+      await act(async () => {
+        mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{
+              testVis: mockVisualization,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
       const updatedState = {};
       const setVisualizationState = (mockVisualization.getLayerOptions as jest.Mock).mock
         .calls[0][0].setState;
@@ -650,22 +633,23 @@ describe('editor_frame', () => {
 
     it('should re-render data panel after state update', async () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
-      mount(
-        <EditorFrame
-          {...getDefaultProps()}
-          visualizationMap={{
-            testVis: mockVisualization,
-          }}
-          datasourceMap={{
-            testDatasource: mockDatasource,
-          }}
-          initialDatasourceId="testDatasource"
-          initialVisualizationId="testVis"
-          ExpressionRenderer={expressionRendererMock}
-        />
-      );
 
-      await waitForPromises();
+      await act(async () => {
+        mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{
+              testVis: mockVisualization,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
 
       const updatedState = {
         title: 'shazm',
@@ -687,22 +671,23 @@ describe('editor_frame', () => {
 
     it('should re-render config panel with updated datasource api after datasource state update', async () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
-      mount(
-        <EditorFrame
-          {...getDefaultProps()}
-          visualizationMap={{
-            testVis: mockVisualization,
-          }}
-          datasourceMap={{
-            testDatasource: mockDatasource,
-          }}
-          initialDatasourceId="testDatasource"
-          initialVisualizationId="testVis"
-          ExpressionRenderer={expressionRendererMock}
-        />
-      );
 
-      await waitForPromises();
+      await act(async () => {
+        mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{
+              testVis: mockVisualization,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
 
       const updatedPublicAPI: DatasourcePublicAPI = {
         datasourceId: 'testDatasource',
@@ -738,40 +723,40 @@ describe('editor_frame', () => {
       mockDatasource2.getLayers.mockReturnValue(['second', 'third']);
       mockVisualization.getLayerIds.mockReturnValue(['first', 'second', 'third']);
 
-      mount(
-        <EditorFrame
-          {...getDefaultProps()}
-          visualizationMap={{
-            testVis: mockVisualization,
-          }}
-          datasourceMap={{
-            testDatasource: mockDatasource,
-            testDatasource2: mockDatasource2,
-          }}
-          initialDatasourceId="testDatasource"
-          initialVisualizationId="testVis"
-          ExpressionRenderer={expressionRendererMock}
-          doc={{
-            visualizationType: 'testVis',
-            title: '',
-            expression: '',
-            state: {
-              datasourceStates: {
-                testDatasource: {},
-                testDatasource2: {},
+      await act(async () => {
+        mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{
+              testVis: mockVisualization,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+              testDatasource2: mockDatasource2,
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+            doc={{
+              visualizationType: 'testVis',
+              title: '',
+              expression: '',
+              state: {
+                datasourceStates: {
+                  testDatasource: {},
+                  testDatasource2: {},
+                },
+                visualization: {},
+                datasourceMetaData: {
+                  filterableIndexPatterns: [],
+                },
+                query: { query: '', language: 'lucene' },
+                filters: [],
               },
-              visualization: {},
-              datasourceMetaData: {
-                filterableIndexPatterns: [],
-              },
-              query: { query: '', language: 'lucene' },
-              filters: [],
-            },
-          }}
-        />
-      );
-
-      await waitForPromises();
+            }}
+          />
+        );
+      });
 
       expect(mockVisualization.getLayerOptions).toHaveBeenCalled();
 
@@ -791,40 +776,40 @@ describe('editor_frame', () => {
       const datasource1State = { datasource1: '' };
       const datasource2State = { datasource2: '' };
 
-      mount(
-        <EditorFrame
-          {...getDefaultProps()}
-          visualizationMap={{
-            testVis: mockVisualization,
-          }}
-          datasourceMap={{
-            testDatasource: mockDatasource,
-            testDatasource2: mockDatasource2,
-          }}
-          initialDatasourceId="testDatasource"
-          initialVisualizationId="testVis"
-          ExpressionRenderer={expressionRendererMock}
-          doc={{
-            visualizationType: 'testVis',
-            title: '',
-            expression: '',
-            state: {
-              datasourceStates: {
-                testDatasource: datasource1State,
-                testDatasource2: datasource2State,
+      await act(async () => {
+        mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{
+              testVis: mockVisualization,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+              testDatasource2: mockDatasource2,
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+            doc={{
+              visualizationType: 'testVis',
+              title: '',
+              expression: '',
+              state: {
+                datasourceStates: {
+                  testDatasource: datasource1State,
+                  testDatasource2: datasource2State,
+                },
+                visualization: {},
+                datasourceMetaData: {
+                  filterableIndexPatterns: [],
+                },
+                query: { query: '', language: 'lucene' },
+                filters: [],
               },
-              visualization: {},
-              datasourceMetaData: {
-                filterableIndexPatterns: [],
-              },
-              query: { query: '', language: 'lucene' },
-              filters: [],
-            },
-          }}
-        />
-      );
-
-      await waitForPromises();
+            }}
+          />
+        );
+      });
 
       expect(mockDatasource.getPublicAPI).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -855,23 +840,23 @@ describe('editor_frame', () => {
       mockDatasource.initialize.mockResolvedValue(datasourceState);
       mockDatasource.getLayers.mockReturnValue(['first']);
 
-      mount(
-        <EditorFrame
-          {...getDefaultProps()}
-          dateRange={dateRange}
-          visualizationMap={{
-            testVis: mockVisualization,
-          }}
-          datasourceMap={{
-            testDatasource: mockDatasource,
-          }}
-          initialDatasourceId="testDatasource"
-          initialVisualizationId="testVis"
-          ExpressionRenderer={expressionRendererMock}
-        />
-      );
-
-      await waitForPromises();
+      await act(async () => {
+        mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            dateRange={dateRange}
+            visualizationMap={{
+              testVis: mockVisualization,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
 
       expect(mockDatasource.getPublicAPI).toHaveBeenCalledWith({
         dateRange,
@@ -883,22 +868,23 @@ describe('editor_frame', () => {
 
     it('should re-create the public api after state has been set', async () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
-      mount(
-        <EditorFrame
-          {...getDefaultProps()}
-          visualizationMap={{
-            testVis: mockVisualization,
-          }}
-          datasourceMap={{
-            testDatasource: mockDatasource,
-          }}
-          initialDatasourceId="testDatasource"
-          initialVisualizationId="testVis"
-          ExpressionRenderer={expressionRendererMock}
-        />
-      );
 
-      await waitForPromises();
+      await act(async () => {
+        mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{
+              testVis: mockVisualization,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
 
       const updatedState = {};
       const setDatasourceState = mockDatasource.getPublicAPI.mock.calls[0][0].setState;
@@ -952,23 +938,24 @@ describe('editor_frame', () => {
         },
       ]);
 
-      instance = mount(
-        <EditorFrame
-          {...getDefaultProps()}
-          visualizationMap={{
-            testVis: mockVisualization,
-            testVis2: mockVisualization2,
-          }}
-          datasourceMap={{
-            testDatasource: mockDatasource,
-            testDatasource2: mockDatasource2,
-          }}
-          initialDatasourceId="testDatasource"
-          initialVisualizationId="testVis"
-          ExpressionRenderer={expressionRendererMock}
-        />
-      );
-      await waitForPromises();
+      await act(async () => {
+        instance = mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{
+              testVis: mockVisualization,
+              testVis2: mockVisualization2,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+              testDatasource2: mockDatasource2,
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
 
       // necessary to flush elements to dom synchronously
       instance.update();
@@ -987,15 +974,14 @@ describe('editor_frame', () => {
     });
 
     it('should initialize other datasource on switch', async () => {
-      act(() => {
+      await act(async () => {
         instance.find('button[data-test-subj="datasource-switch"]').simulate('click');
       });
-      act(() => {
+      await act(async () => {
         (document.querySelector(
           '[data-test-subj="datasource-switch-testDatasource2"]'
         ) as HTMLButtonElement).click();
       });
-      await waitForPromises();
       expect(mockDatasource2.initialize).toHaveBeenCalled();
     });
 
@@ -1005,11 +991,11 @@ describe('editor_frame', () => {
 
       instance.find('button[data-test-subj="datasource-switch"]').simulate('click');
 
-      (document.querySelector(
-        '[data-test-subj="datasource-switch-testDatasource2"]'
-      ) as HTMLButtonElement).click();
-
-      await waitForPromises();
+      await act(async () => {
+        (document.querySelector(
+          '[data-test-subj="datasource-switch-testDatasource2"]'
+        ) as HTMLButtonElement).click();
+      });
 
       expect(mockDatasource2.renderDataPanel).toHaveBeenCalledWith(
         expect.any(Element),
@@ -1063,23 +1049,23 @@ describe('editor_frame', () => {
 
   describe('suggestions', () => {
     it('should fetch suggestions of currently active datasource', async () => {
-      mount(
-        <EditorFrame
-          {...getDefaultProps()}
-          visualizationMap={{
-            testVis: mockVisualization,
-          }}
-          datasourceMap={{
-            testDatasource: mockDatasource,
-            testDatasource2: mockDatasource2,
-          }}
-          initialDatasourceId="testDatasource"
-          initialVisualizationId="testVis"
-          ExpressionRenderer={expressionRendererMock}
-        />
-      );
-
-      await waitForPromises();
+      await act(async () => {
+        mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{
+              testVis: mockVisualization,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+              testDatasource2: mockDatasource2,
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
 
       expect(mockDatasource.getDatasourceSuggestionsFromCurrentState).toHaveBeenCalled();
       expect(mockDatasource2.getDatasourceSuggestionsFromCurrentState).not.toHaveBeenCalled();
@@ -1098,95 +1084,98 @@ describe('editor_frame', () => {
           keptLayerIds: [],
         },
       ]);
-      mount(
-        <EditorFrame
-          {...getDefaultProps()}
-          visualizationMap={{
-            testVis: mockVisualization,
-            testVis2: mockVisualization2,
-          }}
-          datasourceMap={{
-            testDatasource: mockDatasource,
-            testDatasource2: mockDatasource2,
-          }}
-          initialDatasourceId="testDatasource"
-          initialVisualizationId="testVis"
-          ExpressionRenderer={expressionRendererMock}
-        />
-      );
 
-      await waitForPromises();
+      await act(async () => {
+        mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{
+              testVis: mockVisualization,
+              testVis2: mockVisualization2,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+              testDatasource2: mockDatasource2,
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
 
       expect(mockVisualization.getSuggestions).toHaveBeenCalled();
       expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
     });
 
+    let instance: ReactWrapper;
     it('should display top 5 suggestions in descending order', async () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
-      const instance = mount(
-        <EditorFrame
-          {...getDefaultProps()}
-          visualizationMap={{
-            testVis: {
-              ...mockVisualization,
-              getSuggestions: () => [
-                {
-                  score: 0.1,
-                  state: {},
-                  title: 'Suggestion6',
-                  previewIcon: 'empty',
-                },
-                {
-                  score: 0.5,
-                  state: {},
-                  title: 'Suggestion3',
-                  previewIcon: 'empty',
-                },
-                {
-                  score: 0.7,
-                  state: {},
-                  title: 'Suggestion2',
-                  previewIcon: 'empty',
-                },
-                {
-                  score: 0.8,
-                  state: {},
-                  title: 'Suggestion1',
-                  previewIcon: 'empty',
-                },
-              ],
-            },
-            testVis2: {
-              ...mockVisualization,
-              getSuggestions: () => [
-                {
-                  score: 0.4,
-                  state: {},
-                  title: 'Suggestion5',
-                  previewIcon: 'empty',
-                },
-                {
-                  score: 0.45,
-                  state: {},
-                  title: 'Suggestion4',
-                  previewIcon: 'empty',
-                },
-              ],
-            },
-          }}
-          datasourceMap={{
-            testDatasource: {
-              ...mockDatasource,
-              getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
-            },
-          }}
-          initialDatasourceId="testDatasource"
-          initialVisualizationId="testVis"
-          ExpressionRenderer={expressionRendererMock}
-        />
-      );
 
-      await waitForPromises();
+      await act(async () => {
+        instance = mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{
+              testVis: {
+                ...mockVisualization,
+                getSuggestions: () => [
+                  {
+                    score: 0.1,
+                    state: {},
+                    title: 'Suggestion6',
+                    previewIcon: 'empty',
+                  },
+                  {
+                    score: 0.5,
+                    state: {},
+                    title: 'Suggestion3',
+                    previewIcon: 'empty',
+                  },
+                  {
+                    score: 0.7,
+                    state: {},
+                    title: 'Suggestion2',
+                    previewIcon: 'empty',
+                  },
+                  {
+                    score: 0.8,
+                    state: {},
+                    title: 'Suggestion1',
+                    previewIcon: 'empty',
+                  },
+                ],
+              },
+              testVis2: {
+                ...mockVisualization,
+                getSuggestions: () => [
+                  {
+                    score: 0.4,
+                    state: {},
+                    title: 'Suggestion5',
+                    previewIcon: 'empty',
+                  },
+                  {
+                    score: 0.45,
+                    state: {},
+                    title: 'Suggestion4',
+                    previewIcon: 'empty',
+                  },
+                ],
+              },
+            }}
+            datasourceMap={{
+              testDatasource: {
+                ...mockDatasource,
+                getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
+              },
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
 
       // TODO why is this necessary?
       instance.update();
@@ -1209,36 +1198,37 @@ describe('editor_frame', () => {
       mockDatasource.getLayers.mockReturnValue(['first', 'second', 'third']);
       const newDatasourceState = {};
       const suggestionVisState = {};
-      const instance = mount(
-        <EditorFrame
-          {...getDefaultProps()}
-          visualizationMap={{
-            testVis: {
-              ...mockVisualization,
-              getSuggestions: () => [
-                {
-                  score: 0.8,
-                  state: suggestionVisState,
-                  title: 'Suggestion1',
-                  previewIcon: 'empty',
-                },
-              ],
-            },
-            testVis2: mockVisualization2,
-          }}
-          datasourceMap={{
-            testDatasource: {
-              ...mockDatasource,
-              getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
-            },
-          }}
-          initialDatasourceId="testDatasource"
-          initialVisualizationId="testVis2"
-          ExpressionRenderer={expressionRendererMock}
-        />
-      );
 
-      await waitForPromises();
+      await act(async () => {
+        instance = mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{
+              testVis: {
+                ...mockVisualization,
+                getSuggestions: () => [
+                  {
+                    score: 0.8,
+                    state: suggestionVisState,
+                    title: 'Suggestion1',
+                    previewIcon: 'empty',
+                  },
+                ],
+              },
+              testVis2: mockVisualization2,
+            }}
+            datasourceMap={{
+              testDatasource: {
+                ...mockDatasource,
+                getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
+              },
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis2"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
 
       // TODO why is this necessary?
       instance.update();
@@ -1267,43 +1257,44 @@ describe('editor_frame', () => {
     it('should switch to best suggested visualization on field drop', async () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
       const suggestionVisState = {};
-      const instance = mount(
-        <EditorFrame
-          {...getDefaultProps()}
-          visualizationMap={{
-            testVis: {
-              ...mockVisualization,
-              getSuggestions: () => [
-                {
-                  score: 0.2,
-                  state: {},
-                  title: 'Suggestion1',
-                  previewIcon: 'empty',
-                },
-                {
-                  score: 0.8,
-                  state: suggestionVisState,
-                  title: 'Suggestion2',
-                  previewIcon: 'empty',
-                },
-              ],
-            },
-            testVis2: mockVisualization2,
-          }}
-          datasourceMap={{
-            testDatasource: {
-              ...mockDatasource,
-              getDatasourceSuggestionsForField: () => [generateSuggestion()],
-              getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
-            },
-          }}
-          initialDatasourceId="testDatasource"
-          initialVisualizationId="testVis"
-          ExpressionRenderer={expressionRendererMock}
-        />
-      );
 
-      await waitForPromises();
+      await act(async () => {
+        instance = mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{
+              testVis: {
+                ...mockVisualization,
+                getSuggestions: () => [
+                  {
+                    score: 0.2,
+                    state: {},
+                    title: 'Suggestion1',
+                    previewIcon: 'empty',
+                  },
+                  {
+                    score: 0.8,
+                    state: suggestionVisState,
+                    title: 'Suggestion2',
+                    previewIcon: 'empty',
+                  },
+                ],
+              },
+              testVis2: mockVisualization2,
+            }}
+            datasourceMap={{
+              testDatasource: {
+                ...mockDatasource,
+                getDatasourceSuggestionsForField: () => [generateSuggestion()],
+                getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
+              },
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
 
       // TODO why is this necessary?
       instance.update();
@@ -1325,58 +1316,59 @@ describe('editor_frame', () => {
     it('should use the currently selected visualization if possible on field drop', async () => {
       mockDatasource.getLayers.mockReturnValue(['first', 'second', 'third']);
       const suggestionVisState = {};
-      const instance = mount(
-        <EditorFrame
-          {...getDefaultProps()}
-          visualizationMap={{
-            testVis: {
-              ...mockVisualization,
-              getSuggestions: () => [
-                {
-                  score: 0.2,
-                  state: {},
-                  title: 'Suggestion1',
-                  previewIcon: 'empty',
-                },
-                {
-                  score: 0.6,
-                  state: {},
-                  title: 'Suggestion2',
-                  previewIcon: 'empty',
-                },
-              ],
-            },
-            testVis2: {
-              ...mockVisualization2,
-              getSuggestions: () => [
-                {
-                  score: 0.8,
-                  state: suggestionVisState,
-                  title: 'Suggestion3',
-                  previewIcon: 'empty',
-                },
-              ],
-            },
-          }}
-          datasourceMap={{
-            testDatasource: {
-              ...mockDatasource,
-              getDatasourceSuggestionsForField: () => [generateSuggestion()],
-              getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
-              renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
-                if (dragging !== 'draggedField') {
-                  setDragging('draggedField');
-                }
-              },
-            },
-          }}
-          initialDatasourceId="testDatasource"
-          initialVisualizationId="testVis2"
-          ExpressionRenderer={expressionRendererMock}
-        />
-      );
 
-      await waitForPromises();
+      await act(async () => {
+        instance = mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{
+              testVis: {
+                ...mockVisualization,
+                getSuggestions: () => [
+                  {
+                    score: 0.2,
+                    state: {},
+                    title: 'Suggestion1',
+                    previewIcon: 'empty',
+                  },
+                  {
+                    score: 0.6,
+                    state: {},
+                    title: 'Suggestion2',
+                    previewIcon: 'empty',
+                  },
+                ],
+              },
+              testVis2: {
+                ...mockVisualization2,
+                getSuggestions: () => [
+                  {
+                    score: 0.8,
+                    state: suggestionVisState,
+                    title: 'Suggestion3',
+                    previewIcon: 'empty',
+                  },
+                ],
+              },
+            }}
+            datasourceMap={{
+              testDatasource: {
+                ...mockDatasource,
+                getDatasourceSuggestionsForField: () => [generateSuggestion()],
+                getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
+                renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
+                  if (dragging !== 'draggedField') {
+                    setDragging('draggedField');
+                  }
+                },
+              },
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis2"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
 
       // TODO why is this necessary?
       instance.update();
@@ -1427,54 +1419,55 @@ describe('editor_frame', () => {
           },
         ],
       };
-      const instance = mount(
-        <EditorFrame
-          {...getDefaultProps()}
-          visualizationMap={{
-            testVis: {
-              ...mockVisualization,
-              getSuggestions: () => [
-                {
-                  score: 0.2,
-                  state: {},
-                  title: 'Suggestion1',
-                  previewIcon: 'empty',
-                },
-                {
-                  score: 0.6,
-                  state: {},
-                  title: 'Suggestion2',
-                  previewIcon: 'empty',
-                },
-              ],
-            },
-            testVis2: {
-              ...mockVisualization2,
-              getSuggestions: () => [],
-            },
-            testVis3: {
-              ...mockVisualization3,
-            },
-          }}
-          datasourceMap={{
-            testDatasource: {
-              ...mockDatasource,
-              getDatasourceSuggestionsForField: () => [generateSuggestion()],
-              getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
-              renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
-                if (dragging !== 'draggedField') {
-                  setDragging('draggedField');
-                }
-              },
-            },
-          }}
-          initialDatasourceId="testDatasource"
-          initialVisualizationId="testVis2"
-          ExpressionRenderer={expressionRendererMock}
-        />
-      );
 
-      await waitForPromises();
+      await act(async () => {
+        instance = mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            visualizationMap={{
+              testVis: {
+                ...mockVisualization,
+                getSuggestions: () => [
+                  {
+                    score: 0.2,
+                    state: {},
+                    title: 'Suggestion1',
+                    previewIcon: 'empty',
+                  },
+                  {
+                    score: 0.6,
+                    state: {},
+                    title: 'Suggestion2',
+                    previewIcon: 'empty',
+                  },
+                ],
+              },
+              testVis2: {
+                ...mockVisualization2,
+                getSuggestions: () => [],
+              },
+              testVis3: {
+                ...mockVisualization3,
+              },
+            }}
+            datasourceMap={{
+              testDatasource: {
+                ...mockDatasource,
+                getDatasourceSuggestionsForField: () => [generateSuggestion()],
+                getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
+                renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
+                  if (dragging !== 'draggedField') {
+                    setDragging('draggedField');
+                  }
+                },
+              },
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis2"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
 
       // TODO why is this necessary?
       instance.update();
@@ -1515,8 +1508,8 @@ describe('editor_frame', () => {
       });
       mockVisualization.initialize.mockReturnValue({ initialState: true });
 
-      act(() => {
-        instance = mount(
+      await act(async () => {
+        mount(
           <EditorFrame
             {...getDefaultProps()}
             visualizationMap={{
@@ -1531,12 +1524,9 @@ describe('editor_frame', () => {
             onChange={onChange}
           />
         );
+        expect(onChange).toHaveBeenCalledTimes(0);
+        resolver({});
       });
-
-      expect(onChange).toHaveBeenCalledTimes(0);
-
-      resolver({});
-      await waitForPromises();
 
       expect(onChange).toHaveBeenCalledTimes(2);
       expect(onChange).toHaveBeenNthCalledWith(1, {
@@ -1586,7 +1576,7 @@ describe('editor_frame', () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
       mockVisualization.initialize.mockReturnValue({ initialState: true });
 
-      act(() => {
+      await act(async () => {
         instance = mount(
           <EditorFrame
             {...getDefaultProps()}
@@ -1604,8 +1594,6 @@ describe('editor_frame', () => {
         );
       });
 
-      await waitForPromises();
-
       expect(onChange).toHaveBeenCalledTimes(2);
 
       mockDatasource.toExpression.mockReturnValue('data expression');
@@ -1613,7 +1601,6 @@ describe('editor_frame', () => {
       instance.setProps({ query: { query: 'new query', language: 'lucene' } });
       instance.update();
 
-      await waitForPromises();
       expect(onChange).toHaveBeenCalledTimes(3);
       expect(onChange).toHaveBeenNthCalledWith(3, {
         filterableIndexPatterns: [],
@@ -1644,7 +1631,7 @@ describe('editor_frame', () => {
       });
       mockVisualization.initialize.mockReturnValue({ initialState: true });
 
-      act(() => {
+      await act(async () => {
         instance = mount(
           <EditorFrame
             {...getDefaultProps()}
@@ -1658,10 +1645,9 @@ describe('editor_frame', () => {
         );
       });
 
-      await waitForPromises();
       expect(onChange).toHaveBeenCalledTimes(2);
 
-      act(() => {
+      await act(async () => {
         (instance.find(FrameLayout).prop('dataPanel') as ReactElement)!.props.dispatch({
           type: 'UPDATE_DATASOURCE_STATE',
           updater: () => ({
@@ -1670,8 +1656,6 @@ describe('editor_frame', () => {
           datasourceId: 'testDatasource',
         });
       });
-
-      await waitForPromises();
 
       expect(onChange).toHaveBeenCalledTimes(3);
     });
