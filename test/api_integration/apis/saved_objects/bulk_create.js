@@ -58,7 +58,9 @@ export default function({ getService }) {
                   type: 'visualization',
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
                   error: {
-                    message: 'version conflict, document already exists',
+                    error: 'Conflict',
+                    message:
+                      'Saved object [visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab] conflict',
                     statusCode: 409,
                   },
                 },
