@@ -4,6 +4,10 @@
 
 ## ElasticsearchServiceSetup.adminClient property
 
+> Warning: This API is now obsolete.
+> 
+> 
+
 A client for the `admin` cluster. All Elasticsearch config value changes are processed under the hood. See [IClusterClient](./kibana-plugin-core-server.iclusterclient.md)<!-- -->.
 
 <b>Signature:</b>

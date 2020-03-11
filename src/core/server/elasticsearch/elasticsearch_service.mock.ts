@@ -22,7 +22,11 @@ import { IClusterClient, ICustomClusterClient } from './cluster_client';
 import { IScopedClusterClient } from './scoped_cluster_client';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
-import { InternalElasticsearchServiceSetup, ElasticsearchServiceSetup } from './types';
+import {
+  InternalElasticsearchServiceSetup,
+  ElasticsearchServiceSetup,
+  ElasticsearchServiceStart,
+} from './types';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 
 const createScopedClusterClientMock = (): jest.Mocked<IScopedClusterClient> => ({
@@ -63,6 +67,22 @@ const createSetupContractMock = () => {
   return setupContract;
 };
 
+type MockedElasticSearchServiceStart = jest.Mocked<
+  ElasticsearchServiceStart & {
+    client: jest.Mocked<IClusterClient>;
+  }
+>;
+
+const createStartContractMock = () => {
+  const startContract: MockedElasticSearchServiceStart = {
+    createClient: jest.fn(),
+    client: createClusterClientMock(),
+  };
+  startContract.createClient.mockReturnValue(createCustomClusterClientMock());
+  startContract.client.asScoped.mockReturnValue(createScopedClusterClientMock());
+  return startContract;
+};
+
 type MockedInternalElasticSearchServiceSetup = jest.Mocked<
   InternalElasticsearchServiceSetup & {
     adminClient: jest.Mocked<IClusterClient>;
@@ -95,6 +115,7 @@ const createMock = () => {
     stop: jest.fn(),
   };
   mocked.setup.mockResolvedValue(createInternalSetupContractMock());
+  mocked.start.mockResolvedValueOnce(createStartContractMock());
   mocked.stop.mockResolvedValue();
   return mocked;
 };
@@ -103,6 +124,7 @@ export const elasticsearchServiceMock = {
   create: createMock,
   createInternalSetup: createInternalSetupContractMock,
   createSetup: createSetupContractMock,
+  createStart: createStartContractMock,
   createClusterClient: createClusterClientMock,
   createCustomClusterClient: createCustomClusterClientMock,
   createScopedClusterClient: createScopedClusterClientMock,
