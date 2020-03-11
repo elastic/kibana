@@ -10,7 +10,7 @@ import {
   getListHandler,
   getFileHandler,
   getInfoHandler,
-  getIndexPattern,
+  getDataStreamHandler,
   installPackageHandler,
   deletePackageHandler,
 } from './handlers';
@@ -18,7 +18,7 @@ import {
   GetPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
-  GetIndexPatternRequestSchema,
+  GetDataStreamRequestSchema,
   InstallPackageRequestSchema,
   DeletePackageRequestSchema,
 } from '../../types';
@@ -62,11 +62,11 @@ export const registerRoutes = (router: IRouter) => {
 
   router.get(
     {
-      path: EPM_API_ROUTES.INDEX_PATTERN,
-      validate: GetIndexPatternRequestSchema,
+      path: EPM_API_ROUTES.DATA_STREAM,
+      validate: GetDataStreamRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
-    getIndexPattern
+    getDataStreamHandler
   );
 
   router.post(

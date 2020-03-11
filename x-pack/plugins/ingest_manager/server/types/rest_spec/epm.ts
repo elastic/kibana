@@ -24,10 +24,13 @@ export const GetInfoRequestSchema = {
   }),
 };
 
-export const GetIndexPatternRequestSchema = {
+export const GetDataStreamRequestSchema = {
   params: schema.object({
-    pkgkey: schema.string(),
+    pkgName: schema.string(),
+  }),
+  query: schema.object({
     datasetPath: schema.string(),
+    version: schema.maybe(schema.string()),
   }),
 };
 

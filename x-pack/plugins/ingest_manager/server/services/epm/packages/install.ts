@@ -18,7 +18,7 @@ import * as Registry from '../registry';
 import { getObject } from './get_objects';
 import { getInstallation, findInstalledPackageByName } from './index';
 import { installTemplates } from '../elasticsearch/template/install';
-import { generateTemplatePatterns } from '../elasticsearch/template/template';
+import { generateDataStreams } from '../elasticsearch/template/template';
 import { installPipelines } from '../elasticsearch/ingest_pipeline/install';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 
@@ -105,7 +105,7 @@ export async function installPackage(options: {
   ]);
 
   const toSaveRefs: AssetReference[] = res.flat();
-  const toSavePatterns = generateTemplatePatterns(registryPackageInfo.datasets);
+  const toSaveStreams = generateDataStreams(registryPackageInfo.datasets);
   // Save those references in the package manager's state saved object
   await saveInstallationReferences({
     savedObjectsClient,
@@ -113,7 +113,7 @@ export async function installPackage(options: {
     pkgName,
     pkgVersion,
     toSaveRefs,
-    toSavePatterns,
+    toSaveStreams,
   });
   return toSaveRefs;
 }
@@ -143,12 +143,12 @@ export async function saveInstallationReferences(options: {
   pkgName: string;
   pkgVersion: string;
   toSaveRefs: AssetReference[];
-  toSavePatterns: Record<string, string>;
+  toSaveStreams: Record<string, string>;
 }) {
-  const { savedObjectsClient, pkgkey, pkgName, pkgVersion, toSaveRefs, toSavePatterns } = options;
+  const { savedObjectsClient, pkgkey, pkgName, pkgVersion, toSaveRefs, toSaveStreams } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgkey });
   const savedRefs = installation?.installed.references || [];
-  const toInstallPatterns = Object.assign(installation?.datasetIndexPattern || {}, toSavePatterns);
+  const toInstallStreams = Object.assign(installation?.datasetIndexPattern || {}, toSaveStreams);
 
   const mergeRefsReducer = (current: AssetReference[], pending: AssetReference) => {
     const hasRef = current.find(c => c.id === pending.id && c.type === pending.type);
@@ -160,7 +160,7 @@ export async function saveInstallationReferences(options: {
   await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
     {
-      installed: { references: toInstallRefs, patterns: toInstallPatterns },
+      installed: { references: toInstallRefs, dataStreams: toInstallStreams },
       name: pkgName,
       version: pkgVersion,
     },

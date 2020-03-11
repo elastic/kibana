@@ -66,16 +66,18 @@ export function generateTemplateName(dataset: Dataset): string {
 }
 
 /**
- * Returns a map of the dataset path fields to index patterns used in the created templates.
+ * Returns a map of the dataset path fields to datastream name (currently index pattern).
  * @param datasets an array of Dataset objects
  */
-export function generateTemplatePatterns(datasets: Dataset[] | undefined): Record<string, string> {
+export function generateDataStreams(datasets: Dataset[] | undefined): Record<string, string> {
   if (!datasets) {
     return {};
   }
 
   const patterns: Record<string, string> = {};
   for (const dataset of datasets) {
+    // This eventually needs to be changed create a string like <type>-<id>-default that will represent
+    // the datastream name
     patterns[dataset.path] = generateTemplateName(dataset) + '-*';
   }
   return patterns;

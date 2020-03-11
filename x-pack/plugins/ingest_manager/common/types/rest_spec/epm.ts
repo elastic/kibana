@@ -52,7 +52,7 @@ export interface GetInfoResponse {
   success: boolean;
 }
 
-export interface GetIndexPatternResponse {
+export interface GetDataStreamResponse {
   response: string | null;
   success: boolean;
 }

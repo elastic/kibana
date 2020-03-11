@@ -9,13 +9,13 @@ import {
   GetPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
-  GetIndexPatternRequestSchema,
+  GetDataStreamRequestSchema,
   InstallPackageRequestSchema,
   DeletePackageRequestSchema,
 } from '../../types';
 import {
   GetInfoResponse,
-  GetIndexPatternResponse,
+  GetDataStreamResponse,
   InstallPackageResponse,
   DeletePackageResponse,
   GetCategoriesResponse,
@@ -26,7 +26,7 @@ import {
   getPackages,
   getFile,
   getPackageInfo,
-  getIndexPattern as getIndexPatternFromSavedObject,
+  getDataStream,
   installPackage,
   removeInstallation,
 } from '../../services/epm/packages';
@@ -119,14 +119,16 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
   }
 };
 
-export const getIndexPattern: RequestHandler<TypeOf<
-  typeof GetIndexPatternRequestSchema.params
->> = async (context, request, response) => {
+export const getDataStreamHandler: RequestHandler<
+  TypeOf<typeof GetDataStreamRequestSchema.params>,
+  TypeOf<typeof GetDataStreamRequestSchema.query>
+> = async (context, request, response) => {
   try {
-    const { pkgkey, datasetPath } = request.params;
+    const { pkgName } = request.params;
+    const { datasetPath, version } = request.query;
     const savedObjectsClient = context.core.savedObjects.client;
-    const res = await getIndexPatternFromSavedObject({ savedObjectsClient, pkgkey, datasetPath });
-    const body: GetIndexPatternResponse = {
+    const res = await getDataStream({ savedObjectsClient, pkgName, datasetPath, version });
+    const body: GetDataStreamResponse = {
       response: res || null,
       success: res !== undefined,
     };
