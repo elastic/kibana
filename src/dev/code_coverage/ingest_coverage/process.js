@@ -28,7 +28,6 @@ import {
   addJsonSummaryPath,
   testRunner,
   addTimeStamp,
-  distro,
   buildId,
   coveredFilePath,
   ciRunUrl,
@@ -39,7 +38,7 @@ const KIBANA_ROOT_PATH = '../../../..';
 const KIBANA_ROOT = resolve(__dirname, KIBANA_ROOT_PATH);
 
 const ms = process.env.DELAY || 0;
-const staticSiteUrlBase = process.env.STATIC_SITE_URL_BASE || undefined;
+const staticSiteUrlBase = process.env.STATIC_SITE_URL_BASE || 'https://kibana-coverage.elastic.dev';
 const addPrePopulatedTimeStamp = addTimeStamp(process.env.TIME_STAMP);
 const prokStatsTimeStampBuildId = pipe(
   statsAndstaticSiteUrl,

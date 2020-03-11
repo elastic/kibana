@@ -50,22 +50,6 @@ export const addTimeStamp = ts => obj => ({
   '@timestamp': ts,
 });
 
-export const distro = obj => {
-  const { jsonSummaryPath } = obj;
-  const contains = msg => x => x.includes(msg);
-  const combinedMsg = 'combined';
-  const containsCombined = contains(combinedMsg);
-
-  const jsonSummaryPathContainsCombined = containsCombined(jsonSummaryPath) ?
-    right(jsonSummaryPath) :
-    left(null);
-
-  return {
-    ...obj,
-    distro: jsonSummaryPathContainsCombined.fold(always('other'), always(combinedMsg)),
-  };
-};
-
 const captureAfterJobNameAndRootFolder = /.*elastic\+kibana\+code-coverage\/kibana(.*$)/;
 const afterJobNameAndRootFolder = x => captureAfterJobNameAndRootFolder.exec(x)[1];
 const fixFront = x => afterJobNameAndRootFolder(x);

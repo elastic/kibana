@@ -28,13 +28,12 @@ const ROOT_DIR = resolve(__dirname, '../../../../..');
 const MOCKS_DIR = resolve(__dirname, './mocks');
 const staticSiteUrlRegexes = {
   staticHostIncluded: /https:\/\/kibana-coverage\.elastic\.dev/,
-  jobNameIncluded: /jobs\/elastic\+kibana\+code-coverage/,
   timeStampIncluded: /\d{4}-\d{2}-\d{2}T\d{2}.*\d{2}.*\d{2}Z/,
 };
 const env = {
   BUILD_ID: 407,
   CI_RUN_URL: 'https://kibana-ci.elastic.co/job/elastic+kibana+code-coverage/407/',
-  STATIC_SITE_URL_BASE: 'https://kibana-coverage.elastic.dev/jobs/elastic+kibana+code-coverage',
+  STATIC_SITE_URL_BASE: 'https://kibana-coverage.elastic.dev',
   TIME_STAMP: '2020-03-02T21:11:47Z',
   ES_HOST: 'https://super:changeme@some.fake.host:9243',
   NODE_ENV: 'integration_test',
