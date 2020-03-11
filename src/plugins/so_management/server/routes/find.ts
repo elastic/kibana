@@ -20,11 +20,11 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
 import { injectMetaAttributes } from '../lib';
-import { SavedObjectsManagement } from '../services';
+import { ISavedObjectsManagement } from '../services';
 
 export const registerFindRoute = (
   router: IRouter,
-  managementServicePromise: Promise<SavedObjectsManagement>
+  managementServicePromise: Promise<ISavedObjectsManagement>
 ) => {
   router.get(
     {

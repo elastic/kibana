@@ -20,10 +20,12 @@
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
+import { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './types';
 import { SavedObjectsManagement } from './services';
 import { registerRoutes } from './routes';
 
-export class SavedObjectsManagementPlugin implements Plugin<{}, {}> {
+export class SavedObjectsManagementPlugin
+  implements Plugin<SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart, {}, {}> {
   private readonly logger: Logger;
   private managementService$ = new Subject<SavedObjectsManagement>();
 
@@ -33,7 +35,6 @@ export class SavedObjectsManagementPlugin implements Plugin<{}, {}> {
 
   public async setup({ http }: CoreSetup) {
     this.logger.debug('Setting up SavedObjectsManagement plugin');
-
     registerRoutes({
       http,
       managementServicePromise: this.managementService$.pipe(first()).toPromise(),
@@ -46,6 +47,9 @@ export class SavedObjectsManagementPlugin implements Plugin<{}, {}> {
     this.logger.debug('Starting up SavedObjectsManagement plugin');
     const managementService = new SavedObjectsManagement(core.savedObjects.getTypeRegistry());
     this.managementService$.next(managementService);
-    return {};
+
+    return {
+      management: managementService,
+    };
   }
 }

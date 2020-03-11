@@ -18,7 +18,19 @@
  */
 
 import { SavedObject } from 'src/core/server';
+import { ISavedObjectsManagement } from './services';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SavedObjectsManagementPluginSetup {}
+
+export interface SavedObjectsManagementPluginStart {
+  management: ISavedObjectsManagement;
+}
+
+/**
+ * The metadata injected into a {@link SavedObject | saved object} when returning
+ * {@link SavedObjectWithMetadata | enhanced objects} from the plugin API endpoints.
+ */
 export interface SavedObjectMetadata {
   icon?: string;
   title?: string;
@@ -26,6 +38,9 @@ export interface SavedObjectMetadata {
   inAppUrl?: { path: string; uiCapabilitiesPath: string };
 }
 
+/**
+ * A {@link SavedObject | saved object} enhanced with meta properties used by the client-side plugin.
+ */
 export type SavedObjectWithMetadata<T = unknown> = SavedObject<T> & {
   meta: SavedObjectMetadata;
 };

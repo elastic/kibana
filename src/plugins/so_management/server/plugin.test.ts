@@ -17,22 +17,29 @@
  * under the License.
  */
 
-import { HttpServiceSetup } from 'src/core/server';
-import { ISavedObjectsManagement } from '../services';
-import { registerFindRoute } from './find';
-import { registerScrollForCountRoute } from './scroll_count';
-import { registerScrollForExportRoute } from './scroll_export';
-import { registerRelationshipsRoute } from './relationships';
+import { registerRoutesMock } from './plugin.test.mocks';
+import { SavedObjectsManagementPlugin } from './plugin';
+import { coreMock } from '../../../core/server/mocks';
 
-interface RegisterRouteOptions {
-  http: HttpServiceSetup;
-  managementServicePromise: Promise<ISavedObjectsManagement>;
-}
+describe('SavedObjectsManagementPlugin', () => {
+  let plugin: SavedObjectsManagementPlugin;
 
-export function registerRoutes({ http, managementServicePromise }: RegisterRouteOptions) {
-  const router = http.createRouter();
-  registerFindRoute(router, managementServicePromise);
-  registerScrollForCountRoute(router);
-  registerScrollForExportRoute(router);
-  registerRelationshipsRoute(router, managementServicePromise);
-}
+  beforeEach(() => {
+    plugin = new SavedObjectsManagementPlugin(coreMock.createPluginInitializerContext());
+  });
+
+  describe('#setup', () => {
+    it('registers the routes', async () => {
+      const coreSetup = coreMock.createSetup();
+
+      await plugin.setup(coreSetup);
+
+      expect(registerRoutesMock).toHaveBeenCalledTimes(1);
+      expect(registerRoutesMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          http: coreSetup.http,
+        })
+      );
+    });
+  });
+});
