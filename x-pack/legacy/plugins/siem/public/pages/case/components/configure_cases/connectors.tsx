@@ -17,13 +17,6 @@ import styled from 'styled-components';
 
 import { ConnectorsDropdown } from './connectors_dropdown';
 import * as i18n from './translations';
-import { Connector } from '../../../../containers/case/types';
-
-const ICON_SIZE = 'm';
-
-const EuiIconExtended = styled(EuiIcon)`
-  margin-right: 13px;
-`;
 
 import {
   ActionsConnectorsContextProvider,
