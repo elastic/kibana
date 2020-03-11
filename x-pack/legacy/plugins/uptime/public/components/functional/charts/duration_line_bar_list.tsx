@@ -8,7 +8,7 @@ import React from 'react';
 import moment from 'moment';
 import { AnnotationTooltipFormatter, RectAnnotation } from '@elastic/charts';
 import { RectAnnotationDatum } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
-import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from '../../../../../ml/common/constants/anomalies';
+import { ANOMALY_SEVERITY } from '../../../../../ml/common/constants/anomalies';
 import { getSeverityColor, getSeverityType } from '../../../../../ml/common/util/anomaly_utils';
 import { AnnotationTooltip } from './annotation_tooltip';
 
@@ -18,10 +18,10 @@ interface Props {
 }
 
 export const DurationAnomaliesBar = ({ anomalies, maxY }: Props) => {
-  const anomalyAnnotations: Map<string, RectAnnotationDatum[]> = new Map();
+  const anomalyAnnotations: Map<string, { rect: RectAnnotationDatum[]; color: string }> = new Map();
 
   Object.keys(ANOMALY_SEVERITY).forEach(severityLevel => {
-    anomalyAnnotations.set(severityLevel.toLowerCase(), []);
+    anomalyAnnotations.set(severityLevel.toLowerCase(), { rect: [], color: '' });
   });
 
   if (anomalies?.anomalies) {
@@ -33,46 +33,45 @@ export const DurationAnomaliesBar = ({ anomalies, maxY }: Props) => {
         time: record.source.timestamp,
         score: record.severity,
         severity: severityLevel,
-        color: getSeverityColor(ANOMALY_THRESHOLD[severityLevel.toUpperCase()]),
+        color: getSeverityColor(record.severity),
       };
 
       const anomalyRect = {
         coordinates: {
-          x0: moment(record.source.timestamp)
-            // .subtract(record.source.bucket_span / 2, 's')
-            .valueOf(),
+          x0: moment(record.source.timestamp).valueOf(),
           x1: moment(record.source.timestamp)
             .add(record.source.bucket_span, 's')
             .valueOf(),
         },
         details: JSON.stringify(tooltipData),
       };
-      anomalyAnnotations.get(severityLevel)!.push(anomalyRect);
+      anomalyAnnotations.get(severityLevel)!.rect.push(anomalyRect);
+      anomalyAnnotations.get(severityLevel)!.color = getSeverityColor(record.severity);
     });
   }
 
-  const getRectStyle = sevLev => {
+  const getRectStyle = (color: string) => {
     return {
-      fill: getSeverityColor(ANOMALY_THRESHOLD[sevLev.toUpperCase()]),
+      fill: color,
       opacity: 1,
       strokeWidth: 2,
-      stroke: getSeverityColor(ANOMALY_THRESHOLD[sevLev.toUpperCase()]),
+      stroke: color,
     };
   };
 
-  const tooltipFormatter: AnnotationTooltipFormatter = details => {
-    return <AnnotationTooltip details={details} />;
+  const tooltipFormatter: AnnotationTooltipFormatter = (details?: string) => {
+    return <AnnotationTooltip details={details || ''} />;
   };
 
   return (
     <>
       {Array.from(anomalyAnnotations).map(([keyIndex, rectAnnotation]) => {
-        return rectAnnotation.length > 0 ? (
+        return rectAnnotation.rect.length > 0 ? (
           <RectAnnotation
-            dataValues={rectAnnotation}
+            dataValues={rectAnnotation.rect}
             key={keyIndex}
             id={keyIndex}
-            style={getRectStyle(keyIndex)}
+            style={getRectStyle(rectAnnotation.color)}
             renderTooltip={tooltipFormatter}
           />
         ) : null;

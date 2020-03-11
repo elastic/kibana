@@ -14,9 +14,4 @@ export interface BaseParams {
   monitorId?: string;
 }
 
-export interface DateRange {
-  dateStart: string;
-  dateEnd: string;
-}
-
 export type APIFn<P, R = any> = (params: { basePath: string } & P) => Promise<R>;

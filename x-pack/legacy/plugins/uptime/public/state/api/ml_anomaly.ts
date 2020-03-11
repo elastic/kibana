@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import { fetchGet, fetchPost } from './utils';
 import { INDEX_NAMES, ML_JOB_ID } from '../../../common/constants';
-import { DateRange } from './types';
+import { BaseParams } from './types';
 
 export const fetchMLJob = async () => {
   const url = `/api/ml/anomaly_detectors/${ML_JOB_ID}`;
@@ -68,7 +67,7 @@ export const getIndexDateRange = async () => {
   return [result.start.epoch, result.end.epoch];
 };
 
-export const fetchAnomalyRecords = async (params: DateRange) => {
+export const fetchAnomalyRecords = async (params: BaseParams) => {
   const { dateStart, dateEnd, monitorId } = params;
   const url = `/api/ml/results/anomalies_table_data`;
   try {

@@ -24,11 +24,11 @@ const TimeDiv = styled.div`
   padding-bottom: 2px;
 `;
 
-export const AnnotationTooltip = ({ details }) => {
+export const AnnotationTooltip = ({ details }: { details: string }) => {
   const data = JSON.parse(details);
 
-  function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+  function capitalizeFirstLetter(str: string) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
   return (
