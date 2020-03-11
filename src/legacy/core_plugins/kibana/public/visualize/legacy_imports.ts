@@ -34,7 +34,6 @@ export { DashboardConstants } from '../dashboard/np_ready/dashboard_constants';
 export { VisSavedObject, VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/';
 export {
   configureAppAngularModule,
-  ensureDefaultIndexPattern,
   IPrivate,
   migrateLegacyQuery,
   PrivateProvider,

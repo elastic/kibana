@@ -57,12 +57,12 @@ export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
 export { timezoneProvider } from 'ui/vis/lib/timezone';
 export { tabifyAggResponse } from '../../../data/public';
-export { unhashUrl, redirectWhenMissing } from '../../../../../plugins/kibana_utils/public';
 export {
+  unhashUrl,
+  redirectWhenMissing,
   ensureDefaultIndexPattern,
-  formatMsg,
-  formatStack,
-} from '../../../../../plugins/kibana_legacy/public';
+} from '../../../../../plugins/kibana_utils/public';
+export { formatMsg, formatStack } from '../../../../../plugins/kibana_legacy/public';
 
 // EXPORT types
 export {

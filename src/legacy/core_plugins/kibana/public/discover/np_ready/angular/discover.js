@@ -119,7 +119,7 @@ app.config($routeProvider => {
     resolve: {
       savedObjects: function($route, kbnUrl, Promise, $rootScope, history) {
         const savedSearchId = $route.current.params.id;
-        return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl).then(() => {
+        return ensureDefaultIndexPattern(core, data, history).then(() => {
           const { appStateContainer } = getState({ history });
           const { index } = appStateContainer.getState();
           return Promise.props({
