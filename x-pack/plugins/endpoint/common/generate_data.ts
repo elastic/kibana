@@ -86,16 +86,16 @@ export class EndpointDocGenerator {
 
   constructor(seed = Math.random().toString()) {
     this.random = seedrandom(seed);
-    this.commonInfo = this.hostData();
+    this.commonInfo = this.createHostData();
   }
 
   // This function will create new values for all the host fields, so documents from a different endpoint can be created
   // This provides a convenient way to make documents from multiple endpoints that are all tied to a single seed value
   public randomizeHostData() {
-    this.commonInfo = this.hostData();
+    this.commonInfo = this.createHostData();
   }
 
-  private hostData(): HostInfo {
+  private createHostData(): HostInfo {
     return {
       agent: {
         version: this.randomVersion(),
