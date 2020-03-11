@@ -68,7 +68,10 @@ export function findSW(
 }
 
 export async function getSW(
-  { savedObjectsClient: SavedObjectsClientContract, indexPatterns: IndexPatternsContract },
+  {
+    savedObjectsClient,
+    indexPatterns,
+  }: { savedObjectsClient: SavedObjectsClientContract; indexPatterns: IndexPatternsContract },
   id: string
 ) {
   const resp = await savedObjectsClient.get(savedWorkspaceType, id);

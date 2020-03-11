@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _, { cloneDeep } from 'lodash';
+import _, { cloneDeep, defaults, forOwn, assign } from 'lodash';
 import { EsResponse, SavedObject, SavedObjectConfig } from '../../types';
 import { parseSearchSource } from './parse_search_source';
-import { hydrateIndexPattern } from './hydrate_index_pattern';
+import { hydrateIndexPattern as hydrateIndexPatternHelper } from './hydrate_index_pattern';
 import { expandShorthand, SavedObjectNotFound } from '../../../../kibana_utils/public';
-import { IndexPattern } from '../../../../data/public';
+import { IndexPattern, SearchSource } from '../../../../data/public';
 
 /**
  * A given response of and ElasticSearch containing a plain saved object is applied to the given
@@ -81,11 +81,13 @@ export async function applyESRespTo(
   resp: EsResponse,
   config: SavedObjectConfig
 ) {
-  const savedObject: Record<string, any> = { id: config.id };
+  let savedObject: Record<string, any> = { id: config.id };
+  savedObject._source = cloneDeep(resp._source);
+
   const mapping = expandShorthand(config.mapping);
   const esType = config.type || '';
-  savedObject._source = cloneDeep(resp._source);
   const injectReferences = config.injectReferences;
+
   if (typeof resp.found === 'boolean' && !resp.found) {
     throw new SavedObjectNotFound(esType, config.id || '');
   }
@@ -99,10 +101,10 @@ export async function applyESRespTo(
   }
 
   // assign the defaults to the response
-  _.defaults(savedObject._source, config.defaults);
+  defaults(savedObject._source, config.defaults);
 
   // transform the source using _deserializers
-  _.forOwn(mapping, (fieldMapping, fieldName) => {
+  forOwn(mapping, (fieldMapping, fieldName) => {
     if (fieldMapping._deserialize && typeof fieldName === 'string') {
       savedObject._source[fieldName] = fieldMapping._deserialize(
         savedObject._source[fieldName] as string
@@ -111,11 +113,18 @@ export async function applyESRespTo(
   });
 
   // Give obj all of the values in _source.fields
-  _.assign(savedObject, savedObject._source);
+  assign(savedObject, savedObject._source);
   savedObject.lastSavedTitle = savedObject.title;
 
+  // optional search source which this object configures
+  savedObject.searchSource = config.searchSource ? new SearchSource() : undefined;
+  // NOTE: this.type (not set in this file, but somewhere else) is the sub type, e.g. 'area' or
+  // 'data table', while esType is the more generic type - e.g. 'visualization' or 'saved search'.
+  savedObject.getEsType = () => esType;
+
   await parseSearchSource(savedObject, esType, meta.searchSourceJSON, resp.references);
-  await hydrateIndexPattern(id || '', savedObject, indexPatterns, config);
+  await hydrateIndexPatternHelper(id || '', savedObject, indexPatterns, config);
+
   if (injectReferences && resp.references && resp.references.length > 0) {
     injectReferences(savedObject, resp.references);
   }
