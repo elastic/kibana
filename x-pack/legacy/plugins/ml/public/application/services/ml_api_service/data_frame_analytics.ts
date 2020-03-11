@@ -47,24 +47,27 @@ export const dataFrameAnalytics = {
     });
   },
   createDataFrameAnalytics(analyticsId: string, analyticsConfig: any): Promise<any> {
+    const body = JSON.stringify(analyticsConfig);
     return http({
       path: `${basePath()}/data_frame/analytics/${analyticsId}`,
       method: 'PUT',
-      body: analyticsConfig,
+      body,
     });
   },
   evaluateDataFrameAnalytics(evaluateConfig: any): Promise<any> {
+    const body = JSON.stringify(evaluateConfig);
     return http({
       path: `${basePath()}/data_frame/_evaluate`,
       method: 'POST',
-      body: evaluateConfig,
+      body,
     });
   },
   explainDataFrameAnalytics(jobConfig: any): Promise<any> {
+    const body = JSON.stringify(jobConfig);
     return http({
       path: `${basePath()}/data_frame/analytics/_explain`,
       method: 'POST',
-      body: jobConfig,
+      body,
     });
   },
   deleteDataFrameAnalytics(analyticsId: string): Promise<any> {

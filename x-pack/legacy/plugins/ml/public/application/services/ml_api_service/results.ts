@@ -42,7 +42,8 @@ export const results = {
       influencersFilterQuery,
     });
 
-    return http$(`${basePath()}/results/anomalies_table_data`, {
+    return http$({
+      path: `${basePath()}/results/anomalies_table_data`,
       method: 'POST',
       body,
     });
@@ -91,7 +92,8 @@ export const results = {
     latestMs: number
   ): Observable<PartitionFieldsDefinition> {
     const body = JSON.stringify({ jobId, searchTerm, criteriaFields, earliestMs, latestMs });
-    return http$(`${basePath()}/results/partition_fields_values`, {
+    return http$({
+      path: `${basePath()}/results/partition_fields_values`,
       method: 'POST',
       body,
     });

@@ -95,7 +95,7 @@ export const ml = {
   },
 
   addJob({ jobId, job }: { jobId: string; job: Job }) {
-    const body = JSON.stringify({ job });
+    const body = JSON.stringify(job);
     return http({
       path: `${basePath()}/anomaly_detectors/${jobId}`,
       method: 'PUT',
@@ -132,7 +132,7 @@ export const ml = {
   },
 
   updateJob({ jobId, job }: { jobId: string; job: Job }) {
-    const body = JSON.stringify({ job });
+    const body = JSON.stringify(job);
     return http({
       path: `${basePath()}/anomaly_detectors/${jobId}/_update`,
       method: 'POST',
@@ -159,8 +159,9 @@ export const ml = {
   },
 
   validateCardinality$(job: CombinedJob): Observable<CardinalityValidationResults> {
-    const body = JSON.stringify({ job });
-    return http$(`${basePath()}/validate/cardinality`, {
+    const body = JSON.stringify(job);
+    return http$({
+      path: `${basePath()}/validate/cardinality`,
       method: 'POST',
       body,
     });
@@ -181,7 +182,7 @@ export const ml = {
   },
 
   addDatafeed({ datafeedId, datafeedConfig }: { datafeedId: string; datafeedConfig: Datafeed }) {
-    const body = JSON.stringify({ datafeedConfig });
+    const body = JSON.stringify(datafeedConfig);
     return http({
       path: `${basePath()}/datafeeds/${datafeedId}`,
       method: 'PUT',
@@ -190,7 +191,7 @@ export const ml = {
   },
 
   updateDatafeed({ datafeedId, datafeedConfig }: { datafeedId: string; datafeedConfig: Datafeed }) {
-    const body = JSON.stringify({ datafeedConfig });
+    const body = JSON.stringify(datafeedConfig);
     return http({
       path: `${basePath()}/datafeeds/${datafeedId}/_update`,
       method: 'POST',
@@ -240,7 +241,7 @@ export const ml = {
   },
 
   validateDetector({ detector }: { detector: Detector }) {
-    const body = JSON.stringify({ detector });
+    const body = JSON.stringify(detector);
     return http({
       path: `${basePath()}/anomaly_detectors/_validate/detector`,
       method: 'POST',
@@ -618,7 +619,8 @@ export const ml = {
 
   esSearch$(obj: any): Observable<any> {
     const body = JSON.stringify(obj);
-    return http$(`${basePath()}/es_search`, {
+    return http$({
+      path: `${basePath()}/es_search`,
       method: 'POST',
       body,
     });

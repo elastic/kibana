@@ -15,16 +15,19 @@ export const annotations = {
     latestMs: number;
     maxAnnotations: number;
   }) {
-    return http$<{ annotations: Record<string, Annotation[]> }>(`${basePath()}/annotations`, {
+    const body = JSON.stringify(obj);
+    return http$<{ annotations: Record<string, Annotation[]> }>({
+      path: `${basePath()}/annotations`,
       method: 'POST',
-      body: obj,
+      body,
     });
   },
   indexAnnotation(obj: any) {
+    const body = JSON.stringify(obj);
     return http({
       path: `${basePath()}/annotations/index`,
       method: 'PUT',
-      body: obj,
+      body,
     });
   },
   deleteAnnotation(id: string) {
