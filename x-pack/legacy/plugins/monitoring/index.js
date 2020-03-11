@@ -27,6 +27,7 @@ export const monitoring = kibana => {
     configPrefix: 'monitoring',
     publicDir: resolve(__dirname, 'public'),
     init(server) {
+      const serverConfig = server.config();
       const npMonitoring = server.newPlatform.setup.plugins.monitoring;
       if (npMonitoring) {
         const kbnServerStatus = this.kbnServer.status;
@@ -38,6 +39,19 @@ export const monitoring = kibana => {
           },
         });
       }
+
+      server.injectUiAppVars('monitoring', () => {
+        return {
+          maxBucketSize: serverConfig.get('monitoring.ui.max_bucket_size'),
+          minIntervalSeconds: serverConfig.get('monitoring.ui.min_interval_seconds'),
+          kbnIndex: serverConfig.get('kibana.index'),
+          showLicenseExpiration: serverConfig.get('monitoring.ui.show_license_expiration'),
+          showCgroupMetricsElasticsearch: serverConfig.get(
+            'monitoring.ui.container.elasticsearch.enabled'
+          ),
+          showCgroupMetricsLogstash: serverConfig.get('monitoring.ui.container.logstash.enabled'), // Note, not currently used, but see https://github.com/elastic/x-pack-kibana/issues/1559 part 2
+        };
+      });
     },
     config,
     uiExports: getUiExports(),
