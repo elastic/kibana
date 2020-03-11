@@ -40,6 +40,10 @@ export abstract class Embeddable<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
   TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput
 > implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput> {
+  static runtimeId: number = 0;
+
+  public readonly runtimeId = Embeddable.runtimeId++;
+
   public readonly parent?: IContainer;
   public readonly isContainer: boolean = false;
   public abstract readonly type: string;
@@ -63,7 +67,7 @@ export abstract class Embeddable<
     if (!this.params.uiActions) return undefined;
     if (!this.__dynamicActions) {
       this.__dynamicActions = new UiActionsDynamicActionManager({
-        isCompatible: async () => true,
+        isCompatible: async ({ embeddable }: any) => embeddable.runtimeId === this.runtimeId,
         storage: new EmbeddableActionStorage(this),
         uiActions: this.params.uiActions,
       });
@@ -78,7 +82,6 @@ export abstract class Embeddable<
     parent?: IContainer,
     public readonly params: EmbeddableParams = {}
   ) {
-    window.emb = this;
     this.id = input.id;
     this.output = {
       title: getPanelTitle(input, output),
@@ -104,7 +107,12 @@ export abstract class Embeddable<
     }
 
     if (this.dynamicActions) {
-      this.dynamicActions.start();
+      this.dynamicActions.start().catch(error => {
+        /* eslint-disable */
+        console.log('Failed to start embeddable dynamic actions', this);
+        console.error(error);
+        /* eslint-enable */
+      });
     }
   }
 
@@ -184,6 +192,16 @@ export abstract class Embeddable<
    */
   public destroy(): void {
     this.destoyed = true;
+
+    if (this.dynamicActions) {
+      this.dynamicActions.stop().catch(error => {
+        /* eslint-disable */
+        console.log('Failed to stop embeddable dynamic actions', this);
+        console.error(error);
+        /* eslint-enable */
+      });
+    }
+
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();
     }

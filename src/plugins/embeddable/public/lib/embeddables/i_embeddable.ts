@@ -84,6 +84,14 @@ export interface IEmbeddable<
   readonly id: string;
 
   /**
+   * Unique ID an embeddable is assigned each time it is initialized. This ID
+   * is different for different instances of the same embeddable. For example,
+   * if the same dashboard is rendered twice on the screen, all embeddable
+   * instances will have a unique `runtimeId`.
+   */
+  readonly runtimeId?: number;
+
+  /**
    * Default implementation of dynamic action API for embeddables.
    */
   dynamicActions?: UiActionsDynamicActionManager;

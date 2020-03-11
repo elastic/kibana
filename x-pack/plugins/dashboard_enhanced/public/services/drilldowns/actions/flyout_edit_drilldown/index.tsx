@@ -5,33 +5,23 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
-import { EuiNotificationBadge } from '@elastic/eui';
 import { ActionByType } from '../../../../../../../../src/plugins/ui_actions/public';
 import {
   reactToUiComponent,
   toMountPoint,
 } from '../../../../../../../../src/plugins/kibana_react/public';
-import { IEmbeddable } from '../../../../../../../../src/plugins/embeddable/public';
+import { EmbeddableContext, ViewMode } from '../../../../../../../../src/plugins/embeddable/public';
 import { DrilldownsStartContract } from '../../../../../../drilldowns/public';
+import { txtDisplayName } from './i18n';
+import { MenuItem } from './menu_item';
 
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
-
-export interface FlyoutEditDrilldownActionContext {
-  embeddable: IEmbeddable;
-}
-
-const drilldownsData = [{}, {}];
 
 export interface FlyoutEditDrilldownParams {
   overlays: () => Promise<CoreStart['overlays']>;
   drilldowns: () => Promise<DrilldownsStartContract>;
 }
-
-const displayName = i18n.translate('xpack.dashboard.panel.openFlyoutEditDrilldown.displayName', {
-  defaultMessage: 'Manage drilldowns',
-});
 
 export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_EDIT_DRILLDOWN> {
   public readonly type = OPEN_FLYOUT_EDIT_DRILLDOWN;
@@ -41,31 +31,23 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
   constructor(protected readonly params: FlyoutEditDrilldownParams) {}
 
   public getDisplayName() {
-    return displayName;
+    return txtDisplayName;
   }
 
   public getIconType() {
     return 'list';
   }
 
-  private ReactComp: React.FC<{ context: FlyoutEditDrilldownActionContext }> = () => {
-    return (
-      <>
-        {displayName}{' '}
-        <EuiNotificationBadge color="subdued" style={{ float: 'right' }}>
-          {drilldownsData.length}
-        </EuiNotificationBadge>
-      </>
-    );
-  };
+  MenuItem = reactToUiComponent(MenuItem);
 
-  MenuItem = reactToUiComponent(this.ReactComp);
+  public async isCompatible({ embeddable }: EmbeddableContext) {
+    if (embeddable.getInput().viewMode !== ViewMode.EDIT) return false;
+    if (!embeddable.dynamicActions) return false;
 
-  public async isCompatible({ embeddable }: FlyoutEditDrilldownActionContext) {
-    return embeddable.getInput().viewMode === 'edit' && drilldownsData.length > 0;
+    return (await embeddable.dynamicActions.count()) > 0;
   }
 
-  public async execute(context: FlyoutEditDrilldownActionContext) {
+  public async execute(context: EmbeddableContext) {
     const overlays = await this.params.overlays();
     const drilldowns = await this.params.drilldowns();
 
