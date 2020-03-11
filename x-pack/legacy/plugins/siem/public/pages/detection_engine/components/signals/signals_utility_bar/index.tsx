@@ -65,7 +65,9 @@ const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
       <UtilityBar>
         <UtilityBarSection>
           <UtilityBarGroup>
-            <UtilityBarText>{i18n.SHOWING_SIGNALS(formattedTotalCount, totalCount)}</UtilityBarText>
+            <UtilityBarText dataTestSubj="showingRules">
+              {i18n.SHOWING_SIGNALS(formattedTotalCount, totalCount)}
+            </UtilityBarText>
           </UtilityBarGroup>
 
           <UtilityBarGroup>
@@ -79,6 +81,7 @@ const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
                 </UtilityBarText>
 
                 <UtilityBarAction
+                  dataTestSubj="openCloseSignal"
                   disabled={areEventsLoading || isEmpty(selectedEventIds)}
                   iconType={isFilteredToOpen ? 'securitySignalResolved' : 'securitySignalDetected'}
                   onClick={handleUpdateStatus}
