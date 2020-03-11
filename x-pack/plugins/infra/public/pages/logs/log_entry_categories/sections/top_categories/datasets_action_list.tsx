@@ -6,31 +6,30 @@
 
 import React from 'react';
 
-import { euiStyled } from '../../../../../../../observability/public';
 import { LogEntryCategoryDataset } from '../../../../../../common/http_api/log_analysis';
+import { TimeRange } from '../../../../../../common/http_api/shared';
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
+import { AnalyzeCategoryDatasetInMlAction } from './analyze_dataset_in_ml_action';
 
-export const DatasetsList: React.FunctionComponent<{
+export const DatasetActionsList: React.FunctionComponent<{
+  categorizationJobId: string;
+  categoryId: number;
   datasets: LogEntryCategoryDataset[];
-}> = ({ datasets }) => (
+  timeRange: TimeRange;
+}> = ({ categorizationJobId, categoryId, datasets, timeRange }) => (
   <ul>
     {datasets.map(dataset => {
       const datasetLabel = getFriendlyNameForPartitionId(dataset.name);
       return (
         <li key={datasetLabel}>
-          <DatasetLabel>{datasetLabel}</DatasetLabel>
+          <AnalyzeCategoryDatasetInMlAction
+            categorizationJobId={categorizationJobId}
+            categoryId={categoryId}
+            dataset={dataset.name}
+            timeRange={timeRange}
+          />
         </li>
       );
     })}
   </ul>
 );
-
-/*
- * These aim at aligning the list with the EuiHealth list in the neighboring
- * column.
- */
-const DatasetLabel = euiStyled.div`
-  display: inline-block;
-  margin-bottom: 2.5px;
-  margin-top: 1px;
-`;
