@@ -136,7 +136,7 @@ export class SavedObjectEdition extends Component<
 
     const confirmed = await overlays.openConfirm(
       i18n.translate('kbn.management.objects.confirmModalOptions.modalDescription', {
-        defaultMessage: "You can't recover deleted objects",
+        defaultMessage: 'This action permanently removes the object from Kibana.',
       }),
       {
         confirmButtonText: i18n.translate(
@@ -146,7 +146,7 @@ export class SavedObjectEdition extends Component<
           }
         ),
         title: i18n.translate('kbn.management.objects.confirmModalOptions.modalTitle', {
-          defaultMessage: 'Delete {title}?',
+          defaultMessage: `Delete '{title}'?`,
           values: {
             title: object?.attributes?.title || 'saved Kibana object',
           },
