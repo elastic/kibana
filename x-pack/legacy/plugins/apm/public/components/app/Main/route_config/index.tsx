@@ -26,6 +26,7 @@ import { CustomizeUI } from '../../Settings/CustomizeUI';
 import { useLocation } from '../../../../hooks/useLocation';
 import { AgentConfigurationCreateEdit } from '../../Settings/AgentConfigurations/AgentConfigurationCreateEdit';
 import { useFetcher } from '../../../../hooks/useFetcher';
+import { history } from '../../../../utils/history';
 
 const metricsBreadcrumb = i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
   defaultMessage: 'Metrics'
@@ -120,10 +121,7 @@ export const routes: BreadcrumbRoute[] = [
     ),
     name: RouteName.AGENT_CONFIGURATION_CREATE,
     component: () => {
-      // hooks rule is complaining about not using a hook here but it works so 🤷
-      // We should revisit how route params are handled anyway: https://github.com/elastic/kibana/issues/51963
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const { search } = useLocation();
+      const { search } = history.location;
 
       // Ignoring here because we specifically DO NOT want to add the query params to the global route handler
       // @ts-ignore
@@ -147,16 +145,14 @@ export const routes: BreadcrumbRoute[] = [
     ),
     name: RouteName.AGENT_CONFIGURATION_EDIT,
     component: () => {
-      // hooks rule is complaining about not using a hook here but it works so 🤷
-      // We should revisit how route params are handled anyway: https://github.com/elastic/kibana/issues/51963
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const { search } = useLocation();
+      const { search } = history.location;
 
-      // Ignoring here because we specifically DO NOT want to add the query params to the global route handler
+      // typescript complains because `pageStop` does not exist in `APMQueryParams`
+      // Going forward we should move away from globally declared query params and this is a first step
       // @ts-ignore
       const { name, environment, pageStep } = toQuery(search);
 
-      // fetch existing config
+      // hooks rule is complaining about not using a hook here but it works so 🤷
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const { data } = useFetcher(
         callApmApi => {
