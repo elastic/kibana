@@ -14,6 +14,6 @@
   - "Feature:Drilldowns":
     - "x-pack/plugins/drilldowns/**/*.*"
     - "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/**/*.*"
-  - "Feature:ExpressionLanguage"
+  - "Feature:ExpressionLanguage":
     - "src/plugins/expressions/**/*.*"
     - "src/plugins/bfetch/**/*.*"
