@@ -64,41 +64,17 @@ function generateDLL(config) {
     module: {
       rules: [
         {
-          resource: [
+          test: /\.js$/,
+          exclude: BABEL_EXCLUDE_RE.concat(dllNoParseRules),
+          use: [
             {
-              test: /\.js$/,
-              exclude: BABEL_EXCLUDE_RE.concat(dllNoParseRules),
-            },
-            {
-              test: /\.js$/,
-              include: /[\/\\]node_modules[\/\\]x-pack[\/\\]/,
-              exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\](.+?[\/\\])*node_modules[\/\\]/,
-            },
-            // TODO: remove when we drop support for IE11
-            // We need because normalize-url is distributed without
-            // any kind of transpilation
-            // More info: https://github.com/elastic/kibana/pull/35804
-            {
-              test: /\.js$/,
-              include: /[\/\\]node_modules[\/\\]normalize-url[\/\\]/,
-              exclude: /[\/\\]node_modules[\/\\]normalize-url[\/\\](.+?[\/\\])*node_modules[\/\\]/,
-            },
-          ],
-          // Self calling function with the equivalent logic
-          // from maybeAddCacheLoader one from base optimizer
-          use: ((babelLoaderCacheDirPath, loaders) => {
-            return [
-              {
-                loader: 'cache-loader',
-                options: {
-                  cacheContext: fromRoot('.'),
-                  cacheDirectory: babelLoaderCacheDirPath,
-                  readOnly: process.env.KBN_CACHE_LOADER_WRITABLE ? false : IS_KIBANA_DISTRIBUTABLE,
-                },
+              loader: 'cache-loader',
+              options: {
+                cacheContext: fromRoot('.'),
+                cacheDirectory: babelLoaderCacheDir,
+                readOnly: process.env.KBN_CACHE_LOADER_WRITABLE ? false : IS_KIBANA_DISTRIBUTABLE,
               },
-              ...loaders,
-            ];
-          })(babelLoaderCacheDir, [
+            },
             {
               loader: 'thread-loader',
               options: threadLoaderPoolConfig,
@@ -110,7 +86,7 @@ function generateDLL(config) {
                 presets: [BABEL_PRESET_PATH],
               },
             },
-          ]),
+          ],
         },
         {
           test: /\.(html|tmpl)$/,
