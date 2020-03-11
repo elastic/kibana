@@ -40,11 +40,7 @@ data sets.
 <<visualize-maps, Maps>>::
 * *<<maps,Elastic Maps>>* &mdash; Displays geospatial data in {kib}.
 
-* *Coordinate map* &mdash; Displays points on a map using a geohash aggregation.
-
-* *Region map* &mdash; Merges any structured map data onto a shape.
-
-* *Heat map* &mdash; Displays shaded cells within a matrix.
+* <<heat-map,Heat map>>:: Display shaded cells within a matrix.
 
 <<for-dashboard,Dashboard tools>>::
 
