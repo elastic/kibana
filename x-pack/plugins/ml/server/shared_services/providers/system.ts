@@ -31,7 +31,7 @@ export function getMlSystemProvider(
   isFullLicense: LicenseCheck,
   mlLicense: MlServerLicense,
   spaces: SpacesPluginSetup | undefined,
-  cloud: CloudSetup
+  cloud: CloudSetup | undefined
 ): MlSystemProvider {
   return {
     mlSystemProvider(callAsCurrentUser: APICaller, request: RequestFacade) {
