@@ -64,10 +64,24 @@ type ServiceStatus = {
  * The current "level" of availability of a service.
  */
 enum ServiceStatusLevel {
-  available,   // everything is working!
-  degraded,    // some features may not be working
-  unavailable, // the service is unavailable, but other functions should work
-  fatal        // block all user functions and display the status page
+  /**
+   * Everything is working!
+   */
+  available,
+  /**
+   * Some features may not be working.
+   */
+  degraded,
+  /**
+   * The service is unavailable, but other functions that do not depend on this service should work.
+   */
+  unavailable,
+  /**
+   * Block all user functions and display the status page, reserved for Core services only.
+   * Note: In the real implementation, this will be split out to a different type. Kept as a single type here to make
+   * the RFC easier to follow.
+   */
+  critical
 }
 
 /**
@@ -170,10 +184,11 @@ Each member of the `ServiceStatusLevel` enum has specific behaviors associated w
   - All endpoints (with some exceptions in Core) in Kibana return a `503 Unavailable` responses by default. This is automatic.
   - When trying to access any app associated with the unavailable service, the user is presented with an error UI with detail about the outage.
   - Some plugin contract APIs may throw errors. This must be implemented directly by the service.
-- **`fatal`**:
+- **`critical`**:
   - All endpoints (with some exceptions in Core) in Kibana return a `503 Unavailable` response by default. This is automatic.
   - All applications redirect to the system-wide status page with detail about which services are down and any relevant detail. This is automatic.
   - Some plugin contract APIs may throw errors. This must be implemented directly by the service.
+  - This level is reserved for Core services only.
 
 ### Overall status calculation
 
@@ -190,15 +205,15 @@ By default, plugins inherit their status from all Core services and their depend
 ```js
 // pseudo-code
 function getPluginStatus() {
-  if any core service is `fatal`, return `fatal`
+  if any core service is `critical`, return `critical`
   else if any core service is `unavailable`, return `unavailable`
   else if any core service is `degraded`, return `degraded`
 
-  if any required dep is `fatal`, return `fatal`
+  if any required dep is `critical`, return `critical`
   else if any required dep is `unavailable`, return `unavailable`
   else if any required dep is `degraded`, return `degraded`
 
-  if any optional dep is `fatal`, return `degraded`
+  if any optional dep is `critical`, return `degraded`
   else if any optional dep is `unavailable`, return `degraded`
   else if any optional dep is `degraded`, return `degraded`
 
@@ -216,7 +231,7 @@ _Disabled_ plugins, that is plugins that are explicitly disabled in Kibana's con
 
 As specified in the [_Levels section_](#levels), a service's HTTP endpoints will respond with `503 Unavailable` responses in some status levels.
 
-In both the `fatal` and `unavailable` levels, all of a service's endpoints will return 503s. However, in the `degraded` level, it is up to service authors to decide which endpoints should return a 503. This may be implemented directly in the route handler logic or by using any of the [utilities provided](#status-utilities).
+In both the `critical` and `unavailable` levels, all of a service's endpoints will return 503s. However, in the `degraded` level, it is up to service authors to decide which endpoints should return a 503. This may be implemented directly in the route handler logic or by using any of the [utilities provided](#status-utilities).
 
 ## Status Utilities
 
