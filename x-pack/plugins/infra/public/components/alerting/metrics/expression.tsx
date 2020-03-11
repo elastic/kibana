@@ -25,6 +25,7 @@ import { AGGREGATION_TYPES } from '../../../../../triggers_actions_ui/public/com
 import { MetricsExplorerOptions } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
 import { SourceConfiguration } from '../../../utils/source_configuration';
 import { MetricsExplorerKueryBar } from '../../metrics_explorer/kuery_bar';
+import { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explorer';
 
 export interface MetricExpression {
   aggType?: string;
@@ -40,6 +41,7 @@ interface AlertContextMeta {
   currentOptions: MetricsExplorerOptions;
   derivedIndexPattern: IIndexPattern;
   source: SourceConfiguration;
+  series: MetricsExplorerSeries;
 }
 
 interface Props {
@@ -125,6 +127,20 @@ export const Expressions: React.FC<Props> = props => {
     };
   }, []);
 
+  const filterValue = useMemo(() => {
+    const options = alertsContext.metadata?.currentOptions;
+    const series = alertsContext.metadata?.series;
+    if (!options) {
+      return;
+    }
+
+    if (options.filterQuery) {
+      return options.filterQuery;
+    } else if (options.groupBy && series) {
+      return `${options.groupBy}: "${series.id}"`;
+    }
+  }, [alertsContext.metadata]);
+
   return (
     <>
       <EuiSpacer size={'m'} />
@@ -161,7 +177,7 @@ export const Expressions: React.FC<Props> = props => {
       <MetricsExplorerKueryBar
         derivedIndexPattern={alertsContext.metadata!.derivedIndexPattern}
         onSubmit={onFilterQuerySubmit}
-        value={alertsContext.metadata?.currentOptions.filterQuery}
+        value={filterValue}
       />
       <EuiSpacer size={'m'} />
     </>

@@ -205,6 +205,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
       >
         <EuiContextMenu initialPanelId={0} panels={panels} />
         <AlertFlyout
+          series={series}
           options={options}
           derivedIndexPattern={derivedIndexPattern}
           source={source}
