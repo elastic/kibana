@@ -906,7 +906,7 @@ exports[`Timeline should render with data 1`] = `
                 className="rv-xy-plot__grid-lines__line"
                 style={
                   Object {
-                    "stroke": undefined,
+                    "stroke": "#98a2b3",
                   }
                 }
                 x1={900}
