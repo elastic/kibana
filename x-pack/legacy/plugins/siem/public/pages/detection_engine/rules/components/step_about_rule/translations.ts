@@ -75,3 +75,24 @@ export const ADD_RULE_NOTE_HELP_TEXT = i18n.translate(
     defaultMessage: 'Add rule investigation notes...',
   }
 );
+
+export const ABOUT_PANEL_DETAILS_TAB = i18n.translate(
+  'xpack.siem.detectionEngine.details.stepAboutrule.detailsLabel',
+  {
+    defaultMessage: 'Details',
+  }
+);
+
+export const ABOUT_TEXT = i18n.translate(
+  'xpack.siem.detectionEngine.details.stepAboutrule.aboutText',
+  {
+    defaultMessage: 'About',
+  }
+);
+
+export const ABOUT_PANEL_NOTES_TAB = i18n.translate(
+  'xpack.siem.detectionEngine.details.stepAboutrule.investigationNotesLabel',
+  {
+    defaultMessage: 'Investigation notes',
+  }
+);

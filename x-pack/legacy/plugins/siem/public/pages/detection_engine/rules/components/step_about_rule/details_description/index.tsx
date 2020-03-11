@@ -15,21 +15,22 @@ import {
 } from '@elastic/eui';
 import React, { memo, useState } from 'react';
 import styled from 'styled-components';
-import { upperFirst, isEmpty } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 
 import { HeaderSection } from '../../../../../../components/header_section';
 import { Markdown } from '../../../../../../components/markdown';
 import { AboutStepRule, AboutStepRuleDetails } from '../../../types';
+import * as i18n from '../translations';
 import { StepAboutRule } from '../';
 
 const toggleOptions: EuiButtonGroupOption[] = [
   {
     id: 'about',
-    label: 'Details',
+    label: i18n.ABOUT_PANEL_DETAILS_TAB,
   },
   {
     id: 'notes',
-    label: 'Notes',
+    label: i18n.ABOUT_PANEL_NOTES_TAB,
   },
 ];
 
@@ -48,8 +49,8 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({ stepDat
   return (
     <MyPanel>
       {loading && <EuiProgress size="xs" color="accent" position="absolute" />}
-      <HeaderSection title={upperFirst(selectedToggleOption)}>
-        {!isEmpty(stepData.note) && (
+      <HeaderSection title={i18n.ABOUT_TEXT}>
+        {!isEmpty(stepData.noteContent) && (
           <EuiButtonGroup
             options={toggleOptions}
             idSelected={selectedToggleOption}
@@ -62,7 +63,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({ stepDat
       {selectedToggleOption === 'about' ? (
         <>
           <div data-test-subj="stepAboutRuleDetailsToggleDescriptionText">
-            {stepData.descriptionDetails}
+            {stepData.descriptionContent}
           </div>
           <EuiSpacer size="m" />
           <StepAboutRule
@@ -73,7 +74,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({ stepDat
           />
         </>
       ) : (
-        <Markdown raw={stepData.note} />
+        <Markdown raw={stepData.noteContent} />
       )}
     </MyPanel>
   );

@@ -62,7 +62,8 @@ export interface AboutStepRule extends StepRuleData {
 }
 
 export interface AboutStepRuleDetails extends AboutStepRule {
-  descriptionDetails: string;
+  descriptionContent: string;
+  noteContent: string;
 }
 
 export interface DefineStepRule extends StepRuleData {

@@ -292,45 +292,44 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                       </EuiFlexGroup>
                     </DetectionEngineHeaderPage>
                     {ruleError}
+                    <EuiFlexGroup>
+                      <EuiFlexItem component="section" grow={1}>
+                        {aboutRuleData != null && (
+                          <StepAboutRuleToggleDetails
+                            loading={isLoading}
+                            stepData={aboutRuleData}
+                          />
+                        )}
+                      </EuiFlexItem>
+                      <EuiFlexItem component="section" grow={1}>
+                        <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
+                          {defineRuleData != null && (
+                            <StepDefineRule
+                              descriptionColumns="singleSplit"
+                              isReadOnlyView={true}
+                              isLoading={false}
+                              defaultValues={defineRuleData}
+                            />
+                          )}
+                        </StepPanel>
+                        <EuiSpacer />
+                        <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
+                          {scheduleRuleData != null && (
+                            <StepScheduleRule
+                              descriptionColumns="singleSplit"
+                              isReadOnlyView={true}
+                              isLoading={false}
+                              defaultValues={scheduleRuleData}
+                            />
+                          )}
+                        </StepPanel>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiSpacer />
                     {tabs}
                     <EuiSpacer />
                     {ruleDetailTab === RuleDetailTabs.signals && (
                       <>
-                        <EuiFlexGroup>
-                          <EuiFlexItem component="section" grow={1}>
-                            {aboutRuleData != null && (
-                              <StepAboutRuleToggleDetails
-                                loading={isLoading}
-                                stepData={aboutRuleData}
-                              />
-                            )}
-                          </EuiFlexItem>
-
-                          <EuiFlexItem component="section" grow={1}>
-                            <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
-                              {defineRuleData != null && (
-                                <StepDefineRule
-                                  descriptionColumns="singleSplit"
-                                  isReadOnlyView={true}
-                                  isLoading={false}
-                                  defaultValues={defineRuleData}
-                                />
-                              )}
-                            </StepPanel>
-                            <EuiSpacer />
-                            <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
-                              {scheduleRuleData != null && (
-                                <StepScheduleRule
-                                  descriptionColumns="singleSplit"
-                                  isReadOnlyView={true}
-                                  isLoading={false}
-                                  defaultValues={scheduleRuleData}
-                                />
-                              )}
-                            </StepPanel>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                        <EuiSpacer />
                         <SignalsHistogramPanel
                           deleteQuery={deleteQuery}
                           filters={signalMergedFilters}

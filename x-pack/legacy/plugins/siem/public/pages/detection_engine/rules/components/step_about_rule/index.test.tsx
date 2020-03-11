@@ -13,14 +13,9 @@ import { mockAboutStepRule } from '../../all/__mocks__/mock';
 import { StepRuleDescription } from '../description_step';
 import { stepAboutDefaultValue } from './default_value';
 
-jest.mock('react', () => {
-  const r = jest.requireActual('react');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return { ...r, memo: (x: any) => x };
-});
+const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
 describe('StepAboutRuleComponent', () => {
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   test('it renders StepRuleDescription if isReadOnlyView is true and `name` property exists', () => {
     // see mockAboutStepRule for name property
     // Note: is the name check for old rules? It's required so no rules should ever not include it

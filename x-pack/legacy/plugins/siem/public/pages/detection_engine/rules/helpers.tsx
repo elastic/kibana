@@ -51,8 +51,16 @@ export const getStepsData = ({
           isNew: false,
           ...pick(['description', 'name', 'references', 'severity', 'tags', 'threat'], rule),
           ...(detailsView
-            ? { name: '', description: '', descriptionDetails: rule.description }
-            : {}),
+            ? {
+                name: '',
+                description: '',
+                note: '',
+                noteContent: rule.note,
+                descriptionContent: rule.description,
+              }
+            : {
+                note: rule.note ?? '',
+              }),
           threat: rule.threat as IMitreEnterpriseAttack[],
           falsePositives: rule.false_positives,
           riskScore: rule.risk_score,
@@ -60,7 +68,6 @@ export const getStepsData = ({
             id: rule.timeline_id ?? null,
             title: rule.timeline_title ?? null,
           },
-          note: rule.note ?? '',
         }
       : null;
 
