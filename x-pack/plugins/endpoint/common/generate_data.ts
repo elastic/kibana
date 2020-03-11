@@ -332,7 +332,7 @@ export class EndpointDocGenerator {
     percentNodesWithRelated = 100,
     percentChildrenTerminated = 100
   ): Event[] {
-    let events: Event[] = [root];
+    let events: Event[] = [];
     let parents = [root];
     let timestamp = root['@timestamp'];
     for (let i = 0; i < generations; i++) {

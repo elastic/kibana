@@ -22,10 +22,16 @@ async function main() {
       default: 'http://localhost:9200',
       type: 'string',
     },
-    index: {
-      alias: 'i',
-      describe: 'elasticsearch index name',
-      default: 'my-index',
+    eventIndex: {
+      alias: 'ei',
+      describe: 'index to store events in',
+      default: 'events-endpoint-1',
+      type: 'string',
+    },
+    metadataIndex: {
+      alias: 'mi',
+      describe: 'index to store endpoint metadata in',
+      default: 'endpoint-agent-1',
       type: 'string',
     },
     auth: {
@@ -96,14 +102,19 @@ async function main() {
   }
   const client = new Client(clientOptions);
   if (argv.delete) {
-    await client.indices.delete({
-      index: argv.index,
-    });
+    try {
+      await client.indices.delete({
+        index: [argv.eventIndex, argv.metadataIndex],
+      });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log(error);
+    }
   }
   const generator = new EndpointDocGenerator(argv.seed);
   for (let i = 0; i < argv.numEndpoints; i++) {
     await client.index({
-      index: argv.index,
+      index: argv.metadataIndex,
       body: generator.generateEndpointMetadata(),
     });
     for (let j = 0; j < argv.alertsPerEndpoint; j++) {
@@ -116,7 +127,7 @@ async function main() {
         argv.percentTerminated
       );
       const body = resolverDocs
-        .map(doc => [{ index: { _index: argv.index } }, doc])
+        .map(doc => [{ index: { _index: argv.eventIndex } }, doc])
         .reduce((array, value) => (array.push(...value), array), []);
 
       await client.bulk({ body });
