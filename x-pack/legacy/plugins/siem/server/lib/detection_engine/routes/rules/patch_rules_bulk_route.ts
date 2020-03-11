@@ -71,6 +71,7 @@ export const patchRulesBulkRoute = (router: IRouter) => {
             type,
             threat,
             references,
+            note,
             version,
           } = payloadRule;
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
@@ -104,6 +105,7 @@ export const patchRulesBulkRoute = (router: IRouter) => {
               type,
               threat,
               references,
+              note,
               version,
             });
             if (rule != null) {
