@@ -6,7 +6,14 @@
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiTitle, EuiText, EuiHealth, EuiTabbedContent } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiTitle,
+  EuiText,
+  EuiHealth,
+  EuiTabbedContent,
+  EuiTabbedContentTab,
+} from '@elastic/eui';
 import { useAlertListSelector } from '../../hooks/use_alerts_selector';
 import * as selectors from '../../../../store/alerts/selectors';
 import { MetadataPanel } from './metadata_panel';
@@ -23,7 +30,7 @@ export const AlertDetailsOverview = memo(() => {
     selectors.selectedAlertIsLegacyEndpointEvent
   );
 
-  const tabs = useMemo(() => {
+  const tabs: EuiTabbedContentTab[] = useMemo(() => {
     return [
       {
         id: 'overviewMetadata',

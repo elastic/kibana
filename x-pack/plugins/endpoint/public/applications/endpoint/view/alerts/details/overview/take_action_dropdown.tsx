@@ -16,6 +16,7 @@ export const TakeActionDropdown = memo(() => {
       <EuiButton
         iconType="arrowDown"
         iconSide="right"
+        data-test-subj="alertListTakeActionDropdownButton"
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
       >
         <FormattedMessage
@@ -31,6 +32,7 @@ export const TakeActionDropdown = memo(() => {
       button={TakeActionButton}
       isOpen={isDropdownOpen}
       closePopover={() => setIsDropdownOpen(false)}
+      data-test-subj="alertListTakeActionDropdownContent"
     >
       <EuiFormRow>
         <EuiButtonEmpty color="text" onClick={() => {}} iconType="folderCheck">

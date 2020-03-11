@@ -12,7 +12,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('Endpoint Alert List page', function() {
+  describe('Endpoint Alert Page: when es has data and user has navigated to the page', function() {
     this.tags(['ciGroup7']);
     before(async () => {
       await esArchiver.load('endpoint/alerts/api_feature');
@@ -38,6 +38,27 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       const currentUrl = await browser.getCurrentUrl();
       expect(currentUrl).to.contain('query=');
       expect(currentUrl).to.contain('date_range=');
+    });
+
+    describe('and user has clicked details view link', () => {
+      before(async () => {
+        await testSubjects.click('alertTypeCellLink');
+      });
+
+      it('loads the Alert List Flyout correctly', async () => {
+        await testSubjects.existOrFail('alertDetailFlyout');
+      });
+
+      describe('and user has clicked resolver tab', () => {
+        before(async () => {
+          await find.clickByButtonText('Resolver');
+        });
+
+        // TODO this will fail until qualters fixes his code
+        it('loads resolver correctly', async () => {
+          await testSubjects.existOrFail('resolverEmbeddable');
+        });
+      });
     });
 
     after(async () => {
