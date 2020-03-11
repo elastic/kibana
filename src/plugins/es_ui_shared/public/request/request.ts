@@ -17,17 +17,20 @@
  * under the License.
  */
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
+
+import { HttpSetup, HttpFetchQuery } from '../../../../../src/core/public';
 
 export interface SendRequestConfig {
   path: string;
   method: 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head';
+  query?: HttpFetchQuery;
   body?: any;
 }
 
-export interface SendRequestResponse {
-  data: any;
-  error: Error | null;
+export interface SendRequestResponse<D = any, E = Error> {
+  data: D | null;
+  error: E | null;
 }
 
 export interface UseRequestConfig extends SendRequestConfig {
@@ -36,45 +39,46 @@ export interface UseRequestConfig extends SendRequestConfig {
   deserializer?: (data: any) => any;
 }
 
-export interface UseRequestResponse {
+export interface UseRequestResponse<D = any, E = Error> {
   isInitialRequest: boolean;
   isLoading: boolean;
-  error: null | unknown;
-  data: any;
-  sendRequest: (...args: any[]) => Promise<SendRequestResponse>;
+  error: E | null;
+  data?: D | null;
+  sendRequest: (...args: any[]) => Promise<SendRequestResponse<D, E>>;
 }
 
-export const sendRequest = async (
-  httpClient: ng.IHttpService,
-  { path, method, body }: SendRequestConfig
-): Promise<SendRequestResponse> => {
+export const sendRequest = async <D = any, E = Error>(
+  httpClient: HttpSetup,
+  { path, method, body, query }: SendRequestConfig
+): Promise<SendRequestResponse<D, E>> => {
   try {
-    const response = await (httpClient as any)[method](path, body);
+    const stringifiedBody = typeof body === 'string' ? body : JSON.stringify(body);
+    const response = await httpClient[method](path, { body: stringifiedBody, query });
 
-    if (typeof response.data === 'undefined') {
-      throw new Error(response.statusText);
-    }
-
-    return { data: response.data, error: null };
+    return {
+      data: response.data ? response.data : response,
+      error: null,
+    };
   } catch (e) {
     return {
       data: null,
-      error: e.response ? e.response : e,
+      error: e.response && e.response.data ? e.response.data : e.body,
     };
   }
 };
 
-export const useRequest = (
-  httpClient: ng.IHttpService,
+export const useRequest = <D = any, E = Error>(
+  httpClient: HttpSetup,
   {
     path,
     method,
+    query,
     body,
     pollIntervalMs,
     initialData,
     deserializer = (data: any): any => data,
   }: UseRequestConfig
-): UseRequestResponse => {
+): UseRequestResponse<D, E> => {
   const isMounted = useRef(true);
   const sendRequestRef = useRef<() => Promise<SendRequestResponse<D, E>>>();
   const scheduleRequestRef = useRef<() => void>();
@@ -86,7 +90,7 @@ export const useRequest = (
 
   // Consumers can use isInitialRequest to implement a polling UX.
   const [isInitialRequest, setIsInitialRequest] = useState<boolean>(true);
-  const pollIntervalMsRef = useRef<number>(null);
+  const pollIntervalMsRef = useRef<number | undefined>();
   const pollIntervalIdRef = useRef<any>(null);
 
   // We always want to use the most recently-set interval when scheduling the next request.
@@ -115,10 +119,11 @@ export const useRequest = (
     const requestBody = {
       path,
       method,
+      query,
       body,
     };
 
-    const response = await sendRequest(httpClient, requestBody);
+    const response = await sendRequest<D, E>(httpClient, requestBody);
     const { data: serializedResponseData, error: responseError } = response;
 
     // Don't set state if this request resolves after the consuming component has unmounted.
@@ -138,26 +143,28 @@ export const useRequest = (
 
     // If we're on an interval, we need to schedule the next request. This also allows us to reset
     // the interval if the user has manually requested the data, to avoid doubled-up requests.
-    scheduleRequestRef.current();
+    scheduleRequestRef.current!();
 
     return { data: serializedResponseData, error: responseError };
   };
 
+  const stringifiedQuery = useMemo(() => JSON.stringify(query), [query]);
+
   useEffect(() => {
-    sendRequestRef.current();
+    sendRequestRef.current!();
 
     // Prevent state being set if consuming component unmounts while a request is in-flight.
     return () => {
       isMounted.current = false;
     };
 
-    // To be functionally correct we'd send a new request if the method, path, or body changes.
+    // To be functionally correct we'd send a new request if the method, path, query or body changes.
     // But it doesn't seem likely that the method will change and body is likely to be a new
-    // object even if its shape hasn't changed, so for now we're just watching the path.
-  }, [path]);
+    // object even if its shape hasn't changed, so for now we're just watching the path and the query.
+  }, [path, stringifiedQuery]);
 
   useEffect(() => {
-    scheduleRequestRef.current();
+    scheduleRequestRef.current!();
 
     // Clean up timeout.
     return () => {

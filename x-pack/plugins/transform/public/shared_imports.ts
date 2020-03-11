@@ -11,10 +11,7 @@ export {
   expandLiteralStrings,
 } from '../../../../src/plugins/es_ui_shared/public';
 
-export {
-  UseRequestConfig,
-  useRequest,
-} from '../../../../src/plugins/es_ui_shared/public/request/np_ready_request';
+export { UseRequestConfig, useRequest } from '../../../../src/plugins/es_ui_shared/public';
 
 export { getErrorMessage } from '../../ml/common/util/errors';
 
