@@ -50,35 +50,40 @@ export const addTimeStamp = ts => obj => ({
   '@timestamp': ts,
 });
 
-const captureAfterJobNameAndRootFolder = /.*kibana(.*$)/;
-const afterRootFolder = x => captureAfterJobNameAndRootFolder.exec(x)[1];
+const captureAfterRootFolder = /.*kibana(.*$)/;
+const afterRootFolder = x => captureAfterRootFolder.exec(x)[1];
 const fixFront = x => afterRootFolder(x);
 const setTotal = x => obj =>
   obj['isTotal'] = x;
 const mutateTrue = setTotal(true);
 const mutateFalse = setTotal(false);
 
-const prokForTotalsIndex = urlBase => ts => obj =>
+const root = urlBase => ts => testRunnerType =>
+  `${urlBase}/${ts}/${testRunnerType.toLowerCase()}-combined`;
+
+const prokForTotalsIndex = urlRoot => obj =>
   right(obj)
     .map(mutateTrue)
-    .map(always(`${urlBase}/${ts}/index.html`))
+    .map(always(`${urlRoot}/index.html`))
     .fold(noop, id);
 
-const prokForCoverageIndex = urlBase => ts => testRunnerType => obj => siteUrl =>
+const prokForCoverageIndex = urlRoot => obj => siteUrl =>
   right(siteUrl)
     .map(x => {
       mutateFalse(obj);
       return x;
     })
     .map(fixFront)
-    .map(x => `${urlBase}/${ts}/${testRunnerType.toLowerCase()}-combined${x}.html`)
+    .map(x => `${urlRoot}${x}.html`)
     .fold(noop, id);
 
 export const staticSite = urlBase => obj => {
   const { staticSiteUrl, testRunnerType } = obj;
   const ts = obj['@timestamp'];
-  const prokTotal = prokForTotalsIndex(urlBase)(ts);
-  const prokCoverage = prokForCoverageIndex(urlBase)(ts)(testRunnerType)(obj);
+
+  const urlRoot = root(urlBase)(ts)(testRunnerType);
+  const prokTotal = prokForTotalsIndex(urlRoot);
+  const prokCoverage = prokForCoverageIndex(urlRoot)(obj);
 
   delete obj['staticSiteUrl'];
   obj['staticSiteUrl'] = maybeTotal(staticSiteUrl).fold(always(prokTotal(obj)), prokCoverage);

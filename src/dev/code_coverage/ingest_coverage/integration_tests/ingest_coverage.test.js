@@ -72,6 +72,7 @@ describe('Ingesting Coverage to Cluster', () => {
         it(`should have a link to the index page for the specific test runner`, () => {
           const totalsIndexRegexes = {
             ...staticSiteUrlRegexes,
+            containsTestRunner: /jest-combined/,
             endsInDotHtml: /.html$/,
           };
 
