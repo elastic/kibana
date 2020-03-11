@@ -20,14 +20,14 @@
 import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
-} from '../../../../../plugins/embeddable/public';
+} from '../../../../../../../plugins/embeddable/public';
 
 export interface VisEventToTrigger {
-  ['filter']: typeof SELECT_RANGE_TRIGGER;
-  ['brush']: typeof VALUE_CLICK_TRIGGER;
+  ['brush']: typeof SELECT_RANGE_TRIGGER;
+  ['filter']: typeof VALUE_CLICK_TRIGGER;
 }
 
 export const VIS_EVENT_TO_TRIGGER: VisEventToTrigger = {
-  filter: SELECT_RANGE_TRIGGER,
-  brush: VALUE_CLICK_TRIGGER,
+  brush: SELECT_RANGE_TRIGGER,
+  filter: VALUE_CLICK_TRIGGER,
 };

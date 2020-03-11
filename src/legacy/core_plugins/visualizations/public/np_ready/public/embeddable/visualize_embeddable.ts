@@ -49,7 +49,7 @@ import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { VisSavedObject } from '../types';
-import { VIS_EVENT_TO_TRIGGER, VisEventToTrigger } from './events';
+import { VIS_EVENT_TO_TRIGGER } from './events';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -397,12 +397,9 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   };
 
   public supportedTriggers() {
-    const supportedVisEvents = Object.keys(this.vis.API.events).sort() as Array<
-      keyof VisEventToTrigger
-    >;
-    const supportedTriggers = supportedVisEvents
-      .map<Values<VisEventToTrigger>>(visEvent => VIS_EVENT_TO_TRIGGER[visEvent])
-      .filter(Boolean) as Array<Values<VisEventToTrigger>>;
+    // TODO: Report a correct list of triggers. Now it just hard-codes the list
+    // TODO: to one trigger that we know for sure all vis_types have.
+    const supportedTriggers = [VIS_EVENT_TO_TRIGGER.filter];
 
     return supportedTriggers;
   }
