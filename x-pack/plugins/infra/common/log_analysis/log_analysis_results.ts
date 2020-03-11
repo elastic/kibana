@@ -44,3 +44,10 @@ export const formatAnomalyScore = (score: number) => {
 export const getFriendlyNameForPartitionId = (partitionId: string) => {
   return partitionId !== '' ? partitionId : 'unknown';
 };
+
+export const compareDatasetsByMaximumAnomalyScore = <
+  Dataset extends { maximumAnomalyScore: number }
+>(
+  firstDataset: Dataset,
+  secondDataset: Dataset
+) => firstDataset.maximumAnomalyScore - secondDataset.maximumAnomalyScore;

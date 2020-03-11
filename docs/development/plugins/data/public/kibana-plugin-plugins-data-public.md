@@ -74,32 +74,26 @@
 |  [RangeFilterParams](./kibana-plugin-plugins-data-public.rangefilterparams.md) |  |
 |  [RefreshInterval](./kibana-plugin-plugins-data-public.refreshinterval.md) |  |
 |  [SavedQuery](./kibana-plugin-plugins-data-public.savedquery.md) |  |
-|  [SavedQueryAttributes](./kibana-plugin-plugins-data-public.savedqueryattributes.md) |  |
 |  [SavedQueryService](./kibana-plugin-plugins-data-public.savedqueryservice.md) |  |
 |  [SearchSourceFields](./kibana-plugin-plugins-data-public.searchsourcefields.md) |  |
 |  [SearchStrategyProvider](./kibana-plugin-plugins-data-public.searchstrategyprovider.md) |  |
-|  [TimefilterSetup](./kibana-plugin-plugins-data-public.timefiltersetup.md) |  |
 |  [TimeRange](./kibana-plugin-plugins-data-public.timerange.md) |  |
 
 ## Variables
 
 |  Variable | Description |
 |  --- | --- |
-|  [addSearchStrategy](./kibana-plugin-plugins-data-public.addsearchstrategy.md) |  |
 |  [baseFormattersPublic](./kibana-plugin-plugins-data-public.baseformatterspublic.md) |  |
 |  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-public.castestokbnfieldtypename.md) | Get the KbnFieldType name for an esType string |
 |  [connectToQueryState](./kibana-plugin-plugins-data-public.connecttoquerystate.md) | Helper to setup two-way syncing of global data and a state container |
 |  [createSavedQueryService](./kibana-plugin-plugins-data-public.createsavedqueryservice.md) |  |
-|  [defaultSearchStrategy](./kibana-plugin-plugins-data-public.defaultsearchstrategy.md) |  |
 |  [ES\_SEARCH\_STRATEGY](./kibana-plugin-plugins-data-public.es_search_strategy.md) |  |
 |  [esFilters](./kibana-plugin-plugins-data-public.esfilters.md) |  |
 |  [esKuery](./kibana-plugin-plugins-data-public.eskuery.md) |  |
 |  [esQuery](./kibana-plugin-plugins-data-public.esquery.md) |  |
-|  [esSearchStrategyProvider](./kibana-plugin-plugins-data-public.essearchstrategyprovider.md) |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-public.fieldformats.md) |  |
 |  [FilterBar](./kibana-plugin-plugins-data-public.filterbar.md) |  |
 |  [getKbnTypeNames](./kibana-plugin-plugins-data-public.getkbntypenames.md) | Get the esTypes known by all kbnFieldTypes {<!-- -->Array<string>} |
-|  [hasSearchStategyForIndexPattern](./kibana-plugin-plugins-data-public.hassearchstategyforindexpattern.md) |  |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.indexpatterns.md) |  |
 |  [QueryStringInput](./kibana-plugin-plugins-data-public.querystringinput.md) |  |
 |  [SearchBar](./kibana-plugin-plugins-data-public.searchbar.md) |  |

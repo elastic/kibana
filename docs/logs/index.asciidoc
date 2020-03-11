@@ -16,6 +16,7 @@ In this case, you will only see the logs for the selected component.
 * <<xpack-logs-getting-started>>
 * <<xpack-logs-using>>
 * <<xpack-logs-configuring>>
+* <<xpack-logs-analysis>>
 
 [role="screenshot"]
 image::logs/images/logs-console.png[Log Console in Kibana]
