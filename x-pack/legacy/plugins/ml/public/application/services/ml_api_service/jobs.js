@@ -127,7 +127,9 @@ export const jobs = {
   newJobCaps(indexPatternTitle, isRollup = false) {
     const isRollupString = isRollup === true ? `?rollup=true` : '';
     return http({
-      url: `${basePath()}/jobs/new_job_caps/${indexPatternTitle}${isRollupString}`,
+      url: `${basePath()}/jobs/new_job_caps/${encodeURIComponent(
+        indexPatternTitle
+      )}${isRollupString}`,
       method: 'GET',
     });
   },
