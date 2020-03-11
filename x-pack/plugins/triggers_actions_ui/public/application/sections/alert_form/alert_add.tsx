@@ -69,12 +69,7 @@ export const AlertAdd = ({
   const closeFlyout = useCallback(() => {
     setAddFlyoutVisibility(false);
     setAlert(initialAlert);
-    setServerError(null);
   }, [initialAlert, setAddFlyoutVisibility]);
-
-  const [serverError, setServerError] = useState<{
-    body: { message: string; error: string };
-  } | null>(null);
 
   if (!addFlyoutVisible) {
     return null;
@@ -110,20 +105,24 @@ export const AlertAdd = ({
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
       const newAlert = await createAlert({ http, alert });
-      if (toastNotifications) {
-        toastNotifications.addSuccess(
-          i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText', {
-            defaultMessage: "Saved '{alertName}'",
-            values: {
-              alertName: newAlert.name,
-            },
-          })
-        );
-      }
+      toastNotifications.addSuccess(
+        i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText', {
+          defaultMessage: "Saved '{alertName}'",
+          values: {
+            alertName: newAlert.name,
+          },
+        })
+      );
       return newAlert;
     } catch (errorRes) {
-      setServerError(errorRes);
-      return undefined;
+      toastNotifications.addDanger(
+        i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveErrorNotificationText', {
+          defaultMessage: 'Failed to save alert: {message}',
+          values: {
+            message: errorRes.body?.message ?? '',
+          },
+        })
+      );
     }
   }
 
@@ -161,7 +160,6 @@ export const AlertAdd = ({
             alert={alert}
             dispatch={dispatch}
             errors={errors}
-            serverError={serverError}
             canChangeTrigger={canChangeTrigger}
           />
         </EuiFlyoutBody>
