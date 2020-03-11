@@ -6386,8 +6386,6 @@
     "xpack.infra.logs.analysis.anomaliesSectionLineSeriesName": "15 分ごとのログエントリー (平均)",
     "xpack.infra.logs.analysis.anomaliesSectionLoadingAriaLabel": "異常を読み込み中",
     "xpack.infra.logs.analysis.anomaliesSectionTitle": "異常",
-    "xpack.infra.logs.analysis.anomaliesTableCollapseLabel": "縮小",
-    "xpack.infra.logs.analysis.anomaliesTableExpandLabel": "拡張",
     "xpack.infra.logs.analysis.anomaliesTableMaxAnomalyScoreColumnName": "最高異常スコア",
     "xpack.infra.logs.analysis.anomaliesTablePartitionColumnName": "パーティション",
     "xpack.infra.logs.analysis.anomalySectionNoAnomaliesTitle": "異常が検出されませんでした。",
