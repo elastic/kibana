@@ -4,46 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getApiPath } from '../../lib/helper';
 import { QueryParams } from '../actions/types';
 import { Ping } from '../../../common/graphql/types';
+import { apiService } from './utils';
+import { API_URLS } from '../../../common/constants/rest_api';
 
 export interface APIParams {
   basePath: string;
   monitorId: string;
 }
 
-export const fetchSelectedMonitor = async ({ basePath, monitorId }: APIParams): Promise<Ping> => {
-  const url = getApiPath(`/api/uptime/monitor/selected`, basePath);
-  const params = {
+export const fetchSelectedMonitor = async ({ monitorId }: APIParams): Promise<Ping> => {
+  const queryParams = {
     monitorId,
   };
-  const urlParams = new URLSearchParams(params).toString();
-  const response = await fetch(`${url}?${urlParams}`);
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-  const responseData = await response.json();
-  return responseData;
+
+  return await apiService.get(API_URLS.MONITOR_SELECTED, queryParams);
 };
 
 export const fetchMonitorStatus = async ({
-  basePath,
   monitorId,
   dateStart,
   dateEnd,
 }: QueryParams & APIParams): Promise<Ping> => {
-  const url = getApiPath(`/api/uptime/monitor/status`, basePath);
-  const params = {
+  const queryParams = {
     monitorId,
     dateStart,
     dateEnd,
   };
-  const urlParams = new URLSearchParams(params).toString();
-  const response = await fetch(`${url}?${urlParams}`);
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-  const responseData = await response.json();
-  return responseData;
+
+  return await apiService.get(API_URLS.MONITOR_STATUS, queryParams);
 };

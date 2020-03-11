@@ -23,6 +23,7 @@ import { CommonlyUsedRange } from './components/functional/uptime_date_picker';
 import { store } from './state';
 import { setBasePath } from './state/actions';
 import { PageRouter } from './routes';
+import { apiService } from './state/api/utils';
 
 export interface UptimeAppColors {
   danger: string;
@@ -82,6 +83,8 @@ const Application = (props: UptimeAppProps) => {
         : undefined
     );
   }, [canSave, renderGlobalHelpControls, setBadge]);
+
+  apiService.http = core.http;
 
   // @ts-ignore
   store.dispatch(setBasePath(basePath));

@@ -5,7 +5,6 @@
  */
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { getApiPath } from '../../lib/helper';
 import { BaseParams } from './types';
 import {
   MonitorDetailsType,
@@ -14,61 +13,45 @@ import {
   MonitorLocationsType,
 } from '../../../common/runtime_types';
 import { QueryParams } from '../actions/types';
+import { apiService } from './utils';
+import { API_URLS } from '../../../common/constants/rest_api';
 
 interface ApiRequest {
   monitorId: string;
-  basePath: string;
 }
 
 export type MonitorQueryParams = BaseParams & ApiRequest;
 
 export const fetchMonitorDetails = async ({
   monitorId,
-  basePath,
   dateStart,
   dateEnd,
 }: MonitorQueryParams): Promise<MonitorDetails> => {
-  const url = getApiPath(`/api/uptime/monitor/details`, basePath);
   const params = {
     monitorId,
     dateStart,
     dateEnd,
   };
-  const urlParams = new URLSearchParams(params).toString();
-  const response = await fetch(`${url}?${urlParams}`);
+  const response = await apiService.get(API_URLS.MONITOR_DETAILS, params);
 
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-  return response.json().then(data => {
-    PathReporter.report(MonitorDetailsType.decode(data));
-    return data;
-  });
+  PathReporter.report(MonitorDetailsType.decode(response));
+  return response;
 };
 
 type ApiParams = QueryParams & ApiRequest;
 
 export const fetchMonitorLocations = async ({
   monitorId,
-  basePath,
   dateStart,
   dateEnd,
 }: ApiParams): Promise<MonitorLocations> => {
-  const url = getApiPath(`/api/uptime/monitor/locations`, basePath);
-
   const params = {
     dateStart,
     dateEnd,
     monitorId,
   };
-  const urlParams = new URLSearchParams(params).toString();
-  const response = await fetch(`${url}?${urlParams}`);
+  const response = await apiService.get(API_URLS.MONITOR_LOCATIONS, params);
 
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-  return response.json().then(data => {
-    PathReporter.report(MonitorLocationsType.decode(data));
-    return data;
-  });
+  PathReporter.report(MonitorLocationsType.decode(response));
+  return response;
 };

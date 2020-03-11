@@ -37,6 +37,9 @@ export function fetchEffectFactory<T, R, S, F>(
       const response = yield call(fetch, { ...params, basePath });
       yield put(success(response));
     } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+
       yield put(fail(error));
     }
   };

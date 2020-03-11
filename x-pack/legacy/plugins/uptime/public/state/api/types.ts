@@ -5,7 +5,6 @@
  */
 
 export interface BaseParams {
-  basePath: string;
   dateStart: string;
   dateEnd: string;
   filters?: string;
