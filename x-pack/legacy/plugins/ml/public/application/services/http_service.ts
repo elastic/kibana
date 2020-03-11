@@ -5,7 +5,7 @@
  */
 
 import { Observable } from 'rxjs';
-
+import { HttpFetchOptionsWithPath } from 'kibana/public';
 import { getHttp } from '../util/dependency_cache';
 
 function getResultHeaders(headers: HeadersInit): HeadersInit {
@@ -16,29 +16,29 @@ function getResultHeaders(headers: HeadersInit): HeadersInit {
   } as HeadersInit;
 }
 
-interface HttpOptions {
-  url: string;
-  method: string;
-  headers?: any;
-  data?: any;
-}
+// interface HttpOptions {
+//   url: string;
+//   method: string;
+//   headers?: any;
+//   data?: any;
+// }
 
 /**
  * Function for making HTTP requests to Kibana's backend.
  * Wrapper for Kibana's HttpHandler.
  */
-export async function http(options: HttpOptions) {
-  if (!options?.url) {
-    throw new Error('URL is missing');
+export async function http(options: HttpFetchOptionsWithPath) {
+  if (!options?.path) {
+    throw new Error('URL path is missing');
   }
 
   try {
-    let url = '';
-    url = url + (options.url || '');
+    let path = '';
+    path = path + (options.path || '');
     const headers = getResultHeaders(options.headers ?? {});
 
     const allHeaders = options.headers === undefined ? headers : { ...options.headers, ...headers };
-    const body = options.data === undefined ? null : JSON.stringify(options.data);
+    const body = options.body === undefined ? null : JSON.stringify(options.body);
 
     const payload: RequestInit = {
       method: options.method || 'GET',
@@ -50,7 +50,7 @@ export async function http(options: HttpOptions) {
       payload.body = body;
     }
 
-    return await getHttp().fetch(url, payload);
+    return await getHttp().fetch(path, payload);
   } catch (e) {
     throw new Error(e);
   }
@@ -64,7 +64,7 @@ interface RequestOptions extends RequestInit {
  * Function for making HTTP requests to Kibana's backend which returns an Observable
  * with request cancellation support.
  */
-export function http$<T>(url: string, options: RequestOptions): Observable<T> {
+export function http$<T>(path: string, options: RequestOptions): Observable<T> {
   const requestInit: RequestInit = {
     ...options,
     credentials: 'same-origin',
@@ -73,7 +73,7 @@ export function http$<T>(url: string, options: RequestOptions): Observable<T> {
     headers: getResultHeaders(options.headers ?? {}),
   };
 
-  return fromHttpHandler<T>(url, requestInit);
+  return fromHttpHandler<T>(path, requestInit);
 }
 
 /**

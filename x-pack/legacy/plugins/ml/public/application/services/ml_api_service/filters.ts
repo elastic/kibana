@@ -12,55 +12,51 @@ import { http } from '../http_service';
 import { basePath } from './index';
 
 export const filters = {
-  filters(obj) {
+  filters(obj?: { filterId?: string }) {
     const filterId = obj && obj.filterId ? `/${obj.filterId}` : '';
     return http({
-      url: `${basePath()}/filters${filterId}`,
+      path: `${basePath()}/filters${filterId}`,
       method: 'GET',
     });
   },
 
   filtersStats() {
     return http({
-      url: `${basePath()}/filters/_stats`,
+      path: `${basePath()}/filters/_stats`,
       method: 'GET',
     });
   },
 
-  addFilter(filterId, description, items) {
+  addFilter(filterId: string, description: string, items: string[]) {
+    const body = JSON.stringify({
+      filterId,
+      description,
+      items,
+    });
     return http({
-      url: `${basePath()}/filters`,
+      path: `${basePath()}/filters`,
       method: 'PUT',
-      data: {
-        filterId,
-        description,
-        items,
-      },
+      body,
     });
   },
 
-  updateFilter(filterId, description, addItems, removeItems) {
-    const data = {};
-    if (description !== undefined) {
-      data.description = description;
-    }
-    if (addItems !== undefined) {
-      data.addItems = addItems;
-    }
-    if (removeItems !== undefined) {
-      data.removeItems = removeItems;
-    }
+  updateFilter(filterId: string, description: string, addItems: string[], removeItems: string[]) {
+    const body = JSON.stringify({
+      ...(description !== undefined ? { description } : {}),
+      ...(addItems !== undefined ? { addItems } : {}),
+      ...(removeItems !== undefined ? { removeItems } : {}),
+    });
 
     return http({
-      url: `${basePath()}/filters/${filterId}`,
+      path: `${basePath()}/filters/${filterId}`,
       method: 'PUT',
-      data,
+      body,
     });
   },
 
-  deleteFilter(filterId) {
+  deleteFilter(filterId: string) {
     return http({
-      url: `${basePath()}/filters/${filterId}`,
+      path: `${basePath()}/filters/${filterId}`,
       method: 'DELETE',
     });
   },

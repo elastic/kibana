@@ -5,12 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ml } from '../../../../../services/ml_api_service';
 import {
   GetDataFrameAnalyticsStatsResponse,
   GetDataFrameAnalyticsStatsResponseError,
   GetDataFrameAnalyticsStatsResponseOk,
-  ml,
-} from '../../../../../services/ml_api_service';
+} from '../../../../../services/ml_api_service/data_frame_analytics';
 import {
   DataFrameAnalyticsConfig,
   REFRESH_ANALYTICS_LIST_STATE,

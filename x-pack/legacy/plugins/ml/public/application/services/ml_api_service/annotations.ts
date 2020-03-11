@@ -22,14 +22,14 @@ export const annotations = {
   },
   indexAnnotation(obj: any) {
     return http({
-      url: `${basePath()}/annotations/index`,
+      path: `${basePath()}/annotations/index`,
       method: 'PUT',
-      data: obj,
+      body: obj,
     });
   },
   deleteAnnotation(id: string) {
     return http({
-      url: `${basePath()}/annotations/delete/${id}`,
+      path: `${basePath()}/annotations/delete/${id}`,
       method: 'DELETE',
     });
   },
