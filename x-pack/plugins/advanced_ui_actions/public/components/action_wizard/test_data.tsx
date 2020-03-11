@@ -98,7 +98,10 @@ export const dashboardDrilldownActionFactory: ActionFactoryDefinition<
     return Promise.resolve(true);
   },
   order: 0,
-  create: () => null as any,
+  create: () => ({
+    id: 'test',
+    execute: async () => alert('Navigate to dashboard!'),
+  }),
 };
 
 export const dashboardFactory = new ActionFactory(dashboardDrilldownActionFactory);

@@ -17,19 +17,8 @@
  * under the License.
  */
 
-import { ActionType, ActionContextMapping } from '../types';
-import { Presentable } from '../util/presentable';
-
-export interface ActionDefinition<T extends ActionType>
-  extends Partial<Presentable<ActionContextMapping[T]>> {
-  /**
-   * ID of the action factory for this action. Action factories are registered
-   * int X-Pack `ui_actions` plugin.
-   */
-  readonly type?: T;
-
-  /**
-   * Executes the action.
-   */
-  execute(context: ActionContextMapping[T]): Promise<void>;
+export interface SerializedAction<Config> {
+  readonly factoryId: string;
+  readonly name: string;
+  readonly config: Config;
 }

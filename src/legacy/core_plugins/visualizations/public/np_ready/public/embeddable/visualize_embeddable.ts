@@ -304,6 +304,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
             timeFieldName: this.vis.indexPattern.timeFieldName,
             data: event.data,
           };
+
           getUiActions()
             .getTrigger(triggerId)
             .exec(context);

@@ -17,14 +17,77 @@
  * under the License.
  */
 
-import { ActionStorage } from './dynamic_action_storage';
+import { v4 as uuidv4 } from 'uuid';
+import { ActionStorage, SerializedEvent } from './dynamic_action_storage';
 import { UiActionsService } from '../service';
+import { SerializedAction } from './types';
+import { ActionDefinition } from './action';
 
 export interface DynamicActionManagerParams {
   storage: ActionStorage;
-  uiActions: UiActionsService;
+  uiActions: Pick<UiActionsService, 'registerAction' | 'attachAction' | 'getActionFactory'>;
+  isCompatible: <C = unknown>(context: C) => Promise<boolean>;
 }
 
 export class DynamicActionManager {
+  static idPrefixCounter = 0;
+
+  private readonly idPrefix = 'DYN_ACTION_' + DynamicActionManager.idPrefixCounter++;
+
   constructor(protected readonly params: DynamicActionManagerParams) {}
+
+  protected generateActionId(eventId: string): string {
+    return this.idPrefix + eventId;
+  }
+
+  public async start() {
+    const events = await this.params.storage.list();
+
+    for (const event of events) {
+      this.reviveAction(event);
+    }
+  }
+
+  public async stop() {
+    /*
+    const { storage, uiActions } = this.params;
+    const events = await storage.list();
+
+    for (const event of events) {
+      uiActions.detachAction(event.triggerId, event.action.id);
+      uiActions.unregisterAction(event.action.id);
+    }
+    */
+  }
+
+  public async createEvent(action: SerializedAction<unknown>, triggerId = 'VALUE_CLICK_TRIGGER') {
+    const event: SerializedEvent = {
+      eventId: uuidv4(),
+      triggerId,
+      action,
+    };
+
+    await this.params.storage.create(event);
+    this.reviveAction(event);
+  }
+
+  protected reviveAction(event: SerializedEvent) {
+    const { eventId, triggerId, action } = event;
+    const { uiActions, isCompatible } = this.params;
+    const { name } = action;
+
+    const actionId = this.generateActionId(eventId);
+    const factory = uiActions.getActionFactory(event.action.factoryId);
+    const actionDefinition: ActionDefinition<any> = {
+      ...factory.create(action as SerializedAction<object>),
+      id: actionId,
+      isCompatible,
+      getDisplayName: () => name,
+      getIconType: context => factory.getIconType(context),
+    };
+
+    uiActions.attachAction(triggerId as any, actionDefinition as any);
+  }
+
+  protected killAction(actionId: string) {}
 }

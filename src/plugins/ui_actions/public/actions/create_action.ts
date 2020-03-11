@@ -17,11 +17,14 @@
  * under the License.
  */
 
-import { ActionByType } from './action';
-import { ActionType } from '../types';
-import { ActionDefinition } from './action_definition';
+import { Ensure } from '@kbn/utility-types';
+import { Action } from './action';
+import { TriggerContextMapping } from '../types';
+import { ActionDefinition } from './action';
 
-export function createAction<T extends ActionType>(action: ActionDefinition<T>): ActionByType<T> {
+export function createAction<T extends keyof TriggerContextMapping>(
+  action: ActionDefinition<Ensure<TriggerContextMapping[T], object>>
+): Action<TriggerContextMapping[T], T> {
   return {
     getIconType: () => undefined,
     order: 0,
@@ -30,5 +33,5 @@ export function createAction<T extends ActionType>(action: ActionDefinition<T>):
     getDisplayName: () => '',
     getHref: () => undefined,
     ...action,
-  } as ActionByType<T>;
+  } as Action<TriggerContextMapping[T], T>;
 }

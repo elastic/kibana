@@ -90,12 +90,18 @@ export class UiActionsService {
     return trigger.contract;
   };
 
-  public readonly registerAction = <A extends AnyActionDefinition>(definition: A) => {
+  public readonly registerAction = <A extends AnyActionDefinition>(
+    definition: A
+  ): ActionInternal<A> => {
     if (this.actions.has(definition.id)) {
       throw new Error(`Action [action.id = ${definition.id}] already registered.`);
     }
 
-    this.actions.set(definition.id, new ActionInternal(definition));
+    const action = new ActionInternal(definition);
+
+    this.actions.set(action.id, action);
+
+    return action;
   };
 
   public readonly getAction = <T extends AnyActionDefinition>(id: string): ActionInternal<T> => {
@@ -235,6 +241,16 @@ export class UiActionsService {
     const actionFactory = new ActionFactory(definition);
 
     this.actionFactories.set(actionFactory.id, actionFactory);
+  };
+
+  public readonly getActionFactory = (actionFactoryId: string): AnyActionFactory => {
+    const actionFactory = this.actionFactories.get(actionFactoryId);
+
+    if (!actionFactory) {
+      throw new Error(`Action factory [actionFactoryId = ${actionFactoryId}] does not exist.`);
+    }
+
+    return actionFactory;
   };
 
   /**

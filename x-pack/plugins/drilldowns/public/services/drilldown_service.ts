@@ -57,8 +57,14 @@ export class DrilldownService {
       });
     };
 
-    registerDrilldown({ ...dashboardDrilldownActionFactory, execute: () => {} } as any);
-    registerDrilldown({ ...urlDrilldownActionFactory, execute: () => {} } as any);
+    registerDrilldown({
+      ...dashboardDrilldownActionFactory,
+      execute: () => alert('Dashboard drilldown!'),
+    } as any);
+    registerDrilldown({
+      ...urlDrilldownActionFactory,
+      execute: () => alert('URL drilldown!'),
+    } as any);
 
     return {
       registerDrilldown,

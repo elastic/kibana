@@ -23,7 +23,10 @@ import { IContainer } from '../containers';
 import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 import { ViewMode } from '../types';
 import { EmbeddableActionStorage } from './embeddable_action_storage';
-import { UiActionsStart } from '../ui_actions';
+import {
+  UiActionsStart,
+  UiActionsDynamicActionManager,
+} from '../../../../../plugins/ui_actions/public';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
@@ -55,9 +58,18 @@ export abstract class Embeddable<
   // TODO: Rename to destroyed.
   private destoyed: boolean = false;
 
-  private __actionStorage?: EmbeddableActionStorage;
-  public get actionStorage(): EmbeddableActionStorage {
-    return this.__actionStorage || (this.__actionStorage = new EmbeddableActionStorage(this));
+  private __dynamicActions?: UiActionsDynamicActionManager;
+  public get dynamicActions(): UiActionsDynamicActionManager | undefined {
+    if (!this.params.uiActions) return undefined;
+    if (!this.__dynamicActions) {
+      this.__dynamicActions = new UiActionsDynamicActionManager({
+        isCompatible: async () => true,
+        storage: new EmbeddableActionStorage(this),
+        uiActions: this.params.uiActions,
+      });
+    }
+
+    return this.__dynamicActions;
   }
 
   constructor(
@@ -66,6 +78,7 @@ export abstract class Embeddable<
     parent?: IContainer,
     public readonly params: EmbeddableParams = {}
   ) {
+    window.emb = this;
     this.id = input.id;
     this.output = {
       title: getPanelTitle(input, output),
@@ -88,6 +101,10 @@ export abstract class Embeddable<
         const newInput = parent.getInputForChild<TEmbeddableInput>(this.id);
         this.onResetInput(newInput);
       });
+    }
+
+    if (this.dynamicActions) {
+      this.dynamicActions.start();
     }
   }
 

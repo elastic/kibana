@@ -44,4 +44,4 @@ export {
 } from './util';
 export { Trigger, TriggerContext } from './triggers';
 export { TriggerContextMapping, TriggerId, ActionContextMapping, ActionType } from './types';
-export { ActionByType } from './actions';
+export { ActionByType, DynamicActionManager as UiActionsDynamicActionManager } from './actions';
