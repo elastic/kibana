@@ -382,9 +382,11 @@ function VisualizeAppController(
     const handleLinkedSearch = linked => {
       if (linked && !savedVis.savedSearchId && savedSearch) {
         savedVis.savedSearchId = savedSearch.id;
+        vis.savedSearchId = savedSearch.id;
         searchSource.setParent(savedSearch.searchSource);
       } else if (!linked && savedVis.savedSearchId) {
         delete savedVis.savedSearchId;
+        delete vis.savedSearchId;
       }
     };
 
