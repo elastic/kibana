@@ -5,11 +5,11 @@
  */
 
 export {
-  AlertMonitorStatusComponent,
   ToggleAlertFlyoutButtonComponent,
   UptimeAlertsContextProvider,
   UptimeAlertsFlyoutWrapperComponent,
 } from './alerts';
+export * from './alerts';
 export { DonutChart } from './charts/donut_chart';
 export { EmptyState } from './empty_state';
 export { KueryBarComponent } from './kuery_bar/kuery_bar';

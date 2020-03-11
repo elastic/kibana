@@ -7,7 +7,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { selectMonitorStatusAlert } from '../../../state/selectors';
-import { AlertMonitorStatusComponent } from '../../functional';
+import { AlertMonitorStatusComponent } from '../../functional/alerts/alert_monitor_status';
 
 interface Props {
   autocomplete: any;

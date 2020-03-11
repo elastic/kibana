@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { KueryBar } from '../../connected';
+import { KueryBar } from '../../connected/kuerybar/kuery_bar_container';
 
 interface AlertNumberFieldProps {
   'data-test-subj': string;
