@@ -18,6 +18,14 @@ interface Props {
 
 export const DELETE_TIMELINE_MODAL_WIDTH = 600; // px
 
+const getDeletedTitles = (title: string | JSX.Element | null | undefined) => {
+  if (title == null) return `"${i18n.UNTITLED_TIMELINE}"`;
+
+  if (typeof title === 'string') {
+    return title.trim().length > 0 ? title.trim() : `"${i18n.UNTITLED_TIMELINE}"`;
+  } else return title;
+};
+
 /**
  * Renders a modal that confirms deletion of a timeline
  */
@@ -29,12 +37,7 @@ export const DeleteTimelineModal = React.memo<Props>(({ title, closeModal, onDel
         data-test-subj="title"
         defaultMessage="Delete {title}?"
         values={{
-          title:
-            typeof title === 'string'
-              ? title != null && title.trim().length > 0
-                ? title.trim()
-                : i18n.UNTITLED_TIMELINE
-              : title,
+          title: getDeletedTitles(title),
         }}
       />
     }

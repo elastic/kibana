@@ -39,7 +39,9 @@ export const getActionsColumns = ({
         timelineId: savedObjectId ?? '',
       });
     },
+    enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
     description: i18n.OPEN_AS_DUPLICATE,
+    'data-test-subj': 'open-duplicate',
   };
 
   const exportTimelineAction = {

@@ -526,11 +526,6 @@ describe('StatefulOpenTimeline', () => {
         .first()
         .simulate('change', { target: { checked: true } });
       expect(getSelectedItem().length).toEqual(13);
-      wrapper
-        .find('[data-test-subj="delete-selected"]')
-        .first()
-        .simulate('click');
-      expect(getSelectedItem().length).toEqual(0);
     });
   });
 

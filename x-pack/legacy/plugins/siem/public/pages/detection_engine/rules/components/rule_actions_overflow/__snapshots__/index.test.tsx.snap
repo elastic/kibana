@@ -58,7 +58,7 @@ exports[`RuleActionsOverflow renders correctly against snapshot 1`] = `
   <GenericDownloader
     filename="rules_export.ndjson"
     onExportComplete={[Function]}
-    ids={Array []}
+    ruleIds={Array []}
   />
 </Fragment>
 `;

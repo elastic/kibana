@@ -14,10 +14,11 @@ import { ThemeProvider } from 'styled-components';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
 import { mockTimelineResults } from '../../../mock/timeline_results';
 import { OpenTimelineResult } from '../types';
-import { TimelinesTable } from '.';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
 
 jest.mock('../../../lib/kibana');
+
+const { TimelinesTable } = jest.requireActual('.');
 
 describe('#getActionsColumns', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });

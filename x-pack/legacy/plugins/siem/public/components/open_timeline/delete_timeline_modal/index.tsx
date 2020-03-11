@@ -71,7 +71,7 @@ export const ActionListIcon = styled(EuiIcon)`
 
 interface Props {
   deleteTimelines?: DeleteTimelines;
-  savedObjectIds?: string[];
+  savedObjectIds?: string[] | null | undefined;
   title?: string | JSX.Element | null;
   onComplete?: () => void;
 }
@@ -102,13 +102,16 @@ export const DeleteTimelineModalButton = React.memo<Props>(
         <TimelineCustomAction
           aria-label={i18n.DELETE_SELECTED}
           color="text"
+          data-test-subj="delete-timeline-wrapper"
           disabled={
-            deleteTimelines == null || savedObjectIds == null || savedObjectIds.length === 0
+            deleteTimelines == null ||
+            savedObjectIds == null ||
+            savedObjectIds.filter(id => id != null && id.length > 0).length === 0
           }
           onClick={openModal}
         >
           <>
-            <ActionListIcon size="m" type="trash" />
+            <ActionListIcon size="m" type="trash" data-test-subj="delete-timeline" />
             {i18n.DELETE_SELECTED}
           </>
         </TimelineCustomAction>

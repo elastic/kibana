@@ -47,7 +47,7 @@ const getExtendedColumnsIfEnabled = (showExtendedColumns: boolean) =>
  * `Timelines` page
  */
 
-const getTimelinesTableColumns = ({
+export const getTimelinesTableColumns = ({
   actionTimelineToShow,
   deleteTimelines,
   itemIdToExpandedNotesRowMap,

@@ -12,10 +12,10 @@ import { DeleteTimelineModal } from './delete_timeline_modal';
 import * as i18n from '../translations';
 
 describe('DeleteTimelineModal', () => {
-  test('it renders the expected title when a title is specified', () => {
+  test('it renders the expected title when a timeline is selected', () => {
     const wrapper = mountWithIntl(
       <DeleteTimelineModal
-        title="Privilege Escalation"
+        title={'"Privilege Escalation"'}
         onDelete={jest.fn()}
         closeModal={jest.fn()}
       />
@@ -29,10 +29,10 @@ describe('DeleteTimelineModal', () => {
     ).toEqual('Delete "Privilege Escalation"?');
   });
 
-  test('it trims leading and trailing whitespace around the title', () => {
+  test('it trims leading whitespace around the title', () => {
     const wrapper = mountWithIntl(
       <DeleteTimelineModal
-        title="    Leading and trailing whitespace    "
+        title={'    "Leading and trailing whitespace"    '}
         onDelete={jest.fn()}
         closeModal={jest.fn()}
       />

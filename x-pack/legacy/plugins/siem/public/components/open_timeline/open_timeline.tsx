@@ -61,7 +61,6 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     const nTimelines = useMemo(
       () => (
         <FormattedMessage
-          data-test-subj="query-message"
           id="xpack.siem.open.timeline.showingNTimelinesLabel"
           defaultMessage="{totalSearchResultsCount} {totalSearchResultsCount, plural, one {timeline} other {timelines}} {with}"
           values={{
@@ -74,7 +73,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           }}
         />
       ),
-      [totalSearchResultsCount]
+      [totalSearchResultsCount, query]
     );
 
     const getBatchItemsPopoverContent = useCallback(
@@ -133,10 +132,9 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           <UtilityBar border>
             <UtilityBarSection>
               <UtilityBarGroup>
-                <UtilityBarText>
+                <UtilityBarText data-test-subj="query-message">
                   <>
-                    {i18n.SHOWING}
-                    {nTimelines}
+                    {i18n.SHOWING} {nTimelines}
                   </>
                 </UtilityBarText>
               </UtilityBarGroup>
