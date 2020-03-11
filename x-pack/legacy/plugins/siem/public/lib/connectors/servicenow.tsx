@@ -39,6 +39,12 @@ interface ServiceNowActionParams {
   message: string;
 }
 
+interface Errors {
+  apiUrl: string[];
+  username: string[];
+  password: string[];
+}
+
 export function getActionType(): ActionTypeModel {
   return {
     id: serviceNowDefinition.actionTypeId,
@@ -46,10 +52,10 @@ export function getActionType(): ActionTypeModel {
     selectMessage: i18n.SERVICENOW_DESC,
     actionTypeTitle: i18n.SERVICENOW_TITLE,
     validateConnector: (action: ServiceNowActionConnector): ValidationResult => {
-      const errors = {
-        apiUrl: [] as string[],
-        username: [] as string[],
-        password: [] as string[],
+      const errors: Errors = {
+        apiUrl: [],
+        username: [],
+        password: [],
       };
 
       if (!action.config.apiUrl) {
@@ -71,10 +77,7 @@ export function getActionType(): ActionTypeModel {
       return { errors };
     },
     validateParams: (actionParams: ServiceNowActionParams): ValidationResult => {
-      const errors = {
-        message: [] as string[],
-      };
-      return { errors };
+      return { errors: {} };
     },
     actionConnectorFields: ServiceNowConnectorFields,
     actionParamsFields: ServiceNowParamsFields,
