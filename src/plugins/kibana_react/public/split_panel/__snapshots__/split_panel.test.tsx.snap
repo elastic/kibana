@@ -67,25 +67,9 @@ exports[`Split panel should render correctly 1`] = `
           <EuiIcon
             type="grabHorizontal"
           >
-            <EuiIconEmpty
-              aria-hidden={true}
-              className="euiIcon euiIcon--medium euiIcon-isLoading"
-              focusable="false"
-              role="img"
-              style={null}
-            >
-              <svg
-                aria-hidden={true}
-                className="euiIcon euiIcon--medium euiIcon-isLoading"
-                focusable="false"
-                height={16}
-                role="img"
-                style={null}
-                viewBox="0 0 16 16"
-                width={16}
-                xmlns="http://www.w3.org/2000/svg"
-              />
-            </EuiIconEmpty>
+            <div
+              data-euiicon-type="grabHorizontal"
+            />
           </EuiIcon>
         </button>
       </Resizer>
