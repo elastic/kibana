@@ -50,10 +50,10 @@ export default function enterSpaceFunctonalTests({
       await PageObjects.spaceSelector.openSpacesNav();
 
       // change spaces
+      const newSpaceId = 'default';
+      await PageObjects.spaceSelector.clickSpaceAvatar(newSpaceId);
 
-      await PageObjects.spaceSelector.clickSpaceAvatar('default');
-
-      await PageObjects.spaceSelector.expectHomePage(spaceId);
+      await PageObjects.spaceSelector.expectHomePage(newSpaceId);
     });
   });
 }
