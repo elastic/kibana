@@ -10,7 +10,7 @@ Then you can drill down to view more detailed metrics or other information for t
 
 You can:
 
-* View your infrastructure metrics by hosts, Kubernetes pods or Docker containers.
+* View your infrastructure metrics by hosts, Kubernetes pods, or Docker containers.
 You can group and filter the data in various ways to help you identify the items that interest you.
 
 * View current and historic values for metrics such as CPU usage, memory usage, and network traffic for each component.
