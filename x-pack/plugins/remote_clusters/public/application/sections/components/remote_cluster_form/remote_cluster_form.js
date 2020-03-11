@@ -34,7 +34,11 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 
-import { skippingDisconnectedClustersUrl, transportPortUrl } from '../../../services/documentation';
+import {
+  skippingDisconnectedClustersUrl,
+  transportPortUrl,
+  proxyModeUrl,
+} from '../../../services/documentation';
 
 import { RequestFlyout } from './request_flyout';
 
@@ -453,20 +457,40 @@ export class RemoteClusterForm extends Component {
               id="xpack.remoteClusters.remoteClusterForm.sectionModeDescription"
               defaultMessage="Remote cluster connections work by configuring a remote cluster and connecting only to a limited number of nodes in that remote cluster."
             />
-            <EuiSpacer size="m" />
-            <EuiSwitch
-              label={
+            <EuiFormRow
+              hasEmptyLabelSpace
+              fullWidth
+              helpText={
                 <FormattedMessage
-                  id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
-                  defaultMessage="Use proxy mode"
+                  id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription"
+                  defaultMessage="Configure a remote cluster with a single proxy address. {learnMoreLink}"
+                  values={{
+                    learnMoreLink: (
+                      <EuiLink href={proxyModeUrl} target="_blank">
+                        <FormattedMessage
+                          id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription.learnMoreLinkLabel"
+                          defaultMessage="Learn more."
+                        />
+                      </EuiLink>
+                    ),
+                  }}
                 />
               }
-              checked={mode === PROXY_MODE}
-              data-test-subj="remoteClusterFormConnectionModeToggle"
-              onChange={e =>
-                this.onFieldsChange({ mode: e.target.checked ? PROXY_MODE : SNIFF_MODE })
-              }
-            />
+            >
+              <EuiSwitch
+                label={
+                  <FormattedMessage
+                    id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
+                    defaultMessage="Use proxy mode"
+                  />
+                }
+                checked={mode === PROXY_MODE}
+                data-test-subj="remoteClusterFormConnectionModeToggle"
+                onChange={e =>
+                  this.onFieldsChange({ mode: e.target.checked ? PROXY_MODE : SNIFF_MODE })
+                }
+              />
+            </EuiFormRow>
           </>
         }
         fullWidth
