@@ -21,14 +21,14 @@ const ExportTimeline: React.FC<{
     selectedTimelines
   );
   const [, dispatchToaster] = useStateToaster();
-
   return (
     <>
       {selectedTimelines != null && exportedIds != null && enableDownloader && (
         <GenericDownloader
+          data-test-subj="export-timeline-downloader"
+          exportSelectedData={getExportedData}
           filename={`${i18n.EXPORT_FILENAME}.ndjson`}
           ids={exportedIds}
-          exportSelectedData={getExportedData}
           onExportComplete={exportCount => {
             setEnableDownloader(false);
             if (typeof onDownloadComplete === 'function') onDownloadComplete();
@@ -51,9 +51,10 @@ const ExportTimeline: React.FC<{
         onClick={() => {
           setEnableDownloader(true);
         }}
+        data-test-subj="export-timeline"
       >
         <>
-          <ActionListIcon size="m" type="exportAction" />
+          <ActionListIcon size="m" type="exportAction" data-test-subj="export-timeline-icon" />
           {i18n.EXPORT_SELECTED}
         </>
       </TimelineCustomAction>
@@ -61,5 +62,4 @@ const ExportTimeline: React.FC<{
   );
 };
 ExportTimeline.displayName = 'ExportTimeline';
-
 export const TimelineDownloader = React.memo(ExportTimeline);

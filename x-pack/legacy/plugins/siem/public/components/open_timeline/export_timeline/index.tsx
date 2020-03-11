@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, Dispatch, SetStateAction } from 'react';
 import { keys } from 'lodash/fp';
 import { OpenTimelineResult } from '../types';
 import { KibanaServices } from '../../../lib/kibana';
@@ -12,7 +12,22 @@ import { throwIfNotOk } from '../../../hooks/api/api';
 import { ExportSelectedData } from '../../generic_downloader';
 import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
 
-export const useExportTimeline = (selectedItems: OpenTimelineResult[] | undefined) => {
+export interface ExportTimeline {
+  enableDownloader: boolean;
+  setEnableDownloader: Dispatch<SetStateAction<boolean>>;
+  exportedIds:
+    | Array<{
+        timelineId: string | null | undefined;
+        pinnedEventIds: string[] | null | undefined;
+        noteIds: string[] | undefined;
+      }>
+    | undefined;
+  getExportedData: ExportSelectedData;
+}
+
+export const useExportTimeline = (
+  selectedItems: OpenTimelineResult[] | undefined
+): ExportTimeline => {
   const [enableDownloader, setEnableDownloader] = useState(false);
 
   const exportSelectedTimeline: ExportSelectedData = useCallback(
@@ -37,7 +52,7 @@ export const useExportTimeline = (selectedItems: OpenTimelineResult[] | undefine
       await throwIfNotOk(response.response);
       return response.body!;
     },
-    []
+    [selectedItems]
   );
 
   const getExportedIds = useCallback(
