@@ -90,7 +90,7 @@ export const metricVisualization: Visualization<State, PersistableState> = {
     return {
       dimensions: [
         {
-          dimensionId: '',
+          dimensionId: 'metric',
           dimensionLabel: i18n.translate('xpack.lens.metric.label', { defaultMessage: 'Metric' }),
           layerId: props.state.layerId,
           accessors: props.state.accessor ? [props.state.accessor] : [],
