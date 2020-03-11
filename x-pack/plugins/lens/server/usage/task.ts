@@ -184,7 +184,10 @@ export function telemetryTaskRunner(
 ) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
-    const callCluster = core.elasticsearch.adminClient.callAsInternalUser;
+    const callCluster = async (...args: Parameters<APICaller>) => {
+      const [coreStart] = await core.getStartServices();
+      return coreStart.elasticsearch.legacy.client.callAsInternalUser(...args);
+    };
 
     return {
       async run() {
