@@ -4,19 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { isValidPlatinumLicense } from '../../../../../../../plugins/apm/common/service_map';
+import {
+  invalidLicenseMessage,
+  isValidPlatinumLicense
+} from '../../../../../../../plugins/apm/common/service_map';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { useLicense } from '../../../hooks/useLicense';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
+import { LicensePrompt } from '../../shared/LicensePrompt';
 import { BetaBadge } from './BetaBadge';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
 import { cytoscapeDivStyle } from './cytoscapeOptions';
 import { EmptyBanner } from './EmptyBanner';
-import { PlatinumLicensePrompt } from './PlatinumLicensePrompt';
 import { Popover } from './Popover';
 import { useRefDimensions } from './useRefDimensions';
 
@@ -74,6 +79,34 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
       </Cytoscape>
     </div>
   ) : (
-    <PlatinumLicensePrompt />
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="spaceAround"
+      // Set the height to give it some top margin
+      style={{ height: '60vh' }}
+    >
+      <EuiFlexItem
+        grow={false}
+        style={{ width: 600, textAlign: 'center' as const }}
+      >
+        <EuiPanel grow={false} hasShadow={true} paddingSize="none">
+          <LicensePrompt
+            title={i18n.translate(
+              'xpack.apm.serviceMap.licensePromptButtonText',
+              {
+                defaultMessage: 'Service maps is available in Platinum.'
+              }
+            )}
+            text={invalidLicenseMessage}
+            buttonText={i18n.translate(
+              'xpack.apm.serviceMap.licensePromptTitle',
+              {
+                defaultMessage: 'Start 30-day Platinum trial'
+              }
+            )}
+          />
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
