@@ -19,7 +19,7 @@
 
 import { uiToReactComponent } from '../../../kibana_react/public';
 import { Presentable } from '../util/presentable';
-import { ActionDefinition } from './action_definition';
+import { ActionDefinition } from './action';
 import {
   AnyActionFactoryDefinition,
   AFDConfig as Config,
@@ -27,6 +27,7 @@ import {
   AFDActionContext as ActionContext,
 } from './action_factory_definition';
 import { Configurable } from '../util';
+import { SerializedAction } from './types';
 
 export class ActionFactory<D extends AnyActionFactoryDefinition>
   implements Presentable<FactoryContext<D>>, Configurable<Config<D>> {
@@ -62,8 +63,10 @@ export class ActionFactory<D extends AnyActionFactoryDefinition>
     return this.definition.getHref(context);
   }
 
-  public create(config: Config<D>): ActionDefinition<ActionContext<D>> {
-    return this.definition.create(config);
+  public create(
+    serializedAction: Omit<SerializedAction<Config<D>>, 'factoryId'>
+  ): ActionDefinition<ActionContext<D>> {
+    return this.definition.create(serializedAction);
   }
 }
 

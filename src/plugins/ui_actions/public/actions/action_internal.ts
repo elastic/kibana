@@ -21,6 +21,7 @@ import { Action, ActionContext as Context, AnyActionDefinition } from './action'
 import { Presentable } from '../util/presentable';
 import { uiToReactComponent } from '../../../kibana_react/public';
 import { ActionType } from '../types';
+import { SerializedAction } from './types';
 
 export class ActionInternal<A extends AnyActionDefinition>
   implements Action<Context<A>>, Presentable<Context<A>> {
@@ -45,7 +46,7 @@ export class ActionInternal<A extends AnyActionDefinition>
   }
 
   public getDisplayName(context: Context<A>): string {
-    if (!this.definition.getDisplayName) return '';
+    if (!this.definition.getDisplayName) return `Action: ${this.id}`;
     return this.definition.getDisplayName(context);
   }
 
@@ -64,8 +65,7 @@ export class ActionInternal<A extends AnyActionDefinition>
       throw new Error('Action does not have a config.');
     }
 
-    const serialized: SerializedAction = {
-      id: this.id,
+    const serialized: SerializedAction<unknown> = {
       factoryId: this.type,
       name: this.name,
       config: this.config,
@@ -74,17 +74,10 @@ export class ActionInternal<A extends AnyActionDefinition>
     return serialized;
   }
 
-  public deserialize({ name, config }: SerializedAction) {
+  public deserialize({ name, config }: SerializedAction<unknown>) {
     this.name = name;
-    this.config = config;
+    this.config = config as object;
   }
 }
 
 export type AnyActionInternal = ActionInternal<any>;
-
-export interface SerializedAction<Config extends object = object> {
-  readonly id: string;
-  readonly factoryId: string;
-  readonly name: string;
-  readonly config: Config;
-}

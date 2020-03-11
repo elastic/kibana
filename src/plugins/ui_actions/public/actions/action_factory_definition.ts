@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { ActionDefinition } from './action_definition';
+import { ActionDefinition } from './action';
 import { Presentable, Configurable } from '../util';
+import { SerializedAction } from './types';
 
 /**
  * This is a convenience interface for registering new action factories.
@@ -39,7 +40,9 @@ export interface ActionFactoryDefinition<
    * This method should return a definition of a new action, normally used to
    * register it in `ui_actions` registry.
    */
-  create(config: Config): ActionDefinition<any>; // TODO: FIX THIS....
+  create(
+    serializedAction: Omit<SerializedAction<Config>, 'factoryId'>
+  ): ActionDefinition<ActionContext>;
 }
 
 export type AnyActionFactoryDefinition = ActionFactoryDefinition<any, any, any>;

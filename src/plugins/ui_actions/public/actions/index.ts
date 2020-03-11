@@ -24,3 +24,5 @@ export * from './action_factory';
 export * from './create_action';
 export * from './incompatible_action_error';
 export * from './dynamic_action_storage';
+export * from './dynamic_action_manager';
+export * from './types';

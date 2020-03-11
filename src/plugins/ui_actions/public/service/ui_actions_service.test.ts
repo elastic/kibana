@@ -102,6 +102,8 @@ describe('UiActionsService', () => {
         type: 'test' as ActionType,
       });
     });
+
+    test.todo('return action instance');
   });
 
   describe('.getTriggerActions()', () => {
@@ -481,5 +483,7 @@ describe('UiActionsService', () => {
     test.todo('.getActionFactories() returns empty array if no action factories registered');
     test.todo('can register an action factory');
     test.todo('can retrieve all action factories');
+    test.todo('can retrieve action factory by ID');
+    test.todo('throws when retrieving action factory that does not exist');
   });
 });
