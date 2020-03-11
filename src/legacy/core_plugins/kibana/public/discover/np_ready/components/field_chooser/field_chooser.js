@@ -246,17 +246,7 @@ export function createFieldChooserDirective($location, config) {
           });
         });
 
-        const fields = new IndexPatternFieldList(indexPattern, fieldSpecs);
-
-        if ($scope.openFields.size) {
-          fields.forEach(function(field) {
-            if ($scope.openFields.get(field.name)) {
-              field.details = getDetails(field);
-            }
-          });
-        }
-
-        return fields;
+        return new IndexPatternFieldList(indexPattern, fieldSpecs);
       }
     },
   };

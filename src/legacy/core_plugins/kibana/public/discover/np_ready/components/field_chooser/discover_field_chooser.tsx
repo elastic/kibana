@@ -64,7 +64,7 @@ export function DiscoverFieldChooser({
   const [openFieldMap, setOpenFieldMap] = useState(new Map());
   const [showFields, setShowFields] = useState(false);
 
-  if (!selectedIndexPattern) {
+  if (!selectedIndexPattern || !filter) {
     return null;
   }
 
@@ -177,7 +177,7 @@ export function DiscoverFieldChooser({
             </div>
           </>
         )}
-        {groupedFields && groupedFields.popular.length && (
+        {groupedFields && groupedFields.popular.length > 0 && (
           <ul
             className={`list-unstyled sidebar-well dscFieldList--popular ${
               showFields ? 'hidden-sm' : 'hidden-xs'

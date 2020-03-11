@@ -43,8 +43,6 @@ import { createInfiniteScrollDirective } from './np_ready/angular/doc_table/infi
 import { createDocViewerDirective } from './np_ready/angular/doc_viewer';
 // @ts-ignore
 import { createFieldChooserDirective } from './np_ready/components/field_chooser/field_chooser';
-// @ts-ignore
-import { createDiscoverFieldDirective } from './np_ready/components/field_chooser/discover_field_directive';
 import { CollapsibleSidebarProvider } from './np_ready/angular/directives/collapsible_sidebar/collapsible_sidebar';
 import { DiscoverStartPlugins } from './plugin';
 import { createCssTruncateDirective } from './np_ready/angular/directives/css_truncate';
@@ -152,12 +150,10 @@ export function initializeInnerAngularModule(
     .run(registerListenEventListener)
     .directive('icon', reactDirective => reactDirective(EuiIcon))
     .directive('kbnAccessibleClick', KbnAccessibleClickProvider)
-    .directive('fieldName', FieldNameDirectiveProvider)
     .directive('collapsibleSidebar', CollapsibleSidebarProvider)
     .directive('cssTruncate', createCssTruncateDirective)
     .directive('fixedScroll', FixedScrollProvider)
     .directive('renderComplete', createRenderCompleteDirective)
-    .directive('discoverField', createDiscoverFieldDirective)
     .directive('discFieldChooser', createFieldChooserDirective)
     .directive('discoverFieldChooser', createDiscoverFieldChooserDirective)
     .service('debounce', ['$timeout', DebounceProviderTimeout]);
