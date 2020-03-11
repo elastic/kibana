@@ -17,35 +17,47 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
+import { Plugin, CoreSetup, AppMountParameters, CoreStart } from 'kibana/public';
 import { PluginSetupContract as AlertingSetup } from '../../../x-pack/plugins/alerting/public';
-import { ALERTING_EXAMPLE_APP_ID } from '../common/constants';
-import { AlertType, SanitizedAlert } from '../../../x-pack/plugins/alerting/common';
+import { ChartsPluginStart } from '../../../src/plugins/charts/public';
+import { TriggersAndActionsUIPublicPluginSetup } from '../../../x-pack/plugins/triggers_actions_ui/public';
+import { DataPublicPluginStart } from '../../../src/plugins/data/public';
+import { register as registerAlwaysFiringAlert } from './alert_types/always_firing';
 
 export type Setup = void;
 export type Start = void;
 
 export interface AlertingExamplePublicSetupDeps {
   alerting: AlertingSetup;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+}
+
+export interface AlertingExamplePublicStartDeps {
+  alerting: AlertingSetup;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  charts: ChartsPluginStart;
+  data: DataPublicPluginStart;
 }
 
 export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamplePublicSetupDeps> {
-  public setup(core: CoreSetup, { alerting }: AlertingExamplePublicSetupDeps) {
+  public setup(
+    core: CoreSetup<AlertingExamplePublicStartDeps>,
+    { alerting, triggers_actions_ui }: AlertingExamplePublicSetupDeps
+  ) {
     core.application.register({
       id: 'AlertingExample',
       title: 'Alerting Example',
       async mount(params: AppMountParameters) {
-        const [coreStart, depsStart] = await core.getStartServices();
+        const [coreStart, depsStart]: [
+          CoreStart,
+          AlertingExamplePublicStartDeps
+        ] = await core.getStartServices();
         const { renderApp } = await import('./application');
         return renderApp(coreStart, depsStart, params);
       },
     });
 
-    alerting.registerNavigation(
-      ALERTING_EXAMPLE_APP_ID,
-      '.alerting-example',
-      (alert: SanitizedAlert, alertType: AlertType) => `/alert/${alert.id}`
-    );
+    registerAlwaysFiringAlert(alerting, triggers_actions_ui);
   }
 
   public start() {}

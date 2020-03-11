@@ -5,6 +5,6 @@
   "configPath": ["alerting_example"],
   "server": true,
   "ui": true,
-  "requiredPlugins": ["alerting"],
+  "requiredPlugins": ["triggers_actions_ui", "charts", "data", "alerting", "actions"],
   "optionalPlugins": []
 }

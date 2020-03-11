@@ -18,3 +18,6 @@
  */
 
 export const ALERTING_EXAMPLE_APP_ID = 'AlertingExample';
+
+// always firing
+export const DEFAULT_INSTANCES_TO_GENERATE = 5;

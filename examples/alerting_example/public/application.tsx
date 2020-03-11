@@ -19,80 +19,48 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, Route, withRouter, RouteComponentProps } from 'react-router-dom';
-import { EuiPage, EuiPageSideBar, EuiSideNav } from '@elastic/eui';
-import { AppMountParameters, CoreStart } from '../../../src/core/public';
+import { BrowserRouter as Router, Route, RouteComponentProps } from 'react-router-dom';
+import { EuiPage } from '@elastic/eui';
+import {
+  AppMountParameters,
+  CoreStart,
+  IUiSettingsClient,
+  ToastsSetup,
+} from '../../../src/core/public';
+import { DataPublicPluginStart } from '../../../src/plugins/data/public';
+import { ChartsPluginStart } from '../../../src/plugins/charts/public';
+
 import { Page } from './page';
 import { DocumentationPage } from './documentation';
-import { CreateAlertPage } from './create_alert';
 import { ViewAlertPage } from './view_alert';
-
-interface PageDef {
-  title: string;
-  id: string;
-  component: React.ReactNode;
-}
-
-type NavProps = RouteComponentProps & {
-  pages: PageDef[];
-};
-
-const Nav = withRouter(({ history, pages }: NavProps) => {
-  const navItems = pages.map(page => ({
-    id: page.id,
-    name: page.title,
-    onClick: () => history.push(`/${page.id}`),
-    'data-test-subj': page.id,
-  }));
-
-  return (
-    <EuiSideNav
-      items={[
-        {
-          name: 'Alerting example',
-          id: 'home',
-          items: [...navItems],
-        },
-      ]}
-    />
-  );
-});
+import { TriggersAndActionsUIPublicPluginStart } from '../../../x-pack/plugins/triggers_actions_ui/public';
+import { AlertingExamplePublicStartDeps } from './plugin';
 
 export interface AlertingExampleComponentParams {
   application: CoreStart['application'];
   http: CoreStart['http'];
   basename: string;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+  data: DataPublicPluginStart;
+  charts: ChartsPluginStart;
+  uiSettings: IUiSettingsClient;
+  toastNotifications: ToastsSetup;
 }
 
-const AlertingExampleApp = ({ basename, http }: AlertingExampleComponentParams) => {
-  const pages: PageDef[] = [
-    {
-      id: 'home',
-      title: 'Home',
-      component: <DocumentationPage />,
-    },
-    {
-      id: 'create',
-      title: 'Create',
-      component: <CreateAlertPage http={http} />,
-    },
-  ];
-
-  const routes = pages.map((page, i) => (
-    <Route
-      key={i}
-      path={`/${page.id}`}
-      render={() => <Page title={page.title}>{page.component}</Page>}
-    />
-  ));
-
+const AlertingExampleApp = (deps: AlertingExampleComponentParams) => {
+  const { basename, http } = deps;
   return (
     <Router basename={basename}>
       <EuiPage>
-        <EuiPageSideBar>
-          <Nav pages={pages} />
-        </EuiPageSideBar>
-        <Route path="/" exact render={DocumentationPage} />
+        <Route
+          path={`/`}
+          exact={true}
+          render={() => (
+            <Page title={`Home`} isHome={true}>
+              <DocumentationPage {...deps} />
+            </Page>
+          )}
+        />
         <Route
           path={`/alert/:id`}
           render={(props: RouteComponentProps<{ id: string }>) => {
@@ -103,22 +71,24 @@ const AlertingExampleApp = ({ basename, http }: AlertingExampleComponentParams) 
             );
           }}
         />
-        {routes}
       </EuiPage>
     </Router>
   );
 };
 
 export const renderApp = (
-  coreStart: CoreStart,
-  deps: any,
+  { application, notifications, http, uiSettings }: CoreStart,
+  deps: AlertingExamplePublicStartDeps,
   { appBasePath, element }: AppMountParameters
 ) => {
   ReactDOM.render(
     <AlertingExampleApp
       basename={appBasePath}
-      application={coreStart.application}
-      http={coreStart.http}
+      application={application}
+      toastNotifications={notifications.toasts}
+      http={http}
+      uiSettings={uiSettings}
+      {...deps}
     />,
     element
   );

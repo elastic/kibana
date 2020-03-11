@@ -20,6 +20,8 @@
 import { Plugin, CoreSetup } from 'kibana/server';
 import { PluginSetupContract as AlertingSetup } from '../../../x-pack/plugins/alerting/server';
 
+import { alertType as alwaysFiringAlert } from './alert_types/always_firing';
+
 // this plugin's dependendencies
 export interface AlertingExampleDeps {
   alerting: AlertingSetup;
@@ -27,31 +29,7 @@ export interface AlertingExampleDeps {
 
 export class AlertingExamplePlugin implements Plugin<void, void, AlertingExampleDeps> {
   public setup(core: CoreSetup, { alerting }: AlertingExampleDeps) {
-    // Create Alert type
-    const alwaysFiringAlertType: any = {
-      id: '.alerting-example',
-      name: 'Alerting Example',
-      actionGroups: [
-        { id: 'default', name: 'Default' },
-        { id: 'other', name: 'Other' },
-      ],
-      async executor(alertExecutorOptions: any) {
-        const { services, state, params } = alertExecutorOptions;
-
-        (params.instances || []).forEach((instance: { id: string; state: any }) => {
-          services
-            .alertInstanceFactory(instance.id)
-            .replaceState({ instanceStateValue: true, ...(instance.state || {}) })
-            .scheduleActions('default');
-        });
-
-        return {
-          globalStateValue: true,
-          groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,
-        };
-      },
-    };
-    alerting.registerType(alwaysFiringAlertType);
+    alerting.registerType(alwaysFiringAlert);
   }
 
   public start() {}

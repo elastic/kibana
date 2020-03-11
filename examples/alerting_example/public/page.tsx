@@ -18,6 +18,7 @@
  */
 
 import React from 'react';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import {
   EuiPageBody,
@@ -26,14 +27,33 @@ import {
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
+  EuiBreadcrumbs,
+  EuiSpacer,
 } from '@elastic/eui';
 
-interface PageProps {
+type PageProps = RouteComponentProps & {
   title: string;
   children: React.ReactNode;
-}
+  isHome?: boolean;
+};
 
-export function Page({ title, children }: PageProps) {
+export const Page = withRouter(({ title, children, isHome = false, history }: PageProps) => {
+  const breadcrumbs: Array<{
+    text: string;
+    onClick?: () => void;
+  }> = [
+    {
+      text: title,
+    },
+  ];
+  if (!isHome) {
+    breadcrumbs.splice(0, 0, {
+      text: 'Home',
+      onClick: () => {
+        history.push(`/`);
+      },
+    });
+  }
   return (
     <EuiPageBody data-test-subj="searchTestPage">
       <EuiPageHeader>
@@ -43,9 +63,11 @@ export function Page({ title, children }: PageProps) {
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
+      <EuiBreadcrumbs responsive={false} breadcrumbs={breadcrumbs} />
+      <EuiSpacer />
       <EuiPageContent>
         <EuiPageContentBody>{children}</EuiPageContentBody>
       </EuiPageContent>
     </EuiPageBody>
   );
-}
+});

@@ -28,9 +28,12 @@ import {
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
+  EuiSpacer,
 } from '@elastic/eui';
+import { CreateAlert } from './components/create_alert';
+import { AlertingExampleComponentParams } from './application';
 
-export const DocumentationPage = () => (
+export const DocumentationPage = (deps: AlertingExampleComponentParams) => (
   <EuiPageBody>
     <EuiPageHeader>
       <EuiPageHeaderSection>
@@ -52,10 +55,12 @@ export const DocumentationPage = () => (
           <h2>Plugin Structure</h2>
           <p>
             This example solution has both `server` and a `public` plugins. The `server` handles
-            registration of the AlertType, while the `public` handles registration of the
-            navigation.
+            registration of example the AlertTypes, while the `public` handles creation of, and
+            navigation for, these alert types.
           </p>
         </EuiText>
+        <EuiSpacer />
+        <CreateAlert {...deps} />
       </EuiPageContentBody>
     </EuiPageContent>
   </EuiPageBody>
