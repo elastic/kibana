@@ -17,81 +17,84 @@
  * under the License.
  */
 import _ from 'lodash';
+import { SavedObjectReference } from 'kibana/public';
 import { migrateLegacyQuery } from '../../../../kibana_legacy/public';
-import { SavedObject } from '../../types';
 import { InvalidJSONProperty } from '../../../../kibana_utils/public';
+import { SearchSource } from './search_source';
+import { IndexPatternsContract } from '../../index_patterns/index_patterns';
+import { SearchSourceFields } from './types';
 
-export function parseSearchSource(
-  savedObject: SavedObject,
-  esType: string,
+export async function parseSearchSource(
   searchSourceJson: string,
-  references: any[]
+  references: SavedObjectReference[],
+  indexPatterns: IndexPatternsContract
 ) {
-  if (!savedObject.searchSource) return;
+  const searchSource = new SearchSource();
 
   // if we have a searchSource, set its values based on the searchSourceJson field
-  let searchSourceValues: Record<string, any>;
+  let searchSourceValues: Record<string, unknown>;
   try {
     searchSourceValues = JSON.parse(searchSourceJson);
   } catch (e) {
     throw new InvalidJSONProperty(
-      `Invalid JSON in ${esType} "${savedObject.id}". ${e.message} JSON: ${searchSourceJson}`
+      `Invalid JSON in search source. ${e.message} JSON: ${searchSourceJson}`
     );
   }
 
   // This detects a scenario where documents with invalid JSON properties have been imported into the saved object index.
   // (This happened in issue #20308)
   if (!searchSourceValues || typeof searchSourceValues !== 'object') {
-    throw new InvalidJSONProperty(`Invalid searchSourceJSON in ${esType} "${savedObject.id}".`);
+    throw new InvalidJSONProperty('Invalid JSON in search source.');
   }
 
   // Inject index id if a reference is saved
   if (searchSourceValues.indexRefName) {
-    const reference = references.find(
-      (ref: Record<string, any>) => ref.name === searchSourceValues.indexRefName
-    );
+    const reference = references.find(ref => ref.name === searchSourceValues.indexRefName);
     if (!reference) {
-      throw new Error(
-        `Could not find reference for ${
-          searchSourceValues.indexRefName
-        } on ${savedObject.getEsType()} ${savedObject.id}`
-      );
+      throw new Error(`Could not find reference for ${searchSourceValues.indexRefName}`);
     }
     searchSourceValues.index = reference.id;
     delete searchSourceValues.indexRefName;
   }
 
-  if (searchSourceValues.filter) {
+  if (searchSourceValues.filter && Array.isArray(searchSourceValues.filter)) {
     searchSourceValues.filter.forEach((filterRow: any) => {
       if (!filterRow.meta || !filterRow.meta.indexRefName) {
         return;
       }
       const reference = references.find((ref: any) => ref.name === filterRow.meta.indexRefName);
       if (!reference) {
-        throw new Error(
-          `Could not find reference for ${
-            filterRow.meta.indexRefName
-          } on ${savedObject.getEsType()}`
-        );
+        throw new Error(`Could not find reference for ${filterRow.meta.indexRefName}`);
       }
       filterRow.meta.index = reference.id;
       delete filterRow.meta.indexRefName;
     });
   }
 
-  const searchSourceFields = savedObject.searchSource.getFields();
+  if (searchSourceValues.index && typeof searchSourceValues.index === 'string') {
+    const indexObj = await indexPatterns.get(searchSourceValues.index);
+    searchSourceValues.index = indexObj;
+  }
+
+  const searchSourceFields = searchSource.getFields();
   const fnProps = _.transform(
     searchSourceFields,
-    function(dynamic: Record<string, any>, val: any, name: string | undefined) {
+    function(dynamic, val, name) {
       if (_.isFunction(val) && name) dynamic[name] = val;
     },
     {}
   );
 
-  savedObject.searchSource.setFields(_.defaults(searchSourceValues, fnProps));
-  const query = savedObject.searchSource.getOwnField('query');
+  // This assignment might hide problems because the type of values passed from the parsed JSON
+  // might not fit the SearchSourceFields interface.
+  const newFields: SearchSourceFields = _.defaults(searchSourceValues, fnProps);
+
+  searchSource.setFields(newFields);
+  const query = searchSource.getOwnField('query');
 
   if (typeof query !== 'undefined') {
-    savedObject.searchSource.setField('query', migrateLegacyQuery(query));
+    searchSource.setField('query', migrateLegacyQuery(query));
   }
+
+  return searchSource;
 }

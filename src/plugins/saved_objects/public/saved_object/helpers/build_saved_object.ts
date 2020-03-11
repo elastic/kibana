@@ -81,7 +81,8 @@ export function buildSavedObject(
    */
   savedObject.init = _.once(() => intializeSavedObject(savedObject, savedObjectsClient, config));
 
-  savedObject.applyESResp = (resp: EsResponse) => applyESResp(resp, savedObject, config);
+  savedObject.applyESResp = (resp: EsResponse) =>
+    applyESResp(resp, savedObject, config, indexPatterns);
 
   /**
    * Serialize this object

@@ -311,6 +311,8 @@ export {
   SearchStrategyProvider,
   ISearchSource,
   SearchSource,
+  parseSearchSource,
+  serializeSearchSource,
   SearchSourceFields,
   EsQuerySortValue,
   SortDirection,

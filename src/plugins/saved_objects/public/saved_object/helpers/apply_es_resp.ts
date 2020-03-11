@@ -18,9 +18,8 @@
  */
 import _ from 'lodash';
 import { EsResponse, SavedObject, SavedObjectConfig } from '../../types';
-import { parseSearchSource } from './parse_search_source';
 import { expandShorthand, SavedObjectNotFound } from '../../../../kibana_utils/public';
-import { IndexPattern } from '../../../../data/public';
+import { IndexPattern, IndexPatternsContract, parseSearchSource } from '../../../../data/public';
 
 /**
  * A given response of and ElasticSearch containing a plain saved object is applied to the given
@@ -29,13 +28,13 @@ import { IndexPattern } from '../../../../data/public';
 export async function applyESResp(
   resp: EsResponse,
   savedObject: SavedObject,
-  config: SavedObjectConfig
+  config: SavedObjectConfig,
+  indexPatterns: IndexPatternsContract
 ) {
   const mapping = expandShorthand(config.mapping);
   const esType = config.type || '';
   savedObject._source = _.cloneDeep(resp._source);
   const injectReferences = config.injectReferences;
-  const hydrateIndexPattern = savedObject.hydrateIndexPattern!;
   if (typeof resp.found === 'boolean' && !resp.found) {
     throw new SavedObjectNotFound(esType, savedObject.id || '');
   }
@@ -64,8 +63,11 @@ export async function applyESResp(
   _.assign(savedObject, savedObject._source);
   savedObject.lastSavedTitle = savedObject.title;
 
-  await parseSearchSource(savedObject, esType, meta.searchSourceJSON, resp.references);
-  await hydrateIndexPattern();
+  savedObject.searchSource = await parseSearchSource(
+    meta.searchSourceJSON,
+    resp.references,
+    indexPatterns
+  );
   if (injectReferences && resp.references && resp.references.length > 0) {
     injectReferences(savedObject, resp.references);
   }

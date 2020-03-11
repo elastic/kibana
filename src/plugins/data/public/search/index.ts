@@ -57,6 +57,8 @@ export {
   SearchSourceFields,
   EsQuerySortValue,
   SortDirection,
+  parseSearchSource,
+  serializeSearchSource,
 } from './search_source';
 
 export { FetchOptions } from './fetch';

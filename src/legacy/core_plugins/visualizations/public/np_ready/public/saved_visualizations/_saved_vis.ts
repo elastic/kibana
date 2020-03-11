@@ -32,12 +32,15 @@ import {
 // @ts-ignore
 import { updateOldState } from '../legacy/vis_update_state';
 import { extractReferences, injectReferences } from './saved_visualization_references';
-import { IIndexPattern } from '../../../../../../../plugins/data/public';
+import { IIndexPattern, SearchSource } from '../../../../../../../plugins/data/public';
 import { VisSavedObject } from '../types';
 import { VisImpl } from '../vis_impl';
 import { createSavedSearchesLoader } from '../../../../../../../plugins/discover/public';
 
 async function _afterEsResp(savedVis: VisSavedObject, services: any) {
+  if (!savedVis.searchSource) {
+    savedVis.searchSource = new SearchSource();
+  }
   await _getLinkedSavedSearch(savedVis, services);
   savedVis.searchSource!.setField('size', 0);
   savedVis.vis = savedVis.vis ? _updateVis(savedVis) : await _createVis(savedVis);
