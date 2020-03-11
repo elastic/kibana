@@ -43,10 +43,10 @@ export async function setup(
     throw new Error('Config not found');
   }
   for (const installedPackage of installedPackages) {
-    const packageShouldBeInstalled = !DEFAULT_AGENT_CONFIGS_PACKAGES.some(
+    const packageShouldBeInstalled = DEFAULT_AGENT_CONFIGS_PACKAGES.some(
       packageName => installedPackage.name === packageName
     );
-    if (packageShouldBeInstalled) {
+    if (!packageShouldBeInstalled) {
       continue;
     }
 
