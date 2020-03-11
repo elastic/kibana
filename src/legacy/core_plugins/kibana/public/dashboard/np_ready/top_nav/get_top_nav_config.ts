@@ -18,8 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiContextMenuItem } from '@elastic/eui';
-import { EuiContextMenuPanel } from '@elastic/eui';
 import { ViewMode } from '../../../../../../../plugins/embeddable/public';
 import { TopNavIds } from './top_nav_ids';
 import { NavAction } from '../types';

@@ -832,7 +832,7 @@ export class DashboardAppController {
 
       showCloneModal(onClone, currentTitle);
     };
-    navActions[TopNavIds.ADD] = async () => {
+    navActions[TopNavIds.ADD] = () => {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
         openAddPanelFlyout({
           embeddable: dashboardContainer,
