@@ -157,7 +157,7 @@ const useFetchEntriesEffect = (
         sourceId: overrides.sourceId || props.sourceId,
         startTimestamp: overrides.startTimestamp || props.startTimestamp,
         endTimestamp: overrides.endTimestamp || props.endTimestamp,
-        query: overrides.filterQuery || props.filterQuery || undefined, // FIXME
+        query: overrides.filterQuery || props.filterQuery,
       };
 
       const fetchArgs: LogEntriesRequest = props.timeKey
@@ -210,7 +210,7 @@ const useFetchEntriesEffect = (
         sourceId: props.sourceId,
         startTimestamp: props.startTimestamp,
         endTimestamp: props.endTimestamp,
-        query: props.filterQuery || undefined, // FIXME
+        query: props.filterQuery,
       };
 
       const fetchArgs: LogEntriesRequest = getEntriesBefore

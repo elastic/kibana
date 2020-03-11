@@ -16,7 +16,7 @@ export const logEntriesBaseRequestRT = rt.intersection([
     endTimestamp: rt.number,
   }),
   rt.partial({
-    query: rt.string,
+    query: rt.union([rt.string, rt.null]),
     size: rt.number,
   }),
 ]);
