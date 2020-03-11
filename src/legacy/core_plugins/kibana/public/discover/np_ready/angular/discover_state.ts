@@ -17,7 +17,7 @@
  * under the License.
  */
 import { isEqual } from 'lodash';
-import { createHashHistory, History } from 'history';
+import { History } from 'history';
 import {
   createStateContainer,
   createKbnUrlStateStorage,
