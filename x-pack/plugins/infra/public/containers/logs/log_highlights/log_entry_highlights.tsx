@@ -32,8 +32,8 @@ export const useLogEntryHighlights = (
 
         return await fetchLogEntriesHighlights({
           sourceId,
-          startTimestamp: getPreviousTimeKey(startKey).time,
-          endTimestamp: getNextTimeKey(endKey).time,
+          startTimestamp: getPreviousTimeKey(startKey).time, // interval boundaries are exclusive
+          endTimestamp: getNextTimeKey(endKey).time, // interval boundaries are exclusive
           query: filterQuery || undefined,
           highlightTerms,
         });

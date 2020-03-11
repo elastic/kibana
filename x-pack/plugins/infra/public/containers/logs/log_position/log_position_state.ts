@@ -156,7 +156,7 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
 
   // `lastUpdate` needs to be a dependency for the timestamps.
   // ESLint complains it's unnecessary, but we know better.
-  /* eslint-disable react-hooks/exhaustive-deps */
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const startTimestamp = useMemo(() => datemathToEpochMillis(dateRange.startDateExpression), [
     dateRange.startDateExpression,
     timestampsLastUpdate,
@@ -165,11 +165,11 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
   // endTimestamp needs to be synced to `now` to allow auto-streaming
   const endTimestampDep =
     dateRange.endDateExpression === 'now' ? Date.now() : dateRange.endDateExpression;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const endTimestamp = useMemo(() => datemathToEpochMillis(dateRange.endDateExpression, 'up'), [
     endTimestampDep,
     timestampsLastUpdate,
   ]);
-  /* eslint-enable react-hooks/exhaustive-deps */
 
   const state = {
     isInitialized,

@@ -6,6 +6,8 @@
 
 import { useMemo } from 'react';
 
+const SUMMARY_BUCKET_COUNT = 100;
+
 export function useBucketSize(
   startTimestamp: number | null,
   endTimestamp: number | null
@@ -14,7 +16,7 @@ export function useBucketSize(
     if (!startTimestamp || !endTimestamp) {
       return null;
     }
-    return (endTimestamp - startTimestamp) / 100;
+    return (endTimestamp - startTimestamp) / SUMMARY_BUCKET_COUNT;
   }, [startTimestamp, endTimestamp]);
 
   return bucketSize;
