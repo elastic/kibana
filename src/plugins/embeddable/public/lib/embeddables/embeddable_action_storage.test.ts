@@ -58,6 +58,23 @@ describe('EmbeddableActionStorage', () => {
       expect(events2).toEqual([event]);
     });
 
+    test('does not merge .getInput() into .updateInput()', async () => {
+      const embeddable = new TestEmbeddable();
+      const storage = new EmbeddableActionStorage(embeddable);
+      const event: UiActionsSerializedEvent = {
+        eventId: 'EVENT_ID',
+        triggerId: 'TRIGGER-ID',
+        action: {} as any,
+      };
+
+      const spy = jest.spyOn(embeddable, 'updateInput');
+
+      await storage.create(event);
+
+      expect(spy.mock.calls[0][0].id).toBe(undefined);
+      expect(spy.mock.calls[0][0].viewMode).toBe(undefined);
+    });
+
     test('can create multiple events', async () => {
       const embeddable = new TestEmbeddable();
       const storage = new EmbeddableActionStorage(embeddable);

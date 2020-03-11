@@ -36,7 +36,6 @@ export class EmbeddableActionStorage implements UiActionsActionStorage {
     }
 
     this.embbeddable.updateInput({
-      ...input,
       events: [...events, event],
     });
   }
@@ -55,7 +54,6 @@ export class EmbeddableActionStorage implements UiActionsActionStorage {
     }
 
     this.embbeddable.updateInput({
-      ...input,
       events: [...events.slice(0, index), event, ...events.slice(index + 1)],
     });
   }
@@ -74,7 +72,6 @@ export class EmbeddableActionStorage implements UiActionsActionStorage {
     }
 
     this.embbeddable.updateInput({
-      ...input,
       events: [...events.slice(0, index), ...events.slice(index + 1)],
     });
   }
