@@ -21,6 +21,12 @@ export interface Field {
   required?: boolean;
   multi_fields?: Fields;
   doc_values?: boolean;
+  copy_to?: string;
+  analyzer?: string;
+  search_analyzer?: string;
+  ignore_above?: number;
+  object_type?: string;
+  scaling_factor?: number;
 
   // Kibana specific
   analyzed?: boolean;
@@ -74,6 +80,7 @@ export function processFields(fields: Fields) {
         type: 'group',
         fields: [field],
       };
+
       // Replace the old field in the array
       fields[key] = newField;
       if (newField.fields) {
