@@ -199,7 +199,7 @@ export default async function({ readConfigFile }) {
             indices: [
               {
                 names: ['date_nanos_custom_timestamp'],
-                privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                privileges: ['read', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },
             ],
@@ -230,21 +230,6 @@ export default async function({ readConfigFile }) {
               {
                 names: ['testlargestring'],
                 privileges: ['read', 'view_index_metadata'],
-                field_security: { grant: ['*'], except: [] },
-              },
-            ],
-            run_as: [],
-          },
-          kibana: [],
-        },
-
-        kibana_time_zones: {
-          elasticsearch: {
-            cluster: [],
-            indices: [
-              {
-                names: ['logstash-*'],
-                privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
                 field_security: { grant: ['*'], except: [] },
               },
             ],
