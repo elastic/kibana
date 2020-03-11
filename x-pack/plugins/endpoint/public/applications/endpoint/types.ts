@@ -5,7 +5,6 @@
  */
 
 import { Dispatch, MiddlewareAPI } from 'redux';
-import { CoreStart } from 'kibana/public';
 import {
   EndpointMetadata,
   AlertData,
@@ -14,6 +13,7 @@ import {
   ImmutableArray,
 } from '../../../common/types';
 import { AppAction } from './store/action';
+import { CoreStart } from '../../../../../../src/core/public';
 
 export { AppAction };
 export type MiddlewareFactory<S = GlobalState> = (
@@ -127,18 +127,4 @@ export interface AlertingIndexUIQueryParams {
    * If any value is present, show the alert detail view for the selected alert. Should be an ID for an alert event.
    */
   selected_alert?: string;
-}
-
-/**
- * Query params to pass to the alert API when fetching new data.
- */
-export interface AlertsAPIQueryParams {
-  /**
-   * Number of results to return.
-   */
-  page_size?: string;
-  /**
-   * 0-based index of 'page' to return.
-   */
-  page_index?: string;
 }
