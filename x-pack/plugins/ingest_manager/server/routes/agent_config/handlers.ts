@@ -4,9 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TypeOf } from '@kbn/config-schema';
-import { RequestHandler } from 'kibana/server';
+import { RequestHandler, SavedObjectsClientContract } from 'kibana/server';
 import bluebird from 'bluebird';
-import { appContextService, agentConfigService, datasourceService } from '../../services';
+import {
+  appContextService,
+  agentConfigService,
+  datasourceService,
+  outputService,
+} from '../../services';
 import { listAgents } from '../../services/agents';
 import {
   GetAgentConfigsRequestSchema,
@@ -15,8 +20,9 @@ import {
   UpdateAgentConfigRequestSchema,
   DeleteAgentConfigsRequestSchema,
   GetFullAgentConfigRequestSchema,
-  PackageInfo,
   AgentConfig,
+  DefaultPackages,
+  NewDatasource,
 } from '../../types';
 import {
   GetAgentConfigsResponse,
@@ -102,48 +108,25 @@ export const createAgentConfigHandler: RequestHandler<
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   const withSysMonitoring = request.query.sys_monitoring ?? false;
   try {
-    const [agentConfig, sysPkgInfo] = await Promise.all([
+    const [agentConfig, newSysDatasource] = await Promise.all<
+      AgentConfig,
+      NewDatasource | undefined
+    >([
       agentConfigService.create(soClient, request.body, {
         user: user || undefined,
       }),
-      // Retrieve System package information (if necessary) while creating the agent config
-      new Promise<PackageInfo | undefined>(async resolve => {
-        if (!withSysMonitoring) {
-          resolve();
-          return;
-        }
-        const sysPkgInstall = await findInstalledPackageByName({
-          savedObjectsClient: soClient,
-          pkgName: 'system',
-        });
-        if (sysPkgInstall) {
-          const systemPkgInfo = await getPackageInfo({
-            savedObjectsClient: soClient,
-            pkgkey: `${sysPkgInstall.name}-${sysPkgInstall.version}`,
-          });
-          resolve(systemPkgInfo);
-          return;
-        }
-        resolve();
-      }).catch(() => {
-        // ignore Errors if we can't retrieve system package info?
-      }),
+      // If needed, retrieve System package information and build a new Datasource for the system package
+      withSysMonitoring ? buildSystemDatasource(soClient) : undefined,
     ]);
 
     // Create the system monitoring datasource and add it to config.
-    if (withSysMonitoring && sysPkgInfo !== undefined) {
-      await datasourceService.create(soClient, {
-        name: `${sysPkgInfo.name}-1`,
-        package: {
-          name: sysPkgInfo.name,
-          title: sysPkgInfo.title,
-          version: sysPkgInfo.version,
-        },
-        config_id: agentConfig!.id,
-        enabled: true,
-        output_id: '',
-        inputs: packageToConfigDatasourceInputs(sysPkgInfo),
-      });
+    if (withSysMonitoring && newSysDatasource !== undefined && agentConfig !== undefined) {
+      newSysDatasource.config_id = agentConfig.id;
+      const sysDatasource = await datasourceService.create(soClient, newSysDatasource);
+
+      if (sysDatasource) {
+        await agentConfigService.assignDatasources(soClient, agentConfig.id, [sysDatasource.id]);
+      }
     }
 
     const body: CreateAgentConfigResponse = { item: agentConfig, success: true };
@@ -237,5 +220,37 @@ export const getFullAgentConfig: RequestHandler<TypeOf<
       statusCode: 500,
       body: { message: e.message },
     });
+  }
+};
+
+const buildSystemDatasource = async (
+  soClient: SavedObjectsClientContract
+): Promise<NewDatasource | undefined> => {
+  const sysPkgInstall = await findInstalledPackageByName({
+    savedObjectsClient: soClient,
+    pkgName: DefaultPackages.system,
+  });
+  if (sysPkgInstall) {
+    const [sysPkgInfo, defaultOutputId] = await Promise.all([
+      getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgkey: `${sysPkgInstall.name}-${sysPkgInstall.version}`,
+      }),
+      outputService.getDefaultOutputId(soClient),
+    ]);
+    if (sysPkgInfo) {
+      return {
+        name: `${sysPkgInfo.name}-1`,
+        package: {
+          name: sysPkgInfo.name,
+          title: sysPkgInfo.title,
+          version: sysPkgInfo.version,
+        },
+        enabled: true,
+        config_id: '',
+        output_id: defaultOutputId,
+        inputs: packageToConfigDatasourceInputs(sysPkgInfo),
+      };
+    }
   }
 };
