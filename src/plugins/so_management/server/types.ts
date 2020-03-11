@@ -44,3 +44,13 @@ export interface SavedObjectMetadata {
 export type SavedObjectWithMetadata<T = unknown> = SavedObject<T> & {
   meta: SavedObjectMetadata;
 };
+
+/**
+ * Represents a relation between two {@link SavedObject | saved object}
+ */
+export interface SavedObjectRelation {
+  id: string;
+  type: string;
+  relationship: 'child' | 'parent';
+  meta: SavedObjectMetadata;
+}

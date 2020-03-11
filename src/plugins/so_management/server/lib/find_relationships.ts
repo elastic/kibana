@@ -20,14 +20,7 @@
 import { SavedObjectsClientContract } from 'src/core/server';
 import { injectMetaAttributes } from './inject_meta_attributes';
 import { ISavedObjectsManagement } from '../services';
-import { SavedObjectMetadata, SavedObjectWithMetadata } from '../types';
-
-interface SavedObjectRelation {
-  id: string;
-  type: string;
-  relationship: 'child' | 'parent';
-  meta: SavedObjectMetadata;
-}
+import { SavedObjectRelation, SavedObjectWithMetadata } from '../types';
 
 export async function findRelationships({
   type,
