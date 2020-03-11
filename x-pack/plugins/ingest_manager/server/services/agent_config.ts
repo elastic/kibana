@@ -48,7 +48,7 @@ class AgentConfigService {
   }
 
   public async ensureDefaultAgentConfig(soClient: SavedObjectsClientContract) {
-    const configs = await soClient.find({
+    const configs = await soClient.find<AgentConfig>({
       type: AGENT_CONFIG_SAVED_OBJECT_TYPE,
       filter: 'agent_configs.attributes.is_default:true',
     });
@@ -58,8 +58,13 @@ class AgentConfigService {
         ...DEFAULT_AGENT_CONFIG,
       };
 
-      await this.create(soClient, newDefaultAgentConfig);
+      return this.create(soClient, newDefaultAgentConfig);
     }
+
+    return {
+      id: configs.saved_objects[0].id,
+      ...configs.saved_objects[0].attributes,
+    };
   }
 
   public async create(
