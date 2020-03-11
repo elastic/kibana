@@ -167,9 +167,16 @@ export const COLOR_PALETTE_MAX_SIZE = 10;
 export const CATEGORICAL_DATA_TYPES = ['string', 'ip', 'boolean'];
 export const ORDINAL_DATA_TYPES = ['number', 'date'];
 
-export const SYMBOLIZE_AS_TYPES = {
-  CIRCLE: 'circle',
-  ICON: 'icon',
-};
+export enum SYMBOLIZE_AS_TYPES {
+  CIRCLE = 'circle',
+  ICON = 'icon',
+}
+
+export enum LABEL_BORDER_SIZES {
+  NONE = 'NONE',
+  SMALL = 'SMALL',
+  MEDIUM = 'MEDIUM',
+  LARGE = 'LARGE',
+}
 
 export const DEFAULT_ICON = 'airfield';
