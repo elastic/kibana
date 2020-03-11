@@ -69,7 +69,7 @@ const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem key={`description-step-rule`}>
+      <EuiFlexItem data-test-subj="definition" key={`description-step-rule`}>
         <EuiDescriptionList listItems={listItems} />
       </EuiFlexItem>
     </EuiFlexGroup>
