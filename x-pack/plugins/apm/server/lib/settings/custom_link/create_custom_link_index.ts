@@ -39,20 +39,20 @@ const mappings: Mappings = {
     service: {
       properties: {
         name: {
-          type: 'keyword'
+          type: 'text'
         },
         environment: {
-          type: 'keyword'
+          type: 'text'
         }
       }
     },
     transaction: {
       properties: {
         name: {
-          type: 'keyword'
+          type: 'text'
         },
         type: {
-          type: 'keyword'
+          type: 'text'
         }
       }
     }

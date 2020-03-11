@@ -25,8 +25,11 @@ Object {
               "minimum_should_match": 1,
               "should": Array [
                 Object {
-                  "term": Object {
-                    "service.name": "foo",
+                  "match": Object {
+                    "service.name": Object {
+                      "operator": "and",
+                      "query": "foo",
+                    },
                   },
                 },
                 Object {
@@ -48,8 +51,11 @@ Object {
               "minimum_should_match": 1,
               "should": Array [
                 Object {
-                  "term": Object {
-                    "transaction.name": "bar",
+                  "match": Object {
+                    "transaction.name": Object {
+                      "operator": "and",
+                      "query": "bar",
+                    },
                   },
                 },
                 Object {
