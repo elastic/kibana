@@ -72,6 +72,7 @@ export const ruleOutput: RulesSchema = {
   meta: {
     someMeta: 'someField',
   },
+  note: '# Investigative notes',
   timeline_title: 'some-timeline-title',
   timeline_id: 'some-timeline-id',
 };
