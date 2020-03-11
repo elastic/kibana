@@ -2,6 +2,7 @@
   "id": "appSearch",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
+  "requiredPlugins": ["home"],
   "configPath": ["appSearch"],
   "server": true,
   "ui": true
