@@ -80,6 +80,6 @@ export const addPrepackagedRulesSchema = Joi.object({
   type: type.required(),
   threat: threat.default([]),
   references: references.default([]),
-  note: note.default('').default(''),
+  note: note.allow(''),
   version: version.required(),
 });

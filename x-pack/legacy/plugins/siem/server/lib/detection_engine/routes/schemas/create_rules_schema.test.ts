@@ -1249,6 +1249,29 @@ describe('create rules schema', () => {
       ).toBeFalsy();
     });
 
+    test('You can set note to an emtpy string', () => {
+      expect(
+        createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          note: '',
+        }).error
+      ).toBeFalsy();
+    });
+
     test('You cannot create note as an object', () => {
       expect(
         createRulesSchema.validate<Partial<Omit<RuleAlertParamsRest, 'note'> & { note: object }>>({

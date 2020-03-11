@@ -85,7 +85,7 @@ export const importRulesSchema = Joi.object({
   type: type.required(),
   threat: threat.default([]),
   references: references.default([]),
-  note: note.allow('').default(''),
+  note: note.allow(''),
   version: version.default(1),
   created_at,
   updated_at,

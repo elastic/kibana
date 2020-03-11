@@ -77,6 +77,6 @@ export const updateRulesSchema = Joi.object({
   type: type.required(),
   threat: threat.default([]),
   references: references.default([]),
-  note: note.allow('').default(''),
+  note: note.allow(''),
   version,
 }).xor('id', 'rule_id');

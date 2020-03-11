@@ -142,7 +142,7 @@ describe('create_rules_bulk_schema', () => {
     );
   });
 
-  test('The default for "note" will be empty string', () => {
+  test('You can set "note" to a string', () => {
     expect(
       createRulesBulkSchema.validate<Partial<PatchRuleAlertParamsRest>>([
         {
@@ -156,10 +156,32 @@ describe('create_rules_bulk_schema', () => {
           query: 'some query',
           language: 'kuery',
           max_signals: 1,
+          note: '# test markdown',
           version: 1,
         },
-      ]).value[0].note
-    ).toEqual('');
+      ]).error
+    ).toBeFalsy();
+  });
+
+  test('You can set "note" to an empty string', () => {
+    expect(
+      createRulesBulkSchema.validate<Partial<PatchRuleAlertParamsRest>>([
+        {
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          note: '',
+          version: 1,
+        },
+      ]).error
+    ).toBeFalsy();
   });
 
   test('You cannot set "note" to anything other than string', () => {
