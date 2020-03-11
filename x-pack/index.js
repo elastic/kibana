@@ -31,7 +31,6 @@ import { crossClusterReplication } from './legacy/plugins/cross_cluster_replicat
 import { upgradeAssistant } from './legacy/plugins/upgrade_assistant';
 import { uptime } from './legacy/plugins/uptime';
 import { encryptedSavedObjects } from './legacy/plugins/encrypted_saved_objects';
-import { transform } from './legacy/plugins/transform';
 import { actions } from './legacy/plugins/actions';
 import { alerting } from './legacy/plugins/alerting';
 import { lens } from './legacy/plugins/lens';
@@ -61,7 +60,6 @@ module.exports = function(kibana) {
     infra(kibana),
     taskManager(kibana),
     rollup(kibana),
-    transform(kibana),
     siem(kibana),
     remoteClusters(kibana),
     crossClusterReplication(kibana),
