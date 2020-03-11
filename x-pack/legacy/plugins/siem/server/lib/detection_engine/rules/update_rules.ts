@@ -43,6 +43,7 @@ export const updateRules = async ({
   references,
   version,
   throttle,
+  note,
 }: UpdateRuleParams): Promise<PartialAlert | null> => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
@@ -74,6 +75,7 @@ export const updateRules = async ({
     references,
     version,
     throttle,
+    note,
   });
 
   const update = await alertsClient.update({
@@ -106,6 +108,7 @@ export const updateRules = async ({
         to,
         type,
         references,
+        note,
         version: calculatedVersion,
       },
     },
