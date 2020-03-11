@@ -349,7 +349,6 @@ export const getResult = (): RuleAlertType => ({
   alertTypeId: 'siem.signals',
   consumer: 'siem',
   params: {
-    actions: [],
     description: 'Detecting root and admin users',
     ruleId: 'rule-1',
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -393,7 +392,6 @@ export const getResult = (): RuleAlertType => ({
         ],
       },
     ],
-    throttle: 'no_actions',
     references: ['http://www.example.com', 'https://ww.example.com'],
     version: 1,
   },

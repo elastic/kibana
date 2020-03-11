@@ -1225,27 +1225,6 @@ describe('create rules schema', () => {
     );
   });
 
-  test('You cannot set the throttle to a value other than no_actions, rule, 1h, 1d, or 7d', () => {
-    expect(
-      createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        version: 1,
-        throttle: '7d',
-      }).error.message
-    ).toEqual(
-      'child "throttle" fails because ["throttle" must be one of [no_actions, rule, 1h, 1d, 7d]]'
-    );
-  });
-
   test('The default for "actions" will be an empty array', () => {
     expect(
       createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
@@ -1264,7 +1243,7 @@ describe('create rules schema', () => {
     ).toEqual([]);
   });
 
-  test('The default for "throttle" will be no_actions', () => {
+  test('The default for "throttle" will be null', () => {
     expect(
       createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
         rule_id: 'rule-1',
@@ -1279,6 +1258,6 @@ describe('create rules schema', () => {
         max_signals: 1,
         version: 1,
       }).value.throttle
-    ).toEqual('no_actions');
+    ).toEqual(null);
   });
 });

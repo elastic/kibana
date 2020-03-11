@@ -6,11 +6,13 @@
 
 import { pickBy } from 'lodash/fp';
 import { RuleTypeParams, OutputRuleAlertRest } from '../types';
+import { AlertAction } from '../../../../../../../plugins/alerting/common';
 
 interface BuildRuleParams {
   ruleParams: RuleTypeParams;
   name: string;
   id: string;
+  actions: AlertAction[];
   enabled: boolean;
   createdAt: string;
   createdBy: string;
@@ -18,12 +20,14 @@ interface BuildRuleParams {
   updatedBy: string;
   interval: string;
   tags: string[];
+  throttle: string | null;
 }
 
 export const buildRule = ({
   ruleParams,
   name,
   id,
+  actions,
   enabled,
   createdAt,
   createdBy,
@@ -31,11 +35,12 @@ export const buildRule = ({
   updatedBy,
   interval,
   tags,
+  throttle,
 }: BuildRuleParams): Partial<OutputRuleAlertRest> => {
   return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
     id,
     rule_id: ruleParams.ruleId,
-    actions: ruleParams.actions,
+    actions,
     false_positives: ruleParams.falsePositives,
     saved_id: ruleParams.savedId,
     timeline_id: ruleParams.timelineId,
@@ -62,7 +67,7 @@ export const buildRule = ({
     created_by: createdBy,
     updated_by: updatedBy,
     threat: ruleParams.threat,
-    throttle: ruleParams.throttle,
+    throttle,
     version: ruleParams.version,
     created_at: createdAt,
     updated_at: updatedAt,

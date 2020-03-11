@@ -151,6 +151,7 @@ describe('singleBulkCreate', () => {
       logger: mockLogger,
       id: sampleRuleGuid,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
+      actions: [],
       name: 'rule-name',
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
@@ -159,6 +160,7 @@ describe('singleBulkCreate', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(successfulsingleBulkCreate).toEqual(true);
   });
@@ -182,6 +184,7 @@ describe('singleBulkCreate', () => {
       id: sampleRuleGuid,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -189,6 +192,7 @@ describe('singleBulkCreate', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(successfulsingleBulkCreate).toEqual(true);
   });
@@ -204,6 +208,7 @@ describe('singleBulkCreate', () => {
       id: sampleRuleGuid,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -211,6 +216,7 @@ describe('singleBulkCreate', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     expect(successfulsingleBulkCreate).toEqual(true);
   });
@@ -227,6 +233,7 @@ describe('singleBulkCreate', () => {
       id: sampleRuleGuid,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -234,6 +241,7 @@ describe('singleBulkCreate', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
 
     expect(mockLogger.error).not.toHaveBeenCalled();
@@ -252,6 +260,7 @@ describe('singleBulkCreate', () => {
       id: sampleRuleGuid,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -259,6 +268,7 @@ describe('singleBulkCreate', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
 
     expect(mockLogger.error).toHaveBeenCalled();

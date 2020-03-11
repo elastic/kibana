@@ -12,6 +12,7 @@ import { RuleTypeParams } from '../types';
 import { generateId } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { Logger } from '../../../../../../../../src/core/server';
+import { AlertAction } from '../../../../../../../plugins/alerting/common';
 
 interface SingleBulkCreateParams {
   someResult: SignalSearchResponse;
@@ -20,6 +21,7 @@ interface SingleBulkCreateParams {
   logger: Logger;
   id: string;
   signalsIndex: string;
+  actions: AlertAction[];
   name: string;
   createdAt: string;
   createdBy: string;
@@ -28,6 +30,7 @@ interface SingleBulkCreateParams {
   interval: string;
   enabled: boolean;
   tags: string[];
+  throttle: string | null;
 }
 
 /**
@@ -60,6 +63,7 @@ export const singleBulkCreate = async ({
   logger,
   id,
   signalsIndex,
+  actions,
   name,
   createdAt,
   createdBy,
@@ -68,6 +72,7 @@ export const singleBulkCreate = async ({
   interval,
   enabled,
   tags,
+  throttle,
 }: SingleBulkCreateParams): Promise<boolean> => {
   someResult.hits.hits = filterDuplicateRules(id, someResult);
 
@@ -99,6 +104,7 @@ export const singleBulkCreate = async ({
       doc,
       ruleParams,
       id,
+      actions,
       name,
       createdAt,
       createdBy,
@@ -107,6 +113,7 @@ export const singleBulkCreate = async ({
       interval,
       enabled,
       tags,
+      throttle,
     }),
   ]);
   const start = performance.now();

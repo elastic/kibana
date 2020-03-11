@@ -134,7 +134,6 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertR
   to: 'now',
   type: 'query',
   threat: [],
-  throttle: 'no_actions',
   version: 1,
 });
 
@@ -282,7 +281,6 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> 
       ],
     },
   ],
-  throttle: 'no_actions',
   references: [
     'http://www.example.com/some-article-about-attack',
     'Some plain text string here explaining why this is a valid thing to look out for',
@@ -368,7 +366,6 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlert
       ],
     },
   ],
-  throttle: 'no_actions',
   references: [
     'http://www.example.com/some-article-about-attack',
     'Some plain text string here explaining why this is a valid thing to look out for',

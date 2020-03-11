@@ -77,7 +77,6 @@ describe('utils', () => {
             ],
           },
         ],
-        throttle: 'no_actions',
         filters: [
           {
             query: {
@@ -141,7 +140,6 @@ describe('utils', () => {
             ],
           },
         ],
-        throttle: 'no_actions',
         filters: [
           {
             query: {
@@ -207,7 +205,6 @@ describe('utils', () => {
             ],
           },
         ],
-        throttle: 'no_actions',
         filters: [
           {
             query: {
@@ -273,7 +270,6 @@ describe('utils', () => {
             ],
           },
         ],
-        throttle: 'no_actions',
         filters: [
           {
             query: {
@@ -337,7 +333,6 @@ describe('utils', () => {
             ],
           },
         ],
-        throttle: 'no_actions',
         filters: [
           {
             query: {
@@ -404,7 +399,6 @@ describe('utils', () => {
             ],
           },
         ],
-        throttle: 'no_actions',
         filters: [
           {
             query: {
@@ -471,7 +465,6 @@ describe('utils', () => {
             ],
           },
         ],
-        throttle: 'no_actions',
         filters: [
           {
             query: {
@@ -538,7 +531,6 @@ describe('utils', () => {
             ],
           },
         ],
-        throttle: 'no_actions',
         filters: [
           {
             query: {
@@ -691,7 +683,6 @@ describe('utils', () => {
             ],
           },
         ],
-        throttle: 'no_actions',
         filters: [
           {
             query: {
@@ -774,7 +765,6 @@ describe('utils', () => {
             ],
           },
         ],
-        throttle: 'no_actions',
         filters: [
           {
             query: {
@@ -948,7 +938,6 @@ describe('utils', () => {
             ],
           },
         ],
-        throttle: 'no_actions',
         filters: [
           {
             query: {
@@ -1070,7 +1059,6 @@ describe('utils', () => {
               ],
             },
           ],
-          throttle: 'no_actions',
           timeline_id: 'some-timeline-id',
           timeline_title: 'some-timeline-title',
           to: 'now',
@@ -1131,7 +1119,6 @@ describe('utils', () => {
               ],
             },
           ],
-          throttle: 'no_actions',
           timeline_id: 'some-timeline-id',
           timeline_title: 'some-timeline-title',
           to: 'now',
@@ -1181,7 +1168,6 @@ describe('utils', () => {
               ],
             },
           ],
-          throttle: 'no_actions',
           timeline_id: 'some-timeline-id',
           timeline_title: 'some-timeline-title',
           to: 'now',

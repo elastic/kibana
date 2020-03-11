@@ -59,7 +59,6 @@ export const ruleOutput: RulesSchema = {
       ],
     },
   ],
-  throttle: 'no_actions',
   version: 1,
   filters: [
     {

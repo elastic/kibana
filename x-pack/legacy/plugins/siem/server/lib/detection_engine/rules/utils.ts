@@ -5,7 +5,7 @@
  */
 
 import { pickBy, isEmpty } from 'lodash/fp';
-import { PatchRuleParams, Throttle } from './types';
+import { PatchRuleParams } from './types';
 
 export const calculateInterval = (
   interval: string | undefined,
@@ -72,15 +72,4 @@ export const calculateName = ({
     // some point since TypeScript allows it.
     return 'untitled';
   }
-};
-
-/*
-  Alert throttle has to be null in case there are no actions or actions are exectured per rule exectution
-*/
-export const getAlertThrottle = (throttle: Throttle | undefined): Throttle => {
-  if (!throttle || ['no_actions', 'rule'].includes(throttle)) {
-    return null;
-  }
-
-  return throttle;
 };

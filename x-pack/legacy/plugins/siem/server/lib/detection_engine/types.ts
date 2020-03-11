@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertAction } from '../../../../../../plugins/alerting/common/alert';
+import { AlertAction } from '../../../../../../plugins/alerting/common';
 import { CallAPIOptions } from '../../../../../../../src/core/server';
 import { Filter } from '../../../../../../../src/plugins/data/server';
-import { IRuleStatusAttributes, Throttle } from './rules/types';
+import { IRuleStatusAttributes } from './rules/types';
 
 export type PartialFilter = Partial<Filter>;
 
@@ -51,10 +51,13 @@ export interface RuleAlertParams {
   threat: ThreatParams[] | undefined | null;
   type: 'query' | 'saved_query';
   version: number;
-  throttle: Throttle | undefined;
+  throttle: string | null;
 }
 
-export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval' | 'tags'>;
+export type RuleTypeParams = Omit<
+  RuleAlertParams,
+  'name' | 'enabled' | 'interval' | 'tags' | 'actions' | 'throttle'
+>;
 
 export type RuleAlertParamsRest = Omit<
   RuleAlertParams,
@@ -96,11 +99,13 @@ export type RuleAlertParamsRest = Omit<
     last_success_message?: IRuleStatusAttributes['lastSuccessMessage'] | undefined;
   };
 
-export type OutputRuleAlertRest = RuleAlertParamsRest & {
+export type OutputRuleAlertRest = Omit<RuleAlertParamsRest, 'throttle'> & {
   id: string;
   created_by: string | undefined | null;
   updated_by: string | undefined | null;
   immutable: boolean;
+  tags: string[];
+  throttle?: string | null;
 };
 
 export type ImportRuleAlertRest = Omit<OutputRuleAlertRest, 'rule_id' | 'id'> & {

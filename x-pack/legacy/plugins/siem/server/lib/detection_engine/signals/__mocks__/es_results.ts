@@ -13,7 +13,6 @@ export const sampleRuleAlertParams = (
   maxSignals?: number | undefined,
   riskScore?: number | undefined
 ): RuleTypeParams => ({
-  actions: [],
   ruleId: 'rule-1',
   description: 'Detecting root and admin users',
   falsePositives: [],
@@ -35,7 +34,6 @@ export const sampleRuleAlertParams = (
   timelineTitle: undefined,
   meta: undefined,
   threat: undefined,
-  throttle: 'no_actions',
   version: 1,
 });
 

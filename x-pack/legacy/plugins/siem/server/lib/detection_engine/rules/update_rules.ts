@@ -9,7 +9,7 @@ import { readRules } from './read_rules';
 import { IRuleSavedAttributesSavedObjectAttributes, UpdateRuleParams } from './types';
 import { addTags } from './add_tags';
 import { ruleStatusSavedObjectType } from './saved_object_mappings';
-import { calculateVersion, getAlertThrottle } from './utils';
+import { calculateVersion } from './utils';
 
 export const updateRules = async ({
   alertsClient,
@@ -85,7 +85,7 @@ export const updateRules = async ({
       name,
       schedule: { interval },
       actions,
-      throttle: getAlertThrottle(throttle),
+      throttle,
       params: {
         description,
         ruleId: rule.params.ruleId,
@@ -105,7 +105,6 @@ export const updateRules = async ({
         riskScore,
         severity,
         threat,
-        throttle,
         to,
         type,
         references,
