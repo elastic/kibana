@@ -216,7 +216,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
                     onChange={toggleStateCase}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={false} data-test-subj="case-view-actions">
                   <PropertyActions propertyActions={propertyActions} />
                 </EuiFlexItem>
               </EuiFlexGroup>

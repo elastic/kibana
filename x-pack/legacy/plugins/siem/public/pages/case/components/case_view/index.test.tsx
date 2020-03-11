@@ -7,16 +7,30 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { CaseComponent } from './';
-import * as apiHook from '../../../../containers/case/use_update_case';
+import * as updateHook from '../../../../containers/case/use_update_case';
+import * as deleteHook from '../../../../containers/case/use_delete_cases';
 import { caseProps, data } from './__mock__';
 import { TestProviders } from '../../../../mock';
 
 describe('CaseView ', () => {
+  const handleOnDeleteConfirm = jest.fn();
+  const handleToggleModal = jest.fn();
+  const dispatchResetIsDeleted = jest.fn();
   const updateCaseProperty = jest.fn();
+  /* eslint-disable no-console */
+  // Silence until enzyme fixed to use ReactTestUtils.act()
+  const originalError = console.error;
+  beforeAll(() => {
+    console.error = jest.fn();
+  });
+  afterAll(() => {
+    console.error = originalError;
+  });
+  /* eslint-enable no-console */
 
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.spyOn(apiHook, 'useUpdateCase').mockReturnValue({
+    jest.spyOn(updateHook, 'useUpdateCase').mockReturnValue({
       caseData: data,
       isLoading: false,
       isError: false,
@@ -69,23 +83,6 @@ describe('CaseView ', () => {
     ).toEqual(data.description);
   });
 
-  it('should dispatch update state when button is toggled', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CaseComponent {...caseProps} />
-      </TestProviders>
-    );
-
-    wrapper
-      .find('input[data-test-subj="toggle-case-state"]')
-      .simulate('change', { target: { value: false } });
-
-    expect(updateCaseProperty).toBeCalledWith({
-      updateKey: 'state',
-      updateValue: 'closed',
-    });
-  });
-
   it('should render comments', () => {
     const wrapper = mount(
       <TestProviders>
@@ -118,5 +115,64 @@ describe('CaseView ', () => {
         .first()
         .prop('source')
     ).toEqual(data.comments[0].comment);
+  });
+
+  it('should dispatch update state when button is toggled', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <CaseComponent {...caseProps} />
+      </TestProviders>
+    );
+
+    wrapper
+      .find('input[data-test-subj="toggle-case-state"]')
+      .simulate('change', { target: { value: false } });
+
+    expect(updateCaseProperty).toBeCalledWith({
+      updateKey: 'state',
+      updateValue: 'closed',
+    });
+  });
+
+  it('toggle delete modal and cancel', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <CaseComponent {...caseProps} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
+
+    wrapper
+      .find(
+        '[data-test-subj="case-view-actions"] button[data-test-subj="property-actions-ellipses"]'
+      )
+      .first()
+      .simulate('click');
+    wrapper.find('button[data-test-subj="property-actions-trash"]').simulate('click');
+    expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeTruthy();
+    wrapper.find('button[data-test-subj="confirmModalCancelButton"]').simulate('click');
+    expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
+  });
+
+  it('toggle delete modal and confirm', () => {
+    jest.spyOn(deleteHook, 'useDeleteCases').mockReturnValue({
+      dispatchResetIsDeleted,
+      handleToggleModal,
+      handleOnDeleteConfirm,
+      isLoading: false,
+      isError: false,
+      isDeleted: false,
+      isDisplayConfirmDeleteModal: true,
+    });
+    const wrapper = mount(
+      <TestProviders>
+        <CaseComponent {...caseProps} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeTruthy();
+    wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
+    expect(handleOnDeleteConfirm.mock.calls[0][0]).toEqual([caseProps.caseId]);
   });
 });
