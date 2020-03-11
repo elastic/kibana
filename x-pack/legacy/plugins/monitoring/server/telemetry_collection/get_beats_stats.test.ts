@@ -110,6 +110,10 @@ describe('Get Beats Stats', () => {
             count: 0,
             names: [],
           },
+          queue: {
+            mem: 0,
+            spool: 0,
+          },
           architecture: {
             count: 0,
             architectures: [],
@@ -141,6 +145,10 @@ describe('Get Beats Stats', () => {
           input: {
             count: 1,
             names: ['firehose'],
+          },
+          queue: {
+            mem: 0,
+            spool: 0,
           },
           architecture: {
             count: 1,
@@ -197,6 +205,10 @@ describe('Get Beats Stats', () => {
           module: {
             count: 0,
             names: [],
+          },
+          queue: {
+            mem: 0,
+            spool: 0,
           },
           architecture: {
             count: 0,
