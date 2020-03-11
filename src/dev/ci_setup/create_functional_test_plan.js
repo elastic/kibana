@@ -113,8 +113,7 @@ const getTestsTransformed = async (config, overrides = {}) => {
 
     const finalQueue = [];
 
-    // const TARGET_DURATION_SECONDS = 60 * 9;
-    const TARGET_DURATION_SECONDS = 1;
+    const TARGET_DURATION_SECONDS = 60 * 9;
 
     const nextGroup = () => {
       const group = [];
@@ -129,7 +128,7 @@ const getTestsTransformed = async (config, overrides = {}) => {
             ? byConfig.shift()
             : byConfig.pop();
 
-        totalDuration += suite.duration || 1;
+        totalDuration += suite.duration;
         const index = suites.indexOf(suite);
         if (index >= 0) {
           suites.splice(index, 1);

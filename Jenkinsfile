@@ -3,7 +3,7 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
-kibanaPipeline(timeoutMinutes: 240) { // TODO
+kibanaPipeline(timeoutMinutes: 135) {
   githubPr.withDefaultPrComments {
     def queue = [oss: []]
     def finishedSuites = [oss: [], xpack: [], ossFirefox: [], xpackFirefox: []]
