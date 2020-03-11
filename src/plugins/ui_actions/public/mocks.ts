@@ -21,6 +21,7 @@ import { CoreSetup, CoreStart } from 'src/core/public';
 import { UiActionsSetup, UiActionsStart } from '.';
 import { plugin as pluginInitializer } from '.';
 import { coreMock } from '../../../core/public/mocks';
+import { TriggerId } from './types';
 
 export type Setup = jest.Mocked<UiActionsSetup>;
 export type Start = jest.Mocked<UiActionsStart>;
@@ -40,10 +41,11 @@ const createStartContract = (): Start => {
     attachAction: jest.fn(),
     registerAction: jest.fn(),
     registerTrigger: jest.fn(),
+    getAction: jest.fn(),
     detachAction: jest.fn(),
     executeTriggerActions: jest.fn(),
     getTrigger: jest.fn(),
-    getTriggerActions: jest.fn((id: string) => []),
+    getTriggerActions: jest.fn((id: TriggerId) => []),
     getTriggerCompatibleActions: jest.fn(),
     clear: jest.fn(),
     fork: jest.fn(),

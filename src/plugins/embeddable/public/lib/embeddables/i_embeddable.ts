@@ -32,6 +32,11 @@ export interface EmbeddableInput {
   isEmptyState?: boolean;
 
   /**
+   * Reserved key for `ui_actions` events.
+   */
+  events?: unknown;
+
+  /**
    * List of action IDs that this embeddable should not render.
    */
   disabledActions?: string[];

@@ -6,7 +6,11 @@
 
 import { combineReducers } from 'redux';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { SnapshotMetricInput, SnapshotGroupBy } from '../../../../common/http_api/snapshot_api';
+import {
+  SnapshotMetricInput,
+  SnapshotGroupBy,
+  SnapshotCustomMetricInput,
+} from '../../../../common/http_api/snapshot_api';
 import { InfraGroupByOptions, InfraWaffleMapBounds } from '../../../lib/lib';
 import {
   changeAutoBounds,
@@ -18,6 +22,7 @@ import {
   changeView,
   changeAccount,
   changeRegion,
+  changeCustomMetrics,
 } from './actions';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 
@@ -31,6 +36,7 @@ export interface WaffleOptionsState {
   autoBounds: boolean;
   accountId: string;
   region: string;
+  customMetrics: SnapshotCustomMetricInput[];
 }
 
 export const initialWaffleOptionsState: WaffleOptionsState = {
@@ -43,6 +49,7 @@ export const initialWaffleOptionsState: WaffleOptionsState = {
   autoBounds: true,
   accountId: '',
   region: '',
+  customMetrics: [],
 };
 
 const currentMetricReducer = reducerWithInitialState(initialWaffleOptionsState.metric).case(
@@ -88,6 +95,10 @@ const currentRegionReducer = reducerWithInitialState(initialWaffleOptionsState.r
   (current, target) => target
 );
 
+const currentCustomMetricsReducer = reducerWithInitialState(
+  initialWaffleOptionsState.customMetrics
+).case(changeCustomMetrics, (current, target) => target);
+
 export const waffleOptionsReducer = combineReducers<WaffleOptionsState>({
   metric: currentMetricReducer,
   groupBy: currentGroupByReducer,
@@ -98,4 +109,5 @@ export const waffleOptionsReducer = combineReducers<WaffleOptionsState>({
   autoBounds: currentAutoBoundsReducer,
   accountId: currentAccountIdReducer,
   region: currentRegionReducer,
+  customMetrics: currentCustomMetricsReducer,
 });

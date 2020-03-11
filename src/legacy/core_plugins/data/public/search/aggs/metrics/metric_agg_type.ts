@@ -18,13 +18,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { npStart } from 'ui/new_platform';
 import { AggType, AggTypeConfig } from '../agg_type';
 import { AggParamType } from '../param_types/agg';
 import { AggConfig } from '../agg_config';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
-import { FilterFieldTypes } from '../param_types/field';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getFieldFormats } from '../../../../../../../plugins/data/public/services';
+import { FieldTypes } from '../param_types';
 
 export interface IMetricAggConfig extends AggConfig {
   type: InstanceType<typeof MetricAggType>;
@@ -32,7 +33,7 @@ export interface IMetricAggConfig extends AggConfig {
 
 export interface MetricAggParam<TMetricAggConfig extends AggConfig>
   extends AggParamType<TMetricAggConfig> {
-  filterFieldTypes?: FilterFieldTypes;
+  filterFieldTypes?: FieldTypes;
   onlyAggregatable?: boolean;
 }
 
@@ -78,7 +79,7 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
     this.getFormat =
       config.getFormat ||
       (agg => {
-        const fieldFormatsService = npStart.plugins.data.fieldFormats;
+        const fieldFormatsService = getFieldFormats();
         const field = agg.getField();
         return field
           ? field.format

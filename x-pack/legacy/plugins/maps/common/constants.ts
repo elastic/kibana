@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
 
 export const EMS_FILES_CATALOGUE_PATH = 'ems/files';
@@ -44,21 +43,22 @@ export const LAYER_TYPE = {
   HEATMAP: 'HEATMAP',
 };
 
-export const SORT_ORDER = {
-  ASC: 'asc',
-  DESC: 'desc',
-};
+export enum SORT_ORDER {
+  ASC = 'asc',
+  DESC = 'desc',
+}
 
 export const EMS_TMS = 'EMS_TMS';
 export const EMS_FILE = 'EMS_FILE';
 export const ES_GEO_GRID = 'ES_GEO_GRID';
 export const ES_SEARCH = 'ES_SEARCH';
 export const ES_PEW_PEW = 'ES_PEW_PEW';
+export const EMS_XYZ = 'EMS_XYZ'; // identifies a custom TMS source. Name is a little unfortunate.
 
-export const FIELD_ORIGIN = {
-  SOURCE: 'source',
-  JOIN: 'join',
-};
+export enum FIELD_ORIGIN {
+  SOURCE = 'source',
+  JOIN = 'join',
+}
 
 export const SOURCE_DATA_ID_ORIGIN = 'source';
 export const META_ID_ORIGIN_SUFFIX = 'meta';
@@ -117,16 +117,30 @@ export const DRAW_TYPE = {
   POLYGON: 'POLYGON',
 };
 
-export const METRIC_TYPE = {
-  AVG: 'avg',
-  COUNT: 'count',
-  MAX: 'max',
-  MIN: 'min',
-  SUM: 'sum',
-  UNIQUE_COUNT: 'cardinality',
-};
+export enum AGG_TYPE {
+  AVG = 'avg',
+  COUNT = 'count',
+  MAX = 'max',
+  MIN = 'min',
+  SUM = 'sum',
+  TERMS = 'terms',
+  UNIQUE_COUNT = 'cardinality',
+}
 
-export const COUNT_AGG_TYPE = METRIC_TYPE.COUNT;
+export enum RENDER_AS {
+  HEATMAP = 'heatmap',
+  POINT = 'point',
+  GRID = 'grid',
+}
+
+export enum GRID_RESOLUTION {
+  COARSE = 'COARSE',
+  FINE = 'FINE',
+  MOST_FINE = 'MOST_FINE',
+}
+
+export const TOP_TERM_PERCENTAGE_SUFFIX = '__percentage';
+
 export const COUNT_PROP_LABEL = i18n.translate('xpack.maps.aggs.defaultCountLabel', {
   defaultMessage: 'count',
 });
@@ -151,6 +165,7 @@ export const COLOR_MAP_TYPE = {
 export const COLOR_PALETTE_MAX_SIZE = 10;
 
 export const CATEGORICAL_DATA_TYPES = ['string', 'ip', 'boolean'];
+export const ORDINAL_DATA_TYPES = ['number', 'date'];
 
 export const SYMBOLIZE_AS_TYPES = {
   CIRCLE: 'circle',

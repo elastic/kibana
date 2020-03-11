@@ -6,17 +6,21 @@
 
 import Boom from 'boom';
 
+import { SavedObjectsFindResponse } from 'kibana/server';
+import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusAttributes } from '../rules/types';
+import { BadRequestError } from '../errors/bad_request_error';
 import {
   transformError,
   transformBulkError,
   BulkError,
   createSuccessObject,
-  getIndex,
   ImportSuccessError,
   createImportErrorObject,
   transformImportError,
+  convertToSnakeCase,
+  SiemResponseFactory,
 } from './utils';
-import { createMockConfig } from './__mocks__';
+import { responseMock } from './__mocks__';
 
 describe('utils', () => {
   describe('transformError', () => {
@@ -67,8 +71,8 @@ describe('utils', () => {
       });
     });
 
-    test('it detects a TypeError and returns a status code of 400 from that particular error type', () => {
-      const error: TypeError = new TypeError('I have a type error');
+    test('it detects a BadRequestError and returns a status code of 400 from that particular error type', () => {
+      const error: BadRequestError = new BadRequestError('I have a type error');
       const transformed = transformError(error);
       expect(transformed).toEqual({
         message: 'I have a type error',
@@ -76,8 +80,8 @@ describe('utils', () => {
       });
     });
 
-    test('it detects a TypeError and returns a Boom status of 400', () => {
-      const error: TypeError = new TypeError('I have a type error');
+    test('it detects a BadRequestError and returns a Boom status of 400', () => {
+      const error: BadRequestError = new BadRequestError('I have a type error');
       const transformed = transformError(error);
       expect(transformed).toEqual({
         message: 'I have a type error',
@@ -124,8 +128,8 @@ describe('utils', () => {
       expect(transformed).toEqual(expected);
     });
 
-    test('it detects a TypeError and returns a Boom status of 400', () => {
-      const error: TypeError = new TypeError('I have a type error');
+    test('it detects a BadRequestError and returns a Boom status of 400', () => {
+      const error: BadRequestError = new BadRequestError('I have a type error');
       const transformed = transformBulkError('rule-1', error);
       const expected: BulkError = {
         rule_id: 'rule-1',
@@ -276,8 +280,8 @@ describe('utils', () => {
       expect(transformed).toEqual(expected);
     });
 
-    test('it detects a TypeError and returns a Boom status of 400', () => {
-      const error: TypeError = new TypeError('I have a type error');
+    test('it detects a BadRequestError and returns a Boom status of 400', () => {
+      const error: BadRequestError = new BadRequestError('I have a type error');
       const transformed = transformImportError('rule-1', error, {
         success_count: 1,
         success: false,
@@ -295,21 +299,55 @@ describe('utils', () => {
     });
   });
 
-  describe('getIndex', () => {
-    let mockConfig = createMockConfig();
+  describe('convertToSnakeCase', () => {
+    it('converts camelCase to snakeCase', () => {
+      const values = { myTestCamelCaseKey: 'something' };
+      expect(convertToSnakeCase(values)).toEqual({ my_test_camel_case_key: 'something' });
+    });
+    it('returns empty object when object is empty', () => {
+      const values = {};
+      expect(convertToSnakeCase(values)).toEqual({});
+    });
+    it('returns null when passed in undefined', () => {
+      // Array accessors can result in undefined but
+      // this is not represented in typescript for some reason,
+      // https://github.com/Microsoft/TypeScript/issues/11122
+      const values: SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> = {
+        page: 0,
+        per_page: 5,
+        total: 0,
+        saved_objects: [],
+      };
+      expect(
+        convertToSnakeCase<IRuleStatusAttributes>(values.saved_objects[0]?.attributes) // this is undefined, but it says it's not
+      ).toEqual(null);
+    });
+  });
 
-    beforeEach(() => {
-      mockConfig = () => ({
-        get: jest.fn(() => 'mockSignalsIndex'),
-        has: jest.fn(),
-      });
+  describe('SiemResponseFactory', () => {
+    it('builds a custom response', () => {
+      const response = responseMock.create();
+      const responseFactory = new SiemResponseFactory(response);
+
+      responseFactory.error({ statusCode: 400 });
+      expect(response.custom).toHaveBeenCalled();
     });
 
-    it('appends the space id to the configured index', () => {
-      const getSpaceId = jest.fn(() => 'myspace');
-      const index = getIndex(getSpaceId, mockConfig);
+    it('generates a status_code key on the response', () => {
+      const response = responseMock.create();
+      const responseFactory = new SiemResponseFactory(response);
 
-      expect(index).toEqual('mockSignalsIndex-myspace');
+      responseFactory.error({ statusCode: 400 });
+      const [[{ statusCode, body }]] = response.custom.mock.calls;
+
+      expect(statusCode).toEqual(400);
+      expect(body).toBeInstanceOf(Buffer);
+      expect(JSON.parse(body!.toString())).toEqual(
+        expect.objectContaining({
+          message: 'Bad Request',
+          status_code: 400,
+        })
+      );
     });
   });
 });

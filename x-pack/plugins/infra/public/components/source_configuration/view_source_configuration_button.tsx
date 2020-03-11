@@ -6,35 +6,23 @@
 
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
-import { Route } from 'react-router-dom';
-
-export enum ViewSourceConfigurationButtonHrefBase {
-  infrastructure = 'infrastructure',
-  logs = 'logs',
-}
+import { useLinkProps } from '../../hooks/use_link_props';
 
 interface ViewSourceConfigurationButtonProps {
   'data-test-subj'?: string;
-  hrefBase: ViewSourceConfigurationButtonHrefBase;
   children: React.ReactNode;
+  app: 'logs' | 'metrics';
 }
 
 export const ViewSourceConfigurationButton = ({
   'data-test-subj': dataTestSubj,
-  hrefBase,
+  app,
   children,
 }: ViewSourceConfigurationButtonProps) => {
-  const href = `/${hrefBase}/settings`;
-
+  const linkProps = useLinkProps({ app, pathname: '/settings' });
   return (
-    <Route
-      key={href}
-      path={href}
-      children={({ match, history }) => (
-        <EuiButton data-test-subj={dataTestSubj} color="primary" onClick={() => history.push(href)}>
-          {children}
-        </EuiButton>
-      )}
-    />
+    <EuiButton data-test-subj={dataTestSubj} color="primary" {...linkProps}>
+      {children}
+    </EuiButton>
   );
 };

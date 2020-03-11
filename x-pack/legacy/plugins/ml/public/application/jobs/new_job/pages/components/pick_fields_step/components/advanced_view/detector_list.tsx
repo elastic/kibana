@@ -25,7 +25,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator } from '../../../../../common/job_creator';
 import { Validation } from '../../../../../common/job_validator';
 import { detectorToString } from '../../../../../../../util/string_utils';
-import { Detector } from '../../../../../common/job_creator/configs';
+import { Detector } from '../../../../../../../../../common/types/anomaly_detection_jobs';
 
 interface Props {
   isActive: boolean;

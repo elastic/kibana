@@ -17,8 +17,13 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { TypesService, TypesSetup, TypesStart } from './types';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+} from '../../../../../../core/public';
+import { TypesService, TypesSetup, TypesStart } from './vis_types';
 import {
   setUISettings,
   setTypes,
@@ -29,39 +34,42 @@ import {
   setSavedObjects,
   setUsageCollector,
   setFilterManager,
+  setExpressions,
+  setUiActions,
+  setSavedVisualizationsLoader,
+  setTimeFilter,
+  setAggs,
 } from './services';
-import { VisualizeEmbeddableFactory } from '../../embeddable/visualize_embeddable_factory';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../../embeddable';
-import { ExpressionsSetup } from '../../../../../../plugins/expressions/public';
+import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeEmbeddableFactory } from './embeddable';
+import { ExpressionsSetup, ExpressionsStart } from '../../../../../../plugins/expressions/public';
 import { IEmbeddableSetup } from '../../../../../../plugins/embeddable/public';
 import { visualization as visualizationFunction } from './expressions/visualization_function';
 import { visualization as visualizationRenderer } from './expressions/visualization_renderer';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
+  IIndexPattern,
 } from '../../../../../../plugins/data/public';
 import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/public';
-import {
-  createSavedVisLoader,
-  SavedObjectKibanaServicesWithVisualizations,
-} from '../../saved_visualizations';
-import { SavedVisualizations } from '../../../../kibana/public/visualize/np_ready/types';
-import { VisImpl, VisImplConstructor } from './vis_impl';
+import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visualizations';
+import { VisImpl } from './vis_impl';
 import { showNewVisModal } from './wizard';
+import { UiActionsStart } from '../../../../../../plugins/ui_actions/public';
+import { DataStart as LegacyDataStart } from '../../../../data/public';
+import { VisState } from './types';
+
 /**
  * Interface for this plugin's returned setup/start contracts.
  *
  * @public
  */
-export interface VisualizationsSetup {
-  types: TypesSetup;
-}
 
-export interface VisualizationsStart {
-  types: TypesStart;
-  getSavedVisualizationsLoader: () => SavedVisualizations;
+export type VisualizationsSetup = TypesSetup;
+
+export interface VisualizationsStart extends TypesStart {
+  savedVisualizationsLoader: SavedVisualizationsLoader;
+  createVis: (indexPattern: IIndexPattern, visState?: VisState) => VisImpl;
   showNewVisModal: typeof showNewVisModal;
-  Vis: VisImplConstructor;
 }
 
 export interface VisualizationsSetupDeps {
@@ -73,6 +81,11 @@ export interface VisualizationsSetupDeps {
 
 export interface VisualizationsStartDeps {
   data: DataPublicPluginStart;
+  expressions: ExpressionsStart;
+  uiActions: UiActionsStart;
+  __LEGACY: {
+    aggs: LegacyDataStart['search']['aggs'];
+  };
 }
 
 /**
@@ -92,8 +105,6 @@ export class VisualizationsPlugin
       VisualizationsStartDeps
     > {
   private readonly types: TypesService = new TypesService();
-  private savedVisualizations?: SavedVisualizations;
-  private savedVisualizationDependencies?: SavedObjectKibanaServicesWithVisualizations;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -107,18 +118,18 @@ export class VisualizationsPlugin
     expressions.registerFunction(visualizationFunction);
     expressions.registerRenderer(visualizationRenderer);
 
-    const embeddableFactory = new VisualizeEmbeddableFactory(
-      data.query.timefilter.timefilter,
-      this.getSavedVisualizationsLoader
-    );
+    const embeddableFactory = new VisualizeEmbeddableFactory();
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 
     return {
-      types: this.types.setup(),
+      ...this.types.setup(),
     };
   }
 
-  public start(core: CoreStart, { data }: VisualizationsStartDeps): VisualizationsStart {
+  public start(
+    core: CoreStart,
+    { data, expressions, uiActions, __LEGACY: { aggs } }: VisualizationsStartDeps
+  ): VisualizationsStart {
     const types = this.types.start();
     setI18n(core.i18n);
     setTypes(types);
@@ -127,31 +138,34 @@ export class VisualizationsPlugin
     setSavedObjects(core.savedObjects);
     setIndexPatterns(data.indexPatterns);
     setFilterManager(data.query.filterManager);
-
-    this.savedVisualizationDependencies = {
+    setExpressions(expressions);
+    setUiActions(uiActions);
+    setTimeFilter(data.query.timefilter.timefilter);
+    setAggs(aggs);
+    const savedVisualizationsLoader = createSavedVisLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: data.indexPatterns,
       chrome: core.chrome,
       overlays: core.overlays,
       visualizationTypes: types,
-    };
+    });
+    setSavedVisualizationsLoader(savedVisualizationsLoader);
 
     return {
-      types,
-      getSavedVisualizationsLoader: () => this.getSavedVisualizationsLoader(),
+      ...types,
       showNewVisModal,
-      Vis: VisImpl,
+      /**
+       * creates new instance of Vis
+       * @param {IIndexPattern} indexPattern - index pattern to use
+       * @param {VisState} visState - visualization configuration
+       */
+      createVis: (indexPattern: IIndexPattern, visState?: VisState) =>
+        new VisImpl(indexPattern, visState),
+      savedVisualizationsLoader,
     };
   }
 
   public stop() {
     this.types.stop();
   }
-
-  private getSavedVisualizationsLoader = () => {
-    if (!this.savedVisualizations) {
-      this.savedVisualizations = createSavedVisLoader(this.savedVisualizationDependencies!);
-    }
-    return this.savedVisualizations;
-  };
 }

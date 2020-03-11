@@ -22,18 +22,16 @@ export {
   AggType,
   IAggType,
   IAggConfig,
-  AggConfigs,
   IAggConfigs,
   AggParam,
   AggGroupNames,
   aggGroupNamesMap,
   aggTypes,
+  createAggConfigs,
   FieldParamType,
   IFieldParamType,
   BUCKET_TYPES,
   METRIC_TYPES,
-  ISchemas,
-  Schema,
   termsAggFilter,
 } from 'ui/agg_types';
 export { aggTypeFilters, propFilter } from 'ui/agg_types';
@@ -44,9 +42,8 @@ export { parentPipelineType } from 'ui/agg_types';
 export { siblingPipelineType } from 'ui/agg_types';
 export { isType, isStringType } from 'ui/agg_types';
 export { OptionedValueProp, OptionedParamEditorProps, OptionedParamType } from 'ui/agg_types';
-export { isValidJson, isValidInterval } from 'ui/agg_types';
+export { isValidInterval } from 'ui/agg_types';
 export { AggParamOption } from 'ui/agg_types';
 export { CidrMask } from 'ui/agg_types';
 
-export { PersistedState } from 'ui/persisted_state';
 export * from 'ui/vis/lib';

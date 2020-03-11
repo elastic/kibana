@@ -17,17 +17,16 @@
  * under the License.
  */
 
-import { AggConfigs } from '../index';
-import { IAggConfigs } from '../types';
+import { AggConfigs, IAggConfigs } from '../agg_configs';
+import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { significantTermsBucketAgg } from './significant_terms';
 import { IBucketAggConfig } from './_bucket_agg_type';
 
-jest.mock('ui/new_platform');
-
 describe('Significant Terms Agg', () => {
   describe('order agg editor UI', () => {
     describe('convert include/exclude from old format', () => {
+      const typesRegistry = mockAggTypesRegistry([significantTermsBucketAgg]);
       const getAggConfigs = (params: Record<string, any> = {}) => {
         const indexPattern = {
           id: '1234',
@@ -53,7 +52,7 @@ describe('Significant Terms Agg', () => {
               params,
             },
           ],
-          null
+          { typesRegistry }
         );
       };
 

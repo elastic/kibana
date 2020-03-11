@@ -9,7 +9,7 @@ import { merge } from 'lodash';
 import { DataFrameAnalyticsConfig } from '../../../../common';
 
 import { ACTION } from './actions';
-import { reducer, validateAdvancedEditor } from './reducer';
+import { reducer, validateAdvancedEditor, validateMinMML } from './reducer';
 import { getInitialState, JOB_TYPES } from './state';
 
 type SourceIndex = DataFrameAnalyticsConfig['source']['index'];
@@ -41,13 +41,19 @@ describe('useCreateAnalyticsForm', () => {
     const initialState = getInitialState();
     expect(initialState.isValid).toBe(false);
 
-    const updatedState = reducer(initialState, {
+    const stateWithEstimatedMml = reducer(initialState, {
+      type: ACTION.SET_ESTIMATED_MODEL_MEMORY_LIMIT,
+      value: '182222kb',
+    });
+
+    const updatedState = reducer(stateWithEstimatedMml, {
       type: ACTION.SET_FORM_STATE,
       payload: {
         destinationIndex: 'the-destination-index',
         jobId: 'the-analytics-job-id',
         sourceIndex: 'the-source-index',
         jobType: JOB_TYPES.OUTLIER_DETECTION,
+        modelMemoryLimit: '200mb',
       },
     });
     expect(updatedState.isValid).toBe(true);
@@ -144,5 +150,25 @@ describe('useCreateAnalyticsForm', () => {
       validateAdvancedEditor(getMockState({ index: 'the-source-index', modelMemoryLimit: 100 }))
         .isValid
     ).toBe(false);
+  });
+});
+
+describe('validateMinMML', () => {
+  test('should detect a lower value', () => {
+    expect(validateMinMML('10mb')('100kb')).toEqual({
+      min: { minValue: '10mb', actualValue: '100kb' },
+    });
+  });
+
+  test('should allow a bigger value', () => {
+    expect(validateMinMML('10mb')('1GB')).toEqual(null);
+  });
+
+  test('should allow the same value', () => {
+    expect(validateMinMML('1024mb')('1gb')).toEqual(null);
+  });
+
+  test('should ignore empty parameters', () => {
+    expect(validateMinMML((undefined as unknown) as string)('')).toEqual(null);
   });
 });

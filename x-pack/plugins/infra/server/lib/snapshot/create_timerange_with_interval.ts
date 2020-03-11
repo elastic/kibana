@@ -21,7 +21,7 @@ export const createTimeRangeWithInterval = async (
 ): Promise<InfraTimerangeInput> => {
   const aggregations = getMetricsAggregations(options);
   const modules = await aggregationsToModules(framework, requestContext, aggregations, options);
-  const interval =
+  const interval = Math.max(
     (await calculateMetricInterval(
       framework,
       requestContext,
@@ -32,7 +32,9 @@ export const createTimeRangeWithInterval = async (
       },
       modules,
       options.nodeType
-    )) || 60000;
+    )) || 60,
+    60
+  );
   return {
     interval: `${interval}s`,
     from: options.timerange.to - interval * 5000, // We need at least 5 buckets worth of data

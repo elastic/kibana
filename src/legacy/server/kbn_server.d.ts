@@ -77,7 +77,7 @@ declare module 'hapi' {
     addScopedTutorialContextFactory: (
       scopedTutorialContextFactory: (...args: any[]) => any
     ) => void;
-    savedObjectsManagement(): SavedObjectsManagement;
+    getSavedObjectsManagement(): SavedObjectsManagement;
     getInjectedUiAppVars: (pluginName: string) => { [key: string]: any };
     getUiNavLinks(): Array<{ _id: string }>;
     addMemoizedFactoryToRequest: (
@@ -114,7 +114,6 @@ export interface KibanaCore {
     elasticsearch: LegacyServiceSetupDeps['core']['elasticsearch'];
     hapiServer: LegacyServiceSetupDeps['core']['http']['server'];
     kibanaMigrator: LegacyServiceStartDeps['core']['savedObjects']['migrator'];
-    typeRegistry: LegacyServiceStartDeps['core']['savedObjects']['typeRegistry'];
     legacy: ILegacyInternals;
     rendering: LegacyServiceSetupDeps['core']['rendering'];
     uiPlugins: LegacyServiceSetupDeps['core']['plugins']['uiPlugins'];

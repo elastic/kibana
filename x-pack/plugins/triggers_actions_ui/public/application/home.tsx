@@ -16,8 +16,10 @@ import {
   EuiTab,
   EuiTabs,
   EuiTitle,
+  EuiBetaBadge,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { BASE_PATH, Section, routeToConnectors, routeToAlerts } from './constants';
 import { getCurrentBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
@@ -90,6 +92,17 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
                 <FormattedMessage
                   id="xpack.triggersActionsUI.home.appTitle"
                   defaultMessage="Alerts and Actions"
+                />
+                &emsp;
+                <EuiBetaBadge
+                  label="Beta"
+                  tooltipContent={i18n.translate(
+                    'xpack.triggersActionsUI.home.betaBadgeTooltipContent',
+                    {
+                      defaultMessage:
+                        'This module is not GA. Please help us by reporting any bugs.',
+                    }
+                  )}
                 />
               </h1>
             </EuiTitle>

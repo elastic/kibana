@@ -8,9 +8,6 @@ import { ESTermSource, extractPropertiesMap } from './es_term_source';
 
 jest.mock('ui/new_platform');
 jest.mock('../vector_layer', () => {});
-jest.mock('ui/agg_types', () => ({
-  Schemas: function() {},
-}));
 jest.mock('ui/timefilter', () => {});
 
 const indexPatternTitle = 'myIndex';
@@ -34,115 +31,35 @@ const metricExamples = [
 ];
 
 describe('getMetricFields', () => {
-  it('should add default "count" metric when no metrics are provided', async () => {
+  it('should override name and label of count metric', async () => {
     const source = new ESTermSource({
       indexPatternTitle: indexPatternTitle,
       term: termFieldName,
     });
     const metrics = source.getMetricFields();
-    expect(metrics.length).toBe(1);
-
-    expect(metrics[0].getAggType()).toEqual('count');
     expect(metrics[0].getName()).toEqual('__kbnjoin__count_groupby_myIndex.myTermField');
-    expect(await metrics[0].getLabel()).toEqual('count of myIndex:myTermField');
+    expect(await metrics[0].getLabel()).toEqual('Count of myIndex');
   });
 
-  it('should remove incomplete metric configurations', async () => {
+  it('should override name and label of sum metric', async () => {
     const source = new ESTermSource({
       indexPatternTitle: indexPatternTitle,
       term: termFieldName,
       metrics: metricExamples,
     });
     const metrics = source.getMetricFields();
-    expect(metrics.length).toBe(2);
-
-    expect(metrics[0].getAggType()).toEqual('sum');
-    expect(metrics[0].getESDocFieldName()).toEqual(sumFieldName);
     expect(metrics[0].getName()).toEqual(
       '__kbnjoin__sum_of_myFieldGettingSummed_groupby_myIndex.myTermField'
     );
     expect(await metrics[0].getLabel()).toEqual('my custom label');
-
-    expect(metrics[1].getAggType()).toEqual('count');
     expect(metrics[1].getName()).toEqual('__kbnjoin__count_groupby_myIndex.myTermField');
-    expect(await metrics[1].getLabel()).toEqual('count of myIndex:myTermField');
-  });
-});
-
-describe('_makeAggConfigs', () => {
-  describe('no metrics', () => {
-    let aggConfigs;
-    beforeAll(() => {
-      const source = new ESTermSource({
-        indexPatternTitle: indexPatternTitle,
-        term: termFieldName,
-      });
-      aggConfigs = source._makeAggConfigs();
-    });
-
-    it('should make default "count" metric agg config', () => {
-      expect(aggConfigs.length).toBe(2);
-      expect(aggConfigs[0]).toEqual({
-        id: '__kbnjoin__count_groupby_myIndex.myTermField',
-        enabled: true,
-        type: 'count',
-        schema: 'metric',
-        params: {},
-      });
-    });
-
-    it('should make "terms" buckets agg config', () => {
-      expect(aggConfigs.length).toBe(2);
-      expect(aggConfigs[1]).toEqual({
-        id: 'join',
-        enabled: true,
-        type: 'terms',
-        schema: 'segment',
-        params: {
-          field: termFieldName,
-          size: 10000,
-        },
-      });
-    });
-  });
-
-  describe('metrics', () => {
-    let aggConfigs;
-    beforeAll(() => {
-      const source = new ESTermSource({
-        indexPatternTitle: indexPatternTitle,
-        term: 'myTermField',
-        metrics: metricExamples,
-      });
-      aggConfigs = source._makeAggConfigs();
-    });
-
-    it('should ignore invalid metrics configs', () => {
-      expect(aggConfigs.length).toBe(3);
-    });
-
-    it('should make agg config for each valid metric', () => {
-      expect(aggConfigs[0]).toEqual({
-        id: '__kbnjoin__sum_of_myFieldGettingSummed_groupby_myIndex.myTermField',
-        enabled: true,
-        type: 'sum',
-        schema: 'metric',
-        params: {
-          field: sumFieldName,
-        },
-      });
-      expect(aggConfigs[1]).toEqual({
-        id: '__kbnjoin__count_groupby_myIndex.myTermField',
-        enabled: true,
-        type: 'count',
-        schema: 'metric',
-        params: {},
-      });
-    });
+    expect(await metrics[1].getLabel()).toEqual('Count of myIndex');
   });
 });
 
 describe('extractPropertiesMap', () => {
+  const minPropName =
+    '__kbnjoin__min_of_avlAirTemp_groupby_kibana_sample_data_ky_avl.kytcCountyNmbr';
   const responseWithNumberTypes = {
     aggregations: {
       join: {
@@ -150,14 +67,14 @@ describe('extractPropertiesMap', () => {
           {
             key: 109,
             doc_count: 1130,
-            '__kbnjoin__min_of_avlAirTemp_groupby_kibana_sample_data_ky_avl.kytcCountyNmbr': {
+            [minPropName]: {
               value: 36,
             },
           },
           {
             key: 62,
             doc_count: 448,
-            '__kbnjoin__min_of_avlAirTemp_groupby_kibana_sample_data_ky_avl.kytcCountyNmbr': {
+            [minPropName]: {
               value: 0,
             },
           },
@@ -166,11 +83,10 @@ describe('extractPropertiesMap', () => {
     },
   };
   const countPropName = '__kbnjoin__count_groupby_kibana_sample_data_ky_avl.kytcCountyNmbr';
-  const minPropName =
-    '__kbnjoin__min_of_avlAirTemp_groupby_kibana_sample_data_ky_avl.kytcCountyNmbr';
+
   let propertiesMap;
   beforeAll(() => {
-    propertiesMap = extractPropertiesMap(responseWithNumberTypes, [minPropName], countPropName);
+    propertiesMap = extractPropertiesMap(responseWithNumberTypes, countPropName);
   });
 
   it('should create key for each join term', () => {

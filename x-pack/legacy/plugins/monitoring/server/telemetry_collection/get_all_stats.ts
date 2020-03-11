@@ -61,38 +61,31 @@ export function handleAllStats(
   }
 ) {
   return clusters.map(cluster => {
-    // if they are using Kibana or Logstash, then add it to the cluster details under cluster.stack_stats
-    addStackStats(cluster, kibana, KIBANA_SYSTEM_ID);
-    addStackStats(cluster, logstash, LOGSTASH_SYSTEM_ID);
-    addStackStats(cluster, beats, BEATS_SYSTEM_ID);
-    mergeXPackStats(cluster, kibana, 'graph_workspace', 'graph'); // copy graph_workspace info out of kibana, merge it into stack_stats.xpack.graph
+    const stats = {
+      ...cluster,
+      stack_stats: {
+        ...cluster.stack_stats,
+        // if they are using Kibana or Logstash, then add it to the cluster details under cluster.stack_stats
+        ...getStackStats(cluster.cluster_uuid, kibana, KIBANA_SYSTEM_ID),
+        ...getStackStats(cluster.cluster_uuid, logstash, LOGSTASH_SYSTEM_ID),
+        ...getStackStats(cluster.cluster_uuid, beats, BEATS_SYSTEM_ID),
+      },
+    };
 
-    return cluster;
+    mergeXPackStats(stats, kibana, 'graph_workspace', 'graph'); // copy graph_workspace info out of kibana, merge it into stack_stats.xpack.graph
+
+    return stats;
   });
 }
 
-/**
- * Add product data to the {@code cluster}, only if it exists for the current {@code cluster}.
- *
- * @param {Object} cluster The current Elasticsearch cluster stats
- * @param {Object} allProductStats Product stats, keyed by Cluster UUID
- * @param {String} product The product name being added (e.g., 'kibana' or 'logstash')
- */
-export function addStackStats<T extends { [clusterUuid: string]: K }, K>(
-  cluster: ESClusterStats & { stack_stats?: { [product: string]: K } },
+export function getStackStats<T extends { [clusterUuid: string]: K }, K>(
+  clusterUuid: string,
   allProductStats: T,
   product: string
 ) {
-  const productStats = allProductStats[cluster.cluster_uuid];
-
+  const productStats = allProductStats[clusterUuid];
   // Don't add it if they're not using (or configured to report stats) this product for this cluster
-  if (productStats) {
-    if (!cluster.stack_stats) {
-      cluster.stack_stats = {};
-    }
-
-    cluster.stack_stats[product] = productStats;
-  }
+  return productStats ? { [product]: productStats } : {};
 }
 
 export function mergeXPackStats<T extends { [clusterUuid: string]: unknown }>(

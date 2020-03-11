@@ -6,8 +6,10 @@
 import { CoreStart, HttpSetup } from 'kibana/public';
 import { applyMiddleware, createStore, Dispatch, Store } from 'redux';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { History, createBrowserHistory } from 'history';
 import { managementListReducer, managementMiddlewareFactory } from './index';
 import { EndpointMetadata, EndpointResultList } from '../../../../../common/types';
+import { EndpointDocGenerator } from '../../../../../common/generate_data';
 import { ManagementListState } from '../../types';
 import { AppAction } from '../action';
 import { listData } from './selectors';
@@ -18,36 +20,14 @@ describe('endpoint list saga', () => {
   let store: Store<ManagementListState>;
   let getState: typeof store['getState'];
   let dispatch: Dispatch<AppAction>;
+
+  const generator = new EndpointDocGenerator();
   // https://github.com/elastic/endpoint-app-team/issues/131
   const generateEndpoint = (): EndpointMetadata => {
-    return {
-      event: {
-        created: new Date(0),
-      },
-      endpoint: {
-        policy: {
-          id: '',
-        },
-      },
-      agent: {
-        version: '',
-        id: '',
-        name: '',
-      },
-      host: {
-        id: '',
-        hostname: '',
-        ip: [''],
-        mac: [''],
-        os: {
-          name: '',
-          full: '',
-          version: '',
-          variant: '',
-        },
-      },
-    };
+    return generator.generateEndpointMetadata(new Date().getTime());
   };
+
+  let history: History<never>;
   const getEndpointListApiResponse = (): EndpointResultList => {
     return {
       endpoints: [generateEndpoint()],
@@ -65,12 +45,20 @@ describe('endpoint list saga', () => {
     );
     getState = store.getState;
     dispatch = store.dispatch;
+    history = createBrowserHistory();
   });
-  test('it handles `userNavigatedToPage`', async () => {
+  test('it handles `userChangedUrl`', async () => {
     const apiResponse = getEndpointListApiResponse();
     fakeHttpServices.post.mockResolvedValue(apiResponse);
     expect(fakeHttpServices.post).not.toHaveBeenCalled();
-    dispatch({ type: 'userNavigatedToPage', payload: 'managementPage' });
+
+    dispatch({
+      type: 'userChangedUrl',
+      payload: {
+        ...history.location,
+        pathname: '/management',
+      },
+    });
     await sleep();
     expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
       body: JSON.stringify({

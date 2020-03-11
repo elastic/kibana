@@ -4,25 +4,30 @@
 
 ```ts
 
+import { Action } from 'history';
 import { Breadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { ExclusiveUnion } from '@elastic/eui';
+import { History } from 'history';
 import { IconType } from '@elastic/eui';
+import { Location } from 'history';
+import { LocationDescriptorObject } from 'history';
 import { MaybePromise } from '@kbn/utility-types';
 import { Observable } from 'rxjs';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { ShallowPromise } from '@kbn/utility-types';
 import { UiSettingsParams as UiSettingsParams_2 } from 'src/core/server/types';
+import { UnregisterCallback } from 'history';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
 // @public
-export interface App extends AppBase {
+export interface App<HistoryLocationState = unknown> extends AppBase {
     appRoute?: string;
     chromeless?: boolean;
-    mount: AppMount | AppMountDeprecated;
+    mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
 }
 
 // @public (undocumented)
@@ -89,7 +94,7 @@ export type AppLeaveHandler = (factory: AppLeaveActionFactory) => AppLeaveAction
 
 // @public (undocumented)
 export interface ApplicationSetup {
-    register(app: App): void;
+    register<HistoryLocationState = unknown>(app: App<HistoryLocationState>): void;
     registerAppUpdater(appUpdater$: Observable<AppUpdater>): void;
     // @deprecated
     registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
@@ -112,7 +117,7 @@ export interface ApplicationStart {
 }
 
 // @public
-export type AppMount = (params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
+export type AppMount<HistoryLocationState = unknown> = (params: AppMountParameters<HistoryLocationState>) => AppUnmount | Promise<AppUnmount>;
 
 // @public @deprecated
 export interface AppMountContext {
@@ -133,12 +138,14 @@ export interface AppMountContext {
 }
 
 // @public @deprecated
-export type AppMountDeprecated = (context: AppMountContext, params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
+export type AppMountDeprecated<HistoryLocationState = unknown> = (context: AppMountContext, params: AppMountParameters<HistoryLocationState>) => AppUnmount | Promise<AppUnmount>;
 
 // @public (undocumented)
-export interface AppMountParameters {
+export interface AppMountParameters<HistoryLocationState = unknown> {
+    // @deprecated
     appBasePath: string;
     element: HTMLElement;
+    history: ScopedHistory<HistoryLocationState>;
     onAppLeave: (handler: AppLeaveHandler) => void;
 }
 
@@ -603,7 +610,7 @@ export interface HttpFetchOptionsWithPath extends HttpFetchOptions {
 // @public (undocumented)
 export interface HttpFetchQuery {
     // (undocumented)
-    [key: string]: string | number | boolean | undefined;
+    [key: string]: string | number | boolean | undefined | Array<string | number | boolean | undefined>;
 }
 
 // @public
@@ -1174,6 +1181,23 @@ export interface SavedObjectsUpdateOptions {
     // (undocumented)
     version?: string;
 }
+
+// @public
+export class ScopedHistory<HistoryLocationState = unknown> implements History<HistoryLocationState> {
+    constructor(parentHistory: History, basePath: string);
+    get action(): Action;
+    block: (prompt?: string | boolean | History.TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
+    createHref: (location: LocationDescriptorObject<HistoryLocationState>) => string;
+    createSubHistory: <SubHistoryLocationState = unknown>(basePath: string) => ScopedHistory<SubHistoryLocationState>;
+    go: (n: number) => void;
+    goBack: () => void;
+    goForward: () => void;
+    get length(): number;
+    listen: (listener: (location: Location<HistoryLocationState>, action: Action) => void) => UnregisterCallback;
+    get location(): Location<HistoryLocationState>;
+    push: (pathOrLocation: string | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
+    replace: (pathOrLocation: string | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
+    }
 
 // @public
 export class SimpleSavedObject<T = unknown> {
