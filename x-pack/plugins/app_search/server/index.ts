@@ -13,7 +13,7 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
 };
 
 export const configSchema = schema.object({
-  host: schema.string(),
+  host: schema.maybe(schema.string()),
 });
 
 type ConfigType = TypeOf<typeof configSchema>;

@@ -21,7 +21,7 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import AppSearchLogo from './assets/logo.svg';
 
 export interface ClientConfigType {
-  host: string;
+  host?: string;
 }
 export interface PluginsSetup {
   home?: HomePublicPluginSetup;

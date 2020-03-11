@@ -11,7 +11,7 @@ import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { registerEnginesRoute } from './routes/engines';
 
 export interface ServerConfigType {
-  host: string;
+  host?: string;
 }
 
 export class AppSearchPlugin implements Plugin {
