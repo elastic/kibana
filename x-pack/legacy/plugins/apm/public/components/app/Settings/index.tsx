@@ -39,7 +39,7 @@ export const Settings: React.FC = props => {
                 id: 0,
                 items: [
                   {
-                    name: i18n.translate('xpack.apm.agentConfigiguration', {
+                    name: i18n.translate('xpack.apm.settings.agentConfig', {
                       defaultMessage: 'Agent Configuration'
                     }),
                     id: '1',

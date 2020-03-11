@@ -37,7 +37,7 @@ function FormRow({
   onChange: (key: string, value: string) => void;
 }) {
   const defaultInputPlaceholder = i18n.translate(
-    'apm.agentConfig.defaultInputPlaceholder',
+    'xpack.apm.agentConfig.defaultInputPlaceholder',
     {
       defaultMessage: 'Set {settingsLabel}',
       values: { settingsLabel: setting.label }
