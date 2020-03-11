@@ -66,6 +66,9 @@ describe('Actions Plugin', () => {
               savedObjects: {
                 client: {},
               },
+              elasticsearch: {
+                adminClient: jest.fn(),
+              },
             },
           } as any,
           httpServerMock.createKibanaRequest(),
