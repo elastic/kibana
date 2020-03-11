@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 // @ts-ignore
 import numeral from '@elastic/numeral';
+import { isEmpty } from 'lodash';
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
 import { Action, ACTION } from './actions';
@@ -437,7 +438,11 @@ export function reducer(state: State, action: Action): State {
     }
 
     case ACTION.SWITCH_TO_ADVANCED_EDITOR:
-      const jobConfig = getJobConfigFromFormState(state.form);
+      let { jobConfig } = state;
+      const isJobConfigEmpty = isEmpty(state.jobConfig);
+      if (isJobConfigEmpty) {
+        jobConfig = getJobConfigFromFormState(state.form);
+      }
       return validateAdvancedEditor({
         ...state,
         advancedEditorRawString: JSON.stringify(jobConfig, null, 2),
