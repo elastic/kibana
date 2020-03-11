@@ -324,6 +324,7 @@ export const reindexServiceFactory = (
     const indicesState = await esIndicesStateCheck(callAsUser, [indexName]);
     const openAndClose = indicesState[indexName] === 'close';
     if (indicesState[indexName] === 'close') {
+      log.debug(`Detected closed index ${indexName}, opening...`);
       await callAsUser('indices.open', { index: indexName });
     }
 
