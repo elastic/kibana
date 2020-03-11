@@ -20,6 +20,7 @@
 import { ContextService } from '../../../context';
 import { createHttpServer, createCoreContext } from '../../../http/test_utils';
 import { coreMock } from '../../../mocks';
+import { SavedObjectsType } from '../../types';
 
 const coreId = Symbol('core');
 
@@ -41,5 +42,19 @@ export const setupServer = async () => {
     server,
     httpSetup,
     handlerContext,
+  };
+};
+
+export const createExportableType = (name: string): SavedObjectsType => {
+  return {
+    name,
+    hidden: false,
+    namespaceAgnostic: false,
+    mappings: {
+      properties: {},
+    },
+    management: {
+      importableAndExportable: true,
+    },
   };
 };

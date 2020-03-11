@@ -5,9 +5,8 @@
  */
 
 import { useEffect, useReducer } from 'react';
-import { useStateToaster } from '../../components/toasters';
-import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 
+import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { getTags } from './api';
 import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
 import * as i18n from './translations';
