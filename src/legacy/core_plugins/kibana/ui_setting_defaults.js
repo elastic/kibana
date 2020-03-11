@@ -17,12 +17,34 @@
  * under the License.
  */
 
+import { parse } from 'url';
+
 import moment from 'moment-timezone';
 import numeralLanguages from '@elastic/numeral/languages';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import { DEFAULT_QUERY_LANGUAGE } from '../../../plugins/data/common';
+
+function isRelativePath(candidatePath) {
+  // validate that `candidatePath` is not attempting a redirect to somewhere
+  // outside of this Kibana install
+  const { protocol, hostname, port } = parse(
+    candidatePath,
+    false /* parseQueryString */,
+    true /* slashesDenoteHost */
+  );
+
+  // We should explicitly compare `protocol`, `port` and `hostname` to null to make sure these are not
+  // detected in the URL at all. For example `hostname` can be empty string for Node URL parser, but
+  // browser (because of various bwc reasons) processes URL differently (e.g. `///abc.com` - for browser
+  // hostname is `abc.com`, but for Node hostname is an empty string i.e. everything between schema (`//`)
+  // and the first slash that belongs to path.
+  if (protocol !== null || hostname !== null || port !== null) {
+    return false;
+  }
+  return true;
+}
 
 export function getUiSettingDefaults() {
   const weekdays = moment.weekdays().slice();
@@ -71,11 +93,11 @@ export function getUiSettingDefaults() {
       value: '/app/kibana',
       schema: schema.string({
         validate(value) {
-          if (!value.startsWith('/')) {
+          if (!isRelativePath(value)) {
             return i18n.translate(
-              'kbn.advancedSettings.defaultRoute.defaultRouteValidationMessage',
+              'kbn.advancedSettings.defaultRoute.defaultRouteIsRelativeValidationMessage',
               {
-                defaultMessage: 'The route must start with a slash ("/")',
+                defaultMessage: 'Must be a relative URL.',
               }
             );
           }
@@ -85,7 +107,7 @@ export function getUiSettingDefaults() {
         defaultMessage:
           'This setting specifies the default route when opening Kibana. ' +
           'You can use this setting to modify the landing page when opening Kibana. ' +
-          'The route must start with a slash ("/").',
+          'The route must be a relative URL.',
       }),
     },
     'query:queryString:options': {

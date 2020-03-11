@@ -54,7 +54,12 @@ describe('default route provider', () => {
   });
 
   it('ignores invalid values', async function() {
-    const invalidRoutes = ['http://not-your-kibana.com', 'example.com', ' //example.com'];
+    const invalidRoutes = [
+      'http://not-your-kibana.com',
+      '///example.com',
+      '//example.com',
+      ' //example.com',
+    ];
 
     for (const url of invalidRoutes) {
       await kbnTestServer.request
