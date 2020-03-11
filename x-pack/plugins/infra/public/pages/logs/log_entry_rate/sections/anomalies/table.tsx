@@ -4,19 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBasicTable, EuiButtonIcon } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { euiStyled } from '../../../../../../../observability/public';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import {
   formatAnomalyScore,
   getFriendlyNameForPartitionId,
 } from '../../../../../../common/log_analysis';
+import { RowExpansionButton } from '../../../../../components/basic_table';
 import { LogEntryRateResults } from '../../use_log_entry_rate_results';
 import { AnomaliesTableExpandedRow } from './expanded_row';
-import { euiStyled } from '../../../../../../../observability/public';
 
 interface TableItem {
   id: string;
@@ -30,14 +31,6 @@ interface SortingOptions {
     direction: 'asc' | 'desc';
   };
 }
-
-const collapseAriaLabel = i18n.translate('xpack.infra.logs.analysis.anomaliesTableCollapseLabel', {
-  defaultMessage: 'Collapse',
-});
-
-const expandAriaLabel = i18n.translate('xpack.infra.logs.analysis.anomaliesTableExpandLabel', {
-  defaultMessage: 'Expand',
-});
 
 const partitionColumnName = i18n.translate(
   'xpack.infra.logs.analysis.anomaliesTablePartitionColumnName',
@@ -106,29 +99,34 @@ export const AnomaliesTable: React.FunctionComponent<{
     return sorting.sort.direction === 'asc' ? sortedItems : sortedItems.reverse();
   }, [tableItems, sorting]);
 
-  const toggleExpandedItems = useCallback(
+  const expandItem = useCallback(
+    item => {
+      const newItemIdToExpandedRowMap = {
+        ...itemIdToExpandedRowMap,
+        [item.id]: (
+          <AnomaliesTableExpandedRow
+            partitionId={item.partitionId}
+            results={results}
+            topAnomalyScore={item.topAnomalyScore}
+            setTimeRange={setTimeRange}
+            timeRange={timeRange}
+            jobId={jobId}
+          />
+        ),
+      };
+      setItemIdToExpandedRowMap(newItemIdToExpandedRowMap);
+    },
+    [itemIdToExpandedRowMap, jobId, results, setTimeRange, timeRange]
+  );
+
+  const collapseItem = useCallback(
     item => {
       if (itemIdToExpandedRowMap[item.id]) {
         const { [item.id]: toggledItem, ...remainingExpandedRowMap } = itemIdToExpandedRowMap;
         setItemIdToExpandedRowMap(remainingExpandedRowMap);
-      } else {
-        const newItemIdToExpandedRowMap = {
-          ...itemIdToExpandedRowMap,
-          [item.id]: (
-            <AnomaliesTableExpandedRow
-              partitionId={item.partitionId}
-              results={results}
-              topAnomalyScore={item.topAnomalyScore}
-              setTimeRange={setTimeRange}
-              timeRange={timeRange}
-              jobId={jobId}
-            />
-          ),
-        };
-        setItemIdToExpandedRowMap(newItemIdToExpandedRowMap);
       }
     },
-    [itemIdToExpandedRowMap, jobId, results, setTimeRange, timeRange]
+    [itemIdToExpandedRowMap]
   );
 
   const columns = [
@@ -150,10 +148,11 @@ export const AnomaliesTable: React.FunctionComponent<{
       width: '40px',
       isExpander: true,
       render: (item: TableItem) => (
-        <EuiButtonIcon
-          onClick={() => toggleExpandedItems(item)}
-          aria-label={itemIdToExpandedRowMap[item.id] ? collapseAriaLabel : expandAriaLabel}
-          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+        <RowExpansionButton
+          isExpanded={item.id in itemIdToExpandedRowMap}
+          item={item.id}
+          onExpand={expandItem}
+          onCollapse={collapseItem}
         />
       ),
     },
