@@ -17,10 +17,10 @@ import { deleteCustomLink } from '../../lib/settings/custom_link/delete_custom_l
 import { listCustomLinks } from '../../lib/settings/custom_link/list_custom_links';
 
 const FilterOptionsRt = t.partial({
-  [SERVICE_NAME]: t.string,
-  [SERVICE_ENVIRONMENT]: t.string,
-  [TRANSACTION_NAME]: t.string,
-  [TRANSACTION_TYPE]: t.string
+  [SERVICE_NAME]: t.union([t.string, t.array(t.string)]),
+  [SERVICE_ENVIRONMENT]: t.union([t.string, t.array(t.string)]),
+  [TRANSACTION_NAME]: t.union([t.string, t.array(t.string)]),
+  [TRANSACTION_TYPE]: t.union([t.string, t.array(t.string)])
 });
 
 export type FilterOptions = t.TypeOf<typeof FilterOptionsRt>;

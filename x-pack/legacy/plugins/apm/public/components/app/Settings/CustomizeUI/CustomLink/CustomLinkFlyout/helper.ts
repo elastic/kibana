@@ -56,7 +56,9 @@ export const convertFiltersToArray = (customLink?: CustomLink): Filters => {
  */
 export const convertFiltersToObject = (filters: Filters) => {
   const convertedFilters = Object.fromEntries(
-    filters.filter(([key, value]) => !isEmpty(key) && !isEmpty(value))
+    filters
+      .filter(([key, value]) => !isEmpty(key) && !isEmpty(value))
+      .map(([key, value]) => [key, value.split(',').map(v => v.trim())])
   );
   if (!isEmpty(convertedFilters)) {
     return convertedFilters;

@@ -22,7 +22,7 @@ export async function listCustomLinks({
       bool: {
         minimum_should_match: 1,
         should: [
-          { match: { [key]: { query: value, operator: 'and' } } },
+          { term: { [key]: value } },
           { bool: { must_not: [{ exists: { field: key } }] } }
         ]
       }
