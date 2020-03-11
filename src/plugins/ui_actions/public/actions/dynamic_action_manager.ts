@@ -115,6 +115,7 @@ export class DynamicActionManager {
       id: actionId,
       isCompatible,
       getDisplayName: () => name,
+      // TODO: Factory and action have different contexts.
       getIconType: context => factory.getIconType(context),
     };
 
