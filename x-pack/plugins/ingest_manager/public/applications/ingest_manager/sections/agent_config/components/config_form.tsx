@@ -54,12 +54,16 @@ export const agentConfigFormValidation = (
 interface Props {
   agentConfig: Partial<NewAgentConfig>;
   updateAgentConfig: (u: Partial<NewAgentConfig>) => void;
+  withSysMonitoring: boolean;
+  updateSysMonitoring: (newValue: boolean) => void;
   validation: ValidationResults;
 }
 
 export const AgentConfigForm: React.FunctionComponent<Props> = ({
   agentConfig,
   updateAgentConfig,
+  withSysMonitoring,
+  updateSysMonitoring,
   validation,
 }) => {
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
@@ -134,7 +138,6 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
       >
         <EuiSwitch
           showLabel={true}
-          disabled
           label={
             <>
               <FormattedMessage
@@ -154,9 +157,9 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
               />
             </>
           }
-          checked={true}
+          checked={withSysMonitoring}
           onChange={() => {
-            // FIXME: enable collection of system metrics - see: https://github.com/elastic/kibana/issues/59564
+            updateSysMonitoring(!withSysMonitoring);
           }}
         />
       </EuiFormRow>
