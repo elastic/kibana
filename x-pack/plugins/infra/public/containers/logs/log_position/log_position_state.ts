@@ -6,6 +6,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import createContainer from 'constate';
+import { useSetState } from 'react-use';
 import { TimeKey } from '../../../../common/time';
 import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
 
@@ -103,7 +104,7 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
 
   // We group the `startDate` and `endDate` values in the same object to be able
   // to set both at the same time, saving a re-render
-  const [dateRange, setDateRange] = useState<DateRange>(DEFAULT_DATE_RANGE);
+  const [dateRange, setDateRange] = useSetState<DateRange>(DEFAULT_DATE_RANGE);
 
   const { startKey, middleKey, endKey, pagesBeforeStart, pagesAfterEnd } = visiblePositions;
 
@@ -142,16 +143,10 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
         jumpToTargetPosition(null);
       }
 
-      setDateRange(previousDateRange => {
-        return {
-          startDateExpression:
-            newDateRange.startDateExpression || previousDateRange.startDateExpression,
-          endDateExpression: newDateRange.endDateExpression || previousDateRange.endDateExpression,
-        };
-      });
+      setDateRange(newDateRange);
       updateTimestamps();
     },
-    [dateRange, targetPosition, updateTimestamps]
+    [setDateRange, dateRange, targetPosition, updateTimestamps]
   );
 
   // `lastUpdate` needs to be a dependency for the timestamps.
