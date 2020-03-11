@@ -16,6 +16,13 @@ interface ServerReturnedPolicyListData {
   };
 }
 
+interface ServerReturnedPolicyDetailsData {
+  type: 'serverReturnedPolicyDetailsData';
+  payload: {
+    policyItem: PolicyData | undefined;
+  };
+}
+
 interface UserPaginatedPolicyListTable {
   type: 'userPaginatedPolicyListTable';
   payload: {
@@ -25,3 +32,4 @@ interface UserPaginatedPolicyListTable {
 }
 
 export type PolicyListAction = ServerReturnedPolicyListData | UserPaginatedPolicyListTable;
+export type PolicyDetailsAction = ServerReturnedPolicyDetailsData;

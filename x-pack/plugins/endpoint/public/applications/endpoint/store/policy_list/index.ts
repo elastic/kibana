@@ -5,5 +5,8 @@
  */
 
 export { policyListReducer } from './reducer';
+export { policyDetailsReducer } from './reducer';
 export { PolicyListAction } from './action';
+export { PolicyDetailsAction } from './action';
 export { policyListMiddlewareFactory } from './middleware';
+export { policyDetailsMiddlewareFactory } from './middleware';

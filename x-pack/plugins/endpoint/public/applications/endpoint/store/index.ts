@@ -17,7 +17,7 @@ import { CoreStart } from 'kibana/public';
 import { appReducer } from './reducer';
 import { alertMiddlewareFactory } from './alerts/middleware';
 import { managementMiddlewareFactory } from './managing';
-import { policyListMiddlewareFactory } from './policy_list';
+import { policyListMiddlewareFactory, policyDetailsMiddlewareFactory } from './policy_list';
 import { GlobalState } from '../types';
 import { AppAction } from './action';
 import { EndpointPluginStartDependencies } from '../../../plugin';
@@ -60,6 +60,7 @@ export const appStoreFactory: (middlewareDeps?: {
   /**
    * Give middleware access to plugin start dependencies.
    */
+<<<<<<< HEAD
   depsStart: EndpointPluginStartDependencies;
 }) => Store = middlewareDeps => {
   let middleware;
@@ -74,6 +75,10 @@ export const appStoreFactory: (middlewareDeps?: {
         substateMiddlewareFactory(
           globalState => globalState.policyList,
           policyListMiddlewareFactory(coreStart, depsStart)
+        ),
+        substateMiddlewareFactory(
+          globalState => globalState.policyDetails,
+          policyDetailsMiddlewareFactory(coreStart)
         ),
         substateMiddlewareFactory(
           globalState => globalState.alertList,

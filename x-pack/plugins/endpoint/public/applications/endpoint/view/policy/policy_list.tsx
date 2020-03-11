@@ -28,6 +28,7 @@ import {
 } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 import { usePageId } from '../use_page_id';
 import {
   selectIsLoading,
@@ -84,6 +85,10 @@ const renderFormattedNumber = (value: number, _item: PolicyData) => (
   </TruncateText>
 );
 
+const renderPolicyNameLink = (value: string, _item: PolicyData) => {
+  return <Link to={`/policy/${_item.id}`}>{value + ' '}</Link>;
+};
+
 export const PolicyList = React.memo(() => {
   usePageId('policyListPage');
 
@@ -124,6 +129,7 @@ export const PolicyList = React.memo(() => {
         name: i18n.translate('xpack.endpoint.policyList.nameField', {
           defaultMessage: 'Policy Name',
         }),
+        render: renderPolicyNameLink,
         truncateText: true,
       },
       {

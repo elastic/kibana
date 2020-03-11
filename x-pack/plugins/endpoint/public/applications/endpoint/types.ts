@@ -56,6 +56,7 @@ export interface PolicyData {
   total: number;
   pending: number;
   failed: number;
+  id: string;
   created_by: string;
   created: string;
   updated_by: string;
@@ -78,10 +79,22 @@ export interface PolicyListState {
   isLoading: boolean;
 }
 
+/**
+ * Policy list store state
+ */
+export interface PolicyDetailsState {
+  /** Array of policy items  */
+  policyItem: PolicyData;
+  /** data is being retrieved from server */
+  isLoading: boolean;
+  location?: Immutable<EndpointAppLocation>;
+}
+
 export interface GlobalState {
   readonly managementList: ManagementListState;
   readonly alertList: AlertListState;
   readonly policyList: PolicyListState;
+  readonly policyDetails: PolicyDetailsState;
 }
 
 /**

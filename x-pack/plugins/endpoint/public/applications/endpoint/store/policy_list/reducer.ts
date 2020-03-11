@@ -5,7 +5,7 @@
  */
 
 import { Reducer } from 'redux';
-import { PolicyListState } from '../../types';
+import { PolicyListState, PolicyDetailsState } from '../../types';
 import { AppAction } from '../action';
 
 const initialPolicyListState = (): PolicyListState => {
@@ -15,6 +15,23 @@ const initialPolicyListState = (): PolicyListState => {
     pageIndex: 0,
     pageSize: 10,
     total: 0,
+  };
+};
+
+const initialPolicyDetailsState = (): PolicyDetailsState => {
+  return {
+    policyItem: {
+      name: '',
+      total: 0,
+      pending: 0,
+      failed: 0,
+      id: 0,
+      created_by: '',
+      created: '',
+      updated_by: '',
+      updated: '',
+    },
+    isLoading: false,
   };
 };
 
@@ -42,6 +59,28 @@ export const policyListReducer: Reducer<PolicyListState, AppAction> = (
 
   if (action.type === 'userNavigatedFromPage' && action.payload === 'policyListPage') {
     return initialPolicyListState();
+  }
+
+  return state;
+};
+
+export const policyDetailsReducer: Reducer<PolicyDetailsState, AppAction> = (
+  state = initialPolicyDetailsState(),
+  action
+) => {
+  if (action.type === 'serverReturnedPolicyDetailsData') {
+    return {
+      ...state,
+      ...action.payload,
+      isLoading: false,
+    };
+  }
+
+  if (action.type === 'userChangedUrl') {
+    return {
+      ...state,
+      location: action.payload,
+    };
   }
 
   return state;
