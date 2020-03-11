@@ -37,6 +37,14 @@ export function registerExecuteRoute({ router, license }: RouteDependencies) {
           body: response,
         });
       } catch (e) {
+        // Invalid painless script was submitted
+        // Return 200 with error object
+        if (e.body) {
+          return res.ok({
+            body: e.body,
+          });
+        }
+
         if (isEsError(e)) {
           return res.customError({ statusCode: e.statusCode, body: e });
         }
