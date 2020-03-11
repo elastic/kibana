@@ -134,10 +134,12 @@ describe('actions_connectors_list component with items', () => {
       {
         id: 'test',
         name: 'Test',
+        enabled: true,
       },
       {
         id: 'test2',
         name: 'Test2',
+        enabled: true,
       },
     ]);
 

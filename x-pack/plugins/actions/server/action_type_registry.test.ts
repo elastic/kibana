@@ -148,6 +148,7 @@ describe('list()', () => {
         enabled: true,
         enabledInConfig: true,
         enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
       },
     ]);
     expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
