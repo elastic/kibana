@@ -85,6 +85,7 @@ const statusFilters = [
 ] as Array<{ label: string; status: string }>;
 
 const RowActions = React.memo<{ agent: Agent; refresh: () => void }>(({ agent, refresh }) => {
+  const core = useCore();
   const DETAILS_URI = useLink(FLEET_AGENT_DETAIL_PATH);
   const [isOpen, setIsOpen] = useState(false);
   const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
@@ -118,6 +119,7 @@ const RowActions = React.memo<{ agent: Agent; refresh: () => void }>(({ agent, r
           <AgentUnenrollProvider>
             {unenrollAgentsPrompt => (
               <EuiContextMenuItem
+                disabled={!core.application.capabilities.ingestManager.write}
                 icon="cross"
                 onClick={() => {
                   unenrollAgentsPrompt([agent.id], 1, () => {

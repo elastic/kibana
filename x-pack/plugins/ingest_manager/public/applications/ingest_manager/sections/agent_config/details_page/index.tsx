@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import styled from 'styled-components';
-import { useGetOneAgentConfig } from '../../../hooks';
+import { useCore, useGetOneAgentConfig } from '../../../hooks';
 import { Datasource } from '../../../types';
 import { Loading } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
@@ -57,6 +57,7 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
   const {
     params: { configId, tabId = '' },
   } = useRouteMatch<{ configId: string; tabId?: string }>();
+  const core = useCore();
   const agentConfigRequest = useGetOneAgentConfig(configId);
   const agentConfig = agentConfigRequest.data ? agentConfigRequest.data.item : null;
   const { isLoading, error, sendRequest: refreshAgentConfig } = agentConfigRequest;
@@ -318,7 +319,12 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
                             </h2>
                           }
                           actions={
-                            <EuiButton fill iconType="plusInCircle" href={URI.ADD_DATASOURCE}>
+                            <EuiButton
+                              isDisabled={!core.application.capabilities.ingestManager.write}
+                              fill
+                              iconType="plusInCircle"
+                              href={URI.ADD_DATASOURCE}
+                            >
                               <FormattedMessage
                                 id="xpack.ingestManager.configDetails.addDatasourceButtonText"
                                 defaultMessage="Create data source"
@@ -330,7 +336,11 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
                     }
                     search={{
                       toolsRight: [
-                        <EuiButton iconType="plusInCircle" href={URI.ADD_DATASOURCE}>
+                        <EuiButton
+                          isDisabled={!core.application.capabilities.ingestManager.write}
+                          iconType="plusInCircle"
+                          href={URI.ADD_DATASOURCE}
+                        >
                           <FormattedMessage
                             id="xpack.ingestManager.configDetails.addDatasourceButtonText"
                             defaultMessage="Create data source"

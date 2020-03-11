@@ -33,6 +33,7 @@ import {
 } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
 import {
+  useCore,
   useGetAgentConfigs,
   usePagination,
   useLink,
@@ -87,6 +88,7 @@ const DangerEuiContextMenuItem = styled(EuiContextMenuItem)`
 
 const RowActions = React.memo<{ config: AgentConfig; onDelete: () => void }>(
   ({ config, onDelete }) => {
+    const core = useCore();
     const DETAILS_URI = useLink(`${AGENT_CONFIG_DETAILS_PATH}${config.id}`);
     const ADD_DATASOURCE_URI = `${DETAILS_URI}/add-datasource`;
 
@@ -120,6 +122,7 @@ const RowActions = React.memo<{ config: AgentConfig; onDelete: () => void }>(
             </EuiContextMenuItem>,
 
             <EuiContextMenuItem
+              disabled={!core.application.capabilities.ingestManager.write}
               icon="plusInCircle"
               href={ADD_DATASOURCE_URI}
               key="createDataSource"
@@ -130,7 +133,7 @@ const RowActions = React.memo<{ config: AgentConfig; onDelete: () => void }>(
               />
             </EuiContextMenuItem>,
 
-            <EuiContextMenuItem icon="copy" disabled={true} key="copyConfig">
+            <EuiContextMenuItem icon="copy" key="copyConfig">
               <FormattedMessage
                 id="xpack.ingestManager.agentConfigList.copyConfigActionText"
                 defaultMessage="Copy configuration"
@@ -162,6 +165,7 @@ const RowActions = React.memo<{ config: AgentConfig; onDelete: () => void }>(
 
 export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
   // Config information
+  const core = useCore();
   const {
     fleet: { enabled: isFleetEnabled },
   } = useConfig();
@@ -309,6 +313,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
       <EuiButton
         fill
         iconType="plusInCircle"
+        isDisabled={!core.application.capabilities.ingestManager.write}
         onClick={() => setIsCreateAgentConfigFlyoutOpen(true)}
       >
         <FormattedMessage
@@ -317,7 +322,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         />
       </EuiButton>
     ),
-    [setIsCreateAgentConfigFlyoutOpen]
+    [core.application.capabilities.ingestManager.write, setIsCreateAgentConfigFlyoutOpen]
   );
 
   const emptyPrompt = useMemo(
@@ -331,7 +336,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
             />
           </h2>
         }
-        actions={createAgentConfigButton}
+        actions={false ?? createAgentConfigButton}
       />
     ),
     [createAgentConfigButton]

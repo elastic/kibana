@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiTitle, IconType, EuiButton } from '@elastic/eui';
 import { PackageInfo } from '../../../../types';
 import { EPM_PATH } from '../../../../constants';
-import { useLink } from '../../../../hooks';
+import { useCore, useLink } from '../../../../hooks';
 import { IconPanel } from '../../components/icon_panel';
 import { NavButtonBack } from '../../components/nav_button_back';
 import { Version } from '../../components/version';
@@ -34,6 +34,7 @@ type HeaderProps = PackageInfo & { iconType?: IconType };
 
 export function Header(props: HeaderProps) {
   const { iconType, name, title, version } = props;
+  const core = useCore();
   const { toListView } = useLinks();
   // useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }, { text: title }]);
 
@@ -61,7 +62,11 @@ export function Header(props: HeaderProps) {
         <RightColumn>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButton iconType="plusInCircle" href={ADD_DATASOURCE_URI}>
+              <EuiButton
+                isDisabled={!core.application.capabilities.ingestManager.write}
+                iconType="plusInCircle"
+                href={ADD_DATASOURCE_URI}
+              >
                 <FormattedMessage
                   id="xpack.ingestManager.epm.addDatasourceButtonText"
                   defaultMessage="Create data source"
