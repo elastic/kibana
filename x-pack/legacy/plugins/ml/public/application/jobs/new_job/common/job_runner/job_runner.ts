@@ -8,7 +8,7 @@ import { BehaviorSubject } from 'rxjs';
 import { ml } from '../../../../services/ml_api_service';
 import { mlJobService } from '../../../../services/job_service';
 import { JobCreator } from '../job_creator';
-import { DatafeedId, JobId } from '../job_creator/configs';
+import { DatafeedId, JobId } from '../../../../../../common/types/anomaly_detection_jobs';
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
 
 const REFRESH_INTERVAL_MS = 100;

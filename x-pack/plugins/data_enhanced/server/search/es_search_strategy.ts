@@ -36,13 +36,9 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
     const defaultParams = getDefaultSearchParams(config);
     const params = { ...defaultParams, ...request.params };
 
-    const response = await (request.isRollup
+    const rawResponse = await (request.indexType === 'rollup'
       ? rollupSearch(caller, { ...request, params }, options)
       : asyncSearch(caller, { ...request, params }, options));
-
-    const rawResponse = request.isRollup
-      ? (response as SearchResponse<any>)
-      : (response as AsyncSearchResponse<any>).response;
 
     const id = (response as AsyncSearchResponse<any>).id;
     const { total, failed, successful } = rawResponse._shards;
@@ -64,12 +60,13 @@ function asyncSearch(
   request: IEnhancedEsSearchRequest,
   options?: ISearchOptions
 ) {
+  const { body = undefined, index = undefined, ...params } = request.id ? {} : request.params;
+
   // If we have an ID, then just poll for that ID, otherwise send the entire request body
   const method = request.id ? 'GET' : 'POST';
-  const path = request.id ? `_async_search/${request.id}` : `${request.params.index}/_async_search`;
+  const path = request.id ? `_async_search/${request.id}` : `${index}/_async_search`;
 
   // Wait up to 1s for the response to return
-  const { body = undefined, ...params } = request.id ? {} : request.params;
   const query = toSnakeCase({ ...params, waitForCompletion: '1s' });
 
   return caller('transport.request', { method, path, body, query }, options);
@@ -80,9 +77,9 @@ async function rollupSearch(
   request: IEnhancedEsSearchRequest,
   options?: ISearchOptions
 ) {
+  const { body, index, ...params } = request.params;
   const method = 'POST';
-  const path = `${request.params.index}/_rollup_search`;
-  const { body, ...params } = request.params;
+  const path = `${index}/_rollup_search`;
   const query = toSnakeCase(params);
   return caller('transport.request', { method, path, body, query }, options);
 }
