@@ -1,0 +1,82 @@
+[[batch-reindex-queue]]
+=== Batch reindex queue API
+++++
+<titleabbrev>Batch reindex queue</titleabbrev>
+++++
+
+Check the current reindex batch queue.
+
+experimental["The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are experimental."]
+
+[[batch-reindex-queue-request]]
+==== Request
+
+`GET /api/upgrade_assistant/reindex/batch/queue`
+
+[[batch-reindex-queue-request-codes]]
+==== Response code
+
+`200`::
+  Indicates a successful call.
+
+[[batch-reindex-queue-example]]
+==== Example
+
+[source,js]
+--------------------------------------------------
+POST /api/upgrade_assistant/reindex/batch
+{
+  "indexNames": [ <1>
+    "index1",
+    "index2"
+  ]
+}
+--------------------------------------------------
+<1> The order in which the indices are provided here determines the order in which the reindex tasks will be executed.
+
+// KIBANA
+
+The API returns the following:
+
+[source,js]
+--------------------------------------------------
+{
+  "queue": [ <1>
+    {
+      "indexName": "index1",
+      "newIndexName": "reindexed-v8-index2",
+      "status": 3,
+      "lastCompletedStep": 0,
+      "locked": null,
+      "reindexTaskId": null,
+      "reindexTaskPercComplete": null,
+      "errorMessage": null,
+      "runningReindexCount": null,
+      "reindexOptions": {
+        "queueSettings": {
+          "queuedAt": 1583406985489
+        }
+      }
+    },
+    {
+      "indexName": "index2",
+      "newIndexName": "reindexed-v8-index2",
+      "status": 3,
+      "lastCompletedStep": 0,
+      "locked": null,
+      "reindexTaskId": null,
+      "reindexTaskPercComplete": null,
+      "errorMessage": null,
+      "runningReindexCount": null,
+      "reindexOptions": {
+        "queueSettings": {
+          "queuedAt": 1583406987334
+        }
+      }
+    }
+  ]
+}
+--------------------------------------------------
+
+<1> Items in this array indicate reindex tasks at a given point in time
+
