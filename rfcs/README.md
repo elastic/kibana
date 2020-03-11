@@ -138,5 +138,3 @@ who will represent the feature and its progress.
 [Yarn RFC process]: https://github.com/yarnpkg/rfcs
 [Rust RFC process]: https://github.com/rust-lang/rfcs
 [Ember RFC process]: https://github.com/emberjs/rfcs
-
-testing
