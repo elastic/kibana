@@ -29,30 +29,29 @@ async function main() {
       type: 'string',
     },
     auth: {
-      alias: 'auth',
       describe: 'elasticsearch username and password, separated by a colon',
       type: 'string',
     },
     ancestors: {
-      alias: 'a',
+      alias: 'anc',
       describe: 'number of ancestors of origin to create',
       type: 'number',
       default: 3,
     },
     generations: {
-      alias: 'g',
+      alias: 'gen',
       describe: 'number of child generations to create',
       type: 'number',
       default: 3,
     },
     children: {
-      alias: 'c',
+      alias: 'ch',
       describe: 'maximum number of children per node',
       type: 'number',
       default: 3,
     },
     relatedEvents: {
-      alias: 'r',
+      alias: 'related',
       describe: 'number of related events to create for each process event',
       type: 'number',
       default: 5,
@@ -69,8 +68,25 @@ async function main() {
       type: 'number',
       default: 30,
     },
+    numEndpoints: {
+      alias: 'ne',
+      describe: 'number of different endpoints to generate alerts for',
+      type: 'number',
+      default: 1,
+    },
+    alertsPerEndpoint: {
+      alias: 'ape',
+      describe: 'number of resolver trees to make for each endpoint',
+      type: 'number',
+      default: 1,
+    },
+    delete: {
+      alias: 'd',
+      describe: 'delete index before adding new documents',
+      type: 'boolean',
+      default: false,
+    },
   }).argv;
-  const generator = new EndpointDocGenerator(argv.seed);
   const clientOptions: ClientOptions = {
     node: argv.node,
   };
@@ -79,22 +95,32 @@ async function main() {
     clientOptions.auth = { username, password };
   }
   const client = new Client(clientOptions);
-  await client.index({
-    index: argv.index,
-    body: generator.generateEndpointMetadata(),
-  });
+  if (argv.delete) {
+    await client.indices.delete({
+      index: argv.index,
+    });
+  }
+  const generator = new EndpointDocGenerator(argv.seed);
+  for (let i = 0; i < argv.numEndpoints; i++) {
+    await client.index({
+      index: argv.index,
+      body: generator.generateEndpointMetadata(),
+    });
+    for (let j = 0; j < argv.alertsPerEndpoint; j++) {
+      const resolverDocs = generator.generateFullResolverTree(
+        argv.ancestors,
+        argv.generations,
+        argv.children,
+        argv.relatedEvents,
+        argv.percentWithRelated,
+        argv.percentTerminated
+      );
+      const body = resolverDocs
+        .map(doc => [{ index: { _index: argv.index } }, doc])
+        .reduce((array, value) => (array.push(...value), array), []);
 
-  const resolverDocs = generator.generateFullResolverTree(
-    argv.ancestors,
-    argv.generations,
-    argv.children,
-    argv.relatedEvents,
-    argv.percentWithRelated,
-    argv.percentTerminated
-  );
-  const body = resolverDocs
-    .map(doc => [{ index: { _index: argv.index } }, doc])
-    .reduce((array, value) => (array.push(...value), array), []);
-
-  await client.bulk({ body });
+      await client.bulk({ body });
+    }
+    generator.randomizeHostData();
+  }
 }

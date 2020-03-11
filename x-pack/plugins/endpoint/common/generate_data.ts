@@ -90,8 +90,17 @@ export class EndpointDocGenerator {
     this.policy = this.randomChoice(POLICIES);
   }
 
-  public randomizeIPs() {
+  // This function will create new values for all the host fields, so documents from a different endpoint can be created
+  // This provides a convenient way to make documents from multiple endpoints that are all tied to a single seed value
+  public randomizeHostData() {
+    this.hostId = this.seededUUIDv4();
+    this.agentId = this.seededUUIDv4();
+    this.hostname = this.randomHostname();
     this.ip = this.randomArray(3, () => this.randomIP());
+    this.macAddress = this.randomArray(3, () => this.randomMac());
+    this.agentVersion = this.randomVersion();
+    this.os = this.randomChoice(OS);
+    this.policy = this.randomChoice(POLICIES);
   }
 
   public generateEndpointMetadata(ts = new Date().getTime()): EndpointMetadata {
