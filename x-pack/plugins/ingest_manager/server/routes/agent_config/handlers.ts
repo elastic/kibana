@@ -116,7 +116,7 @@ export const createAgentConfigHandler: RequestHandler<
         user: user || undefined,
       }),
       // If needed, retrieve System package information and build a new Datasource for the system package
-      withSysMonitoring ? buildSystemDatasource(soClient) : undefined,
+      withSysMonitoring ? buildSystemDatasource(soClient).catch(() => undefined) : undefined,
     ]);
 
     // Create the system monitoring datasource and add it to config.
