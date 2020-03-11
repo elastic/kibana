@@ -129,6 +129,7 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
       onChange={updateTactic.bind(null, index)}
       fullWidth={false}
       valueOfSelected={camelCase(tacticName)}
+      data-test-subj="mitreTactic"
     />
   );
 
@@ -144,6 +145,7 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow>
           <EuiComboBox
+            data-test-subj="mitreTechniques"
             placeholder={item.tactic.name === 'none' ? '' : i18n.TECHNIQUES_PLACEHOLDER}
             options={options}
             selectedOptions={selectedOptions}
@@ -208,7 +210,7 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
           {values.length - 1 !== index && <EuiSpacer size="s" />}
         </div>
       ))}
-      <MyAddItemButton onClick={addItem} isDisabled={isDisabled}>
+      <MyAddItemButton data-test-subj="addMitre" onClick={addItem} isDisabled={isDisabled}>
         {i18n.ADD_MITRE_ATTACK}
       </MyAddItemButton>
     </MitreContainer>
