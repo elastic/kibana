@@ -33,11 +33,11 @@ interface CasesTableFiltersProps {
 
 const CasesTableFiltersComponent = ({
   onFilterChanged,
-  initial = { search: '', tags: [], state: 'open' },
+  initial = { search: '', tags: [], status: 'open' },
 }: CasesTableFiltersProps) => {
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
-  const [showOpenCases, setShowOpenCases] = useState(initial.state === 'open');
+  const [showOpenCases, setShowOpenCases] = useState(initial.status === 'open');
   const [{ data }] = useGetTags();
 
   const handleSelectedTags = useCallback(
@@ -63,7 +63,7 @@ const CasesTableFiltersComponent = ({
     showOpen => {
       if (showOpen !== showOpenCases) {
         setShowOpenCases(showOpen);
-        onFilterChanged({ state: showOpen ? 'open' : 'closed' });
+        onFilterChanged({ status: showOpen ? 'open' : 'closed' });
       }
     },
     [showOpenCases]

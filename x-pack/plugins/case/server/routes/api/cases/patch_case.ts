@@ -5,19 +5,15 @@
  */
 
 import Boom from 'boom';
-import { difference, get } from 'lodash';
+
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import {
-  CaseAttributes,
-  CasePatchRequestRt,
-  throwErrors,
-  CaseResponseRt,
-} from '../../../../common/api';
+import { CasePatchRequestRt, throwErrors, CaseResponseRt } from '../../../../common/api';
 import { escapeHatch, wrapError, flattenCaseSavedObject } from '../utils';
 import { RouteDeps } from '../types';
+import { getCaseToUpdate } from './helpers';
 
 export function initPatchCaseApi({ caseService, router }: RouteDeps) {
   router.patch(
@@ -43,41 +39,24 @@ export function initPatchCaseApi({ caseService, router }: RouteDeps) {
             'This case has been updated. Please refresh before saving additional updates.'
           );
         }
-        const currentCase: CaseAttributes = myCase.attributes;
-        const updateCase: Partial<CaseAttributes> = Object.entries(query).reduce(
-          (acc, [key, value]) => {
-            const currentValue = get(currentCase, key);
-            if (
-              currentValue != null &&
-              Array.isArray(value) &&
-              Array.isArray(currentValue) &&
-              difference(value, currentValue).length !== 0
-            ) {
-              return {
-                ...acc,
-                [key]: value,
-              };
-            } else if (currentValue != null && value !== currentValue) {
-              return {
-                ...acc,
-                [key]: value,
-              };
-            }
-            return acc;
-          },
-          {}
+
+        const { id: caseId, version, ...updateCaseAttributes } = getCaseToUpdate(
+          myCase.attributes,
+          query
         );
-        if (Object.keys(updateCase).length > 0) {
+
+        if (Object.keys(updateCaseAttributes).length > 0) {
           const updatedBy = await caseService.getUser({ request, response });
           const { full_name, username } = updatedBy;
           const updatedCase = await caseService.patchCase({
             client: context.core.savedObjects.client,
-            caseId: query.id,
+            caseId,
             updatedAttributes: {
-              ...updateCase,
+              ...updateCaseAttributes,
               updated_at: new Date().toISOString(),
               updated_by: { full_name, username },
             },
+            version,
           });
           return response.ok({
             body: CaseResponseRt.encode(

@@ -12,8 +12,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import {
   CaseResponse,
   CaseResponseRt,
-  CasesResponse,
-  CasesResponseRt,
+  CasesFindResponse,
+  CasesFindResponseRt,
   throwErrors,
   CommentResponse,
   CommentResponseRt,
@@ -46,7 +46,7 @@ export const convertToCamelCase = <T, U extends {}>(snakeCase: T): U =>
     return acc;
   }, {} as U);
 
-export const convertAllCasesToCamel = (snakeCases: CasesResponse): AllCases => ({
+export const convertAllCasesToCamel = (snakeCases: CasesFindResponse): AllCases => ({
   cases: snakeCases.cases.map(snakeCase => convertToCamelCase<CaseResponse, Case>(snakeCase)),
   page: snakeCases.page,
   perPage: snakeCases.per_page,
@@ -58,8 +58,8 @@ export const createToasterPlainError = (message: string) => new ToasterError([me
 export const decodeCaseResponse = (respCase?: CaseResponse) =>
   pipe(CaseResponseRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
 
-export const decodeCasesResponse = (respCases?: CasesResponse) =>
-  pipe(CasesResponseRt.decode(respCases), fold(throwErrors(createToasterPlainError), identity));
+export const decodeCasesFindResponse = (respCases?: CasesFindResponse) =>
+  pipe(CasesFindResponseRt.decode(respCases), fold(throwErrors(createToasterPlainError), identity));
 
 export const decodeCommentResponse = (respComment?: CommentResponse) =>
   pipe(CommentResponseRt.decode(respComment), fold(throwErrors(createToasterPlainError), identity));

@@ -6,7 +6,7 @@
 
 import {
   CaseResponse,
-  CasesResponse,
+  CasesFindResponse,
   CaseRequest,
   CommentRequest,
   CommentResponse,
@@ -18,7 +18,7 @@ import {
   convertToCamelCase,
   convertAllCasesToCamel,
   decodeCaseResponse,
-  decodeCasesResponse,
+  decodeCasesFindResponse,
   decodeCommentResponse,
 } from './utils';
 
@@ -44,7 +44,7 @@ export const getTags = async (): Promise<string[]> => {
 export const getCases = async ({
   filterOptions = {
     search: '',
-    state: 'open',
+    status: 'open',
     tags: [],
   },
   queryParams = {
@@ -54,8 +54,8 @@ export const getCases = async ({
     sortOrder: 'desc',
   },
 }: FetchCasesProps): Promise<AllCases> => {
-  const stateFilter = `${CaseSavedObjectType}.attributes.state: ${filterOptions.state}`;
-  const tags = [
+  const stateFilter = `${CaseSavedObjectType}.attributes.status: ${filterOptions.status}`;
+  const filters = [
     ...(filterOptions.tags?.reduce(
       (acc, t) => [...acc, `${CaseSavedObjectType}.attributes.tags: ${t}`],
       [stateFilter]
@@ -63,14 +63,14 @@ export const getCases = async ({
   ];
   const query = {
     ...queryParams,
-    ...(tags.length > 0 ? { filter: tags.join(' AND ') } : {}),
+    ...(filters.length > 0 ? { filter: filters.join(' AND ') } : {}),
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
   };
-  const response = await KibanaServices.get().http.fetch<CasesResponse>(`${CASES_URL}/_find`, {
+  const response = await KibanaServices.get().http.fetch<CasesFindResponse>(`${CASES_URL}/_find`, {
     method: 'GET',
     query,
   });
-  return convertAllCasesToCamel(decodeCasesResponse(response));
+  return convertAllCasesToCamel(decodeCasesFindResponse(response));
 };
 
 export const postCase = async (newCase: CaseRequest): Promise<Case> => {

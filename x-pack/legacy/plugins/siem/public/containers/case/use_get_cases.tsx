@@ -122,7 +122,7 @@ export const useGetCases = (): UseGetCases => {
     data: initialData,
     filterOptions: {
       search: '',
-      state: 'open',
+      status: 'open',
       tags: [],
     },
     isError: false,
@@ -192,7 +192,7 @@ export const useGetCases = (): UseGetCases => {
       dispatch({ type: 'FETCH_INIT', payload: 'caseCount' });
       try {
         const response = await getCases({
-          filterOptions: { search: '', state: caseState, tags: [] },
+          filterOptions: { search: '', status: caseState, tags: [] },
         });
         if (!didCancel) {
           dispatch({

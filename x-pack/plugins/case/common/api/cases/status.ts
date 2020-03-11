@@ -4,6 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './case';
-export * from './comment';
-export * from './status';
+import * as rt from 'io-ts';
+
+export const CasesStatusResponseRt = rt.type({
+  countOpenCases: rt.number,
+  countClosedCases: rt.number,
+});
+
+export type CasesStatusResponse = rt.TypeOf<typeof CasesStatusResponseRt>;

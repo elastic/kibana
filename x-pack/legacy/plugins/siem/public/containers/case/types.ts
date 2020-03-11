@@ -19,7 +19,7 @@ export interface Case {
   createdAt: string;
   createdBy: ElasticUser;
   description: string;
-  state: string;
+  status: string;
   tags: string[];
   title: string;
   updatedAt: string;
@@ -35,7 +35,7 @@ export interface QueryParams {
 
 export interface FilterOptions {
   search: string;
-  state: string;
+  status: string;
   tags: string[];
 }
 

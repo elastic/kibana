@@ -15,7 +15,7 @@ import {
 import {
   CaseRequest,
   CaseResponse,
-  CasesResponse,
+  CasesFindResponse,
   CaseAttributes,
   CommentResponse,
   CommentsResponse,
@@ -71,11 +71,17 @@ export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> 
   };
 }
 
-export const transformCases = (cases: SavedObjectsFindResponse<CaseAttributes>): CasesResponse => ({
+export const transformCases = (
+  cases: SavedObjectsFindResponse<CaseAttributes>,
+  countOpenCases: number,
+  countClosedCases: number
+): CasesFindResponse => ({
   page: cases.page,
   per_page: cases.per_page,
   total: cases.total,
   cases: flattenCaseSavedObjects(cases.saved_objects),
+  countOpenCases,
+  countClosedCases,
 });
 
 export const flattenCaseSavedObjects = (
@@ -121,8 +127,8 @@ export const flattenCommentSavedObject = (
 
 export const sortToSnake = (sortField: string): SortFieldCase => {
   switch (sortField) {
-    case 'state':
-      return SortFieldCase.state;
+    case 'status':
+      return SortFieldCase.status;
     case 'createdAt':
     case 'created_at':
       return SortFieldCase.createdAt;

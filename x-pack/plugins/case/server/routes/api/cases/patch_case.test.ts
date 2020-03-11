@@ -27,7 +27,7 @@ describe('PATCH case', () => {
       method: 'patch',
       body: {
         id: 'mock-id-1',
-        state: 'closed',
+        status: 'closed',
         version: 'WzAsMV0=',
       },
     });
@@ -41,7 +41,7 @@ describe('PATCH case', () => {
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(typeof response.payload.updated_at).toBe('string');
-    expect(response.payload.state).toEqual('closed');
+    expect(response.payload.status).toEqual('closed');
   });
   it(`Fails with 409 if version does not match`, async () => {
     const request = httpServerMock.createKibanaRequest({
@@ -49,7 +49,7 @@ describe('PATCH case', () => {
       method: 'patch',
       body: {
         id: 'mock-id-1',
-        case: { state: 'closed' },
+        case: { status: 'closed' },
         version: 'badv=',
       },
     });
@@ -69,7 +69,7 @@ describe('PATCH case', () => {
       method: 'patch',
       body: {
         id: 'mock-id-1',
-        case: { state: 'open' },
+        case: { status: 'open' },
         version: 'WzAsMV0=',
       },
     });
@@ -90,7 +90,7 @@ describe('PATCH case', () => {
       method: 'patch',
       body: {
         id: 'mock-id-does-not-exist',
-        state: 'closed',
+        status: 'closed',
         version: 'WzAsMV0=',
       },
     });

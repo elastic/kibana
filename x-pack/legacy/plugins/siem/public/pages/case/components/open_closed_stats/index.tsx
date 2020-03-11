@@ -11,25 +11,25 @@ import { CaseCount } from '../../../../containers/case/use_get_cases';
 
 export interface Props {
   caseCount: CaseCount;
-  caseState: 'open' | 'closed';
+  caseStatus: 'open' | 'closed';
   getCaseCount: Dispatch<keyof CaseCount>;
   isLoading: boolean;
 }
 
 export const OpenClosedStats = React.memo<Props>(
-  ({ caseCount, caseState, getCaseCount, isLoading }) => {
+  ({ caseCount, caseStatus, getCaseCount, isLoading }) => {
     useEffect(() => {
-      getCaseCount(caseState);
-    }, [caseState]);
+      getCaseCount(caseStatus);
+    }, [caseStatus]);
 
     const openClosedStats = useMemo(
       () => [
         {
-          title: caseState === 'open' ? i18n.OPEN_CASES : i18n.CLOSED_CASES,
-          description: isLoading ? <EuiLoadingSpinner /> : caseCount[caseState],
+          title: caseStatus === 'open' ? i18n.OPEN_CASES : i18n.CLOSED_CASES,
+          description: isLoading ? <EuiLoadingSpinner /> : caseCount[caseStatus],
         },
       ],
-      [caseCount, caseState, isLoading]
+      [caseCount, caseStatus, isLoading]
     );
     return <EuiDescriptionList textStyle="reverse" listItems={openClosedStats} />;
   }

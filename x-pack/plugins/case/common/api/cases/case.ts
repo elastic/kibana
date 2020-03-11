@@ -11,7 +11,7 @@ import { UserRT } from '../user';
 
 const CaseBasicRt = rt.type({
   description: rt.string,
-  state: rt.union([rt.literal('open'), rt.literal('closed')]),
+  status: rt.union([rt.literal('open'), rt.literal('closed')]),
   tags: rt.array(rt.string),
   title: rt.string,
 });
@@ -40,8 +40,10 @@ export const CaseResponseRt = rt.intersection([
   }),
 ]);
 
-export const CasesResponseRt = rt.type({
+export const CasesFindResponseRt = rt.type({
   cases: rt.array(CaseResponseRt),
+  countOpenCases: rt.number,
+  countClosedCases: rt.number,
   page: rt.number,
   per_page: rt.number,
   total: rt.number,
@@ -52,8 +54,13 @@ export const CasePatchRequestRt = rt.intersection([
   rt.type({ id: rt.string, version: rt.string }),
 ]);
 
+export const CasesPatchRequestRt = rt.array(CasePatchRequestRt);
+export const CasesResponseRt = rt.array(CaseResponseRt);
+
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
 export type CaseRequest = rt.TypeOf<typeof CaseRequestRt>;
 export type CaseResponse = rt.TypeOf<typeof CaseResponseRt>;
 export type CasesResponse = rt.TypeOf<typeof CasesResponseRt>;
+export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
+export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;

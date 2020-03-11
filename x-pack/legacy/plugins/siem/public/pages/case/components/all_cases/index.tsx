@@ -119,11 +119,11 @@ export const AllCases = React.memo(() => {
 
   const actions = useMemo(
     () =>
-      getActions({ caseStatus: filterOptions.state, dispatchUpdate: dispatchUpdateCaseProperty }),
-    [filterOptions.state, dispatchUpdateCaseProperty]
+      getActions({ caseStatus: filterOptions.status, dispatchUpdate: dispatchUpdateCaseProperty }),
+    [filterOptions.status, dispatchUpdateCaseProperty]
   );
 
-  const memoizedGetCasesColumns = useMemo(() => getCasesColumns(actions), [filterOptions.state]);
+  const memoizedGetCasesColumns = useMemo(() => getCasesColumns(actions), [filterOptions.status]);
   const memoizedPagination = useMemo(
     () => ({
       pageIndex: queryParams.page - 1,
@@ -140,11 +140,11 @@ export const AllCases = React.memo(() => {
         items={getBulkItems({
           closePopover,
           selectedCases,
-          caseStatus: filterOptions.state,
+          caseStatus: filterOptions.status,
         })}
       />
     ),
-    [selectedCases, filterOptions.state]
+    [selectedCases, filterOptions.status]
   );
 
   const sorting: EuiTableSortingType<Case> = {
@@ -170,7 +170,7 @@ export const AllCases = React.memo(() => {
           <EuiFlexItem grow={false}>
             <OpenClosedStats
               caseCount={caseCount}
-              caseState={'open'}
+              caseStatus={'open'}
               getCaseCount={getCaseCount}
               isLoading={loading.indexOf('caseCount') > -1}
             />
@@ -178,7 +178,7 @@ export const AllCases = React.memo(() => {
           <FlexItemDivider grow={false}>
             <OpenClosedStats
               caseCount={caseCount}
-              caseState={'closed'}
+              caseStatus={'closed'}
               getCaseCount={getCaseCount}
               isLoading={loading.indexOf('caseCount') > -1}
             />
@@ -204,7 +204,7 @@ export const AllCases = React.memo(() => {
           initial={{
             search: filterOptions.search,
             tags: filterOptions.tags,
-            state: filterOptions.state,
+            status: filterOptions.status,
           }}
         />
         {isCasesLoading && isDataEmpty ? (

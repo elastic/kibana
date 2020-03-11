@@ -35,7 +35,7 @@ export const getActions = ({
         name: i18n.CLOSE_CASE,
         onClick: (theCase: Case) =>
           dispatchUpdate({
-            updateKey: 'state',
+            updateKey: 'status',
             updateValue: 'closed',
             caseId: theCase.id,
             version: theCase.version,
@@ -49,7 +49,7 @@ export const getActions = ({
         name: i18n.REOPEN_CASE,
         onClick: (theCase: Case) =>
           dispatchUpdate({
-            updateKey: 'state',
+            updateKey: 'status',
             updateValue: 'open',
             caseId: theCase.id,
             version: theCase.version,
