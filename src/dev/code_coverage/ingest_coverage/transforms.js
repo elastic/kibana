@@ -50,7 +50,8 @@ export const addTimeStamp = ts => obj => ({
   '@timestamp': ts,
 });
 
-const captureAfterJobNameAndRootFolder = /.*elastic\+kibana\+code-coverage\/kibana(.*$)/;
+// const captureAfterJobNameAndRootFolder = /.*elastic\+kibana\+code-coverage\/kibana(.*$)/;
+const captureAfterJobNameAndRootFolder = /.*kibana(.*$)/;
 const afterJobNameAndRootFolder = x => captureAfterJobNameAndRootFolder.exec(x)[1];
 const fixFront = x => afterJobNameAndRootFolder(x);
 const setTotal = x => obj =>

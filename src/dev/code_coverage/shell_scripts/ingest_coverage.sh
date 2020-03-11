@@ -19,7 +19,7 @@ ES_HOST=https://super:changeme@142fea2d3047486e925eb8b223559cae.europe-west1.gcp
 #ES_HOST="https://${USER_FROM_VAULT}:${PASS_FROM_VAULT}/${HOST_FROM_VAULT}"
 export ES_HOST
 
-STATIC_SITE_URL_BASE='https://kibana-coverage.elastic.dev/jobs/elastic+kibana+code-coverage'
+STATIC_SITE_URL_BASE='https://kibana-coverage.elastic.dev'
 export STATIC_SITE_URL_BASE
 
 for x in jest functional mocha; do
