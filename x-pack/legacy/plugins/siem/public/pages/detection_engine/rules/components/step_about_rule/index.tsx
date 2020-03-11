@@ -126,7 +126,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   ) : (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
-        <Form form={form} data-test-subj="stepAboutRule">
+        <Form form={form}>
           <CommonUseField
             path="name"
             componentProps={{
@@ -198,6 +198,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
           </TagContainer>
           <EuiSpacer size="m" />
           <AdvancedSettingsAccordion
+            data-test-subj="advancedSettings"
             id="advancedSettingsAccordion"
             buttonContent={AdvancedSettingsAccordionButton}
           >
@@ -269,7 +270,12 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             responsive={false}
           >
             <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
+              <EuiButton
+                data-test-subj="about-continue"
+                fill
+                onClick={onSubmit}
+                isDisabled={isLoading}
+              >
                 {RuleI18n.CONTINUE}
               </EuiButton>
             </EuiFlexItem>

@@ -21,7 +21,7 @@ import { AnomalyDetectionTable } from './table';
 import { ml } from '../../../services/ml_api_service';
 import { getGroupsFromJobs, getStatsBarData, getJobsWithTimerange } from './utils';
 import { Dictionary } from '../../../../../common/types/common';
-import { MlSummaryJobs, MlSummaryJob } from '../../../../../common/types/jobs';
+import { MlSummaryJobs, MlSummaryJob } from '../../../../../common/types/anomaly_detection_jobs';
 
 export type GroupsDictionary = Dictionary<Group>;
 

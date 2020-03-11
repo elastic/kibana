@@ -5,6 +5,7 @@
  */
 
 import {
+  CREATE_NEW_RULE_BTN,
   LOAD_PREBUILT_RULES_BTN,
   LOADING_INITIAL_PREBUILT_RULES_TABLE,
   LOADING_SPINNER,
@@ -16,6 +17,22 @@ import {
 export const changeToThreeHundredRowsPerPage = () => {
   cy.get(PAGINATION_POPOVER_BTN).click({ force: true });
   cy.get(THREE_HUNDRED_ROWS).click();
+};
+
+export const filterByCustomRules = () => {
+  cy.get('[data-test-subj="show-custom-rules-filter-button"]').click({ force: true });
+  cy.get('[data-test-subj="loading-spinner"]').should('exist');
+  cy.get('[data-test-subj="loading-spinner"]').should('not.exist');
+};
+
+export const goToCreateNewRule = () => {
+  cy.get(CREATE_NEW_RULE_BTN).click({ force: true });
+};
+
+export const goToRuleDetails = () => {
+  cy.get('[data-test-subj="ruleName"]').click({ force: true });
+  cy.get('.euiLoadingSpinner').should('exist');
+  cy.get('.euiLoadingSpinner').should('not.exist');
 };
 
 export const loadPrebuiltDetectionRules = () => {

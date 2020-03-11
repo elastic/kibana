@@ -24,7 +24,7 @@ import {
   SectionLinks,
   SectionLink,
 } from '../../../../observability/public';
-import { usePrefixPathWithBasepath } from '../../hooks/use_prefix_path_with_basepath';
+import { useLinkProps } from '../../hooks/use_link_props';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -46,10 +46,9 @@ export const NodeContextMenu: React.FC<Props> = ({
   nodeType,
   popoverPosition,
 }) => {
-  const urlPrefixer = usePrefixPathWithBasepath();
-  const uiCapabilities = useKibana().services.application?.capabilities;
   const inventoryModel = findInventoryModel(nodeType);
   const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
+  const uiCapabilities = useKibana().services.application?.capabilities;
   // Due to the changing nature of the fields between APM and this UI,
   // We need to have some exceptions until 7.0 & ECS is finalized. Reference
   // #26620 for the details for these fields.
@@ -81,19 +80,37 @@ export const NodeContextMenu: React.FC<Props> = ({
     return { label: '', value: '' };
   }, [nodeType, node.ip, node.id, options.fields]);
 
+  const nodeLogsMenuItemLinkProps = useLinkProps({
+    app: 'logs',
+    ...getNodeLogsUrl({
+      nodeType,
+      nodeId: node.id,
+      time: currentTime,
+    }),
+  });
+  const nodeDetailMenuItemLinkProps = useLinkProps({
+    ...getNodeDetailUrl({
+      nodeType,
+      nodeId: node.id,
+      from: nodeDetailFrom,
+      to: currentTime,
+    }),
+  });
+  const apmTracesMenuItemLinkProps = useLinkProps({
+    app: 'apm',
+    hash: 'traces',
+    search: {
+      kuery: `${apmField}:"${node.id}"`,
+    },
+  });
+  const uptimeMenuItemLinkProps = useLinkProps(createUptimeLink(options, nodeType, node));
+
   const nodeLogsMenuItem: SectionLinkProps = {
     label: i18n.translate('xpack.infra.nodeContextMenu.viewLogsName', {
       defaultMessage: '{inventoryName} logs',
       values: { inventoryName: inventoryModel.singularDisplayName },
     }),
-    href: urlPrefixer(
-      'logs',
-      getNodeLogsUrl({
-        nodeType,
-        nodeId: node.id,
-        time: currentTime,
-      })
-    ),
+    ...nodeLogsMenuItemLinkProps,
     'data-test-subj': 'viewLogsContextMenuItem',
     isDisabled: !showLogsLink,
   };
@@ -103,15 +120,7 @@ export const NodeContextMenu: React.FC<Props> = ({
       defaultMessage: '{inventoryName} metrics',
       values: { inventoryName: inventoryModel.singularDisplayName },
     }),
-    href: urlPrefixer(
-      'metrics',
-      getNodeDetailUrl({
-        nodeType,
-        nodeId: node.id,
-        from: nodeDetailFrom,
-        to: currentTime,
-      })
-    ),
+    ...nodeDetailMenuItemLinkProps,
     isDisabled: !showDetail,
   };
 
@@ -120,7 +129,7 @@ export const NodeContextMenu: React.FC<Props> = ({
       defaultMessage: '{inventoryName} APM traces',
       values: { inventoryName: inventoryModel.singularDisplayName },
     }),
-    href: urlPrefixer('apm', `#traces?_g=()&kuery=${apmField}:"${node.id}"`),
+    ...apmTracesMenuItemLinkProps,
     'data-test-subj': 'viewApmTracesContextMenuItem',
     isDisabled: !showAPMTraceLink,
   };
@@ -130,7 +139,7 @@ export const NodeContextMenu: React.FC<Props> = ({
       defaultMessage: '{inventoryName} in Uptime',
       values: { inventoryName: inventoryModel.singularDisplayName },
     }),
-    href: urlPrefixer('uptime', createUptimeLink(options, nodeType, node)),
+    ...uptimeMenuItemLinkProps,
     isDisabled: !showUptimeLink,
   };
 
@@ -163,28 +172,10 @@ export const NodeContextMenu: React.FC<Props> = ({
             </SectionSubtitle>
           )}
           <SectionLinks>
-            <SectionLink
-              data-test-subj="viewLogsContextMenuItem"
-              label={nodeLogsMenuItem.label}
-              href={nodeLogsMenuItem.href}
-              isDisabled={nodeLogsMenuItem.isDisabled}
-            />
-            <SectionLink
-              label={nodeDetailMenuItem.label}
-              href={nodeDetailMenuItem.href}
-              isDisabled={nodeDetailMenuItem.isDisabled}
-            />
-            <SectionLink
-              label={apmTracesMenuItem.label}
-              href={apmTracesMenuItem.href}
-              data-test-subj="viewApmTracesContextMenuItem"
-              isDisabled={apmTracesMenuItem.isDisabled}
-            />
-            <SectionLink
-              label={uptimeMenuItem.label}
-              href={uptimeMenuItem.href}
-              isDisabled={uptimeMenuItem.isDisabled}
-            />
+            <SectionLink data-test-subj="viewLogsContextMenuItem" {...nodeLogsMenuItem} />
+            <SectionLink {...nodeDetailMenuItem} />
+            <SectionLink data-test-subj="viewApmTracesContextMenuItem" {...apmTracesMenuItem} />
+            <SectionLink {...uptimeMenuItem} />
           </SectionLinks>
         </Section>
       </div>

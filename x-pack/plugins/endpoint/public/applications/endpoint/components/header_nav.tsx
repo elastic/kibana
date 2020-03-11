@@ -55,7 +55,6 @@ export const HeaderNavigation: React.FunctionComponent<{ basename: string }> = R
       return tabs.map((tab, index) => {
         return (
           <EuiTab
-            data-testid={`${tab.id}EndpointTab`}
             data-test-subj={`${tab.id}EndpointTab`}
             key={index}
             href={`${basename}${tab.href}`}

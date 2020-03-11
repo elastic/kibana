@@ -12495,7 +12495,6 @@
     "xpack.transform.transformList.startModalTitle": "启动 {transformId}",
     "xpack.transform.transformList.startTransformErrorMessage": "启动转换 {transformId} 时发生错误",
     "xpack.transform.transformList.startTransformSuccessMessage": "启动转换 {transformId} 的请求已确认。",
-    "xpack.transform.transformList.stepDetails.previewPane.errorMessage": "无法加载预览",
     "xpack.transform.transformList.stopActionName": "停止",
     "xpack.transform.transformList.stoppedTransformBulkToolTip": "一个或多个选定数据帧转换已停止。",
     "xpack.transform.transformList.stoppedTransformToolTip": "{transformId} 已停止。",

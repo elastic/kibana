@@ -7,7 +7,7 @@
 import { transformActionParams } from './transform_action_params';
 
 test('skips non string parameters', () => {
-  const params = {
+  const actionParams = {
     boolean: true,
     number: 1,
     empty1: null,
@@ -15,10 +15,13 @@ test('skips non string parameters', () => {
     date: '2019-02-12T21:01:22.479Z',
   };
   const result = transformActionParams({
-    params,
+    actionParams,
     context: {},
     state: {},
     alertId: '1',
+    alertName: 'alert-name',
+    tags: ['tag-A', 'tag-B'],
+    spaceId: 'spaceId-A',
     alertInstanceId: '2',
   });
   expect(result).toMatchInlineSnapshot(`
@@ -33,15 +36,18 @@ test('skips non string parameters', () => {
 });
 
 test('missing parameters get emptied out', () => {
-  const params = {
+  const actionParams = {
     message1: '{{context.value}}',
     message2: 'This message "{{context.value2}}" is missing',
   };
   const result = transformActionParams({
-    params,
+    actionParams,
     context: {},
     state: {},
     alertId: '1',
+    alertName: 'alert-name',
+    tags: ['tag-A', 'tag-B'],
+    spaceId: 'spaceId-A',
     alertInstanceId: '2',
   });
   expect(result).toMatchInlineSnapshot(`
@@ -53,14 +59,17 @@ test('missing parameters get emptied out', () => {
 });
 
 test('context parameters are passed to templates', () => {
-  const params = {
+  const actionParams = {
     message: 'Value "{{context.foo}}" exists',
   };
   const result = transformActionParams({
-    params,
+    actionParams,
     state: {},
     context: { foo: 'fooVal' },
     alertId: '1',
+    alertName: 'alert-name',
+    tags: ['tag-A', 'tag-B'],
+    spaceId: 'spaceId-A',
     alertInstanceId: '2',
   });
   expect(result).toMatchInlineSnapshot(`
@@ -71,14 +80,17 @@ test('context parameters are passed to templates', () => {
 });
 
 test('state parameters are passed to templates', () => {
-  const params = {
+  const actionParams = {
     message: 'Value "{{state.bar}}" exists',
   };
   const result = transformActionParams({
-    params,
+    actionParams,
     state: { bar: 'barVal' },
     context: {},
     alertId: '1',
+    alertName: 'alert-name',
+    tags: ['tag-A', 'tag-B'],
+    spaceId: 'spaceId-A',
     alertInstanceId: '2',
   });
   expect(result).toMatchInlineSnapshot(`
@@ -89,14 +101,17 @@ test('state parameters are passed to templates', () => {
 });
 
 test('alertId is passed to templates', () => {
-  const params = {
+  const actionParams = {
     message: 'Value "{{alertId}}" exists',
   };
   const result = transformActionParams({
-    params,
+    actionParams,
     state: {},
     context: {},
     alertId: '1',
+    alertName: 'alert-name',
+    tags: ['tag-A', 'tag-B'],
+    spaceId: 'spaceId-A',
     alertInstanceId: '2',
   });
   expect(result).toMatchInlineSnapshot(`
@@ -106,15 +121,122 @@ test('alertId is passed to templates', () => {
   `);
 });
 
-test('alertInstanceId is passed to templates', () => {
-  const params = {
-    message: 'Value "{{alertInstanceId}}" exists',
+test('alertName is passed to templates', () => {
+  const actionParams = {
+    message: 'Value "{{alertName}}" exists',
   };
   const result = transformActionParams({
-    params,
+    actionParams,
     state: {},
     context: {},
     alertId: '1',
+    alertName: 'alert-name',
+    tags: ['tag-A', 'tag-B'],
+    spaceId: 'spaceId-A',
+    alertInstanceId: '2',
+  });
+  expect(result).toMatchInlineSnapshot(`
+    Object {
+      "message": "Value \\"alert-name\\" exists",
+    }
+  `);
+});
+
+test('tags is passed to templates', () => {
+  const actionParams = {
+    message: 'Value "{{tags}}" exists',
+  };
+  const result = transformActionParams({
+    actionParams,
+    state: {},
+    context: {},
+    alertId: '1',
+    alertName: 'alert-name',
+    tags: ['tag-A', 'tag-B'],
+    spaceId: 'spaceId-A',
+    alertInstanceId: '2',
+  });
+  expect(result).toMatchInlineSnapshot(`
+    Object {
+      "message": "Value \\"tag-A,tag-B\\" exists",
+    }
+  `);
+});
+
+test('undefined tags is passed to templates', () => {
+  const actionParams = {
+    message: 'Value "{{tags}}" is undefined and renders as empty string',
+  };
+  const result = transformActionParams({
+    actionParams,
+    state: {},
+    context: {},
+    alertId: '1',
+    alertName: 'alert-name',
+    spaceId: 'spaceId-A',
+    alertInstanceId: '2',
+  });
+  expect(result).toMatchInlineSnapshot(`
+    Object {
+      "message": "Value \\"\\" is undefined and renders as empty string",
+    }
+  `);
+});
+
+test('empty tags is passed to templates', () => {
+  const actionParams = {
+    message: 'Value "{{tags}}" is an empty array and renders as empty string',
+  };
+  const result = transformActionParams({
+    actionParams,
+    state: {},
+    context: {},
+    alertId: '1',
+    alertName: 'alert-name',
+    tags: [],
+    spaceId: 'spaceId-A',
+    alertInstanceId: '2',
+  });
+  expect(result).toMatchInlineSnapshot(`
+    Object {
+      "message": "Value \\"\\" is an empty array and renders as empty string",
+    }
+  `);
+});
+
+test('spaceId is passed to templates', () => {
+  const actionParams = {
+    message: 'Value "{{spaceId}}" exists',
+  };
+  const result = transformActionParams({
+    actionParams,
+    state: {},
+    context: {},
+    alertId: '1',
+    alertName: 'alert-name',
+    tags: ['tag-A', 'tag-B'],
+    spaceId: 'spaceId-A',
+    alertInstanceId: '2',
+  });
+  expect(result).toMatchInlineSnapshot(`
+    Object {
+      "message": "Value \\"spaceId-A\\" exists",
+    }
+  `);
+});
+
+test('alertInstanceId is passed to templates', () => {
+  const actionParams = {
+    message: 'Value "{{alertInstanceId}}" exists',
+  };
+  const result = transformActionParams({
+    actionParams,
+    state: {},
+    context: {},
+    alertId: '1',
+    alertName: 'alert-name',
+    tags: ['tag-A', 'tag-B'],
+    spaceId: 'spaceId-A',
     alertInstanceId: '2',
   });
   expect(result).toMatchInlineSnapshot(`
@@ -125,16 +247,19 @@ test('alertInstanceId is passed to templates', () => {
 });
 
 test('works recursively', () => {
-  const params = {
+  const actionParams = {
     body: {
       message: 'State: "{{state.value}}", Context: "{{context.value}}"',
     },
   };
   const result = transformActionParams({
-    params,
+    actionParams,
     state: { value: 'state' },
     context: { value: 'context' },
     alertId: '1',
+    alertName: 'alert-name',
+    tags: ['tag-A', 'tag-B'],
+    spaceId: 'spaceId-A',
     alertInstanceId: '2',
   });
   expect(result).toMatchInlineSnapshot(`
@@ -147,16 +272,19 @@ test('works recursively', () => {
 });
 
 test('works recursively with arrays', () => {
-  const params = {
+  const actionParams = {
     body: {
       messages: ['State: "{{state.value}}", Context: "{{context.value}}"'],
     },
   };
   const result = transformActionParams({
-    params,
+    actionParams,
     state: { value: 'state' },
     context: { value: 'context' },
     alertId: '1',
+    alertName: 'alert-name',
+    tags: ['tag-A', 'tag-B'],
+    spaceId: 'spaceId-A',
     alertInstanceId: '2',
   });
   expect(result).toMatchInlineSnapshot(`
