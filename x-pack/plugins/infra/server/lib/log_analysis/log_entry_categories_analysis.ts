@@ -519,8 +519,8 @@ export class LogEntryCategoriesAnalysis {
 
     return {
       examples: hits.map(hit => ({
-        dataset: hit._source['event.dataset'] ?? '',
-        message: hit._source.message,
+        dataset: hit._source.event?.dataset ?? '',
+        message: hit._source.message ?? '',
         timestamp: hit.sort[0],
       })),
       timing: {

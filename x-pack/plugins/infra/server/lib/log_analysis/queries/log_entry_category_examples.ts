@@ -55,8 +55,10 @@ export const createLogEntryCategoryExamplesQuery = (
 });
 
 export const logEntryCategoryExampleHitRT = rt.type({
-  _source: rt.type({
-    'event.dataset': rt.union([rt.string, rt.undefined]),
+  _source: rt.partial({
+    event: rt.partial({
+      dataset: rt.string,
+    }),
     message: rt.string,
   }),
   sort: rt.tuple([rt.number]),
