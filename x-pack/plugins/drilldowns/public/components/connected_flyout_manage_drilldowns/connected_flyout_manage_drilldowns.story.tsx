@@ -23,7 +23,7 @@ const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
         return [dashboardFactory, urlFactory];
       },
     },
-  },
+  } as any,
   storage: new Storage(new StubBrowserStorage()),
 });
 

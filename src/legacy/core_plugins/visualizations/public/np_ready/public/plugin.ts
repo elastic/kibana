@@ -109,7 +109,7 @@ export class VisualizationsPlugin
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<VisualizationsStartDeps>,
     { expressions, embeddable, usageCollection, data }: VisualizationsSetupDeps
   ): VisualizationsSetup {
     setUISettings(core.uiSettings);
@@ -118,7 +118,7 @@ export class VisualizationsPlugin
     expressions.registerFunction(visualizationFunction);
     expressions.registerRenderer(visualizationRenderer);
 
-    const embeddableFactory = new VisualizeEmbeddableFactory();
+    const embeddableFactory = new VisualizeEmbeddableFactory(core.getStartServices);
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 
     return {

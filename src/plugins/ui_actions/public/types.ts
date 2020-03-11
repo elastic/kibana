@@ -19,10 +19,12 @@
 
 import { ActionInternal } from './actions/action_internal';
 import { TriggerInternal } from './triggers/trigger_internal';
+import { AnyActionFactory } from './actions/action_factory';
 
 export type TriggerRegistry = Map<TriggerId, TriggerInternal<any>>;
 export type ActionRegistry = Map<string, ActionInternal<any>>;
 export type TriggerToActionsRegistry = Map<TriggerId, string[]>;
+export type ActionFactoryRegistry = Map<string, AnyActionFactory>;
 
 const DEFAULT_TRIGGER = '';
 

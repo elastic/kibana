@@ -476,4 +476,10 @@ describe('UiActionsService', () => {
       );
     });
   });
+
+  describe('action factories', () => {
+    test.todo('.getActionFactories() returns empty array if no action factories registered');
+    test.todo('can register an action factory');
+    test.todo('can retrieve all action factories');
+  });
 });

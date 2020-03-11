@@ -48,6 +48,7 @@ import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { VisSavedObject } from '../types';
+import { VisualizationsStartDeps } from '../plugin';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -58,6 +59,7 @@ export interface VisualizeEmbeddableConfiguration {
   editable: boolean;
   appState?: { save(): void };
   uiState?: PersistedState;
+  uiActions?: VisualizationsStartDeps['uiActions'];
 }
 
 export interface VisualizeInput extends EmbeddableInput {
@@ -107,6 +109,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       editable,
       appState,
       uiState,
+      uiActions,
     }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
     parent?: Container
@@ -121,7 +124,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         savedObjectId: savedVisualization.id!,
         visTypeName: savedVisualization.vis.type.name,
       },
-      parent
+      parent,
+      { uiActions }
     );
     this.timefilter = timefilter;
     this.appState = appState;

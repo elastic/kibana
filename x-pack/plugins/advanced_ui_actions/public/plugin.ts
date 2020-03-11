@@ -11,7 +11,7 @@ import {
   Plugin,
 } from '../../../../src/core/public';
 import { createReactOverlays } from '../../../../src/plugins/kibana_react/public';
-import { UiActionsStart, UiActionsSetup } from '../../../../src/plugins/ui_actions/public';
+import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import {
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
@@ -30,7 +30,6 @@ import {
   TimeBadgeActionContext,
 } from './custom_time_range_badge';
 import { CommonlyUsedRange } from './types';
-import { ActionFactoryService } from './services';
 
 interface SetupDependencies {
   embeddable: IEmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
@@ -42,11 +41,15 @@ interface StartDependencies {
   uiActions: UiActionsStart;
 }
 
-export interface AdvancedUiActionsSetup {
-  actionFactory: Pick<ActionFactoryService, 'register'>;
+export interface SetupContract extends UiActionsSetup {
+  actionFactory: {
+    register: UiActionsSetup['registerActionFactory'];
+  };
 }
-export interface AdvancedUiActionsStart {
-  actionFactory: Pick<ActionFactoryService, 'getAll'>;
+export interface StartContract extends UiActionsStart {
+  actionFactory: {
+    getAll: UiActionsStart['getActionFactories'];
+  };
 }
 
 declare module '../../../../src/plugins/ui_actions/public' {
@@ -57,19 +60,19 @@ declare module '../../../../src/plugins/ui_actions/public' {
 }
 
 export class AdvancedUiActionsPublicPlugin
-  implements
-    Plugin<AdvancedUiActionsSetup, AdvancedUiActionsStart, SetupDependencies, StartDependencies> {
-  private readonly actionFactory = new ActionFactoryService();
-
+  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { uiActions }: SetupDependencies): AdvancedUiActionsSetup {
+  public setup(core: CoreSetup, { uiActions }: SetupDependencies): SetupContract {
     return {
-      actionFactory: this.actionFactory,
+      ...uiActions,
+      actionFactory: {
+        register: uiActions.registerActionFactory,
+      },
     };
   }
 
-  public start(core: CoreStart, { uiActions }: StartDependencies): AdvancedUiActionsStart {
+  public start(core: CoreStart, { uiActions }: StartDependencies): StartContract {
     const dateFormat = core.uiSettings.get('dateFormat') as string;
     const commonlyUsedRanges = core.uiSettings.get('timepicker:quickRanges') as CommonlyUsedRange[];
     const { openModal } = createReactOverlays(core);
@@ -90,11 +93,12 @@ export class AdvancedUiActionsPublicPlugin
     uiActions.attachAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
 
     return {
-      actionFactory: this.actionFactory,
+      ...uiActions,
+      actionFactory: {
+        getAll: uiActions.getActionFactories,
+      },
     };
   }
 
-  public stop() {
-    this.actionFactory.clear();
-  }
+  public stop() {}
 }

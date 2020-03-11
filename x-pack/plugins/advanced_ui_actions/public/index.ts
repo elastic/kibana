@@ -12,7 +12,10 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { AdvancedUiActionsPublicPlugin as Plugin };
-export { AdvancedUiActionsSetup, AdvancedUiActionsStart } from './plugin';
+export {
+  SetupContract as AdvancedUiActionsSetup,
+  StartContract as AdvancedUiActionsStart,
+} from './plugin';
 
 export { ActionWizard } from './components';
 export {

@@ -6,4 +6,3 @@
 
 export * from './action_factory_definition';
 export * from './action_factory';
-export * from './action_factory_service';

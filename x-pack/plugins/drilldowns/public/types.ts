@@ -17,7 +17,7 @@ export interface Drilldown<
   > {
   /**
    * List of places where this drilldown should be available, e.g "dashboard".
-   * If omitted, the drilldown will be show in all places.
+   * If omitted, the drilldown will be shown in all places.
    */
   places?: string[];
 
