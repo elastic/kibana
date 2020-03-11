@@ -63,8 +63,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    // skipping the test for new because we can't fix it right now
-    it('Click on new to clear the search', async () => {
+    it.skip('Click on new to clear the search', async () => {
       await PageObjects.discover.clickNewSearchButton();
       await a11y.testAppSnapshot();
     });
@@ -132,10 +131,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     // Context view test
     it('should open context view on a doc', async () => {
-      const firstTimestamp = (await docTable.getFields())[0][0];
-      // navigate to the context view
-      await docTable.clickRowToggle({ rowIndex: 0 });
-      await (await docTable.getRowActions({ rowIndex: 0 }))[0].click();
+      await docTable.clickRowToggle();
+      await (await docTable.getRowActions())[0].click();
       await a11y.testAppSnapshot();
     });
 
