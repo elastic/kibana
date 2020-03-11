@@ -26,6 +26,7 @@ import { httpServiceMock } from './http/http_service.mock';
 import { contextServiceMock } from './context/context_service.mock';
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 import { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
+import { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_objects/saved_objects_type_registry.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { SharedGlobalConfig } from './plugins';
 import { InternalCoreSetup, InternalCoreStart } from './internal_types';
@@ -177,6 +178,7 @@ function createCoreRequestHandlerContextMock() {
     },
     savedObjects: {
       client: savedObjectsClientMock.create(),
+      typeRegistry: savedObjectsTypeRegistryMock.create(),
     },
     elasticsearch: {
       adminClient: elasticsearchServiceMock.createScopedClusterClient(),

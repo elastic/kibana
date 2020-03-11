@@ -272,11 +272,6 @@ describe('IndexPattern Data Panel', () => {
   });
 
   describe('loading existence data', () => {
-    const waitForPromises = async () =>
-      act(async () => {
-        await new Promise(resolve => setTimeout(resolve));
-      });
-
     function testProps() {
       const setState = jest.fn();
       core.http.post.mockImplementation(async path => {
@@ -319,14 +314,12 @@ describe('IndexPattern Data Panel', () => {
       const props = testProps();
       const inst = mountWithIntl(<IndexPatternDataPanel {...props} />);
 
-      act(() => {
+      await act(async () => {
         inst.update();
       });
 
-      await waitForPromises();
-
       if (stateChanges || propChanges) {
-        act(() => {
+        await act(async () => {
           ((inst.setProps as unknown) as (props: unknown) => {})({
             ...props,
             ...((propChanges as object) || {}),
@@ -337,7 +330,6 @@ describe('IndexPattern Data Panel', () => {
           });
           inst.update();
         });
-        await waitForPromises();
       }
 
       return props.setState;
@@ -474,13 +466,11 @@ describe('IndexPattern Data Panel', () => {
     });
 
     it('shows a loading indicator when loading', async () => {
+      const load = async () => {};
       const inst = mountWithIntl(<IndexPatternDataPanel {...testProps()} />);
-
       expect(inst.find(EuiProgress).length).toEqual(1);
-
-      await waitForPromises();
+      await act(load);
       inst.update();
-
       expect(inst.find(EuiProgress).length).toEqual(0);
     });
 
@@ -521,15 +511,13 @@ describe('IndexPattern Data Panel', () => {
         inst.update();
       });
 
-      act(() => {
+      await act(async () => {
         ((inst.setProps as unknown) as (props: unknown) => {})({
           ...props,
           dateRange: { fromDate: '2019-01-01', toDate: '2020-01-03' },
         });
         inst.update();
       });
-
-      await waitForPromises();
 
       expect(core.http.post).toHaveBeenCalledTimes(2);
       expect(overlapCount).toEqual(0);

@@ -9,7 +9,15 @@ import { UrlConfig } from '../../../../../../common/types/custom_urls';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import { ML_JOB_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
-import { Job, Datafeed, Detector, JobId, DatafeedId, BucketSpan, CustomSettings } from './configs';
+import {
+  Job,
+  Datafeed,
+  Detector,
+  JobId,
+  DatafeedId,
+  BucketSpan,
+  CustomSettings,
+} from '../../../../../../common/types/anomaly_detection_jobs';
 import { Aggregation, Field } from '../../../../../../common/types/fields';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';

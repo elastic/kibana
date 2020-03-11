@@ -28,11 +28,7 @@ export function plugin() {
 
 /** @public types */
 export { DataSetup, DataStart } from './plugin';
-export {
-  SavedQueryAttributes,
-  SavedQuery,
-  SavedQueryTimeFilter,
-} from '../../../../plugins/data/public';
+export { SavedQuery, SavedQueryTimeFilter } from '../../../../plugins/data/public';
 export {
   // agg_types
   AggParam, // only the type is used externally, only in vis editor
@@ -69,7 +65,6 @@ export {
   isStringType,
   isType,
   isValidInterval,
-  isValidJson,
   METRIC_TYPES,
   OptionedParamType,
   parentPipelineType,
