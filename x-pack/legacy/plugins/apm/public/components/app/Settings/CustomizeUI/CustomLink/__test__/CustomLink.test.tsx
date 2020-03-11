@@ -299,7 +299,7 @@ describe('CustomLink', () => {
           </MockApmPluginContextWrapper>
         </LicenseContext.Provider>
       );
-      expectTextsInDocument(component, ['Start free 14-day trial']);
+      expectTextsInDocument(component, ['Start free 30-day trial']);
     });
     it('shows license prompt when user has an invalid gold license', () => {
       const license = new License({
@@ -319,7 +319,7 @@ describe('CustomLink', () => {
           </MockApmPluginContextWrapper>
         </LicenseContext.Provider>
       );
-      expectTextsInDocument(component, ['Start free 14-day trial']);
+      expectTextsInDocument(component, ['Start free 30-day trial']);
     });
     it('shows license prompt when user has an invalid trial license', () => {
       const license = new License({
@@ -339,7 +339,7 @@ describe('CustomLink', () => {
           </MockApmPluginContextWrapper>
         </LicenseContext.Provider>
       );
-      expectTextsInDocument(component, ['Start free 14-day trial']);
+      expectTextsInDocument(component, ['Start free 30-day trial']);
     });
     it('doesnt show license prompt when user has a trial license', () => {
       const license = new License({
@@ -359,7 +359,7 @@ describe('CustomLink', () => {
           </MockApmPluginContextWrapper>
         </LicenseContext.Provider>
       );
-      expectTextsNotInDocument(component, ['Start free 14-day trial']);
+      expectTextsNotInDocument(component, ['Start free 30-day trial']);
     });
   });
 });

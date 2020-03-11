@@ -6,7 +6,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
   invalidLicenseMessage,
@@ -17,7 +16,6 @@ import { useLicense } from '../../../hooks/useLicense';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { LicensePrompt } from '../../shared/LicensePrompt';
-import { BetaBadge } from './BetaBadge';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
 import { cytoscapeDivStyle } from './cytoscapeOptions';
@@ -90,21 +88,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         style={{ width: 600, textAlign: 'center' as const }}
       >
         <EuiPanel grow={false} hasShadow={true} paddingSize="none">
-          <LicensePrompt
-            title={i18n.translate(
-              'xpack.apm.serviceMap.licensePromptButtonText',
-              {
-                defaultMessage: 'Service maps is available in Platinum.'
-              }
-            )}
-            text={invalidLicenseMessage}
-            buttonText={i18n.translate(
-              'xpack.apm.serviceMap.licensePromptTitle',
-              {
-                defaultMessage: 'Start 30-day Platinum trial'
-              }
-            )}
-          />
+          <LicensePrompt text={invalidLicenseMessage} />
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>

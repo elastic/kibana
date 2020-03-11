@@ -21,11 +21,7 @@ storiesOf('app/LicensePrompt', module).add(
 
     return (
       <ApmPluginContext.Provider value={contextMock}>
-        <LicensePrompt
-          title="Start free trial"
-          text="To create Feature name, you must be subscribed to an Elastic X license or above."
-          buttonText="Start free trial"
-        />
+        <LicensePrompt text="To create Feature name, you must be subscribed to an Elastic X license or above." />
       </ApmPluginContext.Provider>
     );
   },

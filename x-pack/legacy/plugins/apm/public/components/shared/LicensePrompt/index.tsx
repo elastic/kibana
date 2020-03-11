@@ -6,15 +6,14 @@
 
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { useKibanaUrl } from '../../../hooks/useKibanaUrl';
 
 interface Props {
-  title: string;
   text: string;
-  buttonText: string;
 }
 
-export const LicensePrompt = ({ title, text, buttonText }: Props) => {
+export const LicensePrompt = ({ text }: Props) => {
   const licensePageUrl = useKibanaUrl(
     '/app/kibana',
     '/management/elasticsearch/license_management/home'
@@ -23,11 +22,19 @@ export const LicensePrompt = ({ title, text, buttonText }: Props) => {
     <EuiEmptyPrompt
       iconType="iInCircle"
       iconColor=""
-      title={<h2>{title}</h2>}
+      title={
+        <h2>
+          {i18n.translate('xpack.apm.license.title', {
+            defaultMessage: 'Start free 30-day trial'
+          })}
+        </h2>
+      }
       body={<p>{text}</p>}
       actions={
         <EuiButton fill={true} href={licensePageUrl}>
-          {buttonText}
+          {i18n.translate('xpack.apm.license.button', {
+            defaultMessage: 'Start trial'
+          })}
         </EuiButton>
       }
     />
