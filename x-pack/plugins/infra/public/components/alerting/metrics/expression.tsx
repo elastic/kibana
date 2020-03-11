@@ -137,9 +137,11 @@ export const Expressions: React.FC<Props> = props => {
     if (options.filterQuery) {
       return options.filterQuery;
     } else if (options.groupBy && series) {
-      return `${options.groupBy}: "${series.id}"`;
+      const filter = `${options.groupBy}: "${series.id}"`;
+      onFilterQuerySubmit(filter);
+      return filter;
     }
-  }, [alertsContext.metadata]);
+  }, [alertsContext.metadata, onFilterQuerySubmit]);
 
   return (
     <>
