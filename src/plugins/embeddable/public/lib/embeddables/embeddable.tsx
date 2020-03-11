@@ -40,6 +40,10 @@ export abstract class Embeddable<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
   TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput
 > implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput> {
+  static runtimeId: number = 0;
+
+  public readonly runtimeId = Embeddable.runtimeId++;
+
   public readonly parent?: IContainer;
   public readonly isContainer: boolean = false;
   public abstract readonly type: string;
@@ -63,7 +67,7 @@ export abstract class Embeddable<
     if (!this.params.uiActions) return undefined;
     if (!this.__dynamicActions) {
       this.__dynamicActions = new UiActionsDynamicActionManager({
-        isCompatible: async () => true,
+        isCompatible: async ({ embeddable }: any) => embeddable.runtimeId === this.runtimeId,
         storage: new EmbeddableActionStorage(this),
         uiActions: this.params.uiActions,
       });
