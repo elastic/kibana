@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import { darken, transparentize } from 'polished';
 import React, { memo, useState, useCallback, useMemo } from 'react';
 
 import { euiStyled } from '../../../../../observability/public';
@@ -36,7 +35,7 @@ interface LogEntryRowProps {
   isActiveHighlight: boolean;
   isHighlighted: boolean;
   logEntry: LogEntry;
-  openFlyoutWithItem: (id: string) => void;
+  openFlyoutWithItem?: (id: string) => void;
   scale: TextScale;
   wrap: boolean;
 }
@@ -64,7 +63,7 @@ export const LogEntryRow = memo(
       setIsHovered(false);
     }, []);
 
-    const openFlyout = useCallback(() => openFlyoutWithItem(logEntry.gid), [
+    const openFlyout = useCallback(() => openFlyoutWithItem?.(logEntry.gid), [
       openFlyoutWithItem,
       logEntry.gid,
     ]);
@@ -149,7 +148,7 @@ export const LogEntryRow = memo(
                     isHighlighted={isHighlighted}
                     isActiveHighlight={isActiveHighlight}
                     isHovered={isHovered}
-                    isWrapped={wrap}
+                    wrapMode={wrap ? 'long' : 'pre-wrapped'}
                   />
                 ) : null}
               </LogEntryColumn>
@@ -171,7 +170,7 @@ export const LogEntryRow = memo(
                     isActiveHighlight={isActiveHighlight}
                     isHighlighted={isHighlighted}
                     isHovered={isHovered}
-                    isWrapped={wrap}
+                    wrapMode={wrap ? 'long' : 'pre-wrapped'}
                   />
                 ) : null}
               </LogEntryColumn>
@@ -197,7 +196,7 @@ interface LogEntryRowWrapperProps {
   scale: TextScale;
 }
 
-const LogEntryRowWrapper = euiStyled.div.attrs(() => ({
+export const LogEntryRowWrapper = euiStyled.div.attrs(() => ({
   role: 'row',
 }))<LogEntryRowWrapperProps>`
   align-items: stretch;
