@@ -203,7 +203,7 @@
     "leaflet-responsive-popup": "0.6.4",
     "leaflet-vega": "^0.8.6",
     "leaflet.heat": "0.2.0",
-    "less": "^3.0.2",
+    "less": "^2.7.3",
     "less-loader": "5.0.0",
     "lodash": "npm:@elastic/lodash@3.10.1-kibana4",
     "lodash.clonedeep": "^4.5.0",

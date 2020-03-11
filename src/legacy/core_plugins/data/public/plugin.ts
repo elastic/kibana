@@ -18,12 +18,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import {
-  DataPublicPluginStart,
-  addSearchStrategy,
-  defaultSearchStrategy,
-  DataPublicPluginSetup,
-} from '../../../../plugins/data/public';
+import { DataPublicPluginStart, DataPublicPluginSetup } from '../../../../plugins/data/public';
 import { ExpressionsSetup } from '../../../../plugins/expressions/public';
 
 import {
@@ -110,9 +105,6 @@ export class DataPlugin
 
   public setup(core: CoreSetup, { data, uiActions }: DataPluginSetupDependencies) {
     setInjectedMetadata(core.injectedMetadata);
-
-    // This is to be deprecated once we switch to the new search service fully
-    addSearchStrategy(defaultSearchStrategy);
 
     uiActions.attachAction(
       SELECT_RANGE_TRIGGER,
