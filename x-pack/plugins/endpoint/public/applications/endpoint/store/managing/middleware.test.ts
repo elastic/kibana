@@ -24,7 +24,7 @@ describe('endpoint list saga', () => {
   const generator = new EndpointDocGenerator();
   // https://github.com/elastic/endpoint-app-team/issues/131
   const generateEndpoint = (): EndpointMetadata => {
-    return generator.generateEndpointMetadata(new Date().getTime());
+    return generator.generateEndpointMetadata();
   };
 
   let history: History<never>;
