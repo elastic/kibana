@@ -91,7 +91,7 @@ export const getOneAgentConfigHandler: RequestHandler<TypeOf<
 
 export const createAgentConfigHandler: RequestHandler<
   undefined,
-  undefined,
+  TypeOf<typeof CreateAgentConfigRequestSchema.query>,
   TypeOf<typeof CreateAgentConfigRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
