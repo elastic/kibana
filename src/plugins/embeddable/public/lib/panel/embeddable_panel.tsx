@@ -74,6 +74,7 @@ interface State {
   hidePanelTitles: boolean;
   closeContextMenu: boolean;
   badges: Array<Action<EmbeddableContext>>;
+  drilldownCount?: number;
 }
 
 export class EmbeddablePanel extends React.Component<Props, State> {
@@ -194,6 +195,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
             badges={this.state.badges}
             embeddable={this.props.embeddable}
             headerId={headerId}
+            drilldownCount={this.state.drilldownCount}
           />
         )}
         <div className="embPanel__content" ref={this.embeddableRoot} />
@@ -204,6 +206,15 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   public componentDidMount() {
     if (this.embeddableRoot.current) {
       this.props.embeddable.render(this.embeddableRoot.current);
+    }
+
+    const dynamicActions = this.props.embeddable.dynamicActions;
+    if (dynamicActions) {
+      dynamicActions.count().then(drilldownCount => {
+        if (this.mounted) {
+          this.setState({ drilldownCount });
+        }
+      });
     }
   }
 

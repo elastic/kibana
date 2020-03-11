@@ -23,6 +23,7 @@ import {
   EuiIcon,
   EuiToolTip,
   EuiScreenReaderOnly,
+  EuiNotificationBadge,
 } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
@@ -40,6 +41,7 @@ export interface PanelHeaderProps {
   badges: Array<Action<EmbeddableContext>>;
   embeddable: IEmbeddable;
   headerId?: string;
+  drilldownCount?: number;
 }
 
 function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmbeddable) {
@@ -90,6 +92,7 @@ export function PanelHeader({
   badges,
   embeddable,
   headerId,
+  drilldownCount,
 }: PanelHeaderProps) {
   const viewDescription = getViewDescription(embeddable);
   const showTitle = !isViewMode || (title && !hidePanelTitles) || viewDescription !== '';
@@ -147,7 +150,11 @@ export function PanelHeader({
         )}
         {renderBadges(badges, embeddable)}
       </h2>
-
+      {!isViewMode && drilldownCount && (
+        <EuiNotificationBadge style={{ marginTop: '4px', marginRight: '4px' }}>
+          {drilldownCount}
+        </EuiNotificationBadge>
+      )}
       <PanelOptionsMenu
         isViewMode={isViewMode}
         getActionContextMenuPanel={getActionContextMenuPanel}
