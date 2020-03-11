@@ -338,8 +338,7 @@ export class EndpointDocGenerator {
     for (let i = 0; i < generations; i++) {
       const newParents: EndpointEvent[] = [];
       parents.forEach(element => {
-        // const numChildren = randomN(maxChildrenPerNode);
-        const numChildren = maxChildrenPerNode;
+        const numChildren = this.randomN(maxChildrenPerNode);
         for (let j = 0; j < numChildren; j++) {
           timestamp = timestamp + 1000;
           const child = this.generateEvent({
