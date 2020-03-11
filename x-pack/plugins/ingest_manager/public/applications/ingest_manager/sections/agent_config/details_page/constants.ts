@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { AgentConfigForm, agentConfigFormValidation } from './config_form';
-export { AgentConfigDeleteProvider } from './config_delete_provider';
-export { LinkedAgentCount } from './linked_agent_count';
+import { AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
+
+export const DETAILS_ROUTER_PATH = `${AGENT_CONFIG_DETAILS_PATH}:configId`;
+export const DETAILS_ROUTER_SUB_PATH = `${DETAILS_ROUTER_PATH}/:tabId`;
