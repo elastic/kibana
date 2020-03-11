@@ -70,6 +70,10 @@ export class DynamicActionManager {
     this.reviveAction(event);
   }
 
+  public async count(): Promise<number> {
+    return await this.params.storage.count();
+  }
+
   protected reviveAction(event: SerializedEvent) {
     const { eventId, triggerId, action } = event;
     const { uiActions, isCompatible } = this.params;

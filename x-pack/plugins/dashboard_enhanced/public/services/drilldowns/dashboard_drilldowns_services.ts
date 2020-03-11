@@ -6,12 +6,14 @@
 
 import { CoreSetup } from 'src/core/public';
 import { SetupDependencies } from '../../plugin';
-import { CONTEXT_MENU_DRILLDOWNS_TRIGGER } from '../../../../../../src/plugins/embeddable/public';
+import {
+  CONTEXT_MENU_DRILLDOWNS_TRIGGER,
+  EmbeddableContext,
+} from '../../../../../../src/plugins/embeddable/public';
 import {
   FlyoutCreateDrilldownAction,
   FlyoutCreateDrilldownActionContext,
   FlyoutEditDrilldownAction,
-  FlyoutEditDrilldownActionContext,
   OPEN_FLYOUT_ADD_DRILLDOWN,
   OPEN_FLYOUT_EDIT_DRILLDOWN,
 } from './actions';
@@ -20,7 +22,7 @@ import { DrilldownsStartContract } from '../../../../drilldowns/public';
 declare module '../../../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
     [OPEN_FLYOUT_ADD_DRILLDOWN]: FlyoutCreateDrilldownActionContext;
-    [OPEN_FLYOUT_EDIT_DRILLDOWN]: FlyoutEditDrilldownActionContext;
+    [OPEN_FLYOUT_EDIT_DRILLDOWN]: EmbeddableContext;
   }
 }
 

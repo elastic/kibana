@@ -82,7 +82,6 @@ export abstract class Embeddable<
     parent?: IContainer,
     public readonly params: EmbeddableParams = {}
   ) {
-    window.emb = this;
     this.id = input.id;
     this.output = {
       title: getPanelTitle(input, output),

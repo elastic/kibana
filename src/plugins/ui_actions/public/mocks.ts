@@ -39,19 +39,22 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const startContract: Start = {
+    addTriggerAction: jest.fn(),
     attachAction: jest.fn(),
-    registerAction: jest.fn(),
-    registerTrigger: jest.fn(),
-    registerActionFactory: jest.fn(),
-    getAction: jest.fn(),
+    clear: jest.fn(),
     detachAction: jest.fn(),
     executeTriggerActions: jest.fn(),
+    fork: jest.fn(),
+    getAction: jest.fn(),
     getActionFactories: jest.fn(),
+    getActionFactory: jest.fn(),
     getTrigger: jest.fn(),
     getTriggerActions: jest.fn((id: TriggerId) => []),
     getTriggerCompatibleActions: jest.fn(),
-    clear: jest.fn(),
-    fork: jest.fn(),
+    registerAction: jest.fn(),
+    registerActionFactory: jest.fn(),
+    registerTrigger: jest.fn(),
+    removeTriggerAction: jest.fn(),
   };
 
   return startContract;
