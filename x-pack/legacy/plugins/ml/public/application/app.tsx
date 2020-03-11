@@ -12,7 +12,6 @@ import 'ace';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { ManagementSetup } from 'src/plugins/management/public';
 import { SecurityPluginSetup } from '../../../../../plugins/security/public';
 import { LicensingPluginSetup } from '../../../../../plugins/licensing/public';
 
@@ -26,7 +25,6 @@ export interface MlDependencies extends AppMountParameters {
   data: DataPublicPluginStart;
   security: SecurityPluginSetup;
   licensing: LicensingPluginSetup;
-  management: ManagementSetup;
 }
 
 interface AppProps {

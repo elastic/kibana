@@ -119,7 +119,7 @@ export const JobsListPage: FC = () => {
 
   return (
     <I18nContext>
-      <EuiPageContent>
+      <EuiPageContent id="kibanaManagementMLSection">
         <EuiTitle size="l">
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
