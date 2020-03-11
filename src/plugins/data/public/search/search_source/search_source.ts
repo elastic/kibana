@@ -343,7 +343,7 @@ export class SearchSource {
     if (this.searchStrategyId) {
       return this.searchStrategyId === 'default' ? undefined : this.searchStrategyId;
     } else {
-      return index.type;
+      return index?.type;
     }
   }
 
