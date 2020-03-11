@@ -38,6 +38,8 @@ import {
   createTopNavHelper,
 } from '../../../../src/plugins/kibana_legacy/public';
 
+import './index.scss';
+
 /**
  * These are dependencies of the Graph app besides the base dependencies
  * provided by the application service. Some of those still rely on non-shimmed
@@ -57,7 +59,7 @@ export interface GraphDependencies {
   config: IUiSettingsClient;
   toastNotifications: ToastsStart;
   indexPatterns: IndexPatternsContract;
-  npData: ReturnType<DataPlugin['start']>;
+  data: ReturnType<DataPlugin['start']>;
   savedObjectsClient: SavedObjectsClientContract;
   addBasePath: (url: string) => string;
   getBasePath: () => string;
@@ -87,7 +89,7 @@ export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) 
 
   const savedWorkspaceLoader = createSavedWorkspacesLoader({
     chrome: deps.coreStart.chrome,
-    indexPatterns: deps.npData.indexPatterns,
+    indexPatterns: deps.data.indexPatterns,
     overlays: deps.coreStart.overlays,
     savedObjectsClient: deps.coreStart.savedObjects.client,
     basePath: deps.coreStart.http.basePath,

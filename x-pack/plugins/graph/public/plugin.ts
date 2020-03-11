@@ -24,8 +24,6 @@ import {
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import { ConfigSchema } from '../config';
 
-import './index.scss';
-
 export interface GraphPluginSetupDependencies {
   licensing: LicensingPluginSetup;
   home?: HomePublicPluginSetup;
@@ -81,7 +79,7 @@ export class GraphPlugin
           licensing,
           core: coreStart,
           navigation: pluginsStart.navigation,
-          npData: pluginsStart.data,
+          data: pluginsStart.data,
           savedObjectsClient: coreStart.savedObjects.client,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,

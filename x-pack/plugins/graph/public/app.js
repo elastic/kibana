@@ -40,7 +40,7 @@ export function initGraphApp(angularModule, deps) {
     indexPatterns,
     addBasePath,
     getBasePath,
-    npData,
+    data,
     config,
     savedWorkspaceLoader,
     capabilities,
@@ -300,7 +300,7 @@ export function initGraphApp(angularModule, deps) {
     });
 
     // register things on scope passed down to react components
-    $scope.pluginDataStart = npData;
+    $scope.pluginDataStart = data;
     $scope.storage = storage;
     $scope.coreStart = coreStart;
     $scope.loading = false;
