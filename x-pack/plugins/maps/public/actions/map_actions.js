@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// NP Migration
-// Temporarily redundant with x-pack/legacy/plugins/maps/public/actions/map_actions.js
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const SET_TRANSIENT_LAYER = 'SET_TRANSIENT_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
@@ -28,7 +26,6 @@ export const TRIGGER_REFRESH_TIMER = 'TRIGGER_REFRESH_TIMER';
 export const UPDATE_LAYER_PROP = 'UPDATE_LAYER_PROP';
 export const UPDATE_LAYER_STYLE = 'UPDATE_LAYER_STYLE';
 export const SET_LAYER_STYLE_META = 'SET_LAYER_STYLE_META';
-export const TOUCH_LAYER = 'TOUCH_LAYER';
 export const UPDATE_SOURCE_PROP = 'UPDATE_SOURCE_PROP';
 export const SET_REFRESH_CONFIG = 'SET_REFRESH_CONFIG';
 export const SET_MOUSE_COORDINATES = 'SET_MOUSE_COORDINATES';
@@ -48,4 +45,3 @@ export const HIDE_TOOLBAR_OVERLAY = 'HIDE_TOOLBAR_OVERLAY';
 export const HIDE_LAYER_CONTROL = 'HIDE_LAYER_CONTROL';
 export const HIDE_VIEW_CONTROL = 'HIDE_VIEW_CONTROL';
 export const SET_WAITING_FOR_READY_HIDDEN_LAYERS = 'SET_WAITING_FOR_READY_HIDDEN_LAYERS';
-// End temporary redundancy

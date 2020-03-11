@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-nocheck
 import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
+// @ts-ignore
 import { wrapInI18nContext } from 'ui/i18n';
+// @ts-ignore
 import { MapListing } from './components/map_listing';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setInjectedVarFunc } from '../../../../plugins/maps/public/kibana_services';
+// @ts-ignore
+import { setInjectedVarFunc } from '../../../../plugins/maps/public/kibana_services'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+// @ts-ignore
 import { setLicenseId, setInspector, setFileUpload } from './kibana_services';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
