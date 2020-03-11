@@ -24,7 +24,7 @@ export const OFFSET_SCROLLBAR = 17;
 // SIDE EFFECT: the following creates a global class selector
 export const TimelineBodyGlobalStyle = createGlobalStyle`
   body.${IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME} .siemTimeline__body {
-    overflow: hidden;
+    /* overflow: hidden; */
   }
 `;
 

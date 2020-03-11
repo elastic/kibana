@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "lodash": "^4.17.15",
-    "react-beautiful-dnd": "^13.0.0",
+    "react-beautiful-dnd": "^12.2.0",
     "react-markdown": "^4.0.6"
   }
 }

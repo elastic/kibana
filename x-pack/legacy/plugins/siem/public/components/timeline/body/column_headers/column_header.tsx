@@ -9,13 +9,10 @@ import { Draggable } from 'react-beautiful-dnd';
 import { Resizable, ResizeCallback } from 're-resizable';
 
 import { ColumnHeaderOptions } from '../../../../store/timeline/model';
-import { DragEffects } from '../../../drag_and_drop/draggable_wrapper';
 import { getDraggableFieldId, DRAG_TYPE_FIELD } from '../../../drag_and_drop/helpers';
-import { DraggableFieldBadge } from '../../../draggables/field_badge';
 import { OnColumnRemoved, OnColumnSorted, OnFilterChange, OnColumnResized } from '../../events';
 import { EventsTh, EventsThContent, EventsHeadingHandle } from '../../styles';
 import { Sort } from '../sort';
-import { DraggingContainer } from './common/dragging_container';
 
 import { Header } from './header';
 
@@ -25,6 +22,7 @@ interface ColumneHeaderProps {
   onColumnRemoved: OnColumnRemoved;
   onColumnSorted: OnColumnSorted;
   onColumnResized: OnColumnResized;
+  isDragging: boolean;
   onFilterChange?: OnFilterChange;
   sort: Sort;
   timelineId: string;
@@ -34,13 +32,13 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
   draggableIndex,
   header,
   timelineId,
+  isDragging,
   onColumnRemoved,
   onColumnResized,
   onColumnSorted,
   onFilterChange,
   sort,
 }) => {
-  const [isDragging, setIsDragging] = React.useState(false);
   const resizableEnable = { right: true };
   const resizableSize = {
     width: header.width,
@@ -86,31 +84,23 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
         key={header.id}
         type={DRAG_TYPE_FIELD}
       >
-        {(dragProvided, dragSnapshot) => (
+        {dragProvided => (
           <EventsTh
             data-test-subj="draggable-header"
             {...dragProvided.draggableProps}
             {...dragProvided.dragHandleProps}
             ref={dragProvided.innerRef}
           >
-            {!dragSnapshot.isDragging ? (
-              <EventsThContent>
-                <Header
-                  timelineId={timelineId}
-                  header={header}
-                  onColumnRemoved={onColumnRemoved}
-                  onColumnSorted={onColumnSorted}
-                  onFilterChange={onFilterChange}
-                  sort={sort}
-                />
-              </EventsThContent>
-            ) : (
-              <DraggingContainer onDragging={setIsDragging}>
-                <DragEffects>
-                  <DraggableFieldBadge fieldId={header.id} fieldWidth={`${header.width}px`} />
-                </DragEffects>
-              </DraggingContainer>
-            )}
+            <EventsThContent>
+              <Header
+                timelineId={timelineId}
+                header={header}
+                onColumnRemoved={onColumnRemoved}
+                onColumnSorted={onColumnSorted}
+                onFilterChange={onFilterChange}
+                sort={sort}
+              />
+            </EventsThContent>
           </EventsTh>
         )}
       </Draggable>

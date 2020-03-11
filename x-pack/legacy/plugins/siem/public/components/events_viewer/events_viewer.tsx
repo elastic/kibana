@@ -241,7 +241,7 @@ export const EventsViewer = React.memo(
   (prevProps, nextProps) =>
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     prevProps.columns === nextProps.columns &&
-    prevProps.dataProviders === nextProps.dataProviders &&
+    deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
     prevProps.deletedEventIds === nextProps.deletedEventIds &&
     prevProps.end === nextProps.end &&
     deepEqual(prevProps.filters, nextProps.filters) &&
