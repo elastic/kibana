@@ -23,5 +23,6 @@ export default function({ loadTestFile }: FtrProviderContext) {
   describe('saved objects management apis', () => {
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./relationships'));
+    loadTestFile(require.resolve('./scroll_count'));
   });
 }

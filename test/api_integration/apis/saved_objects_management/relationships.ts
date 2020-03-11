@@ -44,10 +44,10 @@ export default function({ getService }: FtrProviderContext) {
 
   describe('relationships', () => {
     before(async () => {
-      await esArchiver.load('management/saved_objects');
+      await esArchiver.load('management/saved_objects/relationships');
     });
     after(async () => {
-      await esArchiver.unload('management/saved_objects');
+      await esArchiver.unload('management/saved_objects/relationships');
     });
 
     const baseApiUrl = `/api/kibana/management/saved_objects/relationships`;
