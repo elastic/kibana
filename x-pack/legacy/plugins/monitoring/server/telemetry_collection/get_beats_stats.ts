@@ -29,6 +29,10 @@ const getBaseStats = () => ({
     count: 0,
     names: [],
   },
+  queue: {
+    mem: 0,
+    spool: 0,
+  },
   architecture: {
     count: 0,
     architectures: [],
@@ -68,6 +72,9 @@ export interface BeatsStats {
       module?: {
         names: string[];
         count: number;
+      };
+      queue?: {
+        name?: string;
       };
       heartbeat?: HeartbeatBase;
       functionbeat?: {
@@ -213,6 +220,11 @@ export function processResults(
         stateModule.names.forEach(name => moduleSet.add(statsType + '.' + name));
         clusters[clusterUuid].module.names = Array.from(moduleSet);
         clusters[clusterUuid].module.count += stateModule.count;
+      }
+
+      const stateQueue = hit._source.beats_state?.state?.queue?.name;
+      if (clusters[clusterUuid].queue.hasOwnProperty(stateQueue)) {
+        clusters[clusterUuid].queue[stateQueue] += 1;
       }
 
       const heartbeatState = hit._source.beats_state?.state?.heartbeat;
