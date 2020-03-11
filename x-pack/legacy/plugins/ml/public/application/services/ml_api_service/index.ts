@@ -17,8 +17,14 @@ import { MlServerDefaults, MlServerLimits } from '../ml_server_info';
 
 import { PrivilegesResponse } from '../../../../common/types/privileges';
 import { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
-import { CombinedJob } from '../../../../common/types/anomaly_detection_jobs';
+import {
+  Job,
+  Datafeed,
+  CombinedJob,
+  Detector,
+} from '../../../../common/types/anomaly_detection_jobs';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
+import { FieldRequestConfig } from '../../datavisualizer/index_based/common';
 
 export interface MlInfoResponse {
   defaults: MlServerDefaults;
@@ -29,14 +35,6 @@ export interface MlInfoResponse {
   };
   upgrade_mode: boolean;
   cloudId?: string;
-}
-
-// TODO This is not a complete representation of all methods of `ml.*`.
-// It just satisfies needs for other parts of the code area which use
-// TypeScript and rely on the methods typed in here.
-// This allows the import of `ml` into TypeScript code.
-interface EsIndex {
-  name: string;
 }
 
 export interface BucketSpanEstimatorData {
@@ -96,7 +94,7 @@ export const ml = {
     });
   },
 
-  addJob({ jobId, job }: { jobId: string; job: any }) {
+  addJob({ jobId, job }: { jobId: string; job: Job }) {
     const body = JSON.stringify({ job });
     return http({
       path: `${basePath()}/anomaly_detectors/${jobId}`,
@@ -133,7 +131,7 @@ export const ml = {
     });
   },
 
-  updateJob({ jobId, job }: { jobId: string; job: any }) {
+  updateJob({ jobId, job }: { jobId: string; job: Job }) {
     const body = JSON.stringify({ job });
     return http({
       path: `${basePath()}/anomaly_detectors/${jobId}/_update`,
@@ -151,7 +149,7 @@ export const ml = {
     });
   },
 
-  validateJob({ job }: { job: any }) {
+  validateJob({ job }: { job: Job }) {
     const body = JSON.stringify({ job });
     return http({
       path: `${basePath()}/validate/job`,
@@ -182,7 +180,7 @@ export const ml = {
     });
   },
 
-  addDatafeed({ datafeedId, datafeedConfig }: { datafeedId: string; datafeedConfig: any }) {
+  addDatafeed({ datafeedId, datafeedConfig }: { datafeedId: string; datafeedConfig: Datafeed }) {
     const body = JSON.stringify({ datafeedConfig });
     return http({
       path: `${basePath()}/datafeeds/${datafeedId}`,
@@ -191,7 +189,7 @@ export const ml = {
     });
   },
 
-  updateDatafeed({ datafeedId, datafeedConfig }: { datafeedId: string; datafeedConfig: any }) {
+  updateDatafeed({ datafeedId, datafeedConfig }: { datafeedId: string; datafeedConfig: Datafeed }) {
     const body = JSON.stringify({ datafeedConfig });
     return http({
       path: `${basePath()}/datafeeds/${datafeedId}/_update`,
@@ -241,7 +239,7 @@ export const ml = {
     });
   },
 
-  validateDetector({ detector }: { detector: any }) {
+  validateDetector({ detector }: { detector: Detector }) {
     const body = JSON.stringify({ detector });
     return http({
       path: `${basePath()}/anomaly_detectors/_validate/detector`,
@@ -375,7 +373,7 @@ export const ml = {
     startDatafeed?: boolean;
     start?: number;
     end?: number;
-    jobOverrides?: any;
+    jobOverrides?: Array<Partial<Job>>;
   }) {
     const body = JSON.stringify({
       prefix,
@@ -414,7 +412,7 @@ export const ml = {
     latest?: number;
     samplerShardSize?: number;
     interval?: string;
-    fields?: any[];
+    fields?: FieldRequestConfig[];
     maxExamples?: number;
   }) {
     const body = JSON.stringify({
@@ -490,7 +488,7 @@ export const ml = {
     });
   },
 
-  addCalendar(obj: any) {
+  addCalendar(obj: Calendar) {
     const body = JSON.stringify(obj);
     return http({
       path: `${basePath()}/calendars`,
@@ -626,7 +624,7 @@ export const ml = {
     });
   },
 
-  getIndices(): Promise<EsIndex[]> {
+  getIndices(): Promise<Array<{ name: string }>> {
     const tempBasePath = '/api';
     return http({
       path: `${tempBasePath}/index_management/indices`,
