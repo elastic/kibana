@@ -207,11 +207,15 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     if (this.embeddableRoot.current) {
       this.props.embeddable.render(this.embeddableRoot.current);
     }
-    this.props.embeddable.actionStorage.count().then(drilldownCount => {
-      if (this.mounted) {
-        this.setState({ drilldownCount });
-      }
-    });
+
+    const dynamicActions = this.props.embeddable.dynamicActions;
+    if (dynamicActions) {
+      dynamicActions.count().then(drilldownCount => {
+        if (this.mounted) {
+          this.setState({ drilldownCount });
+        }
+      });
+    }
   }
 
   closeMyContextMenuPanel = () => {
