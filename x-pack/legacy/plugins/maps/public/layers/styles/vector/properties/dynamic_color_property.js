@@ -105,11 +105,9 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       return null;
     }
 
-    if (this.isCategorical()) {
-      return this._getCategoricalColorMbExpression();
-    } else {
-      return this._getOrdinalColorMbExpression();
-    }
+    return this.isCategorical()
+      ? this._getCategoricalColorMbExpression()
+      : this._getOrdinalColorMbExpression();
   }
 
   _getOrdinalColorMbExpression() {
