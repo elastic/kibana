@@ -142,10 +142,10 @@ export const agentConfigurationSearchRoute = createRoute(core => ({
   method: 'POST',
   path: '/api/apm/settings/agent-configuration/search',
   params: {
-    body: t.type({
-      service: serviceRt,
-      etag: t.string
-    })
+    body: t.intersection([
+      t.type({ service: serviceRt }),
+      t.partial({ etag: t.string })
+    ])
   },
   handler: async ({ context, request }) => {
     const { service, etag } = context.params.body;
