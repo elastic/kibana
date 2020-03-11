@@ -5,7 +5,7 @@
  */
 
 import { EuiFlyout } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { Resizable, ResizeCallback } from 're-resizable';
@@ -69,14 +69,20 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
   );
   const resetLastDelta = useCallback(() => setLastDelta(0), [setLastDelta]);
   const throttledResize = throttle(100, onResizeStop);
-  const resizableEnable = { left: true };
-  const resizableDefaultSize = {
-    width,
-    height: '100%',
-  };
-  const resizableHandleComponent = {
-    left: <TimelineResizeHandle data-test-subj="flyout-resize-handle" height={flyoutHeight} />,
-  };
+  const resizableEnable = useMemo(() => ({ left: true }), []);
+  const resizableDefaultSize = useMemo(
+    () => ({
+      width,
+      height: '100%',
+    }),
+    [width]
+  );
+  const resizableHandleComponent = useMemo(
+    () => ({
+      left: <TimelineResizeHandle data-test-subj="flyout-resize-handle" height={flyoutHeight} />,
+    }),
+    [flyoutHeight]
+  );
 
   return (
     <EuiFlyoutContainer data-test-subj="flyout-pane">

@@ -39,24 +39,33 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
   onFilterChange,
   sort,
 }) => {
-  const resizableEnable = { right: true };
-  const resizableSize = {
-    width: header.width,
-    height: 'auto',
-  };
+  const resizableEnable = useMemo(() => ({ right: true }), []);
+  const resizableSize = useMemo(
+    () => ({
+      width: header.width,
+      height: 'auto',
+    }),
+    [header.width]
+  );
   const resizableStyle: {
     position: 'absolute' | 'relative';
-  } = {
-    position: isDragging ? 'absolute' : 'relative',
-  };
-  const resizableHandleComponent = {
-    right: <EventsHeadingHandle />,
-  };
+  } = useMemo(
+    () => ({
+      position: isDragging ? 'absolute' : 'relative',
+    }),
+    [isDragging]
+  );
+  const resizableHandleComponent = useMemo(
+    () => ({
+      right: <EventsHeadingHandle />,
+    }),
+    []
+  );
   const handleResizeStop: ResizeCallback = useCallback(
     (e, direction, ref, delta) => {
       onColumnResized({ columnId: header.id, delta: delta.width });
     },
-    [header.id]
+    [header.id, onColumnResized]
   );
   const draggableId = useMemo(
     () =>

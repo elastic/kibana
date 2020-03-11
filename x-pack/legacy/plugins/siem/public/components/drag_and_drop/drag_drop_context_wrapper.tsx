@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultTo, noop } from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { DropResult, DragDropContext } from 'react-beautiful-dnd';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
-import deepEqual from 'fast-deep-equal';
 
 import { BeforeCapture } from './drag_drop_context';
 import { BrowserFields } from '../../containers/source';
@@ -94,7 +93,7 @@ export const DragDropContextWrapperComponent = React.memo<Props & PropsFromRedux
   (prevProps, nextProps) => {
     return (
       prevProps.children === nextProps.children &&
-      deepEqual(prevProps.dataProviders, nextProps.dataProviders)
+      prevProps.dataProviders === nextProps.dataProviders
     ); // prevent re-renders when data providers are added or removed, but all other props are the same
   }
 );
@@ -104,10 +103,7 @@ DragDropContextWrapperComponent.displayName = 'DragDropContextWrapperComponent';
 const emptyDataProviders: dragAndDropModel.IdToDataProvider = {}; // stable reference
 
 const mapStateToProps = (state: State) => {
-  const dataProviders = defaultTo(
-    emptyDataProviders,
-    dragAndDropSelectors.dataProvidersSelector(state)
-  );
+  const dataProviders = dragAndDropSelectors.dataProvidersSelector(state) ?? emptyDataProviders;
 
   return { dataProviders };
 };

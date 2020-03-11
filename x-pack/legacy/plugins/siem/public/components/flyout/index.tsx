@@ -5,7 +5,6 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { defaultTo, getOr } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import styled from 'styled-components';
@@ -17,6 +16,7 @@ import { Pane } from './pane';
 import { timelineActions } from '../../store/actions';
 import { DEFAULT_TIMELINE_WIDTH } from '../timeline/body/constants';
 import { StatefulTimeline } from '../timeline';
+import { TimelineById } from '../../store/timeline/types';
 
 export const Badge = styled(EuiBadge)`
   position: absolute;
@@ -67,7 +67,7 @@ export const FlyoutComponent = React.memo<Props>(
           </Pane>
         </Visible>
         <FlyoutButton
-          dataProviders={dataProviders!}
+          dataProviders={dataProviders}
           show={!show}
           timelineId={timelineId}
           onOpen={handleOpen}
@@ -79,11 +79,15 @@ export const FlyoutComponent = React.memo<Props>(
 
 FlyoutComponent.displayName = 'FlyoutComponent';
 
+const DEFAULT_DATA_PROVIDERS: DataProvider[] = [];
+const DEFAULT_TIMELINE_BY_ID = {};
+
 const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
-  const timelineById = defaultTo({}, timelineSelectors.timelineByIdSelector(state));
-  const dataProviders = getOr([], `${timelineId}.dataProviders`, timelineById) as DataProvider[];
-  const show = getOr(false, `${timelineId}.show`, timelineById) as boolean;
-  const width = getOr(DEFAULT_TIMELINE_WIDTH, `${timelineId}.width`, timelineById) as number;
+  const timelineById: TimelineById =
+    timelineSelectors.timelineByIdSelector(state) ?? DEFAULT_TIMELINE_BY_ID;
+  const dataProviders = timelineById[timelineId]?.dataProviders ?? DEFAULT_DATA_PROVIDERS;
+  const show = timelineById[timelineId]?.show ?? false;
+  const width = timelineById[timelineId]?.width ?? DEFAULT_TIMELINE_WIDTH;
 
   return { dataProviders, show, width };
 };
