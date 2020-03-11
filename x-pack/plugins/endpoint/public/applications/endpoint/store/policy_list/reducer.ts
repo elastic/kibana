@@ -25,7 +25,7 @@ const initialPolicyDetailsState = (): PolicyDetailsState => {
       total: 0,
       pending: 0,
       failed: 0,
-      id: 0,
+      id: '',
       created_by: '',
       created: '',
       updated_by: '',

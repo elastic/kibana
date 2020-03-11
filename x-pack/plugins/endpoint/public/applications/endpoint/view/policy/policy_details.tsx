@@ -12,5 +12,13 @@ import { selectPolicyDetails } from '../../store/policy_list/selectors';
 export const PolicyDetails = React.memo(() => {
   usePageId('policyDetailsPage');
   const policyItem = usePolicyDetailsSelector(selectPolicyDetails);
-  return <div>{policyItem.name}</div>;
+
+  function policyName() {
+    if (policyItem) {
+      return policyItem.name;
+    } else {
+      return 'Policy Not Found!';
+    }
+  }
+  return <div>{policyName()}</div>;
 });
