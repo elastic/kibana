@@ -7,8 +7,8 @@
 import * as rt from 'io-ts';
 
 export const CasesStatusResponseRt = rt.type({
-  countOpenCases: rt.number,
-  countClosedCases: rt.number,
+  count_open_cases: rt.number,
+  count_closed_cases: rt.number,
 });
 
 export type CasesStatusResponse = rt.TypeOf<typeof CasesStatusResponseRt>;

@@ -24,7 +24,7 @@ export function initGetCasesStatusApi({ caseService, router }: RouteDeps) {
             fields: [],
             page: 1,
             perPage: 1,
-            filter: `${CASE_SAVED_OBJECT}attributes.status: open`,
+            filter: `${CASE_SAVED_OBJECT}.attributes.status: open`,
           },
         };
 
@@ -34,7 +34,7 @@ export function initGetCasesStatusApi({ caseService, router }: RouteDeps) {
             fields: [],
             page: 1,
             perPage: 1,
-            filter: `${CASE_SAVED_OBJECT}attributes.status: closed`,
+            filter: `${CASE_SAVED_OBJECT}.attributes.status: closed`,
           },
         };
 
@@ -45,8 +45,8 @@ export function initGetCasesStatusApi({ caseService, router }: RouteDeps) {
 
         return response.ok({
           body: CasesStatusResponseRt.encode({
-            countOpenCases: openCases.total,
-            countClosedCases: closesCases.total,
+            count_open_cases: openCases.total,
+            count_closed_cases: closesCases.total,
           }),
         });
       } catch (error) {

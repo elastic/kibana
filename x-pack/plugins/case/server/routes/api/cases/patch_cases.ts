@@ -29,16 +29,15 @@ export function initPatchCasesApi({ caseService, router }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        const queries = pipe(
+        const query = pipe(
           CasesPatchRequestRt.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
         const myCases = await caseService.getCases({
           client: context.core.savedObjects.client,
-          caseIds: queries.map(q => q.id),
+          caseIds: query.cases.map(q => q.id),
         });
-
-        const conflictedCases = queries.filter(q => {
+        const conflictedCases = query.cases.filter(q => {
           const myCase = myCases.saved_objects.find(c => c.id === q.id);
           return myCase == null || myCase?.version !== q.version;
         });
@@ -49,18 +48,16 @@ export function initPatchCasesApi({ caseService, router }: RouteDeps) {
               .join(', ')} has been updated. Please refresh before saving additional updates.`
           );
         }
-
-        const updateCases: CasePatchRequest[] = queries.map(query => {
-          const currentCase = myCases.saved_objects.find(c => c.id === query.id);
+        const updateCases: CasePatchRequest[] = query.cases.map(thisCase => {
+          const currentCase = myCases.saved_objects.find(c => c.id === thisCase.id);
           return currentCase != null
-            ? getCaseToUpdate(currentCase.attributes, query)
-            : { id: query.id, version: query.version };
+            ? getCaseToUpdate(currentCase.attributes, thisCase)
+            : { id: thisCase.id, version: thisCase.version };
         });
         const updateFilterCases = updateCases.filter(updateCase => {
           const { id, version, ...updateCaseAttributes } = updateCase;
           return Object.keys(updateCaseAttributes).length > 0;
         });
-
         if (updateFilterCases.length > 0) {
           const updatedBy = await caseService.getUser({ request, response });
           const { full_name, username } = updatedBy;
@@ -80,7 +77,6 @@ export function initPatchCasesApi({ caseService, router }: RouteDeps) {
               };
             }),
           });
-
           const returnUpdatedCase = myCases.saved_objects
             .filter(myCase =>
               updatedCases.saved_objects.some(updatedCase => updatedCase.id === myCase.id)
@@ -94,7 +90,6 @@ export function initPatchCasesApi({ caseService, router }: RouteDeps) {
                 references: myCase.references,
               });
             });
-
           return response.ok({
             body: CasesResponseRt.encode(returnUpdatedCase),
           });

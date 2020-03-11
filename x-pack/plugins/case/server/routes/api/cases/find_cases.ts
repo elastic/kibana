@@ -11,13 +11,13 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import { isEmpty } from 'lodash';
-import { CasesFindResponseRt, SavedObjectFindOptionsRt, throwErrors } from '../../../../common/api';
+import { CasesFindResponseRt, CasesFindRequestRt, throwErrors } from '../../../../common/api';
 import { transformCases, sortToSnake, wrapError, escapeHatch } from '../utils';
 import { RouteDeps } from '../types';
 import { CASE_SAVED_OBJECT } from '../../../saved_object_types';
 
 const getStatusFilter = (status: 'open' | 'closed', appendFilter?: string) =>
-  `${CASE_SAVED_OBJECT}attributes.status: ${status}${
+  `${CASE_SAVED_OBJECT}.attributes.status: ${status}${
     !isEmpty(appendFilter) ? ` AND ${appendFilter}` : ''
   }`;
 
@@ -31,42 +31,51 @@ export function initFindCasesApi({ caseService, router }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        const query = pipe(
-          SavedObjectFindOptionsRt.decode(request.query),
+        const client = context.core.savedObjects.client;
+        const queryParams = pipe(
+          CasesFindRequestRt.decode(request.query),
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const args = query
+        const { tags, status, ...query } = queryParams;
+        const tagsFilter =
+          tags != null && Array.isArray(tags) && tags.length > 0
+            ? tags.map(tag => `${CASE_SAVED_OBJECT}.attributes.tags: ${tag}`)?.join(' OR ')
+            : tags != null && tags.length > 0
+            ? `${CASE_SAVED_OBJECT}.attributes.tags: ${tags}`
+            : '';
+        const filter = status != null ? getStatusFilter(status, tagsFilter) : tagsFilter;
+
+        const args = queryParams
           ? {
-              client: context.core.savedObjects.client,
+              client,
               options: {
                 ...query,
+                filter,
                 sortField: sortToSnake(query.sortField ?? ''),
               },
             }
           : {
-              client: context.core.savedObjects.client,
+              client,
             };
 
         const argsOpenCases = {
-          ...args,
+          client,
           options: {
-            ...args.options,
             fields: [],
             page: 1,
             perPage: 1,
-            filter: getStatusFilter('open', args?.options?.filter ?? ''),
+            filter: getStatusFilter('open', tagsFilter),
           },
         };
 
         const argsClosedCases = {
-          ...args,
+          client,
           options: {
-            ...args.options,
             fields: [],
             page: 1,
             perPage: 1,
-            filter: getStatusFilter('closed', args?.options?.filter ?? ''),
+            filter: getStatusFilter('closed', tagsFilter),
           },
         };
         const [cases, openCases, closesCases] = await Promise.all([
@@ -76,7 +85,7 @@ export function initFindCasesApi({ caseService, router }: RouteDeps) {
         ]);
         return response.ok({
           body: CasesFindResponseRt.encode(
-            transformCases(cases, openCases.total, closesCases.total)
+            transformCases(cases, openCases.total ?? 0, closesCases.total ?? 0)
           ),
         });
       } catch (error) {

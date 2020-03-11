@@ -20,6 +20,8 @@ import { useGetTags } from '../../../../containers/case/use_get_tags';
 import { FilterPopover } from '../../../../components/filter_popover';
 
 interface CasesTableFiltersProps {
+  countClosedCases: number | null;
+  countOpenCases: number | null;
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
   initial: FilterOptions;
 }
@@ -32,11 +34,13 @@ interface CasesTableFiltersProps {
  */
 
 const CasesTableFiltersComponent = ({
+  countClosedCases,
+  countOpenCases,
   onFilterChanged,
   initial = { search: '', tags: [], status: 'open' },
 }: CasesTableFiltersProps) => {
   const [search, setSearch] = useState(initial.search);
-  const [selectedTags, setSelectedTags] = useState(initial.tags);
+  const [selectedTags, setSelectedTags] = useState<string[]>(initial.tags);
   const [showOpenCases, setShowOpenCases] = useState(initial.status === 'open');
   const [{ data }] = useGetTags();
 
@@ -88,12 +92,14 @@ const CasesTableFiltersComponent = ({
             onClick={handleToggleFilter.bind(null, true)}
           >
             {i18n.OPEN_CASES}
+            {countOpenCases != null ? ` (${countOpenCases})` : ''}
           </EuiFilterButton>
           <EuiFilterButton
             hasActiveFilters={!showOpenCases}
             onClick={handleToggleFilter.bind(null, false)}
           >
             {i18n.CLOSED_CASES}
+            {countClosedCases != null ? ` (${countClosedCases})` : ''}
           </EuiFilterButton>
           <FilterPopover
             buttonLabel={i18n.REPORTER}

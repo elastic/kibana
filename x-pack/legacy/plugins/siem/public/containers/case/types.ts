@@ -39,7 +39,12 @@ export interface FilterOptions {
   tags: string[];
 }
 
-export interface AllCases {
+export interface CasesStatus {
+  countClosedCases: number | null;
+  countOpenCases: number | null;
+}
+
+export interface AllCases extends CasesStatus {
   cases: Case[];
   page: number;
   perPage: number;

@@ -7,7 +7,7 @@
 import { initDeleteCasesApi } from './cases/delete_cases';
 import { initFindCasesApi } from '././cases/find_cases';
 import { initGetCaseApi } from './cases/get_case';
-import { initPatchCaseApi } from './cases/patch_case';
+import { initPatchCasesApi } from './cases/patch_cases';
 import { initPostCaseApi } from './cases/post_case';
 
 import { initDeleteCommentApi } from './cases/comments/delete_comment';
@@ -29,13 +29,12 @@ export function initCaseApi(deps: RouteDeps) {
   initDeleteCasesApi(deps);
   initFindCasesApi(deps);
   initGetCaseApi(deps);
-  initPatchCaseApi(deps);
+  initPatchCasesApi(deps);
   initPostCaseApi(deps);
   // Comments
   initDeleteCommentApi(deps);
   initDeleteAllCommentsApi(deps);
   initFindCaseCommentsApi(deps);
-  initGetCaseApi(deps);
   initGetCommentApi(deps);
   initGetAllCommentsApi(deps);
   initPatchCommentApi(deps);

@@ -6,12 +6,16 @@
 
 import * as rt from 'io-ts';
 
-import { CommentResponseRt } from './comment';
+import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
+import { CommentResponseRt } from './comment';
+import { CasesStatusResponseRt } from './status';
+
+const StatusRt = rt.union([rt.literal('open'), rt.literal('closed')]);
 
 const CaseBasicRt = rt.type({
   description: rt.string,
-  status: rt.union([rt.literal('open'), rt.literal('closed')]),
+  status: StatusRt,
   tags: rt.array(rt.string),
   title: rt.string,
 });
@@ -29,6 +33,19 @@ export const CaseAttributesRt = rt.intersection([
 
 export const CaseRequestRt = CaseBasicRt;
 
+export const CasesFindRequestRt = rt.partial({
+  tags: rt.union([rt.array(rt.string), rt.string]),
+  status: StatusRt,
+  defaultSearchOperator: rt.union([rt.literal('AND'), rt.literal('OR')]),
+  fields: rt.array(rt.string),
+  page: NumberFromString,
+  perPage: NumberFromString,
+  search: rt.string,
+  searchFields: rt.array(rt.string),
+  sortField: rt.string,
+  sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
+});
+
 export const CaseResponseRt = rt.intersection([
   CaseAttributesRt,
   rt.type({
@@ -40,21 +57,22 @@ export const CaseResponseRt = rt.intersection([
   }),
 ]);
 
-export const CasesFindResponseRt = rt.type({
-  cases: rt.array(CaseResponseRt),
-  countOpenCases: rt.number,
-  countClosedCases: rt.number,
-  page: rt.number,
-  per_page: rt.number,
-  total: rt.number,
-});
+export const CasesFindResponseRt = rt.intersection([
+  rt.type({
+    cases: rt.array(CaseResponseRt),
+    page: rt.number,
+    per_page: rt.number,
+    total: rt.number,
+  }),
+  CasesStatusResponseRt,
+]);
 
 export const CasePatchRequestRt = rt.intersection([
   rt.partial(CaseRequestRt.props),
   rt.type({ id: rt.string, version: rt.string }),
 ]);
 
-export const CasesPatchRequestRt = rt.array(CasePatchRequestRt);
+export const CasesPatchRequestRt = rt.type({ cases: rt.array(CasePatchRequestRt) });
 export const CasesResponseRt = rt.array(CaseResponseRt);
 
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;

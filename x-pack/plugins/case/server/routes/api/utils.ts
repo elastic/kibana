@@ -80,8 +80,8 @@ export const transformCases = (
   per_page: cases.per_page,
   total: cases.total,
   cases: flattenCaseSavedObjects(cases.saved_objects),
-  countOpenCases,
-  countClosedCases,
+  count_open_cases: countOpenCases,
+  count_closed_cases: countClosedCases,
 });
 
 export const flattenCaseSavedObjects = (

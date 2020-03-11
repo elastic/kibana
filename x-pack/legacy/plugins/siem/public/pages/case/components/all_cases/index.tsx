@@ -23,12 +23,10 @@ import * as i18n from './translations';
 
 import { getCasesColumns } from './columns';
 import { Case, FilterOptions, SortFieldCase } from '../../../../containers/case/types';
-
 import { useGetCases } from '../../../../containers/case/use_get_cases';
+import { useGetCasesStatus } from '../../../../containers/case/use_get_cases_status';
 import { EuiBasicTableOnChange } from '../../../detection_engine/rules/types';
 import { Panel } from '../../../../components/panel';
-import { CasesTableFilters } from './table_filters';
-
 import {
   UtilityBar,
   UtilityBarAction,
@@ -37,10 +35,13 @@ import {
   UtilityBarText,
 } from '../../../../components/utility_bar';
 import { getConfigureCasesUrl, getCreateCaseUrl } from '../../../../components/link_to';
+
 import { getBulkItems } from '../bulk_actions';
 import { CaseHeaderPage } from '../case_header_page';
 import { OpenClosedStats } from '../open_closed_stats';
+
 import { getActions } from './actions';
+import { CasesTableFilters } from './table_filters';
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -74,12 +75,11 @@ const getSortField = (field: string): SortFieldCase => {
   return SortFieldCase.createdAt;
 };
 export const AllCases = React.memo(() => {
+  const { countClosedCases, countOpenCases, isLoading: isCasesStatusLoading } = useGetCasesStatus();
   const {
-    caseCount,
     data,
     dispatchUpdateCaseProperty,
     filterOptions,
-    getCaseCount,
     loading,
     queryParams,
     selectedCases,
@@ -169,18 +169,16 @@ export const AllCases = React.memo(() => {
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap={true}>
           <EuiFlexItem grow={false}>
             <OpenClosedStats
-              caseCount={caseCount}
+              caseCount={countOpenCases}
               caseStatus={'open'}
-              getCaseCount={getCaseCount}
-              isLoading={loading.indexOf('caseCount') > -1}
+              isLoading={isCasesStatusLoading}
             />
           </EuiFlexItem>
           <FlexItemDivider grow={false}>
             <OpenClosedStats
-              caseCount={caseCount}
+              caseCount={countClosedCases}
               caseStatus={'closed'}
-              getCaseCount={getCaseCount}
-              isLoading={loading.indexOf('caseCount') > -1}
+              isLoading={isCasesStatusLoading}
             />
           </FlexItemDivider>
           <EuiFlexItem grow={false}>
@@ -200,6 +198,8 @@ export const AllCases = React.memo(() => {
       {isCasesLoading && !isDataEmpty && <ProgressLoader size="xs" color="accent" />}
       <Panel loading={isCasesLoading}>
         <CasesTableFilters
+          countClosedCases={data.countClosedCases}
+          countOpenCases={data.countOpenCases}
           onFilterChanged={onFilterChangedCallback}
           initial={{
             search: filterOptions.search,

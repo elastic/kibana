@@ -18,14 +18,12 @@ describe('AllCases', () => {
   const setFilters = jest.fn();
   const setQueryParams = jest.fn();
   const setSelectedCases = jest.fn();
-  const getCaseCount = jest.fn();
   const dispatchUpdateCaseProperty = jest.fn();
   beforeEach(() => {
     jest.resetAllMocks();
     jest.spyOn(apiHook, 'useGetCases').mockReturnValue({
       ...useGetCasesMockState,
       dispatchUpdateCaseProperty,
-      getCaseCount,
       setFilters,
       setQueryParams,
       setSelectedCases,
