@@ -1,5 +1,5 @@
 {
-  "id": "dashboard_embeddable_container",
+  "id": "dashboard",
   "version": "kibana",
   "requiredPlugins": [
     "data",

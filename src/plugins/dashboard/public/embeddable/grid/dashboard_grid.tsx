@@ -164,7 +164,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       isLayoutInvalid = true;
       this.props.kibana.notifications.toasts.danger({
         title: this.props.intl.formatMessage({
-          id: 'dashboardEmbeddableContainer.dashboardGrid.toast.unableToLoadDashboardDangerMessage',
+          id: 'dashboard.dashboardGrid.toast.unableToLoadDashboardDangerMessage',
           defaultMessage: 'Unable to load dashboard.',
         }),
         body: error.message,

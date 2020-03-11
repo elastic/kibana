@@ -50,7 +50,7 @@ export class ReplacePanelAction implements ActionByType<typeof ACTION_REPLACE_PA
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }
-    return i18n.translate('dashboardEmbeddableContainer.panel.removePanel.replacePanel', {
+    return i18n.translate('dashboard.panel.removePanel.replacePanel', {
       defaultMessage: 'Replace panel',
     });
   }
