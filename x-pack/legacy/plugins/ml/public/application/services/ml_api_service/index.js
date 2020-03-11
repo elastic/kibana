@@ -220,7 +220,8 @@ export const ml = {
 
   checkManageMLPrivileges() {
     return http({
-      url: `${basePath()}/ml_capabilities?ignoreSpaces=true`,
+      // TODO Fix http service parameters
+      url: `${basePath()}/ml_capabilities`, // '?ignoreSpaces=true'
       method: 'GET',
     });
   },

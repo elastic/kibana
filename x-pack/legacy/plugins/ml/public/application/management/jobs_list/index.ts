@@ -6,19 +6,10 @@
 
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import React from 'react';
-// import { canGetManagementMlJobs } from '../../privilege/check_privilege';
-// import { JOBS_LIST_PATH, ACCESS_DENIED_PATH } from '../management_urls';
-// import { JobsListPage, AccessDeniedPage } from './components';
 import { JobsListPage } from './components';
-// import { getJobsListBreadcrumbs } from '../breadcrumbs';
 
 export const renderApp = (element: HTMLElement, appDependencies: any) => {
-  // const { mlFeatureEnabledInSpace } = checkPrivilege;
-  const mlFeatureEnabledInSpace = true;
-  ReactDOM.render(
-    React.createElement(JobsListPage, { isMlEnabledInSpace: mlFeatureEnabledInSpace }),
-    element
-  );
+  ReactDOM.render(React.createElement(JobsListPage), element);
 
   return () => {
     unmountComponentAtNode(element);

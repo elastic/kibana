@@ -15,15 +15,21 @@ import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import { metadata } from 'ui/metadata';
 import { take } from 'rxjs/operators';
-import { setDependencyCache } from '../util/dependency_cache';
-import { renderApp } from './jobs_list';
+
+import { ManagementSetup } from '../../../../../../../src/plugins/management/public';
+
 import {
   LicensingPluginSetup,
   LICENSE_CHECK_STATE,
 } from '../../../../../../plugins/licensing/public';
-import { ManagementSetup } from '../../../../../../../src/plugins/management/public';
+
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
+
+import { setDependencyCache } from '../util/dependency_cache';
+
+import { getJobsListBreadcrumbs } from './breadcrumbs';
+import { renderApp } from './jobs_list';
 
 type PluginsSetupExtended = typeof npSetup.plugins & {
   // adds licensing which isn't in the PluginsSetup interface, but does exist
@@ -70,8 +76,9 @@ function initManagementSection(management: ManagementSetup) {
       defaultMessage: 'Jobs list',
     }),
     order: 10,
-    async mount(params) {
-      return renderApp(params.element, {});
+    async mount({ element, setBreadcrumbs }) {
+      setBreadcrumbs(getJobsListBreadcrumbs());
+      return renderApp(element, {});
     },
   });
 }
