@@ -228,3 +228,17 @@ def deleteComment(commentId) {
 def getCommitHash() {
   return env.ghprbActualCommit
 }
+
+def getChanges() {
+  withGithubCredentials {
+    return githubPrs.getChanges(env.ghprbPullId)
+  }
+}
+
+def getChangedFiles() {
+  def changes = getChanges()
+  def changedFiles = changes.collect { it.filename }
+  def renamedFiles = changes.collect { it.previousFilename }.findAll { it }
+
+  return changedFiles + renamedFiles
+}

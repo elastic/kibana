@@ -215,4 +215,31 @@ def call(Map params = [:], Closure closure) {
   }
 }
 
+def getSkippablePaths() {
+  return [
+    /^docs\//,
+    /^rfcs\//,
+    /^.ci\/.+\.yml$/,
+    /^\.github\//,
+    /\.md$/,
+    // TODO remove below
+    /^vars\//,
+    /^Jenkinsfile$/,
+  ]
+}
+
+def areChangesSkippable() {
+  if (!env.ghprbPullId) {
+    return false
+  }
+
+  def skippablePaths = getSkippablePaths()
+  def files = githubPr.getChangedFiles()
+    .findAll { file ->
+      return !skippablePaths.find { regex -> file =~ regex}
+    }
+
+  return files.size() < 1
+}
+
 return this
