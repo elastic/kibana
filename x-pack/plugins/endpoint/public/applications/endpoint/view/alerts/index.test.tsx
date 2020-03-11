@@ -10,7 +10,6 @@ import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n/react';
 import { AlertIndex } from './index';
 import { appStoreFactory } from '../../store';
-import { coreMock } from 'src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { fireEvent, act } from '@testing-library/react';
 import { RouteCapture } from '../route_capture';
@@ -18,11 +17,13 @@ import { createMemoryHistory, MemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
 import { AppAction } from '../../types';
 import { mockAlertResultList } from '../../store/alerts/mock_alert_result_list';
+import { DepsStartMock, depsStartMock } from '../../mocks';
 
 describe('when on the alerting page', () => {
   let render: () => reactTestingLibrary.RenderResult;
   let history: MemoryHistory<never>;
   let store: ReturnType<typeof appStoreFactory>;
+  let depsStart: DepsStartMock;
 
   beforeEach(async () => {
     /**
@@ -32,7 +33,9 @@ describe('when on the alerting page', () => {
     /**
      * Create a store, with the middleware disabled. We don't want side effects being created by our code in this test.
      */
-    store = appStoreFactory(coreMock.createStart(), true);
+    store = appStoreFactory();
+
+    depsStart = depsStartMock();
 
     /**
      * Render the test component, use this after setting up anything in `beforeEach`.
@@ -46,7 +49,7 @@ describe('when on the alerting page', () => {
        */
       return reactTestingLibrary.render(
         <Provider store={store}>
-          <KibanaContextProvider services={undefined}>
+          <KibanaContextProvider services={{ data: depsStart.data }}>
             <I18nProvider>
               <Router history={history}>
                 <RouteCapture>

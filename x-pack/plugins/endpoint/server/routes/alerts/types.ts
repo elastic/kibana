@@ -35,7 +35,7 @@ export interface AlertSearchQuery {
   fromIndex?: number;
   query: Query;
   filters: Filter[];
-  dateRange: TimeRange;
+  dateRange?: TimeRange;
   sort: string;
   order: Direction;
   searchAfter?: SearchCursor;

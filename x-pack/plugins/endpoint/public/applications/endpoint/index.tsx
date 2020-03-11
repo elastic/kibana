@@ -29,7 +29,7 @@ export function renderApp(
   { appBasePath, element }: AppMountParameters
 ) {
   coreStart.http.get('/api/endpoint/hello-world');
-  const store = appStoreFactory(coreStart, depsStart);
+  const store = appStoreFactory({ coreStart, depsStart });
   ReactDOM.render(
     <AppRoot basename={appBasePath} store={store} coreStart={coreStart} depsStart={depsStart} />,
     element

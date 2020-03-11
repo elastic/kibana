@@ -49,38 +49,37 @@ export const substateMiddlewareFactory = <Substate>(
   };
 };
 
-export const appStoreFactory: (
+export const appStoreFactory: (middlewareDeps?: {
   /**
    * Allow middleware to communicate with Kibana core.
    */
-  coreStart: CoreStart,
-  depsStart: EndpointPluginStartDependencies,
-  /**
-   * Create the store without any middleware. This is useful for testing the store w/o side effects.
-   */
-  disableMiddleware?: boolean
-) => Store = (coreStart, depsStart, disableMiddleware = false) => {
-  const store = createStore(
-    appReducer,
-    disableMiddleware
-      ? undefined
-      : composeWithReduxDevTools(
-          applyMiddleware(
-            substateMiddlewareFactory(
-              globalState => globalState.managementList,
-              managementMiddlewareFactory(coreStart)
-            ),
-            substateMiddlewareFactory(
-              globalState => globalState.policyList,
-              policyListMiddlewareFactory(coreStart)
-            ),
-            substateMiddlewareFactory(
-              globalState => globalState.alertList,
-              alertMiddlewareFactory(coreStart, depsStart)
-            )
-          )
+  coreStart: CoreStart;
+  depsStart: EndpointPluginStartDependencies;
+}) => Store = middlewareDeps => {
+  let middleware;
+  if (middlewareDeps) {
+    const { coreStart, depsStart } = middlewareDeps;
+    middleware = composeWithReduxDevTools(
+      applyMiddleware(
+        substateMiddlewareFactory(
+          globalState => globalState.managementList,
+          managementMiddlewareFactory(coreStart, depsStart)
+        ),
+        substateMiddlewareFactory(
+          globalState => globalState.policyList,
+          policyListMiddlewareFactory(coreStart, depsStart)
+        ),
+        substateMiddlewareFactory(
+          globalState => globalState.alertList,
+          alertMiddlewareFactory(coreStart, depsStart)
         )
-  );
+      )
+    );
+  } else {
+    // Create the store without any middleware. This is useful for testing the store w/o side effects.
+    middleware = undefined;
+  }
+  const store = createStore(appReducer, middleware);
 
   return store;
 };

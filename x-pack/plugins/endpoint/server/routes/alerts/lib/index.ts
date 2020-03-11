@@ -32,21 +32,25 @@ function buildQuery(query: AlertSearchQuery): JsonObject {
       },
     },
   };
-  const dateRangeClause = {
-    range: {
-      ['@timestamp']: {
-        gte: query.dateRange.from,
-        lte: query.dateRange.to,
-      },
-    },
-  };
+  const dateRangeClause = query.dateRange
+    ? [
+        {
+          range: {
+            ['@timestamp']: {
+              gte: query.dateRange.from,
+              lte: query.dateRange.to,
+            },
+          },
+        },
+      ]
+    : [];
   const queryAndFiltersClauses = esQuery.buildEsQuery(undefined, query.query, query.filters);
 
   const fullQuery = {
     ...queryAndFiltersClauses,
     bool: {
       ...queryAndFiltersClauses.bool,
-      must: [...queryAndFiltersClauses.bool.must, alertKindClause, dateRangeClause],
+      must: [...queryAndFiltersClauses.bool.must, alertKindClause, ...dateRangeClause],
     },
   };
 
