@@ -90,7 +90,6 @@ export {
   IScopedClusterClient,
   ElasticsearchConfig,
   ElasticsearchClientConfig,
-  ElasticsearchConfigType,
   ElasticsearchError,
   ElasticsearchErrorHelpers,
   ElasticsearchServiceSetup,

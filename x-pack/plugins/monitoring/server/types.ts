@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Observable } from 'rxjs';
+import { TypeOf } from '@kbn/config-schema';
+import { config } from '../../../../src/core/server';
 import { LicenseFeature, ILicense } from '../../licensing/server';
 
 export interface MonitoringLicenseService {
@@ -15,3 +17,5 @@ export interface MonitoringLicenseService {
   getSecurityFeature: () => LicenseFeature;
   stop: () => void;
 }
+
+export type ElasticsearchConfigType = TypeOf<typeof config.elasticsearch.schema>;

@@ -24,7 +24,6 @@ import {
   CoreSetup,
   ICustomClusterClient,
   ElasticsearchConfig,
-  ElasticsearchConfigType,
   UiSettingsServiceStart,
   CoreStart,
   IRouter,
@@ -43,7 +42,7 @@ import { registerMonitoringCollection } from './telemetry_collection';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { LicenseService } from './license_service';
-import { MonitoringLicenseService } from './types';
+import { MonitoringLicenseService, ElasticsearchConfigType } from './types';
 import {
   PluginStartContract as AlertingPluginStartContract,
   PluginSetupContract as AlertingPluginSetupContract,
