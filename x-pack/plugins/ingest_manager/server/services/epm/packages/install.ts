@@ -43,16 +43,15 @@ export async function ensureInstalledDefaultPackages(
   savedObjectsClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ): Promise<Installation[]> {
-  const installations: Installation[] = [];
+  const installations = [];
   for (const pkgName in DefaultPackages) {
     if (!DefaultPackages.hasOwnProperty(pkgName)) continue;
-    installations.push(
-      await ensureInstalledPackage({
-        savedObjectsClient,
-        pkgName,
-        callCluster,
-      })
-    );
+    const installation = await ensureInstalledPackage({
+      savedObjectsClient,
+      pkgName,
+      callCluster,
+    });
+    if (installation) installations.push(installation);
   }
 
   return installations;
@@ -62,7 +61,7 @@ export async function ensureInstalledPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   callCluster: CallESAsCurrentUser;
-}): Promise<Installation> {
+}): Promise<Installation | undefined> {
   const { savedObjectsClient, pkgName, callCluster } = options;
   const installedPackage = await findInstalledPackageByName({ savedObjectsClient, pkgName });
   if (installedPackage) {
@@ -75,7 +74,7 @@ export async function ensureInstalledPackage(options: {
       pkgName,
       callCluster,
     });
-    return (await findInstalledPackageByName({ savedObjectsClient, pkgName })) as Installation;
+    return await findInstalledPackageByName({ savedObjectsClient, pkgName });
   } catch (err) {
     throw new Error(err.message);
   }
