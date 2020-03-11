@@ -10,6 +10,7 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { DatasourceDimensionPanelProps, StateSetter } from '../../types';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
@@ -30,6 +31,7 @@ export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   savedObjectsClient: SavedObjectsClientContract;
   layerId: string;
   http: HttpSetup;
+  data: DataPublicPluginStart;
   uniqueLabel: string;
   dateRange: DateRange;
 };
@@ -128,6 +130,7 @@ export const IndexPatternDimensionPanelComponent = function IndexPatternDimensio
                 layerId,
                 suggestedPriority: props.suggestedPriority,
                 field: droppedItem.field,
+                previousColumn: selectedColumn,
               });
 
           trackUiEvent('drop_onto_dimension');

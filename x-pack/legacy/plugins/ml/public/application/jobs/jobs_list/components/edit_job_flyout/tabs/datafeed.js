@@ -12,7 +12,7 @@ import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiFieldNumber } from '@e
 import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../common/util/job_utils';
 import { getNewJobDefaults } from '../../../../../services/ml_server_info';
 import { parseInterval } from '../../../../../../../common/util/parse_interval';
-import { MLJobEditor } from '../../ml_job_editor';
+import { MLJobEditor, ML_EDITOR_MODE } from '../../ml_job_editor';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 function getDefaults(bucketSpan, jobDefaults) {
@@ -85,7 +85,12 @@ export class Datafeed extends Component {
             }
             style={{ maxWidth: 'inherit' }}
           >
-            <MLJobEditor value={query} onChange={this.onQueryChange} height="200px" />
+            <MLJobEditor
+              mode={ML_EDITOR_MODE.XJSON}
+              value={query}
+              onChange={this.onQueryChange}
+              height="200px"
+            />
           </EuiFormRow>
           <EuiFormRow
             label={

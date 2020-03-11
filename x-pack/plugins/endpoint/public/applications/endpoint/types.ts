@@ -5,10 +5,15 @@
  */
 
 import { Dispatch, MiddlewareAPI } from 'redux';
-import { CoreStart } from 'kibana/public';
-import { EndpointMetadata } from '../../../common/types';
+import {
+  EndpointMetadata,
+  AlertData,
+  AlertResultList,
+  Immutable,
+  ImmutableArray,
+} from '../../../common/types';
 import { AppAction } from './store/action';
-import { AlertResultList, Immutable } from '../../../common/types';
+import { CoreStart } from '../../../../../../src/core/public';
 
 export { AppAction };
 export type MiddlewareFactory<S = GlobalState> = (
@@ -23,11 +28,23 @@ export interface ManagementListState {
   pageSize: number;
   pageIndex: number;
   loading: boolean;
+  detailsError?: ServerApiError;
+  details?: Immutable<EndpointMetadata>;
+  location?: Immutable<EndpointAppLocation>;
 }
 
 export interface ManagementListPagination {
   pageIndex: number;
   pageSize: number;
+}
+export interface ManagingIndexUIQueryParams {
+  selected_host?: string;
+}
+
+export interface ServerApiError {
+  statusCode: number;
+  error: string;
+  message: string;
 }
 
 // REFACTOR to use Types from Ingest Manager - see: https://github.com/elastic/endpoint-app-team/issues/150
@@ -85,9 +102,26 @@ export interface EndpointAppLocation {
 }
 
 export type AlertListData = AlertResultList;
-export type AlertListState = Immutable<AlertResultList> & {
+
+export interface AlertListState {
+  /** Array of alert items. */
+  readonly alerts: ImmutableArray<AlertData>;
+
+  /** The total number of alerts on the page. */
+  readonly total: number;
+
+  /** Number of alerts per page. */
+  readonly pageSize: number;
+
+  /** Page number, starting at 0. */
+  readonly pageIndex: number;
+
+  /** Current location object from React Router history. */
   readonly location?: Immutable<EndpointAppLocation>;
-};
+
+  /** Specific Alert data to be shown in the details view */
+  readonly alertDetails?: Immutable<AlertData>;
+}
 
 /**
  * Gotten by parsing the URL from the browser. Used to calculate the new URL when changing views.
@@ -105,18 +139,4 @@ export interface AlertingIndexUIQueryParams {
    * If any value is present, show the alert detail view for the selected alert. Should be an ID for an alert event.
    */
   selected_alert?: string;
-}
-
-/**
- * Query params to pass to the alert API when fetching new data.
- */
-export interface AlertsAPIQueryParams {
-  /**
-   * Number of results to return.
-   */
-  page_size?: string;
-  /**
-   * 0-based index of 'page' to return.
-   */
-  page_index?: string;
 }

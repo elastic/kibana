@@ -69,6 +69,11 @@ function dataStateSelector(state: ResolverState) {
 }
 
 /**
+ * Whether or not the resolver is pending fetching data
+ */
+export const isLoading = composeSelectors(dataStateSelector, dataSelectors.isLoading);
+
+/**
  * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a
  * concern-specific selector. `selector` should return the concern-specific state.
  */

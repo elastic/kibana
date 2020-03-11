@@ -283,8 +283,48 @@ export {
  * Search:
  */
 
-export { IRequestTypesMap, IResponseTypesMap } from './search';
-export * from './search';
+export {
+  ES_SEARCH_STRATEGY,
+  SYNC_SEARCH_STRATEGY,
+  getEsPreference,
+  getSearchErrorType,
+  ISearchContext,
+  TSearchStrategyProvider,
+  ISearchStrategy,
+  ISearch,
+  ISearchOptions,
+  IRequestTypesMap,
+  IResponseTypesMap,
+  ISearchGeneric,
+  IEsSearchResponse,
+  IEsSearchRequest,
+  ISyncSearchRequest,
+  IKibanaSearchResponse,
+  IKibanaSearchRequest,
+  SearchRequest,
+  SearchResponse,
+  SearchError,
+  SearchStrategyProvider,
+  ISearchSource,
+  SearchSource,
+  SearchSourceFields,
+  EsQuerySortValue,
+  SortDirection,
+  FetchOptions,
+} from './search';
+
+/*
+ * UI components
+ */
+
+export {
+  SearchBar,
+  SearchBarProps,
+  StatefulSearchBarProps,
+  FilterBar,
+  QueryStringInput,
+  IndexPatternSelect,
+} from './ui';
 
 /**
  * Types to be shared externally
@@ -294,23 +334,22 @@ export { Filter, Query, RefreshInterval, TimeRange } from '../common';
 
 export {
   createSavedQueryService,
-  syncAppFilters,
-  syncQuery,
+  connectToQueryState,
+  syncQueryStateWithUrl,
+  QueryState,
   getTime,
   getQueryLog,
-  getQueryStateContainer,
+  getDefaultQuery,
   FilterManager,
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,
-  SavedQueryAttributes,
   InputTimeRange,
-  TimefilterSetup,
   TimeHistory,
   TimefilterContract,
   TimeHistoryContract,
 } from './query';
-export * from './ui';
+
 export {
   // kbn field types
   castEsToKbnFieldTypeName,

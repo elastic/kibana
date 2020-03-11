@@ -21,7 +21,6 @@ import { SavedObjectsClient } from './service/saved_objects_client';
 import { SavedObjectsTypeMappingDefinition, SavedObjectsTypeMappingDefinitions } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
 import { PropertyValidators } from './validation';
-import { SavedObjectsManagementDefinition } from './management';
 
 export {
   SavedObjectsImportResponse,
@@ -34,6 +33,8 @@ export {
 } from './import/types';
 
 import { LegacyConfig } from '../legacy';
+import { SavedObjectUnsanitizedDoc } from './serialization';
+import { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';
 export {
   SavedObjectAttributes,
   SavedObjectAttribute,
@@ -60,7 +61,6 @@ export interface SavedObjectsMigrationVersion {
 }
 
 /**
- *
  * @public
  */
 export interface SavedObject<T = unknown> {
@@ -245,6 +245,50 @@ export interface SavedObjectsType {
    * An optional map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type.
    */
   migrations?: SavedObjectMigrationMap;
+  /**
+   * An optional {@link SavedObjectsTypeManagementDefinition | saved objects management section} definition for the type.
+   */
+  management?: SavedObjectsTypeManagementDefinition;
+}
+
+/**
+ * Configuration options for the {@link SavedObjectsType | type}'s management section.
+ *
+ * @public
+ */
+export interface SavedObjectsTypeManagementDefinition {
+  /**
+   * Is the type importable or exportable. Defaults to `false`.
+   */
+  importableAndExportable?: boolean;
+  /**
+   * The default search field to use for this type. Defaults to `id`.
+   */
+  defaultSearchField?: string;
+  /**
+   * The eui icon name to display in the management table.
+   * If not defined, the default icon will be used.
+   */
+  icon?: string;
+  /**
+   * Function returning the title to display in the management table.
+   * If not defined, will use the object's type and id to generate a label.
+   */
+  getTitle?: (savedObject: SavedObject<any>) => string;
+  /**
+   * Function returning the url to use to redirect to the editing page of this object.
+   * If not defined, editing will not be allowed.
+   */
+  getEditUrl?: (savedObject: SavedObject<any>) => string;
+  /**
+   * Function returning the url to use to redirect to this object from the management section.
+   * If not defined, redirecting to the object will not be allowed.
+   *
+   * @returns an object containing a `path` and `uiCapabilitiesPath` properties. the `path` is the path to
+   *          the object page, relative to the base path. `uiCapabilitiesPath` is the path to check in the
+   *          {@link Capabilities | uiCapabilities} to check if the user has permission to access the object.
+   */
+  getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
 }
 
 /**
@@ -256,7 +300,7 @@ export interface SavedObjectsLegacyUiExports {
   savedObjectMigrations: SavedObjectsLegacyMigrationDefinitions;
   savedObjectSchemas: SavedObjectsLegacySchemaDefinitions;
   savedObjectValidations: PropertyValidators;
-  savedObjectsManagement: SavedObjectsManagementDefinition;
+  savedObjectsManagement: SavedObjectsLegacyManagementDefinition;
 }
 
 /**
@@ -270,11 +314,50 @@ export interface SavedObjectsLegacyMapping {
 
 /**
  * @internal
+ * @deprecated Use {@link SavedObjectsTypeManagementDefinition | management definition} when registering
+ *             from new platform plugins
+ */
+export interface SavedObjectsLegacyManagementDefinition {
+  [key: string]: SavedObjectsLegacyManagementTypeDefinition;
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
+export interface SavedObjectsLegacyManagementTypeDefinition {
+  isImportableAndExportable?: boolean;
+  defaultSearchField?: string;
+  icon?: string;
+  getTitle?: (savedObject: SavedObject<any>) => string;
+  getEditUrl?: (savedObject: SavedObject<any>) => string;
+  getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
+}
+
+/**
+ * @internal
  * @deprecated
  */
 export interface SavedObjectsLegacyMigrationDefinitions {
-  [type: string]: SavedObjectMigrationMap;
+  [type: string]: SavedObjectLegacyMigrationMap;
 }
+
+/**
+ * @internal
+ * @deprecated
+ */
+export interface SavedObjectLegacyMigrationMap {
+  [version: string]: SavedObjectLegacyMigrationFn;
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
+export type SavedObjectLegacyMigrationFn = (
+  doc: SavedObjectUnsanitizedDoc,
+  log: SavedObjectsMigrationLogger
+) => SavedObjectUnsanitizedDoc;
 
 /**
  * @internal

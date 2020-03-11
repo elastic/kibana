@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 
-import { AggConfig } from '../agg_config';
+import { IAggConfig } from '../agg_config';
 import { BaseParamType } from './base';
 
 export class JsonParamType extends BaseParamType {
@@ -29,7 +29,7 @@ export class JsonParamType extends BaseParamType {
     this.name = config.name || 'json';
 
     if (!config.write) {
-      this.write = (aggConfig: AggConfig, output: Record<string, any>) => {
+      this.write = (aggConfig: IAggConfig, output: Record<string, any>) => {
         let paramJson;
         const param = aggConfig.params[this.name];
 

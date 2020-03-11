@@ -12,15 +12,8 @@ exports[`FieldName renders a geo field, useShortDots is set to true 1`] = `
       class="euiToken euiToken--euiColorVis5 euiToken--square euiToken--light euiToken--small kbnFieldIcon"
       title="Geo point field"
     >
-      <svg
-        aria-hidden="true"
-        class="euiIcon euiIcon--medium euiIcon-isLoading"
-        focusable="false"
-        height="16"
-        role="img"
-        viewBox="0 0 16 16"
-        width="16"
-        xmlns="http://www.w3.org/2000/svg"
+      <div
+        data-euiicon-type="tokenGeo"
       />
     </span>
   </div>
@@ -28,9 +21,11 @@ exports[`FieldName renders a geo field, useShortDots is set to true 1`] = `
     class="euiFlexItem eui-textTruncate"
   >
     <span
-      class="dscFieldName__displayName eui-textTruncate"
+      class="euiToolTipAnchor eui-textTruncate"
     >
-      t.t.test
+      <span>
+        t.t.test
+      </span>
     </span>
   </div>
 </div>
@@ -48,15 +43,8 @@ exports[`FieldName renders a number field by providing a field record, useShortD
       class="euiToken euiToken--euiColorVis0 euiToken--square euiToken--light euiToken--small kbnFieldIcon"
       title="Number field"
     >
-      <svg
-        aria-hidden="true"
-        class="euiIcon euiIcon--medium euiIcon-isLoading"
-        focusable="false"
-        height="16"
-        role="img"
-        viewBox="0 0 16 16"
-        width="16"
-        xmlns="http://www.w3.org/2000/svg"
+      <div
+        data-euiicon-type="tokenNumber"
       />
     </span>
   </div>
@@ -64,9 +52,11 @@ exports[`FieldName renders a number field by providing a field record, useShortD
     class="euiFlexItem eui-textTruncate"
   >
     <span
-      class="dscFieldName__displayName eui-textTruncate"
+      class="euiToolTipAnchor eui-textTruncate"
     >
-      test.test.test
+      <span>
+        test.test.test
+      </span>
     </span>
   </div>
 </div>
@@ -84,15 +74,8 @@ exports[`FieldName renders a string field by providing fieldType and fieldName 1
       class="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small kbnFieldIcon"
       title="String field"
     >
-      <svg
-        aria-hidden="true"
-        class="euiIcon euiIcon--medium euiIcon-isLoading"
-        focusable="false"
-        height="16"
-        role="img"
-        viewBox="0 0 16 16"
-        width="16"
-        xmlns="http://www.w3.org/2000/svg"
+      <div
+        data-euiicon-type="tokenString"
       />
     </span>
   </div>
@@ -100,9 +83,11 @@ exports[`FieldName renders a string field by providing fieldType and fieldName 1
     class="euiFlexItem eui-textTruncate"
   >
     <span
-      class="dscFieldName__displayName eui-textTruncate"
+      class="euiToolTipAnchor eui-textTruncate"
     >
-      test
+      <span>
+        test
+      </span>
     </span>
   </div>
 </div>

@@ -34,7 +34,7 @@ import { stubFields } from '../../../../plugins/data/public/stubs';
 import { tableVisResponseHandler } from './table_vis_response_handler';
 import { coreMock } from '../../../../core/public/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AggConfigs } from 'ui/agg_types';
+import { createAggConfigs } from 'ui/agg_types';
 import { tabifyAggResponse, IAggConfig } from './legacy_imports';
 
 jest.mock('ui/new_platform');
@@ -113,24 +113,20 @@ describe('Table Vis - Controller', () => {
     return ({
       type: tableVisTypeDefinition,
       params: Object.assign({}, tableVisTypeDefinition.visConfig.defaults, params),
-      aggs: new AggConfigs(
-        stubIndexPattern,
-        [
-          { type: 'count', schema: 'metric' },
-          {
-            type: 'range',
-            schema: 'bucket',
-            params: {
-              field: 'bytes',
-              ranges: [
-                { from: 0, to: 1000 },
-                { from: 1000, to: 2000 },
-              ],
-            },
+      aggs: createAggConfigs(stubIndexPattern, [
+        { type: 'count', schema: 'metric' },
+        {
+          type: 'range',
+          schema: 'bucket',
+          params: {
+            field: 'bytes',
+            ranges: [
+              { from: 0, to: 1000 },
+              { from: 1000, to: 2000 },
+            ],
           },
-        ],
-        tableVisTypeDefinition.editorConfig.schemas.all
-      ),
+        },
+      ]),
     } as unknown) as Vis;
   }
 

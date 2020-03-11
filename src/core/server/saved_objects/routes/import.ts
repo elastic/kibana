@@ -21,7 +21,7 @@ import { Readable } from 'stream';
 import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
-import { importSavedObjects } from '../import';
+import { importSavedObjectsFromStream } from '../import';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { createSavedObjectsStreamFromNdJson } from './utils';
 
@@ -31,11 +31,7 @@ interface FileStream extends Readable {
   };
 }
 
-export const registerImportRoute = (
-  router: IRouter,
-  config: SavedObjectConfig,
-  supportedTypes: string[]
-) => {
+export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) => {
   const { maxImportExportSize, maxImportPayloadBytes } = config;
 
   router.post(
@@ -65,7 +61,11 @@ export const registerImportRoute = (
         return res.badRequest({ body: `Invalid file extension ${fileExtension}` });
       }
 
-      const result = await importSavedObjects({
+      const supportedTypes = context.core.savedObjects.typeRegistry
+        .getImportableAndExportableTypes()
+        .map(type => type.name);
+
+      const result = await importSavedObjectsFromStream({
         supportedTypes,
         savedObjectsClient: context.core.savedObjects.client,
         readStream: createSavedObjectsStreamFromNdJson(file),

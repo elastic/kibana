@@ -8,7 +8,6 @@ import turf from 'turf';
 import React from 'react';
 import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector/vector_style';
-import { InnerJoin } from './joins/inner_join';
 import {
   FEATURE_ID_PROPERTY_NAME,
   SOURCE_DATA_ID_ORIGIN,
@@ -49,19 +48,21 @@ export class VectorLayer extends AbstractLayer {
       layerDescriptor.style = VectorStyle.createDescriptor(styleProperties);
     }
 
+    if (!options.joins) {
+      layerDescriptor.joins = [];
+    }
+
     return layerDescriptor;
   }
 
-  constructor(options) {
-    super(options);
-    this._joins = [];
-    if (options.layerDescriptor.joins) {
-      options.layerDescriptor.joins.forEach(joinDescriptor => {
-        const join = new InnerJoin(joinDescriptor, this.getSource());
-        this._joins.push(join);
-      });
-    }
-    this._style = new VectorStyle(this._descriptor.style, this._source, this);
+  constructor({ layerDescriptor, source, joins = [] }) {
+    super({ layerDescriptor, source });
+    this._joins = joins;
+    this._style = new VectorStyle(this._descriptor.style, this.getSource(), this);
+  }
+
+  getStyle() {
+    return this._style;
   }
 
   destroy() {
@@ -197,19 +198,6 @@ export class VectorLayer extends AbstractLayer {
     return joinFields;
   }
 
-  async getDateFields() {
-    return await this.getSource().getDateFields();
-  }
-
-  async getNumberFields() {
-    const numberFieldOptions = await this.getSource().getNumberFields();
-    return [...numberFieldOptions, ...this._getJoinFields()];
-  }
-
-  async getCategoricalFields() {
-    return await this.getSource().getCategoricalFields();
-  }
-
   async getFields() {
     const sourceFields = await this.getSource().getFields();
     return [...sourceFields, ...this._getJoinFields()];
@@ -231,7 +219,7 @@ export class VectorLayer extends AbstractLayer {
     return indexPatternIds;
   }
 
-  _findDataRequestById(sourceDataId) {
+  findDataRequestById(sourceDataId) {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
   }
 
@@ -252,7 +240,7 @@ export class VectorLayer extends AbstractLayer {
       sourceQuery: joinSource.getWhereQuery(),
       applyGlobalQuery: joinSource.getApplyGlobalQuery(),
     };
-    const prevDataRequest = this._findDataRequestById(sourceDataId);
+    const prevDataRequest = this.findDataRequestById(sourceDataId);
 
     const canSkipFetch = await canSkipSourceUpdate({
       source: joinSource,
@@ -479,7 +467,7 @@ export class VectorLayer extends AbstractLayer {
       isTimeAware: this.getCurrentStyle().isTimeAware() && (await source.isTimeAware()),
       timeFilters: dataFilters.timeFilters,
     };
-    const prevDataRequest = this._findDataRequestById(dataRequestId);
+    const prevDataRequest = this.findDataRequestById(dataRequestId);
     const canSkipFetch = canSkipStyleMetaUpdate({ prevDataRequest, nextMeta });
     if (canSkipFetch) {
       return;
@@ -555,7 +543,7 @@ export class VectorLayer extends AbstractLayer {
     const nextMeta = {
       fieldNames: _.uniq(fieldNames).sort(),
     };
-    const prevDataRequest = this._findDataRequestById(dataRequestId);
+    const prevDataRequest = this.findDataRequestById(dataRequestId);
     const canSkipUpdate = canSkipFormattersUpdate({ prevDataRequest, nextMeta });
     if (canSkipUpdate) {
       return;
@@ -566,10 +554,13 @@ export class VectorLayer extends AbstractLayer {
       startLoading(dataRequestId, requestToken, nextMeta);
 
       const formatters = {};
-      const promises = fields.map(async field => {
-        const fieldName = field.getName();
-        formatters[fieldName] = await source.getFieldFormatter(fieldName);
-      });
+      const promises = fields
+        .filter(field => {
+          return field.canValueBeFormatted();
+        })
+        .map(async field => {
+          formatters[field.getName()] = await source.createFieldFormatter(field);
+        });
       await Promise.all(promises);
 
       stopLoading(dataRequestId, requestToken, formatters, nextMeta);

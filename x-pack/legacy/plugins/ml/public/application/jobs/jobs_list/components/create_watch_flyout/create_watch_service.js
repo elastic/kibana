@@ -9,9 +9,10 @@ import { http } from '../../../../services/http_service';
 
 import emailBody from './email.html';
 import emailInfluencersBody from './email_influencers.html';
+import { DEFAULT_WATCH_SEVERITY } from './select_severity';
 import { watch } from './watch.js';
 import { i18n } from '@kbn/i18n';
-import { getBasePath, getAppUrl } from '../../../../util/dependency_cache';
+import { getBasePath, getApplication } from '../../../../util/dependency_cache';
 
 const compiledEmailBody = template(emailBody);
 const compiledEmailInfluencersBody = template(emailInfluencersBody);
@@ -38,8 +39,7 @@ function randomNumber(min, max) {
 }
 
 function saveWatch(watchModel) {
-  const basePath = getBasePath();
-  const path = basePath.prepend('/api/watcher');
+  const path = '/api/watcher';
   const url = `${path}/watch/${watchModel.id}`;
 
   return http({
@@ -75,7 +75,10 @@ class CreateWatchService {
     this.config.interval = '20m';
     this.config.watcherEditURL = '';
     this.config.includeInfluencers = false;
-    this.config.threshold = { display: 'critical', val: 75 };
+
+    // Current implementation means that default needs to match that of the select severity control.
+    const { display, val } = DEFAULT_WATCH_SEVERITY;
+    this.config.threshold = { display, val };
   }
 
   createNewWatch = function(jobId) {
@@ -91,12 +94,13 @@ class CreateWatchService {
         watch.input.search.request.body.aggs.bucket_results.filter.range.anomaly_score.gte = this.config.threshold.val;
 
         if (this.config.includeEmail && this.config.email !== '') {
+          const { getUrlForApp } = getApplication();
           const emails = this.config.email.split(',');
           emailSection.send_email.email.to = emails;
 
           // create the html by adding the variables to the compiled email body.
           emailSection.send_email.email.body.html = compiledEmailBody({
-            serverAddress: getAppUrl(),
+            serverAddress: getUrlForApp('ml', { absolute: true }),
             influencersSection:
               this.config.includeInfluencers === true
                 ? compiledEmailInfluencersBody({
@@ -153,6 +157,7 @@ class CreateWatchService {
           upstreamJSON: {
             id,
             type: 'json',
+            isNew: false, // Set to false, as we want to allow watches to be overwritten.
             watch,
           },
         };
@@ -182,8 +187,7 @@ class CreateWatchService {
 
   loadWatch(jobId) {
     const id = `ml-${jobId}`;
-    const basePath = getBasePath();
-    const path = basePath.prepend('/api/watcher');
+    const path = '/api/watcher';
     const url = `${path}/watch/${id}`;
     return http({
       url,

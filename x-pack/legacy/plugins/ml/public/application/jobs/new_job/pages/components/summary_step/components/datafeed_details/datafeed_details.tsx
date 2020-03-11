@@ -28,7 +28,7 @@ export const DatafeedDetails: FC = () => {
     <Italic>{`${DEFAULT_QUERY_DELAY} (${defaultLabel})`}</Italic>
   );
   const frequency = jobCreator.frequency || (
-    <Italic>{`${defaultFrequency} (${defaultLabel})`}</Italic>
+    <Italic>{`${defaultFrequency}s (${defaultLabel})`}</Italic>
   );
   const scrollSize =
     jobCreator.scrollSize !== null ? (
@@ -69,7 +69,7 @@ export const DatafeedDetails: FC = () => {
   const queryTitle = i18n.translate(
     'xpack.ml.newJob.wizard.summaryStep.datafeedDetails.query.title',
     {
-      defaultMessage: 'Scroll size',
+      defaultMessage: 'Elasticsearch query',
     }
   );
 

@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonIcon,
   EuiComboBox,
-  EuiComboBoxOptionProps,
+  EuiComboBoxOptionOption,
   EuiComboBoxProps,
   EuiFlexGroup,
   EuiFlexItem,
@@ -28,10 +28,10 @@ import { GLOBAL_CALENDAR } from '../../../../../../../../../../../common/constan
 export const CalendarsSelection: FC = () => {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
   const [selectedCalendars, setSelectedCalendars] = useState<Calendar[]>(jobCreator.calendars);
-  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionProps<Calendar>>>(
+  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<Calendar>>>(
     []
   );
-  const [options, setOptions] = useState<Array<EuiComboBoxOptionProps<Calendar>>>([]);
+  const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<Calendar>>>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   async function loadCalendars() {

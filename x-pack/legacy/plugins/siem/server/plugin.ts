@@ -24,7 +24,7 @@ import { PluginStartContract as ActionsStart } from '../../../../plugins/actions
 import { LegacyServices } from './types';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
-import { initRoutes, LegacyInitRoutes } from './routes';
+import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
 import {
@@ -33,7 +33,7 @@ import {
   timelineSavedObjectType,
   ruleStatusSavedObjectType,
 } from './saved_objects';
-import { ClientsService } from './services';
+import { SiemClientFactory } from './client';
 
 export { CoreSetup, CoreStart };
 
@@ -54,13 +54,12 @@ export class Plugin {
   readonly name = 'siem';
   private readonly logger: Logger;
   private context: PluginInitializerContext;
-  private clients: ClientsService;
-  private legacyInitRoutes?: LegacyInitRoutes;
+  private siemClientFactory: SiemClientFactory;
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
     this.logger = context.logger.get('plugins', this.name);
-    this.clients = new ClientsService();
+    this.siemClientFactory = new SiemClientFactory();
 
     this.logger.debug('Shim plugin initialized');
   }
@@ -68,10 +67,18 @@ export class Plugin {
   public setup(core: CoreSetup, plugins: SetupPlugins, __legacy: LegacyServices) {
     this.logger.debug('Shim plugin setup');
 
-    this.clients.setup(core.elasticsearch.dataClient, plugins.spaces?.spacesService);
+    const router = core.http.createRouter();
+    core.http.registerRouteHandlerContext(this.name, (context, request, response) => ({
+      getSiemClient: () => this.siemClientFactory.create(request),
+    }));
 
-    this.legacyInitRoutes = initRoutes(
-      __legacy.route,
+    this.siemClientFactory.setup({
+      getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
+      config: __legacy.config,
+    });
+
+    initRoutes(
+      router,
       __legacy.config,
       plugins.encryptedSavedObjects?.usingEphemeralEncryptionKey ?? false
     );
@@ -150,9 +157,5 @@ export class Plugin {
     initServer(libs);
   }
 
-  public start(core: CoreStart, plugins: StartPlugins) {
-    this.clients.start(core.savedObjects, plugins.actions, plugins.alerting);
-
-    this.legacyInitRoutes!(this.clients.createGetScoped());
-  }
+  public start(core: CoreStart, plugins: StartPlugins) {}
 }

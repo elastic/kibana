@@ -5,6 +5,7 @@ exports[`it renders ToolBarPagerButtons 1`] = `
   className="kuiButtonGroup"
 >
   <button
+    aria-label="Previous page in table"
     className="kuiButton kuiButton--basic kuiButton--icon"
     data-test-subj="btnPrevPage"
     disabled={false}
@@ -15,6 +16,7 @@ exports[`it renders ToolBarPagerButtons 1`] = `
     />
   </button>
   <button
+    aria-label="Next page in table"
     className="kuiButton kuiButton--basic kuiButton--icon"
     data-test-subj="btnNextPage"
     disabled={false}

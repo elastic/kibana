@@ -9,9 +9,8 @@ import { useEffect, useReducer } from 'react';
 import { Case } from './types';
 import { FETCH_INIT, FETCH_FAILURE, FETCH_SUCCESS } from './constants';
 import { getTypedPayload } from './utils';
-import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import * as i18n from './translations';
-import { useStateToaster } from '../../components/toasters';
+import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { getCase } from './api';
 
 interface CaseState {
@@ -50,8 +49,9 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
   }
 };
 const initialData: Case = {
-  caseId: '',
+  id: '',
   createdAt: '',
+  comments: [],
   createdBy: {
     username: '',
   },
@@ -60,6 +60,7 @@ const initialData: Case = {
   tags: [],
   title: '',
   updatedAt: '',
+  version: '',
 };
 
 export const useGetCase = (caseId: string): [CaseState] => {
@@ -75,13 +76,17 @@ export const useGetCase = (caseId: string): [CaseState] => {
     const fetchData = async () => {
       dispatch({ type: FETCH_INIT });
       try {
-        const response = await getCase(caseId, false);
+        const response = await getCase(caseId);
         if (!didCancel) {
           dispatch({ type: FETCH_SUCCESS, payload: response });
         }
       } catch (error) {
         if (!didCancel) {
-          errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
+          errorToToaster({
+            title: i18n.ERROR_TITLE,
+            error: error.body && error.body.message ? new Error(error.body.message) : error,
+            dispatchToaster,
+          });
           dispatch({ type: FETCH_FAILURE });
         }
       }

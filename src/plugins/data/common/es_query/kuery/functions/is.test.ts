@@ -35,11 +35,6 @@ describe('kuery functions', () => {
     });
 
     describe('buildNodeParams', () => {
-      test('fieldName and value should be required arguments', () => {
-        expect(() => is.buildNodeParams()).toThrowError(/fieldName is a required argument/);
-        expect(() => is.buildNodeParams('foo')).toThrowError(/value is a required argument/);
-      });
-
       test('arguments should contain the provided fieldName and value as literals', () => {
         const {
           arguments: [fieldName, value],
@@ -117,7 +112,7 @@ describe('kuery functions', () => {
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('bool');
-        expect(result.bool.should.length).toBe(indexPattern.fields.length);
+        expect(result.bool!.should!.length).toBe(indexPattern.fields.length);
       });
 
       test('should return an ES exists query when value is "*"', () => {
@@ -196,7 +191,7 @@ describe('kuery functions', () => {
         const node = nodeTypes.function.buildNode('is', 'script string', 'foo');
         const result = is.toElasticsearchQuery(node, indexPattern);
 
-        expect(result.bool.should[0]).toHaveProperty('script');
+        expect(result.bool!.should![0]).toHaveProperty('script');
       });
 
       test('should support date fields without a dateFormat provided', () => {
