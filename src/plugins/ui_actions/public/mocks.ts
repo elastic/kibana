@@ -32,6 +32,7 @@ const createSetupContract = (): Setup => {
     detachAction: jest.fn(),
     registerAction: jest.fn(),
     registerTrigger: jest.fn(),
+    registerActionFactory: jest.fn(),
   };
   return setupContract;
 };
@@ -41,9 +42,11 @@ const createStartContract = (): Start => {
     attachAction: jest.fn(),
     registerAction: jest.fn(),
     registerTrigger: jest.fn(),
+    registerActionFactory: jest.fn(),
     getAction: jest.fn(),
     detachAction: jest.fn(),
     executeTriggerActions: jest.fn(),
+    getActionFactories: jest.fn(),
     getTrigger: jest.fn(),
     getTriggerActions: jest.fn((id: TriggerId) => []),
     getTriggerCompatibleActions: jest.fn(),

@@ -30,7 +30,6 @@ import {
   TimeBadgeActionContext,
 } from './custom_time_range_badge';
 import { CommonlyUsedRange } from './types';
-import { ActionFactoryService } from './services';
 
 interface SetupDependencies {
   embeddable: IEmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
@@ -43,10 +42,14 @@ interface StartDependencies {
 }
 
 export interface SetupContract extends UiActionsSetup {
-  actionFactory: Pick<ActionFactoryService, 'register'>;
+  actionFactory: {
+    register: UiActionsSetup['registerActionFactory'];
+  };
 }
 export interface StartContract extends UiActionsStart {
-  actionFactory: Pick<ActionFactoryService, 'getAll'>;
+  actionFactory: {
+    getAll: UiActionsStart['getActionFactories'];
+  };
 }
 
 declare module '../../../../src/plugins/ui_actions/public' {
@@ -58,14 +61,14 @@ declare module '../../../../src/plugins/ui_actions/public' {
 
 export class AdvancedUiActionsPublicPlugin
   implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
-  private readonly actionFactory = new ActionFactoryService();
-
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { uiActions }: SetupDependencies): SetupContract {
     return {
       ...uiActions,
-      actionFactory: this.actionFactory,
+      actionFactory: {
+        register: uiActions.registerActionFactory,
+      },
     };
   }
 
@@ -91,11 +94,11 @@ export class AdvancedUiActionsPublicPlugin
 
     return {
       ...uiActions,
-      actionFactory: this.actionFactory,
+      actionFactory: {
+        getAll: uiActions.getActionFactories,
+      },
     };
   }
 
-  public stop() {
-    this.actionFactory.clear();
-  }
+  public stop() {}
 }

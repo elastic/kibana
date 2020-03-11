@@ -19,6 +19,8 @@
 
 export * from './action';
 export * from './action_internal';
+export * from './action_factory_definition';
+export * from './action_factory';
 export * from './create_action';
 export * from './incompatible_action_error';
 export * from './dynamic_action_storage';

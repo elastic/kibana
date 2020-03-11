@@ -24,6 +24,7 @@ import {
   TriggerId,
   TriggerContextMapping,
   ActionType,
+  ActionFactoryRegistry,
 } from '../types';
 import {
   ActionInternal,
@@ -31,6 +32,9 @@ import {
   Action,
   ActionByType,
   AnyActionDefinition,
+  AnyActionFactoryDefinition,
+  ActionFactory,
+  AnyActionFactory,
 } from '../actions';
 import { Trigger, TriggerContext } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
@@ -44,21 +48,25 @@ export interface UiActionsServiceParams {
    * A 1-to-N mapping from `Trigger` to zero or more `Action`.
    */
   readonly triggerToActions?: TriggerToActionsRegistry;
+  readonly actionFactories?: ActionFactoryRegistry;
 }
 
 export class UiActionsService {
   protected readonly triggers: TriggerRegistry;
   protected readonly actions: ActionRegistry;
   protected readonly triggerToActions: TriggerToActionsRegistry;
+  protected readonly actionFactories: ActionFactoryRegistry;
 
   constructor({
     triggers = new Map(),
     actions = new Map(),
     triggerToActions = new Map(),
+    actionFactories = new Map(),
   }: UiActionsServiceParams = {}) {
     this.triggers = triggers;
     this.actions = actions;
     this.triggerToActions = triggerToActions;
+    this.actionFactories = actionFactories;
   }
 
   public readonly registerTrigger = (trigger: Trigger) => {
@@ -194,6 +202,7 @@ export class UiActionsService {
     this.actions.clear();
     this.triggers.clear();
     this.triggerToActions.clear();
+    this.actionFactories.clear();
   };
 
   /**
@@ -212,5 +221,26 @@ export class UiActionsService {
       triggerToActions.set(key, [...value]);
 
     return new UiActionsService({ triggers, actions, triggerToActions });
+  };
+
+  /**
+   * Register an action factory. Action factories are used to configure and
+   * serialize/deserialize dynamic actions.
+   */
+  public readonly registerActionFactory = (definition: AnyActionFactoryDefinition) => {
+    if (this.actionFactories.has(definition.id)) {
+      throw new Error(`ActionFactory [actionFactory.id = ${definition.id}] already registered.`);
+    }
+
+    const actionFactory = new ActionFactory(definition);
+
+    this.actionFactories.set(actionFactory.id, actionFactory);
+  };
+
+  /**
+   * Returns an array of all action factories.
+   */
+  public readonly getActionFactories = (): AnyActionFactory[] => {
+    return [...this.actionFactories.values()];
   };
 }

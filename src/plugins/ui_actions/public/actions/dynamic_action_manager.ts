@@ -17,5 +17,14 @@
  * under the License.
  */
 
-export * from './presentable';
-export * from './configurable';
+import { ActionStorage } from './dynamic_action_storage';
+import { UiActionsService } from '../service';
+
+export interface DynamicActionManagerParams {
+  storage: ActionStorage;
+  uiActions: UiActionsService;
+}
+
+export class DynamicActionManager {
+  constructor(protected readonly params: DynamicActionManagerParams) {}
+}

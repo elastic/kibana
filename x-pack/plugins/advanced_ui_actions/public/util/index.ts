@@ -4,4 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './configurable';
+export {
+  UiActionsConfigurable as Configurable,
+  UiActionsCollectConfigProps as CollectConfigProps,
+} from '../../../../../src/plugins/ui_actions/public';

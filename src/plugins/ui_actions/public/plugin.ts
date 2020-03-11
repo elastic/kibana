@@ -22,7 +22,7 @@ import { UiActionsService } from './service';
 
 export type UiActionsSetup = Pick<
   UiActionsService,
-  'attachAction' | 'detachAction' | 'registerAction' | 'registerTrigger'
+  'attachAction' | 'detachAction' | 'registerAction' | 'registerTrigger' | 'registerActionFactory'
 >;
 
 export type UiActionsStart = PublicMethodsOf<UiActionsService>;

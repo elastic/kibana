@@ -37,7 +37,11 @@ export {
   SerializedAction as UiActionsSerializedAction,
 } from './actions';
 export { buildContextMenuForActions, contextMenuSeparatorAction } from './context_menu';
-export { Presentable as UiActionsPresentable } from './util';
+export {
+  Presentable as UiActionsPresentable,
+  Configurable as UiActionsConfigurable,
+  CollectConfigProps as UiActionsCollectConfigProps,
+} from './util';
 export { Trigger, TriggerContext } from './triggers';
 export { TriggerContextMapping, TriggerId, ActionContextMapping, ActionType } from './types';
 export { ActionByType } from './actions';
