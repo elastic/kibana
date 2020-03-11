@@ -11,7 +11,7 @@ import {
   Plugin,
 } from '../../../../src/core/public';
 import { createReactOverlays } from '../../../../src/plugins/kibana_react/public';
-import { UiActionsStart, UiActionsSetup } from '../../../../src/plugins/ui_actions/public';
+import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import {
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
@@ -42,10 +42,10 @@ interface StartDependencies {
   uiActions: UiActionsStart;
 }
 
-export interface AdvancedUiActionsSetup {
+export interface SetupContract extends UiActionsSetup {
   actionFactory: Pick<ActionFactoryService, 'register'>;
 }
-export interface AdvancedUiActionsStart {
+export interface StartContract extends UiActionsStart {
   actionFactory: Pick<ActionFactoryService, 'getAll'>;
 }
 
@@ -57,19 +57,19 @@ declare module '../../../../src/plugins/ui_actions/public' {
 }
 
 export class AdvancedUiActionsPublicPlugin
-  implements
-    Plugin<AdvancedUiActionsSetup, AdvancedUiActionsStart, SetupDependencies, StartDependencies> {
+  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
   private readonly actionFactory = new ActionFactoryService();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { uiActions }: SetupDependencies): AdvancedUiActionsSetup {
+  public setup(core: CoreSetup, { uiActions }: SetupDependencies): SetupContract {
     return {
+      ...uiActions,
       actionFactory: this.actionFactory,
     };
   }
 
-  public start(core: CoreStart, { uiActions }: StartDependencies): AdvancedUiActionsStart {
+  public start(core: CoreStart, { uiActions }: StartDependencies): StartContract {
     const dateFormat = core.uiSettings.get('dateFormat') as string;
     const commonlyUsedRanges = core.uiSettings.get('timepicker:quickRanges') as CommonlyUsedRange[];
     const { openModal } = createReactOverlays(core);
@@ -90,6 +90,7 @@ export class AdvancedUiActionsPublicPlugin
     uiActions.attachAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
 
     return {
+      ...uiActions,
       actionFactory: this.actionFactory,
     };
   }
