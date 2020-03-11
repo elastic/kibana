@@ -10,23 +10,38 @@ import { AlertActionParams, State, Context } from '../types';
 
 interface TransformActionParamsOptions {
   alertId: string;
+  alertName: string;
+  spaceId: string;
+  tags?: string[];
   alertInstanceId: string;
-  params: AlertActionParams;
+  actionParams: AlertActionParams;
   state: State;
   context: Context;
 }
 
 export function transformActionParams({
   alertId,
+  alertName,
+  spaceId,
+  tags,
   alertInstanceId,
   context,
-  params,
+  actionParams,
   state,
 }: TransformActionParamsOptions): AlertActionParams {
-  const result = cloneDeep(params, (value: any) => {
+  const result = cloneDeep(actionParams, (value: any) => {
     if (!isString(value)) return;
 
-    return Mustache.render(value, { alertId, alertInstanceId, context, state });
+    const variables = {
+      alertId,
+      alertName,
+      spaceId,
+      tags,
+      alertInstanceId,
+      context,
+      state,
+    };
+    return Mustache.render(value, variables);
   });
 
   // The return type signature for `cloneDeep()` ends up taking the return
