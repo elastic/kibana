@@ -56,7 +56,6 @@ export default ({ jsonSummaryPath }, log) => {
 
   validateRoot(KIBANA_ROOT, log);
 
-  const addjsonSummaryPathAndDistro = pipe(addJsonSummaryPath(jsonSummaryPath), distro);
   const objStream = jsonStream(jsonSummaryPath).on('done', noop);
 
   fromEventPattern(_ => objStream.on('node', '!.*', _))
@@ -64,7 +63,7 @@ export default ({ jsonSummaryPath }, log) => {
       map(prokStatsTimeStampBuildId),
       map(coveredFilePath),
       map(ciRunUrl),
-      map(addjsonSummaryPathAndDistro),
+      map(addJsonSummaryPath(jsonSummaryPath)),
       map(addTestRunnerAndStaticSiteUrl),
       concatMap(x => of(x).pipe(delay(ms)))
     )
