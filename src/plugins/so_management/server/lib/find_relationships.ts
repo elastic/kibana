@@ -27,14 +27,14 @@ export async function findRelationships({
   id,
   size,
   client,
-  savedObjectTypes,
+  referenceTypes,
   savedObjectsManagement,
 }: {
   type: string;
   id: string;
   size: number;
   client: SavedObjectsClientContract;
-  savedObjectTypes: string[];
+  referenceTypes: string[];
   savedObjectsManagement: ISavedObjectsManagement;
 }): Promise<SavedObjectRelation[]> {
   const { references = [] } = await client.get(type, id);
@@ -44,18 +44,18 @@ export async function findRelationships({
     references.map(ref => [`${ref.type}:${ref.id}`, { id: ref.id, type: ref.type }])
   );
 
-  const [referencedObjects, referencedResponse] = await Promise.all([
+  const [childReferencesResponse, parentReferencesResponse] = await Promise.all([
     referencedToBulkGetOpts.size > 0
       ? client.bulkGet([...referencedToBulkGetOpts.values()])
       : Promise.resolve({ saved_objects: [] }),
     client.find({
       hasReference: { type, id },
       perPage: size,
-      type: savedObjectTypes,
+      type: referenceTypes,
     }),
   ]);
 
-  return referencedObjects.saved_objects
+  return childReferencesResponse.saved_objects
     .map(obj => injectMetaAttributes(obj, savedObjectsManagement))
     .map(extractCommonProperties)
     .map(
@@ -66,7 +66,7 @@ export async function findRelationships({
         } as SavedObjectRelation)
     )
     .concat(
-      referencedResponse.saved_objects
+      parentReferencesResponse.saved_objects
         .map(obj => injectMetaAttributes(obj, savedObjectsManagement))
         .map(extractCommonProperties)
         .map(

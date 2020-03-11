@@ -54,7 +54,7 @@ export const registerRelationshipsRoute = (
         id,
         client,
         size,
-        savedObjectTypes,
+        referenceTypes: savedObjectTypes,
         savedObjectsManagement: managementService,
       });
 
