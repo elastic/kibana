@@ -24,7 +24,7 @@ export function registerExecuteRoute({ router, license }: RouteDependencies) {
       },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const body = req.body as typeof bodySchema.type;
+      const body = req.body;
 
       try {
         const callAsCurrentUser = ctx.core.elasticsearch.dataClient.callAsCurrentUser;

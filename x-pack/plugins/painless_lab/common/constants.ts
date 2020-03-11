@@ -10,10 +10,6 @@ const basicLicense: LicenseType = 'basic';
 export const PLUGIN = {
   id: 'painlessLab',
   minimumLicenseType: basicLicense,
-  getI18nName: (i18n: any): string =>
-    i18n.translate('xpack.painlessLab.appTitle', {
-      defaultMessage: 'Painless Lab',
-    }),
 };
 
 export const API_BASE_PATH = '/api/painless_lab';

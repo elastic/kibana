@@ -63,7 +63,6 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
       ) as any,
       enableRouting: false,
       disabled: false,
-      // tooltipContent: xpackInfo.get('features.painlessLab.message'),
       mount: async (ctx, { element }) => {
         const [core] = await getStartServices();
 
