@@ -110,22 +110,18 @@ const ConfigureCasesComponent: React.FC = () => {
   }, [connectors, connectorId]);
 
   useEffect(() => {
-    const resetConnectorToDefaultState = async () => {
-      if (
-        !isLoadingConnectors &&
-        connectorId !== 'none' &&
-        !connectors.some(c => c.id === connectorId)
-      ) {
-        setConnectorIsValid(false);
-      } else if (
-        !isLoadingConnectors &&
-        (connectorId === 'none' || connectors.some(c => c.id === connectorId))
-      ) {
-        setConnectorIsValid(true);
-      }
-    };
-
-    resetConnectorToDefaultState();
+    if (
+      !isLoadingConnectors &&
+      connectorId !== 'none' &&
+      !connectors.some(c => c.id === connectorId)
+    ) {
+      setConnectorIsValid(false);
+    } else if (
+      !isLoadingConnectors &&
+      (connectorId === 'none' || connectors.some(c => c.id === connectorId))
+    ) {
+      setConnectorIsValid(true);
+    }
   }, [connectors, connectorId]);
 
   return (
