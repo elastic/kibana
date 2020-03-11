@@ -6,8 +6,7 @@
 
 import { useReducer, useCallback } from 'react';
 
-import { useStateToaster } from '../../components/toasters';
-import { errorToToaster } from '../../components/ml/api/error_to_toaster';
+import { errorToToaster, useStateToaster } from '../../components/toasters';
 
 import { patchComment } from './api';
 import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
@@ -70,7 +69,7 @@ const dataFetchReducer = (state: CommentUpdateState, action: Action): CommentUpd
 };
 
 interface UseUpdateComment extends CommentUpdateState {
-  updateComment: (commentId: string, commentUpdate: string) => void;
+  updateComment: (caseId: string, commentId: string, commentUpdate: string) => void;
 }
 
 export const useUpdateComment = (comments: Comment[]): UseUpdateComment => {
@@ -82,14 +81,19 @@ export const useUpdateComment = (comments: Comment[]): UseUpdateComment => {
   const [, dispatchToaster] = useStateToaster();
 
   const dispatchUpdateComment = useCallback(
-    async (commentId: string, commentUpdate: string) => {
+    async (caseId: string, commentId: string, commentUpdate: string) => {
       let cancel = false;
       try {
         dispatch({ type: FETCH_INIT, payload: commentId });
         const currentComment = state.comments.find(comment => comment.id === commentId) ?? {
           version: '',
         };
-        const response = await patchComment(commentId, commentUpdate, currentComment.version);
+        const response = await patchComment(
+          caseId,
+          commentId,
+          commentUpdate,
+          currentComment.version
+        );
         if (!cancel) {
           dispatch({ type: FETCH_SUCCESS, payload: { update: response, commentId } });
         }

@@ -6,9 +6,8 @@
 
 import { noop } from 'lodash/fp';
 import { useEffect, useState, useRef } from 'react';
-import { useStateToaster } from '../../../components/toasters';
+import { errorToToaster, useStateToaster } from '../../../components/toasters';
 import { fetchTags } from './api';
-import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
 import * as i18n from './translations';
 
 export type ReturnTags = [boolean, string[], () => void];
