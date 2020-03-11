@@ -134,7 +134,6 @@ export async function changeIndexPattern({
       patterns: [id],
     });
 
-    debugger;
     setState(s => ({
       ...s,
       layers: isSingleEmptyLayer(state.layers)
