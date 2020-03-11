@@ -16,6 +16,7 @@ interface PropDefinition {
   optional: boolean;
   formKey?: keyof State['form'];
   defaultValue?: any;
+  ignore?: boolean;
 }
 
 function isPropDefinition(a: PropDefinition | object): a is PropDefinition {
@@ -72,6 +73,7 @@ const getAnalyticsJobMeta = (config: DataFrameAnalyticsConfig): AnalyticsJobMeta
             randomize_seed: {
               optional: true,
               // By default it is randomly generated
+              ignore: true,
             },
             num_top_feature_importance_values: {
               optional: true,
@@ -142,6 +144,7 @@ const getAnalyticsJobMeta = (config: DataFrameAnalyticsConfig): AnalyticsJobMeta
             randomize_seed: {
               optional: true,
               // By default it is randomly generated
+              ignore: true,
             },
           },
         }
@@ -176,6 +179,7 @@ const getAnalyticsJobMeta = (config: DataFrameAnalyticsConfig): AnalyticsJobMeta
   dest: {
     index: {
       optional: false,
+      formKey: 'destinationIndex',
     },
     results_field: {
       optional: true,
@@ -205,11 +209,15 @@ export function isAdvancedConfig(
       if (fieldMeta) {
         if (isPropDefinition(fieldMeta)) {
           const isAdvancedSetting =
-            !fieldMeta.formKey &&
-            fieldMeta.defaultValue !== undefined &&
+            fieldMeta.formKey === undefined &&
+            fieldMeta.ignore !== true &&
             !isEqual(fieldMeta.defaultValue, fieldConfig);
 
           if (isAdvancedSetting) {
+            // eslint-disable-next-line no-console
+            console.info(
+              `Property "${configKey}" is not supported by the form or has a value distinguished from the default one.`
+            );
             return true;
           }
         } else if (isAdvancedConfig(fieldConfig, fieldMeta)) {

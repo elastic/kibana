@@ -182,7 +182,7 @@ describe('Analytics job clone action', () => {
       expect(isAdvancedConfig(advancedOutlierDetectionJob)).toBe(true);
     });
 
-    test('should detect advanced regression job', () => {
+    test('should detect a custom query', () => {
       const advancedRegressionJob = {
         id: 'grid_regression_1',
         description: "Regression job with 'electrical-grid-stability' dataset",
@@ -217,6 +217,31 @@ describe('Analytics job clone action', () => {
       };
 
       expect(isAdvancedConfig(advancedRegressionJob)).toBe(true);
+    });
+
+    test('should detect custom analysis settings', () => {
+      const config = {
+        description: "Classification clone with 'bank-marketing' dataset",
+        source: {
+          index: 'bank-marketing',
+        },
+        dest: {
+          index: 'bank_classification4',
+        },
+        analyzed_fields: {
+          excludes: [],
+        },
+        analysis: {
+          classification: {
+            dependent_variable: 'y',
+            training_percent: 71,
+            maximum_number_trees: 1500,
+          },
+        },
+        model_memory_limit: '400mb',
+      };
+
+      expect(isAdvancedConfig(config)).toBe(true);
     });
   });
 });
