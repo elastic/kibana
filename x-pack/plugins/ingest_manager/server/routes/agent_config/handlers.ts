@@ -6,7 +6,7 @@
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler } from 'kibana/server';
 import bluebird from 'bluebird';
-import { appContextService, agentConfigService } from '../../services';
+import { appContextService, agentConfigService, datasourceService } from '../../services';
 import { listAgents } from '../../services/agents';
 import {
   GetAgentConfigsRequestSchema,
@@ -15,6 +15,8 @@ import {
   UpdateAgentConfigRequestSchema,
   DeleteAgentConfigsRequestSchema,
   GetFullAgentConfigRequestSchema,
+  PackageInfo,
+  AgentConfig,
 } from '../../types';
 import {
   GetAgentConfigsResponse,
@@ -23,7 +25,9 @@ import {
   UpdateAgentConfigResponse,
   DeleteAgentConfigsResponse,
   GetFullAgentConfigResponse,
+  packageToConfigDatasourceInputs,
 } from '../../../common';
+import { findInstalledPackageByName, getPackageInfo } from '../../services/epm/packages';
 
 export const getAgentConfigsHandler: RequestHandler<
   undefined,
@@ -96,10 +100,52 @@ export const createAgentConfigHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
+  const withSysMonitoring = request.query.sys_monitoring ?? false;
   try {
-    const agentConfig = await agentConfigService.create(soClient, request.body, {
-      user: user || undefined,
-    });
+    const [agentConfig, sysPkgInfo] = await Promise.all([
+      agentConfigService.create(soClient, request.body, {
+        user: user || undefined,
+      }),
+      // Retrieve System package information (if necessary) while creating the agent config
+      new Promise<PackageInfo | undefined>(async resolve => {
+        if (!withSysMonitoring) {
+          resolve();
+          return;
+        }
+        const sysPkgInstall = await findInstalledPackageByName({
+          savedObjectsClient: soClient,
+          pkgName: 'system',
+        });
+        if (sysPkgInstall) {
+          const systemPkgInfo = await getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgkey: `${sysPkgInstall.name}-${sysPkgInstall.version}`,
+          });
+          resolve(systemPkgInfo);
+          return;
+        }
+        resolve();
+      }).catch(() => {
+        // ignore Errors if we can't retrieve system package info?
+      }),
+    ]);
+
+    // Create the system monitoring datasource and add it to config.
+    if (withSysMonitoring && sysPkgInfo !== undefined) {
+      await datasourceService.create(soClient, {
+        name: `${sysPkgInfo.name}-1`,
+        package: {
+          name: sysPkgInfo.name,
+          title: sysPkgInfo.title,
+          version: sysPkgInfo.version,
+        },
+        config_id: agentConfig!.id,
+        enabled: true,
+        output_id: '',
+        inputs: packageToConfigDatasourceInputs(sysPkgInfo),
+      });
+    }
+
     const body: CreateAgentConfigResponse = { item: agentConfig, success: true };
     return response.ok({
       body,
