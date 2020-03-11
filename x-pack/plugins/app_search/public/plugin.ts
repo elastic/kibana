@@ -12,10 +12,17 @@ import {
   AppMountParameters,
 } from 'src/core/public';
 
+import {
+  FeatureCatalogueCategory,
+  HomePublicPluginSetup,
+} from '../../../../src/plugins/home/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 export interface ClientConfigType {
   host: string;
+}
+export interface PluginsSetup {
+  home?: HomePublicPluginSetup;
 }
 
 export class AppSearchPlugin implements Plugin {
@@ -25,7 +32,7 @@ export class AppSearchPlugin implements Plugin {
     this.config = initializerContext.config.get<ClientConfigType>();
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, plugins: PluginsSetup) {
     const config = this.config;
 
     core.application.register({
@@ -40,6 +47,17 @@ export class AppSearchPlugin implements Plugin {
 
         return renderApp(coreStart, params, config);
       },
+    });
+
+    plugins.home.featureCatalogue.register({
+      id: 'app_search',
+      title: 'App Search',
+      icon: 'logoAppSearch', // TODO
+      description:
+        'Leverage dashboards, analytics, and APIs for advanced application search made simple.',
+      path: '/app/app_search',
+      category: FeatureCatalogueCategory.DATA,
+      showOnHomePage: true,
     });
   }
 
