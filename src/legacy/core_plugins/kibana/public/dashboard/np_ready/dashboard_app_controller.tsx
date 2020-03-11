@@ -369,9 +369,11 @@ export class DashboardAppController {
           if ($routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE]) {
             const type = $routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE];
             const id = $routeParams[DashboardConstants.ADD_EMBEDDABLE_ID];
-            container.addSavedObjectEmbeddable(type, id);
+            if (id) container.addSavedObjectEmbeddable(type, id);
+            else container.addNewEmbeddable(type, JSON.parse($routeParams[DashboardConstants.ADD_EMBEDDABLE_INPUT]));
             removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_TYPE);
             removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_ID);
+            removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_INPUT);
           }
         }
 

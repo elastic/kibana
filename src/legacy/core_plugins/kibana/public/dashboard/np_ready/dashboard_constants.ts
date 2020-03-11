@@ -23,6 +23,7 @@ export const DashboardConstants = {
   CREATE_NEW_DASHBOARD_URL: '/dashboard',
   ADD_EMBEDDABLE_ID: 'addEmbeddableId',
   ADD_EMBEDDABLE_TYPE: 'addEmbeddableType',
+  ADD_EMBEDDABLE_INPUT: 'addEmbeddableInput',
   DASHBOARDS_ID: 'dashboards',
   DASHBOARD_ID: 'dashboard',
 };

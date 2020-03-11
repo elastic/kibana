@@ -100,7 +100,7 @@ export function initVisualizeApp(app, deps) {
         template: editorTemplate,
         k7Breadcrumbs: getCreateBreadcrumbs,
         resolve: {
-          savedVis: function(redirectWhenMissing, $route, $rootScope, kbnUrl) {
+          visInfo: function(redirectWhenMissing, $route, $rootScope, kbnUrl) {
             const { core, data, savedVisualizations, visualizations } = deps;
             const visTypes = visualizations.all();
             const visType = find(visTypes, { name: $route.current.params.type });
@@ -118,13 +118,15 @@ export function initVisualizeApp(app, deps) {
               );
             }
 
+            let savedVis;
             return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl)
               .then(() => savedVisualizations.get($route.current.params))
-              .then(savedVis => {
-                if (savedVis.vis.type.setup) {
-                  return savedVis.vis.type.setup(savedVis).catch(() => savedVis);
-                }
-                return savedVis;
+              .then(s => {
+                savedVis = s;
+                return visualizations.createVisWithData(savedVis);
+              })
+              .then(visWithData => {
+                return { savedVis, visWithData }
               })
               .catch(
                 redirectWhenMissing({

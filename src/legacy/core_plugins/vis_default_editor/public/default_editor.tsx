@@ -33,7 +33,6 @@ import { getInitialWidth } from './editor_size';
 
 function DefaultEditor({
   embeddable,
-  savedObj,
   uiState,
   timeRange,
   filters,
@@ -41,12 +40,13 @@ function DefaultEditor({
   optionTabs,
   query,
   linked,
+  vis,
+  searchSource,
 }: DefaultEditorControllerState & Omit<EditorRenderProps, 'data' | 'core'>) {
   const visRef = useRef<HTMLDivElement>(null);
   const visHandler = useRef<VisualizeEmbeddable | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [factory, setFactory] = useState<VisualizeEmbeddableFactory | null>(null);
-  const { vis, savedSearch } = savedObj;
 
   const onClickCollapse = useCallback(() => {
     setIsCollapsed(value => !value);
@@ -64,7 +64,7 @@ function DefaultEditor({
         ) as VisualizeEmbeddableFactory;
         setFactory(embeddableFactory);
 
-        visHandler.current = (await embeddableFactory.createFromObject(savedObj, {
+        visHandler.current = (await embeddableFactory.createFromObject({ vis, searchSource }, {
           // should be look through createFromObject interface again because of "id" param
           id: '',
           uiState,
@@ -85,7 +85,7 @@ function DefaultEditor({
     }
 
     visualize();
-  }, [uiState, savedObj, timeRange, filters, appState, query, factory, embeddable]);
+  }, [uiState, timeRange, filters, appState, query, factory, embeddable]);
 
   useEffect(() => {
     return () => {
@@ -119,7 +119,7 @@ function DefaultEditor({
           vis={vis}
           uiState={uiState}
           isLinkedSearch={linked}
-          savedSearch={savedSearch}
+          savedSearch={searchSource.getParent()}
         />
       </Panel>
     </PanelsContainer>

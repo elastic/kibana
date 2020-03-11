@@ -146,11 +146,17 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     }
   }
 
-  public async create() {
-    // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
-    // to allow for in place creation of visualizations without having to navigate away to a new URL.
+  public async create(input: any, parent?: Container) {
+    if (input && input.visState) {
+      return this.createFromObject(await getVisPanel(input), input, parent)
+    }
+    // TODO: visualize embeddable is currently hardcoded to redirect back to current dashboard, we should make this configurable
     showNewVisModal({
-      editorParams: ['addToDashboard'],
+      editorParams: {
+        inlineEditor: true,
+        redirectToApp: 'kibana',
+        redirectToPath: (new URLSearchParams(`#/dashboard?addEmbeddableType=visualization%26embeddableState=`)).toString(),
+      },
     });
     return undefined;
   }

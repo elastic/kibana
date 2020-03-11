@@ -23,26 +23,28 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import { EditorRenderProps } from 'src/legacy/core_plugins/kibana/public/visualize/np_ready/types';
-import { VisSavedObject } from 'src/legacy/core_plugins/visualizations/public/';
 import { Storage } from '../../../../plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../plugins/kibana_react/public';
 import { DefaultEditor } from './default_editor';
 import { DefaultEditorDataTab, OptionTab } from './components/sidebar';
+import { VisImpl } from '../../visualizations/public/np_ready/public/vis_impl';
+import { ISearchSource } from '../../../../plugins/data/public';
 
 const localStorage = new Storage(window.localStorage);
 
 export interface DefaultEditorControllerState {
-  savedObj: VisSavedObject;
   optionTabs: OptionTab[];
+  vis: VisImpl;
+  searchSource: ISearchSource;
 }
 
 class DefaultEditorController {
   private el: HTMLElement;
   private state: DefaultEditorControllerState;
 
-  constructor(el: HTMLElement, savedObj: VisSavedObject) {
+  constructor(el: HTMLElement, vis: VisImpl, searchSource: ISearchSource) {
     this.el = el;
-    const { type: visType } = savedObj.vis;
+    const { type: visType } = vis;
 
     const optionTabs = [
       ...(visType.schemas.buckets || visType.schemas.metrics
@@ -71,8 +73,9 @@ class DefaultEditorController {
     ];
 
     this.state = {
-      savedObj,
       optionTabs,
+      vis,
+      searchSource,
     };
   }
 

@@ -88,11 +88,13 @@ function VisualizeAppController(
     toastNotifications,
     chrome,
     getBasePath,
-    core: { docLinks },
+    core: { docLinks, application },
     savedQueryService,
     uiSettings,
     I18nContext,
     setActiveUrl,
+    visualizations,
+
   } = getServices();
 
   const {
@@ -107,17 +109,17 @@ function VisualizeAppController(
   );
 
   // Retrieve the resolved SavedVis instance.
-  const savedVis = $route.current.locals.savedVis;
+  const { savedVis, visWithData } = $route.current.locals.visInfo;
+  const { vis, searchSource } = visWithData;
   const _applyVis = () => {
     $scope.$apply();
   };
-  // This will trigger a digest cycle. This is needed when vis is updated from a global angular like in visualize_embeddable.js.
-  savedVis.vis.on('apply', _applyVis);
-  // vis is instance of src/legacy/ui/public/vis/vis.js.
-  // SearchSource is a promise-based stream of search results that can inherit from other search sources.
-  const { vis, searchSource } = savedVis;
 
   $scope.vis = vis;
+  $scope.searchSource = searchSource;
+
+  // This will trigger a digest cycle. This is needed when vis is updated from a global angular like in visualize_embeddable.js.
+  $scope.vis.on('apply', _applyVis);
 
   const $appStatus = {
     dirty: !savedVis.id,
@@ -157,6 +159,16 @@ function VisualizeAppController(
               }
             },
             run: async () => {
+              if ($scope.isAddToDashMode()) {
+                const appId = $route.current.params['redirectToApp'];
+                const path = $route.current.params['redirectToPath'];
+                // in legacy mode we can't use state, so we need to push everything to path
+                const dashState = {};
+                const newVisState = visualizations.serialize({ vis: $scope.vis, searchSource: $scope.searchSource });
+                const newPanelState = JSON.stringify(newVisState);
+                application.navigateToApp(appId, { path: `${path}${newPanelState}`, dashState });
+                return;
+              }
               const onSave = ({
                 newTitle,
                 newCopyOnSave,
@@ -391,11 +403,11 @@ function VisualizeAppController(
     $scope.searchSource = searchSource;
     $scope.refreshInterval = timefilter.getRefreshInterval();
 
-    const addToDashMode =
-      $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
-    kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
+    const inlineEdit =
+      $route.current.params['inlineEditor'];
+    kbnUrl.removeParam('inlineEditor');
 
-    $scope.isAddToDashMode = () => addToDashMode;
+    $scope.isAddToDashMode = () => inlineEdit;
 
     $scope.showFilterBar = () => {
       return vis.type.options.showFilterBar;
@@ -602,35 +614,9 @@ function VisualizeAppController(
               'data-test-subj': 'saveVisualizationSuccess',
             });
 
-            if ($scope.isAddToDashMode()) {
-              const savedVisualizationParsedUrl = new KibanaParsedUrl({
-                basePath: getBasePath(),
-                appId: kbnBaseUrl.slice('/app/'.length),
-                appPath: kbnUrl.eval(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id }),
-              });
-              // Manually insert a new url so the back button will open the saved visualization.
-              $window.history.pushState({}, '', savedVisualizationParsedUrl.getRootRelativePath());
-              setActiveUrl(savedVisualizationParsedUrl.appPath);
-
-              const lastDashboardAbsoluteUrl = chrome.navLinks.get('kibana:dashboard').url;
-              const dashboardParsedUrl = absoluteToParsedUrl(
-                lastDashboardAbsoluteUrl,
-                getBasePath()
-              );
-              dashboardParsedUrl.addQueryParameter(
-                DashboardConstants.ADD_EMBEDDABLE_TYPE,
-                VISUALIZE_EMBEDDABLE_TYPE
-              );
-              dashboardParsedUrl.addQueryParameter(
-                DashboardConstants.ADD_EMBEDDABLE_ID,
-                savedVis.id
-              );
-              kbnUrl.change(dashboardParsedUrl.appPath);
-            } else if (savedVis.id === $route.current.params.id) {
+            if (savedVis.id === $route.current.params.id) {
               chrome.docTitle.change(savedVis.lastSavedTitle);
               chrome.setBreadcrumbs($injector.invoke(getEditBreadcrumbs));
-              savedVis.vis.title = savedVis.title;
-              savedVis.vis.description = savedVis.description;
             } else {
               history.replace({
                 ...history.location,

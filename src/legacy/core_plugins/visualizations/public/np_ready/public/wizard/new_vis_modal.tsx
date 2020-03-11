@@ -23,7 +23,7 @@ import { EuiModal, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
-import { IUiSettingsClient, SavedObjectsStart } from '../../../../../../../core/public';
+import { ApplicationStart, IUiSettingsClient, SavedObjectsStart } from '../../../../../../../core/public';
 import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
 import { TypesStart, VisType, VisTypeAlias } from '../vis_types';
@@ -33,11 +33,12 @@ interface TypeSelectionProps {
   isOpen: boolean;
   onClose: () => void;
   visTypesRegistry: TypesStart;
-  editorParams?: string[];
+  editorParams?: { inlineEditor?: boolean, redirectToApp?: string, redirectToPath?: string, callback?: any };
   addBasePath: (path: string) => string;
   uiSettings: IUiSettingsClient;
   savedObjects: SavedObjectsStart;
   usageCollection?: UsageCollectionSetup;
+  application: ApplicationStart;
 }
 
 interface TypeSelectionState {
@@ -51,7 +52,7 @@ const baseUrl = `#/visualize/create?`;
 
 class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState> {
   public static defaultProps = {
-    editorParams: [],
+    editorParams: {},
   };
 
   private readonly isLabsEnabled: boolean;
@@ -143,8 +144,11 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     let params;
     if ('aliasUrl' in visType) {
       params = this.props.addBasePath(visType.aliasUrl);
-      if (this.props.editorParams && this.props.editorParams.includes('addToDashboard')) {
-        params = `${params}?addToDashboard`;
+      // in legacy mode passing state between apps doesn't work, so we need to push everything to url
+      if (this.props.editorParams && this.props.editorParams.inlineEditor) {
+        params = `${params}&inlineEditor=true`;
+        params = `${params}&redirectToApp=${this.props.editorParams.redirectToApp}`;
+        params = `${params}&redirectToPath=${this.props.editorParams.redirectToPath}`;
       }
       this.props.onClose();
       window.location.assign(params);
@@ -156,10 +160,16 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     if (searchType) {
       params.push(`${searchType === 'search' ? 'savedSearchId' : 'indexPattern'}=${searchId}`);
     }
-    params = params.concat(this.props.editorParams!);
 
     this.props.onClose();
-    location.assign(`${baseUrl}${params.join('&')}`);
+
+    // in legacy mode passing state between apps doesn't work, so we need to push everything to url
+    if (this.props.editorParams && this.props.editorParams.inlineEditor) {
+      params.push(`inlineEditor=true`);
+      params.push(`redirectToApp=${this.props.editorParams.redirectToApp}`);
+      params.push(`redirectToPath=${this.props.editorParams.redirectToPath}`);
+    }
+    this.props.application.navigateToApp('kibana', { path: `${baseUrl}${params.join('&')}`});
   }
 }
 
