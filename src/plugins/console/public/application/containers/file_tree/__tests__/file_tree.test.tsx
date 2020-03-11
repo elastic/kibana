@@ -21,7 +21,7 @@ import '../../../models/legacy_core_editor/legacy_core_editor.test.mocks';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import React from 'react';
-import { mount } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 
 import { FileTreeEntry } from '../../../components/file_tree/file_tree_entry';
 
@@ -38,9 +38,13 @@ import { createHelpers } from './helpers';
 
 describe('File Tree', () => {
   let serviceContext: ContextValue;
+  let component: ReactWrapper;
+  let helpers: ReturnType<typeof createHelpers>;
 
   beforeEach(() => {
     serviceContext = serviceContextMock.create();
+    component = doMount();
+    helpers = createHelpers(component);
   });
 
   afterEach(() => {
@@ -57,37 +61,41 @@ describe('File Tree', () => {
     );
 
   it('renders', () => {
-    doMount();
+    // Empty file tree
+    expect(component).toMatchSnapshot();
   });
 
   it('creates a new file', async () => {
+    const { createTestFile, fileEntryExists } = helpers;
+    const name1 = 'test';
+    const name2 = 'anotherTest';
     (serviceContext.services.objectStorageClient.text.create as jest.Mock)
       .mockResolvedValueOnce({
-        id: 'test',
-        name: 'test',
+        id: name1,
+        name: name1,
       })
       .mockResolvedValueOnce({
-        id: 'test2',
-        name: 'test2',
+        id: name2,
+        name: name2,
       });
 
-    const component = doMount();
-
     expect(component.find(FileTreeEntry).length).toBe(0);
-
-    const { createTestFile } = createHelpers(component);
     await createTestFile();
 
     component.update();
     expect(component.find(FileTreeEntry).length).toBe(1);
+    expect(fileEntryExists(name1)).toBe(true);
+    expect(fileEntryExists(name2)).toBe(false);
 
     await createTestFile();
 
     component.update();
     expect(component.find(FileTreeEntry).length).toBe(2);
+    expect(fileEntryExists(name2)).toBe(true);
   });
 
   it('edits a file name', async () => {
+    const { createTestFile, editFile, getFileEntry } = helpers;
     const oldName = 'test';
     const newName = 'test2';
     (serviceContext.services.objectStorageClient.text.create as jest.Mock).mockResolvedValue({
@@ -99,11 +107,8 @@ describe('File Tree', () => {
       name: newName,
     });
 
-    const component = doMount();
-
     expect(component.find(FileTreeEntry).length).toBe(0);
 
-    const { createTestFile, editFile } = createHelpers(component);
     await createTestFile();
     component.update();
 
@@ -111,10 +116,71 @@ describe('File Tree', () => {
     component.update();
 
     expect(component.find(FileTreeEntry).length).toBe(1);
-    expect(findTestSubject(component, `consoleFileNameLabel-${newName}`).text()).toBe(newName);
+    expect(getFileEntry(newName).text()).toBe(newName);
   });
 
-  it('deletes a file', async () => {});
+  it('deletes a file', async () => {
+    const { createTestFile, deleteFile, fileEntryExists } = helpers;
+    const name1 = 'test';
+    const name2 = 'scratchpad'; // This name is overridden with 'Default'
+    expect(findTestSubject(component, `consoleModalDeleteFileButton-${name1}`).exists()).toBe(
+      false
+    );
+    (serviceContext.services.objectStorageClient.text.create as jest.Mock)
+      .mockResolvedValueOnce({
+        id: name1,
+        name: name1,
+      })
+      .mockResolvedValueOnce({
+        id: name2,
+        name: name2,
+        isScratchPad: true,
+      });
 
-  it('shows errors', async () => {});
+    await createTestFile();
+    await createTestFile();
+
+    component.update();
+    expect(findTestSubject(component, `consoleDeleteFileButton-${name1}`).exists()).toBe(true);
+    // The default text object should not have a delete button!
+    expect(findTestSubject(component, `consoleDeleteFileButton-${name2}`).exists()).toBe(false);
+
+    await deleteFile(name1);
+    component.update();
+
+    expect(component.find(FileTreeEntry).length).toBe(1);
+    expect(fileEntryExists(name1)).toBe(false);
+    expect(fileEntryExists('Default')).toBe(true);
+  });
+
+  it('shows errors', async () => {
+    const { createTestFile, editFile, getFileErrorIcon } = helpers;
+    const name1 = 'test';
+    const newName1 = 'testAgain';
+    const name2 = 'anotherTest';
+    (serviceContext.services.objectStorageClient.text.create as jest.Mock)
+      .mockResolvedValueOnce({
+        id: name1,
+        name: name1,
+      })
+      .mockResolvedValueOnce({
+        id: name2,
+        name: name2,
+        isScratchPad: true,
+      });
+
+    (serviceContext.services.objectStorageClient.text.update as jest.Mock).mockRejectedValueOnce(
+      new Error('something is wrong!')
+    );
+
+    await createTestFile();
+    await createTestFile();
+    component.update();
+    await editFile(name1, newName1);
+    component.update();
+
+    expect(getFileErrorIcon(newName1).exists()).toBe(true);
+    expect(getFileErrorIcon(name1).exists()).toBe(false);
+    expect(getFileErrorIcon(name2).exists()).toBe(false);
+  });
 });

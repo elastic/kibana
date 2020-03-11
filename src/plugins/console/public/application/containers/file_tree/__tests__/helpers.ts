@@ -23,7 +23,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { ReactWrapper } from 'enzyme';
 
 export const createHelpers = (component: ReactWrapper) => {
-  return {
+  const publicAPI = {
     createTestFile: async () => {
       (findTestSubject(component, 'consoleCreateFileButton') as ReactWrapper).simulate('click');
       const textInput = component.find('.conAppFileNameTextField').last();
@@ -43,5 +43,26 @@ export const createHelpers = (component: ReactWrapper) => {
         textInput.simulate('blur');
       });
     },
+
+    deleteFile: async (name: string) => {
+      (findTestSubject(component, `consoleDeleteFileButton-${name}`) as ReactWrapper).simulate(
+        'click'
+      );
+      await act(async () => {
+        (findTestSubject(
+          component,
+          `consoleModalDeleteFileButton-${name}`
+        ) as ReactWrapper).simulate('click');
+      });
+    },
+
+    getFileEntry: (name: string) => findTestSubject(component, `consoleFileNameLabel-${name}`),
+
+    fileEntryExists: (name: string) => publicAPI.getFileEntry(name).exists(),
+
+    getFileErrorIcon: (name: string) =>
+      findTestSubject(component, `consoleFileSaveErrorIcon-${name}`),
   };
+
+  return publicAPI;
 };

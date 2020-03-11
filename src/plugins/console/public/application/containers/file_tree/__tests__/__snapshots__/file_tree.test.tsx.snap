@@ -1,0 +1,306 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`File Tree renders 1`] = `
+<ServicesContextProvider
+  value={
+    Object {
+      "docLinkVersion": "NA",
+      "elasticsearchUrl": "test",
+      "services": Object {
+        "history": HistoryMock {
+          "addToHistory": [MockFunction],
+          "change": [MockFunction],
+          "changeEmitter": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Array [],
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "clearHistory": [MockFunction],
+          "deleteLegacySavedEditorState": [MockFunction],
+          "getHistory": [MockFunction],
+          "getHistoryKeys": [MockFunction],
+          "getLegacySavedEditorState": [MockFunction],
+          "storage": StorageMock {
+            "decode": [MockFunction],
+            "decodeKey": [MockFunction],
+            "delete": [MockFunction],
+            "encode": [MockFunction],
+            "encodeKey": [MockFunction],
+            "engine": Object {},
+            "get": [MockFunction],
+            "has": [MockFunction],
+            "keys": [MockFunction] {
+              "calls": Array [
+                Array [],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": Array [],
+                },
+              ],
+            },
+            "prefix": "test",
+            "set": [MockFunction],
+          },
+          "updateCurrentState": [MockFunction],
+        },
+        "notifications": Object {
+          "toasts": Object {
+            "add": [MockFunction],
+            "addDanger": [MockFunction],
+            "addError": [MockFunction],
+            "addSuccess": [MockFunction],
+            "addWarning": [MockFunction],
+            "get$": [MockFunction],
+            "remove": [MockFunction],
+          },
+        },
+        "objectStorageClient": Object {
+          "text": Object {
+            "create": [MockFunction],
+            "delete": [MockFunction],
+            "findAll": [MockFunction],
+            "update": [MockFunction],
+          },
+        },
+        "settings": undefined,
+        "storage": StorageMock {
+          "decode": [MockFunction],
+          "decodeKey": [MockFunction],
+          "delete": [MockFunction],
+          "encode": [MockFunction],
+          "encodeKey": [MockFunction],
+          "engine": Object {},
+          "get": [MockFunction],
+          "has": [MockFunction],
+          "keys": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Array [],
+              },
+            ],
+          },
+          "prefix": "test",
+          "set": [MockFunction],
+        },
+        "trackUiMetric": Object {
+          "count": [Function],
+          "load": [Function],
+        },
+      },
+    }
+  }
+>
+  <TextObjectsContextProvider>
+    <FileTree>
+      <FileTree
+        disabled={false}
+        entries={Array []}
+        onCreate={[Function]}
+        onSearchFilter={[Function]}
+      >
+        <div
+          className="conApp__fileTree"
+        >
+          <EuiFlexGroup
+            className="conApp__fileTree__entryContainer"
+            direction="column"
+            gutterSize="none"
+            responsive={false}
+          >
+            <div
+              className="euiFlexGroup euiFlexGroup--directionColumn conApp__fileTree__entryContainer"
+            >
+              <EuiFlexItem
+                grow={false}
+              >
+                <div
+                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <FileActionsBar
+                    disabled={false}
+                    onCreate={[Function]}
+                    onFilter={[Function]}
+                  >
+                    <EuiFlexGroup
+                      alignItems="center"
+                      className="conApp__fileTree__actionBar"
+                      gutterSize="none"
+                      justifyContent="center"
+                    >
+                      <div
+                        className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive conApp__fileTree__actionBar"
+                      >
+                        <EuiFlexItem>
+                          <div
+                            className="euiFlexItem"
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem
+                          grow={false}
+                        >
+                          <div
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <EuiButtonIcon
+                              aria-label="Toggle file filter"
+                              color="text"
+                              disabled={false}
+                              iconType="search"
+                              onClick={[Function]}
+                              size="s"
+                            >
+                              <button
+                                aria-label="Toggle file filter"
+                                className="euiButtonIcon euiButtonIcon--text"
+                                disabled={false}
+                                onClick={[Function]}
+                                size="s"
+                                type="button"
+                              >
+                                <EuiIcon
+                                  aria-hidden="true"
+                                  className="euiButtonIcon__icon"
+                                  size="m"
+                                  type="search"
+                                >
+                                  <EuiIconEmpty
+                                    aria-hidden={true}
+                                    className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                                    focusable="false"
+                                    role="img"
+                                    style={null}
+                                  >
+                                    <svg
+                                      aria-hidden={true}
+                                      className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                                      focusable="false"
+                                      height={16}
+                                      role="img"
+                                      style={null}
+                                      viewBox="0 0 16 16"
+                                      width={16}
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    />
+                                  </EuiIconEmpty>
+                                </EuiIcon>
+                              </button>
+                            </EuiButtonIcon>
+                          </div>
+                        </EuiFlexItem>
+                        <EuiFlexItem
+                          grow={false}
+                        >
+                          <div
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <EuiPopover
+                              anchorPosition="downCenter"
+                              button={
+                                <EuiButtonIcon
+                                  aria-label="Create a file"
+                                  color="text"
+                                  data-test-subj="consoleCreateFileButton"
+                                  disabled={false}
+                                  iconType="plusInCircle"
+                                  onClick={[Function]}
+                                  size="s"
+                                />
+                              }
+                              closePopover={[Function]}
+                              display="inlineBlock"
+                              hasArrow={true}
+                              initialFocus={[Function]}
+                              isOpen={false}
+                              ownFocus={true}
+                              panelPaddingSize="m"
+                            >
+                              <EuiOutsideClickDetector
+                                isDisabled={true}
+                                onOutsideClick={[Function]}
+                              >
+                                <div
+                                  className="euiPopover euiPopover--anchorDownCenter"
+                                  onKeyDown={[Function]}
+                                  onMouseDown={[Function]}
+                                  onMouseUp={[Function]}
+                                  onTouchEnd={[Function]}
+                                  onTouchStart={[Function]}
+                                >
+                                  <div
+                                    className="euiPopover__anchor"
+                                  >
+                                    <EuiButtonIcon
+                                      aria-label="Create a file"
+                                      color="text"
+                                      data-test-subj="consoleCreateFileButton"
+                                      disabled={false}
+                                      iconType="plusInCircle"
+                                      onClick={[Function]}
+                                      size="s"
+                                    >
+                                      <button
+                                        aria-label="Create a file"
+                                        className="euiButtonIcon euiButtonIcon--text"
+                                        data-test-subj="consoleCreateFileButton"
+                                        disabled={false}
+                                        onClick={[Function]}
+                                        size="s"
+                                        type="button"
+                                      >
+                                        <EuiIcon
+                                          aria-hidden="true"
+                                          className="euiButtonIcon__icon"
+                                          size="m"
+                                          type="plusInCircle"
+                                        >
+                                          <EuiIconEmpty
+                                            aria-hidden={true}
+                                            className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                                            focusable="false"
+                                            role="img"
+                                            style={null}
+                                          >
+                                            <svg
+                                              aria-hidden={true}
+                                              className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                                              focusable="false"
+                                              height={16}
+                                              role="img"
+                                              style={null}
+                                              viewBox="0 0 16 16"
+                                              width={16}
+                                              xmlns="http://www.w3.org/2000/svg"
+                                            />
+                                          </EuiIconEmpty>
+                                        </EuiIcon>
+                                      </button>
+                                    </EuiButtonIcon>
+                                  </div>
+                                </div>
+                              </EuiOutsideClickDetector>
+                            </EuiPopover>
+                          </div>
+                        </EuiFlexItem>
+                      </div>
+                    </EuiFlexGroup>
+                  </FileActionsBar>
+                </div>
+              </EuiFlexItem>
+            </div>
+          </EuiFlexGroup>
+        </div>
+      </FileTree>
+    </FileTree>
+  </TextObjectsContextProvider>
+</ServicesContextProvider>
+`;

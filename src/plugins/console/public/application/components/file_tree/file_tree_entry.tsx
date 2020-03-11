@@ -107,7 +107,10 @@ export const FileTreeEntry: FunctionComponent<Props> = ({
           }}
         >
           {error && (
-            <span className="conApp__fileTree__errorIconContainer">
+            <span
+              data-test-subj={`consoleFileSaveErrorIcon-${name}`}
+              className="conApp__fileTree__errorIconContainer"
+            >
               <FileSaveErrorIcon errorMessage={error} />
             </span>
           )}
@@ -153,6 +156,7 @@ export const FileTreeEntry: FunctionComponent<Props> = ({
           {canDelete && (
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
+                data-test-subj={`consoleDeleteFileButton-${name}`}
                 tabIndex={0}
                 aria-label={i18n.translate('console.fileTree.deleteButtonLabel', {
                   defaultMessage: 'Delete {name}',

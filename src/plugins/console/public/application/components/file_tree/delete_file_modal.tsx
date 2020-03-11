@@ -54,7 +54,12 @@ export const DeleteFileModal: FunctionComponent<Props> = ({
               defaultMessage: 'Cancel',
             })}
           </EuiButtonEmpty>
-          <EuiButton fill color="danger" onClick={onDeleteConfirmation}>
+          <EuiButton
+            data-test-subj={`consoleModalDeleteFileButton-${fileName}`}
+            fill
+            color="danger"
+            onClick={onDeleteConfirmation}
+          >
             {i18n.translate('console.fileTree.deleteModal.deleteButtonLabel', {
               defaultMessage: 'Delete',
             })}
