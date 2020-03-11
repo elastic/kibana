@@ -5,3 +5,7 @@
     - name: euid
 - name: long.nested.foo
 - name: nested.bar
+- name: myalias
+  type: alias
+  path: user.euid
+
