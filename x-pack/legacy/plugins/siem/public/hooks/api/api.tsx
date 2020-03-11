@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as i18n from '../translations';
 import { StartServices } from '../../plugin';
-import { parseJsonFromBody, ToasterErrors } from './throw_if_not_ok';
 import { IndexPatternSavedObject, IndexPatternSavedObjectAttributes } from '../types';
 
 /**
@@ -24,25 +22,4 @@ export const getIndexPatterns = async (
   });
 
   return response.savedObjects;
-};
-
-export const throwIfNotOk = async (response?: Response): Promise<void> => {
-  if (!response) {
-    throw new ToasterErrors([i18n.NETWORK_ERROR]);
-  }
-
-  if (!response.ok) {
-    const body = await parseJsonFromBody(response);
-    if (body != null && body.message) {
-      if (body.statusCode != null) {
-        throw new ToasterErrors([body.message, `${i18n.STATUS_CODE} ${body.statusCode}`]);
-      } else if (body.status_code != null) {
-        throw new ToasterErrors([body.message, `${i18n.STATUS_CODE} ${body.status_code}`]);
-      } else {
-        throw new ToasterErrors([body.message]);
-      }
-    } else {
-      throw new ToasterErrors([`${i18n.NETWORK_ERROR} ${response.statusText}`]);
-    }
-  }
 };

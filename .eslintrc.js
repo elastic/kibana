@@ -49,6 +49,11 @@ const ELASTIC_LICENSE_HEADER = `
  */
 `;
 
+const allMochaRules = {};
+Object.keys(require('eslint-plugin-mocha').rules).forEach(k => {
+  allMochaRules['mocha/' + k] = 'off';
+});
+
 module.exports = {
   root: true,
 
@@ -512,6 +517,14 @@ module.exports = {
       rules: {
         'jest/valid-describe': 'error',
       },
+    },
+
+    /**
+     * Harden specific rules
+     */
+    {
+      files: ['test/harden/*.js'],
+      rules: allMochaRules,
     },
 
     /**

@@ -88,9 +88,7 @@ describe('CoordinateMapsVisualizationTest', function() {
 
       if (!visRegComplete) {
         visRegComplete = true;
-        visualizationsSetup.types.createBaseVisualization(
-          createTileMapTypeDefinition(dependencies)
-        );
+        visualizationsSetup.createBaseVisualization(createTileMapTypeDefinition(dependencies));
       }
 
       CoordinateMapsVisualization = createTileMapVisualization(dependencies);
@@ -126,7 +124,7 @@ describe('CoordinateMapsVisualizationTest', function() {
       setupDOM('512px', '512px');
 
       imageComparator = new ImageComparator();
-      vis = new visualizationsStart.Vis(indexPattern, {
+      vis = visualizationsStart.createVis(indexPattern, {
         type: 'tile_map',
       });
       vis.params = {
