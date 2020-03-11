@@ -18,7 +18,9 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: SETUP_API_ROUTE,
       validate: false,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      // if this route is set to `-all`, a read-only user get a 404 for this route
+      // and will see `Unable to initialize Ingest Manager` in the UI
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     ingestManagerSetupHandler
   );
@@ -27,7 +29,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: FLEET_SETUP_API_ROUTES.INFO_PATTERN,
       validate: GetFleetSetupRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getFleetSetupHandler
   );
@@ -37,7 +39,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: FLEET_SETUP_API_ROUTES.CREATE_PATTERN,
       validate: CreateFleetSetupRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     createFleetSetupHandler
   );
