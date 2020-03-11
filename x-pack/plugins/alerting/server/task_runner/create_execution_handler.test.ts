@@ -24,6 +24,8 @@ const createExecutionHandlerParams = {
   actionsPlugin: actionsMock.createStart(),
   spaceId: 'default',
   alertId: '1',
+  alertName: 'name-of-alert',
+  tags: ['tag-A', 'tag-B'],
   apiKey: 'MTIzOmFiYw==',
   spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
   getBasePath: jest.fn().mockReturnValue(undefined),
@@ -38,6 +40,7 @@ const createExecutionHandlerParams = {
         foo: true,
         contextVal: 'My {{context.value}} goes here',
         stateVal: 'My {{state.value}} goes here',
+        alertVal: 'My {{alertId}} {{alertName}} {{spaceId}} {{tags}} {{alertInstanceId}} goes here',
       },
     },
   ],
@@ -63,6 +66,7 @@ test('calls actionsPlugin.execute per selected action', async () => {
             "apiKey": "MTIzOmFiYw==",
             "id": "1",
             "params": Object {
+              "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
               "contextVal": "My  goes here",
               "foo": true,
               "stateVal": "My  goes here",
@@ -138,6 +142,7 @@ test('context attribute gets parameterized', async () => {
             "apiKey": "MTIzOmFiYw==",
             "id": "1",
             "params": Object {
+              "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
               "contextVal": "My context-val goes here",
               "foo": true,
               "stateVal": "My  goes here",
@@ -163,6 +168,7 @@ test('state attribute gets parameterized', async () => {
             "apiKey": "MTIzOmFiYw==",
             "id": "1",
             "params": Object {
+              "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
               "contextVal": "My  goes here",
               "foo": true,
               "stateVal": "My state-val goes here",

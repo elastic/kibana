@@ -29,7 +29,7 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
   const allPaths = Object.values(ExternalServiceSimulator).map(service =>
     getExternalServiceSimulatorPath(service)
   );
-  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/api/now/v1/table/incident`);
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/api/now/v2/table/incident`);
   return allPaths;
 }
 

@@ -13,6 +13,24 @@ import {
 
 // node ../scripts/functional_test_runner.js --grep "Actions.servicenddd" --config=test/alerting_api_integration/security_and_spaces/config.ts
 
+const mapping = [
+  {
+    source: 'title',
+    target: 'description',
+    actionType: 'nothing',
+  },
+  {
+    source: 'description',
+    target: 'short_description',
+    actionType: 'nothing',
+  },
+  {
+    source: 'comments',
+    target: 'comments',
+    actionType: 'nothing',
+  },
+];
+
 // eslint-disable-next-line import/no-default-export
 export default function servicenowTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -20,6 +38,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
   const mockServiceNow = {
     config: {
       apiUrl: 'www.servicenowisinkibanaactions.com',
+      casesConfiguration: { mapping: [...mapping] },
     },
     secrets: {
       password: 'elastic',
@@ -49,6 +68,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           actionTypeId: '.servicenow',
           config: {
             apiUrl: servicenowSimulatorURL,
+            casesConfiguration: { ...mockServiceNow.config.casesConfiguration },
           },
           secrets: mockServiceNow.secrets,
         })

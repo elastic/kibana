@@ -93,8 +93,10 @@ export class TaskRunner {
     return this.context.getServices(fakeRequest);
   }
 
-  getExecutionHandler(
+  private getExecutionHandler(
     alertId: string,
+    alertName: string,
+    tags: string[] | undefined,
     spaceId: string,
     apiKey: string | null,
     actions: RawAlert['actions'],
@@ -114,6 +116,8 @@ export class TaskRunner {
 
     return createExecutionHandler({
       alertId,
+      alertName,
+      tags,
       logger: this.logger,
       actionsPlugin: this.context.actionsPlugin,
       apiKey,
@@ -225,6 +229,8 @@ export class TaskRunner {
     const params = validateAlertTypeParams(this.alertType, attributes.params);
     const executionHandler = this.getExecutionHandler(
       alertId,
+      attributes.name,
+      attributes.tags,
       spaceId,
       apiKey,
       attributes.actions,

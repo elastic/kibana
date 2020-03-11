@@ -42,9 +42,9 @@ interface ActionConnectorProps {
   connector: ActionConnector;
   dispatch: React.Dispatch<ReducerAction>;
   actionTypeName: string;
-  serverError: {
+  serverError?: {
     body: { message: string; error: string };
-  } | null;
+  };
   errors: IErrorObject;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
 }
@@ -110,7 +110,7 @@ export const ActionConnectorForm = ({
   const FieldsComponent = actionTypeRegistered.actionConnectorFields;
 
   return (
-    <EuiForm isInvalid={serverError !== null} error={serverError?.body.message}>
+    <EuiForm isInvalid={!!serverError} error={serverError?.body.message}>
       <EuiFormRow
         id="actionName"
         fullWidth
@@ -125,6 +125,7 @@ export const ActionConnectorForm = ({
       >
         <EuiFieldText
           fullWidth
+          autoFocus={true}
           isInvalid={errors.name.length > 0 && connector.name !== undefined}
           name="name"
           placeholder="Untitled"
