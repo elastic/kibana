@@ -9,7 +9,9 @@ import { EndpointAppContext } from '../../types';
 import { esKuery } from '../../../../../../src/plugins/data/server';
 
 /**
- * TODO, add comment to exported function.
+ * Takes the POST body from the metadata index API.
+ * Returns the client params for an Elasticsearch query.
+ * Documents used in the 'host' UI
  */
 export const kibanaRequestToMetadataListESQuery = async (
   request: KibanaRequest<unknown, unknown, MetadataIndexGetBodyResult>,
@@ -63,7 +65,7 @@ async function getPagingProperties(
       }
     }
   }
-  // If page_size or page_index are 0 or undefined, use the defaults instead. TODO, is this logic right?
+  // If page_size or page_index are 0 or undefined, use the defaults instead.
   return {
     pageSize: pagingProperties.page_size || config.endpointResultListDefaultPageSize,
     pageIndex: pagingProperties.page_index || config.endpointResultListDefaultFirstPageIndex,
@@ -82,7 +84,7 @@ function buildQueryBody(
 }
 
 /**
- * TODO, add comment to exported function.
+ * Takes an 'metadata' ID and returns the client params for an Elasticsearch query which returns a metadata document.
  */
 export const kibanaRequestToMetadataGetESQuery = (
   request: KibanaRequest<{ id: string }, unknown, unknown>
