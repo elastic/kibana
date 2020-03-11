@@ -30,9 +30,9 @@ import {
 import { DataPublicPluginStart } from '../../../src/plugins/data/public';
 import { ChartsPluginStart } from '../../../src/plugins/charts/public';
 
-import { Page } from './page';
-import { DocumentationPage } from './documentation';
-import { ViewAlertPage } from './view_alert';
+import { Page } from './components/page';
+import { DocumentationPage } from './components/documentation';
+import { ViewAlertPage } from './components/view_alert';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../x-pack/plugins/triggers_actions_ui/public';
 import { AlertingExamplePublicStartDeps } from './plugin';
 
@@ -65,7 +65,7 @@ const AlertingExampleApp = (deps: AlertingExampleComponentParams) => {
           path={`/alert/:id`}
           render={(props: RouteComponentProps<{ id: string }>) => {
             return (
-              <Page title={`View Alert ${props.match.params.id}`}>
+              <Page title={`View Alert`} crumb={`View Alert ${props.match.params.id}`}>
                 <ViewAlertPage http={http} id={props.match.params.id} />
               </Page>
             );

@@ -30,8 +30,8 @@ import {
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import { CreateAlert } from './components/create_alert';
-import { AlertingExampleComponentParams } from './application';
+import { CreateAlert } from './create_alert';
+import { AlertingExampleComponentParams } from '../application';
 
 export const DocumentationPage = (deps: AlertingExampleComponentParams) => (
   <EuiPageBody>

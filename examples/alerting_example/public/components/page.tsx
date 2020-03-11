@@ -34,16 +34,17 @@ import {
 type PageProps = RouteComponentProps & {
   title: string;
   children: React.ReactNode;
+  crumb?: string;
   isHome?: boolean;
 };
 
-export const Page = withRouter(({ title, children, isHome = false, history }: PageProps) => {
+export const Page = withRouter(({ title, crumb, children, isHome = false, history }: PageProps) => {
   const breadcrumbs: Array<{
     text: string;
     onClick?: () => void;
   }> = [
     {
-      text: title,
+      text: crumb ?? title,
     },
   ];
   if (!isHome) {
