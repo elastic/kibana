@@ -36,7 +36,7 @@ export function createFlyoutManageDrilldowns({
   storage: IStorageWrapper;
 }) {
   // This is ok to assume this is static,
-  // because all action factories should be registerd in setup phase
+  // because all action factories should be registered in setup phase
   const allActionFactories = advancedUiActions.actionFactory.getAll();
 
   return (props: ConnectedFlyoutManageDrilldownsProps) => {
