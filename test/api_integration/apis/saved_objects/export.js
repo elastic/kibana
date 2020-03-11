@@ -191,10 +191,28 @@ export default function({ getService }) {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message:
-                  '[request body.type]: types that failed validation:\n' +
-                  '- [request body.type.0]: expected value of type [string] but got [Array]\n' +
-                  '- [request body.type.1.0]: wigwags is not exportable',
+                message: 'Trying to export non-exportable type(s): wigwags',
+              });
+            });
+        });
+
+        it(`should return 400 when exporting objects with unsupported type`, async () => {
+          await supertest
+            .post('/api/saved_objects/_export')
+            .send({
+              objects: [
+                {
+                  type: 'wigwags',
+                  id: '1',
+                },
+              ],
+            })
+            .expect(400)
+            .then(resp => {
+              expect(resp.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: 'Trying to export object(s) with non-exportable types: wigwags:1',
               });
             });
         });

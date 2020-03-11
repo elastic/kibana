@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useMlKibana } from '../../contexts/kibana';
 import { Dictionary } from '../../../../common/types/common';
-import { MlJobWithTimeRange } from '../../../../common/types/jobs';
+import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 import { ml } from '../../services/ml_api_service';
 import { useUrlState } from '../../util/url_state';
 // @ts-ignore
