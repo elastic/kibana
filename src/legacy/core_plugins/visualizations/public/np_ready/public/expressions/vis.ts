@@ -32,25 +32,46 @@ import _ from 'lodash';
 import { PersistedState } from '../../../../../../../plugins/visualizations/public';
 
 import { getTypes } from '../services';
+import { VisType } from '../vis_types';
+import { VisParams } from '../types';
 
-export class Vis extends EventEmitter {
-  constructor(visState = { type: 'histogram' }) {
+export interface ExprVisState {
+  title?: string;
+  type: VisType | string;
+  params?: VisParams;
+}
+
+export interface ExprVisAPIEvents {
+  filter: (data: any) => void;
+  brush: (data: any) => void;
+}
+
+export interface ExprVisAPI {
+  events: ExprVisAPIEvents;
+}
+
+export class ExprVis extends EventEmitter {
+  public title: string = '';
+  public type?: VisType;
+  public params: VisParams = {};
+  public sessionState: Record<string, any> = {};
+  public API: ExprVisAPI;
+  public eventsSubject: any;
+  private uiState: PersistedState;
+
+  constructor(visState: ExprVisState = { type: 'histogram' }) {
     super();
 
-    this._setUiState(new PersistedState());
+    this.uiState = new PersistedState();
     this.setState(visState);
-
-    // Session state is for storing information that is transitory, and will not be saved with the visualization.
-    // For instance, map bounds, which depends on the view port, browser window size, etc.
-    this.sessionState = {};
 
     this.API = {
       events: {
-        filter: data => {
+        filter: (data: any) => {
           if (!this.eventsSubject) return;
           this.eventsSubject.next({ name: 'filterBucket', data });
         },
-        brush: data => {
+        brush: (data: any) => {
           if (!this.eventsSubject) return;
           this.eventsSubject.next({ name: 'brush', data });
         },
@@ -58,7 +79,7 @@ export class Vis extends EventEmitter {
     };
   }
 
-  setState(state) {
+  setState(state: ExprVisState) {
     this.title = state.title || '';
     const type = state.type || this.type;
     if (_.isString(type)) {
@@ -73,18 +94,14 @@ export class Vis extends EventEmitter {
     this.params = _.defaultsDeep(
       {},
       _.cloneDeep(state.params || {}),
-      _.cloneDeep(this.type.visConfig.defaults || {})
+      _.cloneDeep(this.type!.visConfig.defaults || {})
     );
-  }
-
-  setCurrentState(state) {
-    this.setState(state);
   }
 
   getState() {
     return {
       title: this.title,
-      type: this.type.name,
+      type: this.type!.name,
       params: _.cloneDeep(this.params),
     };
   }
@@ -98,42 +115,35 @@ export class Vis extends EventEmitter {
   }
 
   isHierarchical() {
-    if (_.isFunction(this.type.hierarchicalData)) {
-      return !!this.type.hierarchicalData(this);
+    if (_.isFunction(this.type!.hierarchicalData)) {
+      return !!this.type!.hierarchicalData(this);
     } else {
-      return !!this.type.hierarchicalData;
+      return !!this.type!.hierarchicalData;
     }
   }
 
   hasUiState() {
-    return !!this.__uiState;
-  }
-
-  /***
-   * this should not be used outside of visualize
-   * @param uiState
-   * @private
-   */
-  _setUiState(uiState) {
-    if (uiState instanceof PersistedState) {
-      this.__uiState = uiState;
-    }
+    return !!this.uiState;
   }
 
   getUiState() {
-    return this.__uiState;
+    return this.uiState;
+  }
+
+  setUiState(state: PersistedState) {
+    this.uiState = state;
   }
 
   /**
    * Currently this is only used to extract map-specific information
    * (e.g. mapZoom, mapCenter).
    */
-  uiStateVal(key, val) {
+  uiStateVal(key: string, val: any) {
     if (this.hasUiState()) {
       if (_.isUndefined(val)) {
-        return this.__uiState.get(key);
+        return this.uiState.get(key);
       }
-      return this.__uiState.set(key, val);
+      return this.uiState.set(key, val);
     }
     return val;
   }

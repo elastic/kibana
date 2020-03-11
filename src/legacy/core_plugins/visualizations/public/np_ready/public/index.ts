@@ -39,7 +39,7 @@ export { VisualizationsSetup, VisualizationsStart };
 /** @public types */
 export { VisTypeAlias, VisType } from './vis_types';
 export { VisSavedObject } from './types';
-export { Vis, VisParams, VisState } from './vis';
+export { Vis, VisParams, SerializedVis, SerializedVisData, VisData } from './vis';
 import { VisualizeEmbeddableFactory, VisualizeEmbeddable } from './embeddable';
 export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;

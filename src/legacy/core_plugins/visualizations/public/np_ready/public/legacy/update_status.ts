@@ -19,7 +19,7 @@
 
 import { PersistedState } from '../../../../../../../plugins/visualizations/public';
 import { calculateObjectHash } from '../../../../../../../plugins/kibana_utils/common';
-import { Vis } from '../vis';
+import { ExprVis } from '../expressions/vis';
 
 enum Status {
   AGGS = 'aggs',
@@ -43,22 +43,10 @@ function hasHashChanged<T extends string>(
   return oldHash !== valueHash;
 }
 
-interface Size {
-  width: number;
-  height: number;
-}
-
-function hasSizeChanged(size: Size, oldSize?: Size): boolean {
-  if (!oldSize) {
-    return true;
-  }
-  return oldSize.width !== size.width || oldSize.height !== size.height;
-}
-
 function getUpdateStatus<T extends Status>(
   requiresUpdateStatus: T[] = [],
   obj: any,
-  param: { vis: Vis; visData: any; uiState: PersistedState }
+  param: { vis: ExprVis; visData: any; uiState: PersistedState }
 ): { [reqStats in T]: boolean } {
   const status = {} as { [reqStats in Status]: boolean };
 
@@ -76,9 +64,7 @@ function getUpdateStatus<T extends Status>(
     // Calculate all required status updates for this visualization
     switch (requiredStatus) {
       case Status.AGGS:
-        hash = calculateObjectHash(param.vis.aggs);
-        status.aggs = hasHashChanged(hash, obj._oldStatus, 'aggs');
-        obj._oldStatus.aggs = hash;
+        status.aggs = true;
         break;
       case Status.DATA:
         hash = calculateObjectHash(param.visData);
@@ -86,22 +72,13 @@ function getUpdateStatus<T extends Status>(
         obj._oldStatus.data = hash;
         break;
       case Status.PARAMS:
-        hash = calculateObjectHash(param.vis.params);
-        status.params = hasHashChanged(hash, obj._oldStatus, 'param');
-        obj._oldStatus.param = hash;
+        status.params = true;
         break;
       case Status.RESIZE:
-        const width: number = param.vis.size ? param.vis.size[0] : 0;
-        const height: number = param.vis.size ? param.vis.size[1] : 0;
-        const size = { width, height };
-        status.resize = hasSizeChanged(size, obj._oldStatus.resize);
-        obj._oldStatus.resize = size;
+        status.resize = true;
         break;
       case Status.TIME:
-        const timeRange = param.vis.filters && param.vis.filters.timeRange;
-        hash = calculateObjectHash(timeRange);
-        status.time = hasHashChanged(hash, obj._oldStatus, 'time');
-        obj._oldStatus.time = hash;
+        status.time = true;
         break;
       case Status.UI_STATE:
         hash = calculateObjectHash(param.uiState);

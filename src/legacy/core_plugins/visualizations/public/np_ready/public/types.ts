@@ -18,21 +18,35 @@
  */
 
 import { SavedObject } from '../../../../../../plugins/saved_objects/public';
-import { Vis, VisState, VisParams, VisualizationController } from './vis';
 import { ISearchSource } from '../../../../../../plugins/data/public/';
-import { SavedSearch } from '../../../../../../plugins/discover/public';
+import { SerializedVis, Vis, VisParams } from './vis';
 
-export { Vis, VisState, VisParams, VisualizationController };
+import { Status } from './legacy/update_status';
+import { AggConfigOptions } from '../../../../data/public/search/aggs/agg_config';
 
-export interface VisSavedObject extends SavedObject {
-  vis: Vis;
-  description?: string;
-  searchSource: ISearchSource;
+export { Vis, SerializedVis, VisParams };
+
+export interface VisualizationController {
+  render(visData: any, visParams: any, update: { [key in Status]: boolean }): Promise<void>;
+  destroy(): void;
+  isLoaded?(): Promise<void> | void;
+}
+
+export interface SavedVisState {
+  type: string;
+  params: VisParams;
+  aggs: AggConfigOptions[];
+}
+
+export interface ISavedVis {
   title: string;
+  description?: string;
+  visState: SavedVisState;
+  searchSource?: ISearchSource;
   uiStateJSON?: string;
-  destroy: () => void;
   savedSearchRefName?: string;
   savedSearchId?: string;
-  savedSearch?: SavedSearch;
-  visState: VisState;
 }
+
+// @ts-ignore-next-line
+export interface VisSavedObject extends SavedObject, ISavedVis {}
