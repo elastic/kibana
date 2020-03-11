@@ -31,26 +31,32 @@ In order to provide the user with as much detail as possible about any systems t
  * The current status of a service at a point in time.
  */
 type ServiceStatus = {
-  /** The current availability level of the service. */
+  /**
+   * The current availability level of the service.
+   */
   level: ServiceStatusLevel.available;
-  /** A high-level summary of the service status. */
+  /**
+   * A high-level summary of the service status.
+   */
   summary?: string;
-  /** A more detailed description of the service status. */
+  /**
+   * A more detailed description of the service status.
+   */
   detail?: string;
-  /** A URL to open in a new tab about how to resolve or troubleshoot the problem */
+  /**
+   * A URL to open in a new tab about how to resolve or troubleshoot the problem.
+   */
   documentationUrl?: string;
-  /** Any JSON-serializable data to be included in the HTTP API response. */
-  meta?: object;
+  /**
+   * Any JSON-serializable data to be included in the HTTP API response. Useful for providing more fine-grained, 
+   * machine-readable information about the service status. May include status information for underlying features.
+   */
+  meta?: JSONObject;
 } | {
-  /** The current availability level of the service. */
   level: ServiceStatusLevel;
-  /** A high-level summary of the service status. */
   summary: string; // required when level !== available
-  /** A more detailed description of the service status. */
   detail?: string;
-  /** A URL to open in a new tab about how to resolve or troubleshoot the problem */
   documentationUrl?: string;
-  /** Any JSON-serializable data to be included in the HTTP API response. */
   meta?: object;
 }
 
@@ -65,7 +71,8 @@ enum ServiceStatusLevel {
 }
 
 /**
- * Status of core services.
+ * Status of core services. Only contains entries for backend services that could have a non-available `status`.
+ * For example, `context` cannot possibly be broken, so it is not included.
  */
 interface CoreStatus {
   elasticsearch: ServiceStatus;
@@ -74,6 +81,10 @@ interface CoreStatus {
   uiSettings: ServiceStatus;
   metrics: ServiceStatus;
 }
+
+// Types that specify valid JSON values.
+type JSONValue = string | number | boolean | null | JSONValue[] | JSONObject;
+type JSONObject = Record<string, JSONValue>;
 ```
 
 ## API Design
@@ -89,7 +100,7 @@ interface StatusSetup {
    * Allows a plugin to specify a custom status dependent on its own criteria.
    * Completely overrides the default inherited status.
    */
-  set(status$: Observable<ServiceStatus>): Observable<ServiceStatus>;
+  set(status$: Observable<ServiceStatus>): void;
 
   /**
    * Current status for all Core services.
@@ -136,8 +147,9 @@ interface StatusResponse {
   };
   /** Similar format to existing API, but slightly different shape */
   status: {
+    /** See "Overall status calculation" section below */
     overall: ServiceStatus;
-    core: Record<string, ServiceStatus>;
+    core: CoreStatus;
     plugins: Record<string, ServiceStatus>;
   }
 }
@@ -153,12 +165,24 @@ Each member of the `ServiceStatusLevel` enum has specific behaviors associated w
 - **`degraded`**:
   - All endpoints and apps are available by default
   - Some APIs may return `503 Unavailable` responses. This must be implemented directly by the service.
+  - Some plugin contract APIs may throw errors. This must be implemented directly by the service.
 - **`unavailable`**:
   - All endpoints (with some exceptions in Core) in Kibana return a `503 Unavailable` responses by default. This is automatic.
   - When trying to access any app associated with the unavailable service, the user is presented with an error UI with detail about the outage.
+  - Some plugin contract APIs may throw errors. This must be implemented directly by the service.
 - **`fatal`**:
   - All endpoints (with some exceptions in Core) in Kibana return a `503 Unavailable` response by default. This is automatic.
-  - All applications redirect to the system-wide status page with detail about which services are down and any relevant detail.
+  - All applications redirect to the system-wide status page with detail about which services are down and any relevant detail. This is automatic.
+  - Some plugin contract APIs may throw errors. This must be implemented directly by the service.
+
+### Overall status calculation
+
+The status level of the overall system is calculated to be the highest severity status of all core services and plugins.
+
+The `summary` property is calculated as follows:
+- If the overall status level is `available`, the `summary` is `"Kibana is operating normally"`
+- If a single core service or plugin is not `available`, the `summary` is `Kibana is ${level} due to ${serviceName}. See ${statusPageUrl} for more information.`
+- If multiple core services or plugins are not `available`, the `summary` is `Kibana is ${level} due to multiple components. See ${statusPageUrl} for more information.`
 
 ### Status inheritance
 
@@ -236,7 +260,7 @@ interface StatusSetup {
      */
     unavailableWhen<P, Q, B>(
       predicate: ServiceStatusLevel |
-        (core: CoreStatus, plugins: Record<string, ServiceStatus>) => boolean,
+        (self: ServiceStatus, core: CoreStatus, plugins: Record<string, ServiceStatus>) => boolean,
       handler: RouteHandler<P, Q, B>
     ): RouteHandler<P, Q, B>;
   }
@@ -276,7 +300,6 @@ core.status.set(
 
 1. **The default behaviors and inheritance of statuses may appear to be "magic" to developers who do not read the documentation about how this works.** Compared to the legacy status mechanism, these defaults are much more opinionated and the resulting status is less explicit in plugin code compared to the legacy `mirrorPluginStatus` mechanism.
 2. **The default behaviors and inheritance may not fit real-world status very well.** If many plugins must customize their status in order to opt-out of the defaults, this would be a step backwards from the legacy mechanism.
-3. **Supporting the legacy status API and the new mechansim may be tricky.** We are removing fields from the legacy API's response (`uiColor` and `icon`) in the new API and must make sure we can easily translate this, or consider making a breaking change to this API.
 
 # Alternatives
 
@@ -297,8 +320,3 @@ This largely follows the same patterns we have used for other Core APIs: Observa
 This should be taught using the same channels we've leveraged for other Kibana Platform APIs: API documentation, additions to the [Migration Guide](../../src/core/MIGRATION.md) and [Migration Examples](../../src/core/MIGRATION_EXMAPLES.md).
 
 # Unresolved questions
-
-1. Are the default behaviors too prescriptive? Do we know of many plugins whose status would not fall in line with these behaviors?
-2. Should we provide a status for every core service or only the services that we expect to have a status?
-3. Should the `meta` field be more structured?
-4. Should the hierarchy of the plugins be expressed in the response from the status API and/or UI of the status page?
