@@ -42,16 +42,11 @@ exports[`Storyshots components/Sidebar/SidebarHeader default 1`] = `
               onFocus={[Function]}
               type="button"
             >
-              <svg
-                aria-hidden={true}
-                className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                focusable="false"
-                height={16}
-                role="img"
-                style={null}
-                viewBox="0 0 16 16"
-                width={16}
-                xmlns="http://www.w3.org/2000/svg"
+              <div
+                aria-hidden="true"
+                className="euiButtonIcon__icon"
+                data-euiicon-type="indexOpen"
+                size="m"
               />
             </button>
           </span>
@@ -85,16 +80,11 @@ exports[`Storyshots components/Sidebar/SidebarHeader default 1`] = `
                   onFocus={[Function]}
                   type="button"
                 >
-                  <svg
-                    aria-hidden={true}
-                    className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                    focusable="false"
-                    height={16}
-                    role="img"
-                    style={null}
-                    viewBox="0 0 16 16"
-                    width={16}
-                    xmlns="http://www.w3.org/2000/svg"
+                  <div
+                    aria-hidden="true"
+                    className="euiButtonIcon__icon"
+                    data-euiicon-type="boxesVertical"
+                    size="m"
                   />
                 </button>
               </span>
@@ -149,16 +139,11 @@ exports[`Storyshots components/Sidebar/SidebarHeader without layer controls 1`] 
               onFocus={[Function]}
               type="button"
             >
-              <svg
-                aria-hidden={true}
-                className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                focusable="false"
-                height={16}
-                role="img"
-                style={null}
-                viewBox="0 0 16 16"
-                width={16}
-                xmlns="http://www.w3.org/2000/svg"
+              <div
+                aria-hidden="true"
+                className="euiButtonIcon__icon"
+                data-euiicon-type="indexOpen"
+                size="m"
               />
             </button>
           </span>
@@ -192,16 +177,11 @@ exports[`Storyshots components/Sidebar/SidebarHeader without layer controls 1`] 
                   onFocus={[Function]}
                   type="button"
                 >
-                  <svg
-                    aria-hidden={true}
-                    className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                    focusable="false"
-                    height={16}
-                    role="img"
-                    style={null}
-                    viewBox="0 0 16 16"
-                    width={16}
-                    xmlns="http://www.w3.org/2000/svg"
+                  <div
+                    aria-hidden="true"
+                    className="euiButtonIcon__icon"
+                    data-euiicon-type="boxesVertical"
+                    size="m"
                   />
                 </button>
               </span>

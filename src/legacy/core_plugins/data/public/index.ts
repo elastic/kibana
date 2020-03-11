@@ -65,7 +65,6 @@ export {
   isStringType,
   isType,
   isValidInterval,
-  isValidJson,
   METRIC_TYPES,
   OptionedParamType,
   parentPipelineType,
