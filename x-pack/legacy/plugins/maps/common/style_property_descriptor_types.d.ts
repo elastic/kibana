@@ -12,7 +12,7 @@ export type SymbolizeAsOptions = {
   value: SYMBOLIZE_AS_TYPES;
 };
 
-export type LableBorderSizeOptions = {
+export type LabelBorderSizeOptions = {
   size: LABEL_BORDER_SIZES;
 };
 
@@ -103,7 +103,7 @@ export type SizeStaticOptions = {
 };
 
 export type StylePropertyOptions =
-  | LableBorderSizeOptions
+  | LabelBorderSizeOptions
   | SymbolizeAsOptions
   | DynamicStylePropertyOptions
   | StaticStylePropertyOptions;

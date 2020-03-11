@@ -32,7 +32,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
 
   getValueSuggestions = query => {
     const field = this.getField();
-    const fieldSource = this.getFieldSource();
+    const fieldSource = this._getFieldSource();
     return fieldSource && field ? fieldSource.getValueSuggestions(field, query) : [];
   };
 
@@ -101,7 +101,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return this._field;
   }
 
-  getFieldSource() {
+  _getFieldSource() {
     return this._field ? this._field.getSource() : null;
   }
 
@@ -169,7 +169,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
   }
 
-  supportsFeatureState() {
+  supportsMbFeatureState() {
     return true;
   }
 

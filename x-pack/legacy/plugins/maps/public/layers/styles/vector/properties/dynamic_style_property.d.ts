@@ -19,13 +19,12 @@ export interface IDynamicStyleProperty extends IStyleProperty {
   getFieldName(): string;
   getFieldOrigin(): FIELD_ORIGIN | undefined;
   getComputedFieldName(): string | undefined;
-  getFieldSource(): IVectorSource | undefined;
   getRangeFieldMeta(): RangeFieldMeta;
   getCategoryFieldMeta(): CategoryFieldMeta;
   isFieldMetaEnabled(): boolean;
   supportsFieldMeta(): boolean;
   getFieldMetaRequest(): Promise<unknown>;
-  supportsFeatureState(): boolean;
+  supportsMbFeatureState(): boolean;
   pluckOrdinalStyleMetaFromFeatures(features: unknown[]): RangeFieldMeta;
   pluckCategoricalStyleMetaFromFeatures(features: unknown[]): CategoryFieldMeta;
   pluckOrdinalStyleMetaFromFieldMetaData(fieldMetaData: unknown): RangeFieldMeta;
