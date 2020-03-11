@@ -39,6 +39,7 @@ import {
   getTimeFilter,
 } from '../services';
 import { showNewVisModal } from '../wizard';
+import { VisualizationsStartDeps } from '../plugin';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -52,7 +53,11 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
 > {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
-  constructor() {
+  constructor(
+    private readonly getServices: () => Promise<
+      [unknown, Pick<VisualizationsStartDeps, 'uiActions'>]
+    >
+  ) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('visualizations.savedObjectName', { defaultMessage: 'Visualization' }),
@@ -114,6 +119,8 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
 
       const indexPattern = await getIndexPattern(savedObject);
       const indexPatterns = indexPattern ? [indexPattern] : [];
+      const [, { uiActions }] = await this.getServices();
+
       return new VisualizeEmbeddable(
         getTimeFilter(),
         {
@@ -123,6 +130,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
           editable: this.isEditable(),
           appState: input.appState,
           uiState: input.uiState,
+          uiActions,
         },
         input,
         parent

@@ -23,9 +23,14 @@ import { IContainer } from '../containers';
 import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 import { ViewMode } from '../types';
 import { EmbeddableActionStorage } from './embeddable_action_storage';
+import { UiActionsStart } from '../ui_actions';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
+}
+
+export interface EmbeddableParams {
+  uiActions?: UiActionsStart;
 }
 
 export abstract class Embeddable<
@@ -55,7 +60,12 @@ export abstract class Embeddable<
     return this.__actionStorage || (this.__actionStorage = new EmbeddableActionStorage(this));
   }
 
-  constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer) {
+  constructor(
+    input: TEmbeddableInput,
+    output: TEmbeddableOutput,
+    parent?: IContainer,
+    public readonly params: EmbeddableParams = {}
+  ) {
     this.id = input.id;
     this.output = {
       title: getPanelTitle(input, output),
