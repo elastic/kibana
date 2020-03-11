@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { Values } from '@kbn/utility-types';
 import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
@@ -35,8 +34,6 @@ import {
   EmbeddableOutput,
   Embeddable,
   Container,
-  selectRangeTrigger,
-  valueClickTrigger,
   EmbeddableVisTriggerContext,
 } from '../../../../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../../../../plugins/kibana_utils/public';
@@ -295,16 +292,17 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         }
 
         if (!this.input.disableTriggers) {
-          const triggerId: 'SELECT_RANGE_TRIGGER' | 'VALUE_CLICK_TRIGGER' =
-            event.name === 'brush' ? selectRangeTrigger.id : valueClickTrigger.id;
-          const context: EmbeddableVisTriggerContext = {
-            embeddable: this,
-            timeFieldName: this.vis.indexPattern.timeFieldName,
-            data: event.data,
-          };
-          getUiActions()
-            .getTrigger(triggerId)
-            .exec(context);
+          const triggerId = VIS_EVENT_TO_TRIGGER[event.name as 'brush' | 'filter'];
+          if (triggerId) {
+            const context: EmbeddableVisTriggerContext = {
+              embeddable: this,
+              timeFieldName: this.vis.indexPattern.timeFieldName,
+              data: event.data,
+            };
+            getUiActions()
+              .getTrigger(triggerId)
+              .exec(context);
+          }
         }
       })
     );
