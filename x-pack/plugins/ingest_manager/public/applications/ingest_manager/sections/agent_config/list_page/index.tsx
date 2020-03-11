@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { CSSProperties, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { CSSProperties, useCallback, useMemo, useState } from 'react';
 import {
   EuiSpacer,
   EuiText,
@@ -170,11 +170,15 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
   const DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
 
   // Table and search states
-  const [search, setSearch] = useState<string>('');
+  const { urlParams, toUrlParams } = useUrlParams();
+  const [search, setSearch] = useState<string>(
+    Array.isArray(urlParams.kuery)
+      ? urlParams.kuery[urlParams.kuery.length - 1]
+      : urlParams.kuery ?? ''
+  );
   const { pagination, pageSizeOptions, setPagination } = usePagination();
   const [selectedAgentConfigs, setSelectedAgentConfigs] = useState<AgentConfig[]>([]);
   const history = useHistory();
-  const { urlParams, toUrlParams } = useUrlParams();
   const isCreateAgentConfigFlyoutOpen = 'create' in urlParams;
   const setIsCreateAgentConfigFlyoutOpen = useCallback(
     (isOpen: boolean) => {
@@ -196,16 +200,6 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
     perPage: pagination.pageSize,
     kuery: search,
   });
-
-  // If `kuery` url param changes trigger a search
-  useEffect(() => {
-    const kuery = Array.isArray(urlParams.kuery)
-      ? urlParams.kuery[urlParams.kuery.length - 1]
-      : urlParams.kuery ?? '';
-    if (kuery !== search) {
-      setSearch(kuery);
-    }
-  }, [search, urlParams]);
 
   // Some configs retrieved, set up table props
   const columns = useMemo(() => {
