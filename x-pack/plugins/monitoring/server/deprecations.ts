@@ -5,6 +5,7 @@
  */
 
 import { get } from 'lodash';
+import { ConfigDeprecationFactory, ConfigDeprecation } from 'kibana/server';
 import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from '../common/constants';
 
 /**
@@ -15,50 +16,45 @@ import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from '../common/constants';
  * major version!
  * @return {Array} array of rename operations and callback function for rename logging
  */
-export const deprecations = ({ renameFromRoot }) => {
+export const deprecations = ({ rename }: ConfigDeprecationFactory): ConfigDeprecation[] => {
   return [
-    (settings, log) => {
-      const clusterAlertsEnabled = get(settings, 'cluster_alerts.enabled');
+    (config, fromPath, logger) => {
+      const clusterAlertsEnabled = get(config, 'cluster_alerts.enabled');
       const emailNotificationsEnabled =
-        clusterAlertsEnabled && get(settings, 'cluster_alerts.email_notifications.enabled');
-      if (emailNotificationsEnabled && !get(settings, CLUSTER_ALERTS_ADDRESS_CONFIG_KEY)) {
-        log(
-          `Config key "${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}" will be required for email notifications to work in 7.0."`
+        clusterAlertsEnabled && get(config, 'cluster_alerts.email_notifications.enabled');
+      if (emailNotificationsEnabled && !get(config, CLUSTER_ALERTS_ADDRESS_CONFIG_KEY)) {
+        logger(
+          `Config key [${fromPath}.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}] will be required for email notifications to work in 7.0."`
         );
       }
-      return settings;
+      return config;
     },
-    (settings, log) => {
-      const fromPath = 'monitoring.elasticsearch';
-      const es = get(settings, 'elasticsearch');
+    (config, fromPath, logger) => {
+      const es: Record<string, any> = get(config, 'elasticsearch');
       if (es) {
         if (es.username === 'elastic') {
-          log(
+          logger(
             `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana" user instead.`
           );
         }
       }
-      return settings;
+      return config;
     },
-    (settings, log) => {
-      const fromPath = 'monitoring.elasticsearch.ssl';
-      const ssl = get(settings, 'elasticsearch.ssl');
+    (config, fromPath, logger) => {
+      const ssl: Record<string, any> = get(config, 'elasticsearch.ssl');
       if (ssl) {
         if (ssl.key !== undefined && ssl.certificate === undefined) {
-          log(
+          logger(
             `Setting [${fromPath}.key] without [${fromPath}.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
           );
         } else if (ssl.certificate !== undefined && ssl.key === undefined) {
-          log(
+          logger(
             `Setting [${fromPath}.certificate] without [${fromPath}.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
           );
         }
       }
-      return settings;
+      return config;
     },
-    renameFromRoot(
-      'monitoring.xpack_api_polling_frequency_millis',
-      'monitoring.licensing.api_polling_frequency'
-    ),
+    rename('xpack_api_polling_frequency_millis', 'licensing.api_polling_frequency'),
   ];
 };

@@ -4,6 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  ElasticsearchConfig,
+  Logger,
+  ElasticsearchClientConfig,
+  ICustomClusterClient,
+} from 'kibana/server';
+// @ts-ignore
 import { monitoringBulk } from '../kibana_monitoring/lib/monitoring_bulk';
 
 /* Provide a dedicated Elasticsearch client for Monitoring
@@ -12,9 +19,16 @@ import { monitoringBulk } from '../kibana_monitoring/lib/monitoring_bulk';
  * Kibana itself is connected to a production cluster.
  */
 
-export function instantiateClient({ elasticsearchConfig, log, elasticsearchPlugin }) {
+export function instantiateClient(
+  elasticsearchConfig: ElasticsearchConfig,
+  log: Logger,
+  createClient: (
+    type: string,
+    clientConfig?: Partial<ElasticsearchClientConfig>
+  ) => ICustomClusterClient
+) {
   const isMonitoringCluster = hasMonitoringCluster(elasticsearchConfig);
-  const cluster = elasticsearchPlugin.createCluster('monitoring', {
+  const cluster = createClient('monitoring', {
     ...(isMonitoringCluster ? elasticsearchConfig : {}),
     plugins: [monitoringBulk],
     logQueries: Boolean(elasticsearchConfig.logQueries),
@@ -25,6 +39,6 @@ export function instantiateClient({ elasticsearchConfig, log, elasticsearchPlugi
   return cluster;
 }
 
-export function hasMonitoringCluster(config) {
+export function hasMonitoringCluster(config: ElasticsearchConfig) {
   return Boolean(config.hosts && config.hosts[0]);
 }

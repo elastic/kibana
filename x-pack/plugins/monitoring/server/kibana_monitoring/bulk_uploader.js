@@ -8,7 +8,7 @@ import { defaultsDeep, uniq, compact, get } from 'lodash';
 
 import { TELEMETRY_COLLECTION_INTERVAL } from '../../common/constants';
 
-import { sendBulkPayload, monitoringBulk, getKibanaInfoForStats } from './lib';
+import { sendBulkPayload, monitoringBulk } from './lib';
 import { hasMonitoringCluster } from '../es_client/instantiate_client';
 import { ElasticsearchConfig } from '../../../../../src/core/server';
 
@@ -62,7 +62,12 @@ export class BulkUploader {
       });
     }
 
-    this._getKibanaInfoForStats = () => getKibanaInfoForStats(kibanaStats);
+    this.kibanaStats = kibanaStats;
+    this.kibanaStatusGetter = null;
+  }
+
+  setKibanaStatusGetter(getter) {
+    this.kibanaStatusGetter = getter;
   }
 
   filterCollectorSet(usageCollection) {
@@ -242,7 +247,10 @@ export class BulkUploader {
         ...accum,
         { index: { _type: type } },
         {
-          kibana: this._getKibanaInfoForStats(),
+          kibana: {
+            ...this.kibanaStats,
+            status: this.kibanaStatusGetter(),
+          },
           ...typesNested[type],
         },
       ];

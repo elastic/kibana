@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { isFunction, get } from 'lodash';
 
 /**
  * Prefix all comma separated index patterns within the original {@code indexPattern}.
@@ -16,7 +17,14 @@
  * @return {String} The index pattern with the {@code cluster} prefix appropriately prepended.
  */
 export function prefixIndexPattern(config, indexPattern, ccs) {
-  const ccsEnabled = config.get('monitoring.ui.ccs.enabled');
+  let ccsEnabled = false;
+  // TODO: NP
+  // This function is called with both NP config and LP config
+  if (isFunction(config.get)) {
+    ccsEnabled = config.get('monitoring.ui.ccs.enabled');
+  } else {
+    ccsEnabled = get(config, 'monitoring.ui.ccs.enabled');
+  }
 
   if (!ccsEnabled || !ccs) {
     return indexPattern;

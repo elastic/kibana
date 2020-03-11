@@ -8,16 +8,13 @@ import { TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext, PluginConfigDescriptor } from '../../../../src/core/server';
 import { Plugin } from './plugin';
 import { configSchema } from './config';
-// @ts-ignore
-import { getKibanaInfoForStats } from './kibana_monitoring/lib';
-// @ts-ignore
 import { deprecations } from './deprecations';
 
 export const plugin = (initContext: PluginInitializerContext) => new Plugin(initContext);
 export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
   schema: configSchema,
   deprecations,
+  exposeToBrowser: {
+    ui: true,
+  },
 };
-
-// TODO: why are we doing this?
-export { getKibanaInfoForStats };

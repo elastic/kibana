@@ -13,4 +13,5 @@ export interface MonitoringLicenseService {
   getWatcherFeature: () => LicenseFeature;
   getMonitoringFeature: () => LicenseFeature;
   getSecurityFeature: () => LicenseFeature;
+  stop: () => void;
 }

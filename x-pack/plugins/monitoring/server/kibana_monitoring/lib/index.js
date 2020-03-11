@@ -6,4 +6,3 @@
 
 export { sendBulkPayload } from './send_bulk_payload';
 export { monitoringBulk } from './monitoring_bulk';
-export { getKibanaInfoForStats } from './get_kibana_info_for_stats';

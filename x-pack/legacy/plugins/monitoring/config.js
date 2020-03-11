@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS } from '../../server/lib/constants';
-
 /**
  * User-configurable settings for xpack.monitoring via configuration schema
  * @param {Object} Joi - HapiJS Joi module that allows for schema validation
@@ -133,7 +131,7 @@ export const config = Joi => {
       }).default(),
     }).default(),
     licensing: Joi.object({
-      api_polling_frequency: Joi.number().default(XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS),
+      api_polling_frequency: Joi.number().default(30001),
     }),
     agent: Joi.object({
       interval: Joi.string()

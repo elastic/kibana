@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KIBANA_STATS_TYPE_MONITORING } from '../../../common/constants';
+import { Observable } from 'rxjs';
 import moment from 'moment';
+import { OpsMetrics } from 'kibana/server';
+import { KIBANA_STATS_TYPE_MONITORING } from '../../../common/constants';
 
 /*
  * Initialize a collector for Kibana Ops Stats
  */
-export function getOpsStatsCollector(usageCollection, { metrics$ }) {
-  let lastMetrics = null;
+export function getOpsStatsCollector(usageCollection: any, metrics$: Observable<OpsMetrics>) {
+  let lastMetrics: OpsMetrics | null = null;
   metrics$.subscribe(metrics => {
     lastMetrics = metrics;
   });

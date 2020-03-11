@@ -4,34 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY, KIBANA_SETTINGS_TYPE } from '../../../common/constants';
+import { KIBANA_SETTINGS_TYPE } from '../../../common/constants';
+import { MonitoringConfig } from '../../config';
 
 /*
  * Check if Cluster Alert email notifications is enabled in config
  * If so, get email from kibana.yml
  */
-export async function getDefaultAdminEmail(config) {
-  if (!config.get('monitoring.cluster_alerts.email_notifications.enabled')) {
+export async function getDefaultAdminEmail(config: MonitoringConfig) {
+  if (!config.cluster_alerts.email_notifications.enabled) {
     return null;
   }
-
-  const emailAddressConfigKey = `monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`;
-  const configuredEmailAddress = config.get(emailAddressConfigKey);
-
-  return configuredEmailAddress || null;
+  return config.cluster_alerts.email_notifications.email_address || null;
 }
 
 // we use shouldUseNull to determine if we need to send nulls; we only send nulls if the last email wasn't null
 let shouldUseNull = true;
 
 export async function checkForEmailValue(
-  config,
-  callCluster,
-  log,
+  config: MonitoringConfig,
   _shouldUseNull = shouldUseNull,
   _getDefaultAdminEmail = getDefaultAdminEmail
 ) {
-  const defaultAdminEmail = await _getDefaultAdminEmail(config, callCluster, log);
+  const defaultAdminEmail = await _getDefaultAdminEmail(config);
 
   // Allow null so clearing the advanced setting will be reflected in the data
   const isAcceptableNull = defaultAdminEmail === null && _shouldUseNull;
@@ -46,13 +41,13 @@ export async function checkForEmailValue(
   }
 }
 
-export function getSettingsCollector(usageCollection, config) {
+export function getSettingsCollector(usageCollection: any, config: MonitoringConfig) {
   return usageCollection.makeStatsCollector({
     type: KIBANA_SETTINGS_TYPE,
     isReady: () => true,
-    async fetch(callCluster) {
+    async fetch() {
       let kibanaSettingsData;
-      const defaultAdminEmail = await checkForEmailValue(config, callCluster, this.log);
+      const defaultAdminEmail = await checkForEmailValue(config);
 
       // skip everything if defaultAdminEmail === undefined
       if (defaultAdminEmail || (defaultAdminEmail === null && shouldUseNull)) {
@@ -72,7 +67,7 @@ export function getSettingsCollector(usageCollection, config) {
       // returns undefined if there was no result
       return kibanaSettingsData;
     },
-    getEmailValueStructure(email) {
+    getEmailValueStructure(email: string) {
       return {
         xpack: {
           default_admin_email: email,

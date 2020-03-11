@@ -5,6 +5,7 @@
  */
 
 import { get, snakeCase } from 'lodash';
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { KIBANA_USAGE_TYPE, KIBANA_STATS_TYPE_MONITORING } from '../../../common/constants';
 
 const TYPES = [
@@ -19,14 +20,13 @@ const TYPES = [
 /**
  * Fetches saved object counts by querying the .kibana index
  */
-export function getKibanaUsageCollector(usageCollection, config) {
+export function getKibanaUsageCollector(usageCollection: any, kibanaIndex: string) {
   return usageCollection.makeUsageCollector({
     type: KIBANA_USAGE_TYPE,
     isReady: () => true,
-    async fetch(callCluster) {
-      const index = config.get('kibana.index');
+    async fetch(callCluster: CallCluster) {
       const savedObjectCountSearchParams = {
-        index,
+        index: kibanaIndex,
         ignoreUnavailable: true,
         filterPath: 'aggregations.types.buckets',
         body: {
@@ -43,11 +43,11 @@ export function getKibanaUsageCollector(usageCollection, config) {
       };
 
       const resp = await callCluster('search', savedObjectCountSearchParams);
-      const buckets = get(resp, 'aggregations.types.buckets', []);
+      const buckets: any = get(resp, 'aggregations.types.buckets', []);
 
       // get the doc_count from each bucket
       const bucketCounts = buckets.reduce(
-        (acc, bucket) => ({
+        (acc: any, bucket: any) => ({
           ...acc,
           [bucket.key]: bucket.doc_count,
         }),
@@ -55,7 +55,7 @@ export function getKibanaUsageCollector(usageCollection, config) {
       );
 
       return {
-        index,
+        index: kibanaIndex,
         ...TYPES.reduce(
           (acc, type) => ({
             // combine the bucketCounts and 0s for types that don't have documents
@@ -74,7 +74,7 @@ export function getKibanaUsageCollector(usageCollection, config) {
      * 1. Make this data part of the "kibana_stats" type
      * 2. Organize the payload in the usage namespace of the data payload (usage.index, etc)
      */
-    formatForBulkUpload: result => {
+    formatForBulkUpload: (result: any) => {
       return {
         type: KIBANA_STATS_TYPE_MONITORING,
         payload: {
