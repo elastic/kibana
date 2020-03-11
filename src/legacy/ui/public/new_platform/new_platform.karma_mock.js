@@ -401,6 +401,11 @@ export const npStart = {
         useChartsTheme: sinon.fake(),
       },
     },
+    discover: {
+      docViews: {
+        DocViewer: () => null,
+      },
+    },
   },
 };
 
