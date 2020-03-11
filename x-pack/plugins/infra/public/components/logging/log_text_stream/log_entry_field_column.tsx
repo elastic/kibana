@@ -19,7 +19,7 @@ import { LogEntryColumnContent } from './log_entry_column';
 import {
   hoveredContentStyle,
   longWrappedContentStyle,
-  originalWrappedContentStyle,
+  preWrappedContentStyle,
   unwrappedContentStyle,
   WrapMode,
 } from './text_styles';
@@ -94,7 +94,7 @@ const FieldColumnContent = euiStyled(LogEntryColumnContent)<LogEntryColumnConten
   ${props =>
     props.wrapMode === 'long'
       ? longWrappedContentStyle
-      : props.wrapMode === 'original'
-      ? originalWrappedContentStyle
+      : props.wrapMode === 'pre-wrapped'
+      ? preWrappedContentStyle
       : unwrappedContentStyle};
 `;

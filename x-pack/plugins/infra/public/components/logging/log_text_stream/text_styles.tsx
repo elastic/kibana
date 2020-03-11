@@ -10,7 +10,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { euiStyled, css } from '../../../../../observability/public';
 import { TextScale } from '../../../../common/log_text_scale';
 
-export type WrapMode = 'none' | 'original' | 'long';
+export type WrapMode = 'none' | 'pre-wrapped' | 'long';
 
 export const monospaceTextStyle = (scale: TextScale) => css`
   font-family: ${props => props.theme.eui.euiCodeFontFamily};
@@ -42,7 +42,7 @@ export const longWrappedContentStyle = css`
   word-break: break-all;
 `;
 
-export const originalWrappedContentStyle = css`
+export const preWrappedContentStyle = css`
   overflow: hidden;
   white-space: pre;
 `;

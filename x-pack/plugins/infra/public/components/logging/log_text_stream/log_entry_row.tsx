@@ -148,7 +148,7 @@ export const LogEntryRow = memo(
                     isHighlighted={isHighlighted}
                     isActiveHighlight={isActiveHighlight}
                     isHovered={isHovered}
-                    wrapMode={wrap ? 'long' : 'original'}
+                    wrapMode={wrap ? 'long' : 'pre-wrapped'}
                   />
                 ) : null}
               </LogEntryColumn>
@@ -170,7 +170,7 @@ export const LogEntryRow = memo(
                     isActiveHighlight={isActiveHighlight}
                     isHighlighted={isHighlighted}
                     isHovered={isHovered}
-                    wrapMode={wrap ? 'long' : 'original'}
+                    wrapMode={wrap ? 'long' : 'pre-wrapped'}
                   />
                 ) : null}
               </LogEntryColumn>
