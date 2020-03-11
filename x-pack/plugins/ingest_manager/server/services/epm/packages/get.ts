@@ -61,6 +61,16 @@ export async function getPackageKeysByStatus(
   }, []);
 }
 
+export async function getIndexPattern(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgkey: string;
+  datasetPath: string;
+}): Promise<string | undefined> {
+  const { savedObjectsClient, pkgkey, datasetPath } = options;
+  const savedObject = await getInstallationObject({ savedObjectsClient, pkgkey });
+  return savedObject?.attributes.installed.patterns[datasetPath];
+}
+
 export async function getPackageInfo(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;

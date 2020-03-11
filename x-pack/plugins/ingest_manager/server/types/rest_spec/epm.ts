@@ -24,6 +24,13 @@ export const GetInfoRequestSchema = {
   }),
 };
 
+export const GetIndexPatternRequestSchema = {
+  params: schema.object({
+    pkgkey: schema.string(),
+    datasetPath: schema.string(),
+  }),
+};
+
 export const InstallPackageRequestSchema = {
   params: schema.object({
     pkgkey: schema.string(),

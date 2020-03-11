@@ -19,6 +19,7 @@ export {
   getInstallationObject,
   getInstallation,
   getPackageInfo,
+  getIndexPattern,
   getPackages,
   SearchParams,
   findInstalledPackageByName,

@@ -9,11 +9,13 @@ import {
   GetPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
+  GetIndexPatternRequestSchema,
   InstallPackageRequestSchema,
   DeletePackageRequestSchema,
 } from '../../types';
 import {
   GetInfoResponse,
+  GetIndexPatternResponse,
   InstallPackageResponse,
   DeletePackageResponse,
   GetCategoriesResponse,
@@ -24,6 +26,7 @@ import {
   getPackages,
   getFile,
   getPackageInfo,
+  getIndexPattern as getIndexPatternFromSavedObject,
   installPackage,
   removeInstallation,
 } from '../../services/epm/packages';
@@ -106,6 +109,26 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
     const body: GetInfoResponse = {
       response: res,
       success: true,
+    };
+    return response.ok({ body });
+  } catch (e) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const getIndexPattern: RequestHandler<TypeOf<
+  typeof GetIndexPatternRequestSchema.params
+>> = async (context, request, response) => {
+  try {
+    const { pkgkey, datasetPath } = request.params;
+    const savedObjectsClient = context.core.savedObjects.client;
+    const res = await getIndexPatternFromSavedObject({ savedObjectsClient, pkgkey, datasetPath });
+    const body: GetIndexPatternResponse = {
+      response: res || null,
+      success: res !== undefined,
     };
     return response.ok({ body });
   } catch (e) {
