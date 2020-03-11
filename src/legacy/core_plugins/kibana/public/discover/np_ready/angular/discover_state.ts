@@ -65,9 +65,9 @@ interface GetStateParams {
    */
   storeInSessionStorage?: boolean;
   /**
-   * Browser history used for testing
+   * Browser history
    */
-  hashHistory?: History;
+  history: History;
 }
 
 export interface GetStateReturn {
@@ -121,11 +121,11 @@ const APP_STATE_URL_KEY = '_a';
 export function getState({
   defaultAppState = {},
   storeInSessionStorage = false,
-  hashHistory,
+  history,
 }: GetStateParams): GetStateReturn {
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
-    history: hashHistory ? hashHistory : createHashHistory(),
+    history,
   });
 
   const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as AppState;

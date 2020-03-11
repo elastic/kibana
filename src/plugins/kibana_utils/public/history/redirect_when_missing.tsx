@@ -72,7 +72,7 @@ export function redirectWhenMissing({
     url += (url.indexOf('?') >= 0 ? '&' : '?') + `notFound=${error.savedObjectType}`;
 
     toastNotifications.addWarning({
-      title: i18n.translate('common.ui.url.savedObjectIsMissingNotificationMessage', {
+      title: i18n.translate('kibana_utils.history.savedObjectIsMissingNotificationMessage', {
         defaultMessage: 'Saved object is missing',
       }),
       text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),

@@ -24,6 +24,7 @@ import { debounceTime } from 'rxjs/operators';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
+import { createHashHistory } from 'history';
 import { getState, splitState } from './discover_state';
 
 import { RequestAdapter } from '../../../../../../../plugins/inspector/public';
@@ -87,6 +88,8 @@ const fetchStatuses = {
 
 const app = getAngularModule();
 
+app.factory('history', () => createHashHistory());
+
 app.config($routeProvider => {
   const defaults = {
     requireDefaultIndex: true,
@@ -114,10 +117,10 @@ app.config($routeProvider => {
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      savedObjects: function($route, kbnUrl, Promise, $rootScope) {
+      savedObjects: function($route, kbnUrl, Promise, $rootScope, history) {
         const savedSearchId = $route.current.params.id;
         return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl).then(() => {
-          const { appStateContainer } = getState({});
+          const { appStateContainer } = getState({ history });
           const { index } = appStateContainer.getState();
           return Promise.props({
             ip: indexPatterns.getCache().then(indexPatternList => {
@@ -152,6 +155,7 @@ app.config($routeProvider => {
               })
               .catch(
                 redirectWhenMissing({
+                  history,
                   mapping: {
                     search: '/discover',
                     'index-pattern':
@@ -185,7 +189,8 @@ function discoverController(
   config,
   kbnUrl,
   localStorage,
-  uiCapabilities
+  uiCapabilities,
+  history
 ) {
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
@@ -211,6 +216,7 @@ function discoverController(
   } = getState({
     defaultAppState: getStateDefaults(),
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
+    history,
   });
   if (appStateContainer.getState().index !== $scope.indexPattern.id) {
     //used index pattern is different than the given by url/state which is invalid
