@@ -83,7 +83,7 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
         selectedCases: action.payload,
       };
     default:
-      throw new Error();
+      return state;
   }
 };
 
@@ -97,6 +97,7 @@ const initialData: AllCases = {
 };
 interface UseGetCases extends UseGetCasesState {
   dispatchUpdateCaseProperty: ({ updateKey, updateValue, caseId, version }: UpdateCase) => void;
+  refetchCases: (filters: FilterOptions, queryParams: QueryParams) => void;
   setFilters: (filters: FilterOptions) => void;
   setQueryParams: (queryParams: QueryParams) => void;
   setSelectedCases: (mySelectedCases: Case[]) => void;
@@ -200,9 +201,14 @@ export const useGetCases = (): UseGetCases => {
     [state.filterOptions, state.queryParams]
   );
 
+  const refetchCases = useCallback(() => {
+    fetchCases(state.filterOptions, state.queryParams);
+  }, [state.filterOptions, state.queryParams]);
+
   return {
     ...state,
     dispatchUpdateCaseProperty,
+    refetchCases,
     setFilters,
     setQueryParams,
     setSelectedCases,

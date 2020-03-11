@@ -13,18 +13,19 @@ import { UpdateCase } from '../../../../containers/case/use_get_cases';
 interface GetActions {
   caseStatus: string;
   dispatchUpdate: Dispatch<UpdateCase>;
+  deleteCaseOnClick: (deleteCase: Case) => void;
 }
 
 export const getActions = ({
   caseStatus,
   dispatchUpdate,
+  deleteCaseOnClick,
 }: GetActions): Array<DefaultItemIconButtonAction<Case>> => [
   {
     description: i18n.DELETE,
     icon: 'trash',
     name: i18n.DELETE,
-    // eslint-disable-next-line no-console
-    onClick: ({ id }: Case) => console.log('TO DO Delete case', id),
+    onClick: deleteCaseOnClick,
     type: 'icon',
     'data-test-subj': 'action-delete',
   },

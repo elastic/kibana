@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
@@ -25,6 +25,7 @@ import { getCasesColumns } from './columns';
 import { Case, FilterOptions, SortFieldCase } from '../../../../containers/case/types';
 import { useGetCases } from '../../../../containers/case/use_get_cases';
 import { useGetCasesStatus } from '../../../../containers/case/use_get_cases_status';
+import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
 import { EuiBasicTableOnChange } from '../../../detection_engine/rules/types';
 import { Panel } from '../../../../components/panel';
 import {
@@ -38,6 +39,7 @@ import { getConfigureCasesUrl, getCreateCaseUrl } from '../../../../components/l
 
 import { getBulkItems } from '../bulk_actions';
 import { CaseHeaderPage } from '../case_header_page';
+import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { OpenClosedStats } from '../open_closed_stats';
 
 import { getActions } from './actions';
@@ -58,11 +60,9 @@ const FlexItemDivider = styled(EuiFlexItem)`
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ theme }) => css`
-    .euiFlexGroup--gutterMedium > &.euiFlexItem {
-      top: 2px;
-      border-radius: ${theme.eui.euiBorderRadius};
-      z-index: ${theme.eui.euiZHeader};
-    }
+    top: 2px;
+    border-radius: ${theme.eui.euiBorderRadius};
+    z-index: ${theme.eui.euiZHeader};
   `}
 `;
 
@@ -83,10 +83,94 @@ export const AllCases = React.memo(() => {
     loading,
     queryParams,
     selectedCases,
+    refetchCases,
     setFilters,
     setQueryParams,
     setSelectedCases,
   } = useGetCases();
+
+  // Delete case
+  const {
+    dispatchResetIsDeleted,
+    handleOnDeleteConfirm,
+    handleToggleModal,
+    isLoading: isDeleting,
+    isDeleted,
+    isDisplayConfirmDeleteModal,
+  } = useDeleteCases();
+
+  useEffect(() => {
+    if (isDeleted) {
+      refetchCases(filterOptions, queryParams);
+      dispatchResetIsDeleted();
+    }
+  }, [isDeleted, filterOptions, queryParams]);
+
+  const [deleteThisCase, setDeleteThisCase] = useState({
+    title: '',
+    id: '',
+  });
+  const [deleteBulk, setDeleteBulk] = useState<string[]>([]);
+  const confirmDeleteModal = useMemo(
+    () => (
+      <ConfirmDeleteCaseModal
+        caseTitle={deleteThisCase.title}
+        isModalVisible={isDisplayConfirmDeleteModal}
+        isPlural={deleteBulk.length > 0}
+        onCancel={handleToggleModal}
+        onConfirm={handleOnDeleteConfirm.bind(
+          null,
+          deleteBulk.length > 0 ? deleteBulk : [deleteThisCase.id]
+        )}
+      />
+    ),
+    [deleteBulk, deleteThisCase, isDisplayConfirmDeleteModal]
+  );
+
+  const toggleDeleteModal = useCallback(
+    (deleteCase: Case) => {
+      handleToggleModal();
+      setDeleteThisCase(deleteCase);
+    },
+    [isDisplayConfirmDeleteModal]
+  );
+
+  const toggleBulkDeleteModal = useCallback(
+    (deleteCases: string[]) => {
+      handleToggleModal();
+      setDeleteBulk(deleteCases);
+    },
+    [isDisplayConfirmDeleteModal]
+  );
+
+  const selectedCaseIds = useMemo(
+    (): string[] =>
+      selectedCases.reduce((arr: string[], caseObj: Case) => [...arr, caseObj.id], []),
+    [selectedCases]
+  );
+
+  const getBulkItemsPopoverContent = useCallback(
+    (closePopover: () => void) => (
+      <EuiContextMenuPanel
+        items={getBulkItems({
+          closePopover,
+          deleteCasesAction: toggleBulkDeleteModal,
+          selectedCaseIds,
+          caseStatus: filterOptions.status,
+        })}
+      />
+    ),
+    [selectedCaseIds, filterOptions.status]
+  );
+  const actions = useMemo(
+    () =>
+      getActions({
+        caseStatus: filterOptions.status,
+        deleteCaseOnClick: toggleDeleteModal,
+        dispatchUpdate: dispatchUpdateCaseProperty,
+      }),
+    [filterOptions.status]
+  );
 
   const tableOnChangeCallback = useCallback(
     ({ page, sort }: EuiBasicTableOnChange) => {
@@ -117,13 +201,7 @@ export const AllCases = React.memo(() => {
     [filterOptions, setFilters]
   );
 
-  const actions = useMemo(
-    () =>
-      getActions({ caseStatus: filterOptions.status, dispatchUpdate: dispatchUpdateCaseProperty }),
-    [filterOptions.status, dispatchUpdateCaseProperty]
-  );
-
-  const memoizedGetCasesColumns = useMemo(() => getCasesColumns(actions), [filterOptions.status]);
+  const memoizedGetCasesColumns = useMemo(() => getCasesColumns(actions), [actions]);
   const memoizedPagination = useMemo(
     () => ({
       pageIndex: queryParams.page - 1,
@@ -132,19 +210,6 @@ export const AllCases = React.memo(() => {
       pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
     }),
     [data, queryParams]
-  );
-
-  const getBulkItemsPopoverContent = useCallback(
-    (closePopover: () => void) => (
-      <EuiContextMenuPanel
-        items={getBulkItems({
-          closePopover,
-          selectedCases,
-          caseStatus: filterOptions.status,
-        })}
-      />
-    ),
-    [selectedCases, filterOptions.status]
   );
 
   const sorting: EuiTableSortingType<Case> = {
@@ -162,7 +227,6 @@ export const AllCases = React.memo(() => {
     [loading]
   );
   const isDataEmpty = useMemo(() => data.total === 0, [data]);
-
   return (
     <>
       <CaseHeaderPage title={i18n.PAGE_TITLE}>
@@ -195,7 +259,9 @@ export const AllCases = React.memo(() => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </CaseHeaderPage>
-      {isCasesLoading && !isDataEmpty && <ProgressLoader size="xs" color="accent" />}
+      {(isCasesLoading || isDeleting) && !isDataEmpty && (
+        <ProgressLoader size="xs" color="accent" className="essentialAnimation" />
+      )}
       <Panel loading={isCasesLoading}>
         <CasesTableFilters
           countClosedCases={data.countClosedCases}
@@ -222,7 +288,7 @@ export const AllCases = React.memo(() => {
                 </UtilityBarGroup>
                 <UtilityBarGroup>
                   <UtilityBarText data-test-subj="case-table-selected-case-count">
-                    {i18n.SELECTED_CASES(selectedCases.length)}
+                    {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
                   </UtilityBarText>
                   <UtilityBarAction
                     iconSide="right"
@@ -237,7 +303,7 @@ export const AllCases = React.memo(() => {
             <EuiBasicTable
               columns={memoizedGetCasesColumns}
               isSelectable
-              itemId="caseId"
+              itemId="id"
               items={data.cases}
               noItemsMessage={
                 <EuiEmptyPrompt
@@ -259,6 +325,7 @@ export const AllCases = React.memo(() => {
           </Div>
         )}
       </Panel>
+      {confirmDeleteModal}
     </>
   );
 });

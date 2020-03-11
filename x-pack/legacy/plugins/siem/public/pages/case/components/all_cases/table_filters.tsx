@@ -40,9 +40,9 @@ const CasesTableFiltersComponent = ({
   initial = { search: '', tags: [], status: 'open' },
 }: CasesTableFiltersProps) => {
   const [search, setSearch] = useState(initial.search);
-  const [selectedTags, setSelectedTags] = useState<string[]>(initial.tags);
+  const [selectedTags, setSelectedTags] = useState(initial.tags);
   const [showOpenCases, setShowOpenCases] = useState(initial.status === 'open');
-  const [{ data }] = useGetTags();
+  const { tags } = useGetTags();
 
   const handleSelectedTags = useCallback(
     newTags => {
@@ -112,7 +112,7 @@ const CasesTableFiltersComponent = ({
             buttonLabel={i18n.TAGS}
             onSelectedOptionsChanged={handleSelectedTags}
             selectedOptions={selectedTags}
-            options={data}
+            options={tags}
             optionsEmptyLabel={i18n.NO_TAGS_AVAILABLE}
           />
         </EuiFilterGroup>

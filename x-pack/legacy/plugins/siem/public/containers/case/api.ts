@@ -126,3 +126,11 @@ export const patchComment = async (
   );
   return convertToCamelCase<CommentResponse, Comment>(decodeCommentResponse(response));
 };
+
+export const deleteCases = async (caseIds: string[]): Promise<boolean> => {
+  const response = await KibanaServices.get().http.fetch<string>(`${CASES_URL}`, {
+    method: 'DELETE',
+    query: { ids: JSON.stringify(caseIds) },
+  });
+  return response === 'true' ? true : false;
+};

@@ -16,6 +16,7 @@ export interface Comment {
 export interface Case {
   id: string;
   comments: Comment[];
+  commentIds: string[];
   createdAt: string;
   createdBy: ElasticUser;
   description: string;
