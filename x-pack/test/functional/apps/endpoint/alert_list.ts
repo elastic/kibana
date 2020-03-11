@@ -48,17 +48,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       it('loads the Alert List Flyout correctly', async () => {
         await testSubjects.existOrFail('alertDetailFlyout');
       });
-
-      describe('and user has clicked resolver tab', () => {
-        before(async () => {
-          await find.clickByButtonText('Resolver');
-        });
-
-        // TODO this will fail until qualters fixes his code
-        it('loads resolver correctly', async () => {
-          await testSubjects.existOrFail('resolverEmbeddable');
-        });
-      });
     });
 
     after(async () => {

@@ -34,6 +34,7 @@ export const AlertDetailsOverview = memo(() => {
     return [
       {
         id: 'overviewMetadata',
+        'data-test-subj': 'overviewMetadata',
         name: i18n.translate(
           'xpack.endpoint.application.endpoint.alertDetails.overview.tabs.overview',
           {

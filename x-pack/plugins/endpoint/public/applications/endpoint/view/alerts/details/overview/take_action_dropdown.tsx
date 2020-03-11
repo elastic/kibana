@@ -16,7 +16,7 @@ export const TakeActionDropdown = memo(() => {
       <EuiButton
         iconType="arrowDown"
         iconSide="right"
-        data-test-subj="alertListTakeActionDropdownButton"
+        data-test-subj="alertDetailTakeActionDropdownButton"
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
       >
         <FormattedMessage
@@ -35,7 +35,12 @@ export const TakeActionDropdown = memo(() => {
       data-test-subj="alertListTakeActionDropdownContent"
     >
       <EuiFormRow>
-        <EuiButtonEmpty color="text" onClick={() => {}} iconType="folderCheck">
+        <EuiButtonEmpty
+          data-test-subj="alertDetailTakeActionCloseAlertButton"
+          color="text"
+          onClick={() => {}}
+          iconType="folderCheck"
+        >
           <FormattedMessage
             id="xpack.endpoint.application.endpoint.alertDetails.takeAction.close"
             defaultMessage="Close Alert"
@@ -44,7 +49,12 @@ export const TakeActionDropdown = memo(() => {
       </EuiFormRow>
 
       <EuiFormRow>
-        <EuiButtonEmpty color="text" onClick={() => {}} iconType="listAdd">
+        <EuiButtonEmpty
+          data-test-subj="alertDetailTakeActionWhitelistButton"
+          color="text"
+          onClick={() => {}}
+          iconType="listAdd"
+        >
           <FormattedMessage
             id="xpack.endpoint.application.endpoint.alertDetails.takeAction.whitelist"
             defaultMessage="Whitelist..."

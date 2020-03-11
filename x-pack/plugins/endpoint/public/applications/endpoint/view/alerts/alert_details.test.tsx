@@ -59,7 +59,7 @@ describe('when the alert details flyout is open', () => {
       );
     };
   });
-  describe('when the details overview tab is open', () => {
+  describe('when the alerts details flyout is open', () => {
     beforeEach(() => {
       reactTestingLibrary.act(() => {
         history.push({
@@ -79,20 +79,41 @@ describe('when the alert details flyout is open', () => {
         });
       });
       it('should display take action button', async () => {
-        await render().findByTestId('alertListTakeActionDropdownButton');
+        await render().findByTestId('alertDetailTakeActionDropdownButton');
       });
       describe('when the user clicks the take action button on the flyout', () => {
         let renderResult: reactTestingLibrary.RenderResult;
         beforeEach(async () => {
           renderResult = render();
           const takeActionButton = await renderResult.findByTestId(
-            'alertListTakeActionDropdownButton'
+            'alertDetailTakeActionDropdownButton'
           );
           if (takeActionButton) {
             fireEvent.click(takeActionButton);
           }
         });
-        it('should display the correct fields in the dropdown', () => {});
+        it('should display the correct fields in the dropdown', async () => {
+          await render().findByTestId('alertDetailTakeActionCloseAlertButton');
+          await render().findByTestId('alertDetailTakeActionWhitelistButton');
+        });
+      });
+      describe('when the user navigates to the overview tab', () => {
+        let renderResult: reactTestingLibrary.RenderResult;
+        beforeEach(async () => {
+          renderResult = render();
+          const overviewTab = await renderResult.findByTestId('overviewMetadata');
+          if (overviewTab) {
+            fireEvent.click(overviewTab);
+          }
+        });
+        it('should render all accordion panels', async () => {
+          await render().findAllByTestId('alertDetailsAlertAccordion');
+          await render().findAllByTestId('alertDetailsHostAccordion');
+          await render().findAllByTestId('alertDetailsFileAccordion');
+          await render().findAllByTestId('alertDetailsHashAccordion');
+          await render().findAllByTestId('alertDetailsSourceProcessAccordion');
+          await render().findAllByTestId('alertDetailsSourceProcessTokenAccordion');
+        });
       });
     });
   });
