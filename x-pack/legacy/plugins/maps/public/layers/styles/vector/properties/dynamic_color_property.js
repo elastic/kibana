@@ -89,7 +89,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return this._options.useCustomColorRamp;
   }
 
-  supportsFeatureState() {
+  supportsMbFeatureState() {
     return true;
   }
 

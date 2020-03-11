@@ -22,7 +22,7 @@ export class DynamicOrientationProperty extends DynamicStyleProperty {
     }
   }
 
-  supportsFeatureState() {
+  supportsMbFeatureState() {
     return false;
   }
 }
