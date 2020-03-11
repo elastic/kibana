@@ -124,11 +124,12 @@ export interface UpdateAgentRequest {
   };
 }
 
-export interface GetAgentStatusForConfig {
-  params: {
+export interface GetAgentStatusRequest {
+  query: {
     configId: string;
   };
 }
+
 export interface GetAgentStatusResponse {
   success: boolean;
   results: {

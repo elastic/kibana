@@ -28,7 +28,6 @@ import { useHistory } from 'react-router-dom';
 import { AgentConfig } from '../../../types';
 import {
   AGENT_CONFIG_DETAILS_PATH,
-  FLEET_AGENTS_PATH,
   AGENT_CONFIG_SAVED_OBJECT_TYPE,
   AGENT_CONFIG_PATH,
 } from '../../../constants';
@@ -43,6 +42,7 @@ import {
 import { AgentConfigDeleteProvider } from '../components';
 import { CreateAgentConfigFlyout } from './components';
 import { SearchBar } from '../../../components/search_bar';
+import { LinkedAgentCount } from '../components';
 
 const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
   overflow: 'hidden',
@@ -87,7 +87,8 @@ const DangerEuiContextMenuItem = styled(EuiContextMenuItem)`
 
 const RowActions = React.memo<{ config: AgentConfig; onDelete: () => void }>(
   ({ config, onDelete }) => {
-    const DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
+    const DETAILS_URI = useLink(`${AGENT_CONFIG_DETAILS_PATH}${config.id}`);
+    const ADD_DATASOURCE_URI = `${DETAILS_URI}/add-datasource`;
 
     const [isOpen, setIsOpen] = useState(false);
     const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
@@ -111,14 +112,18 @@ const RowActions = React.memo<{ config: AgentConfig; onDelete: () => void }>(
       >
         <EuiContextMenuPanel
           items={[
-            <EuiContextMenuItem icon="inspect" href={`${DETAILS_URI}${config.id}`} key="viewConfig">
+            <EuiContextMenuItem icon="inspect" href={DETAILS_URI} key="viewConfig">
               <FormattedMessage
                 id="xpack.ingestManager.agentConfigList.viewConfigActionText"
                 defaultMessage="View configuration"
               />
             </EuiContextMenuItem>,
 
-            <EuiContextMenuItem icon="plusInCircle" disabled={true} key="createDataSource">
+            <EuiContextMenuItem
+              icon="plusInCircle"
+              href={ADD_DATASOURCE_URI}
+              key="createDataSource"
+            >
               <FormattedMessage
                 id="xpack.ingestManager.agentConfigList.createDatasourceActionText"
                 defaultMessage="Create data source"
@@ -163,7 +168,6 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
 
   // Base URL paths
   const DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
-  const FLEET_URI = useLink(FLEET_AGENTS_PATH);
 
   // Table and search states
   const [search, setSearch] = useState<string>('');
@@ -266,22 +270,9 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
           defaultMessage: 'Agents',
         }),
         dataType: 'number',
-        render: (agents: number, config: AgentConfig) => {
-          const displayValue = (
-            <FormattedMessage
-              id="xpack.ingestManager.agentConfigList.agentsText"
-              defaultMessage="{agents, plural, one {# agent} other {# agents}}"
-              values={{ agents }}
-            />
-          );
-          return agents > 0 ? (
-            <EuiLink href={`${FLEET_URI}?kuery=agents.config_id : ${config.id}`}>
-              {displayValue}
-            </EuiLink>
-          ) : (
-            displayValue
-          );
-        },
+        render: (agents: number, config: AgentConfig) => (
+          <LinkedAgentCount count={agents} agentConfigId={config.id} />
+        ),
       },
       {
         field: 'datasources',
@@ -311,7 +302,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
     }
 
     return cols;
-  }, [DETAILS_URI, FLEET_URI, isFleetEnabled, sendRequest]);
+  }, [DETAILS_URI, isFleetEnabled, sendRequest]);
 
   const createAgentConfigButton = useMemo(
     () => (

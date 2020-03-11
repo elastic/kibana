@@ -85,16 +85,19 @@ export interface RegistryDatasource {
 
 export interface RegistryInput {
   type: string;
-  vars?: RegistryVarsEntry[];
+  title: string;
   description?: string;
+  vars?: RegistryVarsEntry[];
   streams: RegistryStream[];
 }
 
 export interface RegistryStream {
   input: string;
   dataset: string;
-  vars?: RegistryVarsEntry[];
+  title: string;
   description?: string;
+  enabled?: boolean;
+  vars?: RegistryVarsEntry[];
 }
 
 export type RequirementVersion = string;
@@ -183,6 +186,7 @@ export interface Dataset {
 // but we effectively only see this shape
 export interface RegistryVarsEntry {
   name: string;
+  title?: string;
   description?: string;
   type: string;
   required?: boolean;
