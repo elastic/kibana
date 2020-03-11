@@ -14,11 +14,9 @@ import {
   EuiFlexItem,
   EuiCode,
   EuiSpacer,
-  EuiHealth,
   EuiIconTip
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import {
   amountAndUnitToString,
   amountAndUnitToObject

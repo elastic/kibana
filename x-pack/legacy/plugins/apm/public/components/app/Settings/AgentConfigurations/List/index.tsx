@@ -12,11 +12,7 @@ import {
   EuiButtonEmpty,
   EuiHealth,
   EuiToolTip,
-  EuiButtonIcon,
-  EuiFieldText,
-  EuiSelect,
-  EuiFlexGroup,
-  EuiFlexItem
+  EuiButtonIcon
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
@@ -216,7 +212,7 @@ export function AgentConfigurationList({
         items={data}
         initialSortField="service.name"
         initialSortDirection="asc"
-        initialPageSize={50}
+        initialPageSize={20}
       />
     </>
   );

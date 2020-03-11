@@ -8,7 +8,7 @@ import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
 import { amountAndUnitToObject } from './amount_and_unit';
 
-export const BYTE_UNITS = ['b', 'kb', 'mb', 'gb'];
+export const BYTE_UNITS = ['b', 'kb', 'mb'];
 
 export const bytesRt = new t.Type<string, string, unknown>(
   'bytes',

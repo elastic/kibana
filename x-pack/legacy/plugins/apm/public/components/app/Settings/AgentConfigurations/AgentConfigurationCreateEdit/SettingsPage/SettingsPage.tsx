@@ -12,7 +12,10 @@ import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiStat
+  EuiStat,
+  EuiBottomBar,
+  EuiText,
+  EuiHealth
 } from '@elastic/eui';
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -27,7 +30,7 @@ import { useApmPluginContext } from '../../../../../../hooks/useApmPluginContext
 import { useUiTracker } from '../../../../../../../../../../plugins/observability/public';
 import { SettingFormRow } from './SettingFormRow';
 import { getOptionLabel } from '../../../../../../../../../../plugins/apm/common/agent_configuration_constants';
-import { CancelButton } from '../CancelButton';
+import { CancelButton } from '../ServicePage/CancelButton';
 
 export function SettingsPage({
   unsavedChanges,
@@ -46,6 +49,7 @@ export function SettingsPage({
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
+  const unsavedChangesCount = Object.keys(unsavedChanges).length;
 
   const isFormValid = useMemo(() => {
     return (
@@ -80,107 +84,138 @@ export function SettingsPage({
   };
 
   return (
-    <EuiForm>
-      <form
-        onSubmit={e => {
-          e.preventDefault();
-          handleSubmitEvent();
-        }}
-      >
-        {/* Show Selected Service panel */}
-        <EuiPanel paddingSize="m">
-          <EuiTitle size="s">
-            <h3>
-              {i18n.translate('xpack.apm.agentConfig.editConfigTitle', {
-                defaultMessage: 'Choose service'
-              })}
-            </h3>
-          </EuiTitle>
+    <>
+      <EuiForm>
+        {/* Since the submit button is placed outside the form we cannot use `onSubmit` and have to use `onKeyPress` to submit the form on enter */}
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+        <form
+          onKeyPress={e => {
+            const didClickEnter = e.which === 13;
+            if (didClickEnter && isFormValid) {
+              e.preventDefault();
+              handleSubmitEvent();
+            }
+          }}
+        >
+          {/* Selected Service panel */}
+          <EuiPanel paddingSize="m">
+            <EuiTitle size="s">
+              <h3>
+                {i18n.translate('xpack.apm.agentConfig.editConfigTitle', {
+                  defaultMessage: 'Choose service'
+                })}
+              </h3>
+            </EuiTitle>
 
-          <EuiSpacer size="m" />
+            <EuiSpacer size="m" />
 
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiStat
-                titleSize="xs"
-                title={getOptionLabel(newConfig.service.name)}
-                description="Service name"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiStat
-                titleSize="xs"
-                title={getOptionLabel(newConfig.service.environment)}
-                description="Environment"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {!isEditMode && (
-                <EuiButton onClick={onClickEdit} iconType="pencil">
-                  {i18n.translate('xpack.apm.agentConfig.editButton', {
-                    defaultMessage: 'Edit'
-                  })}
-                </EuiButton>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-
-        <EuiSpacer size="m" />
-
-        {/* Settings panel */}
-        <EuiPanel paddingSize="m">
-          <EuiTitle size="s">
-            <h3>
-              {i18n.translate('xpack.apm.agentConfig.settings.title', {
-                defaultMessage: 'Core configuration options'
-              })}
-            </h3>
-          </EuiTitle>
-
-          <EuiSpacer size="m" />
-
-          {settingDefinitions.map(setting => (
-            <SettingFormRow
-              isUnsaved={unsavedChanges.hasOwnProperty(setting.key)}
-              key={setting.key}
-              setting={setting}
-              value={newConfig.settings[setting.key]}
-              onChange={(key, value) => {
-                setNewConfig(prev => ({
-                  ...prev,
-                  settings: {
-                    ...prev.settings,
-                    [key]: value
-                  }
-                }));
-              }}
-            />
-          ))}
-
-          <EuiSpacer />
-
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <CancelButton />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                type="submit"
-                fill
-                isLoading={isSaving}
-                isDisabled={!isFormValid}
-              >
-                {i18n.translate(
-                  'xpack.apm.agentConfig.settingsPage.saveButton',
-                  { defaultMessage: 'Save' }
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiStat
+                  titleSize="xs"
+                  title={getOptionLabel(newConfig.service.name)}
+                  description="Service name"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiStat
+                  titleSize="xs"
+                  title={getOptionLabel(newConfig.service.environment)}
+                  description="Environment"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {!isEditMode && (
+                  <EuiButton onClick={onClickEdit} iconType="pencil">
+                    {i18n.translate('xpack.apm.agentConfig.editButton', {
+                      defaultMessage: 'Edit'
+                    })}
+                  </EuiButton>
                 )}
-              </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+
+          <EuiSpacer size="m" />
+
+          {/* Settings panel */}
+          <EuiPanel paddingSize="m">
+            <EuiTitle size="s">
+              <h3>
+                {i18n.translate('xpack.apm.agentConfig.settings.title', {
+                  defaultMessage: 'Core configuration options'
+                })}
+              </h3>
+            </EuiTitle>
+
+            <EuiSpacer size="m" />
+
+            {settingDefinitions.map(setting => (
+              <SettingFormRow
+                isUnsaved={unsavedChanges.hasOwnProperty(setting.key)}
+                key={setting.key}
+                setting={setting}
+                value={newConfig.settings[setting.key]}
+                onChange={(key, value) => {
+                  setNewConfig(prev => ({
+                    ...prev,
+                    settings: {
+                      ...prev.settings,
+                      [key]: value
+                    }
+                  }));
+                }}
+              />
+            ))}
+          </EuiPanel>
+        </form>
+      </EuiForm>
+      <EuiSpacer size="xxl" />
+
+      {/* Bottom bar with save button */}
+      {unsavedChangesCount > 0 && (
+        <EuiBottomBar paddingSize="s">
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem
+              grow={false}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center'
+              }}
+            >
+              <EuiHealth color="warning" />
+              <EuiText>
+                {i18n.translate('apm.unsavedChanges', {
+                  defaultMessage:
+                    '{unsavedChangesCount, plural, =0{0 unsaved changes} one {1 unsaved change} other {# unsaved changes}} ',
+                  values: { unsavedChangesCount }
+                })}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <CancelButton color="ghost" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={handleSubmitEvent}
+                    fill
+                    isLoading={isSaving}
+                    isDisabled={!isFormValid}
+                  >
+                    {i18n.translate(
+                      'xpack.apm.agentConfig.settingsPage.saveButton',
+                      { defaultMessage: 'Save' }
+                    )}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPanel>
-      </form>
-    </EuiForm>
+        </EuiBottomBar>
+      )}
+    </>
   );
 }
 

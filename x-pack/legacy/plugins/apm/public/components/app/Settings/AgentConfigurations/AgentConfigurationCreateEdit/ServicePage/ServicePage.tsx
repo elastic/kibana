@@ -22,7 +22,7 @@ import {
 } from '../../../../../../../../../../plugins/apm/common/agent_configuration_constants';
 import { useFetcher } from '../../../../../../hooks/useFetcher';
 import { FormRowSelect } from './FormRowSelect';
-import { CancelButton } from '../CancelButton';
+import { CancelButton } from './CancelButton';
 
 interface Props {
   newConfig: AgentConfigurationIntake;

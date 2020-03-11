@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
 import { isRight } from 'fp-ts/lib/Either';
 import { transactionSampleRateRt } from './transaction_sample_rate_rt';
-import { transactionMaxSpansRt } from './transaction_max_spans_rt';
+import { getIntegerRt, integerRt } from './integer_rt';
 import { captureBodyRt } from './capture_body_rt';
 import { booleanRt } from './boolean_rt';
 import { BYTE_UNITS, bytesRt } from './bytes_rt';
@@ -60,17 +60,27 @@ export type SettingDefinition =
  * and validated bothj client and server-side
  */
 export const settingDefinitions: SettingDefinition[] = [
+  // my_custom_setting
+  {
+    key: 'my_custom_setting',
+    label: 'My very custom option',
+    type: 'boolean',
+    validation: booleanRt,
+    helpText: 'You should choose something'
+  },
+
   // Active
   {
     key: 'active',
     validation: booleanRt,
     type: 'boolean',
-    defaultValue: 'off',
+    defaultValue: 'true',
     label: i18n.translate('apm.agentConfig.active.label', {
       defaultMessage: 'Active'
     }),
     helpText: i18n.translate('apm.agentConfig.active.helpText', {
-      defaultMessage: 'abc'
+      defaultMessage:
+        'A boolean specifying if the agent should be active or not.\nWhen active, the agent instruments incoming HTTP requests, tracks errors and collects and sends metrics.\nWhen inactive, the agent works as a noop, not collecting data and not communicating with the APM sever.\nAs this is a reversible switch, agent threads are not being killed when inactivated, but they will be \nmostly idle in this state, so the overhead should be negligible.\n\nYou can use this setting to dynamically disable Elastic APM at runtime.'
     })
   },
 
@@ -89,7 +99,8 @@ export const settingDefinitions: SettingDefinition[] = [
       defaultMessage: 'API Request Size'
     }),
     helpText: i18n.translate('apm.agentConfig.apiRequestSize.helpText', {
-      defaultMessage: 'abc'
+      defaultMessage:
+        'The maximum total compressed size of the request body which is sent to the APM server intake api via a chunked encoding (HTTP streaming).\nNote that a small overshoot is possible.\n\nAllowed byte units are `b`, `kb` and `mb`. `1kb` is equal to `1024b`.'
     })
   },
 
@@ -108,7 +119,8 @@ export const settingDefinitions: SettingDefinition[] = [
       defaultMessage: 'API Request Time'
     }),
     helpText: i18n.translate('apm.agentConfig.apiRequestTime.helpText', {
-      defaultMessage: 'abc'
+      defaultMessage:
+        "Maximum time to keep an HTTP request to the APM Server open for.\n\nNOTE: This value has to be lower than the APM Server's `read_timeout` setting."
     })
   },
 
@@ -122,7 +134,8 @@ export const settingDefinitions: SettingDefinition[] = [
       defaultMessage: 'Capture Headers'
     }),
     helpText: i18n.translate('apm.agentConfig.captureHeaders.helpText', {
-      defaultMessage: 'abc'
+      defaultMessage:
+        'If set to `true`, the agent will capture request and response headers, including cookies.\n\nNOTE: Setting this to `false` reduces network bandwidth, disk space and object allocations.'
     })
   },
 
@@ -136,7 +149,8 @@ export const settingDefinitions: SettingDefinition[] = [
       defaultMessage: 'Enable log correlation'
     }),
     helpText: i18n.translate('apm.agentConfig.enableLogCorrelation.helpText', {
-      defaultMessage: 'abc'
+      defaultMessage:
+        "A boolean specifying if the agent should integrate into SLF4J's https://www.slf4j.org/api/org/slf4j/MDC.html[MDC] to enable trace-log correlation.\nIf set to `true`, the agent will set the `trace.id` and `transaction.id` for the currently active spans and transactions to the MDC.\nSee <<log-correlation>> for more details.\n\nNOTE: While it's allowed to enable this setting at runtime, you can't disable it without a restart."
     })
   },
 
@@ -151,7 +165,7 @@ export const settingDefinitions: SettingDefinition[] = [
       defaultMessage: 'Log level'
     }),
     helpText: i18n.translate('apm.agentConfig.logLevel.helpText', {
-      defaultMessage: 'abc'
+      defaultMessage: 'Sets the logging level for the agent'
     })
   },
 
@@ -163,12 +177,14 @@ export const settingDefinitions: SettingDefinition[] = [
     validationError: i18n.translate('apm.agentConfig.serverTimeout.errorText', {
       defaultMessage: 'Please specify a value and a unit'
     }),
+    defaultValue: '5s',
     units: DURATION_UNITS,
     label: i18n.translate('apm.agentConfig.serverTimeout.label', {
       defaultMessage: 'Server Timeout'
     }),
     helpText: i18n.translate('apm.agentConfig.serverTimeout.helpText', {
-      defaultMessage: 'abc'
+      defaultMessage:
+        'If a request to the APM server takes longer than the configured timeout,\nthe request is cancelled and the event (exception or transaction) is discarded.\nSet to 0 to disable timeouts.\n\nWARNING: If timeouts are disabled or set to a high value, your app could experience memory issues if the APM server times out.'
     })
   },
 
@@ -180,12 +196,14 @@ export const settingDefinitions: SettingDefinition[] = [
     validationError: i18n.translate('apm.agentConfig.serverTimeout.errorText', {
       defaultMessage: 'Please specify a value and a unit'
     }),
+    defaultValue: '5ms',
     units: DURATION_UNITS,
     label: i18n.translate('apm.agentConfig.serverTimeout.label', {
       defaultMessage: 'Span frames minimum duration'
     }),
     helpText: i18n.translate('apm.agentConfig.serverTimeout.helpText', {
-      defaultMessage: 'abc'
+      defaultMessage:
+        'In its default settings, the APM agent will collect a stack trace with every recorded span.\nWhile this is very helpful to find the exact place in your code that causes the span, collecting this stack trace does have some overhead. \nWhen setting this option to a negative value, like `-1ms`, stack traces will be collected for all spans. Setting it to a positive value, e.g. `5ms`, will limit stack trace collection to spans with durations equal to or longer than the given value, e.g. 5 milliseconds.\n\nTo disable stack trace collection for spans completely, set the value to `0ms`.'
     })
   },
 
@@ -193,17 +211,18 @@ export const settingDefinitions: SettingDefinition[] = [
   {
     key: 'stack_trace_limit',
     type: 'integer',
-    validation: transactionMaxSpansRt,
+    validation: integerRt,
     validationError: i18n.translate(
       'apm.agentConfig.stackTraceLimit.errorText',
-      { defaultMessage: 'Invalid input' }
+      { defaultMessage: 'Must be a valid number' }
     ),
     defaultValue: '50',
     label: i18n.translate('apm.agentConfig.stackTraceLimit.label', {
       defaultMessage: 'Stack trace limit'
     }),
     helpText: i18n.translate('apm.agentConfig.stackTraceLimit.helpText', {
-      defaultMessage: 'abc'
+      defaultMessage:
+        'Setting it to 0 will disable stack trace collection. Any positive integer value will be used as the maximum number of frames to collect. Setting it -1 means that all frames will be collected.'
     })
   },
 
@@ -211,10 +230,10 @@ export const settingDefinitions: SettingDefinition[] = [
   {
     key: 'trace_methods_duration_threshold',
     type: 'integer',
-    validation: transactionMaxSpansRt,
+    validation: integerRt,
     validationError: i18n.translate(
       'apm.agentConfig.traceMethodsDurationThreshold.errorText',
-      { defaultMessage: 'Invalid input' }
+      { defaultMessage: 'Must be a valid number' }
     ),
     label: i18n.translate(
       'apm.agentConfig.traceMethodsDurationThreshold.label',
@@ -225,20 +244,11 @@ export const settingDefinitions: SettingDefinition[] = [
     helpText: i18n.translate(
       'apm.agentConfig.traceMethodsDurationThreshold.helpText',
       {
-        defaultMessage: 'abc'
+        defaultMessage:
+          'If trace_methods config option is set, provides a threshold to limit spans based on duration. When set to a value greater than 0, spans representing methods traced based on trace_methods will be discarded by default.'
       }
     )
   },
-
-  /*
-   *
-   *
-   *
-   *
-   *
-   *
-   *
-   * ** ** ** ** ** ** ** ** ** ** ** ** */
 
   // Transaction sample rate
   {
@@ -255,7 +265,7 @@ export const settingDefinitions: SettingDefinition[] = [
     }),
     helpText: i18n.translate('apm.agentConfig.transactionSampleRate.helpText', {
       defaultMessage:
-        'Choose a rate between 0.000 and 1.0. Default is 1.0 (100% of traces).'
+        'By default, the agent will sample every transaction (e.g. request to your service). To reduce overhead and storage requirements, you can set the sample rate to a value between 0.0 and 1.0. We still record overall time and the result for unsampled transactions, but no context information, labels, or spans.'
     })
   },
 
@@ -284,7 +294,7 @@ export const settingDefinitions: SettingDefinition[] = [
   {
     key: 'transaction_max_spans',
     type: 'integer',
-    validation: transactionMaxSpansRt,
+    validation: getIntegerRt({ min: 0, max: 32000 }),
     validationError: i18n.translate(
       'apm.agentConfig.transactionMaxSpans.errorText',
       { defaultMessage: 'Must be between 0 and 32000' }

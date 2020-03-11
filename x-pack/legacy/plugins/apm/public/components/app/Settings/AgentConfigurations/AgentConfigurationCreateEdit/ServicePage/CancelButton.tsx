@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonEmptyColor } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { history } from '../../../../../utils/history';
+import { history } from '../../../../../../utils/history';
 
-export function CancelButton() {
+export function CancelButton({
+  color = 'primary'
+}: {
+  color?: EuiButtonEmptyColor;
+}) {
   return (
     <EuiButtonEmpty
+      color={color}
       onClick={() => {
         history.push({
           pathname: '/settings/agent-configuration',
