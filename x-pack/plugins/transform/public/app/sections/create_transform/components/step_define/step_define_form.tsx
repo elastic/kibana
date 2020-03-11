@@ -26,6 +26,7 @@ import {
 
 import {
   esKuery,
+  esQuery,
   Query,
   QueryStringInput,
 } from '../../../../../../../../../src/plugins/data/public';
@@ -47,7 +48,6 @@ import { SwitchModal } from './switch_modal';
 import {
   getPivotQuery,
   getPreviewRequestBody,
-  isMatchAllQuery,
   matchAllQuery,
   AggName,
   DropDownLabel,
@@ -69,14 +69,12 @@ export interface StepDefineExposedState {
   groupByList: PivotGroupByConfigDict;
   isAdvancedPivotEditorEnabled: boolean;
   isAdvancedSourceEditorEnabled: boolean;
-  searchString: string | SavedSearchQuery;
   searchQuery: string | SavedSearchQuery;
   sourceConfigUpdated: boolean;
   valid: boolean;
 }
 
 const defaultSearch = '*';
-const emptySearch = '';
 
 enum QUERY_LANGUAGE {
   KUERY = 'kuery',
@@ -89,7 +87,6 @@ export function getDefaultStepDefineState(searchItems: SearchItems): StepDefineE
     groupByList: {} as PivotGroupByConfigDict,
     isAdvancedPivotEditorEnabled: false,
     isAdvancedSourceEditorEnabled: false,
-    searchString: searchItems.savedSearch !== undefined ? searchItems.combinedQuery : defaultSearch,
     searchQuery: searchItems.savedSearch !== undefined ? searchItems.combinedQuery : defaultSearch,
     sourceConfigUpdated: false,
     valid: false,
@@ -135,7 +132,6 @@ export function applyTransformConfigToDefineState(
     const query = transformConfig.source.query;
     if (query !== undefined && !isEqual(query, matchAllQuery)) {
       state.isAdvancedSourceEditorEnabled = true;
-      state.searchString = '';
       state.searchQuery = query;
       state.sourceConfigUpdated = true;
     }
@@ -257,32 +253,25 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
     query: '',
     language: QUERY_LANGUAGE.KUERY as string,
   });
-  const [searchString, setSearchString] = useState(defaults.searchString);
   const [searchQuery, setSearchQuery] = useState(defaults.searchQuery);
-  const [useKQL] = useState(true);
 
   const { indexPattern } = searchItems;
 
   const searchChangeHandler = (query: Query) => setSearchInput(query);
   const searchSubmitHandler = (query: Query) => {
-    let queryString = '';
-    let filterQuery = { match_all: {} } as Dictionary<any>;
-
-    if (query.language === QUERY_LANGUAGE.KUERY && typeof query.query === 'string') {
-      filterQuery = esKuery.toElasticsearchQuery(
-        esKuery.fromKueryExpression(query.query as string),
-        indexPattern
-      );
-    } else if (typeof query.query === 'string') {
-      queryString = query.query;
-    } else {
-      filterQuery = query.query;
+    switch (query.language) {
+      case QUERY_LANGUAGE.KUERY:
+        setSearchQuery(
+          esKuery.toElasticsearchQuery(
+            esKuery.fromKueryExpression(query.query as string),
+            indexPattern
+          )
+        );
+        return;
+      case QUERY_LANGUAGE.LUCENE:
+        setSearchQuery(esQuery.luceneStringToDsl(query.query as string));
+        return;
     }
-
-    const newSearchString = queryString === emptySearch ? defaultSearch : queryString;
-    const newSearchQuery = isMatchAllQuery(filterQuery) ? defaultSearch : filterQuery;
-    setSearchString(newSearchString);
-    setSearchQuery(newSearchQuery);
   };
 
   // The list of selected group by fields
@@ -376,7 +365,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
 
   const pivotAggsArr = dictionaryToArray(aggList);
   const pivotGroupByArr = dictionaryToArray(groupByList);
-  const pivotQuery = useKQL ? getPivotQuery(searchQuery) : getPivotQuery(searchString);
+  const pivotQuery = getPivotQuery(searchQuery);
 
   // Advanced editor for pivot config state
   const [isAdvancedEditorSwitchModalVisible, setAdvancedEditorSwitchModalVisible] = useState(false);
@@ -436,8 +425,6 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
   const applyAdvancedSourceEditorChanges = () => {
     const sourceConfig = JSON.parse(advancedEditorSourceConfig);
     const prettySourceConfig = JSON.stringify(sourceConfig, null, 2);
-    // Switched to editor so we clear out the search string as the bar won't be visible
-    setSearchString(emptySearch);
     setSearchQuery(sourceConfig);
     setSourceConfigUpdated(true);
     setAdvancedEditorSourceConfig(prettySourceConfig);
@@ -498,7 +485,6 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
   const toggleAdvancedSourceEditor = (reset = false) => {
     if (reset === true) {
       setSearchQuery(defaultSearch);
-      setSearchString(defaultSearch);
       setSourceConfigUpdated(false);
     }
     if (isAdvancedSourceEditorEnabled === false) {
@@ -559,7 +545,6 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
       groupByList,
       isAdvancedPivotEditorEnabled,
       isAdvancedSourceEditorEnabled,
-      searchString,
       searchQuery,
       sourceConfigUpdated,
       valid,
@@ -571,7 +556,6 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
     JSON.stringify(pivotGroupByArr),
     isAdvancedPivotEditorEnabled,
     isAdvancedSourceEditorEnabled,
-    searchString,
     searchQuery,
     valid,
     /* eslint-enable react-hooks/exhaustive-deps */
@@ -587,7 +571,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
       <EuiFlexItem grow={false} className="transform__stepDefineFormLeftColumn">
         <div data-test-subj="transformStepDefineForm">
           <EuiForm>
-            {searchItems.savedSearch === undefined && typeof searchString === 'string' && (
+            {searchItems.savedSearch === undefined && (
               <Fragment>
                 <EuiFormRow
                   label={i18n.translate('xpack.transform.stepDefineForm.indexPatternLabel', {
@@ -638,7 +622,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
                                   'xpack.transform.stepDefineForm.queryPlaceholderLucene',
                                   {
                                     defaultMessage: 'e.g. {example}',
-                                    values: { example: 'sample lucene query' },
+                                    values: { example: 'method:GET OR status:404' },
                                   }
                                 )
                           }
