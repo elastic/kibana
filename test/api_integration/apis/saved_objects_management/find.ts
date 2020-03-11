@@ -18,8 +18,10 @@
  */
 
 import expect from '@kbn/expect';
+import { Response } from 'supertest';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }) {
+export default function({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -33,7 +35,7 @@ export default function({ getService }) {
         await supertest
           .get('/api/kibana/management/saved_objects/_find?type=visualization&fields=title')
           .expect(200)
-          .then(resp => {
+          .then((resp: Response) => {
             expect(resp.body).to.eql({
               page: 1,
               per_page: 20,
@@ -75,7 +77,7 @@ export default function({ getService }) {
           await supertest
             .get('/api/kibana/management/saved_objects/_find?type=wigwags')
             .expect(200)
-            .then(resp => {
+            .then((resp: Response) => {
               expect(resp.body).to.eql({
                 page: 1,
                 per_page: 20,
@@ -92,7 +94,7 @@ export default function({ getService }) {
               '/api/kibana/management/saved_objects/_find?type=visualization&page=100&perPage=100'
             )
             .expect(200)
-            .then(resp => {
+            .then((resp: Response) => {
               expect(resp.body).to.eql({
                 page: 100,
                 per_page: 100,
@@ -107,15 +109,11 @@ export default function({ getService }) {
           await supertest
             .get('/api/kibana/management/saved_objects/_find?type=url&searchFields=a')
             .expect(400)
-            .then(resp => {
+            .then((resp: Response) => {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: '"searchFields" is not allowed',
-                validation: {
-                  source: 'query',
-                  keys: ['searchFields'],
-                },
+                message: '[request query.searchFields]: definition for this key is missing',
               });
             }));
       });
@@ -135,7 +133,7 @@ export default function({ getService }) {
         await supertest
           .get('/api/kibana/management/saved_objects/_find?type=visualization')
           .expect(200)
-          .then(resp => {
+          .then((resp: Response) => {
             expect(resp.body).to.eql({
               page: 1,
               per_page: 20,
@@ -149,7 +147,7 @@ export default function({ getService }) {
           await supertest
             .get('/api/kibana/management/saved_objects/_find?type=wigwags')
             .expect(200)
-            .then(resp => {
+            .then((resp: Response) => {
               expect(resp.body).to.eql({
                 page: 1,
                 per_page: 20,
@@ -164,15 +162,12 @@ export default function({ getService }) {
           await supertest
             .get('/api/kibana/management/saved_objects/_find')
             .expect(400)
-            .then(resp => {
+            .then((resp: Response) => {
               expect(resp.body).to.eql({
                 error: 'Bad Request',
-                message: 'child "type" fails because ["type" is required]',
+                message:
+                  '[request query.type]: expected at least one defined value but got [undefined]',
                 statusCode: 400,
-                validation: {
-                  keys: ['type'],
-                  source: 'query',
-                },
               });
             }));
       });
@@ -184,7 +179,7 @@ export default function({ getService }) {
               '/api/kibana/management/saved_objects/_find?type=visualization&page=100&perPage=100'
             )
             .expect(200)
-            .then(resp => {
+            .then((resp: Response) => {
               expect(resp.body).to.eql({
                 page: 100,
                 per_page: 100,
@@ -199,15 +194,11 @@ export default function({ getService }) {
           await supertest
             .get('/api/kibana/management/saved_objects/_find?type=url&searchFields=a')
             .expect(400)
-            .then(resp => {
+            .then((resp: Response) => {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: '"searchFields" is not allowed',
-                validation: {
-                  source: 'query',
-                  keys: ['searchFields'],
-                },
+                message: '[request query.searchFields]: definition for this key is missing',
               });
             }));
       });
@@ -221,7 +212,7 @@ export default function({ getService }) {
         await supertest
           .get('/api/kibana/management/saved_objects/_find?type=search')
           .expect(200)
-          .then(resp => {
+          .then((resp: Response) => {
             expect(resp.body.saved_objects).to.have.length(1);
             expect(resp.body.saved_objects[0].meta).to.eql({
               icon: 'discoverApp',
@@ -239,7 +230,7 @@ export default function({ getService }) {
         await supertest
           .get('/api/kibana/management/saved_objects/_find?type=dashboard')
           .expect(200)
-          .then(resp => {
+          .then((resp: Response) => {
             expect(resp.body.saved_objects).to.have.length(1);
             expect(resp.body.saved_objects[0].meta).to.eql({
               icon: 'dashboardApp',
@@ -257,7 +248,7 @@ export default function({ getService }) {
         await supertest
           .get('/api/kibana/management/saved_objects/_find?type=visualization')
           .expect(200)
-          .then(resp => {
+          .then((resp: Response) => {
             expect(resp.body.saved_objects).to.have.length(2);
             expect(resp.body.saved_objects[0].meta).to.eql({
               icon: 'visualizeApp',
@@ -285,7 +276,7 @@ export default function({ getService }) {
         await supertest
           .get('/api/kibana/management/saved_objects/_find?type=index-pattern')
           .expect(200)
-          .then(resp => {
+          .then((resp: Response) => {
             expect(resp.body.saved_objects).to.have.length(1);
             expect(resp.body.saved_objects[0].meta).to.eql({
               icon: 'indexPatternApp',
