@@ -11,7 +11,7 @@ import React from 'react';
 import * as i18n from '../translations';
 
 interface Props {
-  title?: string | null;
+  title?: string | JSX.Element | null;
   onDelete: () => void;
   closeModal: () => void;
 }
@@ -27,9 +27,14 @@ export const DeleteTimelineModal = React.memo<Props>(({ title, closeModal, onDel
       <FormattedMessage
         id="xpack.siem.open.timeline.deleteTimelineModalTitle"
         data-test-subj="title"
-        defaultMessage='Delete "{title}"?'
+        defaultMessage="Delete {title}?"
         values={{
-          title: title != null && title.trim().length > 0 ? title.trim() : i18n.UNTITLED_TIMELINE,
+          title:
+            typeof title === 'string'
+              ? title != null && title.trim().length > 0
+                ? title.trim()
+                : i18n.UNTITLED_TIMELINE
+              : title,
         }}
       />
     }

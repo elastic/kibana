@@ -71,24 +71,29 @@ export const ActionListIcon = styled(EuiIcon)`
 
 interface Props {
   deleteTimelines?: DeleteTimelines;
-  savedObjectId?: string | null;
-  title?: string | null;
+  savedObjectIds?: string[];
+  title?: string | JSX.Element | null;
+  onComplete?: () => void;
 }
 /**
  * Renders a button that when clicked, displays the `Delete Timeline` modal
  */
 export const DeleteTimelineModalButton = React.memo<Props>(
-  ({ deleteTimelines, savedObjectId, title }) => {
+  ({ deleteTimelines, savedObjectIds, title, onComplete }) => {
     const [showModal, setShowModal] = useState(false);
 
     const openModal = () => setShowModal(true);
-    const closeModal = () => setShowModal(false);
+    const closeModal = () => {
+      setShowModal(false);
+      if (typeof onComplete === 'function') onComplete();
+    };
 
     const onDelete = () => {
-      if (deleteTimelines != null && savedObjectId != null) {
-        deleteTimelines([savedObjectId]);
+      if (deleteTimelines != null && savedObjectIds != null) {
+        deleteTimelines(savedObjectIds);
       }
       closeModal();
+      if (typeof onComplete === 'function') onComplete();
     };
 
     return (
@@ -97,7 +102,9 @@ export const DeleteTimelineModalButton = React.memo<Props>(
         <TimelineCustomAction
           aria-label={i18n.DELETE_SELECTED}
           color="text"
-          disabled={deleteTimelines == null || savedObjectId == null || savedObjectId === ''}
+          disabled={
+            deleteTimelines == null || savedObjectIds == null || savedObjectIds.length === 0
+          }
           onClick={openModal}
         >
           <>

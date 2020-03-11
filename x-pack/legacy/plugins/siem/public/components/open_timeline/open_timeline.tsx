@@ -23,6 +23,7 @@ import {
 import * as i18n from './translations';
 import { useStateToaster } from '../toasters';
 import { TimelineDownloader } from './export_timeline/export_timeline';
+import { DeleteTimelineModalButton } from './delete_timeline_modal';
 export interface ExportTimelineIds {
   timelineId: string | null | undefined;
   pinnedEventIds: string[] | null | undefined;
@@ -57,12 +58,12 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
   }) => {
     const [, dispatchToaster] = useStateToaster();
 
-    const text = useMemo(
+    const nTimelines = useMemo(
       () => (
         <FormattedMessage
           data-test-subj="query-message"
           id="xpack.siem.open.timeline.showingNTimelinesLabel"
-          defaultMessage="Showing: {totalSearchResultsCount} {totalSearchResultsCount, plural, one {timeline} other {timelines}} {with}"
+          defaultMessage="{totalSearchResultsCount} {totalSearchResultsCount, plural, one {timeline} other {timelines}} {with}"
           values={{
             totalSearchResultsCount,
             with: (
@@ -77,29 +78,36 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     );
 
     const getBatchItemsPopoverContent = useCallback(
-      (closePopover: () => void) => (
-        <EuiContextMenuPanel
-          items={[
-            <EuiContextMenuItem key="ExportItemKey" disabled={selectedItems.length === 0}>
-              <TimelineDownloader
-                selectedTimelines={selectedItems}
-                onDownloadComplete={closePopover}
-              />
-            </EuiContextMenuItem>,
-            <EuiContextMenuItem
-              key="DeleteItemKey"
-              icon="trash"
-              disabled={selectedItems.length === 0}
-              onClick={async () => {
-                closePopover();
-                if (typeof onDeleteSelected === 'function') onDeleteSelected();
-              }}
-            >
-              {i18n.DELETE_SELECTED}
-            </EuiContextMenuItem>,
-          ]}
-        />
-      ),
+      (closePopover: () => void) => {
+        return (
+          <EuiContextMenuPanel
+            items={[
+              <EuiContextMenuItem key="ExportItemKey" disabled={selectedItems.length === 0}>
+                <TimelineDownloader
+                  selectedTimelines={selectedItems}
+                  onDownloadComplete={closePopover}
+                />
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem key="DeleteItemKey" disabled={selectedItems.length === 0}>
+                <DeleteTimelineModalButton
+                  deleteTimelines={deleteTimelines}
+                  savedObjectIds={selectedItems?.reduce(
+                    (acc, item) =>
+                      item.savedObjectId != null ? [...acc, item.savedObjectId] : acc,
+                    [] as string[]
+                  )}
+                  title={
+                    selectedItems.length > 1
+                      ? i18n.SELECTED_TIMELINES(selectedItems.length)
+                      : `"${selectedItems[0]?.title}"`
+                  }
+                  onComplete={closePopover}
+                />
+              </EuiContextMenuItem>,
+            ]}
+          />
+        );
+      },
       [selectedItems, dispatchToaster, history]
     );
 
@@ -125,7 +133,12 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           <UtilityBar border>
             <UtilityBarSection>
               <UtilityBarGroup>
-                <UtilityBarText>{text}</UtilityBarText>
+                <UtilityBarText>
+                  <>
+                    {i18n.SHOWING}
+                    {nTimelines}
+                  </>
+                </UtilityBarText>
               </UtilityBarGroup>
 
               <UtilityBarGroup>

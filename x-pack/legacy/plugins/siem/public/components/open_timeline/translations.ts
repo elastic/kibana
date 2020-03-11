@@ -135,6 +135,10 @@ export const SELECTED_TIMELINES = (selectedTimelines: number) =>
       'Selected {selectedTimelines} {selectedTimelines, plural, =1 {timeline} other {timelines}}',
   });
 
+export const SHOWING = i18n.translate('xpack.siem.open.timeline.showingLabel', {
+  defaultMessage: 'Showing:',
+});
+
 export const SUCCESSFULLY_EXPORTED_TIMELINES = (totalTimelines: number) =>
   i18n.translate('xpack.siem.open.timeline.successfullyExportedTimelinesTitle', {
     values: { totalTimelines },

@@ -142,6 +142,7 @@ export interface OpenTimelineProps {
   query: string;
   /** Refetch timelines data */
   refetch?: Refetch;
+
   /** The results of executing a search */
   searchResults: OpenTimelineResult[];
   /** the currently-selected timelines in the table */

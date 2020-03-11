@@ -56,7 +56,7 @@ export const getActionsColumns = ({
     render: ({ savedObjectId, title }: OpenTimelineResult) => (
       <DeleteTimelineModalButton
         deleteTimelines={deleteTimelines}
-        savedObjectId={savedObjectId}
+        savedObjectIds={savedObjectId != null ? [savedObjectId] : undefined}
         title={title}
       />
     ),
