@@ -18,6 +18,8 @@ import {
 } from '../../../../src/plugins/home/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
+import AppSearchLogo from './assets/logo.svg';
+
 export interface ClientConfigType {
   host: string;
 }
@@ -38,7 +40,7 @@ export class AppSearchPlugin implements Plugin {
     core.application.register({
       id: 'app_search',
       title: 'App Search',
-      euiIconType: 'logoAppSearch', // TODO: Temporary - App Search will likely no longer need an icon once the nav structure changes.
+      euiIconType: AppSearchLogo, // TODO: Temporary - App Search will likely no longer need an icon once the nav structure changes.
       category: DEFAULT_APP_CATEGORIES.management, // TODO - This is likely not final/correct
       order: 10, // TODO - This will also likely not be needed once new nav structure changes land
       async mount(params: AppMountParameters) {
@@ -52,7 +54,7 @@ export class AppSearchPlugin implements Plugin {
     plugins.home.featureCatalogue.register({
       id: 'app_search',
       title: 'App Search',
-      icon: 'logoAppSearch', // TODO
+      icon: AppSearchLogo,
       description:
         'Leverage dashboards, analytics, and APIs for advanced application search made simple.',
       path: '/app/app_search',
