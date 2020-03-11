@@ -83,7 +83,9 @@ describe('patch_rules_bulk_schema', () => {
             someprop: 'some value here',
           },
         },
-      ]).error
-    ).toBeTruthy();
+      ]).error.message
+    ).toEqual(
+      '"value" at position 0 fails because [child "note" fails because ["note" must be a string]]'
+    );
   });
 });
