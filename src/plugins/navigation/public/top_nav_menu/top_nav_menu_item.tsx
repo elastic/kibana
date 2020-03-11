@@ -54,7 +54,7 @@ export function TopNavMenuItem(props: TopNavMenuData) {
     'data-test-subj': props.testId,
   };
 
-  const btn = props.emphasize ? (
+  let btn = props.emphasize ? (
     <EuiButton size="s" fill {...commonButtonProps}>
       {capitalize(props.label || props.id!)}
     </EuiButton>
@@ -64,10 +64,8 @@ export function TopNavMenuItem(props: TopNavMenuData) {
     </EuiButtonEmpty>
   );
 
-  const tooltip = getTooltip();
-  // TODO: tooltip AND popover...
   if (props.popOverContents) {
-    return (
+    btn = (
       <EuiPopover
         id={`${props.id}-popover`}
         button={btn}
@@ -78,11 +76,17 @@ export function TopNavMenuItem(props: TopNavMenuData) {
         {props.popOverContents}
       </EuiPopover>
     );
-  } else if (tooltip) {
-    return <EuiToolTip content={tooltip}>{btn}</EuiToolTip>;
-  } else {
-    return btn;
   }
+
+  const tooltip = getTooltip();
+  if (tooltip) {
+    btn = (
+      <EuiToolTip content={tooltip} position={props.popOverContents ? 'top' : 'bottom'}>
+        {btn}
+      </EuiToolTip>
+    );
+  }
+  return btn;
 }
 
 TopNavMenuItem.defaultProps = {
