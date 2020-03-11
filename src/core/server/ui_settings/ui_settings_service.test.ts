@@ -122,6 +122,7 @@ describe('uiSettings', () => {
       });
 
       it('validates overrides', async () => {
+        const coreContext = mockCoreContext.create();
         coreContext.configService.atPath.mockReturnValueOnce(
           new BehaviorSubject({
             overrides: {
