@@ -69,6 +69,8 @@ export interface StepDefineExposedState {
   groupByList: PivotGroupByConfigDict;
   isAdvancedPivotEditorEnabled: boolean;
   isAdvancedSourceEditorEnabled: boolean;
+  searchLanguage: QUERY_LANGUAGE;
+  searchString: string | undefined;
   searchQuery: string | SavedSearchQuery;
   sourceConfigUpdated: boolean;
   valid: boolean;
@@ -76,10 +78,9 @@ export interface StepDefineExposedState {
 
 const defaultSearch = '*';
 
-enum QUERY_LANGUAGE {
-  KUERY = 'kuery',
-  LUCENE = 'lucene',
-}
+const QUERY_LANGUAGE_KUERY = 'kuery';
+const QUERY_LANGUAGE_LUCENE = 'lucene';
+type QUERY_LANGUAGE = 'kuery' | 'lucene';
 
 export function getDefaultStepDefineState(searchItems: SearchItems): StepDefineExposedState {
   return {
@@ -87,6 +88,8 @@ export function getDefaultStepDefineState(searchItems: SearchItems): StepDefineE
     groupByList: {} as PivotGroupByConfigDict,
     isAdvancedPivotEditorEnabled: false,
     isAdvancedSourceEditorEnabled: false,
+    searchLanguage: QUERY_LANGUAGE_KUERY,
+    searchString: undefined,
     searchQuery: searchItems.savedSearch !== undefined ? searchItems.combinedQuery : defaultSearch,
     sourceConfigUpdated: false,
     valid: false,
@@ -248,19 +251,29 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
 
   const defaults = { ...getDefaultStepDefineState(searchItems), ...overrides };
 
-  // The search filter
+  // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>({
-    query: '',
-    language: QUERY_LANGUAGE.KUERY as string,
+    query: defaults.searchString || '',
+    language: defaults.searchLanguage,
   });
+
+  // The state of the input query bar updated on every submit and to be exposed.
+  const [searchLanguage, setSearchLanguage] = useState<StepDefineExposedState['searchLanguage']>(
+    defaults.searchLanguage
+  );
+  const [searchString, setSearchString] = useState<StepDefineExposedState['searchString']>(
+    defaults.searchString
+  );
   const [searchQuery, setSearchQuery] = useState(defaults.searchQuery);
 
   const { indexPattern } = searchItems;
 
   const searchChangeHandler = (query: Query) => setSearchInput(query);
   const searchSubmitHandler = (query: Query) => {
+    setSearchLanguage(query.language as QUERY_LANGUAGE);
+    setSearchString(query.query !== '' ? (query.query as string) : undefined);
     switch (query.language) {
-      case QUERY_LANGUAGE.KUERY:
+      case QUERY_LANGUAGE_KUERY:
         setSearchQuery(
           esKuery.toElasticsearchQuery(
             esKuery.fromKueryExpression(query.query as string),
@@ -268,7 +281,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
           )
         );
         return;
-      case QUERY_LANGUAGE.LUCENE:
+      case QUERY_LANGUAGE_LUCENE:
         setSearchQuery(esQuery.luceneStringToDsl(query.query as string));
         return;
     }
@@ -545,6 +558,8 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
       groupByList,
       isAdvancedPivotEditorEnabled,
       isAdvancedSourceEditorEnabled,
+      searchLanguage,
+      searchString,
       searchQuery,
       sourceConfigUpdated,
       valid,
@@ -556,6 +571,8 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
     JSON.stringify(pivotGroupByArr),
     isAdvancedPivotEditorEnabled,
     isAdvancedSourceEditorEnabled,
+    searchLanguage,
+    searchString,
     searchQuery,
     valid,
     /* eslint-enable react-hooks/exhaustive-deps */
@@ -610,7 +627,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
                           onChange={searchChangeHandler}
                           onSubmit={searchSubmitHandler}
                           placeholder={
-                            searchInput.language === QUERY_LANGUAGE.KUERY
+                            searchInput.language === QUERY_LANGUAGE_KUERY
                               ? i18n.translate(
                                   'xpack.transform.stepDefineForm.queryPlaceholderKql',
                                   {

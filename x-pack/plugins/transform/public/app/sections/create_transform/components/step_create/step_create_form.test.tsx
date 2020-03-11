@@ -12,7 +12,6 @@ import { Providers } from '../../../../app_dependencies.mock';
 
 import { StepCreateForm } from './step_create_form';
 
-jest.mock('ui/new_platform');
 jest.mock('../../../../../shared_imports');
 
 describe('Transform: <StepCreateForm />', () => {

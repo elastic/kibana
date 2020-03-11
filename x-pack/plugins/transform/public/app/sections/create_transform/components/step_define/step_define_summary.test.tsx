@@ -20,7 +20,6 @@ import { SearchItems } from '../../../../hooks/use_search_items';
 import { StepDefineExposedState } from './step_define_form';
 import { StepDefineSummary } from './step_define_summary';
 
-jest.mock('ui/new_platform');
 jest.mock('../../../../../shared_imports');
 
 describe('Transform: <DefinePivotSummary />', () => {
@@ -51,6 +50,7 @@ describe('Transform: <DefinePivotSummary />', () => {
       isAdvancedPivotEditorEnabled: false,
       isAdvancedSourceEditorEnabled: false,
       sourceConfigUpdated: false,
+      searchLanguage: 'kuery',
       searchString: 'the-query',
       searchQuery: 'the-search-query',
       valid: true,

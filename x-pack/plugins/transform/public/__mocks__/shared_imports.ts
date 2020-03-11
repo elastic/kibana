@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('ui/new_platform');
-
 export const expandLiteralStrings = jest.fn();
 export const XJsonMode = jest.fn();
 export const useRequest = jest.fn(() => ({

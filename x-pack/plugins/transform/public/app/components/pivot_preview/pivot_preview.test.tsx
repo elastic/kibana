@@ -19,7 +19,6 @@ import {
 
 import { PivotPreview } from './pivot_preview';
 
-jest.mock('ui/new_platform');
 jest.mock('../../../shared_imports');
 
 describe('Transform: <PivotPreview />', () => {

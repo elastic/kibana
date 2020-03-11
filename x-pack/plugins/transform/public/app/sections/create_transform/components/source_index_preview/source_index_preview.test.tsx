@@ -14,7 +14,6 @@ import { SearchItems } from '../../../../hooks/use_search_items';
 
 import { SourceIndexPreview } from './source_index_preview';
 
-jest.mock('ui/new_platform');
 jest.mock('../../../../../shared_imports');
 
 describe('Transform: <SourceIndexPreview />', () => {

@@ -19,7 +19,6 @@ import { SearchItems } from '../../../../hooks/use_search_items';
 
 import { StepDefineForm, getAggNameConflictToastMessages } from './step_define_form';
 
-jest.mock('ui/new_platform');
 jest.mock('../../../../../shared_imports');
 
 describe('Transform: <DefinePivotForm />', () => {

@@ -14,7 +14,6 @@ import { DeleteAction } from './action_delete';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
-jest.mock('ui/new_platform');
 jest.mock('../../../../../shared_imports');
 
 describe('Transform: Transform List Actions <DeleteAction />', () => {

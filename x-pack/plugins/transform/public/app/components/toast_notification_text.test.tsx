@@ -12,7 +12,6 @@ import { Providers } from '../app_dependencies.mock';
 import { ToastNotificationText } from './toast_notification_text';
 
 jest.mock('../../shared_imports');
-jest.mock('ui/new_platform');
 
 describe('ToastNotificationText', () => {
   test('should render the text as plain text', () => {
