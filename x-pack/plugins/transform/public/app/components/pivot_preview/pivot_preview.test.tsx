@@ -8,20 +8,19 @@ import React from 'react';
 import { render, wait } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-import { Providers } from '../../../../app_dependencies.mock';
+import { Providers } from '../../app_dependencies.mock';
 import {
   getPivotQuery,
   PivotAggsConfig,
   PivotGroupByConfig,
   PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
-} from '../../../../common';
-import { SearchItems } from '../../../../hooks/use_search_items';
+} from '../../common';
 
 import { PivotPreview } from './pivot_preview';
 
 jest.mock('ui/new_platform');
-jest.mock('../../../../../shared_imports');
+jest.mock('../../../shared_imports');
 
 describe('Transform: <PivotPreview />', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.
@@ -42,10 +41,7 @@ describe('Transform: <PivotPreview />', () => {
     const props = {
       aggs: { 'the-agg-name': agg },
       groupBy: { 'the-group-by-name': groupBy },
-      indexPattern: {
-        title: 'the-index-pattern-title',
-        fields: [] as any[],
-      } as SearchItems['indexPattern'],
+      indexPatternTitle: 'the-index-pattern-title',
       query: getPivotQuery('the-query'),
     };
 
