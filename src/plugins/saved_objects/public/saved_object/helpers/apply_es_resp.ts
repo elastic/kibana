@@ -63,16 +63,21 @@ export async function applyESResp(
   _.assign(savedObject, savedObject._source);
   savedObject.lastSavedTitle = savedObject.title;
 
-  savedObject.searchSource = await parseSearchSource(
-    meta.searchSourceJSON,
-    resp.references,
-    indexPatterns
-  );
+  if (config.searchSource) {
+    savedObject.searchSource = await parseSearchSource(
+      meta.searchSourceJSON,
+      resp.references,
+      indexPatterns
+    );
+  }
+
   if (injectReferences && resp.references && resp.references.length > 0) {
     injectReferences(savedObject, resp.references);
   }
+
   if (typeof config.afterESResp === 'function') {
     savedObject = await config.afterESResp(savedObject);
   }
+
   return savedObject;
 }
