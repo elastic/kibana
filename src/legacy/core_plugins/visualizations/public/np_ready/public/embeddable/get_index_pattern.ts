@@ -28,18 +28,18 @@ import { getUISettings, getSavedObjects } from '../services';
 export async function getIndexPattern(
   savedVis: VisSavedObject
 ): Promise<IIndexPattern | undefined> {
-  if (savedVis.vis.type.name !== 'metrics') {
-    return savedVis.vis.indexPattern;
+  if (savedVis.visState.type !== 'metrics') {
+    return savedVis.searchSource!.getField('index');
   }
 
   const savedObjectsClient = getSavedObjects().client;
   const defaultIndex = getUISettings().get('defaultIndex');
 
-  if (savedVis.vis.params.index_pattern) {
+  if (savedVis.visState.params.index_pattern) {
     const indexPatternObjects = await savedObjectsClient.find<IndexPatternAttributes>({
       type: 'index-pattern',
       fields: ['title', 'fields'],
-      search: `"${savedVis.vis.params.index_pattern}"`,
+      search: `"${savedVis.visState.params.index_pattern}"`,
       searchFields: ['title'],
     });
     const [indexPattern] = indexPatternObjects.savedObjects.map(indexPatterns.getFromSavedObject);

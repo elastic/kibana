@@ -21,14 +21,15 @@ import React from 'react';
 import * as Rx from 'rxjs';
 import { debounceTime, filter, share, switchMap } from 'rxjs/operators';
 import { PersistedState } from '../../../../../../../plugins/visualizations/public';
-import { Vis, VisualizationController } from '../vis';
+import { VisualizationController } from '../types';
 import { getUpdateStatus } from '../legacy/update_status';
 import { ResizeChecker } from '../../../../../../../plugins/kibana_utils/public';
+import { ExprVis } from '../expressions/vis';
 
 interface VisualizationChartProps {
   onInit?: () => void;
   uiState: PersistedState;
-  vis: Vis;
+  vis: ExprVis;
   visData: any;
   visParams: any;
   listenOnChange: boolean;
@@ -40,7 +41,7 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
   private chartDiv = React.createRef<HTMLDivElement>();
   private containerDiv = React.createRef<HTMLDivElement>();
   private renderSubject: Rx.Subject<{
-    vis: Vis;
+    vis: ExprVis;
     visParams: any;
     visData: any;
     container: HTMLElement;
@@ -54,11 +55,9 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
     const render$ = this.renderSubject.asObservable().pipe(share());
 
     const success$ = render$.pipe(
-      filter(
-        ({ vis, visData, container }) => vis && container && (!vis.type.requiresSearch || visData)
-      ),
+      filter(({ vis, visData }) => vis && (!vis.type!.requiresSearch || visData)),
       debounceTime(100),
-      switchMap(async ({ vis, visData, visParams, container }) => {
+      switchMap(async ({ vis, visData, visParams }) => {
         if (!this.visualization) {
           // This should never happen, since we only should trigger another rendering
           // after this component has mounted and thus the visualization implementation
@@ -66,15 +65,12 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
           throw new Error('Visualization implementation was not initialized on first render.');
         }
 
-        vis.size = [container.clientWidth, container.clientHeight];
-        const status = getUpdateStatus(vis.type.requiresUpdateStatus, this, this.props);
+        const status = getUpdateStatus(vis.type!.requiresUpdateStatus, this, this.props);
         return this.visualization.render(visData, visParams, status);
       })
     );
 
-    const requestError$ = render$.pipe(filter(({ vis }) => vis.requestError));
-
-    this.renderSubscription = Rx.merge(success$, requestError$).subscribe(() => {
+    this.renderSubscription = success$.subscribe(() => {
       if (this.props.onInit) {
         this.props.onInit();
       }
@@ -85,10 +81,10 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
     return (
       <div className="visChart__container kbn-resetFocusState" tabIndex={0} ref={this.containerDiv}>
         <p className="euiScreenReaderOnly">
-          {this.props.vis.type.title} visualization, not yet accessible
+          {this.props.vis.type!.title} visualization, not yet accessible
         </p>
         <div
-          aria-hidden={!this.props.vis.type.isAccessible}
+          aria-hidden={!this.props.vis.type!.isAccessible}
           className="visChart"
           ref={this.chartDiv}
         />
@@ -102,7 +98,7 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
     }
 
     const { vis } = this.props;
-    const Visualization = vis.type.visualization;
+    const Visualization = vis.type!.visualization;
 
     this.visualization = new Visualization(this.chartDiv.current, vis);
 

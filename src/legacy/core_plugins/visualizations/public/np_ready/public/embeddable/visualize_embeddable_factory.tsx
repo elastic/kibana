@@ -26,9 +26,8 @@ import {
   ErrorEmbeddable,
 } from '../../../../../../../plugins/embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
-import { getIndexPattern } from './get_index_pattern';
 import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualize_embeddable';
-import { VisSavedObject } from '../types';
+import { Vis } from '../types';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   getCapabilities,
@@ -39,6 +38,7 @@ import {
   getTimeFilter,
 } from '../services';
 import { showNewVisModal } from '../wizard';
+import { convertToSerializedVis } from '../saved_visualizations/_saved_vis';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -93,32 +93,32 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     });
   }
 
-  public async createFromObject(
-    savedObject: VisSavedObject,
+  public createFromObject(
+    vis: Vis,
     input: Partial<VisualizeInput> & { id: string },
     parent?: Container
-  ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
+  ): VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable {
     const savedVisualizations = getSavedVisualizationsLoader();
 
     try {
-      const visId = savedObject.id as string;
+      const visId = input.id as string;
 
       const editUrl = visId
         ? getHttp().basePath.prepend(`/app/kibana${savedVisualizations.urlFor(visId)}`)
         : '';
       const isLabsEnabled = getUISettings().get<boolean>('visualize:enableLabs');
 
-      if (!isLabsEnabled && savedObject.vis.type.stage === 'experimental') {
-        return new DisabledLabEmbeddable(savedObject.title, input);
+      if (!isLabsEnabled && vis.type.stage === 'experimental') {
+        return new DisabledLabEmbeddable(vis.title, input);
       }
 
-      const indexPattern = await getIndexPattern(savedObject);
+      const indexPattern = vis.data.indexPattern;
       const indexPatterns = indexPattern ? [indexPattern] : [];
       const editable = await this.isEditable();
       return new VisualizeEmbeddable(
         getTimeFilter(),
         {
-          savedVisualization: savedObject,
+          vis,
           indexPatterns,
           editUrl,
           editable,
@@ -143,7 +143,8 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
 
     try {
       const savedObject = await savedVisualizations.get(savedObjectId);
-      return this.createFromObject(savedObject, input, parent);
+      const vis = new Vis(savedObject.visState.type, await convertToSerializedVis(savedObject));
+      return this.createFromObject(vis, input, parent);
     } catch (e) {
       console.error(e); // eslint-disable-line no-console
       return new ErrorEmbeddable(e, input, parent);
