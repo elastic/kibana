@@ -19,6 +19,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { FixDefaultFieldsButton } from './default_fields/button';
 import { ReindexButton } from './reindex';
 import { AppContext } from '../../../../app_context';
+import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 
 interface DeprecationCellProps {
   items?: Array<{ title?: string; body: string }>;
@@ -29,6 +30,7 @@ interface DeprecationCellProps {
   headline?: string;
   healthColor?: string;
   children?: ReactNode;
+  reindexBlocker?: EnrichedDeprecationInfo['blockerForReindexing'];
 }
 
 /**
@@ -43,6 +45,7 @@ export const DeprecationCell: FunctionComponent<DeprecationCellProps> = ({
   docUrl,
   items = [],
   children,
+  reindexBlocker,
 }) => (
   <div className="upgDeprecationCell">
     <EuiFlexGroup responsive={false} wrap alignItems="baseline">
@@ -84,7 +87,14 @@ export const DeprecationCell: FunctionComponent<DeprecationCellProps> = ({
       {reindex && (
         <EuiFlexItem grow={false}>
           <AppContext.Consumer>
-            {({ http }) => <ReindexButton indexName={indexName!} http={http} />}
+            {({ http, docLinks }) => (
+              <ReindexButton
+                docLinks={docLinks}
+                reindexBlocker={reindexBlocker}
+                indexName={indexName!}
+                http={http}
+              />
+            )}
           </AppContext.Consumer>
         </EuiFlexItem>
       )}

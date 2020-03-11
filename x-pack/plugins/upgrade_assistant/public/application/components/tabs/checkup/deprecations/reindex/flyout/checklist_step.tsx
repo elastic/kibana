@@ -70,18 +70,20 @@ const buttonLabel = (status?: ReindexStatus) => {
  * Displays a flyout that shows the current reindexing status for a given index.
  */
 export const ChecklistFlyoutStep: React.FunctionComponent<{
+  renderGlobalCallouts: () => React.ReactNode;
   closeFlyout: () => void;
   reindexState: ReindexState;
   startReindex: () => void;
   cancelReindex: () => void;
   http: HttpSetup;
-}> = ({ closeFlyout, reindexState, startReindex, cancelReindex, http }) => {
+}> = ({ closeFlyout, reindexState, startReindex, cancelReindex, http, renderGlobalCallouts }) => {
   const { loadingState, status, hasRequiredPrivileges, reindexWarnings } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
 
   return (
     <Fragment>
       <EuiFlyoutBody>
+        {renderGlobalCallouts()}
         <EuiCallOut
           title={
             <FormattedMessage
