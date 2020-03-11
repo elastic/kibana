@@ -446,7 +446,7 @@ function checkActionTypeEnabled(
         'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.actionTypeDisabledByLicenseMessage',
         {
           defaultMessage:
-            'Connector is disabled because it requires a {minimumLicenseRequired} license.',
+            'This connector is disabled because it requires a {minimumLicenseRequired} license.',
           values: {
             minimumLicenseRequired: actionType.minimumLicenseRequired,
           },
@@ -459,7 +459,7 @@ function checkActionTypeEnabled(
       isEnabled: false,
       message: i18n.translate(
         'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.actionTypeDisabledByConfigMessage',
-        { defaultMessage: 'Connector is disabled by the Kibana configuration.' }
+        { defaultMessage: 'This connector is disabled by the Kibana configuration.' }
       ),
     };
   }
