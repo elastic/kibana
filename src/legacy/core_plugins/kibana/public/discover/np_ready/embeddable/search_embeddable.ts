@@ -214,24 +214,24 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
         return;
       }
       indexPattern.popularizeField(columnName, 1);
-      columnActions.addColumn(searchScope.columns, columnName);
-      this.updateInput({ columns: searchScope.columns });
+      const columns = columnActions.addColumn(searchScope.columns, columnName);
+      this.updateInput({ columns });
     };
 
     searchScope.removeColumn = (columnName: string) => {
       if (!searchScope.columns) {
         return;
       }
-      columnActions.removeColumn(searchScope.columns, columnName);
-      this.updateInput({ columns: searchScope.columns });
+      const columns = columnActions.removeColumn(searchScope.columns, columnName);
+      this.updateInput({ columns });
     };
 
     searchScope.moveColumn = (columnName, newIndex: number) => {
       if (!searchScope.columns) {
         return;
       }
-      columnActions.moveColumn(searchScope.columns, columnName, newIndex);
-      this.updateInput({ columns: searchScope.columns });
+      const columns = columnActions.moveColumn(searchScope.columns, columnName, newIndex);
+      this.updateInput({ columns });
     };
 
     searchScope.filter = async (field, value, operator) => {

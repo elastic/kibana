@@ -4,9 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { asset } from './asset';
-import { filters } from './filters';
+import { filtersFunctionFactory } from './filters';
 import { timelion } from './timelion';
-import { to } from './to';
+import { toFunctionFactory } from './to';
 
-export const clientFunctions = [asset, filters, timelion, to];
+export interface InitializeArguments {
+  typesRegistry: ExpressionsSetup['__LEGACY']['types'];
+}
+
+export function initFunctions(initialize: InitializeArguments) {
+  return [asset, filtersFunctionFactory(initialize), timelion, toFunctionFactory(initialize)];
+}
