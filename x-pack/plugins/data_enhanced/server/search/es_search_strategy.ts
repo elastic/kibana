@@ -36,9 +36,14 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
     const defaultParams = getDefaultSearchParams(config);
     const params = { ...defaultParams, ...request.params };
 
-    const rawResponse = await (request.indexType === 'rollup'
+    const response = await (request.indexType === 'rollup'
       ? rollupSearch(caller, { ...request, params }, options)
       : asyncSearch(caller, { ...request, params }, options));
+
+    const rawResponse =
+      request.indexType === 'rollup'
+        ? (response as SearchResponse<any>)
+        : (response as AsyncSearchResponse<any>).response;
 
     const id = (response as AsyncSearchResponse<any>).id;
     const { total, failed, successful } = rawResponse._shards;
