@@ -235,7 +235,7 @@ Set to true to proxy all <<maps,Maps application>> Elastic Maps Service requests
 This setting does not impact <<coordinate-map,Coordinate map visualizations>> and <<region-map,Region map visualizations>>.
 
 [[regionmap-settings]] `map.regionmap:`:: Specifies additional vector layers for
-use in <<region-map,Region Map>> visualizations. Supported on {ece}. Each layer
+use in <<maps, Maps>> visualizations. Supported on {ece}. Each layer
 object points to an external vector file that contains a geojson
 FeatureCollection. The file must use the
 https://en.wikipedia.org/wiki/World_Geodetic_System[WGS84 coordinate reference system (ESPG:4326)]
