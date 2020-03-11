@@ -61,13 +61,13 @@ const mutateFalse = setTotal(false);
 const root = urlBase => ts => testRunnerType =>
   `${urlBase}/${ts}/${testRunnerType.toLowerCase()}-combined`;
 
-const prokForTotalsIndex = urlRoot => obj =>
+const prokForTotalsIndex = mutateTrue => urlRoot => obj =>
   right(obj)
     .map(mutateTrue)
     .map(always(`${urlRoot}/index.html`))
     .fold(noop, id);
 
-const prokForCoverageIndex = urlRoot => obj => siteUrl =>
+const prokForCoverageIndex = mutateFalse => urlRoot => obj => siteUrl =>
   right(siteUrl)
     .map(x => {
       mutateFalse(obj);
@@ -80,15 +80,12 @@ const prokForCoverageIndex = urlRoot => obj => siteUrl =>
 export const staticSite = urlBase => obj => {
   const { staticSiteUrl, testRunnerType } = obj;
   const ts = obj['@timestamp'];
-
   const urlRoot = root(urlBase)(ts)(testRunnerType);
-  const prokTotal = prokForTotalsIndex(urlRoot);
-  const prokCoverage = prokForCoverageIndex(urlRoot)(obj);
+  const prokTotal = prokForTotalsIndex(mutateTrue)(urlRoot);
+  const prokCoverage = prokForCoverageIndex(mutateFalse)(urlRoot)(obj);
+  const prokForBoth = always(maybeTotal(staticSiteUrl).fold(always(prokTotal(obj)), prokCoverage));
 
-  delete obj['staticSiteUrl'];
-  obj['staticSiteUrl'] = maybeTotal(staticSiteUrl).fold(always(prokTotal(obj)), prokCoverage);
-
-  return obj;
+  return {...obj, staticSiteUrl: prokForBoth()};
 };
 
 export const coveredFilePath = obj => {
