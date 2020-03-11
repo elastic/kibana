@@ -10,6 +10,6 @@ export { KueryBarComponent } from './kuery_bar/kuery_bar';
 export { MonitorCharts } from './monitor_charts';
 export { MonitorList } from './monitor_list';
 export { OverviewPageParsingErrorCallout } from './overview_page_parsing_error_callout';
-export { PingList } from './ping_list';
+export { PingListComponent } from './ping_list';
 export { PingHistogramComponent } from './charts';
 export { StatusPanel } from './status_panel';

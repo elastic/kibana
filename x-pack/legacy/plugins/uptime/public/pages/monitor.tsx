@@ -19,7 +19,7 @@ import { selectSelectedMonitor } from '../state/selectors';
 import { getSelectedMonitor } from '../state/actions';
 import { PageHeader } from './page_header';
 import { MonitorCharts } from '../components/functional';
-import { PingList } from '../components/functional/ping_list';
+import { PingList } from '../components/connected';
 
 interface StateProps {
   selectedMonitor: Ping | null;
