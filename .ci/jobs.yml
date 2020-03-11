@@ -34,5 +34,5 @@ JOB:
   - x-pack-accessibility
   - x-pack-visualRegression
 
-# `~` is yaml for `null`
+# `~` is yaml for `null` testing
 exclude: ~

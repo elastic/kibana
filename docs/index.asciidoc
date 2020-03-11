@@ -1,5 +1,5 @@
 [[kibana-guide]]
-= Kibana Guide
+= Kibana Guide testing
 
 :include-xpack:  true
 :lang:           en

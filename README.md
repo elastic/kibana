@@ -2,12 +2,13 @@
 
 Kibana is your window into the [Elastic Stack](https://www.elastic.co/products). Specifically, it's a browser-based analytics and search dashboard for Elasticsearch.
 
-- [Getting Started](#getting-started)
-  - [Using a Kibana Release](#using-a-kibana-release)
-  - [Building and Running Kibana, and/or Contributing Code](#building-and-running-kibana-andor-contributing-code)
-- [Documentation](#documentation)
-- [Version Compatibility with Elasticsearch](#version-compatibility-with-elasticsearch)
-- [Questions? Problems? Suggestions?](#questions-problems-suggestions)
+- [Kibana](#kibana)
+  - [Getting Started](#getting-started)
+    - [Using a Kibana Release](#using-a-kibana-release)
+    - [Building and Running Kibana, and/or Contributing Code](#building-and-running-kibana-andor-contributing-code)
+  - [Documentation](#documentation)
+  - [Version Compatibility with Elasticsearch](#version-compatibility-with-elasticsearch)
+  - [Questions? Problems? Suggestions?](#questions-problems-suggestions)
 
 ## Getting Started
 
@@ -64,3 +65,5 @@ _Note: The version numbers below are only examples, meant to illustrate the rela
   Please check to make sure someone else hasn't already created an issue for the same topic.
 - Need help using Kibana? Ask away on our [Kibana Discuss Forum](https://discuss.elastic.co/c/kibana) and a fellow community member or
 Elastic engineer will be glad to help you out.
+
+Testing
