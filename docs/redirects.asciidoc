@@ -65,3 +65,8 @@ This page has moved. Please see <<get-data-in>>.
 == Coordinate map
 
 This page has moved. Please see <<maps>>.
+
+[role="exclude",id="visualize-maps"]
+== Maps
+
+This page has moved. Please see <<maps>>.
