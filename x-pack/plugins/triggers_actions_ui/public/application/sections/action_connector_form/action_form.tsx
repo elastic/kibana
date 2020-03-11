@@ -436,21 +436,7 @@ export const ActionForm = ({
       .filter(
         item => actionTypesIndex[item.id] && actionTypesIndex[item.id].enabledInConfig === true
       )
-      .sort((a, b) => {
-        if (
-          actionTypesIndex[a.id].enabledInLicense === true &&
-          actionTypesIndex[b.id].enabledInLicense === false
-        ) {
-          return -1;
-        }
-        if (
-          actionTypesIndex[a.id].enabledInLicense === false &&
-          actionTypesIndex[b.id].enabledInLicense === true
-        ) {
-          return 1;
-        }
-        return 0;
-      })
+      .sort((a, b) => actionTypeCompare(actionTypesIndex[a.id], actionTypesIndex[b.id]))
       .map(function(item, index) {
         return (
           <EuiKeyPadMenuItem
@@ -532,3 +518,13 @@ export const ActionForm = ({
     </Fragment>
   );
 };
+
+function actionTypeCompare(a: ActionType, b: ActionType) {
+  if (a.enabledInLicense === true && b.enabledInLicense === false) {
+    return -1;
+  }
+  if (a.enabledInLicense === false && b.enabledInLicense === true) {
+    return 1;
+  }
+  return 0;
+}

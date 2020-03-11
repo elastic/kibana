@@ -56,15 +56,7 @@ export const ActionTypeMenu = ({ onActionTypeChange, actionTypes }: Props) => {
     });
 
   const cardNodes = registeredActionTypes
-    .sort((a, b) => {
-      if (a.actionType.enabledInLicense === true && b.actionType.enabledInLicense === false) {
-        return -1;
-      }
-      if (a.actionType.enabledInLicense === false && b.actionType.enabledInLicense === true) {
-        return 1;
-      }
-      return a.name.localeCompare(b.name);
-    })
+    .sort((a, b) => actionTypeCompare(a.actionType, b.actionType))
     .map((item, index) => {
       return (
         <EuiFlexItem key={index}>
@@ -82,3 +74,13 @@ export const ActionTypeMenu = ({ onActionTypeChange, actionTypes }: Props) => {
 
   return <EuiFlexGrid columns={2}>{cardNodes}</EuiFlexGrid>;
 };
+
+function actionTypeCompare(a: ActionType, b: ActionType) {
+  if (a.enabledInLicense === true && b.enabledInLicense === false) {
+    return -1;
+  }
+  if (a.enabledInLicense === false && b.enabledInLicense === true) {
+    return 1;
+  }
+  return a.name.localeCompare(b.name);
+}

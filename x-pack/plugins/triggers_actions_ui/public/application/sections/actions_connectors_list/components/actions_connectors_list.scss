@@ -2,7 +2,7 @@
   margin-left: $euiSize;
 }
 
-.euiTableRow[disabled] {
+.actConnectorsList__tableRowDisabled {
   background-color:#F5F7FA;
   .euiTableCellContent__text, .euiLink {
     color:#69707D;

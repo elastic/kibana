@@ -21,12 +21,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useAppDependencies } from '../../../app_context';
 import { loadAllActions, loadActionTypes } from '../../../lib/action_connector_api';
-import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
 import { ConnectorAddFlyout, ConnectorEditFlyout } from '../../action_connector_form';
 import { hasDeleteActionsCapability, hasSaveActionsCapability } from '../../../lib/capabilities';
 import { DeleteConnectorsModal } from '../../../components/delete_connectors_modal';
 import { ActionsConnectorsContextProvider } from '../../../context/actions_connectors_context';
 import './actions_connectors_list.scss';
+import {
+  ActionConnector,
+  ActionConnectorTableItem,
+  ActionTypeIndex,
+  ActionType,
+} from '../../../../types';
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
   const { http, toastNotifications, capabilities, actionTypeRegistry } = useAppDependencies();
@@ -140,27 +145,9 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       sortable: false,
       truncateText: true,
       render: (value: string, item: ActionConnectorTableItem) => {
-        let actionTypeDisabledMessage = null;
-        if (actionTypesIndex && actionTypesIndex[item.actionTypeId].enabledInLicense === false) {
-          actionTypeDisabledMessage = i18n.translate(
-            'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.actionTypeDisabledByLicenseMessage',
-            {
-              defaultMessage:
-                'Connector is disabled because it requires a {minimumLicenseRequired} license.',
-              values: {
-                minimumLicenseRequired: actionTypesIndex[item.actionTypeId].minimumLicenseRequired,
-              },
-            }
-          );
-        } else if (
-          actionTypesIndex &&
-          actionTypesIndex[item.actionTypeId].enabledInConfig === false
-        ) {
-          actionTypeDisabledMessage = i18n.translate(
-            'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.actionTypeDisabledByConfigMessage',
-            { defaultMessage: 'Connector is disabled by the Kibana configuration.' }
-          );
-        }
+        const checkEnabledResult = checkActionTypeEnabled(
+          actionTypesIndex && actionTypesIndex[item.actionTypeId]
+        );
 
         const link = (
           <EuiLink
@@ -173,15 +160,15 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
           </EuiLink>
         );
 
-        return actionTypeDisabledMessage ? (
-          <EuiToolTip position="top" content={actionTypeDisabledMessage}>
+        return checkEnabledResult.isEnabled ? (
+          link
+        ) : (
+          <EuiToolTip position="top" content={checkEnabledResult.message}>
             <Fragment>
               {link}
               <EuiIcon type="questionInCircle" />
             </Fragment>
           </EuiToolTip>
-        ) : (
-          link
         );
       },
     },
@@ -251,7 +238,10 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       itemId="id"
       columns={actionsTableColumns}
       rowProps={(item: ActionConnectorTableItem) => ({
-        disabled: actionTypesIndex ? !actionTypesIndex[item.actionTypeId].enabled : true,
+        className:
+          !actionTypesIndex || !actionTypesIndex[item.actionTypeId].enabled
+            ? 'actConnectorsList__tableRowDisabled'
+            : '',
         'data-test-subj': 'connectors-row',
       })}
       cellProps={() => ({
@@ -444,4 +434,34 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
 
 function getActionsCountByActionType(actions: ActionConnector[], actionTypeId: string) {
   return actions.filter(action => action.actionTypeId === actionTypeId).length;
+}
+
+function checkActionTypeEnabled(
+  actionType?: ActionType
+): { isEnabled: true } | { isEnabled: false; message: string } {
+  if (actionType?.enabledInLicense === false) {
+    return {
+      isEnabled: false,
+      message: i18n.translate(
+        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.actionTypeDisabledByLicenseMessage',
+        {
+          defaultMessage:
+            'Connector is disabled because it requires a {minimumLicenseRequired} license.',
+          values: {
+            minimumLicenseRequired: actionType.minimumLicenseRequired,
+          },
+        }
+      ),
+    };
+  }
+  if (!actionType || actionType.enabledInConfig === false) {
+    return {
+      isEnabled: false,
+      message: i18n.translate(
+        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.actionTypeDisabledByConfigMessage',
+        { defaultMessage: 'Connector is disabled by the Kibana configuration.' }
+      ),
+    };
+  }
+  return { isEnabled: true };
 }
