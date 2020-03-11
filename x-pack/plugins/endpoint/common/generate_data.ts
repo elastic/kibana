@@ -6,8 +6,6 @@
 
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
-import { Client } from '@elastic/elasticsearch';
-import { run } from '@kbn/dev-utils';
 import { AlertEvent, EndpointEvent, EndpointMetadata, OSFields } from './types';
 
 export type Event = AlertEvent | EndpointEvent;
@@ -430,32 +428,4 @@ export class EndpointDocGenerator {
   private seededUUIDv4(): string {
     return uuid.v4({ random: [...this.randomNGenerator(255, 16)] });
   }
-}
-
-export function runGeneratorCli() {
-  run(
-    async ({ flags }) => {
-      const generator = new EndpointDocGenerator(flags.seed as string);
-      const client = new Client({
-        node: flags.node as string,
-      });
-      await client.index({
-        index: flags.index as string,
-        body: generator.generateEndpointMetadata(),
-      });
-
-      const resolverDocs = generator.generateFullResolverTree();
-      const body = resolverDocs.flatMap(doc => [{ index: { _index: flags.index } }, doc]);
-
-      await client.bulk({ body });
-    },
-    {
-      flags: {
-        string: ['node', 'index', 'seed'],
-        default: {
-          index: 'my-index',
-        },
-      },
-    }
-  );
 }
