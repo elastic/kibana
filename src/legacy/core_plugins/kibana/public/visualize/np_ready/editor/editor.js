@@ -93,6 +93,7 @@ function VisualizeAppController(
     uiSettings,
     I18nContext,
     setActiveUrl,
+    visualizations,
   } = getServices();
 
   const {
@@ -107,15 +108,11 @@ function VisualizeAppController(
   );
 
   // Retrieve the resolved SavedVis instance.
-  const savedVis = $route.current.locals.savedVis;
-  const _applyVis = () => {
-    $scope.$apply();
-  };
-  // This will trigger a digest cycle. This is needed when vis is updated from a global angular like in visualize_embeddable.js.
-  savedVis.vis.on('apply', _applyVis);
+  const { vis, savedVis, embeddableHandler } = $route.current.locals.resolved;
+
   // vis is instance of src/legacy/ui/public/vis/vis.js.
   // SearchSource is a promise-based stream of search results that can inherit from other search sources.
-  const { vis, searchSource, savedSearch } = savedVis;
+  const searchSource = vis.data.searchSource;
 
   $scope.vis = vis;
 
@@ -123,10 +120,9 @@ function VisualizeAppController(
     dirty: !savedVis.id,
   };
 
-  vis.on('dirtyStateChange', ({ isDirty }) => {
-    vis.dirty = isDirty;
-    $scope.$digest();
-  });
+  $scope.dirty = !savedVis.id;
+
+  $scope.embeddableHandler = embeddableHandler;
 
   $scope.topNavMenu = [
     ...(visualizeCapabilities.save
@@ -144,10 +140,10 @@ function VisualizeAppController(
             ),
             testId: 'visualizeSaveButton',
             disableButton() {
-              return Boolean(vis.dirty);
+              return Boolean($scope.dirty);
             },
             tooltip() {
-              if (vis.dirty) {
+              if ($scope.dirty) {
                 return i18n.translate(
                   'kbn.visualize.topNavMenu.saveVisualizationDisabledButtonTooltip',
                   {
@@ -216,7 +212,7 @@ function VisualizeAppController(
       }),
       testId: 'shareTopNavButton',
       run: anchorElement => {
-        const hasUnappliedChanges = vis.dirty;
+        const hasUnappliedChanges = $scope.dirty;
         const hasUnsavedChanges = $appStatus.dirty;
         share.toggleShareContextMenu({
           anchorElement,
@@ -242,17 +238,18 @@ function VisualizeAppController(
       }),
       testId: 'openInspectorButton',
       disableButton() {
-        return !vis.hasInspector || !vis.hasInspector();
+        // todo: needs to use embeddable
+        return !embeddableHandler.hasInspector || !embeddableHandler.hasInspector();
       },
       run() {
-        const inspectorSession = vis.openInspector();
+        const inspectorSession = embeddableHandler.openInspector();
         // Close the inspector if this scope is destroyed (e.g. because the user navigates away).
         const removeWatch = $scope.$on('$destroy', () => inspectorSession.close());
         // Remove that watch in case the user closes the inspector session herself.
         inspectorSession.onClose.finally(removeWatch);
       },
       tooltip() {
-        if (!vis.hasInspector || !vis.hasInspector()) {
+        if (!embeddableHandler.hasInspector || !embeddableHandler.hasInspector()) {
           return i18n.translate('kbn.visualize.topNavMenu.openInspectorDisabledButtonTooltip', {
             defaultMessage: `This visualization doesn't support any inspectors.`,
           });
@@ -266,7 +263,7 @@ function VisualizeAppController(
         defaultMessage: 'Refresh',
       }),
       run: function() {
-        vis.forceReload();
+        embeddableHandler.reload();
       },
       testId: 'visualizeRefreshButton',
     },
@@ -282,16 +279,18 @@ function VisualizeAppController(
       localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
   };
 
-  // Extract visualization state with filtered aggs. You can see these filtered aggs in the URL.
-  // Consists of things like aggs, params, listeners, title, type, etc.
-  const savedVisState = vis.getState();
-  const stateDefaults = {
-    uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
-    query: searchSource.getOwnField('query') || defaultQuery,
-    filters: searchSource.getOwnField('filter') || [],
-    vis: savedVisState,
-    linked: !!savedVis.savedSearchId,
+  const visStateToEditorState = () => {
+    const savedVisState = visualizations.convertFromSerializedVis(vis.serialize());
+    return {
+      uiState: vis.uiState.getChanges(),
+      query: vis.data.searchSource.getOwnField('query') || defaultQuery,
+      filters: vis.data.searchSource.getOwnField('filter') || [],
+      vis: savedVisState.visState,
+      linked: !!savedVis.savedSearchId,
+    };
   };
+
+  const stateDefaults = visStateToEditorState();
 
   const { stateContainer, stopStateSync } = useVisualizeAppState({
     stateDefaults,
@@ -378,8 +377,8 @@ function VisualizeAppController(
   };
 
   function init() {
-    if (vis.indexPattern) {
-      $scope.indexPattern = vis.indexPattern;
+    if (vis.data.indexPattern) {
+      $scope.indexPattern = vis.data.indexPattern;
     } else {
       indexPatterns.getDefault().then(defaultIndexPattern => {
         $scope.indexPattern = defaultIndexPattern;
@@ -387,14 +386,6 @@ function VisualizeAppController(
     }
 
     const initialState = stateContainer.getState();
-
-    $scope.appState = {
-      // mock implementation of the legacy appState.save()
-      // this could be even replaced by passing only "updateAppState" callback
-      save() {
-        stateContainer.transitions.updateVisState(vis.getState());
-      },
-    };
 
     const handleLinkedSearch = linked => {
       if (linked && !savedVis.savedSearchId && savedSearch) {
@@ -436,7 +427,7 @@ function VisualizeAppController(
     $scope.showQueryBarTimePicker = () => {
       // tsvb loads without an indexPattern initially (TODO investigate).
       // hide timefilter only if timeFieldName is explicitly undefined.
-      const hasTimeField = vis.indexPattern ? !!vis.indexPattern.timeFieldName : true;
+      const hasTimeField = vis.data.indexPattern ? !!vis.data.indexPattern.timeFieldName : true;
       return vis.type.options.showTimePicker && hasTimeField;
     };
 
@@ -451,10 +442,20 @@ function VisualizeAppController(
       updateSavedQueryFromUrl(state.savedQuery);
 
       // if the browser history was changed manually we need to reflect changes in the editor
-      if (!_.isEqual(vis.getState(), state.vis)) {
-        vis.setState(state.vis);
-        vis.forceReload();
-        vis.emit('updateEditor');
+      if (
+        !_.isEqual(visualizations.convertFromSerializedVis(vis.serialize()).visState, state.vis)
+      ) {
+        vis.setState({
+          params: state.vis.params,
+          data: {
+            aggs: state.vis.aggs,
+            indexPattern: vis.data.indexPattern.id,
+            searchSouyrce: vis.data.searchSource,
+          },
+        });
+        // todo: replace with embeddable
+        embeddableHandler.reload();
+        // vis.emit('updateEditor');
       }
 
       $appStatus.dirty = true;
@@ -507,9 +508,9 @@ function VisualizeAppController(
       const { query, linked, filters } = stateContainer.getState();
       $scope.query = query;
       handleLinkedSearch(linked);
-      savedVis.searchSource.setField('query', query);
-      savedVis.searchSource.setField('filter', filters);
-      $scope.$broadcast('render');
+      vis.data.searchSource.setField('query', query);
+      vis.data.searchSource.setField('filter', filters);
+      embeddableHandler.reload();
     };
 
     // update the searchSource when filters update
@@ -542,8 +543,6 @@ function VisualizeAppController(
       }
       savedVis.destroy();
       subscriptions.unsubscribe();
-      $scope.vis.off('apply', _applyVis);
-
       unsubscribePersisted();
       unsubscribeStateUpdates();
 
@@ -565,7 +564,7 @@ function VisualizeAppController(
 
     // If nothing has changed, trigger the fetch manually, otherwise it will happen as a result of the changes
     if (!isUpdate) {
-      $scope.vis.forceReload();
+      embeddableHandler.reload();
     }
   };
 
@@ -662,8 +661,6 @@ function VisualizeAppController(
             } else if (savedVis.id === $route.current.params.id) {
               chrome.docTitle.change(savedVis.lastSavedTitle);
               chrome.setBreadcrumbs($injector.invoke(getEditBreadcrumbs));
-              savedVis.vis.title = savedVis.title;
-              savedVis.vis.description = savedVis.description;
             } else {
               history.replace({
                 ...history.location,
@@ -695,8 +692,8 @@ function VisualizeAppController(
     );
   }
 
-  const unlinkFromSavedSearch = () => {
-    const searchSourceParent = savedSearch.searchSource;
+  $scope.unlinkFromSavedSearch = () => {
+    const searchSourceParent = searchSource.getParent();
     const searchSourceGrandparent = searchSourceParent.getParent();
     const currentIndex = searchSourceParent.getField('index');
 
@@ -710,12 +707,14 @@ function VisualizeAppController(
 
     toastNotifications.addSuccess(
       i18n.translate('kbn.visualize.linkedToSearch.unlinkSuccessNotificationText', {
-        defaultMessage: `Unlinked from saved search '{searchTitle}'`,
-        values: {
-          searchTitle: savedSearch.title,
-        },
+        defaultMessage: `Unlinked from saved search`,
       })
     );
+  };
+
+  $scope.reloadVisualization = () => {
+    stateContainer.transitions.updateVisState(visStateToEditorState().vis);
+    embeddableHandler.reload();
   };
 
   $scope.getAdditionalMessage = () => {
@@ -728,8 +727,6 @@ function VisualizeAppController(
       vis.type.feedbackMessage
     );
   };
-
-  vis.on('unlinkFromSavedSearch', unlinkFromSavedSearch);
 
   addHelpMenuToAppChrome(chrome, docLinks);
 

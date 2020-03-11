@@ -40,22 +40,23 @@ import { SavedSearch } from '../../../../../../plugins/discover/public';
 interface LinkedSearchProps {
   savedSearch: SavedSearch;
   vis: Vis;
+  unlinkFromSavedSearch: any;
 }
 
 interface SidebarTitleProps {
-  isLinkedSearch: boolean;
+  unlinkFromSavedSearch: any;
   savedSearch?: SavedSearch;
   vis: Vis;
 }
 
-export function LinkedSearch({ savedSearch, vis }: LinkedSearchProps) {
+export function LinkedSearch({ savedSearch, vis, unlinkFromSavedSearch }: LinkedSearchProps) {
   const [showPopover, setShowPopover] = useState(false);
   const closePopover = useCallback(() => setShowPopover(false), []);
   const onClickButtonLink = useCallback(() => setShowPopover(v => !v), []);
   const onClickUnlikFromSavedSearch = useCallback(() => {
     setShowPopover(false);
-    vis.emit('unlinkFromSavedSearch');
-  }, [vis]);
+    unlinkFromSavedSearch();
+  }, [unlinkFromSavedSearch]);
 
   const linkButtonAriaLabel = i18n.translate(
     'visDefaultEditor.sidebar.savedSearch.linkButtonAriaLabel',
@@ -151,20 +152,24 @@ export function LinkedSearch({ savedSearch, vis }: LinkedSearchProps) {
   );
 }
 
-function SidebarTitle({ savedSearch, vis, isLinkedSearch }: SidebarTitleProps) {
-  return isLinkedSearch && savedSearch ? (
-    <LinkedSearch savedSearch={savedSearch} vis={vis} />
+function SidebarTitle({ savedSearch, vis, unlinkFromSavedSearch }: SidebarTitleProps) {
+  return savedSearch ? (
+    <LinkedSearch
+      savedSearch={savedSearch}
+      vis={vis}
+      unlinkFromSavedSearch={unlinkFromSavedSearch}
+    />
   ) : vis.type.options.showIndexSelection ? (
     <EuiTitle size="xs" className="visEditorSidebar__titleContainer eui-textTruncate">
       <h2
         title={i18n.translate('visDefaultEditor.sidebar.indexPatternAriaLabel', {
           defaultMessage: 'Index pattern: {title}',
           values: {
-            title: vis.indexPattern.title,
+            title: vis.data.indexPattern!.title,
           },
         })}
       >
-        {vis.indexPattern.title}
+        {vis.data.indexPattern!.title}
       </h2>
     </EuiTitle>
   ) : (

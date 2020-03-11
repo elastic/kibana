@@ -69,7 +69,8 @@
   <visualization-embedded
     ng-if="!isVisible"
     class="visualize"
-    saved-obj="savedVis"
+    vis="vis"
+    embeddable-handler="embeddableHandler"
     ui-state="uiState"
     time-range="timeRange"
     filters="filters"
@@ -89,7 +90,10 @@
   </h1>
   <visualization-editor
     ng-if="isVisible"
-    saved-obj="savedVis"
+    vis="vis"
+    embeddable-handler="embeddableHandler"
+    reload-visualization="reloadVisualization"
+    unlink-from-saved-search="unlinkFromSavedSearch"
     ui-state="uiState"
     time-range="timeRange"
     filters="filters"

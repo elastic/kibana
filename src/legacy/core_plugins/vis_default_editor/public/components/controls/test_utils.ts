@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { IAggConfig, AggParam } from '../../legacy_imports';
 import { EditorConfig } from '../utils';
+import { EditorVisState } from '../sidebar/state/reducers';
 
 export const aggParamCommonPropsMock = {
   agg: {} as IAggConfig,
@@ -27,7 +27,7 @@ export const aggParamCommonPropsMock = {
   editorConfig: {} as EditorConfig,
   formIsTouched: false,
   metricAggs: [] as IAggConfig[],
-  state: {} as VisState,
+  state: {} as EditorVisState,
   showValidation: false,
   schemas: [],
 };

@@ -20,7 +20,6 @@
 import { get, isEmpty } from 'lodash';
 
 import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
-import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
 import { AggTypeState, AggParamsState } from './agg_params_state';
 import { AggParamEditorProps } from './agg_param_props';
@@ -36,12 +35,13 @@ import {
 } from '../legacy_imports';
 import { EditorConfig } from './utils';
 import { Schema, getSchemaByName } from '../schemas';
+import { EditorVisState } from './sidebar/state/reducers';
 
 interface ParamInstanceBase {
   agg: IAggConfig;
   editorConfig: EditorConfig;
   metricAggs: IAggConfig[];
-  state: VisState;
+  state: EditorVisState;
   schemas: Schema[];
   hideCustomLabel?: boolean;
 }

@@ -29,8 +29,9 @@ import { PersistedState } from 'src/plugins/visualizations/public';
 import { LegacyCoreStart } from 'kibana/public';
 import { Vis } from 'src/legacy/core_plugins/visualizations/public';
 import { VisSavedObject } from '../legacy_imports';
+import { SavedVisState } from '../../../../visualizations/public/np_ready/public/types';
 
-export type PureVisState = ReturnType<Vis['getCurrentState']>;
+export type PureVisState = SavedVisState;
 
 export interface VisualizeAppState {
   filters: Filter[];

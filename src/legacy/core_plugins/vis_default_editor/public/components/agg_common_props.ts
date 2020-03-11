@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { VisState, VisParams } from 'src/legacy/core_plugins/visualizations/public';
+import { VisParams } from 'src/legacy/core_plugins/visualizations/public';
 import { IAggType, IAggConfig, IAggGroupNames } from '../legacy_imports';
 import { Schema } from '../schemas';
+import { EditorVisState } from './sidebar/state/reducers';
 
 type AggId = IAggConfig['id'];
 type AggParams = IAggConfig['params'];
@@ -31,7 +32,7 @@ export interface DefaultEditorCommonProps {
   formIsTouched: boolean;
   groupName: IAggGroupNames;
   metricAggs: IAggConfig[];
-  state: VisState;
+  state: EditorVisState;
   setAggParamValue: <T extends keyof AggParams>(
     aggId: AggId,
     paramName: T,

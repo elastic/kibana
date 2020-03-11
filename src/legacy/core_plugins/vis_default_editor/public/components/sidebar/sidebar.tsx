@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useMemo, useState, useCallback, KeyboardEventHandler, useEffect } from 'react';
+import React, { useMemo, useState, useCallback, KeyboardEventHandler } from 'react';
 import { get, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { keyCodes, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -26,10 +26,9 @@ import { Vis } from 'src/legacy/core_plugins/visualizations/public';
 import { AggGroupNames } from '../../legacy_imports';
 import { DefaultEditorNavBar, OptionTab } from './navbar';
 import { DefaultEditorControls } from './controls';
-import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
+import { setStateParamValue, useEditorReducer, useEditorFormState } from './state';
 import { DefaultEditorAggCommonProps } from '../agg_common_props';
 import { SidebarTitle } from './sidebar_title';
-import { PersistedState } from '../../../../../../plugins/visualizations/public';
 import { SavedSearch } from '../../../../../../plugins/discover/public';
 import { getSchemasByGroup } from '../../schemas';
 
@@ -37,9 +36,9 @@ interface DefaultEditorSideBarProps {
   isCollapsed: boolean;
   onClickCollapse: () => void;
   optionTabs: OptionTab[];
-  uiState: PersistedState;
   vis: Vis;
-  isLinkedSearch: boolean;
+  unlinkFromSavedSearch: any;
+  reloadVisualization: any;
   savedSearch?: SavedSearch;
 }
 
@@ -47,17 +46,27 @@ function DefaultEditorSideBar({
   isCollapsed,
   onClickCollapse,
   optionTabs,
-  uiState,
   vis,
-  isLinkedSearch,
-  savedSearch,
+  unlinkFromSavedSearch,
+  reloadVisualization,
 }: DefaultEditorSideBarProps) {
   const [selectedTab, setSelectedTab] = useState(optionTabs[0].name);
   const [isDirty, setDirty] = useState(false);
-  const [state, dispatch] = useEditorReducer(vis);
+
+  const dirtyStateChange = ({ isDirty: dirty }: { isDirty: boolean }) => {
+    setDirty(dirty);
+
+    if (!dirty) {
+      resetValidity();
+    }
+  };
+
+  const [state, dispatch] = useEditorReducer(vis, dirtyStateChange);
   const { formState, setTouched, setValidity, resetValidity } = useEditorFormState();
 
-  const responseAggs = useMemo(() => state.aggs.getResponseAggs(), [state.aggs]);
+  const responseAggs = useMemo(() => (state.data.aggs ? state.data.aggs.getResponseAggs() : []), [
+    state.data.aggs,
+  ]);
   const metricSchemas = getSchemasByGroup(vis.type.schemas.all || [], AggGroupNames.Metrics).map(
     s => s.name
   );
@@ -90,17 +99,17 @@ function DefaultEditorSideBar({
   const applyChanges = useCallback(() => {
     if (formState.invalid || !isDirty) {
       setTouched(true);
-
       return;
     }
 
-    vis.setCurrentState(state);
-    vis.updateState();
-    vis.emit('dirtyStateChange', {
-      isDirty: false,
+    vis.setState({
+      ...vis.serialize(),
+      params: state.params,
+      data: { aggs: state.data.aggs!.aggs.map(agg => agg.toJSON()) as any },
     });
+    reloadVisualization();
     setTouched(false);
-  }, [vis, state, formState.invalid, setTouched, isDirty]);
+  }, [reloadVisualization, state, formState.invalid, setTouched, isDirty, vis]);
 
   const onSubmit: KeyboardEventHandler<HTMLFormElement> = useCallback(
     event => {
@@ -114,27 +123,6 @@ function DefaultEditorSideBar({
     [applyChanges]
   );
 
-  useEffect(() => {
-    const changeHandler = ({ isDirty: dirty }: { isDirty: boolean }) => {
-      setDirty(dirty);
-
-      if (!dirty) {
-        resetValidity();
-      }
-    };
-    vis.on('dirtyStateChange', changeHandler);
-
-    return () => vis.off('dirtyStateChange', changeHandler);
-  }, [resetValidity, vis]);
-
-  // subscribe on external vis changes using browser history, for example press back button
-  useEffect(() => {
-    const resetHandler = () => dispatch(discardChanges(vis));
-    vis.on('updateEditor', resetHandler);
-
-    return () => vis.off('updateEditor', resetHandler);
-  }, [dispatch, vis]);
-
   const dataTabProps = {
     dispatch,
     formIsTouched: formState.touched,
@@ -147,15 +135,16 @@ function DefaultEditorSideBar({
   };
 
   const optionTabProps = {
-    aggs: state.aggs,
+    aggs: state.data.aggs!,
     hasHistogramAgg,
     stateParams: state.params,
     vis,
-    uiState,
     setValue: setStateValue,
     setValidity: setStateValidity,
     setTouched,
   };
+
+  const savedSearch = {};
 
   return (
     <>
@@ -173,7 +162,11 @@ function DefaultEditorSideBar({
             onKeyDownCapture={onSubmit}
           >
             {vis.type.requiresSearch && (
-              <SidebarTitle isLinkedSearch={isLinkedSearch} savedSearch={savedSearch} vis={vis} />
+              <SidebarTitle
+                savedSearch={savedSearch as any}
+                vis={vis}
+                unlinkFromSavedSearch={unlinkFromSavedSearch}
+              />
             )}
 
             {optionTabs.length > 1 && (

@@ -22,16 +22,25 @@ export function initVisEditorDirective(app, deps) {
     return {
       restrict: 'E',
       scope: {
-        savedObj: '=',
+        vis: '=',
         uiState: '=?',
         timeRange: '=',
         filters: '=',
         query: '=',
         appState: '=',
+        embeddableHandler: '=',
+        reloadVisualization: '=',
+        unlinkFromSavedSearch: '=',
       },
       link: function($scope, element) {
-        const Editor = $scope.savedObj.vis.type.editor || deps.DefaultVisualizationEditor;
-        const editor = new Editor(element[0], $scope.savedObj);
+        const Editor = $scope.vis.type.editor || deps.DefaultVisualizationEditor;
+        const editor = new Editor(
+          element[0],
+          $scope.vis,
+          $scope.embeddableHandler,
+          $scope.reloadVisualization,
+          $scope.unlinkFromSavedSearch
+        );
 
         $scope.renderFunction = () => {
           editor.render({
@@ -43,7 +52,6 @@ export function initVisEditorDirective(app, deps) {
             filters: $scope.filters,
             query: $scope.query,
             appState: $scope.appState,
-            linked: !!$scope.savedObj.savedSearchId,
           });
         };
 

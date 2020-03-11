@@ -73,9 +73,10 @@ function DefaultEditorAggGroup({
   const schemaNames = getSchemasByGroup(schemas, groupName).map(s => s.name);
   const group: IAggConfig[] = useMemo(
     () =>
-      state.aggs.aggs.filter((agg: IAggConfig) => agg.schema && schemaNames.includes(agg.schema)) ||
-      [],
-    [state.aggs.aggs, schemaNames]
+      state.data.aggs!.aggs.filter(
+        (agg: IAggConfig) => agg.schema && schemaNames.includes(agg.schema)
+      ) || [],
+    [state.data.aggs, schemaNames]
   );
 
   const stats = {

@@ -18,7 +18,6 @@
  */
 
 import { IndexPattern } from 'src/plugins/data/public';
-import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { IAggConfig, IAggType, AggGroupNames, BUCKET_TYPES } from '../legacy_imports';
 import {
   getAggParamsToRender,
@@ -28,6 +27,7 @@ import {
 import { FieldParamEditor, OrderByParamEditor } from './controls';
 import { EditorConfig } from './utils';
 import { Schema } from '../schemas';
+import { EditorVisState } from './sidebar/state/reducers';
 
 jest.mock('../utils', () => ({
   groupAndSortBy: jest.fn(() => ['indexedFields']),
@@ -48,7 +48,7 @@ describe('DefaultEditorAggParams helpers', () => {
         hideCustomLabel: true,
       } as Schema,
     ];
-    const state = {} as VisState;
+    const state = {} as EditorVisState;
     const metricAggs: IAggConfig[] = [];
     const emptyParams = {
       basic: [],

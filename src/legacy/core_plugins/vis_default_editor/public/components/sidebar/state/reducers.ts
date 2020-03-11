@@ -19,33 +19,40 @@
 
 import { cloneDeep } from 'lodash';
 
-import { Vis, VisState } from 'src/legacy/core_plugins/visualizations/public';
+import { Vis } from 'src/legacy/core_plugins/visualizations/public';
 import { createAggConfigs, AggGroupNames } from '../../../legacy_imports';
 import { EditorStateActionTypes } from './constants';
 import { getEnabledMetricAggsCount } from '../../agg_group_helper';
 import { EditorAction } from './actions';
 
 function initEditorState(vis: Vis) {
-  return vis.copyCurrentState(true);
+  return {
+    ...vis.clone(),
+  };
 }
 
-function editorStateReducer(state: VisState, action: EditorAction): VisState {
+export type EditorVisState = Pick<Vis, 'title' | 'description' | 'type' | 'params' | 'data'>;
+
+function editorStateReducer(state: EditorVisState, action: EditorAction): EditorVisState {
   switch (action.type) {
     case EditorStateActionTypes.ADD_NEW_AGG: {
       const { schema } = action.payload;
       const defaultConfig =
-        !state.aggs.aggs.find(agg => agg.schema === schema.name) && schema.defaults
+        !state.data.aggs!.aggs.find(agg => agg.schema === schema.name) && schema.defaults
           ? (schema as any).defaults.slice(0, schema.max)
           : { schema: schema.name };
-      const aggConfig = state.aggs.createAggConfig(defaultConfig, {
+      const aggConfig = state.data.aggs!.createAggConfig(defaultConfig, {
         addToAggConfigs: false,
       });
       aggConfig.brandNew = true;
-      const newAggs = [...state.aggs.aggs, aggConfig];
+      const newAggs = [...state.data.aggs!.aggs, aggConfig];
 
       return {
         ...state,
-        aggs: createAggConfigs(state.aggs.indexPattern, newAggs),
+        data: {
+          ...state.data,
+          aggs: createAggConfigs(state.data.indexPattern!, newAggs),
+        },
       };
     }
 
@@ -56,7 +63,7 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
     case EditorStateActionTypes.CHANGE_AGG_TYPE: {
       const { aggId, value } = action.payload;
 
-      const newAggs = state.aggs.aggs.map(agg => {
+      const newAggs = state.data.aggs!.aggs.map(agg => {
         if (agg.id === aggId) {
           agg.type = value;
 
@@ -68,14 +75,17 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
 
       return {
         ...state,
-        aggs: createAggConfigs(state.aggs.indexPattern, newAggs),
+        data: {
+          ...state.data,
+          aggs: createAggConfigs(state.data.indexPattern!, newAggs),
+        },
       };
     }
 
     case EditorStateActionTypes.SET_AGG_PARAM_VALUE: {
       const { aggId, paramName, value } = action.payload;
 
-      const newAggs = state.aggs.aggs.map(agg => {
+      const newAggs = state.data.aggs!.aggs.map(agg => {
         if (agg.id === aggId) {
           const parsedAgg = agg.toJSON();
 
@@ -93,7 +103,10 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
 
       return {
         ...state,
-        aggs: createAggConfigs(state.aggs.indexPattern, newAggs),
+        data: {
+          ...state.data,
+          aggs: createAggConfigs(state.data.indexPattern!, newAggs),
+        },
       };
     }
 
@@ -111,7 +124,7 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
 
     case EditorStateActionTypes.REMOVE_AGG: {
       let isMetric = false;
-      const newAggs = state.aggs.aggs.filter(({ id, schema }) => {
+      const newAggs = state.data.aggs!.aggs.filter(({ id, schema }) => {
         if (id === action.payload.aggId) {
           const schemaDef = action.payload.schemas.find(s => s.name === schema);
           if (schemaDef && schemaDef.group === AggGroupNames.Metrics) {
@@ -134,26 +147,36 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
 
       return {
         ...state,
-        aggs: createAggConfigs(state.aggs.indexPattern, newAggs),
+        data: {
+          ...state.data,
+          aggs: createAggConfigs(state.data.indexPattern!, newAggs),
+        },
       };
     }
 
     case EditorStateActionTypes.REORDER_AGGS: {
       const { sourceAgg, destinationAgg } = action.payload;
-      const destinationIndex = state.aggs.aggs.indexOf(destinationAgg);
-      const newAggs = [...state.aggs.aggs];
-      newAggs.splice(destinationIndex, 0, newAggs.splice(state.aggs.aggs.indexOf(sourceAgg), 1)[0]);
+      const destinationIndex = state.data.aggs!.aggs.indexOf(destinationAgg);
+      const newAggs = [...state.data.aggs!.aggs];
+      newAggs.splice(
+        destinationIndex,
+        0,
+        newAggs.splice(state.data.aggs!.aggs.indexOf(sourceAgg), 1)[0]
+      );
 
       return {
         ...state,
-        aggs: createAggConfigs(state.aggs.indexPattern, newAggs),
+        data: {
+          ...state.data,
+          aggs: createAggConfigs(state.data.indexPattern!, newAggs),
+        },
       };
     }
 
     case EditorStateActionTypes.TOGGLE_ENABLED_AGG: {
       const { aggId, enabled } = action.payload;
 
-      const newAggs = state.aggs.aggs.map(agg => {
+      const newAggs = state.data.aggs!.aggs.map(agg => {
         if (agg.id === aggId) {
           const parsedAgg = agg.toJSON();
 
@@ -168,7 +191,10 @@ function editorStateReducer(state: VisState, action: EditorAction): VisState {
 
       return {
         ...state,
-        aggs: createAggConfigs(state.aggs.indexPattern, newAggs),
+        data: {
+          ...state.data,
+          aggs: createAggConfigs(state.data.indexPattern!, newAggs),
+        },
       };
     }
 

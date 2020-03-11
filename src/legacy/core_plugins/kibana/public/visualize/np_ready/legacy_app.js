@@ -103,7 +103,7 @@ export function initVisualizeApp(app, deps) {
         template: editorTemplate,
         k7Breadcrumbs: getCreateBreadcrumbs,
         resolve: {
-          savedVis: function($route, $rootScope, kbnUrl, history) {
+          resolved: function($route, $rootScope, kbnUrl, history) {
             const { core, data, savedVisualizations, visualizations, toastNotifications } = deps;
             const visTypes = visualizations.all();
             const visType = find(visTypes, { name: $route.current.params.type });
@@ -121,13 +121,30 @@ export function initVisualizeApp(app, deps) {
               );
             }
 
+            const results = {};
+
             return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl)
               .then(() => savedVisualizations.get($route.current.params))
-              .then(savedVis => {
-                if (savedVis.vis.type.setup) {
-                  return savedVis.vis.type.setup(savedVis).catch(() => savedVis);
+              .then(savedObj => {
+                results.savedVis = savedObj;
+                return visualizations.convertToSerializedVis(savedObj);
+              })
+              .then(serializedVis => visualizations.createVis(serializedVis.type, serializedVis))
+              .then(vis => {
+                if (vis.type.setup) {
+                  return vis.type.setup(vis).catch(() => vis);
                 }
-                return savedVis;
+                results.vis = vis;
+                return deps.embeddable
+                  .getEmbeddableFactory('visualization')
+                  .createFromObject(results.vis, {
+                    timeRange: data.query.timefilter.timefilter.getTime(),
+                    filters: data.query.filterManager.getFilters(),
+                  });
+              })
+              .then(embeddableHandler => {
+                results.embeddableHandler = embeddableHandler;
+                return results;
               })
               .catch(
                 redirectWhenMissing({
@@ -144,19 +161,34 @@ export function initVisualizeApp(app, deps) {
         template: editorTemplate,
         k7Breadcrumbs: getEditBreadcrumbs,
         resolve: {
-          savedVis: function($route, $rootScope, kbnUrl, history) {
-            const { chrome, core, data, savedVisualizations, toastNotifications } = deps;
+          resolved: function($route, $rootScope, kbnUrl, history) {
+            const { chrome, core, data, savedVisualizations, visualizations, toastNotifications } = deps;
+
+            const results = {};
+
             return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl)
               .then(() => savedVisualizations.get($route.current.params.id))
               .then(savedVis => {
                 chrome.recentlyAccessed.add(savedVis.getFullPath(), savedVis.title, savedVis.id);
-                return savedVis;
+                results.savedVis = savedVis;
+                return visualizations.convertToSerializedVis(savedVis);
               })
-              .then(savedVis => {
-                if (savedVis.vis.type.setup) {
-                  return savedVis.vis.type.setup(savedVis).catch(() => savedVis);
+              .then(serializedVis => visualizations.createVis(serializedVis.type, serializedVis))
+              .then(vis => {
+                if (vis.type.setup) {
+                  return vis.type.setup(vis).catch(() => vis);
                 }
-                return savedVis;
+                results.vis = vis;
+                return deps.embeddable
+                  .getEmbeddableFactory('visualization')
+                  .createFromObject(results.vis, {
+                    timeRange: data.query.timefilter.timefilter.getTime(),
+                    filters: data.query.filterManager.getFilters(),
+                  });
+              })
+              .then(embeddableHandler => {
+                results.embeddableHandler = embeddableHandler;
+                return results;
               })
               .catch(
                 redirectWhenMissing({

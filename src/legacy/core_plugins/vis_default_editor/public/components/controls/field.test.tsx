@@ -23,10 +23,10 @@ import { mount, shallow, ReactWrapper } from 'enzyme';
 import { EuiComboBoxProps, EuiComboBox } from '@elastic/eui';
 
 import { IndexPatternField } from 'src/plugins/data/public';
-import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { ComboBoxGroupedOptions } from '../../utils';
 import { FieldParamEditor, FieldParamEditorProps } from './field';
 import { IAggConfig } from '../../legacy_imports';
+import { EditorVisState } from '../sidebar/state/reducers';
 
 function callComboBoxOnChange(comp: ReactWrapper, value: any = []) {
   const comboBoxProps = comp.find(EuiComboBox).props() as EuiComboBoxProps<any>;
@@ -79,7 +79,7 @@ describe('FieldParamEditor component', () => {
       setValue,
       setValidity,
       setTouched,
-      state: {} as VisState,
+      state: {} as EditorVisState,
       metricAggs: [] as IAggConfig[],
       schemas: [],
     };
