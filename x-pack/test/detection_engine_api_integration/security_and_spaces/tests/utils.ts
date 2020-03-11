@@ -132,7 +132,6 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertR
   tags: [],
   to: 'now',
   type: 'query',
-  note: '',
   threat: [],
   version: 1,
 });
