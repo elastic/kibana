@@ -5,7 +5,7 @@
   "private": true,
   "license": "Elastic-License",
   "scripts": {
-    "test:generate": "node scripts/generator.js"
+    "test:generate": "ts-node scripts/generator.ts"
   },
   "dependencies": {
     "react-redux": "^7.1.0",
