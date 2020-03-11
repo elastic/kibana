@@ -233,13 +233,25 @@ def areChangesSkippable() {
     return false
   }
 
-  def skippablePaths = getSkippablePaths()
-  def files = githubPr.getChangedFiles()
-    .findAll { file ->
+  try {
+    def skippablePaths = getSkippablePaths()
+    def files = githubPr.getChangedFiles()
+
+    // 3000 is the max files GH API will return
+    if (files.size() >= 3000) {
+      return false
+    }
+
+    files = files.findAll { file ->
       return !skippablePaths.find { regex -> file =~ regex}
     }
 
-  return files.size() < 1
+    return files.size() < 1
+  } catch (ex) {
+    buildUtils.printStacktrace(ex)
+    print "Error while checking to see if CI is skippable based on changes. Will run CI."
+    return false
+  }
 }
 
 return this
