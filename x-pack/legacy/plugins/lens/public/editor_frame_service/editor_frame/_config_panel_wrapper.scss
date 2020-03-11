@@ -2,7 +2,7 @@
   margin-bottom: $euiSizeS;
 }
 
-.lnsConfigPanel__axis {
+.lnsConfigPanel__row {
   background: $euiColorLightestShade;
   padding: $euiSizeS;
   border-radius: $euiBorderRadius;
@@ -22,10 +22,28 @@
 
 .lnsConfigPanel__dimension {
   @include euiFontSizeS;
-  background-color: $euiColorEmptyShade;
+  background: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
   border-radius: $euiBorderRadius;
   display: flex;
   align-items: center;
   margin-top: $euiSizeXS;
   overflow: hidden;
+}
+
+.lnsConfigPanel__trigger {
+  max-width: 100%;
+  display: block;
+}
+
+.lnsConfigPanel__triggerLink {
+  padding: $euiSizeS;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  min-height: $euiSizeXXL;
+}
+
+.lnsConfigPanel__popover {
+  line-height: 0;
+  flex-grow: 1;
 }

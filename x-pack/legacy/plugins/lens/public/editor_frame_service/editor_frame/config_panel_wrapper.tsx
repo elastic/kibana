@@ -255,6 +255,8 @@ function LayerPanel(
     const noMatch = popoverState.isOpen ? !dimensions.some(d => d.accessors.includes(id)) : false;
     return (
       <EuiPopover
+        className="lnsConfigPanel__popover"
+        anchorClassName="lnsConfigPanel__trigger"
         isOpen={
           popoverState.isOpen &&
           (popoverState.openId === id ||
@@ -264,7 +266,6 @@ function LayerPanel(
           setPopoverState({ isOpen: false, openId: null, addingToDimensionId: null });
         }}
         button={trigger}
-        display="block"
         anchorPosition="leftUp"
         withTitle
         panelPaddingSize="s"
@@ -303,7 +304,7 @@ function LayerPanel(
           const isMissing = !isEmptyLayer && dimension.required && dimension.accessors.length === 0;
           return (
             <EuiFormRow
-              className="lnsConfigPanel__axis"
+              className="lnsConfigPanel__row"
               label={dimension.dimensionLabel}
               key={index}
               isInvalid={isMissing}
@@ -412,7 +413,7 @@ function LayerPanel(
                 ))}
                 {dimension.supportsMoreColumns ? (
                   <DragDrop
-                    className="lnsIndexPatternDimensionPanel"
+                    className="lnsConfigPanel__dimension"
                     data-test-subj={dimension.dataTestSubj}
                     droppable={
                       dragDropContext.dragging &&
@@ -444,37 +445,39 @@ function LayerPanel(
                     {wrapInPopover(
                       newId,
                       dimension.dimensionId,
-                      <EuiButtonEmpty
-                        iconType="plusInCircleFilled"
-                        data-test-subj="lns-empty-dimension"
-                        aria-label={i18n.translate('xpack.lens.configure.addConfig', {
-                          defaultMessage: 'Add a configuration',
-                        })}
-                        title={i18n.translate('xpack.lens.configure.addConfig', {
-                          defaultMessage: 'Add a configuration',
-                        })}
-                        onClick={() => {
-                          if (popoverState.isOpen) {
-                            setPopoverState({
-                              isOpen: false,
-                              openId: null,
-                              addingToDimensionId: null,
-                            });
-                          } else {
-                            setPopoverState({
-                              isOpen: true,
-                              openId: newId,
-                              addingToDimensionId: dimension.dimensionId,
-                            });
-                          }
-                        }}
-                        size="xs"
-                      >
-                        <FormattedMessage
-                          id="xpack.lens.configure.emptyConfig"
-                          defaultMessage="Drop a field here"
-                        />
-                      </EuiButtonEmpty>,
+                      <div className="lnsConfigPanel__triggerLink">
+                        <EuiButtonEmpty
+                          iconType="plusInCircleFilled"
+                          data-test-subj="lns-empty-dimension"
+                          aria-label={i18n.translate('xpack.lens.configure.addConfig', {
+                            defaultMessage: 'Add a configuration',
+                          })}
+                          title={i18n.translate('xpack.lens.configure.addConfig', {
+                            defaultMessage: 'Add a configuration',
+                          })}
+                          onClick={() => {
+                            if (popoverState.isOpen) {
+                              setPopoverState({
+                                isOpen: false,
+                                openId: null,
+                                addingToDimensionId: null,
+                              });
+                            } else {
+                              setPopoverState({
+                                isOpen: true,
+                                openId: newId,
+                                addingToDimensionId: dimension.dimensionId,
+                              });
+                            }
+                          }}
+                          size="xs"
+                        >
+                          <FormattedMessage
+                            id="xpack.lens.configure.emptyConfig"
+                            defaultMessage="Drop a field here"
+                          />
+                        </EuiButtonEmpty>
+                      </div>,
                       <NativeRenderer
                         render={props.datasourceMap[datasourceId].renderDimensionEditor}
                         nativeProps={{

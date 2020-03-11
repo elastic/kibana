@@ -199,11 +199,9 @@ describe('editor_frame', () => {
             ExpressionRenderer={expressionRendererMock}
           />
         );
-        expect(mockVisualization.renderLayerConfigPanel).not.toHaveBeenCalled();
         expect(mockDatasource.renderDataPanel).not.toHaveBeenCalled();
       });
-      expect(mockVisualization.getLayerOptions).not.toHaveBeenCalled();
-      expect(mockDatasource.renderDataPanel).not.toHaveBeenCalled();
+      expect(mockDatasource.renderDataPanel).toHaveBeenCalled();
     });
 
     it('should not initialize visualization before datasource is initialized', async () => {

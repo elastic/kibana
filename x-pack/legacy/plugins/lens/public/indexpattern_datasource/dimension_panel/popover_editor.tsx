@@ -109,14 +109,14 @@ export function PopoverEditor(props: PopoverEditorProps) {
         items: getOperationTypes().map(({ operationType, compatibleWithCurrentField }) => ({
           name: operationPanels[operationType].displayName,
           id: operationType as string,
-          className: classNames('lnsPopoverEditor__operation', {
-            'lnsPopoverEditor__operation--selected': Boolean(
+          className: classNames('lnsIndexPatternDimensionEditor__operation', {
+            'lnsIndexPatternDimensionEditor__operation--selected': Boolean(
               incompatibleSelectedOperationType === operationType ||
                 (!incompatibleSelectedOperationType &&
                   selectedColumn &&
                   selectedColumn.operationType === operationType)
             ),
-            'lnsPopoverEditor__operation--incompatible': !compatibleWithCurrentField,
+            'lnsIndexPatternDimensionEditor__operation--incompatible': !compatibleWithCurrentField,
           }),
           'data-test-subj': `lns-indexPatternDimension${
             compatibleWithCurrentField ? '' : 'Incompatible'
@@ -182,7 +182,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
   }
 
   return (
-    <div id={columnId} className="lnsPopoverEditor">
+    <div id={columnId} className="lnsIndexPatternDimensionEditor">
       <EuiFlexGroup gutterSize="s" direction="column">
         <EuiFlexItem>
           <FieldSelect
@@ -258,10 +258,10 @@ export function PopoverEditor(props: PopoverEditorProps) {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={null} className={classNames('lnsPopoverEditor__left')}>
+            <EuiFlexItem grow={null} className={classNames('lnsIndexPatternDimensionEditor__left')}>
               <EuiSideNav items={getSideNavItems()} />
             </EuiFlexItem>
-            <EuiFlexItem grow={true} className="lnsPopoverEditor__right">
+            <EuiFlexItem grow={true} className="lnsIndexPatternDimensionEditor__right">
               {incompatibleSelectedOperationType && selectedColumn && (
                 <EuiCallOut
                   data-test-subj="indexPattern-invalid-operation"

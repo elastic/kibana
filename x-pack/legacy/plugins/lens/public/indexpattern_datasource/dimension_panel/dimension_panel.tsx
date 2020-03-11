@@ -186,32 +186,26 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
     props.state.layers[layerId].columns[props.columnId] || null;
 
   const { columnId, uniqueLabel } = props;
+  if (!selectedColumn) {
+    return null;
+  }
   return (
-    <div
+    <EuiLink
       id={columnId}
-      className={[
-        'lnsPopoverEditor',
-        selectedColumn ? 'lnsPopoverEditor__anchor' : 'lnsPopoverEditor__link',
-      ].join(' ')}
+      className="lnsConfigPanel__triggerLink"
+      onClick={() => {
+        props.togglePopover();
+      }}
+      data-test-subj="lns-dimensionTrigger"
+      aria-label={i18n.translate('xpack.lens.configure.editConfig', {
+        defaultMessage: 'Edit configuration',
+      })}
+      title={i18n.translate('xpack.lens.configure.editConfig', {
+        defaultMessage: 'Edit configuration',
+      })}
     >
-      {selectedColumn ? (
-        <EuiLink
-          className="lnsPopoverEditor__link"
-          onClick={() => {
-            props.togglePopover();
-          }}
-          data-test-subj="lns-dimensionTrigger"
-          aria-label={i18n.translate('xpack.lens.configure.editConfig', {
-            defaultMessage: 'Edit configuration',
-          })}
-          title={i18n.translate('xpack.lens.configure.editConfig', {
-            defaultMessage: 'Edit configuration',
-          })}
-        >
-          {uniqueLabel}
-        </EuiLink>
-      ) : null}
-    </div>
+      {uniqueLabel}
+    </EuiLink>
   );
 };
 
