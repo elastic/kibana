@@ -7,7 +7,7 @@
 import { set } from 'lodash';
 import {
   APICaller,
-  ElasticsearchServiceSetup,
+  ElasticsearchServiceStart,
   ISavedObjectsRepository,
   SavedObjectsServiceStart,
 } from 'src/core/server';
@@ -51,7 +51,7 @@ async function getDeprecationLoggingStatusValue(callAsCurrentUser: APICaller): P
 }
 
 export async function fetchUpgradeAssistantMetrics(
-  { adminClient }: ElasticsearchServiceSetup,
+  { legacy: { client: esClient } }: ElasticsearchServiceStart,
   savedObjects: SavedObjectsServiceStart
 ): Promise<UpgradeAssistantTelemetry> {
   const savedObjectsRepository = savedObjects.createInternalRepository();
@@ -60,7 +60,7 @@ export async function fetchUpgradeAssistantMetrics(
     UPGRADE_ASSISTANT_TYPE,
     UPGRADE_ASSISTANT_DOC_ID
   );
-  const callAsInternalUser = adminClient.callAsInternalUser.bind(adminClient);
+  const callAsInternalUser = esClient.callAsInternalUser.bind(esClient);
   const deprecationLoggingStatusValue = await getDeprecationLoggingStatusValue(callAsInternalUser);
 
   const getTelemetrySavedObject = (
@@ -107,7 +107,7 @@ export async function fetchUpgradeAssistantMetrics(
 }
 
 interface Dependencies {
-  elasticsearch: ElasticsearchServiceSetup;
+  elasticsearch: ElasticsearchServiceStart;
   savedObjects: SavedObjectsServiceStart;
   usageCollection: UsageCollectionSetup;
 }
