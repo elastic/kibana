@@ -28,7 +28,7 @@ export default function({ getService, getPageObjects }) {
 
   describe('Index patterns on aliases', function() {
     before(async function() {
-      await security.testUser.setRoles(['kibana_user', 'test_alias_reader']);
+      await security.testUser.setRoles(['kibana_admin', 'test_alias_reader']);
       await esArchiver.loadIfNeeded('alias');
       await esArchiver.load('empty_kibana');
       await es.indices.updateAliases({

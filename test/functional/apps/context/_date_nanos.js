@@ -32,7 +32,7 @@ export default function({ getService, getPageObjects }) {
 
   describe('context view for date_nanos', () => {
     before(async function() {
-      await security.testUser.setRoles(['kibana_user', 'kibana_date_nanos']);
+      await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos']);
       await esArchiver.loadIfNeeded('date_nanos');
       await kibanaServer.uiSettings.replace({ defaultIndex: TEST_INDEX_PATTERN });
       await kibanaServer.uiSettings.update({

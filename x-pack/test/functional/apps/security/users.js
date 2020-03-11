@@ -96,8 +96,8 @@ export default function({ getService, getPageObjects }) {
       expect(roles.kibana_admin.reserved).to.be(true);
       expect(roles.kibana_admin.deprecated).to.be(false);
 
-      expect(roles.kibana_user.reserved).to.be(true);
-      expect(roles.kibana_user.deprecated).to.be(true);
+      expect(roles.kibana_admin.reserved).to.be(true);
+      expect(roles.kibana_admin.deprecated).to.be(true);
 
       expect(roles.kibana_dashboard_only_user.reserved).to.be(true);
       expect(roles.kibana_dashboard_only_user.deprecated).to.be(true);

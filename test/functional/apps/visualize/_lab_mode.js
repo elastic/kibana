@@ -26,7 +26,7 @@ export default function({ getService, getPageObjects }) {
 
   describe('visualize lab mode', () => {
     before(async () => {
-      await security.testUser.setRoles(['kibana_user', 'test_logstash_reader']);
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
     });
 
     it('disabling does not break loading saved searches', async () => {

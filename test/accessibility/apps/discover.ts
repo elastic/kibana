@@ -30,7 +30,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Discover', () => {
     before(async () => {
-      await security.testUser.setRoles(['kibana_user', 'test_logstash_reader']);
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.update({

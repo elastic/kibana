@@ -30,7 +30,7 @@ export default function({ getService, getPageObjects }) {
 
   describe('test large strings', function() {
     before(async function() {
-      await security.testUser.setRoles(['kibana_user', 'kibana_large_strings']);
+      await security.testUser.setRoles(['kibana_admin', 'kibana_large_strings']);
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('hamlet');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'testlargestring' });

@@ -37,7 +37,7 @@ export default function({ getService, getPageObjects }) {
       log.debug('load kibana index with default index pattern');
       await PageObjects.common.navigateToApp('home');
       await security.testUser.setRoles([
-        'kibana_user',
+        'kibana_admin',
         'test_logstash_reader',
         'long_window_logstash',
       ]);

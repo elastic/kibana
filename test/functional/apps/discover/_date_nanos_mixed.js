@@ -31,7 +31,7 @@ export default function({ getService, getPageObjects }) {
     before(async function() {
       await esArchiver.loadIfNeeded('date_nanos_mixed');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'timestamp-*' });
-      await security.testUser.setRoles(['kibana_user', 'kibana_date_nanos_mixed']);
+      await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos_mixed']);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });

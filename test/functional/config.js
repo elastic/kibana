@@ -268,7 +268,7 @@ export default async function({ readConfigFile }) {
           kibana: [],
         },
       },
-      defaultRoles: ['test_logstash_reader', 'kibana_user'],
+      defaultRoles: ['test_logstash_reader', 'kibana_admin'],
     },
   };
 }

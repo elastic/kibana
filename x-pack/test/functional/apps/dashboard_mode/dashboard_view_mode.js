@@ -200,7 +200,7 @@ export default function({ getService, getPageObjects }) {
         await security.testUser.setRoles([
           'test_logstash_reader',
           'kibana_dashboard_only_user',
-          'kibana_user',
+          'kibana_admin',
         ]);
         await PageObjects.header.waitUntilLoadingHasFinished();
 

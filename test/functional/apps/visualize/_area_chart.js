@@ -61,7 +61,7 @@ export default function({ getService, getPageObjects }) {
 
     before(async function() {
       await security.testUser.setRoles([
-        'kibana_user',
+        'kibana_admin',
         'long_window_logstash',
         'test_logstash_reader',
       ]);
@@ -292,7 +292,7 @@ export default function({ getService, getPageObjects }) {
           .pop()
           .replace('embed=true', '');
         await PageObjects.common.navigateToUrl('visualize', embedUrl);
-        //await security.testUser.restoreDefaults();
+        await security.testUser.restoreDefaults();
       });
     });
 
