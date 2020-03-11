@@ -9,7 +9,7 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import { i18n } from '@kbn/i18n';
 import rison from 'rison-node';
 import { takeEvery, select } from 'redux-saga/effects';
-import { KibanaParsedUrl } from './kibana_parsed_url';
+import { format, parse } from 'url';
 import { GraphState, GraphStoreDependencies } from './store';
 import { UrlTemplate } from '../types';
 import { reset } from './global';
@@ -17,6 +17,7 @@ import { setDatasource, IndexpatternDatasource, requestDatasource } from './data
 import { outlinkEncoders } from '../helpers/outlink_encoders';
 import { urlTemplatePlaceholder } from '../helpers/url_template';
 import { matchesOne } from './helpers';
+import { modifyUrl } from '../../../../../src/core/utils';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/urlTemplates');
 
@@ -32,30 +33,32 @@ const initialTemplates: UrlTemplatesState = [];
 
 function generateDefaultTemplate(
   datasource: IndexpatternDatasource,
-  basePath: string
+  addBasePath: (url: string) => string
 ): UrlTemplate {
-  const kUrl = new KibanaParsedUrl({
-    appId: 'kibana',
-    basePath,
-    appPath: '/discover',
-  });
-
-  kUrl.addQueryParameter(
-    '_a',
-    rison.encode({
+  const appPath = modifyUrl('/discover', parsed => {
+    parsed.query._a = rison.encode({
       columns: ['_source'],
       index: datasource.id,
       interval: 'auto',
       query: { language: 'kuery', query: urlTemplatePlaceholder },
       sort: ['_score', 'desc'],
-    })
-  );
+    });
+  });
+  const parsedAppPath = parse(`/app/kibana#${appPath}`, true, true);
+  const formattedAppPath = format({
+    protocol: parsedAppPath.protocol,
+    host: parsedAppPath.host,
+    pathname: parsedAppPath.pathname,
+    query: parsedAppPath.query,
+    hash: parsedAppPath.hash,
+  });
 
   // replace the URI encoded version of the tag with the unescaped version
   // so it can be found with String.replace, regexp, etc.
-  const discoverUrl = kUrl
-    .getRootRelativePath()
-    .replace(encodeURIComponent(urlTemplatePlaceholder), urlTemplatePlaceholder);
+  const discoverUrl = addBasePath(formattedAppPath).replace(
+    encodeURIComponent(urlTemplatePlaceholder),
+    urlTemplatePlaceholder
+  );
 
   return {
     url: discoverUrl,
@@ -68,7 +71,7 @@ function generateDefaultTemplate(
   };
 }
 
-export const urlTemplatesReducer = (basePath: string) =>
+export const urlTemplatesReducer = (addBasePath: (url: string) => string) =>
   reducerWithInitialState(initialTemplates)
     .case(reset, () => initialTemplates)
     .cases([requestDatasource, setDatasource], (templates, datasource) => {
@@ -76,7 +79,7 @@ export const urlTemplatesReducer = (basePath: string) =>
         return initialTemplates;
       }
       const customTemplates = templates.filter(template => !template.isDefault);
-      return [...customTemplates, generateDefaultTemplate(datasource, basePath)];
+      return [...customTemplates, generateDefaultTemplate(datasource, addBasePath)];
     })
     .case(loadTemplates, (_currentTemplates, newTemplates) => newTemplates)
     .case(saveTemplate, (templates, { index: indexToUpdate, template: updatedTemplate }) => {

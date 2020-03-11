@@ -10,9 +10,11 @@ import { outlinkEncoders } from '../helpers/outlink_encoders';
 import { UrlTemplate } from '../types';
 
 describe('url_templates', () => {
+  const addBasePath = (url: string) => url;
+
   describe('reducer', () => {
     it('should create a default template as soon as datasource is known', () => {
-      const templates = urlTemplatesReducer('basepath')(
+      const templates = urlTemplatesReducer(addBasePath)(
         [],
         requestDatasource({
           type: 'indexpattern',
@@ -28,7 +30,7 @@ describe('url_templates', () => {
     });
 
     it('should keep non-default templates when switching datasource', () => {
-      const templates = urlTemplatesReducer('basepath')(
+      const templates = urlTemplatesReducer(addBasePath)(
         [
           {
             description: 'default template',
@@ -52,7 +54,7 @@ describe('url_templates', () => {
     });
 
     it('should remove isDefault flag when saving a template even if it is spreaded in', () => {
-      const templates = urlTemplatesReducer('basepath')(
+      const templates = urlTemplatesReducer(addBasePath)(
         [
           {
             description: 'abc',

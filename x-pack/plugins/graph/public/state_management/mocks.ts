@@ -49,7 +49,7 @@ export function createMockGraphStore({
   } as unknown) as GraphWorkspaceSavedObject;
 
   const mockedDeps: jest.Mocked<GraphStoreDependencies> = {
-    basePath: 'basepath',
+    addBasePath: jest.fn((url: string) => url),
     changeUrl: jest.fn(),
     chrome: ({
       setBreadcrumbs: jest.fn(),
@@ -83,7 +83,7 @@ export function createMockGraphStore({
   };
   const sagaMiddleware = createSagaMiddleware();
 
-  const rootReducer = createRootReducer(mockedDeps.basePath);
+  const rootReducer = createRootReducer(mockedDeps.addBasePath);
   const initializedRootReducer = (state: GraphState | undefined, action: AnyAction) =>
     rootReducer(state || (initialStateOverwrites as GraphState), action);
 

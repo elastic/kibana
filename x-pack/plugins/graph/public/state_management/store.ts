@@ -46,7 +46,7 @@ export interface GraphState {
 }
 
 export interface GraphStoreDependencies {
-  basePath: string;
+  addBasePath: (url: string) => string;
   indexPatternProvider: IndexPatternProvider;
   indexPatterns: IndexPatternSavedObject[];
   createWorkspace: (index: string, advancedSettings: AdvancedSettings) => void;
@@ -65,10 +65,10 @@ export interface GraphStoreDependencies {
   I18nContext: I18nStart['Context'];
 }
 
-export function createRootReducer(basePath: string) {
+export function createRootReducer(addBasePath: (url: string) => string) {
   return combineReducers({
     fields: fieldsReducer,
-    urlTemplates: urlTemplatesReducer(basePath),
+    urlTemplates: urlTemplatesReducer(addBasePath),
     advancedSettings: advancedSettingsReducer,
     datasource: datasourceReducer,
     metaData: metaDataReducer,
@@ -91,7 +91,7 @@ function registerSagas(sagaMiddleware: SagaMiddleware<object>, deps: GraphStoreD
 export const createGraphStore = (deps: GraphStoreDependencies) => {
   const sagaMiddleware = createSagaMiddleware();
 
-  const rootReducer = createRootReducer(deps.basePath);
+  const rootReducer = createRootReducer(deps.addBasePath);
 
   const store = createStore(rootReducer, applyMiddleware(sagaMiddleware));
 

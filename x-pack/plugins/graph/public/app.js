@@ -248,6 +248,7 @@ export function initGraphApp(angularModule, deps) {
 
     const store = createGraphStore({
       basePath: getBasePath(),
+      addBasePath,
       indexPatternProvider: $scope.indexPatternProvider,
       indexPatterns: $route.current.locals.indexPatterns,
       createWorkspace: (indexPattern, exploreControls) => {
