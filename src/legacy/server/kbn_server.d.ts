@@ -77,7 +77,7 @@ declare module 'hapi' {
     addScopedTutorialContextFactory: (
       scopedTutorialContextFactory: (...args: any[]) => any
     ) => void;
-    savedObjectsManagement(): SavedObjectsManagement;
+    getSavedObjectsManagement(): SavedObjectsManagement;
     getInjectedUiAppVars: (pluginName: string) => { [key: string]: any };
     getUiNavLinks(): Array<{ _id: string }>;
     addMemoizedFactoryToRequest: (
