@@ -84,16 +84,9 @@ exports[`DonutChart component renders a donut chart 1`] = `
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <svg
-                  aria-hidden="true"
-                  class="euiIcon euiIcon--medium euiIcon-isLoading"
-                  focusable="false"
-                  height="16"
-                  role="img"
-                  style="fill:#bd271e"
-                  viewBox="0 0 16 16"
-                  width="16"
-                  xmlns="http://www.w3.org/2000/svg"
+                <div
+                  color="#bd271e"
+                  data-euiicon-type="dot"
                 />
               </div>
               <div
@@ -132,16 +125,9 @@ exports[`DonutChart component renders a donut chart 1`] = `
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <svg
-                  aria-hidden="true"
-                  class="euiIcon euiIcon--medium euiIcon-isLoading"
-                  focusable="false"
-                  height="16"
-                  role="img"
-                  style="fill:#d3dae6"
-                  viewBox="0 0 16 16"
-                  width="16"
-                  xmlns="http://www.w3.org/2000/svg"
+                <div
+                  color="#d3dae6"
+                  data-euiicon-type="dot"
                 />
               </div>
               <div
@@ -210,15 +196,9 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
       height="125"
       width="125"
     />
-    <svg
-      aria-hidden="true"
-      class="euiIcon euiIcon--medium euiIcon-isLoading c0 greenCheckIcon"
-      focusable="false"
-      height="16"
-      role="img"
-      viewBox="0 0 16 16"
-      width="16"
-      xmlns="http://www.w3.org/2000/svg"
+    <div
+      class="c0 greenCheckIcon"
+      data-euiicon-type="checkInCircleFilled"
     />
   </div>
   <div
@@ -242,16 +222,9 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <svg
-                  aria-hidden="true"
-                  class="euiIcon euiIcon--medium euiIcon-isLoading"
-                  focusable="false"
-                  height="16"
-                  role="img"
-                  style="fill:#bd271e"
-                  viewBox="0 0 16 16"
-                  width="16"
-                  xmlns="http://www.w3.org/2000/svg"
+                <div
+                  color="#bd271e"
+                  data-euiicon-type="dot"
                 />
               </div>
               <div
@@ -290,16 +263,9 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <svg
-                  aria-hidden="true"
-                  class="euiIcon euiIcon--medium euiIcon-isLoading"
-                  focusable="false"
-                  height="16"
-                  role="img"
-                  style="fill:#d3dae6"
-                  viewBox="0 0 16 16"
-                  width="16"
-                  xmlns="http://www.w3.org/2000/svg"
+                <div
+                  color="#d3dae6"
+                  data-euiicon-type="dot"
                 />
               </div>
               <div
