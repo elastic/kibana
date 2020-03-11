@@ -67,5 +67,33 @@ export function EndpointPageProvider({ getService }: FtrProviderContext) {
         return true;
       });
     },
+
+    async hostFlyoutDescriptionKeys(dataTestSubj: string) {
+      await testSubjects.exists(dataTestSubj);
+      const detailsData: WebElementWrapper = await testSubjects.find(dataTestSubj);
+      const $ = await detailsData.parseDomContent();
+      return $('dt')
+        .toArray()
+        .map(key =>
+          $(key)
+            .text()
+            .replace(/&nbsp;/g, '')
+            .trim()
+        );
+    },
+
+    async hostFlyoutDescriptionValues(dataTestSubj: string) {
+      await testSubjects.exists(dataTestSubj);
+      const detailsData: WebElementWrapper = await testSubjects.find(dataTestSubj);
+      const $ = await detailsData.parseDomContent();
+      return $('dd')
+        .toArray()
+        .map(value =>
+          $(value)
+            .text()
+            .replace(/&nbsp;/g, '')
+            .trim()
+        );
+    },
   };
 }

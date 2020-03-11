@@ -12,7 +12,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
 
-  describe('Endpoint host list', function() {
+  describe('host list', function() {
     this.tags('ciGroup7');
     before(async () => {
       await esArchiver.load('endpoint/metadata/api_feature');
@@ -71,7 +71,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(tableData).to.eql(expectedData);
     });
 
-    it('displays no items found', async () => {
+    it('display details flyout when the hostname is clicked on', async () => {
+      await (await testSubjects.find('hostnameCellLink')).click();
+      await testSubjects.existOrFail('hostDetailsUpperList');
+      await testSubjects.existOrFail('hostDetailsLowerList');
+    });
+
+    it('displays no items found when empty', async () => {
       // clear out the data and reload the page
       await esArchiver.unload('endpoint/metadata/api_feature');
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/hosts');
@@ -82,18 +88,46 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await esArchiver.load('endpoint/metadata/api_feature');
     });
 
-    describe('when on the details page', () => {
+    describe('has a url with a host id', () => {
       before(async () => {
-        await esArchiver.load('endpoint/metadata/api_feature');
         await pageObjects.common.navigateToUrlWithBrowserHistory(
           'endpoint',
           '/hosts',
-          'selected_host=de5bf078-c247-4944-a198-6e2bc27e0b7b'
+          'selected_host=1fb3e58f-6ab0-4406-9d2a-91911207a712'
         );
       });
 
-      it('displays shows a flyout', async () => {
+      it('shows a flyout', async () => {
         await testSubjects.existOrFail('hostDetailsFlyout');
+      });
+
+      it('displays details row headers', async () => {
+        const expectedData = [
+          'OS',
+          'Last Seen',
+          'Alerts',
+          'Policy',
+          'Policy Status',
+          'IP Address',
+          'Hostname',
+          'Sensor Version',
+        ];
+        const keys = await pageObjects.endpoint.hostFlyoutDescriptionKeys('hostDetailsFlyout');
+        expect(keys).to.eql(expectedData);
+      });
+
+      it('displays details row descriptions', async () => {
+        const values = await pageObjects.endpoint.hostFlyoutDescriptionValues('hostDetailsFlyout');
+        expect(values).to.eql([
+          'Windows 10',
+          '1/24/2020',
+          '0',
+          'C2A9093E-E289-4C0A-AA44-8C32A414FA7A',
+          'active',
+          '10.192.213.13010.70.28.129',
+          'cadmann-4.example.com',
+          '6.6.1',
+        ]);
       });
     });
     after(async () => {
