@@ -8,7 +8,6 @@ import React from 'react';
 import { render } from '@testing-library/react';
 
 import * as CheckPrivilige from '../../../../../privilege/check_privilege';
-import { queryByTestSubj } from '../../../../../util/test_utils';
 
 import { DeleteAction } from './action_delete';
 
@@ -21,24 +20,22 @@ jest.mock('../../../../../privilege/check_privilege', () => ({
 
 describe('DeleteAction', () => {
   test('When canDeleteDataFrameAnalytics permission is false, button should be disabled.', () => {
-    const { container } = render(<DeleteAction item={mockAnalyticsListItem} />);
-    expect(queryByTestSubj(container, 'mlAnalyticsJobDeleteButton')).toHaveAttribute('disabled');
+    const { getByTestId } = render(<DeleteAction item={mockAnalyticsListItem} />);
+    expect(getByTestId('mlAnalyticsJobDeleteButton')).toHaveAttribute('disabled');
   });
 
   test('When canDeleteDataFrameAnalytics permission is true, button should not be disabled.', () => {
     const mock = jest.spyOn(CheckPrivilige, 'checkPermission');
     mock.mockImplementation(p => p === 'canDeleteDataFrameAnalytics');
-    const { container } = render(<DeleteAction item={mockAnalyticsListItem} />);
+    const { getByTestId } = render(<DeleteAction item={mockAnalyticsListItem} />);
 
-    expect(queryByTestSubj(container, 'mlAnalyticsJobDeleteButton')).not.toHaveAttribute(
-      'disabled'
-    );
+    expect(getByTestId('mlAnalyticsJobDeleteButton')).not.toHaveAttribute('disabled');
 
     mock.mockRestore();
   });
 
   test('When job is running, delete button should be disabled.', () => {
-    const { container } = render(
+    const { getByTestId } = render(
       <DeleteAction
         item={{
           ...mockAnalyticsListItem,
@@ -47,6 +44,6 @@ describe('DeleteAction', () => {
       />
     );
 
-    expect(queryByTestSubj(container, 'mlAnalyticsJobDeleteButton')).toHaveAttribute('disabled');
+    expect(getByTestId('mlAnalyticsJobDeleteButton')).toHaveAttribute('disabled');
   });
 });
