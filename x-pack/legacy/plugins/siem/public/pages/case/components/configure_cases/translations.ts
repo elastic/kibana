@@ -144,14 +144,14 @@ export const SAVE_CHANGES = i18n.translate('xpack.siem.case.configureCases.saveC
   defaultMessage: 'Save Changes',
 });
 
-export const WARNING_NO_CONNETCTOR_TITLE = i18n.translate(
+export const WARNING_NO_CONNECTOR_TITLE = i18n.translate(
   'xpack.siem.case.configureCases.warningTitle',
   {
     defaultMessage: 'Warning',
   }
 );
 
-export const WARNING_NO_CONNETCTOR_MESSAGE = i18n.translate(
+export const WARNING_NO_CONNECTOR_MESSAGE = i18n.translate(
   'xpack.siem.case.configureCases.warningMessage',
   {
     defaultMessage:

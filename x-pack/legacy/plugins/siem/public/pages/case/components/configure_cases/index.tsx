@@ -128,8 +128,8 @@ const ConfigureCasesComponent: React.FC = () => {
     <FormWrapper>
       {!connectorIsValid && (
         <SectionWrapper style={{ marginTop: 0 }}>
-          <EuiCallOut title={i18n.WARNING_NO_CONNETCTOR_TITLE} color="warning" iconType="help">
-            {i18n.WARNING_NO_CONNETCTOR_MESSAGE}
+          <EuiCallOut title={i18n.WARNING_NO_CONNECTOR_TITLE} color="warning" iconType="help">
+            {i18n.WARNING_NO_CONNECTOR_MESSAGE}
           </EuiCallOut>
         </SectionWrapper>
       )}
