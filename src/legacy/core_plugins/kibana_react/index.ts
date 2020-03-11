@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { resolve } from 'path';
 import { Legacy } from '../../../../kibana';
 
 // eslint-disable-next-line import/no-default-export
