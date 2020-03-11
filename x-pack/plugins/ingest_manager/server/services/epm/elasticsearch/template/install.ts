@@ -12,7 +12,7 @@ import {
   ElasticsearchAssetType,
 } from '../../../../types';
 import { CallESAsCurrentUser } from '../../../../types';
-import { Field, loadFieldsFromYaml } from '../../fields/field';
+import { Field, Fields, loadFieldsFromYaml } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import { generateMappings, generateTemplateName, getTemplate } from './template';
 import * as Registry from '../../registry';
@@ -98,7 +98,7 @@ export async function installTemplate({
   dataset: Dataset;
   packageVersion: string;
 }): Promise<AssetReference> {
-  const mappings = generateMappings(fields);
+  const mappings = generateMappings(flattenAndPreprocessFields(fields));
   const templateName = generateTemplateName(dataset);
   let pipelineName;
   if (dataset.ingest_pipeline) {
@@ -118,3 +118,89 @@ export async function installTemplate({
   // The id of a template is its name
   return { id: templateName, type: IngestAssetType.IndexTemplate };
 }
+
+/**
+ * flattenAndPreprocessFields
+ *
+ * flattens fields and renames them with a path of the parent names
+ * also does some additional preprocessing of the fields for use in index templates
+ *
+ * There is a very similar function in kibana/index_pattern/install, at some point it
+ * might be useful to pull out the similarities and put them into a generic version in
+ * fields/field.
+ */
+
+export const flattenAndPreprocessFields = (allFields: Fields): Fields => {
+  const flatten = (fields: Fields): Fields =>
+    fields.reduce<Field[]>((acc, field) => {
+      // recurse through nested fields
+      if (field.type === 'group' && field.fields?.length) {
+        // skip if field.enabled is explicitly set to false
+        if (!field.hasOwnProperty('enabled') || field.enabled === true) {
+          acc = renameAndFlatten(field, field.fields, [...acc]);
+        }
+      } else {
+        // handle alias type fields
+        if (field.type === 'alias' && field.path) {
+          const foundField = findFieldByPath(allFields, field.path);
+          // if aliased leaf field is found, this is a valid alias field
+          if (foundField) {
+            acc.push(field);
+          }
+        } else {
+          acc.push(field);
+        }
+
+        // for each field in multi_field add new field
+        if (field.multi_fields?.length) {
+          acc = renameAndFlatten(field, field.multi_fields, [...acc]);
+        }
+      }
+      return acc;
+    }, []);
+
+  // helper function to call flatten() and rename the fields
+  const renameAndFlatten = (field: Field, fields: Fields, acc: Fields): Fields => {
+    const flattenedFields = flatten(fields);
+    flattenedFields.forEach(nestedField => {
+      acc.push({
+        ...nestedField,
+        name: `${field.name}.${nestedField.name}`,
+      });
+    });
+    return acc;
+  };
+
+  return flatten(allFields);
+};
+
+/**
+ * search through fields with field's path property
+ * returns undefined if field not found or field is not a leaf node
+ * @param  allFields fields to search
+ * @param  path dot separated path from field.path
+ */
+const findFieldByPath = (allFields: Fields, path: string): Field | undefined => {
+  const pathParts = path.split('.');
+  return getField(allFields, pathParts);
+};
+
+const getField = (fields: Fields, pathNames: string[]): Field | undefined => {
+  if (!pathNames.length) return undefined;
+  // get the first rest of path names
+  const [name, ...restPathNames] = pathNames;
+  for (const field of fields) {
+    if (field.name === name) {
+      // check field's fields, passing in the remaining path names
+      if (field.fields && field.fields.length > 0) {
+        return getField(field.fields, restPathNames);
+      }
+      // no nested fields to search, but still more names - not found
+      if (restPathNames.length) {
+        return undefined;
+      }
+      return field;
+    }
+  }
+  return undefined;
+};
