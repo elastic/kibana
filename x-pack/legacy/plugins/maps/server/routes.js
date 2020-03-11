@@ -38,7 +38,8 @@ export function initRoutes(server, licenseUid) {
   if (mapConfig.includeElasticMapsService) {
     emsClient = new EMSClient({
       language: i18n.getLocale(),
-      kbnVersion: serverConfig.get('pkg.version'),
+      appVersion: serverConfig.get('pkg.version'),
+      appName: 'kibana',
       fileApiUrl: mapConfig.emsFileApiUrl,
       tileApiUrl: mapConfig.emsTileApiUrl,
       landingPageUrl: mapConfig.emsLandingPageUrl,

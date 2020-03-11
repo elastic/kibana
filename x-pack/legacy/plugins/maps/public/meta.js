@@ -56,7 +56,8 @@ export function getEMSClient() {
 
       emsClient = new EMSClient({
         language: i18n.getLocale(),
-        kbnVersion: chrome.getInjected('kbnPkgVersion'),
+        appVersion: chrome.getInjected('kbnPkgVersion'),
+        appName: 'kibana',
         tileApiUrl,
         fileApiUrl,
         landingPageUrl: chrome.getInjected('emsLandingPageUrl'),
