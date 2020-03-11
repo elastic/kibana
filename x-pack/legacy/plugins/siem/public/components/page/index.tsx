@@ -14,18 +14,17 @@ import {
   EuiPage,
 } from '@elastic/eui';
 import styled, { createGlobalStyle } from 'styled-components';
-import { IS_DRAGGING_CLASS_NAME } from '../drag_and_drop/helpers';
 
 /*
   SIDE EFFECT: the following `createGlobalStyle` overrides default styling in angular code that was not theme-friendly
   and `EuiPopover`, `EuiToolTip` global styles
 */
 export const AppGlobalStyle = createGlobalStyle`
-  body.${IS_DRAGGING_CLASS_NAME} {
-    /* .euiToolTipAnchor {
-      pointer-events: none;
-    } */
+  /* dirty hack to fix draggables with tooltip on FF */
+  body#siem-app {
+    position: static;
   }
+  /* end of dirty hack to fix draggables with tooltip on FF */
   
   div.app-wrapper {
     background-color: rgba(0,0,0,0);

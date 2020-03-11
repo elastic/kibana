@@ -9,7 +9,7 @@ import { Draggable } from 'react-beautiful-dnd';
 import { Resizable, ResizeCallback } from 're-resizable';
 
 import { ColumnHeaderOptions } from '../../../../store/timeline/model';
-import { getDraggableFieldId, DRAG_TYPE_FIELD } from '../../../drag_and_drop/helpers';
+import { getDraggableFieldId } from '../../../drag_and_drop/helpers';
 import { OnColumnRemoved, OnColumnSorted, OnFilterChange, OnColumnResized } from '../../events';
 import { EventsTh, EventsThContent, EventsHeadingHandle } from '../../styles';
 import { Sort } from '../sort';
@@ -82,7 +82,6 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
         draggableId={draggableId}
         index={draggableIndex}
         key={header.id}
-        type={DRAG_TYPE_FIELD}
       >
         {dragProvided => (
           <EventsTh

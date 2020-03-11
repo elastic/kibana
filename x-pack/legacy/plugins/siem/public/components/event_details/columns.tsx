@@ -133,7 +133,6 @@ export const getColumns = ({
                 fieldId: field,
               })}
               index={0}
-              type={DRAG_TYPE_FIELD}
             >
               {provided => (
                 <div

@@ -104,7 +104,6 @@ export const getFieldItems = ({
             fieldId: field.name || '',
           })}
           index={0}
-          type={DRAG_TYPE_FIELD}
         >
           {provided => (
             <div {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>

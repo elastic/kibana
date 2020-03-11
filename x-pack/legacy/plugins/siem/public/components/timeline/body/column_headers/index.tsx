@@ -55,25 +55,25 @@ interface Props {
   toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
-interface ConditionalPortalProps {
+interface DraggableContainerProps {
   children: React.ReactNode;
-  registerProvider: () => void;
-  unregisterProvider: () => void;
+  onMount: () => void;
+  onUnmount: () => void;
 }
 
-export const ConditionalPortal = React.memo<ConditionalPortalProps>(
-  ({ children, registerProvider, unregisterProvider }) => {
+export const DraggableContainer = React.memo<DraggableContainerProps>(
+  ({ children, onMount, onUnmount }) => {
     useEffect(() => {
-      registerProvider();
+      onMount();
 
-      return () => unregisterProvider();
-    }, [registerProvider, unregisterProvider]);
+      return () => onUnmount();
+    }, [onMount, onUnmount]);
 
     return <>{children}</>;
   }
 );
 
-ConditionalPortal.displayName = 'ConditionalPortal';
+DraggableContainer.displayName = 'DraggableContainer';
 
 /** Renders the timeline header columns */
 export const ColumnHeadersComponent = ({
@@ -105,12 +105,13 @@ export const ColumnHeadersComponent = ({
 
   const renderClone: DraggableChildrenFn = useCallback(
     (dragProvided, dragSnapshot, rubric) => {
-      console.error('close', dragProvided, dragSnapshot, rubric);
+      // TODO: Remove after github.com/DefinitelyTyped/DefinitelyTyped/pull/43057 is merged
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const index = (rubric as any).source.index;
       const header = columnHeaders[index];
 
-      const registerProvider = () => setDraggingIndex(index);
-      const unregisterProvider = () => setDraggingIndex(null);
+      const onMount = () => setDraggingIndex(index);
+      const onUnmount = () => setDraggingIndex(null);
 
       return (
         <EventsTh
@@ -119,14 +120,11 @@ export const ColumnHeadersComponent = ({
           {...dragProvided.dragHandleProps}
           ref={dragProvided.innerRef}
         >
-          <ConditionalPortal
-            registerProvider={registerProvider}
-            unregisterProvider={unregisterProvider}
-          >
+          <DraggableContainer onMount={onMount} onUnmount={onUnmount}>
             <DragEffects>
               <DraggableFieldBadge fieldId={header.id} fieldWidth={`${header.width}px`} />
             </DragEffects>
-          </ConditionalPortal>
+          </DraggableContainer>
         </EventsTh>
       );
     },
