@@ -6,12 +6,11 @@
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { identity } from 'fp-ts/lib/function';
-import React, { useMemo } from 'react';
+import React from 'react';
 
-import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { TimeRange } from '../../../../../../common/http_api/shared';
 import { getEntitySpecificSingleMetricViewerLink } from '../../../../../components/logging/log_analysis_results';
+import { useLinkProps } from '../../../../../hooks/use_link_props';
 
 export const AnalyzeCategoryDatasetInMlAction: React.FunctionComponent<{
   categorizationJobId: string;
@@ -19,19 +18,11 @@ export const AnalyzeCategoryDatasetInMlAction: React.FunctionComponent<{
   dataset: string;
   timeRange: TimeRange;
 }> = ({ categorizationJobId, categoryId, dataset, timeRange }) => {
-  const prependBasePath = useKibana().services.http?.basePath?.prepend ?? identity;
-  const href = useMemo(
-    () =>
-      getEntitySpecificSingleMetricViewerLink(
-        prependBasePath('/app/ml'),
-        categorizationJobId,
-        timeRange,
-        {
-          'event.dataset': dataset,
-          mlcategory: `${categoryId}`,
-        }
-      ),
-    [categorizationJobId, categoryId, dataset, prependBasePath, timeRange]
+  const linkProps = useLinkProps(
+    getEntitySpecificSingleMetricViewerLink(categorizationJobId, timeRange, {
+      'event.dataset': dataset,
+      mlcategory: `${categoryId}`,
+    })
   );
 
   return (
@@ -39,8 +30,8 @@ export const AnalyzeCategoryDatasetInMlAction: React.FunctionComponent<{
       <EuiButtonIcon
         aria-label={analyseCategoryDatasetInMlButtonLabel}
         iconType="machineLearningApp"
-        href={href}
         data-test-subj="analyzeCategoryDatasetInMlButton"
+        {...linkProps}
       />
     </EuiToolTip>
   );
