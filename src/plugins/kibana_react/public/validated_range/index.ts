@@ -17,5 +17,4 @@
  * under the License.
  */
 
-// @ts-ignore
 export { ValidatedDualRange } from './validated_dual_range';
