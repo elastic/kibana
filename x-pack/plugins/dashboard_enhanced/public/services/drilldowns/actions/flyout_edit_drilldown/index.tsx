@@ -57,6 +57,7 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
           onClose={() => handle.close()}
           context={context}
           viewMode={'manage'}
+          dynamicActionsManager={context.embeddable.dynamicActions!}
         />
       )
     );

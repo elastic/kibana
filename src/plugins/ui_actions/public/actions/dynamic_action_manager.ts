@@ -70,6 +70,35 @@ export class DynamicActionManager {
     this.reviveAction(event);
   }
 
+  public async updateEvent(
+    eventId: string,
+    action: SerializedAction<unknown>,
+    triggerId = 'VALUE_CLICK_TRIGGER'
+  ) {
+    const event: SerializedEvent = {
+      eventId,
+      triggerId,
+      action,
+    };
+
+    const oldEvent = await this.params.storage.read(eventId);
+    this.killAction(oldEvent);
+    await this.params.storage.update(event);
+    this.reviveAction(event);
+  }
+
+  public async deleteEvents(eventIds: string[]) {
+    const eventsToKill = (await this.params.storage.list()).filter(event =>
+      eventIds.includes(event.eventId)
+    );
+    await Promise.all(eventIds.map(eventId => this.params.storage.remove(eventId)));
+    eventsToKill.forEach(event => this.killAction(event));
+  }
+
+  public async list(): Promise<SerializedEvent[]> {
+    return await this.params.storage.list();
+  }
+
   public async count(): Promise<number> {
     return await this.params.storage.count();
   }

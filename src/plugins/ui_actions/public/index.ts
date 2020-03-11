@@ -35,6 +35,8 @@ export {
   ActionStorage as UiActionsActionStorage,
   SerializedEvent as UiActionsSerializedEvent,
   SerializedAction as UiActionsSerializedAction,
+  AnyActionFactory,
+  DynamicActionManager,
 } from './actions';
 export { buildContextMenuForActions, contextMenuSeparatorAction } from './context_menu';
 export {

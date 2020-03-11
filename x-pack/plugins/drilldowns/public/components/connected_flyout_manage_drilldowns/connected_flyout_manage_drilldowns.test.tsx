@@ -14,6 +14,7 @@ import {
 } from '../../../../advanced_ui_actions/public/components/action_wizard/test_data';
 import { StubBrowserStorage } from '../../../../../../src/test_utils/public/stub_browser_storage';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { mockDynamicActionManager } from './test_data';
 
 const storage = new Storage(new StubBrowserStorage());
 const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
@@ -35,7 +36,9 @@ beforeEach(() => {
 });
 
 test('<FlyoutManageDrilldowns/> should render in manage view and should allow to create new drilldown', async () => {
-  const screen = render(<FlyoutManageDrilldowns context={{}} />);
+  const screen = render(
+    <FlyoutManageDrilldowns context={{}} dynamicActionsManager={mockDynamicActionManager} />
+  );
 
   // wait for initial render. It is async because resolving compatible action factories is async
   await wait(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
@@ -71,7 +74,9 @@ test('<FlyoutManageDrilldowns/> should render in manage view and should allow to
 });
 
 test('Should show drilldown welcome message. Should be able to dismiss it', async () => {
-  let screen = render(<FlyoutManageDrilldowns context={{}} />);
+  let screen = render(
+    <FlyoutManageDrilldowns context={{}} dynamicActionsManager={mockDynamicActionManager} />
+  );
 
   // wait for initial render. It is async because resolving compatible action factories is async
   await wait(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
@@ -81,7 +86,9 @@ test('Should show drilldown welcome message. Should be able to dismiss it', asyn
   expect(screen.queryByTestId(welcomeMessageTestSubj)).toBeNull();
   cleanup();
 
-  screen = render(<FlyoutManageDrilldowns context={{}} />);
+  screen = render(
+    <FlyoutManageDrilldowns context={{}} dynamicActionsManager={mockDynamicActionManager} />
+  );
   // wait for initial render. It is async because resolving compatible action factories is async
   await wait(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
   expect(screen.queryByTestId(welcomeMessageTestSubj)).toBeNull();

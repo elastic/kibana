@@ -54,6 +54,7 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
           onClose={() => handle.close()}
           context={context}
           viewMode={'create'}
+          dynamicActionsManager={context.embeddable.dynamicActions!}
         />
       )
     );

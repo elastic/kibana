@@ -35,7 +35,7 @@ export interface FlyoutDrilldownWizardProps<
 > {
   drilldownActionFactories: AnyActionFactory[];
 
-  onSubmit?: (drilldownWizardConfig: DrilldownWizardConfig) => void;
+  onSubmit?: (drilldownWizardConfig: Required<DrilldownWizardConfig>) => void;
   onDelete?: () => void;
   onClose?: () => void;
   onBack?: () => void;
@@ -70,7 +70,9 @@ export function FlyoutDrilldownWizard<
       }
   );
 
-  const isActionValid = (): boolean => {
+  const isActionValid = (
+    config: DrilldownWizardConfig
+  ): config is Required<DrilldownWizardConfig> => {
     if (!wizardConfig.name) return false;
     if (!wizardConfig.actionFactory) return false;
     if (!wizardConfig.actionConfig) return false;
@@ -81,12 +83,12 @@ export function FlyoutDrilldownWizard<
   const footer = (
     <EuiButton
       onClick={() => {
-        if (isActionValid()) {
+        if (isActionValid(wizardConfig)) {
           onSubmit(wizardConfig);
         }
       }}
       fill
-      isDisabled={!isActionValid()}
+      isDisabled={!isActionValid(wizardConfig)}
     >
       {mode === 'edit' ? txtEditDrilldownButtonLabel : txtCreateDrilldownButtonLabel}
     </EuiButton>
