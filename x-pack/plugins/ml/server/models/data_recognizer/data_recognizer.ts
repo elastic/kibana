@@ -10,7 +10,7 @@ import numeral from '@elastic/numeral';
 import { CallAPIOptions, RequestHandlerContext, SavedObjectsClientContract } from 'kibana/server';
 import { IndexPatternAttributes } from 'src/plugins/data/server';
 import { merge } from 'lodash';
-import { MlJob } from '../../../../../legacy/plugins/ml/common/types/jobs';
+import { CombinedJobWithStats } from '../../../../../legacy/plugins/ml/common/types/anomaly_detection_jobs';
 import {
   KibanaObjects,
   ModuleDataFeed,
@@ -29,7 +29,6 @@ import {
   prefixDatafeedId,
 } from '../../../../../legacy/plugins/ml/common/util/job_utils';
 import { mlLog } from '../../client/log';
-// @ts-ignore
 import { jobServiceProvider } from '../job_service';
 import { resultsServiceProvider } from '../results_service';
 
@@ -61,7 +60,7 @@ interface RawModuleConfig {
 }
 
 interface MlJobStats {
-  jobs: MlJob[];
+  jobs: CombinedJobWithStats[];
 }
 
 interface Config {

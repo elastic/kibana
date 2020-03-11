@@ -105,7 +105,7 @@ export function initVisualizeApp(app, deps) {
         resolve: {
           savedVis: function($route, $rootScope, kbnUrl, history) {
             const { core, data, savedVisualizations, visualizations, toastNotifications } = deps;
-            const visTypes = visualizations.types.all();
+            const visTypes = visualizations.all();
             const visType = find(visTypes, { name: $route.current.params.type });
             const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
             const hasIndex =
