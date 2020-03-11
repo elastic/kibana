@@ -1,6 +1,6 @@
 #!/bin/groovy
 
-library 'kibana-pipeline-library@gh-pr-changes'
+library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
 kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
