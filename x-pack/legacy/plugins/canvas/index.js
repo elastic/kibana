@@ -26,11 +26,7 @@ export function canvas(kibana) {
         main: 'plugins/canvas/legacy_start',
         category: DEFAULT_APP_CATEGORIES.analyze,
       },
-      interpreter: [
-        'plugins/canvas/browser_functions',
-        'plugins/canvas/renderers',
-        'plugins/canvas/interpreter_expression_types',
-      ],
+      interpreter: ['plugins/canvas/legacy_register_interpreter'],
       styleSheetPaths: resolve(__dirname, 'public/style/index.scss'),
       hacks: [
         // window.onerror override

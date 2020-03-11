@@ -22,14 +22,8 @@
 // They can stay even after NP cutover
 import angular from 'angular';
 import { EuiIcon } from '@elastic/eui';
-// @ts-ignore
-import { StateProvider } from 'ui/state_management/state';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
-// @ts-ignore
-import { AppStateProvider } from 'ui/state_management/app_state';
-// @ts-ignore
-import { GlobalStateProvider } from 'ui/state_management/global_state';
 // @ts-ignore
 import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
 // @ts-ignore
@@ -113,8 +107,6 @@ export function initializeInnerAngularModule(
     createLocalConfigModule(core.uiSettings);
     createLocalKbnUrlModule();
     createLocalTopNavModule(navigation);
-    createLocalGlobalStateModule();
-    createLocalAppStateModule();
     createLocalStorageModule();
     createElasticSearchModule(data);
     createPagerFactoryModule();
@@ -132,6 +124,7 @@ export function initializeInnerAngularModule(
         'discoverPrivate',
         'discoverDocTable',
         'discoverPagerFactory',
+        'discoverPromise',
       ])
       .config(watchMultiDecorator)
       .directive('icon', reactDirective => reactDirective(EuiIcon))
@@ -148,9 +141,8 @@ export function initializeInnerAngularModule(
       'discoverConfig',
       'discoverI18n',
       'discoverPrivate',
+      'discoverPromise',
       'discoverTopNav',
-      'discoverGlobalState',
-      'discoverAppState',
       'discoverLocalStorageProvider',
       'discoverEs',
       'discoverDocTable',
@@ -169,19 +161,6 @@ export function initializeInnerAngularModule(
     .directive('discFieldChooser', createFieldChooserDirective)
     .directive('discoverFieldChooser', createDiscoverFieldChooserDirective)
     .service('debounce', ['$timeout', DebounceProviderTimeout]);
-}
-
-export function createLocalGlobalStateModule() {
-  angular
-    .module('discoverGlobalState', [
-      'discoverPrivate',
-      'discoverConfig',
-      'discoverKbnUrl',
-      'discoverPromise',
-    ])
-    .service('globalState', function(Private: IPrivate) {
-      return Private(GlobalStateProvider);
-    });
 }
 
 function createLocalKbnUrlModule() {
@@ -229,26 +208,6 @@ function createLocalI18nModule() {
     .directive('i18nId', i18nDirective);
 }
 
-function createLocalAppStateModule() {
-  angular
-    .module('discoverAppState', [
-      'discoverGlobalState',
-      'discoverPrivate',
-      'discoverConfig',
-      'discoverKbnUrl',
-      'discoverPromise',
-    ])
-    .service('AppState', function(Private: IPrivate) {
-      return Private(AppStateProvider);
-    })
-    .service('getAppState', function(Private: any) {
-      return Private(AppStateProvider).getAppState;
-    })
-    .service('State', function(Private: any) {
-      return Private(StateProvider);
-    });
-}
-
 function createLocalStorageModule() {
   angular
     .module('discoverLocalStorageProvider', ['discoverPrivate'])
@@ -280,7 +239,6 @@ function createDocTableModule() {
     .module('discoverDocTable', [
       'discoverKbnUrl',
       'discoverConfig',
-      'discoverAppState',
       'discoverPagerFactory',
       'react',
     ])
