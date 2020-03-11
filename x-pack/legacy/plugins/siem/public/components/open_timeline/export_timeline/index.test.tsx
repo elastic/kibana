@@ -6,13 +6,12 @@
 
 import React from 'react';
 import { mockSelectedTimeline } from './mocks';
-import { ReactWrapper, mount } from 'enzyme';
+import { mount } from 'enzyme';
 import { useExportTimeline, ExportTimeline } from '.';
 import { get } from 'lodash/fp';
 
 describe('useExportTimeline', () => {
   describe('call with selected timelines', () => {
-    let wrapper: ReactWrapper;
     let exportTimelineRes: ExportTimeline;
     const TestHook = () => {
       exportTimelineRes = useExportTimeline(mockSelectedTimeline);
@@ -20,7 +19,7 @@ describe('useExportTimeline', () => {
     };
 
     beforeAll(() => {
-      wrapper = mount(<TestHook />);
+      mount(<TestHook />);
     });
 
     test('Downloader should be disabled by default', () => {
@@ -48,7 +47,6 @@ describe('useExportTimeline', () => {
   });
 
   describe('call without selected timelines', () => {
-    let wrapper: ReactWrapper;
     let exportTimelineRes: ExportTimeline;
     const TestHook = () => {
       exportTimelineRes = useExportTimeline(undefined);
@@ -56,7 +54,7 @@ describe('useExportTimeline', () => {
     };
 
     beforeAll(() => {
-      wrapper = mount(<TestHook />);
+      mount(<TestHook />);
     });
 
     test('should contain exportedIds', () => {

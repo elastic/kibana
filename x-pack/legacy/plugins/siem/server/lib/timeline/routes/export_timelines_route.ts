@@ -5,14 +5,17 @@
  */
 
 import { set as _set } from 'lodash/fp';
-import {
-  SavedObjectsClient,
-  IRouter,
-  KibanaRequest,
-  SavedObjectsBulkResponse,
-} from '../../../../../../../../src/core/server';
+import { IRouter, SavedObjectsBulkResponse } from '../../../../../../../../src/core/server';
 import { LegacyServices } from '../../../types';
-import { ExportTimelineRequestParams, TimelineSavedObject } from '../types';
+import {
+  ExportTimelineRequestParams,
+  ExportTimelineSavedObjectsClient,
+  ExportTimelineRequest,
+  ExportedNotes,
+  TimelineSavedObject,
+  ExportedTimelines,
+  BulkGetInput,
+} from '../types';
 import { timelineSavedObjectType, noteSavedObjectType } from '../../../saved_objects';
 
 import { convertSavedObjectToSavedTimeline } from '../convert_saved_object_to_savedtimeline';
@@ -31,44 +34,6 @@ import {
   exportTimelinesQuerySchema,
 } from './schemas/export_timelines_schema';
 import { NoteSavedObject } from '../../note/types';
-
-type ExportTimelineRequest = KibanaRequest<
-  unknown,
-  ExportTimelineRequestParams['query'],
-  ExportTimelineRequestParams['body'],
-  'post'
->;
-
-type ExportTimelineSavedObjectsClient = Pick<
-  SavedObjectsClient,
-  | 'get'
-  | 'errors'
-  | 'create'
-  | 'bulkCreate'
-  | 'delete'
-  | 'find'
-  | 'bulkGet'
-  | 'update'
-  | 'bulkUpdate'
->;
-
-type GlobalNotes = Array<Exclude<NoteSavedObject, 'eventId'>>;
-type EventNotes = NoteSavedObject[];
-
-interface ExportedNotes {
-  eventNotes: EventNotes;
-  globalNotes: GlobalNotes;
-}
-
-type ExportedTimelines = TimelineSavedObject &
-  ExportedNotes & {
-    pinnedEventIds: string[];
-  };
-
-interface BulkGetInput {
-  type: string;
-  id: string;
-}
 
 const getExportTimelineByObjectIds = async ({
   client,
@@ -136,17 +101,17 @@ const getTimelinesFromObjects = async (
     bulkGetNotes.length > 0 ? client.bulkGet(bulkGetNotes) : Promise.resolve(null),
   ]);
 
-  const timelineObjects:
-    | TimelineSavedObject[]
-    | undefined = savedObjects[0]?.saved_objects.map((savedObject: unknown) =>
-    convertSavedObjectToSavedTimeline(savedObject)
-  );
+  const timelineObjects: TimelineSavedObject[] | undefined = savedObjects[0]
+    ? savedObjects[0]?.saved_objects.map((savedObject: unknown) => {
+        return convertSavedObjectToSavedTimeline(savedObject);
+      })
+    : undefined;
 
-  const noteObjects:
-    | NoteSavedObject[]
-    | undefined = savedObjects[1]?.saved_objects?.map((savedObject: unknown) =>
-    convertSavedObjectToSavedNote(savedObject)
-  );
+  const noteObjects: NoteSavedObject[] | undefined = savedObjects[1]
+    ? savedObjects[1]?.saved_objects?.map((savedObject: unknown) =>
+        convertSavedObjectToSavedNote(savedObject)
+      )
+    : undefined;
 
   return (
     timelineObjects?.map(timeline => {
@@ -179,16 +144,12 @@ export const exportTimelinesRoute = (router: IRouter, config: LegacyServices['co
       const savedObjectsClient = context.core.savedObjects.client;
       const siemResponse = buildSiemResponse(response);
 
-      if (!savedObjectsClient) {
-        return siemResponse.error({ statusCode: 404 });
-      }
-
       try {
         const exportSizeLimit = config().get<number>('savedObjects.maxImportExportSize');
         if (request.body?.objects != null && request.body.objects.length > exportSizeLimit) {
           return siemResponse.error({
             statusCode: 400,
-            body: `Can't export more than ${exportSizeLimit} rules`,
+            body: `Can't export more than ${exportSizeLimit} timelines`,
           });
         }
 
