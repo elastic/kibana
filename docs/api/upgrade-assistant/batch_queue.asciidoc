@@ -22,20 +22,6 @@ experimental["The underlying Upgrade Assistant concepts are stable, but the APIs
 [[batch-reindex-queue-example]]
 ==== Example
 
-[source,js]
---------------------------------------------------
-POST /api/upgrade_assistant/reindex/batch
-{
-  "indexNames": [ <1>
-    "index1",
-    "index2"
-  ]
-}
---------------------------------------------------
-<1> The order in which the indices are provided here determines the order in which the reindex tasks will be executed.
-
-// KIBANA
-
 The API returns the following:
 
 [source,js]

@@ -42,8 +42,6 @@ POST /api/upgrade_assistant/reindex/batch
 --------------------------------------------------
 <1> The order in which the indices are provided here determines the order in which the reindex tasks will be executed.
 
-// KIBANA
-
 The API returns the following which is similar to the <<start-resume-reindex, start or resume endpoint>>:
 
 [source,js]
