@@ -49,6 +49,11 @@ const ELASTIC_LICENSE_HEADER = `
  */
 `;
 
+const allMochaRules = {};
+Object.keys(require('eslint-plugin-mocha').rules).forEach(k => {
+  allMochaRules['mocha/' + k] = 'off';
+});
+
 module.exports = {
   root: true,
 
@@ -523,9 +528,7 @@ module.exports = {
      */
     {
       files: ['test/harden/*.js'],
-      rules: {
-        'mocha/handle-done-callback': 'off', // TODO: Find a way to disable all mocha rules
-      },
+      rules: allMochaRules,
     },
 
     /**
