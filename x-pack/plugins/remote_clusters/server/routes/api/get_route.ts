@@ -33,13 +33,27 @@ export const register = (deps: RouteDependencies): void => {
         const cluster = clustersByName[clusterName];
         const isTransient = transientClusterNames.includes(clusterName);
         const isPersistent = persistentClusterNames.includes(clusterName);
+
         // If the cluster hasn't been stored in the cluster state, then it's defined by the
         // node's config file.
         const isConfiguredByNode = !isTransient && !isPersistent;
 
+        // Pre-7.6, ES supported an undocumented "proxy" field
+        // ES does not handle migrating this to the new implementation, so we need to surface it in the UI
+        const deprecatedProxyAddress = isPersistent
+          ? get(clusterSettings, `persistent.cluster.remote[${clusterName}].proxy`, undefined)
+          : undefined;
+
+        // server_name is not available via the GET /_remote/info API, so we get it from the cluster settings
+        // Per https://github.com/elastic/kibana/pull/26067#issuecomment-441848124, we only look at persistent settings
+        const serverName = isPersistent
+          ? get(clusterSettings, `persistent.cluster.remote[${clusterName}].server_name`, undefined)
+          : undefined;
+
         return {
-          ...deserializeCluster(clusterName, cluster),
+          ...deserializeCluster(clusterName, cluster, deprecatedProxyAddress),
           isConfiguredByNode,
+          serverName,
         };
       });
 

@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function deserializeCluster(name: string, esClusterObject: any): any {
+import { PROXY_MODE } from '../constants';
+
+export function deserializeCluster(
+  name: string,
+  esClusterObject: any,
+  deprecatedProxyAddress: string | undefined
+): any {
   if (!name || !esClusterObject || typeof esClusterObject !== 'object') {
     throw new Error('Unable to deserialize cluster');
   }
@@ -21,8 +27,6 @@ export function deserializeCluster(name: string, esClusterObject: any): any {
     address: proxyAddress,
     max_socket_connections: proxySocketConnections,
     num_sockets_connected: connectedSocketsCount,
-    // TODO: Need to support serverName somehow
-    // server_name: serverName,
   } = esClusterObject;
 
   let deserializedClusterObject: any = {
@@ -46,6 +50,18 @@ export function deserializeCluster(name: string, esClusterObject: any): any {
       ...deserializedClusterObject,
       transportPingSchedule,
       transportCompress,
+    };
+  }
+
+  // If a user has a remote cluster with the deprecated proxy setting,
+  // we transform the data to support the new implementation and also flag the deprecation
+  if (deprecatedProxyAddress) {
+    deserializedClusterObject = {
+      ...deserializedClusterObject,
+      proxyAddress: deprecatedProxyAddress,
+      seeds: undefined,
+      hasDeprecatedProxySetting: true,
+      mode: PROXY_MODE,
     };
   }
 
@@ -76,6 +92,7 @@ export function serializeCluster(deserializedClusterObject: any): any {
   } = deserializedClusterObject;
 
   return {
+    // Background on why we only save as persistent settings detailed here: https://github.com/elastic/kibana/pull/26067#issuecomment-441848124
     persistent: {
       cluster: {
         remote: {

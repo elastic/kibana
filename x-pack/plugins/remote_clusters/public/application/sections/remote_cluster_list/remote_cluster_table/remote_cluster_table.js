@@ -84,7 +84,7 @@ export class RemoteClusterTable extends Component {
         }),
         sortable: true,
         truncateText: false,
-        render: (name, { isConfiguredByNode }) => {
+        render: (name, { isConfiguredByNode, hasDeprecatedProxySetting }) => {
           const link = (
             <EuiLink
               data-test-subj="remoteClustersTableListClusterLink"
@@ -113,6 +113,30 @@ export class RemoteClusterTable extends Component {
                       <FormattedMessage
                         id="xpack.remoteClusters.remoteClusterList.table.isConfiguredByNodeMessage"
                         defaultMessage="Defined in elasticsearch.yml"
+                      />
+                    }
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            );
+          }
+
+          if (hasDeprecatedProxySetting) {
+            return (
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>{link}</EuiFlexItem>
+
+                <EuiFlexItem
+                  grow={false}
+                  data-test-subj="remoteClustersTableListDeprecatedSetttingsTooltip"
+                >
+                  <EuiIconTip
+                    type="alert"
+                    color="warning"
+                    content={
+                      <FormattedMessage
+                        id="xpack.remoteClusters.remoteClusterList.table.hasDeprecatedSettingMessage"
+                        defaultMessage="This remote cluster contains deprecated settings. Edit the remote cluster to resolve."
                       />
                     }
                   />
