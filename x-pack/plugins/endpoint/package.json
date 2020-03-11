@@ -6,9 +6,11 @@
   "license": "Elastic-License",
   "scripts": {},
   "dependencies": {
-    "react-redux": "^7.1.0"
+    "react-redux": "^7.1.0",
+    "seedrandom": "^3.0.5"
   },
   "devDependencies": {
+    "@types/seedrandom": ">=2.0.0 <4.0.0",
     "@types/react-redux": "^7.1.0",
     "redux-devtools-extension": "^2.13.8"
   }
