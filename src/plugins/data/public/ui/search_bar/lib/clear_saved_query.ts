@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { each } from 'lodash';
 import { QueryStart, SavedQuery } from '../../../query';
 import { Filter } from '../../../../common';
 
@@ -27,7 +26,7 @@ export const clearStateFromSavedQuery = (
   defaultLanguage: string,
   prevSavedQuery?: SavedQuery
 ) => {
-  each(prevSavedQuery?.attributes.filters || [], (filter: Filter) => {
+  (prevSavedQuery?.attributes.filters || []).forEach((filter: Filter) => {
     queryService.filterManager.removeFilter(filter);
   });
   setQueryStringState({

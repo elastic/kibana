@@ -44,7 +44,6 @@ export const useSavedQuery = (props: UseSavedQueriesProps): UseSavedQueriesRetur
   const defaultLanguage = props.uiSettings.get('search:queryLanguage');
   const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>();
   const prevSavedQuery = useRef<SavedQuery | undefined>();
-  prevSavedQuery.current = savedQuery;
 
   // Effect is used to convert a saved query id into an object
   useEffect(() => {
