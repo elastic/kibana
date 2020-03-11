@@ -19,29 +19,18 @@
 
 import React, { Component } from 'react';
 import PropTypes, { ReactNodeLike, Requireable } from 'prop-types';
-import { EuiFormRow, EuiDualRange } from '@elastic/eui';
+import { EuiFormRow, EuiDualRange, EuiRangeProps } from '@elastic/eui';
 import { EuiFormRowDisplayKeys } from '@elastic/eui/src/components/form/form_row/form_row';
 import { isRangeValid } from './is_range_valid';
 
 // Wrapper around EuiDualRange that ensures onChange callback is only called when range value
 // is valid and within min/max
 
-interface ValidatedRangeValues {
-  id?: string | number | undefined;
+interface ValidatedRangeValues extends Omit<EuiRangeProps, 'value'> {
   value?: [number | string, number | string] | undefined;
-  min?: number;
-  max?: number;
   allowEmptyRange?: boolean;
-  onChange?: Function;
-  compressed?: boolean;
-  fullWidth?: boolean;
   label?: string;
   formRowDisplay?: EuiFormRowDisplayKeys;
-  disabled?: boolean;
-  showInput?: boolean;
-  showRange?: boolean;
-  showTicks?: boolean;
-  ticks?: object[];
 }
 
 interface ValidateDualRangeState {
@@ -97,8 +86,8 @@ export class ValidatedDualRange extends Component<ValidatedRangeValues> {
       errorMessage,
     });
 
-    if (isValid && this.props.onChange) {
-      this.props.onChange(value);
+    if (this.props.onChange) {
+      this.props.onChange(value, isValid);
     }
   };
 
