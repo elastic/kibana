@@ -5,8 +5,6 @@
  */
 
 // Service for obtaining data for the ML Results dashboards.
-
-import { Observable } from 'rxjs';
 import { http, http$ } from '../http_service';
 
 import { basePath } from './index';
@@ -42,20 +40,20 @@ export const results = {
       influencersFilterQuery,
     });
 
-    return http$({
+    return http$<any>({
       path: `${basePath()}/results/anomalies_table_data`,
       method: 'POST',
       body,
     });
   },
 
-  getMaxAnomalyScore(jobIds: string[], earliestMs: number, latestMs: number) {
+  getMaxAnomalyScore<T>(jobIds: string[], earliestMs: number, latestMs: number): Promise<T> {
     const body = JSON.stringify({
       jobIds,
       earliestMs,
       latestMs,
     });
-    return http({
+    return http<T>({
       path: `${basePath()}/results/max_anomaly_score`,
       method: 'POST',
       body,
@@ -64,7 +62,7 @@ export const results = {
 
   getCategoryDefinition(jobId: string, categoryId: string) {
     const body = JSON.stringify({ jobId, categoryId });
-    return http({
+    return http<any>({
       path: `${basePath()}/results/category_definition`,
       method: 'POST',
       body,
@@ -77,7 +75,7 @@ export const results = {
       categoryIds,
       maxExamples,
     });
-    return http({
+    return http<any>({
       path: `${basePath()}/results/category_examples`,
       method: 'POST',
       body,
@@ -90,9 +88,9 @@ export const results = {
     criteriaFields: Array<{ fieldName: string; fieldValue: any }>,
     earliestMs: number,
     latestMs: number
-  ): Observable<PartitionFieldsDefinition> {
+  ) {
     const body = JSON.stringify({ jobId, searchTerm, criteriaFields, earliestMs, latestMs });
-    return http$({
+    return http$<PartitionFieldsDefinition>({
       path: `${basePath()}/results/partition_fields_values`,
       method: 'POST',
       body,

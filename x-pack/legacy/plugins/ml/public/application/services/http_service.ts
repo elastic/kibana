@@ -38,9 +38,9 @@ function getFetchOptions(
  * Function for making HTTP requests to Kibana's backend.
  * Wrapper for Kibana's HttpHandler.
  */
-export async function http(options: HttpFetchOptionsWithPath): Promise<any> {
+export async function http<T>(options: HttpFetchOptionsWithPath): Promise<T> {
   const { path, fetchOptions } = getFetchOptions(options);
-  return getHttp().fetch(path, fetchOptions);
+  return getHttp().fetch<T>(path, fetchOptions);
 }
 
 /**

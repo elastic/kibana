@@ -82,21 +82,21 @@ export function basePath() {
 export const ml = {
   getJobs(obj?: { jobId?: string }) {
     const jobId = obj && obj.jobId ? `/${obj.jobId}` : '';
-    return http({
+    return http<any>({
       path: `${basePath()}/anomaly_detectors${jobId}`,
     });
   },
 
   getJobStats(obj: { jobId?: string }) {
     const jobId = obj && obj.jobId ? `/${obj.jobId}` : '';
-    return http({
+    return http<any>({
       path: `${basePath()}/anomaly_detectors${jobId}/_stats`,
     });
   },
 
   addJob({ jobId, job }: { jobId: string; job: Job }) {
     const body = JSON.stringify(job);
-    return http({
+    return http<any>({
       path: `${basePath()}/anomaly_detectors/${jobId}`,
       method: 'PUT',
       body,
@@ -104,28 +104,28 @@ export const ml = {
   },
 
   openJob({ jobId }: { jobId: string }) {
-    return http({
+    return http<any>({
       path: `${basePath()}/anomaly_detectors/${jobId}/_open`,
       method: 'POST',
     });
   },
 
   closeJob({ jobId }: { jobId: string }) {
-    return http({
+    return http<any>({
       path: `${basePath()}/anomaly_detectors/${jobId}/_close`,
       method: 'POST',
     });
   },
 
   deleteJob({ jobId }: { jobId: string }) {
-    return http({
+    return http<any>({
       path: `${basePath()}/anomaly_detectors/${jobId}`,
       method: 'DELETE',
     });
   },
 
   forceDeleteJob({ jobId }: { jobId: string }) {
-    return http({
+    return http<any>({
       path: `${basePath()}/anomaly_detectors/${jobId}?force=true`,
       method: 'DELETE',
     });
@@ -133,16 +133,16 @@ export const ml = {
 
   updateJob({ jobId, job }: { jobId: string; job: Job }) {
     const body = JSON.stringify(job);
-    return http({
+    return http<any>({
       path: `${basePath()}/anomaly_detectors/${jobId}/_update`,
       method: 'POST',
       body,
     });
   },
 
-  estimateBucketSpan(obj: BucketSpanEstimatorData): Promise<BucketSpanEstimatorResponse> {
+  estimateBucketSpan(obj: BucketSpanEstimatorData) {
     const body = JSON.stringify(obj);
-    return http({
+    return http<BucketSpanEstimatorResponse>({
       path: `${basePath()}/validate/estimate_bucket_span`,
       method: 'POST',
       body,
@@ -151,7 +151,7 @@ export const ml = {
 
   validateJob({ job }: { job: Job }) {
     const body = JSON.stringify({ job });
-    return http({
+    return http<any>({
       path: `${basePath()}/validate/job`,
       method: 'POST',
       body,
@@ -169,21 +169,21 @@ export const ml = {
 
   getDatafeeds(obj: { datafeedId: string }) {
     const datafeedId = obj && obj.datafeedId ? `/${obj.datafeedId}` : '';
-    return http({
+    return http<any>({
       path: `${basePath()}/datafeeds${datafeedId}`,
     });
   },
 
   getDatafeedStats(obj: { datafeedId: string }) {
     const datafeedId = obj && obj.datafeedId ? `/${obj.datafeedId}` : '';
-    return http({
+    return http<any>({
       path: `${basePath()}/datafeeds${datafeedId}/_stats`,
     });
   },
 
   addDatafeed({ datafeedId, datafeedConfig }: { datafeedId: string; datafeedConfig: Datafeed }) {
     const body = JSON.stringify(datafeedConfig);
-    return http({
+    return http<any>({
       path: `${basePath()}/datafeeds/${datafeedId}`,
       method: 'PUT',
       body,
@@ -192,7 +192,7 @@ export const ml = {
 
   updateDatafeed({ datafeedId, datafeedConfig }: { datafeedId: string; datafeedConfig: Datafeed }) {
     const body = JSON.stringify(datafeedConfig);
-    return http({
+    return http<any>({
       path: `${basePath()}/datafeeds/${datafeedId}/_update`,
       method: 'POST',
       body,
@@ -200,14 +200,14 @@ export const ml = {
   },
 
   deleteDatafeed({ datafeedId }: { datafeedId: string }) {
-    return http({
+    return http<any>({
       path: `${basePath()}/datafeeds/${datafeedId}`,
       method: 'DELETE',
     });
   },
 
   forceDeleteDatafeed({ datafeedId }: { datafeedId: string }) {
-    return http({
+    return http<any>({
       path: `${basePath()}/datafeeds/${datafeedId}?force=true`,
       method: 'DELETE',
     });
@@ -219,7 +219,7 @@ export const ml = {
       ...(end !== undefined ? { end } : {}),
     });
 
-    return http({
+    return http<any>({
       path: `${basePath()}/datafeeds/${datafeedId}/_start`,
       method: 'POST',
       body,
@@ -227,14 +227,14 @@ export const ml = {
   },
 
   stopDatafeed({ datafeedId }: { datafeedId: string }) {
-    return http({
+    return http<any>({
       path: `${basePath()}/datafeeds/${datafeedId}/_stop`,
       method: 'POST',
     });
   },
 
   datafeedPreview({ datafeedId }: { datafeedId: string }) {
-    return http({
+    return http<any>({
       path: `${basePath()}/datafeeds/${datafeedId}/_preview`,
       method: 'GET',
     });
@@ -242,7 +242,7 @@ export const ml = {
 
   validateDetector({ detector }: { detector: Detector }) {
     const body = JSON.stringify(detector);
-    return http({
+    return http<any>({
       path: `${basePath()}/anomaly_detectors/_validate/detector`,
       method: 'POST',
       body,
@@ -254,7 +254,7 @@ export const ml = {
       ...(duration !== undefined ? { duration } : {}),
     });
 
-    return http({
+    return http<any>({
       path: `${basePath()}/anomaly_detectors/${jobId}/_forecast`,
       method: 'POST',
       body,
@@ -275,7 +275,7 @@ export const ml = {
     end: number;
   }) {
     const body = JSON.stringify({ topN, bucketSpan, start, end });
-    return http({
+    return http<any>({
       path: `${basePath()}/anomaly_detectors/${jobId}/results/overall_buckets`,
       method: 'POST',
       body,
@@ -284,29 +284,29 @@ export const ml = {
 
   hasPrivileges(obj: any) {
     const body = JSON.stringify(obj);
-    return http({
+    return http<any>({
       path: `${basePath()}/_has_privileges`,
       method: 'POST',
       body,
     });
   },
 
-  checkMlPrivileges(): Promise<PrivilegesResponse> {
-    return http({
+  checkMlPrivileges() {
+    return http<PrivilegesResponse>({
       path: `${basePath()}/ml_capabilities`,
       method: 'GET',
     });
   },
 
-  checkManageMLPrivileges(): Promise<PrivilegesResponse> {
-    return http({
+  checkManageMLPrivileges() {
+    return http<PrivilegesResponse>({
       path: `${basePath()}/ml_capabilities?ignoreSpaces=true`,
       method: 'GET',
     });
   },
 
   getNotificationSettings() {
-    return http({
+    return http<any>({
       path: `${basePath()}/notification_settings`,
       method: 'GET',
     });
@@ -318,7 +318,7 @@ export const ml = {
       ...(fields !== undefined ? { fields } : {}),
     });
 
-    return http({
+    return http<any>({
       path: `${basePath()}/indices/field_caps`,
       method: 'POST',
       body,
@@ -326,34 +326,34 @@ export const ml = {
   },
 
   recognizeIndex({ indexPatternTitle }: { indexPatternTitle: string }) {
-    return http({
+    return http<any>({
       path: `${basePath()}/modules/recognize/${indexPatternTitle}`,
       method: 'GET',
     });
   },
 
   listDataRecognizerModules() {
-    return http({
+    return http<any>({
       path: `${basePath()}/modules/get_module`,
       method: 'GET',
     });
   },
 
-  getDataRecognizerModule({ moduleId }: { moduleId: string }) {
-    return http({
+  getDataRecognizerModule<T>({ moduleId }: { moduleId: string }): Promise<T> {
+    return http<T>({
       path: `${basePath()}/modules/get_module/${moduleId}`,
       method: 'GET',
     });
   },
 
   dataRecognizerModuleJobsExist({ moduleId }: { moduleId: string }) {
-    return http({
+    return http<any>({
       path: `${basePath()}/modules/jobs_exist/${moduleId}`,
       method: 'GET',
     });
   },
 
-  setupDataRecognizerConfig({
+  setupDataRecognizerConfig<T>({
     moduleId,
     prefix,
     groups,
@@ -375,7 +375,7 @@ export const ml = {
     start?: number;
     end?: number;
     jobOverrides?: Array<Partial<Job>>;
-  }) {
+  }): Promise<T> {
     const body = JSON.stringify({
       prefix,
       groups,
@@ -388,14 +388,14 @@ export const ml = {
       jobOverrides,
     });
 
-    return http({
+    return http<T>({
       path: `${basePath()}/modules/setup/${moduleId}`,
       method: 'POST',
       body,
     });
   },
 
-  getVisualizerFieldStats({
+  getVisualizerFieldStats<T>({
     indexPatternTitle,
     query,
     timeFieldName,
@@ -415,7 +415,7 @@ export const ml = {
     interval?: string;
     fields?: FieldRequestConfig[];
     maxExamples?: number;
-  }) {
+  }): Promise<T> {
     const body = JSON.stringify({
       query,
       timeFieldName,
@@ -427,7 +427,7 @@ export const ml = {
       maxExamples,
     });
 
-    return http({
+    return http<T>({
       path: `${basePath()}/data_visualizer/get_field_stats/${indexPatternTitle}`,
       method: 'POST',
       body,
@@ -463,7 +463,7 @@ export const ml = {
       nonAggregatableFields,
     });
 
-    return http({
+    return http<any>({
       path: `${basePath()}/data_visualizer/get_overall_stats/${indexPatternTitle}`,
       method: 'POST',
       body,
@@ -475,7 +475,7 @@ export const ml = {
    * @param obj
    * @returns {Promise<unknown>}
    */
-  calendars(obj?: { calendarId?: CalendarId; calendarIds?: CalendarId[] }): Promise<Calendar[]> {
+  calendars(obj?: { calendarId?: CalendarId; calendarIds?: CalendarId[] }) {
     const { calendarId, calendarIds } = obj || {};
     let calendarIdsPathComponent = '';
     if (calendarId) {
@@ -483,7 +483,7 @@ export const ml = {
     } else if (calendarIds) {
       calendarIdsPathComponent = `/${calendarIds.join(',')}`;
     }
-    return http({
+    return http<Calendar[]>({
       path: `${basePath()}/calendars${calendarIdsPathComponent}`,
       method: 'GET',
     });
@@ -491,7 +491,7 @@ export const ml = {
 
   addCalendar(obj: Calendar) {
     const body = JSON.stringify(obj);
-    return http({
+    return http<any>({
       path: `${basePath()}/calendars`,
       method: 'PUT',
       body,
@@ -501,7 +501,7 @@ export const ml = {
   updateCalendar(obj: UpdateCalendar) {
     const calendarId = obj && obj.calendarId ? `/${obj.calendarId}` : '';
     const body = JSON.stringify(obj);
-    return http({
+    return http<any>({
       path: `${basePath()}/calendars${calendarId}`,
       method: 'PUT',
       body,
@@ -509,21 +509,21 @@ export const ml = {
   },
 
   deleteCalendar({ calendarId }: { calendarId?: string }) {
-    return http({
+    return http<any>({
       path: `${basePath()}/calendars/${calendarId}`,
       method: 'DELETE',
     });
   },
 
-  mlNodeCount(): Promise<{ count: number }> {
-    return http({
+  mlNodeCount() {
+    return http<{ count: number }>({
       path: `${basePath()}/ml_node_count`,
       method: 'GET',
     });
   },
 
-  mlInfo(): Promise<MlInfoResponse> {
-    return http({
+  mlInfo() {
+    return http<MlInfoResponse>({
       path: `${basePath()}/info`,
       method: 'GET',
     });
@@ -547,7 +547,7 @@ export const ml = {
     timeFieldName: string;
     earliestMs: number;
     latestMs: number;
-  }): Promise<{ modelMemoryLimit: string }> {
+  }) {
     const body = JSON.stringify({
       indexPattern,
       splitFieldName,
@@ -559,7 +559,7 @@ export const ml = {
       latestMs,
     });
 
-    return http({
+    return http<{ modelMemoryLimit: string }>({
       path: `${basePath()}/validate/calculate_model_memory_limit`,
       method: 'POST',
       body,
@@ -583,7 +583,7 @@ export const ml = {
   }) {
     const body = JSON.stringify({ index, fieldNames, query, timeFieldName, earliestMs, latestMs });
 
-    return http({
+    return http<any>({
       path: `${basePath()}/fields_service/field_cardinality`,
       method: 'POST',
       body,
@@ -598,37 +598,37 @@ export const ml = {
     index: string;
     timeFieldName?: string;
     query: any;
-  }): Promise<GetTimeFieldRangeResponse> {
+  }) {
     const body = JSON.stringify({ index, timeFieldName, query });
 
-    return http({
+    return http<GetTimeFieldRangeResponse>({
       path: `${basePath()}/fields_service/time_field_range`,
       method: 'POST',
       body,
     });
   },
 
-  esSearch(obj: any): Promise<any> {
+  esSearch(obj: any) {
     const body = JSON.stringify(obj);
-    return http({
+    return http<any>({
       path: `${basePath()}/es_search`,
       method: 'POST',
       body,
     });
   },
 
-  esSearch$(obj: any): Observable<any> {
+  esSearch$(obj: any) {
     const body = JSON.stringify(obj);
-    return http$({
+    return http$<any>({
       path: `${basePath()}/es_search`,
       method: 'POST',
       body,
     });
   },
 
-  getIndices(): Promise<Array<{ name: string }>> {
+  getIndices() {
     const tempBasePath = '/api';
-    return http({
+    return http<Array<{ name: string }>>({
       path: `${tempBasePath}/index_management/indices`,
       method: 'GET',
     });

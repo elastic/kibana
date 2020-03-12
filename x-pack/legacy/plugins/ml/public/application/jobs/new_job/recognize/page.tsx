@@ -106,7 +106,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
    */
   const loadModule = async () => {
     try {
-      const response: Module = await ml.getDataRecognizerModule({ moduleId });
+      const response = await ml.getDataRecognizerModule<Module>({ moduleId });
       setJobs(response.jobs);
 
       const kibanaObjectsResult = await checkForSavedObjects(response.kibana as KibanaObjects);
@@ -165,7 +165,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       let jobOverridesPayload: JobOverride[] | null = Object.values(jobOverrides);
       jobOverridesPayload = jobOverridesPayload.length > 0 ? jobOverridesPayload : null;
 
-      const response: DataRecognizerConfigResponse = await ml.setupDataRecognizerConfig({
+      const response = await ml.setupDataRecognizerConfig<DataRecognizerConfigResponse>({
         moduleId,
         prefix: resultJobPrefix,
         query: tempQuery,

@@ -21,20 +21,18 @@ import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../common/constant
 import { Category } from '../../../../common/types/categories';
 
 export const jobs = {
-  jobsSummary(jobIds: string[]): Promise<MlSummaryJobs> {
+  jobsSummary(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
-    return http({
+    return http<MlSummaryJobs>({
       path: `${basePath()}/jobs/jobs_summary`,
       method: 'POST',
       body,
     });
   },
 
-  jobsWithTimerange(
-    dateFormatTz: string
-  ): Promise<{ jobs: MlJobWithTimeRange[]; jobsMap: Dictionary<MlJobWithTimeRange> }> {
+  jobsWithTimerange(dateFormatTz: string) {
     const body = JSON.stringify({ dateFormatTz });
-    return http({
+    return http<{ jobs: MlJobWithTimeRange[]; jobsMap: Dictionary<MlJobWithTimeRange> }>({
       path: `${basePath()}/jobs/jobs_with_time_range`,
       method: 'POST',
       body,
@@ -43,7 +41,7 @@ export const jobs = {
 
   jobs(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
-    return http({
+    return http<any>({
       path: `${basePath()}/jobs/jobs`,
       method: 'POST',
       body,
@@ -51,7 +49,7 @@ export const jobs = {
   },
 
   groups() {
-    return http({
+    return http<any>({
       path: `${basePath()}/jobs/groups`,
       method: 'GET',
     });
@@ -59,7 +57,7 @@ export const jobs = {
 
   updateGroups(updatedJobs: string[]) {
     const body = JSON.stringify({ updatedJobs });
-    return http({
+    return http<any>({
       path: `${basePath()}/jobs/update_groups`,
       method: 'POST',
       body,
@@ -73,7 +71,7 @@ export const jobs = {
       end,
     });
 
-    return http({
+    return http<any>({
       path: `${basePath()}/jobs/force_start_datafeeds`,
       method: 'POST',
       body,
@@ -82,7 +80,7 @@ export const jobs = {
 
   stopDatafeeds(datafeedIds: string[]) {
     const body = JSON.stringify({ datafeedIds });
-    return http({
+    return http<any>({
       path: `${basePath()}/jobs/stop_datafeeds`,
       method: 'POST',
       body,
@@ -91,7 +89,7 @@ export const jobs = {
 
   deleteJobs(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
-    return http({
+    return http<any>({
       path: `${basePath()}/jobs/delete_jobs`,
       method: 'POST',
       body,
@@ -100,17 +98,17 @@ export const jobs = {
 
   closeJobs(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
-    return http({
+    return http<any>({
       path: `${basePath()}/jobs/close_jobs`,
       method: 'POST',
       body,
     });
   },
 
-  jobAuditMessages(jobId: string, from?: number): Promise<JobMessage[]> {
+  jobAuditMessages(jobId: string, from?: number) {
     const jobIdString = jobId !== undefined ? `/${jobId}` : '';
     const query = from !== undefined ? { from } : {};
-    return http({
+    return http<JobMessage[]>({
       path: `${basePath()}/job_audit_messages/messages${jobIdString}`,
       method: 'GET',
       query,
@@ -118,7 +116,7 @@ export const jobs = {
   },
 
   deletingJobTasks() {
-    return http({
+    return http<any>({
       path: `${basePath()}/jobs/deleting_jobs_tasks`,
       method: 'GET',
     });
@@ -126,7 +124,7 @@ export const jobs = {
 
   jobsExist(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
-    return http({
+    return http<any>({
       path: `${basePath()}/jobs/jobs_exist`,
       method: 'POST',
       body,
@@ -135,14 +133,14 @@ export const jobs = {
 
   newJobCaps(indexPatternTitle: string, isRollup: boolean = false) {
     const query = isRollup === true ? { rollup: true } : {};
-    return http({
+    return http<any>({
       path: `${basePath()}/jobs/new_job_caps/${indexPatternTitle}`,
       method: 'GET',
       query,
     });
   },
 
-  newJobLineChart(
+  newJobLineChart<T>(
     indexPatternTitle: string,
     timeField: string,
     start: number,
@@ -152,7 +150,7 @@ export const jobs = {
     aggFieldNamePairs: AggFieldNamePair[],
     splitFieldName: string | null,
     splitFieldValue: string | null
-  ) {
+  ): Promise<T> {
     const body = JSON.stringify({
       indexPatternTitle,
       timeField,
@@ -164,14 +162,14 @@ export const jobs = {
       splitFieldName,
       splitFieldValue,
     });
-    return http({
+    return http<T>({
       path: `${basePath()}/jobs/new_job_line_chart`,
       method: 'POST',
       body,
     });
   },
 
-  newJobPopulationsChart(
+  newJobPopulationsChart<T>(
     indexPatternTitle: string,
     timeField: string,
     start: number,
@@ -180,7 +178,7 @@ export const jobs = {
     query: any,
     aggFieldNamePairs: AggFieldNamePair[],
     splitFieldName: string
-  ) {
+  ): Promise<T> {
     const body = JSON.stringify({
       indexPatternTitle,
       timeField,
@@ -191,31 +189,27 @@ export const jobs = {
       aggFieldNamePairs,
       splitFieldName,
     });
-    return http({
+    return http<T>({
       path: `${basePath()}/jobs/new_job_population_chart`,
       method: 'POST',
       body,
     });
   },
 
-  getAllJobAndGroupIds(): Promise<ExistingJobsAndGroups> {
-    return http({
+  getAllJobAndGroupIds() {
+    return http<ExistingJobsAndGroups>({
       path: `${basePath()}/jobs/all_jobs_and_group_ids`,
       method: 'GET',
     });
   },
 
-  getLookBackProgress(
-    jobId: string,
-    start: number,
-    end: number
-  ): Promise<{ progress: number; isRunning: boolean; isJobClosed: boolean }> {
+  getLookBackProgress(jobId: string, start: number, end: number) {
     const body = JSON.stringify({
       jobId,
       start,
       end,
     });
-    return http({
+    return http<{ progress: number; isRunning: boolean; isJobClosed: boolean }>({
       path: `${basePath()}/jobs/look_back_progress`,
       method: 'POST',
       body,
@@ -231,12 +225,7 @@ export const jobs = {
     start: number,
     end: number,
     analyzer: CategorizationAnalyzer
-  ): Promise<{
-    examples: CategoryFieldExample[];
-    sampleSize: number;
-    overallValidStatus: CATEGORY_EXAMPLES_VALIDATION_STATUS;
-    validationChecks: FieldExampleCheck[];
-  }> {
+  ) {
     const body = JSON.stringify({
       indexPatternTitle,
       query,
@@ -247,19 +236,21 @@ export const jobs = {
       end,
       analyzer,
     });
-    return http({
+    return http<{
+      examples: CategoryFieldExample[];
+      sampleSize: number;
+      overallValidStatus: CATEGORY_EXAMPLES_VALIDATION_STATUS;
+      validationChecks: FieldExampleCheck[];
+    }>({
       path: `${basePath()}/jobs/categorization_field_examples`,
       method: 'POST',
       body,
     });
   },
 
-  topCategories(
-    jobId: string,
-    count: number
-  ): Promise<{ total: number; categories: Array<{ count?: number; category: Category }> }> {
+  topCategories(jobId: string, count: number) {
     const body = JSON.stringify({ jobId, count });
-    return http({
+    return http<{ total: number; categories: Array<{ count?: number; category: Category }> }>({
       path: `${basePath()}/jobs/top_categories`,
       method: 'POST',
       body,

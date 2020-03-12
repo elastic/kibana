@@ -8,6 +8,7 @@ import { http } from '../http_service';
 
 import { basePath } from './index';
 import { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { DataFrameAnalyticsConfig } from '../../data_frame_analytics/common';
 
 export interface GetDataFrameAnalyticsStatsResponseOk {
   node_failures?: object;
@@ -25,72 +26,77 @@ export type GetDataFrameAnalyticsStatsResponse =
   | GetDataFrameAnalyticsStatsResponseOk
   | GetDataFrameAnalyticsStatsResponseError;
 
+interface GetDataFrameAnalyticsResponse {
+  count: number;
+  data_frame_analytics: DataFrameAnalyticsConfig[];
+}
+
 export const dataFrameAnalytics = {
-  getDataFrameAnalytics(analyticsId?: string): Promise<any> {
+  getDataFrameAnalytics(analyticsId?: string) {
     const analyticsIdString = analyticsId !== undefined ? `/${analyticsId}` : '';
-    return http({
+    return http<GetDataFrameAnalyticsResponse>({
       path: `${basePath()}/data_frame/analytics${analyticsIdString}`,
       method: 'GET',
     });
   },
-  getDataFrameAnalyticsStats(analyticsId?: string): Promise<GetDataFrameAnalyticsStatsResponse> {
+  getDataFrameAnalyticsStats(analyticsId?: string) {
     if (analyticsId !== undefined) {
-      return http({
+      return http<GetDataFrameAnalyticsStatsResponse>({
         path: `${basePath()}/data_frame/analytics/${analyticsId}/_stats`,
         method: 'GET',
       });
     }
 
-    return http({
+    return http<GetDataFrameAnalyticsStatsResponse>({
       path: `${basePath()}/data_frame/analytics/_stats`,
       method: 'GET',
     });
   },
-  createDataFrameAnalytics(analyticsId: string, analyticsConfig: any): Promise<any> {
+  createDataFrameAnalytics(analyticsId: string, analyticsConfig: any) {
     const body = JSON.stringify(analyticsConfig);
-    return http({
+    return http<any>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}`,
       method: 'PUT',
       body,
     });
   },
-  evaluateDataFrameAnalytics(evaluateConfig: any): Promise<any> {
+  evaluateDataFrameAnalytics(evaluateConfig: any) {
     const body = JSON.stringify(evaluateConfig);
-    return http({
+    return http<any>({
       path: `${basePath()}/data_frame/_evaluate`,
       method: 'POST',
       body,
     });
   },
-  explainDataFrameAnalytics(jobConfig: any): Promise<any> {
+  explainDataFrameAnalytics(jobConfig: any) {
     const body = JSON.stringify(jobConfig);
-    return http({
+    return http<any>({
       path: `${basePath()}/data_frame/analytics/_explain`,
       method: 'POST',
       body,
     });
   },
-  deleteDataFrameAnalytics(analyticsId: string): Promise<any> {
-    return http({
+  deleteDataFrameAnalytics(analyticsId: string) {
+    return http<any>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}`,
       method: 'DELETE',
     });
   },
-  startDataFrameAnalytics(analyticsId: string): Promise<any> {
-    return http({
+  startDataFrameAnalytics(analyticsId: string) {
+    return http<any>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}/_start`,
       method: 'POST',
     });
   },
-  stopDataFrameAnalytics(analyticsId: string, force: boolean = false): Promise<any> {
-    return http({
+  stopDataFrameAnalytics(analyticsId: string, force: boolean = false) {
+    return http<any>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}/_stop`,
       method: 'POST',
       query: { force },
     });
   },
-  getAnalyticsAuditMessages(analyticsId: string): Promise<any> {
-    return http({
+  getAnalyticsAuditMessages(analyticsId: string) {
+    return http<any>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}/messages`,
       method: 'GET',
     });

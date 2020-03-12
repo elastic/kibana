@@ -11,7 +11,7 @@ import { basePath } from './index';
 export const fileDatavisualizer = {
   analyzeFile(file: string, params: Record<string, string> = {}) {
     const body = JSON.stringify(file);
-    return http({
+    return http<any>({
       path: `${basePath()}/file_data_visualizer/analyze_file`,
       method: 'POST',
       body,
@@ -43,7 +43,7 @@ export const fileDatavisualizer = {
       ingestPipeline,
     });
 
-    return http({
+    return http<any>({
       path: `${basePath()}/file_data_visualizer/import`,
       method: 'POST',
       query,

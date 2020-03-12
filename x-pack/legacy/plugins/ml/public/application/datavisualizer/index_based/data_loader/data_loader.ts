@@ -76,7 +76,7 @@ export class DataLoader {
     fields: FieldRequestConfig[],
     interval?: string
   ): Promise<any[]> {
-    const stats = await ml.getVisualizerFieldStats({
+    const stats = await ml.getVisualizerFieldStats<any>({
       indexPatternTitle: this._indexPatternTitle,
       query,
       timeFieldName: this._indexPattern.timeFieldName,

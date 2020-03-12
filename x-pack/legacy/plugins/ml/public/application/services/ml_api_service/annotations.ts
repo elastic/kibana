@@ -24,14 +24,14 @@ export const annotations = {
   },
   indexAnnotation(obj: any) {
     const body = JSON.stringify(obj);
-    return http({
+    return http<any>({
       path: `${basePath()}/annotations/index`,
       method: 'PUT',
       body,
     });
   },
   deleteAnnotation(id: string) {
-    return http({
+    return http<any>({
       path: `${basePath()}/annotations/delete/${id}`,
       method: 'DELETE',
     });

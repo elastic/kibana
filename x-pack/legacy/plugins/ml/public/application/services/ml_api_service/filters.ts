@@ -14,14 +14,14 @@ import { basePath } from './index';
 export const filters = {
   filters(obj?: { filterId?: string }) {
     const filterId = obj && obj.filterId ? `/${obj.filterId}` : '';
-    return http({
+    return http<any>({
       path: `${basePath()}/filters${filterId}`,
       method: 'GET',
     });
   },
 
   filtersStats() {
-    return http({
+    return http<any>({
       path: `${basePath()}/filters/_stats`,
       method: 'GET',
     });
@@ -33,7 +33,7 @@ export const filters = {
       description,
       items,
     });
-    return http({
+    return http<any>({
       path: `${basePath()}/filters`,
       method: 'PUT',
       body,
@@ -47,7 +47,7 @@ export const filters = {
       ...(removeItems !== undefined ? { removeItems } : {}),
     });
 
-    return http({
+    return http<any>({
       path: `${basePath()}/filters/${filterId}`,
       method: 'PUT',
       body,
@@ -55,7 +55,7 @@ export const filters = {
   },
 
   deleteFilter(filterId: string) {
-    return http({
+    return http<any>({
       path: `${basePath()}/filters/${filterId}`,
       method: 'DELETE',
     });

@@ -102,7 +102,11 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
           const latestTimestamp = group.latest_timestamp;
           const startMoment = moment(latestTimestamp);
           const twentyFourHoursAgo = startMoment.subtract(24, 'hours').valueOf();
-          return ml.results.getMaxAnomalyScore(group.jobIds, twentyFourHoursAgo, latestTimestamp);
+          return ml.results.getMaxAnomalyScore<any>(
+            group.jobIds,
+            twentyFourHoursAgo,
+            latestTimestamp
+          );
         });
 
       const results = await Promise.all(promises);
