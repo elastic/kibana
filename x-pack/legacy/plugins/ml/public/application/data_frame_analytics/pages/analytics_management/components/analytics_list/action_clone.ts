@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { DataFrameAnalyticsConfig, isOutlierAnalysis } from '../../../../common';
 import { isClassificationAnalysis, isRegressionAnalysis } from '../../../../common/analytics';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
-import { getCloneFormStateFromJobConfig, State } from '../../hooks/use_create_analytics_form/state';
+import { State } from '../../hooks/use_create_analytics_form/state';
 import { DataFrameAnalyticsListRow } from './common';
 
 interface PropDefinition {
@@ -247,7 +247,7 @@ export type CloneDataFrameAnalyticsConfig = Omit<
   'id' | 'version' | 'create_time'
 >;
 
-function extractCloningConfig(
+export function extractCloningConfig(
   originalConfig: DataFrameAnalyticsConfig
 ): CloneDataFrameAnalyticsConfig {
   const {
@@ -271,18 +271,7 @@ export function getCloneAction(createAnalyticsForm: CreateAnalyticsFormProps) {
   const { actions } = createAnalyticsForm;
 
   const onClick = async (item: DataFrameAnalyticsListRow) => {
-    await actions.openModal();
-
-    const config = extractCloningConfig(item.config);
-
-    actions.setJobClone(item.config);
-
-    if (isAdvancedConfig(config)) {
-      actions.setJobConfig(config);
-      actions.switchToAdvancedEditor();
-    } else {
-      actions.setFormState(getCloneFormStateFromJobConfig(config));
-    }
+    await actions.setJobClone(item.config);
   };
 
   return {

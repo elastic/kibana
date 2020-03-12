@@ -79,5 +79,5 @@ export interface ActionDispatchers {
   startAnalyticsJob: () => void;
   switchToAdvancedEditor: () => void;
   setEstimatedModelMemoryLimit: (value: State['estimatedModelMemoryLimit']) => void;
-  setJobClone: (cloneJob: DataFrameAnalyticsConfig) => void;
+  setJobClone: (cloneJob: DataFrameAnalyticsConfig) => Promise<void>;
 }
