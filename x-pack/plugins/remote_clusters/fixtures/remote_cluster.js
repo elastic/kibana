@@ -16,6 +16,7 @@ export const getRemoteClusterMock = ({
   isConfiguredByNode = false,
   mode = SNIFF_MODE,
   proxyAddress,
+  hasDeprecatedProxySetting = false,
 } = {}) => ({
   name,
   seeds,
@@ -28,4 +29,5 @@ export const getRemoteClusterMock = ({
   mode,
   connectedSocketsCount,
   proxyAddress,
+  hasDeprecatedProxySetting,
 });

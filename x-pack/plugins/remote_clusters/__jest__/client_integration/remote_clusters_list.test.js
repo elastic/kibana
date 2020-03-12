@@ -90,9 +90,22 @@ describe('<RemoteClusterList />', () => {
       proxyAddress: 'localhost:9500',
       isConfiguredByNode: true,
       mode: PROXY_MODE,
+      seeds: null,
+      connectedNodesCount: null,
+    });
+    const remoteCluster3 = getRemoteClusterMock({
+      name: `c${getRandomString()}`,
+      isConnected: false,
+      connectedSocketsCount: 0,
+      proxyAddress: 'localhost:9500',
+      isConfiguredByNode: false,
+      mode: PROXY_MODE,
+      hasDeprecatedProxySetting: true,
+      seeds: null,
+      connectedNodesCount: null,
     });
 
-    const remoteClusters = [remoteCluster1, remoteCluster2];
+    const remoteClusters = [remoteCluster1, remoteCluster2, remoteCluster3];
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
@@ -136,6 +149,15 @@ describe('<RemoteClusterList />', () => {
           remoteCluster2.connectedSocketsCount.toString(),
           '',
         ],
+        [
+          '',
+          remoteCluster3.name,
+          'Not connected',
+          PROXY_MODE,
+          remoteCluster2.proxyAddress,
+          remoteCluster2.connectedSocketsCount.toString(),
+          '',
+        ],
       ]);
     });
 
@@ -143,6 +165,14 @@ describe('<RemoteClusterList />', () => {
       const secondRow = rows[1].reactWrapper; // The second cluster has been defined by node
       expect(
         findTestSubject(secondRow, 'remoteClustersTableListClusterDefinedByNodeTooltip').length
+      ).toBe(1);
+    });
+
+    test('should have a tooltip to indicate that the cluster has a deprecated setting', () => {
+      const secondRow = rows[2].reactWrapper; // The third cluster has been defined with deprecated setting
+      expect(
+        findTestSubject(secondRow, 'remoteClustersTableListClusterWithDeprecatedSettingTooltip')
+          .length
       ).toBe(1);
     });
 
@@ -204,8 +234,8 @@ describe('<RemoteClusterList />', () => {
           errors: [],
         });
 
-        // Make sure that we have our 2 remote clusters in the table
-        expect(rows.length).toBe(2);
+        // Make sure that we have our 3 remote clusters in the table
+        expect(rows.length).toBe(3);
 
         actions.selectRemoteClusterAt(0);
         actions.clickBulkDeleteButton();
@@ -216,7 +246,7 @@ describe('<RemoteClusterList />', () => {
 
         ({ rows } = table.getMetaData('remoteClusterListTable'));
 
-        expect(rows.length).toBe(1);
+        expect(rows.length).toBe(2);
         expect(rows[0].columns[1].value).toEqual(remoteCluster2.name);
       });
     });

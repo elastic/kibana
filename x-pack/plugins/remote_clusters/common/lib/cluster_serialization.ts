@@ -6,10 +6,18 @@
 
 import { PROXY_MODE } from '../constants';
 
+// interface ClusterEs {
+//   seeds?: string[];
+// }
+
+// interface Cluster {}
+
+// interface ClusterPayload {}
+
 export function deserializeCluster(
   name: string,
   esClusterObject: any,
-  deprecatedProxyAddress: string | undefined
+  deprecatedProxyAddress?: string | undefined
 ): any {
   if (!name || !esClusterObject || typeof esClusterObject !== 'object') {
     throw new Error('Unable to deserialize cluster');

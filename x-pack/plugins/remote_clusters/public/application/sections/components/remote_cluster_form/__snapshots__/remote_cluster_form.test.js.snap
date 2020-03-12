@@ -368,21 +368,46 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
               id="xpack.remoteClusters.remoteClusterForm.sectionModeDescription"
               values={Object {}}
             />
-            <EuiSpacer
-              size="m"
-            />
-            <EuiSwitch
-              checked={true}
-              data-test-subj="remoteClusterFormConnectionModeToggle"
-              label={
+            <EuiFormRow
+              describedByIds={Array []}
+              display="row"
+              fullWidth={true}
+              hasChildLabel={true}
+              hasEmptyLabelSpace={true}
+              helpText={
                 <FormattedMessage
-                  defaultMessage="Use proxy mode"
-                  id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
-                  values={Object {}}
+                  defaultMessage="Configure a remote cluster with a single proxy address. {learnMoreLink}"
+                  id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription"
+                  values={
+                    Object {
+                      "learnMoreLink": <ForwardRef
+                        target="_blank"
+                      >
+                        <FormattedMessage
+                          defaultMessage="Learn more."
+                          id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription.learnMoreLinkLabel"
+                          values={Object {}}
+                        />
+                      </ForwardRef>,
+                    }
+                  }
                 />
               }
-              onChange={[Function]}
-            />
+              labelType="label"
+            >
+              <EuiSwitch
+                checked={true}
+                data-test-subj="remoteClusterFormConnectionModeToggle"
+                label={
+                  <FormattedMessage
+                    defaultMessage="Use proxy mode"
+                    id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
+                    values={Object {}}
+                  />
+                }
+                onChange={[Function]}
+              />
+            </EuiFormRow>
           </React.Fragment>
         }
         fullWidth={true}
@@ -469,115 +494,169 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                             >
                               Remote cluster connections work by configuring a remote cluster and connecting only to a limited number of nodes in that remote cluster.
                             </FormattedMessage>
-                            <EuiSpacer
-                              size="m"
-                            >
-                              <div
-                                className="euiSpacer euiSpacer--m"
-                              />
-                            </EuiSpacer>
-                            <EuiSwitch
-                              checked={true}
-                              data-test-subj="remoteClusterFormConnectionModeToggle"
-                              label={
+                            <EuiFormRow
+                              describedByIds={Array []}
+                              display="row"
+                              fullWidth={true}
+                              hasChildLabel={true}
+                              hasEmptyLabelSpace={true}
+                              helpText={
                                 <FormattedMessage
-                                  defaultMessage="Use proxy mode"
-                                  id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
-                                  values={Object {}}
+                                  defaultMessage="Configure a remote cluster with a single proxy address. {learnMoreLink}"
+                                  id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription"
+                                  values={
+                                    Object {
+                                      "learnMoreLink": <ForwardRef
+                                        target="_blank"
+                                      >
+                                        <FormattedMessage
+                                          defaultMessage="Learn more."
+                                          id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription.learnMoreLinkLabel"
+                                          values={Object {}}
+                                        />
+                                      </ForwardRef>,
+                                    }
+                                  }
                                 />
                               }
-                              onChange={[Function]}
+                              labelType="label"
                             >
                               <div
-                                className="euiSwitch"
+                                className="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth"
+                                id="mockId-row"
                               >
-                                <button
-                                  aria-checked={true}
-                                  aria-labelledby="mockId"
-                                  className="euiSwitch__button"
-                                  data-test-subj="remoteClusterFormConnectionModeToggle"
-                                  id="mockId"
-                                  onClick={[Function]}
-                                  role="switch"
-                                  type="button"
+                                <div
+                                  className="euiFormRow__fieldWrapper"
                                 >
-                                  <span
-                                    className="euiSwitch__body"
+                                  <EuiSwitch
+                                    aria-describedby="mockId-help"
+                                    checked={true}
+                                    data-test-subj="remoteClusterFormConnectionModeToggle"
+                                    id="mockId"
+                                    label={
+                                      <FormattedMessage
+                                        defaultMessage="Use proxy mode"
+                                        id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
+                                        values={Object {}}
+                                      />
+                                    }
+                                    onBlur={[Function]}
+                                    onChange={[Function]}
+                                    onFocus={[Function]}
                                   >
-                                    <span
-                                      className="euiSwitch__thumb"
-                                    />
-                                    <span
-                                      className="euiSwitch__track"
+                                    <div
+                                      className="euiSwitch"
                                     >
-                                      <EuiIcon
-                                        className="euiSwitch__icon"
-                                        size="m"
-                                        type="cross"
+                                      <button
+                                        aria-checked={true}
+                                        aria-describedby="mockId-help"
+                                        aria-labelledby="mockId"
+                                        className="euiSwitch__button"
+                                        data-test-subj="remoteClusterFormConnectionModeToggle"
+                                        id="mockId"
+                                        onBlur={[Function]}
+                                        onClick={[Function]}
+                                        onFocus={[Function]}
+                                        role="switch"
+                                        type="button"
                                       >
-                                        <EuiIconEmpty
-                                          aria-hidden={true}
-                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
-                                          focusable="false"
-                                          role="img"
-                                          style={null}
+                                        <span
+                                          className="euiSwitch__body"
                                         >
-                                          <svg
-                                            aria-hidden={true}
-                                            className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
-                                            focusable="false"
-                                            height={16}
-                                            role="img"
-                                            style={null}
-                                            viewBox="0 0 16 16"
-                                            width={16}
-                                            xmlns="http://www.w3.org/2000/svg"
+                                          <span
+                                            className="euiSwitch__thumb"
                                           />
-                                        </EuiIconEmpty>
-                                      </EuiIcon>
-                                      <EuiIcon
-                                        className="euiSwitch__icon euiSwitch__icon--checked"
-                                        size="m"
-                                        type="check"
+                                          <span
+                                            className="euiSwitch__track"
+                                          >
+                                            <EuiIcon
+                                              className="euiSwitch__icon"
+                                              size="m"
+                                              type="cross"
+                                            >
+                                              <div
+                                                className="euiSwitch__icon"
+                                                data-euiicon-type="cross"
+                                                size="m"
+                                              />
+                                            </EuiIcon>
+                                            <EuiIcon
+                                              className="euiSwitch__icon euiSwitch__icon--checked"
+                                              size="m"
+                                              type="check"
+                                            >
+                                              <div
+                                                className="euiSwitch__icon euiSwitch__icon--checked"
+                                                data-euiicon-type="check"
+                                                size="m"
+                                              />
+                                            </EuiIcon>
+                                          </span>
+                                        </span>
+                                      </button>
+                                      <span
+                                        className="euiSwitch__label"
+                                        id="mockId"
+                                        onClick={[Function]}
                                       >
-                                        <EuiIconEmpty
-                                          aria-hidden={true}
-                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
-                                          focusable="false"
-                                          role="img"
-                                          style={null}
+                                        <FormattedMessage
+                                          defaultMessage="Use proxy mode"
+                                          id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
+                                          values={Object {}}
                                         >
-                                          <svg
-                                            aria-hidden={true}
-                                            className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
-                                            focusable="false"
-                                            height={16}
-                                            role="img"
-                                            style={null}
-                                            viewBox="0 0 16 16"
-                                            width={16}
-                                            xmlns="http://www.w3.org/2000/svg"
-                                          />
-                                        </EuiIconEmpty>
-                                      </EuiIcon>
-                                    </span>
-                                  </span>
-                                </button>
-                                <span
-                                  className="euiSwitch__label"
-                                  id="mockId"
-                                  onClick={[Function]}
-                                >
-                                  <FormattedMessage
-                                    defaultMessage="Use proxy mode"
-                                    id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
-                                    values={Object {}}
+                                          Use proxy mode
+                                        </FormattedMessage>
+                                      </span>
+                                    </div>
+                                  </EuiSwitch>
+                                  <EuiFormHelpText
+                                    className="euiFormRow__text"
+                                    id="mockId-help"
                                   >
-                                    Use proxy mode
-                                  </FormattedMessage>
-                                </span>
+                                    <div
+                                      className="euiFormHelpText euiFormRow__text"
+                                      id="mockId-help"
+                                    >
+                                      <FormattedMessage
+                                        defaultMessage="Configure a remote cluster with a single proxy address. {learnMoreLink}"
+                                        id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription"
+                                        values={
+                                          Object {
+                                            "learnMoreLink": <ForwardRef
+                                              target="_blank"
+                                            >
+                                              <FormattedMessage
+                                                defaultMessage="Learn more."
+                                                id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription.learnMoreLinkLabel"
+                                                values={Object {}}
+                                              />
+                                            </ForwardRef>,
+                                          }
+                                        }
+                                      >
+                                        Configure a remote cluster with a single proxy address. 
+                                        <EuiLink
+                                          target="_blank"
+                                        >
+                                          <button
+                                            className="euiLink euiLink--primary"
+                                            type="button"
+                                          >
+                                            <FormattedMessage
+                                              defaultMessage="Learn more."
+                                              id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription.learnMoreLinkLabel"
+                                              values={Object {}}
+                                            >
+                                              Learn more.
+                                            </FormattedMessage>
+                                          </button>
+                                        </EuiLink>
+                                      </FormattedMessage>
+                                    </div>
+                                  </EuiFormHelpText>
+                                </div>
                               </div>
-                            </EuiSwitch>
+                            </EuiFormRow>
                           </div>
                         </EuiTextColor>
                       </div>
@@ -1178,50 +1257,22 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                       size="m"
                                       type="cross"
                                     >
-                                      <EuiIconEmpty
-                                        aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
-                                        focusable="false"
-                                        role="img"
-                                        style={null}
-                                      >
-                                        <svg
-                                          aria-hidden={true}
-                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
-                                          focusable="false"
-                                          height={16}
-                                          role="img"
-                                          style={null}
-                                          viewBox="0 0 16 16"
-                                          width={16}
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        />
-                                      </EuiIconEmpty>
+                                      <div
+                                        className="euiSwitch__icon"
+                                        data-euiicon-type="cross"
+                                        size="m"
+                                      />
                                     </EuiIcon>
                                     <EuiIcon
                                       className="euiSwitch__icon euiSwitch__icon--checked"
                                       size="m"
                                       type="check"
                                     >
-                                      <EuiIconEmpty
-                                        aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
-                                        focusable="false"
-                                        role="img"
-                                        style={null}
-                                      >
-                                        <svg
-                                          aria-hidden={true}
-                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
-                                          focusable="false"
-                                          height={16}
-                                          role="img"
-                                          style={null}
-                                          viewBox="0 0 16 16"
-                                          width={16}
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        />
-                                      </EuiIconEmpty>
+                                      <div
+                                        className="euiSwitch__icon euiSwitch__icon--checked"
+                                        data-euiicon-type="check"
+                                        size="m"
+                                      />
                                     </EuiIcon>
                                   </span>
                                 </span>
@@ -1306,25 +1357,12 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                           size="m"
                           type="check"
                         >
-                          <EuiIconEmpty
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
-                            focusable="false"
-                            role="img"
-                            style={null}
-                          >
-                            <svg
-                              aria-hidden={true}
-                              className="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
-                              focusable="false"
-                              height={16}
-                              role="img"
-                              style={null}
-                              viewBox="0 0 16 16"
-                              width={16}
-                              xmlns="http://www.w3.org/2000/svg"
-                            />
-                          </EuiIconEmpty>
+                          <div
+                            aria-hidden="true"
+                            className="euiButton__icon"
+                            data-euiicon-type="check"
+                            size="m"
+                          />
                         </EuiIcon>
                         <span
                           className="euiButton__text"
@@ -1496,58 +1534,65 @@ Array [
             >
               Remote cluster connections work by configuring a remote cluster and connecting only to a limited number of nodes in that remote cluster.
               <div
-                class="euiSpacer euiSpacer--m"
-              />
-              <div
-                class="euiSwitch"
+                class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth"
+                id="mockId-row"
               >
-                <button
-                  aria-checked="false"
-                  aria-labelledby="mockId"
-                  class="euiSwitch__button"
-                  data-test-subj="remoteClusterFormConnectionModeToggle"
-                  id="mockId"
-                  role="switch"
-                  type="button"
+                <div
+                  class="euiFormRow__fieldWrapper"
                 >
-                  <span
-                    class="euiSwitch__body"
+                  <div
+                    class="euiSwitch"
                   >
-                    <span
-                      class="euiSwitch__thumb"
-                    />
-                    <span
-                      class="euiSwitch__track"
+                    <button
+                      aria-checked="false"
+                      aria-describedby="mockId-help"
+                      aria-labelledby="mockId"
+                      class="euiSwitch__button"
+                      data-test-subj="remoteClusterFormConnectionModeToggle"
+                      id="mockId"
+                      role="switch"
+                      type="button"
                     >
-                      <svg
-                        aria-hidden="true"
-                        class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
-                        focusable="false"
-                        height="16"
-                        role="img"
-                        viewBox="0 0 16 16"
-                        width="16"
-                        xmlns="http://www.w3.org/2000/svg"
-                      />
-                      <svg
-                        aria-hidden="true"
-                        class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
-                        focusable="false"
-                        height="16"
-                        role="img"
-                        viewBox="0 0 16 16"
-                        width="16"
-                        xmlns="http://www.w3.org/2000/svg"
-                      />
+                      <span
+                        class="euiSwitch__body"
+                      >
+                        <span
+                          class="euiSwitch__thumb"
+                        />
+                        <span
+                          class="euiSwitch__track"
+                        >
+                          <div
+                            class="euiSwitch__icon"
+                            data-euiicon-type="cross"
+                          />
+                          <div
+                            class="euiSwitch__icon euiSwitch__icon--checked"
+                            data-euiicon-type="check"
+                          />
+                        </span>
+                      </span>
+                    </button>
+                    <span
+                      class="euiSwitch__label"
+                      id="mockId"
+                    >
+                      Use proxy mode
                     </span>
-                  </span>
-                </button>
-                <span
-                  class="euiSwitch__label"
-                  id="mockId"
-                >
-                  Use proxy mode
-                </span>
+                  </div>
+                  <div
+                    class="euiFormHelpText euiFormRow__text"
+                    id="mockId-help"
+                  >
+                    Configure a remote cluster with a single proxy address. 
+                    <button
+                      class="euiLink euiLink--primary"
+                      type="button"
+                    >
+                      Learn more.
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

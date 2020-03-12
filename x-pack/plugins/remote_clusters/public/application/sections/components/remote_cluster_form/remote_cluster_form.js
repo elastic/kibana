@@ -380,6 +380,7 @@ export class RemoteClusterForm extends Component {
             )}
             onChange={e => this.onFieldsChange({ proxyAddress: e.target.value })}
             isInvalid={Boolean(areErrorsVisible && errorProxyAddress)}
+            data-test-subj="remoteClusterFormProxyAddressInput"
             fullWidth
           />
         </EuiFormRow>

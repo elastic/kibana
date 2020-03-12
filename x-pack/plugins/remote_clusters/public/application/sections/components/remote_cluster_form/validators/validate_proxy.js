@@ -25,8 +25,8 @@ export function validateProxy(proxy) {
     return (
       <FormattedMessage
         id="xpack.remoteClusters.remoteClusterForm.proxyError.invalidCharactersMessage"
-        defaultMessage="Address must use host:port format. Example: 127.0.0.1:9400, localhost:9400. ' +
-            'Hosts can only consist of letters, numbers, and dashes."
+        defaultMessage="Address must use host:port format. Example: 127.0.0.1:9400, localhost:9400.
+          Hosts can only consist of letters, numbers, and dashes."
       />
     );
   }

@@ -124,7 +124,12 @@ export class RemoteClusterTable extends Component {
           if (hasDeprecatedProxySetting) {
             return (
               <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>{link}</EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                  data-test-subj="remoteClustersTableListClusterWithDeprecatedSettingTooltip"
+                >
+                  {link}
+                </EuiFlexItem>
 
                 <EuiFlexItem
                   grow={false}
