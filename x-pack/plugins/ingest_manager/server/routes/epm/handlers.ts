@@ -116,28 +116,6 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
   }
 };
 
-/* export const getDataStreamHandler: RequestHandler<
-  TypeOf<typeof GetDataStreamRequestSchema.params>,
-  TypeOf<typeof GetDataStreamRequestSchema.query>
-> = async (context, request, response) => {
-  try {
-    const { pkgName } = request.params;
-    const { datasetPath, version } = request.query;
-    const savedObjectsClient = context.core.savedObjects.client;
-    const res = await getDataStream({ savedObjectsClient, pkgName, datasetPath, version });
-    const body: GetDataStreamResponse = {
-      response: res || null,
-      success: res !== undefined,
-    };
-    return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
-  }
-};*/
-
 export const installPackageHandler: RequestHandler<TypeOf<
   typeof InstallPackageRequestSchema.params
 >> = async (context, request, response) => {

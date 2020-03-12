@@ -18,7 +18,7 @@ import * as Registry from '../registry';
 import { getObject } from './get_objects';
 import { getInstallation, findInstalledPackageByName } from './index';
 import { installTemplates } from '../elasticsearch/template/install';
-import { generateDataStreams } from '../elasticsearch/template/template';
+import { generateIndexPatterns } from '../elasticsearch/template/template';
 import { installPipelines } from '../elasticsearch/ingest_pipeline/install';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 
@@ -111,7 +111,7 @@ export async function installPackage(options: {
   ]);
 
   const toSaveRefs: AssetReference[] = res.flat();
-  const toSaveStreams = generateDataStreams(registryPackageInfo.datasets);
+  const toSavePatterns = generateIndexPatterns(registryPackageInfo.datasets);
   // Save those references in the package manager's state saved object
   await saveInstallationReferences({
     savedObjectsClient,
@@ -119,7 +119,7 @@ export async function installPackage(options: {
     pkgName,
     pkgVersion,
     toSaveRefs,
-    toSaveStreams,
+    toSavePatterns,
   });
   return toSaveRefs;
 }
@@ -149,12 +149,12 @@ export async function saveInstallationReferences(options: {
   pkgName: string;
   pkgVersion: string;
   toSaveRefs: AssetReference[];
-  toSaveStreams: Record<string, string>;
+  toSavePatterns: Record<string, string>;
 }) {
-  const { savedObjectsClient, pkgkey, pkgName, pkgVersion, toSaveRefs, toSaveStreams } = options;
+  const { savedObjectsClient, pkgkey, pkgName, pkgVersion, toSaveRefs, toSavePatterns } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgkey });
   const savedRefs = installation?.installed.references || [];
-  const toInstallStreams = Object.assign(installation?.datasetIndexPattern || {}, toSaveStreams);
+  const toInstallStreams = Object.assign(installation?.datasetIndexPattern || {}, toSavePatterns);
 
   const mergeRefsReducer = (current: AssetReference[], pending: AssetReference) => {
     const hasRef = current.find(c => c.id === pending.id && c.type === pending.type);
