@@ -25,13 +25,19 @@ const StyledPanel = styled(Panel)`
   max-width: 50%;
 `;
 
-const bgColor = NamedColors.resolverBackground;
-
 const StyledGraphControls = styled(GraphControls)`
   position: absolute;
   top: 5px;
   right: 5px;
 `;
+
+const StyledResolverContainer = styled.div`
+  display: flex;
+  flex-grow: 1;
+  contain: layout;
+`;
+
+const bgColor = NamedColors.resolverBackground;
 
 export const Resolver = styled(
   React.memo(function Resolver({ className }: { className?: string }) {
@@ -39,11 +45,19 @@ export const Resolver = styled(
       selectors.processNodePositionsAndEdgeLineSegments
     );
 
+    const { processToAdjacencyMap } = useSelector(selectors.processAdjacencies);
+
     const { projectionMatrix, ref, onMouseDown } = useCamera();
 
     return (
       <div data-test-subj="resolverEmbeddable" className={className}>
-        <div className="resolver-graph" onMouseDown={onMouseDown} ref={ref}>
+        <StyledResolverContainer
+          className="resolver-graph kbn-resetFocusState"
+          onMouseDown={onMouseDown}
+          ref={ref}
+          role="tree"
+          tabIndex={0}
+        >
           {edgeLineSegments.map(([startPosition, endPosition], index) => (
             <EdgeLine
               key={index}
@@ -58,9 +72,10 @@ export const Resolver = styled(
               position={position}
               projectionMatrix={projectionMatrix}
               event={processEvent}
+              adjacentNodeMap={processToAdjacencyMap.get(processEvent)}
             />
           ))}
-        </div>
+        </StyledResolverContainer>
         <StyledPanel />
         <StyledGraphControls />
         <SymbolDefinitions />
@@ -84,11 +99,6 @@ export const Resolver = styled(
    * Prevent partially visible components from showing up outside the bounds of Resolver.
    */
   overflow: hidden;
-  contain: content;
+  contain: strict;
   background-color: ${bgColor};
-
-  .resolver-graph {
-    display: flex;
-    flex-grow: 1;
-  }
 `;

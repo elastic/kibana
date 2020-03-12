@@ -7,11 +7,25 @@ import { Reducer, combineReducers } from 'redux';
 import { animateProcessIntoView } from './methods';
 import { cameraReducer } from './camera/reducer';
 import { dataReducer } from './data/reducer';
-import { ResolverState, ResolverAction } from '../types';
+import { ResolverState, ResolverAction, ResolverUIState } from '../types';
+
+const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
+  uiState = { activeDescendentId: null },
+  action
+) => {
+  if (action.type === 'userFocusedOnResolverNode') {
+    return {
+      activeDescendentId: action.payload.nodeId,
+    };
+  } else {
+    return uiState as ResolverUIState;
+  }
+};
 
 const concernReducers = combineReducers({
   camera: cameraReducer,
   data: dataReducer,
+  ui: uiReducer,
 });
 
 export const resolverReducer: Reducer<ResolverState, ResolverAction> = (state, action) => {
