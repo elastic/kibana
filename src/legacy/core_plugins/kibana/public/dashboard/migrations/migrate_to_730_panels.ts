@@ -113,7 +113,7 @@ function migratePre61PanelToLatest(
     ? PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS
     : PANEL_HEIGHT_SCALE_FACTOR;
 
-  // These are snapshotted here instead of imported form dashboard because
+  // These are snapshotted here instead of imported from dashboard because
   // this function is called from both client and server side, and having an import from a public
   // folder will cause errors for the server side version.  Also, this is only run for the point in time
   // from panels created in < 7.3 so maybe using a snapshot of the default values when this migration was
