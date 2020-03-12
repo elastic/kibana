@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiBadge,
   EuiButtonToggle,
@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 
 import styled, { css } from 'styled-components';
+import { Redirect } from 'react-router-dom';
 import * as i18n from './translations';
 import { Case } from '../../../../containers/case/types';
 import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
@@ -32,6 +33,9 @@ import { useUpdateCase } from '../../../../containers/case/use_update_case';
 import { WrapperPage } from '../../../../components/wrapper_page';
 import { getTypedPayload } from '../../../../containers/case/utils';
 import { WhitePageWrapper } from '../wrappers';
+import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
+import { SiemPageName } from '../../../home/types';
+import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 
 interface Props {
   caseId: string;
@@ -62,6 +66,7 @@ export interface CaseProps {
 export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => {
   const { caseData, isLoading, updateKey, updateCaseProperty } = useUpdateCase(caseId, initialData);
 
+  // Update Fields
   const onUpdateField = useCallback(
     (newUpdateKey: keyof Case, updateValue: Case[keyof Case]) => {
       switch (newUpdateKey) {
@@ -104,13 +109,39 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
     },
     [updateCaseProperty, caseData.state]
   );
+  const toggleStateCase = useCallback(
+    e => onUpdateField('state', e.target.checked ? 'open' : 'closed'),
+    [onUpdateField]
+  );
+  const onSubmitTitle = useCallback(newTitle => onUpdateField('title', newTitle), [onUpdateField]);
+  const onSubmitTags = useCallback(newTags => onUpdateField('tags', newTags), [onUpdateField]);
 
+  // Delete case
+  const {
+    handleToggleModal,
+    handleOnDeleteConfirm,
+    isDeleted,
+    isDisplayConfirmDeleteModal,
+  } = useDeleteCases();
+
+  const confirmDeleteModal = useMemo(
+    () => (
+      <ConfirmDeleteCaseModal
+        caseTitle={caseData.title}
+        isModalVisible={isDisplayConfirmDeleteModal}
+        isPlural={false}
+        onCancel={handleToggleModal}
+        onConfirm={handleOnDeleteConfirm.bind(null, [caseId])}
+      />
+    ),
+    [isDisplayConfirmDeleteModal]
+  );
   // TO DO refactor each of these const's into their own components
   const propertyActions = [
     {
       iconType: 'trash',
       label: 'Delete case',
-      onClick: () => null,
+      onClick: handleToggleModal,
     },
     {
       iconType: 'popout',
@@ -124,12 +155,9 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
     },
   ];
 
-  const onSubmit = useCallback(newTitle => onUpdateField('title', newTitle), [onUpdateField]);
-  const toggleStateCase = useCallback(
-    e => onUpdateField('state', e.target.checked ? 'open' : 'closed'),
-    [onUpdateField]
-  );
-  const onSubmitTags = useCallback(newTags => onUpdateField('tags', newTags), [onUpdateField]);
+  if (isDeleted) {
+    return <Redirect to={`/${SiemPageName.case}`} />;
+  }
 
   return (
     <>
@@ -144,7 +172,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
             <EditableTitle
               isLoading={isLoading && updateKey === 'title'}
               title={caseData.title}
-              onSubmit={onSubmit}
+              onSubmit={onSubmitTitle}
             />
           }
           title={caseData.title}
@@ -222,12 +250,13 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
           </EuiFlexGroup>
         </MyWrapper>
       </WhitePageWrapper>
+      {confirmDeleteModal}
     </>
   );
 });
 
 export const CaseView = React.memo(({ caseId }: Props) => {
-  const [{ data, isLoading, isError }] = useGetCase(caseId);
+  const { data, isLoading, isError } = useGetCase(caseId);
   if (isError) {
     return null;
   }
