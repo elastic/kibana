@@ -345,7 +345,7 @@ describe('get mapbox color expression', () => {
       const dynamicStyleOptions = {
         type: COLOR_MAP_TYPE.CATEGORICAL,
       };
-      const colorProperty = makeProperty(dynamicStyleOptions);
+      const colorProperty = makeProperty(dynamicStyleOptions, getCategoricalFieldMeta);
       expect(colorProperty._getMbColor()).toBeNull();
     });
 
@@ -354,7 +354,7 @@ describe('get mapbox color expression', () => {
         type: COLOR_MAP_TYPE.CATEGORICAL,
         field: {},
       };
-      const colorProperty = makeProperty(dynamicStyleOptions);
+      const colorProperty = makeProperty(dynamicStyleOptions, getCategoricalFieldMeta);
       expect(colorProperty._getMbColor()).toBeNull();
     });
 
@@ -366,7 +366,7 @@ describe('get mapbox color expression', () => {
             name: 'myField',
           },
         };
-        const colorProperty = makeProperty(dynamicStyleOptions);
+        const colorProperty = makeProperty(dynamicStyleOptions, getCategoricalFieldMeta);
         expect(colorProperty._getMbColor()).toBeNull();
       });
 
@@ -378,7 +378,7 @@ describe('get mapbox color expression', () => {
           },
           colorCategory: 'palette_0',
         };
-        const colorProperty = makeProperty(dynamicStyleOptions);
+        const colorProperty = makeProperty(dynamicStyleOptions, getCategoricalFieldMeta);
         expect(colorProperty._getMbColor()).toEqual([
           'match',
           ['to-string', ['get', 'myField']],
@@ -400,7 +400,7 @@ describe('get mapbox color expression', () => {
           },
           useCustomColorPalette: true,
         };
-        const colorProperty = makeProperty(dynamicStyleOptions);
+        const colorProperty = makeProperty(dynamicStyleOptions, getCategoricalFieldMeta);
         expect(colorProperty._getMbColor()).toBeNull();
       });
 
@@ -413,7 +413,7 @@ describe('get mapbox color expression', () => {
           useCustomColorPalette: true,
           customColorPalette: [],
         };
-        const colorProperty = makeProperty(dynamicStyleOptions);
+        const colorProperty = makeProperty(dynamicStyleOptions, getCategoricalFieldMeta);
         expect(colorProperty._getMbColor()).toBeNull();
       });
 
@@ -429,7 +429,7 @@ describe('get mapbox color expression', () => {
             { stop: 'MX', color: '#072f6b' },
           ],
         };
-        const colorProperty = makeProperty(dynamicStyleOptions);
+        const colorProperty = makeProperty(dynamicStyleOptions, getCategoricalFieldMeta);
         expect(colorProperty._getMbColor()).toEqual([
           'match',
           ['to-string', ['get', 'myField']],
