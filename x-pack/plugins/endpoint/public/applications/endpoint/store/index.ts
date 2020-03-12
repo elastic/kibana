@@ -61,7 +61,6 @@ export const appStoreFactory: (middlewareDeps?: {
   /**
    * Give middleware access to plugin start dependencies.
    */
-<<<<<<< HEAD
   depsStart: EndpointPluginStartDependencies;
 }) => Store = middlewareDeps => {
   let middleware;
