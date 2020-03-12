@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useEffect, useState } from 'react';
-import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid } from '@elastic/eui';
+import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionType, ActionTypeIndex } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { actionTypeCompare } from '../../lib/action_type_compare';
+import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
@@ -59,16 +60,26 @@ export const ActionTypeMenu = ({ onActionTypeChange, actionTypes }: Props) => {
   const cardNodes = registeredActionTypes
     .sort((a, b) => actionTypeCompare(a.actionType, b.actionType))
     .map((item, index) => {
+      const checkActionTypeResult = checkActionTypeEnabled(item.actionType);
+      const card = (
+        <EuiCard
+          data-test-subj={`${item.actionType.id}-card`}
+          icon={<EuiIcon size="xl" type={item.iconClass} />}
+          title={item.name}
+          description={item.selectMessage}
+          isDisabled={!checkActionTypeResult.isEnabled}
+          onClick={() => onActionTypeChange(item.actionType)}
+        />
+      );
+
       return (
         <EuiFlexItem key={index}>
-          <EuiCard
-            data-test-subj={`${item.actionType.id}-card`}
-            icon={<EuiIcon size="xl" type={item.iconClass} />}
-            title={item.name}
-            description={item.selectMessage}
-            isDisabled={!item.actionType.enabledInLicense}
-            onClick={() => onActionTypeChange(item.actionType)}
-          />
+          {checkActionTypeResult.isEnabled && card}
+          {checkActionTypeResult.isEnabled === false && (
+            <EuiToolTip position="top" content={checkActionTypeResult.message}>
+              {card}
+            </EuiToolTip>
+          )}
         </EuiFlexItem>
       );
     });

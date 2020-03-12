@@ -25,13 +25,9 @@ import { ConnectorAddFlyout, ConnectorEditFlyout } from '../../action_connector_
 import { hasDeleteActionsCapability, hasSaveActionsCapability } from '../../../lib/capabilities';
 import { DeleteConnectorsModal } from '../../../components/delete_connectors_modal';
 import { ActionsConnectorsContextProvider } from '../../../context/actions_connectors_context';
+import { checkActionTypeEnabled } from '../../../lib/check_action_type_enabled';
 import './actions_connectors_list.scss';
-import {
-  ActionConnector,
-  ActionConnectorTableItem,
-  ActionTypeIndex,
-  ActionType,
-} from '../../../../types';
+import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
   const { http, toastNotifications, capabilities, actionTypeRegistry } = useAppDependencies();
@@ -434,34 +430,4 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
 
 function getActionsCountByActionType(actions: ActionConnector[], actionTypeId: string) {
   return actions.filter(action => action.actionTypeId === actionTypeId).length;
-}
-
-function checkActionTypeEnabled(
-  actionType?: ActionType
-): { isEnabled: true } | { isEnabled: false; message: string } {
-  if (actionType?.enabledInLicense === false) {
-    return {
-      isEnabled: false,
-      message: i18n.translate(
-        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.actionTypeDisabledByLicenseMessage',
-        {
-          defaultMessage:
-            'This connector is disabled because it requires a {minimumLicenseRequired} license.',
-          values: {
-            minimumLicenseRequired: actionType.minimumLicenseRequired,
-          },
-        }
-      ),
-    };
-  }
-  if (!actionType || actionType.enabledInConfig === false) {
-    return {
-      isEnabled: false,
-      message: i18n.translate(
-        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.actionTypeDisabledByConfigMessage',
-        { defaultMessage: 'This connector is disabled by the Kibana configuration.' }
-      ),
-    };
-  }
-  return { isEnabled: true };
 }

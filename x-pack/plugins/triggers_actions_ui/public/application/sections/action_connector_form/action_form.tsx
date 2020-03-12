@@ -21,8 +21,6 @@ import {
   EuiButtonIcon,
   EuiEmptyPrompt,
   EuiButtonEmpty,
-  EuiCard,
-  EuiLink,
 } from '@elastic/eui';
 import { HttpSetup, ToastsApi } from 'kibana/public';
 import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
@@ -37,8 +35,8 @@ import {
 import { SectionLoading } from '../../components/section_loading';
 import { ConnectorAddModal } from './connector_add_modal';
 import { TypeRegistry } from '../../type_registry';
-import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { actionTypeCompare } from '../../lib/action_type_compare';
+import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import './action_form.scss';
 
 interface ActionAccordionFormProps {
@@ -547,55 +545,3 @@ export const ActionForm = ({
     </Fragment>
   );
 };
-
-function checkActionTypeEnabled(
-  actionType?: ActionType
-): { isEnabled: true } | { isEnabled: false; messageCard: JSX.Element } {
-  if (actionType?.enabledInLicense === false) {
-    return {
-      isEnabled: false,
-      messageCard: (
-        <EuiCard
-          title={i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.actionTypeDisabledByLicenseMessageTitle',
-            {
-              defaultMessage: 'This feature requires a {minimumLicenseRequired} license.',
-              values: {
-                minimumLicenseRequired: actionType.minimumLicenseRequired,
-              },
-            }
-          )}
-          description={i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.actionTypeDisabledByLicenseMessageDescription',
-            { defaultMessage: 'To re-enable this action, please upgrade your license.' }
-          )}
-          className="actActionForm__disabledActionWarningCard"
-          children={
-            <EuiLink href={VIEW_LICENSE_OPTIONS_LINK} target="_blank">
-              <FormattedMessage
-                defaultMessage="View license options"
-                id="xpack.triggersActionsUI.sections.alertForm.actionTypeDisabledByLicenseLinkTitle"
-              />
-            </EuiLink>
-          }
-        />
-      ),
-    };
-  }
-  if (!actionType || actionType.enabledInConfig === false) {
-    return {
-      isEnabled: false,
-      messageCard: (
-        <EuiCard
-          title={i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.actionTypeDisabledByConfigMessageTitle',
-            { defaultMessage: 'This feature is disabled by the Kibana configuration.' }
-          )}
-          description=""
-          className="actActionForm__disabledActionWarningCard"
-        />
-      ),
-    };
-  }
-  return { isEnabled: true };
-}
