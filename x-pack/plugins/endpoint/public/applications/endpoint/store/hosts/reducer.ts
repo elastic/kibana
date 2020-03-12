@@ -50,8 +50,6 @@ export const hostListReducer: Reducer<HostListState, AppAction> = (
       ...state,
       detailsError: action.payload,
     };
-  } else if (action.type === 'userExitedHostList') {
-    return initialState();
   } else if (action.type === 'userPaginatedHostList') {
     return {
       ...state,
