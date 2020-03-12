@@ -153,7 +153,7 @@ export {
 
 export {
   ISearch,
-  ICancel,
+  ISearchCancel,
   ISearchOptions,
   IRequestTypesMap,
   IResponseTypesMap,

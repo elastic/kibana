@@ -14,7 +14,7 @@ import {
   TSearchStrategyProvider,
   ISearch,
   ISearchOptions,
-  ICancel,
+  ISearchCancel,
   getDefaultSearchParams,
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
@@ -36,9 +36,14 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
     const defaultParams = getDefaultSearchParams(config);
     const params = { ...defaultParams, ...request.params };
 
-    const rawResponse = await (request.indexType === 'rollup'
+    const response = await (request.indexType === 'rollup'
       ? rollupSearch(caller, { ...request, params }, options)
       : asyncSearch(caller, { ...request, params }, options));
+
+    const rawResponse =
+      request.indexType === 'rollup'
+        ? (response as SearchResponse<any>)
+        : (response as AsyncSearchResponse<any>).response;
 
     const id = (response as AsyncSearchResponse<any>).id;
     const { total, failed, successful } = rawResponse._shards;
@@ -46,7 +51,7 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
     return { id, total, loaded, rawResponse };
   };
 
-  const cancel: ICancel<typeof ES_SEARCH_STRATEGY> = async id => {
+  const cancel: ISearchCancel<typeof ES_SEARCH_STRATEGY> = async id => {
     const method = 'DELETE';
     const path = `_async_search/${id}`;
     await caller('transport.request', { method, path });
@@ -67,7 +72,7 @@ function asyncSearch(
   const path = request.id ? `_async_search/${request.id}` : `${index}/_async_search`;
 
   // Wait up to 1s for the response to return
-  const query = toSnakeCase({ ...params, waitForCompletion: '1s' });
+  const query = toSnakeCase({ waitForCompletion: '1s', ...params });
 
   return caller('transport.request', { method, path, body, query }, options);
 }
