@@ -72,11 +72,6 @@ import { useMlContext } from '../../../../../contexts/ml';
 
 const FEATURE_INFLUENCE = 'feature_influence';
 
-interface GetDataFrameAnalyticsResponse {
-  count: number;
-  data_frame_analytics: DataFrameAnalyticsConfig[];
-}
-
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 
 const ExplorationTitle: React.FC<{ jobId: string }> = ({ jobId }) => (
@@ -130,9 +125,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
 
   useEffect(() => {
     (async function() {
-      const analyticsConfigs: GetDataFrameAnalyticsResponse = await ml.dataFrameAnalytics.getDataFrameAnalytics(
-        jobId
-      );
+      const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
       if (
         Array.isArray(analyticsConfigs.data_frame_analytics) &&
         analyticsConfigs.data_frame_analytics.length > 0
