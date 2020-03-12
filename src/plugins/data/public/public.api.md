@@ -49,11 +49,6 @@ import { UiSettingsParams } from 'src/core/server/types';
 import { UnregisterCallback } from 'history';
 import { UserProvidedValues } from 'src/core/server/types';
 
-// Warning: (ae-missing-release-tag) "addSearchStrategy" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export const addSearchStrategy: (searchStrategy: SearchStrategyProvider) => void;
-
 // Warning: (ae-forgotten-export) The symbol "DateFormat" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "baseFormattersPublic" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -152,11 +147,6 @@ export interface DataPublicPluginStart {
         SearchBar: React.ComponentType<StatefulSearchBarProps>;
     };
 }
-
-// Warning: (ae-missing-release-tag) "defaultSearchStrategy" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export const defaultSearchStrategy: SearchStrategyProvider;
 
 // @public (undocumented)
 export enum ES_FIELD_TYPES {
@@ -312,11 +302,6 @@ export interface EsQueryConfig {
 //
 // @public (undocumented)
 export type EsQuerySortValue = Record<string, SortDirection | SortDirectionNumeric>;
-
-// Warning: (ae-missing-release-tag) "esSearchStrategyProvider" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY>;
 
 // Warning: (ae-missing-release-tag) "ExistsFilter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -488,11 +473,6 @@ export function getSearchErrorType({ message }: Pick<SearchError, 'message'>): "
 // @public (undocumented)
 export function getTime(indexPattern: IIndexPattern | undefined, timeRange: TimeRange, forceNow?: Date): import("../..").RangeFilter | undefined;
 
-// Warning: (ae-missing-release-tag) "hasSearchStategyForIndexPattern" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export const hasSearchStategyForIndexPattern: (indexPattern: IndexPattern) => boolean;
-
 // Warning: (ae-missing-release-tag) "IDataPluginServices" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -517,6 +497,8 @@ export interface IDataPluginServices extends Partial<CoreStart_2> {
 //
 // @public (undocumented)
 export interface IEsSearchRequest extends IKibanaSearchRequest {
+    // (undocumented)
+    indexType?: string;
     // (undocumented)
     params: SearchParams;
 }
@@ -1227,26 +1209,12 @@ export interface RefreshInterval {
 //
 // @public (undocumented)
 export interface SavedQuery {
+    // Warning: (ae-forgotten-export) The symbol "SavedQueryAttributes" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
     attributes: SavedQueryAttributes;
     // (undocumented)
     id: string;
-}
-
-// Warning: (ae-missing-release-tag) "SavedQueryAttributes" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export interface SavedQueryAttributes {
-    // (undocumented)
-    description: string;
-    // (undocumented)
-    filters?: Filter[];
-    // (undocumented)
-    query: Query;
-    // (undocumented)
-    timefilter?: SavedQueryTimeFilter;
-    // (undocumented)
-    title: string;
 }
 
 // Warning: (ae-missing-release-tag) "SavedQueryService" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1483,14 +1451,6 @@ export const syncQueryStateWithUrl: (query: Pick<{
 //
 // @public (undocumented)
 export type TimefilterContract = PublicMethodsOf<Timefilter>;
-
-// @public (undocumented)
-export interface TimefilterSetup {
-    // (undocumented)
-    history: TimeHistoryContract;
-    // (undocumented)
-    timefilter: TimefilterContract;
-}
 
 // Warning: (ae-missing-release-tag) "TimeHistory" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
