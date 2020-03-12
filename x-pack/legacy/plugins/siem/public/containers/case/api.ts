@@ -13,7 +13,6 @@ import {
 } from '../../../../../../plugins/case/common/api';
 import { KibanaServices } from '../../lib/kibana';
 import { AllCases, Case, Comment, FetchCasesProps, SortFieldCase } from './types';
-import { throwIfNotOk } from '../../hooks/api/api';
 import { CASES_URL } from './constants';
 import {
   convertToCamelCase,
@@ -28,22 +27,18 @@ const CaseSavedObjectType = 'cases';
 export const getCase = async (caseId: string, includeComments: boolean = true): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch<CaseResponse>(`${CASES_URL}/${caseId}`, {
     method: 'GET',
-    asResponse: true,
     query: {
       includeComments,
     },
   });
-  await throwIfNotOk(response.response);
-  return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response.body));
+  return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
 };
 
 export const getTags = async (): Promise<string[]> => {
   const response = await KibanaServices.get().http.fetch<string[]>(`${CASES_URL}/tags`, {
     method: 'GET',
-    asResponse: true,
   });
-  await throwIfNotOk(response.response);
-  return response.body ?? [];
+  return response ?? [];
 };
 
 export const getCases = async ({
@@ -74,20 +69,16 @@ export const getCases = async ({
   const response = await KibanaServices.get().http.fetch<CasesResponse>(`${CASES_URL}/_find`, {
     method: 'GET',
     query,
-    asResponse: true,
   });
-  await throwIfNotOk(response.response);
-  return convertAllCasesToCamel(decodeCasesResponse(response.body));
+  return convertAllCasesToCamel(decodeCasesResponse(response));
 };
 
 export const postCase = async (newCase: CaseRequest): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch<CaseResponse>(`${CASES_URL}`, {
     method: 'POST',
-    asResponse: true,
     body: JSON.stringify(newCase),
   });
-  await throwIfNotOk(response.response);
-  return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response.body));
+  return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
 };
 
 export const patchCase = async (
@@ -97,11 +88,9 @@ export const patchCase = async (
 ): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch(`${CASES_URL}`, {
     method: 'PATCH',
-    asResponse: true,
     body: JSON.stringify({ ...updatedCase, id: caseId, version }),
   });
-  await throwIfNotOk(response.response);
-  return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response.body));
+  return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
 };
 
 export const postComment = async (newComment: CommentRequest, caseId: string): Promise<Comment> => {
@@ -109,24 +98,32 @@ export const postComment = async (newComment: CommentRequest, caseId: string): P
     `${CASES_URL}/${caseId}/comments`,
     {
       method: 'POST',
-      asResponse: true,
       body: JSON.stringify(newComment),
     }
   );
-  await throwIfNotOk(response.response);
-  return convertToCamelCase<CommentResponse, Comment>(decodeCommentResponse(response.body));
+  return convertToCamelCase<CommentResponse, Comment>(decodeCommentResponse(response));
 };
 
 export const patchComment = async (
+  caseId: string,
   commentId: string,
   commentUpdate: string,
   version: string
 ): Promise<Partial<Comment>> => {
-  const response = await KibanaServices.get().http.fetch<CommentResponse>(`${CASES_URL}/comments`, {
-    method: 'PATCH',
-    asResponse: true,
-    body: JSON.stringify({ comment: commentUpdate, id: commentId, version }),
+  const response = await KibanaServices.get().http.fetch<CommentResponse>(
+    `${CASES_URL}/${caseId}/comments`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ comment: commentUpdate, id: commentId, version }),
+    }
+  );
+  return convertToCamelCase<CommentResponse, Comment>(decodeCommentResponse(response));
+};
+
+export const deleteCases = async (caseIds: string[]): Promise<boolean> => {
+  const response = await KibanaServices.get().http.fetch<string>(`${CASES_URL}`, {
+    method: 'DELETE',
+    query: { ids: JSON.stringify(caseIds) },
   });
-  await throwIfNotOk(response.response);
-  return convertToCamelCase<CommentResponse, Comment>(decodeCommentResponse(response.body));
+  return response === 'true' ? true : false;
 };
