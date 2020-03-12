@@ -65,7 +65,7 @@ const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
       <UtilityBar>
         <UtilityBarSection>
           <UtilityBarGroup>
-            <UtilityBarText dataTestSubj="showingRules">
+            <UtilityBarText dataTestSubj="showingSignals">
               {i18n.SHOWING_SIGNALS(formattedTotalCount, totalCount)}
             </UtilityBarText>
           </UtilityBarGroup>
