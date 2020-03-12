@@ -8,7 +8,7 @@ import {
   KibanaResponseFactory,
   RequestHandler,
   RequestHandlerContext,
-} from 'src/core/server';
+} from 'kibana/server';
 
 import { MlLicense } from '../../../../../legacy/plugins/ml/common/license';
 

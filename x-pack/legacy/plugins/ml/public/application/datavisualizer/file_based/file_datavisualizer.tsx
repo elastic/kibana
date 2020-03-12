@@ -5,7 +5,7 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import { IUiSettingsClient } from 'src/core/public';
+import { IUiSettingsClient } from 'kibana/public';
 
 import { useTimefilter } from '../../contexts/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
