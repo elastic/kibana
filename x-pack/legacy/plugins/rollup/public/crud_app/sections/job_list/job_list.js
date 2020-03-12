@@ -113,7 +113,7 @@ export class JobListUi extends Component {
         >
           <FormattedMessage
             id="xpack.rollupJobs.jobList.noPermissionText"
-            defaultMessage="You do not have permission to view or add rollup jobs."
+            defaultMessage="You do not have permission to view or add rollup jobs due to expired license."
           />
         </EuiCallOut>
       </Fragment>
