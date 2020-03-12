@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import _ from 'lodash';
-import { RequestHandlerContext } from 'src/core/server';
+import { APICaller } from 'kibana/server';
 
 import { ANNOTATION_TYPE } from '../../../../../legacy/plugins/ml/common/constants/annotations';
 import {
@@ -68,8 +68,7 @@ export type callWithRequestType = (
   params: annotationProviderParams
 ) => Promise<any>;
 
-export function annotationProvider(context: RequestHandlerContext) {
-  const callAsCurrentUser = context.ml!.mlClient.callAsCurrentUser;
+export function annotationProvider(callAsCurrentUser: APICaller) {
   async function indexAnnotation(annotation: Annotation, username: string) {
     if (isAnnotation(annotation) === false) {
       // No need to translate, this will not be exposed in the UI.

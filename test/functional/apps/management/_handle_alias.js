@@ -25,7 +25,8 @@ export default function({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'timePicker']);
 
-  describe('Index patterns on aliases', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/59717
+  describe.skip('Index patterns on aliases', function() {
     before(async function() {
       await esArchiver.loadIfNeeded('alias');
       await esArchiver.load('empty_kibana');
