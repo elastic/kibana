@@ -321,6 +321,8 @@ export const reindexServiceFactory = (
   const startReindexing = async (reindexOp: ReindexSavedObject) => {
     const { indexName, reindexOptions } = reindexOp.attributes;
 
+    // Where possible, derive reindex options at the last moment before reindexing
+    // to prevent them from becoming stale as they wait in the queue.
     const indicesState = await esIndicesStateCheck(callAsUser, [indexName]);
     const openAndClose = indicesState[indexName] === 'close';
     if (indicesState[indexName] === 'close') {
