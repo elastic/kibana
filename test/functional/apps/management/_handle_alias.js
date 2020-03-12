@@ -26,7 +26,8 @@ export default function({ getService, getPageObjects }) {
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'timePicker']);
 
-  describe('Index patterns on aliases', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/59717
+  describe.skip('Index patterns on aliases', function() {
     before(async function() {
       await security.testUser.setRoles(['kibana_admin', 'test_alias_reader']);
       await esArchiver.loadIfNeeded('alias');

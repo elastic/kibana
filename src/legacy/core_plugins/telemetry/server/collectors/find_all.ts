@@ -17,18 +17,25 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import {
+  SavedObjectAttributes,
+  ISavedObjectsRepository,
+  SavedObjectsFindOptions,
+  SavedObject,
+} from 'kibana/server';
 
-export function createStateStub(overrides) {
-  return _.merge(
-    {
-      queryParameters: {
-        defaultStepSize: 3,
-        indexPatternId: 'INDEX_PATTERN_ID',
-        predecessorCount: 10,
-        successorCount: 10,
-      },
-    },
-    overrides
-  );
+export async function findAll<T extends SavedObjectAttributes>(
+  savedObjectsClient: ISavedObjectsRepository,
+  opts: SavedObjectsFindOptions
+): Promise<Array<SavedObject<T>>> {
+  const { page = 1, perPage = 100, ...options } = opts;
+  const { saved_objects: savedObjects, total } = await savedObjectsClient.find<T>({
+    ...options,
+    page,
+    perPage,
+  });
+  if (page * perPage >= total) {
+    return savedObjects;
+  }
+  return [...savedObjects, ...(await findAll<T>(savedObjectsClient, { ...opts, page: page + 1 }))];
 }
