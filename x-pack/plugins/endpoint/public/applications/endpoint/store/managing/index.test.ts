@@ -41,6 +41,7 @@ describe('endpoint_list store concerns', () => {
           name: '',
           full: '',
           version: '',
+          variant: '',
         },
       },
     };

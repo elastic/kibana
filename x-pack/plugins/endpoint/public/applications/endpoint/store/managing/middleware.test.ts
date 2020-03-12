@@ -46,6 +46,7 @@ describe('endpoint list saga', () => {
           name: '',
           full: '',
           version: '',
+          variant: '',
         },
       },
     };
