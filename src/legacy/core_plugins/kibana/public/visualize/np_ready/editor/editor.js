@@ -115,7 +115,7 @@ function VisualizeAppController(
   savedVis.vis.on('apply', _applyVis);
   // vis is instance of src/legacy/ui/public/vis/vis.js.
   // SearchSource is a promise-based stream of search results that can inherit from other search sources.
-  const { vis, searchSource } = savedVis;
+  const { vis, searchSource, savedSearch } = savedVis;
 
   $scope.vis = vis;
 
@@ -392,6 +392,17 @@ function VisualizeAppController(
       },
     };
 
+    const handleLinkedSearch = linked => {
+      if (linked && !savedVis.savedSearchId && savedSearch) {
+        savedVis.savedSearchId = savedSearch.id;
+        vis.savedSearchId = savedSearch.id;
+        searchSource.setParent(savedSearch.searchSource);
+      } else if (!linked && savedVis.savedSearchId) {
+        delete savedVis.savedSearchId;
+        delete vis.savedSearchId;
+      }
+    };
+
     // Create a PersistedState instance for uiState.
     const { persistedState, unsubscribePersisted, persistOnChange } = makeStateful(
       'uiState',
@@ -400,9 +411,9 @@ function VisualizeAppController(
     $scope.uiState = persistedState;
     $scope.savedVis = savedVis;
     $scope.query = initialState.query;
-    $scope.linked = initialState.linked;
     $scope.searchSource = searchSource;
     $scope.refreshInterval = timefilter.getRefreshInterval();
+    handleLinkedSearch(initialState.linked);
 
     const addToDashMode =
       $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
@@ -481,7 +492,7 @@ function VisualizeAppController(
     $scope.fetch = function() {
       const { query, linked, filters } = stateContainer.getState();
       $scope.query = query;
-      $scope.linked = linked;
+      handleLinkedSearch(linked);
       savedVis.searchSource.setField('query', query);
       savedVis.searchSource.setField('filter', filters);
       $scope.$broadcast('render');
@@ -569,20 +580,6 @@ function VisualizeAppController(
     $scope.savedQuery = savedQuery;
     updateStateFromSavedQuery(savedQuery);
   };
-
-  $scope.$watch('linked', linked => {
-    if (linked && !savedVis.savedSearchId) {
-      savedVis.savedSearchId = savedVis.searchSource.id;
-      vis.savedSearchId = savedVis.searchSource.id;
-
-      $scope.$broadcast('render');
-    } else if (!linked && savedVis.savedSearchId) {
-      delete savedVis.savedSearchId;
-      delete vis.savedSearchId;
-
-      $scope.$broadcast('render');
-    }
-  });
 
   /**
    * Called when the user clicks "Save" button.
@@ -675,33 +672,26 @@ function VisualizeAppController(
   }
 
   const unlinkFromSavedSearch = () => {
-    const searchSourceParent = searchSource.getParent();
+    const searchSourceParent = savedSearch.searchSource;
     const searchSourceGrandparent = searchSourceParent.getParent();
+    const currentIndex = searchSourceParent.getField('index');
 
-    delete savedVis.savedSearchId;
-    delete vis.savedSearchId;
-    searchSourceParent.setField(
-      'filter',
-      _.union(searchSource.getOwnField('filter'), searchSourceParent.getOwnField('filter'))
-    );
-
-    stateContainer.transitions.unlinkSavedSearch(
-      searchSourceParent.getField('query'),
-      searchSourceParent.getField('filter')
-    );
-    searchSource.setField('index', searchSourceParent.getField('index'));
+    searchSource.setField('index', currentIndex);
     searchSource.setParent(searchSourceGrandparent);
+
+    stateContainer.transitions.unlinkSavedSearch({
+      query: searchSourceParent.getField('query'),
+      parentFilters: searchSourceParent.getOwnField('filter'),
+    });
 
     toastNotifications.addSuccess(
       i18n.translate('kbn.visualize.linkedToSearch.unlinkSuccessNotificationText', {
         defaultMessage: `Unlinked from saved search '{searchTitle}'`,
         values: {
-          searchTitle: savedVis.savedSearch.title,
+          searchTitle: savedSearch.title,
         },
       })
     );
-
-    $scope.fetch();
   };
 
   $scope.getAdditionalMessage = () => {
