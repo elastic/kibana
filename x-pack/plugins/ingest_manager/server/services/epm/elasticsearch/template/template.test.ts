@@ -7,9 +7,8 @@
 import { readFileSync } from 'fs';
 import { safeLoad } from 'js-yaml';
 import path from 'path';
-import { Field } from '../../fields/field';
+import { Field, processFields } from '../../fields/field';
 import { generateMappings, getTemplate } from './template';
-import { flattenAndPreprocessFields } from './install';
 
 // Add our own serialiser to just do JSON.stringify
 expect.addSnapshotSerializer({
@@ -34,8 +33,8 @@ test('tests loading base.yml', () => {
   const fieldsYML = readFileSync(ymlPath, 'utf-8');
   const fields: Field[] = safeLoad(fieldsYML);
 
-  const flattenedFields = flattenAndPreprocessFields(fields);
-  const mappings = generateMappings(flattenedFields);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
   const template = getTemplate('logs', 'foo', mappings);
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));
@@ -46,8 +45,8 @@ test('tests loading coredns.logs.yml', () => {
   const fieldsYML = readFileSync(ymlPath, 'utf-8');
   const fields: Field[] = safeLoad(fieldsYML);
 
-  const flattenedFields = flattenAndPreprocessFields(fields);
-  const mappings = generateMappings(flattenedFields);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
   const template = getTemplate('logs', 'foo', mappings);
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));
@@ -58,8 +57,8 @@ test('tests loading system.yml', () => {
   const fieldsYML = readFileSync(ymlPath, 'utf-8');
   const fields: Field[] = safeLoad(fieldsYML);
 
-  const flattenedFields = flattenAndPreprocessFields(fields);
-  const mappings = generateMappings(flattenedFields);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
   const template = getTemplate('metrics', 'whatsthis', mappings);
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));

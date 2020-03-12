@@ -50,9 +50,12 @@ export function generateMappings(fields: Field[]): Mappings {
     // If type is not defined, assume keyword
     const type = field.type || 'keyword';
 
-    const fieldProps = getDefaultProperties(field);
+    let fieldProps = getDefaultProperties(field);
 
     switch (type) {
+      case 'group':
+        fieldProps = generateMappings(field.fields!);
+        break;
       case 'integer':
         fieldProps.type = 'long';
         break;
