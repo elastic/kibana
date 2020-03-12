@@ -18,6 +18,10 @@ import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import {
   PLUGIN_ID,
+  OUTPUT_SAVED_OBJECT_TYPE,
+  AGENT_CONFIG_SAVED_OBJECT_TYPE,
+  DATASOURCE_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
@@ -49,6 +53,16 @@ export interface IngestManagerAppContext {
   savedObjects: SavedObjectsServiceStart;
 }
 
+const allSavedObjectTypes = [
+  OUTPUT_SAVED_OBJECT_TYPE,
+  AGENT_CONFIG_SAVED_OBJECT_TYPE,
+  DATASOURCE_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  AGENT_SAVED_OBJECT_TYPE,
+  AGENT_EVENT_SAVED_OBJECT_TYPE,
+  ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+];
+
 export class IngestManagerPlugin implements Plugin {
   private config$: Observable<IngestManagerConfigType>;
   private security: SecurityPluginSetup | undefined;
@@ -73,26 +87,18 @@ export class IngestManagerPlugin implements Plugin {
         app: [PLUGIN_ID, 'kibana'],
         privileges: {
           all: {
-            api: [PLUGIN_ID],
+            api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
             savedObject: {
-              all: [
-                AGENT_SAVED_OBJECT_TYPE,
-                AGENT_EVENT_SAVED_OBJECT_TYPE,
-                ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
-              ],
+              all: allSavedObjectTypes,
               read: [],
             },
             ui: ['show', 'read', 'write'],
           },
           read: {
-            api: [PLUGIN_ID],
+            api: [`${PLUGIN_ID}-read`],
             savedObject: {
               all: [],
-              read: [
-                AGENT_SAVED_OBJECT_TYPE,
-                AGENT_EVENT_SAVED_OBJECT_TYPE,
-                ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
-              ],
+              read: allSavedObjectTypes,
             },
             ui: ['show', 'read'],
           },

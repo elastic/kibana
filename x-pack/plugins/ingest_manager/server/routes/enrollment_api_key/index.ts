@@ -23,7 +23,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: ENROLLMENT_API_KEY_ROUTES.INFO_PATTERN,
       validate: GetOneEnrollmentAPIKeyRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getOneEnrollmentApiKeyHandler
   );
@@ -32,7 +32,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: ENROLLMENT_API_KEY_ROUTES.DELETE_PATTERN,
       validate: DeleteEnrollmentAPIKeyRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     deleteEnrollmentApiKeyHandler
   );
@@ -41,7 +41,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: ENROLLMENT_API_KEY_ROUTES.LIST_PATTERN,
       validate: GetEnrollmentAPIKeysRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getEnrollmentApiKeysHandler
   );
@@ -50,7 +50,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: ENROLLMENT_API_KEY_ROUTES.CREATE_PATTERN,
       validate: PostEnrollmentAPIKeyRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     postEnrollmentApiKeyHandler
   );

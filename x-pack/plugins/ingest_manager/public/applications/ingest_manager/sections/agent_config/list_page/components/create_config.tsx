@@ -27,7 +27,7 @@ interface Props {
 }
 
 export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
-  const { notifications } = useCore();
+  const { application, notifications } = useCore();
 
   const [agentConfig, setAgentConfig] = useState<NewAgentConfig>({
     name: '',
@@ -93,7 +93,11 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
           <EuiButton
             fill
             isLoading={isLoading}
-            disabled={isLoading || Object.keys(validation).length > 0}
+            isDisabled={
+              !application.capabilities.ingestManager.write ||
+              isLoading ||
+              Object.keys(validation).length > 0
+            }
             onClick={async () => {
               setIsLoading(true);
               try {

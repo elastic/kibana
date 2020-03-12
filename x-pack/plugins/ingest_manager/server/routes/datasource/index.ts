@@ -24,7 +24,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: DATASOURCE_API_ROUTES.LIST_PATTERN,
       validate: GetDatasourcesRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getDatasourcesHandler
   );
@@ -34,7 +34,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: DATASOURCE_API_ROUTES.INFO_PATTERN,
       validate: GetOneDatasourceRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getOneDatasourceHandler
   );
@@ -44,7 +44,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: DATASOURCE_API_ROUTES.CREATE_PATTERN,
       validate: CreateDatasourceRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     createDatasourceHandler
   );
@@ -54,7 +54,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: DATASOURCE_API_ROUTES.UPDATE_PATTERN,
       validate: UpdateDatasourceRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     updateDatasourceHandler
   );

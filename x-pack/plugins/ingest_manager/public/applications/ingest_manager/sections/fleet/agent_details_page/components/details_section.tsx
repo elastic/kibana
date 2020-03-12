@@ -24,7 +24,7 @@ import { useAgentRefresh } from '../hooks';
 import { AgentMetadataFlyout } from './metadata_flyout';
 import { Agent } from '../../../../types';
 import { AgentHealth } from '../../components/agent_health';
-import { useGetOneAgentConfig } from '../../../../hooks';
+import { useCapabilities, useGetOneAgentConfig } from '../../../../hooks';
 import { Loading } from '../../../../components';
 import { ConnectedLink } from '../../components';
 import { AgentUnenrollProvider } from '../../components/agent_unenroll_provider';
@@ -53,6 +53,7 @@ interface Props {
   agent: Agent;
 }
 export const AgentDetailSection: React.FunctionComponent<Props> = ({ agent }) => {
+  const hasWriteCapabilites = useCapabilities().write;
   const metadataFlyout = useFlyout();
   const refreshAgent = useAgentRefresh();
 
@@ -125,7 +126,7 @@ export const AgentDetailSection: React.FunctionComponent<Props> = ({ agent }) =>
           <AgentUnenrollProvider>
             {unenrollAgentsPrompt => (
               <EuiButton
-                disabled={!agent.active}
+                disabled={!hasWriteCapabilites || !agent.active}
                 onClick={() => {
                   unenrollAgentsPrompt([agent.id], 1, refreshAgent);
                 }}

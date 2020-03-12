@@ -26,7 +26,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
       validate: false,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getCategoriesHandler
   );
@@ -35,7 +35,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: EPM_API_ROUTES.LIST_PATTERN,
       validate: GetPackagesRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getListHandler
   );
@@ -44,7 +44,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: EPM_API_ROUTES.FILEPATH_PATTERN,
       validate: GetFileRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getFileHandler
   );
@@ -53,7 +53,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: EPM_API_ROUTES.INFO_PATTERN,
       validate: GetInfoRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getInfoHandler
   );
@@ -62,7 +62,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: EPM_API_ROUTES.INSTALL_PATTERN,
       validate: InstallPackageRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     installPackageHandler
   );
@@ -71,7 +71,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: EPM_API_ROUTES.DELETE_PATTERN,
       validate: DeletePackageRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     deletePackageHandler
   );

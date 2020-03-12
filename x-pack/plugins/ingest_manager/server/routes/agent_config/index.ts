@@ -28,7 +28,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_CONFIG_API_ROUTES.LIST_PATTERN,
       validate: GetAgentConfigsRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getAgentConfigsHandler
   );
@@ -38,7 +38,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_CONFIG_API_ROUTES.INFO_PATTERN,
       validate: GetOneAgentConfigRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getOneAgentConfigHandler
   );
@@ -48,7 +48,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_CONFIG_API_ROUTES.CREATE_PATTERN,
       validate: CreateAgentConfigRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     createAgentConfigHandler
   );
@@ -58,7 +58,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_CONFIG_API_ROUTES.UPDATE_PATTERN,
       validate: UpdateAgentConfigRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     updateAgentConfigHandler
   );
@@ -68,7 +68,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_CONFIG_API_ROUTES.DELETE_PATTERN,
       validate: DeleteAgentConfigsRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     deleteAgentConfigsHandler
   );
@@ -78,7 +78,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_CONFIG_API_ROUTES.FULL_INFO_PATTERN,
       validate: GetFullAgentConfigRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getFullAgentConfig
   );

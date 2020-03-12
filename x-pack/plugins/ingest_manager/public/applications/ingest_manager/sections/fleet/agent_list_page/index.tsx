@@ -34,7 +34,7 @@ import { WithHeaderLayout } from '../../../layouts';
 import { Agent } from '../../../types';
 import {
   usePagination,
-  useCore,
+  useCapabilities,
   useGetAgentConfigs,
   useGetAgents,
   useUrlParams,
@@ -85,6 +85,7 @@ const statusFilters = [
 ] as Array<{ label: string; status: string }>;
 
 const RowActions = React.memo<{ agent: Agent; refresh: () => void }>(({ agent, refresh }) => {
+  const hasWriteCapabilites = useCapabilities().write;
   const DETAILS_URI = useLink(FLEET_AGENT_DETAIL_PATH);
   const [isOpen, setIsOpen] = useState(false);
   const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
@@ -118,6 +119,7 @@ const RowActions = React.memo<{ agent: Agent; refresh: () => void }>(({ agent, r
           <AgentUnenrollProvider>
             {unenrollAgentsPrompt => (
               <EuiContextMenuItem
+                disabled={!hasWriteCapabilites}
                 icon="cross"
                 onClick={() => {
                   unenrollAgentsPrompt([agent.id], 1, () => {
@@ -140,7 +142,7 @@ const RowActions = React.memo<{ agent: Agent; refresh: () => void }>(({ agent, r
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
-  const core = useCore();
+  const hasWriteCapabilites = useCapabilities().write;
   // Agent data states
   const [showInactive, setShowInactive] = useState<boolean>(false);
 
@@ -363,7 +365,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         </h2>
       }
       actions={
-        core.application.capabilities.ingestManager.write ? (
+        hasWriteCapabilites ? (
           <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
             <FormattedMessage
               id="xpack.ingestManager.agentList.addButton"
@@ -432,7 +434,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           })}
         />
       </EuiFlexItem>
-      {core.application.capabilities.ingestManager.write && (
+      {hasWriteCapabilites && (
         <>
           <EuiFlexItem grow={false}>
             <Divider />
