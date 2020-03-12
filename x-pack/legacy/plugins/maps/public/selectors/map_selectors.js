@@ -13,8 +13,13 @@ import { HeatmapLayer } from '../layers/heatmap_layer';
 import { BlendedVectorLayer } from '../layers/blended_vector_layer';
 import { ALL_SOURCES } from '../layers/sources/all_sources';
 import { timefilter } from 'ui/timefilter';
-import { getInspectorAdapters } from '../reducers/non_serializable_instances';
-import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInspectorAdapters } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
+import {
+  copyPersistentState,
+  TRACKED_LAYER_DESCRIPTOR,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/reducers/util';
 import { InnerJoin } from '../layers/joins/inner_join';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
