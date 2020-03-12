@@ -1424,27 +1424,6 @@ describe('import rules schema', () => {
     );
   });
 
-  test('You cannot set the throttle to a value other than no_actions, rule, 1h, 1d, or 7d', () => {
-    expect(
-      importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        version: 1,
-        throttle: '1w',
-      }).error.message
-    ).toEqual(
-      'child "throttle" fails because ["throttle" must be one of [no_actions, rule, 1h, 1d, 7d]]'
-    );
-  });
-
   test('The default for "actions" will be an empty array', () => {
     expect(
       importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
@@ -1463,7 +1442,7 @@ describe('import rules schema', () => {
     ).toEqual([]);
   });
 
-  test('The default for "throttle" will be no_actions', () => {
+  test('The default for "throttle" will be null', () => {
     expect(
       importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
         rule_id: 'rule-1',
@@ -1478,6 +1457,118 @@ describe('import rules schema', () => {
         max_signals: 1,
         version: 1,
       }).value.throttle
-    ).toEqual('no_actions');
+    ).toEqual(null);
+  });
+
+  describe('note', () => {
+    test('You can set note to a string', () => {
+      expect(
+        importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: false,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          meta: {
+            somethingMadeUp: { somethingElse: true },
+          },
+          note: '# test header',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You can set note to an empty string', () => {
+      expect(
+        importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: false,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          meta: {
+            somethingMadeUp: { somethingElse: true },
+          },
+          note: '',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You cannot create note set to null', () => {
+      expect(
+        importRulesSchema.validate<Partial<ImportRuleAlertRest>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: false,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          meta: {
+            somethingMadeUp: { somethingElse: true },
+          },
+          note: null,
+        }).error.message
+      ).toEqual('child "note" fails because ["note" must be a string]');
+    });
+
+    test('You cannot create note as something other than a string', () => {
+      expect(
+        importRulesSchema.validate<Partial<Omit<ImportRuleAlertRest, 'note'> & { note: object }>>({
+          rule_id: 'rule-1',
+          output_index: '.siem-signals',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          immutable: false,
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          meta: {
+            somethingMadeUp: { somethingElse: true },
+          },
+          note: {
+            somethingMadeUp: { somethingElse: true },
+          },
+        }).error.message
+      ).toEqual('child "note" fails because ["note" must be a string]');
+    });
   });
 });

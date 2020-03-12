@@ -134,7 +134,6 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertR
   to: 'now',
   type: 'query',
   threat: [],
-  throttle: 'no_actions',
   version: 1,
 });
 
@@ -214,6 +213,7 @@ export const ruleToNdjson = (rule: Partial<OutputRuleAlertRest>): Buffer => {
  * @param ruleId The ruleId to set which is optional and defaults to rule-1
  */
 export const getComplexRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+  actions: [],
   name: 'Complex Rule Query',
   description: 'Complex Rule Query',
   false_positives: [
@@ -287,6 +287,7 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> 
   ],
   timeline_id: 'timeline_id',
   timeline_title: 'timeline_title',
+  note: '# some investigation documentation',
   version: 1,
   query: 'user.name: root or user.name: admin',
 });
@@ -296,6 +297,7 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> 
  * @param ruleId The ruleId to set which is optional and defaults to rule-1
  */
 export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+  actions: [],
   created_by: 'elastic',
   name: 'Complex Rule Query',
   description: 'Complex Rule Query',
@@ -372,6 +374,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlert
   timeline_id: 'timeline_id',
   timeline_title: 'timeline_title',
   updated_by: 'elastic',
+  note: '# some investigation documentation',
   version: 1,
   query: 'user.name: root or user.name: admin',
 });

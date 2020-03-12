@@ -197,6 +197,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
               onChangeDatasetSelection={setCategoryQueryDatasets}
               onRequestRecreateMlJob={viewSetupForReconfiguration}
               selectedDatasets={categoryQueryDatasets}
+              sourceId={sourceId}
               timeRange={categoryQueryTimeRange.timeRange}
               topCategories={topLogEntryCategories}
             />

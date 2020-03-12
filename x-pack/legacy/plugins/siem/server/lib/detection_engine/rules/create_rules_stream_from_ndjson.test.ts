@@ -7,6 +7,7 @@ import { Readable } from 'stream';
 import { createRulesStreamFromNdJson } from './create_rules_stream_from_ndjson';
 import { createPromiseFromStreams } from 'src/legacy/utils/streams';
 import { ImportRuleAlertRest } from '../types';
+import { BadRequestError } from '../errors/bad_request_error';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -68,7 +69,7 @@ describe('create_rules_stream_from_ndjson', () => {
           max_signals: 100,
           tags: [],
           threat: [],
-          throttle: 'no_actions',
+          throttle: null,
           references: [],
           version: 1,
         },
@@ -93,7 +94,7 @@ describe('create_rules_stream_from_ndjson', () => {
           max_signals: 100,
           tags: [],
           threat: [],
-          throttle: 'no_actions',
+          throttle: null,
           references: [],
           version: 1,
         },
@@ -156,7 +157,7 @@ describe('create_rules_stream_from_ndjson', () => {
           max_signals: 100,
           tags: [],
           threat: [],
-          throttle: 'no_actions',
+          throttle: null,
           references: [],
           version: 1,
         },
@@ -181,7 +182,7 @@ describe('create_rules_stream_from_ndjson', () => {
           max_signals: 100,
           tags: [],
           threat: [],
-          throttle: 'no_actions',
+          throttle: null,
           references: [],
           version: 1,
         },
@@ -227,7 +228,7 @@ describe('create_rules_stream_from_ndjson', () => {
           max_signals: 100,
           tags: [],
           threat: [],
-          throttle: 'no_actions',
+          throttle: null,
           references: [],
           version: 1,
         },
@@ -252,7 +253,7 @@ describe('create_rules_stream_from_ndjson', () => {
           max_signals: 100,
           tags: [],
           threat: [],
-          throttle: 'no_actions',
+          throttle: null,
           references: [],
           version: 1,
         },
@@ -298,7 +299,7 @@ describe('create_rules_stream_from_ndjson', () => {
         max_signals: 100,
         tags: [],
         threat: [],
-        throttle: 'no_actions',
+        throttle: null,
         references: [],
         version: 1,
       });
@@ -324,7 +325,7 @@ describe('create_rules_stream_from_ndjson', () => {
         max_signals: 100,
         tags: [],
         threat: [],
-        throttle: 'no_actions',
+        throttle: null,
         references: [],
         version: 1,
       });
@@ -347,7 +348,7 @@ describe('create_rules_stream_from_ndjson', () => {
         ndJsonStream,
         ...rulesObjectsStream,
       ]);
-      const resultOrError = result as TypeError[];
+      const resultOrError = result as BadRequestError[];
       expect(resultOrError[0]).toEqual({
         actions: [],
         rule_id: 'rule-1',
@@ -369,7 +370,7 @@ describe('create_rules_stream_from_ndjson', () => {
         max_signals: 100,
         tags: [],
         threat: [],
-        throttle: 'no_actions',
+        throttle: null,
         references: [],
         version: 1,
       });
@@ -397,13 +398,13 @@ describe('create_rules_stream_from_ndjson', () => {
         max_signals: 100,
         tags: [],
         threat: [],
-        throttle: 'no_actions',
+        throttle: null,
         references: [],
         version: 1,
       });
     });
 
-    test('non validated data is an instanceof TypeError', async () => {
+    test('non validated data is an instanceof BadRequestError', async () => {
       const sample1 = getOutputSample();
       const sample2 = getOutputSample();
       sample2.rule_id = 'rule-2';
@@ -420,8 +421,8 @@ describe('create_rules_stream_from_ndjson', () => {
         ndJsonStream,
         ...rulesObjectsStream,
       ]);
-      const resultOrError = result as TypeError[];
-      expect(resultOrError[1] instanceof TypeError).toEqual(true);
+      const resultOrError = result as BadRequestError[];
+      expect(resultOrError[1] instanceof BadRequestError).toEqual(true);
     });
   });
 });

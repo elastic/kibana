@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertAction } from '../../../../../../plugins/alerting/common/alert';
+import { AlertAction } from '../../../../../../plugins/alerting/common';
 import { CallAPIOptions } from '../../../../../../../src/core/server';
 import { Filter } from '../../../../../../../src/plugins/data/server';
 import { IRuleStatusAttributes } from './rules/types';
@@ -26,6 +26,7 @@ export interface ThreatParams {
 export interface RuleAlertParams {
   actions: AlertAction[];
   description: string;
+  note: string | undefined | null;
   enabled: boolean;
   falsePositives: string[];
   filters: PartialFilter[] | undefined | null;
@@ -51,10 +52,13 @@ export interface RuleAlertParams {
   threat: ThreatParams[] | undefined | null;
   type: 'query' | 'saved_query';
   version: number;
-  throttle: string | undefined | null;
+  throttle: string | null;
 }
 
-export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval' | 'tags'>;
+export type RuleTypeParams = Omit<
+  RuleAlertParams,
+  'name' | 'enabled' | 'interval' | 'tags' | 'actions' | 'throttle'
+>;
 
 export type RuleAlertParamsRest = Omit<
   RuleAlertParams,

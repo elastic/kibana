@@ -13,7 +13,6 @@ export const sampleRuleAlertParams = (
   maxSignals?: number | undefined,
   riskScore?: number | undefined
 ): RuleTypeParams => ({
-  actions: [],
   ruleId: 'rule-1',
   description: 'Detecting root and admin users',
   falsePositives: [],
@@ -29,13 +28,13 @@ export const sampleRuleAlertParams = (
   references: ['http://google.com'],
   riskScore: riskScore ? riskScore : 50,
   maxSignals: maxSignals ? maxSignals : 10000,
+  note: '',
   filters: undefined,
   savedId: undefined,
   timelineId: undefined,
   timelineTitle: undefined,
   meta: undefined,
   threat: undefined,
-  throttle: 'no_actions',
   version: 1,
 });
 
@@ -342,6 +341,7 @@ export const sampleRule = (): Partial<OutputRuleAlertRest> => {
     tags: ['some fake tag 1', 'some fake tag 2'],
     to: 'now',
     type: 'query',
+    note: '',
   };
 };
 

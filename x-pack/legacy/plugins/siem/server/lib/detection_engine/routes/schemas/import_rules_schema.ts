@@ -40,6 +40,7 @@ import {
   threat,
   throttle,
   references,
+  note,
   version,
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
@@ -88,6 +89,7 @@ export const importRulesSchema = Joi.object({
   threat: threat.default([]),
   throttle,
   references: references.default([]),
+  note: note.allow(''),
   version: version.default(1),
   created_at,
   updated_at,

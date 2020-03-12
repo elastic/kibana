@@ -15,6 +15,7 @@ import {
   DEFAULT_MAX_SIGNALS,
   DEFAULT_SEARCH_AFTER_PAGE_SIZE,
 } from '../../../../common/constants';
+import { AlertAction } from '../../../../../../../plugins/alerting/common';
 
 import { buildEventsSearchQuery } from './build_events_query';
 import { getInputIndex } from './get_input_output_index';
@@ -28,12 +29,14 @@ interface AlertAttributes {
   enabled: boolean;
   name: string;
   tags: string[];
+  actions: AlertAction[];
   createdBy: string;
   createdAt: string;
   updatedBy: string;
   schedule: {
     interval: string;
   };
+  throttle: string | null;
 }
 export const signalRulesAlertType = ({
   logger,
@@ -57,6 +60,7 @@ export const signalRulesAlertType = ({
     validate: {
       params: schema.object({
         description: schema.string(),
+        note: schema.nullable(schema.string()),
         falsePositives: schema.arrayOf(schema.string(), { defaultValue: [] }),
         from: schema.string(),
         ruleId: schema.string(),
@@ -74,7 +78,6 @@ export const signalRulesAlertType = ({
         riskScore: schema.number(),
         severity: schema.string(),
         threat: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
-        throttle: schema.string(),
         to: schema.string(),
         type: schema.string(),
         references: schema.arrayOf(schema.string(), { defaultValue: [] }),
@@ -94,7 +97,6 @@ export const signalRulesAlertType = ({
         query,
         to,
         type,
-        throttle,
       } = params;
       // TODO: Remove this hard extraction of name once this is fixed: https://github.com/elastic/kibana/issues/50522
       const savedObject = await services.savedObjectsClient.get<AlertAttributes>('alert', alertId);
@@ -147,6 +149,8 @@ export const signalRulesAlertType = ({
       const updatedAt = savedObject.updated_at ?? '';
       const interval = savedObject.attributes.schedule.interval;
       const enabled = savedObject.attributes.enabled;
+      const actions = savedObject.attributes.actions;
+      const throttle = savedObject.attributes.throttle;
       const gap = getGapBetweenRuns({
         previousStartedAt: previousStartedAt != null ? moment(previousStartedAt) : null, // TODO: Remove this once previousStartedAt is no longer a string
         interval,
@@ -213,29 +217,13 @@ export const signalRulesAlertType = ({
             `[+] Initial search call of signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
           );
           const noReIndexResult = await services.callCluster('search', noReIndex);
-          const newSignalsCount = noReIndexResult.hits.total.value;
-
-          if (newSignalsCount !== 0) {
-            const inputIndexes = inputIndex.join(', ');
-
-            if (throttle && throttle !== 'no_actions') {
-              const alertInstance = services.alertInstanceFactory(ruleId!);
-
-              alertInstance
-                .replaceState({
-                  signalsCount: newSignalsCount,
-                })
-                .scheduleActions('default', {
-                  inputIndexes,
-                  outputIndex,
-                  name,
-                  alertId,
-                  ruleId,
-                });
-            }
-
+          if (noReIndexResult.hits.total.value !== 0) {
             logger.info(
-              `Found ${newSignalsCount} signals from the indexes of "[${inputIndexes}]" using signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
+              `Found ${
+                noReIndexResult.hits.total.value
+              } signals from the indexes of "[${inputIndex.join(
+                ', '
+              )}]" using signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
             );
           }
 
@@ -247,6 +235,7 @@ export const signalRulesAlertType = ({
             id: alertId,
             signalsIndex: outputIndex,
             filter: esFilter,
+            actions,
             name,
             createdBy,
             createdAt,
@@ -256,6 +245,7 @@ export const signalRulesAlertType = ({
             enabled,
             pageSize: searchAfterSize,
             tags,
+            throttle,
           });
 
           if (bulkIndexResult) {

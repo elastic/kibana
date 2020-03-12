@@ -59,7 +59,6 @@ export const ruleOutput: RulesSchema = {
       ],
     },
   ],
-  throttle: 'no_actions',
   version: 1,
   filters: [
     {
@@ -74,6 +73,7 @@ export const ruleOutput: RulesSchema = {
   meta: {
     someMeta: 'someField',
   },
+  note: '# Investigative notes',
   timeline_title: 'some-timeline-title',
   timeline_id: 'some-timeline-id',
 };

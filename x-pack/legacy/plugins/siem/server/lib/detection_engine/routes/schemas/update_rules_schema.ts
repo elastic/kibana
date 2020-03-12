@@ -35,6 +35,7 @@ import {
   throttle,
   references,
   id,
+  note,
   version,
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
@@ -80,5 +81,6 @@ export const updateRulesSchema = Joi.object({
   threat: threat.default([]),
   throttle,
   references: references.default([]),
+  note: note.allow(''),
   version,
 }).xor('id', 'rule_id');

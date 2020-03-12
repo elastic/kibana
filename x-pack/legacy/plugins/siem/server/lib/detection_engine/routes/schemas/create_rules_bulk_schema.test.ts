@@ -142,7 +142,7 @@ describe('create_rules_bulk_schema', () => {
     );
   });
 
-  test('You cannot set the throttle to a value other than no_actions, rule, 1h, 1d, or 7d', () => {
+  test('You can set "note" to a string', () => {
     expect(
       createRulesBulkSchema.validate<Partial<PatchRuleAlertParamsRest>>([
         {
@@ -156,12 +156,56 @@ describe('create_rules_bulk_schema', () => {
           query: 'some query',
           language: 'kuery',
           max_signals: 1,
+          note: '# test markdown',
           version: 1,
-          throttle: '1w',
+        },
+      ]).error
+    ).toBeFalsy();
+  });
+
+  test('You can set "note" to an empty string', () => {
+    expect(
+      createRulesBulkSchema.validate<Partial<PatchRuleAlertParamsRest>>([
+        {
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          note: '',
+          version: 1,
+        },
+      ]).error
+    ).toBeFalsy();
+  });
+
+  test('You cannot set "note" to anything other than string', () => {
+    expect(
+      createRulesBulkSchema.validate<Partial<PatchRuleAlertParamsRest>>([
+        {
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          note: {
+            something: 'some object',
+          },
+          version: 1,
         },
       ]).error.message
     ).toEqual(
-      '"value" at position 0 fails because [child "throttle" fails because ["throttle" must be one of [no_actions, rule, 1h, 1d, 7d]]]'
+      '"value" at position 0 fails because [child "note" fails because ["note" must be a string]]'
     );
   });
 
@@ -185,7 +229,7 @@ describe('create_rules_bulk_schema', () => {
     ).toEqual([]);
   });
 
-  test('The default for "throttle" will be no_actions', () => {
+  test('The default for "throttle" will be null', () => {
     expect(
       createRulesBulkSchema.validate<Partial<PatchRuleAlertParamsRest>>([
         {
@@ -202,6 +246,6 @@ describe('create_rules_bulk_schema', () => {
           version: 1,
         },
       ]).value[0].throttle
-    ).toEqual('no_actions');
+    ).toEqual(null);
   });
 });

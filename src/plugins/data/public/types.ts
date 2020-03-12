@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import React from 'react';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';

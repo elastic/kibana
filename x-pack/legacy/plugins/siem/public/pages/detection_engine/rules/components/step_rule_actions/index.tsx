@@ -91,7 +91,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   //   return subscription.unsubscribe;
   // }, [form]);
 
-  console.error('ss', myStepData, form.getFormData());
+  // console.error('ss', myStepData, form.getFormData());
 
   return isReadOnlyView && myStepData != null ? (
     <StepContentWrapper addPadding={addPadding}>
@@ -100,7 +100,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   ) : (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
-        <Form form={form} data-test-subj="StepRuleActions">
+        <Form form={form} data-test-subj="stepRuleActions">
           <UseField
             path="throttle"
             component={ThrottleSelectField}
@@ -152,6 +152,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                 isDisabled={isLoading}
                 isLoading={isLoading}
                 onClick={onSubmit.bind(null, true)}
+                data-test-subj="create-activate"
               >
                 {I18n.COMPLETE_WITH_ACTIVATING}
               </EuiButton>

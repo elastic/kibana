@@ -52,13 +52,7 @@ export const output_index = t.string;
 export const saved_id = t.string;
 export const timeline_id = t.string;
 export const timeline_title = t.string;
-export const throttle = t.keyof({
-  no_actions: null,
-  rule: null,
-  '1h': null,
-  '1d': null,
-  '7d': null,
-});
+export const throttle = t.string;
 
 /**
  * Note that this is a plain unknown object because we allow the UI
@@ -142,3 +136,4 @@ export const success_count = PositiveInteger;
 export const rules_custom_installed = PositiveInteger;
 export const rules_not_installed = PositiveInteger;
 export const rules_not_updated = PositiveInteger;
+export const note = t.string;

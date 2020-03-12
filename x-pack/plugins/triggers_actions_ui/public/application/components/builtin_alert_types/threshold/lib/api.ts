@@ -7,9 +7,7 @@ import { HttpSetup } from 'kibana/public';
 import { TimeSeriesResult } from '../types';
 export { TimeSeriesResult } from '../types';
 
-const WATCHER_API_ROOT = '/api/watcher';
-
-// TODO: replace watcher api with the proper from alerts
+const INDEX_THRESHOLD_API_ROOT = '/api/alerting_builtins/index_threshold';
 
 export async function getMatchingIndicesForThresholdAlertType({
   pattern,
@@ -24,7 +22,7 @@ export async function getMatchingIndicesForThresholdAlertType({
   if (!pattern.endsWith('*')) {
     pattern = `${pattern}*`;
   }
-  const { indices } = await http.post(`${WATCHER_API_ROOT}/indices`, {
+  const { indices } = await http.post(`${INDEX_THRESHOLD_API_ROOT}/_indices`, {
     body: JSON.stringify({ pattern }),
   });
   return indices;
@@ -37,8 +35,8 @@ export async function getThresholdAlertTypeFields({
   indexes: string[];
   http: HttpSetup;
 }): Promise<Record<string, any>> {
-  const { fields } = await http.post(`${WATCHER_API_ROOT}/fields`, {
-    body: JSON.stringify({ indexes }),
+  const { fields } = await http.post(`${INDEX_THRESHOLD_API_ROOT}/_fields`, {
+    body: JSON.stringify({ indexPatterns: indexes }),
   });
   return fields;
 }
@@ -61,8 +59,6 @@ export const loadIndexPatterns = async () => {
   });
   return savedObjects;
 };
-
-const TimeSeriesQueryRoute = '/api/alerting_builtins/index_threshold/_time_series_query';
 
 interface GetThresholdAlertVisualizationDataParams {
   model: any;
@@ -90,7 +86,7 @@ export async function getThresholdAlertVisualizationData({
     interval: visualizeOptions.interval,
   };
 
-  return await http.post<TimeSeriesResult>(TimeSeriesQueryRoute, {
+  return await http.post<TimeSeriesResult>(`${INDEX_THRESHOLD_API_ROOT}/_time_series_query`, {
     body: JSON.stringify(timeSeriesQueryParams),
   });
 }

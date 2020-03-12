@@ -9,7 +9,7 @@ import { readRules } from './read_rules';
 import { IRuleSavedAttributesSavedObjectAttributes, UpdateRuleParams } from './types';
 import { addTags } from './add_tags';
 import { ruleStatusSavedObjectType } from './saved_object_mappings';
-import { calculateVersion, getAlertThrottle } from './utils';
+import { calculateVersion } from './utils';
 
 export const updateRules = async ({
   alertsClient,
@@ -44,6 +44,7 @@ export const updateRules = async ({
   type,
   references,
   version,
+  note,
 }: UpdateRuleParams): Promise<PartialAlert | null> => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
@@ -76,6 +77,7 @@ export const updateRules = async ({
     type,
     references,
     version,
+    note,
   });
 
   const update = await alertsClient.update({
@@ -85,7 +87,7 @@ export const updateRules = async ({
       name,
       schedule: { interval },
       actions,
-      throttle: getAlertThrottle(throttle),
+      throttle,
       params: {
         description,
         ruleId: rule.params.ruleId,
@@ -105,10 +107,10 @@ export const updateRules = async ({
         riskScore,
         severity,
         threat,
-        throttle,
         to,
         type,
         references,
+        note,
         version: calculatedVersion,
       },
     },

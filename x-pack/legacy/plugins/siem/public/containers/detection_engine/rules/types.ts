@@ -100,9 +100,12 @@ export type Rule = t.TypeOf<typeof RuleSchema>;
 export type Rules = t.TypeOf<typeof RulesSchema>;
 
 export interface RuleError {
-  rule_id: string;
+  id?: string;
+  rule_id?: string;
   error: { status_code: number; message: string };
 }
+
+export type BulkRuleResponse = Array<Rule | RuleError>;
 
 export interface RuleResponseBuckets {
   rules: Rule[];

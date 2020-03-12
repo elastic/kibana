@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { calculateInterval, calculateVersion, calculateName, getAlertThrottle } from './utils';
+import { calculateInterval, calculateVersion, calculateName } from './utils';
 import { PatchRuleParams } from './types';
 
 describe('utils', () => {
@@ -68,23 +68,6 @@ describe('utils', () => {
     test('should return untitled when both updatedName and originalName is undefined', () => {
       const name = calculateName({ updatedName: undefined, originalName: undefined });
       expect(name).toEqual('untitled');
-    });
-  });
-
-  describe('#getAlertThrottle', () => {
-    test('should return null if throttle is undefined', () => {
-      const throttle = getAlertThrottle(undefined);
-      expect(throttle).toEqual(null);
-    });
-
-    test('should return null if throttle is null', () => {
-      const throttle = getAlertThrottle(null);
-      expect(throttle).toEqual(null);
-    });
-
-    test('should return string if throttle is string', () => {
-      const throttle = getAlertThrottle('1d');
-      expect(throttle).toEqual('1d');
     });
   });
 });

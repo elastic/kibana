@@ -25,6 +25,7 @@ describe('buildBulkBody', () => {
       ruleParams: sampleParams,
       id: sampleRuleGuid,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -32,6 +33,7 @@ describe('buildBulkBody', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -78,9 +80,9 @@ describe('buildBulkBody', () => {
           references: ['http://google.com'],
           severity: 'high',
           tags: ['some fake tag 1', 'some fake tag 2'],
-          throttle: 'no_actions',
           type: 'query',
           to: 'now',
+          note: '',
           enabled: true,
           created_by: 'elastic',
           updated_by: 'elastic',
@@ -107,6 +109,7 @@ describe('buildBulkBody', () => {
       ruleParams: sampleParams,
       id: sampleRuleGuid,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -114,6 +117,7 @@ describe('buildBulkBody', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -169,9 +173,9 @@ describe('buildBulkBody', () => {
           references: ['http://google.com'],
           severity: 'high',
           tags: ['some fake tag 1', 'some fake tag 2'],
-          throttle: 'no_actions',
           type: 'query',
           to: 'now',
+          note: '',
           enabled: true,
           created_by: 'elastic',
           updated_by: 'elastic',
@@ -197,6 +201,7 @@ describe('buildBulkBody', () => {
       ruleParams: sampleParams,
       id: sampleRuleGuid,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -204,6 +209,7 @@ describe('buildBulkBody', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -258,9 +264,9 @@ describe('buildBulkBody', () => {
           references: ['http://google.com'],
           severity: 'high',
           tags: ['some fake tag 1', 'some fake tag 2'],
-          throttle: 'no_actions',
           type: 'query',
           to: 'now',
+          note: '',
           enabled: true,
           created_by: 'elastic',
           updated_by: 'elastic',
@@ -284,6 +290,7 @@ describe('buildBulkBody', () => {
       ruleParams: sampleParams,
       id: sampleRuleGuid,
       name: 'rule-name',
+      actions: [],
       createdAt: '2020-01-28T15:58:34.810Z',
       updatedAt: '2020-01-28T15:59:14.004Z',
       createdBy: 'elastic',
@@ -291,6 +298,7 @@ describe('buildBulkBody', () => {
       interval: '5m',
       enabled: true,
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -340,9 +348,9 @@ describe('buildBulkBody', () => {
           references: ['http://google.com'],
           severity: 'high',
           tags: ['some fake tag 1', 'some fake tag 2'],
-          throttle: 'no_actions',
           type: 'query',
           to: 'now',
+          note: '',
           enabled: true,
           created_by: 'elastic',
           updated_by: 'elastic',

@@ -1013,27 +1013,6 @@ describe('patch rules schema', () => {
     );
   });
 
-  test('You cannot set the throttle to a value other than no_actions, rule, 1h, 1d, or 7d', () => {
-    expect(
-      patchRulesSchema.validate<Partial<PatchRuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        version: 1,
-        throttle: '1w',
-      }).error.message
-    ).toEqual(
-      'child "throttle" fails because ["throttle" must be one of [no_actions, rule, 1h, 1d, 7d]]'
-    );
-  });
-
   test('The default for "actions" will be an empty array', () => {
     expect(
       patchRulesSchema.validate<Partial<PatchRuleAlertParamsRest>>({
@@ -1052,7 +1031,7 @@ describe('patch rules schema', () => {
     ).toEqual([]);
   });
 
-  test('The default for "throttle" will be no_actions', () => {
+  test('The default for "throttle" will be null', () => {
     expect(
       patchRulesSchema.validate<Partial<PatchRuleAlertParamsRest>>({
         rule_id: 'rule-1',
@@ -1067,6 +1046,47 @@ describe('patch rules schema', () => {
         max_signals: 1,
         version: 1,
       }).value.throttle
-    ).toEqual('no_actions');
+    ).toEqual(null);
+  });
+
+  describe('note', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, note] does validate', () => {
+      expect(
+        patchRulesSchema.validate<Partial<PatchRuleAlertParamsRest>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          note: '# some documentation markdown',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('note can be patched', () => {
+      expect(
+        patchRulesSchema.validate<Partial<PatchRuleAlertParamsRest>>({
+          id: 'rule-1',
+          note: '# new documentation markdown',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You cannot patch note as an object', () => {
+      expect(
+        patchRulesSchema.validate<
+          Partial<Omit<PatchRuleAlertParamsRest, 'note'> & { note: object }>
+        >({
+          id: 'rule-1',
+          note: {
+            someProperty: 'something else here',
+          },
+        }).error.message
+      ).toEqual('child "note" fails because ["note" must be a string]');
+    });
   });
 });

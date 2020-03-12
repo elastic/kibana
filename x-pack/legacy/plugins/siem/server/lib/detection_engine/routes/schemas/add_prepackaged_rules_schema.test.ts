@@ -1275,28 +1275,6 @@ describe('add prepackaged rules schema', () => {
     );
   });
 
-  test('You cannot set the throttle to a value other than no_actions, rule, 1h, 1d, or 7d', () => {
-    expect(
-      addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        index: ['auditbeat-*'],
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        version: 1,
-        throttle: '1w',
-      }).error.message
-    ).toEqual(
-      'child "throttle" fails because ["throttle" must be one of [no_actions, rule, 1h, 1d, 7d]]'
-    );
-  });
-
   test('The default for "actions" will be an empty array', () => {
     expect(
       addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({
@@ -1316,7 +1294,7 @@ describe('add prepackaged rules schema', () => {
     ).toEqual([]);
   });
 
-  test('The default for "throttle" will be no_actions', () => {
+  test('The default for "throttle" will be null', () => {
     expect(
       addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({
         rule_id: 'rule-1',
@@ -1332,6 +1310,64 @@ describe('add prepackaged rules schema', () => {
         max_signals: 1,
         version: 1,
       }).value.throttle
-    ).toEqual('no_actions');
+    ).toEqual(null);
+  });
+
+  describe('note', () => {
+    test('You can set note to any string you want', () => {
+      expect(
+        addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          meta: {
+            somethingMadeUp: { somethingElse: true },
+          },
+          note: '# test header',
+          version: 1,
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You cannot create note as anything other than a string', () => {
+      expect(
+        addPrepackagedRulesSchema.validate<
+          Partial<Omit<PrepackagedRules, 'note'> & { note: object }>
+        >({
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          meta: {
+            somethingMadeUp: { somethingElse: true },
+          },
+          note: {
+            somethingMadeUp: { somethingElse: true },
+          },
+          version: 1,
+        }).error.message
+      ).toEqual('child "note" fails because ["note" must be a string]');
+    });
   });
 });

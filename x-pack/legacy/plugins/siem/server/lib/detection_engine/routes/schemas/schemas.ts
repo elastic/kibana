@@ -106,6 +106,5 @@ export const version = Joi.number()
   .integer()
   .min(1);
 export const actions = Joi.array().default([]);
-export const throttle = Joi.string()
-  .valid('no_actions', 'rule', '1h', '1d', '7d')
-  .default('no_actions');
+export const throttle = Joi.string().default(null);
+export const note = Joi.string();

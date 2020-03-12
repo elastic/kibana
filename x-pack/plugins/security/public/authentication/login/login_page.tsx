@@ -88,13 +88,13 @@ export class LoginPage extends Component<Props, State> {
           <div className={contentHeaderClasses}>
             <EuiSpacer size="xxl" />
             <span className="loginWelcome__logo">
-              <EuiIcon type="logoKibana" size="xxl" />
+              <EuiIcon type="logoElastic" size="xxl" />
             </span>
-            <EuiTitle size="l" className="loginWelcome__title">
+            <EuiTitle size="m" className="loginWelcome__title">
               <h1>
                 <FormattedMessage
                   id="xpack.security.loginPage.welcomeTitle"
-                  defaultMessage="Welcome to Kibana"
+                  defaultMessage="Welcome to Elastic Kibana"
                 />
               </h1>
             </EuiTitle>

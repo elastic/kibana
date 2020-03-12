@@ -27,6 +27,7 @@ describe('buildRule', () => {
       },
     ];
     const rule = buildRule({
+      actions: [],
       ruleParams,
       name: 'some-name',
       id: sampleRuleGuid,
@@ -37,6 +38,7 @@ describe('buildRule', () => {
       updatedBy: 'elastic',
       interval: 'some interval',
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     const expected: Partial<OutputRuleAlertRest> = {
       actions: [],
@@ -59,9 +61,9 @@ describe('buildRule', () => {
       rule_id: 'rule-1',
       severity: 'high',
       tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
       to: 'now',
       type: 'query',
+      note: '',
       updated_by: 'elastic',
       updated_at: rule.updated_at,
       created_at: rule.created_at,
@@ -85,6 +87,7 @@ describe('buildRule', () => {
     const ruleParams = sampleRuleAlertParams();
     ruleParams.filters = undefined;
     const rule = buildRule({
+      actions: [],
       ruleParams,
       name: 'some-name',
       id: sampleRuleGuid,
@@ -95,6 +98,7 @@ describe('buildRule', () => {
       updatedBy: 'elastic',
       interval: 'some interval',
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     const expected: Partial<OutputRuleAlertRest> = {
       actions: [],
@@ -117,9 +121,9 @@ describe('buildRule', () => {
       rule_id: 'rule-1',
       severity: 'high',
       tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
       to: 'now',
       type: 'query',
+      note: '',
       updated_by: 'elastic',
       version: 1,
       updated_at: rule.updated_at,
@@ -132,6 +136,7 @@ describe('buildRule', () => {
     const ruleParams = sampleRuleAlertParams();
     ruleParams.filters = undefined;
     const rule = buildRule({
+      actions: [],
       ruleParams,
       name: 'some-name',
       id: sampleRuleGuid,
@@ -142,6 +147,7 @@ describe('buildRule', () => {
       updatedBy: 'elastic',
       interval: 'some interval',
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     const expected: Partial<OutputRuleAlertRest> = {
       actions: [],
@@ -157,6 +163,7 @@ describe('buildRule', () => {
       language: 'kuery',
       max_signals: 10000,
       name: 'some-name',
+      note: '',
       output_index: '.siem-signals',
       query: 'user.name: root or user.name: admin',
       references: ['http://google.com'],
@@ -164,7 +171,6 @@ describe('buildRule', () => {
       rule_id: 'rule-1',
       severity: 'high',
       tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
       to: 'now',
       type: 'query',
       updated_by: 'elastic',
@@ -177,8 +183,8 @@ describe('buildRule', () => {
 
   test('it omits a null value such as if throttle is undefined if is present', () => {
     const ruleParams = sampleRuleAlertParams();
-    ruleParams.throttle = undefined;
     const rule = buildRule({
+      actions: [],
       ruleParams,
       name: 'some-name',
       id: sampleRuleGuid,
@@ -189,6 +195,7 @@ describe('buildRule', () => {
       updatedBy: 'elastic',
       interval: 'some interval',
       tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: null,
     });
     const expected: Partial<OutputRuleAlertRest> = {
       actions: [],
@@ -213,6 +220,7 @@ describe('buildRule', () => {
       tags: ['some fake tag 1', 'some fake tag 2'],
       to: 'now',
       type: 'query',
+      note: '',
       updated_by: 'elastic',
       version: 1,
       updated_at: rule.updated_at,
