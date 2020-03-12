@@ -32,7 +32,7 @@ import {
   coveredFilePath,
   ciRunUrl,
 } from './transforms';
-import { resolve } from "path";
+import { resolve } from 'path';
 
 const KIBANA_ROOT_PATH = '../../../..';
 const KIBANA_ROOT = resolve(__dirname, KIBANA_ROOT_PATH);
@@ -40,18 +40,13 @@ const KIBANA_ROOT = resolve(__dirname, KIBANA_ROOT_PATH);
 const ms = process.env.DELAY || 0;
 const staticSiteUrlBase = process.env.STATIC_SITE_URL_BASE || 'https://kibana-coverage.elastic.dev';
 const addPrePopulatedTimeStamp = addTimeStamp(process.env.TIME_STAMP);
-const prokStatsTimeStampBuildId = pipe(
-  statsAndstaticSiteUrl,
-  buildId,
-  addPrePopulatedTimeStamp,
-);
+const prokStatsTimeStampBuildId = pipe(statsAndstaticSiteUrl, buildId, addPrePopulatedTimeStamp);
 const addTestRunnerAndStaticSiteUrl = pipe(testRunner, staticSite(staticSiteUrlBase));
-
 
 export default ({ jsonSummaryPath }, log) => {
   log.debug(`### Code coverage ingestion set to delay for: ${green(ms)} ms`);
   log.debug(`### KIBANA_ROOT: \n\t${green(KIBANA_ROOT)}`);
-  log.debug(`### Ingesting from summary json: \n\t[${green(jsonSummaryPath)}]`)
+  log.debug(`### Ingesting from summary json: \n\t[${green(jsonSummaryPath)}]`);
 
   validateRoot(KIBANA_ROOT, log);
 

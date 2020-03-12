@@ -45,7 +45,7 @@ const siteUrlsSplitByNewLine = siteUrlLines(splitByNewLine);
 const siteUrlsSplitByNewLineWithoutBlanks = siteUrlsSplitByNewLine(notBlankLines);
 
 describe('Ingesting Coverage to Cluster', () => {
-  const verboseArgs = [ 'scripts/ingest_coverage.js', '--verbose', '--path', ];
+  const verboseArgs = ['scripts/ingest_coverage.js', '--verbose', '--path'];
 
   const justTotalPath = 'jest-combined/coverage-summary-just-total.json';
   const noTotalsPath = 'jest-combined/coverage-summary-NO-total.json';
@@ -64,7 +64,9 @@ describe('Ingesting Coverage to Cluster', () => {
         });
 
         it(`should say it's Just Logging when sending to the totals index: [${TOTALS_INDEX}]`, () => {
-          const actual = mutableTotalsIndexLoggingChunks.filter(x => x.includes('debg ### Just Logging'));
+          const actual = mutableTotalsIndexLoggingChunks.filter(x =>
+            x.includes('debg ### Just Logging')
+          );
           const re = new RegExp(TOTALS_INDEX);
           expect(re.test(actual)).to.be(true);
         });
@@ -76,17 +78,15 @@ describe('Ingesting Coverage to Cluster', () => {
             endsInDotHtml: /.html$/,
           };
 
-          const justUrl = text => x =>
-            x.split(text)[1].trim()
+          const justUrl = text => x => x.split(text)[1].trim();
 
           const splitFromText = justUrl('staticSiteUrl:');
 
-            siteUrlsSplitByNewLineWithoutBlanks(mutableTotalsIndexLoggingChunks)
-              .filter(x => x.includes('### staticSiteUrl'))
-              .map(splitFromText)
-              .forEach(expectAllRegexesToPass(totalsIndexRegexes))
+          siteUrlsSplitByNewLineWithoutBlanks(mutableTotalsIndexLoggingChunks)
+            .filter(x => x.includes('### staticSiteUrl'))
+            .map(splitFromText)
+            .forEach(expectAllRegexesToPass(totalsIndexRegexes));
         });
-
       });
       describe(`to the [${COVERAGE_INDEX}] index`, () => {
         const mutableCoverageIndexChunks = [];
@@ -98,21 +98,24 @@ describe('Ingesting Coverage to Cluster', () => {
           verboseIngestAndMutateAsyncWithPath(mutableCoverageIndexChunks);
         });
 
-        it('should result in every posted item having a site url that meets all regex assertions',
-          F(siteUrlsSplitByNewLineWithoutBlanks(mutableCoverageIndexChunks)
-            .forEach(expectAllRegexesToPass({
+        it(
+          'should result in every posted item having a site url that meets all regex assertions',
+          F(
+            siteUrlsSplitByNewLineWithoutBlanks(mutableCoverageIndexChunks).forEach(
+              expectAllRegexesToPass({
                 ...staticSiteUrlRegexes,
                 folderStructureIncluded: /\/(?:.*|.*-combined)\//,
                 endsInDotJsDotHtml: /.js.html$/,
-              }),
-            ),
-          ),
+              })
+            )
+          )
         );
 
         describe(`with a jsonSummaryPath containing the text 'combined'`, () => {
           const combinedMsg = 'combined';
 
-          const because = 'currently, they are all combined, per how we merge them in ci using "nyc"';
+          const because =
+            'currently, they are all combined, per how we merge them in ci using "nyc"';
           it(`should always result in a distro of ${combinedMsg}, because: ${because}`, () => {
             const includesDistroPredicate = x => x.includes('distro');
             const distroLines = specificLinesOnly(includesDistroPredicate);
@@ -136,12 +139,15 @@ describe('Ingesting Coverage to Cluster', () => {
           verboseIngestAndMutateAsyncWithPath(mutableBothIndexesChunks);
         });
 
-        it('should result in every posted item having a site url that meets all regex assertions',
-          F(siteUrlsSplitByNewLineWithoutBlanks(mutableBothIndexesChunks)
-            .forEach(expectAllRegexesToPass({
-              ...staticSiteUrlRegexes,
-              folderStructureIncluded: /live_cc_app\/coverage_data\/(?:.*|.*-combined)\//,
-            }))
+        it(
+          'should result in every posted item having a site url that meets all regex assertions',
+          F(
+            siteUrlsSplitByNewLineWithoutBlanks(mutableBothIndexesChunks).forEach(
+              expectAllRegexesToPass({
+                ...staticSiteUrlRegexes,
+                folderStructureIncluded: /live_cc_app\/coverage_data\/(?:.*|.*-combined)\//,
+              })
+            )
           )
         );
 
@@ -149,20 +155,19 @@ describe('Ingesting Coverage to Cluster', () => {
           expect(mutableBothIndexesChunks.some(x => x.includes('Just Logging'))).to.be(true);
         });
         it('should result in the "actually sending" message NOT being present in the log', () => {
-          expect(mutableBothIndexesChunks.every(x => !x.includes('Actually sending...'))).to.be(true);
+          expect(mutableBothIndexesChunks.every(x => !x.includes('Actually sending...'))).to.be(
+            true
+          );
         });
       });
     });
   });
 });
 
-function ingestAndMutate (done) {
+function ingestAndMutate(done) {
   return summaryPathSuffix => args => xs => {
     const coverageSummaryPath = resolve(MOCKS_DIR, summaryPathSuffix);
-    const opts = [
-      ...args,
-      coverageSummaryPath,
-    ];
+    const opts = [...args, coverageSummaryPath];
     const ingest = spawn(process.execPath, opts, { cwd: ROOT_DIR, env });
 
     ingest.stdout.on('data', x => xs.push(x + ''));
@@ -170,22 +175,24 @@ function ingestAndMutate (done) {
   };
 }
 
-function specificLinesOnly (predicate) {
+function specificLinesOnly(predicate) {
   return splitByNewLine => notBlankLines => xs =>
-    xs.filter(predicate)
-      .map(x => splitByNewLine(x).reduce(notBlankLines));
+    xs.filter(predicate).map(x => splitByNewLine(x).reduce(notBlankLines));
 }
 
-function notBlankLines (acc, item) {
+function notBlankLines(acc, item) {
   if (item != '') return item;
   return acc;
 }
 
-function expectAllRegexesToPass (staticSiteUrlRegexes) {
+function expectAllRegexesToPass(staticSiteUrlRegexes) {
   return urlLine =>
-    Object.entries(staticSiteUrlRegexes)
-      .forEach(regexTuple => {
-        if (!regexTuple[1].test(urlLine))
-          throw new Error(`\n### ${green('FAILED')}\nAsserting: [\n\t${green(regexTuple[0])}\n]\nAgainst: [\n\t${urlLine}\n]`);
-      });
+    Object.entries(staticSiteUrlRegexes).forEach(regexTuple => {
+      if (!regexTuple[1].test(urlLine))
+        throw new Error(
+          `\n### ${green('FAILED')}\nAsserting: [\n\t${green(
+            regexTuple[0]
+          )}\n]\nAgainst: [\n\t${urlLine}\n]`
+        );
+    });
 }

@@ -20,8 +20,7 @@
 import { left, right } from './either';
 import { always, id, noop } from './utils';
 
-const maybeTotal = x =>
-  x === 'total' ? left(x) : right(x);
+const maybeTotal = x => (x === 'total' ? left(x) : right(x));
 
 export const trimLeftFrom = (text, x) => x.replace(new RegExp(`(?:.*)(${text}.*$)`, 'gm'), '$1');
 
@@ -53,8 +52,7 @@ export const addTimeStamp = ts => obj => ({
 const captureAfterRootFolder = /.*kibana(.*$)/;
 const afterRootFolder = x => captureAfterRootFolder.exec(x)[1];
 const fixFront = x => afterRootFolder(x);
-const setTotal = x => obj =>
-  obj['isTotal'] = x;
+const setTotal = x => obj => (obj.isTotal = x);
 const mutateTrue = setTotal(true);
 const mutateFalse = setTotal(false);
 
@@ -85,7 +83,7 @@ export const staticSite = urlBase => obj => {
   const prokCoverage = prokForCoverageIndex(mutateFalse)(urlRoot)(obj);
   const prokForBoth = always(maybeTotal(staticSiteUrl).fold(always(prokTotal(obj)), prokCoverage));
 
-  return {...obj, staticSiteUrl: prokForBoth()};
+  return { ...obj, staticSiteUrl: prokForBoth() };
 };
 
 export const coveredFilePath = obj => {
@@ -120,8 +118,7 @@ export const testRunner = obj => {
     }
   };
 
-  ['mocha', 'jest', 'functional']
-    .forEach(upperTestRunnerType);
+  ['mocha', 'jest', 'functional'].forEach(upperTestRunnerType);
 
   return {
     testRunnerType,

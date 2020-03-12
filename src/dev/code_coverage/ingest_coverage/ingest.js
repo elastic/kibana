@@ -20,9 +20,8 @@
 const { Client } = require('@elastic/elasticsearch');
 import { createFailError } from '@kbn/dev-utils';
 import chalk from 'chalk';
-import { green } from './utils'
+import { green, always } from './utils';
 import { fromNullable } from './either';
-import { always } from './utils'
 
 const COVERAGE_INDEX = process.env.COVERAGE_INDEX || 'kibana_code_coverage';
 const TOTALS_INDEX = process.env.TOTALS_INDEX || `kibana_total_code_coverage`;
@@ -30,8 +29,7 @@ const node = process.env.ES_HOST || 'http://localhost:9200';
 const redacted = redact(node);
 const client = new Client({ node });
 
-const indexName = body =>
-  body.isTotal ? TOTALS_INDEX : COVERAGE_INDEX;
+const indexName = body => (body.isTotal ? TOTALS_INDEX : COVERAGE_INDEX);
 
 export const ingest = log => async body => {
   const index = indexName(body);
@@ -41,30 +39,32 @@ export const ingest = log => async body => {
     logSuccess(log, index, body);
   } else {
     try {
-      log.debug(`### Actually sending to: ${green(index)}`)
+      log.debug(`### Actually sending to: ${green(index)}`);
       await client.index({ index, body });
       logSuccess(log, index, body);
     } catch (e) {
       throw createFailError(errMsg(index, body, e));
     }
   }
-
-}
+};
 function logSuccess(log, index, body) {
   const logShort = () => `### Sent:
 ### ES HOST (redacted): ${redacted}
 ### Index: ${green(index)}`;
 
-logShort();
-log.verbose(pretty(body));
+  logShort();
+  log.verbose(pretty(body));
 
-  const {staticSiteUrl} = body;
+  const { staticSiteUrl } = body;
 
   logShort();
   log.debug(`### staticSiteUrl: ${staticSiteUrl}`);
 }
 function errMsg(index, body, e) {
-  const orig = fromNullable(e.body).fold(always(''), () => `### Orig Err:\n${pretty(e.body.error)}`);
+  const orig = fromNullable(e.body).fold(
+    always(''),
+    () => `### Orig Err:\n${pretty(e.body.error)}`
+  );
 
   const red = color('red');
 
@@ -78,7 +78,6 @@ ${orig}
 ### Troubleshooting Hint:
 ${red('Perhaps the coverage data was not merged properly?\n')}
 `;
-
 }
 
 function partial(x) {
@@ -98,7 +97,7 @@ function redact(x) {
 function color(whichColor) {
   return function colorInner(x) {
     return chalk[whichColor].bgWhiteBright(x);
-  }
+  };
 }
 function pretty(x) {
   return JSON.stringify(x, null, 2);
