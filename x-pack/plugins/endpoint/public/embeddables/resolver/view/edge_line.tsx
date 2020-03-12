@@ -74,4 +74,5 @@ export const EdgeLine = styled(
   height: 3px;
   background-color: #d4d4d4;
   color: #333333;
+  contain: strict;
 `;

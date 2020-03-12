@@ -13,11 +13,12 @@ import {
   EdgeLineSegment,
   ProcessWithWidthMetadata,
   Matrix3,
+  AdjacentProcessMap,
 } from '../../types';
 import { LegacyEndpointEvent } from '../../../../../common/types';
 import { Vector2 } from '../../types';
 import { add as vector2Add, applyMatrix3 } from '../../lib/vector2';
-import { isGraphableProcess } from '../../models/process_event';
+import { isGraphableProcess, uniquePidForProcess } from '../../models/process_event';
 import {
   factory as indexedProcessTreeFactory,
   children as indexedProcessTreeChildren,
@@ -391,6 +392,31 @@ function processPositions(
 
   return positions;
 }
+
+export const processAdjacencies = createSelector(
+  graphableProcesses,
+  function selectProcessAdjacencies(
+    /* eslint-disable no-shadow */
+    graphableProcesses
+    /* eslint-enable no-shadow */
+  ) {
+    const processToAdjacencyMap = new Map<LegacyEndpointEvent, AdjacentProcessMap>();
+    const { idToAdjacent } = indexedProcessTreeFactory(graphableProcesses);
+
+    for (const graphableProcess of graphableProcesses) {
+      const processPid = uniquePidForProcess(graphableProcess);
+      const adjacencyMap = idToAdjacent.get(processPid) || {
+        self: processPid,
+        up: null,
+        down: null,
+        previous: null,
+        next: null,
+      };
+      processToAdjacencyMap.set(graphableProcess, adjacencyMap);
+    }
+    return { processToAdjacencyMap };
+  }
+);
 
 export const processNodePositionsAndEdgeLineSegments = createSelector(
   graphableProcesses,

@@ -5,8 +5,8 @@
  */
 
 import { uniquePidForProcess, uniqueParentPidForProcess } from './process_event';
-import { IndexedProcessTree } from '../types';
 import { LegacyEndpointEvent } from '../../../../common/types';
+import { IndexedProcessTree, AdjacentProcessMap } from '../types';
 import { levelOrder as baseLevelOrder } from '../lib/tree_sequencers';
 
 /**
@@ -15,21 +15,61 @@ import { levelOrder as baseLevelOrder } from '../lib/tree_sequencers';
 export function factory(processes: LegacyEndpointEvent[]): IndexedProcessTree {
   const idToChildren = new Map<number | undefined, LegacyEndpointEvent[]>();
   const idToValue = new Map<number, LegacyEndpointEvent>();
+  const idToAdjacent = new Map<number, AdjacentProcessMap>();
 
   for (const process of processes) {
-    idToValue.set(uniquePidForProcess(process), process);
+    const uniqueProcessPid = uniquePidForProcess(process);
+    idToValue.set(uniqueProcessPid, process);
+
     const uniqueParentPid = uniqueParentPidForProcess(process);
     const processChildren = idToChildren.get(uniqueParentPid);
+    const adjacencyMapToUpdate: AdjacentProcessMap = idToAdjacent.get(uniqueProcessPid) || {
+      self: uniqueProcessPid,
+      up: null,
+      down: null,
+      previous: null,
+      next: null,
+    };
+
     if (processChildren) {
       processChildren.push(process);
+
+      /**
+       * Update adjacency maps for current and previous entries
+       */
+      const previousProcessId = uniquePidForProcess(processChildren[processChildren.length - 2]);
+      const previousAdjacencyMap = idToAdjacent.get(previousProcessId) as AdjacentProcessMap;
+
+      previousAdjacencyMap.next = uniqueProcessPid;
+      idToAdjacent.set(previousProcessId, previousAdjacencyMap);
+      adjacencyMapToUpdate.previous = previousProcessId;
+      if (uniqueParentPid) {
+        adjacencyMapToUpdate.up = uniqueParentPid;
+      }
+      idToAdjacent.set(uniqueProcessPid, adjacencyMapToUpdate);
     } else {
       idToChildren.set(uniqueParentPid, [process]);
+      // set up, down
+      if (uniqueParentPid) {
+        const parentAdjacencyMap = idToAdjacent.get(uniqueParentPid) || {
+          self: uniqueParentPid,
+          up: null,
+          down: null,
+          previous: null,
+          next: null,
+        };
+        parentAdjacencyMap.down = uniqueProcessPid;
+        idToAdjacent.set(uniqueParentPid, parentAdjacencyMap);
+        adjacencyMapToUpdate.up = uniqueParentPid;
+        idToAdjacent.set(uniqueProcessPid, adjacencyMapToUpdate);
+      }
     }
   }
 
   return {
     idToChildren,
     idToProcess: idToValue,
+    idToAdjacent,
   };
 }
 

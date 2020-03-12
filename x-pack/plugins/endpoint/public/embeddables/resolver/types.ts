@@ -23,6 +23,21 @@ export interface ResolverState {
    * Contains the state associated with event data (process events and possibly other event types).
    */
   readonly data: DataState;
+
+  /**
+   * Contains the state needed to maintain Resolver UI elements.
+   */
+  readonly ui: ResolverUIState;
+}
+
+/**
+ * Piece of redux state that models an animation for the camera.
+ */
+export interface ResolverUIState {
+  /**
+   * The ID attribute of the resolver's aria-activedescendent.
+   */
+  readonly activeDescendentId: string | null;
 }
 
 /**
@@ -180,6 +195,18 @@ export interface ProcessEvent {
 }
 
 /**
+ * A map of Process Ids that indicate which processes are adjacent to a given process along
+ * directions in two axes: up/down and previous/next.
+ */
+export interface AdjacentProcessMap {
+  readonly self: number;
+  up: number | null;
+  down: number | null;
+  previous: number | null;
+  next: number | null;
+}
+
+/**
  * A represention of a process tree with indices for O(1) access to children and values by id.
  */
 export interface IndexedProcessTree {
@@ -191,6 +218,10 @@ export interface IndexedProcessTree {
    * Map of ID to process
    */
   idToProcess: Map<number, LegacyEndpointEvent>;
+  /**
+   * Map of ID to adjacent processes
+   */
+  idToAdjacent: Map<number, AdjacentProcessMap>;
 }
 
 /**
