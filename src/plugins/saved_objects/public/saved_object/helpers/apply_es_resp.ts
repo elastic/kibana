@@ -122,14 +122,14 @@ export async function applyESRespTo(
   // 'data table', while esType is the more generic type - e.g. 'visualization' or 'saved search'.
   savedObject.getEsType = () => esType;
 
-  await parseSearchSource(savedObject, esType, meta.searchSourceJSON, resp.references);
-  await hydrateIndexPatternHelper(id || '', savedObject, indexPatterns, config);
+  await parseSearchSource(savedObject as any, esType, meta.searchSourceJSON, resp.references);
+  await hydrateIndexPatternHelper(config.id || '', savedObject as any, indexPatterns, config);
 
   if (injectReferences && resp.references && resp.references.length > 0) {
     injectReferences(savedObject, resp.references);
   }
   if (typeof config.afterESResp === 'function') {
-    savedObject = await config.afterESResp(savedObject);
+    savedObject = await config.afterESResp(savedObject as any);
   }
   return savedObject;
 }
