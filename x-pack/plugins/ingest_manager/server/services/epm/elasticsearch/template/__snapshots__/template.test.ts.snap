@@ -942,37 +942,13 @@ exports[`tests loading system.yml: system.yml 1`] = `
           },
           "process": {
             "properties": {
-              "name": {
-                "type": "alias",
-                "path": "process.name"
-              },
               "state": {
                 "type": "keyword",
                 "ignore_above": 1024
               },
-              "pid": {
-                "type": "alias",
-                "path": "process.pid"
-              },
-              "ppid": {
-                "type": "alias",
-                "path": "process.ppid"
-              },
-              "pgid": {
-                "type": "alias",
-                "path": "process.pgid"
-              },
               "cmdline": {
                 "type": "keyword",
                 "ignore_above": 2048
-              },
-              "username": {
-                "type": "alias",
-                "path": "user.name"
-              },
-              "cwd": {
-                "type": "alias",
-                "path": "process.working_directory"
               },
               "env": {
                 "type": "object"
@@ -1509,14 +1485,6 @@ exports[`tests loading system.yml: system.yml 1`] = `
           },
           "socket": {
             "properties": {
-              "direction": {
-                "type": "alias",
-                "path": "network.direction"
-              },
-              "family": {
-                "type": "alias",
-                "path": "network.type"
-              },
               "local": {
                 "properties": {
                   "ip": {
@@ -1551,35 +1519,14 @@ exports[`tests loading system.yml: system.yml 1`] = `
               },
               "process": {
                 "properties": {
-                  "pid": {
-                    "type": "alias",
-                    "path": "process.pid"
-                  },
-                  "command": {
-                    "type": "alias",
-                    "path": "process.name"
-                  },
                   "cmdline": {
                     "type": "keyword",
                     "ignore_above": 1024
-                  },
-                  "exe": {
-                    "type": "alias",
-                    "path": "process.executable"
                   }
                 }
               },
               "user": {
-                "properties": {
-                  "id": {
-                    "type": "alias",
-                    "path": "user.id"
-                  },
-                  "name": {
-                    "type": "alias",
-                    "path": "user.full_name"
-                  }
-                }
+                "properties": {}
               },
               "summary": {
                 "properties": {
