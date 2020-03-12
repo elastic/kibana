@@ -71,7 +71,7 @@ direction is appropriate for improving PDF report generation.
 
 # Detailed design
 
-The Screenshot Mode Service is a callable API availble in the context of a
+The Screenshot Mode Service is a callable API available in the context of a
 request on the server side, and as a pubic coreSetup Javascript API.
 
 The data provided by the Screenshot Mode are signals about:
