@@ -5,12 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { to } from '../../../public/functions/to';
+import { toFunctionFactory } from '../../../public/functions/to';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { CONTEXT } from '../../constants';
 
-export const help: FunctionHelp<FunctionFactory<typeof to>> = {
+export const help: FunctionHelp<FunctionFactory<ReturnType<typeof toFunctionFactory>>> = {
   help: i18n.translate('xpack.canvas.functions.toHelpText', {
     defaultMessage: 'Explicitly casts the type of the {CONTEXT} to the specified type.',
     values: {

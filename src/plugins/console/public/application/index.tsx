@@ -22,15 +22,10 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { NotificationsSetup } from 'src/core/public';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { Main } from './containers';
-import { createStorage, createHistory, createSettings, Settings } from '../services';
+import { createStorage, createHistory, createSettings } from '../services';
 import * as localStorageObjectClient from '../lib/local_storage_object_client';
 import { createUsageTracker } from '../services/tracker';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
-
-let settingsRef: Settings;
-export function legacyBackDoorToSettings() {
-  return settingsRef;
-}
 
 export interface BootDependencies {
   docLinkVersion: string;
@@ -59,7 +54,6 @@ export function renderApp({
   const history = createHistory({ storage });
   const settings = createSettings({ storage });
   const objectStorageClient = localStorageObjectClient.create(storage);
-  settingsRef = settings;
 
   render(
     <I18nContext>
