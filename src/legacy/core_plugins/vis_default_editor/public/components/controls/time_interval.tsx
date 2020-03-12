@@ -65,7 +65,7 @@ function TimeIntervalParamEditor({
   const interval = get(agg, 'buckets.getInterval') && (agg as any).buckets.getInterval();
   const scaledHelpText =
     interval && interval.scaled && isValid ? (
-      <strong className="eui-displayBlock">
+      <strong data-test-subj="currentlyScaledText" className="eui-displayBlock">
         <FormattedMessage
           id="visDefaultEditor.controls.timeInterval.scaledHelpText"
           defaultMessage="Currently scaled to {bucketDescription}"

@@ -21,6 +21,7 @@ import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
   const log = getService('log');
+  const find = getService('find');
   const inspector = getService('inspector');
   const browser = getService('browser');
   const retry = getService('retry');
@@ -454,6 +455,39 @@ export default function({ getService, getPageObjects }) {
         const paths = await PageObjects.visChart.getAreaChartPaths('Count');
         log.debug('actual chart data =     ' + paths);
         expect(paths.length).to.eql(numberOfSegments);
+      });
+    });
+
+    describe('date histogram interval', () => {
+      beforeEach(async () => await PageObjects.visEditor.toggleAccordion('visEditorAggAccordion2'));
+
+      it('should update accordion label when collapsed', async () => {
+        await PageObjects.visEditor.toggleAccordion('visEditorAggAccordion2', false);
+        const accordionLabel = await (
+          await find.byCssSelector(
+            '[data-test-subj="visEditorAggAccordion2"] .visEditorSidebar__aggGroupAccordionButtonContent'
+          )
+        ).getVisibleText();
+        expect(accordionLabel).to.include.string('per 3 hours');
+      });
+
+      it('should update label inside when scaled to milliseconds', async () => {
+        await PageObjects.visEditor.setInterval('Millisecond');
+        const accordionLabel = await (
+          await find.byCssSelector('[data-test-subj="currentlyScaledText"]')
+        ).getVisibleText();
+        expect(accordionLabel).to.include.string('to hour');
+      });
+
+      it('should scale to 10 minutes and display the correct label when time range is changed and custom interval is set to 10s', async () => {
+        const fromTime = 'Sep 20, 2015 @ 00:00:00.000';
+        const toTime = 'Sep 20, 2015 @ 23:30:00.000';
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.visEditor.setInterval('10s', { type: 'custom' });
+        const accordionLabel = await (
+          await find.byCssSelector('[data-test-subj="currentlyScaledText"]')
+        ).getVisibleText();
+        expect(accordionLabel).to.include.string('to 10 minutes');
       });
     });
   });
