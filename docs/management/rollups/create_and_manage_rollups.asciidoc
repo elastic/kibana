@@ -56,6 +56,7 @@ job&mdash;reusing the same name can lead to problems with mismatched job configu
 You can read more at {ref}/rollup-job-config.html[rollup job configuration].
 
 [float]
+[[rollup-data-tutorial]]
 === Try it: Create and visualize rolled up data
 
 This example creates a rollup job to capture log data from sample web logs.
@@ -128,7 +129,7 @@ rollup index, or you can remove or archive it using <<creating-index-lifecycle-p
 Your next step is to visualize your rolled up data in a vertical bar chart.
 Most visualizations support rolled up data, with the exception of Timelion, TSVB, and Vega visualizations.
 
-Using the information from the example rollup configuration described above,
+Using the information from the example rollup configuration,
 you can use `rollup_logstash` to match the rolled up index pattern,
 and `kibana_sample_data_logs` to match the index pattern for raw data.
 The notation for a combination index pattern with both raw and rolled up data
@@ -138,8 +139,7 @@ is `rollup_logstash,kibana_sample_data_logs`.
 image::images/management_rollup_job_vis.png[][Visualization of rolled up data]
 
 You can then create a dashboard that contains visualizations of the rolled up
-data, raw data, or both.  See <<visualize-rollup-data, Using rolled up data in a visualization>>
-for more information.
+data, raw data, or both. For more information, refer to <<rollup-index-pattern,rolled up data>>.
 
 [role="screenshot"]
 image::images/management_rollup_job_dashboard.png[][Dashboard with rolled up data]
