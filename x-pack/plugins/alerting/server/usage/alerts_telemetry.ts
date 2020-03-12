@@ -4,236 +4,300 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ISavedObjectsRepository } from 'kibana/server';
-import { TaskManagerStartContract } from '../../../task_manager/server';
-import { AlertTypeRegistry } from '../alert_type_registry';
-import { parseDuration } from '../lib';
+import { APICaller } from 'kibana/server';
 
-export async function getTotalCountAggregations(savedObjectsRepository: ISavedObjectsRepository) {
-  const findResult = await savedObjectsRepository.find({
-    type: 'alert',
-    fields: ['enabled', 'throttle', 'schedule'],
-  });
+const alertTypeMetric = {
+  scripted_metric: {
+    init_script: 'state.types = [:]',
+    map_script: `
+      String alertType = doc['alert.alertTypeId'].value;
+      state.types.put(alertType, state.types.containsKey(alertType) ? state.types.get(alertType) + 1 : 1);
+    `,
+    // Combine script is executed per cluster, but we already have a key-value pair per cluster.
+    // Despite docs that say this is optional, this script can't be blank.
+    combine_script: 'return state',
+    // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
+    // This also needs to account for having no data
+    reduce_script: `
+      Map result = [:];
+      for (Map m : states.toArray()) {
+        if (m !== null) {
+          for (String k : m.keySet()) {
+            result.put(k, result.containsKey(k) ? result.get(k) + m.get(k) : m.get(k));
+          }
+        }
+      }
+      return result;
+    `,
+  },
+};
 
-  if (findResult.total === 0) {
-    return {
-      count_total: 0,
-      count_active_total: 0,
-      count_disabled_total: 0,
-      throttle_time: {
-        min: 0,
-        avg: 0,
-        max: 0,
-      },
-      schedule_time: {
-        min: 0,
-        avg: 0,
-        max: 0,
-      },
-      connectors_per_alert: {
-        min: 0,
-        avg: 0,
-        max: 0,
-      },
-    };
-  }
+export async function getTotalCountAggregations(callCluster: APICaller, kibanaInex: string) {
+  const throttleTimeMetric = {
+    scripted_metric: {
+      init_script: 'state.min = 0; state.max = 0; state.totalSum = 0; state.totalCount = 0;',
+      map_script: `
+        if (doc['alert.throttle'].size() > 0) {
+          def throttle = doc['alert.throttle'].value;
+          
+          if (throttle.length() > 1) {
+              // get last char
+              String timeChar = throttle.substring(throttle.length() - 1);
+              // remove last char
+              throttle = throttle.substring(0, throttle.length() - 1);
 
-  const alertsWithThrottle = findResult.saved_objects.filter(
-    (savedObject: any) => savedObject.attributes.throttle !== null
-  );
-  const totalThrottleTime = alertsWithThrottle.reduce(
-    (sum, savedObject: any) => sum + parseDuration(savedObject.attributes.throttle),
-    0
-  );
-  const minThrottleTime = Math.min(
-    ...alertsWithThrottle.map((savedObject: any) => {
-      return parseDuration(savedObject.attributes.throttle);
-    })
-  );
-  const maxThrottleTime = Math.max(
-    ...alertsWithThrottle.map((savedObject: any) => {
-      return parseDuration(savedObject.attributes.throttle);
-    })
-  );
-
-  const alertsWithInterval = findResult.saved_objects.filter(
-    (savedObject: any) =>
-      savedObject.attributes.schedule !== null && savedObject.attributes.schedule.interval
-  );
-
-  const totalIntervalTime = alertsWithInterval.reduce(
-    (sum, savedObject: any) => sum + parseDuration(savedObject.attributes.schedule.interval),
-    0
-  );
-
-  const minIntervalTime = Math.min(
-    ...alertsWithInterval.map((savedObject: any) => {
-      return parseDuration(savedObject.attributes.schedule.interval);
-    })
-  );
-  const maxIntervalTime = Math.max(
-    ...alertsWithInterval.map((savedObject: any) => {
-      return parseDuration(savedObject.attributes.schedule.interval);
-    })
-  );
-
-  const alertsWithConnectorsCount = findResult.saved_objects.map((savedObject: any) => {
-    return {
-      ...savedObject,
-      references: [
-        ...new Set(
-          savedObject.references
-            .filter((ref: any) => ref.type === 'action')
-            .map((ref: any) => ref.id)
-        ),
-      ],
-    };
-  });
-
-  const totalConnectorsCount = alertsWithConnectorsCount.reduce(
-    (sum, savedObject: any) => sum + savedObject.references.length,
-    0
-  );
-
-  const minConnectorsCount = Math.min(
-    ...alertsWithConnectorsCount.map((savedObject: any) => {
-      return savedObject.references.length;
-    })
-  );
-  const maxConnectorsCount = Math.max(
-    ...alertsWithConnectorsCount.map((savedObject: any) => {
-      return savedObject.references.length;
-    })
-  );
-
-  return {
-    count_total: findResult.total,
-    count_active_total: findResult.saved_objects.filter(
-      (savedObject: any) => savedObject.attributes.enabled
-    ).length,
-    count_disabled_total: findResult.saved_objects.filter(
-      (savedObject: any) => !savedObject.attributes.enabled
-    ).length,
-    throttle_time: {
-      min: alertsWithThrottle.length > 0 ? `${minThrottleTime / 1000}s` : '0',
-      avg:
-        alertsWithThrottle.length > 0
-          ? `${totalThrottleTime / alertsWithThrottle.length / 1000}s`
-          : '0',
-      max: alertsWithThrottle.length > 0 ? `${maxThrottleTime / 1000}s` : '0',
-    },
-    schedule_time: {
-      min: `${minIntervalTime / 1000}s`,
-      avg: `${(alertsWithInterval.length > 0 ? totalIntervalTime / alertsWithInterval.length : 0) /
-        1000}s`,
-      max: `${maxIntervalTime / 1000}s`,
-    },
-    connectors_per_alert: {
-      min: minConnectorsCount,
-      avg: Math.round(totalConnectorsCount / findResult.total),
-      max: maxConnectorsCount,
+              if (throttle.chars().allMatch(Character::isDigit)) {
+                // using of regex is not allowed in painless language
+                int parsed = Integer.parseInt(throttle);
+                
+                if (timeChar === "s") {
+                  parsed = parsed * 1000;
+                } else if (timeChar === "m") {
+                  parsed = parsed * 60 * 1000;
+                } else if (timeChar === "h") {
+                  parsed = parsed * 60 * 60 * 1000;
+                } else if (timeChar === "d") {
+                  parsed = parsed * 24 * 60 * 60 * 1000;
+                }
+                if (state.min === 0 || parsed < state.min) {
+                  state.min = parsed;
+                }
+                if (parsed > state.max) {
+                  state.max = parsed;
+                }
+                state.totalSum += parsed;
+                state.totalCount++;
+              }
+          }
+        }
+      `,
+      // Combine script is executed per cluster, but we already have a key-value pair per cluster.
+      // Despite docs that say this is optional, this script can't be blank.
+      combine_script: 'return state',
+      // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
+      // This also needs to account for having no data
+      reduce_script: `
+        double min = 0;
+        double max = 0;
+        long totalSum = 0;
+        long totalCount = 0;
+        for (Map m : states.toArray()) {
+          if (m !== null) {
+            min = min > 0 ? Math.min(min, m.min) : m.min;
+            max = Math.max(max, m.max);
+            totalSum += m.totalSum;
+            totalCount += m.totalCount;
+          }
+        }
+        Map result = new HashMap();
+        result.min = min;
+        result.max = max;
+        result.totalSum = totalSum;
+        result.totalCount = totalCount;
+        return result;
+      `,
     },
   };
-}
 
-export async function getTotalCountByAlertTypes(
-  savedObjectsRepository: ISavedObjectsRepository,
-  alertTypeRegistry: AlertTypeRegistry
-) {
-  const totalByAlertType = alertTypeRegistry.list().reduce(async (accPromise: any, alertType) => {
-    const acc = await accPromise;
-    const total = await getTotalCountByAlertType(savedObjectsRepository, alertType.id);
-    return { ...acc, [alertType.name]: total };
-  }, Promise.resolve({}));
+  const intervalTimeMetric = {
+    scripted_metric: {
+      init_script: 'state.min = 0; state.max = 0; state.totalSum = 0; state.totalCount = 0;',
+      map_script: `
+        if (doc['alert.schedule.interval'].size() > 0) {
+          def interval = doc['alert.schedule.interval'].value;
+          
+          if (interval.length() > 1) {
+              // get last char
+              String timeChar = interval.substring(interval.length() - 1);
+              // remove last char
+              interval = interval.substring(0, interval.length() - 1);
 
-  return totalByAlertType;
-}
+              if (interval.chars().allMatch(Character::isDigit)) {
+                // using of regex is not allowed in painless language
+                int parsed = Integer.parseInt(interval);
+                
+                if (timeChar === "s") {
+                  parsed = parsed * 1000;
+                } else if (timeChar === "m") {
+                  parsed = parsed * 60 * 1000;
+                } else if (timeChar === "h") {
+                  parsed = parsed * 60 * 60 * 1000;
+                } else if (timeChar === "d") {
+                  parsed = parsed * 24 * 60 * 60 * 1000;
+                }
+                if (state.min === 0 || parsed < state.min) {
+                  state.min = parsed;
+                }
+                if (parsed > state.max) {
+                  state.max = parsed;
+                }
+                state.totalSum += parsed;
+                state.totalCount++;
+              }
+          }
+        }
+      `,
+      // Combine script is executed per cluster, but we already have a key-value pair per cluster.
+      // Despite docs that say this is optional, this script can't be blank.
+      combine_script: 'return state',
+      // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
+      // This also needs to account for having no data
+      reduce_script: `
+        double min = 0;
+        double max = 0;
+        long totalSum = 0;
+        long totalCount = 0;
+        for (Map m : states.toArray()) {
+          if (m !== null) {
+            min = min > 0 ? Math.min(min, m.min) : m.min;
+            max = Math.max(max, m.max);
+            totalSum += m.totalSum;
+            totalCount += m.totalCount;
+          }
+        }
+        Map result = new HashMap();
+        result.min = min;
+        result.max = max;
+        result.totalSum = totalSum;
+        result.totalCount = totalCount;
+        return result;
+      `,
+    },
+  };
 
-async function getTotalCountByAlertType(
-  savedObjectsRepository: ISavedObjectsRepository,
-  alertTypeId: string
-) {
-  const findResult = await savedObjectsRepository.find({
-    type: 'alert',
-    searchFields: ['alertTypeId'],
-    fields: ['alertTypeId'],
-    search: alertTypeId,
-  });
+  const connectorsMinMetric = {
+    scripted_metric: {
+      init_script:
+        'state.currentAlertActions = 0; state.min = 0; state.max = 0; state.totalActionsCount = 0;',
+      map_script: `
+        String refName = doc['alert.actions.actionRef'].value;
+        if (refName === 'action_0') {
+          if (state.currentAlertActions !== 0 && (state.min === 0 || state.currentAlertActions < state.min)) {
+            state.min = state.currentAlertActions;
+          }
+          if (state.currentAlertActions !== 0 && state.currentAlertActions > state.max) {
+            state.max = state.currentAlertActions;
+          }
+          state.currentAlertActions = 1;
+        } else {
+          state.currentAlertActions++;
+        }
 
-  return findResult.total;
-}
+        state.totalActionsCount++;
+      `,
+      // Combine script is executed per cluster, but we already have a key-value pair per cluster.
+      // Despite docs that say this is optional, this script can't be blank.
+      combine_script: 'return state',
+      // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
+      // This also needs to account for having no data
+      reduce_script: `
+        double min = 0;
+        double max = 0;
+        long totalActionsCount = 0;
+        long currentAlertActions = 0;
+        for (Map m : states.toArray()) {
+          if (m !== null) {
+            min = min > 0 ? Math.min(min, m.min) : m.min;
+            max = Math.max(max, m.max);
+            currentAlertActions += m.currentAlertActions;
+            totalActionsCount += m.totalActionsCount;
+          }
+        }
+        Map result = new HashMap();
+        result.min = min;
+        result.max = max;
+        result.currentAlertActions = currentAlertActions;
+        result.totalActionsCount = totalActionsCount;
+        return result;
+      `,
+    },
+  };
 
-export async function getTotalInUseCountByAlertTypes(
-  savedObjectsRepository: ISavedObjectsRepository,
-  alertTypeRegistry: AlertTypeRegistry
-) {
-  const totalByAlertType = alertTypeRegistry.list().reduce(async (accPromise: any, alertType) => {
-    const acc = await accPromise;
-    const total = await getTotalInUseCountByAlertType(savedObjectsRepository, alertType.id);
-    return { ...acc, [alertType.name]: total };
-  }, Promise.resolve({}));
-
-  return totalByAlertType;
-}
-
-async function getTotalInUseCountByAlertType(
-  savedObjectsRepository: ISavedObjectsRepository,
-  alertTypeId: string
-) {
-  const findResult = await savedObjectsRepository.find({
-    type: 'alert',
-    searchFields: ['alertTypeId'],
-    fields: ['alertTypeId'],
-    search: alertTypeId,
-  });
-
-  if (findResult.total === 0) {
-    return 0;
-  }
-
-  return findResult.saved_objects.filter((savedObject: any) => savedObject.attributes.enabled)
-    .length;
-}
-
-// TODO: Replace executions count telemetry with eventLog, when it will write to index
-async function getExecutions(taskManager: TaskManagerStartContract) {
-  const result = await taskManager.fetch({
-    query: {
-      bool: {
-        filter: {
-          bool: {
-            must: {
-              term: {
-                'task.scope': 'alerting',
-              },
-            },
+  const results = await callCluster('search', {
+    index: kibanaInex,
+    rest_total_hits_as_int: true,
+    body: {
+      query: {
+        bool: {
+          filter: [{ term: { type: 'alert' } }],
+        },
+      },
+      aggs: {
+        byAlertTypeId: alertTypeMetric,
+        throttleTime: throttleTimeMetric,
+        intervalTime: intervalTimeMetric,
+        connectorsCount: {
+          nested: {
+            path: 'alert.actions',
+          },
+          aggs: {
+            min_connectors: connectorsMinMetric,
           },
         },
       },
     },
-    size: 10000,
   });
-  return result.docs;
+
+  return {
+    count_total: Object.keys(results.aggregations.byAlertTypeId.value.types).reduce(
+      (total: number, key: string) =>
+        parseInt(results.aggregations.byAlertTypeId.value.types[key], 0) + total,
+      0
+    ),
+    count_by_type: results.aggregations.byAlertTypeId.value.types,
+    throttle_time: {
+      min: `${results.aggregations.throttleTime.value.min / 1000}s`,
+      avg: `${
+        results.aggregations.throttleTime.value.totalCount > 0
+          ? results.aggregations.throttleTime.value.totalSum /
+            results.aggregations.throttleTime.value.totalCount /
+            1000
+          : 0
+      }s`,
+      max: `${results.aggregations.throttleTime.value.max / 1000}s`,
+    },
+    schedule_time: {
+      min: `${results.aggregations.intervalTime.value.min / 1000}s`,
+      avg: `${
+        results.aggregations.intervalTime.value.totalCount > 0
+          ? results.aggregations.intervalTime.value.totalSum /
+            results.aggregations.intervalTime.value.totalCount /
+            1000
+          : 0
+      }s`,
+      max: `${results.aggregations.intervalTime.value.max / 1000}s`,
+    },
+    connectors_per_alert: {
+      min: 0,
+      avg: 0,
+      max: 0,
+    },
+  };
 }
 
-export async function getExecutionsCount(taskManager: TaskManagerStartContract) {
-  const alertExecutions = await getExecutions(taskManager);
-  return alertExecutions.length;
+export async function getTotalCountInUse(callCluster: APICaller, kibanaInex: string) {
+  const searchResult = await callCluster('search', {
+    index: kibanaInex,
+    rest_total_hits_as_int: true,
+    body: {
+      query: {
+        bool: {
+          filter: [{ term: { type: 'alert' } }, { term: { 'alert.enabled': true } }],
+        },
+      },
+      aggs: {
+        byAlertTypeId: alertTypeMetric,
+      },
+    },
+  });
+  return {
+    countTotal: Object.keys(searchResult.aggregations.byAlertTypeId.value.types).reduce(
+      (total: number, key: string) =>
+        parseInt(searchResult.aggregations.byAlertTypeId.value.types[key], 0) + total,
+      0
+    ),
+    countByType: searchResult.aggregations.byAlertTypeId.value.types,
+  };
 }
 
-export async function getExecutionsCountByAlertTypes(
-  taskManager: TaskManagerStartContract,
-  alertTypeRegistry: AlertTypeRegistry
-) {
-  const alertExecutions = await getExecutions(taskManager);
-  const totalByAlertType = alertTypeRegistry.list().reduce(
-    (res: any, alertType) => ({
-      ...res,
-      [alertType.name]:
-        alertExecutions.filter(execution => execution.taskType === `alerting:${alertType.id}`)
-          .length ?? 0,
-    }),
-    {}
-  );
-  return totalByAlertType;
-}
+// TODO: Implement executions count telemetry with eventLog, when it will write to index

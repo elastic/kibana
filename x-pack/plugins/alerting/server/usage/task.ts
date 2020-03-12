@@ -4,22 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, ISavedObjectsRepository } from 'kibana/server';
+import { Logger, CoreSetup } from 'kibana/server';
 import moment from 'moment';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../task_manager/server';
-import { AlertTypeRegistry } from '../alert_type_registry';
 
-import {
-  getTotalCountAggregations,
-  getTotalInUseCountByAlertTypes,
-  getExecutionsCount,
-  getTotalCountByAlertTypes,
-  getExecutionsCountByAlertTypes,
-} from './alerts_telemetry';
+import { getTotalCountAggregations, getTotalCountInUse } from './alerts_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
 
@@ -27,18 +20,11 @@ export const TASK_ID = `Alerting-${TELEMETRY_TASK_TYPE}`;
 
 export function initializeAlertingTelemetry(
   logger: Logger,
-  savedObjectsRepository: ISavedObjectsRepository,
-  alertTypeRegistry: AlertTypeRegistry,
+  core: CoreSetup,
   taskManager: TaskManagerSetupContract,
-  taskManagerStart: TaskManagerStartContract
+  kibanaIndex: string
 ) {
-  registerAlertingTelemetryTask(
-    logger,
-    savedObjectsRepository,
-    alertTypeRegistry,
-    taskManager,
-    taskManagerStart
-  );
+  registerAlertingTelemetryTask(logger, core, taskManager, kibanaIndex);
 }
 
 export function scheduleAlertingTelemetry(logger: Logger, taskManager?: TaskManagerStartContract) {
@@ -49,22 +35,16 @@ export function scheduleAlertingTelemetry(logger: Logger, taskManager?: TaskMana
 
 function registerAlertingTelemetryTask(
   logger: Logger,
-  savedObjectsRepository: ISavedObjectsRepository,
-  alertTypeRegistry: AlertTypeRegistry,
+  core: CoreSetup,
   taskManager: TaskManagerSetupContract,
-  taskManagerStart: TaskManagerStartContract
+  kibanaIndex: string
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Alerting telemetry fetch task',
       type: TELEMETRY_TASK_TYPE,
       timeout: '5m',
-      createTaskRunner: telemetryTaskRunner(
-        logger,
-        savedObjectsRepository,
-        alertTypeRegistry,
-        taskManagerStart
-      ),
+      createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex),
     },
   });
 }
@@ -82,45 +62,35 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
   }
 }
 
-export function telemetryTaskRunner(
-  logger: Logger,
-  savedObjectsRepository: ISavedObjectsRepository,
-  alertTypeRegistry: AlertTypeRegistry,
-  taskManager: TaskManagerStartContract
-) {
+export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex: string) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
+    const callCluster = core.elasticsearch.adminClient.callAsInternalUser;
     return {
       async run() {
         return Promise.all([
-          getTotalCountAggregations(savedObjectsRepository),
-          getExecutionsCount(taskManager),
-          getTotalInUseCountByAlertTypes(savedObjectsRepository, alertTypeRegistry),
-          getTotalCountByAlertTypes(savedObjectsRepository, alertTypeRegistry),
-          getExecutionsCountByAlertTypes(taskManager, alertTypeRegistry),
+          getTotalCountAggregations(callCluster, kibanaIndex),
+          getTotalCountInUse(callCluster, kibanaIndex),
         ])
-          .then(
-            ([
-              totalCountAggregations,
-              executionsTotal,
-              countActiveByType,
-              countByType,
-              executionByType,
-            ]) => {
-              return {
-                state: {
-                  runs: (state.runs || 0) + 1,
-                  ...totalCountAggregations,
-                  executions_total: executionsTotal,
-                  count_active_by_type: countActiveByType,
-                  count_by_type: countByType,
-                  executions_by_type: executionByType,
-                },
-                runAt: getNextMidnight(),
-              };
-            }
-          )
-          .catch(errMsg => logger.warn(`Error executing alerting telemetry task: ${errMsg}`));
+          .then(([totalCountAggregations, totalInUse]) => {
+            return {
+              state: {
+                runs: (state.runs || 0) + 1,
+                ...totalCountAggregations,
+                count_active_by_type: totalInUse.countByType,
+                count_active_total: totalInUse.countTotal,
+                count_disabled_total: totalCountAggregations.count_total - totalInUse.countTotal,
+              },
+              runAt: getNextMidnight(),
+            };
+          })
+          .catch(errMsg => {
+            logger.warn(`Error executing alerting telemetry task: ${errMsg}`);
+            return {
+              state: {},
+              runAt: getNextMidnight(),
+            };
+          });
       },
     };
   };
@@ -128,7 +98,7 @@ export function telemetryTaskRunner(
 
 function getNextMidnight() {
   return moment()
-    .add(1, 'day')
-    .startOf('day')
+    .add(1, 'd')
+    .startOf('d')
     .toDate();
 }

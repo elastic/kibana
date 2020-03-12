@@ -173,15 +173,13 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
       core.getStartServices().then(async ([coreStart, startPlugins]: [CoreStart, any]) => {
-        const savedObjectsRepository = coreStart.savedObjects.createInternalRepository();
         registerActionsUsageCollector(usageCollection, startPlugins.taskManager);
 
         initializeActionsTelemetry(
           this.telemetryLogger,
-          savedObjectsRepository,
-          actionTypeRegistry,
           plugins.taskManager,
-          startPlugins.taskManager
+          core,
+          await this.kibanaIndex
         );
       });
     }

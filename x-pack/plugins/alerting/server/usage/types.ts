@@ -8,10 +8,8 @@ export interface AlertsUsage {
   count_total: number;
   count_active_total: number;
   count_disabled_total: number;
-  executions_total: number;
   count_by_type: Record<string, number>;
   count_active_by_type: Record<string, number>;
-  executions_by_type: Record<string, number>;
   throttle_time: {
     min: number;
     avg: number;

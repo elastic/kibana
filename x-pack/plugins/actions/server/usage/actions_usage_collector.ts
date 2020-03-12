@@ -18,9 +18,9 @@ export function createActionsUsageCollector(
     isReady: () => true,
     fetch: async (): Promise<ActionsUsage> => {
       try {
-        const docs = await getLatestTaskState(await taskManager);
+        const doc = await getLatestTaskState(await taskManager);
         // get the accumulated state from the recurring task
-        const state: ActionsUsage = get(docs, '[0].state');
+        const state: ActionsUsage = get(doc, 'state');
 
         return {
           ...state,
@@ -29,10 +29,8 @@ export function createActionsUsageCollector(
         return {
           count_total: 0,
           count_active_total: 0,
-          executions_total: 0,
           count_active_by_type: {},
           count_by_type: {},
-          executions_by_type: {},
         };
       }
     },
@@ -41,10 +39,8 @@ export function createActionsUsageCollector(
 
 async function getLatestTaskState(taskManager: TaskManagerStartContract) {
   try {
-    const result = await taskManager.fetch({
-      query: { bool: { filter: { term: { _id: `task:Actions-actions_telemetry` } } } },
-    });
-    return result.docs;
+    const result = await taskManager.get('Actions-actions_telemetry');
+    return result;
   } catch (err) {
     const errMessage = err && err.message ? err.message : err.toString();
     /*

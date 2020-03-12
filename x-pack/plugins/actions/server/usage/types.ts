@@ -7,8 +7,9 @@
 export interface ActionsUsage {
   count_total: number;
   count_active_total: number;
-  executions_total: number;
   count_by_type: Record<string, number>;
   count_active_by_type: Record<string, number>;
-  executions_by_type: Record<string, number>;
+  // TODO: Implement executions count telemetry with eventLog, when it will write to index
+  // executions_by_type: Record<string, number>;
+  // executions_total: number;
 }

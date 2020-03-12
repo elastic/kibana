@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { first, map } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { SecurityPluginSetup } from '../../security/server';
 import {
@@ -27,6 +28,7 @@ import {
   SavedObjectsServiceStart,
   IContextProvider,
   RequestHandler,
+  SharedGlobalConfig,
 } from '../../../../src/core/server';
 
 import {
@@ -89,12 +91,19 @@ export class AlertingPlugin {
   private security?: SecurityPluginSetup;
   private readonly alertsClientFactory: AlertsClientFactory;
   private readonly telemetryLogger: Logger;
+  private readonly kibanaIndex: Promise<string>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.alertsClientFactory = new AlertsClientFactory();
     this.telemetryLogger = initializerContext.logger.get('telemetry');
+    this.kibanaIndex = initializerContext.config.legacy.globalConfig$
+      .pipe(
+        first(),
+        map((config: SharedGlobalConfig) => config.kibana.index)
+      )
+      .toPromise();
   }
 
   public async setup(core: CoreSetup, plugins: AlertingPluginsSetup): Promise<PluginSetupContract> {
@@ -131,17 +140,15 @@ export class AlertingPlugin {
     this.serverBasePath = core.http.basePath.serverBasePath;
 
     const usageCollection = plugins.usageCollection;
-    if (usageCollection && plugins.taskManager) {
+    if (usageCollection) {
       core.getStartServices().then(async ([coreStart, startPlugins]: [CoreStart, any]) => {
-        const savedObjectsRepository = coreStart.savedObjects.createInternalRepository();
         registerAlertsUsageCollector(usageCollection, startPlugins.taskManager);
 
         initializeAlertingTelemetry(
           this.telemetryLogger,
-          savedObjectsRepository,
-          alertTypeRegistry,
+          core,
           plugins.taskManager,
-          startPlugins.taskManager
+          await this.kibanaIndex
         );
       });
     }
@@ -165,6 +172,16 @@ export class AlertingPlugin {
     unmuteAllAlertRoute(router, this.licenseState);
     muteAlertInstanceRoute(router, this.licenseState);
     unmuteAlertInstanceRoute(router, this.licenseState);
+
+    alertTypeRegistry.register({
+      id: 'test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      defaultActionGroupId: 'default',
+      name: 'Test',
+      executor: async options => {
+        return { status: 'ok' };
+      },
+    });
 
     return {
       registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
