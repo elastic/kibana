@@ -25,6 +25,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const inspector = getService('inspector');
+  const docTable = getService('docTable');
   const security = getService('security');
   const filterBar = getService('filterBar');
   const TEST_COLUMN_NAMES = ['@message'];
