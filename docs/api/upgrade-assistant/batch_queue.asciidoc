@@ -4,9 +4,9 @@
 <titleabbrev>Batch reindex queue</titleabbrev>
 ++++
 
-Check the current reindex batch queue.
-
 experimental["The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are experimental."]
+
+Check the current reindex batch queue.
 
 [[batch-reindex-queue-request]]
 ==== Request
@@ -64,5 +64,5 @@ The API returns the following:
 }
 --------------------------------------------------
 
-<1> Items in this array indicate reindex tasks at a given point in time
+<1> Items in this array indicate reindex tasks at a given point in time and the order in which they will be executed.
 

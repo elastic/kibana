@@ -4,9 +4,9 @@
 <titleabbrev>Check reindex status</titleabbrev>
 ++++
 
-Check the status of the reindex operation.
-
 experimental["The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are experimental."]
+
+Check the status of the reindex operation.
 
 [[check-reindex-status-request]]
 ==== Request

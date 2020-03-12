@@ -4,9 +4,9 @@
 <titleabbrev>Start or resume reindex</titleabbrev>
 ++++
 
-Start a new reindex or resume a paused reindex.
-
 experimental["The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are experimental."]
+
+Start a new reindex or resume a paused reindex.
 
 [[start-resume-reindex-request]]
 ==== Request

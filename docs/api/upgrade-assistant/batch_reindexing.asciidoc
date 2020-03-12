@@ -4,11 +4,11 @@
 <titleabbrev>Batch start or resume reindex</titleabbrev>
 ++++
 
-Enables starting or resuming multiple reindexing tasks in one request. Additionally, reindexing tasks started or resumed
-via the batch endpoint will be placed on a queue and executed one-by-one which ensures that minimal cluster resources
-are consumed over time.
-
 experimental["The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are experimental."]
+
+Start or resume multiple reindexing tasks in one request. Additionally, reindexing tasks started or resumed
+via the batch endpoint will be placed on a queue and executed one-by-one, which ensures that minimal cluster resources
+are consumed over time.
 
 [[batch-start-resume-reindex-request]]
 ==== Request
@@ -42,7 +42,7 @@ POST /api/upgrade_assistant/reindex/batch
 --------------------------------------------------
 <1> The order in which the indices are provided here determines the order in which the reindex tasks will be executed.
 
-The API returns the following which is similar to the <<start-resume-reindex, start or resume endpoint>>:
+Similar to the <<start-resume-reindex, start or resume endpoint>>, the API returns the following:
 
 [source,js]
 --------------------------------------------------
