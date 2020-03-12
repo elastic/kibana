@@ -4,7 +4,11 @@
     - name: auid
     - name: euid
 - name: long.nested.foo
+  type: text
+- name: long.nested.bar
+  type: integer
 - name: nested.bar
+- name: nested.baz
 - name: myalias
   type: alias
   path: user.euid
