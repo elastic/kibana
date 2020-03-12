@@ -79,11 +79,12 @@ The data provided by the Screenshot Mode are signals about:
  - layout and dimensions that the result image is expected to be
  - time zone for which to format the page data
 
-There are a few ways for the service to obtain the data for its internal state.
-The most typical way would be to have a URL query string variable with the
-raw data and have the service read it when an API client is constructed. The
-service would provide some abstractions around that data to the different
-applications.
+To obtain the screenshot mode context data and provide it as a service to
+plugins, this RFC recommends using a URL query string variable with raw data,
+and provide an interface to it in the form of an observable. The Screenshot
+Mode Service plugin will read the data in its `setup` method and provide the
+observable to the data interface in its plugin contract. The interface is
+described below as the `ScreenshotModeServiceApi`.
 
 The new query string parameter could appear in the URL of any Kibana
 application. Adding new URL query string parameters is a non-breaking change,
