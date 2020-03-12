@@ -20,6 +20,7 @@ import { debounce } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
@@ -310,7 +311,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     }
   }, [sourceIndex, jobType, sourceIndexNameEmpty]);
 
-  useEffect(() => {
+  useUpdateEffect(() => {
     const hasBasicRequiredFields =
       jobType !== undefined && sourceIndex !== '' && sourceIndexNameValid === true;
 
