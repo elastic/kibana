@@ -11,7 +11,7 @@ export default function({ getService, getPageObjects }) {
   const config = getService('config');
   const log = getService('log');
 
-  describe.only('users', function() {
+  describe('users', function() {
     this.tags('smoke');
     before(async () => {
       log.debug('users');
