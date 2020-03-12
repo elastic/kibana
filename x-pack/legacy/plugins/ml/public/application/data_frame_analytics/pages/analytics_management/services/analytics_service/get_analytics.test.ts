@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GetDataFrameAnalyticsStatsResponseOk } from '../../../../../services/ml_api_service';
+import { GetDataFrameAnalyticsStatsResponseOk } from '../../../../../services/ml_api_service/data_frame_analytics';
 import { getAnalyticsJobsStats } from './get_analytics';
 import { DATA_FRAME_TASK_STATE } from '../../components/analytics_list/common';
 
