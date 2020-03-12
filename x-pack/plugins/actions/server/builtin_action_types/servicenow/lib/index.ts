@@ -73,6 +73,14 @@ class ServiceNow {
     return res.data.result[0].sys_id;
   }
 
+  async getIncident(incidentId: string) {
+    const res = await this._request({
+      url: `${this.incidentUrl}/${incidentId}`,
+    });
+
+    return { ...res.data.result };
+  }
+
   async createIncident(incident: Incident): Promise<IncidentResponse> {
     const res = await this._request({
       url: `${this.incidentUrl}`,

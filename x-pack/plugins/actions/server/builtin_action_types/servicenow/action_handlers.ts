@@ -7,12 +7,17 @@
 import { zipWith } from 'lodash';
 import { Incident, CommentResponse } from './lib/types';
 import {
-  ActionHandlerArguments,
   UpdateParamsType,
-  UpdateActionHandlerArguments,
   IncidentCreationResponse,
   CommentType,
   CommentsZipped,
+  CreateHandlerArguments,
+  UpdateHandlerArguments,
+  IncidentHandlerArguments,
+  FinalMapping,
+  ApplyActionTypeToFieldsArgs,
+  AppendFieldArgs,
+  KeyAny,
 } from './types';
 import { ServiceNow } from './lib';
 
@@ -30,12 +35,47 @@ const createComments = async (
   }));
 };
 
+export const appendField = ({ value, prefix = '', suffix = '' }: AppendFieldArgs) => {
+  return `${prefix}${value}${suffix}`;
+};
+
+export const applyActionTypeToFields = ({
+  params,
+  mapping,
+  incident,
+}: ApplyActionTypeToFieldsArgs) => {
+  // Ignore fields that have as actionType = nothing
+  params = Object.keys(params)
+    .filter((p: string) => mapping.get(p).actionType !== 'nothing')
+    .reduce((fields: KeyAny, paramKey: string) => {
+      fields[paramKey] = params[paramKey];
+      return fields;
+    }, {} as KeyAny);
+
+  // Append previous incident's value to fields that have as actionType = append
+  return Object.keys(params).reduce((fields: KeyAny, paramKey: string) => {
+    const actionType = mapping.get(paramKey).actionType;
+    const incidentCurrentFieldValue = incident[paramKey] ?? '';
+
+    if (actionType === 'append') {
+      fields[paramKey] = appendField({
+        value: params[paramKey],
+        suffix: incidentCurrentFieldValue,
+      });
+    } else {
+      fields[paramKey] = params[paramKey];
+    }
+
+    return fields;
+  }, {} as KeyAny);
+};
+
 export const handleCreateIncident = async ({
   serviceNow,
   params,
   comments,
   mapping,
-}: ActionHandlerArguments): Promise<IncidentCreationResponse> => {
+}: CreateHandlerArguments): Promise<IncidentCreationResponse> => {
   const paramsAsIncident = params as Incident;
 
   const { incidentId, number, pushedDate } = await serviceNow.createIncident({
@@ -59,7 +99,7 @@ export const handleUpdateIncident = async ({
   params,
   comments,
   mapping,
-}: UpdateActionHandlerArguments): Promise<IncidentCreationResponse> => {
+}: UpdateHandlerArguments): Promise<IncidentCreationResponse> => {
   const paramsAsIncident = params as UpdateParamsType;
 
   const { number, pushedDate } = await serviceNow.updateIncident(incidentId, {
@@ -75,4 +115,20 @@ export const handleUpdateIncident = async ({
   }
 
   return { ...res };
+};
+
+export const handleIncident = async ({
+  incidentId,
+  serviceNow,
+  params,
+  comments,
+  mapping,
+}: IncidentHandlerArguments): Promise<IncidentCreationResponse> => {
+  if (!incidentId) {
+    return await handleCreateIncident({ serviceNow, params, comments, mapping });
+  } else {
+    const serviceNowIncident = await serviceNow.getIncident(incidentId);
+    params = applyActionTypeToFields({ params, mapping, incident: serviceNowIncident });
+    return await handleUpdateIncident({ incidentId, serviceNow, params, comments, mapping });
+  }
 };

@@ -23,7 +23,7 @@ import { ConfigType, SecretsType, ParamsType, CommentType } from './types';
 import { ConfigSchemaProps, SecretsSchemaProps, ParamsSchema } from './schema';
 
 import { buildMap, mapParams } from './helpers';
-import { handleCreateIncident, handleUpdateIncident } from './action_handlers';
+import { handleIncident } from './action_handlers';
 
 function validateConfig(
   configurationUtilities: ActionsConfigurationUtilities,
@@ -88,6 +88,7 @@ async function serviceNowExecutor(
   const serviceNow = new ServiceNow({ url: apiUrl, username, password });
 
   const handlerInput = {
+    incidentId,
     serviceNow,
     params: restParamsMapped,
     comments: comments as CommentType[],
@@ -100,13 +101,7 @@ async function serviceNowExecutor(
     actionId,
   };
 
-  let data = {};
-
-  if (!incidentId) {
-    data = await handleCreateIncident(handlerInput);
-  } else {
-    data = await handleUpdateIncident({ incidentId, ...handlerInput });
-  }
+  const data = await handleIncident(handlerInput);
 
   return {
     ...res,
