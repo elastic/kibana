@@ -77,15 +77,15 @@ export interface ActionVariable {
 }
 
 export interface ActionVariables {
-  context?: ActionVariable[];
-  state?: ActionVariable[];
+  context: ActionVariable[];
+  state: ActionVariable[];
 }
 
 export interface AlertType {
   id: string;
   name: string;
   actionGroups: ActionGroup[];
-  actionVariables?: ActionVariables;
+  actionVariables: ActionVariables;
   defaultActionGroupId: ActionGroup['id'];
 }
 

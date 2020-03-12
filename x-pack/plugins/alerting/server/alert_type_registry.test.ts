@@ -6,6 +6,7 @@
 
 import { TaskRunnerFactory } from './task_runner';
 import { AlertTypeRegistry } from './alert_type_registry';
+import { AlertType } from './types';
 import { taskManagerMock } from '../../../plugins/task_manager/server/task_manager.mock';
 
 const taskManager = taskManagerMock.setup();
@@ -126,6 +127,10 @@ describe('get()', () => {
             "name": "Default",
           },
         ],
+        "actionVariables": Object {
+          "context": Array [],
+          "state": Array [],
+        },
         "defaultActionGroupId": "default",
         "executor": [MockFunction],
         "id": "test",
@@ -184,4 +189,67 @@ describe('list()', () => {
       ]
     `);
   });
+
+  test('should return action variables state and empty context', () => {
+    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+    registry.register(alertTypeWithVariables('x', '', 's'));
+    const alertType = registry.get('x');
+    expect(alertType.actionVariables).toBeTruthy();
+
+    const context = alertType.actionVariables!.context;
+    const state = alertType.actionVariables!.state;
+
+    expect(context).toBeTruthy();
+    expect(context!.length).toBe(0);
+
+    expect(state).toBeTruthy();
+    expect(state!.length).toBe(1);
+    expect(state![0]).toEqual({ name: 's', description: 'x state' });
+  });
+
+  test('should return action variables context and empty state', () => {
+    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+    registry.register(alertTypeWithVariables('x', 'c', ''));
+    const alertType = registry.get('x');
+    expect(alertType.actionVariables).toBeTruthy();
+
+    const context = alertType.actionVariables!.context;
+    const state = alertType.actionVariables!.state;
+
+    expect(state).toBeTruthy();
+    expect(state!.length).toBe(0);
+
+    expect(context).toBeTruthy();
+    expect(context!.length).toBe(1);
+    expect(context![0]).toEqual({ name: 'c', description: 'x context' });
+  });
 });
+
+function alertTypeWithVariables(id: string, context: string, state: string): AlertType {
+  const baseAlert = {
+    id,
+    name: `${id}-name`,
+    actionGroups: [],
+    defaultActionGroupId: id,
+    executor: (params: any): any => {},
+  };
+
+  if (!context && !state) {
+    return baseAlert;
+  }
+
+  const actionVariables = {
+    context: [{ name: context, description: `${id} context` }],
+    state: [{ name: state, description: `${id} state` }],
+  };
+
+  if (!context) {
+    delete actionVariables.context;
+  }
+
+  if (!state) {
+    delete actionVariables.state;
+  }
+
+  return { ...baseAlert, actionVariables };
+}

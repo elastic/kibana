@@ -53,6 +53,7 @@ describe('alert_details', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
     };
 
@@ -85,6 +86,7 @@ describe('alert_details', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
     };
 
@@ -112,6 +114,7 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
+        actionVariables: { context: [], state: [] },
         defaultActionGroupId: 'default',
       };
 
@@ -161,6 +164,7 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
+        actionVariables: { context: [], state: [] },
         defaultActionGroupId: 'default',
       };
       const actionTypes: ActionType[] = [
@@ -211,6 +215,7 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
+        actionVariables: { context: [], state: [] },
         defaultActionGroupId: 'default',
       };
 
@@ -235,6 +240,7 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
+        actionVariables: { context: [], state: [] },
         defaultActionGroupId: 'default',
       };
 
@@ -259,6 +265,7 @@ describe('alert_details', () => {
         id: '.noop',
         name: 'No Op',
         actionGroups: [{ id: 'default', name: 'Default' }],
+        actionVariables: { context: [], state: [] },
         defaultActionGroupId: 'default',
       };
 
@@ -288,6 +295,7 @@ describe('enable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
     };
 
@@ -313,6 +321,7 @@ describe('enable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
     };
 
@@ -338,6 +347,7 @@ describe('enable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
     };
 
@@ -372,6 +382,7 @@ describe('enable button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
     };
 
@@ -409,6 +420,7 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
     };
 
@@ -435,6 +447,7 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
     };
 
@@ -461,6 +474,7 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
     };
 
@@ -496,6 +510,7 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
     };
 
@@ -531,6 +546,7 @@ describe('mute button', () => {
       id: '.noop',
       name: 'No Op',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
     };
 

@@ -10,8 +10,8 @@ import { AlertType, ActionVariable } from '../../types';
 // return a "flattened" list of action variables for an alertType
 export function actionVariablesFromAlertType(alertType: AlertType): ActionVariable[] {
   const alwaysProvidedVars = getAlwaysProvidedActionVariables();
-  const contextVars = prefixKeys(alertType.actionVariables?.context ?? [], 'context.');
-  const stateVars = prefixKeys(alertType.actionVariables?.state ?? [], 'state.');
+  const contextVars = prefixKeys(alertType.actionVariables.context, 'context.');
+  const stateVars = prefixKeys(alertType.actionVariables.state, 'state.');
 
   return alwaysProvidedVars.concat(contextVars, stateVars);
 }
