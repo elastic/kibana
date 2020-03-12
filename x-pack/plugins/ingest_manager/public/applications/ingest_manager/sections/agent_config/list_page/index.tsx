@@ -239,7 +239,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
                 <FormattedMessage
                   id="xpack.ingestManager.agentConfigList.revisionNumber"
                   defaultMessage="rev. {revNumber}"
-                  values={{ revNumber: '999' }}
+                  values={{ revNumber: agentConfig.revision }}
                 />
               </EuiText>
             </EuiFlexItem>

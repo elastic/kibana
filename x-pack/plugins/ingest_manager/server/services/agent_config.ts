@@ -36,8 +36,24 @@ class AgentConfigService {
     agentConfig: Partial<AgentConfig>,
     user?: AuthenticatedUser
   ): Promise<AgentConfig> {
+    const oldAgentConfig = await this.get(soClient, id, false);
+
+    if (!oldAgentConfig) {
+      throw new Error('Agent config not found');
+    }
+
+    if (
+      oldAgentConfig.status === AgentConfigStatus.Inactive &&
+      agentConfig.status !== AgentConfigStatus.Active
+    ) {
+      throw new Error(
+        `Agent config ${id} cannot be updated because it is ${oldAgentConfig.status}`
+      );
+    }
+
     await soClient.update<AgentConfig>(SAVED_OBJECT_TYPE, id, {
       ...agentConfig,
+      revision: oldAgentConfig.revision + 1,
       updated_on: new Date().toString(),
       updated_by: user ? user.username : 'system',
     });
@@ -76,6 +92,7 @@ class AgentConfigService {
       SAVED_OBJECT_TYPE,
       {
         ...agentConfig,
+        revision: 1,
         updated_on: new Date().toISOString(),
         updated_by: options?.user?.username || 'system',
       } as AgentConfig,
@@ -160,22 +177,15 @@ class AgentConfigService {
     agentConfig: Partial<AgentConfig>,
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentConfig> {
-    const oldAgentConfig = await this.get(soClient, id);
-
-    if (!oldAgentConfig) {
-      throw new Error('Agent config not found');
-    }
-
-    if (
-      oldAgentConfig.status === AgentConfigStatus.Inactive &&
-      agentConfig.status !== AgentConfigStatus.Active
-    ) {
-      throw new Error(
-        `Agent config ${id} cannot be updated because it is ${oldAgentConfig.status}`
-      );
-    }
-
     return this._update(soClient, id, agentConfig, options?.user);
+  }
+
+  public async bumpRevision(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    options?: { user?: AuthenticatedUser }
+  ): Promise<AgentConfig> {
+    return this._update(soClient, id, {}, options?.user);
   }
 
   public async assignDatasources(
@@ -307,6 +317,7 @@ class AgentConfigService {
       datasources: (config.datasources as Datasource[]).map(ds =>
         storedDatasourceToAgentDatasource(ds)
       ),
+      revision: config.revision,
     };
 
     return agentConfig;
