@@ -49,11 +49,17 @@ export const substateMiddlewareFactory = <Substate>(
   };
 };
 
+/**
+ * @param middlewareDeps Optionally create the store without any middleware. This is useful for testing the store w/o side effects.
+ */
 export const appStoreFactory: (middlewareDeps?: {
   /**
    * Allow middleware to communicate with Kibana core.
    */
   coreStart: CoreStart;
+  /**
+   * Give middleware access to plugin start dependencies.
+   */
   depsStart: EndpointPluginStartDependencies;
 }) => Store = middlewareDeps => {
   let middleware;

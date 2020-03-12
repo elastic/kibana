@@ -15,8 +15,6 @@ import { EndpointAppConstants } from '../../../../../common/types';
 export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = (coreStart, depsStart) => {
   async function fetchIndexPatterns(): Promise<IIndexPattern[]> {
     const { indexPatterns } = depsStart.data;
-    // TODO: what's the best way to get the index pattern?
-    // const pattern = await indexPatterns.get('287e7b60-4394-11ea-aaac-c76376668d76');
     const indexName = EndpointAppConstants.ALERT_INDEX_NAME;
     const fields = await indexPatterns.getFieldsForWildcard({ pattern: indexName });
     const indexPattern: IIndexPattern = {
@@ -31,7 +29,6 @@ export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = (coreSt
     next(action);
     const state = api.getState();
     if (action.type === 'userChangedUrl' && isOnAlertPage(state)) {
-      // TODO: only fetch index pattern once when the page loads
       const patterns = await fetchIndexPatterns();
       api.dispatch({ type: 'serverReturnedSearchBarIndexPatterns', payload: patterns });
 

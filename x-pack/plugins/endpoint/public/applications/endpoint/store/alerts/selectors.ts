@@ -78,6 +78,10 @@ export const uiQueryParams: (
   }
 );
 
+/**
+ * Parses the ui query params and returns a object that represents the query used by the SearchBar component.
+ * If the query url param is undefined, a default is returned.
+ */
 export const searchBarQuery: (state: AlertListState) => Query = createSelector(
   uiQueryParams,
   ({ query }) => {
@@ -89,17 +93,24 @@ export const searchBarQuery: (state: AlertListState) => Query = createSelector(
   }
 );
 
+/**
+ * Parses the ui query params and returns a rison encoded string that represents the search bar's date range.
+ * A default is provided if 'date_range' is not present in the url params.
+ */
 export const encodedSearchBarDateRange: (state: AlertListState) => string = createSelector(
   uiQueryParams,
   ({ date_range: dateRange }) => {
     if (dateRange === undefined) {
-      return encode({ from: 'now-15m', to: 'now' });
+      return encode({ from: 'now-24h', to: 'now' });
     } else {
       return dateRange;
     }
   }
 );
 
+/**
+ * Parses the ui query params and returns a object that represents the dateRange used by the SearchBar component.
+ */
 export const searchBarDateRange: (state: AlertListState) => TimeRange = createSelector(
   encodedSearchBarDateRange,
   encodedDateRange => {
@@ -107,6 +118,10 @@ export const searchBarDateRange: (state: AlertListState) => TimeRange = createSe
   }
 );
 
+/**
+ * Parses the ui query params and returns an array of filters used by the SearchBar component.
+ * If the 'filters' param is not present, a default is returned.
+ */
 export const searchBarFilters: (state: AlertListState) => Filter[] = createSelector(
   uiQueryParams,
   ({ filters }) => {
@@ -117,6 +132,11 @@ export const searchBarFilters: (state: AlertListState) => Filter[] = createSelec
     }
   }
 );
+
+/**
+ * Returns the indexPatterns used by the SearchBar component
+ */
+export const searchBarIndexPatterns = (state: AlertListState) => state.searchBar.patterns;
 
 /**
  * query params to use when requesting alert data.
@@ -157,5 +177,3 @@ export const selectedAlertIsLegacyEndpointEvent: (
   }
   return 'endgame' in event;
 });
-
-export const searchBarIndexPatterns = (state: AlertListState) => state.searchBar.patterns;

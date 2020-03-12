@@ -129,7 +129,7 @@ export interface AlertListState {
   /** Specific Alert data to be shown in the details view */
   readonly alertDetails?: Immutable<AlertData>;
 
-  /** Search bar filters, query, dateRange, and index */
+  /** Search bar state including indexPatterns */
   readonly searchBar: AlertsSearchBarState;
 }
 
