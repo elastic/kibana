@@ -1,4 +1,5 @@
 - [Organisational Conventions](#organisational-conventions)
+  - [Definition of done](#definition-of-done)
 - [Technical Conventions](#technical-conventions)
   - [Plugin Structure](#plugin-structure)
     - [The PluginInitializer](#the-plugininitializer)
