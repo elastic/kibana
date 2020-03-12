@@ -10,7 +10,7 @@ import { Server } from 'src/legacy/server/kbn_server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 // @ts-ignore: could not find declaration file for module
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
-// @ts-ignore: could not find declaration file for module
+// @ts-ignore: importing JSON file
 import mappings from './mappings';
 
 export const ml = (kibana: any) => {
