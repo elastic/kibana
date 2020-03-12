@@ -5,12 +5,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MANAGEMENT_BREADCRUMB } from 'ui/management/breadcrumbs';
 import { JOBS_LIST_PATH } from './management_urls';
 
 export function getJobsListBreadcrumbs() {
   return [
-    MANAGEMENT_BREADCRUMB,
     {
       text: i18n.translate('xpack.ml.jobsList.breadcrumb', {
         defaultMessage: 'Jobs',

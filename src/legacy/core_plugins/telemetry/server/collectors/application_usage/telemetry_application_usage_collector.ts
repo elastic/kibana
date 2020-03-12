@@ -53,9 +53,11 @@ interface ApplicationUsageTransactional extends ApplicationUsageTotal {
 interface ApplicationUsageTelemetryReport {
   [appId: string]: {
     clicks_total: number;
+    clicks_7_days: number;
     clicks_30_days: number;
     clicks_90_days: number;
     minutes_on_screen_total: number;
+    minutes_on_screen_7_days: number;
     minutes_on_screen_30_days: number;
     minutes_on_screen_90_days: number;
   };
@@ -103,9 +105,11 @@ export function registerApplicationUsageCollector(
             ...acc,
             [appId]: {
               clicks_total: numberOfClicks + existing.clicks_total,
+              clicks_7_days: 0,
               clicks_30_days: 0,
               clicks_90_days: 0,
               minutes_on_screen_total: minutesOnScreen + existing.minutes_on_screen_total,
+              minutes_on_screen_7_days: 0,
               minutes_on_screen_30_days: 0,
               minutes_on_screen_90_days: 0,
             },
@@ -113,7 +117,7 @@ export function registerApplicationUsageCollector(
         },
         {} as ApplicationUsageTelemetryReport
       );
-
+      const nowMinus7 = moment().subtract(7, 'days');
       const nowMinus30 = moment().subtract(30, 'days');
       const nowMinus90 = moment().subtract(90, 'days');
 
@@ -121,17 +125,24 @@ export function registerApplicationUsageCollector(
         (acc, { attributes: { appId, minutesOnScreen, numberOfClicks, timestamp } }) => {
           const existing = acc[appId] || {
             clicks_total: 0,
+            clicks_7_days: 0,
             clicks_30_days: 0,
             clicks_90_days: 0,
             minutes_on_screen_total: 0,
+            minutes_on_screen_7_days: 0,
             minutes_on_screen_30_days: 0,
             minutes_on_screen_90_days: 0,
           };
 
           const timeOfEntry = moment(timestamp as string);
+          const isInLast7Days = timeOfEntry.isSameOrAfter(nowMinus7);
           const isInLast30Days = timeOfEntry.isSameOrAfter(nowMinus30);
           const isInLast90Days = timeOfEntry.isSameOrAfter(nowMinus90);
 
+          const last7Days = {
+            clicks_7_days: existing.clicks_7_days + numberOfClicks,
+            minutes_on_screen_7_days: existing.minutes_on_screen_7_days + minutesOnScreen,
+          };
           const last30Days = {
             clicks_30_days: existing.clicks_30_days + numberOfClicks,
             minutes_on_screen_30_days: existing.minutes_on_screen_30_days + minutesOnScreen,
@@ -147,6 +158,7 @@ export function registerApplicationUsageCollector(
               ...existing,
               clicks_total: existing.clicks_total + numberOfClicks,
               minutes_on_screen_total: existing.minutes_on_screen_total + minutesOnScreen,
+              ...(isInLast7Days ? last7Days : {}),
               ...(isInLast30Days ? last30Days : {}),
               ...(isInLast90Days ? last90Days : {}),
             },
