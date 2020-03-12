@@ -20,7 +20,7 @@ export const PackageIcon: React.FunctionComponent<{
   const svgIcons = icons?.filter(icon => icon.type === 'image/svg+xml');
   const localIcon = svgIcons && Array.isArray(svgIcons) && svgIcons[0];
   const pathToLocal = localIcon && toImage(localIcon.src);
-  const euiIconType = pathToLocal || euiLogoIcon || 'savedObjectsApp';
+  const euiIconType = pathToLocal || euiLogoIcon || 'package';
 
   return <EuiIcon size="s" type={euiIconType} {...euiIconProps} />;
 };
