@@ -113,20 +113,22 @@ describe('Table Vis - Controller', () => {
     return ({
       type: tableVisTypeDefinition,
       params: Object.assign({}, tableVisTypeDefinition.visConfig.defaults, params),
-      aggs: createAggConfigs(stubIndexPattern, [
-        { type: 'count', schema: 'metric' },
-        {
-          type: 'range',
-          schema: 'bucket',
-          params: {
-            field: 'bytes',
-            ranges: [
-              { from: 0, to: 1000 },
-              { from: 1000, to: 2000 },
-            ],
+      data: {
+        aggs: createAggConfigs(stubIndexPattern, [
+          { type: 'count', schema: 'metric' },
+          {
+            type: 'range',
+            schema: 'bucket',
+            params: {
+              field: 'bytes',
+              ranges: [
+                { from: 0, to: 1000 },
+                { from: 1000, to: 2000 },
+              ],
+            },
           },
-        },
-      ]),
+        ]),
+      },
     } as unknown) as Vis;
   }
 
@@ -146,11 +148,11 @@ describe('Table Vis - Controller', () => {
 
   // basically a parameterized beforeEach
   function initController(vis: Vis) {
-    vis.aggs.aggs.forEach((agg: IAggConfig, i: number) => {
+    vis.data.aggs!.aggs.forEach((agg: IAggConfig, i: number) => {
       agg.id = 'agg_' + (i + 1);
     });
 
-    tabifiedResponse = tabifyAggResponse(vis.aggs, oneRangeBucket);
+    tabifiedResponse = tabifyAggResponse(vis.data.aggs!, oneRangeBucket);
     $rootScope.vis = vis;
     $rootScope.visParams = vis.params;
     $rootScope.uiState = {

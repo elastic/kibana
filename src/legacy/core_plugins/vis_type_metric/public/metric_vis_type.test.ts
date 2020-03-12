@@ -74,11 +74,22 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
       labelTemplate: 'ip[{{value}}]',
     });
 
+    const searchSource = {
+      getField: (name: string) => {
+        if (name === 'index') {
+          return stubIndexPattern;
+        }
+      },
+    };
+
     // TODO: remove when Vis is converted to typescript. Only importing Vis as type
     // @ts-ignore
-    vis = visualizationsStart.createVis(stubIndexPattern, {
+    vis = visualizationsStart.createVis('metric', {
       type: 'metric',
-      aggs: [{ id: '1', type: 'top_hits', schema: 'metric', params: { field: 'ip' } }],
+      data: {
+        searchSource,
+        aggs: [{ id: '1', type: 'top_hits', schema: 'metric', params: { field: 'ip' } }],
+      },
     });
 
     vis.params.dimensions = {

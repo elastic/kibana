@@ -69,7 +69,7 @@ export const createVegaVisualization = ({ serviceSettings }) =>
      * @param {*} status
      * @returns {Promise<void>}
      */
-    async render(visData, visParams, status) {
+    async render(visData) {
       const { toasts } = getNotifications();
 
       if (!visData && !this._vegaView) {
@@ -82,7 +82,7 @@ export const createVegaVisualization = ({ serviceSettings }) =>
       }
 
       try {
-        await this._render(visData, status);
+        await this._render(visData);
       } catch (error) {
         if (this._vegaView) {
           this._vegaView.onError(error);
@@ -96,8 +96,8 @@ export const createVegaVisualization = ({ serviceSettings }) =>
       }
     }
 
-    async _render(vegaParser, status) {
-      if (vegaParser && (status.data || !this._vegaView)) {
+    async _render(vegaParser) {
+      if (vegaParser) {
         // New data received, rebuild the graph
         if (this._vegaView) {
           await this._vegaView.destroy();
@@ -121,9 +121,6 @@ export const createVegaVisualization = ({ serviceSettings }) =>
           this._vegaView = new VegaView(vegaViewParams);
         }
         await this._vegaView.init();
-      } else if (status.resize) {
-        // the graph has been resized
-        await this._vegaView.resize();
       }
     }
 

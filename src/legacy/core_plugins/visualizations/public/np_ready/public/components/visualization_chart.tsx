@@ -22,7 +22,6 @@ import * as Rx from 'rxjs';
 import { debounceTime, filter, share, switchMap } from 'rxjs/operators';
 import { PersistedState } from '../../../../../../../plugins/visualizations/public';
 import { VisualizationController } from '../types';
-import { getUpdateStatus } from '../legacy/update_status';
 import { ResizeChecker } from '../../../../../../../plugins/kibana_utils/public';
 import { ExprVis } from '../expressions/vis';
 
@@ -65,8 +64,7 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
           throw new Error('Visualization implementation was not initialized on first render.');
         }
 
-        const status = getUpdateStatus(vis.type!.requiresUpdateStatus, this, this.props);
-        return this.visualization.render(visData, visParams, status);
+        return this.visualization.render(visData, visParams);
       })
     );
 

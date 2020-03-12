@@ -20,7 +20,6 @@
 import { i18n } from '@kbn/i18n';
 
 import { Schemas } from './legacy_imports';
-import { Status } from '../../visualizations/public';
 
 import { TagCloudOptions } from './components/tag_cloud_options';
 
@@ -44,7 +43,6 @@ export const createTagCloudVisTypeDefinition = (deps: TagCloudVisDependencies) =
       showLabel: true,
     },
   },
-  requiresUpdateStatus: [Status.PARAMS, Status.RESIZE, Status.DATA],
   visualization: createTagCloudVisualization(deps),
   editorConfig: {
     collections: {

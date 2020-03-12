@@ -20,14 +20,12 @@
 import { SavedObject } from '../../../../../../plugins/saved_objects/public';
 import { ISearchSource } from '../../../../../../plugins/data/public/';
 import { SerializedVis, Vis, VisParams } from './vis';
-
-import { Status } from './legacy/update_status';
 import { AggConfigOptions } from '../../../../data/public/search/aggs/agg_config';
 
 export { Vis, SerializedVis, VisParams };
 
 export interface VisualizationController {
-  render(visData: any, visParams: any, update: { [key in Status]: boolean }): Promise<void>;
+  render(visData: any, visParams: any): Promise<void>;
   destroy(): void;
   isLoaded?(): Promise<void> | void;
 }

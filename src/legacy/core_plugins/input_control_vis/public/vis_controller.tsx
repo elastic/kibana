@@ -54,7 +54,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
         .subscribe(this.queryBarUpdateHandler);
     }
 
-    async render(visData: any, visParams: VisParams, status: any) {
+    async render(visData: any, visParams: VisParams) {
       this.visParams = visParams;
       this.controls = [];
       this.controls = await this.initControls();

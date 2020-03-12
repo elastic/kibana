@@ -44,7 +44,6 @@ import { VisualizeEmbeddableFactory, VisualizeEmbeddable } from './embeddable';
 export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
 export { TypesService } from './vis_types/types_service';
-export { Status } from './legacy/update_status'; // should remove
 export { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from './embeddable';
 export { SchemaConfig } from './legacy/build_pipeline';
 

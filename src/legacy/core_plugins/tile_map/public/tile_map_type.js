@@ -23,7 +23,6 @@ import { i18n } from '@kbn/i18n';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 import { Schemas } from 'ui/agg_types';
 
-import { Status } from '../../visualizations/public';
 import { createTileMapVisualization } from './tile_map_visualization';
 import { TileMapOptions } from './components/tile_map_options';
 import { MapTypes } from './map_types';
@@ -57,7 +56,6 @@ export function createTileMapTypeDefinition(dependencies) {
         wms: uiSettings.get('visualization:tileMap:WMSdefaults'),
       },
     },
-    requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.UI_STATE],
     requiresPartialRows: true,
     visualization: CoordinateMapsVisualization,
     responseHandler: convertToGeoJson,

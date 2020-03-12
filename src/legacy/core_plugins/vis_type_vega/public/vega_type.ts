@@ -19,7 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
-import { Status } from '../../visualizations/public';
 import { DefaultEditorSize } from '../../vis_default_editor/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { VegaVisEditor } from './components';
@@ -51,7 +50,6 @@ export const createVegaTypeDefinition = (dependencies: VegaVisualizationDependen
     },
     visualization,
     requestHandler,
-    requiresUpdateStatus: [Status.DATA, Status.RESIZE],
     responseHandler: 'none',
     options: {
       showIndexSelection: false,

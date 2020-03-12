@@ -103,9 +103,9 @@ describe('DefaultEditorAgg component', () => {
       formIsTouched: false,
       metricAggs: [],
       groupName: 'metrics',
-      state: ({
-        aggs,
-      } as any) as EditorVisState,
+      state: {
+        data: { aggs },
+      } as EditorVisState,
       schemas: [
         {
           name: 'metrics',

@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/agg_types';
 import { mapToLayerWithId } from './util';
 import { createRegionMapVisualization } from './region_map_visualization';
-import { Status } from '../../visualizations/public';
 import { RegionMapOptions } from './components/region_map_options';
 import { truncatedColorSchemas } from '../../../../plugins/charts/public';
 
@@ -55,7 +54,6 @@ provided base maps, or add your own. Darker colors represent higher values.',
         showAllShapes: true, //still under consideration
       },
     },
-    requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.DATA, Status.UI_STATE],
     visualization,
     editorConfig: {
       optionsTemplate: props => <RegionMapOptions {...props} serviceSettings={serviceSettings} />,

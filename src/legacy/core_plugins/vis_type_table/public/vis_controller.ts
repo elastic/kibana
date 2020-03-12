@@ -61,7 +61,7 @@ export class TableVisualizationController {
     }
   }
 
-  async render(esResponse: object, visParams: VisParams, status: { [key: string]: boolean }) {
+  async render(esResponse: object, visParams: VisParams) {
     this.initLocalAngular();
 
     return new Promise(async (resolve, reject) => {
@@ -86,7 +86,6 @@ export class TableVisualizationController {
         this.$scope.renderComplete = resolve;
         this.$scope.renderFailed = reject;
         this.$scope.resize = Date.now();
-        this.$scope.updateStatus = status;
         this.$scope.$apply();
       };
 
