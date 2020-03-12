@@ -34,6 +34,7 @@ export function timefilterControl(): ExpressionFunctionDefinition<
         help: argHelp.column,
         default: '@timestamp',
       },
+      // TODO: remove this deprecated arg
       compact: {
         types: ['boolean'],
         help: argHelp.compact,
