@@ -34,7 +34,7 @@ export class EndpointAppConstants {
   static ENDPOINT_INDEX_NAME = 'endpoint-agent*';
   static ALERT_INDEX_NAME = 'events-endpoint-1';
   static ENDPOINT_PACKAGE_NAME = 'endpoint';
-  static EVENT_DATASET = 'event';
+  static EVENT_DATASET = 'events';
   static METADATA_DATASET = 'metadata';
   static DEFAULT_TOTAL_HITS = 10000;
   /**

@@ -166,7 +166,7 @@ export async function saveInstallationReferences(options: {
   await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
     {
-      installed: { references: toInstallRefs, dataStreams: toInstallStreams },
+      installed: { references: toInstallRefs, patterns: toInstallStreams },
       name: pkgName,
       version: pkgVersion,
     },

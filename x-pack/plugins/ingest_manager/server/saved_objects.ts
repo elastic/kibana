@@ -153,8 +153,8 @@ export const savedObjectMappings = {
               type: { type: 'keyword' },
             },
           },
-          dataStreams: {
-            dynamic: true,
+          patterns: {
+            dynamic: false,
             type: 'object',
           },
         },

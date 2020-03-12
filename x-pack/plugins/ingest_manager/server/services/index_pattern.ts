@@ -25,6 +25,6 @@ export class IndexPatternService {
     } else {
       installation = await findInstalledPackageByName({ savedObjectsClient, pkgName });
     }
-    return installation?.installed.dataStreams[datasetPath];
+    return installation?.installed.patterns[datasetPath];
   }
 }
