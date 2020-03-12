@@ -16,6 +16,7 @@ import {
 } from '../../../../containers/case/configure/types';
 import { FieldMappingRow } from './field_mapping_row';
 import * as i18n from './translations';
+
 import { defaultMapping } from '../../../../lib/connectors/config';
 
 const FieldRowWrapper = styled.div`
@@ -26,19 +27,19 @@ const FieldRowWrapper = styled.div`
 const supportedThirdPartyFields: Array<EuiSuperSelectOption<ThirdPartyField>> = [
   {
     value: 'not_mapped',
-    inputDisplay: <span>{'Not mapped'}</span>,
+    inputDisplay: <span>{i18n.FIELD_MAPPING_FIELD_NOT_MAPPED}</span>,
   },
   {
     value: 'short_description',
-    inputDisplay: <span>{'Short Description'}</span>,
+    inputDisplay: <span>{i18n.FIELD_MAPPING_FIELD_SHORT_DESC}</span>,
   },
   {
     value: 'comments',
-    inputDisplay: <span>{'Comments'}</span>,
+    inputDisplay: <span>{i18n.FIELD_MAPPING_FIELD_COMMENTS}</span>,
   },
   {
     value: 'description',
-    inputDisplay: <span>{'Description'}</span>,
+    inputDisplay: <span>{i18n.FIELD_MAPPING_FIELD_DESC}</span>,
   },
 ];
 

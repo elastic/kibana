@@ -158,3 +158,31 @@ export const WARNING_NO_CONNECTOR_MESSAGE = i18n.translate(
       'Configuration seems to be invalid. The selected connector is missing. Did you delete the connector?',
   }
 );
+
+export const FIELD_MAPPING_FIELD_NOT_MAPPED = i18n.translate(
+  'xpack.siem.case.configureCases.fieldMappingFieldNotMapped',
+  {
+    defaultMessage: 'Not mapped',
+  }
+);
+
+export const FIELD_MAPPING_FIELD_SHORT_DESC = i18n.translate(
+  'xpack.siem.case.configureCases.fieldMappingFieldShortDescription',
+  {
+    defaultMessage: 'Short Description',
+  }
+);
+
+export const FIELD_MAPPING_FIELD_DESC = i18n.translate(
+  'xpack.siem.case.configureCases.fieldMappingFieldDescription',
+  {
+    defaultMessage: 'Description',
+  }
+);
+
+export const FIELD_MAPPING_FIELD_COMMENTS = i18n.translate(
+  'xpack.siem.case.configureCases.fieldMappingFieldComments',
+  {
+    defaultMessage: 'Comments',
+  }
+);
