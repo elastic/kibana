@@ -53,14 +53,12 @@ export { wrapInI18nContext } from 'ui/i18n';
 export { getRequestInspectorStats, getResponseInspectorStats } from '../../../data/public';
 // @ts-ignore
 export { intervalOptions } from 'ui/agg_types';
-export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
 export { timezoneProvider } from 'ui/vis/lib/timezone';
 export { tabifyAggResponse } from '../../../data/public';
 export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 export {
-  migrateLegacyQuery,
   ensureDefaultIndexPattern,
   formatMsg,
   formatStack,
@@ -72,7 +70,6 @@ export {
   IIndexPattern,
   IndexPattern,
   indexPatterns,
-  hasSearchStategyForIndexPattern,
   IFieldType,
   SearchSource,
   ISearchSource,
@@ -80,7 +77,6 @@ export {
   SortDirection,
 } from '../../../../../plugins/data/public';
 export { ElasticSearchHit } from './np_ready/doc_views/doc_views_types';
-export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
 export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 // @ts-ignore
 export { buildPointSeriesData } from 'ui/agg_response/point_series/point_series';
