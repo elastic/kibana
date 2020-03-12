@@ -20,8 +20,7 @@ export const stopAnalytics = async (d: DataFrameAnalyticsListRow) => {
   try {
     await ml.dataFrameAnalytics.stopDataFrameAnalytics(
       d.config.id,
-      isDataFrameAnalyticsFailed(d.stats.state),
-      true
+      isDataFrameAnalyticsFailed(d.stats.state)
     );
     toastNotifications.addSuccess(
       i18n.translate('xpack.ml.dataframe.analyticsList.stopAnalyticsSuccessMessage', {

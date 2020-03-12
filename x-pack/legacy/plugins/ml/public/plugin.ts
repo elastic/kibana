@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
+import { Plugin, CoreStart, CoreSetup } from 'kibana/public';
 import { MlDependencies } from './application/app';
 
 export class MlPlugin implements Plugin<Setup, Start> {
@@ -14,8 +14,8 @@ export class MlPlugin implements Plugin<Setup, Start> {
       title: 'Machine learning',
       async mount(context, params) {
         const [coreStart, depsStart] = await core.getStartServices();
-        const { renderApp } = await import('./application/app');
-        return renderApp(coreStart, depsStart, {
+        const { renderApp: renderMlApp } = await import('./application/app');
+        return renderMlApp(coreStart, depsStart, {
           element: params.element,
           appBasePath: params.appBasePath,
           onAppLeave: params.onAppLeave,
