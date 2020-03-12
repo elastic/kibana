@@ -50,14 +50,14 @@ export async function getTotalCountAggregations(callCluster: APICaller, kibanaIn
                 // using of regex is not allowed in painless language
                 int parsed = Integer.parseInt(throttle);
                 
-                if (timeChar === "s") {
-                  parsed = parsed * 1000;
-                } else if (timeChar === "m") {
-                  parsed = parsed * 60 * 1000;
-                } else if (timeChar === "h") {
-                  parsed = parsed * 60 * 60 * 1000;
-                } else if (timeChar === "d") {
-                  parsed = parsed * 24 * 60 * 60 * 1000;
+                if (timeChar.equals("s")) {
+                  parsed = parsed;
+                } else if (timeChar.equals("m")) {
+                  parsed = parsed * 60;
+                } else if (timeChar.equals("h")) {
+                  parsed = parsed * 60 * 60;
+                } else if (timeChar.equals("d")) {
+                  parsed = parsed * 24 * 60 * 60;
                 }
                 if (state.min === 0 || parsed < state.min) {
                   state.min = parsed;
@@ -116,14 +116,14 @@ export async function getTotalCountAggregations(callCluster: APICaller, kibanaIn
                 // using of regex is not allowed in painless language
                 int parsed = Integer.parseInt(interval);
                 
-                if (timeChar === "s") {
-                  parsed = parsed * 1000;
-                } else if (timeChar === "m") {
-                  parsed = parsed * 60 * 1000;
-                } else if (timeChar === "h") {
-                  parsed = parsed * 60 * 60 * 1000;
-                } else if (timeChar === "d") {
-                  parsed = parsed * 24 * 60 * 60 * 1000;
+                if (timeChar.equals("s")) {
+                  parsed = parsed;
+                } else if (timeChar.equals("m")) {
+                  parsed = parsed * 60;
+                } else if (timeChar.equals("h")) {
+                  parsed = parsed * 60 * 60;
+                } else if (timeChar.equals("d")) {
+                  parsed = parsed * 24 * 60 * 60;
                 }
                 if (state.min === 0 || parsed < state.min) {
                   state.min = parsed;
@@ -247,26 +247,24 @@ export async function getTotalCountAggregations(callCluster: APICaller, kibanaIn
     count_total: totalAlertsCount,
     count_by_type: results.aggregations.byAlertTypeId.value.types,
     throttle_time: {
-      min: `${results.aggregations.throttleTime.value.min / 1000}s`,
+      min: `${results.aggregations.throttleTime.value.min}s`,
       avg: `${
         results.aggregations.throttleTime.value.totalCount > 0
           ? results.aggregations.throttleTime.value.totalSum /
-            results.aggregations.throttleTime.value.totalCount /
-            1000
+            results.aggregations.throttleTime.value.totalCount
           : 0
       }s`,
-      max: `${results.aggregations.throttleTime.value.max / 1000}s`,
+      max: `${results.aggregations.throttleTime.value.max}s`,
     },
     schedule_time: {
-      min: `${results.aggregations.intervalTime.value.min / 1000}s`,
+      min: `${results.aggregations.intervalTime.value.min}s`,
       avg: `${
         results.aggregations.intervalTime.value.totalCount > 0
           ? results.aggregations.intervalTime.value.totalSum /
-            results.aggregations.intervalTime.value.totalCount /
-            1000
+            results.aggregations.intervalTime.value.totalCount
           : 0
       }s`,
-      max: `${results.aggregations.intervalTime.value.max / 1000}s`,
+      max: `${results.aggregations.intervalTime.value.max}s`,
     },
     connectors_per_alert: {
       min: results.aggregations.connectorsAgg.connectors.value.min,
