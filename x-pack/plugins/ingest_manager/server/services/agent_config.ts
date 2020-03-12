@@ -54,7 +54,7 @@ class AgentConfigService {
     await soClient.update<AgentConfig>(SAVED_OBJECT_TYPE, id, {
       ...agentConfig,
       revision: oldAgentConfig.revision + 1,
-      updated_on: new Date().toString(),
+      updated_on: new Date().toISOString(),
       updated_by: user ? user.username : 'system',
     });
 
