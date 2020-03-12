@@ -165,14 +165,14 @@ export async function getTotalCountAggregations(callCluster: APICaller, kibanaIn
     },
   };
 
-  const connectorsMinMetric = {
+  const connectorsMetric = {
     scripted_metric: {
       init_script:
         'state.currentAlertActions = 0; state.min = 0; state.max = 0; state.totalActionsCount = 0;',
       map_script: `
         String refName = doc['alert.actions.actionRef'].value;
-        if (refName === 'action_0') {
-          if (state.currentAlertActions !== 0 && (state.min === 0 || state.currentAlertActions < state.min)) {
+        if (refName == 'action_0') {
+          if (state.currentAlertActions !== 0 && state.currentAlertActions < state.min) {
             state.min = state.currentAlertActions;
           }
           if (state.currentAlertActions !== 0 && state.currentAlertActions > state.max) {
@@ -182,7 +182,6 @@ export async function getTotalCountAggregations(callCluster: APICaller, kibanaIn
         } else {
           state.currentAlertActions++;
         }
-
         state.totalActionsCount++;
       `,
       // Combine script is executed per cluster, but we already have a key-value pair per cluster.
@@ -226,24 +225,26 @@ export async function getTotalCountAggregations(callCluster: APICaller, kibanaIn
         byAlertTypeId: alertTypeMetric,
         throttleTime: throttleTimeMetric,
         intervalTime: intervalTimeMetric,
-        connectorsCount: {
+        connectorsAgg: {
           nested: {
             path: 'alert.actions',
           },
           aggs: {
-            min_connectors: connectorsMinMetric,
+            connectors: connectorsMetric,
           },
         },
       },
     },
   });
 
+  const totalAlertsCount = Object.keys(results.aggregations.byAlertTypeId.value.types).reduce(
+    (total: number, key: string) =>
+      parseInt(results.aggregations.byAlertTypeId.value.types[key], 0) + total,
+    0
+  );
+
   return {
-    count_total: Object.keys(results.aggregations.byAlertTypeId.value.types).reduce(
-      (total: number, key: string) =>
-        parseInt(results.aggregations.byAlertTypeId.value.types[key], 0) + total,
-      0
-    ),
+    count_total: totalAlertsCount,
     count_by_type: results.aggregations.byAlertTypeId.value.types,
     throttle_time: {
       min: `${results.aggregations.throttleTime.value.min / 1000}s`,
@@ -268,9 +269,12 @@ export async function getTotalCountAggregations(callCluster: APICaller, kibanaIn
       max: `${results.aggregations.intervalTime.value.max / 1000}s`,
     },
     connectors_per_alert: {
-      min: 0,
-      avg: 0,
-      max: 0,
+      min: results.aggregations.connectorsAgg.connectors.value.min,
+      avg:
+        totalAlertsCount > 0
+          ? results.aggregations.connectorsAgg.connectors.value.totalActionsCount / totalAlertsCount
+          : 0,
+      max: results.aggregations.connectorsAgg.connectors.value.max,
     },
   };
 }
