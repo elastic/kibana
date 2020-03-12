@@ -19,7 +19,7 @@ interface PersistCaseConfigure {
 export interface ReturnUseCaseConfigure {
   loading: boolean;
   refetchCaseConfigure: () => void;
-  persistCaseConfigure: ({ connectorId, closureType }: PersistCaseConfigure) => Promise<unknown>;
+  persistCaseConfigure: ({ connectorId, closureType }: PersistCaseConfigure) => unknown;
   persistLoading: boolean;
 }
 
@@ -37,30 +37,36 @@ export const useCaseConfigure = ({
   const [persistLoading, setPersistLoading] = useState(false);
   const [version, setVersion] = useState('');
 
-  const refetchCaseConfigure = useCallback(async () => {
+  const refetchCaseConfigure = useCallback(() => {
     let didCancel = false;
     const abortCtrl = new AbortController();
-    try {
-      setLoading(true);
-      const res = await getCaseConfigure({ signal: abortCtrl.signal });
-      if (!didCancel) {
-        setLoading(false);
-        if (res != null) {
-          setConnectorId(res.connectorId);
-          setClosureType(res.closureType);
-          setVersion(res.version);
+
+    const fetchCaseConfiguration = async () => {
+      try {
+        setLoading(true);
+        const res = await getCaseConfigure({ signal: abortCtrl.signal });
+        if (!didCancel) {
+          setLoading(false);
+          if (res != null) {
+            setConnectorId(res.connectorId);
+            setClosureType(res.closureType);
+            setVersion(res.version);
+          }
+        }
+      } catch (error) {
+        if (!didCancel) {
+          setLoading(false);
+          errorToToaster({
+            title: i18n.ERROR_TITLE,
+            error: error.body && error.body.message ? new Error(error.body.message) : error,
+            dispatchToaster,
+          });
         }
       }
-    } catch (error) {
-      if (!didCancel) {
-        setLoading(false);
-        errorToToaster({
-          title: i18n.ERROR_TITLE,
-          error: error.body && error.body.message ? new Error(error.body.message) : error,
-          dispatchToaster,
-        });
-      }
-    }
+    };
+
+    fetchCaseConfiguration();
+
     return () => {
       didCancel = true;
       abortCtrl.abort();
@@ -71,34 +77,37 @@ export const useCaseConfigure = ({
     async ({ connectorId, closureType }: PersistCaseConfigure) => {
       let didCancel = false;
       const abortCtrl = new AbortController();
-      try {
-        setPersistLoading(true);
-        const res =
-          version.length === 0
-            ? await postCaseConfigure(
-                { connector_id: connectorId, closure_type: closureType },
-                abortCtrl.signal
-              )
-            : await patchCaseConfigure(
-                { connector_id: connectorId, closure_type: closureType, version },
-                abortCtrl.signal
-              );
-        if (!didCancel) {
-          setPersistLoading(false);
-          setConnectorId(res.connectorId);
-          setClosureType(res.closureType);
-          setVersion(res.version);
+      const saveCaseConfiguration = async () => {
+        try {
+          setPersistLoading(true);
+          const res =
+            version.length === 0
+              ? await postCaseConfigure(
+                  { connector_id: connectorId, closure_type: closureType },
+                  abortCtrl.signal
+                )
+              : await patchCaseConfigure(
+                  { connector_id: connectorId, closure_type: closureType, version },
+                  abortCtrl.signal
+                );
+          if (!didCancel) {
+            setPersistLoading(false);
+            setConnectorId(res.connectorId);
+            setClosureType(res.closureType);
+            setVersion(res.version);
+          }
+        } catch (error) {
+          if (!didCancel) {
+            setPersistLoading(false);
+            errorToToaster({
+              title: i18n.ERROR_TITLE,
+              error: error.body && error.body.message ? new Error(error.body.message) : error,
+              dispatchToaster,
+            });
+          }
         }
-      } catch (error) {
-        if (!didCancel) {
-          setPersistLoading(false);
-          errorToToaster({
-            title: i18n.ERROR_TITLE,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
-          });
-        }
-      }
+      };
+      saveCaseConfiguration();
       return () => {
         didCancel = true;
         abortCtrl.abort();

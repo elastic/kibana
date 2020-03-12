@@ -15,7 +15,7 @@ export interface ReturnConnectors {
   loading: boolean;
   connectors: Connector[];
   refetchConnectors: () => void;
-  updateConnector: (connectorId: string, mappings: CasesConfigurationMapping[]) => Promise<unknown>;
+  updateConnector: (connectorId: string, mappings: CasesConfigurationMapping[]) => unknown;
 }
 
 export const useConnectors = (): ReturnConnectors => {
@@ -23,64 +23,21 @@ export const useConnectors = (): ReturnConnectors => {
   const [loading, setLoading] = useState(true);
   const [connectors, setConnectors] = useState<Connector[]>([]);
 
-  const refetchConnectors = useCallback(async () => {
+  const refetchConnectors = useCallback(() => {
     let didCancel = false;
     const abortCtrl = new AbortController();
-    try {
-      setLoading(true);
-      const res = await fetchConnectors({ signal: abortCtrl.signal });
-      if (!didCancel) {
-        setLoading(false);
-        setConnectors(res.data);
-      }
-    } catch (error) {
-      if (!didCancel) {
-        setLoading(false);
-        setConnectors([]);
-        errorToToaster({
-          title: i18n.ERROR_TITLE,
-          error: error.body && error.body.message ? new Error(error.body.message) : error,
-          dispatchToaster,
-        });
-      }
-    }
-    return () => {
-      didCancel = true;
-      abortCtrl.abort();
-    };
-  }, []);
-
-  const updateConnector = useCallback(
-    async (connectorId: string, mappings: CasesConfigurationMapping[]) => {
-      if (connectorId === 'none') {
-        return;
-      }
-
-      let didCancel = false;
-      const abortCtrl = new AbortController();
+    const getConnectors = async () => {
       try {
         setLoading(true);
-        await patchConfigConnector({
-          connectorId,
-          config: {
-            cases_configuration: {
-              mapping: mappings.map(m => ({
-                source: m.source,
-                target: m.target,
-                action_type: m.actionType,
-              })),
-            },
-          },
-          signal: abortCtrl.signal,
-        });
+        const res = await fetchConnectors({ signal: abortCtrl.signal });
         if (!didCancel) {
           setLoading(false);
-          refetchConnectors();
+          setConnectors(res.data);
         }
       } catch (error) {
         if (!didCancel) {
           setLoading(false);
-          refetchConnectors();
+          setConnectors([]);
           errorToToaster({
             title: i18n.ERROR_TITLE,
             error: error.body && error.body.message ? new Error(error.body.message) : error,
@@ -88,6 +45,55 @@ export const useConnectors = (): ReturnConnectors => {
           });
         }
       }
+    };
+    getConnectors();
+    return () => {
+      didCancel = true;
+      abortCtrl.abort();
+    };
+  }, []);
+
+  const updateConnector = useCallback(
+    (connectorId: string, mappings: CasesConfigurationMapping[]) => {
+      if (connectorId === 'none') {
+        return;
+      }
+
+      let didCancel = false;
+      const abortCtrl = new AbortController();
+      const update = async () => {
+        try {
+          setLoading(true);
+          await patchConfigConnector({
+            connectorId,
+            config: {
+              cases_configuration: {
+                mapping: mappings.map(m => ({
+                  source: m.source,
+                  target: m.target,
+                  action_type: m.actionType,
+                })),
+              },
+            },
+            signal: abortCtrl.signal,
+          });
+          if (!didCancel) {
+            setLoading(false);
+            refetchConnectors();
+          }
+        } catch (error) {
+          if (!didCancel) {
+            setLoading(false);
+            refetchConnectors();
+            errorToToaster({
+              title: i18n.ERROR_TITLE,
+              error: error.body && error.body.message ? new Error(error.body.message) : error,
+              dispatchToaster,
+            });
+          }
+        }
+      };
+      update();
       return () => {
         didCancel = true;
         abortCtrl.abort();

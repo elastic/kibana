@@ -80,14 +80,14 @@ const ConfigureCasesComponent: React.FC = () => {
     updateConnector,
   } = useConnectors();
 
+  const isLoadingAny = isLoadingConnectors || persistLoading || loadingCaseConfigure;
+
   const handleSubmit = useCallback(
     // TO DO give a warning/error to user when field are not mapped so they have chance to do it
-    async () =>
-      // eslint-disable-next-line no-return-await
-      await Promise.all([
-        persistCaseConfigure({ connectorId, closureType }),
-        updateConnector(connectorId, mapping ?? []),
-      ]),
+    () => {
+      persistCaseConfigure({ connectorId, closureType });
+      updateConnector(connectorId, mapping ?? []);
+    },
     [connectorId, closureType, mapping]
   );
 
@@ -174,7 +174,7 @@ const ConfigureCasesComponent: React.FC = () => {
           <EuiFlexItem grow={false}>
             <EuiButton
               fill={false}
-              isDisabled={persistLoading || loadingCaseConfigure}
+              isDisabled={isLoadingAny}
               isLoading={persistLoading}
               onClick={noop} // TO DO redirect to the main page of cases
             >
@@ -185,7 +185,7 @@ const ConfigureCasesComponent: React.FC = () => {
             <EuiButton
               fill
               iconType="save"
-              isDisabled={persistLoading || loadingCaseConfigure}
+              isDisabled={isLoadingAny}
               isLoading={persistLoading}
               onClick={handleSubmit}
             >
