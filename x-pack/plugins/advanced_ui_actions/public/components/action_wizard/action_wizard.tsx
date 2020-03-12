@@ -173,19 +173,22 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
 
   return (
     <EuiFlexGroup wrap>
-      {actionFactories.map(actionFactory => (
-        <EuiKeyPadMenuItemButton
-          className="auaActionWizard__actionFactoryItem"
-          key={actionFactory.id}
-          label={actionFactory.getDisplayName(context)}
-          data-test-subj={TEST_SUBJ_ACTION_FACTORY_ITEM}
-          onClick={() => onActionFactorySelected(actionFactory)}
-        >
-          {actionFactory.getIconType(context) && (
-            <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
-          )}
-        </EuiKeyPadMenuItemButton>
-      ))}
+      {[...actionFactories]
+        .sort((f1, f2) => f1.order - f2.order)
+        .map(actionFactory => (
+          <EuiKeyPadMenuItemButton
+            className="auaActionWizard__actionFactoryItem"
+            key={actionFactory.id}
+            label={actionFactory.getDisplayName(context)}
+            data-test-subj={TEST_SUBJ_ACTION_FACTORY_ITEM}
+            onClick={() => onActionFactorySelected(actionFactory)}
+          >
+            {actionFactory.getIconType(context) && (
+              <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
+            )}
+            {actionFactory.order}
+          </EuiKeyPadMenuItemButton>
+        ))}
     </EuiFlexGroup>
   );
 };
