@@ -33,7 +33,7 @@ case-by-case bases for loading components and the parameters that get passed
 into the components.
 
 In most cases, the information coming from this service would help the
-application which UI components should **not** be loaded, as applications will
+application determine which UI components should **not** be loaded, as applications will
 use the service response for skipping components that aren't needed for
 presenting the data in a screenshot, and thus work towards better performance
 for the display-only purpose.
@@ -47,7 +47,7 @@ When Kibana loads initially, there is a Newsfeed component in the UI that
 checks internally cached records to see if it must fetch the Elastic News
 Service for newer items. When the Screenshot Mode Service is implemented, the
 Newsfeed component has a source of information to check on whether or not it
-should load in the Kibana UI. If it can avoid loading, it avoids an unecessary
+should load in the Kibana UI. If it can avoid loading, it avoids an unnecessary
 HTTP round trip, which weigh heavily on performance.
 
 # Motivation
@@ -71,7 +71,7 @@ direction is appropriate for improving PDF report generation.
 
 # Detailed design
 
-The Screenshot Mode Service is a callable API availble in the context of a
+The Screenshot Mode Service is a callable API available in the context of a
 request on the server side, and as a pubic pluginsSetup Javascript API.
 
 The data provided by the Screenshot Mode are signals about:
@@ -204,7 +204,7 @@ work for screenshot mode.
   Many things can be improved on capturing screenshots from the page using
   `@print` CSS media query selecting. Also, CSS makes things hidden on the
   page, but they are still loading in the DOM and take browser memory
-  resources. Print media query CSS is a good supplement to the Screenshot Mode
+  resources. Print media query CSS are a good supplement to the Screenshot Mode
   Service, but the best performance will come with streamlining the page
   rendering in Javascript. See "further examples" in this RFC about how this
   alternative solution can still be leveraged.
