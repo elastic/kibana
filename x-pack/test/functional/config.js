@@ -49,6 +49,7 @@ export default async function({ readConfigFile }) {
       resolve(__dirname, './apps/saved_objects_management'),
       resolve(__dirname, './apps/dev_tools'),
       resolve(__dirname, './apps/apm'),
+      resolve(__dirname, './apps/api_keys'),
       resolve(__dirname, './apps/index_patterns'),
       resolve(__dirname, './apps/index_management'),
       resolve(__dirname, './apps/index_lifecycle_management'),
@@ -68,7 +69,7 @@ export default async function({ readConfigFile }) {
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
-      serverArgs: ['path.repo=/tmp/'],
+      serverArgs: ['path.repo=/tmp/', 'xpack.security.authc.api_key.enabled=true'],
     },
 
     kbnTestServer: {
@@ -157,6 +158,10 @@ export default async function({ readConfigFile }) {
       rollupJob: {
         pathname: '/app/kibana',
         hash: '/management/elasticsearch/rollup_jobs/',
+      },
+      apiKeys: {
+        pathname: '/app/kibana',
+        hash: '/management/security/api_keys/',
       },
       licenseManagement: {
         pathname: '/app/kibana',
