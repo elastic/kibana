@@ -93,8 +93,8 @@ describe('when the alert details flyout is open', () => {
           }
         });
         it('should display the correct fields in the dropdown', async () => {
-          await render().findByTestId('alertDetailTakeActionCloseAlertButton');
-          await render().findByTestId('alertDetailTakeActionWhitelistButton');
+          await renderResult.findByTestId('alertDetailTakeActionCloseAlertButton');
+          await renderResult.findByTestId('alertDetailTakeActionWhitelistButton');
         });
       });
       describe('when the user navigates to the overview tab', () => {
@@ -107,12 +107,12 @@ describe('when the alert details flyout is open', () => {
           }
         });
         it('should render all accordion panels', async () => {
-          await render().findAllByTestId('alertDetailsAlertAccordion');
-          await render().findAllByTestId('alertDetailsHostAccordion');
-          await render().findAllByTestId('alertDetailsFileAccordion');
-          await render().findAllByTestId('alertDetailsHashAccordion');
-          await render().findAllByTestId('alertDetailsSourceProcessAccordion');
-          await render().findAllByTestId('alertDetailsSourceProcessTokenAccordion');
+          await renderResult.findAllByTestId('alertDetailsAlertAccordion');
+          await renderResult.findAllByTestId('alertDetailsHostAccordion');
+          await renderResult.findAllByTestId('alertDetailsFileAccordion');
+          await renderResult.findAllByTestId('alertDetailsHashAccordion');
+          await renderResult.findAllByTestId('alertDetailsSourceProcessAccordion');
+          await renderResult.findAllByTestId('alertDetailsSourceProcessTokenAccordion');
         });
       });
     });

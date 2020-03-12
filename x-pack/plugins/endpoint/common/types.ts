@@ -53,7 +53,7 @@ export interface AlertResultList {
   alerts: AlertData[];
 
   /**
-   * The total number of alerts on the page.
+   * The total number of alerts in the index.
    */
   total: number;
 
