@@ -32,7 +32,7 @@ import { asAngularSyncedObservable } from './helpers/as_observable';
 import { colorChoices } from './helpers/style_choices';
 import { createGraphStore, datasourceSelector, hasFieldsSelector } from './state_management';
 import { formatHttpError } from './helpers/format_http_error';
-import { findSW, getSW } from './helpers/saved_workspace_utils';
+import { findSW, getSW, deleteWS } from './helpers/saved_workspace_utils';
 
 export function initGraphApp(angularModule, deps) {
   const {
@@ -44,7 +44,6 @@ export function initGraphApp(angularModule, deps) {
     getBasePath,
     npData,
     config,
-    savedWorkspaceLoader,
     capabilities,
     coreStart,
     storage,
@@ -124,9 +123,11 @@ export function initGraphApp(angularModule, deps) {
             $location.url(getEditPath(workspace));
           };
           $scope.getViewUrl = workspace => getEditUrl(addBasePath, workspace);
-          $scope.delete = workspaces => {
-            return savedWorkspaceLoader.delete(workspaces.map(({ id }) => id));
-          };
+          $scope.delete = workspaces =>
+            deleteWS(
+              savedObjectsClient,
+              workspaces.map(({ id }) => id)
+            );
           $scope.capabilities = capabilities;
           $scope.initialFilter = $location.search().filter || '';
           $scope.coreStart = coreStart;

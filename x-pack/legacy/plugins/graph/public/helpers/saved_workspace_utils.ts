@@ -110,3 +110,7 @@ export async function getSW(
   //   await config.init.call(savedObject);
   // }
 }
+
+export function deleteWS(savedObjectsClient: SavedObjectsClientContract, ids: string[]) {
+  return Promise.all(ids.map((id: string) => savedObjectsClient.delete(savedWorkspaceType, id)));
+}
