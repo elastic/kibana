@@ -8,7 +8,7 @@ import {
   DynamicSettings,
   defaultDynamicSettings,
 } from '../../../../legacy/plugins/uptime/common/runtime_types/dynamic_settings';
-import { SavedObjectsType } from '../../../../../src/core/server';
+import { SavedObjectsType, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { UMSavedObjectsQueryFn } from './adapters';
 
 export interface UMDynamicSettingsType {
@@ -41,13 +41,25 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
     try {
       const obj = await client.get<DynamicSettings>(umDynamicSettings.name, settingsObjectId);
       return obj.attributes;
-    } catch (e) {
-      return (
-        await client.create(umDynamicSettings.name, defaultDynamicSettings, {
-          id: settingsObjectId,
-          overwrite: false,
-        })
-      ).attributes;
+    } catch (getErr) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
+        try {
+          return (
+            await client.create(umDynamicSettings.name, defaultDynamicSettings, {
+              id: settingsObjectId,
+              overwrite: false,
+            })
+          ).attributes;
+        } catch (createErr) {
+          if (
+            SavedObjectsErrorHelpers.isNotAuthorizedError(createErr) ||
+            SavedObjectsErrorHelpers.isForbiddenError(createErr)
+          ) {
+            return defaultDynamicSettings;
+          }
+        }
+      }
+      throw getErr;
     }
   },
   setUptimeDynamicSettings: async (client, settings) => {
