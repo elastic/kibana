@@ -14,7 +14,7 @@ import { Rule } from '../../../containers/detection_engine/rules';
 import { FormData, FormHook, FormSchema } from '../../../shared_imports';
 import { AboutStepRule, DefineStepRule, IMitreEnterpriseAttack, ScheduleStepRule } from './types';
 
-interface GetStepsData {
+export interface GetStepsData {
   aboutRuleData: AboutStepRule | null;
   defineRuleData: DefineStepRule | null;
   scheduleRuleData: ScheduleStepRule | null;
@@ -52,6 +52,7 @@ export const getStepsData = ({
             id: rule.timeline_id ?? null,
             title: rule.timeline_title ?? null,
           },
+          note: rule.note ?? '',
         }
       : null;
 

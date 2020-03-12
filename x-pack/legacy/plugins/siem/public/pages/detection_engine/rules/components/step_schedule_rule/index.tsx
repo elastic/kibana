@@ -31,7 +31,7 @@ const stepScheduleDefaultValue = {
 const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
   addPadding = false,
   defaultValues,
-  descriptionDirection = 'row',
+  descriptionColumns = 'singleSplit',
   isReadOnlyView,
   isLoading,
   isUpdateView = false,
@@ -80,7 +80,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
 
   return isReadOnlyView && myStepData != null ? (
     <StepContentWrapper addPadding={addPadding}>
-      <StepRuleDescription direction={descriptionDirection} schema={schema} data={myStepData} />
+      <StepRuleDescription columns={descriptionColumns} schema={schema} data={myStepData} />
     </StepContentWrapper>
   ) : (
     <>

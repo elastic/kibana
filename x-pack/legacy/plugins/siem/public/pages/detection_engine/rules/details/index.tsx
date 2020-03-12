@@ -300,7 +300,7 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                             <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
                               {defineRuleData != null && (
                                 <StepDefineRule
-                                  descriptionDirection="column"
+                                  descriptionColumns="single"
                                   isReadOnlyView={true}
                                   isLoading={false}
                                   defaultValues={defineRuleData}
@@ -313,7 +313,7 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                             <StepPanel loading={isLoading} title={ruleI18n.ABOUT}>
                               {aboutRuleData != null && (
                                 <StepAboutRule
-                                  descriptionDirection="row"
+                                  descriptionColumns="multi"
                                   isReadOnlyView={true}
                                   isLoading={false}
                                   defaultValues={aboutRuleData}
@@ -326,7 +326,7 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                             <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
                               {scheduleRuleData != null && (
                                 <StepScheduleRule
-                                  descriptionDirection="column"
+                                  descriptionColumns="single"
                                   isReadOnlyView={true}
                                   isLoading={false}
                                   defaultValues={scheduleRuleData}
