@@ -24,7 +24,7 @@ import { CollectorOptions } from '../../../../../../plugins/usage_collection/ser
 
 import { registerUiMetricUsageCollector } from './';
 
-describe('telemetry_application_usage', () => {
+describe('telemetry_ui_metric', () => {
   let collector: CollectorOptions;
 
   const usageCollectionMock: jest.Mocked<UsageCollectionSetup> = {
