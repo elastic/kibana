@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'src/core/server';
+import { APICaller } from 'kibana/server';
 import { BucketSpanEstimatorData } from '../../../../../legacy/plugins/ml/public/application/services/ml_api_service';
 
 export function estimateBucketSpanFactory(
