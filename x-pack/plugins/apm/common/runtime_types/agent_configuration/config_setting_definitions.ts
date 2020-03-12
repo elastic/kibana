@@ -200,20 +200,23 @@ export const settingDefinitions: SettingDefinition[] = [
     type: 'amountAndUnit',
     validation: durationRt,
     validationError: i18n.translate(
-      'xpack.apm.agentConfig.serverTimeout.errorText',
+      'xpack.apm.agentConfig.spanFramesMinDuration.errorText',
       {
         defaultMessage: 'Please specify a value and a unit'
       }
     ),
     defaultValue: '5ms',
     units: DURATION_UNITS,
-    label: i18n.translate('xpack.apm.agentConfig.serverTimeout.label', {
+    label: i18n.translate('xpack.apm.agentConfig.spanFramesMinDuration.label', {
       defaultMessage: 'Span frames minimum duration'
     }),
-    helpText: i18n.translate('xpack.apm.agentConfig.serverTimeout.helpText', {
-      defaultMessage:
-        'In its default settings, the APM agent will collect a stack trace with every recorded span.\nWhile this is very helpful to find the exact place in your code that causes the span, collecting this stack trace does have some overhead. \nWhen setting this option to a negative value, like `-1ms`, stack traces will be collected for all spans. Setting it to a positive value, e.g. `5ms`, will limit stack trace collection to spans with durations equal to or longer than the given value, e.g. 5 milliseconds.\n\nTo disable stack trace collection for spans completely, set the value to `0ms`.'
-    })
+    helpText: i18n.translate(
+      'xpack.apm.agentConfig.spanFramesMinDuration.helpText',
+      {
+        defaultMessage:
+          'In its default settings, the APM agent will collect a stack trace with every recorded span.\nWhile this is very helpful to find the exact place in your code that causes the span, collecting this stack trace does have some overhead. \nWhen setting this option to a negative value, like `-1ms`, stack traces will be collected for all spans. Setting it to a positive value, e.g. `5ms`, will limit stack trace collection to spans with durations equal to or longer than the given value, e.g. 5 milliseconds.\n\nTo disable stack trace collection for spans completely, set the value to `0ms`.'
+      }
+    )
   },
 
   // STACK_TRACE_LIMIT
