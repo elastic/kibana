@@ -6,5 +6,5 @@
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "alerting"],
   "requiredPlugins": ["licensing", "taskManager", "encryptedSavedObjects", "actions"],
-  "optionalPlugins": ["spaces", "security"]
+  "optionalPlugins": ["usageCollection", "spaces", "security"]
 }
