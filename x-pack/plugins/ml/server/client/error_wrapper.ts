@@ -5,7 +5,7 @@
  */
 
 import { boomify, isBoom } from 'boom';
-import { ResponseError, CustomHttpResponseOptions } from 'src/core/server';
+import { ResponseError, CustomHttpResponseOptions } from 'kibana/server';
 
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
   const boom = isBoom(error) ? error : boomify(error, { statusCode: error.status });
