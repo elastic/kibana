@@ -22,6 +22,7 @@ export interface IDynamicStyleProperty extends IStyleProperty {
   getRangeFieldMeta(): RangeFieldMeta;
   getCategoryFieldMeta(): CategoryFieldMeta;
   isFieldMetaEnabled(): boolean;
+  isOrdinal(): boolean;
   supportsFieldMeta(): boolean;
   getFieldMetaRequest(): Promise<unknown>;
   supportsMbFeatureState(): boolean;

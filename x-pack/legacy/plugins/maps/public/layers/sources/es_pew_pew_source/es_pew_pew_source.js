@@ -167,7 +167,7 @@ export class ESPewPewSource extends AbstractESAggSource {
 
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
     const indexPattern = await this.getIndexPattern();
-    const searchSource = await this._makeSearchSource(searchFilters, 0);
+    const searchSource = await this.makeSearchSource(searchFilters, 0);
     searchSource.setField('aggs', {
       destSplit: {
         terms: {

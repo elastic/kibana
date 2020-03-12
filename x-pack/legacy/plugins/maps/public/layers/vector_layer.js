@@ -58,7 +58,7 @@ export class VectorLayer extends AbstractLayer {
   constructor({ layerDescriptor, source, joins = [] }) {
     super({ layerDescriptor, source });
     this._joins = joins;
-    this._style = new VectorStyle(this._descriptor.style, this.getSource(), this);
+    this._style = new VectorStyle(this._descriptor.style, source, this);
   }
 
   getStyle() {

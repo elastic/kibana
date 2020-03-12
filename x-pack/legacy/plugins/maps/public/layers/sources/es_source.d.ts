@@ -7,11 +7,18 @@
 import { AbstractVectorSource } from './vector_source';
 import { IVectorSource } from './vector_source';
 import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import { SearchSource } from '../../kibana_services';
 
 export interface IESSource extends IVectorSource {
   getIndexPattern(): Promise<IndexPattern>;
+  getGeoFieldName(): string;
+  getMaxResultWindow(): Promise<number>;
+  makeSearchSource(): Promise<SearchSource>;
 }
 
 export class AbstractESSource extends AbstractVectorSource implements IESSource {
   getIndexPattern(): Promise<IndexPattern>;
+  getGeoFieldName(): string;
+  getMaxResultWindow(): Promise<number>;
+  makeSearchSource(): Promise<SearchSource>;
 }

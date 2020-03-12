@@ -292,7 +292,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
 
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback, isRequestStillActive) {
     const indexPattern = await this.getIndexPattern();
-    const searchSource = await this._makeSearchSource(searchFilters, 0);
+    const searchSource = await this.makeSearchSource(searchFilters, 0);
 
     let bucketsPerGrid = 1;
     this.getMetricFields().forEach(metricField => {

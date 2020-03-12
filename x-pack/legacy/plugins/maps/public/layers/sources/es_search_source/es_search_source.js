@@ -271,7 +271,7 @@ export class ESSearchSource extends AbstractESSource {
       shard_size: DEFAULT_MAX_BUCKETS_LIMIT,
     };
 
-    const searchSource = await this._makeSearchSource(searchFilters, 0);
+    const searchSource = await this.makeSearchSource(searchFilters, 0);
     searchSource.setField('aggs', {
       totalEntities: {
         cardinality: addFieldToDSL(cardinalityAgg, topHitsSplitField),
@@ -332,7 +332,7 @@ export class ESSearchSource extends AbstractESSource {
     );
 
     const initialSearchContext = { docvalue_fields: docValueFields }; // Request fields in docvalue_fields insted of _source
-    const searchSource = await this._makeSearchSource(
+    const searchSource = await this.makeSearchSource(
       searchFilters,
       maxResultWindow,
       initialSearchContext

@@ -10,10 +10,14 @@ import { ILayer } from '../layer';
 export interface ISource {
   createDefaultLayer(): ILayer;
   getDisplayName(): Promise<string>;
+  destroy(): void;
+  getInspectorAdapters(): object;
 }
 
 export class AbstractSource implements ISource {
   constructor(sourceDescriptor: AbstractSourceDescriptor, inspectorAdapters: object);
   createDefaultLayer(): ILayer;
   getDisplayName(): Promise<string>;
+  destroy(): void;
+  getInspectorAdapters(): object;
 }

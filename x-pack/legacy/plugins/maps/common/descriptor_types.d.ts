@@ -95,10 +95,10 @@ export type JoinDescriptor = {
 
 export type DataRequestDescriptor = {
   dataId: string;
-  dataMetaAtStart: object;
-  dataRequestToken: symbol;
-  data: object;
-  dataMeta: object;
+  dataMetaAtStart?: object;
+  dataRequestToken?: symbol;
+  data?: object;
+  dataMeta?: object;
 };
 
 export type LayerDescriptor = {

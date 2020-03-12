@@ -7,7 +7,10 @@
 import { VectorLayer } from './vector_layer';
 import { VectorStyle } from './styles/vector/vector_style';
 import { getDefaultDynamicProperties, VECTOR_STYLES } from './styles/vector/vector_style_defaults';
-import { DynamicStyleProperty } from './styles/vector/properties/dynamic_style_property';
+import {
+  IDynamicStyleProperty,
+  DynamicStyleProperty,
+} from './styles/vector/properties/dynamic_style_property';
 import { StaticStyleProperty } from './styles/vector/properties/static_style_property';
 import {
   COUNT_PROP_LABEL,
@@ -20,12 +23,15 @@ import {
 } from '../../common/constants';
 import { ESGeoGridSource } from './sources/es_geo_grid_source';
 import { canSkipSourceUpdate } from './util/can_skip_fetch';
+import { IVectorLayer } from './vector_layer';
+import { IESSource } from '../sources/es_source';
+import { IESAggSource } from '../sources/es_agg_source';
 
-function getAggType(dynamicProperty) {
+function getAggType(dynamicProperty: IDynamicStyleProperty): AGG_TYPE {
   return dynamicProperty.isOrdinal() ? AGG_TYPE.AVG : AGG_TYPE.TERMS;
 }
 
-export class BlendedVectorLayer extends VectorLayer {
+export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   static type = LAYER_TYPE.BLENDED_VECTOR;
 
   static createDescriptor(options, mapColors) {
@@ -33,6 +39,13 @@ export class BlendedVectorLayer extends VectorLayer {
     layerDescriptor.type = BlendedVectorLayer.type;
     return layerDescriptor;
   }
+
+  private _activeSource;
+  private _activeStyle;
+  private readonly _clusterSource: IESAggSource;
+  private readonly _clusterStyle;
+  private readonly _documentSource: IESSource;
+  private readonly _documentStyle;
 
   constructor(options) {
     super(options);
@@ -136,10 +149,7 @@ export class BlendedVectorLayer extends VectorLayer {
             ...options,
             field: {
               ...options.field,
-              name: this._clusterSource.formatMetricKey(
-                getAggType(styleProperty),
-                options.field.name
-              ),
+              name: this._clusterSource.getAggKey(getAggType(styleProperty), options.field.name),
             },
           },
         };
@@ -180,16 +190,15 @@ export class BlendedVectorLayer extends VectorLayer {
     return this._documentStyle;
   }
 
-  async syncData(syncContext) {
+  async syncData(syncContext: unknown) {
     const searchFilters = this._getSearchFilters(syncContext.dataFilters);
-    const prevDataRequest = this.getSourceDataRequest();
     const canSkipFetch = await canSkipSourceUpdate({
       source: this.getSource(),
-      prevDataRequest,
+      prevDataRequest: this.getSourceDataRequest(),
       nextMeta: searchFilters,
     });
     if (!canSkipFetch) {
-      const searchSource = await this._documentSource._makeSearchSource(searchFilters, 0);
+      const searchSource = await this._documentSource.makeSearchSource(searchFilters, 0);
       const resp = await searchSource.fetch();
       const maxResultWindow = await this._documentSource.getMaxResultWindow();
       if (resp.hits.total > maxResultWindow) {
@@ -204,5 +213,5 @@ export class BlendedVectorLayer extends VectorLayer {
     super.syncData(syncContext);
   }
 
-  /*syncLayerWithMB(mbMap) {}*/
+  /* syncLayerWithMB(mbMap) {}*/
 }

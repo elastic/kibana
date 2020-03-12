@@ -3,42 +3,47 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+/* eslint-disable max-classes-per-file */
+
 import _ from 'lodash';
+import { DataRequestDescriptor } from '../../../common/descriptor_types';
 
 export class DataRequest {
-  constructor(descriptor) {
+  private readonly _descriptor: DataRequestDescriptor;
+
+  constructor(descriptor: DataRequestDescriptor) {
     this._descriptor = {
       ...descriptor,
     };
   }
 
-  getData() {
+  getData(): object {
     return this._descriptor.data;
   }
 
-  isLoading() {
+  isLoading(): boolean {
     return !!this._descriptor.dataRequestToken;
   }
 
-  getMeta() {
+  getMeta(): object {
     return this.hasData()
       ? _.get(this._descriptor, 'dataMeta', {})
       : _.get(this._descriptor, 'dataMetaAtStart', {});
   }
 
-  hasData() {
+  hasData(): boolean {
     return !!this._descriptor.data;
   }
 
-  hasDataOrRequestInProgress() {
-    return this._descriptor.data || this._descriptor.dataRequestToken;
+  hasDataOrRequestInProgress(): boolean {
+    return this.hasData() || this.isLoading();
   }
 
-  getDataId() {
+  getDataId(): string {
     return this._descriptor.dataId;
   }
 
-  getRequestToken() {
+  getRequestToken(): symbol | undefined {
     return this._descriptor.dataRequestToken;
   }
 }

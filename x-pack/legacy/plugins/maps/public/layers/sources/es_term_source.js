@@ -86,7 +86,7 @@ export class ESTermSource extends AbstractESAggSource {
     }
 
     const indexPattern = await this.getIndexPattern();
-    const searchSource = await this._makeSearchSource(searchFilters, 0);
+    const searchSource = await this.makeSearchSource(searchFilters, 0);
     const termsField = getField(indexPattern, this._termField.getName());
     const termsAgg = { size: DEFAULT_MAX_BUCKETS_LIMIT };
     searchSource.setField('aggs', {

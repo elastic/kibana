@@ -105,7 +105,7 @@ export class AbstractESSource extends AbstractVectorSource {
     }
   }
 
-  async _makeSearchSource(searchFilters, limit, initialSearchContext) {
+  async makeSearchSource(searchFilters, limit, initialSearchContext) {
     const indexPattern = await this.getIndexPattern();
     const isTimeAware = await this.isTimeAware();
     const applyGlobalQuery = _.get(searchFilters, 'applyGlobalQuery', true);
@@ -142,7 +142,7 @@ export class AbstractESSource extends AbstractVectorSource {
   }
 
   async getBoundsForFilters({ sourceQuery, query, timeFilters, filters, applyGlobalQuery }) {
-    const searchSource = await this._makeSearchSource(
+    const searchSource = await this.makeSearchSource(
       { sourceQuery, query, timeFilters, filters, applyGlobalQuery },
       0
     );

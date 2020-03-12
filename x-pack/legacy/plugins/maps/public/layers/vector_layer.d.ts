@@ -24,4 +24,5 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   constructor(options: VectorLayerArguments);
 
   getValidJoins(): IJoin[];
+  _getSearchFilters(dataFilters: unknown): unknown;
 }

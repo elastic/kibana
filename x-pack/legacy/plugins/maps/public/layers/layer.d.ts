@@ -5,9 +5,14 @@
  */
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { ISource } from './sources/source';
+import { DataRequest } from './util/data_request';
 
 export interface ILayer {
   getDisplayName(): Promise<string>;
+  getSourceDataRequest(): DataRequest | undefined;
+  getSource(): ISource;
+  getSourceForEditing(): ISource;
+  syncData(syncContext: unknown): Promise<void>;
 }
 
 export interface ILayerArguments {
@@ -18,4 +23,8 @@ export interface ILayerArguments {
 export class AbstractLayer implements ILayer {
   constructor(layerArguments: ILayerArguments);
   getDisplayName(): Promise<string>;
+  getSourceDataRequest(): DataRequest | undefined;
+  getSource(): ISource;
+  getSourceForEditing(): ISource;
+  syncData(syncContext: unknown): Promise<void>;
 }
