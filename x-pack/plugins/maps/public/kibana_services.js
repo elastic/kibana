@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npSetup } from 'ui/new_platform';
-
-// @ts-ignore
-import { MapView } from './map_view';
-
-npSetup.plugins.inspector.registerView(MapView);
+let getInjectedVar;
+export const setInjectedVarFunc = getInjectedVarFunc => (getInjectedVar = getInjectedVarFunc);
+export const getInjectedVarFunc = () => getInjectedVar;

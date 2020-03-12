@@ -4,5 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-export * from '../../../../plugins/maps/common/parse_xml_string';
+import { PluginInitializer } from 'kibana/public';
+import { MapsPlugin, MapsPluginSetup, MapsPluginStart } from './plugin';
+
+export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = () => {
+  return new MapsPlugin();
+};
