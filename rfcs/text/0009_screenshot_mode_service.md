@@ -202,7 +202,7 @@ work for screenshot mode.
   Many things can be improved on capturing screenshots from the page using
   `@print` CSS media query selecting. Also, CSS makes things hidden on the
   page, but they are still loading in the DOM and take browser memory
-  resources. Print media query CSS is a good supplement to the Screenshot Mode
+  resources. Print media query CSS are a good supplement to the Screenshot Mode
   Service, but the best performance will come with streamlining the page
   rendering in Javascript. See "further examples" in this RFC about how this
   alternative solution can still be leveraged.
