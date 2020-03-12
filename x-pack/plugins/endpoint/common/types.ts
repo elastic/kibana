@@ -253,6 +253,7 @@ export type AlertData = AlertEvent & AlertMetadata;
 
 export interface EndpointMetadata {
   '@timestamp': string;
+  host: HostFields;
   event: {
     created: Date;
   };
@@ -264,17 +265,6 @@ export interface EndpointMetadata {
   agent: {
     version: string;
     id: string;
-  };
-  host: {
-    id: string;
-    hostname: string;
-    ip: string[];
-    mac: string[];
-    os: {
-      name: string;
-      full: string;
-      version: string;
-    };
   };
 }
 
