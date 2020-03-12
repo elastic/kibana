@@ -17,7 +17,7 @@ import {
 } from '../../../../../../alerting/common';
 import { Alert } from '../../../../types';
 
-interface ViewInAppProps {
+export interface ViewInAppProps {
   alert: Alert;
 }
 

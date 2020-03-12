@@ -5,47 +5,84 @@
  */
 import * as React from 'react';
 import uuid from 'uuid';
-import { shallow } from 'enzyme';
-import { Alert } from '../../../../types';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { ViewInApp } from './view_in_app';
+import { mount, ReactWrapper } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 
-jest.mock('../../../app_context', () => ({
-  useAppDependencies: jest.fn(() => ({
-    http: { getNavigation: jest.fn() },
-    alerting: jest.fn(),
-    legacy: {
-      capabilities: {
-        get: jest.fn(() => ({})),
+import { Alert } from '../../../../types';
+import { ViewInApp } from './view_in_app';
+import { useAppDependencies } from '../../../app_context';
+
+jest.mock('../../../app_context', () => {
+  const alerting = {
+    getNavigation: jest.fn(async id => (id === 'alert-with-nav' ? { path: '/alert' } : undefined)),
+  };
+  const navigateToApp = jest.fn();
+  return {
+    useAppDependencies: jest.fn(() => ({
+      http: jest.fn(),
+      navigateToApp,
+      alerting,
+      legacy: {
+        capabilities: {
+          get: jest.fn(() => ({})),
+        },
       },
-    },
-  })),
-}));
+    })),
+  };
+});
 
 jest.mock('../../../lib/capabilities', () => ({
   hasSaveAlertsCapability: jest.fn(() => true),
 }));
 
-// const AlertDetails = withBulkAlertOperations(RawAlertDetails);
 describe('alert_details', () => {
-  describe('links', () => {
-    it('links to the app that created the alert', () => {
+  describe('link to the app that created the alert', () => {
+    it('is disabled when there is no navigation', async () => {
       const alert = mockAlert();
+      const { alerting } = useAppDependencies();
 
-      expect(
-        shallow(<ViewInApp alert={alert} />).containsMatchingElement(
-          <EuiButtonEmpty disabled={true} iconType="popout">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertDetails.viewAlertInAppButtonLabel"
-              defaultMessage="View in app"
-            />
-          </EuiButtonEmpty>
-        )
-      ).toBeTruthy();
+      let component: ReactWrapper;
+      await act(async () => {
+        // use mount as we need useEffect to run
+        component = mount(<ViewInApp alert={alert} />);
+
+        await waitForUseEffect();
+
+        expect(component!.find('button').prop('disabled')).toBe(true);
+        expect(component!.text()).toBe('View in app');
+
+        expect(alerting.getNavigation).toBeCalledWith(alert.id);
+      });
+    });
+
+    it('enabled when there is navigation', async () => {
+      const alert = mockAlert({ id: 'alert-with-nav', consumer: 'siem' });
+      const { navigateToApp } = useAppDependencies();
+
+      let component: ReactWrapper;
+      act(async () => {
+        // use mount as we need useEffect to run
+        component = mount(<ViewInApp alert={alert} />);
+
+        await waitForUseEffect();
+
+        expect(component!.find('button').prop('disabled')).toBe(undefined);
+
+        component!.find('button').prop('onClick')!({
+          currentTarget: {},
+        } as React.MouseEvent<{}, MouseEvent>);
+
+        expect(navigateToApp).toBeCalledWith('siem', '/alert');
+      });
     });
   });
 });
+
+function waitForUseEffect() {
+  return new Promise(resolve => {
+    setTimeout(resolve, 0);
+  });
+}
 
 function mockAlert(overloads: Partial<Alert> = {}): Alert {
   return {
