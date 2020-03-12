@@ -23,10 +23,27 @@ import { getCalculateAutoTimeExpression } from './aggs/buckets/lib/date_utils';
 
 export * from './search_source/mocks';
 
+const coreStart = coreMock.createStart();
+
 export const searchSetupMock = {
   aggs: {
     calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreMock.createSetup().uiSettings),
   },
   registerSearchStrategyContext: jest.fn(),
   registerSearchStrategyProvider: jest.fn(),
+};
+
+export const searchStartMock = {
+  cancelPendingSearches: jest.fn(),
+  getPendingSearchesCount$: jest.fn(),
+  aggs: {
+    calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreStart.uiSettings),
+  },
+  search: jest.fn(),
+  __LEGACY: {
+    esClient: {
+      search: jest.fn(),
+      msearch: jest.fn(),
+    },
+  },
 };

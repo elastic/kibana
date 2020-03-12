@@ -20,6 +20,7 @@
 import { IUiSettingsClient } from '../../../../../core/public';
 import { SearchStrategySearchParams } from './types';
 import { defaultSearchStrategy } from './default_search_strategy';
+import { searchStartMock } from '../mocks';
 
 const { search } = defaultSearchStrategy;
 
@@ -55,6 +56,16 @@ describe('defaultSearchStrategy', function() {
       searchMockResponse.abort.mockClear();
       searchMock.mockClear();
 
+      const searchService = searchStartMock;
+      searchService.aggs.calculateAutoTimeExpression = jest.fn().mockReturnValue('1d');
+      searchService.search = newSearchMock;
+      searchService.__LEGACY = {
+        esClient: {
+          search: searchMock,
+          msearch: msearchMock,
+        },
+      };
+
       searchArgs = {
         searchRequests: [
           {
@@ -62,18 +73,7 @@ describe('defaultSearchStrategy', function() {
           },
         ],
         esShardTimeout: 0,
-        searchService: {
-          aggs: {
-            calculateAutoTimeExpression: jest.fn().mockReturnValue('1d'),
-          },
-          search: newSearchMock,
-          __LEGACY: {
-            esClient: {
-              search: searchMock,
-              msearch: msearchMock,
-            },
-          },
-        },
+        searchService,
       };
 
       es = searchArgs.searchService.__LEGACY.esClient;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SearchSource } from '../search_source';
+import { SearchSource } from './search_source';
 import { IndexPattern } from '../..';
 import { setSearchService, setUiSettings, setInjectedMetadata } from '../../services';
 
@@ -25,21 +25,11 @@ import {
   injectedMetadataServiceMock,
   uiSettingsServiceMock,
 } from '../../../../../core/public/mocks';
+import { searchStartMock } from '../mocks';
 
 setUiSettings(uiSettingsServiceMock.createStartContract());
 setInjectedMetadata(injectedMetadataServiceMock.createSetupContract());
-setSearchService({
-  aggs: {
-    calculateAutoTimeExpression: jest.fn().mockReturnValue('1d'),
-  },
-  search: jest.fn(),
-  __LEGACY: {
-    esClient: {
-      search: jest.fn(),
-      msearch: jest.fn(),
-    },
-  },
-});
+setSearchService(searchStartMock);
 
 jest.mock('../fetch', () => ({
   fetchSoon: jest.fn().mockResolvedValue({}),
