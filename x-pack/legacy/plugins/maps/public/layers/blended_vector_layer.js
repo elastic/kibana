@@ -16,8 +16,9 @@ import {
   LAYER_TYPE,
   AGG_TYPE,
   SOURCE_DATA_ID_ORIGIN,
+  RENDER_AS,
 } from '../../common/constants';
-import { ESGeoGridSource, RENDER_AS } from './sources/es_geo_grid_source';
+import { ESGeoGridSource } from './sources/es_geo_grid_source';
 import { canSkipSourceUpdate } from './util/can_skip_fetch';
 
 function getAggType(dynamicProperty) {

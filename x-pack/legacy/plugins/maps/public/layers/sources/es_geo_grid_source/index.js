@@ -5,4 +5,3 @@
  */
 
 export { ESGeoGridSource } from './es_geo_grid_source';
-export { RENDER_AS } from './render_as';
