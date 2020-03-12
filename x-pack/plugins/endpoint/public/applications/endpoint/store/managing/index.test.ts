@@ -19,6 +19,7 @@ describe('endpoint_list store concerns', () => {
   };
   const generateEndpoint = (): EndpointMetadata => {
     return {
+      '@timestamp': new Date(1582231151055).toString(),
       event: {
         created: new Date(0),
       },
@@ -40,6 +41,7 @@ describe('endpoint_list store concerns', () => {
           name: '',
           full: '',
           version: '',
+          variant: '',
         },
       },
     };

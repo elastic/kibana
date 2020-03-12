@@ -610,7 +610,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
             })}
             helpText={i18n.translate('xpack.ml.dataframe.analytics.create.excludedFieldsHelpText', {
               defaultMessage:
-                'Optionally select fields to be excluded from analysis. All other supported fields will be included',
+                'Select fields to exclude from analysis. All other supported fields are included.',
             })}
             error={
               excludesOptions.length === 0 &&
