@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiTableFieldDataColumnType,
   EuiToolTip,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -28,7 +29,7 @@ import {
 } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { usePageId } from '../use_page_id';
 import {
   selectIsLoading,
@@ -71,6 +72,25 @@ const FormattedDateAndTime: React.FC<{ date: Date }> = ({ date }) => {
   );
 };
 
+const PolicyLink: React.FC<{ name: string; route: string }> = ({ name, route }) => {
+  const history = useHistory();
+
+  return (
+    <EuiLink
+      onClick={(event: React.MouseEvent) => {
+        event.preventDefault();
+        history.push(route);
+      }}
+    >
+      {name}
+    </EuiLink>
+  );
+};
+
+const renderPolicyNameLink = (value: string, _item: PolicyData) => {
+  return <PolicyLink name={value} route={`/policy/${_item.id}`} />;
+};
+
 const renderDate = (date: string, _item: PolicyData) => (
   <TruncateTooltipText>
     <EuiToolTip content={date}>
@@ -84,10 +104,6 @@ const renderFormattedNumber = (value: number, _item: PolicyData) => (
     <FormattedNumber value={value} />
   </TruncateText>
 );
-
-const renderPolicyNameLink = (value: string, _item: PolicyData) => {
-  return <Link to={`/policy/${_item.id}`}>{value + ' '}</Link>;
-};
 
 export const PolicyList = React.memo(() => {
   usePageId('policyListPage');
