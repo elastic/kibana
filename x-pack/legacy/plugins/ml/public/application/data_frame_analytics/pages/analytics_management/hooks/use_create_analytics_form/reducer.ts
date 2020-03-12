@@ -12,7 +12,7 @@ import { isEmpty } from 'lodash';
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
 import { Action, ACTION } from './actions';
-import { getInitialState, getJobConfigFromFormState, State, JOB_TYPES } from './state';
+import { getInitialState, getJobConfigFromFormState, State } from './state';
 import {
   isJobIdValid,
   validateModelMemoryLimitUnits,
@@ -31,6 +31,7 @@ import {
   getDependentVar,
   isRegressionAnalysis,
   isClassificationAnalysis,
+  ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/analytics';
 import { indexPatterns } from '../../../../../../../../../../../src/plugins/data/public';
 
@@ -143,7 +144,7 @@ export const validateAdvancedEditor = (state: State): State => {
 
   if (
     jobConfig.analysis === undefined &&
-    (jobType === JOB_TYPES.CLASSIFICATION || jobType === JOB_TYPES.REGRESSION)
+    (jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION || jobType === ANALYSIS_CONFIG_TYPE.REGRESSION)
   ) {
     dependentVariableEmpty = true;
   }
@@ -316,7 +317,8 @@ const validateForm = (state: State): State => {
 
   const jobTypeEmpty = jobType === undefined;
   const dependentVariableEmpty =
-    (jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION) &&
+    (jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
+      jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION) &&
     dependentVariable === '';
 
   const mmlValidationResult = validateMml(estimatedModelMemoryLimit, modelMemoryLimit);

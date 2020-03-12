@@ -28,7 +28,6 @@ import { newJobCapsService } from '../../../../../services/new_job_capabilities_
 import { useMlContext } from '../../../../../contexts/ml';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import {
-  JOB_TYPES,
   DEFAULT_MODEL_MEMORY_LIMIT,
   getJobConfigFromFormState,
   State,
@@ -42,7 +41,11 @@ import {
   IndexPattern,
   indexPatterns,
 } from '../../../../../../../../../../../src/plugins/data/public';
-import { DfAnalyticsExplainResponse, FieldSelectionItem } from '../../../../common/analytics';
+import {
+  ANALYSIS_CONFIG_TYPE,
+  DfAnalyticsExplainResponse,
+  FieldSelectionItem,
+} from '../../../../common/analytics';
 import { shouldAddAsDepVarOption, OMIT_FIELDS } from './form_options_validation';
 
 export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
@@ -95,7 +98,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   ]);
 
   const isJobTypeWithDepVar =
-    jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION;
+    jobType === ANALYSIS_CONFIG_TYPE.REGRESSION || jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
 
   // Find out if index pattern contain numeric fields. Provides a hint in the form
   // that an analytics jobs is not able to identify outliers if there are no numeric fields present.
@@ -190,7 +193,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     } catch (e) {
       let errorMessage;
       if (
-        jobType === JOB_TYPES.CLASSIFICATION &&
+        jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
         e.message !== undefined &&
         e.message.includes('status_exception') &&
         e.message.includes('must have at most')
@@ -306,7 +309,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       loadDepVarOptions(form);
     }
 
-    if (jobType === JOB_TYPES.OUTLIER_DETECTION && sourceIndexNameEmpty === false) {
+    if (jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && sourceIndexNameEmpty === false) {
       validateSourceIndexFields();
     }
   }, [sourceIndex, jobType, sourceIndexNameEmpty]);
@@ -316,7 +319,8 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       jobType !== undefined && sourceIndex !== '' && sourceIndexNameValid === true;
 
     const hasRequiredAnalysisFields =
-      (isJobTypeWithDepVar && dependentVariable !== '') || jobType === JOB_TYPES.OUTLIER_DETECTION;
+      (isJobTypeWithDepVar && dependentVariable !== '') ||
+      jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION;
 
     if (hasBasicRequiredFields && hasRequiredAnalysisFields) {
       debouncedGetExplainData();
@@ -514,7 +518,8 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               data-test-subj="mlAnalyticsCreateJobFlyoutDestinationIndexInput"
             />
           </EuiFormRow>
-          {(jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION) && (
+          {(jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
+            jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION) && (
             <Fragment>
               <EuiFormRow
                 fullWidth

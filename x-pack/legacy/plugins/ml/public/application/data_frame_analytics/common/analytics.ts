@@ -23,7 +23,6 @@ export enum ANALYSIS_CONFIG_TYPE {
   OUTLIER_DETECTION = 'outlier_detection',
   REGRESSION = 'regression',
   CLASSIFICATION = 'classification',
-  UNKNOWN = 'unknown',
 }
 
 interface OutlierAnalysis {
@@ -155,7 +154,7 @@ export const getAnalysisType = (analysis: AnalysisConfig) => {
     return keys[0];
   }
 
-  return ANALYSIS_CONFIG_TYPE.UNKNOWN;
+  return 'unknown';
 };
 
 export const getDependentVar = (analysis: AnalysisConfig) => {

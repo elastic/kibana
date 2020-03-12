@@ -229,7 +229,7 @@ export function isAdvancedConfig(
           if (isAdvancedSetting) {
             // eslint-disable-next-line no-console
             console.info(
-              `Property "${configKey}" is not supported by the form or has a value distinguished from the default one.`
+              `Property "${configKey}" is not supported by the form or has a different value to the default.`
             );
             return true;
           }
