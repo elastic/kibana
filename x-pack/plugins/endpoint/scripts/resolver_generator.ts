@@ -6,6 +6,7 @@
 import yargs = require('yargs');
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { EndpointDocGenerator } from '../common/generate_data';
+import { default as mapping } from '../common/mapping.json';
 
 main();
 
@@ -86,12 +87,6 @@ async function main() {
       type: 'number',
       default: 1,
     },
-    delete: {
-      alias: 'd',
-      describe: 'delete index before adding new documents',
-      type: 'boolean',
-      default: false,
-    },
   }).argv;
   const clientOptions: ClientOptions = {
     node: argv.node,
@@ -101,15 +96,22 @@ async function main() {
     clientOptions.auth = { username, password };
   }
   const client = new Client(clientOptions);
-  if (argv.delete) {
-    try {
-      await client.indices.delete({
-        index: [argv.eventIndex, argv.metadataIndex],
-      });
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log(error);
-    }
+  try {
+    await client.indices.delete({
+      index: [argv.eventIndex, argv.metadataIndex],
+    });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.log(error);
+  }
+  try {
+    await client.indices.create({
+      index: argv.eventIndex,
+      body: mapping,
+    });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.log(error);
   }
   const generator = new EndpointDocGenerator(argv.seed);
   for (let i = 0; i < argv.numEndpoints; i++) {
