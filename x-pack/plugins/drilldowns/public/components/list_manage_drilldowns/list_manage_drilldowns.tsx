@@ -47,12 +47,12 @@ export function ListManageDrilldowns({
 
   const columns: Array<EuiBasicTableColumn<DrilldownListItem>> = [
     {
-      field: 'actionName',
+      field: 'drilldownName',
       name: 'Name',
       truncateText: true,
     },
     {
-      field: 'drilldownName',
+      field: 'actionName',
       name: 'Action',
       truncateText: true,
     },
