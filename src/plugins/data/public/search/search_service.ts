@@ -81,7 +81,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
      * TODO: Make this modular so that apps can opt in/out of search collection, or even provide
      * their own search collector instances
      */
-    const searchInterceptor = new SearchInterceptor();
+    const searchInterceptor = new SearchInterceptor(
+      core.injectedMetadata.getInjectedVar('esRequestTimeout')
+    );
 
     return {
       aggs: {
@@ -89,6 +91,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       },
       cancelPendingSearches: () => searchInterceptor.cancelPending(),
       getPendingSearchesCount$: () => searchInterceptor.getPendingCount$(),
+      cancelSearchTimeout: () => searchInterceptor.cancelTimeout(),
       search: (request, options, strategyName) => {
         const strategyProvider = this.getSearchStrategy(strategyName || DEFAULT_SEARCH_STRATEGY);
         const { search } = strategyProvider({

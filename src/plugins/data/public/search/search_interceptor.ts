@@ -29,14 +29,16 @@ export class SearchInterceptor {
   private abortController = new AbortController();
 
   /**
-   * Number of in-progress search requests.
-   */
-  private pendingCount: number = 0;
-
-  /**
    * Observable that emits when the number of pending requests changes.
    */
   private pendingCount$: Subject<number> = new Subject();
+
+  /**
+   * The values returned from `setTimeout` when scheduling the automatic timeout for each request.
+   */
+  private pendingTimeoutIds: Set<number> = new Set();
+
+  constructor(private readonly requestTimeout: number) {}
 
   /**
    * Abort our `AbortController`, which in turn aborts any intercepted searches.
@@ -47,13 +49,19 @@ export class SearchInterceptor {
   };
 
   /**
+   * Un-schedule timing out all of the searches intercepted.
+   */
+  cancelTimeout = () => {
+    this.pendingTimeoutIds.forEach(clearTimeout);
+    this.pendingTimeoutIds.clear();
+  };
+
+  /**
    * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort
    * either when `cancelPending` is called, or when the original `AbortSignal` is aborted. Updates
    * the `pendingCount` when the request is started/finalized.
    */
   search = (search: ISearchGeneric, request: IKibanaSearchRequest, options: ISearchOptions) => {
-    this.pendingCount$.next(++this.pendingCount);
-
     // Create a new `AbortController` that will abort when our either our private `AbortController`
     // aborts, or the given `AbortSignal` aborts.
     const abortController = new AbortController();
@@ -67,8 +75,19 @@ export class SearchInterceptor {
     });
     const { signal } = abortController;
 
+    // Schedule this request to automatically timeout after some interval
+    const timeoutId = window.setTimeout(() => {
+      abortController.abort();
+    }, this.requestTimeout);
+    this.pendingTimeoutIds.add(timeoutId);
+
+    this.pendingCount$.next(this.pendingTimeoutIds.size);
+
     return search(request as any, { ...options, signal }).pipe(
-      finalize(() => this.pendingCount$.next(--this.pendingCount))
+      finalize(() => {
+        this.pendingTimeoutIds.delete(timeoutId);
+        this.pendingCount$.next(this.pendingTimeoutIds.size);
+      })
     );
   };
 

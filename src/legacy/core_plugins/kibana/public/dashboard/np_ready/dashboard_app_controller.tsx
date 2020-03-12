@@ -128,6 +128,7 @@ export class DashboardAppController {
       $scope.$evalAsync(() => ($scope.isLoading = count > 0));
     });
     $scope.cancelPending = () => searchService.cancelPendingSearches();
+    $scope.cancelSearchTimeout = () => searchService.cancelSearchTimeout();
 
     const filterManager = queryService.filterManager;
     const queryFilter = filterManager;
