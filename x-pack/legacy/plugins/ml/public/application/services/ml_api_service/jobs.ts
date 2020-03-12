@@ -56,7 +56,7 @@ export const jobs = {
   },
 
   updateGroups(updatedJobs: string[]) {
-    const body = JSON.stringify({ updatedJobs });
+    const body = JSON.stringify({ jobs: updatedJobs });
     return http<any>({
       path: `${basePath()}/jobs/update_groups`,
       method: 'POST',

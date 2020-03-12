@@ -52,7 +52,7 @@ export const dataFrameAnalytics = {
       method: 'GET',
     });
   },
-  createDataFrameAnalytics(analyticsId: string, analyticsConfig: any) {
+  createDataFrameAnalytics(analyticsId: string, analyticsConfig: DataFrameAnalyticsConfig) {
     const body = JSON.stringify(analyticsConfig);
     return http<any>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}`,
@@ -60,7 +60,7 @@ export const dataFrameAnalytics = {
       body,
     });
   },
-  evaluateDataFrameAnalytics(evaluateConfig: any) {
+  evaluateDataFrameAnalytics(evaluateConfig: DataFrameAnalyticsConfig) {
     const body = JSON.stringify(evaluateConfig);
     return http<any>({
       path: `${basePath()}/data_frame/_evaluate`,
@@ -68,7 +68,7 @@ export const dataFrameAnalytics = {
       body,
     });
   },
-  explainDataFrameAnalytics(jobConfig: any) {
+  explainDataFrameAnalytics(jobConfig: DataFrameAnalyticsConfig) {
     const body = JSON.stringify(jobConfig);
     return http<any>({
       path: `${basePath()}/data_frame/analytics/_explain`,

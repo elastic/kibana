@@ -301,8 +301,9 @@ export const ml = {
 
   checkManageMLPrivileges() {
     return http<PrivilegesResponse>({
-      path: `${basePath()}/ml_capabilities?ignoreSpaces=true`,
+      path: `${basePath()}/ml_capabilities`,
       method: 'GET',
+      query: { ignoreSpaces: true },
     });
   },
 
