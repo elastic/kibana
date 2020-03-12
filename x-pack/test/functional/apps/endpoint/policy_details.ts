@@ -10,15 +10,15 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'endpoint']);
   const testSubjects = getService('testSubjects');
 
-  describe('Endpoint Policy Details', function() {
+  describe.only('Endpoint Policy Details', function() {
     this.tags(['ciGroup7']);
 
-    it('loads the Policy Details Page with an invalid id', async () => {
+    it('loads the Policy Details Page', async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy/123');
       await testSubjects.existOrFail('policyDetailsViewTitle');
 
-      const policyDetailsNotFoundTitle = await testSubjects.getVisibleText('policyDetailsNotFound');
-      expect(policyDetailsNotFoundTitle).to.equal('Policy Not Found');
+      const policyDetailsNotFoundTitle = await testSubjects.getVisibleText('policyDetailsName');
+      expect(policyDetailsNotFoundTitle).to.equal('policy with some protections 123');
     });
   });
 }

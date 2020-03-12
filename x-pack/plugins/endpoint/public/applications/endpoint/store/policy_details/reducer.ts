@@ -7,7 +7,6 @@
 import { Reducer } from 'redux';
 import { PolicyDetailsState } from '../../types';
 import { AppAction } from '../action';
-import { isOnPolicyDetailsPage } from './selectors';
 
 const initialPolicyDetailsState = (): PolicyDetailsState => {
   return {

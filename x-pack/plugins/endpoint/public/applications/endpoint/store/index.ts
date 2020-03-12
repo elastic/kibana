@@ -78,7 +78,7 @@ export const appStoreFactory: (middlewareDeps?: {
         ),
         substateMiddlewareFactory(
           globalState => globalState.policyDetails,
-          policyDetailsMiddlewareFactory(coreStart)
+          policyDetailsMiddlewareFactory(coreStart, depsStart)
         ),
         substateMiddlewareFactory(
           globalState => globalState.alertList,
