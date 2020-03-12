@@ -6,10 +6,12 @@
 
 import { CoreStart, CoreSetup, Plugin } from 'src/core/public';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import { AdvancedUiActionsSetup } from '../../advanced_ui_actions/public';
 import { DashboardDrilldownsService } from './services';
 import { DrilldownsSetupContract, DrilldownsStartContract } from '../../drilldowns/public';
 
 export interface SetupDependencies {
+  advancedUiActions: AdvancedUiActionsSetup;
   uiActions: UiActionsSetup;
   drilldowns: DrilldownsSetupContract;
 }

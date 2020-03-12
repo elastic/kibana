@@ -18,6 +18,7 @@ import {
   OPEN_FLYOUT_EDIT_DRILLDOWN,
 } from './actions';
 import { DrilldownsStartContract } from '../../../../drilldowns/public';
+import { DashboardDrilldownActionFactory } from './action_factories';
 
 declare module '../../../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
@@ -27,9 +28,9 @@ declare module '../../../../../../src/plugins/ui_actions/public' {
 }
 
 export class DashboardDrilldownsService {
-  bootstrap(
+  async bootstrap(
     core: CoreSetup<{ drilldowns: DrilldownsStartContract }>,
-    { uiActions }: Pick<SetupDependencies, 'uiActions'>
+    { uiActions, advancedUiActions }: SetupDependencies
   ) {
     const overlays = async () => (await core.getStartServices())[0].overlays;
     const drilldowns = async () => (await core.getStartServices())[1].drilldowns;
@@ -41,5 +42,19 @@ export class DashboardDrilldownsService {
     const actionFlyoutEditDrilldown = new FlyoutEditDrilldownAction({ overlays, drilldowns });
     uiActions.registerAction(actionFlyoutEditDrilldown);
     uiActions.attachAction(CONTEXT_MENU_DRILLDOWNS_TRIGGER, actionFlyoutEditDrilldown);
+
+    /*
+    const [coreServices] = await core.getStartServices();
+
+    advancedUiActions.actionFactory.register(
+      DashboardDrilldownActionFactory({
+        savedObjectsClient: coreServices.savedObjects.client,
+        chrome: coreServices.chrome,
+        overlays: coreServices.overlays,
+        indexPatterns: {} as any, // todo
+      })
+    );
+    */
+    advancedUiActions.actionFactory.register(DashboardDrilldownActionFactory);
   }
 }

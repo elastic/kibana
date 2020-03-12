@@ -10,7 +10,7 @@ import { Drilldown } from '../types';
 
 // TODO: MOCK DATA
 import {
-  dashboardDrilldownActionFactory,
+  // dashboardDrilldownActionFactory,
   urlDrilldownActionFactory,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../advanced_ui_actions/public/components/action_wizard/test_data';
@@ -57,10 +57,12 @@ export class DrilldownService {
       });
     };
 
+    /*
     registerDrilldown({
       ...dashboardDrilldownActionFactory,
       execute: () => alert('Dashboard drilldown!'),
     } as any);
+    */
     registerDrilldown({
       ...urlDrilldownActionFactory,
       execute: () => alert('URL drilldown!'),
