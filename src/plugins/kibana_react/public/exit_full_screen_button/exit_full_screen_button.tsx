@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { PureComponent } from 'react';
 import { EuiScreenReaderOnly, keyCodes } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 
 export interface ExitFullScreenButtonProps {
   onExitFullScreenMode: () => void;
@@ -61,17 +61,24 @@ class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
             )}
             className="dshExitFullScreenButton"
             onClick={this.props.onExitFullScreenMode}
+            data-test-subj="exitFullScreenModeLogo"
           >
-            <span
-              className="dshExitFullScreenButton__logo"
-              data-test-subj="exitFullScreenModeLogo"
-            />
-            <span className="dshExitFullScreenButton__text" data-test-subj="exitFullScreenModeText">
-              {i18n.translate('kibana-react.exitFullScreenButton.exitFullScreenModeButtonLabel', {
-                defaultMessage: 'Exit full screen',
-              })}
-              <EuiIcon type="arrowLeft" size="s" />
-            </span>
+            <EuiFlexGroup component="span" responsive={false} alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="logoElastic" size="xl" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} data-test-subj="exitFullScreenModeText">
+                <EuiText color="subdued" size="xs">
+                  <p>Powered by</p>
+                </EuiText>
+                <EuiTitle size="xxs">
+                  <p>Elastic Kibana</p>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="cross" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </button>
         </div>
       </div>
