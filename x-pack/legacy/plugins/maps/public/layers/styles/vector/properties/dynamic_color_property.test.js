@@ -237,62 +237,224 @@ test('Should pluck the categorical style-meta from fieldmeta', async () => {
   });
 });
 
-test('Should set the correct mapbox style', async () => {
-  const colorStyle = makeProperty({
-    color: 'Blues',
-    type: undefined,
+describe('get mapbox color expression', () => {
+  describe('ordinal color ramp', () => {
+    test('should return null when field is not provided', async () => {
+      const dynamicStyleOptions = {
+        type: COLOR_MAP_TYPE.ORDINAL,
+      };
+      const colorProperty = makeProperty(dynamicStyleOptions);
+      expect(colorProperty._getMbColor()).toBeNull();
+    });
+
+    test('should return null when field name is not provided', async () => {
+      const dynamicStyleOptions = {
+        type: COLOR_MAP_TYPE.ORDINAL,
+        field: {},
+      };
+      const colorProperty = makeProperty(dynamicStyleOptions);
+      expect(colorProperty._getMbColor()).toBeNull();
+    });
+
+    describe('pre-defined color ramp', () => {
+      test('should return null when color ramp is not provided', async () => {
+        const dynamicStyleOptions = {
+          type: COLOR_MAP_TYPE.ORDINAL,
+        };
+        const colorProperty = makeProperty(dynamicStyleOptions);
+        expect(colorProperty._getMbColor()).toBeNull();
+      });
+
+      test('Should set the correct mapbox style', async () => {
+        const colorStyle = makeProperty({
+          color: 'Blues',
+          type: undefined,
+        });
+
+        const calls = [];
+        const mockMbMap = {
+          setPaintProperty(...args) {
+            calls.push(args);
+          },
+        };
+
+        colorStyle.syncCircleColorWithMb('foobarid', mockMbMap, 1);
+        expect(calls[0]).toEqual([
+          'foobarid',
+          'circle-color',
+          [
+            'interpolate',
+            ['linear'],
+            [
+              'coalesce',
+              [
+                'case',
+                ['==', ['feature-state', '__kbn__dynamic__foobar__lineColor'], null],
+                -1,
+                [
+                  'max',
+                  [
+                    'min',
+                    ['to-number', ['feature-state', '__kbn__dynamic__foobar__lineColor']],
+                    100,
+                  ],
+                  0,
+                ],
+              ],
+              -1,
+            ],
+            -1,
+            'rgba(0,0,0,0)',
+            0,
+            '#f7faff',
+            12.5,
+            '#ddeaf7',
+            25,
+            '#c5daee',
+            37.5,
+            '#9dc9e0',
+            50,
+            '#6aadd5',
+            62.5,
+            '#4191c5',
+            75,
+            '#2070b4',
+            87.5,
+            '#072f6b',
+          ],
+        ]);
+        expect(calls[1]).toEqual(['foobarid', 'circle-opacity', 1]);
+      });
+    });
+
+    describe('custom color ramp', () => {
+      test('should return null when customColorRamp is not provided', async () => {
+        const dynamicStyleOptions = {
+          type: COLOR_MAP_TYPE.ORDINAL,
+          useCustomColorRamp: true,
+        };
+        const colorProperty = makeProperty(dynamicStyleOptions);
+        expect(colorProperty._getMbColor()).toBeNull();
+      });
+
+      test('should return null when customColorRamp is empty', async () => {
+        const dynamicStyleOptions = {
+          type: COLOR_MAP_TYPE.ORDINAL,
+          useCustomColorRamp: true,
+          customColorRamp: [],
+        };
+        const colorProperty = makeProperty(dynamicStyleOptions);
+        expect(colorProperty._getMbColor()).toBeNull();
+      });
+
+      test('should return mapbox expression for custom color ramp', async () => {
+        const dynamicStyleOptions = {
+          type: COLOR_MAP_TYPE.ORDINAL,
+          useCustomColorRamp: true,
+          customColorRamp: [
+            { stop: 10, color: '#f7faff' },
+            { stop: 100, color: '#072f6b' },
+          ],
+        };
+        const colorProperty = makeProperty(dynamicStyleOptions);
+        expect(colorProperty._getMbColor()).toEqual([
+          'step',
+          ['coalesce', ['feature-state', '__kbn__dynamic__foobar__lineColor'], 9],
+          'rgba(0,0,0,0)',
+          10,
+          '#f7faff',
+          100,
+          '#072f6b',
+        ]);
+      });
+    });
   });
 
-  const calls = [];
+  describe('categorical color palette', () => {
+    test('should return null when field is not provided', async () => {
+      const dynamicStyleOptions = {
+        type: COLOR_MAP_TYPE.CATEGORICAL,
+      };
+      const colorProperty = makeProperty(dynamicStyleOptions);
+      expect(colorProperty._getMbColor()).toBeNull();
+    });
 
-  const mockMbMap = {
-    setPaintProperty(...args) {
-      calls.push(args);
-    },
-  };
+    test('should return null when field name is not provided', async () => {
+      const dynamicStyleOptions = {
+        type: COLOR_MAP_TYPE.CATEGORICAL,
+        field: {},
+      };
+      const colorProperty = makeProperty(dynamicStyleOptions);
+      expect(colorProperty._getMbColor()).toBeNull();
+    });
 
-  colorStyle.syncCircleColorWithMb('foobarid', mockMbMap, 1);
-  expect(calls[0]).toEqual([
-    'foobarid',
-    'circle-color',
-    [
-      'interpolate',
-      ['linear'],
-      [
-        'coalesce',
-        [
-          'case',
-          ['==', ['feature-state', '__kbn__dynamic__foobar__lineColor'], null],
-          -1,
-          [
-            'max',
-            ['min', ['to-number', ['feature-state', '__kbn__dynamic__foobar__lineColor']], 100],
-            0,
+    describe('pre-defined color palette', () => {
+      test('should return null when color palette is not provided', async () => {
+        const dynamicStyleOptions = {
+          type: COLOR_MAP_TYPE.CATEGORICAL,
+        };
+        const colorProperty = makeProperty(dynamicStyleOptions);
+        expect(colorProperty._getMbColor()).toBeNull();
+      });
+
+      test('should return mapbox expression for color palette', async () => {
+        const dynamicStyleOptions = {
+          type: COLOR_MAP_TYPE.CATEGORICAL,
+          colorCategory: 'palette_0',
+        };
+        const colorProperty = makeProperty(dynamicStyleOptions);
+        expect(colorProperty._getMbColor()).toEqual([
+          'match',
+          ['to-string', ['get', 'foobar']],
+          'US',
+          '#54B399',
+          'CN',
+          '#6092C0',
+          '#D36086',
+        ]);
+      });
+    });
+
+    describe('custom color palette', () => {
+      test('should return null when customColorPalette is not provided', async () => {
+        const dynamicStyleOptions = {
+          type: COLOR_MAP_TYPE.CATEGORICAL,
+          useCustomColorPalette: true,
+        };
+        const colorProperty = makeProperty(dynamicStyleOptions);
+        expect(colorProperty._getMbColor()).toBeNull();
+      });
+
+      test('should return null when customColorPalette is empty', async () => {
+        const dynamicStyleOptions = {
+          type: COLOR_MAP_TYPE.CATEGORICAL,
+          useCustomColorPalette: true,
+          customColorPalette: [],
+        };
+        const colorProperty = makeProperty(dynamicStyleOptions);
+        expect(colorProperty._getMbColor()).toBeNull();
+      });
+
+      test('should return mapbox expression for custom color palette', async () => {
+        const dynamicStyleOptions = {
+          type: COLOR_MAP_TYPE.CATEGORICAL,
+          useCustomColorPalette: true,
+          customColorPalette: [
+            { stop: null, color: '#f7faff' },
+            { stop: 'MX', color: '#072f6b' },
           ],
-        ],
-        -1,
-      ],
-      -1,
-      'rgba(0,0,0,0)',
-      0,
-      '#f7faff',
-      12.5,
-      '#ddeaf7',
-      25,
-      '#c5daee',
-      37.5,
-      '#9dc9e0',
-      50,
-      '#6aadd5',
-      62.5,
-      '#4191c5',
-      75,
-      '#2070b4',
-      87.5,
-      '#072f6b',
-    ],
-  ]);
-  expect(calls[1]).toEqual(['foobarid', 'circle-opacity', 1]);
+        };
+        const colorProperty = makeProperty(dynamicStyleOptions);
+        expect(colorProperty._getMbColor()).toEqual([
+          'match',
+          ['to-string', ['get', 'foobar']],
+          'MX',
+          '#072f6b',
+          '#f7faff',
+        ]);
+      });
+    });
+  });
 });
 
 test('isCategorical should return true when type is categorical', async () => {

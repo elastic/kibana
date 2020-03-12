@@ -5,7 +5,6 @@
  */
 
 import { DynamicStyleProperty } from './dynamic_style_property';
-import _ from 'lodash';
 import {
   getComputedFieldName,
   getOtherCategoryLabel,
@@ -102,33 +101,26 @@ export class DynamicColorProperty extends DynamicStyleProperty {
   }
 
   _getMbColor() {
-    const isDynamicConfigComplete = this.getFieldName() && _.has(this._options, 'color');
-    if (!isDynamicConfigComplete) {
+    if (!this._field || !this._field.getName()) {
       return null;
     }
 
-    const targetName = getComputedFieldName(this._styleName, this.getFieldName());
-    if (this.isCategorical()) {
-      return this._getMbDataDrivenCategoricalColor({ targetName });
-    } else {
-      return this._getMbDataDrivenOrdinalColor({ targetName });
-    }
+    return this.isCategorical()
+      ? this._getCategoricalColorMbExpression()
+      : this._getOrdinalColorMbExpression();
   }
 
-  _getMbDataDrivenOrdinalColor({ targetName }) {
-    if (
-      this._options.useCustomColorRamp &&
-      (!this._options.customColorRamp || !this._options.customColorRamp.length)
-    ) {
-      return null;
-    }
-
-    const colorStops = this._getMbOrdinalColorStops();
-    if (!colorStops) {
-      return null;
-    }
-
+  _getOrdinalColorMbExpression() {
+    const targetName = getComputedFieldName(this._styleName, this._field.getName());
     if (this._options.useCustomColorRamp) {
+      if (!this._options.customColorRamp || !this._options.customColorRamp.length) {
+        // custom color ramp config is not complete
+        return null;
+      }
+
+      const colorStops = this._options.customColorRamp.reduce((accumulatedStops, nextStop) => {
+        return [...accumulatedStops, nextStop.stop, nextStop.color];
+      }, []);
       const firstStopValue = colorStops[0];
       const lessThenFirstStopValue = firstStopValue - 1;
       return [
@@ -140,6 +132,15 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     } else {
       const rangeFieldMeta = this.getRangeFieldMeta();
       if (!rangeFieldMeta) {
+        return null;
+      }
+
+      const colorStops = getOrdinalColorRampStops(
+        this._options.color,
+        rangeFieldMeta.min,
+        rangeFieldMeta.max
+      );
+      if (!colorStops) {
         return null;
       }
 
@@ -207,7 +208,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     };
   }
 
-  _getMbDataDrivenCategoricalColor() {
+  _getCategoricalColorMbExpression() {
     if (
       this._options.useCustomColorPalette &&
       (!this._options.customColorPalette || !this._options.customColorPalette.length)
@@ -236,7 +237,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     }
 
     mbStops.push(defaultColor); //last color is default color
-    return ['match', ['to-string', ['get', this._options.field.name]], ...mbStops];
+    return ['match', ['to-string', ['get', this._field.getName()]], ...mbStops];
   }
 
   _getMbOrdinalColorStops() {
@@ -245,11 +246,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
         return [...accumulatedStops, nextStop.stop, nextStop.color];
       }, []);
     } else {
-      const rangeFieldMeta = this.getRangeFieldMeta();
-      if (!rangeFieldMeta) {
-        return null;
-      }
-      return getOrdinalColorRampStops(this._options.color, rangeFieldMeta.min, rangeFieldMeta.max);
+      return getOrdinalColorRampStops(this._options.color);
     }
   }
 
