@@ -123,13 +123,6 @@ export class DashboardAppController {
     history,
     kbnUrlStateStorage,
   }: DashboardAppControllerDependencies) {
-    // TODO: Remove these few lines
-    searchService.getPendingSearchesCount$().subscribe(count => {
-      $scope.$evalAsync(() => ($scope.isLoading = count > 0));
-    });
-    $scope.cancelPending = () => searchService.cancelPendingSearches();
-    $scope.cancelSearchTimeout = () => searchService.cancelSearchTimeout();
-
     const filterManager = queryService.filterManager;
     const queryFilter = filterManager;
     const timefilter = queryService.timefilter.timefilter;

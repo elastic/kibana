@@ -91,7 +91,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       },
       cancelPendingSearches: () => searchInterceptor.cancelPending(),
       getPendingSearchesCount$: () => searchInterceptor.getPendingCount$(),
-      cancelSearchTimeout: () => searchInterceptor.cancelTimeout(),
+      runBeyondTimeout: () => searchInterceptor.runBeyondTimeout(),
       search: (request, options, strategyName) => {
         const strategyProvider = this.getSearchStrategy(strategyName || DEFAULT_SEARCH_STRATEGY);
         const { search } = strategyProvider({
