@@ -6,14 +6,13 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import {
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '../../../../../../src/plugins/expressions/public';
 import { MetricConfig } from './types';
-import { LensMultiTable } from '../types';
+import { FormatFactory, LensMultiTable } from '../types';
 import { AutoScale } from './auto_scale';
 import { VisualizationContainer } from '../visualization_container';
 
@@ -68,17 +67,26 @@ export const metricChart: ExpressionFunctionDefinition<
 };
 
 export const getMetricChartRenderer = (
-  formatFactory: FormatFactory
+  formatFactory: Promise<FormatFactory>
 ): ExpressionRenderDefinition<MetricChartProps> => ({
   name: 'lens_metric_chart_renderer',
   displayName: 'Metric chart',
   help: 'Metric chart renderer',
   validate: () => undefined,
   reuseDomNode: true,
-  render: (domNode: Element, config: MetricChartProps, handlers: IInterpreterRenderHandlers) => {
-    ReactDOM.render(<MetricChart {...config} formatFactory={formatFactory} />, domNode, () => {
-      handlers.done();
-    });
+  render: async (
+    domNode: Element,
+    config: MetricChartProps,
+    handlers: IInterpreterRenderHandlers
+  ) => {
+    const resolvedFormatFactory = await formatFactory;
+    ReactDOM.render(
+      <MetricChart {...config} formatFactory={resolvedFormatFactory} />,
+      domNode,
+      () => {
+        handlers.done();
+      }
+    );
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },
 });

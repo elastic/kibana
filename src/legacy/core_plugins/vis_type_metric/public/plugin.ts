@@ -24,12 +24,19 @@ import { VisualizationsSetup } from '../../visualizations/public';
 import { createMetricVisFn } from './metric_vis_fn';
 import { createMetricVisTypeDefinition } from './metric_vis_type';
 import { ChartsPluginSetup } from '../../../../plugins/charts/public';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import { setFormatService } from './services';
 
 /** @internal */
 export interface MetricVisPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
+}
+
+/** @internal */
+export interface MetricVisPluginStartDependencies {
+  data: DataPublicPluginStart;
 }
 
 /** @internal */
@@ -48,7 +55,7 @@ export class MetricVisPlugin implements Plugin<void, void> {
     visualizations.createReactVisualization(createMetricVisTypeDefinition());
   }
 
-  public start(core: CoreStart) {
-    // nothing to do here yet
+  public start(core: CoreStart, { data }: MetricVisPluginStartDependencies) {
+    setFormatService(data.fieldFormats);
   }
 }

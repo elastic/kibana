@@ -27,8 +27,7 @@ import {
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { FormatFactory } from '../legacy_imports';
-import { LensMultiTable } from '../types';
+import { FormatFactory, LensMultiTable } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
@@ -97,7 +96,7 @@ export const xyChart: ExpressionFunctionDefinition<
 };
 
 export const getXyChartRenderer = (dependencies: {
-  formatFactory: FormatFactory;
+  formatFactory: Promise<FormatFactory>;
   chartTheme: PartialTheme;
   timeZone: string;
 }): ExpressionRenderDefinition<XYChartProps> => ({
@@ -108,11 +107,17 @@ export const getXyChartRenderer = (dependencies: {
   }),
   validate: () => undefined,
   reuseDomNode: true,
-  render: (domNode: Element, config: XYChartProps, handlers: IInterpreterRenderHandlers) => {
+  render: async (domNode: Element, config: XYChartProps, handlers: IInterpreterRenderHandlers) => {
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+    const formatFactory = await dependencies.formatFactory;
     ReactDOM.render(
       <I18nProvider>
-        <XYChartReportable {...config} {...dependencies} />
+        <XYChartReportable
+          {...config}
+          formatFactory={formatFactory}
+          chartTheme={dependencies.chartTheme}
+          timeZone={dependencies.timeZone}
+        />
       </I18nProvider>,
       domNode,
       () => handlers.done()

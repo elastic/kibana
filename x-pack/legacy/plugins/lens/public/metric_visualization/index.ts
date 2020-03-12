@@ -5,15 +5,14 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { FormatFactory } from '../legacy_imports';
 import { metricVisualization } from './metric_visualization';
 import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
 import { metricChart, getMetricChartRenderer } from './metric_expression';
-import { EditorFrameSetup } from '../types';
+import { EditorFrameSetup, FormatFactory } from '../types';
 
 export interface MetricVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
-  formatFactory: FormatFactory;
+  formatFactory: Promise<FormatFactory>;
   editorFrame: EditorFrameSetup;
 }
 

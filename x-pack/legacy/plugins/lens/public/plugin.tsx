@@ -35,7 +35,6 @@ import {
   getUrlVars,
   getLensUrlFromDashboardAbsoluteUrl,
 } from '../../../../../src/legacy/core_plugins/kibana/public/dashboard/np_ready/url_helper';
-import { FormatFactory } from './legacy_imports';
 import { IEmbeddableSetup, IEmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
@@ -47,7 +46,6 @@ export interface LensPluginSetupDependencies {
   data: DataPublicPluginSetup;
   embeddable: IEmbeddableSetup;
   __LEGACY: {
-    formatFactory: FormatFactory;
     visualizations: VisualizationsSetup;
   };
 }
@@ -84,7 +82,7 @@ export class LensPlugin {
       expressions,
       data,
       embeddable,
-      __LEGACY: { formatFactory, visualizations },
+      __LEGACY: { visualizations },
     }: LensPluginSetupDependencies
   ) {
     const editorFrameSetupInterface = this.editorFrameService.setup(core, {
@@ -96,7 +94,9 @@ export class LensPlugin {
       expressions,
       data,
       editorFrame: editorFrameSetupInterface,
-      formatFactory,
+      formatFactory: core
+        .getStartServices()
+        .then(([_, { data: dataStart }]) => dataStart.fieldFormats.deserialize),
     };
     this.indexpatternDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);

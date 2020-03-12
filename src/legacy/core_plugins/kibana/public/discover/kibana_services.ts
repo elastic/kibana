@@ -77,6 +77,5 @@ export {
   SortDirection,
 } from '../../../../../plugins/data/public';
 export { ElasticSearchHit } from './np_ready/doc_views/doc_views_types';
-export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 // @ts-ignore
 export { buildPointSeriesData } from 'ui/agg_response/point_series/point_series';

@@ -7,16 +7,21 @@
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'src/core/public';
-import { KibanaDatatable } from '../../../../../src/plugins/expressions/public';
+import {
+  KibanaDatatable,
+  SerializedFieldFormat,
+} from '../../../../../src/plugins/expressions/public';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../../../../plugins/lens/common';
-import { Query, Filter, SavedQuery } from '../../../../../src/plugins/data/public';
+import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../../src/plugins/data/public';
 
 // eslint-disable-next-line
 export interface EditorFrameOptions {}
 
 export type ErrorCallback = (e: { message: string }) => void;
+
+export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
 export interface PublicAPIProps<T> {
   state: T;

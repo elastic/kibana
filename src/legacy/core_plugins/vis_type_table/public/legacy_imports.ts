@@ -18,7 +18,6 @@
  */
 
 export { npSetup, npStart } from 'ui/new_platform';
-export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 export { IAggConfig, AggGroupNames, Schemas } from 'ui/agg_types';
 // @ts-ignore
 export { PaginateDirectiveProvider } from 'ui/directives/paginate';

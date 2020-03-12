@@ -23,7 +23,7 @@ import { take } from 'rxjs/operators';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 
-import { getFormat } from '../legacy_imports';
+import { getFormatService } from '../services';
 
 import { Label } from './label';
 import { TagCloud } from './tag_cloud';
@@ -125,7 +125,7 @@ export function createTagCloudVisualization({ colors }) {
 
       const bucket = this._visParams.bucket;
       const metric = this._visParams.metric;
-      const bucketFormatter = bucket ? getFormat(bucket.format) : null;
+      const bucketFormatter = bucket ? getFormatService().deserialize(bucket.format) : null;
       const tagColumn = bucket ? data.columns[bucket.accessor].id : -1;
       const metricColumn = data.columns[metric.accessor].id;
       const tags = data.rows.map((row, rowIndex) => {

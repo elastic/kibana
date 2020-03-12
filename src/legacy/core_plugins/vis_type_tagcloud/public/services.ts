@@ -17,4 +17,9 @@
  * under the License.
  */
 
-export { AggGroupNames, Schemas } from 'ui/agg_types';
+import { createGetterSetter } from '../../../../plugins/kibana_utils/common';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
+
+export const [getFormatService, setFormatService] = createGetterSetter<
+  DataPublicPluginStart['fieldFormats']
+>('data.fieldFormats');

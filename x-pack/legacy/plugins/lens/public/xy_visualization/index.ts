@@ -7,16 +7,15 @@
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { CoreSetup, IUiSettingsClient } from 'src/core/public';
 import moment from 'moment-timezone';
-import { FormatFactory } from '../legacy_imports';
 import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
 import { xyVisualization } from './xy_visualization';
 import { xyChart, getXyChartRenderer } from './xy_expression';
 import { legendConfig, xConfig, layerConfig } from './types';
-import { EditorFrameSetup } from '../types';
+import { EditorFrameSetup, FormatFactory } from '../types';
 
 export interface XyVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
-  formatFactory: FormatFactory;
+  formatFactory: Promise<FormatFactory>;
   editorFrame: EditorFrameSetup;
 }
 
