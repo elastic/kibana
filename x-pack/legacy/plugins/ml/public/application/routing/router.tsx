@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 import { HashRouter, Route, RouteProps } from 'react-router-dom';
 import { Location } from 'history';
 
-import { IUiSettingsClient, ChromeStart } from 'src/core/public';
+import { IUiSettingsClient, ChromeStart } from 'kibana/public';
 import { ChromeBreadcrumb } from 'kibana/public';
 import { IndexPatternsContract } from 'src/plugins/data/public';
 import { MlContext, MlContextValue } from '../contexts/ml';

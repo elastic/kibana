@@ -7,14 +7,11 @@
 import { useReducer, useCallback } from 'react';
 
 import { CaseRequest } from '../../../../../../plugins/case/common/api';
-import { useStateToaster } from '../../components/toasters';
-import { errorToToaster } from '../../components/ml/api/error_to_toaster';
+import { errorToToaster, useStateToaster } from '../../components/toasters';
 
 import { patchCase } from './api';
-import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
 import * as i18n from './translations';
 import { Case } from './types';
-import { getTypedPayload } from './utils';
 
 type UpdateKey = keyof CaseRequest;
 
@@ -30,30 +27,30 @@ export interface UpdateByKey {
   updateValue: CaseRequest[UpdateKey];
 }
 
-interface Action {
-  type: string;
-  payload?: Case | UpdateKey;
-}
+type Action =
+  | { type: 'FETCH_INIT'; payload: UpdateKey }
+  | { type: 'FETCH_SUCCESS'; payload: Case }
+  | { type: 'FETCH_FAILURE' };
 
 const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => {
   switch (action.type) {
-    case FETCH_INIT:
+    case 'FETCH_INIT':
       return {
         ...state,
         isLoading: true,
         isError: false,
-        updateKey: getTypedPayload<UpdateKey>(action.payload),
+        updateKey: action.payload,
       };
 
-    case FETCH_SUCCESS:
+    case 'FETCH_SUCCESS':
       return {
         ...state,
         isLoading: false,
         isError: false,
-        caseData: getTypedPayload<Case>(action.payload),
+        caseData: action.payload,
         updateKey: null,
       };
-    case FETCH_FAILURE:
+    case 'FETCH_FAILURE':
       return {
         ...state,
         isLoading: false,
@@ -61,7 +58,7 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
         updateKey: null,
       };
     default:
-      throw new Error();
+      return state;
   }
 };
 
@@ -81,14 +78,14 @@ export const useUpdateCase = (caseId: string, initialData: Case): UseUpdateCase 
     async ({ updateKey, updateValue }: UpdateByKey) => {
       let cancel = false;
       try {
-        dispatch({ type: FETCH_INIT, payload: updateKey });
+        dispatch({ type: 'FETCH_INIT', payload: updateKey });
         const response = await patchCase(
           caseId,
           { [updateKey]: updateValue },
           state.caseData.version
         );
         if (!cancel) {
-          dispatch({ type: FETCH_SUCCESS, payload: response });
+          dispatch({ type: 'FETCH_SUCCESS', payload: response });
         }
       } catch (error) {
         if (!cancel) {
@@ -97,7 +94,7 @@ export const useUpdateCase = (caseId: string, initialData: Case): UseUpdateCase 
             error: error.body && error.body.message ? new Error(error.body.message) : error,
             dispatchToaster,
           });
-          dispatch({ type: FETCH_FAILURE });
+          dispatch({ type: 'FETCH_FAILURE' });
         }
       }
       return () => {
