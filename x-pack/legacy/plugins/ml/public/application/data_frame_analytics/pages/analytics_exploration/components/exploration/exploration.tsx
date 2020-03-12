@@ -18,8 +18,14 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  Query,
 } from '@elastic/eui';
+
+import {
+  esKuery,
+  esQuery,
+  Query,
+  QueryStringInput,
+} from '../../../../../../../../../../../src/plugins/data/public';
 
 import {
   useColorRange,
@@ -43,10 +49,7 @@ import { isKeywordAndTextType } from '../../../../common/fields';
 
 import { getOutlierScoreFieldName } from './common';
 import { useExploreData, TableItem } from './use_explore_data';
-import {
-  DATA_FRAME_TASK_STATE,
-  Query as QueryType,
-} from '../../../analytics_management/components/analytics_list/common';
+import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { getIndexPatternIdFromName } from '../../../../../util/index_utils';
@@ -57,6 +60,9 @@ import { useMlContext } from '../../../../../contexts/ml';
 const FEATURE_INFLUENCE = 'feature_influence';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
+
+const QUERY_LANGUAGE_KUERY = 'kuery';
+const QUERY_LANGUAGE_LUCENE = 'lucene';
 
 const ExplorationTitle: React.FC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
@@ -85,13 +91,16 @@ const getFeatureCount = (jobConfig?: DataFrameAnalyticsConfig, tableItems: Table
 };
 
 export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
+  const [indexPattern, setIndexPattern] = useState<IIndexPattern | undefined>(undefined);
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
-
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
-
   const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
-  const [searchError, setSearchError] = useState<any>(undefined);
-  const [searchString, setSearchString] = useState<string | undefined>(undefined);
+
+  // The internal state of the input query bar updated on every key stroke.
+  const [searchInput, setSearchInput] = useState<Query>({
+    query: '',
+    language: QUERY_LANGUAGE_KUERY,
+  });
 
   const mlContext = useMlContext();
 
@@ -99,9 +108,10 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
     if (jobConfig !== undefined) {
       const sourceIndex = jobConfig.source.index[0];
       const indexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
-      const indexPattern: IIndexPattern = await mlContext.indexPatterns.get(indexPatternId);
-      if (indexPattern !== undefined) {
-        await newJobCapsService.initializeFromIndexPattern(indexPattern, false, false);
+      const jobCapsIndexPattern: IIndexPattern = await mlContext.indexPatterns.get(indexPatternId);
+      if (jobCapsIndexPattern !== undefined) {
+        setIndexPattern(jobCapsIndexPattern);
+        await newJobCapsService.initializeFromIndexPattern(jobCapsIndexPattern, false, false);
       }
     }
   };
@@ -290,55 +300,27 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
     [setSortingColumns]
   );
 
-  if (columns.length > 0 && sortField !== '') {
-    const onTableChange = ({
-      page = { index: 0, size: 10 },
-      sort = { field: sortField, direction: sortDirection },
-    }) => {
-      if (
-        (sort.field !== sortField || sort.direction !== sortDirection) &&
-        jobConfig !== undefined
-      ) {
-        const outlierScoreFieldName = getOutlierScoreFieldName(jobConfig);
-        let requiresKeyword = false;
-
-        if (outlierScoreFieldName !== sort.field) {
-          requiresKeyword = isKeywordAndTextType(sort.field);
-        }
-        loadExploreData({ ...sort, searchQuery, requiresKeyword });
-      }
-    };
-  }
-
-  const onQueryChange = ({ query, error }: { query: QueryType; error: any }) => {
-    if (error) {
-      setSearchError(error.message);
-    } else {
-      try {
-        const esQueryDsl = Query.toESQuery(query);
-        setSearchQuery(esQueryDsl);
-        setSearchString(query.text);
-        setSearchError(undefined);
-      } catch (e) {
-        setSearchError(e.toString());
-      }
+  const searchChangeHandler = (query: Query) => setSearchInput(query);
+  const searchSubmitHandler = (query: Query) => {
+    switch (query.language) {
+      case QUERY_LANGUAGE_KUERY:
+        setSearchQuery(
+          esKuery.toElasticsearchQuery(
+            esKuery.fromKueryExpression(query.query as string),
+            indexPattern
+          )
+        );
+        return;
+      case QUERY_LANGUAGE_LUCENE:
+        setSearchQuery(esQuery.luceneStringToDsl(query.query as string));
+        return;
     }
   };
 
-  const search = {
-    onChange: onQueryChange,
-    defaultQuery: searchString,
-    box: {
-      incremental: false,
-      placeholder: i18n.translate('xpack.ml.dataframe.analytics.exploration.searchBoxPlaceholder', {
-        defaultMessage: 'E.g. avg>0.5',
-      }),
-    },
-  };
-
-  if (jobConfig === undefined) {
+  if (jobConfig === undefined || indexPattern === undefined) {
     return null;
   }
+
   // if it's a searchBar syntax error leave the table visible so they can try again
   if (status === INDEX_STATUS.ERROR && !errorMessage.includes('parsing_exception')) {
     return (
@@ -360,7 +342,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
   let tableError =
     status === INDEX_STATUS.ERROR && errorMessage.includes('parsing_exception')
       ? errorMessage
-      : searchError;
+      : undefined;
 
   if (status === INDEX_STATUS.LOADED && tableItems.length === 0 && tableError === undefined) {
     tableError = i18n.translate('xpack.ml.dataframe.analytics.exploration.noDataCalloutBody', {
@@ -420,6 +402,29 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <QueryStringInput
+            bubbleSubmitEvent={true}
+            query={searchInput}
+            indexPatterns={[indexPattern]}
+            onChange={searchChangeHandler}
+            onSubmit={searchSubmitHandler}
+            placeholder={
+              searchInput.language === QUERY_LANGUAGE_KUERY
+                ? i18n.translate('xpack.transform.stepDefineForm.queryPlaceholderKql', {
+                    defaultMessage: 'e.g. {example}',
+                    values: { example: 'method : "GET" or status : "404"' },
+                  })
+                : i18n.translate('xpack.transform.stepDefineForm.queryPlaceholderLucene', {
+                    defaultMessage: 'e.g. {example}',
+                    values: { example: 'method:GET OR status:404' },
+                  })
+            }
+            disableAutoFocus={true}
+            dataTestSubj="transformQueryInput"
+            languageSwitcherPopoverAnchorPosition="rightDown"
+          />
+          <EuiSpacer size="s" />
           {columns.length > 0 && tableItems.length > 0 && (
             <EuiDataGrid
               aria-label={i18n.translate(

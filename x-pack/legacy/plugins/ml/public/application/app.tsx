@@ -12,6 +12,7 @@ import 'ace';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { SecurityPluginSetup } from '../../../../../plugins/security/public';
 import { LicensingPluginSetup } from '../../../../../plugins/licensing/public';
 
@@ -31,6 +32,8 @@ interface AppProps {
   coreStart: CoreStart;
   deps: MlDependencies;
 }
+
+const localStorage = new Storage(window.localStorage);
 
 const App: FC<AppProps> = ({ coreStart, deps }) => {
   setDependencyCache({
@@ -69,6 +72,7 @@ const App: FC<AppProps> = ({ coreStart, deps }) => {
     appName: 'ML',
     data: deps.data,
     security: deps.security,
+    storage: localStorage,
     ...coreStart,
   };
 

@@ -19,7 +19,6 @@ import {
   DataFrameAnalyticsConfig,
   EsFieldName,
   INDEX_STATUS,
-  SEARCH_SIZE,
   defaultSearchQuery,
   SearchQuery,
 } from '../../../../common';
@@ -38,6 +37,16 @@ export interface UseExploreDataReturnType {
   status: INDEX_STATUS;
   tableFields: string[];
   tableItems: TableItem[];
+}
+
+// The types specified in `@types/elasticsearch` are out of date and still have `total: number`.
+interface SearchResponse7 extends SearchResponse<any> {
+  hits: SearchResponse<any>['hits'] & {
+    total: {
+      value: number;
+      relation: string;
+    };
+  };
 }
 
 export const useExploreData = (
@@ -82,7 +91,7 @@ export const useExploreData = (
           ];
         }
 
-        const resp: SearchResponse<any> = await ml.esSearch({
+        const resp: SearchResponse7 = await ml.esSearch({
           index: jobConfig.dest.index,
           from: pageIndex * pageSize,
           size: pageSize,
