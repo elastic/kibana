@@ -74,7 +74,7 @@ export const compareFilters = (
   second: Filter | Filter[],
   comparatorOptions: FilterCompareOptions = {}
 ) => {
-  if (first === null || second === null) return false;
+  if (!first || !second) return false;
 
   let comparators: FilterCompareOptions = {};
 
