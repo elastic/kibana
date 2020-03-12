@@ -52,9 +52,10 @@ export const useDataInit = () => {
         ]);
         if (!results.length) {
           const newObject = await objectStorageClient.text.create({
+            // Do not set a text value here so that the default text value
+            // is used.
             createdAt: Date.now(),
             updatedAt: Date.now(),
-            text: '',
             isScratchPad: true,
           });
           dispatch({ type: 'upsertAndSetCurrent', payload: newObject });
