@@ -58,7 +58,14 @@ export const convertFiltersToObject = (filters: Filters) => {
   const convertedFilters = Object.fromEntries(
     filters
       .filter(([key, value]) => !isEmpty(key) && !isEmpty(value))
-      .map(([key, value]) => [key, value.split(',').map(v => v.trim())])
+      .map(([key, value]) => [
+        key,
+        // Splits the value by comma, removes whitespace from both ends and filters out empty values
+        value
+          .split(',')
+          .map(v => v.trim())
+          .filter(v => v)
+      ])
   );
   if (!isEmpty(convertedFilters)) {
     return convertedFilters;
