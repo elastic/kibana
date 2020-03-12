@@ -28,7 +28,7 @@ export class DashboardToDashboardDrilldown
 
   public readonly id = DASHBOARD_TO_DASHBOARD_DRILLDOWN;
 
-  public readonly order = 5;
+  public readonly order = 100;
 
   public readonly getDisplayName = () => txtGoToDashboard;
 
