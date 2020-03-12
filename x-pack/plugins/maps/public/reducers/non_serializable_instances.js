@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
-import { RequestAdapter } from '../../../../../../src/plugins/inspector/public';
+import { RequestAdapter } from '../../../../../src/plugins/inspector/common/adapters/request';
 import { MapAdapter } from '../inspector/adapters/map_adapter';
+import { getInjectedVarFunc } from '../kibana_services';
 
 const REGISTER_CANCEL_CALLBACK = 'REGISTER_CANCEL_CALLBACK';
 const UNREGISTER_CANCEL_CALLBACK = 'UNREGISTER_CANCEL_CALLBACK';
@@ -16,7 +16,8 @@ function createInspectorAdapters() {
   const inspectorAdapters = {
     requests: new RequestAdapter(),
   };
-  if (chrome.getInjected('showMapsInspectorAdapter', false)) {
+  const getInjectedVar = getInjectedVarFunc();
+  if (getInjectedVar && getInjectedVar('showMapsInspectorAdapter', false)) {
     inspectorAdapters.map = new MapAdapter();
   }
   return inspectorAdapters;
