@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 
 import { AlertServices } from '../../../../../../plugins/alerting/server';
