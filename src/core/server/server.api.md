@@ -776,18 +776,21 @@ export class ElasticsearchErrorHelpers {
 
 // @public (undocumented)
 export interface ElasticsearchServiceSetup {
-    // @deprecated
+    // @deprecated (undocumented)
     readonly adminClient: IClusterClient;
-    // @deprecated
+    // @deprecated (undocumented)
     readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
-    // @deprecated
+    // @deprecated (undocumented)
     readonly dataClient: IClusterClient;
 }
 
 // @public (undocumented)
 export interface ElasticsearchServiceStart {
-    readonly client: IClusterClient;
-    readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
+    // (undocumented)
+    legacy: {
+        readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
+        readonly client: IClusterClient;
+    };
 }
 
 // @public (undocumented)

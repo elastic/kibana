@@ -194,8 +194,10 @@ export class ElasticsearchService
       throw new Error('ElasticsearchService needs to be setup before calling start');
     } else {
       return {
-        client: this.adminClient,
-        createClient: this.createClient,
+        legacy: {
+          client: this.adminClient,
+          createClient: this.createClient,
+        },
       };
     }
   }

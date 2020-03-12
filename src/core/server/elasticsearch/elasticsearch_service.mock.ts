@@ -67,19 +67,23 @@ const createSetupContractMock = () => {
   return setupContract;
 };
 
-type MockedElasticSearchServiceStart = jest.Mocked<
-  ElasticsearchServiceStart & {
+type MockedElasticSearchServiceStart = {
+  legacy: jest.Mocked<ElasticsearchServiceStart['legacy']>;
+} & {
+  legacy: {
     client: jest.Mocked<IClusterClient>;
-  }
->;
+  };
+};
 
 const createStartContractMock = () => {
   const startContract: MockedElasticSearchServiceStart = {
-    createClient: jest.fn(),
-    client: createClusterClientMock(),
+    legacy: {
+      createClient: jest.fn(),
+      client: createClusterClientMock(),
+    },
   };
-  startContract.createClient.mockReturnValue(createCustomClusterClientMock());
-  startContract.client.asScoped.mockReturnValue(createScopedClusterClientMock());
+  startContract.legacy.createClient.mockReturnValue(createCustomClusterClientMock());
+  startContract.legacy.client.asScoped.mockReturnValue(createScopedClusterClientMock());
   return startContract;
 };
 
