@@ -82,7 +82,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
      * their own search collector instances
      */
     const searchInterceptor = new SearchInterceptor(
-      core.injectedMetadata.getInjectedVar('esRequestTimeout')
+      core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
     );
 
     return {

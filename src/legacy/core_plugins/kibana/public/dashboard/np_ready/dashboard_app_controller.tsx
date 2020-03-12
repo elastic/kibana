@@ -109,7 +109,7 @@ export class DashboardAppController {
     share,
     dashboardCapabilities,
     embeddableCapabilities: { visualizeCapabilities, mapsCapabilities },
-    data: { query: queryService, search: searchService },
+    data: { query: queryService },
     core: {
       notifications,
       overlays,

@@ -93,6 +93,7 @@ export interface ISearchStart {
   aggs: SearchAggsStart;
   cancelPendingSearches: () => void;
   getPendingSearchesCount$: () => Observable<number>;
+  runBeyondTimeout: () => void;
   search: ISearchGeneric;
   __LEGACY: {
     esClient: LegacyApiCaller;
