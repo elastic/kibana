@@ -18,6 +18,9 @@ type DataMock = Omit<DataPublicStartMock, 'indexPatterns' | 'query'> & {
       setFilters: jest.Mock;
     };
   };
+  ui: DataPublicStartMock['ui'] & {
+    SearchBar: jest.Mock;
+  };
 };
 
 export interface DepsStartMock {
@@ -28,6 +31,7 @@ export const depsStartMock: () => DepsStartMock = () => {
   const dataMock: DataMock = (dataPluginMock.createStartContract() as unknown) as DataMock;
   dataMock.indexPatterns.getFieldsForWildcard = jest.fn();
   dataMock.query.filterManager.setFilters = jest.fn();
+  dataMock.ui.SearchBar = jest.fn();
 
   return {
     data: dataMock,

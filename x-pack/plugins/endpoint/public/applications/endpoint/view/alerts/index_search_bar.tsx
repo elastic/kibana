@@ -63,6 +63,7 @@ export const AlertIndexSearchBar = memo(() => {
     <div>
       {searchBarIndexPatterns.length > 0 && (
         <SearchBar
+          dataTestSubj="alertsSearchBar"
           appName="endpoint"
           isLoading={false}
           indexPatterns={searchBarIndexPatterns}

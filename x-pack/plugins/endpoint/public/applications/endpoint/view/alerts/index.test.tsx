@@ -9,6 +9,7 @@ import * as reactTestingLibrary from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n/react';
 import { AlertIndex } from './index';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { appStoreFactory } from '../../store';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { fireEvent, act } from '@testing-library/react';
@@ -36,6 +37,7 @@ describe('when on the alerting page', () => {
     store = appStoreFactory();
 
     depsStart = depsStartMock();
+    depsStart.data.ui.SearchBar.mockImplementation(() => <div />);
 
     /**
      * Render the test component, use this after setting up anything in `beforeEach`.
@@ -165,6 +167,67 @@ describe('when on the alerting page', () => {
       it('should have a page_index of 0', () => {
         expect(history.location.search).toBe('?page_size=10');
       });
+    });
+  });
+  describe('when there are filtering params in the url', () => {
+    let indexPatterns: IIndexPattern[];
+    beforeEach(() => {
+      /**
+       * Dispatch the `serverReturnedSearchBarIndexPatterns` action, which is normally dispatched by the middleware
+       * when the page loads. The SearchBar will not render if there are no indexPatterns in the state.
+       */
+      indexPatterns = [
+        { title: 'endpoint-events-1', fields: [{ name: 'host.hostname', type: 'string' }] },
+      ];
+      reactTestingLibrary.act(() => {
+        const action: AppAction = {
+          type: 'serverReturnedSearchBarIndexPatterns',
+          payload: indexPatterns,
+        };
+        store.dispatch(action);
+      });
+
+      const searchBarQueryParam =
+        '(language%3Akuery%2Cquery%3A%27host.hostname%20%3A%20"DESKTOP-QBBSCUT"%27)';
+      const searchBarDateRangeParam = '(from%3Anow-1y%2Cto%3Anow)';
+      reactTestingLibrary.act(() => {
+        history.push({
+          ...history.location,
+          search: `?query=${searchBarQueryParam}&date_range=${searchBarDateRangeParam}`,
+        });
+      });
+    });
+    it("should render the SearchBar component with the correct 'indexPatterns' prop", async () => {
+      render();
+      const callProps = depsStart.data.ui.SearchBar.mock.calls[0][0];
+      expect(callProps.indexPatterns).toEqual(indexPatterns);
+    });
+    it("should render the SearchBar component with the correct 'query' prop", async () => {
+      render();
+      const callProps = depsStart.data.ui.SearchBar.mock.calls[0][0];
+      const expectedProp = { query: 'host.hostname : "DESKTOP-QBBSCUT"', language: 'kuery' };
+      expect(callProps.query).toEqual(expectedProp);
+    });
+    it("should render the SearchBar component with the correct 'dateRangeFrom' prop", async () => {
+      render();
+      const callProps = depsStart.data.ui.SearchBar.mock.calls[0][0];
+      const expectedProp = 'now-1y';
+      expect(callProps.dateRangeFrom).toEqual(expectedProp);
+    });
+    it("should render the SearchBar component with the correct 'dateRangeTo' prop", async () => {
+      render();
+      const callProps = depsStart.data.ui.SearchBar.mock.calls[0][0];
+      const expectedProp = 'now';
+      expect(callProps.dateRangeTo).toEqual(expectedProp);
+    });
+    it('should render the SearchBar component with the correct display props', async () => {
+      render();
+      const callProps = depsStart.data.ui.SearchBar.mock.calls[0][0];
+      expect(callProps.showFilterBar).toBe(true);
+      expect(callProps.showDatePicker).toBe(true);
+      expect(callProps.showQueryBar).toBe(true);
+      expect(callProps.showQueryInput).toBe(true);
+      expect(callProps.showSaveQuery).toBe(false);
     });
   });
 });
