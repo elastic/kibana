@@ -19,7 +19,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { collapseLiteralStrings } from '../../../../../../../../shared_imports';
-import { Datafeed } from '../../../../common/job_creator/configs';
+import { Datafeed } from '../../../../../../../../common/types/anomaly_detection_jobs';
 import { ML_EDITOR_MODE, MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { isValidJson } from '../../../../../../../../common/util/validation_utils';
 import { JobCreatorContext } from '../../job_creator_context';
