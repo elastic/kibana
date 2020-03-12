@@ -24,7 +24,7 @@ import webpackMerge from 'webpack-merge';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
-import { DisallowedSyntaxPlugin } from './disallowed_syntax_plugin';
+import { DisallowedSyntaxPlugin } from '@kbn/optimizer';
 
 function generateDLL(config) {
   const {

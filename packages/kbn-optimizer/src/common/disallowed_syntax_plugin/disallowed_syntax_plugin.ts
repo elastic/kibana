@@ -18,9 +18,11 @@
  */
 
 import webpack from 'webpack';
-import normalizePath from 'normalize-path';
+import acorn from 'acorn';
 import { full as walkFullProgram } from 'acorn-walk';
+
 import { checksByNodeType, DisallowedSyntaxCheck } from './disallowed_syntax';
+import { parseFilePath } from '../parse_path';
 
 export class DisallowedSyntaxPlugin {
   apply(compiler: webpack.Compiler) {
@@ -28,15 +30,12 @@ export class DisallowedSyntaxPlugin {
       factory.hooks.parser.for('javascript/auto').tap(DisallowedSyntaxPlugin.name, parser => {
         parser.hooks.program.tap(DisallowedSyntaxPlugin.name, (program: acorn.Node) => {
           const module = parser.state?.current;
-          if (!module || !module?.resource) {
+          if (!module || !module.resource) {
             return;
           }
 
           const resource: string = module.resource;
-          const [filePath] = resource.split('?');
-          const dirs = normalizePath(filePath)
-            .split('/')
-            .slice(0, -1);
+          const { dirs } = parseFilePath(resource);
 
           if (!dirs.includes('node_modules')) {
             return;
