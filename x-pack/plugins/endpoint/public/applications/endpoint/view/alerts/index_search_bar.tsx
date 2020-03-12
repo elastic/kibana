@@ -8,7 +8,7 @@ import React from 'react';
 import { memo, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { encode, RisonValue } from 'rison-node';
-import { Query, TimeRange, Filter } from 'src/plugins/data/public';
+import { Query, TimeRange } from 'src/plugins/data/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { urlFromQueryParams } from './url_from_query_params';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
@@ -29,22 +29,24 @@ export const AlertIndexSearchBar = memo(() => {
     query: { filterManager },
   } = kibanaContext.services.data;
 
-  // Update the the filters in filterManager when the filters url value (searchBarFilters) changes
   useEffect(() => {
+    // Update the the filters in filterManager when the filters url value (searchBarFilters) changes
     filterManager.setFilters(searchBarFilters);
-  }, [filterManager, searchBarFilters]);
 
-  const onFiltersUpdated = useCallback(
-    (filters: Filter[]) => {
-      history.push(
-        urlFromQueryParams({
-          ...queryParams,
-          filters: encode((filters as unknown) as RisonValue),
-        })
-      );
-    },
-    [queryParams, history]
-  );
+    const filterSubscription = filterManager.getUpdates$().subscribe({
+      next: () => {
+        history.push(
+          urlFromQueryParams({
+            ...queryParams,
+            filters: encode((filterManager.getFilters() as unknown) as RisonValue),
+          })
+        );
+      },
+    });
+    return () => {
+      filterSubscription.unsubscribe();
+    };
+  }, [filterManager, history, queryParams, searchBarFilters]);
 
   const onQuerySubmit = useCallback(
     (params: { dateRange: TimeRange; query?: Query }) => {
@@ -71,7 +73,6 @@ export const AlertIndexSearchBar = memo(() => {
           dateRangeFrom={searchBarDateRange.from}
           dateRangeTo={searchBarDateRange.to}
           onQuerySubmit={onQuerySubmit}
-          onFiltersUpdated={onFiltersUpdated}
           showFilterBar={true}
           showDatePicker={true}
           showQueryBar={true}
