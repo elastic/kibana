@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import { spawn } from 'child_process';
 import { resolve } from 'path';
-import { green, always as F } from '../utils';
+import { green, always } from '../utils';
 
 import { STATIC_SITE_URL_PROP_NAME, TOTALS_INDEX, COVERAGE_INDEX } from '../constants';
 
@@ -29,6 +29,7 @@ const MOCKS_DIR = resolve(__dirname, './mocks');
 const staticSiteUrlRegexes = {
   staticHostIncluded: /https:\/\/kibana-coverage\.elastic\.dev/,
   timeStampIncluded: /\d{4}-\d{2}-\d{2}T\d{2}.*\d{2}.*\d{2}Z/,
+  folderStructureIncluded: /(?:.*|.*-combined)\//,
 };
 const env = {
   BUILD_ID: 407,
@@ -100,11 +101,10 @@ describe('Ingesting Coverage to Cluster', () => {
 
         it(
           'should result in every posted item having a site url that meets all regex assertions',
-          F(
+          always(
             siteUrlsSplitByNewLineWithoutBlanks(mutableCoverageIndexChunks).forEach(
               expectAllRegexesToPass({
                 ...staticSiteUrlRegexes,
-                folderStructureIncluded: /\/(?:.*|.*-combined)\//,
                 endsInDotJsDotHtml: /.js.html$/,
               })
             )
@@ -141,12 +141,9 @@ describe('Ingesting Coverage to Cluster', () => {
 
         it(
           'should result in every posted item having a site url that meets all regex assertions',
-          F(
+          always(
             siteUrlsSplitByNewLineWithoutBlanks(mutableBothIndexesChunks).forEach(
-              expectAllRegexesToPass({
-                ...staticSiteUrlRegexes,
-                folderStructureIncluded: /live_cc_app\/coverage_data\/(?:.*|.*-combined)\//,
-              })
+              expectAllRegexesToPass(staticSiteUrlRegexes)
             )
           )
         );
@@ -181,7 +178,7 @@ function specificLinesOnly(predicate) {
 }
 
 function notBlankLines(acc, item) {
-  if (item != '') return item;
+  if (item !== '') return item;
   return acc;
 }
 

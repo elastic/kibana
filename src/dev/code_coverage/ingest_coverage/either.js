@@ -17,6 +17,9 @@
  * under the License.
  */
 
+/* eslint new-cap: 0 */
+/* eslint no-unused-vars: 0 */
+
 export const Right = x => ({
   chain: f => f(x),
   map: f => Right(f(x)),
