@@ -16,6 +16,8 @@ import { Sort } from '../sort';
 
 import { Header } from './header';
 
+const RESIZABLE_ENABLE = { right: true };
+
 interface ColumneHeaderProps {
   draggableIndex: number;
   header: ColumnHeaderOptions;
@@ -39,7 +41,6 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
   onFilterChange,
   sort,
 }) => {
-  const resizableEnable = useMemo(() => ({ right: true }), []);
   const resizableSize = useMemo(
     () => ({
       width: header.width,
@@ -78,7 +79,7 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
 
   return (
     <Resizable
-      enable={resizableEnable}
+      enable={RESIZABLE_ENABLE}
       size={resizableSize}
       style={resizableStyle}
       handleComponent={resizableHandleComponent}

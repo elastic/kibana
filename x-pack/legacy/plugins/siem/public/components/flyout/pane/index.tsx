@@ -38,6 +38,8 @@ const StyledResizable = styled(Resizable)`
   flex-direction: column;
 `;
 
+const RESIZABLE_ENABLE = { left: true };
+
 const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
   children,
   flyoutHeight,
@@ -69,7 +71,6 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
   );
   const resetLastDelta = useCallback(() => setLastDelta(0), [setLastDelta]);
   const throttledResize = throttle(100, onResizeStop);
-  const resizableEnable = useMemo(() => ({ left: true }), []);
   const resizableDefaultSize = useMemo(
     () => ({
       width,
@@ -95,7 +96,7 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
         size="l"
       >
         <StyledResizable
-          enable={resizableEnable}
+          enable={RESIZABLE_ENABLE}
           defaultSize={resizableDefaultSize}
           minWidth={minWidthPixels}
           maxWidth={`${maxWidthPercent}vw`}

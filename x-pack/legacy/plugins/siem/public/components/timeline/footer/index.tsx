@@ -338,18 +338,6 @@ export const FooterComponent = ({
 
 FooterComponent.displayName = 'FooterComponent';
 
-export const Footer = React.memo(
-  FooterComponent,
-  (prevProps, nextProps) =>
-    prevProps.compact === nextProps.compact &&
-    prevProps.hasNextPage === nextProps.hasNextPage &&
-    prevProps.height === nextProps.height &&
-    prevProps.isLive === nextProps.isLive &&
-    prevProps.isLoading === nextProps.isLoading &&
-    prevProps.itemsCount === nextProps.itemsCount &&
-    prevProps.itemsPerPage === nextProps.itemsPerPage &&
-    prevProps.itemsPerPageOptions === nextProps.itemsPerPageOptions &&
-    prevProps.serverSideEventCount === nextProps.serverSideEventCount
-);
+export const Footer = React.memo(FooterComponent);
 
 Footer.displayName = 'Footer';
