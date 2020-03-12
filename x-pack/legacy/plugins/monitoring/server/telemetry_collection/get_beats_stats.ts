@@ -343,6 +343,7 @@ async function fetchBeatsByType(
       'hits.hits._source.beats_stats.metrics.libbeat.output.type',
       'hits.hits._source.beats_state.state.input',
       'hits.hits._source.beats_state.state.module',
+      'hits.hits._source.beats_state.state.queue',
       'hits.hits._source.beats_state.state.host',
       'hits.hits._source.beats_state.state.heartbeat',
       'hits.hits._source.beats_state.beat.type',
