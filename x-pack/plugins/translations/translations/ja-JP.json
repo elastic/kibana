@@ -12427,7 +12427,6 @@
     "xpack.transform.stepDefineForm.nestedGroupByListConflictErrorMessage": "「{groupByListName}」とネスティングの矛盾があるため、構成「{aggName}」を追加できませんでした。",
     "xpack.transform.stepDefineForm.queryHelpText": "クエリ文字列でソースデータをフィルタリングしてください (オプション)。",
     "xpack.transform.stepDefineForm.queryLabel": "クエリ",
-    "xpack.transform.stepDefineForm.queryPlaceholder": "例: {example}.",
     "xpack.transform.stepDefineForm.savedSearchLabel": "保存検索",
     "xpack.transform.stepDefineSummary.aggregationsLabel": "アグリゲーション（集計）",
     "xpack.transform.stepDefineSummary.groupByLabel": "グループ分けの条件",

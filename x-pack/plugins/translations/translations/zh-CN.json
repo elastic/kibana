@@ -12427,7 +12427,6 @@
     "xpack.transform.stepDefineForm.nestedGroupByListConflictErrorMessage": "无法添加配置“{aggName}”，因为与“{groupByListName}”有嵌套冲突。",
     "xpack.transform.stepDefineForm.queryHelpText": "使用查询字符串筛选源数据（可选）。",
     "xpack.transform.stepDefineForm.queryLabel": "查询",
-    "xpack.transform.stepDefineForm.queryPlaceholder": "例如，{example}",
     "xpack.transform.stepDefineForm.savedSearchLabel": "已保存搜索",
     "xpack.transform.stepDefineSummary.aggregationsLabel": "聚合",
     "xpack.transform.stepDefineSummary.groupByLabel": "分组依据",
