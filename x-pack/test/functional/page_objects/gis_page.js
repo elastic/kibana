@@ -515,9 +515,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async uploadJsonFileForIndexing(path) {
-      log.debug(`Setting the path on the file input`);
-      const input = await find.byCssSelector('.euiFilePicker__input');
-      await input.type(path);
+      await PageObjects.common.setFileInputPath(path);
       log.debug(`File selected`);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
