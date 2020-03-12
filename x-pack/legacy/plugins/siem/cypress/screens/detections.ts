@@ -14,7 +14,9 @@ export const NUMBER_OF_SIGNALS = '[data-test-subj="server-side-event-count"]';
 
 export const OPEN_CLOSE_SIGNALS_BTN = '[data-test-subj="openCloseSignal"] .siemLinkIcon__label';
 
-export const OPENED_SIGNALS_BTN = '[data-test-subj=openSignals]';
+export const OPENED_SIGNALS_BTN = '[data-test-subj="openSignals"]';
+
+export const SELECTED_SIGNALS = '[data-test-subj="selectedSignals"]';
 
 export const SHOWING_SIGNALS = '[data-test-subj="showingSignals"]';
 

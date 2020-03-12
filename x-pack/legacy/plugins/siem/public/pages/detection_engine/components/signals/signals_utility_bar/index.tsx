@@ -73,7 +73,7 @@ const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
           <UtilityBarGroup>
             {canUserCRUD && hasIndexWrite && (
               <>
-                <UtilityBarText>
+                <UtilityBarText dataTestSubj="selectedSignals">
                   {i18n.SELECTED_SIGNALS(
                     showClearSelection ? formattedTotalCount : formattedSelectedEventsCount,
                     showClearSelection ? totalCount : Object.keys(selectedEventIds).length

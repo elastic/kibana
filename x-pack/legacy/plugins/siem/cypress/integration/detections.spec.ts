@@ -3,7 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { NUMBER_OF_SIGNALS, SHOWING_SIGNALS, SIGNALS } from '../screens/detections';
+import {
+  NUMBER_OF_SIGNALS,
+  SELECTED_SIGNALS,
+  SHOWING_SIGNALS,
+  SIGNALS,
+} from '../screens/detections';
 
 import {
   closeSignals,
@@ -39,6 +44,11 @@ describe('Detections', () => {
 
         const numberOfSignalsToBeClosed = 3;
         selectNumberOfSignals(numberOfSignalsToBeClosed);
+
+        cy.get(SELECTED_SIGNALS)
+          .invoke('text')
+          .should('eql', `Selected ${numberOfSignalsToBeClosed} signals`);
+
         closeSignals();
         waitForSignals();
         cy.reload();
@@ -65,6 +75,11 @@ describe('Detections', () => {
 
         const numberOfSignalsToBeOpened = 1;
         selectNumberOfSignals(numberOfSignalsToBeOpened);
+
+        cy.get(SELECTED_SIGNALS)
+          .invoke('text')
+          .should('eql', `Selected ${numberOfSignalsToBeOpened} signal`);
+
         openSignals();
         waitForSignals();
         cy.reload();
