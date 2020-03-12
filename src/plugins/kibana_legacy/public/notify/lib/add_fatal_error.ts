@@ -23,12 +23,6 @@ import {
   isAngularHttpError,
 } from './format_angular_http_error';
 
-export function addFatalErrorCallback(fatalErrors: FatalErrorsSetup, callback: () => void) {
-  fatalErrors.get$().subscribe(() => {
-    callback();
-  });
-}
-
 export function addFatalError(
   fatalErrors: FatalErrorsSetup,
   error: AngularHttpError | Error | string,
