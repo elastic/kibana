@@ -45,6 +45,7 @@ export function generatePngObservableFactory(
     }).pipe(
       map((results: ScreenshotResults[]) => {
         if (apmScreenshots) apmScreenshots.end();
+        if (apmTrans) apmTrans.end();
 
         return {
           buffer: results[0].screenshots[0].base64EncodedData,
@@ -58,7 +59,6 @@ export function generatePngObservableFactory(
       })
     );
 
-    if (apmTrans) apmTrans.end();
     return screenshots$;
   };
 }

@@ -100,6 +100,8 @@ export function generatePdfObservableFactory(
           logger.error(`Could not generate the PDF buffer! ${err}`);
         }
 
+        tracker.end();
+
         return {
           buffer,
           warnings: results.reduce((found, current) => {
@@ -112,7 +114,6 @@ export function generatePdfObservableFactory(
       })
     );
 
-    tracker.end();
     return screenshots$;
   };
 }
