@@ -28,12 +28,14 @@ import { isRangeValid } from './is_range_valid';
 
 export type ValueMember = EuiDualRangeProps['value'][0];
 
-interface Props extends Omit<EuiDualRangeProps, 'value' | 'onChange'> {
+interface Props extends Omit<EuiDualRangeProps, 'value' | 'onChange' | 'min' | 'max'> {
   value?: [ValueMember, ValueMember] | undefined;
   allowEmptyRange?: boolean;
   label?: string;
   formRowDisplay?: EuiFormRowDisplayKeys;
-  onChange?: (val: [ValueMember, ValueMember]) => void;
+  onChange?: (val: [string, string]) => void;
+  min?: ValueMember;
+  max?: ValueMember;
 }
 
 interface State {
