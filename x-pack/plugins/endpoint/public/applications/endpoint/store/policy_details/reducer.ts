@@ -7,6 +7,7 @@
 import { Reducer } from 'redux';
 import { PolicyDetailsState } from '../../types';
 import { AppAction } from '../action';
+import { isOnPolicyDetailsPage } from './selectors';
 
 const initialPolicyDetailsState = (): PolicyDetailsState => {
   return {
@@ -35,10 +36,6 @@ export const policyDetailsReducer: Reducer<PolicyDetailsState, AppAction> = (
       ...action.payload,
       isLoading: false,
     };
-  }
-
-  if (action.type === 'userNavigatedFromPage' && action.payload === 'policyDetailsPage') {
-    return initialPolicyDetailsState();
   }
 
   if (action.type === 'userChangedUrl') {

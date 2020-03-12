@@ -336,7 +336,7 @@ export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
 /**
  * The PageId type is used for the payload when firing userNavigatedToPage actions
  */
-export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage' | 'policyDetailsPage';
+export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';
 
 /**
  * Takes a @kbn/config-schema 'schema' type and returns a type that represents valid inputs.

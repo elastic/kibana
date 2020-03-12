@@ -5,14 +5,14 @@
  */
 
 import { MiddlewareFactory, PolicyDetailsState } from '../../types';
-import { selectPolicyIdFromParams } from './selectors';
+import { selectPolicyIdFromParams, isOnPolicyDetailsPage } from './selectors';
 
 export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsState> = coreStart => {
   return ({ getState, dispatch }) => next => async action => {
     next(action);
+    const state = getState();
 
-    if (action.type === 'userNavigatedToPage' && action.payload === 'policyDetailsPage') {
-      const state = getState();
+    if (action.type === 'userChangedUrl' && isOnPolicyDetailsPage(state)) {
       const id = selectPolicyIdFromParams(state);
 
       const { getFakeDatasourceDetailsApiResponse } = await import('../policy_list/fake_data');

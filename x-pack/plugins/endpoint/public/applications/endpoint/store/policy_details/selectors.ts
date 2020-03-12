@@ -9,6 +9,15 @@ import { PolicyDetailsState } from '../../types';
 
 export const selectPolicyDetails = (state: PolicyDetailsState) => state.policyItem;
 
+export const isOnPolicyDetailsPage = (state: PolicyDetailsState) => {
+  if (state.location) {
+    const pathnameParts = state.location.pathname.split('/');
+    return pathnameParts[1] === 'policy' && pathnameParts[2];
+  } else {
+    return false;
+  }
+};
+
 export const selectPolicyIdFromParams: (state: PolicyDetailsState) => string = createSelector(
   (state: PolicyDetailsState) => state.location,
   (location: PolicyDetailsState['location']) => {
