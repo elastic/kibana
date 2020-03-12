@@ -18,23 +18,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ValueMember } from "./validated_dual_range";
 
 const LOWER_VALUE_INDEX = 0;
 const UPPER_VALUE_INDEX = 1;
 
-type RangeValue = string | number;
-
 export function isRangeValid(
-  value: RangeValue[] = [0, 0],
-  min: RangeValue = 0,
-  max: RangeValue = 0,
+  value: ValueMember[] = [0, 0],
+  min: ValueMember = 0,
+  max: ValueMember = 0,
   allowEmptyRange?: boolean
 ) {
   allowEmptyRange = typeof allowEmptyRange === 'boolean' ? allowEmptyRange : true; // cannot use default props since that uses falsy check
-  let lowerValue: RangeValue = isNaN(value[LOWER_VALUE_INDEX] as number)
+  let lowerValue: ValueMember = isNaN(value[LOWER_VALUE_INDEX] as number)
     ? ''
     : `${value[LOWER_VALUE_INDEX]}`;
-  let upperValue: RangeValue = isNaN(value[UPPER_VALUE_INDEX] as number)
+  let upperValue: ValueMember = isNaN(value[UPPER_VALUE_INDEX] as number)
     ? ''
     : `${value[UPPER_VALUE_INDEX]}`;
 

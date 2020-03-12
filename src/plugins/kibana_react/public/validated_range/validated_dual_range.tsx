@@ -18,38 +18,34 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes, { ReactNodeLike, Requireable } from 'prop-types';
-import { EuiFormRow, EuiDualRange, EuiRangeProps } from '@elastic/eui';
+import { EuiFormRow, EuiDualRange } from '@elastic/eui';
 import { EuiFormRowDisplayKeys } from '@elastic/eui/src/components/form/form_row/form_row';
 import { isRangeValid } from './is_range_valid';
+import { EuiDualRangeProps } from "@elastic/eui/src/components/form/range/dual_range";
 
 // Wrapper around EuiDualRange that ensures onChange callback is only called when range value
 // is valid and within min/max
 
-interface ValidatedRangeValues extends Omit<EuiRangeProps, 'value'> {
-  value?: [number | string, number | string] | undefined;
+export type ValueMember = EuiDualRangeProps['value'][0];
+
+interface Props extends Omit<EuiDualRangeProps, 'value' | 'onChange'> {
+  value?: [ValueMember, ValueMember] | undefined;
   allowEmptyRange?: boolean;
   label?: string;
   formRowDisplay?: EuiFormRowDisplayKeys;
+  onChange?: (val: [ValueMember, ValueMember]) => void;
 }
 
-interface ValidateDualRangeState {
+interface State {
   isValid?: boolean;
   errorMessage?: string;
-  value: [number | string, number | string];
+  value: [ValueMember, ValueMember];
 }
 
-export class ValidatedDualRange extends Component<ValidatedRangeValues> {
+export class ValidatedDualRange extends Component<Props> {
   static defaultProps: { fullWidth: boolean; allowEmptyRange: boolean; compressed: boolean };
-  static propTypes: {
-    fullWidth: Requireable<boolean>;
-    allowEmptyRange: Requireable<boolean>;
-    formRowDisplay: Requireable<string>;
-    compressed: Requireable<boolean>;
-    label: Requireable<ReactNodeLike>;
-  };
 
-  static getDerivedStateFromProps(nextProps: ValidatedRangeValues, prevState: any) {
+  static getDerivedStateFromProps(nextProps: Props, prevState: any) {
     if (nextProps.value !== prevState.prevValue) {
       const { isValid, errorMessage } = isRangeValid(
         nextProps.value,
@@ -68,7 +64,7 @@ export class ValidatedDualRange extends Component<ValidatedRangeValues> {
     return null;
   }
 
-  state: ValidateDualRangeState = {
+  state: State = {
     value: ['0', '0'],
   };
 
@@ -86,8 +82,8 @@ export class ValidatedDualRange extends Component<ValidatedRangeValues> {
       errorMessage,
     });
 
-    if (this.props.onChange) {
-      this.props.onChange(value, isValid);
+    if (this.props.onChange && isValid) {
+      this.props.onChange(value);
     }
   };
 
@@ -126,14 +122,6 @@ export class ValidatedDualRange extends Component<ValidatedRangeValues> {
     );
   }
 }
-
-ValidatedDualRange.propTypes = {
-  allowEmptyRange: PropTypes.bool,
-  fullWidth: PropTypes.bool,
-  compressed: PropTypes.bool,
-  label: PropTypes.node,
-  formRowDisplay: PropTypes.string,
-};
 
 ValidatedDualRange.defaultProps = {
   allowEmptyRange: true,
