@@ -25,6 +25,7 @@ import {
 } from '../../../../common/types/anomaly_detection_jobs';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { FieldRequestConfig } from '../../datavisualizer/index_based/common';
+import { DataRecognizerConfigResponse, Module } from '../../../../common/types/modules';
 
 export interface MlInfoResponse {
   defaults: MlServerDefaults;
@@ -339,8 +340,8 @@ export const ml = {
     });
   },
 
-  getDataRecognizerModule<T>({ moduleId }: { moduleId: string }): Promise<T> {
-    return http<T>({
+  getDataRecognizerModule({ moduleId }: { moduleId: string }) {
+    return http<Module>({
       path: `${basePath()}/modules/get_module/${moduleId}`,
       method: 'GET',
     });
@@ -353,7 +354,7 @@ export const ml = {
     });
   },
 
-  setupDataRecognizerConfig<T>({
+  setupDataRecognizerConfig({
     moduleId,
     prefix,
     groups,
@@ -375,7 +376,7 @@ export const ml = {
     start?: number;
     end?: number;
     jobOverrides?: Array<Partial<Job>>;
-  }): Promise<T> {
+  }) {
     const body = JSON.stringify({
       prefix,
       groups,
@@ -388,14 +389,14 @@ export const ml = {
       jobOverrides,
     });
 
-    return http<T>({
+    return http<DataRecognizerConfigResponse>({
       path: `${basePath()}/modules/setup/${moduleId}`,
       method: 'POST',
       body,
     });
   },
 
-  getVisualizerFieldStats<T>({
+  getVisualizerFieldStats({
     indexPatternTitle,
     query,
     timeFieldName,
@@ -415,7 +416,7 @@ export const ml = {
     interval?: string;
     fields?: FieldRequestConfig[];
     maxExamples?: number;
-  }): Promise<T> {
+  }) {
     const body = JSON.stringify({
       query,
       timeFieldName,
@@ -427,7 +428,7 @@ export const ml = {
       maxExamples,
     });
 
-    return http<T>({
+    return http<any>({
       path: `${basePath()}/data_visualizer/get_field_stats/${indexPatternTitle}`,
       method: 'POST',
       body,

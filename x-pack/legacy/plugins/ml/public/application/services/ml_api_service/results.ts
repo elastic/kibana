@@ -47,13 +47,13 @@ export const results = {
     });
   },
 
-  getMaxAnomalyScore<T>(jobIds: string[], earliestMs: number, latestMs: number): Promise<T> {
+  getMaxAnomalyScore(jobIds: string[], earliestMs: number, latestMs: number) {
     const body = JSON.stringify({
       jobIds,
       earliestMs,
       latestMs,
     });
-    return http<T>({
+    return http<any>({
       path: `${basePath()}/results/max_anomaly_score`,
       method: 'POST',
       body,

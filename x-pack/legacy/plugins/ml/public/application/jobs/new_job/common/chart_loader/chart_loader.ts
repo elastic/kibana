@@ -24,10 +24,10 @@ export type LineChartData = Record<DetectorIndex, LineChartPoint[]>;
 
 const eq = (newArgs: any[], lastArgs: any[]) => isEqual(newArgs, lastArgs);
 
-const newJobLineChart = memoizeOne<any>(ml.jobs.newJobLineChart, eq);
-const newJobPopulationsChart = memoizeOne<any>(ml.jobs.newJobPopulationsChart, eq);
-const getEventRateData = memoizeOne<any>(mlResultsService.getEventRateData, eq);
-const getCategoryFields = memoizeOne<any>(getCategoryFieldsOrig, eq);
+const newJobLineChart = memoizeOne(ml.jobs.newJobLineChart, eq);
+const newJobPopulationsChart = memoizeOne(ml.jobs.newJobPopulationsChart, eq);
+const getEventRateData = memoizeOne(mlResultsService.getEventRateData, eq);
+const getCategoryFields = memoizeOne(getCategoryFieldsOrig, eq);
 
 export class ChartLoader {
   private _indexPatternTitle: IndexPatternTitle = '';

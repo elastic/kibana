@@ -140,7 +140,7 @@ export const jobs = {
     });
   },
 
-  newJobLineChart<T>(
+  newJobLineChart(
     indexPatternTitle: string,
     timeField: string,
     start: number,
@@ -150,7 +150,7 @@ export const jobs = {
     aggFieldNamePairs: AggFieldNamePair[],
     splitFieldName: string | null,
     splitFieldValue: string | null
-  ): Promise<T> {
+  ) {
     const body = JSON.stringify({
       indexPatternTitle,
       timeField,
@@ -162,14 +162,14 @@ export const jobs = {
       splitFieldName,
       splitFieldValue,
     });
-    return http<T>({
+    return http<any>({
       path: `${basePath()}/jobs/new_job_line_chart`,
       method: 'POST',
       body,
     });
   },
 
-  newJobPopulationsChart<T>(
+  newJobPopulationsChart(
     indexPatternTitle: string,
     timeField: string,
     start: number,
@@ -178,7 +178,7 @@ export const jobs = {
     query: any,
     aggFieldNamePairs: AggFieldNamePair[],
     splitFieldName: string
-  ): Promise<T> {
+  ) {
     const body = JSON.stringify({
       indexPatternTitle,
       timeField,
@@ -189,7 +189,7 @@ export const jobs = {
       aggFieldNamePairs,
       splitFieldName,
     });
-    return http<T>({
+    return http<any>({
       path: `${basePath()}/jobs/new_job_population_chart`,
       method: 'POST',
       body,
