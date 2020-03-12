@@ -49,7 +49,7 @@ const EuiFlyoutContainer = styled.div<{ headerHeight: number }>`
   .timeline-flyout-body {
     overflow-y: hidden;
     padding: 0;
-    .euiFlyoutBody__overflow {
+    .euiFlyoutBody__overflowContent {
       padding: 0;
     }
   }

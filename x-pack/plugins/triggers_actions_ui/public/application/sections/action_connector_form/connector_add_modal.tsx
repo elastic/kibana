@@ -23,6 +23,7 @@ import { ActionType, ActionConnector, IErrorObject, ActionTypeModel } from '../.
 import { connectorReducer } from './connector_reducer';
 import { createActionConnector } from '../../lib/action_connector_api';
 import { TypeRegistry } from '../../type_registry';
+import './connector_add_modal.scss';
 
 interface ConnectorAddModalProps {
   actionType: ActionType;
@@ -58,14 +59,17 @@ export const ConnectorAddModal = ({
   const setConnector = (value: any) => {
     dispatch({ command: { type: 'setConnector' }, payload: { key: 'connector', value } });
   };
-  const [serverError, setServerError] = useState<{
-    body: { message: string; error: string };
-  } | null>(null);
+  const [serverError, setServerError] = useState<
+    | {
+        body: { message: string; error: string };
+      }
+    | undefined
+  >(undefined);
 
   const closeModal = useCallback(() => {
     setAddModalVisibility(false);
     setConnector(initialConnector);
-    setServerError(null);
+    setServerError(undefined);
   }, [initialConnector, setAddModalVisibility]);
 
   if (!addModalVisible) {

@@ -24,7 +24,9 @@ const NewId = 'newComent';
 
 export const UserActionTree = React.memo(
   ({ data: caseData, onUpdateField, isLoadingDescription }: UserActionTreeProps) => {
-    const { comments, isLoadingIds, updateComment } = useUpdateComment(caseData.comments);
+    const { comments, isLoadingIds, updateComment, addPostedComment } = useUpdateComment(
+      caseData.comments
+    );
 
     const [manageMarkdownEditIds, setManangeMardownEditIds] = useState<string[]>([]);
 
@@ -42,7 +44,7 @@ export const UserActionTree = React.memo(
     const handleSaveComment = useCallback(
       (id: string, content: string) => {
         handleManageMarkdownEditId(id);
-        updateComment(id, content);
+        updateComment(caseData.id, id, content);
       },
       [handleManageMarkdownEditId, updateComment]
     );
@@ -63,7 +65,10 @@ export const UserActionTree = React.memo(
       [caseData.description, handleManageMarkdownEditId, manageMarkdownEditIds, onUpdateField]
     );
 
-    const MarkdownNewComment = useMemo(() => <AddComment caseId={caseData.id} />, [caseData.id]);
+    const MarkdownNewComment = useMemo(
+      () => <AddComment caseId={caseData.id} onCommentPosted={addPostedComment} />,
+      [caseData.id]
+    );
 
     return (
       <>

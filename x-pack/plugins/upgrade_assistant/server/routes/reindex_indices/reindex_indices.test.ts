@@ -20,7 +20,6 @@ const mockReindexService = {
   resumeReindexOperation: jest.fn(),
   cancelReindexing: jest.fn(),
 };
-
 jest.mock('../../lib/es_version_precheck', () => ({
   versionCheckHandlerWrapper: (a: any) => a,
 }));

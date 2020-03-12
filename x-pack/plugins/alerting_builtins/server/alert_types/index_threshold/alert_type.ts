@@ -85,15 +85,11 @@ export function getAlertType(service: Service): AlertType {
       if (!met) continue;
 
       const baseContext: BaseActionContext = {
-        name,
-        spaceId: options.spaceId,
-        namespace: options.namespace,
-        tags: options.tags,
         date,
         group: instanceId,
         value,
       };
-      const actionContext = addMessages(baseContext, params);
+      const actionContext = addMessages(options, baseContext, params);
       const alertInstance = options.services.alertInstanceFactory(instanceId);
       alertInstance.scheduleActions(ActionGroupId, actionContext);
       logger.debug(`scheduled actionGroup: ${JSON.stringify(actionContext)}`);

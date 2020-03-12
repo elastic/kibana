@@ -19,11 +19,6 @@ import { IIndexPattern } from '../../../../../../../../../../../src/plugins/data
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { useMlContext } from '../../../../../contexts/ml';
 
-interface GetDataFrameAnalyticsResponse {
-  count: number;
-  data_frame_analytics: DataFrameAnalyticsConfig[];
-}
-
 export const ExplorationTitle: React.FC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
     <span>
@@ -69,9 +64,7 @@ export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
   const loadJobConfig = async () => {
     setIsLoadingJobConfig(true);
     try {
-      const analyticsConfigs: GetDataFrameAnalyticsResponse = await ml.dataFrameAnalytics.getDataFrameAnalytics(
-        jobId
-      );
+      const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
       if (
         Array.isArray(analyticsConfigs.data_frame_analytics) &&
         analyticsConfigs.data_frame_analytics.length > 0
