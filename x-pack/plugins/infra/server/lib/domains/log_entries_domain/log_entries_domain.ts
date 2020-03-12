@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import stringify from 'json-stable-stringify';
 import { sortBy } from 'lodash';
 
 import { RequestHandlerContext } from 'src/core/server';

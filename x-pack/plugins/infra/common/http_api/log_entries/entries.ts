@@ -49,15 +49,12 @@ export type LogEntriesAfterRequest = rt.TypeOf<typeof logEntriesAfterRequestRT>;
 export type LogEntriesCenteredRequest = rt.TypeOf<typeof logEntriesCenteredRequestRT>;
 export type LogEntriesRequest = rt.TypeOf<typeof logEntriesRequestRT>;
 
-// JSON value
-const valueRT = rt.union([rt.string, rt.number, rt.boolean, rt.object, rt.null, rt.undefined]);
-
 export const logMessageConstantPartRT = rt.type({
   constant: rt.string,
 });
 export const logMessageFieldPartRT = rt.type({
   field: rt.string,
-  value: valueRT,
+  value: rt.unknown,
   highlights: rt.array(rt.string),
 });
 
