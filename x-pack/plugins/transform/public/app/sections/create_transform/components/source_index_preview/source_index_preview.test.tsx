@@ -8,13 +8,13 @@ import React from 'react';
 import { render, wait } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-import { Providers } from '../../../../app_dependencies.mock';
 import { getPivotQuery } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
 import { SourceIndexPreview } from './source_index_preview';
 
 jest.mock('../../../../../shared_imports');
+jest.mock('../../../../../app/app_dependencies');
 
 describe('Transform: <SourceIndexPreview />', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.
@@ -27,11 +27,7 @@ describe('Transform: <SourceIndexPreview />', () => {
       } as SearchItems['indexPattern'],
       query: getPivotQuery('the-query'),
     };
-    const { getByText } = render(
-      <Providers>
-        <SourceIndexPreview {...props} />
-      </Providers>
-    );
+    const { getByText } = render(<SourceIndexPreview {...props} />);
 
     // Act
     // Assert

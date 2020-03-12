@@ -8,7 +8,6 @@ import React from 'react';
 import { render, wait } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-import { Providers } from '../../../../app_dependencies.mock';
 import {
   PivotAggsConfig,
   PivotGroupByConfig,
@@ -21,6 +20,7 @@ import { StepDefineExposedState } from './step_define_form';
 import { StepDefineSummary } from './step_define_summary';
 
 jest.mock('../../../../../shared_imports');
+jest.mock('../../../../../app/app_dependencies');
 
 describe('Transform: <DefinePivotSummary />', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.
@@ -57,9 +57,7 @@ describe('Transform: <DefinePivotSummary />', () => {
     };
 
     const { getByText } = render(
-      <Providers>
-        <StepDefineSummary formState={formState} searchItems={searchItems as SearchItems} />
-      </Providers>
+      <StepDefineSummary formState={formState} searchItems={searchItems as SearchItems} />
     );
 
     // Act

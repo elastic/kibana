@@ -7,14 +7,13 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { Providers } from '../../../../app_dependencies.mock';
-
 import { TransformListRow } from '../../../../common';
 import { StopAction } from './action_stop';
 
 import transformListRow from '../../../../common/__mocks__/transform_list_row.json';
 
 jest.mock('../../../../../shared_imports');
+jest.mock('../../../../../app/app_dependencies');
 
 describe('Transform: Transform List Actions <StopAction />', () => {
   test('Minimal initialization', () => {
@@ -25,13 +24,7 @@ describe('Transform: Transform List Actions <StopAction />', () => {
       stopTransform(d: TransformListRow) {},
     };
 
-    const wrapper = shallow(
-      <Providers>
-        <StopAction {...props} />
-      </Providers>
-    )
-      .find(StopAction)
-      .shallow();
+    const wrapper = shallow(<StopAction {...props} />);
 
     expect(wrapper).toMatchSnapshot();
   });

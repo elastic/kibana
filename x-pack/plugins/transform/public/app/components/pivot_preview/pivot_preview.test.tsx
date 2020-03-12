@@ -8,7 +8,6 @@ import React from 'react';
 import { render, wait } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
-import { Providers } from '../../app_dependencies.mock';
 import {
   getPivotQuery,
   PivotAggsConfig,
@@ -20,6 +19,7 @@ import {
 import { PivotPreview } from './pivot_preview';
 
 jest.mock('../../../shared_imports');
+jest.mock('../../../app/app_dependencies');
 
 describe('Transform: <PivotPreview />', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.
@@ -44,11 +44,7 @@ describe('Transform: <PivotPreview />', () => {
       query: getPivotQuery('the-query'),
     };
 
-    const { getByText } = render(
-      <Providers>
-        <PivotPreview {...props} />
-      </Providers>
-    );
+    const { getByText } = render(<PivotPreview {...props} />);
 
     // Act
     // Assert
