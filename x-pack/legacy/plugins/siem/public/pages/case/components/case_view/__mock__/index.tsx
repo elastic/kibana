@@ -11,6 +11,7 @@ export const caseProps: CaseProps = {
   caseId: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
   initialData: {
     id: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
+    commentIds: ['a357c6a0-5435-11ea-b427-fb51a1fcb7b8'],
     comments: [
       {
         comment: 'Solve this fast!',
@@ -37,6 +38,7 @@ export const caseProps: CaseProps = {
 
 export const data: Case = {
   id: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
+  commentIds: ['a357c6a0-5435-11ea-b427-fb51a1fcb7b8'],
   comments: [
     {
       comment: 'Solve this fast!',

@@ -37,11 +37,6 @@
     </disc-field-chooser>
 
     <div class="dscApp__content">
-      <discover-unsupported-index-pattern
-        ng-if="isUnsupportedIndexPattern"
-        unsupported-type="unsupportedIndexPatternType"
-      ></discover-unsupported-index-pattern>
-
       <discover-no-results
         ng-show="resultState === 'none'"
         shard-failures="failures"

@@ -133,6 +133,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
                 isDisabled={isLoading}
                 isLoading={isLoading}
                 onClick={onSubmit.bind(null, true)}
+                data-test-subj="create-activate"
               >
                 {I18n.COMPLETE_WITH_ACTIVATING}
               </EuiButton>

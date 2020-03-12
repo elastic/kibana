@@ -18,7 +18,7 @@ export const ADD_NEW_CASE = i18n.translate('xpack.siem.case.caseTable.addNewCase
   defaultMessage: 'Add New Case',
 });
 
-export const SELECTED_CASES = (totalRules: number) =>
+export const SHOWING_SELECTED_CASES = (totalRules: number) =>
   i18n.translate('xpack.siem.case.caseTable.selectedCasesTitle', {
     values: { totalRules },
     defaultMessage: 'Selected {totalRules} {totalRules, plural, =1 {case} other {cases}}',
@@ -65,7 +65,4 @@ export const REOPEN_CASE = i18n.translate('xpack.siem.case.caseTable.reopenCase'
 });
 export const CLOSE_CASE = i18n.translate('xpack.siem.case.caseTable.closeCase', {
   defaultMessage: 'Close case',
-});
-export const DUPLICATE_CASE = i18n.translate('xpack.siem.case.caseTable.duplicateCase', {
-  defaultMessage: 'Duplicate case',
 });

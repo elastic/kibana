@@ -66,7 +66,6 @@ describe('action_connector_form', () => {
           actionTypeName={'my-action-type-name'}
           connector={initialConnector}
           dispatch={() => {}}
-          serverError={null}
           errors={{ name: [] }}
           actionTypeRegistry={deps.actionTypeRegistry}
         />
