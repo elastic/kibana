@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PolicyData } from '../../types';
-
 // !!!! Should be deleted when https://github.com/elastic/endpoint-app-team/issues/150
 // is implemented
 
@@ -21,12 +19,6 @@ const dateOffsets = [
 
 const randomNumbers = [5, 50, 500, 5000, 50000];
 
-interface SavedFakePolicyData {
-  items: PolicyData[];
-}
-
-let savedFakePolicyData: SavedFakePolicyData = { items: [] };
-
 const getRandomDateIsoString = () => {
   const randomIndex = Math.floor(Math.random() * Math.floor(dateOffsets.length));
   return new Date(Date.now() - dateOffsets[randomIndex]).toISOString();
@@ -37,8 +29,18 @@ const getRandomNumber = () => {
   return randomNumbers[randomIndex];
 };
 
-const getRandomId = () => {
-  return Math.floor(Math.random() * 100000).toString();
+const policyItem = (id: string) => {
+  return {
+    name: `policy with some protections  ${id}`,
+    total: getRandomNumber(),
+    pending: getRandomNumber(),
+    failed: getRandomNumber(),
+    id: `${id}`,
+    created_by: `admin ABC`,
+    created: getRandomDateIsoString(),
+    updated_by: 'admin 123',
+    updated: getRandomDateIsoString(),
+  };
 };
 
 export const getFakeDatasourceApiResponse = async (page: number, pageSize: number) => {
@@ -46,38 +48,16 @@ export const getFakeDatasourceApiResponse = async (page: number, pageSize: numbe
 
   // Emulates the API response - see PR:
   // https://github.com/elastic/kibana/pull/56567/files#diff-431549a8739efe0c56763f164c32caeeR25
-  const policyData = {
-    items: Array.from({ length: pageSize }, (x, i) => ({
-      name: `policy with some protections  ${i + 1}`,
-      total: getRandomNumber(),
-      pending: getRandomNumber(),
-      failed: getRandomNumber(),
-      id: getRandomId(),
-      created_by: `admin ABC`,
-      created: getRandomDateIsoString(),
-      updated_by: 'admin 123',
-      updated: getRandomDateIsoString(),
-    })),
+  return {
+    items: Array.from({ length: pageSize }, (x, i) => policyItem(`${i + 1}`)),
     success: true,
     total: pageSize * 10,
     page,
     perPage: pageSize,
   };
-
-  savedFakePolicyData = { items: policyData.items };
-  return policyData;
 };
 
 export const getFakeDatasourceDetailsApiResponse = async (id: string) => {
   await new Promise(resolve => setTimeout(resolve, 500));
-
-  // Emulates the API response - see PR:
-  // https://github.com/elastic/kibana/pull/56567/files#diff-431549a8739efe0c56763f164c32caeeR25
-
-  if (savedFakePolicyData.items) {
-    return savedFakePolicyData.items.find(function(item: PolicyData) {
-      return item.id === id;
-    });
-  }
-  return undefined;
+  return policyItem(id);
 };
