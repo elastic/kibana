@@ -51,7 +51,7 @@ function registerNavigation(alerting: AlertingSetup) {
   alerting.registerNavigation(
     ALERTING_EXAMPLE_APP_ID,
     'example.people-in-space',
-    (alert: SanitizedAlert) => `/alert/${alert.id}`
+    (alert: SanitizedAlert) => `/astros/${alert.id}`
   );
 }
 
@@ -148,7 +148,7 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
   });
 
   const errorsCallout = flatten(
-    Object.entries(([field, errs]: [string, string[]]) =>
+    Object.entries(errors).map(([field, errs]: [string, string[]]) =>
       errs.map(e => (
         <p>
           <EuiTextColor color="accent">{field}:</EuiTextColor>`: ${errs}`

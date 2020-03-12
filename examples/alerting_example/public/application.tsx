@@ -35,6 +35,7 @@ import { DocumentationPage } from './components/documentation';
 import { ViewAlertPage } from './components/view_alert';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../x-pack/plugins/triggers_actions_ui/public';
 import { AlertingExamplePublicStartDeps } from './plugin';
+import { ViewPeopleInSpaceAlertPage } from './components/view_astros_alert';
 
 export interface AlertingExampleComponentParams {
   application: CoreStart['application'];
@@ -67,6 +68,16 @@ const AlertingExampleApp = (deps: AlertingExampleComponentParams) => {
             return (
               <Page title={`View Alert`} crumb={`View Alert ${props.match.params.id}`}>
                 <ViewAlertPage http={http} id={props.match.params.id} />
+              </Page>
+            );
+          }}
+        />
+        <Route
+          path={`/astros/:id`}
+          render={(props: RouteComponentProps<{ id: string }>) => {
+            return (
+              <Page title={`View People In Space Alert`} crumb={`Astros ${props.match.params.id}`}>
+                <ViewPeopleInSpaceAlertPage http={http} id={props.match.params.id} />
               </Page>
             );
           }}
