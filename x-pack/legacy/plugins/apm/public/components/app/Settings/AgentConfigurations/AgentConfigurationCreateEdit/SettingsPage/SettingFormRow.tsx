@@ -108,7 +108,7 @@ function FormRow({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <SelectWithPlaceholder
-              placeholder={i18n.translate('apm.unitLabel', {
+              placeholder={i18n.translate('xpack.apm.unitLabel', {
                 defaultMessage: 'Select unit'
               })}
               value={unit}

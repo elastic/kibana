@@ -115,7 +115,7 @@ export const routes: BreadcrumbRoute[] = [
     exact: true,
     path: '/settings/agent-configuration/create',
     breadcrumb: i18n.translate(
-      'xpack.apm.breadcrumb.settings.agentConfigurationTitle',
+      'xpack.apm.breadcrumb.settings.createAgentConfigurationTitle',
       { defaultMessage: 'Create Agent Configuration' }
     ),
     name: RouteName.AGENT_CONFIGURATION_CREATE,
@@ -139,7 +139,7 @@ export const routes: BreadcrumbRoute[] = [
     exact: true,
     path: '/settings/agent-configuration/edit',
     breadcrumb: i18n.translate(
-      'xpack.apm.breadcrumb.settings.agentConfigurationTitle',
+      'xpack.apm.breadcrumb.settings.editAgentConfigurationTitle',
       { defaultMessage: 'Edit Agent Configuration' }
     ),
     name: RouteName.AGENT_CONFIGURATION_EDIT,

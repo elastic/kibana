@@ -101,7 +101,7 @@ export function SettingsPage({
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">
               <h3>
-                {i18n.translate('xpack.apm.agentConfig.editConfigTitle', {
+                {i18n.translate('xpack.apm.agentConfig.chooseServiceTitle', {
                   defaultMessage: 'Choose service'
                 })}
               </h3>
@@ -185,7 +185,7 @@ export function SettingsPage({
             >
               <EuiHealth color="warning" />
               <EuiText>
-                {i18n.translate('apm.unsavedChanges', {
+                {i18n.translate('xpack.apm.unsavedChanges', {
                   defaultMessage:
                     '{unsavedChangesCount, plural, =0{0 unsaved changes} one {1 unsaved change} other {# unsaved changes}} ',
                   values: { unsavedChangesCount }
