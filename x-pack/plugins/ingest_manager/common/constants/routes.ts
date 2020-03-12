@@ -9,7 +9,6 @@ export const DATASOURCE_API_ROOT = `${API_ROOT}/datasources`;
 export const AGENT_CONFIG_API_ROOT = `${API_ROOT}/agent_configs`;
 export const EPM_API_ROOT = `${API_ROOT}/epm`;
 export const FLEET_API_ROOT = `${API_ROOT}/fleet`;
-export const EPM_DATA_STREAM = `${EPM_API_ROOT}/data_stream`;
 
 // EPM API routes
 const EPM_PACKAGES_MANY = `${EPM_API_ROOT}/packages`;
@@ -17,7 +16,6 @@ const EPM_PACKAGES_ONE = `${EPM_PACKAGES_MANY}/{pkgkey}`;
 export const EPM_API_ROUTES = {
   LIST_PATTERN: EPM_PACKAGES_MANY,
   INFO_PATTERN: EPM_PACKAGES_ONE,
-  DATA_STREAM: `${EPM_DATA_STREAM}/{pkgName}`,
   INSTALL_PATTERN: EPM_PACKAGES_ONE,
   DELETE_PATTERN: EPM_PACKAGES_ONE,
   FILEPATH_PATTERN: `${EPM_PACKAGES_ONE}/{filePath*}`,
