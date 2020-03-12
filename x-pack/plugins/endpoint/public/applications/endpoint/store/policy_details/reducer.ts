@@ -37,6 +37,10 @@ export const policyDetailsReducer: Reducer<PolicyDetailsState, AppAction> = (
     };
   }
 
+  if (action.type === 'userNavigatedFromPage' && action.payload === 'policyDetailsPage') {
+    return initialPolicyDetailsState();
+  }
+
   if (action.type === 'userChangedUrl') {
     return {
       ...state,
