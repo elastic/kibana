@@ -11,11 +11,13 @@ import sinon from 'sinon';
 
 describe('monitoring plugin deprecations', function() {
   let transformDeprecations;
+  const rename = sinon.stub().returns(() => {});
+  const fromPath = 'monitoring';
 
   before(function() {
-    const deprecations = deprecationsModule();
-    transformDeprecations = (settings, log = noop) => {
-      deprecations.forEach(deprecation => deprecation(settings, log));
+    const deprecations = deprecationsModule({ rename });
+    transformDeprecations = (settings, fromPath, log = noop) => {
+      deprecations.forEach(deprecation => deprecation(settings, fromPath, log));
     };
   });
 
@@ -30,7 +32,7 @@ describe('monitoring plugin deprecations', function() {
       };
 
       const log = sinon.spy();
-      transformDeprecations(settings, log);
+      transformDeprecations(settings, fromPath, log);
       expect(log.called).to.be(false);
     });
 
@@ -45,7 +47,7 @@ describe('monitoring plugin deprecations', function() {
       };
 
       const log = sinon.spy();
-      transformDeprecations(settings, log);
+      transformDeprecations(settings, fromPath, log);
       expect(log.called).to.be(false);
     });
 
@@ -61,7 +63,7 @@ describe('monitoring plugin deprecations', function() {
       };
 
       const log = sinon.spy();
-      transformDeprecations(settings, log);
+      transformDeprecations(settings, fromPath, log);
       expect(log.called).to.be(false);
     });
 
@@ -76,7 +78,7 @@ describe('monitoring plugin deprecations', function() {
       };
 
       const log = sinon.spy();
-      transformDeprecations(settings, log);
+      transformDeprecations(settings, fromPath, log);
       expect(log.called).to.be(true);
     });
   });
@@ -86,7 +88,7 @@ describe('monitoring plugin deprecations', function() {
       const settings = { elasticsearch: { username: 'elastic' } };
 
       const log = sinon.spy();
-      transformDeprecations(settings, log);
+      transformDeprecations(settings, fromPath, log);
       expect(log.called).to.be(true);
     });
 
@@ -94,7 +96,7 @@ describe('monitoring plugin deprecations', function() {
       const settings = { elasticsearch: { username: 'otheruser' } };
 
       const log = sinon.spy();
-      transformDeprecations(settings, log);
+      transformDeprecations(settings, fromPath, log);
       expect(log.called).to.be(false);
     });
 
@@ -102,7 +104,7 @@ describe('monitoring plugin deprecations', function() {
       const settings = { elasticsearch: { username: undefined } };
 
       const log = sinon.spy();
-      transformDeprecations(settings, log);
+      transformDeprecations(settings, fromPath, log);
       expect(log.called).to.be(false);
     });
 
@@ -110,7 +112,7 @@ describe('monitoring plugin deprecations', function() {
       const settings = { elasticsearch: { ssl: { key: '' } } };
 
       const log = sinon.spy();
-      transformDeprecations(settings, log);
+      transformDeprecations(settings, fromPath, log);
       expect(log.called).to.be(true);
     });
 
@@ -118,7 +120,7 @@ describe('monitoring plugin deprecations', function() {
       const settings = { elasticsearch: { ssl: { certificate: '' } } };
 
       const log = sinon.spy();
-      transformDeprecations(settings, log);
+      transformDeprecations(settings, fromPath, log);
       expect(log.called).to.be(true);
     });
 
@@ -126,8 +128,17 @@ describe('monitoring plugin deprecations', function() {
       const settings = { elasticsearch: { ssl: { key: '', certificate: '' } } };
 
       const log = sinon.spy();
-      transformDeprecations(settings, log);
+      transformDeprecations(settings, fromPath, log);
       expect(log.called).to.be(false);
+    });
+  });
+
+  describe('xpack_api_polling_frequency_millis', () => {
+    it('should call rename for this renamed config key', () => {
+      const settings = { xpack_api_polling_frequency_millis: 30000 };
+      const log = sinon.spy();
+      transformDeprecations(settings, fromPath, log);
+      expect(rename.called).to.be(true);
     });
   });
 });

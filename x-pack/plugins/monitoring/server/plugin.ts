@@ -97,13 +97,13 @@ export class Plugin {
   private readonly initializerContext: PluginInitializerContext;
   private readonly log: Logger;
   private readonly getLogger: (...scopes: string[]) => Logger;
-  private cluster?: ICustomClusterClient;
-  private licenseService?: MonitoringLicenseService;
-  private legacyAPI?: LegacyAPI;
-  private uiSettingsService?: UiSettingsServiceStart;
-  private monitoringCore?: MonitoringCore;
-  private legacyShimDependencies: LegacyShimDependencies | undefined;
-  private bulkUploader?: IBulkUploader;
+  private cluster = {} as ICustomClusterClient;
+  private licenseService = {} as MonitoringLicenseService;
+  private legacyAPI = {} as LegacyAPI;
+  private uiSettingsService = {} as UiSettingsServiceStart;
+  private monitoringCore = {} as MonitoringCore;
+  private legacyShimDependencies = {} as LegacyShimDependencies;
+  private bulkUploader = {} as IBulkUploader;
   private needToSetupLegacy: boolean = true;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -150,11 +150,11 @@ export class Plugin {
     });
     await this.licenseService.refresh();
 
-    if (KIBANA_ALERTING_ENABLED && this.cluster && this.getLogger) {
+    if (KIBANA_ALERTING_ENABLED) {
       plugins.alerting.registerType(
         getLicenseExpiration(
           () => this.uiSettingsService,
-          this.cluster,
+          cluster,
           this.getLogger,
           config.ui.ccs.enabled
         )
@@ -185,7 +185,7 @@ export class Plugin {
           index: get(legacyConfig, 'kibana.index'),
           host: serverInfo.host,
           transport_address: `${serverInfo.host}:${serverInfo.port}`,
-          port: serverInfo.port?.toString(),
+          port: serverInfo.port.toString(),
           version: this.initializerContext.env.packageInfo.version,
           snapshot: snapshotRegex.test(this.initializerContext.env.packageInfo.version),
         },
@@ -212,27 +212,29 @@ export class Plugin {
       );
     }
 
+    // If the UI is enabled, then we want to register it so it shows up
+    // and start any other UI-related setup tasks
     if (config.ui.enabled) {
       this.registerPluginInUI(plugins);
       initInfraSource(config, plugins.infra);
     }
 
     return {
+      // The legacy plugin calls this to register certain legacy dependencies
+      // that are necessary for the plugin to properly run
       registerLegacyAPI: (legacyAPI: LegacyAPI) => {
         this.legacyAPI = legacyAPI;
         if (this.needToSetupLegacy) {
           this.setupLegacy();
         }
       },
-      getKibanaStats: () => this.bulkUploader?.getKibanaStats(),
+      // OSS stats api needs to call this in order to centralize how
+      // we fetch kibana specific stats
+      getKibanaStats: () => this.bulkUploader.getKibanaStats(),
     };
   }
 
   async start(core: CoreStart, plugins: PluginsStart) {
-    if (!this.licenseService || !this.cluster) {
-      return;
-    }
-
     const [config, legacyConfig] = await combineLatest([
       this.initializerContext.config.create<MonitoringConfig>(),
       this.initializerContext.config.legacy.globalConfig$,
@@ -254,7 +256,7 @@ export class Plugin {
     }
 
     this.uiSettingsService = core.uiSettings;
-    if (this.legacyAPI) {
+    if (this.needToSetupLegacy && !!this.legacyAPI.telemetryCollectionManager) {
       this.setupLegacy();
       this.needToSetupLegacy = false;
     }
@@ -296,18 +298,11 @@ export class Plugin {
   }
 
   async setupLegacy() {
-    if (!this.cluster || !this.legacyAPI || !this.bulkUploader) {
-      this.getLogger().warn(
-        'Unable to setup legacy bits of this plugin as the required dependencies are not available'
-      );
-      return;
-    }
-
     // Initialize telemetry
     registerMonitoringCollection(this.cluster, this.legacyAPI.telemetryCollectionManager);
 
     // Set the stats getter
-    this.bulkUploader.setKibanaStatusGetter(() => this.legacyAPI?.getServerStatus());
+    this.bulkUploader.setKibanaStatusGetter(() => this.legacyAPI.getServerStatus());
   }
 
   getLegacyShim(
@@ -317,13 +312,6 @@ export class Plugin {
     licenseService: MonitoringLicenseService,
     cluster: ICustomClusterClient
   ): MonitoringCore {
-    if (!this.legacyShimDependencies) {
-      // Something was not setup correctly
-      throw new Error(
-        'Unable to get legacy shim because the monitoring plugin init phase did not properly run.'
-      );
-    }
-
     const router = this.legacyShimDependencies.router;
     const legacyConfigWrapper = () => ({
       get: (_key: string): string | undefined => {
@@ -336,7 +324,7 @@ export class Plugin {
         }
 
         if (key === 'server.uuid') {
-          return this.legacyShimDependencies?.instanceUuid;
+          return this.legacyShimDependencies.instanceUuid;
         }
 
         throw new Error(`Unknown key '${_key}'`);
@@ -347,7 +335,7 @@ export class Plugin {
       log: this.log,
       route: (options: any) => {
         const method = options.method;
-        const handler = router?.handleLegacyErrors(
+        const handler = router.handleLegacyErrors(
           async (
             context: RequestHandlerContext,
             req: KibanaRequest<any, any, any, any>,
@@ -358,7 +346,7 @@ export class Plugin {
               logger: this.log,
               getLogger: this.getLogger,
               payload: req.body,
-              getKibanaStatsCollector: () => this.legacyShimDependencies?.kibanaStatsCollector,
+              getKibanaStatsCollector: () => this.legacyShimDependencies.kibanaStatsCollector,
               getUiSettingsService: () => context.core.uiSettings.client,
               getAlertsClient: () => plugins.alerting.getAlertsClientWithRequest(req),
               server: {
@@ -378,8 +366,8 @@ export class Plugin {
                         const client =
                           name === 'monitoring'
                             ? cluster
-                            : this.legacyShimDependencies?.esDataClient;
-                        return client?.asScoped(req).callAsCurrentUser(endpoint, params);
+                            : this.legacyShimDependencies.esDataClient;
+                        return client.asScoped(req).callAsCurrentUser(endpoint, params);
                       },
                     }),
                   },
