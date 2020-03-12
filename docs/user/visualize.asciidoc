@@ -37,14 +37,14 @@ Quickly build several types of basic visualizations by simply dragging and dropp
 <<timelion,Timelion>>:: Computes and combine data from multiple time series
 data sets.
 
-<<visualize-maps, Maps>>::
+Maps::
 * *<<maps,Elastic Maps>>* &mdash; Displays geospatial data in {kib}.
 
-* *Coordinate map* &mdash; Displays points on a map using a geohash aggregation.
+* *<<visualize-maps,Coordinate map>>* &mdash; Displays points on a map using a geohash aggregation.
 
-* *Region map* &mdash; Merges any structured map data onto a shape.
+* *<<visualize-maps,Region map>>* &mdash; Merges any structured map data onto a shape.
 
-* *Heat map* &mdash; Displays shaded cells within a matrix.
+* *<<heat-map,Heat map>>* &mdash; Displays shaded cells within a matrix.
 
 <<for-dashboard,Dashboard tools>>::
 
@@ -139,6 +139,7 @@ include::{kib-repo-dir}/visualize/tsvb.asciidoc[]
 include::{kib-repo-dir}/visualize/timelion.asciidoc[]
 
 include::{kib-repo-dir}/visualize/tilemap.asciidoc[]
+include::{kib-repo-dir}/visualize/heatmap.asciidoc[]
 
 include::{kib-repo-dir}/visualize/for-dashboard.asciidoc[]
 
