@@ -1,0 +1,12 @@
+{
+  "id": "licenseManagement",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "home",
+    "management",
+    "licensing"
+  ],
+  "configPath": ["xpack", "license_management"]
+}
