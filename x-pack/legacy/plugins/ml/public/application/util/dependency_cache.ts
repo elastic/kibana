@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimefilterSetup } from 'src/plugins/data/public';
+import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import {
   IUiSettingsClient,
   ChromeStart,
   SavedObjectsClientContract,
   ApplicationStart,
   HttpStart,
-} from 'src/core/public';
+} from 'kibana/public';
 import { IndexPatternsContract, DataPublicPluginStart } from 'src/plugins/data/public';
 import {
   DocLinksStart,
@@ -23,7 +23,7 @@ import {
 import { SecurityPluginSetup } from '../../../../../../plugins/security/public';
 
 export interface DependencyCache {
-  timefilter: TimefilterSetup | null;
+  timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
   config: IUiSettingsClient | null;
   indexPatterns: IndexPatternsContract | null;
   chrome: ChromeStart | null;

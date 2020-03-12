@@ -26,12 +26,10 @@ import { ml } from '../../../services/ml_api_service';
 import { useMlContext } from '../../../contexts/ml';
 import {
   DatafeedResponse,
-  DataRecognizerConfigResponse,
   JobOverride,
   JobResponse,
   KibanaObject,
   KibanaObjectResponse,
-  Module,
   ModuleJob,
 } from '../../../../../common/types/modules';
 import { mlJobService } from '../../../services/job_service';
@@ -106,7 +104,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
    */
   const loadModule = async () => {
     try {
-      const response: Module = await ml.getDataRecognizerModule({ moduleId });
+      const response = await ml.getDataRecognizerModule({ moduleId });
       setJobs(response.jobs);
 
       const kibanaObjectsResult = await checkForSavedObjects(response.kibana as KibanaObjects);
@@ -165,7 +163,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       let jobOverridesPayload: JobOverride[] | null = Object.values(jobOverrides);
       jobOverridesPayload = jobOverridesPayload.length > 0 ? jobOverridesPayload : null;
 
-      const response: DataRecognizerConfigResponse = await ml.setupDataRecognizerConfig({
+      const response = await ml.setupDataRecognizerConfig({
         moduleId,
         prefix: resultJobPrefix,
         query: tempQuery,
