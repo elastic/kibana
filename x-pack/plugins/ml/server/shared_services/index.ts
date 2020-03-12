@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface InjectorService {
-  get<T>(name: string, caller?: string): T;
-}
+export { SharedServices, createSharedServices } from './shared_services';
