@@ -7,7 +7,7 @@
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
-import { setHttpClient } from '../../../public/app/services/api';
+import { setHttpClient } from '../../../public/np_ready/app/services/api';
 import { init as initHttpRequests } from './http_requests';
 
 export const setupEnvironment = () => {

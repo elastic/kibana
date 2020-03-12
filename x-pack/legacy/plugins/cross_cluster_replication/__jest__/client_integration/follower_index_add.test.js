@@ -5,7 +5,7 @@
  */
 
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
-import { RemoteClustersFormField } from '../../public/app/components';
+import { RemoteClustersFormField } from '../../public/np_ready/app/components';
 
 import { indexPatterns } from '../../../../../../src/plugins/data/public';
 

@@ -5,7 +5,7 @@
  */
 
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
-import { FollowerIndexForm } from '../../public/app/components/follower_index_form/follower_index_form';
+import { FollowerIndexForm } from '../../public/np_ready/app/components/follower_index_form/follower_index_form';
 import { FOLLOWER_INDEX_EDIT } from './helpers/constants';
 
 jest.mock('ui/new_platform');
