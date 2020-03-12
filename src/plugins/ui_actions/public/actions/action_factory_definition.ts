@@ -36,8 +36,6 @@ export interface ActionFactoryDefinition<
    */
   id: string;
 
-  // todo: add `icon` field here
-
   /**
    * This method should return a definition of a new action, normally used to
    * register it in `ui_actions` registry.
