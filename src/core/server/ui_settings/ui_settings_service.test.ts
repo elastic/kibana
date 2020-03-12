@@ -37,6 +37,7 @@ const defaults = {
     value: 'bar',
     category: [],
     description: '',
+    schema: schema.string(),
   },
 };
 

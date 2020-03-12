@@ -79,7 +79,7 @@ export interface UiSettingsParams<T = unknown> {
    * Value validation schema
    * Used to validate value on write and read.
    */
-  schema?: Type<T>;
+  schema: Type<T>;
 }
 
 /**
