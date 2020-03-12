@@ -48,7 +48,7 @@ export const useGetReporters = (): UseGetReporters => {
           setReporterState({
             reporters: response.map(r => r.full_name ?? r.username ?? 'N/A'),
             respReporters: response,
-            isLoading: true,
+            isLoading: false,
             isError: false,
           });
         }
