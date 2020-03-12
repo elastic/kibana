@@ -227,8 +227,10 @@ export function processResults(
       }
 
       const stateQueue = hit._source.beats_state?.state?.queue?.name;
-      if (clusters[clusterUuid].queue.hasOwnProperty(stateQueue)) {
-        clusters[clusterUuid].queue[stateQueue] += 1;
+      if (stateQueue !== undefined) {
+        if (clusters[clusterUuid].queue.hasOwnProperty(stateQueue)) {
+          clusters[clusterUuid].queue[stateQueue] += 1;
+        }
       }
 
       const heartbeatState = hit._source.beats_state?.state?.heartbeat;
