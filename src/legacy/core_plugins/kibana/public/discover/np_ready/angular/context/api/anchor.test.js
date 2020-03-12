@@ -17,28 +17,19 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
-import { pluginInstance } from 'plugins/kibana/discover/legacy';
-
 import { createIndexPatternsStub, createSearchSourceStub } from './_stubs';
 
-import { fetchAnchorProvider } from '../anchor';
+import { fetchAnchorProvider } from './anchor';
 
 describe('context app', function() {
-  beforeEach(() => pluginInstance.initializeInnerAngular());
-  beforeEach(ngMock.module('app/discover'));
-
   describe('function fetchAnchor', function() {
     let fetchAnchor;
     let searchSourceStub;
 
-    beforeEach(
-      ngMock.inject(function createPrivateStubs() {
-        searchSourceStub = createSearchSourceStub([{ _id: 'hit1' }]);
-        fetchAnchor = fetchAnchorProvider(createIndexPatternsStub(), searchSourceStub);
-      })
-    );
+    beforeEach(() => {
+      searchSourceStub = createSearchSourceStub([{ _id: 'hit1' }]);
+      fetchAnchor = fetchAnchorProvider(createIndexPatternsStub(), searchSourceStub);
+    });
 
     afterEach(() => {
       searchSourceStub._restore();
@@ -49,7 +40,7 @@ describe('context app', function() {
         { '@timestamp': 'desc' },
         { _doc: 'desc' },
       ]).then(() => {
-        expect(searchSourceStub.fetch.calledOnce).to.be(true);
+        expect(searchSourceStub.fetch.calledOnce).toBe(true);
       });
     });
 
@@ -59,8 +50,8 @@ describe('context app', function() {
         { _doc: 'desc' },
       ]).then(() => {
         const setParentSpy = searchSourceStub.setParent;
-        expect(setParentSpy.calledOnce).to.be(true);
-        expect(setParentSpy.firstCall.args[0]).to.be(undefined);
+        expect(setParentSpy.calledOnce).toBe(true);
+        expect(setParentSpy.firstCall.args[0]).toBe(undefined);
       });
     });
 
@@ -70,7 +61,7 @@ describe('context app', function() {
         { _doc: 'desc' },
       ]).then(() => {
         const setFieldSpy = searchSourceStub.setField;
-        expect(setFieldSpy.firstCall.args[1].id).to.eql('INDEX_PATTERN_ID');
+        expect(setFieldSpy.firstCall.args[1].id).toEqual('INDEX_PATTERN_ID');
       });
     });
 
@@ -80,8 +71,8 @@ describe('context app', function() {
         { _doc: 'desc' },
       ]).then(() => {
         const setVersionSpy = searchSourceStub.setField.withArgs('version');
-        expect(setVersionSpy.calledOnce).to.be(true);
-        expect(setVersionSpy.firstCall.args[1]).to.eql(true);
+        expect(setVersionSpy.calledOnce).toBe(true);
+        expect(setVersionSpy.firstCall.args[1]).toEqual(true);
       });
     });
 
@@ -91,8 +82,8 @@ describe('context app', function() {
         { _doc: 'desc' },
       ]).then(() => {
         const setSizeSpy = searchSourceStub.setField.withArgs('size');
-        expect(setSizeSpy.calledOnce).to.be(true);
-        expect(setSizeSpy.firstCall.args[1]).to.eql(1);
+        expect(setSizeSpy.calledOnce).toBe(true);
+        expect(setSizeSpy.firstCall.args[1]).toEqual(1);
       });
     });
 
@@ -102,8 +93,8 @@ describe('context app', function() {
         { _doc: 'desc' },
       ]).then(() => {
         const setQuerySpy = searchSourceStub.setField.withArgs('query');
-        expect(setQuerySpy.calledOnce).to.be(true);
-        expect(setQuerySpy.firstCall.args[1]).to.eql({
+        expect(setQuerySpy.calledOnce).toBe(true);
+        expect(setQuerySpy.firstCall.args[1]).toEqual({
           query: {
             constant_score: {
               filter: {
@@ -124,8 +115,8 @@ describe('context app', function() {
         { _doc: 'desc' },
       ]).then(() => {
         const setSortSpy = searchSourceStub.setField.withArgs('sort');
-        expect(setSortSpy.calledOnce).to.be(true);
-        expect(setSortSpy.firstCall.args[1]).to.eql([{ '@timestamp': 'desc' }, { _doc: 'desc' }]);
+        expect(setSortSpy.calledOnce).toBe(true);
+        expect(setSortSpy.firstCall.args[1]).toEqual([{ '@timestamp': 'desc' }, { _doc: 'desc' }]);
       });
     });
 
@@ -140,7 +131,7 @@ describe('context app', function() {
           expect().fail('expected the promise to be rejected');
         },
         error => {
-          expect(error).to.be.an(Error);
+          expect(error).toBeInstanceOf(Error);
         }
       );
     });
@@ -152,8 +143,8 @@ describe('context app', function() {
         { '@timestamp': 'desc' },
         { _doc: 'desc' },
       ]).then(anchorDocument => {
-        expect(anchorDocument).to.have.property('property1', 'value1');
-        expect(anchorDocument).to.have.property('$$_isAnchor', true);
+        expect(anchorDocument).toHaveProperty('property1', 'value1');
+        expect(anchorDocument).toHaveProperty('$$_isAnchor', true);
       });
     });
   });
