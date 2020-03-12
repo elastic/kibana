@@ -104,7 +104,7 @@ export interface GetResponse {
 }
 
 export type SignalSearchResponse = SearchResponse<SignalSource>;
-export type SignalSourceHit = SignalSearchResponse['hits']['hits'][0];
+export type SignalSourceHit = SignalSearchResponse['hits']['hits'][number];
 
 export type RuleExecutorOptions = Omit<AlertExecutorOptions, 'params'> & {
   params: RuleAlertParams & {

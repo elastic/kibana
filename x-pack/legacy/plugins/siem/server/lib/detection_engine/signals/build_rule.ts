@@ -65,5 +65,7 @@ export const buildRule = ({
     version: ruleParams.version,
     created_at: createdAt,
     updated_at: updatedAt,
+    ml_job_id: ruleParams.mlJobId,
+    anomaly_threshold: ruleParams.anomalyThreshold,
   });
 };

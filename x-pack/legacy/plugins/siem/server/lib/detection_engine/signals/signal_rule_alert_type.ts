@@ -23,6 +23,7 @@ import { getGapBetweenRuns } from './utils';
 import { ruleStatusSavedObjectType } from '../rules/saved_object_mappings';
 import { IRuleSavedAttributesSavedObjectAttributes, RuleAlertAttributes } from '../rules/types';
 import { findMlSignals } from './find_ml_signals';
+import { bulkCreateMlSignals } from './bulk_create_ml_signals';
 
 export const signalRulesAlertType = ({
   logger,
@@ -175,73 +176,36 @@ export const signalRulesAlertType = ({
         }
       }
 
-      if (type === 'machine_learning') {
-        const { anomalies, interval: _interval } = await findMlSignals(
-          mlJobId!,
-          anomalyThreshold!,
-          from,
-          to,
-          services.callCluster
-        );
-
-        console.log('foundMlSignals', anomalies);
-        if (anomalies.length) {
-          logger.info(
-            `Found ${anomalies.length} anomalies in interval ${_interval}; generating signals`
-          );
-        }
-
-        return;
-      }
-
       const searchAfterSize = Math.min(params.maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let bulkIndexResult: any = null;
+
       try {
-        const inputIndex = await getInputIndex(services, version, index);
-        const esFilter = await getFilter({
-          type,
-          filters,
-          language,
-          query,
-          savedId,
-          services,
-          index: inputIndex,
-        });
-
-        const noReIndex = buildEventsSearchQuery({
-          index: inputIndex,
-          from,
-          to,
-          filter: esFilter,
-          size: searchAfterSize,
-          searchAfterSortId: undefined,
-        });
-
-        try {
-          logger.debug(
-            `Starting signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+        if (type === 'machine_learning') {
+          const anomalyResults = await findMlSignals(
+            mlJobId!,
+            anomalyThreshold!,
+            from,
+            to,
+            services.callCluster
           );
-          logger.debug(
-            `[+] Initial search call of signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
-          );
-          const noReIndexResult = await services.callCluster('search', noReIndex);
-          if (noReIndexResult.hits.total.value !== 0) {
+
+          // console.log('foundMlSignals', JSON.stringify(anomalyResults, null, 2));
+          const anomalyCount = anomalyResults.hits.hits.length;
+          if (anomalyCount) {
             logger.info(
-              `Found ${
-                noReIndexResult.hits.total.value
-              } signals from the indexes of "[${inputIndex.join(
-                ', '
-              )}]" using signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
+              `Found ${anomalyCount} anomalies in interval [${from}, ${to}]; generating signals`
             );
           }
 
-          const bulkIndexResult = await searchAfterAndBulkCreate({
-            someResult: noReIndexResult,
+          bulkIndexResult = await bulkCreateMlSignals({
+            someResult: anomalyResults,
             ruleParams: params,
             services,
             logger,
             id: alertId,
             signalsIndex: outputIndex,
-            filter: esFilter,
             name,
             createdBy,
             createdAt,
@@ -249,35 +213,74 @@ export const signalRulesAlertType = ({
             updatedAt,
             interval,
             enabled,
-            pageSize: searchAfterSize,
             tags,
           });
+        } else {
+          const inputIndex = await getInputIndex(services, version, index);
+          const esFilter = await getFilter({
+            type,
+            filters,
+            language,
+            query,
+            savedId,
+            services,
+            index: inputIndex,
+          });
 
-          if (bulkIndexResult) {
+          const noReIndex = buildEventsSearchQuery({
+            index: inputIndex,
+            from,
+            to,
+            filter: esFilter,
+            size: searchAfterSize,
+            searchAfterSortId: undefined,
+          });
+
+          try {
             logger.debug(
-              `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+              `Starting signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
             );
-            const sDate = new Date().toISOString();
-            currentStatusSavedObject.attributes.status = 'succeeded';
-            currentStatusSavedObject.attributes.statusDate = sDate;
-            currentStatusSavedObject.attributes.lastSuccessAt = sDate;
-            currentStatusSavedObject.attributes.lastSuccessMessage = 'succeeded';
-            await services.savedObjectsClient.update(
-              ruleStatusSavedObjectType,
-              currentStatusSavedObject.id,
-              {
-                ...currentStatusSavedObject.attributes,
-              }
+            logger.debug(
+              `[+] Initial search call of signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
             );
-          } else {
+            const noReIndexResult = await services.callCluster('search', noReIndex);
+            if (noReIndexResult.hits.total.value !== 0) {
+              logger.info(
+                `Found ${
+                  noReIndexResult.hits.total.value
+                } signals from the indexes of "[${inputIndex.join(
+                  ', '
+                )}]" using signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
+              );
+            }
+
+            bulkIndexResult = await searchAfterAndBulkCreate({
+              someResult: noReIndexResult,
+              ruleParams: params,
+              services,
+              logger,
+              id: alertId,
+              signalsIndex: outputIndex,
+              filter: esFilter,
+              name,
+              createdBy,
+              createdAt,
+              updatedBy,
+              updatedAt,
+              interval,
+              enabled,
+              pageSize: searchAfterSize,
+              tags,
+            });
+          } catch (err) {
             logger.error(
-              `Error processing signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+              `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", ${err.message}\n${err.stack}`
             );
             const sDate = new Date().toISOString();
             currentStatusSavedObject.attributes.status = 'failed';
             currentStatusSavedObject.attributes.statusDate = sDate;
             currentStatusSavedObject.attributes.lastFailureAt = sDate;
-            currentStatusSavedObject.attributes.lastFailureMessage = `Bulk Indexing signals failed. Check logs for further details \nRule name: "${name}"\nid: "${alertId}"\nrule_id: "${ruleId}"\n`;
+            currentStatusSavedObject.attributes.lastFailureMessage = err.message;
             // current status is failing
             await services.savedObjectsClient.update(
               ruleStatusSavedObjectType,
@@ -299,15 +302,33 @@ export const signalRulesAlertType = ({
               );
             }
           }
-        } catch (err) {
+        }
+
+        if (bulkIndexResult) {
+          logger.debug(
+            `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+          );
+          const sDate = new Date().toISOString();
+          currentStatusSavedObject.attributes.status = 'succeeded';
+          currentStatusSavedObject.attributes.statusDate = sDate;
+          currentStatusSavedObject.attributes.lastSuccessAt = sDate;
+          currentStatusSavedObject.attributes.lastSuccessMessage = 'succeeded';
+          await services.savedObjectsClient.update(
+            ruleStatusSavedObjectType,
+            currentStatusSavedObject.id,
+            {
+              ...currentStatusSavedObject.attributes,
+            }
+          );
+        } else {
           logger.error(
-            `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", ${err.message}`
+            `Error processing signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
           );
           const sDate = new Date().toISOString();
           currentStatusSavedObject.attributes.status = 'failed';
           currentStatusSavedObject.attributes.statusDate = sDate;
           currentStatusSavedObject.attributes.lastFailureAt = sDate;
-          currentStatusSavedObject.attributes.lastFailureMessage = err.message;
+          currentStatusSavedObject.attributes.lastFailureMessage = `Bulk Indexing signals failed. Check logs for further details \nRule name: "${name}"\nid: "${alertId}"\nrule_id: "${ruleId}"\n`;
           // current status is failing
           await services.savedObjectsClient.update(
             ruleStatusSavedObjectType,
@@ -331,7 +352,7 @@ export const signalRulesAlertType = ({
         }
       } catch (exception) {
         logger.error(
-          `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}" message: ${exception.message}`
+          `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}" message: ${exception.message}, trace: \n${exception.stack}`
         );
         const sDate = new Date().toISOString();
         currentStatusSavedObject.attributes.status = 'failed';

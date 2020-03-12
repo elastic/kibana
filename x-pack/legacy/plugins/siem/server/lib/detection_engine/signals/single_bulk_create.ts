@@ -12,9 +12,11 @@ import { RuleTypeParams } from '../types';
 import { generateId } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { Logger } from '../../../../../../../../src/core/server';
+import { SearchResponse } from '../../types';
 
 interface SingleBulkCreateParams {
-  someResult: SignalSearchResponse;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  someResult: SearchResponse<any>;
   ruleParams: RuleTypeParams;
   services: AlertServices;
   logger: Logger;

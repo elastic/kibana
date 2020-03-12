@@ -5,12 +5,8 @@
  */
 
 import _ from 'lodash';
-import moment from 'moment';
 import { SearchResponse } from 'elasticsearch';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { buildAnomalyTableItems } from '../../../../../../plugins/ml/server/models/results_service/build_anomaly_table_items';
-import { CriteriaFields, InfluencerInput, Anomalies } from '../../../public/components/ml/types';
 import { AlertServices } from '../../../../../../plugins/alerting/server';
 
 export interface AnomaliesSearchParams {
@@ -21,13 +17,16 @@ export interface AnomaliesSearchParams {
   maxRecords?: number;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Anomaly = any;
+
 export const anomaliesTableData = async (
   params: AnomaliesSearchParams,
   callCluster: AlertServices['callCluster']
-): Promise<Anomalies> => {
+): Promise<SearchResponse<Anomaly>> => {
   const boolCriteria = buildCriteria(params);
 
-  const anomalies: SearchResponse<any> = await callCluster('search', {
+  return callCluster('search', {
     index: '.ml-anomalies-*',
     rest_total_hits_as_int: true,
     size: params.maxRecords || 100,
@@ -52,8 +51,6 @@ export const anomaliesTableData = async (
       sort: [{ record_score: { order: 'desc' } }],
     },
   });
-
-  return aggregate(anomalies);
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -93,70 +90,4 @@ const buildCriteria = (params: AnomaliesSearchParams): any => {
   }
 
   return boolCriteria;
-};
-
-const aggregate = (anomalies: SearchResponse<any>): Anomalies => {
-  const aggregationInterval = 'auto';
-  const tableData: {
-    anomalies: AnomaliesTableRecord[];
-    interval: string;
-    examplesByJobId?: { [key: string]: any };
-  } = {
-    anomalies: [],
-    interval: 'second',
-  };
-  if (anomalies.hits.total !== 0) {
-    let records: AnomalyRecordDoc[] = [];
-    anomalies.hits.hits.forEach(hit => {
-      records.push(hit._source);
-    });
-
-    // Sort anomalies in ascending time order.
-    records = _.sortBy(records, 'timestamp');
-    tableData.interval = aggregationInterval;
-    if (aggregationInterval === 'auto') {
-      // Determine the actual interval to use if aggregating.
-      const earliest = moment(records[0].timestamp);
-      const latest = moment(records[records.length - 1].timestamp);
-
-      const daysDiff = latest.diff(earliest, 'days');
-      tableData.interval = daysDiff < 2 ? 'hour' : 'day';
-    }
-
-    tableData.anomalies = buildAnomalyTableItems(records, tableData.interval, 'America/Chicago');
-
-    // Load examples for any categorization anomalies.
-    const categoryAnomalies = tableData.anomalies.filter(
-      (item: any) => item.entityName === 'mlcategory'
-    );
-    if (categoryAnomalies.length > 0) {
-      tableData.examplesByJobId = {};
-
-      const categoryIdsByJobId: { [key: string]: any } = {};
-      categoryAnomalies.forEach(anomaly => {
-        if (!_.has(categoryIdsByJobId, anomaly.jobId)) {
-          categoryIdsByJobId[anomaly.jobId] = [];
-        }
-        if (categoryIdsByJobId[anomaly.jobId].indexOf(anomaly.entityValue) === -1) {
-          categoryIdsByJobId[anomaly.jobId].push(anomaly.entityValue);
-        }
-      });
-
-      // const categoryJobIds = Object.keys(categoryIdsByJobId);
-      // await Promise.all(
-      //   categoryJobIds.map(async jobId => {
-      //     const examplesByCategoryId = await getCategoryExamples(
-      //       jobId,
-      //       categoryIdsByJobId[jobId],
-      //       maxExamples
-      //     );
-      //     if (tableData.examplesByJobId !== undefined) {
-      //       tableData.examplesByJobId[jobId] = examplesByCategoryId;
-      //     }
-      //   })
-      // );
-    }
-  }
-
-  return tableData;
 };
