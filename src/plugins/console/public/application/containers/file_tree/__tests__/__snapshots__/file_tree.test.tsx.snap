@@ -65,6 +65,7 @@ exports[`File Tree renders 1`] = `
             "create": [MockFunction],
             "delete": [MockFunction],
             "findAll": [MockFunction],
+            "get": [MockFunction],
             "update": [MockFunction],
           },
         },
@@ -93,8 +94,8 @@ exports[`File Tree renders 1`] = `
           "set": [MockFunction],
         },
         "trackUiMetric": Object {
-          "count": [Function],
-          "load": [Function],
+          "count": [MockFunction],
+          "load": [MockFunction],
         },
       },
     }

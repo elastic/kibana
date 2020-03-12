@@ -65,16 +65,25 @@ describe('File Tree', () => {
     expect(component).toMatchSnapshot();
   });
 
+  const DEFAULT_CREATE_ATTRIBUTES = {
+    id: 'test',
+    name: 'test',
+    createdAt: 123,
+    updatedAt: 123,
+  };
+
   it('creates a new file', async () => {
     const { createTestFile, fileEntryExists } = helpers;
     const name1 = 'test';
     const name2 = 'anotherTest';
     (serviceContext.services.objectStorageClient.text.create as jest.Mock)
       .mockResolvedValueOnce({
+        ...DEFAULT_CREATE_ATTRIBUTES,
         id: name1,
         name: name1,
       })
       .mockResolvedValueOnce({
+        ...DEFAULT_CREATE_ATTRIBUTES,
         id: name2,
         name: name2,
       });
@@ -99,10 +108,12 @@ describe('File Tree', () => {
     const oldName = 'test';
     const newName = 'test2';
     (serviceContext.services.objectStorageClient.text.create as jest.Mock).mockResolvedValue({
+      ...DEFAULT_CREATE_ATTRIBUTES,
       id: 'test',
       name: oldName,
     });
     (serviceContext.services.objectStorageClient.text.update as jest.Mock).mockResolvedValue({
+      ...DEFAULT_CREATE_ATTRIBUTES,
       id: 'test',
       name: newName,
     });
@@ -128,10 +139,12 @@ describe('File Tree', () => {
     );
     (serviceContext.services.objectStorageClient.text.create as jest.Mock)
       .mockResolvedValueOnce({
+        ...DEFAULT_CREATE_ATTRIBUTES,
         id: name1,
         name: name1,
       })
       .mockResolvedValueOnce({
+        ...DEFAULT_CREATE_ATTRIBUTES,
         id: name2,
         name: name2,
         isScratchPad: true,
@@ -160,10 +173,12 @@ describe('File Tree', () => {
     const name2 = 'anotherTest';
     (serviceContext.services.objectStorageClient.text.create as jest.Mock)
       .mockResolvedValueOnce({
+        ...DEFAULT_CREATE_ATTRIBUTES,
         id: name1,
         name: name1,
       })
       .mockResolvedValueOnce({
+        ...DEFAULT_CREATE_ATTRIBUTES,
         id: name2,
         name: name2,
         isScratchPad: true,
