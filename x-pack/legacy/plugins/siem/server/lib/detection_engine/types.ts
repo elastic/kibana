@@ -100,12 +100,11 @@ export type RuleAlertParamsRest = Omit<
     last_success_message?: IRuleStatusAttributes['lastSuccessMessage'] | undefined;
   };
 
-export type OutputRuleAlertRest = Omit<RuleAlertParamsRest, 'throttle'> & {
+export type OutputRuleAlertRest = RuleAlertParamsRest & {
   id: string;
   created_by: string | undefined | null;
   updated_by: string | undefined | null;
   immutable: boolean;
-  throttle?: RuleAlertParams['throttle'];
 };
 
 export type ImportRuleAlertRest = Omit<OutputRuleAlertRest, 'rule_id' | 'id'> & {
