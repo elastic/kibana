@@ -8,7 +8,7 @@ import { useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { SimpleSavedObject } from 'src/core/public';
+import { SimpleSavedObject } from 'kibana/public';
 import { ml } from '../../../../../services/ml_api_service';
 import { useMlContext } from '../../../../../contexts/ml';
 
