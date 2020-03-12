@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
+import { Plugin, CoreStart, CoreSetup } from 'kibana/public';
 import { MlDependencies } from './application/app';
 
 export class MlPlugin implements Plugin<Setup, Start> {
