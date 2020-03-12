@@ -37,8 +37,8 @@ export class UpgradeAssistantUIPlugin implements Plugin {
       }),
       order: 1000,
       async mount({ element }) {
-        const [{ i18n: i18nDep }] = await getStartServices();
-        return renderApp({ element, isCloudEnabled, http, i18n: i18nDep });
+        const [{ i18n: i18nDep, docLinks }] = await getStartServices();
+        return renderApp({ element, isCloudEnabled, http, i18n: i18nDep, docLinks });
       },
     });
   }

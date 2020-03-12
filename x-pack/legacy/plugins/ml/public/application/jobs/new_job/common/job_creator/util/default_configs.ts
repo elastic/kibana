@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Job, Datafeed } from '../configs';
 import { IndexPatternTitle } from '../../../../../../../common/types/kibana';
 import { Field, Aggregation, EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';
-import { Detector } from '../configs';
+import { Job, Datafeed, Detector } from '../../../../../../../common/types/anomaly_detection_jobs';
 
 export function createEmptyJob(): Job {
   return {
@@ -28,6 +27,7 @@ export function createEmptyJob(): Job {
 export function createEmptyDatafeed(indexPatternTitle: IndexPatternTitle): Datafeed {
   return {
     datafeed_id: '',
+    job_id: '',
     indices: [indexPatternTitle],
     query: {},
   };
