@@ -36,7 +36,7 @@ describe('utils', () => {
     test('should work with a full data set', () => {
       const fullRule = getResult();
       const rule = transformAlertToRule(fullRule);
-      const expected: OutputRuleAlertRest = {
+      const expected: Omit<OutputRuleAlertRest, 'throttle'> = {
         actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
@@ -363,7 +363,7 @@ describe('utils', () => {
       const fullRule = getResult();
       fullRule.enabled = false;
       const ruleWithEnabledFalse = transformAlertToRule(fullRule);
-      const expected: OutputRuleAlertRest = {
+      const expected: Omit<OutputRuleAlertRest, 'throttle'> = {
         actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
@@ -430,7 +430,7 @@ describe('utils', () => {
       const fullRule = getResult();
       fullRule.params.immutable = false;
       const ruleWithEnabledFalse = transformAlertToRule(fullRule);
-      const expected: OutputRuleAlertRest = {
+      const expected: Omit<OutputRuleAlertRest, 'throttle'> = {
         actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
@@ -497,7 +497,7 @@ describe('utils', () => {
       const fullRule = getResult();
       fullRule.tags = ['tag 1', 'tag 2', `${INTERNAL_IDENTIFIER}_some_other_value`];
       const rule = transformAlertToRule(fullRule);
-      const expected: OutputRuleAlertRest = {
+      const expected: Omit<OutputRuleAlertRest, 'throttle'> = {
         actions: [],
         created_at: '2019-12-13T16:40:33.400Z',
         updated_at: '2019-12-13T16:40:33.400Z',
@@ -648,7 +648,7 @@ describe('utils', () => {
         total: 0,
         data: [getResult()],
       });
-      const expected: OutputRuleAlertRest = {
+      const expected: Omit<OutputRuleAlertRest, 'throttle'> = {
         actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
@@ -731,7 +731,7 @@ describe('utils', () => {
   describe('transform', () => {
     test('outputs 200 if the data is of type siem alert', () => {
       const output = transform(getResult());
-      const expected: OutputRuleAlertRest = {
+      const expected: Omit<OutputRuleAlertRest, 'throttle'> = {
         actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
@@ -905,7 +905,7 @@ describe('utils', () => {
   describe('transformOrBulkError', () => {
     test('outputs 200 if the data is of type siem alert', () => {
       const output = transformOrBulkError('rule-1', getResult());
-      const expected: OutputRuleAlertRest = {
+      const expected: Omit<OutputRuleAlertRest, 'throttle'> = {
         actions: [],
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
