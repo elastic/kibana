@@ -37,9 +37,14 @@ const FIRED_ACTIONS = {
 };
 
 const getCurrentValueFromAggregations = (aggregations: Aggregation) => {
-  const { buckets } = aggregations.aggregatedIntervals;
-  const { value } = buckets[buckets.length - 1].aggregatedValue;
-  return value;
+  try {
+    const { buckets } = aggregations.aggregatedIntervals;
+    if (!buckets.length) return null; // No Data state
+    const { value } = buckets[buckets.length - 1].aggregatedValue;
+    return value;
+  } catch (e) {
+    return undefined; // Error state
+  }
 };
 
 const getParsedFilterQuery: (
@@ -138,34 +143,37 @@ const getMetric: (
     aggs,
   };
 
-  if (groupBy) {
-    const bucketSelector = (
-      response: InfraDatabaseSearchResponse<{}, CompositeAggregationsResponse>
-    ) => response.aggregations?.groupings?.buckets || [];
-    const afterKeyHandler = createAfterKeyHandler(
-      'aggs.groupings.composite.after',
-      response => response.aggregations?.groupings?.after_key
-    );
-    const compositeBuckets = (await getAllCompositeData(
-      body => callCluster('search', { body, index: indexPattern }),
-      searchBody,
-      bucketSelector,
-      afterKeyHandler
-    )) as Array<Aggregation & { key: { groupBy: string } }>;
-    return compositeBuckets.reduce(
-      (result, bucket) => ({
-        ...result,
-        [bucket.key.groupBy]: getCurrentValueFromAggregations(bucket),
-      }),
-      {}
-    );
+  try {
+    if (groupBy) {
+      const bucketSelector = (
+        response: InfraDatabaseSearchResponse<{}, CompositeAggregationsResponse>
+      ) => response.aggregations?.groupings?.buckets || [];
+      const afterKeyHandler = createAfterKeyHandler(
+        'aggs.groupings.composite.after',
+        response => response.aggregations?.groupings?.after_key
+      );
+      const compositeBuckets = (await getAllCompositeData(
+        body => callCluster('search', { body, index: indexPattern }),
+        searchBody,
+        bucketSelector,
+        afterKeyHandler
+      )) as Array<Aggregation & { key: { groupBy: string } }>;
+      return compositeBuckets.reduce(
+        (result, bucket) => ({
+          ...result,
+          [bucket.key.groupBy]: getCurrentValueFromAggregations(bucket),
+        }),
+        {}
+      );
+    }
+    const result = await callCluster('search', {
+      body: searchBody,
+      index: indexPattern,
+    });
+    return { '*': getCurrentValueFromAggregations(result.aggregations) };
+  } catch (e) {
+    return { '*': undefined }; // Trigger an Error state
   }
-
-  const result = await callCluster('search', {
-    body: searchBody,
-    index: indexPattern,
-  });
-  return { '*': getCurrentValueFromAggregations(result.aggregations) };
 };
 
 const comparatorMap = {
@@ -220,14 +228,15 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
         criteria.map(criterion =>
           (async () => {
             const currentValues = await getMetric(services, criterion, groupBy, filterQuery);
-            if (typeof currentValues === 'undefined')
-              throw new Error('Could not get current value of metric');
             const { threshold, comparator } = criterion;
             const comparisonFunction = comparatorMap[comparator];
 
             return mapValues(currentValues, value => ({
-              shouldFire: comparisonFunction(value, threshold),
+              shouldFire:
+                value !== undefined && value !== null && comparisonFunction(value, threshold),
               currentValue: value,
+              isNoData: value === null,
+              isError: value === undefined,
             }));
           })()
         )
@@ -237,8 +246,12 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
       for (const group of groups) {
         const alertInstance = services.alertInstanceFactory(`${alertUUID}-${group}`);
 
+        // AND logic; all criteria must be across the threshold
         const shouldAlertFire = alertResults.every(result => result[group].shouldFire);
-
+        // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
+        // whole alert is in a No Data/Error state
+        const isNoData = alertResults.some(result => result[group].isNoData);
+        const isError = alertResults.some(result => result[group].isError);
         if (shouldAlertFire) {
           alertInstance.scheduleActions(FIRED_ACTIONS.id, {
             group,
@@ -248,7 +261,13 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
 
         // Future use: ability to fetch display current alert state
         alertInstance.replaceState({
-          alertState: shouldAlertFire ? AlertStates.ALERT : AlertStates.OK,
+          alertState: isError
+            ? AlertStates.ERROR
+            : isNoData
+            ? AlertStates.NO_DATA
+            : shouldAlertFire
+            ? AlertStates.ALERT
+            : AlertStates.OK,
         });
       }
     },
