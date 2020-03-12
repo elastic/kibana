@@ -60,23 +60,23 @@ export const ActionTypeMenu = ({ onActionTypeChange, actionTypes }: Props) => {
   const cardNodes = registeredActionTypes
     .sort((a, b) => actionTypeCompare(a.actionType, b.actionType))
     .map((item, index) => {
-      const checkActionTypeResult = checkActionTypeEnabled(item.actionType);
+      const checkEnabledResult = checkActionTypeEnabled(item.actionType);
       const card = (
         <EuiCard
           data-test-subj={`${item.actionType.id}-card`}
           icon={<EuiIcon size="xl" type={item.iconClass} />}
           title={item.name}
           description={item.selectMessage}
-          isDisabled={!checkActionTypeResult.isEnabled}
+          isDisabled={!checkEnabledResult.isEnabled}
           onClick={() => onActionTypeChange(item.actionType)}
         />
       );
 
       return (
         <EuiFlexItem key={index}>
-          {checkActionTypeResult.isEnabled && card}
-          {checkActionTypeResult.isEnabled === false && (
-            <EuiToolTip position="top" content={checkActionTypeResult.message}>
+          {checkEnabledResult.isEnabled && card}
+          {checkEnabledResult.isEnabled === false && (
+            <EuiToolTip position="top" content={checkEnabledResult.message}>
               {card}
             </EuiToolTip>
           )}

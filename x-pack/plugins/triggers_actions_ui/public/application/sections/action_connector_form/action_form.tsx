@@ -21,6 +21,7 @@ import {
   EuiButtonIcon,
   EuiEmptyPrompt,
   EuiButtonEmpty,
+  EuiToolTip,
 } from '@elastic/eui';
 import { HttpSetup, ToastsApi } from 'kibana/public';
 import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
@@ -465,16 +466,29 @@ export const ActionForm = ({
       )
       .sort((a, b) => actionTypeCompare(actionTypesIndex[a.id], actionTypesIndex[b.id]))
       .map(function(item, index) {
-        return (
+        const checkEnabledResult = checkActionTypeEnabled(actionTypesIndex[item.id]);
+
+        const keyPadItem = (
           <EuiKeyPadMenuItem
             key={index}
-            isDisabled={!actionTypesIndex[item.id].enabledInLicense}
+            isDisabled={!checkEnabledResult.isEnabled}
             data-test-subj={`${item.id}-ActionTypeSelectOption`}
             label={actionTypesIndex[item.id].name}
             onClick={() => addActionType(item)}
           >
             <EuiIcon size="xl" type={item.iconClass} />
           </EuiKeyPadMenuItem>
+        );
+
+        return (
+          <Fragment>
+            {checkEnabledResult.isEnabled && keyPadItem}
+            {checkEnabledResult.isEnabled === false && (
+              <EuiToolTip position="top" content={checkEnabledResult.message}>
+                {keyPadItem}
+              </EuiToolTip>
+            )}
+          </Fragment>
         );
       });
   }
