@@ -42,7 +42,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_API_ROUTES.INFO_PATTERN,
       validate: GetOneAgentRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getAgentHandler
   );
@@ -51,7 +51,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_API_ROUTES.UPDATE_PATTERN,
       validate: UpdateAgentRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     updateAgentHandler
   );
@@ -60,7 +60,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_API_ROUTES.DELETE_PATTERN,
       validate: DeleteAgentRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     deleteAgentHandler
   );
@@ -69,7 +69,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_API_ROUTES.LIST_PATTERN,
       validate: GetAgentsRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getAgentsHandler
   );
@@ -108,7 +108,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_API_ROUTES.UNENROLL_PATTERN,
       validate: PostAgentUnenrollRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     postAgentsUnenrollHandler
   );
@@ -118,7 +118,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_API_ROUTES.EVENTS_PATTERN,
       validate: GetOneAgentEventsRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getAgentEventsHandler
   );
@@ -128,7 +128,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_API_ROUTES.STATUS_PATTERN,
       validate: GetAgentStatusRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     getAgentStatusForConfigHandler
   );

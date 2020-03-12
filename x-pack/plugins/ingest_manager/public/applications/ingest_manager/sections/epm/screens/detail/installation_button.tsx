@@ -6,6 +6,7 @@
 import { EuiButton } from '@elastic/eui';
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { PackageInfo, InstallStatus } from '../../../../types';
+import { useCapabilities } from '../../../../hooks';
 import { useDeletePackage, useGetPackageInstallStatus, useInstallPackage } from '../../hooks';
 import { ConfirmPackageDelete } from './confirm_package_delete';
 import { ConfirmPackageInstall } from './confirm_package_install';
@@ -16,6 +17,7 @@ interface InstallationButtonProps {
 
 export function InstallationButton(props: InstallationButtonProps) {
   const { assets, name, title, version } = props.package;
+  const hasWriteCapabilites = useCapabilities().write;
   const installPackage = useInstallPackage();
   const deletePackage = useDeletePackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
@@ -86,10 +88,10 @@ export function InstallationButton(props: InstallationButtonProps) {
     />
   );
 
-  return (
+  return hasWriteCapabilites ? (
     <Fragment>
       {isInstalled ? installedButton : installButton}
       {isModalVisible && (isInstalled ? deletionModal : installationModal)}
     </Fragment>
-  );
+  ) : null;
 }

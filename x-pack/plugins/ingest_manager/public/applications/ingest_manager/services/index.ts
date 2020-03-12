@@ -13,4 +13,6 @@ export {
   epmRouteService,
   setupRouteService,
   packageToConfigDatasourceInputs,
+  storedDatasourceToAgentDatasource,
+  AgentStatusKueryHelper,
 } from '../../../../common';

@@ -65,7 +65,7 @@ export default function({ getService }: FtrProviderContext) {
         .delete(`/api/ingest_manager/fleet/agents/agent1`)
         .auth(users.fleet_user.username, users.fleet_user.password)
         .set('kbn-xsrf', 'xx')
-        .expect(403);
+        .expect(404);
 
       expect(apiResponse).not.to.eql({
         success: true,

@@ -50,7 +50,7 @@ export async function agentCheckin(
         );
       }
       // Mutate the config to set the api token for this agent
-      config.outputs.default.api_token = agent.default_api_key || updateData.default_api_key;
+      config.outputs.default.api_key = agent.default_api_key || updateData.default_api_key;
 
       const configChangeAction: AgentAction = {
         id: uuid.v4(),

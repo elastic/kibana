@@ -12,6 +12,7 @@ import { useEnrollmentApiKeys, useEnrollmentApiKey } from './hooks';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 import { CreateApiKeyForm } from './create_api_key_form';
 import { EnrollmentAPIKey } from '../../../../../types';
+import { useCapabilities } from '../../../../../hooks';
 import { enrollmentAPIKeyRouteService } from '../../../../../services';
 export { useEnrollmentApiKeys, useEnrollmentApiKey } from './hooks';
 
@@ -98,13 +99,14 @@ export const EnrollmentApiKeysTable: React.FunctionComponent<{
 export const CreateApiKeyButton: React.FunctionComponent<{ onChange: () => void }> = ({
   onChange,
 }) => {
+  const hasWriteCapabilites = useCapabilities().write;
   const [isOpen, setIsOpen] = React.useState(false);
 
   return (
     <EuiPopover
       ownFocus
       button={
-        <EuiLink onClick={() => setIsOpen(true)} color="primary">
+        <EuiLink disabled={!hasWriteCapabilites} onClick={() => setIsOpen(true)} color="primary">
           <FormattedMessage
             id="xpack.ingestManager.enrollmentApiKeyList.createNewButton"
             defaultMessage="Create a new key"

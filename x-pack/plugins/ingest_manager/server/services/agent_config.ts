@@ -11,11 +11,10 @@ import {
   NewAgentConfig,
   AgentConfig,
   FullAgentConfig,
-  FullAgentConfigDatasource,
   AgentConfigStatus,
   ListWithKuery,
 } from '../types';
-import { DeleteAgentConfigsResponse } from '../../common';
+import { DeleteAgentConfigsResponse, storedDatasourceToAgentDatasource } from '../../common';
 import { datasourceService } from './datasource';
 import { outputService } from './output';
 import { agentConfigUpdateEventHandler } from './agent_config_update';
@@ -49,7 +48,7 @@ class AgentConfigService {
   }
 
   public async ensureDefaultAgentConfig(soClient: SavedObjectsClientContract) {
-    const configs = await soClient.find({
+    const configs = await soClient.find<AgentConfig>({
       type: AGENT_CONFIG_SAVED_OBJECT_TYPE,
       filter: 'agent_configs.attributes.is_default:true',
     });
@@ -59,8 +58,13 @@ class AgentConfigService {
         ...DEFAULT_AGENT_CONFIG,
       };
 
-      await this.create(soClient, newDefaultAgentConfig);
+      return this.create(soClient, newDefaultAgentConfig);
     }
+
+    return {
+      id: configs.saved_objects[0].id,
+      ...configs.saved_objects[0].attributes,
+    };
   }
 
   public async create(
@@ -265,34 +269,6 @@ class AgentConfigService {
     return result;
   }
 
-  private storedDatasourceToAgentDatasource = (
-    datasource: Datasource
-  ): FullAgentConfigDatasource => {
-    const { name, namespace, enabled, package: pkg, output_id, inputs } = datasource;
-    return {
-      name,
-      namespace,
-      enabled,
-      package: pkg
-        ? {
-            name: pkg.name,
-            version: pkg.version,
-          }
-        : undefined,
-      use_output: output_id,
-      inputs: inputs
-        .filter(input => input.enabled)
-        .map(input => ({
-          ...input,
-          streams: input.streams.map(stream => ({
-            ...stream,
-            config: undefined,
-            ...(stream.config || {}),
-          })),
-        })),
-    };
-  };
-
   public async getFullConfig(
     soClient: SavedObjectsClientContract,
     id: string
@@ -329,7 +305,7 @@ class AgentConfigService {
         }, {} as FullAgentConfig['outputs']),
       },
       datasources: (config.datasources as Datasource[]).map(ds =>
-        this.storedDatasourceToAgentDatasource(ds)
+        storedDatasourceToAgentDatasource(ds)
       ),
     };
 

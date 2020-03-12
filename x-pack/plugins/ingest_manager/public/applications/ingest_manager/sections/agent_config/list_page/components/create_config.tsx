@@ -19,7 +19,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { NewAgentConfig } from '../../../../types';
-import { useCore, sendCreateAgentConfig } from '../../../../hooks';
+import { useCapabilities, useCore, sendCreateAgentConfig } from '../../../../hooks';
 import { AgentConfigForm, agentConfigFormValidation } from '../../components';
 
 interface Props {
@@ -28,7 +28,7 @@ interface Props {
 
 export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
   const { notifications } = useCore();
-
+  const hasWriteCapabilites = useCapabilities().write;
   const [agentConfig, setAgentConfig] = useState<NewAgentConfig>({
     name: '',
     description: '',
@@ -93,7 +93,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
           <EuiButton
             fill
             isLoading={isLoading}
-            disabled={isLoading || Object.keys(validation).length > 0}
+            isDisabled={!hasWriteCapabilites || isLoading || Object.keys(validation).length > 0}
             onClick={async () => {
               setIsLoading(true);
               try {
