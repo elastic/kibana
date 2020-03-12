@@ -37,3 +37,7 @@ export interface PatchConnectorProps extends ApiProps {
   connectorId: string;
   config: CasesConnectorConfiguration;
 }
+
+export interface CCMapsCombinedActionAttributes extends CasesConfigurationMaps {
+  actionType?: ActionType;
+}

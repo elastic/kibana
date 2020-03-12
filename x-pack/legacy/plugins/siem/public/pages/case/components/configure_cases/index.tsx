@@ -14,7 +14,7 @@ import { useCaseConfigure } from '../../../../containers/case/configure/use_conf
 import {
   ClosureType,
   CasesConfigurationMapping,
-  CasesConfigurationMaps,
+  CCMapsCombinedActionAttributes,
 } from '../../../../containers/case/configure/types';
 import { Connectors } from '../configure_cases/connectors';
 import { ClosureOptions } from '../configure_cases/closure_options';
@@ -100,10 +100,10 @@ const ConfigureCasesComponent: React.FC = () => {
       const myConnector = connectors.find(c => c.id === connectorId);
       const myMapping = myConnector?.config?.casesConfiguration?.mapping ?? [];
       setMapping(
-        myMapping.map((m: CasesConfigurationMaps) => ({
+        myMapping.map((m: CCMapsCombinedActionAttributes) => ({
           source: m.source,
           target: m.target,
-          actionType: m.action_type,
+          actionType: m.action_type ?? m.actionType,
         }))
       );
     }
