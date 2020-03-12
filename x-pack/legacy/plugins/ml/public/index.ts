@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import acorn from 'acorn';
-acorn.full();
-
 import { PluginInitializer } from '../../../../../src/core/public';
 import { MlPlugin, Setup, Start } from './plugin';
 
