@@ -87,6 +87,7 @@ interface LegacyShimDependencies {
 
 interface IBulkUploader {
   setKibanaStatusGetter: (getter: () => string | undefined) => void;
+  getKibanaStats: () => any;
 }
 
 // This is used to test the version of kibana
@@ -223,6 +224,7 @@ export class Plugin {
           this.setupLegacy();
         }
       },
+      getKibanaStats: () => this.bulkUploader?.getKibanaStats(),
     };
   }
 

@@ -190,6 +190,13 @@ export class BulkUploader {
     );
   }
 
+  getKibanaStats() {
+    return {
+      ...this.kibanaStats,
+      status: this.kibanaStatusGetter(),
+    };
+  }
+
   /*
    * Bulk stats are transformed into a bulk upload format
    * Non-legacy transformation is done in CollectorSet.toApiStats
@@ -247,10 +254,7 @@ export class BulkUploader {
         ...accum,
         { index: { _type: type } },
         {
-          kibana: {
-            ...this.kibanaStats,
-            status: this.kibanaStatusGetter(),
-          },
+          kibana: this.getKibanaStats(),
           ...typesNested[type],
         },
       ];
