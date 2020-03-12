@@ -17,5 +17,22 @@
  * under the License.
  */
 
-require('../src/setup_node_env/node_version_validator');
-require('backport');
+if (process.noProcessWarnings !== true) {
+  var ignore = ['MaxListenersExceededWarning'];
+
+  process.on('warning', function(warn) {
+    if (ignore.includes(warn.name)) return;
+
+    if (process.traceProcessWarnings === true) {
+      console.error('Node.js process-warning detected - Terminating process...');
+    } else {
+      console.error('Node.js process-warning detected:');
+      console.error();
+      console.error(warn.stack);
+      console.error();
+      console.error('Terminating process...');
+    }
+
+    process.exit(1);
+  });
+}
