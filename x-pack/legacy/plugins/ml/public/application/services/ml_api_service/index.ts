@@ -13,7 +13,7 @@ import { filters } from './filters';
 import { results } from './results';
 import { jobs } from './jobs';
 import { fileDatavisualizer } from './datavisualizer';
-import { MlServerDefaults, MlServerLimits } from '../ml_server_info';
+import { MlServerDefaults, MlServerLimits } from '../../../../common/types/ml_server_info';
 
 import { PrivilegesResponse } from '../../../../common/types/privileges';
 import { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';

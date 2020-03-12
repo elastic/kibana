@@ -9,6 +9,7 @@ import { http } from '../http_service';
 import { basePath } from './index';
 import { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { DataFrameAnalyticsConfig } from '../../data_frame_analytics/common';
+import { DeepPartial } from '../../../../common/types/common';
 
 export interface GetDataFrameAnalyticsStatsResponseOk {
   node_failures?: object;
@@ -52,7 +53,10 @@ export const dataFrameAnalytics = {
       method: 'GET',
     });
   },
-  createDataFrameAnalytics(analyticsId: string, analyticsConfig: DataFrameAnalyticsConfig) {
+  createDataFrameAnalytics(
+    analyticsId: string,
+    analyticsConfig: DeepPartial<DataFrameAnalyticsConfig>
+  ) {
     const body = JSON.stringify(analyticsConfig);
     return http<any>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}`,
@@ -60,7 +64,7 @@ export const dataFrameAnalytics = {
       body,
     });
   },
-  evaluateDataFrameAnalytics(evaluateConfig: DataFrameAnalyticsConfig) {
+  evaluateDataFrameAnalytics(evaluateConfig: any) {
     const body = JSON.stringify(evaluateConfig);
     return http<any>({
       path: `${basePath()}/data_frame/_evaluate`,
@@ -68,7 +72,7 @@ export const dataFrameAnalytics = {
       body,
     });
   },
-  explainDataFrameAnalytics(jobConfig: DataFrameAnalyticsConfig) {
+  explainDataFrameAnalytics(jobConfig: DeepPartial<DataFrameAnalyticsConfig>) {
     const body = JSON.stringify(jobConfig);
     return http<any>({
       path: `${basePath()}/data_frame/analytics/_explain`,
