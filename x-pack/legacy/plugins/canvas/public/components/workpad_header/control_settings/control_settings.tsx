@@ -38,13 +38,10 @@ export const ControlSettings = ({
     setRefresh(0);
   };
 
-  // TODO: i18n the button label
   const popoverButton = (handleClick: MouseEventHandler<HTMLButtonElement>) => (
-    <EuiToolTip position="bottom" content={strings.getTooltip()}>
-      <EuiButtonEmpty size="s" aria-label={strings.getTooltip()} onClick={handleClick}>
-        {strings.getButtonLabel()}
-      </EuiButtonEmpty>
-    </EuiToolTip>
+    <EuiButtonEmpty size="s" aria-label={strings.getTooltip()} onClick={handleClick}>
+      {strings.getButtonLabel()}
+    </EuiButtonEmpty>
   );
 
   return (
@@ -53,6 +50,9 @@ export const ControlSettings = ({
       button={popoverButton}
       anchorPosition="rightUp"
       panelClassName="canvasControlSettings__popover"
+      // TODO: do we still need this tooltip?
+      tooltip={strings.getTooltip()}
+      tooltipPosition="bottom"
     >
       {() => (
         <EuiFlexGroup>

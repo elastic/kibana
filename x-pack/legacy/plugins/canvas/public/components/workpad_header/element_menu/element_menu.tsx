@@ -223,6 +223,7 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
       <Popover
         button={exportControl}
         panelPaddingSize="none"
+        // TODO: do we still need this tooltip?
         tooltip={strings.getElementMenuLabel()}
         tooltipPosition="bottom"
       >

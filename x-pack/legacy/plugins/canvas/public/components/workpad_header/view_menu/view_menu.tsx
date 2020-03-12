@@ -175,6 +175,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
     <Popover
       button={exportControl}
       panelPaddingSize="none"
+      // TODO: do we still need this tooltip?
       tooltip={strings.getViewMenuLabel()}
       tooltipPosition="bottom"
     >

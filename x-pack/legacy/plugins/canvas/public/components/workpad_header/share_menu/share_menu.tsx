@@ -105,6 +105,7 @@ export const ShareMenu: FunctionComponent<Props> = ({ onCopy, onExport, getExpor
       <Popover
         button={exportControl}
         panelPaddingSize="none"
+        // TODO: do we still need this tooltip?
         tooltip={strings.getShareWorkpadMessage()}
         tooltipPosition="bottom"
       >
