@@ -5,7 +5,10 @@
  */
 
 export { DASHBOARD_TO_DASHBOARD_DRILLDOWN } from './constants';
-export { DashboardToDashboardDrilldown } from './drilldown';
+export {
+  DashboardToDashboardDrilldown,
+  Params as DashboardToDashboardDrilldownParams,
+} from './drilldown';
 export {
   FactoryContext as DashboardToDashboardFactoryContext,
   ActionContext as DashboardToDashboardActionContext,
