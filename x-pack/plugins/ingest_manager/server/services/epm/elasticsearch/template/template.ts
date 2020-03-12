@@ -37,10 +37,10 @@ export function getTemplate(
 }
 
 /**
- * Generate mapping takes the given fields array and creates the Elasticsearch
+ * Generate mapping takes the given nested fields array and creates the Elasticsearch
  * mapping properties out of it.
  *
- * This assumes that the fields have been flattened be a previous step.
+ * This assumes that all fields with dotted.names have been expanded in a previous step.
  *
  * @param fields
  */
