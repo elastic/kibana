@@ -9,7 +9,13 @@ import { DeepPartial } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 
-import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
+import {
+  isClassificationAnalysis,
+  isRegressionAnalysis,
+  DataFrameAnalyticsId,
+  DataFrameAnalyticsConfig,
+  ANALYSIS_CONFIG_TYPE,
+} from '../../../../common/analytics';
 import { CloneDataFrameAnalyticsConfig } from '../../components/analytics_list/action_clone';
 
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
@@ -22,7 +28,7 @@ export enum DEFAULT_MODEL_MEMORY_LIMIT {
 export type EsIndexName = string;
 export type DependentVariable = string;
 export type IndexPatternTitle = string;
-export type AnalyticsJobType = JOB_TYPES | undefined;
+export type AnalyticsJobType = ANALYSIS_CONFIG_TYPE | undefined;
 type IndexPatternId = string;
 export type SourceIndexMap = Record<
   IndexPatternTitle,
@@ -32,12 +38,6 @@ export type SourceIndexMap = Record<
 export interface FormMessage {
   error?: string;
   message: string;
-}
-
-export enum JOB_TYPES {
-  OUTLIER_DETECTION = 'outlier_detection',
-  REGRESSION = 'regression',
-  CLASSIFICATION = 'classification',
 }
 
 export interface State {
@@ -176,8 +176,8 @@ export const getJobConfigFromFormState = (
   };
 
   if (
-    formState.jobType === JOB_TYPES.REGRESSION ||
-    formState.jobType === JOB_TYPES.CLASSIFICATION
+    formState.jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
+    formState.jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
   ) {
     jobConfig.analysis = {
       [formState.jobType]: {
@@ -197,10 +197,10 @@ export const getJobConfigFromFormState = (
 export function getCloneFormStateFromJobConfig(
   analyticsJobConfig: CloneDataFrameAnalyticsConfig
 ): Partial<State['form']> {
-  const jobType: string = Object.keys(analyticsJobConfig.analysis)[0];
+  const jobType = Object.keys(analyticsJobConfig.analysis)[0] as ANALYSIS_CONFIG_TYPE;
 
   const resultState: Partial<State['form']> = {
-    jobType: jobType as AnalyticsJobType,
+    jobType,
     description: analyticsJobConfig.description ?? '',
     sourceIndex: Array.isArray(analyticsJobConfig.source.index)
       ? analyticsJobConfig.source.index.join(',')
@@ -209,12 +209,14 @@ export function getCloneFormStateFromJobConfig(
     excludes: analyticsJobConfig.analyzed_fields.excludes,
   };
 
-  if (jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION) {
-    // @ts-ignore
+  if (
+    isRegressionAnalysis(analyticsJobConfig.analysis) ||
+    isClassificationAnalysis(analyticsJobConfig.analysis)
+  ) {
     const analysisConfig = analyticsJobConfig.analysis[jobType];
 
-    resultState.dependentVariable = analysisConfig!.dependent_variable;
-    resultState.trainingPercent = analysisConfig!.training_percent;
+    resultState.dependentVariable = analysisConfig.dependent_variable;
+    resultState.trainingPercent = analysisConfig.training_percent;
   }
 
   return resultState;

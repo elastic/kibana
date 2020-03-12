@@ -19,25 +19,37 @@ export type IndexName = string;
 export type IndexPattern = string;
 export type DataFrameAnalyticsId = string;
 
+export enum ANALYSIS_CONFIG_TYPE {
+  OUTLIER_DETECTION = 'outlier_detection',
+  REGRESSION = 'regression',
+  CLASSIFICATION = 'classification',
+  UNKNOWN = 'unknown',
+}
+
 interface OutlierAnalysis {
+  [key: string]: {};
   outlier_detection: {};
 }
 
+interface Regression {
+  dependent_variable: string;
+  training_percent?: number;
+  prediction_field_name?: string;
+}
 interface RegressionAnalysis {
-  regression: {
-    dependent_variable: string;
-    training_percent?: number;
-    prediction_field_name?: string;
-  };
+  [key: string]: Regression;
+  regression: Regression;
 }
 
+interface Classification {
+  dependent_variable: string;
+  training_percent?: number;
+  num_top_classes?: string;
+  prediction_field_name?: string;
+}
 interface ClassificationAnalysis {
-  classification: {
-    dependent_variable: string;
-    training_percent?: number;
-    num_top_classes?: string;
-    prediction_field_name?: string;
-  };
+  [key: string]: Classification;
+  classification: Classification;
 }
 
 export interface LoadExploreDataArg {
@@ -135,13 +147,6 @@ type AnalysisConfig =
   | RegressionAnalysis
   | ClassificationAnalysis
   | GenericAnalysis;
-
-export enum ANALYSIS_CONFIG_TYPE {
-  OUTLIER_DETECTION = 'outlier_detection',
-  REGRESSION = 'regression',
-  CLASSIFICATION = 'classification',
-  UNKNOWN = 'unknown',
-}
 
 export const getAnalysisType = (analysis: AnalysisConfig) => {
   const keys = Object.keys(analysis);
