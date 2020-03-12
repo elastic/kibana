@@ -12,18 +12,18 @@ import { OpenTimelineProps } from './types';
 import { SearchRow } from './search_row';
 import { TimelinesTable } from './timelines_table';
 import { TitleRow } from './title_row';
-import {
-  UtilityBar,
-  UtilityBarSection,
-  UtilityBarGroup,
-  UtilityBarText,
-  UtilityBarAction,
-} from '../detection_engine/utility_bar';
 
 import * as i18n from './translations';
 import { useStateToaster } from '../toasters';
 import { TimelineDownloader } from './export_timeline/export_timeline';
 import { DeleteTimelineModalButton } from './delete_timeline_modal';
+import {
+  UtilityBarGroup,
+  UtilityBarText,
+  UtilityBar,
+  UtilityBarSection,
+  UtilityBarAction,
+} from '../utility_bar';
 export interface ExportTimelineIds {
   timelineId: string | null | undefined;
   pinnedEventIds: string[] | null | undefined;

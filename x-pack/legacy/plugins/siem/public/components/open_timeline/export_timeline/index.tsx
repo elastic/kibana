@@ -8,7 +8,6 @@ import { useState, useCallback, Dispatch, SetStateAction } from 'react';
 import { keys } from 'lodash/fp';
 import { OpenTimelineResult } from '../types';
 import { KibanaServices } from '../../../lib/kibana';
-import { throwIfNotOk } from '../../../hooks/api/api';
 import { ExportSelectedData } from '../../generic_downloader';
 import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
 
@@ -49,7 +48,6 @@ export const useExportTimeline = (
         asResponse: true,
       });
 
-      await throwIfNotOk(response.response);
       return response.body!;
     },
     [selectedItems]
