@@ -222,7 +222,7 @@ uiModules
           handleTabChange($scope, tab);
         },
       },
-      setup.fatalErrors
+      fatalError
     );
 
     handleTabChange($scope, getCurrentTab()); // setup initial tab depending on initial tab state
