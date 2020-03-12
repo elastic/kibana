@@ -14,7 +14,7 @@ import { wrapError } from '../../utils';
 
 const CASE_SERVICE_NOW_ACTION = '.servicenow';
 
-export function initCaseConfigurePutActionConnector({ caseService, router }: RouteDeps) {
+export function initCaseConfigureGetActionConnector({ caseService, router }: RouteDeps) {
   router.get(
     {
       path: '/api/cases/configure/connectors/_find',
