@@ -26,8 +26,9 @@ import {
   RawConfigurationProvider,
   coreDeprecationProvider,
 } from './config';
+import { CoreApp } from './core_app';
 import { ElasticsearchService } from './elasticsearch';
-import { HttpService, InternalHttpServiceSetup } from './http';
+import { HttpService } from './http';
 import { RenderingService, RenderingServiceSetup } from './rendering';
 import { LegacyService, ensureValidConfiguration } from './legacy';
 import { Logger, LoggerFactory } from './logging';
@@ -69,6 +70,7 @@ export class Server {
   private readonly uiSettings: UiSettingsService;
   private readonly uuid: UuidService;
   private readonly metrics: MetricsService;
+  private readonly coreApp: CoreApp;
 
   private coreStart?: InternalCoreStart;
 
@@ -92,6 +94,7 @@ export class Server {
     this.capabilities = new CapabilitiesService(core);
     this.uuid = new UuidService(core);
     this.metrics = new MetricsService(core);
+    this.coreApp = new CoreApp(core);
   }
 
   public async setup() {
@@ -166,7 +169,7 @@ export class Server {
     });
 
     this.registerCoreContext(coreSetup, renderingSetup);
-    this.registerDefaultRoutes(httpSetup);
+    this.coreApp.setup(coreSetup);
 
     return coreSetup;
   }
@@ -215,24 +218,6 @@ export class Server {
     await this.uiSettings.stop();
     await this.rendering.stop();
     await this.metrics.stop();
-  }
-
-  private registerDefaultRoutes(httpSetup: InternalHttpServiceSetup) {
-    const router = httpSetup.createRouter('/');
-    router.get({ path: '/', validate: false }, async (context, req, res) => {
-      const defaultRoute = await context.core.uiSettings.client.get<string>('defaultRoute');
-      const basePath = httpSetup.basePath.get(req);
-      const url = `${basePath}${defaultRoute}`;
-
-      return res.redirected({
-        headers: {
-          location: url,
-        },
-      });
-    });
-    router.get({ path: '/core', validate: false }, async (context, req, res) =>
-      res.ok({ body: { version: '0.0.1' } })
-    );
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup, rendering: RenderingServiceSetup) {
