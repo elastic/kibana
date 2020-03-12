@@ -33,7 +33,7 @@ case-by-case bases for loading components and the parameters that get passed
 into the components.
 
 In most cases, the information coming from this service would help the
-application which UI components should **not** be loaded, as applications will
+application determine which UI components should **not** be loaded, as applications will
 use the service response for skipping components that aren't needed for
 presenting the data in a screenshot, and thus work towards better performance
 for the display-only purpose.
