@@ -20,8 +20,8 @@
 import React, { Component } from 'react';
 import { EuiFormRow, EuiDualRange } from '@elastic/eui';
 import { EuiFormRowDisplayKeys } from '@elastic/eui/src/components/form/form_row/form_row';
+import { EuiDualRangeProps } from '@elastic/eui/src/components/form/range/dual_range';
 import { isRangeValid } from './is_range_valid';
-import { EuiDualRangeProps } from "@elastic/eui/src/components/form/range/dual_range";
 
 // Wrapper around EuiDualRange that ensures onChange callback is only called when range value
 // is valid and within min/max

@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ValueMember } from "./validated_dual_range";
+import { ValueMember } from './validated_dual_range';
 
 const LOWER_VALUE_INDEX = 0;
 const UPPER_VALUE_INDEX = 1;
