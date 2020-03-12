@@ -11,7 +11,10 @@ type Schema = PublicMethodsOf<AlertNavigationRegistry>;
 const createAlertNavigationRegistryMock = () => {
   const mocked: jest.Mocked<Schema> = {
     has: jest.fn(),
+    hasDefaultHandler: jest.fn(),
+    hasTypedHandler: jest.fn(),
     register: jest.fn(),
+    registerDefault: jest.fn(),
     get: jest.fn(),
   };
   return mocked;

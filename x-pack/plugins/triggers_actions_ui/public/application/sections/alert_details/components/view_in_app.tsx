@@ -40,6 +40,7 @@ export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ alert }) =>
 
   return (
     <EuiButtonEmpty
+      data-test-subj="alertDetails-viewInApp"
       isLoading={alertNavigation === null}
       disabled={!hasNavigation(alertNavigation)}
       iconType="popout"

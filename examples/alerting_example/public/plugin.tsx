@@ -22,8 +22,9 @@ import { PluginSetupContract as AlertingSetup } from '../../../x-pack/plugins/al
 import { ChartsPluginStart } from '../../../src/plugins/charts/public';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../x-pack/plugins/triggers_actions_ui/public';
 import { DataPublicPluginStart } from '../../../src/plugins/data/public';
-import { register as registerAlwaysFiringAlert } from './alert_types/always_firing';
-import { register as registerPeopleInSpaceAlert } from './alert_types/astros';
+import { getAlertType as getAlwaysFiringAlertType } from './alert_types/always_firing';
+import { getAlertType as getPeopleInSpaceAlertType } from './alert_types/astros';
+import { registerNavigation } from './alert_types';
 
 export type Setup = void;
 export type Start = void;
@@ -58,8 +59,10 @@ export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamp
       },
     });
 
-    registerAlwaysFiringAlert(alerting, triggers_actions_ui);
-    registerPeopleInSpaceAlert(alerting, triggers_actions_ui);
+    triggers_actions_ui.alertTypeRegistry.register(getAlwaysFiringAlertType());
+    triggers_actions_ui.alertTypeRegistry.register(getPeopleInSpaceAlertType());
+
+    registerNavigation(alerting);
   }
 
   public start() {}

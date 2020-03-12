@@ -34,20 +34,9 @@ import { flatten } from 'lodash';
 import { ALERTING_EXAMPLE_APP_ID, Craft, Operator } from '../../common/constants';
 import { SanitizedAlert } from '../../../../x-pack/plugins/alerting/common';
 import { PluginSetupContract as AlertingSetup } from '../../../../x-pack/plugins/alerting/public';
-import {
-  AlertTypeModel,
-  TriggersAndActionsUIPublicPluginSetup,
-} from '../../../../x-pack/plugins/triggers_actions_ui/public';
+import { AlertTypeModel } from '../../../../x-pack/plugins/triggers_actions_ui/public';
 
-export function register(
-  alerting: AlertingSetup,
-  triggersActionsUI: TriggersAndActionsUIPublicPluginSetup
-) {
-  registerNavigation(alerting);
-  triggersActionsUI.alertTypeRegistry.register(getAlertType());
-}
-
-function registerNavigation(alerting: AlertingSetup) {
+export function registerNavigation(alerting: AlertingSetup) {
   alerting.registerNavigation(
     ALERTING_EXAMPLE_APP_ID,
     'example.people-in-space',
@@ -65,7 +54,7 @@ function isValueInEnum(enumeratin: Record<string, any>, value: any): boolean {
   return !!Object.values(enumeratin).find(enumVal => enumVal === value);
 }
 
-function getAlertType(): AlertTypeModel {
+export function getAlertType(): AlertTypeModel {
   return {
     id: 'example.people-in-space',
     name: 'People Are In Space Right Now',

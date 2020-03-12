@@ -102,5 +102,16 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
       const nextButton = await testSubjects.find(`pagination-button-next`);
       nextButton.click();
     },
+    async isViewInAppEnabled() {
+      const viewInAppButton = await testSubjects.find(`alertDetails-viewInApp`);
+      return (await viewInAppButton.getAttribute('disabled')) !== 'disabled';
+    },
+    async clickViewInAppEnabled() {
+      const viewInAppButton = await testSubjects.find(`alertDetails-viewInApp`);
+      viewInAppButton.click();
+    },
+    async getNoOpAppTitle() {
+      return await testSubjects.getVisibleText('noop-title');
+    },
   };
 }

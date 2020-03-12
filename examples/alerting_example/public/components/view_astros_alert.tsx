@@ -100,14 +100,16 @@ export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiDescriptionList compressed>
-                  {Object.entries(alertState.alertInstances ?? {}).map(([instance, { state }]) => (
-                    <Fragment>
-                      <EuiDescriptionListTitle>{instance}</EuiDescriptionListTitle>
-                      <EuiDescriptionListDescription>
-                        {hasCraft(state) ? state.craft : 'Unknown Craft'}
-                      </EuiDescriptionListDescription>
-                    </Fragment>
-                  ))}
+                  {Object.entries(alertState.alertInstances ?? {}).map(
+                    ([instance, { state }], index) => (
+                      <Fragment key={index}>
+                        <EuiDescriptionListTitle>{instance}</EuiDescriptionListTitle>
+                        <EuiDescriptionListDescription>
+                          {hasCraft(state) ? state.craft : 'Unknown Craft'}
+                        </EuiDescriptionListDescription>
+                      </Fragment>
+                    )
+                  )}
                 </EuiDescriptionList>
               </EuiFlexItem>
             </EuiFlexGroup>

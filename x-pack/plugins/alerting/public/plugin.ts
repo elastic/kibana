@@ -48,6 +48,7 @@ export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginS
       getNavigation: async (alertId: Alert['id']) => {
         const alert = await loadAlert({ http: core.http, alertId });
         const alertType = await loadAlertType({ http: core.http, id: alert.alertTypeId });
+
         if (this.alertNavigationRegistry!.has(alert.consumer, alertType)) {
           const navigationHandler = this.alertNavigationRegistry!.get(alert.consumer, alertType);
           const state = navigationHandler(alert, alertType);

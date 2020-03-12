@@ -11,6 +11,7 @@ export type Start = jest.Mocked<ReturnType<AlertingPublicPlugin['start']>>;
 
 const createSetupContract = (): Setup => ({
   registerNavigation: jest.fn(),
+  registerDefaultNavigation: jest.fn(),
 });
 
 const createStartContract = (): Start => ({

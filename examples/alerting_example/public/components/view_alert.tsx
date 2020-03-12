@@ -28,8 +28,6 @@ import {
   EuiDescriptionListDescription,
   EuiCodeBlock,
   EuiSpacer,
-  EuiFlexGroup,
-  EuiPanel,
 } from '@elastic/eui';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { CoreStart } from 'kibana/public';

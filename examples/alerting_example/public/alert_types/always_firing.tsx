@@ -20,30 +20,8 @@
 import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
-import { SanitizedAlert } from '../../../../x-pack/plugins/alerting/common';
-import { PluginSetupContract as AlertingSetup } from '../../../../x-pack/plugins/alerting/public';
-import {
-  AlertTypeModel,
-  TriggersAndActionsUIPublicPluginSetup,
-} from '../../../../x-pack/plugins/triggers_actions_ui/public';
+import { AlertTypeModel } from '../../../../x-pack/plugins/triggers_actions_ui/public';
 import { DEFAULT_INSTANCES_TO_GENERATE } from '../../common/constants';
-
-export function register(
-  alerting: AlertingSetup,
-  triggersActionsUI: TriggersAndActionsUIPublicPluginSetup
-) {
-  registerNavigation(alerting);
-  triggersActionsUI.alertTypeRegistry.register(getAlertType());
-}
-
-function registerNavigation(alerting: AlertingSetup) {
-  alerting.registerNavigation(
-    ALERTING_EXAMPLE_APP_ID,
-    'example.always-firing',
-    (alert: SanitizedAlert) => `/alert/${alert.id}`
-  );
-}
 
 interface AlwaysFiringParamsProps {
   alertParams: { instances?: number };
@@ -51,7 +29,7 @@ interface AlwaysFiringParamsProps {
   errors: { [key: string]: string[] };
 }
 
-function getAlertType(): AlertTypeModel {
+export function getAlertType(): AlertTypeModel {
   return {
     id: 'example.always-firing',
     name: 'Always Fires',
