@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { IScopedClusterClient } from 'src/core/server';
+import { IScopedClusterClient } from 'kibana/server';
 
 import {
   DetectorRule,
