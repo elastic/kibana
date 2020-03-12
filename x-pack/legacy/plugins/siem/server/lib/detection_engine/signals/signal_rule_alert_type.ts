@@ -5,15 +5,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Logger } from 'src/core/server';
+import { Logger, SavedObject, SavedObjectsFindResponse } from 'src/core/server';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { AlertServices } from '../../../../../../../plugins/alerting/server';
+
 import {
   SIGNALS_ID,
   DEFAULT_MAX_SIGNALS,
   DEFAULT_SEARCH_AFTER_PAGE_SIZE,
 } from '../../../../common/constants';
-
 import { buildEventsSearchQuery } from './build_events_query';
 import { getInputIndex } from './get_input_output_index';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
@@ -104,7 +105,7 @@ export const signalRulesAlertType = ({
         search: `${alertId}`,
         searchFields: ['alertId'],
       });
-      let currentStatusSavedObject;
+      let currentStatusSavedObject: SavedObject<IRuleSavedAttributesSavedObjectAttributes>;
       if (ruleStatusSavedObjects.saved_objects.length === 0) {
         // create
         const date = new Date().toISOString();
@@ -276,31 +277,7 @@ export const signalRulesAlertType = ({
             logger.error(
               `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", ${err.message}\n${err.stack}`
             );
-            const sDate = new Date().toISOString();
-            currentStatusSavedObject.attributes.status = 'failed';
-            currentStatusSavedObject.attributes.statusDate = sDate;
-            currentStatusSavedObject.attributes.lastFailureAt = sDate;
-            currentStatusSavedObject.attributes.lastFailureMessage = err.message;
-            // current status is failing
-            await services.savedObjectsClient.update(
-              ruleStatusSavedObjectType,
-              currentStatusSavedObject.id,
-              {
-                ...currentStatusSavedObject.attributes,
-              }
-            );
-            // create new status for historical purposes
-            await services.savedObjectsClient.create(ruleStatusSavedObjectType, {
-              ...currentStatusSavedObject.attributes,
-            });
-
-            if (ruleStatusSavedObjects.saved_objects.length >= 6) {
-              // delete fifth status and prepare to insert a newer one.
-              const toDelete = ruleStatusSavedObjects.saved_objects.slice(5);
-              await toDelete.forEach(async item =>
-                services.savedObjectsClient.delete(ruleStatusSavedObjectType, item.id)
-              );
-            }
+            markRuleFailed(currentStatusSavedObject, ruleStatusSavedObjects, err.message, services);
           }
         }
 
@@ -324,62 +301,53 @@ export const signalRulesAlertType = ({
           logger.error(
             `Error processing signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
           );
-          const sDate = new Date().toISOString();
-          currentStatusSavedObject.attributes.status = 'failed';
-          currentStatusSavedObject.attributes.statusDate = sDate;
-          currentStatusSavedObject.attributes.lastFailureAt = sDate;
-          currentStatusSavedObject.attributes.lastFailureMessage = `Bulk Indexing signals failed. Check logs for further details \nRule name: "${name}"\nid: "${alertId}"\nrule_id: "${ruleId}"\n`;
-          // current status is failing
-          await services.savedObjectsClient.update(
-            ruleStatusSavedObjectType,
-            currentStatusSavedObject.id,
-            {
-              ...currentStatusSavedObject.attributes,
-            }
+          markRuleFailed(
+            currentStatusSavedObject,
+            ruleStatusSavedObjects,
+            `Bulk Indexing signals failed. Check logs for further details \nRule name: "${name}"\nid: "${alertId}"\nrule_id: "${ruleId}"\n`,
+            services
           );
-          // create new status for historical purposes
-          await services.savedObjectsClient.create(ruleStatusSavedObjectType, {
-            ...currentStatusSavedObject.attributes,
-          });
-
-          if (ruleStatusSavedObjects.saved_objects.length >= 6) {
-            // delete fifth status and prepare to insert a newer one.
-            const toDelete = ruleStatusSavedObjects.saved_objects.slice(5);
-            await toDelete.forEach(async item =>
-              services.savedObjectsClient.delete(ruleStatusSavedObjectType, item.id)
-            );
-          }
         }
       } catch (exception) {
         logger.error(
           `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}" message: ${exception.message}, trace: \n${exception.stack}`
         );
-        const sDate = new Date().toISOString();
-        currentStatusSavedObject.attributes.status = 'failed';
-        currentStatusSavedObject.attributes.statusDate = sDate;
-        currentStatusSavedObject.attributes.lastFailureAt = sDate;
-        currentStatusSavedObject.attributes.lastFailureMessage = exception.message;
-        // current status is failing
-        await services.savedObjectsClient.update(
-          ruleStatusSavedObjectType,
-          currentStatusSavedObject.id,
-          {
-            ...currentStatusSavedObject.attributes,
-          }
+        markRuleFailed(
+          currentStatusSavedObject,
+          ruleStatusSavedObjects,
+          exception.message,
+          services
         );
-        // create new status for historical purposes
-        await services.savedObjectsClient.create(ruleStatusSavedObjectType, {
-          ...currentStatusSavedObject.attributes,
-        });
-
-        if (ruleStatusSavedObjects.saved_objects.length >= 6) {
-          // delete fifth status and prepare to insert a newer one.
-          const toDelete = ruleStatusSavedObjects.saved_objects.slice(5);
-          await toDelete.forEach(async item =>
-            services.savedObjectsClient.delete(ruleStatusSavedObjectType, item.id)
-          );
-        }
       }
     },
   };
+};
+
+const markRuleFailed = async (
+  currentStatus: SavedObject<IRuleSavedAttributesSavedObjectAttributes>,
+  statuses: SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>,
+  message: string,
+  services: AlertServices
+) => {
+  const sDate = new Date().toISOString();
+  currentStatus.attributes.status = 'failed';
+  currentStatus.attributes.statusDate = sDate;
+  currentStatus.attributes.lastFailureAt = sDate;
+  currentStatus.attributes.lastFailureMessage = message;
+  // current status is failing
+  await services.savedObjectsClient.update(ruleStatusSavedObjectType, currentStatus.id, {
+    ...currentStatus.attributes,
+  });
+  // create new status for historical purposes
+  await services.savedObjectsClient.create(ruleStatusSavedObjectType, {
+    ...currentStatus.attributes,
+  });
+
+  if (statuses.saved_objects.length >= 6) {
+    // delete fifth status and prepare to insert a newer one.
+    const toDelete = statuses.saved_objects.slice(5);
+    await toDelete.forEach(async item =>
+      services.savedObjectsClient.delete(ruleStatusSavedObjectType, item.id)
+    );
+  }
 };
