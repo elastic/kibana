@@ -5,7 +5,7 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { SavedObjectsServiceStart } from 'src/core/server';
+import { SavedObjectsServiceStart } from 'kibana/server';
 import {
   createMlTelemetry,
   ML_TELEMETRY_DOC_ID,
