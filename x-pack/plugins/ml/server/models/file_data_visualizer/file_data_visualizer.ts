@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { RequestHandlerContext } from 'kibana/server';
+import { APICaller } from 'kibana/server';
 import { FindFileStructureResponse } from '../../../../../legacy/plugins/ml/common/types/file_datavisualizer';
 
 export type InputData = any[];
@@ -25,12 +25,12 @@ export interface AnalysisResult {
   overrides?: FormattedOverrides;
 }
 
-export function fileDataVisualizerProvider(context: RequestHandlerContext) {
+export function fileDataVisualizerProvider(callAsCurrentUser: APICaller) {
   async function analyzeFile(data: any, overrides: any): Promise<AnalysisResult> {
     let results = [];
 
     try {
-      results = await context.ml!.mlClient.callAsCurrentUser('ml.fileStructure', {
+      results = await callAsCurrentUser('ml.fileStructure', {
         body: data,
         ...overrides,
       });
