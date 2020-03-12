@@ -5,7 +5,6 @@
  */
 
 import { GetResponse, SearchResponse } from 'elasticsearch';
-import { RequestHandlerContext } from 'src/core/server';
 import {
   AlertEvent,
   AlertHits,
@@ -16,6 +15,7 @@ import { EndpointConfigType } from '../../../../config';
 import { searchESForAlerts, Pagination } from '../../lib';
 import { AlertSearchQuery, SearchCursor, AlertDetailsRequestParams } from '../../types';
 import { BASE_ALERTS_ROUTE } from '../..';
+import { RequestHandlerContext } from '../../../../../../../../src/core/server';
 
 /**
  * Pagination class for alert details.
@@ -40,10 +40,10 @@ export class AlertDetailsPagination extends Pagination<
     const reqData: AlertSearchQuery = {
       pageSize: 1,
       sort: EndpointAppConstants.ALERT_LIST_DEFAULT_SORT,
-      order: EndpointAppConstants.ALERT_LIST_DEFAULT_ORDER,
+      order: 'desc',
     };
 
-    if (direction === Direction.asc) {
+    if (direction === 'asc') {
       reqData.searchAfter = cursor;
     } else {
       reqData.searchBefore = cursor;
@@ -67,7 +67,7 @@ export class AlertDetailsPagination extends Pagination<
    * Gets the next alert after this one.
    */
   async getNextUrl(): Promise<string | null> {
-    const response = await this.doSearch(Direction.asc, [
+    const response = await this.doSearch('asc', [
       this.data._source['@timestamp'].toString(),
       this.data._source.event.id,
     ]);
@@ -78,7 +78,7 @@ export class AlertDetailsPagination extends Pagination<
    * Gets the alert before this one.
    */
   async getPrevUrl(): Promise<string | null> {
-    const response = await this.doSearch(Direction.desc, [
+    const response = await this.doSearch('desc', [
       this.data._source['@timestamp'].toString(),
       this.data._source.event.id,
     ]);

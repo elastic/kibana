@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { IUiSettingsClient } from 'src/core/public';
+import { IUiSettingsClient } from 'kibana/public';
 import {
   getIndexPatternById,
   getIndexPatternsContract,

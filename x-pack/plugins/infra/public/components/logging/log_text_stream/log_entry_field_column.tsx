@@ -5,14 +5,20 @@
  */
 
 import stringify from 'json-stable-stringify';
-import { darken, transparentize } from 'polished';
 import React, { useMemo } from 'react';
 
-import { euiStyled, css } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../observability/public';
 import { isFieldColumn, isHighlightFieldColumn } from '../../../utils/log_entry';
 import { ActiveHighlightMarker, highlightFieldValue, HighlightMarker } from './highlighting';
 import { LogEntryColumnContent } from './log_entry_column';
 import { LogColumn } from '../../../../common/http_api';
+import {
+  hoveredContentStyle,
+  longWrappedContentStyle,
+  preWrappedContentStyle,
+  unwrappedContentStyle,
+  WrapMode,
+} from './text_styles';
 
 interface LogEntryFieldColumnProps {
   columnValue: LogColumn;
@@ -20,7 +26,7 @@ interface LogEntryFieldColumnProps {
   isActiveHighlight: boolean;
   isHighlighted: boolean;
   isHovered: boolean;
-  isWrapped: boolean;
+  wrapMode: WrapMode;
 }
 
 export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnProps> = ({
@@ -29,7 +35,7 @@ export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnPro
   isActiveHighlight,
   isHighlighted,
   isHovered,
-  isWrapped,
+  wrapMode,
 }) => {
   const value = useMemo(() => {
     if (isFieldColumn(columnValue)) {
@@ -58,29 +64,11 @@ export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnPro
   );
 
   return (
-    <FieldColumnContent isHighlighted={isHighlighted} isHovered={isHovered} isWrapped={isWrapped}>
+    <FieldColumnContent isHighlighted={isHighlighted} isHovered={isHovered} wrapMode={wrapMode}>
       {formattedValue}
     </FieldColumnContent>
   );
 };
-
-const hoveredContentStyle = css`
-  background-color: ${props =>
-    props.theme.darkMode
-      ? transparentize(0.9, darken(0.05, props.theme.eui.euiColorHighlight))
-      : darken(0.05, props.theme.eui.euiColorHighlight)};
-`;
-
-const wrappedContentStyle = css`
-  overflow: visible;
-  white-space: pre-wrap;
-  word-break: break-all;
-`;
-
-const unwrappedContentStyle = css`
-  overflow: hidden;
-  white-space: pre;
-`;
 
 const CommaSeparatedLi = euiStyled.li`
   display: inline;
@@ -95,13 +83,17 @@ const CommaSeparatedLi = euiStyled.li`
 interface LogEntryColumnContentProps {
   isHighlighted: boolean;
   isHovered: boolean;
-  isWrapped?: boolean;
+  wrapMode: WrapMode;
 }
 
 const FieldColumnContent = euiStyled(LogEntryColumnContent)<LogEntryColumnContentProps>`
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
   text-overflow: ellipsis;
 
   ${props => (props.isHovered || props.isHighlighted ? hoveredContentStyle : '')};
-  ${props => (props.isWrapped ? wrappedContentStyle : unwrappedContentStyle)};
+  ${props =>
+    props.wrapMode === 'long'
+      ? longWrappedContentStyle
+      : props.wrapMode === 'pre-wrapped'
+      ? preWrappedContentStyle
+      : unwrappedContentStyle};
 `;

@@ -27,7 +27,7 @@ describe('LogEntryFieldColumn', () => {
         isActiveHighlight={false}
         isHighlighted={false}
         isHovered={false}
-        isWrapped={false}
+        wrapMode="pre-wrapped"
       />,
       { wrappingComponent: EuiThemeProvider } as any // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/36075
     );
@@ -60,7 +60,7 @@ describe('LogEntryFieldColumn', () => {
         isActiveHighlight={false}
         isHighlighted={false}
         isHovered={false}
-        isWrapped={false}
+        wrapMode="pre-wrapped"
       />,
       { wrappingComponent: EuiThemeProvider } as any // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/36075
     );
@@ -83,7 +83,7 @@ describe('LogEntryFieldColumn', () => {
         isActiveHighlight={false}
         isHighlighted={false}
         isHovered={false}
-        isWrapped={false}
+        wrapMode="pre-wrapped"
       />,
       { wrappingComponent: EuiThemeProvider } as any // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/36075
     );

@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { BasicValidations } from './job_validator';
-import { Job, Datafeed } from '../job_creator/configs';
+import { Job, Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
 import {
   ALLOWED_DATA_UNITS,
   JOB_ID_MAX_LENGTH,
