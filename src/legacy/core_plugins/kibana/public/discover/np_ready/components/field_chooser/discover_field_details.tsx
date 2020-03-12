@@ -55,6 +55,9 @@ interface Props {
 
 export function DiscoverFieldDetails({ field, details, onAddFilter }: Props) {
   const warnings = getWarnings(field);
+  if (!details) {
+    return null;
+  }
 
   return (
     <div className="dscFieldDetails">

@@ -22,13 +22,14 @@ import { Field } from './discover_field_details';
 import { DiscoverField } from './discover_field';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
+import { IIndexPattern } from '../../../../../../../../plugins/data/common/index_patterns';
 
 export interface Props {
-  computeDetails: any;
   fields: Field[];
   fieldTypes: any;
   filter: any;
   indexPatternList: any;
+  getDetails: any;
   groupedFields: {
     selected: any;
     popular: any;
@@ -37,10 +38,9 @@ export interface Props {
   onAddField: any;
   onAddFilter: any;
   onRemoveField: any;
-  onShowDetails: any;
   onShowFields: any;
   openFields: any;
-  selectedIndexPattern: any;
+  selectedIndexPattern: IIndexPattern;
   setFilterValue: any;
   setIndexPattern: any;
   showDetails: boolean;
@@ -48,12 +48,12 @@ export interface Props {
 }
 
 export function DiscoverFieldChooser({
-  computeDetails,
   fields,
   fieldTypes,
   filter,
-  indexPatternList,
+  getDetails,
   groupedFields,
+  indexPatternList,
   onAddField,
   onAddFilter,
   onRemoveField,
@@ -68,12 +68,12 @@ export function DiscoverFieldChooser({
     return null;
   }
 
-  const onShowDetails = (show: boolean, field: Field, recompute: boolean = true) => {
+  const onShowDetails = (show: boolean, field: Field) => {
     if (!show) {
-      setOpenFieldMap(new Map(openFieldMap.set(field.name, recompute)));
+      setOpenFieldMap(new Map(openFieldMap.set(field.name, false)));
     } else {
-      setOpenFieldMap(new Map(openFieldMap.set(field.name, recompute)));
-      computeDetails(true, field, true);
+      setOpenFieldMap(new Map(openFieldMap.set(field.name, true)));
+      selectedIndexPattern.popularizeField(field.name, 1);
     }
   };
 
@@ -140,11 +140,11 @@ export function DiscoverFieldChooser({
                   <li key={`field${idx}`}>
                     <DiscoverField
                       field={field}
-                      details={field.details}
                       onAddField={onAddField}
                       onRemoveField={onRemoveField}
                       onAddFilter={onAddFilter}
                       onShowDetails={onShowDetails}
+                      getDetails={getDetails}
                       showDetails={openFieldMap.get(field.name) || false}
                     />
                   </li>
@@ -198,11 +198,11 @@ export function DiscoverFieldChooser({
                   <li key={`field${idx}`}>
                     <DiscoverField
                       field={field}
-                      details={field.details}
                       onAddField={onAddField}
                       onRemoveField={onRemoveField}
                       onAddFilter={onAddFilter}
                       onShowDetails={onShowDetails}
+                      getDetails={getDetails}
                       showDetails={openFieldMap.get(field.name) || false}
                     />
                   </li>
@@ -224,11 +224,11 @@ export function DiscoverFieldChooser({
                   <li key={`field${idx}`}>
                     <DiscoverField
                       field={field}
-                      details={field.details}
                       onAddField={onAddField}
                       onRemoveField={onRemoveField}
                       onAddFilter={onAddFilter}
                       onShowDetails={onShowDetails}
+                      getDetails={getDetails}
                       showDetails={openFieldMap.get(field.name) || false}
                     />
                   </li>

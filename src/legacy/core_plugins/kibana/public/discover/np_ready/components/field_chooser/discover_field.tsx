@@ -24,22 +24,22 @@ import { FieldIcon } from '../../../../../../../../plugins/kibana_react/public';
 
 export interface Props {
   field: Field;
-  details: any;
   onAddField: any;
   onAddFilter: any;
   onRemoveField: any;
   onShowDetails: any;
   showDetails: boolean;
+  getDetails: any;
 }
 
 export function DiscoverField({
   field,
-  details,
   onAddField,
   onRemoveField,
   onAddFilter,
   onShowDetails,
   showDetails,
+  getDetails,
 }: Props) {
   const addLabel = i18n.translate('kbn.discover.fieldChooser.discoverField.addButtonLabel', {
     defaultMessage: 'Add to selected fields',
@@ -55,6 +55,7 @@ export function DiscoverField({
       onAddField(f.name);
     }
   };
+  const details = showDetails ? getDetails(field) : null;
 
   return (
     <div className={`${showDetails ? 'dscSidebarItemExpanded' : ''}`}>

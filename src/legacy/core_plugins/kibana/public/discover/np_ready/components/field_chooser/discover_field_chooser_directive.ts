@@ -21,16 +21,15 @@ import { DiscoverFieldChooser } from './discover_field_chooser';
 
 export function createDiscoverFieldChooserDirective(reactDirective: any) {
   return reactDirective(wrapInI18nContext(DiscoverFieldChooser), [
-    ['computeDetails', { watchDepth: 'reference' }],
     ['fields', { watchDepth: 'reference' }],
     ['fieldTypes', { watchDepth: 'reference' }],
     ['filter', { watchDepth: 'reference' }],
+    ['getDetails', { watchDepth: 'reference' }],
     ['groupedFields', { watchDepth: 'reference' }],
     ['indexPatternList', { watchDepth: 'reference' }],
     ['onAddField', { watchDepth: 'reference' }],
     ['onAddFilter', { watchDepth: 'reference' }],
     ['onRemoveField', { watchDepth: 'reference' }],
-    ['onShowDetails', { watchDepth: 'reference' }],
     ['onShowFields', { watchDepth: 'reference' }],
     ['openFields', { watchDepth: 'reference' }],
     ['popularFields', { watchDepth: 'reference' }],

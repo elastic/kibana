@@ -44,9 +44,6 @@ export function createFieldChooserDirective($location, config) {
     },
     template: fieldChooserTemplate,
     link: function($scope) {
-      $scope.openFields = new Map();
-      $scope.showFilter = false;
-      $scope.toggleShowFilter = () => ($scope.showFilter = !$scope.showFilter);
       $scope.indexPatternList = _.sortBy($scope.indexPatternList, o => o.get('title'));
 
       const filter = ($scope.filter = {
@@ -64,19 +61,12 @@ export function createFieldChooserDirective($location, config) {
         reset: function() {
           filter.vals = _.clone(filter.defaults);
         },
-        getActive: function() {
-          return _.some(filter.props, function(prop) {
-            return filter.vals[prop] !== filter.defaults[prop];
-          });
-        },
       });
 
       $scope.setFilterValue = (name, value) => {
         filter.vals[name] = value;
         $scope.filter = { ...filter };
       };
-
-      $scope.filtersActive = 0;
 
       // set the initial values to the defaults
       filter.reset();
@@ -126,10 +116,6 @@ export function createFieldChooserDirective($location, config) {
         // include undefined so the user can clear the filter
         $scope.fieldTypes = _.union(['any'], _.pluck(fields, 'type'));
       });
-
-      $scope.increaseFieldCounter = function(fieldName) {
-        $scope.indexPattern.popularizeField(fieldName, 1);
-      };
 
       function getVisualizeUrl(field) {
         if (!$scope.state) {
@@ -197,7 +183,7 @@ export function createFieldChooserDirective($location, config) {
         );
       }
 
-      function getDetails(field) {
+      $scope.getDetails = field => {
         const details = {
           visualizeUrl:
             getServices().capabilities.visualize.show && isFieldVisualizable(field)
@@ -214,16 +200,6 @@ export function createFieldChooserDirective($location, config) {
           bucket.display = field.format.convert(bucket.value);
         });
         return details;
-      }
-
-      $scope.computeDetails = function(show, field) {
-        if (show) {
-          field.details = getDetails(field);
-          $scope.increaseFieldCounter(field, 1);
-        } else {
-          delete field.details;
-        }
-        return field.details;
       };
 
       function getFields() {
