@@ -71,6 +71,8 @@ const ConnectorsComponent: React.FC<Props> = ({
     </EuiFlexGroup>
   );
 
+  const reloadConnectors = useCallback(async () => refetchConnectors(), []);
+
   return (
     <>
       <EuiDescribedFormGroup
@@ -94,7 +96,7 @@ const ConnectorsComponent: React.FC<Props> = ({
           actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
           toastNotifications: notifications.toasts,
           capabilities: application.capabilities,
-          reloadConnectors: refetchConnectors as () => Promise<void>,
+          reloadConnectors,
         }}
       >
         <ConnectorAddFlyout
