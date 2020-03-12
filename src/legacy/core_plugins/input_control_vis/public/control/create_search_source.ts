@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PhraseFilter, IndexPattern, TimefilterSetup } from '../../../../../plugins/data/public';
+import { PhraseFilter, IndexPattern, TimefilterContract } from '../../../../../plugins/data/public';
 import { SearchSource as SearchSourceClass, SearchSourceFields } from '../legacy_imports';
 
 export function createSearchSource(
@@ -27,7 +27,7 @@ export function createSearchSource(
   aggs: any,
   useTimeFilter: boolean,
   filters: PhraseFilter[] = [],
-  timefilter: TimefilterSetup['timefilter']
+  timefilter: TimefilterContract
 ) {
   const searchSource = initialState ? new SearchSource(initialState) : new SearchSource();
   // Do not not inherit from rootSearchSource to avoid picking up time and globals

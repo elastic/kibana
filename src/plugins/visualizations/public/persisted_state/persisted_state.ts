@@ -26,10 +26,8 @@ function prepSetParams(key: PersistedStateKey, value: any, path: PersistedStateP
   // key must be the value, set the entire state using it
   if (value === undefined && (isPlainObject(key) || path.length > 0)) {
     // setting entire tree, swap the key and value to write to the state
-    return {
-      value: key,
-      key: undefined,
-    };
+    value = key;
+    key = undefined;
   }
 
   // ensure the value being passed in is never mutated
