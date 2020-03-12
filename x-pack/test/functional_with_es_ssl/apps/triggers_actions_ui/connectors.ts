@@ -16,9 +16,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const find = getService('find');
+  const alerting = getService('alerting');
 
   describe('Connectors', function() {
     before(async () => {
+      await alerting.actions.createAction({
+        name: `server-log-${Date.now()}`,
+        actionTypeId: '.server-log',
+        config: {},
+        secrets: {},
+      });
+
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('connectorsTab');
     });
