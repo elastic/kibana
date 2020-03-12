@@ -291,6 +291,8 @@ export function initGraphApp(angularModule, deps) {
       },
       notifications: coreStart.notifications,
       http: coreStart.http,
+      overlays: coreStart.overlays,
+      savedObjectsClient,
       showSaveModal,
       setWorkspaceInitialized: () => {
         $scope.workspaceInitialized = true;

@@ -21,7 +21,15 @@ import { SavedObjectsPublicPlugin } from './plugin';
 
 export { OnSaveProps, SavedObjectSaveModal, SaveResult, showSaveModal } from './save_modal';
 export { getSavedObjectFinder, SavedObjectFinderUi, SavedObjectMetaData } from './finder';
-export { SavedObjectLoader, createSavedObjectClass, applyESRespTo } from './saved_object';
+export {
+  SavedObjectLoader,
+  createSavedObjectClass,
+  applyESRespUtil,
+  serializeSavedObject,
+  checkForDuplicateTitle,
+  createSourceUtil,
+  isErrorNonFatal,
+} from './saved_object';
 export { SavedObjectSaveOpts, SavedObjectKibanaServices, SavedObject } from './types';
 
 export const plugin = () => new SavedObjectsPublicPlugin();

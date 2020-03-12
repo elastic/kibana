@@ -76,7 +76,7 @@ export async function applyESResp(
   return savedObject;
 }
 
-export async function applyESRespTo(
+export async function applyESRespUtil(
   indexPatterns: IndexPatternsContract,
   resp: EsResponse,
   savedObject: any,
@@ -115,10 +115,6 @@ export async function applyESRespTo(
   // Give obj all of the values in _source.fields
   assign(savedObject, savedObject._source);
   savedObject.lastSavedTitle = savedObject.title;
-
-  // NOTE: this.type (not set in this file, but somewhere else) is the sub type, e.g. 'area' or
-  // 'data table', while esType is the more generic type - e.g. 'visualization' or 'saved search'.
-  savedObject.getEsType = () => esType;
 
   await parseSearchSource(savedObject as any, esType, meta.searchSourceJSON, resp.references);
   await hydrateIndexPatternHelper(savedObject.id || '', savedObject as any, indexPatterns, config);

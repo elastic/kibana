@@ -18,7 +18,7 @@
  */
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectAttributes } from 'kibana/public';
+import { SavedObjectAttributes, SavedObjectsCreateOptions } from 'kibana/public';
 import { SavedObject, SavedObjectKibanaServices } from '../../types';
 import { OVERWRITE_REJECTED } from '../../constants';
 import { confirmModalPromise } from './confirm_modal_promise';
@@ -74,6 +74,47 @@ export async function createSource(
             source,
             savedObject.creationOpts({ overwrite: true, ...options })
           )
+        )
+        .catch(() => Promise.reject(new Error(OVERWRITE_REJECTED)));
+    }
+    return await Promise.reject(err);
+  }
+}
+
+export async function createSourceUtil(
+  source: SavedObjectAttributes,
+  savedObject: SavedObject,
+  options: SavedObjectsCreateOptions,
+  services: SavedObjectKibanaServices
+) {
+  const { savedObjectsClient, overlays } = services;
+  try {
+    return await savedObjectsClient.create(savedObject.getEsType(), source, options);
+  } catch (err) {
+    // record exists, confirm overwriting
+    if (_.get(err, 'res.status') === 409) {
+      const confirmMessage = i18n.translate(
+        'savedObjects.confirmModal.overwriteConfirmationMessage',
+        {
+          defaultMessage: 'Are you sure you want to overwrite {title}?',
+          values: { title: savedObject.title },
+        }
+      );
+
+      const title = i18n.translate('savedObjects.confirmModal.overwriteTitle', {
+        defaultMessage: 'Overwrite {name}?',
+        values: { name: savedObject.getDisplayName() },
+      });
+      const confirmButtonText = i18n.translate('savedObjects.confirmModal.overwriteButtonLabel', {
+        defaultMessage: 'Overwrite',
+      });
+
+      return confirmModalPromise(confirmMessage, title, confirmButtonText, overlays)
+        .then(() =>
+          savedObjectsClient.create(savedObject.getEsType(), source, {
+            overwrite: true,
+            ...options,
+          })
         )
         .catch(() => Promise.reject(new Error(OVERWRITE_REJECTED)));
     }
