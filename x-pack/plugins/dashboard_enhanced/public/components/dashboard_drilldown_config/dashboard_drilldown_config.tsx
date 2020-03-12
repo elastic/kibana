@@ -49,7 +49,7 @@ export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> =
           <EuiSwitch
             name="useCurrentFilters"
             label="Use current dashboard's filters"
-            checked={currentFilters!}
+            checked={!!currentFilters}
             onChange={onCurrentFiltersToggle}
           />
         </EuiFormRow>
@@ -59,7 +59,7 @@ export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> =
           <EuiSwitch
             name="useCurrentDateRange"
             label="Use current dashboard's date range"
-            checked={keepRange!}
+            checked={!!keepRange}
             onChange={onKeepRangeToggle}
           />
         </EuiFormRow>
