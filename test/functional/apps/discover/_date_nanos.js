@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common', 'timePicker', 'context', 'discover']);
+  const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const fromTime = 'Sep 22, 2019 @ 20:31:44.000';

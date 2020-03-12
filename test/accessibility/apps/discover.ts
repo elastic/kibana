@@ -25,18 +25,10 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const inspector = getService('inspector');
-  const docTable = getService('docTable');
-  const security = getService('security');
   const filterBar = getService('filterBar');
-  const TEST_COLUMN_NAMES = ['@message'];
-  const TEST_FILTER_COLUMN_NAMES = [
-    ['extension', 'jpg'],
-    ['geo.src', 'IN'],
-  ];
 
   describe('Discover', () => {
     before(async () => {
-      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.update({
@@ -65,6 +57,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
+    // skipping the test for new because we can't fix it right now
     it.skip('Click on new to clear the search', async () => {
       await PageObjects.discover.clickNewSearchButton();
       await a11y.testAppSnapshot();
@@ -101,6 +94,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
+    // unable to validate on EUI pop-over
     it('click share button', async () => {
       await PageObjects.share.clickShareTopNavButton();
       await a11y.testAppSnapshot();
@@ -115,29 +109,5 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.closeSidebarFieldFilter();
       await a11y.testAppSnapshot();
     });
-
-    it('Add a field from sidebar', async () => {
-      for (const columnName of TEST_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItemAdd(columnName);
-      }
-      await a11y.testAppSnapshot();
-    });
-
-    it.skip('Add more fields from sidebar', async () => {
-      for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItem(columnName);
-        await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
-      }
-      await a11y.testAppSnapshot();
-    });
-
-    // Context view test
-    it('should open context view on a doc', async () => {
-      await docTable.clickRowToggle();
-      await (await docTable.getRowActions())[0].click();
-      await a11y.testAppSnapshot();
-    });
-
-    // Adding rest of the tests after https://github.com/elastic/kibana/issues/53888 is resolved
   });
 }

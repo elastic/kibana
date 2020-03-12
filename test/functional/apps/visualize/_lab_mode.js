@@ -21,14 +21,9 @@ import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
   const log = getService('log');
-  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'settings']);
 
   describe('visualize lab mode', () => {
-    before(async () => {
-      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
-    });
-
     it('disabling does not break loading saved searches', async () => {
       await PageObjects.common.navigateToUrl('discover', '');
       await PageObjects.discover.saveSearch('visualize_lab_mode_test');
@@ -57,7 +52,6 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.header.clickStackManagement();
       await PageObjects.settings.clickKibanaSettings();
       await PageObjects.settings.clearAdvancedSettings('visualize:enableLabs');
-      await security.testUser.restoreDefaults();
     });
   });
 }

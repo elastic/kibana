@@ -43,7 +43,6 @@ export default function({ getService, getPageObjects }) {
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
-  const security = getService('security');
   const PageObjects = getPageObjects([
     'common',
     'header',
@@ -54,12 +53,11 @@ export default function({ getService, getPageObjects }) {
   ]);
 
   describe('scripted fields', function() {
-    this.tags(['skipFirefox', 'skipCoverage']);
+    this.tags(['skipFirefox']);
 
     before(async function() {
       await browser.setWindowSize(1200, 800);
       // delete .kibana index and then wait for Kibana to re-create it
-      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.createIndexPattern();
       await kibanaServer.uiSettings.update({});
