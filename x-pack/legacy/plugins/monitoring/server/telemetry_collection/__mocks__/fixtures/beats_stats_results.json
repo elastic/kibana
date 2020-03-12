@@ -12,6 +12,9 @@
                   "functions": {
                     "count": 1
                   }
+                },
+                "queue": {
+                  "name": "mem"
                 }
               }
             }
@@ -27,6 +30,9 @@
                   "functions": {
                     "count": 3
                   }
+                },
+                "queue": {
+                  "name": "mem"
                 }
               }
             }
@@ -53,6 +59,9 @@
                     "endpoints" : 1
                   },
                   "monitors" : 2
+                },
+                "queue": {
+                  "name": "spool"
                 }
               }
             }
