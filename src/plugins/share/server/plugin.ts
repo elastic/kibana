@@ -28,6 +28,8 @@ export class SharePlugin implements Plugin {
   }
 
   public start() {
+    const b = new Buffer('');
+    console.log(b);
     this.initializerContext.logger.get().debug('Starting plugin');
   }
 

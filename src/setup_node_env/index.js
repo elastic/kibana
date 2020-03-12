@@ -22,9 +22,6 @@ require('./exit_on_warning');
 require('./harden');
 // The following require statements MUST be executed before any others - END
 
-var b = new Buffer('');
-console.log(b);
-
 require('symbol-observable');
 require('./root');
 require('./node_version_validator');
