@@ -19,18 +19,21 @@ import {
   EuiButton,
   EuiToast,
   EuiButtonEmpty,
+  EuiPage,
+  EuiPageBody,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { connect } from 'react-redux';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ChromeBreadcrumb } from 'kibana/public';
+import { Link } from 'react-router-dom';
 import { AppState } from '../state';
 import { selectDynamicSettings } from '../state/selectors';
 import { DynamicSettingsState } from '../state/reducers/dynamic_settings';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
 import { DynamicSettings, defaultDynamicSettings } from '../../common/runtime_types';
-import { PageHeader } from './page_header';
+import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
+import { OVERVIEW_ROUTE } from '../../common/constants';
 
 interface Props {
   dynamicSettingsState: DynamicSettingsState;
@@ -46,8 +49,13 @@ export const SettingsPageComponent = ({
   dispatchGetDynamicSettings,
   dispatchSetDynamicSettings,
 }: Props & DispatchProps) => {
+  const settingsBreadcrumbText = i18n.translate('xpack.uptime.settingsBreadcrumbText', {
+    defaultMessage: 'Settings',
+  });
+  useBreadcrumbs([{ text: settingsBreadcrumbText }]);
+
   useEffect(() => {
-    dispatchGetDynamicSettings('');
+    dispatchGetDynamicSettings({});
   }, [dispatchGetDynamicSettings]);
 
   const [formFields, setFormFields] = useState<DynamicSettings | null>(dss.settings || null);
@@ -92,117 +100,122 @@ export const SettingsPageComponent = ({
 
   const isFormDirty = dss.settings ? !isEqual(dss.settings, formFields) : true;
 
-  const headingText = i18n.translate('xpack.uptime.settingsPage.headerText', {
-    defaultMessage: 'Settings',
-    description: `The text that will be displayed in the app's heading when the settings page loads.`,
-  });
-
-  const breadcrumbs: ChromeBreadcrumb[] = [
-    {
-      text: 'Settings',
-    },
-  ];
-
   return (
     <>
-      <PageHeader headingText={headingText} breadcrumbs={breadcrumbs} datePicker={false} />
-      <form onSubmit={onApply}>
-        <EuiForm>
+      <Link to={OVERVIEW_ROUTE}>
+        <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
+          {i18n.translate('xpack.uptime.settings.returnToOverviewLinkLabel', {
+            defaultMessage: 'Return to overview',
+          })}
+        </EuiButtonEmpty>
+      </Link>
+      <EuiPage>
+        <EuiPageBody>
           <EuiPanel>
-            <EuiTitle size="s">
-              <h3>
-                <FormattedMessage
-                  id="xpack.uptime.sourceConfiguration.indicesSectionTitle"
-                  defaultMessage="Indices"
-                />
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            <EuiDescribedFormGroup
-              title={
-                <h4>
-                  <FormattedMessage
-                    id="xpack.uptime.sourceConfiguration.heartbeatIndicesTitle"
-                    defaultMessage="Uptime indices"
-                  />
-                </h4>
-              }
-              description={
-                <FormattedMessage
-                  id="xpack.uptime.sourceConfiguration.heartbeatIndicesDescription"
-                  defaultMessage="Index pattern for matching indices that contain Heartbeat data"
-                />
-              }
-            >
-              <EuiFormRow
-                describedByIds={['heartbeatIndices']}
-                error={fieldErrors?.heartbeatIndices}
-                fullWidth
-                helpText={
-                  <FormattedMessage
-                    id="xpack.uptime.sourceConfiguration.heartbeatIndicesDefaultValue"
-                    defaultMessage="The default value is {defaultValue}"
-                    values={{
-                      defaultValue: <EuiCode>{defaultDynamicSettings.heartbeatIndices}</EuiCode>,
-                    }}
-                  />
-                }
-                isInvalid={!!fieldErrors?.heartbeatIndices}
-                label={
-                  <FormattedMessage
-                    id="xpack.uptime.sourceConfiguration.heartbeatIndicesLabel"
-                    defaultMessage="Heartbeat indices"
-                  />
-                }
-              >
-                <EuiFieldText
-                  data-test-subj="heartbeat-indices-input"
-                  fullWidth
-                  disabled={dss.loading}
-                  isLoading={dss.loading}
-                  value={formFields?.heartbeatIndices || ''}
-                  onChange={(event: any) =>
-                    onChangeFormField('heartbeatIndices', event.currentTarget.value)
-                  }
-                />
-              </EuiFormRow>
-            </EuiDescribedFormGroup>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <form onSubmit={onApply}>
+                  <EuiForm>
+                    <EuiTitle size="s">
+                      <h3>
+                        <FormattedMessage
+                          id="xpack.uptime.sourceConfiguration.indicesSectionTitle"
+                          defaultMessage="Indices"
+                        />
+                      </h3>
+                    </EuiTitle>
+                    <EuiSpacer size="m" />
+                    <EuiDescribedFormGroup
+                      title={
+                        <h4>
+                          <FormattedMessage
+                            id="xpack.uptime.sourceConfiguration.heartbeatIndicesTitle"
+                            defaultMessage="Uptime indices"
+                          />
+                        </h4>
+                      }
+                      description={
+                        <FormattedMessage
+                          id="xpack.uptime.sourceConfiguration.heartbeatIndicesDescription"
+                          defaultMessage="Index pattern for matching indices that contain Heartbeat data"
+                        />
+                      }
+                    >
+                      <EuiFormRow
+                        describedByIds={['heartbeatIndices']}
+                        error={fieldErrors?.heartbeatIndices}
+                        fullWidth
+                        helpText={
+                          <FormattedMessage
+                            id="xpack.uptime.sourceConfiguration.heartbeatIndicesDefaultValue"
+                            defaultMessage="The default value is {defaultValue}"
+                            values={{
+                              defaultValue: (
+                                <EuiCode>{defaultDynamicSettings.heartbeatIndices}</EuiCode>
+                              ),
+                            }}
+                          />
+                        }
+                        isInvalid={!!fieldErrors?.heartbeatIndices}
+                        label={
+                          <FormattedMessage
+                            id="xpack.uptime.sourceConfiguration.heartbeatIndicesLabel"
+                            defaultMessage="Heartbeat indices"
+                          />
+                        }
+                      >
+                        <EuiFieldText
+                          data-test-subj="heartbeat-indices-input"
+                          fullWidth
+                          disabled={dss.loading}
+                          isLoading={dss.loading}
+                          value={formFields?.heartbeatIndices || ''}
+                          onChange={(event: any) =>
+                            onChangeFormField('heartbeatIndices', event.currentTarget.value)
+                          }
+                        />
+                      </EuiFormRow>
+                    </EuiDescribedFormGroup>
 
-            <EuiSpacer size="m" />
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="discardSettingsButton"
-                  isDisabled={!isFormDirty || dss.loading}
-                  onClick={() => {
-                    resetForm();
-                  }}
-                >
-                  <FormattedMessage
-                    id="xpack.uptime.sourceConfiguration.discardSettingsButtonLabel"
-                    defaultMessage="Cancel"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="apply-settings-button"
-                  type="submit"
-                  color="primary"
-                  isDisabled={!isFormDirty || !isFormValid || dss.loading}
-                  fill
-                  onClick={onApply}
-                >
-                  <FormattedMessage
-                    id="xpack.uptime.sourceConfiguration.applySettingsButtonLabel"
-                    defaultMessage="Apply changes"
-                  />
-                </EuiButton>
+                    <EuiSpacer size="m" />
+                    <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          data-test-subj="discardSettingsButton"
+                          isDisabled={!isFormDirty || dss.loading}
+                          onClick={() => {
+                            resetForm();
+                          }}
+                        >
+                          <FormattedMessage
+                            id="xpack.uptime.sourceConfiguration.discardSettingsButtonLabel"
+                            defaultMessage="Cancel"
+                          />
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          data-test-subj="apply-settings-button"
+                          type="submit"
+                          color="primary"
+                          isDisabled={!isFormDirty || !isFormValid || dss.loading}
+                          fill
+                          onClick={onApply}
+                        >
+                          <FormattedMessage
+                            id="xpack.uptime.sourceConfiguration.applySettingsButtonLabel"
+                            defaultMessage="Apply changes"
+                          />
+                        </EuiButton>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiForm>
+                </form>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
-        </EuiForm>
-      </form>
+        </EuiPageBody>
+      </EuiPage>
     </>
   );
 };

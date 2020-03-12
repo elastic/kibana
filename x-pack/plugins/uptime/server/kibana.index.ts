@@ -43,7 +43,7 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
           all: [umDynamicSettings.name],
           read: [],
         },
-        ui: ['save', 'configureSource', 'show'],
+        ui: ['save', 'configureSettings', 'show'],
       },
       read: {
         api: ['uptime'],

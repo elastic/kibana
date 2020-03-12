@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`PageHeader shallow renders with breadcrumbs and the date picker: page_header_with_date_picker 1`] = `
+exports[`PageHeader shallow renders with the date picker: page_header_with_date_picker 1`] = `
 Array [
   <div
     class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
@@ -13,29 +13,6 @@ Array [
       >
         TestingHeading
       </h1>
-    </div>
-    <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
-    >
-      <a
-        href="/settings"
-      >
-        <button
-          class="euiButtonEmpty euiButtonEmpty--primary"
-          data-test-subj="settings-page-link"
-          type="button"
-        >
-          <span
-            class="euiButtonEmpty__content"
-          >
-            <span
-              class="euiButtonEmpty__text"
-            >
-              Settings
-            </span>
-          </span>
-        </button>
-      </a>
     </div>
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -156,7 +133,7 @@ Array [
 ]
 `;
 
-exports[`PageHeader shallow renders with breadcrumbs without the date picker: page_header_no_date_picker 1`] = `
+exports[`PageHeader shallow renders without the date picker: page_header_no_date_picker 1`] = `
 Array [
   <div
     class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
@@ -169,29 +146,6 @@ Array [
       >
         TestingHeading
       </h1>
-    </div>
-    <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
-    >
-      <a
-        href="/settings"
-      >
-        <button
-          class="euiButtonEmpty euiButtonEmpty--primary"
-          data-test-subj="settings-page-link"
-          type="button"
-        >
-          <span
-            class="euiButtonEmpty__content"
-          >
-            <span
-              class="euiButtonEmpty__text"
-            >
-              Settings
-            </span>
-          </span>
-        </button>
-      </a>
     </div>
   </div>,
   <div
