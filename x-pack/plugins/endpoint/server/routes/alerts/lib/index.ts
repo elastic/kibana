@@ -18,10 +18,10 @@ import {
 export { Pagination } from './pagination';
 
 function reverseSortDirection(order: Direction): Direction {
-  if (order === Direction.asc) {
-    return Direction.desc;
+  if (order === 'asc') {
+    return 'desc';
   }
-  return Direction.asc;
+  return 'asc';
 }
 
 function buildQuery(query: AlertSearchQuery): JsonObject {
