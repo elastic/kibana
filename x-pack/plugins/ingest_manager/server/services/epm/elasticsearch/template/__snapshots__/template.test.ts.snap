@@ -53,10 +53,16 @@ exports[`tests loading base.yml: base.yml 1`] = `
         "ignore_above": 1024
       },
       "long.nested.foo": {
+        "type": "text"
+      },
+      "long.nested.bar": {
+        "type": "long"
+      },
+      "nested.bar": {
         "type": "keyword",
         "ignore_above": 1024
       },
-      "nested.bar": {
+      "nested.baz": {
         "type": "keyword",
         "ignore_above": 1024
       },

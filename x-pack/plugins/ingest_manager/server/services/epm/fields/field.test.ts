@@ -27,9 +27,9 @@ test('tests loading fields.yml', () => {
   for (const file of files) {
     const fieldsYML = readFileSync(file, 'utf-8');
     const fields: Field[] = safeLoad(fieldsYML);
-    processFields(fields);
+    const processedFields = processFields(fields);
 
     // Check that content file and generated file are equal
-    expect(fields).toMatchSnapshot(path.basename(file));
+    expect(processedFields).toMatchSnapshot(path.basename(file));
   }
 });
