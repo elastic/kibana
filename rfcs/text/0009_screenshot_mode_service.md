@@ -12,7 +12,7 @@ Kibana. However, it looks like there are too many constraints to streamlining
 performance for Reporting if we only look for ways to change the Reporting code
 to do it. In other words, it will take a cross-team effort to improve the main
 performance issues. This RFC proposes one way to make cross-team efforts work
-smoothly, which is to have a new core service in Kibana that helps UIs and
+smoothly, which is to have a new plugin-provided service in Kibana that helps UIs and
 visualizations work nicely when loaded for screenshot capture.
 
 **Screenshot mode service**
@@ -26,7 +26,7 @@ Kibana pages. This turns out to be crucial for features like scheduled PDF
 report generation, and automated alerts with embedded images.
 
 As a bridge between the Kibana applications screenshot-capture features is
-needed as a core service in Kibana. This RFC names that service the Screenshot
+needed as a service in Kibana. This RFC names that service the Screenshot
 Mode Service (name TBD). Applications would read from this service while
 loading UI components into the browser, and help the application make
 case-by-case bases for loading components and the parameters that get passed
@@ -58,7 +58,7 @@ PDF export. However, the way it works has downsides with performance,
 maintainability, and expanding it as a tool that can power higher-level
 features. The solution to those downsides is to have Kibana pages themselves
 become more capable at presenting themselves for screenshot capture reports.
-With the Screenshot Mode Service available in core, Reporting could drop the
+With the Screenshot Mode Service available, Reporting could drop the
 task that it currently has which hurt performance: wasted rendering that is
 replaced with custom styles that make the page "reportable."
 
@@ -72,7 +72,7 @@ direction is appropriate for improving PDF report generation.
 # Detailed design
 
 The Screenshot Mode Service is a callable API availble in the context of a
-request on the server side, and as a pubic coreSetup Javascript API.
+request on the server side, and as a pubic pluginsSetup Javascript API.
 
 The data provided by the Screenshot Mode are signals about:
  - whether or not the context of the page load is for a screenshot capture
@@ -118,53 +118,53 @@ certain state of data in the page. In order to be "reportable" these parts of
 the URL must be totally sufficient for recreating everything the user expects
 to see in a report.
 
-The `screenshot` object has to be crafted in Javascript code. That can be done
-by anything, but generally it would be done in Kibana Reporting as a
-modification of the URL it is reporting on. Currently, this kind of data acts
-as job parameters for PNG and PDF Reporting jobs. Each source document for a
-Reporting job already has these fields - they are defined by the applications
-in the various points of Reporting integration.
+The `screenshot` object has to be crafted by a client that is generating a
+request for a screenshot. That can be done by anything, but the implementation
+concerns will be left out to keep the RFC about the details on the service.
 
-The Screenshot Mode Service would be designed to wrap the raw context data for
-applications to consume, and it is up to an outside feature (i.e. Kibana
+The Screenshot Mode Service would be a plugin designed to wrap the raw context data for
+applications to consume, and it is up to an outside feature (i.e.  Kibana
 Reporting) to craft the raw context data. Applications are the parts that make
 this design useful for Kibana, by reading the service data and using it to
 inform its rendering.
 
-As an example, say there is a visualization that displays data in a UI, and the
-data is modeled on the server side. The request handler looks like:
+As a plugin, the screenshot mode service won't automatically work in the
+background to inject the data into the various running stages of applications.
+This is in line with the pattern on the client-side where all query parameters
+are delegated to the individual applications, letting them do as they wish with
+it. For this RFC, it's an important topic because plugins have to "wire-up"
+this service in their router and UI app, but it will prevent "magical" behavior
+happening.
 
-**Before code:**
-```javascript
-const handler = (request) => {
-  const fetchOpts = {
-    pageNumber: request.params.pageNumber, // show them the page they navigated to
-    rowsPerPage: ITEMS_SET_SIZE_DEFAULT, // show as many items as the user normally sees on this page
-  };
-  const tableData = fetchData(request, fetchOpts);
-  return tableData;
-};
+## Server side
+On the server side, applications will have to interact with the screenshot
+plugin to support custom endpoints include the screenshot data as part of the
+route handling context. Example:
+```
+const screenshotRouter = plugins.screenshots.wrapRouter(router);
+screenshotRouter.get(
+  { path: '/my-endpoint' },
+  async (context, req, res) => {
+    const isScreenshotMode = context.screenshots.isScreenshotMode();
+  }
+);
 ```
 
-The "after" code takes care in handling this request, that if it is for the
-purpose of rendering a screenshot, the data must be gathered with different
-options so the result set will be suitable for non-interactive display.
+The `screenshotRouter` handlers could either replace the existing routes of the
+application, or the application can feature custom endpoints for screenshot
+export that use this plugin.
 
-**After code:**
-```javascript
-const handler = (request) => {
-  const isInteractive = !request.screenshotMode.isScreenshotMode();
+## Front-end
+On the front-end, the plugin service could be built as a simple utility that takes a
+[History](https://developer.mozilla.org/en-US/docs/Web/API/History)
+instance and returns an Observable that emits the screenshot data by listening
+for location updates and computing the data based on the query parameters.
 
-  const fetchOpts = {
-    pageNumber: isInteractive ? request.params.pageNumber : 0, // start at the beginning if there is no interactive user
-    rowsPerPage: isInteractive ? ITEMS_SET_SIZE_DEFAULT : ITEMS_SET_SIZE_MAX, // show as much data as possible if there is no interactive user
-  };
-
-  const tableData = fetchData(request, fetchOpts);
-  return tableData;
-};
+```
+const screenshot$ = plugins.screenshots.readFrom(history);
 ```
 
+## Types
 The `request.screenshotMode` object is an instance of a class that has
 functions to abstract it's internal raw data:
 
@@ -188,7 +188,8 @@ cases such as the Dashboard application's "print layout" mode.
 
 Why should we *not* do this? Please consider:
 
-- Adds extra code that application teams have to maintain and account for in their tests.
+- Plugins have to "wire-up" this service in their router and UI app
+- Low-level of discoverability since this logic is hidden in a plugin rather than exposed on the CoreSetup API.
 - Hard for application teams to create an environment to test against to check the screenshot mode rendering of their work.
 
 As a solution to the drawbacks of extra maintenance and tests needed, the
