@@ -26,10 +26,11 @@ import { isRangeValid } from './is_range_valid';
 // Wrapper around EuiDualRange that ensures onChange callback is only called when range value
 // is valid and within min/max
 
+export type Value = EuiDualRangeProps['value'];
 export type ValueMember = EuiDualRangeProps['value'][0];
 
 interface Props extends Omit<EuiDualRangeProps, 'value' | 'onChange' | 'min' | 'max'> {
-  value?: [ValueMember, ValueMember] | undefined;
+  value?: Value;
   allowEmptyRange?: boolean;
   label?: string;
   formRowDisplay?: EuiFormRowDisplayKeys;
@@ -42,12 +43,13 @@ interface State {
   isValid?: boolean;
   errorMessage?: string;
   value: [ValueMember, ValueMember];
+  prevValue?: Value;
 }
 
 export class ValidatedDualRange extends Component<Props> {
   static defaultProps: { fullWidth: boolean; allowEmptyRange: boolean; compressed: boolean };
 
-  static getDerivedStateFromProps(nextProps: Props, prevState: any) {
+  static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     if (nextProps.value !== prevState.prevValue) {
       const { isValid, errorMessage } = isRangeValid(
         nextProps.value,
@@ -70,7 +72,7 @@ export class ValidatedDualRange extends Component<Props> {
     value: ['0', '0'],
   };
 
-  _onChange = (value: any) => {
+  _onChange = (value: Value) => {
     const { isValid, errorMessage } = isRangeValid(
       value,
       this.props.min,
@@ -85,7 +87,7 @@ export class ValidatedDualRange extends Component<Props> {
     });
 
     if (this.props.onChange && isValid) {
-      this.props.onChange(value);
+      this.props.onChange([value[0] as string, value[1] as string]);
     }
   };
 

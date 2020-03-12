@@ -18,13 +18,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ValueMember } from './validated_dual_range';
+import { ValueMember, Value } from './validated_dual_range';
 
 const LOWER_VALUE_INDEX = 0;
 const UPPER_VALUE_INDEX = 1;
 
 export function isRangeValid(
-  value: ValueMember[] = [0, 0],
+  value: Value = [0, 0],
   min: ValueMember = 0,
   max: ValueMember = 0,
   allowEmptyRange?: boolean
