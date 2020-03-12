@@ -23,6 +23,8 @@ export interface RendererHandlers {
   onEmbeddableInputChange: (expression: string) => void;
   /** Handler to invoke when a rendered embeddable is destroyed */
   onEmbeddableDestroyed: () => void;
+  /** kibana-react uiSettings service used to retrieve Kibana advanced settings */
+  useUiSetting: <T>(key: string, defaultValue?: T) => T;
 }
 
 export interface RendererSpec<RendererConfig = {}> {

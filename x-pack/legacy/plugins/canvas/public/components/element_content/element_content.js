@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { pure, compose, branch, renderComponent } from 'recompose';
 import Style from 'style-it';
 import { getType } from '@kbn/interpreter/common';
+import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
 import { Loading } from '../loading';
 import { RenderWithFn } from '../render_with_fn';
 import { ElementShareContainer } from '../element_share_container';
@@ -84,6 +85,7 @@ export const ElementContent = compose(
             onEmbeddableInputChange,
             onEmbeddableDestroyed,
             getElementId,
+            useUiSetting,
           }}
         />
       </ElementShareContainer>
