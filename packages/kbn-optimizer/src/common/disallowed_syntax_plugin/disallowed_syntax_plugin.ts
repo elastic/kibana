@@ -19,7 +19,7 @@
 
 import webpack from 'webpack';
 import acorn from 'acorn';
-import { full as walkFullProgram } from 'acorn-walk';
+import * as AcornWalk from 'acorn-walk';
 
 import { checksByNodeType, DisallowedSyntaxCheck } from './disallowed_syntax';
 import { parseFilePath } from '../parse_path';
@@ -43,7 +43,7 @@ export class DisallowedSyntaxPlugin {
 
           const failedChecks = new Set<DisallowedSyntaxCheck>();
 
-          walkFullProgram(program, node => {
+          AcornWalk.full(program, node => {
             const checks = checksByNodeType.get(node.type as any);
             if (!checks) {
               return;
