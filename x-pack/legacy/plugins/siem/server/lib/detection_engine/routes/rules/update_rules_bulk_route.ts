@@ -74,6 +74,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
             threat,
             throttle,
             references,
+            note,
             version,
           } = payloadRule;
           const finalIndex = outputIndex ?? siemClient.signalsIndex;
@@ -111,6 +112,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
               threat,
               throttle,
               references,
+              note,
               version,
             });
             if (rule != null) {

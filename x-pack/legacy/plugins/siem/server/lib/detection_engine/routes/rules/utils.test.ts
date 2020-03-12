@@ -93,6 +93,7 @@ describe('utils', () => {
         timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
+        note: '# Investigative notes',
         version: 1,
       };
       expect(rule).toEqual(expected);
@@ -156,6 +157,7 @@ describe('utils', () => {
         timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
+        note: '# Investigative notes',
         version: 1,
       };
       expect(omitData).toEqual(expected);
@@ -221,6 +223,7 @@ describe('utils', () => {
         timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
+        note: '# Investigative notes',
         version: 1,
       };
       expect(rule).toEqual(expected);
@@ -286,6 +289,7 @@ describe('utils', () => {
         timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
+        note: '# Investigative notes',
         version: 1,
       };
       expect(rule).toEqual(expected);
@@ -349,6 +353,7 @@ describe('utils', () => {
         timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
+        note: '# Investigative notes',
         version: 1,
       };
       expect(omitData).toEqual(expected);
@@ -415,6 +420,7 @@ describe('utils', () => {
         timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
+        note: '# Investigative notes',
         version: 1,
       };
       expect(ruleWithEnabledFalse).toEqual(expected);
@@ -481,6 +487,7 @@ describe('utils', () => {
         timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
+        note: '# Investigative notes',
         version: 1,
       };
       expect(ruleWithEnabledFalse).toEqual(expected);
@@ -547,6 +554,7 @@ describe('utils', () => {
         timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
+        note: '# Investigative notes',
         version: 1,
       };
       expect(rule).toEqual(expected);
@@ -697,6 +705,7 @@ describe('utils', () => {
         },
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
+        note: '# Investigative notes',
         version: 1,
       };
       expect(output).toEqual({
@@ -779,6 +788,7 @@ describe('utils', () => {
         },
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
+        note: '# Investigative notes',
         version: 1,
       };
       expect(output).toEqual(expected);
@@ -952,6 +962,7 @@ describe('utils', () => {
         },
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
+        note: '# Investigative notes',
         version: 1,
       };
       expect(output).toEqual(expected);
@@ -1065,6 +1076,7 @@ describe('utils', () => {
           type: 'query',
           updated_at: '2019-12-13T16:40:33.400Z',
           updated_by: 'elastic',
+          note: '# Investigative notes',
           version: 1,
         },
       ]);
@@ -1125,6 +1137,7 @@ describe('utils', () => {
           type: 'query',
           updated_at: '2019-12-13T16:40:33.400Z',
           updated_by: 'elastic',
+          note: '# Investigative notes',
           version: 1,
         },
         {
@@ -1174,6 +1187,7 @@ describe('utils', () => {
           type: 'query',
           updated_at: '2019-12-13T16:40:33.400Z',
           updated_by: 'elastic',
+          note: '# Investigative notes',
           version: 1,
         },
       ]);

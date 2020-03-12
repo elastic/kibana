@@ -44,6 +44,7 @@ export const installPrepackagedRules = (
       threat,
       throttle,
       references,
+      note,
       version,
     } = rule;
     return [
@@ -78,6 +79,7 @@ export const installPrepackagedRules = (
         threat,
         throttle,
         references,
+        note,
         version,
       }),
     ];

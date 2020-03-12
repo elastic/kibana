@@ -1048,4 +1048,45 @@ describe('patch rules schema', () => {
       }).value.throttle
     ).toEqual(null);
   });
+
+  describe('note', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, note] does validate', () => {
+      expect(
+        patchRulesSchema.validate<Partial<PatchRuleAlertParamsRest>>({
+          rule_id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'low',
+          interval: '5m',
+          type: 'query',
+          note: '# some documentation markdown',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('note can be patched', () => {
+      expect(
+        patchRulesSchema.validate<Partial<PatchRuleAlertParamsRest>>({
+          id: 'rule-1',
+          note: '# new documentation markdown',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('You cannot patch note as an object', () => {
+      expect(
+        patchRulesSchema.validate<
+          Partial<Omit<PatchRuleAlertParamsRest, 'note'> & { note: object }>
+        >({
+          id: 'rule-1',
+          note: {
+            someProperty: 'something else here',
+          },
+        }).error.message
+      ).toEqual('child "note" fails because ["note" must be a string]');
+    });
+  });
 });

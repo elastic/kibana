@@ -136,6 +136,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                     to,
                     type,
                     references,
+                    note,
                     timeline_id: timelineId,
                     timeline_title: timelineTitle,
                     version,
@@ -187,6 +188,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         threat,
                         throttle,
                         references,
+                        note,
                         version,
                       });
                       resolve({ rule_id: ruleId, status_code: 200 });
@@ -223,6 +225,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         threat,
                         throttle,
                         references,
+                        note,
                         version,
                       });
                       resolve({ rule_id: ruleId, status_code: 200 });

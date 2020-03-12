@@ -60,6 +60,7 @@ export const mockPrepackagedRule = (): PrepackagedRules => ({
   version: 1,
   false_positives: [],
   max_signals: 100,
+  note: '',
   timeline_id: 'timeline-id',
   timeline_title: 'timeline-title',
 });
@@ -393,6 +394,7 @@ export const getResult = (): RuleAlertType => ({
       },
     ],
     references: ['http://www.example.com', 'https://ww.example.com'],
+    note: '# Investigative notes',
     version: 1,
   },
   createdAt: new Date('2019-12-13T16:40:33.400Z'),

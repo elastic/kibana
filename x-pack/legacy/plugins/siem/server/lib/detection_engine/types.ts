@@ -26,6 +26,7 @@ export interface ThreatParams {
 export interface RuleAlertParams {
   actions: AlertAction[];
   description: string;
+  note: string | undefined | null;
   enabled: boolean;
   falsePositives: string[];
   filters: PartialFilter[] | undefined | null;

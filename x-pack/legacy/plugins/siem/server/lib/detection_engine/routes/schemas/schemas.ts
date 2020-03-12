@@ -107,3 +107,4 @@ export const version = Joi.number()
   .min(1);
 export const actions = Joi.array().default([]);
 export const throttle = Joi.string().default(null);
+export const note = Joi.string();
