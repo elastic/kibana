@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiTitle, IconType, EuiButton } from '@elastic/eui';
 import { PackageInfo } from '../../../../types';
 import { EPM_PATH } from '../../../../constants';
-import { useCore, useLink } from '../../../../hooks';
+import { useCapabilities, useLink } from '../../../../hooks';
 import { IconPanel } from '../../components/icon_panel';
 import { NavButtonBack } from '../../components/nav_button_back';
 import { Version } from '../../components/version';
@@ -34,7 +34,7 @@ type HeaderProps = PackageInfo & { iconType?: IconType };
 
 export function Header(props: HeaderProps) {
   const { iconType, name, title, version } = props;
-  const core = useCore();
+  const hasWriteCapabilites = useCapabilities().write;
   const { toListView } = useLinks();
   // useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }, { text: title }]);
 
@@ -63,7 +63,7 @@ export function Header(props: HeaderProps) {
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButton
-                isDisabled={!core.application.capabilities.ingestManager.write}
+                isDisabled={!hasWriteCapabilites}
                 iconType="plusInCircle"
                 href={ADD_DATASOURCE_URI}
               >

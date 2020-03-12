@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { Error } from '../../../components';
 import { AGENT_CONFIG_PATH } from '../../../constants';
-import { useCore, useLink } from '../../../hooks';
+import { useCapabilities, useLink } from '../../../hooks';
 import { AgentConfig, PackageInfo, GetAgentConfigsResponseItem } from '../../../types';
 import { useGetPackageInfoByKey, useGetAgentConfigs, sendGetOneAgentConfig } from '../../../hooks';
 
@@ -30,7 +30,7 @@ export const StepSelectConfig: React.FunctionComponent<{
   cancelUrl: string;
   onNext: () => void;
 }> = ({ pkgkey, updatePackageInfo, agentConfig, updateAgentConfig, cancelUrl, onNext }) => {
-  const core = useCore();
+  const hasWriteCapabilites = useCapabilities().write;
   // Selected config state
   const [selectedConfigId, setSelectedConfigId] = useState<string | undefined>(
     agentConfig ? agentConfig.id : undefined
@@ -136,7 +136,7 @@ export const StepSelectConfig: React.FunctionComponent<{
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              isDisabled={!core.application.capabilities.ingestManager.write}
+              isDisabled={!hasWriteCapabilites}
               iconType="plusInCircle"
               href={CREATE_NEW_CONFIG_URI}
               size="s"

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { useCapabilities } from './use_capabilities';
 export { useCore, CoreContext } from './use_core';
 export { useConfig, ConfigContext } from './use_config';
 export { useSetupDeps, useStartDeps, DepsContext } from './use_deps';

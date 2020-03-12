@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import styled from 'styled-components';
-import { useCore, useGetOneAgentConfig } from '../../../hooks';
+import { useCapabilities, useGetOneAgentConfig } from '../../../hooks';
 import { Datasource } from '../../../types';
 import { Loading } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
@@ -57,7 +57,7 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
   const {
     params: { configId, tabId = '' },
   } = useRouteMatch<{ configId: string; tabId?: string }>();
-  const core = useCore();
+  const hasWriteCapabilites = useCapabilities().write;
   const agentConfigRequest = useGetOneAgentConfig(configId);
   const agentConfig = agentConfigRequest.data ? agentConfigRequest.data.item : null;
   const { isLoading, error, sendRequest: refreshAgentConfig } = agentConfigRequest;
@@ -320,7 +320,7 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
                           }
                           actions={
                             <EuiButton
-                              isDisabled={!core.application.capabilities.ingestManager.write}
+                              isDisabled={!hasWriteCapabilites}
                               fill
                               iconType="plusInCircle"
                               href={URI.ADD_DATASOURCE}
@@ -337,7 +337,7 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
                     search={{
                       toolsRight: [
                         <EuiButton
-                          isDisabled={!core.application.capabilities.ingestManager.write}
+                          isDisabled={!hasWriteCapabilites}
                           iconType="plusInCircle"
                           href={URI.ADD_DATASOURCE}
                         >

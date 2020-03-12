@@ -33,7 +33,7 @@ import {
 } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
 import {
-  useCore,
+  useCapabilities,
   useGetAgentConfigs,
   usePagination,
   useLink,
@@ -88,7 +88,7 @@ const DangerEuiContextMenuItem = styled(EuiContextMenuItem)`
 
 const RowActions = React.memo<{ config: AgentConfig; onDelete: () => void }>(
   ({ config, onDelete }) => {
-    const core = useCore();
+    const hasWriteCapabilites = useCapabilities().write;
     const DETAILS_URI = useLink(`${AGENT_CONFIG_DETAILS_PATH}${config.id}`);
     const ADD_DATASOURCE_URI = `${DETAILS_URI}/add-datasource`;
 
@@ -122,7 +122,7 @@ const RowActions = React.memo<{ config: AgentConfig; onDelete: () => void }>(
             </EuiContextMenuItem>,
 
             <EuiContextMenuItem
-              disabled={!core.application.capabilities.ingestManager.write}
+              disabled={!hasWriteCapabilites}
               icon="plusInCircle"
               href={ADD_DATASOURCE_URI}
               key="createDataSource"
@@ -133,7 +133,7 @@ const RowActions = React.memo<{ config: AgentConfig; onDelete: () => void }>(
               />
             </EuiContextMenuItem>,
 
-            <EuiContextMenuItem icon="copy" key="copyConfig">
+            <EuiContextMenuItem disabled={true} icon="copy" key="copyConfig">
               <FormattedMessage
                 id="xpack.ingestManager.agentConfigList.copyConfigActionText"
                 defaultMessage="Copy configuration"
@@ -165,7 +165,7 @@ const RowActions = React.memo<{ config: AgentConfig; onDelete: () => void }>(
 
 export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
   // Config information
-  const core = useCore();
+  const hasWriteCapabilites = useCapabilities().write;
   const {
     fleet: { enabled: isFleetEnabled },
   } = useConfig();
@@ -313,7 +313,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
       <EuiButton
         fill
         iconType="plusInCircle"
-        isDisabled={!core.application.capabilities.ingestManager.write}
+        isDisabled={!hasWriteCapabilites}
         onClick={() => setIsCreateAgentConfigFlyoutOpen(true)}
       >
         <FormattedMessage
@@ -322,7 +322,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         />
       </EuiButton>
     ),
-    [core.application.capabilities.ingestManager.write, setIsCreateAgentConfigFlyoutOpen]
+    [hasWriteCapabilites, setIsCreateAgentConfigFlyoutOpen]
   );
 
   const emptyPrompt = useMemo(
@@ -336,10 +336,10 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
             />
           </h2>
         }
-        actions={false ?? createAgentConfigButton}
+        actions={hasWriteCapabilites ?? createAgentConfigButton}
       />
     ),
-    [createAgentConfigButton]
+    [hasWriteCapabilites, createAgentConfigButton]
   );
 
   return (
