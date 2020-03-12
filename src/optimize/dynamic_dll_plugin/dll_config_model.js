@@ -24,7 +24,7 @@ import webpackMerge from 'webpack-merge';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
-import { SyntaxCheckPlugin } from './syntax_check_plugin';
+import { DisallowedSyntaxPlugin } from './disallowed_syntax_plugin';
 
 function generateDLL(config) {
   const {
@@ -141,7 +141,7 @@ function generateDLL(config) {
       new MiniCssExtractPlugin({
         filename: dllStyleFilename,
       }),
-      new SyntaxCheckPlugin(),
+      new DisallowedSyntaxPlugin(),
     ],
     // Single runtime for the dll bundles which assures that common transient dependencies won't be evaluated twice.
     // The module cache will be shared, even when module code may be duplicated across chunks.
