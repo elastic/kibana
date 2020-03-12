@@ -18,12 +18,12 @@ class DatasourceService {
     datasource: NewDatasource,
     options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<Datasource> {
-    const newSo = await soClient.create<Datasource>(
+    const newSo = await soClient.create<Omit<Datasource, 'id'>>(
       SAVED_OBJECT_TYPE,
       {
         ...datasource,
         revision: 1,
-      } as Datasource,
+      },
       options
     );
 
@@ -124,7 +124,7 @@ class DatasourceService {
     });
 
     // Bump revision of associated agent config
-    await agentConfigService.update(soClient, datasource.config_id, {}, { user: options?.user });
+    await agentConfigService.bumpRevision(soClient, datasource.config_id, { user: options?.user });
 
     return (await this.get(soClient, id)) as Datasource;
   }

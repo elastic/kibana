@@ -175,6 +175,14 @@ class AgentConfigService {
     return this._update(soClient, id, agentConfig, options?.user);
   }
 
+  public async bumpRevision(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    options?: { user?: AuthenticatedUser }
+  ): Promise<AgentConfig> {
+    return this._update(soClient, id, {}, options?.user);
+  }
+
   public async assignDatasources(
     soClient: SavedObjectsClientContract,
     id: string,
