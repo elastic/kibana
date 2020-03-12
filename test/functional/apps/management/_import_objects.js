@@ -19,12 +19,14 @@
 
 import expect from '@kbn/expect';
 import path from 'path';
+import { indexBy } from 'lodash';
 
 export default function({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'settings', 'header']);
   const testSubjects = getService('testSubjects');
+  const log = getService('log');
 
   describe('import objects', function describeIndexTests() {
     describe('.ndjson file', () => {
@@ -50,6 +52,27 @@ export default function({ getService, getPageObjects }) {
         const objects = await PageObjects.settings.getSavedObjectsInTable();
         const isSavedObjectImported = objects.includes('Log Agents');
         expect(isSavedObjectImported).to.be(true);
+
+        // new stuff here ////////
+        // get all the elements in the table, and index them by the 'title' visible text field
+        await PageObjects.common.sleep(2000);
+        const elements = indexBy(
+          await PageObjects.settings.getSavedObjectElementsInTable(),
+          'title'
+        );
+        log.debug(`the title = ${elements['Log Agents'].title}`);
+        log.debug(`the object type = ${elements['Log Agents'].objectType}`);
+        log.debug(`the keys of the list returned = ${Object.keys(elements)}`);
+        log.debug(`the size of the list returned = ${Object.keys(elements).length}`);
+        // seems like I can click relationshipsElement and InspectElement, but then I can't click checkbox
+        // await elements['Log Agents'].relationshipsElement.click();
+        // await elements['Log Agents'].InspectElement.click();
+
+        // or I can click the checkbox.  Maybe it's because I didn't close the relationshipsElement and InspectElement flyouts?
+        await elements['Log Agents'].checkbox.click();
+
+        // this is just so I can see the actions above
+        await PageObjects.common.sleep(20000);
       });
 
       it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function() {
@@ -209,7 +232,7 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    describe('.json file', () => {
+    describe.skip('.json file', () => {
       beforeEach(async function() {
         // delete .kibana index and then wait for Kibana to re-create it
         await kibanaServer.uiSettings.replace({});

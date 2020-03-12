@@ -680,6 +680,33 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       });
     }
 
+    async getSavedObjectElementsInTable() {
+      const rows = await find.allByCssSelector('.euiTableRow');
+      return mapAsync(rows, async row => {
+        const checkbox = await row.findByCssSelector('.euiCheckbox__input');
+        // would be nice to return the object type aria-label="index patterns"
+        const objectType = await row.findByCssSelector('td:nth-child(2) svg');
+        const titleElement = await row.findByCssSelector('.euiLink');
+        // not all rows have inspect button - Advanced Settings objects don't
+        let inspectElement;
+        const innerHtml = await row.getAttribute('innerHTML');
+        if (innerHtml.includes('Inspect')) {
+          inspectElement = await row.findByCssSelector('[aria-label="Inspect"]');
+        } else {
+          inspectElement = null;
+        }
+        const relationshipsElement = await row.findByCssSelector('[aria-label="Relationships"]');
+        return {
+          checkbox,
+          objectType: await objectType.getAttribute('aria-label'),
+          titleElement,
+          title: await titleElement.getVisibleText(),
+          inspectElement,
+          relationshipsElement,
+        };
+      });
+    }
+
     async getSavedObjectsInTable() {
       const table = await testSubjects.find('savedObjectsTable');
       const cells = await table.findAllByCssSelector('td:nth-child(3)');
