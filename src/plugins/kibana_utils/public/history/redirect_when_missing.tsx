@@ -63,11 +63,6 @@ export function redirectWhenMissing({
       throw error;
     }
 
-    const unknownVisType = error.message.indexOf('Invalid type') === 0;
-    if (unknownVisType) {
-      error.savedObjectType = 'visualization';
-    }
-
     let url = localMappingObject[error.savedObjectType] || localMappingObject['*'] || '/';
     url += (url.indexOf('?') >= 0 ? '&' : '?') + `notFound=${error.savedObjectType}`;
 

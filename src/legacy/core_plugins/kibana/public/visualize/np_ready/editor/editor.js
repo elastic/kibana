@@ -30,8 +30,9 @@ import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
-import { unhashUrl, redirectWhenMissing } from '../../../../../../../plugins/kibana_utils/public';
+import { unhashUrl } from '../../../../../../../plugins/kibana_utils/public';
 import { kbnBaseUrl } from '../../../../../../../plugins/kibana_legacy/public';
+import { MarkdownSimple, toMountPoint } from '../../../../../../../plugins/kibana_react/public';
 import {
   SavedObjectSaveModal,
   showSaveModal,
@@ -312,6 +313,12 @@ function VisualizeAppController(
     }
   );
 
+  const stopAllSyncing = () => {
+    stopStateSync();
+    stopSyncingQueryServiceStateWithUrl();
+    stopSyncingAppFilters();
+  };
+
   // The savedVis is pulled from elasticsearch, but the appState is pulled from the url, with the
   // defaults applied. If the url was from a previous session which included modifications to the
   // appState then they won't be equal.
@@ -319,15 +326,16 @@ function VisualizeAppController(
     try {
       vis.setState(stateContainer.getState().vis);
     } catch (error) {
-      const redirect = redirectWhenMissing({
-        history,
-        mapping: {
-          'index-pattern-field': '/visualize',
-        },
-        toastNotifications,
+      stopAllSyncing();
+
+      toastNotifications.addWarning({
+        title: i18n.translate('kbn.visualize.visualizationTypeInvalidNotificationMessage', {
+          defaultMessage: 'Invalid visualization type',
+        }),
+        text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
       });
 
-      redirect(error);
+      history.replace('/notFound=visualization');
     }
   }
 
@@ -503,9 +511,8 @@ function VisualizeAppController(
 
       unsubscribePersisted();
       unsubscribeStateUpdates();
-      stopStateSync();
-      stopSyncingQueryServiceStateWithUrl();
-      stopSyncingAppFilters();
+
+      stopAllSyncing();
     });
 
     $timeout(() => {
