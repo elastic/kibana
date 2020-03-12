@@ -9,7 +9,6 @@ import { useReducer, useCallback } from 'react';
 import { CaseRequest } from '../../../../../../plugins/case/common/api';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { postCase } from './api';
-import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
 import * as i18n from './translations';
 import { Case } from './types';
 
@@ -18,34 +17,34 @@ interface NewCaseState {
   isLoading: boolean;
   isError: boolean;
 }
-interface Action {
-  type: string;
-  payload?: Case;
-}
+type Action =
+  | { type: 'FETCH_INIT' }
+  | { type: 'FETCH_SUCCESS'; payload: Case }
+  | { type: 'FETCH_FAILURE' };
 
 const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => {
   switch (action.type) {
-    case FETCH_INIT:
+    case 'FETCH_INIT':
       return {
         ...state,
         isLoading: true,
         isError: false,
       };
-    case FETCH_SUCCESS:
+    case 'FETCH_SUCCESS':
       return {
         ...state,
         isLoading: false,
         isError: false,
         caseData: action.payload ?? null,
       };
-    case FETCH_FAILURE:
+    case 'FETCH_FAILURE':
       return {
         ...state,
         isLoading: false,
         isError: true,
       };
     default:
-      throw new Error();
+      return state;
   }
 };
 
@@ -63,11 +62,11 @@ export const usePostCase = (): UsePostCase => {
   const postMyCase = useCallback(async (data: CaseRequest) => {
     let cancel = false;
     try {
-      dispatch({ type: FETCH_INIT });
+      dispatch({ type: 'FETCH_INIT' });
       const response = await postCase({ ...data, state: 'open' });
       if (!cancel) {
         dispatch({
-          type: FETCH_SUCCESS,
+          type: 'FETCH_SUCCESS',
           payload: response,
         });
       }
@@ -78,7 +77,7 @@ export const usePostCase = (): UsePostCase => {
           error: error.body && error.body.message ? new Error(error.body.message) : error,
           dispatchToaster,
         });
-        dispatch({ type: FETCH_FAILURE });
+        dispatch({ type: 'FETCH_FAILURE' });
       }
     }
     return () => {

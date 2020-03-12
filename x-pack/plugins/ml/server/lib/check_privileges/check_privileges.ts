@@ -16,7 +16,7 @@ import { mlPrivileges } from './privileges';
 
 type ClusterPrivilege = Record<string, boolean>;
 
-interface Response {
+export interface MlCapabilities {
   capabilities: Privileges;
   upgradeInProgress: boolean;
   isPlatinumOrTrialLicense: boolean;
@@ -30,7 +30,7 @@ export function privilegesProvider(
   ignoreSpaces: boolean = false
 ) {
   const { isUpgradeInProgress } = upgradeCheckProvider(callAsCurrentUser);
-  async function getPrivileges(): Promise<Response> {
+  async function getPrivileges(): Promise<MlCapabilities> {
     // get the default privileges, forced to be false.
     const privileges = getDefaultPrivileges();
 
