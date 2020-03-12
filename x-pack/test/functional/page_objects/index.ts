@@ -34,6 +34,7 @@ import { UpgradeAssistantProvider } from './upgrade_assistant';
 // @ts-ignore not ts yet
 import { RollupPageProvider } from './rollup_page';
 import { UptimePageProvider } from './uptime_page';
+import { ApiKeysPageProvider } from './api_keys_page';
 import { LicenseManagementPageProvider } from './license_management_page';
 import { IndexManagementPageProvider } from './index_management_page';
 import { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
@@ -68,6 +69,7 @@ export const pageObjects = {
   upgradeAssistant: UpgradeAssistantProvider,
   uptime: UptimePageProvider,
   rollup: RollupPageProvider,
+  apiKeys: ApiKeysPageProvider,
   licenseManagement: LicenseManagementPageProvider,
   indexManagement: IndexManagementPageProvider,
   indexLifecycleManagement: IndexLifecycleManagementPageProvider,
