@@ -27,6 +27,7 @@ import { LicensingPluginSetup, LICENSE_CHECK_STATE, ILicense } from '../../../li
 import { Poller } from '../../common/poller';
 import { JobStatuses, JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG } from '../../constants';
 import { ReportingAPIClient, JobQueueEntry } from '../lib/reporting_api_client';
+import { checkLicense } from '../lib/license_check';
 import { ReportErrorButton } from './report_error_button';
 import { ReportInfoButton } from './report_info_button';
 
@@ -169,14 +170,14 @@ class ReportListingUi extends Component<Props, State> {
   }
 
   private licenseHandler = (license: ILicense) => {
-    const { state, message } = license.check('reporting', 'basic');
-    const enableLinks = state === LICENSE_CHECK_STATE.Valid;
-    const showLinks = enableLinks;
+    const { enableLinks, showLinks, message: badLicenseMessage } = checkLicense(
+      license.check('reporting', 'basic')
+    );
 
     this.setState({
       enableLinks,
       showLinks,
-      badLicenseMessage: message || '',
+      badLicenseMessage,
     });
   };
 

@@ -8,8 +8,9 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import React from 'react';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
+import { checkLicense } from '../lib/license_check';
 import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content';
-import { LicensingPluginSetup, LICENSE_CHECK_STATE } from '../../../licensing/public';
+import { LicensingPluginSetup } from '../../../licensing/public';
 import { ShareContext } from '../../../../../src/plugins/share/public';
 import { ToastsSetup, IUiSettingsClient } from '../../';
 
@@ -31,11 +32,10 @@ export const reportingPDFPNGProvider = ({
   let hasPDFPNGReporting = false;
 
   license$.subscribe(license => {
-    const { state, message = '' } = license.check('reporting', 'gold');
-    const enableLinks = state === LICENSE_CHECK_STATE.Valid;
+    const { enableLinks, showLinks, message } = checkLicense(license.check('reporting', 'gold'));
 
     toolTipContent = message;
-    hasPDFPNGReporting = enableLinks;
+    hasPDFPNGReporting = showLinks;
     disabled = !enableLinks;
   });
 

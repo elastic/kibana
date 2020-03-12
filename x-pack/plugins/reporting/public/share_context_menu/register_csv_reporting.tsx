@@ -9,7 +9,8 @@ import React from 'react';
 
 import { ReportingPanelContent } from '../components/reporting_panel_content';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
-import { LicensingPluginSetup, LICENSE_CHECK_STATE } from '../../../licensing/public';
+import { checkLicense } from '../lib/license_check';
+import { LicensingPluginSetup } from '../../../licensing/public';
 import { ShareContext } from '../../../../../src/plugins/share/public';
 import { ToastsSetup } from '../..';
 
@@ -25,11 +26,10 @@ export const csvReportingProvider = ({ apiClient, toasts, license$ }: ReportingP
   let hasCSVReporting = false;
 
   license$.subscribe(license => {
-    const { state, message = '' } = license.check('reporting', 'basic');
-    const enableLinks = state === LICENSE_CHECK_STATE.Valid;
+    const { enableLinks, showLinks, message } = checkLicense(license.check('reporting', 'basic'));
 
     toolTipContent = message;
-    hasCSVReporting = enableLinks;
+    hasCSVReporting = showLinks;
     disabled = !enableLinks;
   });
 

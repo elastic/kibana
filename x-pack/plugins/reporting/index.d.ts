@@ -69,3 +69,9 @@ export interface PollerOptions {
   successFunction?: (...args: any) => any;
   errorFunction?: (error: Error) => any;
 }
+
+export interface LicenseCheckResults {
+  enableLinks: boolean;
+  showLinks: boolean;
+  message: string;
+}
