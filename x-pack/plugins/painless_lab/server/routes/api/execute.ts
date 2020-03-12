@@ -12,7 +12,16 @@ import { isEsError } from '../../lib';
 const bodySchema = schema.object({
   script: schema.object({
     source: schema.string(),
+    params: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   }),
+  context: schema.maybe(schema.string()),
+  context_setup: schema.maybe(
+    schema.object({
+      params: schema.maybe(schema.any()),
+      document: schema.recordOf(schema.string(), schema.any()),
+      index: schema.string(),
+    })
+  ),
 });
 
 export function registerExecuteRoute({ router, license }: RouteDependencies) {
