@@ -6,7 +6,12 @@
 
 import React from 'react';
 
-export default function LastTickValue({ x, marginTop, value }) {
+interface LastTickValueProps {
+  x: number;
+  marginTop: number;
+  value: string;
+}
+export function LastTickValue({ x, marginTop, value }: LastTickValueProps) {
   return (
     <g transform={`translate(${x}, ${marginTop})`}>
       <text textAnchor="middle" dy="0" transform="translate(0, -8)">

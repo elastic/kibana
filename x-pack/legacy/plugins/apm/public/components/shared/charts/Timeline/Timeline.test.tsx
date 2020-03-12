@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
+import React from 'react';
 import { StickyContainer } from 'react-sticky';
-
-import Timeline from '../index';
-import { mockMoment, toJson } from '../../../../../utils/testHelpers';
+import { mockMoment, toJson } from '../../../../utils/testHelpers';
+import { Timeline } from '.';
 
 describe('Timeline', () => {
   beforeAll(() => {

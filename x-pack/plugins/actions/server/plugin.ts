@@ -282,7 +282,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
             );
           }
           return new ActionsClient({
-            savedObjectsClient: context.core!.savedObjects.client,
+            savedObjectsClient: context.core.savedObjects.client,
             actionTypeRegistry: actionTypeRegistry!,
             defaultKibanaIndex,
             scopedClusterClient: adminClient!.asScoped(request),
