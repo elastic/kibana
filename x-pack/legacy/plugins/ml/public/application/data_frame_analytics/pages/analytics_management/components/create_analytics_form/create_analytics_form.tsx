@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useEffect, useMemo } from 'react';
+import React, { Fragment, FC, useEffect, useMemo, useRef } from 'react';
 
 import {
   EuiComboBox,
@@ -56,6 +56,8 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   const { setFormState, setEstimatedModelMemoryLimit } = actions;
   const mlContext = useMlContext();
   const { form, indexPatternsMap, isAdvancedEditorEnabled, isJobCreated, requestMessages } = state;
+
+  let myInput: any = useRef(null);
 
   const {
     createIndexPattern,
@@ -331,6 +333,13 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     };
   }, [jobType, sourceIndex, sourceIndexNameEmpty, dependentVariable, trainingPercent]);
 
+  // Temp effect to close the context menu popover on Clone button click
+  useEffect(() => {
+    const evt = document.createEvent('MouseEvents');
+    evt.initEvent('mouseup', true, true);
+    myInput.dispatchEvent(evt);
+  }, []);
+
   return (
     <EuiForm className="mlDataFrameAnalyticsCreateForm">
       <Messages messages={requestMessages} />
@@ -398,6 +407,11 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
             ]}
           >
             <EuiFieldText
+              inputRef={input => {
+                if (input) {
+                  myInput = input;
+                }
+              }}
               disabled={isJobCreated}
               placeholder={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdPlaceholder', {
                 defaultMessage: 'Job ID',

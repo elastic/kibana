@@ -20,7 +20,7 @@ import {
   isClassificationAnalysis,
 } from '../../../../common/analytics';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
-import { getCloneAction } from './action_clone';
+import { CloneAction } from './action_clone';
 
 import { getResultsUrl, isDataFrameAnalyticsRunning, DataFrameAnalyticsListRow } from './common';
 import { stopAnalytics } from '../../services/analytics_service';
@@ -106,6 +106,10 @@ export const getActions = (createAnalyticsForm: CreateAnalyticsFormProps) => {
         return <DeleteAction item={item} />;
       },
     },
-    getCloneAction(createAnalyticsForm),
+    {
+      render: (item: DataFrameAnalyticsListRow) => {
+        return <CloneAction item={item} createAnalyticsForm={createAnalyticsForm} />;
+      },
+    },
   ];
 };

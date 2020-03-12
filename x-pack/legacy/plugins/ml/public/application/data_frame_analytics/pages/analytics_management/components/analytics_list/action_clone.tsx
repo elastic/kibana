@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiButtonEmpty } from '@elastic/eui';
+import React, { FC } from 'react';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { DataFrameAnalyticsConfig, isOutlierAnalysis } from '../../../../common';
@@ -282,3 +284,36 @@ export function getCloneAction(createAnalyticsForm: CreateAnalyticsFormProps) {
     'data-test-subj': 'mlAnalyticsJobCloneButton',
   };
 }
+
+interface CloneActionProps {
+  item: DataFrameAnalyticsListRow;
+  createAnalyticsForm: CreateAnalyticsFormProps;
+}
+
+/**
+ * Temp component to have Clone job button with the same look as the other actions.
+ * Replace with {@link getCloneAction} as soon as all the actions are refactored
+ * to support EuiContext with a valid DOM structure without nested buttons.
+ */
+export const CloneAction: FC<CloneActionProps> = ({ createAnalyticsForm, item }) => {
+  const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.cloneJobButtonLabel', {
+    defaultMessage: 'Clone job',
+  });
+  const { actions } = createAnalyticsForm;
+  const onClick = async () => {
+    await actions.setJobClone(item.config);
+  };
+
+  return (
+    <EuiButtonEmpty
+      data-test-subj="mlAnalyticsJobCloneButton"
+      size="xs"
+      color="text"
+      iconType="copy"
+      onClick={onClick}
+      aria-label={buttonText}
+    >
+      {buttonText}
+    </EuiButtonEmpty>
+  );
+};

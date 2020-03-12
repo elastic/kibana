@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment } from 'react';
+import React, { FC, Fragment, useEffect, useRef } from 'react';
 
 import {
   EuiCallOut,
@@ -41,6 +41,8 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
     jobIdValid,
   } = state.form;
 
+  let myInput: any = useRef();
+
   const onChange = (str: string) => {
     setAdvancedEditorRawString(str);
     try {
@@ -50,6 +52,13 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
       resetAdvancedEditorMessages();
     }
   };
+
+  // Temp effect to close the context menu popover on Clone button click
+  useEffect(() => {
+    const evt = document.createEvent('MouseEvents');
+    evt.initEvent('mouseup', true, true);
+    myInput.dispatchEvent(evt);
+  }, []);
 
   return (
     <EuiForm className="mlDataFrameAnalyticsCreateForm">
@@ -98,6 +107,11 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
             ]}
           >
             <EuiFieldText
+              inputRef={input => {
+                if (input) {
+                  myInput = input;
+                }
+              }}
               disabled={isJobCreated}
               placeholder="analytics job ID"
               value={jobId}
