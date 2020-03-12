@@ -22,6 +22,9 @@ export const caseProps: CaseProps = {
           username: 'smilovic',
         },
         updatedAt: '2020-02-20T23:06:33.798Z',
+        updatedBy: {
+          username: 'elastic',
+        },
         version: 'WzQ3LDFd',
       },
     ],
@@ -32,6 +35,9 @@ export const caseProps: CaseProps = {
     tags: ['defacement'],
     title: 'Another horrible breach!!',
     updatedAt: '2020-02-19T15:02:57.995Z',
+    updatedBy: {
+      username: 'elastic',
+    },
     version: 'WzQ3LDFd',
   },
 };
@@ -49,6 +55,9 @@ export const data: Case = {
         username: 'smilovic',
       },
       updatedAt: '2020-02-20T23:06:33.798Z',
+      updatedBy: {
+        username: 'elastic',
+      },
       version: 'WzQ3LDFd',
     },
   ],
@@ -59,5 +68,8 @@ export const data: Case = {
   tags: ['defacement'],
   title: 'Another horrible breach!!',
   updatedAt: '2020-02-19T15:02:57.995Z',
+  updatedBy: {
+    username: 'elastic',
+  },
   version: 'WzQ3LDFd',
 };

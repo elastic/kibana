@@ -5,14 +5,14 @@
  */
 
 import {
-  CaseConfigureClosureType,
+  ClosureType,
   CasesConfigurationMapping,
 } from '../../../../containers/case/configure/types';
 
 export interface State {
   mapping: CasesConfigurationMapping[] | null;
   connectorId: string;
-  closureType: CaseConfigureClosureType;
+  closureType: ClosureType;
 }
 
 export type Action =
@@ -22,7 +22,7 @@ export type Action =
     }
   | {
       type: 'setClosureType';
-      closureType: CaseConfigureClosureType;
+      closureType: ClosureType;
     }
   | {
       type: 'setMapping';
