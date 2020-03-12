@@ -21,7 +21,7 @@ import { EsResponse, SavedObject, SavedObjectConfig } from '../../types';
 import { parseSearchSource } from './parse_search_source';
 import { hydrateIndexPattern as hydrateIndexPatternHelper } from './hydrate_index_pattern';
 import { expandShorthand, SavedObjectNotFound } from '../../../../kibana_utils/public';
-import { IndexPattern, SearchSource } from '../../../../data/public';
+import { IndexPattern, IndexPatternsContract } from '../../../../data/public';
 
 /**
  * A given response of and ElasticSearch containing a plain saved object is applied to the given
@@ -77,19 +77,19 @@ export async function applyESResp(
 }
 
 export async function applyESRespTo(
-  indexPatterns: any,
+  indexPatterns: IndexPatternsContract,
   resp: EsResponse,
+  savedObject: any,
   config: SavedObjectConfig
 ) {
-  let savedObject: Record<string, any> = { id: config.id };
-  savedObject._source = cloneDeep(resp._source);
-
   const mapping = expandShorthand(config.mapping);
   const esType = config.type || '';
+  savedObject._source = cloneDeep(resp._source);
+
   const injectReferences = config.injectReferences;
 
   if (typeof resp.found === 'boolean' && !resp.found) {
-    throw new SavedObjectNotFound(esType, config.id || '');
+    throw new SavedObjectNotFound(esType, savedObject.id || '');
   }
 
   const meta = resp._source.kibanaSavedObjectMeta || {};
@@ -101,7 +101,7 @@ export async function applyESRespTo(
   }
 
   // assign the defaults to the response
-  defaults(savedObject._source, config.defaults);
+  defaults(savedObject._source, config.defaults || {});
 
   // transform the source using _deserializers
   forOwn(mapping, (fieldMapping, fieldName) => {
@@ -116,14 +116,12 @@ export async function applyESRespTo(
   assign(savedObject, savedObject._source);
   savedObject.lastSavedTitle = savedObject.title;
 
-  // optional search source which this object configures
-  savedObject.searchSource = config.searchSource ? new SearchSource() : undefined;
   // NOTE: this.type (not set in this file, but somewhere else) is the sub type, e.g. 'area' or
   // 'data table', while esType is the more generic type - e.g. 'visualization' or 'saved search'.
   savedObject.getEsType = () => esType;
 
   await parseSearchSource(savedObject as any, esType, meta.searchSourceJSON, resp.references);
-  await hydrateIndexPatternHelper(config.id || '', savedObject as any, indexPatterns, config);
+  await hydrateIndexPatternHelper(savedObject.id || '', savedObject as any, indexPatterns, config);
 
   if (injectReferences && resp.references && resp.references.length > 0) {
     injectReferences(savedObject, resp.references);

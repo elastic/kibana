@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep, assign } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { IBasePath, SavedObjectsClientContract } from 'kibana/public';
 
@@ -72,8 +72,27 @@ export async function getSW(
     savedObjectsClient,
     indexPatterns,
   }: { savedObjectsClient: SavedObjectsClientContract; indexPatterns: IndexPatternsContract },
-  id: string
+  id?: string
 ) {
+  const savedObject = { id };
+
+  const config = {
+    mapping,
+    type: savedWorkspaceType,
+    injectReferences,
+    defaults,
+  };
+
+  if (!id) {
+    assign(savedObject, defaults);
+    // no need for Graph
+    // await hydrateIndexPattern(config.id || '', savedObject as any, indexPatterns, config);
+    // if (typeof config.afterESResp === 'function') {
+    //    savedObject = await config.afterESResp(savedObject);
+    // }
+    return Promise.resolve(savedObject);
+  }
+
   const resp = await savedObjectsClient.get(savedWorkspaceType, id);
 
   const respMapped = {
@@ -84,13 +103,10 @@ export async function getSW(
     found: !!resp._version,
   };
 
-  const config = {
-    id,
-    mapping,
-    type: savedWorkspaceType,
-    injectReferences,
-    defaults,
-  };
+  return await applyESRespTo(indexPatterns, respMapped, savedObject, config);
 
-  return await applyESRespTo(indexPatterns, respMapped, config);
+  // no need for Graph
+  // if (typeof config.init === 'function') {
+  //   await config.init.call(savedObject);
+  // }
 }

@@ -154,7 +154,7 @@ export function initGraphApp(angularModule, deps) {
                     return new Promise();
                   }
                 )
-              : savedWorkspaceLoader.get();
+              : getSW({ savedObjectsClient, indexPatterns });
           },
           indexPatterns: function() {
             return savedObjectsClient
