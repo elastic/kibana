@@ -52,6 +52,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Kibana browser back navigation should work', function describeIndexTests() {
     before(async () => {
+      await esArchiver.loadIfNeeded('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
       if (browser.isInternetExplorer) {
         await kibanaServer.uiSettings.replace({ 'state:storeInSessionStorage': false });
