@@ -33,9 +33,8 @@ const Spacer = styled.span`
   margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
 `;
 
-const TempNumberComponent = () => <span>{1}</span>;
-TempNumberComponent.displayName = 'TempNumberComponent';
-
+const renderStringField = (field: string, dataTestSubj: string) =>
+  field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 export const getCasesColumns = (
   actions: Array<DefaultItemIconButtonAction<Case>>
 ): CasesColumns[] => [
@@ -59,6 +58,7 @@ export const getCasesColumns = (
       }
       return getEmptyTagValue();
     },
+    width: '25%',
   },
   {
     field: 'createdBy',
@@ -101,13 +101,15 @@ export const getCasesColumns = (
       return getEmptyTagValue();
     },
     truncateText: true,
+    width: '20%',
   },
   {
     align: 'right',
-    field: 'commentCount', // TO DO once we have commentCount returned in the API: https://github.com/elastic/kibana/issues/58525
+    field: 'commentIds',
     name: i18n.COMMENTS,
     sortable: true,
-    render: TempNumberComponent,
+    render: (comments: Case['commentIds']) =>
+      renderStringField(`${comments.length}`, `case-table-column-commentCount`),
   },
   {
     field: 'createdAt',

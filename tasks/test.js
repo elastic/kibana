@@ -61,7 +61,7 @@ module.exports = function(grunt) {
     'run:apiIntegrationTests',
   ]);
 
-  grunt.registerTask('test:karmaDebug', ['checkPlugins', 'run:karmaDebugServer', 'karma:dev']);
+  grunt.registerTask('test:karmaDebug', ['checkPlugins', 'run:karmaTestDebugServer', 'karma:dev']);
   grunt.registerTask('test:mochaCoverage', ['run:mochaCoverage']);
 
   grunt.registerTask('test', subTask => {
