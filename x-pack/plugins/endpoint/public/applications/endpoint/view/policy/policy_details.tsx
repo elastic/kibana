@@ -7,7 +7,7 @@
 import React from 'react';
 import { usePageId } from '../use_page_id';
 import { usePolicyDetailsSelector } from './policy_hooks';
-import { selectPolicyDetails } from '../../store/policy_list/selectors';
+import { selectPolicyDetails } from '../../store/policy_details/selectors';
 
 export const PolicyDetails = React.memo(() => {
   usePageId('policyDetailsPage');

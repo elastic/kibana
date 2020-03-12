@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { policyListReducer } from './reducer';
-export { PolicyListAction } from './action';
-export { policyListMiddlewareFactory } from './middleware';
+export { policyDetailsMiddlewareFactory } from './middleware';
+export { PolicyDetailsAction } from './action';
+export { policyDetailsReducer } from './reducer';

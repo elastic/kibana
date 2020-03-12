@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MiddlewareFactory, PolicyListState, PolicyDetailsState } from '../../types';
-import { selectPolicyIdFromParams } from './selectors';
+import { MiddlewareFactory, PolicyListState } from '../../types';
 
 export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = coreStart => {
   return ({ getState, dispatch }) => next => async action => {
@@ -39,27 +38,6 @@ export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = c
           pageIndex,
           pageSize,
           total,
-        },
-      });
-    }
-  };
-};
-
-export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsState> = coreStart => {
-  return ({ getState, dispatch }) => next => async action => {
-    next(action);
-
-    if (action.type === 'userNavigatedToPage' && action.payload === 'policyDetailsPage') {
-      const state = getState();
-      const id = selectPolicyIdFromParams(state);
-
-      const { getFakeDatasourceDetailsApiResponse } = await import('./fake_data');
-      const policyItem = await getFakeDatasourceDetailsApiResponse(id);
-
-      dispatch({
-        type: 'serverReturnedPolicyDetailsData',
-        payload: {
-          policyItem,
         },
       });
     }
