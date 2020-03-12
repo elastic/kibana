@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
-import { APICaller } from 'src/core/server';
+import { APICaller } from 'kibana/server';
 import {
   JOB_STATE,
   DATAFEED_STATE,
