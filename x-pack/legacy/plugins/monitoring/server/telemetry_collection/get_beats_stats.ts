@@ -114,6 +114,10 @@ export interface BeatsBaseStats {
     count: number;
     names: string[];
   };
+  queue: {
+    mem: number;
+    spool: number;
+  };
   architecture: {
     count: number;
     architectures: BeatsArchitecture[];
