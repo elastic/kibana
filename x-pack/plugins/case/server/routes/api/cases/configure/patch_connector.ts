@@ -37,11 +37,20 @@ export function initCaseConfigurePatchActionConnector({ caseService, router }: R
         const { connector_id: connectorId } = request.params;
         const { cases_configuration: casesConfiguration } = query;
 
+        const normalizedMapping = casesConfiguration.mapping.map(m => ({
+          source: m.source,
+          target: m.target,
+          actionType: m.action_type,
+        }));
+
         const action = await client.get<ActionResult>('action', connectorId);
 
         const { config } = action.attributes;
         const res = await client.update('action', connectorId, {
-          config: { ...config, casesConfiguration },
+          config: {
+            ...config,
+            casesConfiguration: { ...casesConfiguration, mapping: normalizedMapping },
+          },
         });
 
         return response.ok({
