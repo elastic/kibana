@@ -12,7 +12,7 @@ import { handleLifecycle, validateLifecycle } from './resolver/lifecycle';
 
 export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const log = endpointAppContext.logFactory.get('resolver');
-  const indexPatternService = endpointAppContext.ingestManager.dataStreamService;
+  const indexPatternService = endpointAppContext.ingestManager.indexPatternService;
 
   router.get(
     {

@@ -46,7 +46,7 @@ import { appContextService, IndexPatternService } from './services';
  * Describes public IngestManager plugin contract returned at the `setup` stage.
  */
 export interface IngestManagerSetupContract {
-  dataStreamService: IndexPatternService;
+  indexPatternService: IndexPatternService;
 }
 
 export interface IngestManagerSetupDeps {
@@ -141,7 +141,7 @@ export class IngestManagerPlugin implements Plugin<IngestManagerSetupContract> {
       });
     }
     return deepFreeze({
-      dataStreamService: new IndexPatternService(),
+      indexPatternService: new IndexPatternService(),
     });
   }
 
