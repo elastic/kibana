@@ -31,3 +31,5 @@ export interface Drilldown<
    */
   execute(config: Config, context: ExecutionContext): void;
 }
+
+export type AnyDrilldown = Drilldown<any, any, any>;

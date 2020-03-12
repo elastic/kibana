@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { DashboardDrilldownActionFactory } from './dashboard_drilldown_action_factory';
+import { i18n } from '@kbn/i18n';
+
+export const txtGoToDashboard = i18n.translate('xpack.dashboard.drilldown.goToDashboard', {
+  defaultMessage: 'Go to Dashboard',
+});

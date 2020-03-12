@@ -6,7 +6,7 @@
 
 import { CoreSetup } from 'src/core/public';
 import { AdvancedUiActionsSetup } from '../../../advanced_ui_actions/public';
-import { Drilldown } from '../types';
+import { AnyDrilldown } from '../types';
 
 // TODO: MOCK DATA
 import {
@@ -23,7 +23,7 @@ export interface DrilldownServiceSetupContract {
   /**
    * Convenience method to register a drilldown.
    */
-  registerDrilldown: (drilldown: Drilldown) => void;
+  registerDrilldown: (drilldown: AnyDrilldown) => void;
 }
 
 export class DrilldownService {
