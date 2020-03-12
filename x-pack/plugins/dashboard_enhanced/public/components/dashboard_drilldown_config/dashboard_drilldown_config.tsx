@@ -14,7 +14,7 @@ export interface DashboardItem {
 }
 
 export interface DashboardDrilldownConfigProps {
-  activeDashboardId: string;
+  activeDashboardId?: string;
   dashboards: DashboardItem[];
   currentFilters?: boolean;
   keepRange?: boolean;

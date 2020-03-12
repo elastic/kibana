@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 import { CollectConfigProps } from './types';
+import { DashboardDrilldownConfig } from '../../../components/dashboard_drilldown_config';
 
 export const dashboards = [
   { id: 'dashboard1', title: 'Dashboard 1' },
@@ -21,46 +21,27 @@ export const CollectConfig: React.FC<CollectConfigProps> = props => {
     useCurrentDashboardFilters: true,
   };
 
-  // TODO: use i18n below.
   return (
-    <>
-      <EuiFormRow label="Choose destination dashboard:">
-        <EuiSelect
-          name="selectDashboard"
-          hasNoInitialSelection={true}
-          options={dashboards.map(({ id, title }) => ({ value: id, text: title }))}
-          value={config.dashboardId}
-          onChange={e => {
-            props.onConfig({ ...config, dashboardId: e.target.value });
-          }}
-        />
-      </EuiFormRow>
-      <EuiFormRow hasChildLabel={false}>
-        <EuiSwitch
-          name="useCurrentFilters"
-          label="Use current dashboard's filters"
-          checked={config.useCurrentDashboardFilters}
-          onChange={() =>
-            props.onConfig({
-              ...config,
-              useCurrentDashboardFilters: !config.useCurrentDashboardFilters,
-            })
-          }
-        />
-      </EuiFormRow>
-      <EuiFormRow hasChildLabel={false}>
-        <EuiSwitch
-          name="useCurrentDateRange"
-          label="Use current dashboard's date range"
-          checked={config.useCurrentDashboardDataRange}
-          onChange={() =>
-            props.onConfig({
-              ...config,
-              useCurrentDashboardDataRange: !config.useCurrentDashboardDataRange,
-            })
-          }
-        />
-      </EuiFormRow>
-    </>
+    <DashboardDrilldownConfig
+      activeDashboardId={config.dashboardId}
+      dashboards={dashboards}
+      currentFilters={config.useCurrentDashboardFilters}
+      keepRange={config.useCurrentDashboardDataRange}
+      onDashboardSelect={dashboardId => {
+        props.onConfig({ ...config, dashboardId });
+      }}
+      onCurrentFiltersToggle={() =>
+        props.onConfig({
+          ...config,
+          useCurrentDashboardFilters: !config.useCurrentDashboardFilters,
+        })
+      }
+      onKeepRangeToggle={() =>
+        props.onConfig({
+          ...config,
+          useCurrentDashboardDataRange: !config.useCurrentDashboardDataRange,
+        })
+      }
+    />
   );
 };
