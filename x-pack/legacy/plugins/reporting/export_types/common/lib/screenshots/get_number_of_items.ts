@@ -11,16 +11,14 @@ import { LevelLogger } from '../../../../server/lib';
 import { ServerFacade } from '../../../../types';
 import { LayoutInstance } from '../../layouts/layout';
 import { CONTEXT_GETNUMBEROFITEMS, CONTEXT_READMETADATA } from './constants';
-import { ApmTransaction } from './types';
 
 export const getNumberOfItems = async (
   server: ServerFacade,
   browser: HeadlessBrowser,
   layout: LayoutInstance,
-  logger: LevelLogger,
-  txn: ApmTransaction | null
+  logger: LevelLogger
 ): Promise<number> => {
-  const apmSpan = txn?.startSpan('get_number_of_items', 'read');
+  const apmSpan = apm.startSpan('get_number_of_items', 'read');
   const config = server.config();
   const { renderComplete: renderCompleteSelector, itemsCountAttribute } = layout.selectors;
   let itemsCount: number;

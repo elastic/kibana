@@ -4,20 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import apm from 'elastic-apm-node';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
 import { CONTEXT_GETTIMERANGE } from './constants';
 import { TimeRange } from './types';
-import { ApmTransaction } from './types';
 
 export const getTimeRange = async (
   browser: HeadlessBrowser,
   layout: LayoutInstance,
-  logger: LevelLogger,
-  txn: ApmTransaction
+  logger: LevelLogger
 ): Promise<TimeRange | null> => {
-  const apmSpan = txn?.startSpan('get_time_range', 'read');
+  const apmSpan = apm.startSpan('get_time_range', 'read');
   logger.debug('getting timeRange');
 
   const timeRange: TimeRange | null = await browser.evaluate(

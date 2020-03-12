@@ -4,19 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import apm from 'elastic-apm-node';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
 import { LevelLogger } from '../../../../server/lib';
 import { CONTEXT_SKIPTELEMETRY } from './constants';
-import { ApmTransaction } from './types';
 
 const LAST_REPORT_STORAGE_KEY = 'xpack.data';
 
-export async function skipTelemetry(
-  browser: HeadlessBrowser,
-  logger: LevelLogger,
-  txn: ApmTransaction
-) {
-  const apmSpan = txn?.startSpan('skip_telemetry', 'correction');
+export async function skipTelemetry(browser: HeadlessBrowser, logger: LevelLogger) {
+  const apmSpan = apm.startSpan('skip_telemetry', 'correction');
   const storageData = await browser.evaluate(
     {
       fn: storageKey => {

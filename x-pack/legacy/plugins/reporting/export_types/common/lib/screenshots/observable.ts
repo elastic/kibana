@@ -42,9 +42,9 @@ export function screenshotsObservableFactory(
     layout,
     browserTimezone,
   }: ScreenshotObservableOpts): Rx.Observable<ScreenshotResults[]> {
-    const txn = apm.startTransaction(`reporting screenshot pipeline`, 'reporting');
+    const apmTrans = apm.startTransaction(`reporting screenshot pipeline`, 'reporting');
 
-    const apmCreatePage = txn?.startSpan('create_page', 'wait');
+    const apmCreatePage = apmTrans?.startSpan('create_page', 'wait');
     const create$ = browserDriverFactory.createPage(
       { viewport: layout.getBrowserViewport(), browserTimezone },
       logger
@@ -58,34 +58,34 @@ export function screenshotsObservableFactory(
 
             const setup$: Rx.Observable<ScreenSetupData> = Rx.of(1).pipe(
               takeUntil(exit$),
-              mergeMap(() => openUrl(server, driver, url, conditionalHeaders, logger, txn)),
-              mergeMap(() => skipTelemetry(driver, logger, txn)),
-              mergeMap(() => getNumberOfItems(server, driver, layout, logger, txn)),
+              mergeMap(() => openUrl(server, driver, url, conditionalHeaders, logger)),
+              mergeMap(() => skipTelemetry(driver, logger)),
+              mergeMap(() => getNumberOfItems(server, driver, layout, logger)),
               mergeMap(async itemsCount => {
                 const viewport = layout.getViewport(itemsCount);
                 await Promise.all([
                   driver.setViewport(viewport, logger),
-                  waitForVisualizations(server, driver, itemsCount, layout, logger, txn),
+                  waitForVisualizations(server, driver, itemsCount, layout, logger),
                 ]);
               }),
               mergeMap(async () => {
                 // Waiting till _after_ elements have rendered before injecting our CSS
                 // allows for them to be displayed properly in many cases
-                await injectCustomCss(driver, layout, logger, txn);
+                await injectCustomCss(driver, layout, logger);
 
-                const apmPositionElements = txn?.startSpan('position_elements', 'correction');
+                const apmPositionElements = apmTrans?.startSpan('position_elements', 'correction');
                 if (layout.positionElements) {
                   // position panel elements for print layout
                   await layout.positionElements(driver, logger);
                 }
                 if (apmPositionElements) apmPositionElements.end();
 
-                await waitForRenderComplete(driver, layout, captureConfig, logger, txn);
+                await waitForRenderComplete(driver, layout, captureConfig, logger);
               }),
               mergeMap(async () => {
                 return await Promise.all([
-                  getTimeRange(driver, layout, logger, txn),
-                  getElementPositionAndAttributes(driver, layout, logger, txn),
+                  getTimeRange(driver, layout, logger),
+                  getElementPositionAndAttributes(driver, layout, logger),
                 ]).then(([timeRange, elementsPositionAndAttributes]) => ({
                   elementsPositionAndAttributes,
                   timeRange,
@@ -104,7 +104,7 @@ export function screenshotsObservableFactory(
                   const elements = data.elementsPositionAndAttributes
                     ? data.elementsPositionAndAttributes
                     : getDefaultElementPosition(layout.getViewport(1));
-                  const screenshots = await getScreenshots(driver, elements, logger, txn);
+                  const screenshots = await getScreenshots(driver, elements, logger);
                   const { timeRange, error: setupError } = data;
                   return { timeRange, screenshots, error: setupError };
                 }
@@ -117,7 +117,7 @@ export function screenshotsObservableFactory(
       take(urls.length),
       toArray(),
       tap(() => {
-        if (txn) txn.end();
+        if (apmTrans) apmTrans.end();
       })
     );
   };

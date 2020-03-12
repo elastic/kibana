@@ -46,12 +46,3 @@ export interface ScreenshotResults {
   screenshots: Screenshot[];
   error?: Error;
 }
-
-export interface ApmSpan {
-  end: () => void;
-}
-interface ApmTransactionInitialized {
-  startSpan: (name: string, type: string) => ApmSpan | null;
-  end: () => void;
-}
-export type ApmTransaction = ApmTransactionInitialized | null;

@@ -10,17 +10,15 @@ import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/br
 import { LevelLogger } from '../../../../server/lib';
 import { ConditionalHeaders, ServerFacade } from '../../../../types';
 import { PAGELOAD_SELECTOR } from '../../constants';
-import { ApmTransaction } from './types';
 
 export const openUrl = async (
   server: ServerFacade,
   browser: HeadlessBrowser,
   url: string,
   conditionalHeaders: ConditionalHeaders,
-  logger: LevelLogger,
-  txn: ApmTransaction
+  logger: LevelLogger
 ): Promise<void> => {
-  const apmSpan = txn?.startSpan('open_url', 'wait');
+  const apmSpan = apm.startSpan('open_url', 'wait');
   const config = server.config();
   try {
     await browser.open(

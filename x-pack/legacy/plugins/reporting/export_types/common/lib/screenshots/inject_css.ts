@@ -12,17 +12,15 @@ import { LevelLogger } from '../../../../server/lib';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
 import { Layout } from '../../layouts/layout';
 import { CONTEXT_INJECTCSS } from './constants';
-import { ApmTransaction } from './types';
 
 const fsp = { readFile: promisify(fs.readFile) };
 
 export const injectCustomCss = async (
   browser: HeadlessBrowser,
   layout: Layout,
-  logger: LevelLogger,
-  txn: ApmTransaction
+  logger: LevelLogger
 ): Promise<void> => {
-  const apmSpan = txn?.startSpan('inject_css', 'correction');
+  const apmSpan = apm.startSpan('inject_css', 'correction');
   logger.debug(
     i18n.translate('xpack.reporting.screencapture.injectingCss', {
       defaultMessage: 'injecting custom css',

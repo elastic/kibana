@@ -11,7 +11,6 @@ import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/br
 import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
 import { CONTEXT_WAITFORELEMENTSTOBEINDOM } from './constants';
-import { ApmTransaction } from './types';
 
 type SelectorArgs = Record<string, string>;
 
@@ -29,10 +28,9 @@ export const waitForVisualizations = async (
   browser: HeadlessBrowser,
   itemsCount: number,
   layout: LayoutInstance,
-  logger: LevelLogger,
-  txn: ApmTransaction
+  logger: LevelLogger
 ): Promise<void> => {
-  const apmSpan = txn?.startSpan('wait_for_visualizations', 'wait');
+  const apmSpan = apm.startSpan('wait_for_visualizations', 'wait');
   const config = server.config();
   const { renderComplete: renderCompleteSelector } = layout.selectors;
 
