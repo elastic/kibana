@@ -4,22 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { CollectConfigProps } from './types';
 import { DashboardDrilldownConfig } from '../../../components/dashboard_drilldown_config';
+import { Params } from './drilldown';
 
-export const dashboards = [
-  { id: 'dashboard1', title: 'Dashboard 1' },
-  { id: 'dashboard2', title: 'Dashboard 2' },
-  { id: 'dashboard3', title: 'Dashboard 3' },
-];
+export interface CollectConfigContainerProps extends CollectConfigProps {
+  params: Params;
+}
 
-export const CollectConfig: React.FC<CollectConfigProps> = props => {
-  const config = props.config ?? {
-    dashboardId: undefined,
-    useCurrentDashboardDataRange: true,
-    useCurrentDashboardFilters: true,
-  };
+export const CollectConfigContainer: React.FC<CollectConfigContainerProps> = ({
+  config,
+  onConfig,
+  params: { savedObjects },
+}) => {
+  const [dashboards] = useState([
+    { id: 'dashboard1', title: 'Dashboard 1' },
+    { id: 'dashboard2', title: 'Dashboard 2' },
+    { id: 'dashboard3', title: 'Dashboard 3' },
+    { id: 'dashboard4', title: 'Dashboard 4' },
+  ]);
+
+  useEffect(() => {
+    // TODO: Load dashboards...
+  }, [savedObjects]);
 
   return (
     <DashboardDrilldownConfig
@@ -28,16 +36,16 @@ export const CollectConfig: React.FC<CollectConfigProps> = props => {
       currentFilters={config.useCurrentDashboardFilters}
       keepRange={config.useCurrentDashboardDataRange}
       onDashboardSelect={dashboardId => {
-        props.onConfig({ ...config, dashboardId });
+        onConfig({ ...config, dashboardId });
       }}
       onCurrentFiltersToggle={() =>
-        props.onConfig({
+        onConfig({
           ...config,
           useCurrentDashboardFilters: !config.useCurrentDashboardFilters,
         })
       }
       onKeepRangeToggle={() =>
-        props.onConfig({
+        onConfig({
           ...config,
           useCurrentDashboardDataRange: !config.useCurrentDashboardDataRange,
         })

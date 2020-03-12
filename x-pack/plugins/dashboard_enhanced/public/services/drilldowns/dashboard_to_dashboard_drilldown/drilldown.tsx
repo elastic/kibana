@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { CoreStart } from 'src/core/public';
 import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_react/public';
-import { FactoryContext, ActionContext, Config } from './types';
-import { CollectConfig } from './collect_config';
+import { FactoryContext, ActionContext, Config, CollectConfigProps } from './types';
+import { CollectConfigContainer } from './collect_config';
 import { DASHBOARD_TO_DASHBOARD_DRILLDOWN } from './constants';
 import { DrilldownsDrilldown as Drilldown } from '../../../../../drilldowns/public';
 import { txtGoToDashboard } from './i18n';
@@ -33,7 +34,11 @@ export class DashboardToDashboardDrilldown
 
   public readonly getIconType = () => 'dashboardApp';
 
-  public readonly CollectConfig = reactToUiComponent(CollectConfig);
+  private readonly ReactCollectConfig: React.FC<CollectConfigProps> = props => (
+    <CollectConfigContainer {...props} params={this.params} />
+  );
+
+  public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
 
   public readonly createConfig = () => ({
     dashboardId: '123',
