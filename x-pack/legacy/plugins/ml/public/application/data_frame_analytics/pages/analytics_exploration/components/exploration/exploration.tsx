@@ -13,10 +13,9 @@ import {
   EuiDataGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiPanel,
-  EuiProgress,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -42,7 +41,6 @@ import {
   DataFrameAnalyticsConfig,
   EsFieldName,
   INDEX_STATUS,
-  SEARCH_SIZE,
   defaultSearchQuery,
 } from '../../../../common';
 import { isKeywordAndTextType } from '../../../../common/fields';
@@ -369,28 +367,35 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {status === INDEX_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
-      {status !== INDEX_STATUS.LOADING && (
-        <EuiProgress size="xs" color="accent" max={1} value={0} />
-      )}
+      <EuiHorizontalRule margin="xs" />
       {(columns.length > 0 || searchQuery !== defaultSearchQuery) && sortField !== '' && (
         <>
-          <EuiSpacer size="s" />
           <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              {tableItems.length === SEARCH_SIZE && (
-                <EuiText size="xs" color="subdued">
-                  {i18n.translate(
-                    'xpack.ml.dataframe.analytics.exploration.documentsShownHelpText',
-                    {
-                      defaultMessage: 'Showing first {searchSize} documents',
-                      values: { searchSize: SEARCH_SIZE },
-                    }
-                  )}
-                </EuiText>
-              )}
+            <EuiFlexItem>
+              <QueryStringInput
+                bubbleSubmitEvent={true}
+                query={searchInput}
+                indexPatterns={[indexPattern]}
+                onChange={searchChangeHandler}
+                onSubmit={searchSubmitHandler}
+                placeholder={
+                  searchInput.language === QUERY_LANGUAGE_KUERY
+                    ? i18n.translate('xpack.transform.stepDefineForm.queryPlaceholderKql', {
+                        defaultMessage: 'e.g. {example}',
+                        values: { example: 'method : "GET" or status : "404"' },
+                      })
+                    : i18n.translate('xpack.transform.stepDefineForm.queryPlaceholderLucene', {
+                        defaultMessage: 'e.g. {example}',
+                        values: { example: 'method:GET OR status:404' },
+                      })
+                }
+                disableAutoFocus={true}
+                dataTestSubj="transformQueryInput"
+                languageSwitcherPopoverAnchorPosition="rightDown"
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
+              <EuiSpacer size="s" />
               <ColorRangeLegend
                 colorRange={cellBgColor}
                 title={i18n.translate(
@@ -402,28 +407,6 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <QueryStringInput
-            bubbleSubmitEvent={true}
-            query={searchInput}
-            indexPatterns={[indexPattern]}
-            onChange={searchChangeHandler}
-            onSubmit={searchSubmitHandler}
-            placeholder={
-              searchInput.language === QUERY_LANGUAGE_KUERY
-                ? i18n.translate('xpack.transform.stepDefineForm.queryPlaceholderKql', {
-                    defaultMessage: 'e.g. {example}',
-                    values: { example: 'method : "GET" or status : "404"' },
-                  })
-                : i18n.translate('xpack.transform.stepDefineForm.queryPlaceholderLucene', {
-                    defaultMessage: 'e.g. {example}',
-                    values: { example: 'method:GET OR status:404' },
-                  })
-            }
-            disableAutoFocus={true}
-            dataTestSubj="transformQueryInput"
-            languageSwitcherPopoverAnchorPosition="rightDown"
-          />
           <EuiSpacer size="s" />
           {columns.length > 0 && tableItems.length > 0 && (
             <EuiDataGrid
