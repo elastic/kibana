@@ -152,7 +152,7 @@ export class InfraLogEntriesDomain {
               return {
                 columnId: column.fieldColumn.id,
                 field: column.fieldColumn.field,
-                value: stringify(doc.fields[column.fieldColumn.field]),
+                value: doc.fields[column.fieldColumn.field],
                 highlights: doc.highlights[column.fieldColumn.field] || [],
               };
             }
