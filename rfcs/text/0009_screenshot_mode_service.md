@@ -47,7 +47,7 @@ When Kibana loads initially, there is a Newsfeed component in the UI that
 checks internally cached records to see if it must fetch the Elastic News
 Service for newer items. When the Screenshot Mode Service is implemented, the
 Newsfeed component has a source of information to check on whether or not it
-should load in the Kibana UI. If it can avoid loading, it avoids an unecessary
+should load in the Kibana UI. If it can avoid loading, it avoids an unnecessary
 HTTP round trip, which weigh heavily on performance.
 
 # Motivation
