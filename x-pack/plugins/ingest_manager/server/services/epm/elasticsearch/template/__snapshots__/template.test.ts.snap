@@ -44,27 +44,43 @@ exports[`tests loading base.yml: base.yml 1`] = `
     ],
     "date_detection": false,
     "properties": {
-      "user.auid": {
-        "type": "keyword",
-        "ignore_above": 1024
+      "user": {
+        "properties": {
+          "auid": {
+            "type": "keyword",
+            "ignore_above": 1024
+          },
+          "euid": {
+            "type": "keyword",
+            "ignore_above": 1024
+          }
+        }
       },
-      "user.euid": {
-        "type": "keyword",
-        "ignore_above": 1024
+      "long": {
+        "properties": {
+          "nested": {
+            "properties": {
+              "foo": {
+                "type": "text"
+              },
+              "bar": {
+                "type": "long"
+              }
+            }
+          }
+        }
       },
-      "long.nested.foo": {
-        "type": "text"
-      },
-      "long.nested.bar": {
-        "type": "long"
-      },
-      "nested.bar": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "nested.baz": {
-        "type": "keyword",
-        "ignore_above": 1024
+      "nested": {
+        "properties": {
+          "bar": {
+            "type": "keyword",
+            "ignore_above": 1024
+          },
+          "baz": {
+            "type": "keyword",
+            "ignore_above": 1024
+          }
+        }
       },
       "myalias": {
         "type": "alias",
@@ -120,38 +136,50 @@ exports[`tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
     ],
     "date_detection": false,
     "properties": {
-      "coredns.id": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "coredns.query.size": {
-        "type": "long"
-      },
-      "coredns.query.class": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "coredns.query.name": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "coredns.query.type": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "coredns.response.code": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "coredns.response.flags": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "coredns.response.size": {
-        "type": "long"
-      },
-      "coredns.dnssec_ok": {
-        "type": "boolean"
+      "coredns": {
+        "properties": {
+          "id": {
+            "type": "keyword",
+            "ignore_above": 1024
+          },
+          "query": {
+            "properties": {
+              "size": {
+                "type": "long"
+              },
+              "class": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "name": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "type": {
+                "type": "keyword",
+                "ignore_above": 1024
+              }
+            }
+          },
+          "response": {
+            "properties": {
+              "code": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "flags": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "size": {
+                "type": "long"
+              }
+            }
+          },
+          "dnssec_ok": {
+            "type": "boolean"
+          }
+        }
       }
     }
   },
@@ -203,847 +231,1487 @@ exports[`tests loading system.yml: system.yml 1`] = `
     ],
     "date_detection": false,
     "properties": {
-      "system.core.id": {
-        "type": "long"
-      },
-      "system.core.user.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.core.user.ticks": {
-        "type": "long"
-      },
-      "system.core.system.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.core.system.ticks": {
-        "type": "long"
-      },
-      "system.core.nice.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.core.nice.ticks": {
-        "type": "long"
-      },
-      "system.core.idle.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.core.idle.ticks": {
-        "type": "long"
-      },
-      "system.core.iowait.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.core.iowait.ticks": {
-        "type": "long"
-      },
-      "system.core.irq.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.core.irq.ticks": {
-        "type": "long"
-      },
-      "system.core.softirq.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.core.softirq.ticks": {
-        "type": "long"
-      },
-      "system.core.steal.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.core.steal.ticks": {
-        "type": "long"
-      },
-      "system.cpu.cores": {
-        "type": "long"
-      },
-      "system.cpu.user.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.cpu.system.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.cpu.nice.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.cpu.idle.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.cpu.iowait.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.cpu.irq.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.cpu.softirq.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.cpu.steal.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.cpu.total.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.cpu.user.norm.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.cpu.system.norm.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.cpu.nice.norm.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.cpu.idle.norm.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.cpu.iowait.norm.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.cpu.irq.norm.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.cpu.softirq.norm.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.cpu.steal.norm.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.cpu.total.norm.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.cpu.user.ticks": {
-        "type": "long"
-      },
-      "system.cpu.system.ticks": {
-        "type": "long"
-      },
-      "system.cpu.nice.ticks": {
-        "type": "long"
-      },
-      "system.cpu.idle.ticks": {
-        "type": "long"
-      },
-      "system.cpu.iowait.ticks": {
-        "type": "long"
-      },
-      "system.cpu.irq.ticks": {
-        "type": "long"
-      },
-      "system.cpu.softirq.ticks": {
-        "type": "long"
-      },
-      "system.cpu.steal.ticks": {
-        "type": "long"
-      },
-      "system.diskio.name": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.diskio.serial_number": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.diskio.read.count": {
-        "type": "long"
-      },
-      "system.diskio.write.count": {
-        "type": "long"
-      },
-      "system.diskio.read.bytes": {
-        "type": "long"
-      },
-      "system.diskio.write.bytes": {
-        "type": "long"
-      },
-      "system.diskio.read.time": {
-        "type": "long"
-      },
-      "system.diskio.write.time": {
-        "type": "long"
-      },
-      "system.diskio.io.time": {
-        "type": "long"
-      },
-      "system.diskio.iostat.read.request.merges_per_sec": {
-        "type": "float"
-      },
-      "system.diskio.iostat.write.request.merges_per_sec": {
-        "type": "float"
-      },
-      "system.diskio.iostat.read.request.per_sec": {
-        "type": "float"
-      },
-      "system.diskio.iostat.write.request.per_sec": {
-        "type": "float"
-      },
-      "system.diskio.iostat.read.per_sec.bytes": {
-        "type": "float"
-      },
-      "system.diskio.iostat.read.await": {
-        "type": "float"
-      },
-      "system.diskio.iostat.write.per_sec.bytes": {
-        "type": "float"
-      },
-      "system.diskio.iostat.write.await": {
-        "type": "float"
-      },
-      "system.diskio.iostat.request.avg_size": {
-        "type": "float"
-      },
-      "system.diskio.iostat.queue.avg_size": {
-        "type": "float"
-      },
-      "system.diskio.iostat.await": {
-        "type": "float"
-      },
-      "system.diskio.iostat.service_time": {
-        "type": "float"
-      },
-      "system.diskio.iostat.busy": {
-        "type": "float"
-      },
-      "system.entropy.available_bits": {
-        "type": "long"
-      },
-      "system.entropy.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.filesystem.available": {
-        "type": "long"
-      },
-      "system.filesystem.device_name": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.filesystem.type": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.filesystem.mount_point": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.filesystem.files": {
-        "type": "long"
-      },
-      "system.filesystem.free": {
-        "type": "long"
-      },
-      "system.filesystem.free_files": {
-        "type": "long"
-      },
-      "system.filesystem.total": {
-        "type": "long"
-      },
-      "system.filesystem.used.bytes": {
-        "type": "long"
-      },
-      "system.filesystem.used.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.fsstat.count": {
-        "type": "long"
-      },
-      "system.fsstat.total_files": {
-        "type": "long"
-      },
-      "system.fsstat.total_size.free": {
-        "type": "long"
-      },
-      "system.fsstat.total_size.used": {
-        "type": "long"
-      },
-      "system.fsstat.total_size.total": {
-        "type": "long"
-      },
-      "system.load.1": {
-        "type": "scaled_float",
-        "scaling_factor": 100
-      },
-      "system.load.5": {
-        "type": "scaled_float",
-        "scaling_factor": 100
-      },
-      "system.load.15": {
-        "type": "scaled_float",
-        "scaling_factor": 100
-      },
-      "system.load.norm.1": {
-        "type": "scaled_float",
-        "scaling_factor": 100
-      },
-      "system.load.norm.5": {
-        "type": "scaled_float",
-        "scaling_factor": 100
-      },
-      "system.load.norm.15": {
-        "type": "scaled_float",
-        "scaling_factor": 100
-      },
-      "system.load.cores": {
-        "type": "long"
-      },
-      "system.memory.total": {
-        "type": "long"
-      },
-      "system.memory.used.bytes": {
-        "type": "long"
-      },
-      "system.memory.free": {
-        "type": "long"
-      },
-      "system.memory.used.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.memory.actual.used.bytes": {
-        "type": "long"
-      },
-      "system.memory.actual.free": {
-        "type": "long"
-      },
-      "system.memory.actual.used.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.memory.swap.total": {
-        "type": "long"
-      },
-      "system.memory.swap.used.bytes": {
-        "type": "long"
-      },
-      "system.memory.swap.free": {
-        "type": "long"
-      },
-      "system.memory.swap.out.pages": {
-        "type": "long"
-      },
-      "system.memory.swap.in.pages": {
-        "type": "long"
-      },
-      "system.memory.swap.readahead.pages": {
-        "type": "long"
-      },
-      "system.memory.swap.readahead.cached": {
-        "type": "long"
-      },
-      "system.memory.swap.used.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.memory.hugepages.total": {
-        "type": "long"
-      },
-      "system.memory.hugepages.used.bytes": {
-        "type": "long"
-      },
-      "system.memory.hugepages.used.pct": {
-        "type": "long"
-      },
-      "system.memory.hugepages.free": {
-        "type": "long"
-      },
-      "system.memory.hugepages.reserved": {
-        "type": "long"
-      },
-      "system.memory.hugepages.surplus": {
-        "type": "long"
-      },
-      "system.memory.hugepages.default_size": {
-        "type": "long"
-      },
-      "system.memory.hugepages.swap.out.pages": {
-        "type": "long"
-      },
-      "system.memory.hugepages.swap.out.fallback": {
-        "type": "long"
-      },
-      "system.network.name": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.network.out.bytes": {
-        "type": "long"
-      },
-      "system.network.in.bytes": {
-        "type": "long"
-      },
-      "system.network.out.packets": {
-        "type": "long"
-      },
-      "system.network.in.packets": {
-        "type": "long"
-      },
-      "system.network.in.errors": {
-        "type": "long"
-      },
-      "system.network.out.errors": {
-        "type": "long"
-      },
-      "system.network.in.dropped": {
-        "type": "long"
-      },
-      "system.network.out.dropped": {
-        "type": "long"
-      },
-      "system.network_summary.ip.*": {
-        "type": "object"
-      },
-      "system.network_summary.tcp.*": {
-        "type": "object"
-      },
-      "system.network_summary.udp.*": {
-        "type": "object"
-      },
-      "system.network_summary.udp_lite.*": {
-        "type": "object"
-      },
-      "system.network_summary.icmp.*": {
-        "type": "object"
-      },
-      "system.process.state": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.process.cmdline": {
-        "type": "keyword",
-        "ignore_above": 2048
-      },
-      "system.process.env": {
-        "type": "object"
-      },
-      "system.process.cpu.user.ticks": {
-        "type": "long"
-      },
-      "system.process.cpu.total.value": {
-        "type": "long"
-      },
-      "system.process.cpu.total.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.process.cpu.total.norm.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.process.cpu.system.ticks": {
-        "type": "long"
-      },
-      "system.process.cpu.total.ticks": {
-        "type": "long"
-      },
-      "system.process.cpu.start_time": {
-        "type": "date"
-      },
-      "system.process.memory.size": {
-        "type": "long"
-      },
-      "system.process.memory.rss.bytes": {
-        "type": "long"
-      },
-      "system.process.memory.rss.pct": {
-        "type": "scaled_float",
-        "scaling_factor": 1000
-      },
-      "system.process.memory.share": {
-        "type": "long"
-      },
-      "system.process.fd.open": {
-        "type": "long"
-      },
-      "system.process.fd.limit.soft": {
-        "type": "long"
-      },
-      "system.process.fd.limit.hard": {
-        "type": "long"
-      },
-      "system.process.cgroup.id": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.process.cgroup.path": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.process.cgroup.cpu.id": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.process.cgroup.cpu.path": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.process.cgroup.cpu.cfs.period.us": {
-        "type": "long"
-      },
-      "system.process.cgroup.cpu.cfs.quota.us": {
-        "type": "long"
-      },
-      "system.process.cgroup.cpu.cfs.shares": {
-        "type": "long"
-      },
-      "system.process.cgroup.cpu.rt.period.us": {
-        "type": "long"
-      },
-      "system.process.cgroup.cpu.rt.runtime.us": {
-        "type": "long"
-      },
-      "system.process.cgroup.cpu.stats.periods": {
-        "type": "long"
-      },
-      "system.process.cgroup.cpu.stats.throttled.periods": {
-        "type": "long"
-      },
-      "system.process.cgroup.cpu.stats.throttled.ns": {
-        "type": "long"
-      },
-      "system.process.cgroup.cpuacct.id": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.process.cgroup.cpuacct.path": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.process.cgroup.cpuacct.total.ns": {
-        "type": "long"
-      },
-      "system.process.cgroup.cpuacct.stats.user.ns": {
-        "type": "long"
-      },
-      "system.process.cgroup.cpuacct.stats.system.ns": {
-        "type": "long"
-      },
-      "system.process.cgroup.cpuacct.percpu": {
-        "type": "object"
-      },
-      "system.process.cgroup.memory.id": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.process.cgroup.memory.path": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.process.cgroup.memory.mem.usage.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.mem.usage.max.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.mem.limit.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.mem.failures": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.memsw.usage.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.memsw.usage.max.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.memsw.limit.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.memsw.failures": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.kmem.usage.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.kmem.usage.max.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.kmem.limit.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.kmem.failures": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.kmem_tcp.usage.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.kmem_tcp.usage.max.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.kmem_tcp.limit.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.kmem_tcp.failures": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.stats.active_anon.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.stats.active_file.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.stats.cache.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.stats.hierarchical_memory_limit.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.stats.hierarchical_memsw_limit.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.stats.inactive_anon.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.stats.inactive_file.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.stats.mapped_file.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.stats.page_faults": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.stats.major_page_faults": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.stats.pages_in": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.stats.pages_out": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.stats.rss.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.stats.rss_huge.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.stats.swap.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.memory.stats.unevictable.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.blkio.id": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.process.cgroup.blkio.path": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.process.cgroup.blkio.total.bytes": {
-        "type": "long"
-      },
-      "system.process.cgroup.blkio.total.ios": {
-        "type": "long"
-      },
-      "system.process.summary.total": {
-        "type": "long"
-      },
-      "system.process.summary.running": {
-        "type": "long"
-      },
-      "system.process.summary.idle": {
-        "type": "long"
-      },
-      "system.process.summary.sleeping": {
-        "type": "long"
-      },
-      "system.process.summary.stopped": {
-        "type": "long"
-      },
-      "system.process.summary.zombie": {
-        "type": "long"
-      },
-      "system.process.summary.dead": {
-        "type": "long"
-      },
-      "system.process.summary.unknown": {
-        "type": "long"
-      },
-      "system.raid.name": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.raid.status": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.raid.level": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.raid.sync_action": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.raid.disks.active": {
-        "type": "long"
-      },
-      "system.raid.disks.total": {
-        "type": "long"
-      },
-      "system.raid.disks.spare": {
-        "type": "long"
-      },
-      "system.raid.disks.failed": {
-        "type": "long"
-      },
-      "system.raid.disks.states.*": {
-        "type": "object"
-      },
-      "system.raid.blocks.total": {
-        "type": "long"
-      },
-      "system.raid.blocks.synced": {
-        "type": "long"
-      },
-      "system.socket.local.ip": {
-        "type": "ip"
-      },
-      "system.socket.local.port": {
-        "type": "long"
-      },
-      "system.socket.remote.ip": {
-        "type": "ip"
-      },
-      "system.socket.remote.port": {
-        "type": "long"
-      },
-      "system.socket.remote.host": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.socket.remote.etld_plus_one": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.socket.remote.host_error": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.socket.process.cmdline": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.socket.summary.all.count": {
-        "type": "long"
-      },
-      "system.socket.summary.all.listening": {
-        "type": "long"
-      },
-      "system.socket.summary.tcp.memory": {
-        "type": "long"
-      },
-      "system.socket.summary.tcp.all.orphan": {
-        "type": "long"
-      },
-      "system.socket.summary.tcp.all.count": {
-        "type": "long"
-      },
-      "system.socket.summary.tcp.all.listening": {
-        "type": "long"
-      },
-      "system.socket.summary.tcp.all.established": {
-        "type": "long"
-      },
-      "system.socket.summary.tcp.all.close_wait": {
-        "type": "long"
-      },
-      "system.socket.summary.tcp.all.time_wait": {
-        "type": "long"
-      },
-      "system.socket.summary.tcp.all.syn_sent": {
-        "type": "long"
-      },
-      "system.socket.summary.tcp.all.syn_recv": {
-        "type": "long"
-      },
-      "system.socket.summary.tcp.all.fin_wait1": {
-        "type": "long"
-      },
-      "system.socket.summary.tcp.all.fin_wait2": {
-        "type": "long"
-      },
-      "system.socket.summary.tcp.all.last_ack": {
-        "type": "long"
-      },
-      "system.socket.summary.tcp.all.closing": {
-        "type": "long"
-      },
-      "system.socket.summary.udp.memory": {
-        "type": "long"
-      },
-      "system.socket.summary.udp.all.count": {
-        "type": "long"
-      },
-      "system.uptime.duration.ms": {
-        "type": "long"
-      },
-      "system.users.id": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.users.seat": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.users.path": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.users.type": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.users.service": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.users.remote": {
-        "type": "boolean"
-      },
-      "system.users.state": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.users.scope": {
-        "type": "keyword",
-        "ignore_above": 1024
-      },
-      "system.users.leader": {
-        "type": "long"
-      },
-      "system.users.remote_host": {
-        "type": "keyword",
-        "ignore_above": 1024
+      "system": {
+        "properties": {
+          "core": {
+            "properties": {
+              "id": {
+                "type": "long"
+              },
+              "user": {
+                "properties": {
+                  "pct": {
+                    "type": "scaled_float",
+                    "scaling_factor": 1000
+                  },
+                  "ticks": {
+                    "type": "long"
+                  }
+                }
+              },
+              "system": {
+                "properties": {
+                  "pct": {
+                    "type": "scaled_float",
+                    "scaling_factor": 1000
+                  },
+                  "ticks": {
+                    "type": "long"
+                  }
+                }
+              },
+              "nice": {
+                "properties": {
+                  "pct": {
+                    "type": "scaled_float",
+                    "scaling_factor": 1000
+                  },
+                  "ticks": {
+                    "type": "long"
+                  }
+                }
+              },
+              "idle": {
+                "properties": {
+                  "pct": {
+                    "type": "scaled_float",
+                    "scaling_factor": 1000
+                  },
+                  "ticks": {
+                    "type": "long"
+                  }
+                }
+              },
+              "iowait": {
+                "properties": {
+                  "pct": {
+                    "type": "scaled_float",
+                    "scaling_factor": 1000
+                  },
+                  "ticks": {
+                    "type": "long"
+                  }
+                }
+              },
+              "irq": {
+                "properties": {
+                  "pct": {
+                    "type": "scaled_float",
+                    "scaling_factor": 1000
+                  },
+                  "ticks": {
+                    "type": "long"
+                  }
+                }
+              },
+              "softirq": {
+                "properties": {
+                  "pct": {
+                    "type": "scaled_float",
+                    "scaling_factor": 1000
+                  },
+                  "ticks": {
+                    "type": "long"
+                  }
+                }
+              },
+              "steal": {
+                "properties": {
+                  "pct": {
+                    "type": "scaled_float",
+                    "scaling_factor": 1000
+                  },
+                  "ticks": {
+                    "type": "long"
+                  }
+                }
+              }
+            }
+          },
+          "cpu": {
+            "properties": {
+              "cores": {
+                "type": "long"
+              },
+              "user": {
+                "properties": {
+                  "pct": {
+                    "type": "scaled_float",
+                    "scaling_factor": 1000
+                  },
+                  "norm": {
+                    "properties": {
+                      "pct": {
+                        "type": "scaled_float",
+                        "scaling_factor": 1000
+                      }
+                    }
+                  },
+                  "ticks": {
+                    "type": "long"
+                  }
+                }
+              },
+              "system": {
+                "properties": {
+                  "pct": {
+                    "type": "scaled_float",
+                    "scaling_factor": 1000
+                  },
+                  "norm": {
+                    "properties": {
+                      "pct": {
+                        "type": "scaled_float",
+                        "scaling_factor": 1000
+                      }
+                    }
+                  },
+                  "ticks": {
+                    "type": "long"
+                  }
+                }
+              },
+              "nice": {
+                "properties": {
+                  "pct": {
+                    "type": "scaled_float",
+                    "scaling_factor": 1000
+                  },
+                  "norm": {
+                    "properties": {
+                      "pct": {
+                        "type": "scaled_float",
+                        "scaling_factor": 1000
+                      }
+                    }
+                  },
+                  "ticks": {
+                    "type": "long"
+                  }
+                }
+              },
+              "idle": {
+                "properties": {
+                  "pct": {
+                    "type": "scaled_float",
+                    "scaling_factor": 1000
+                  },
+                  "norm": {
+                    "properties": {
+                      "pct": {
+                        "type": "scaled_float",
+                        "scaling_factor": 1000
+                      }
+                    }
+                  },
+                  "ticks": {
+                    "type": "long"
+                  }
+                }
+              },
+              "iowait": {
+                "properties": {
+                  "pct": {
+                    "type": "scaled_float",
+                    "scaling_factor": 1000
+                  },
+                  "norm": {
+                    "properties": {
+                      "pct": {
+                        "type": "scaled_float",
+                        "scaling_factor": 1000
+                      }
+                    }
+                  },
+                  "ticks": {
+                    "type": "long"
+                  }
+                }
+              },
+              "irq": {
+                "properties": {
+                  "pct": {
+                    "type": "scaled_float",
+                    "scaling_factor": 1000
+                  },
+                  "norm": {
+                    "properties": {
+                      "pct": {
+                        "type": "scaled_float",
+                        "scaling_factor": 1000
+                      }
+                    }
+                  },
+                  "ticks": {
+                    "type": "long"
+                  }
+                }
+              },
+              "softirq": {
+                "properties": {
+                  "pct": {
+                    "type": "scaled_float",
+                    "scaling_factor": 1000
+                  },
+                  "norm": {
+                    "properties": {
+                      "pct": {
+                        "type": "scaled_float",
+                        "scaling_factor": 1000
+                      }
+                    }
+                  },
+                  "ticks": {
+                    "type": "long"
+                  }
+                }
+              },
+              "steal": {
+                "properties": {
+                  "pct": {
+                    "type": "scaled_float",
+                    "scaling_factor": 1000
+                  },
+                  "norm": {
+                    "properties": {
+                      "pct": {
+                        "type": "scaled_float",
+                        "scaling_factor": 1000
+                      }
+                    }
+                  },
+                  "ticks": {
+                    "type": "long"
+                  }
+                }
+              },
+              "total": {
+                "properties": {
+                  "pct": {
+                    "type": "scaled_float",
+                    "scaling_factor": 1000
+                  },
+                  "norm": {
+                    "properties": {
+                      "pct": {
+                        "type": "scaled_float",
+                        "scaling_factor": 1000
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "diskio": {
+            "properties": {
+              "name": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "serial_number": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "read": {
+                "properties": {
+                  "count": {
+                    "type": "long"
+                  },
+                  "bytes": {
+                    "type": "long"
+                  },
+                  "time": {
+                    "type": "long"
+                  }
+                }
+              },
+              "write": {
+                "properties": {
+                  "count": {
+                    "type": "long"
+                  },
+                  "bytes": {
+                    "type": "long"
+                  },
+                  "time": {
+                    "type": "long"
+                  }
+                }
+              },
+              "io": {
+                "properties": {
+                  "time": {
+                    "type": "long"
+                  }
+                }
+              },
+              "iostat": {
+                "properties": {
+                  "read": {
+                    "properties": {
+                      "request": {
+                        "properties": {
+                          "merges_per_sec": {
+                            "type": "float"
+                          },
+                          "per_sec": {
+                            "type": "float"
+                          }
+                        }
+                      },
+                      "per_sec": {
+                        "properties": {
+                          "bytes": {
+                            "type": "float"
+                          }
+                        }
+                      },
+                      "await": {
+                        "type": "float"
+                      }
+                    }
+                  },
+                  "write": {
+                    "properties": {
+                      "request": {
+                        "properties": {
+                          "merges_per_sec": {
+                            "type": "float"
+                          },
+                          "per_sec": {
+                            "type": "float"
+                          }
+                        }
+                      },
+                      "per_sec": {
+                        "properties": {
+                          "bytes": {
+                            "type": "float"
+                          }
+                        }
+                      },
+                      "await": {
+                        "type": "float"
+                      }
+                    }
+                  },
+                  "request": {
+                    "properties": {
+                      "avg_size": {
+                        "type": "float"
+                      }
+                    }
+                  },
+                  "queue": {
+                    "properties": {
+                      "avg_size": {
+                        "type": "float"
+                      }
+                    }
+                  },
+                  "await": {
+                    "type": "float"
+                  },
+                  "service_time": {
+                    "type": "float"
+                  },
+                  "busy": {
+                    "type": "float"
+                  }
+                }
+              }
+            }
+          },
+          "entropy": {
+            "properties": {
+              "available_bits": {
+                "type": "long"
+              },
+              "pct": {
+                "type": "scaled_float",
+                "scaling_factor": 1000
+              }
+            }
+          },
+          "filesystem": {
+            "properties": {
+              "available": {
+                "type": "long"
+              },
+              "device_name": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "type": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "mount_point": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "files": {
+                "type": "long"
+              },
+              "free": {
+                "type": "long"
+              },
+              "free_files": {
+                "type": "long"
+              },
+              "total": {
+                "type": "long"
+              },
+              "used": {
+                "properties": {
+                  "bytes": {
+                    "type": "long"
+                  },
+                  "pct": {
+                    "type": "scaled_float",
+                    "scaling_factor": 1000
+                  }
+                }
+              }
+            }
+          },
+          "fsstat": {
+            "properties": {
+              "count": {
+                "type": "long"
+              },
+              "total_files": {
+                "type": "long"
+              },
+              "total_size": {
+                "properties": {
+                  "free": {
+                    "type": "long"
+                  },
+                  "used": {
+                    "type": "long"
+                  },
+                  "total": {
+                    "type": "long"
+                  }
+                }
+              }
+            }
+          },
+          "load": {
+            "properties": {
+              "1": {
+                "type": "scaled_float",
+                "scaling_factor": 100
+              },
+              "5": {
+                "type": "scaled_float",
+                "scaling_factor": 100
+              },
+              "15": {
+                "type": "scaled_float",
+                "scaling_factor": 100
+              },
+              "norm": {
+                "properties": {
+                  "1": {
+                    "type": "scaled_float",
+                    "scaling_factor": 100
+                  },
+                  "5": {
+                    "type": "scaled_float",
+                    "scaling_factor": 100
+                  },
+                  "15": {
+                    "type": "scaled_float",
+                    "scaling_factor": 100
+                  }
+                }
+              },
+              "cores": {
+                "type": "long"
+              }
+            }
+          },
+          "memory": {
+            "properties": {
+              "total": {
+                "type": "long"
+              },
+              "used": {
+                "properties": {
+                  "bytes": {
+                    "type": "long"
+                  },
+                  "pct": {
+                    "type": "scaled_float",
+                    "scaling_factor": 1000
+                  }
+                }
+              },
+              "free": {
+                "type": "long"
+              },
+              "actual": {
+                "properties": {
+                  "used": {
+                    "properties": {
+                      "bytes": {
+                        "type": "long"
+                      },
+                      "pct": {
+                        "type": "scaled_float",
+                        "scaling_factor": 1000
+                      }
+                    }
+                  },
+                  "free": {
+                    "type": "long"
+                  }
+                }
+              },
+              "swap": {
+                "properties": {
+                  "total": {
+                    "type": "long"
+                  },
+                  "used": {
+                    "properties": {
+                      "bytes": {
+                        "type": "long"
+                      },
+                      "pct": {
+                        "type": "scaled_float",
+                        "scaling_factor": 1000
+                      }
+                    }
+                  },
+                  "free": {
+                    "type": "long"
+                  },
+                  "out": {
+                    "properties": {
+                      "pages": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "in": {
+                    "properties": {
+                      "pages": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "readahead": {
+                    "properties": {
+                      "pages": {
+                        "type": "long"
+                      },
+                      "cached": {
+                        "type": "long"
+                      }
+                    }
+                  }
+                }
+              },
+              "hugepages": {
+                "properties": {
+                  "total": {
+                    "type": "long"
+                  },
+                  "used": {
+                    "properties": {
+                      "bytes": {
+                        "type": "long"
+                      },
+                      "pct": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "free": {
+                    "type": "long"
+                  },
+                  "reserved": {
+                    "type": "long"
+                  },
+                  "surplus": {
+                    "type": "long"
+                  },
+                  "default_size": {
+                    "type": "long"
+                  },
+                  "swap": {
+                    "properties": {
+                      "out": {
+                        "properties": {
+                          "pages": {
+                            "type": "long"
+                          },
+                          "fallback": {
+                            "type": "long"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "network": {
+            "properties": {
+              "name": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "out": {
+                "properties": {
+                  "bytes": {
+                    "type": "long"
+                  },
+                  "packets": {
+                    "type": "long"
+                  },
+                  "errors": {
+                    "type": "long"
+                  },
+                  "dropped": {
+                    "type": "long"
+                  }
+                }
+              },
+              "in": {
+                "properties": {
+                  "bytes": {
+                    "type": "long"
+                  },
+                  "packets": {
+                    "type": "long"
+                  },
+                  "errors": {
+                    "type": "long"
+                  },
+                  "dropped": {
+                    "type": "long"
+                  }
+                }
+              }
+            }
+          },
+          "network_summary": {
+            "properties": {
+              "ip": {
+                "properties": {
+                  "*": {
+                    "type": "object"
+                  }
+                }
+              },
+              "tcp": {
+                "properties": {
+                  "*": {
+                    "type": "object"
+                  }
+                }
+              },
+              "udp": {
+                "properties": {
+                  "*": {
+                    "type": "object"
+                  }
+                }
+              },
+              "udp_lite": {
+                "properties": {
+                  "*": {
+                    "type": "object"
+                  }
+                }
+              },
+              "icmp": {
+                "properties": {
+                  "*": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "process": {
+            "properties": {
+              "name": {
+                "type": "alias",
+                "path": "process.name"
+              },
+              "state": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "pid": {
+                "type": "alias",
+                "path": "process.pid"
+              },
+              "ppid": {
+                "type": "alias",
+                "path": "process.ppid"
+              },
+              "pgid": {
+                "type": "alias",
+                "path": "process.pgid"
+              },
+              "cmdline": {
+                "type": "keyword",
+                "ignore_above": 2048
+              },
+              "username": {
+                "type": "alias",
+                "path": "user.name"
+              },
+              "cwd": {
+                "type": "alias",
+                "path": "process.working_directory"
+              },
+              "env": {
+                "type": "object"
+              },
+              "cpu": {
+                "properties": {
+                  "user": {
+                    "properties": {
+                      "ticks": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "total": {
+                    "properties": {
+                      "value": {
+                        "type": "long"
+                      },
+                      "pct": {
+                        "type": "scaled_float",
+                        "scaling_factor": 1000
+                      },
+                      "norm": {
+                        "properties": {
+                          "pct": {
+                            "type": "scaled_float",
+                            "scaling_factor": 1000
+                          }
+                        }
+                      },
+                      "ticks": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "system": {
+                    "properties": {
+                      "ticks": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "start_time": {
+                    "type": "date"
+                  }
+                }
+              },
+              "memory": {
+                "properties": {
+                  "size": {
+                    "type": "long"
+                  },
+                  "rss": {
+                    "properties": {
+                      "bytes": {
+                        "type": "long"
+                      },
+                      "pct": {
+                        "type": "scaled_float",
+                        "scaling_factor": 1000
+                      }
+                    }
+                  },
+                  "share": {
+                    "type": "long"
+                  }
+                }
+              },
+              "fd": {
+                "properties": {
+                  "open": {
+                    "type": "long"
+                  },
+                  "limit": {
+                    "properties": {
+                      "soft": {
+                        "type": "long"
+                      },
+                      "hard": {
+                        "type": "long"
+                      }
+                    }
+                  }
+                }
+              },
+              "cgroup": {
+                "properties": {
+                  "id": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "path": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "cpu": {
+                    "properties": {
+                      "id": {
+                        "type": "keyword",
+                        "ignore_above": 1024
+                      },
+                      "path": {
+                        "type": "keyword",
+                        "ignore_above": 1024
+                      },
+                      "cfs": {
+                        "properties": {
+                          "period": {
+                            "properties": {
+                              "us": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "quota": {
+                            "properties": {
+                              "us": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "shares": {
+                            "type": "long"
+                          }
+                        }
+                      },
+                      "rt": {
+                        "properties": {
+                          "period": {
+                            "properties": {
+                              "us": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "runtime": {
+                            "properties": {
+                              "us": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "stats": {
+                        "properties": {
+                          "periods": {
+                            "type": "long"
+                          },
+                          "throttled": {
+                            "properties": {
+                              "periods": {
+                                "type": "long"
+                              },
+                              "ns": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "cpuacct": {
+                    "properties": {
+                      "id": {
+                        "type": "keyword",
+                        "ignore_above": 1024
+                      },
+                      "path": {
+                        "type": "keyword",
+                        "ignore_above": 1024
+                      },
+                      "total": {
+                        "properties": {
+                          "ns": {
+                            "type": "long"
+                          }
+                        }
+                      },
+                      "stats": {
+                        "properties": {
+                          "user": {
+                            "properties": {
+                              "ns": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "system": {
+                            "properties": {
+                              "ns": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "percpu": {
+                        "type": "object"
+                      }
+                    }
+                  },
+                  "memory": {
+                    "properties": {
+                      "id": {
+                        "type": "keyword",
+                        "ignore_above": 1024
+                      },
+                      "path": {
+                        "type": "keyword",
+                        "ignore_above": 1024
+                      },
+                      "mem": {
+                        "properties": {
+                          "usage": {
+                            "properties": {
+                              "bytes": {
+                                "type": "long"
+                              },
+                              "max": {
+                                "properties": {
+                                  "bytes": {
+                                    "type": "long"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "limit": {
+                            "properties": {
+                              "bytes": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "failures": {
+                            "type": "long"
+                          }
+                        }
+                      },
+                      "memsw": {
+                        "properties": {
+                          "usage": {
+                            "properties": {
+                              "bytes": {
+                                "type": "long"
+                              },
+                              "max": {
+                                "properties": {
+                                  "bytes": {
+                                    "type": "long"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "limit": {
+                            "properties": {
+                              "bytes": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "failures": {
+                            "type": "long"
+                          }
+                        }
+                      },
+                      "kmem": {
+                        "properties": {
+                          "usage": {
+                            "properties": {
+                              "bytes": {
+                                "type": "long"
+                              },
+                              "max": {
+                                "properties": {
+                                  "bytes": {
+                                    "type": "long"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "limit": {
+                            "properties": {
+                              "bytes": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "failures": {
+                            "type": "long"
+                          }
+                        }
+                      },
+                      "kmem_tcp": {
+                        "properties": {
+                          "usage": {
+                            "properties": {
+                              "bytes": {
+                                "type": "long"
+                              },
+                              "max": {
+                                "properties": {
+                                  "bytes": {
+                                    "type": "long"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "limit": {
+                            "properties": {
+                              "bytes": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "failures": {
+                            "type": "long"
+                          }
+                        }
+                      },
+                      "stats": {
+                        "properties": {
+                          "active_anon": {
+                            "properties": {
+                              "bytes": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "active_file": {
+                            "properties": {
+                              "bytes": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "cache": {
+                            "properties": {
+                              "bytes": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "hierarchical_memory_limit": {
+                            "properties": {
+                              "bytes": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "hierarchical_memsw_limit": {
+                            "properties": {
+                              "bytes": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "inactive_anon": {
+                            "properties": {
+                              "bytes": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "inactive_file": {
+                            "properties": {
+                              "bytes": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "mapped_file": {
+                            "properties": {
+                              "bytes": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "page_faults": {
+                            "type": "long"
+                          },
+                          "major_page_faults": {
+                            "type": "long"
+                          },
+                          "pages_in": {
+                            "type": "long"
+                          },
+                          "pages_out": {
+                            "type": "long"
+                          },
+                          "rss": {
+                            "properties": {
+                              "bytes": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "rss_huge": {
+                            "properties": {
+                              "bytes": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "swap": {
+                            "properties": {
+                              "bytes": {
+                                "type": "long"
+                              }
+                            }
+                          },
+                          "unevictable": {
+                            "properties": {
+                              "bytes": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "blkio": {
+                    "properties": {
+                      "id": {
+                        "type": "keyword",
+                        "ignore_above": 1024
+                      },
+                      "path": {
+                        "type": "keyword",
+                        "ignore_above": 1024
+                      },
+                      "total": {
+                        "properties": {
+                          "bytes": {
+                            "type": "long"
+                          },
+                          "ios": {
+                            "type": "long"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "summary": {
+                "properties": {
+                  "total": {
+                    "type": "long"
+                  },
+                  "running": {
+                    "type": "long"
+                  },
+                  "idle": {
+                    "type": "long"
+                  },
+                  "sleeping": {
+                    "type": "long"
+                  },
+                  "stopped": {
+                    "type": "long"
+                  },
+                  "zombie": {
+                    "type": "long"
+                  },
+                  "dead": {
+                    "type": "long"
+                  },
+                  "unknown": {
+                    "type": "long"
+                  }
+                }
+              }
+            }
+          },
+          "raid": {
+            "properties": {
+              "name": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "status": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "level": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "sync_action": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "disks": {
+                "properties": {
+                  "active": {
+                    "type": "long"
+                  },
+                  "total": {
+                    "type": "long"
+                  },
+                  "spare": {
+                    "type": "long"
+                  },
+                  "failed": {
+                    "type": "long"
+                  },
+                  "states": {
+                    "properties": {
+                      "*": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              },
+              "blocks": {
+                "properties": {
+                  "total": {
+                    "type": "long"
+                  },
+                  "synced": {
+                    "type": "long"
+                  }
+                }
+              }
+            }
+          },
+          "socket": {
+            "properties": {
+              "direction": {
+                "type": "alias",
+                "path": "network.direction"
+              },
+              "family": {
+                "type": "alias",
+                "path": "network.type"
+              },
+              "local": {
+                "properties": {
+                  "ip": {
+                    "type": "ip"
+                  },
+                  "port": {
+                    "type": "long"
+                  }
+                }
+              },
+              "remote": {
+                "properties": {
+                  "ip": {
+                    "type": "ip"
+                  },
+                  "port": {
+                    "type": "long"
+                  },
+                  "host": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "etld_plus_one": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "host_error": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  }
+                }
+              },
+              "process": {
+                "properties": {
+                  "pid": {
+                    "type": "alias",
+                    "path": "process.pid"
+                  },
+                  "command": {
+                    "type": "alias",
+                    "path": "process.name"
+                  },
+                  "cmdline": {
+                    "type": "keyword",
+                    "ignore_above": 1024
+                  },
+                  "exe": {
+                    "type": "alias",
+                    "path": "process.executable"
+                  }
+                }
+              },
+              "user": {
+                "properties": {
+                  "id": {
+                    "type": "alias",
+                    "path": "user.id"
+                  },
+                  "name": {
+                    "type": "alias",
+                    "path": "user.full_name"
+                  }
+                }
+              },
+              "summary": {
+                "properties": {
+                  "all": {
+                    "properties": {
+                      "count": {
+                        "type": "long"
+                      },
+                      "listening": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "tcp": {
+                    "properties": {
+                      "memory": {
+                        "type": "long"
+                      },
+                      "all": {
+                        "properties": {
+                          "orphan": {
+                            "type": "long"
+                          },
+                          "count": {
+                            "type": "long"
+                          },
+                          "listening": {
+                            "type": "long"
+                          },
+                          "established": {
+                            "type": "long"
+                          },
+                          "close_wait": {
+                            "type": "long"
+                          },
+                          "time_wait": {
+                            "type": "long"
+                          },
+                          "syn_sent": {
+                            "type": "long"
+                          },
+                          "syn_recv": {
+                            "type": "long"
+                          },
+                          "fin_wait1": {
+                            "type": "long"
+                          },
+                          "fin_wait2": {
+                            "type": "long"
+                          },
+                          "last_ack": {
+                            "type": "long"
+                          },
+                          "closing": {
+                            "type": "long"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "udp": {
+                    "properties": {
+                      "memory": {
+                        "type": "long"
+                      },
+                      "all": {
+                        "properties": {
+                          "count": {
+                            "type": "long"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "uptime": {
+            "properties": {
+              "duration": {
+                "properties": {
+                  "ms": {
+                    "type": "long"
+                  }
+                }
+              }
+            }
+          },
+          "users": {
+            "properties": {
+              "id": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "seat": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "path": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "type": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "service": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "remote": {
+                "type": "boolean"
+              },
+              "state": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "scope": {
+                "type": "keyword",
+                "ignore_above": 1024
+              },
+              "leader": {
+                "type": "long"
+              },
+              "remote_host": {
+                "type": "keyword",
+                "ignore_above": 1024
+              }
+            }
+          }
+        }
       }
     }
   },
