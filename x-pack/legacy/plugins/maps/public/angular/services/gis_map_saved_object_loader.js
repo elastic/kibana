@@ -17,6 +17,7 @@ module.service('gisMapSavedObjectLoader', function() {
   const services = {
     savedObjectsClient,
     indexPatterns: npStart.plugins.data.indexPatterns,
+    search: npStart.plugins.data.search,
     chrome: npStart.core.chrome,
     overlays: npStart.core.overlays,
   };

@@ -26,6 +26,8 @@ import { TStrategyTypes } from './strategy_types';
 import { getEsClient, LegacyApiCaller } from './es_client';
 import { ES_SEARCH_STRATEGY, DEFAULT_SEARCH_STRATEGY } from '../../common/search';
 import { esSearchStrategyProvider } from './es_search/es_search_strategy';
+import { IndexPatternsContract } from '../index_patterns/index_patterns';
+import { parseSearchSource, serializeSearchSource } from './search_source';
 
 /**
  * The search plugin exposes two registration methods for other plugins:
@@ -73,7 +75,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
   }
 
-  public start(core: CoreStart): ISearchStart {
+  public start(core: CoreStart, indexPatterns: IndexPatternsContract): ISearchStart {
     return {
       aggs: {
         calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
@@ -86,6 +88,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         });
         return search(request as any, options);
       },
+      serializeSearchSource,
+      parseSearchSource: parseSearchSource(indexPatterns),
       __LEGACY: {
         esClient: this.esClient!,
       },

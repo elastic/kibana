@@ -24,11 +24,10 @@ import { SearchSource } from './search_source';
 import { IndexPatternsContract } from '../../index_patterns/index_patterns';
 import { SearchSourceFields } from './types';
 
-export async function parseSearchSource(
+export const parseSearchSource = (indexPatterns: IndexPatternsContract) => async (
   searchSourceJson: string,
-  references: SavedObjectReference[],
-  indexPatterns: IndexPatternsContract
-) {
+  references: SavedObjectReference[]
+) => {
   const searchSource = new SearchSource();
 
   // if we have a searchSource, set its values based on the searchSourceJson field
@@ -72,8 +71,7 @@ export async function parseSearchSource(
   }
 
   if (searchSourceValues.index && typeof searchSourceValues.index === 'string') {
-    const indexObj = await indexPatterns.get(searchSourceValues.index);
-    searchSourceValues.index = indexObj;
+    searchSourceValues.index = await indexPatterns.get(searchSourceValues.index);
   }
 
   const searchSourceFields = searchSource.getFields();
@@ -97,4 +95,4 @@ export async function parseSearchSource(
   }
 
   return searchSource;
-}
+};

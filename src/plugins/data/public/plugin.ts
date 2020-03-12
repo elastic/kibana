@@ -104,7 +104,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
     const dataServices = {
       autocomplete: this.autocomplete.start(),
-      search: this.searchService.start(core),
+      search: this.searchService.start(core, indexPatternsService),
       fieldFormats,
       query: this.queryService.start(core.savedObjects),
       indexPatterns: indexPatternsService,

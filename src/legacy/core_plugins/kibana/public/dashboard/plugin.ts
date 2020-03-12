@@ -133,6 +133,7 @@ export class DashboardPlugin implements Plugin {
         const savedDashboards = createSavedDashboardLoader({
           savedObjectsClient,
           indexPatterns: dataStart.indexPatterns,
+          search: dataStart.search,
           chrome: coreStart.chrome,
           overlays: coreStart.overlays,
         });

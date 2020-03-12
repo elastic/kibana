@@ -52,6 +52,7 @@ export const savedObjectManagementRegistry = {
 const services = {
   savedObjectsClient: npStart.core.savedObjects.client,
   indexPatterns: npStart.plugins.data.indexPatterns,
+  search: npStart.plugins.data.search,
   chrome: npStart.core.chrome,
   overlays: npStart.core.overlays,
 };

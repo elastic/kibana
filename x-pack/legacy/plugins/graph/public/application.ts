@@ -82,6 +82,7 @@ export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) 
   const savedWorkspaceLoader = createSavedWorkspacesLoader({
     chrome: deps.coreStart.chrome,
     indexPatterns: deps.npData.indexPatterns,
+    search: deps.npData.search,
     overlays: deps.coreStart.overlays,
     savedObjectsClient: deps.coreStart.savedObjects.client,
     basePath: deps.coreStart.http.basePath,

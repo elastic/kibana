@@ -67,6 +67,7 @@ export async function buildServices(
   const services = {
     savedObjectsClient: core.savedObjects.client,
     indexPatterns: plugins.data.indexPatterns,
+    search: plugins.data.search,
     chrome: core.chrome,
     overlays: core.overlays,
   };

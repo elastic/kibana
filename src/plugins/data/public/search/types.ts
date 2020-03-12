@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { CoreStart } from 'kibana/public';
+import { CoreStart, SavedObjectReference } from 'kibana/public';
 import { TimeRange } from '../../common';
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
 import { LegacyApiCaller } from './es_client';
+import { ISearchSource } from './search_source';
 
 export interface ISearchContext {
   core: CoreStart;
@@ -91,6 +92,30 @@ export interface ISearchSetup {
 export interface ISearchStart {
   aggs: SearchAggsStart;
   search: ISearchGeneric;
+  /**
+   * Serializes a `SearchSource` instance to a JSON string and a set of referenced objects.
+   * Use this method to get a representation of the search source which can be stored in a saved object.
+   *
+   * The references returned by this function can be mixed with other references in the same object,
+   * however make sure there are no name-collisions. The references will be named `kibanaSavedObjectMeta.searchSourceJSON.index`
+   * and `kibanaSavedObjectMeta.searchSourceJSON.filter[<number>].meta.index`.
+   *
+   * Using `parseSearchSource`, the instance can be re-created.
+   * @param searchSource The search source to serialize
+   */
+  serializeSearchSource: (
+    searchSource: ISearchSource
+  ) => { searchSourceJSON: string; references: SavedObjectReference[] };
+  /**
+   * Deserializes a json string and a set of referenced objects to a `SearchSource` instance.
+   * Use this method to re-create the search source serialized using `serializeSearchSource`
+   * @param searchSourceJson The json string returned by `serializeSearchSource`
+   * @param references A list of references including the ones returned by `serializeSearchSource`
+   */
+  parseSearchSource: (
+    searchSourceJson: string,
+    references: SavedObjectReference[]
+  ) => Promise<ISearchSource>;
   __LEGACY: {
     esClient: LegacyApiCaller;
   };

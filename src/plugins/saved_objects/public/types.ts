@@ -24,7 +24,12 @@ import {
   SavedObjectAttributes,
   SavedObjectReference,
 } from 'kibana/public';
-import { IIndexPattern, IndexPatternsContract, ISearchSource } from '../../data/public';
+import {
+  DataPublicPluginStart,
+  IIndexPattern,
+  IndexPatternsContract,
+  ISearchSource,
+} from '../../data/public';
 
 export interface SavedObject {
   _serialize: () => { attributes: SavedObjectAttributes; references: SavedObjectReference[] };
@@ -65,6 +70,7 @@ export interface SavedObjectCreationOpts {
 export interface SavedObjectKibanaServices {
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
+  search: DataPublicPluginStart['search'];
   chrome: ChromeStart;
   overlays: OverlayStart;
 }

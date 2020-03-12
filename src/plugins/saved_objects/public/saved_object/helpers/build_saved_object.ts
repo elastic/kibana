@@ -82,13 +82,14 @@ export function buildSavedObject(
   savedObject.init = _.once(() => intializeSavedObject(savedObject, savedObjectsClient, config));
 
   savedObject.applyESResp = (resp: EsResponse) =>
-    applyESResp(resp, savedObject, config, indexPatterns);
+    applyESResp(resp, savedObject, config, services.search.parseSearchSource);
 
   /**
    * Serialize this object
    * @return {Object}
    */
-  savedObject._serialize = () => serializeSavedObject(savedObject, config);
+  savedObject._serialize = () =>
+    serializeSavedObject(savedObject, config, services.search.serializeSearchSource);
 
   /**
    * Returns true if the object's original title has been changed. New objects return false.

@@ -145,6 +145,7 @@ export class VisualizationsPlugin
     const savedVisualizationsLoader = createSavedVisLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: data.indexPatterns,
+      search: data.search,
       chrome: core.chrome,
       overlays: core.overlays,
       visualizationTypes: types,

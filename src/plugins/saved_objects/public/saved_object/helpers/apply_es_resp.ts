@@ -19,7 +19,7 @@
 import _ from 'lodash';
 import { EsResponse, SavedObject, SavedObjectConfig } from '../../types';
 import { expandShorthand, SavedObjectNotFound } from '../../../../kibana_utils/public';
-import { IndexPattern, IndexPatternsContract, parseSearchSource } from '../../../../data/public';
+import { DataPublicPluginStart, IndexPattern } from '../../../../data/public';
 
 /**
  * A given response of and ElasticSearch containing a plain saved object is applied to the given
@@ -29,7 +29,7 @@ export async function applyESResp(
   resp: EsResponse,
   savedObject: SavedObject,
   config: SavedObjectConfig,
-  indexPatterns: IndexPatternsContract
+  parseSearchSource: DataPublicPluginStart['search']['parseSearchSource']
 ) {
   const mapping = expandShorthand(config.mapping);
   const esType = config.type || '';
@@ -64,11 +64,7 @@ export async function applyESResp(
   savedObject.lastSavedTitle = savedObject.title;
 
   if (config.searchSource) {
-    savedObject.searchSource = await parseSearchSource(
-      meta.searchSourceJSON,
-      resp.references,
-      indexPatterns
-    );
+    savedObject.searchSource = await parseSearchSource(meta.searchSourceJSON, resp.references);
   }
 
   if (injectReferences && resp.references && resp.references.length > 0) {
