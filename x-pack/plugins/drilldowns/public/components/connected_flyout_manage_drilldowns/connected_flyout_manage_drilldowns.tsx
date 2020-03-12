@@ -8,7 +8,6 @@ import React, { useEffect, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 import useMountedState from 'react-use/lib/useMountedState';
 import {
-  AdvancedUiActionsActionFactory as ActionFactory,
   AdvancedUiActionsAnyActionFactory as AnyActionFactory,
   AdvancedUiActionsStart,
 } from '../../../../advanced_ui_actions/public';
@@ -202,12 +201,10 @@ export function createFlyoutManageDrilldowns({
 }
 
 function useCompatibleActionFactoriesForCurrentContext<Context extends object = object>(
-  actionFactories: Array<ActionFactory<any>>,
+  actionFactories: AnyActionFactory[],
   context: Context
 ) {
-  const [compatibleActionFactories, setCompatibleActionFactories] = useState<
-    Array<ActionFactory<any>>
-  >();
+  const [compatibleActionFactories, setCompatibleActionFactories] = useState<AnyActionFactory[]>();
   useEffect(() => {
     let canceled = false;
     async function updateCompatibleFactoriesForContext() {

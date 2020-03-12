@@ -186,7 +186,6 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
             {actionFactory.getIconType(context) && (
               <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
             )}
-            {actionFactory.order}
           </EuiKeyPadMenuItemButton>
         ))}
     </EuiFlexGroup>
