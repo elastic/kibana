@@ -7,7 +7,13 @@
 import React from 'react';
 import { MetricsExplorerChartContextMenu, createNodeDetailLink, Props } from './chart_context_menu';
 import { ReactWrapper, mount } from 'enzyme';
-import { options, source, timeRange, chartOptions } from '../../utils/fixtures/metrics_explorer';
+import {
+  options,
+  source,
+  timeRange,
+  chartOptions,
+  derivedIndexPattern,
+} from '../../utils/fixtures/metrics_explorer';
 import { Capabilities } from 'src/core/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { coreMock } from 'src/core/public/mocks';
@@ -45,6 +51,7 @@ describe('MetricsExplorerChartContextMenu', () => {
         onFilter,
         uiCapabilities,
         chartOptions,
+        derivedIndexPattern,
       });
       component.find('button').simulate('click');
       expect(getTestSubject(component, 'metricsExplorerAction-AddFilter').length).toBe(1);
@@ -63,6 +70,7 @@ describe('MetricsExplorerChartContextMenu', () => {
         onFilter,
         uiCapabilities,
         chartOptions,
+        derivedIndexPattern,
       });
       component.find('button').simulate('click');
       expect(getTestSubject(component, 'metricsExplorerAction-ViewNodeMetrics').length).toBe(0);
@@ -76,6 +84,7 @@ describe('MetricsExplorerChartContextMenu', () => {
         options,
         uiCapabilities,
         chartOptions,
+        derivedIndexPattern,
       });
       component.find('button').simulate('click');
       expect(getTestSubject(component, 'metricsExplorerAction-AddFilter').length).toBe(0);
@@ -92,6 +101,7 @@ describe('MetricsExplorerChartContextMenu', () => {
         onFilter,
         uiCapabilities,
         chartOptions,
+        derivedIndexPattern,
       });
       component.find('button').simulate('click');
       expect(getTestSubject(component, 'metricsExplorerAction-AddFilter').length).toBe(0);
@@ -106,6 +116,7 @@ describe('MetricsExplorerChartContextMenu', () => {
         options: customOptions,
         uiCapabilities,
         chartOptions,
+        derivedIndexPattern,
       });
       component.find('button').simulate('click');
       expect(
@@ -124,6 +135,7 @@ describe('MetricsExplorerChartContextMenu', () => {
         onFilter,
         uiCapabilities: customUICapabilities,
         chartOptions,
+        derivedIndexPattern,
       });
 
       component.find('button').simulate('click');
@@ -142,6 +154,7 @@ describe('MetricsExplorerChartContextMenu', () => {
         onFilter,
         uiCapabilities: customUICapabilities,
         chartOptions,
+        derivedIndexPattern,
       });
       expect(component.find('button').length).toBe(0);
     });

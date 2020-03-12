@@ -39,6 +39,7 @@ export const AlertFlyout = (props: Props) => {
               currentOptions: props.options,
               series: props.series,
             },
+            toastNotifications: services.notifications?.toasts,
             http: services.http,
             actionTypeRegistry: triggersActionsUI.actionTypeRegistry,
             alertTypeRegistry: triggersActionsUI.alertTypeRegistry,
