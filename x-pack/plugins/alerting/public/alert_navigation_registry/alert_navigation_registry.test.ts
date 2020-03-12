@@ -40,6 +40,27 @@ describe('AlertNavigationRegistry', () => {
       registry.register('siem', alertType, handler);
       expect(registry.has('siem', alertType)).toEqual(true);
     });
+
+    test('returns true for registered consumer with default handler', () => {
+      const registry = new AlertNavigationRegistry();
+      const alertType = mockAlertType('index_threshold');
+      registry.registerDefault('siem', handler);
+      expect(registry.has('siem', alertType)).toEqual(true);
+    });
+  });
+
+  describe('hasDefaultHandler()', () => {
+    test('returns false for unregistered consumer  handlers', () => {
+      const registry = new AlertNavigationRegistry();
+      expect(registry.hasDefaultHandler('siem')).toEqual(false);
+    });
+
+    test('returns true for registered consumer handlers', () => {
+      const registry = new AlertNavigationRegistry();
+
+      registry.registerDefault('siem', handler);
+      expect(registry.hasDefaultHandler('siem')).toEqual(true);
+    });
   });
 
   describe('register()', () => {
@@ -85,6 +106,35 @@ describe('AlertNavigationRegistry', () => {
     });
   });
 
+  describe('registerDefault()', () => {
+    test('registers a handler by consumer', () => {
+      const registry = new AlertNavigationRegistry();
+      registry.registerDefault('siem', handler);
+      expect(registry.hasDefaultHandler('siem')).toEqual(true);
+    });
+
+    test('allows registeration of default and typed handlers for the same consumer', () => {
+      const registry = new AlertNavigationRegistry();
+
+      registry.registerDefault('siem', handler);
+      expect(registry.hasDefaultHandler('siem')).toEqual(true);
+
+      const geoAlertType = mockAlertType('geogrid');
+      registry.register('siem', geoAlertType, handler);
+      expect(registry.has('siem', geoAlertType)).toEqual(true);
+    });
+
+    test('throws if an existing handler is registered', () => {
+      const registry = new AlertNavigationRegistry();
+      registry.registerDefault('siem', handler);
+      expect(() => {
+        registry.registerDefault('siem', handler);
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Default Navigation within \\"siem\\" is already registered."`
+      );
+    });
+  });
+
   describe('get()', () => {
     test('returns registered handlers by consumer & Alert Type', () => {
       const registry = new AlertNavigationRegistry();
@@ -93,9 +143,33 @@ describe('AlertNavigationRegistry', () => {
         return {};
       }
 
-      const indexThresholdAlertType = mockAlertType('geogrid');
+      const indexThresholdAlertType = mockAlertType('indexThreshold');
       registry.register('siem', indexThresholdAlertType, indexThresholdHandler);
       expect(registry.get('siem', indexThresholdAlertType)).toEqual(indexThresholdHandler);
+    });
+
+    test('returns default handlers by consumer when there is no handler for requested alert type', () => {
+      const registry = new AlertNavigationRegistry();
+
+      function defaultHandler(alert: SanitizedAlert, alertType: AlertType) {
+        return {};
+      }
+
+      registry.registerDefault('siem', defaultHandler);
+      expect(registry.get('siem', mockAlertType('geogrid'))).toEqual(defaultHandler);
+    });
+
+    test('returns default handlers by consumer when there are other alert type handler', () => {
+      const registry = new AlertNavigationRegistry();
+
+      registry.register('siem', mockAlertType('indexThreshold'), () => ({}));
+
+      function defaultHandler(alert: SanitizedAlert, alertType: AlertType) {
+        return {};
+      }
+
+      registry.registerDefault('siem', defaultHandler);
+      expect(registry.get('siem', mockAlertType('geogrid'))).toEqual(defaultHandler);
     });
 
     test('throws if a handler isnt registered', () => {

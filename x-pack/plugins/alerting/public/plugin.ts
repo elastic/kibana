@@ -16,6 +16,7 @@ export interface PluginSetupContract {
     alertType: string,
     handler: AlertNavigationHandler
   ) => void;
+  registerDefaultNavigation: (consumer: string, handler: AlertNavigationHandler) => void;
 }
 export interface PluginStartContract {
   getNavigation: (alertId: Alert['id']) => Promise<AlertNavigation | undefined>;
@@ -37,6 +38,8 @@ export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginS
           await loadAlertType({ http: core.http, id: alertType }),
           handler
         ),
+      registerDefaultNavigation: async (consumer: string, handler: AlertNavigationHandler) =>
+        alertNavigationRegistry.registerDefault(consumer, handler),
     };
   }
 
