@@ -19,6 +19,7 @@ const EmptyBannerCallOut = styled(EuiCallOut)`
       ${lightTheme.gutterTypes.gutterExtraLarge}
   );
   position: absolute;
+  width: 95%;
   z-index: 1;
 `;
 
