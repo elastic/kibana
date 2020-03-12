@@ -54,12 +54,16 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
       },
     },
     async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
+
+      if (!context.alerting || !context.actions) {
+        return siemResponse.error({ statusCode: 404 });
+      }
       const alertsClient = context.alerting.getAlertsClient();
       const actionsClient = context.actions.getActionsClient();
       const clusterClient = context.core.elasticsearch.dataClient;
       const savedObjectsClient = context.core.savedObjects.client;
       const siemClient = context.siem.getSiemClient();
-      const siemResponse = buildSiemResponse(response);
 
       if (!actionsClient || !alertsClient) {
         return siemResponse.error({ statusCode: 404 });
@@ -130,6 +134,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                     to,
                     type,
                     references,
+                    note,
                     timeline_id: timelineId,
                     timeline_title: timelineTitle,
                     version,
@@ -179,6 +184,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         type,
                         threat,
                         references,
+                        note,
                         version,
                       });
                       resolve({ rule_id: ruleId, status_code: 200 });
@@ -213,6 +219,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         type,
                         threat,
                         references,
+                        note,
                         version,
                       });
                       resolve({ rule_id: ruleId, status_code: 200 });

@@ -29,6 +29,9 @@ import {
 setUiSettings(uiSettingsServiceMock.createStartContract());
 setInjectedMetadata(injectedMetadataServiceMock.createSetupContract());
 setSearchService({
+  aggs: {
+    calculateAutoTimeExpression: jest.fn().mockReturnValue('1d'),
+  },
   search: jest.fn(),
   __LEGACY: {
     esClient: {

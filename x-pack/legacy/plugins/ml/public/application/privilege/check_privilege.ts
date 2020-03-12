@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { hasLicenseExpired } from '../license/check_license';
+import { hasLicenseExpired } from '../license';
 
 import { Privileges, getDefaultPrivileges } from '../../../common/types/privileges';
 import { getPrivileges, getManageMlPrivileges } from './get_privileges';
@@ -14,8 +14,8 @@ import { ACCESS_DENIED_PATH } from '../management/management_urls';
 
 let privileges: Privileges = getDefaultPrivileges();
 // manage_ml requires all monitor and admin cluster privileges: https://github.com/elastic/elasticsearch/blob/664a29c8905d8ce9ba8c18aa1ed5c5de93a0eabc/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/security/authz/privilege/ClusterPrivilege.java#L53
-export function canGetManagementMlJobs() {
-  return new Promise((resolve, reject) => {
+export function checkGetManagementMlJobs() {
+  return new Promise<{ mlFeatureEnabledInSpace: boolean }>((resolve, reject) => {
     getManageMlPrivileges().then(
       ({ capabilities, isPlatinumOrTrialLicense, mlFeatureEnabledInSpace }) => {
         privileges = capabilities;

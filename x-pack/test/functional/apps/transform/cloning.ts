@@ -5,7 +5,7 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { TransformPivotConfig } from '../../../../legacy/plugins/transform/public/app/common';
+import { TransformPivotConfig } from '../../../../plugins/transform/public/app/common';
 
 function getTransformConfig(): TransformPivotConfig {
   const date = Date.now();

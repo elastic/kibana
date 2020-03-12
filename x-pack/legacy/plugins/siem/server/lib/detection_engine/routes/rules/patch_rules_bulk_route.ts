@@ -30,10 +30,14 @@ export const patchRulesBulkRoute = (router: IRouter) => {
       },
     },
     async (context, request, response) => {
+      const siemResponse = buildSiemResponse(response);
+
+      if (!context.alerting || !context.actions) {
+        return siemResponse.error({ statusCode: 404 });
+      }
       const alertsClient = context.alerting.getAlertsClient();
       const actionsClient = context.actions.getActionsClient();
       const savedObjectsClient = context.core.savedObjects.client;
-      const siemResponse = buildSiemResponse(response);
 
       if (!actionsClient || !alertsClient) {
         return siemResponse.error({ statusCode: 404 });
@@ -67,6 +71,7 @@ export const patchRulesBulkRoute = (router: IRouter) => {
             type,
             threat,
             references,
+            note,
             version,
           } = payloadRule;
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
@@ -100,6 +105,7 @@ export const patchRulesBulkRoute = (router: IRouter) => {
               type,
               threat,
               references,
+              note,
               version,
             });
             if (rule != null) {

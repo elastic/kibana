@@ -11,8 +11,11 @@ import { AggFieldNamePair } from '../../../../common/types/fields';
 import { Category } from '../../../../common/types/categories';
 import { ExistingJobsAndGroups } from '../job_service';
 import { PrivilegesResponse } from '../../../../common/types/privileges';
-import { MlJobWithTimeRange, MlSummaryJobs } from '../../../../common/types/jobs';
-import { MlServerDefaults, MlServerLimits } from '../ml_server_info';
+import {
+  MlInfoResponse,
+  MlServerDefaults,
+  MlServerLimits,
+} from '../../../../common/types/ml_server_info';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { JobMessage } from '../../../../common/types/audit_message';
@@ -21,7 +24,12 @@ import { DeepPartial } from '../../../../common/types/common';
 import { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 import { annotations } from './annotations';
 import { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
-import { CombinedJob, JobId } from '../../jobs/new_job/common/job_creator/configs';
+import {
+  MlJobWithTimeRange,
+  MlSummaryJobs,
+  CombinedJob,
+  JobId,
+} from '../../../../common/types/anomaly_detection_jobs';
 import {
   CategorizationAnalyzer,
   CategoryFieldExample,
@@ -63,17 +71,6 @@ export interface BucketSpanEstimatorResponse {
   ms: number;
   error?: boolean;
   message?: { msg: string } | string;
-}
-
-export interface MlInfoResponse {
-  defaults: MlServerDefaults;
-  limits: MlServerLimits;
-  native_code: {
-    build_hash: string;
-    version: string;
-  };
-  upgrade_mode: boolean;
-  cloudId?: string;
 }
 
 export interface SuccessCardinality {

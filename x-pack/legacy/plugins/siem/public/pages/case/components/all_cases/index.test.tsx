@@ -11,29 +11,42 @@ import { AllCases } from './';
 import { TestProviders } from '../../../../mock';
 import { useGetCasesMockState } from './__mock__';
 import * as apiHook from '../../../../containers/case/use_get_cases';
+import { act } from '@testing-library/react';
+import { wait } from '../../../../lib/helpers';
 
 describe('AllCases', () => {
-  const setQueryParams = jest.fn();
+  const dispatchUpdateCaseProperty = jest.fn();
+  const getCaseCount = jest.fn();
+  const refetchCases = jest.fn();
   const setFilters = jest.fn();
+  const setQueryParams = jest.fn();
+  const setSelectedCases = jest.fn();
   beforeEach(() => {
     jest.resetAllMocks();
-    jest
-      .spyOn(apiHook, 'useGetCases')
-      .mockReturnValue([useGetCasesMockState, setQueryParams, setFilters]);
+    jest.spyOn(apiHook, 'useGetCases').mockReturnValue({
+      ...useGetCasesMockState,
+      dispatchUpdateCaseProperty,
+      getCaseCount,
+      refetchCases,
+      setFilters,
+      setQueryParams,
+      setSelectedCases,
+    });
     moment.tz.setDefault('UTC');
   });
-  it('should render AllCases', () => {
+  it('should render AllCases', async () => {
     const wrapper = mount(
       <TestProviders>
         <AllCases />
       </TestProviders>
     );
+    await act(() => wait());
     expect(
       wrapper
         .find(`a[data-test-subj="case-details-link"]`)
         .first()
         .prop('href')
-    ).toEqual(`#/link-to/case/${useGetCasesMockState.data.cases[0].caseId}`);
+    ).toEqual(`#/link-to/case/${useGetCasesMockState.data.cases[0].id}`);
     expect(
       wrapper
         .find(`a[data-test-subj="case-details-link"]`)
@@ -42,19 +55,13 @@ describe('AllCases', () => {
     ).toEqual(useGetCasesMockState.data.cases[0].title);
     expect(
       wrapper
-        .find(`[data-test-subj="case-table-column-state"]`)
-        .first()
-        .text()
-    ).toEqual(useGetCasesMockState.data.cases[0].state);
-    expect(
-      wrapper
         .find(`span[data-test-subj="case-table-column-tags-0"]`)
         .first()
         .prop('title')
     ).toEqual(useGetCasesMockState.data.cases[0].tags[0]);
     expect(
       wrapper
-        .find(`[data-test-subj="case-table-column-username"]`)
+        .find(`[data-test-subj="case-table-column-createdBy"]`)
         .first()
         .text()
     ).toEqual(useGetCasesMockState.data.cases[0].createdBy.username);
@@ -66,31 +73,26 @@ describe('AllCases', () => {
     ).toEqual(useGetCasesMockState.data.cases[0].createdAt);
     expect(
       wrapper
-        .find(`[data-test-subj="case-table-column-updatedAt"]`)
-        .first()
-        .prop('value')
-    ).toEqual(useGetCasesMockState.data.cases[0].updatedAt);
-
-    expect(
-      wrapper
         .find(`[data-test-subj="case-table-case-count"]`)
         .first()
         .text()
     ).toEqual('Showing 10 cases');
   });
-  it('should tableHeaderSortButton AllCases', () => {
+  it('should tableHeaderSortButton AllCases', async () => {
     const wrapper = mount(
       <TestProviders>
         <AllCases />
       </TestProviders>
     );
+    await act(() => wait());
     wrapper
-      .find('[data-test-subj="tableHeaderCell_state_5"] [data-test-subj="tableHeaderSortButton"]')
+      .find('[data-test-subj="tableHeaderSortButton"]')
+      .first()
       .simulate('click');
     expect(setQueryParams).toBeCalledWith({
       page: 1,
       perPage: 5,
-      sortField: 'state',
+      sortField: 'createdAt',
       sortOrder: 'asc',
     });
   });

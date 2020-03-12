@@ -13,10 +13,9 @@ import { filters } from './filters';
 import { results } from './results';
 import { jobs } from './jobs';
 import { fileDatavisualizer } from './datavisualizer';
-import { getBasePath } from '../../util/dependency_cache';
 
 export function basePath() {
-  return getBasePath().prepend('/api/ml');
+  return '/api/ml';
 }
 
 export const ml = {
@@ -221,7 +220,8 @@ export const ml = {
 
   checkManageMLPrivileges() {
     return http({
-      url: `${basePath()}/ml_capabilities?ignoreSpaces=true`,
+      // TODO Fix http service parameters
+      url: `${basePath()}/ml_capabilities`, // '?ignoreSpaces=true'
       method: 'GET',
     });
   },
@@ -250,7 +250,7 @@ export const ml = {
 
   recognizeIndex(obj) {
     return http({
-      url: `${basePath()}/modules/recognize/${obj.indexPatternTitle}`,
+      url: `${basePath()}/modules/recognize/${encodeURIComponent(obj.indexPatternTitle)}`,
       method: 'GET',
     });
   },
@@ -309,7 +309,9 @@ export const ml = {
     ]);
 
     return http({
-      url: `${basePath()}/data_visualizer/get_field_stats/${obj.indexPatternTitle}`,
+      url: `${basePath()}/data_visualizer/get_field_stats/${encodeURIComponent(
+        obj.indexPatternTitle
+      )}`,
       method: 'POST',
       data,
     });
@@ -327,7 +329,9 @@ export const ml = {
     ]);
 
     return http({
-      url: `${basePath()}/data_visualizer/get_overall_stats/${obj.indexPatternTitle}`,
+      url: `${basePath()}/data_visualizer/get_overall_stats/${encodeURIComponent(
+        obj.indexPatternTitle
+      )}`,
       method: 'POST',
       data,
     });
@@ -452,7 +456,7 @@ export const ml = {
   },
 
   getIndices() {
-    const tempBasePath = getBasePath().prepend('/api');
+    const tempBasePath = '/api';
     return http({
       url: `${tempBasePath}/index_management/indices`,
       method: 'GET',

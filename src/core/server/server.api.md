@@ -419,7 +419,26 @@ export type AuthenticationHandler = (request: KibanaRequest, response: Lifecycle
 export type AuthHeaders = Record<string, string | string[]>;
 
 // @public (undocumented)
-export type AuthResult = Authenticated;
+export interface AuthNotHandled {
+    // (undocumented)
+    type: AuthResultType.notHandled;
+}
+
+// @public (undocumented)
+export interface AuthRedirected extends AuthRedirectedParams {
+    // (undocumented)
+    type: AuthResultType.redirected;
+}
+
+// @public
+export interface AuthRedirectedParams {
+    headers: {
+        location: string;
+    } & ResponseHeaders;
+}
+
+// @public (undocumented)
+export type AuthResult = Authenticated | AuthNotHandled | AuthRedirected;
 
 // @public
 export interface AuthResultParams {
@@ -431,7 +450,11 @@ export interface AuthResultParams {
 // @public (undocumented)
 export enum AuthResultType {
     // (undocumented)
-    authenticated = "authenticated"
+    authenticated = "authenticated",
+    // (undocumented)
+    notHandled = "notHandled",
+    // (undocumented)
+    redirected = "redirected"
 }
 
 // @public
@@ -444,6 +467,10 @@ export enum AuthStatus {
 // @public
 export interface AuthToolkit {
     authenticated: (data?: AuthResultParams) => AuthResult;
+    notHandled: () => AuthResult;
+    redirected: (headers: {
+        location: string;
+    } & ResponseHeaders) => AuthResult;
 }
 
 // @public
@@ -606,6 +633,8 @@ export interface CoreSetup<TPluginsStart extends object = object> {
     // (undocumented)
     http: HttpServiceSetup;
     // (undocumented)
+    metrics: MetricsServiceSetup;
+    // (undocumented)
     savedObjects: SavedObjectsServiceSetup;
     // (undocumented)
     uiSettings: UiSettingsServiceSetup;
@@ -767,6 +796,9 @@ export interface ErrorHttpResponseOptions {
 }
 
 // @public
+export function exportSavedObjectsToStream({ types, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, }: SavedObjectsExportOptions): Promise<import("stream").Readable>;
+
+// @public
 export interface FakeRequest {
     headers: Headers;
 }
@@ -894,6 +926,9 @@ export interface ImageValidation {
     };
 }
 
+// @public
+export function importSavedObjectsFromStream({ readStream, objectLimit, overwrite, savedObjectsClient, supportedTypes, namespace, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+
 // @public (undocumented)
 export interface IndexSettingsDeprecationInfo {
     // (undocumented)
@@ -933,7 +968,7 @@ export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolea
 export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
 
 // @public
-export type ISavedObjectTypeRegistry = Pick<SavedObjectTypeRegistry, 'getType' | 'getAllTypes' | 'getIndex' | 'isNamespaceAgnostic' | 'isHidden'>;
+export type ISavedObjectTypeRegistry = Pick<SavedObjectTypeRegistry, 'getType' | 'getAllTypes' | 'getIndex' | 'isNamespaceAgnostic' | 'isHidden' | 'getImportableAndExportableTypes' | 'isImportableAndExportable'>;
 
 // @public
 export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
@@ -961,6 +996,10 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     // @internal (undocumented)
     protected readonly [requestSymbol]: Request;
     constructor(request: Request, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
+    // (undocumented)
+    readonly auth: {
+        isAuthenticated: boolean;
+    };
     // (undocumented)
     readonly body: Body;
     readonly events: KibanaRequestEvents;
@@ -1417,6 +1456,7 @@ export interface RequestHandlerContext {
         rendering: IScopedRenderingClient;
         savedObjects: {
             client: SavedObjectsClientContract;
+            typeRegistry: ISavedObjectTypeRegistry;
         };
         elasticsearch: {
             dataClient: IScopedClusterClient;
@@ -1433,6 +1473,9 @@ export type RequestHandlerContextContainer = IContextContainer<RequestHandler<an
 
 // @public
 export type RequestHandlerContextProvider<TContextName extends keyof RequestHandlerContext> = IContextProvider<RequestHandler<any, any, any>, TContextName>;
+
+// @public
+export function resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, supportedTypes, namespace, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
 
 // @public
 export type ResponseError = string | Error | {
@@ -1459,7 +1502,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
 
 // @public
 export interface RouteConfigOptions<Method extends RouteMethod> {
-    authRequired?: boolean;
+    authRequired?: boolean | 'optional';
     body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
     tags?: readonly string[];
     xsrfRequired?: Method extends 'get' ? never : boolean;
@@ -1896,17 +1939,11 @@ export interface SavedObjectsImportMissingReferencesError {
 
 // @public
 export interface SavedObjectsImportOptions {
-    // (undocumented)
     namespace?: string;
-    // (undocumented)
     objectLimit: number;
-    // (undocumented)
     overwrite: boolean;
-    // (undocumented)
     readStream: Readable;
-    // (undocumented)
     savedObjectsClient: SavedObjectsClientContract;
-    // (undocumented)
     supportedTypes: string[];
 }
 
@@ -2060,17 +2097,11 @@ export interface SavedObjectsRepositoryFactory {
 
 // @public
 export interface SavedObjectsResolveImportErrorsOptions {
-    // (undocumented)
     namespace?: string;
-    // (undocumented)
     objectLimit: number;
-    // (undocumented)
     readStream: Readable;
-    // (undocumented)
     retries: SavedObjectsImportRetry[];
-    // (undocumented)
     savedObjectsClient: SavedObjectsClientContract;
-    // (undocumented)
     supportedTypes: string[];
 }
 
@@ -2101,6 +2132,7 @@ export class SavedObjectsSerializer {
 // @public
 export interface SavedObjectsServiceSetup {
     addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
+    getImportExportObjectLimit: () => number;
     registerType: (type: SavedObjectsType) => void;
     setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 }
@@ -2119,10 +2151,24 @@ export interface SavedObjectsType {
     convertToAliasScript?: string;
     hidden: boolean;
     indexPattern?: string;
+    management?: SavedObjectsTypeManagementDefinition;
     mappings: SavedObjectsTypeMappingDefinition;
     migrations?: SavedObjectMigrationMap;
     name: string;
     namespaceAgnostic: boolean;
+}
+
+// @public
+export interface SavedObjectsTypeManagementDefinition {
+    defaultSearchField?: string;
+    getEditUrl?: (savedObject: SavedObject<any>) => string;
+    getInAppUrl?: (savedObject: SavedObject<any>) => {
+        path: string;
+        uiCapabilitiesPath: string;
+    };
+    getTitle?: (savedObject: SavedObject<any>) => string;
+    icon?: string;
+    importableAndExportable?: boolean;
 }
 
 // @public
@@ -2149,9 +2195,11 @@ export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<SavedObjec
 // @public
 export class SavedObjectTypeRegistry {
     getAllTypes(): SavedObjectsType[];
+    getImportableAndExportableTypes(): SavedObjectsType[];
     getIndex(type: string): string | undefined;
     getType(type: string): SavedObjectsType | undefined;
     isHidden(type: string): boolean;
+    isImportableAndExportable(type: string): boolean;
     isNamespaceAgnostic(type: string): boolean;
     registerType(type: SavedObjectsType): void;
     }

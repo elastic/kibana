@@ -8,7 +8,7 @@ import { useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { SimpleSavedObject } from 'src/core/public';
+import { SimpleSavedObject } from 'kibana/public';
 import { ml } from '../../../../../services/ml_api_service';
 import { useMlContext } from '../../../../../contexts/ml';
 
@@ -297,6 +297,10 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     dispatch({ type: ACTION.SWITCH_TO_ADVANCED_EDITOR });
   };
 
+  const setEstimatedModelMemoryLimit = (value: State['estimatedModelMemoryLimit']) => {
+    dispatch({ type: ACTION.SET_ESTIMATED_MODEL_MEMORY_LIMIT, value });
+  };
+
   const actions: ActionDispatchers = {
     closeModal,
     createAnalyticsJob,
@@ -308,6 +312,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     setJobConfig,
     startAnalyticsJob,
     switchToAdvancedEditor,
+    setEstimatedModelMemoryLimit,
   };
 
   return { state, actions };
