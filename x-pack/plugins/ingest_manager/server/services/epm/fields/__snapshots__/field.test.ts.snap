@@ -23,7 +23,12 @@ exports[`tests loading fields.yml: base.yml 1`] = `
         "type": "group",
         "fields": [
           {
-            "name": "foo"
+            "name": "foo",
+            "type": "text"
+          },
+          {
+            "name": "bar",
+            "type": "integer"
           }
         ]
       }
@@ -35,6 +40,9 @@ exports[`tests loading fields.yml: base.yml 1`] = `
     "fields": [
       {
         "name": "bar"
+      },
+      {
+        "name": "baz"
       }
     ]
   },
@@ -59,41 +67,53 @@ exports[`tests loading fields.yml: coredns.logs.yml 1`] = `
         "description": "id of the DNS transaction\\n"
       },
       {
-        "name": "query.size",
-        "type": "integer",
-        "format": "bytes",
-        "description": "size of the DNS query\\n"
+        "name": "query",
+        "type": "group",
+        "fields": [
+          {
+            "name": "size",
+            "type": "integer",
+            "format": "bytes",
+            "description": "size of the DNS query\\n"
+          },
+          {
+            "name": "class",
+            "type": "keyword",
+            "description": "DNS query class\\n"
+          },
+          {
+            "name": "name",
+            "type": "keyword",
+            "description": "DNS query name\\n"
+          },
+          {
+            "name": "type",
+            "type": "keyword",
+            "description": "DNS query type\\n"
+          }
+        ]
       },
       {
-        "name": "query.class",
-        "type": "keyword",
-        "description": "DNS query class\\n"
-      },
-      {
-        "name": "query.name",
-        "type": "keyword",
-        "description": "DNS query name\\n"
-      },
-      {
-        "name": "query.type",
-        "type": "keyword",
-        "description": "DNS query type\\n"
-      },
-      {
-        "name": "response.code",
-        "type": "keyword",
-        "description": "DNS response code\\n"
-      },
-      {
-        "name": "response.flags",
-        "type": "keyword",
-        "description": "DNS response flags\\n"
-      },
-      {
-        "name": "response.size",
-        "type": "integer",
-        "format": "bytes",
-        "description": "size of the DNS response\\n"
+        "name": "response",
+        "type": "group",
+        "fields": [
+          {
+            "name": "code",
+            "type": "keyword",
+            "description": "DNS response code\\n"
+          },
+          {
+            "name": "flags",
+            "type": "keyword",
+            "description": "DNS response flags\\n"
+          },
+          {
+            "name": "size",
+            "type": "integer",
+            "format": "bytes",
+            "description": "size of the DNS response\\n"
+          }
+        ]
       },
       {
         "name": "dnssec_ok",
@@ -122,101 +142,143 @@ exports[`tests loading fields.yml: system.yml 1`] = `
             "description": "CPU Core number.\\n"
           },
           {
-            "name": "user.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent in user space.\\n"
+            "name": "user",
+            "type": "group",
+            "fields": [
+              {
+                "name": "pct",
+                "type": "scaled_float",
+                "format": "percent",
+                "description": "The percentage of CPU time spent in user space.\\n"
+              },
+              {
+                "name": "ticks",
+                "type": "long",
+                "description": "The amount of CPU time spent in user space.\\n"
+              }
+            ]
           },
           {
-            "name": "user.ticks",
-            "type": "long",
-            "description": "The amount of CPU time spent in user space.\\n"
+            "name": "system",
+            "type": "group",
+            "fields": [
+              {
+                "name": "pct",
+                "type": "scaled_float",
+                "format": "percent",
+                "description": "The percentage of CPU time spent in kernel space.\\n"
+              },
+              {
+                "name": "ticks",
+                "type": "long",
+                "description": "The amount of CPU time spent in kernel space.\\n"
+              }
+            ]
           },
           {
-            "name": "system.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent in kernel space.\\n"
+            "name": "nice",
+            "type": "group",
+            "fields": [
+              {
+                "name": "pct",
+                "type": "scaled_float",
+                "format": "percent",
+                "description": "The percentage of CPU time spent on low-priority processes.\\n"
+              },
+              {
+                "name": "ticks",
+                "type": "long",
+                "description": "The amount of CPU time spent on low-priority processes.\\n"
+              }
+            ]
           },
           {
-            "name": "system.ticks",
-            "type": "long",
-            "description": "The amount of CPU time spent in kernel space.\\n"
+            "name": "idle",
+            "type": "group",
+            "fields": [
+              {
+                "name": "pct",
+                "type": "scaled_float",
+                "format": "percent",
+                "description": "The percentage of CPU time spent idle.\\n"
+              },
+              {
+                "name": "ticks",
+                "type": "long",
+                "description": "The amount of CPU time spent idle.\\n"
+              }
+            ]
           },
           {
-            "name": "nice.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent on low-priority processes.\\n"
+            "name": "iowait",
+            "type": "group",
+            "fields": [
+              {
+                "name": "pct",
+                "type": "scaled_float",
+                "format": "percent",
+                "description": "The percentage of CPU time spent in wait (on disk).\\n"
+              },
+              {
+                "name": "ticks",
+                "type": "long",
+                "description": "The amount of CPU time spent in wait (on disk).\\n"
+              }
+            ]
           },
           {
-            "name": "nice.ticks",
-            "type": "long",
-            "description": "The amount of CPU time spent on low-priority processes.\\n"
+            "name": "irq",
+            "type": "group",
+            "fields": [
+              {
+                "name": "pct",
+                "type": "scaled_float",
+                "format": "percent",
+                "description": "The percentage of CPU time spent servicing and handling hardware interrupts.\\n"
+              },
+              {
+                "name": "ticks",
+                "type": "long",
+                "description": "The amount of CPU time spent servicing and handling hardware interrupts.\\n"
+              }
+            ]
           },
           {
-            "name": "idle.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent idle.\\n"
+            "name": "softirq",
+            "type": "group",
+            "fields": [
+              {
+                "name": "pct",
+                "type": "scaled_float",
+                "format": "percent",
+                "description": "The percentage of CPU time spent servicing and handling software interrupts.\\n"
+              },
+              {
+                "name": "ticks",
+                "type": "long",
+                "description": "The amount of CPU time spent servicing and handling software interrupts.\\n"
+              }
+            ]
           },
           {
-            "name": "idle.ticks",
-            "type": "long",
-            "description": "The amount of CPU time spent idle.\\n"
-          },
-          {
-            "name": "iowait.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent in wait (on disk).\\n"
-          },
-          {
-            "name": "iowait.ticks",
-            "type": "long",
-            "description": "The amount of CPU time spent in wait (on disk).\\n"
-          },
-          {
-            "name": "irq.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent servicing and handling hardware interrupts.\\n"
-          },
-          {
-            "name": "irq.ticks",
-            "type": "long",
-            "description": "The amount of CPU time spent servicing and handling hardware interrupts.\\n"
-          },
-          {
-            "name": "softirq.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent servicing and handling software interrupts.\\n"
-          },
-          {
-            "name": "softirq.ticks",
-            "type": "long",
-            "description": "The amount of CPU time spent servicing and handling software interrupts.\\n"
-          },
-          {
-            "name": "steal.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent in involuntary wait by the virtual CPU while the hypervisor was servicing another processor. Available only on Unix.\\n"
-          },
-          {
-            "name": "steal.ticks",
-            "type": "long",
-            "description": "The amount of CPU time spent in involuntary wait by the virtual CPU while the hypervisor was servicing another processor. Available only on Unix.\\n"
+            "name": "steal",
+            "type": "group",
+            "fields": [
+              {
+                "name": "pct",
+                "type": "scaled_float",
+                "format": "percent",
+                "description": "The percentage of CPU time spent in involuntary wait by the virtual CPU while the hypervisor was servicing another processor. Available only on Unix.\\n"
+              },
+              {
+                "name": "ticks",
+                "type": "long",
+                "description": "The amount of CPU time spent in involuntary wait by the virtual CPU while the hypervisor was servicing another processor. Available only on Unix.\\n"
+              }
+            ]
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "system",
-    "type": "group",
-    "fields": [
+      },
       {
         "name": "cpu",
         "type": "group",
@@ -229,161 +291,263 @@ exports[`tests loading fields.yml: system.yml 1`] = `
             "description": "The number of CPU cores present on the host. The non-normalized percentages will have a maximum value of \`100% * cores\`. The normalized percentages already take this value into account and have a maximum value of 100%.\\n"
           },
           {
-            "name": "user.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent in user space. On multi-core systems, you can have percentages that are greater than 100%. For example, if 3 cores are at 60% use, then the \`system.cpu.user.pct\` will be 180%.\\n"
+            "name": "user",
+            "type": "group",
+            "fields": [
+              {
+                "name": "pct",
+                "type": "scaled_float",
+                "format": "percent",
+                "description": "The percentage of CPU time spent in user space. On multi-core systems, you can have percentages that are greater than 100%. For example, if 3 cores are at 60% use, then the \`system.cpu.user.pct\` will be 180%.\\n"
+              },
+              {
+                "name": "norm",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "pct",
+                    "type": "scaled_float",
+                    "format": "percent",
+                    "description": "The percentage of CPU time spent in user space.\\n"
+                  }
+                ]
+              },
+              {
+                "name": "ticks",
+                "type": "long",
+                "description": "The amount of CPU time spent in user space.\\n"
+              }
+            ]
           },
           {
-            "name": "system.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent in kernel space.\\n"
+            "name": "system",
+            "type": "group",
+            "fields": [
+              {
+                "name": "pct",
+                "type": "scaled_float",
+                "format": "percent",
+                "description": "The percentage of CPU time spent in kernel space.\\n"
+              },
+              {
+                "name": "norm",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "pct",
+                    "type": "scaled_float",
+                    "format": "percent",
+                    "description": "The percentage of CPU time spent in kernel space.\\n"
+                  }
+                ]
+              },
+              {
+                "name": "ticks",
+                "type": "long",
+                "description": "The amount of CPU time spent in kernel space.\\n"
+              }
+            ]
           },
           {
-            "name": "nice.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent on low-priority processes.\\n"
+            "name": "nice",
+            "type": "group",
+            "fields": [
+              {
+                "name": "pct",
+                "type": "scaled_float",
+                "format": "percent",
+                "description": "The percentage of CPU time spent on low-priority processes.\\n"
+              },
+              {
+                "name": "norm",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "pct",
+                    "type": "scaled_float",
+                    "format": "percent",
+                    "description": "The percentage of CPU time spent on low-priority processes.\\n"
+                  }
+                ]
+              },
+              {
+                "name": "ticks",
+                "type": "long",
+                "description": "The amount of CPU time spent on low-priority processes.\\n"
+              }
+            ]
           },
           {
-            "name": "idle.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent idle.\\n"
+            "name": "idle",
+            "type": "group",
+            "fields": [
+              {
+                "name": "pct",
+                "type": "scaled_float",
+                "format": "percent",
+                "description": "The percentage of CPU time spent idle.\\n"
+              },
+              {
+                "name": "norm",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "pct",
+                    "type": "scaled_float",
+                    "format": "percent",
+                    "description": "The percentage of CPU time spent idle.\\n"
+                  }
+                ]
+              },
+              {
+                "name": "ticks",
+                "type": "long",
+                "description": "The amount of CPU time spent idle.\\n"
+              }
+            ]
           },
           {
-            "name": "iowait.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent in wait (on disk).\\n"
+            "name": "iowait",
+            "type": "group",
+            "fields": [
+              {
+                "name": "pct",
+                "type": "scaled_float",
+                "format": "percent",
+                "description": "The percentage of CPU time spent in wait (on disk).\\n"
+              },
+              {
+                "name": "norm",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "pct",
+                    "type": "scaled_float",
+                    "format": "percent",
+                    "description": "The percentage of CPU time spent in wait (on disk).\\n"
+                  }
+                ]
+              },
+              {
+                "name": "ticks",
+                "type": "long",
+                "description": "The amount of CPU time spent in wait (on disk).\\n"
+              }
+            ]
           },
           {
-            "name": "irq.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent servicing and handling hardware interrupts.\\n"
+            "name": "irq",
+            "type": "group",
+            "fields": [
+              {
+                "name": "pct",
+                "type": "scaled_float",
+                "format": "percent",
+                "description": "The percentage of CPU time spent servicing and handling hardware interrupts.\\n"
+              },
+              {
+                "name": "norm",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "pct",
+                    "type": "scaled_float",
+                    "format": "percent",
+                    "description": "The percentage of CPU time spent servicing and handling hardware interrupts.\\n"
+                  }
+                ]
+              },
+              {
+                "name": "ticks",
+                "type": "long",
+                "description": "The amount of CPU time spent servicing and handling hardware interrupts.\\n"
+              }
+            ]
           },
           {
-            "name": "softirq.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent servicing and handling software interrupts.\\n"
+            "name": "softirq",
+            "type": "group",
+            "fields": [
+              {
+                "name": "pct",
+                "type": "scaled_float",
+                "format": "percent",
+                "description": "The percentage of CPU time spent servicing and handling software interrupts.\\n"
+              },
+              {
+                "name": "norm",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "pct",
+                    "type": "scaled_float",
+                    "format": "percent",
+                    "description": "The percentage of CPU time spent servicing and handling software interrupts.\\n"
+                  }
+                ]
+              },
+              {
+                "name": "ticks",
+                "type": "long",
+                "description": "The amount of CPU time spent servicing and handling software interrupts.\\n"
+              }
+            ]
           },
           {
-            "name": "steal.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent in involuntary wait by the virtual CPU while the hypervisor was servicing another processor. Available only on Unix.\\n"
+            "name": "steal",
+            "type": "group",
+            "fields": [
+              {
+                "name": "pct",
+                "type": "scaled_float",
+                "format": "percent",
+                "description": "The percentage of CPU time spent in involuntary wait by the virtual CPU while the hypervisor was servicing another processor. Available only on Unix.\\n"
+              },
+              {
+                "name": "norm",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "pct",
+                    "type": "scaled_float",
+                    "format": "percent",
+                    "description": "The percentage of CPU time spent in involuntary wait by the virtual CPU while the hypervisor was servicing another processor. Available only on Unix.\\n"
+                  }
+                ]
+              },
+              {
+                "name": "ticks",
+                "type": "long",
+                "description": "The amount of CPU time spent in involuntary wait by the virtual CPU while the hypervisor was servicing another processor. Available only on Unix.\\n"
+              }
+            ]
           },
           {
-            "name": "total.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent in states other than Idle and IOWait.\\n"
-          },
-          {
-            "name": "user.norm.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent in user space.\\n"
-          },
-          {
-            "name": "system.norm.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent in kernel space.\\n"
-          },
-          {
-            "name": "nice.norm.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent on low-priority processes.\\n"
-          },
-          {
-            "name": "idle.norm.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent idle.\\n"
-          },
-          {
-            "name": "iowait.norm.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent in wait (on disk).\\n"
-          },
-          {
-            "name": "irq.norm.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent servicing and handling hardware interrupts.\\n"
-          },
-          {
-            "name": "softirq.norm.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent servicing and handling software interrupts.\\n"
-          },
-          {
-            "name": "steal.norm.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time spent in involuntary wait by the virtual CPU while the hypervisor was servicing another processor. Available only on Unix.\\n"
-          },
-          {
-            "name": "total.norm.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of CPU time in states other than Idle and IOWait, normalised by the number of cores.\\n"
-          },
-          {
-            "name": "user.ticks",
-            "type": "long",
-            "description": "The amount of CPU time spent in user space.\\n"
-          },
-          {
-            "name": "system.ticks",
-            "type": "long",
-            "description": "The amount of CPU time spent in kernel space.\\n"
-          },
-          {
-            "name": "nice.ticks",
-            "type": "long",
-            "description": "The amount of CPU time spent on low-priority processes.\\n"
-          },
-          {
-            "name": "idle.ticks",
-            "type": "long",
-            "description": "The amount of CPU time spent idle.\\n"
-          },
-          {
-            "name": "iowait.ticks",
-            "type": "long",
-            "description": "The amount of CPU time spent in wait (on disk).\\n"
-          },
-          {
-            "name": "irq.ticks",
-            "type": "long",
-            "description": "The amount of CPU time spent servicing and handling hardware interrupts.\\n"
-          },
-          {
-            "name": "softirq.ticks",
-            "type": "long",
-            "description": "The amount of CPU time spent servicing and handling software interrupts.\\n"
-          },
-          {
-            "name": "steal.ticks",
-            "type": "long",
-            "description": "The amount of CPU time spent in involuntary wait by the virtual CPU while the hypervisor was servicing another processor. Available only on Unix.\\n"
+            "name": "total",
+            "type": "group",
+            "fields": [
+              {
+                "name": "pct",
+                "type": "scaled_float",
+                "format": "percent",
+                "description": "The percentage of CPU time spent in states other than Idle and IOWait.\\n"
+              },
+              {
+                "name": "norm",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "pct",
+                    "type": "scaled_float",
+                    "format": "percent",
+                    "description": "The percentage of CPU time in states other than Idle and IOWait, normalised by the number of cores.\\n"
+                  }
+                ]
+              }
+            ]
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "system",
-    "type": "group",
-    "fields": [
+      },
       {
         "name": "diskio",
         "type": "group",
@@ -402,117 +566,183 @@ exports[`tests loading fields.yml: system.yml 1`] = `
             "description": "The disk's serial number. This may not be provided by all operating systems.\\n"
           },
           {
-            "name": "read.count",
-            "type": "long",
-            "description": "The total number of reads completed successfully.\\n"
+            "name": "read",
+            "type": "group",
+            "fields": [
+              {
+                "name": "count",
+                "type": "long",
+                "description": "The total number of reads completed successfully.\\n"
+              },
+              {
+                "name": "bytes",
+                "type": "long",
+                "format": "bytes",
+                "description": "The total number of bytes read successfully. On Linux this is the number of sectors read multiplied by an assumed sector size of 512.\\n"
+              },
+              {
+                "name": "time",
+                "type": "long",
+                "description": "The total number of milliseconds spent by all reads.\\n"
+              }
+            ]
           },
           {
-            "name": "write.count",
-            "type": "long",
-            "description": "The total number of writes completed successfully.\\n"
+            "name": "write",
+            "type": "group",
+            "fields": [
+              {
+                "name": "count",
+                "type": "long",
+                "description": "The total number of writes completed successfully.\\n"
+              },
+              {
+                "name": "bytes",
+                "type": "long",
+                "format": "bytes",
+                "description": "The total number of bytes written successfully. On Linux this is the number of sectors written multiplied by an assumed sector size of 512.\\n"
+              },
+              {
+                "name": "time",
+                "type": "long",
+                "description": "The total number of milliseconds spent by all writes.\\n"
+              }
+            ]
           },
           {
-            "name": "read.bytes",
-            "type": "long",
-            "format": "bytes",
-            "description": "The total number of bytes read successfully. On Linux this is the number of sectors read multiplied by an assumed sector size of 512.\\n"
+            "name": "io",
+            "type": "group",
+            "fields": [
+              {
+                "name": "time",
+                "type": "long",
+                "description": "The total number of of milliseconds spent doing I/Os.\\n"
+              }
+            ]
           },
           {
-            "name": "write.bytes",
-            "type": "long",
-            "format": "bytes",
-            "description": "The total number of bytes written successfully. On Linux this is the number of sectors written multiplied by an assumed sector size of 512.\\n"
-          },
-          {
-            "name": "read.time",
-            "type": "long",
-            "description": "The total number of milliseconds spent by all reads.\\n"
-          },
-          {
-            "name": "write.time",
-            "type": "long",
-            "description": "The total number of milliseconds spent by all writes.\\n"
-          },
-          {
-            "name": "io.time",
-            "type": "long",
-            "description": "The total number of of milliseconds spent doing I/Os.\\n"
-          },
-          {
-            "name": "iostat.read.request.merges_per_sec",
-            "type": "float",
-            "description": "The number of read requests merged per second that were queued to the device.\\n"
-          },
-          {
-            "name": "iostat.write.request.merges_per_sec",
-            "type": "float",
-            "description": "The number of write requests merged per second that were queued to the device.\\n"
-          },
-          {
-            "name": "iostat.read.request.per_sec",
-            "type": "float",
-            "description": "The number of read requests that were issued to the device per second\\n"
-          },
-          {
-            "name": "iostat.write.request.per_sec",
-            "type": "float",
-            "description": "The number of write requests that were issued to the device per second\\n"
-          },
-          {
-            "name": "iostat.read.per_sec.bytes",
-            "type": "float",
-            "description": "The number of Bytes read from the device per second.\\n",
-            "format": "bytes"
-          },
-          {
-            "name": "iostat.read.await",
-            "type": "float",
-            "description": "The average time spent for read requests issued to the device to be served.\\n"
-          },
-          {
-            "name": "iostat.write.per_sec.bytes",
-            "type": "float",
-            "description": "The number of Bytes write from the device per second.\\n",
-            "format": "bytes"
-          },
-          {
-            "name": "iostat.write.await",
-            "type": "float",
-            "description": "The average time spent for write requests issued to the device to be served.\\n"
-          },
-          {
-            "name": "iostat.request.avg_size",
-            "type": "float",
-            "description": "The average size (in bytes) of the requests that were issued to the device.\\n"
-          },
-          {
-            "name": "iostat.queue.avg_size",
-            "type": "float",
-            "description": "The average queue length of the requests that were issued to the device.\\n"
-          },
-          {
-            "name": "iostat.await",
-            "type": "float",
-            "description": "The average time spent for requests issued to the device to be served.\\n"
-          },
-          {
-            "name": "iostat.service_time",
-            "type": "float",
-            "description": "The average service time (in milliseconds) for I/O requests that were issued to the device.\\n"
-          },
-          {
-            "name": "iostat.busy",
-            "type": "float",
-            "description": "Percentage of CPU time during which I/O requests were issued to the device (bandwidth utilization for the device). Device saturation occurs when this value is close to 100%.\\n"
+            "name": "iostat",
+            "type": "group",
+            "fields": [
+              {
+                "name": "read",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "request",
+                    "type": "group",
+                    "fields": [
+                      {
+                        "name": "merges_per_sec",
+                        "type": "float",
+                        "description": "The number of read requests merged per second that were queued to the device.\\n"
+                      },
+                      {
+                        "name": "per_sec",
+                        "type": "float",
+                        "description": "The number of read requests that were issued to the device per second\\n"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "per_sec",
+                    "type": "group",
+                    "fields": [
+                      {
+                        "name": "bytes",
+                        "type": "float",
+                        "description": "The number of Bytes read from the device per second.\\n",
+                        "format": "bytes"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "await",
+                    "type": "float",
+                    "description": "The average time spent for read requests issued to the device to be served.\\n"
+                  }
+                ]
+              },
+              {
+                "name": "write",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "request",
+                    "type": "group",
+                    "fields": [
+                      {
+                        "name": "merges_per_sec",
+                        "type": "float",
+                        "description": "The number of write requests merged per second that were queued to the device.\\n"
+                      },
+                      {
+                        "name": "per_sec",
+                        "type": "float",
+                        "description": "The number of write requests that were issued to the device per second\\n"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "per_sec",
+                    "type": "group",
+                    "fields": [
+                      {
+                        "name": "bytes",
+                        "type": "float",
+                        "description": "The number of Bytes write from the device per second.\\n",
+                        "format": "bytes"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "await",
+                    "type": "float",
+                    "description": "The average time spent for write requests issued to the device to be served.\\n"
+                  }
+                ]
+              },
+              {
+                "name": "request",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "avg_size",
+                    "type": "float",
+                    "description": "The average size (in bytes) of the requests that were issued to the device.\\n"
+                  }
+                ]
+              },
+              {
+                "name": "queue",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "avg_size",
+                    "type": "float",
+                    "description": "The average queue length of the requests that were issued to the device.\\n"
+                  }
+                ]
+              },
+              {
+                "name": "await",
+                "type": "float",
+                "description": "The average time spent for requests issued to the device to be served.\\n"
+              },
+              {
+                "name": "service_time",
+                "type": "float",
+                "description": "The average service time (in milliseconds) for I/O requests that were issued to the device.\\n"
+              },
+              {
+                "name": "busy",
+                "type": "float",
+                "description": "Percentage of CPU time during which I/O requests were issued to the device (bandwidth utilization for the device). Device saturation occurs when this value is close to 100%.\\n"
+              }
+            ]
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "system",
-    "type": "group",
-    "fields": [
+      },
       {
         "name": "entropy",
         "type": "group",
@@ -531,13 +761,7 @@ exports[`tests loading fields.yml: system.yml 1`] = `
             "description": "The percentage of available entropy, relative to the pool size of 4096\\n"
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "system",
-    "type": "group",
-    "fields": [
+      },
       {
         "name": "filesystem",
         "type": "group",
@@ -588,25 +812,25 @@ exports[`tests loading fields.yml: system.yml 1`] = `
             "description": "The total disk space in bytes.\\n"
           },
           {
-            "name": "used.bytes",
-            "type": "long",
-            "format": "bytes",
-            "description": "The used disk space in bytes.\\n"
-          },
-          {
-            "name": "used.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of used disk space.\\n"
+            "name": "used",
+            "type": "group",
+            "fields": [
+              {
+                "name": "bytes",
+                "type": "long",
+                "format": "bytes",
+                "description": "The used disk space in bytes.\\n"
+              },
+              {
+                "name": "pct",
+                "type": "scaled_float",
+                "format": "percent",
+                "description": "The percentage of used disk space.\\n"
+              }
+            ]
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "system",
-    "type": "group",
-    "fields": [
+      },
       {
         "name": "fsstat",
         "type": "group",
@@ -650,13 +874,7 @@ exports[`tests loading fields.yml: system.yml 1`] = `
             ]
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "system",
-    "type": "group",
-    "fields": [
+      },
       {
         "name": "load",
         "type": "group",
@@ -682,22 +900,28 @@ exports[`tests loading fields.yml: system.yml 1`] = `
             "description": "Load average for the last 15 minutes.\\n"
           },
           {
-            "name": "norm.1",
-            "type": "scaled_float",
-            "scaling_factor": 100,
-            "description": "Load for the last minute divided by the number of cores.\\n"
-          },
-          {
-            "name": "norm.5",
-            "type": "scaled_float",
-            "scaling_factor": 100,
-            "description": "Load for the last 5 minutes divided by the number of cores.\\n"
-          },
-          {
-            "name": "norm.15",
-            "type": "scaled_float",
-            "scaling_factor": 100,
-            "description": "Load for the last 15 minutes divided by the number of cores.\\n"
+            "name": "norm",
+            "type": "group",
+            "fields": [
+              {
+                "name": "1",
+                "type": "scaled_float",
+                "scaling_factor": 100,
+                "description": "Load for the last minute divided by the number of cores.\\n"
+              },
+              {
+                "name": "5",
+                "type": "scaled_float",
+                "scaling_factor": 100,
+                "description": "Load for the last 5 minutes divided by the number of cores.\\n"
+              },
+              {
+                "name": "15",
+                "type": "scaled_float",
+                "scaling_factor": 100,
+                "description": "Load for the last 15 minutes divided by the number of cores.\\n"
+              }
+            ]
           },
           {
             "name": "cores",
@@ -705,13 +929,7 @@ exports[`tests loading fields.yml: system.yml 1`] = `
             "description": "The number of CPU cores present on the host.\\n"
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "system",
-    "type": "group",
-    "fields": [
+      },
       {
         "name": "memory",
         "type": "group",
@@ -725,10 +943,22 @@ exports[`tests loading fields.yml: system.yml 1`] = `
             "description": "Total memory.\\n"
           },
           {
-            "name": "used.bytes",
-            "type": "long",
-            "format": "bytes",
-            "description": "Used memory.\\n"
+            "name": "used",
+            "type": "group",
+            "fields": [
+              {
+                "name": "bytes",
+                "type": "long",
+                "format": "bytes",
+                "description": "Used memory.\\n"
+              },
+              {
+                "name": "pct",
+                "type": "scaled_float",
+                "format": "percent",
+                "description": "The percentage of used memory.\\n"
+              }
+            ]
           },
           {
             "name": "free",
@@ -737,33 +967,33 @@ exports[`tests loading fields.yml: system.yml 1`] = `
             "description": "The total amount of free memory in bytes. This value does not include memory consumed by system caches and buffers (see system.memory.actual.free).\\n"
           },
           {
-            "name": "used.pct",
-            "type": "scaled_float",
-            "format": "percent",
-            "description": "The percentage of used memory.\\n"
-          },
-          {
             "name": "actual",
             "type": "group",
             "description": "Actual memory used and free.\\n",
             "fields": [
               {
-                "name": "used.bytes",
-                "type": "long",
-                "format": "bytes",
-                "description": "Actual used memory in bytes. It represents the difference between the total and the available memory. The available memory depends on the OS. For more details, please check \`system.actual.free\`.\\n"
+                "name": "used",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "bytes",
+                    "type": "long",
+                    "format": "bytes",
+                    "description": "Actual used memory in bytes. It represents the difference between the total and the available memory. The available memory depends on the OS. For more details, please check \`system.actual.free\`.\\n"
+                  },
+                  {
+                    "name": "pct",
+                    "type": "scaled_float",
+                    "format": "percent",
+                    "description": "The percentage of actual used memory.\\n"
+                  }
+                ]
               },
               {
                 "name": "free",
                 "type": "long",
                 "format": "bytes",
                 "description": "Actual free memory in bytes. It is calculated based on the OS. On Linux it consists of the free memory plus caches and buffers. On OSX it is a sum of free memory and the inactive memory. On Windows, it is equal to \`system.memory.free\`.\\n"
-              },
-              {
-                "name": "used.pct",
-                "type": "scaled_float",
-                "format": "percent",
-                "description": "The percentage of actual used memory.\\n"
               }
             ]
           },
@@ -780,10 +1010,22 @@ exports[`tests loading fields.yml: system.yml 1`] = `
                 "description": "Total swap memory.\\n"
               },
               {
-                "name": "used.bytes",
-                "type": "long",
-                "format": "bytes",
-                "description": "Used swap memory.\\n"
+                "name": "used",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "bytes",
+                    "type": "long",
+                    "format": "bytes",
+                    "description": "Used swap memory.\\n"
+                  },
+                  {
+                    "name": "pct",
+                    "type": "scaled_float",
+                    "format": "percent",
+                    "description": "The percentage of used swap memory.\\n"
+                  }
+                ]
               },
               {
                 "name": "free",
@@ -792,30 +1034,42 @@ exports[`tests loading fields.yml: system.yml 1`] = `
                 "description": "Available swap memory.\\n"
               },
               {
-                "name": "out.pages",
-                "type": "long",
-                "description": "count of pages swapped out"
+                "name": "out",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "pages",
+                    "type": "long",
+                    "description": "count of pages swapped out"
+                  }
+                ]
               },
               {
-                "name": "in.pages",
-                "type": "long",
-                "description": "count of pages swapped in"
+                "name": "in",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "pages",
+                    "type": "long",
+                    "description": "count of pages swapped in"
+                  }
+                ]
               },
               {
-                "name": "readahead.pages",
-                "type": "long",
-                "description": "swap readahead pages"
-              },
-              {
-                "name": "readahead.cached",
-                "type": "long",
-                "description": "swap readahead cache hits"
-              },
-              {
-                "name": "used.pct",
-                "type": "scaled_float",
-                "format": "percent",
-                "description": "The percentage of used swap memory.\\n"
+                "name": "readahead",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "pages",
+                    "type": "long",
+                    "description": "swap readahead pages"
+                  },
+                  {
+                    "name": "cached",
+                    "type": "long",
+                    "description": "swap readahead cache hits"
+                  }
+                ]
               }
             ]
           },
@@ -832,16 +1086,22 @@ exports[`tests loading fields.yml: system.yml 1`] = `
                 "description": "Number of huge pages in the pool.\\n"
               },
               {
-                "name": "used.bytes",
-                "type": "long",
-                "format": "bytes",
-                "description": "Memory used in allocated huge pages.\\n"
-              },
-              {
-                "name": "used.pct",
-                "type": "long",
-                "format": "percent",
-                "description": "Percentage of huge pages used.\\n"
+                "name": "used",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "bytes",
+                    "type": "long",
+                    "format": "bytes",
+                    "description": "Memory used in allocated huge pages.\\n"
+                  },
+                  {
+                    "name": "pct",
+                    "type": "long",
+                    "format": "percent",
+                    "description": "Percentage of huge pages used.\\n"
+                  }
+                ]
               },
               {
                 "name": "free",
@@ -868,32 +1128,32 @@ exports[`tests loading fields.yml: system.yml 1`] = `
                 "description": "Default size for huge pages.\\n"
               },
               {
-                "name": "swap.out",
+                "name": "swap",
                 "type": "group",
-                "description": "huge pages swapped out",
                 "fields": [
                   {
-                    "name": "pages",
-                    "type": "long",
-                    "description": "pages swapped out"
-                  },
-                  {
-                    "name": "fallback",
-                    "type": "long",
-                    "description": "Count of huge pages that must be split before swapout"
+                    "name": "out",
+                    "type": "group",
+                    "description": "huge pages swapped out",
+                    "fields": [
+                      {
+                        "name": "pages",
+                        "type": "long",
+                        "description": "pages swapped out"
+                      },
+                      {
+                        "name": "fallback",
+                        "type": "long",
+                        "description": "Count of huge pages that must be split before swapout"
+                      }
+                    ]
                   }
                 ]
               }
             ]
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "system",
-    "type": "group",
-    "fields": [
+      },
       {
         "name": "network",
         "type": "group",
@@ -907,55 +1167,61 @@ exports[`tests loading fields.yml: system.yml 1`] = `
             "description": "The network interface name.\\n"
           },
           {
-            "name": "out.bytes",
-            "type": "long",
-            "format": "bytes",
-            "description": "The number of bytes sent.\\n"
+            "name": "out",
+            "type": "group",
+            "fields": [
+              {
+                "name": "bytes",
+                "type": "long",
+                "format": "bytes",
+                "description": "The number of bytes sent.\\n"
+              },
+              {
+                "name": "packets",
+                "type": "long",
+                "description": "The number of packets sent.\\n"
+              },
+              {
+                "name": "errors",
+                "type": "long",
+                "description": "The number of errors while sending.\\n"
+              },
+              {
+                "name": "dropped",
+                "type": "long",
+                "description": "The number of outgoing packets that were dropped. This value is always 0 on Darwin and BSD because it is not reported by the operating system.\\n"
+              }
+            ]
           },
           {
-            "name": "in.bytes",
-            "type": "long",
-            "format": "bytes",
-            "description": "The number of bytes received.\\n"
-          },
-          {
-            "name": "out.packets",
-            "type": "long",
-            "description": "The number of packets sent.\\n"
-          },
-          {
-            "name": "in.packets",
-            "type": "long",
-            "description": "The number or packets received.\\n"
-          },
-          {
-            "name": "in.errors",
-            "type": "long",
-            "description": "The number of errors while receiving.\\n"
-          },
-          {
-            "name": "out.errors",
-            "type": "long",
-            "description": "The number of errors while sending.\\n"
-          },
-          {
-            "name": "in.dropped",
-            "type": "long",
-            "description": "The number of incoming packets that were dropped.\\n"
-          },
-          {
-            "name": "out.dropped",
-            "type": "long",
-            "description": "The number of outgoing packets that were dropped. This value is always 0 on Darwin and BSD because it is not reported by the operating system.\\n"
+            "name": "in",
+            "type": "group",
+            "fields": [
+              {
+                "name": "bytes",
+                "type": "long",
+                "format": "bytes",
+                "description": "The number of bytes received.\\n"
+              },
+              {
+                "name": "packets",
+                "type": "long",
+                "description": "The number or packets received.\\n"
+              },
+              {
+                "name": "errors",
+                "type": "long",
+                "description": "The number of errors while receiving.\\n"
+              },
+              {
+                "name": "dropped",
+                "type": "long",
+                "description": "The number of incoming packets that were dropped.\\n"
+              }
+            ]
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "system",
-    "type": "group",
-    "fields": [
+      },
       {
         "name": "network_summary",
         "type": "group",
@@ -963,38 +1229,62 @@ exports[`tests loading fields.yml: system.yml 1`] = `
         "description": "Metrics relating to global network activity\\n",
         "fields": [
           {
-            "name": "ip.*",
-            "type": "object",
-            "description": "IP counters\\n"
+            "name": "ip",
+            "type": "group",
+            "fields": [
+              {
+                "name": "*",
+                "type": "object",
+                "description": "IP counters\\n"
+              }
+            ]
           },
           {
-            "name": "tcp.*",
-            "type": "object",
-            "description": "TCP counters\\n"
+            "name": "tcp",
+            "type": "group",
+            "fields": [
+              {
+                "name": "*",
+                "type": "object",
+                "description": "TCP counters\\n"
+              }
+            ]
           },
           {
-            "name": "udp.*",
-            "type": "object",
-            "description": "UDP counters\\n"
+            "name": "udp",
+            "type": "group",
+            "fields": [
+              {
+                "name": "*",
+                "type": "object",
+                "description": "UDP counters\\n"
+              }
+            ]
           },
           {
-            "name": "udp_lite.*",
-            "type": "object",
-            "description": "UDP Lite counters\\n"
+            "name": "udp_lite",
+            "type": "group",
+            "fields": [
+              {
+                "name": "*",
+                "type": "object",
+                "description": "UDP Lite counters\\n"
+              }
+            ]
           },
           {
-            "name": "icmp.*",
-            "type": "object",
-            "description": "ICMP counters\\n"
+            "name": "icmp",
+            "type": "group",
+            "fields": [
+              {
+                "name": "*",
+                "type": "object",
+                "description": "ICMP counters\\n"
+              }
+            ]
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "system",
-    "type": "group",
-    "fields": [
+      },
       {
         "name": "process",
         "type": "group",
@@ -1061,36 +1351,60 @@ exports[`tests loading fields.yml: system.yml 1`] = `
             "description": "CPU-specific statistics per process.",
             "fields": [
               {
-                "name": "user.ticks",
-                "type": "long",
-                "description": "The amount of CPU time the process spent in user space.\\n"
+                "name": "user",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "ticks",
+                    "type": "long",
+                    "description": "The amount of CPU time the process spent in user space.\\n"
+                  }
+                ]
               },
               {
-                "name": "total.value",
-                "type": "long",
-                "description": "The value of CPU usage since starting the process.\\n"
+                "name": "total",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "value",
+                    "type": "long",
+                    "description": "The value of CPU usage since starting the process.\\n"
+                  },
+                  {
+                    "name": "pct",
+                    "type": "scaled_float",
+                    "format": "percent",
+                    "description": "The percentage of CPU time spent by the process since the last update. Its value is similar to the %CPU value of the process displayed by the top command on Unix systems.\\n"
+                  },
+                  {
+                    "name": "norm",
+                    "type": "group",
+                    "fields": [
+                      {
+                        "name": "pct",
+                        "type": "scaled_float",
+                        "format": "percent",
+                        "description": "The percentage of CPU time spent by the process since the last event. This value is normalized by the number of CPU cores and it ranges from 0 to 100%.\\n"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "ticks",
+                    "type": "long",
+                    "description": "The total CPU time spent by the process.\\n"
+                  }
+                ]
               },
               {
-                "name": "total.pct",
-                "type": "scaled_float",
-                "format": "percent",
-                "description": "The percentage of CPU time spent by the process since the last update. Its value is similar to the %CPU value of the process displayed by the top command on Unix systems.\\n"
-              },
-              {
-                "name": "total.norm.pct",
-                "type": "scaled_float",
-                "format": "percent",
-                "description": "The percentage of CPU time spent by the process since the last event. This value is normalized by the number of CPU cores and it ranges from 0 to 100%.\\n"
-              },
-              {
-                "name": "system.ticks",
-                "type": "long",
-                "description": "The amount of CPU time the process spent in kernel space.\\n"
-              },
-              {
-                "name": "total.ticks",
-                "type": "long",
-                "description": "The total CPU time spent by the process.\\n"
+                "name": "system",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "ticks",
+                    "type": "long",
+                    "description": "The amount of CPU time the process spent in kernel space.\\n"
+                  }
+                ]
               },
               {
                 "name": "start_time",
@@ -1112,16 +1426,22 @@ exports[`tests loading fields.yml: system.yml 1`] = `
                 "description": "The total virtual memory the process has.\\n"
               },
               {
-                "name": "rss.bytes",
-                "type": "long",
-                "format": "bytes",
-                "description": "The Resident Set Size. The amount of memory the process occupied in main memory (RAM).\\n"
-              },
-              {
-                "name": "rss.pct",
-                "type": "scaled_float",
-                "format": "percent",
-                "description": "The percentage of memory the process occupied in main memory (RAM).\\n"
+                "name": "rss",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "bytes",
+                    "type": "long",
+                    "format": "bytes",
+                    "description": "The Resident Set Size. The amount of memory the process occupied in main memory (RAM).\\n"
+                  },
+                  {
+                    "name": "pct",
+                    "type": "scaled_float",
+                    "format": "percent",
+                    "description": "The percentage of memory the process occupied in main memory (RAM).\\n"
+                  }
+                ]
               },
               {
                 "name": "share",
@@ -1143,14 +1463,20 @@ exports[`tests loading fields.yml: system.yml 1`] = `
                 "description": "The number of file descriptors open by the process."
               },
               {
-                "name": "limit.soft",
-                "type": "long",
-                "description": "The soft limit on the number of file descriptors opened by the process. The soft limit can be changed by the process at any time.\\n"
-              },
-              {
-                "name": "limit.hard",
-                "type": "long",
-                "description": "The hard limit on the number of file descriptors opened by the process. The hard limit can only be raised by root.\\n"
+                "name": "limit",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "soft",
+                    "type": "long",
+                    "description": "The soft limit on the number of file descriptors opened by the process. The soft limit can be changed by the process at any time.\\n"
+                  },
+                  {
+                    "name": "hard",
+                    "type": "long",
+                    "description": "The hard limit on the number of file descriptors opened by the process. The hard limit can only be raised by root.\\n"
+                  }
+                ]
               }
             ]
           },
@@ -1185,44 +1511,92 @@ exports[`tests loading fields.yml: system.yml 1`] = `
                     "description": "Path to the cgroup relative to the cgroup subsystem's mountpoint.\\n"
                   },
                   {
-                    "name": "cfs.period.us",
-                    "type": "long",
-                    "description": "Period of time in microseconds for how regularly a cgroup's access to CPU resources should be reallocated.\\n"
+                    "name": "cfs",
+                    "type": "group",
+                    "fields": [
+                      {
+                        "name": "period",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "us",
+                            "type": "long",
+                            "description": "Period of time in microseconds for how regularly a cgroup's access to CPU resources should be reallocated.\\n"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "quota",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "us",
+                            "type": "long",
+                            "description": "Total amount of time in microseconds for which all tasks in a cgroup can run during one period (as defined by cfs.period.us).\\n"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "shares",
+                        "type": "long",
+                        "description": "An integer value that specifies a relative share of CPU time available to the tasks in a cgroup. The value specified in the cpu.shares file must be 2 or higher.\\n"
+                      }
+                    ]
                   },
                   {
-                    "name": "cfs.quota.us",
-                    "type": "long",
-                    "description": "Total amount of time in microseconds for which all tasks in a cgroup can run during one period (as defined by cfs.period.us).\\n"
+                    "name": "rt",
+                    "type": "group",
+                    "fields": [
+                      {
+                        "name": "period",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "us",
+                            "type": "long",
+                            "description": "Period of time in microseconds for how regularly a cgroup's access to CPU resources is reallocated.\\n"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "runtime",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "us",
+                            "type": "long",
+                            "description": "Period of time in microseconds for the longest continuous period in which the tasks in a cgroup have access to CPU resources.\\n"
+                          }
+                        ]
+                      }
+                    ]
                   },
                   {
-                    "name": "cfs.shares",
-                    "type": "long",
-                    "description": "An integer value that specifies a relative share of CPU time available to the tasks in a cgroup. The value specified in the cpu.shares file must be 2 or higher.\\n"
-                  },
-                  {
-                    "name": "rt.period.us",
-                    "type": "long",
-                    "description": "Period of time in microseconds for how regularly a cgroup's access to CPU resources is reallocated.\\n"
-                  },
-                  {
-                    "name": "rt.runtime.us",
-                    "type": "long",
-                    "description": "Period of time in microseconds for the longest continuous period in which the tasks in a cgroup have access to CPU resources.\\n"
-                  },
-                  {
-                    "name": "stats.periods",
-                    "type": "long",
-                    "description": "Number of period intervals (as specified in cpu.cfs.period.us) that have elapsed.\\n"
-                  },
-                  {
-                    "name": "stats.throttled.periods",
-                    "type": "long",
-                    "description": "Number of times tasks in a cgroup have been throttled (that is, not allowed to run because they have exhausted all of the available time as specified by their quota).\\n"
-                  },
-                  {
-                    "name": "stats.throttled.ns",
-                    "type": "long",
-                    "description": "The total time duration (in nanoseconds) for which tasks in a cgroup have been throttled.\\n"
+                    "name": "stats",
+                    "type": "group",
+                    "fields": [
+                      {
+                        "name": "periods",
+                        "type": "long",
+                        "description": "Number of period intervals (as specified in cpu.cfs.period.us) that have elapsed.\\n"
+                      },
+                      {
+                        "name": "throttled",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "periods",
+                            "type": "long",
+                            "description": "Number of times tasks in a cgroup have been throttled (that is, not allowed to run because they have exhausted all of the available time as specified by their quota).\\n"
+                          },
+                          {
+                            "name": "ns",
+                            "type": "long",
+                            "description": "The total time duration (in nanoseconds) for which tasks in a cgroup have been throttled.\\n"
+                          }
+                        ]
+                      }
+                    ]
                   }
                 ]
               },
@@ -1242,19 +1616,43 @@ exports[`tests loading fields.yml: system.yml 1`] = `
                     "description": "Path to the cgroup relative to the cgroup subsystem's mountpoint.\\n"
                   },
                   {
-                    "name": "total.ns",
-                    "type": "long",
-                    "description": "Total CPU time in nanoseconds consumed by all tasks in the cgroup.\\n"
+                    "name": "total",
+                    "type": "group",
+                    "fields": [
+                      {
+                        "name": "ns",
+                        "type": "long",
+                        "description": "Total CPU time in nanoseconds consumed by all tasks in the cgroup.\\n"
+                      }
+                    ]
                   },
                   {
-                    "name": "stats.user.ns",
-                    "type": "long",
-                    "description": "CPU time consumed by tasks in user mode."
-                  },
-                  {
-                    "name": "stats.system.ns",
-                    "type": "long",
-                    "description": "CPU time consumed by tasks in user (kernel) mode."
+                    "name": "stats",
+                    "type": "group",
+                    "fields": [
+                      {
+                        "name": "user",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "ns",
+                            "type": "long",
+                            "description": "CPU time consumed by tasks in user mode."
+                          }
+                        ]
+                      },
+                      {
+                        "name": "system",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "ns",
+                            "type": "long",
+                            "description": "CPU time consumed by tasks in user (kernel) mode."
+                          }
+                        ]
+                      }
+                    ]
                   },
                   {
                     "name": "percpu",
@@ -1280,188 +1678,362 @@ exports[`tests loading fields.yml: system.yml 1`] = `
                     "description": "Path to the cgroup relative to the cgroup subsystem's mountpoint.\\n"
                   },
                   {
-                    "name": "mem.usage.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "Total memory usage by processes in the cgroup (in bytes).\\n"
+                    "name": "mem",
+                    "type": "group",
+                    "fields": [
+                      {
+                        "name": "usage",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "bytes",
+                            "type": "long",
+                            "format": "bytes",
+                            "description": "Total memory usage by processes in the cgroup (in bytes).\\n"
+                          },
+                          {
+                            "name": "max",
+                            "type": "group",
+                            "fields": [
+                              {
+                                "name": "bytes",
+                                "type": "long",
+                                "format": "bytes",
+                                "description": "The maximum memory used by processes in the cgroup (in bytes).\\n"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "name": "limit",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "bytes",
+                            "type": "long",
+                            "format": "bytes",
+                            "description": "The maximum amount of user memory in bytes (including file cache) that tasks in the cgroup are allowed to use.\\n"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "failures",
+                        "type": "long",
+                        "description": "The number of times that the memory limit (mem.limit.bytes) was reached.\\n"
+                      }
+                    ]
                   },
                   {
-                    "name": "mem.usage.max.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "The maximum memory used by processes in the cgroup (in bytes).\\n"
+                    "name": "memsw",
+                    "type": "group",
+                    "fields": [
+                      {
+                        "name": "usage",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "bytes",
+                            "type": "long",
+                            "format": "bytes",
+                            "description": "The sum of current memory usage plus swap space used by processes in the cgroup (in bytes).\\n"
+                          },
+                          {
+                            "name": "max",
+                            "type": "group",
+                            "fields": [
+                              {
+                                "name": "bytes",
+                                "type": "long",
+                                "format": "bytes",
+                                "description": "The maximum amount of memory and swap space used by processes in the cgroup (in bytes).\\n"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "name": "limit",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "bytes",
+                            "type": "long",
+                            "format": "bytes",
+                            "description": "The maximum amount for the sum of memory and swap usage that tasks in the cgroup are allowed to use.\\n"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "failures",
+                        "type": "long",
+                        "description": "The number of times that the memory plus swap space limit (memsw.limit.bytes) was reached.\\n"
+                      }
+                    ]
                   },
                   {
-                    "name": "mem.limit.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "The maximum amount of user memory in bytes (including file cache) that tasks in the cgroup are allowed to use.\\n"
+                    "name": "kmem",
+                    "type": "group",
+                    "fields": [
+                      {
+                        "name": "usage",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "bytes",
+                            "type": "long",
+                            "format": "bytes",
+                            "description": "Total kernel memory usage by processes in the cgroup (in bytes).\\n"
+                          },
+                          {
+                            "name": "max",
+                            "type": "group",
+                            "fields": [
+                              {
+                                "name": "bytes",
+                                "type": "long",
+                                "format": "bytes",
+                                "description": "The maximum kernel memory used by processes in the cgroup (in bytes).\\n"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "name": "limit",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "bytes",
+                            "type": "long",
+                            "format": "bytes",
+                            "description": "The maximum amount of kernel memory that tasks in the cgroup are allowed to use.\\n"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "failures",
+                        "type": "long",
+                        "description": "The number of times that the memory limit (kmem.limit.bytes) was reached.\\n"
+                      }
+                    ]
                   },
                   {
-                    "name": "mem.failures",
-                    "type": "long",
-                    "description": "The number of times that the memory limit (mem.limit.bytes) was reached.\\n"
+                    "name": "kmem_tcp",
+                    "type": "group",
+                    "fields": [
+                      {
+                        "name": "usage",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "bytes",
+                            "type": "long",
+                            "format": "bytes",
+                            "description": "Total memory usage for TCP buffers in bytes.\\n"
+                          },
+                          {
+                            "name": "max",
+                            "type": "group",
+                            "fields": [
+                              {
+                                "name": "bytes",
+                                "type": "long",
+                                "format": "bytes",
+                                "description": "The maximum memory used for TCP buffers by processes in the cgroup (in bytes).\\n"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "name": "limit",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "bytes",
+                            "type": "long",
+                            "format": "bytes",
+                            "description": "The maximum amount of memory for TCP buffers that tasks in the cgroup are allowed to use.\\n"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "failures",
+                        "type": "long",
+                        "description": "The number of times that the memory limit (kmem_tcp.limit.bytes) was reached.\\n"
+                      }
+                    ]
                   },
                   {
-                    "name": "memsw.usage.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "The sum of current memory usage plus swap space used by processes in the cgroup (in bytes).\\n"
-                  },
-                  {
-                    "name": "memsw.usage.max.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "The maximum amount of memory and swap space used by processes in the cgroup (in bytes).\\n"
-                  },
-                  {
-                    "name": "memsw.limit.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "The maximum amount for the sum of memory and swap usage that tasks in the cgroup are allowed to use.\\n"
-                  },
-                  {
-                    "name": "memsw.failures",
-                    "type": "long",
-                    "description": "The number of times that the memory plus swap space limit (memsw.limit.bytes) was reached.\\n"
-                  },
-                  {
-                    "name": "kmem.usage.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "Total kernel memory usage by processes in the cgroup (in bytes).\\n"
-                  },
-                  {
-                    "name": "kmem.usage.max.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "The maximum kernel memory used by processes in the cgroup (in bytes).\\n"
-                  },
-                  {
-                    "name": "kmem.limit.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "The maximum amount of kernel memory that tasks in the cgroup are allowed to use.\\n"
-                  },
-                  {
-                    "name": "kmem.failures",
-                    "type": "long",
-                    "description": "The number of times that the memory limit (kmem.limit.bytes) was reached.\\n"
-                  },
-                  {
-                    "name": "kmem_tcp.usage.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "Total memory usage for TCP buffers in bytes.\\n"
-                  },
-                  {
-                    "name": "kmem_tcp.usage.max.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "The maximum memory used for TCP buffers by processes in the cgroup (in bytes).\\n"
-                  },
-                  {
-                    "name": "kmem_tcp.limit.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "The maximum amount of memory for TCP buffers that tasks in the cgroup are allowed to use.\\n"
-                  },
-                  {
-                    "name": "kmem_tcp.failures",
-                    "type": "long",
-                    "description": "The number of times that the memory limit (kmem_tcp.limit.bytes) was reached.\\n"
-                  },
-                  {
-                    "name": "stats.active_anon.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "Anonymous and swap cache on active least-recently-used (LRU) list, including tmpfs (shmem), in bytes.\\n"
-                  },
-                  {
-                    "name": "stats.active_file.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "File-backed memory on active LRU list, in bytes."
-                  },
-                  {
-                    "name": "stats.cache.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "Page cache, including tmpfs (shmem), in bytes."
-                  },
-                  {
-                    "name": "stats.hierarchical_memory_limit.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "Memory limit for the hierarchy that contains the memory cgroup, in bytes.\\n"
-                  },
-                  {
-                    "name": "stats.hierarchical_memsw_limit.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "Memory plus swap limit for the hierarchy that contains the memory cgroup, in bytes.\\n"
-                  },
-                  {
-                    "name": "stats.inactive_anon.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "Anonymous and swap cache on inactive LRU list, including tmpfs (shmem), in bytes\\n"
-                  },
-                  {
-                    "name": "stats.inactive_file.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "File-backed memory on inactive LRU list, in bytes.\\n"
-                  },
-                  {
-                    "name": "stats.mapped_file.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "Size of memory-mapped mapped files, including tmpfs (shmem), in bytes.\\n"
-                  },
-                  {
-                    "name": "stats.page_faults",
-                    "type": "long",
-                    "description": "Number of times that a process in the cgroup triggered a page fault.\\n"
-                  },
-                  {
-                    "name": "stats.major_page_faults",
-                    "type": "long",
-                    "description": "Number of times that a process in the cgroup triggered a major fault. \\"Major\\" faults happen when the kernel actually has to read the data from disk.\\n"
-                  },
-                  {
-                    "name": "stats.pages_in",
-                    "type": "long",
-                    "description": "Number of pages paged into memory. This is a counter.\\n"
-                  },
-                  {
-                    "name": "stats.pages_out",
-                    "type": "long",
-                    "description": "Number of pages paged out of memory. This is a counter.\\n"
-                  },
-                  {
-                    "name": "stats.rss.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "Anonymous and swap cache (includes transparent hugepages), not including tmpfs (shmem), in bytes.\\n"
-                  },
-                  {
-                    "name": "stats.rss_huge.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "Number of bytes of anonymous transparent hugepages.\\n"
-                  },
-                  {
-                    "name": "stats.swap.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "Swap usage, in bytes.\\n"
-                  },
-                  {
-                    "name": "stats.unevictable.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "Memory that cannot be reclaimed, in bytes.\\n"
+                    "name": "stats",
+                    "type": "group",
+                    "fields": [
+                      {
+                        "name": "active_anon",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "bytes",
+                            "type": "long",
+                            "format": "bytes",
+                            "description": "Anonymous and swap cache on active least-recently-used (LRU) list, including tmpfs (shmem), in bytes.\\n"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "active_file",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "bytes",
+                            "type": "long",
+                            "format": "bytes",
+                            "description": "File-backed memory on active LRU list, in bytes."
+                          }
+                        ]
+                      },
+                      {
+                        "name": "cache",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "bytes",
+                            "type": "long",
+                            "format": "bytes",
+                            "description": "Page cache, including tmpfs (shmem), in bytes."
+                          }
+                        ]
+                      },
+                      {
+                        "name": "hierarchical_memory_limit",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "bytes",
+                            "type": "long",
+                            "format": "bytes",
+                            "description": "Memory limit for the hierarchy that contains the memory cgroup, in bytes.\\n"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "hierarchical_memsw_limit",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "bytes",
+                            "type": "long",
+                            "format": "bytes",
+                            "description": "Memory plus swap limit for the hierarchy that contains the memory cgroup, in bytes.\\n"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "inactive_anon",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "bytes",
+                            "type": "long",
+                            "format": "bytes",
+                            "description": "Anonymous and swap cache on inactive LRU list, including tmpfs (shmem), in bytes\\n"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "inactive_file",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "bytes",
+                            "type": "long",
+                            "format": "bytes",
+                            "description": "File-backed memory on inactive LRU list, in bytes.\\n"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "mapped_file",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "bytes",
+                            "type": "long",
+                            "format": "bytes",
+                            "description": "Size of memory-mapped mapped files, including tmpfs (shmem), in bytes.\\n"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "page_faults",
+                        "type": "long",
+                        "description": "Number of times that a process in the cgroup triggered a page fault.\\n"
+                      },
+                      {
+                        "name": "major_page_faults",
+                        "type": "long",
+                        "description": "Number of times that a process in the cgroup triggered a major fault. \\"Major\\" faults happen when the kernel actually has to read the data from disk.\\n"
+                      },
+                      {
+                        "name": "pages_in",
+                        "type": "long",
+                        "description": "Number of pages paged into memory. This is a counter.\\n"
+                      },
+                      {
+                        "name": "pages_out",
+                        "type": "long",
+                        "description": "Number of pages paged out of memory. This is a counter.\\n"
+                      },
+                      {
+                        "name": "rss",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "bytes",
+                            "type": "long",
+                            "format": "bytes",
+                            "description": "Anonymous and swap cache (includes transparent hugepages), not including tmpfs (shmem), in bytes.\\n"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "rss_huge",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "bytes",
+                            "type": "long",
+                            "format": "bytes",
+                            "description": "Number of bytes of anonymous transparent hugepages.\\n"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "swap",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "bytes",
+                            "type": "long",
+                            "format": "bytes",
+                            "description": "Swap usage, in bytes.\\n"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "unevictable",
+                        "type": "group",
+                        "fields": [
+                          {
+                            "name": "bytes",
+                            "type": "long",
+                            "format": "bytes",
+                            "description": "Memory that cannot be reclaimed, in bytes.\\n"
+                          }
+                        ]
+                      }
+                    ]
                   }
                 ]
               },
@@ -1481,32 +2053,26 @@ exports[`tests loading fields.yml: system.yml 1`] = `
                     "description": "Path to the cgroup relative to the cgroup subsystems mountpoint.\\n"
                   },
                   {
-                    "name": "total.bytes",
-                    "type": "long",
-                    "format": "bytes",
-                    "description": "Total number of bytes transferred to and from all block devices by processes in the cgroup.\\n"
-                  },
-                  {
-                    "name": "total.ios",
-                    "type": "long",
-                    "description": "Total number of I/O operations performed on all devices by processes in the cgroup as seen by the throttling policy.\\n"
+                    "name": "total",
+                    "type": "group",
+                    "fields": [
+                      {
+                        "name": "bytes",
+                        "type": "long",
+                        "format": "bytes",
+                        "description": "Total number of bytes transferred to and from all block devices by processes in the cgroup.\\n"
+                      },
+                      {
+                        "name": "ios",
+                        "type": "long",
+                        "description": "Total number of I/O operations performed on all devices by processes in the cgroup as seen by the throttling policy.\\n"
+                      }
+                    ]
                   }
                 ]
               }
             ]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "system",
-    "type": "group",
-    "fields": [
-      {
-        "name": "process",
-        "type": "group",
-        "fields": [
+          },
           {
             "name": "summary",
             "title": "Process Summary",
@@ -1557,13 +2123,7 @@ exports[`tests loading fields.yml: system.yml 1`] = `
             ]
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "system",
-    "type": "group",
-    "fields": [
+      },
       {
         "name": "raid",
         "type": "group",
@@ -1591,119 +2151,61 @@ exports[`tests loading fields.yml: system.yml 1`] = `
             "description": "Current sync action, if the RAID array is redundant\\n"
           },
           {
-            "name": "disks.active",
-            "type": "long",
-            "description": "Number of active disks.\\n"
+            "name": "disks",
+            "type": "group",
+            "fields": [
+              {
+                "name": "active",
+                "type": "long",
+                "description": "Number of active disks.\\n"
+              },
+              {
+                "name": "total",
+                "type": "long",
+                "description": "Total number of disks the device consists of.\\n"
+              },
+              {
+                "name": "spare",
+                "type": "long",
+                "description": "Number of spared disks.\\n"
+              },
+              {
+                "name": "failed",
+                "type": "long",
+                "description": "Number of failed disks.\\n"
+              },
+              {
+                "name": "states",
+                "type": "group",
+                "fields": [
+                  {
+                    "name": "*",
+                    "type": "object",
+                    "object_type": "keyword",
+                    "description": "map of raw disk states\\n"
+                  }
+                ]
+              }
+            ]
           },
           {
-            "name": "disks.total",
-            "type": "long",
-            "description": "Total number of disks the device consists of.\\n"
-          },
-          {
-            "name": "disks.spare",
-            "type": "long",
-            "description": "Number of spared disks.\\n"
-          },
-          {
-            "name": "disks.failed",
-            "type": "long",
-            "description": "Number of failed disks.\\n"
-          },
-          {
-            "name": "disks.states.*",
-            "type": "object",
-            "object_type": "keyword",
-            "description": "map of raw disk states\\n"
-          },
-          {
-            "name": "blocks.total",
-            "type": "long",
-            "description": "Number of blocks the device holds, in 1024-byte blocks.\\n"
-          },
-          {
-            "name": "blocks.synced",
-            "type": "long",
-            "description": "Number of blocks on the device that are in sync, in 1024-byte blocks.\\n"
+            "name": "blocks",
+            "type": "group",
+            "fields": [
+              {
+                "name": "total",
+                "type": "long",
+                "description": "Number of blocks the device holds, in 1024-byte blocks.\\n"
+              },
+              {
+                "name": "synced",
+                "type": "long",
+                "description": "Number of blocks on the device that are in sync, in 1024-byte blocks.\\n"
+              }
+            ]
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "system",
-    "type": "group",
-    "fields": [
-      {
-        "name": "raid",
-        "type": "group",
-        "description": "raid\\n",
-        "release": "ga",
-        "fields": [
-          {
-            "name": "name",
-            "type": "keyword",
-            "description": "Name of the device.\\n"
-          },
-          {
-            "name": "status",
-            "type": "keyword",
-            "description": "activity-state of the device.\\n"
-          },
-          {
-            "name": "level",
-            "type": "keyword",
-            "description": "The raid level of the device\\n"
-          },
-          {
-            "name": "sync_action",
-            "type": "keyword",
-            "description": "Current sync action, if the RAID array is redundant\\n"
-          },
-          {
-            "name": "disks.active",
-            "type": "long",
-            "description": "Number of active disks.\\n"
-          },
-          {
-            "name": "disks.total",
-            "type": "long",
-            "description": "Total number of disks the device consists of.\\n"
-          },
-          {
-            "name": "disks.spare",
-            "type": "long",
-            "description": "Number of spared disks.\\n"
-          },
-          {
-            "name": "disks.failed",
-            "type": "long",
-            "description": "Number of failed disks.\\n"
-          },
-          {
-            "name": "disks.states.*",
-            "type": "object",
-            "object_type": "keyword",
-            "description": "map of raw disk states\\n"
-          },
-          {
-            "name": "blocks.total",
-            "type": "long",
-            "description": "Number of blocks the device holds, in 1024-byte blocks.\\n"
-          },
-          {
-            "name": "blocks.synced",
-            "type": "long",
-            "description": "Number of blocks on the device that are in sync, in 1024-byte blocks.\\n"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "system",
-    "type": "group",
-    "fields": [
+      },
       {
         "name": "socket",
         "type": "group",
@@ -1723,93 +2225,105 @@ exports[`tests loading fields.yml: system.yml 1`] = `
             "migration": true
           },
           {
-            "name": "local.ip",
-            "type": "ip",
-            "example": "192.0.2.1 or 2001:0DB8:ABED:8536::1",
-            "description": "Local IP address. This can be an IPv4 or IPv6 address.\\n"
+            "name": "local",
+            "type": "group",
+            "fields": [
+              {
+                "name": "ip",
+                "type": "ip",
+                "example": "192.0.2.1 or 2001:0DB8:ABED:8536::1",
+                "description": "Local IP address. This can be an IPv4 or IPv6 address.\\n"
+              },
+              {
+                "name": "port",
+                "type": "long",
+                "example": 22,
+                "description": "Local port.\\n"
+              }
+            ]
           },
           {
-            "name": "local.port",
-            "type": "long",
-            "example": 22,
-            "description": "Local port.\\n"
+            "name": "remote",
+            "type": "group",
+            "fields": [
+              {
+                "name": "ip",
+                "type": "ip",
+                "example": "192.0.2.1 or 2001:0DB8:ABED:8536::1",
+                "description": "Remote IP address. This can be an IPv4 or IPv6 address.\\n"
+              },
+              {
+                "name": "port",
+                "type": "long",
+                "example": 22,
+                "description": "Remote port.\\n"
+              },
+              {
+                "name": "host",
+                "type": "keyword",
+                "example": "76-211-117-36.nw.example.com.",
+                "description": "PTR record associated with the remote IP. It is obtained via reverse IP lookup.\\n"
+              },
+              {
+                "name": "etld_plus_one",
+                "type": "keyword",
+                "example": "example.com.",
+                "description": "The effective top-level domain (eTLD) of the remote host plus one more label. For example, the eTLD+1 for \\"foo.bar.golang.org.\\" is \\"golang.org.\\". The data for determining the eTLD comes from an embedded copy of the data from http://publicsuffix.org.\\n"
+              },
+              {
+                "name": "host_error",
+                "type": "keyword",
+                "description": "Error describing the cause of the reverse lookup failure.\\n"
+              }
+            ]
           },
           {
-            "name": "remote.ip",
-            "type": "ip",
-            "example": "192.0.2.1 or 2001:0DB8:ABED:8536::1",
-            "description": "Remote IP address. This can be an IPv4 or IPv6 address.\\n"
+            "name": "process",
+            "type": "group",
+            "fields": [
+              {
+                "name": "pid",
+                "type": "alias",
+                "path": "process.pid",
+                "migration": true
+              },
+              {
+                "name": "command",
+                "type": "alias",
+                "path": "process.name",
+                "migration": true
+              },
+              {
+                "name": "cmdline",
+                "type": "keyword",
+                "description": "Full command line\\n"
+              },
+              {
+                "name": "exe",
+                "type": "alias",
+                "path": "process.executable",
+                "migration": true
+              }
+            ]
           },
           {
-            "name": "remote.port",
-            "type": "long",
-            "example": 22,
-            "description": "Remote port.\\n"
+            "name": "user",
+            "type": "group",
+            "fields": [
+              {
+                "name": "id",
+                "type": "alias",
+                "path": "user.id",
+                "migration": true
+              },
+              {
+                "name": "name",
+                "type": "alias",
+                "path": "user.full_name",
+                "migration": true
+              }
+            ]
           },
-          {
-            "name": "remote.host",
-            "type": "keyword",
-            "example": "76-211-117-36.nw.example.com.",
-            "description": "PTR record associated with the remote IP. It is obtained via reverse IP lookup.\\n"
-          },
-          {
-            "name": "remote.etld_plus_one",
-            "type": "keyword",
-            "example": "example.com.",
-            "description": "The effective top-level domain (eTLD) of the remote host plus one more label. For example, the eTLD+1 for \\"foo.bar.golang.org.\\" is \\"golang.org.\\". The data for determining the eTLD comes from an embedded copy of the data from http://publicsuffix.org.\\n"
-          },
-          {
-            "name": "remote.host_error",
-            "type": "keyword",
-            "description": "Error describing the cause of the reverse lookup failure.\\n"
-          },
-          {
-            "name": "process.pid",
-            "type": "alias",
-            "path": "process.pid",
-            "migration": true
-          },
-          {
-            "name": "process.command",
-            "type": "alias",
-            "path": "process.name",
-            "migration": true
-          },
-          {
-            "name": "process.cmdline",
-            "type": "keyword",
-            "description": "Full command line\\n"
-          },
-          {
-            "name": "process.exe",
-            "type": "alias",
-            "path": "process.executable",
-            "migration": true
-          },
-          {
-            "name": "user.id",
-            "type": "alias",
-            "path": "user.id",
-            "migration": true
-          },
-          {
-            "name": "user.name",
-            "type": "alias",
-            "path": "user.full_name",
-            "migration": true
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "system",
-    "type": "group",
-    "fields": [
-      {
-        "name": "socket",
-        "type": "group",
-        "fields": [
           {
             "name": "summary",
             "title": "Socket summary",
@@ -1942,13 +2456,7 @@ exports[`tests loading fields.yml: system.yml 1`] = `
             ]
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "system",
-    "type": "group",
-    "fields": [
+      },
       {
         "name": "uptime",
         "type": "group",
@@ -1956,20 +2464,20 @@ exports[`tests loading fields.yml: system.yml 1`] = `
         "release": "ga",
         "fields": [
           {
-            "name": "duration.ms",
-            "type": "long",
-            "format": "duration",
-            "input_format": "milliseconds",
-            "description": "The OS uptime in milliseconds.\\n"
+            "name": "duration",
+            "type": "group",
+            "fields": [
+              {
+                "name": "ms",
+                "type": "long",
+                "format": "duration",
+                "input_format": "milliseconds",
+                "description": "The OS uptime in milliseconds.\\n"
+              }
+            ]
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "system",
-    "type": "group",
-    "fields": [
+      },
       {
         "name": "users",
         "type": "group",

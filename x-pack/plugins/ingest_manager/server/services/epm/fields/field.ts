@@ -49,45 +49,87 @@ export interface Field {
 export type Fields = Field[];
 
 /**
- * ProcessFields takes the given fields read from yaml and expands it.
+ * expandFields takes the given fields read from yaml and expands them.
  * There are dotted fields in the field.yml like `foo.bar`. These should
- * be stored as an object inside an object and is the main purpose of this
- * preprocessing.
+ * be stored as an field within a 'group' field.
  *
- * Note: This function modifies the passed field param.
+ * Note: This function modifies the passed fields array.
  */
-export function processFields(fields: Fields) {
+export function expandFields(fields: Fields) {
   fields.forEach((field, key) => {
     const fieldName = field.name;
 
-    // If the field name contains a dot, it means we need to create sub objects
+    // If the field name contains a dot, it means we need to
+    // - take the first part of the name
+    // - create a field of type 'group' with this first part
+    // - put the original field, named with the rest of the original name in the fields property of the new group field
     if (fieldName.includes('.')) {
       // Split up the name by dots to extract first and other parts
       const nameParts = fieldName.split('.');
 
       // Getting first part of the name for the new field
-      const newNameTop = nameParts[0];
-      delete nameParts[0];
+      const groupFieldName = nameParts[0];
 
       // Put back together the parts again for the new field name
-      const newName = nameParts.length === 1 ? nameParts[0] : nameParts.slice(1).join('.');
+      const restFieldName = nameParts.slice(1).join('.');
 
-      field.name = newName;
+      // keep all properties of the original field, but give it the shortened name
+      field.name = restFieldName;
 
-      // Create the new field with the old field inside
-      const newField: Field = {
-        name: newNameTop,
+      // create a new field of type group with the original field in the fields array
+      const groupField: Field = {
+        name: groupFieldName,
         type: 'group',
         fields: [field],
       };
-
-      // Replace the old field in the array
-      fields[key] = newField;
-      if (newField.fields) {
-        processFields(newField.fields);
+      // check child fields further down the tree
+      if (groupField.fields) {
+        expandFields(groupField.fields);
+      }
+      // Replace the original field in the array with the new one
+      fields[key] = groupField;
+    } else {
+      // even if this field doesn't have dots to expand, its child fields further down the tree might
+      if (field.fields) {
+        expandFields(field.fields);
       }
     }
   });
+}
+/**
+ * dedupFields takes the given fields and merges sibling fields with the
+ * same name together.
+ * These can result from expandFields when the input contains dotted field
+ * names that share parts of their hierarchy.
+ */
+function dedupFields(fields: Fields): Fields {
+  const dedupedFields: Fields = [];
+  fields.forEach(field => {
+    const found = dedupedFields.find(f => {
+      return f.name === field.name;
+    });
+    if (found) {
+      if (found.type === 'group' && field.type === 'group' && found.fields && field.fields) {
+        found.fields = dedupFields(found.fields.concat(field.fields));
+      } else {
+        // only 'group' fields can be merged in this way
+        throw new Error(
+          "Can't merge fields " + JSON.stringify(found) + ' and ' + JSON.stringify(field)
+        );
+      }
+    } else {
+      if (field.fields) {
+        field.fields = dedupFields(field.fields);
+      }
+      dedupedFields.push(field);
+    }
+  });
+  return dedupedFields;
+}
+
+export function processFields(fields: Fields): Fields {
+  expandFields(fields);
+  return dedupFields(fields);
 }
 
 const isFields = (path: string) => {
