@@ -73,11 +73,10 @@ export const singleBulkCreate = async ({
   enabled,
   tags,
   throttle,
-}: SingleBulkCreateParams): Promise<boolean> => {
+}: SingleBulkCreateParams): Promise<{ success: boolean; bulkCreateDuration?: string }> => {
   someResult.hits.hits = filterDuplicateRules(id, someResult);
-
   if (someResult.hits.hits.length === 0) {
-    return true;
+    return { success: true };
   }
   // index documents after creating an ID based on the
   // source documents' originating index, and the original
@@ -141,5 +140,5 @@ export const singleBulkCreate = async ({
       );
     }
   }
-  return true;
+  return { success: true, bulkCreateDuration: Number(end - start).toFixed(2) };
 };

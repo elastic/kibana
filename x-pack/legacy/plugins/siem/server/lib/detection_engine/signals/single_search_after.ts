@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { performance } from 'perf_hooks';
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { Logger } from '../../../../../../../../src/core/server';
 import { SignalSearchResponse } from './types';
@@ -30,7 +31,10 @@ export const singleSearchAfter = async ({
   filter,
   logger,
   pageSize,
-}: SingleSearchAfterParams): Promise<SignalSearchResponse> => {
+}: SingleSearchAfterParams): Promise<{
+  searchResult: SignalSearchResponse;
+  searchDuration: string;
+}> => {
   if (searchAfterSortId == null) {
     throw Error('Attempted to search after with empty sort id');
   }
@@ -43,11 +47,13 @@ export const singleSearchAfter = async ({
       size: pageSize,
       searchAfterSortId,
     });
+    const start = performance.now();
     const nextSearchAfterResult: SignalSearchResponse = await services.callCluster(
       'search',
       searchAfterQuery
     );
-    return nextSearchAfterResult;
+    const end = performance.now();
+    return { searchResult: nextSearchAfterResult, searchDuration: Number(end - start).toFixed(2) };
   } catch (exc) {
     logger.error(`[-] nextSearchAfter threw an error ${exc}`);
     throw exc;

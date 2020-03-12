@@ -175,7 +175,9 @@ export const signalRulesAlertType = ({
           logger.debug(
             `[+] Initial search call of signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
           );
+          const start = performance.now();
           const noReIndexResult = await services.callCluster('search', noReIndex);
+          const end = performance.now();
           if (noReIndexResult.hits.total.value !== 0) {
             logger.info(
               `Found ${
@@ -186,7 +188,12 @@ export const signalRulesAlertType = ({
             );
           }
 
-          creationSucceeded = await searchAfterAndBulkCreate({
+          const {
+            success,
+            bulkCreateTimes,
+            searchAfterTimes,
+            lastLookBackDate,
+          } = await searchAfterAndBulkCreate({
             someResult: noReIndexResult,
             ruleParams: params,
             services,
@@ -209,7 +216,7 @@ export const signalRulesAlertType = ({
           });
         }
 
-        if (creationSucceeded) {
+        if (success) {
           if (meta?.throttle === NOTIFICATION_THROTTLE_RULE && actions.length) {
             const notificationRuleParams = {
               ...ruleParams,
@@ -248,6 +255,18 @@ export const signalRulesAlertType = ({
             currentStatusSavedObject,
           });
         } else {
+            await writeSignalRuleExceptionToSavedObject({
+              name,
+              alertId,
+              currentStatusSavedObject,
+              logger,
+              message: `Bulk Indexing signals failed. Check logs for further details \nRule name: "${name}"\nid: "${alertId}"\nrule_id: "${ruleId}"\n`,
+              services,
+              ruleStatusSavedObjects,
+              ruleId: ruleId ?? '(unknown rule id)',
+            });
+          }
+        } catch (err) {
           await writeSignalRuleExceptionToSavedObject({
             name,
             alertId,
@@ -258,7 +277,6 @@ export const signalRulesAlertType = ({
             ruleStatusSavedObjects,
             ruleId: ruleId ?? '(unknown rule id)',
           });
-        }
       } catch (error) {
         await writeSignalRuleExceptionToSavedObject({
           name,
