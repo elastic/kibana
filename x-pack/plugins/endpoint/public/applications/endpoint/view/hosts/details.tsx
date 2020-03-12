@@ -30,7 +30,7 @@ import { FormattedDateAndTime } from '../formatted_date_time';
 import { uiQueryParams, detailsData, detailsError } from './../../store/hosts/selectors';
 
 const HostDetails = memo(({ details }: { details: HostListState }) => {
-  const Clumpy = styled(EuiListGroupItem)`
+  const HostIds = styled(EuiListGroupItem)`
     margin-top: 0;
     .euiListGroupItem__text {
       padding: 0;
@@ -90,7 +90,7 @@ const HostDetails = memo(({ details }: { details: HostListState }) => {
         description: (
           <EuiListGroup flush>
             {details.host.ip.map((ip: string, index: number) => (
-              <Clumpy key={index} label={ip} />
+              <HostIds key={index} label={ip} />
             ))}
           </EuiListGroup>
         ),
