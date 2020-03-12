@@ -4,9 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function transform(kibana: any) {
-  return new kibana.Plugin({
-    id: 'transform',
-    configPrefix: 'xpack.transform',
-  });
-}
+export const ACTION_TYPE_ID = '.servicenow';
+export const SUPPORTED_SOURCE_FIELDS = ['title', 'comments', 'description'];
