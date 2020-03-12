@@ -11,6 +11,7 @@ import { CollectConfigProps } from './types';
 export const dashboards = [
   { id: 'dashboard1', title: 'Dashboard 1' },
   { id: 'dashboard2', title: 'Dashboard 2' },
+  { id: 'dashboard3', title: 'Dashboard 3' },
 ];
 
 export const CollectConfig: React.FC<CollectConfigProps> = props => {
