@@ -279,7 +279,7 @@ const upgradeYourLicenseCallOut = (
   >
     <FormattedMessage
       id="xpack.triggersActionsUI.sections.actionConnectorAdd.upgradeYourPlanBannerMessage"
-      defaultMessage="With an upgraded license, you hae the option to connecto to more 3rd party services."
+      defaultMessage="With an upgraded license, you have the option to connect to more 3rd party services."
     />
     <EuiSpacer size="xs" />
     <EuiLink href={VIEW_LICENSE_OPTIONS_LINK} target="_blank">
