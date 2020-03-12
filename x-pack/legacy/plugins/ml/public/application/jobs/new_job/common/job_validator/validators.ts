@@ -12,6 +12,7 @@ import {
   ml,
 } from '../../../../services/ml_api_service';
 import { JobCreator } from '../job_creator';
+import { CombinedJob } from '../../../../../../common/types/anomaly_detection_jobs';
 
 export enum VALIDATOR_SEVERITY {
   ERROR,
@@ -57,7 +58,7 @@ export function cardinalityValidator(
       return ml.validateCardinality$({
         ...jobCreator.jobConfig,
         datafeed_config: jobCreator.datafeedConfig,
-      });
+      } as CombinedJob);
     }),
     map(validationResults => {
       for (const validationResult of validationResults) {
