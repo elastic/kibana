@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { uniq } from 'lodash';
 import { SavedObjectsClientContract } from 'kibana/server';
 import { AuthenticatedUser } from '../../../security/server';
 import { DEFAULT_AGENT_CONFIG, AGENT_CONFIG_SAVED_OBJECT_TYPE } from '../constants';
@@ -205,7 +206,9 @@ class AgentConfigService {
       id,
       {
         ...oldAgentConfig,
-        datasources: [...((oldAgentConfig.datasources || []) as string[])].concat(datasourceIds),
+        datasources: uniq(
+          [...((oldAgentConfig.datasources || []) as string[])].concat(datasourceIds)
+        ),
       },
       options?.user
     );
@@ -228,8 +231,10 @@ class AgentConfigService {
       id,
       {
         ...oldAgentConfig,
-        datasources: [...((oldAgentConfig.datasources || []) as string[])].filter(
-          dsId => !datasourceIds.includes(dsId)
+        datasources: uniq(
+          [...((oldAgentConfig.datasources || []) as string[])].filter(
+            dsId => !datasourceIds.includes(dsId)
+          )
         ),
       },
       options?.user
