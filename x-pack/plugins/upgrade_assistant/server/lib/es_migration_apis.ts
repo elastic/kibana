@@ -9,6 +9,8 @@ import { EnrichedDeprecationInfo, UpgradeAssistantStatus } from '../../common/ty
 import { getDeprecatedApmIndices } from './apm';
 import { isSystemIndex } from './reindexing';
 
+import { esIndicesStateCheck } from './es_indices_state_check';
+
 export async function getUpgradeAssistantStatus(
   dataClient: IScopedClusterClient,
   isCloudEnabled: boolean,
@@ -24,6 +26,22 @@ export async function getUpgradeAssistantStatus(
 
   const cluster = getClusterDeprecations(deprecations, isCloudEnabled);
   const indices = getCombinedIndexInfos(deprecations, apmIndexDeprecations);
+
+  const indexNames = indices.map(({ index }) => index!);
+
+  // If we have found deprecation information for index/indices check whether the index is
+  // open or closed.
+  if (indexNames.length) {
+    const indexStates = await esIndicesStateCheck(
+      dataClient.callAsCurrentUser.bind(dataClient),
+      indexNames
+    );
+
+    indices.forEach(indexData => {
+      indexData.blockerForReindexing =
+        indexStates[indexData.index!] === 'close' ? 'index-closed' : undefined;
+    });
+  }
 
   const criticalWarnings = cluster.concat(indices).filter(d => d.level === 'critical');
 

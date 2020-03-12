@@ -214,7 +214,9 @@ export function registerReindexIndicesRoutes(
               licensing,
               headers: request.headers,
               credentialStore,
-              enqueue: true,
+              reindexOptions: {
+                enqueue: true,
+              },
             });
             results.enqueued.push(result);
           } catch (e) {

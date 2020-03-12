@@ -78,11 +78,11 @@ function getLayoutOptions(
   };
 }
 
-function selectRoots(elements: cytoscape.ElementDefinition[]): string[] {
-  const nodes = cytoscape({ elements }).nodes();
-  const unconnectedNodes = nodes.roots().intersection(nodes.leaves());
+function selectRoots(cy: cytoscape.Core): string[] {
+  const nodes = cy.nodes();
+  const roots = nodes.roots();
   const rumNodes = nodes.filter(node => isRumAgentName(node.data('agentName')));
-  return rumNodes.union(unconnectedNodes).map(node => node.id());
+  return rumNodes.union(roots).map(node => node.id());
 }
 
 export function Cytoscape({
@@ -118,7 +118,7 @@ export function Cytoscape({
         }
 
         if (event.cy.elements().length > 0) {
-          const selectedRoots = selectRoots(elements);
+          const selectedRoots = selectRoots(event.cy);
           const layout = cy.layout(
             getLayoutOptions(selectedRoots, height, width)
           );
@@ -130,7 +130,7 @@ export function Cytoscape({
         }
       }
     },
-    [cy, serviceName, elements, height, width]
+    [cy, serviceName, height, width]
   );
 
   // Trigger a custom "data" event when data changes

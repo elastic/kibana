@@ -11,7 +11,11 @@ import { AggFieldNamePair } from '../../../../common/types/fields';
 import { Category } from '../../../../common/types/categories';
 import { ExistingJobsAndGroups } from '../job_service';
 import { PrivilegesResponse } from '../../../../common/types/privileges';
-import { MlServerDefaults, MlServerLimits } from '../ml_server_info';
+import {
+  MlInfoResponse,
+  MlServerDefaults,
+  MlServerLimits,
+} from '../../../../common/types/ml_server_info';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { DataFrameAnalyticsStats } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { JobMessage } from '../../../../common/types/audit_message';
@@ -67,17 +71,6 @@ export interface BucketSpanEstimatorResponse {
   ms: number;
   error?: boolean;
   message?: { msg: string } | string;
-}
-
-export interface MlInfoResponse {
-  defaults: MlServerDefaults;
-  limits: MlServerLimits;
-  native_code: {
-    build_hash: string;
-    version: string;
-  };
-  upgrade_mode: boolean;
-  cloudId?: string;
 }
 
 export interface SuccessCardinality {

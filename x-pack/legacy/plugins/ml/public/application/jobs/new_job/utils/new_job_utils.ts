@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IUiSettingsClient } from 'src/core/public';
+import { IUiSettingsClient } from 'kibana/public';
 import { esQuery, Query, esKuery } from '../../../../../../../../../src/plugins/data/public';
 import { IIndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
+import { APICaller } from 'kibana/server';
 import { INDEX_META_DATA_CREATED_BY } from '../../../../../legacy/plugins/ml/common/constants/file_datavisualizer';
 import { InputData } from './file_data_visualizer';
 
@@ -30,9 +30,7 @@ interface Failure {
   doc: any;
 }
 
-export function importDataProvider(context: RequestHandlerContext) {
-  const callAsCurrentUser = context.ml!.mlClient.callAsCurrentUser;
-
+export function importDataProvider(callAsCurrentUser: APICaller) {
   async function importData(
     id: string,
     index: string,

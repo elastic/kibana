@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'src/core/server';
+import { APICaller } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import {
   JOB_STATE,

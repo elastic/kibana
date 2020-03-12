@@ -106,7 +106,7 @@ module.exports = function(grunt) {
     }),
 
     // used by the test tasks
-    //    runs the check_core_api_changes script to ensure API changes are explictily accepted
+    //    runs the check_published_api_changes script to ensure API changes are explictily accepted
     checkDocApiChanges: scriptWithGithubChecks({
       title: 'Check core API changes',
       cmd: NODE,
@@ -196,6 +196,12 @@ module.exports = function(grunt) {
       },
       cmd: NODE,
       args: ['scripts/notice', '--validate'],
+    }),
+
+    test_hardening: scriptWithGithubChecks({
+      title: 'Node.js hardening tests',
+      cmd: NODE,
+      args: ['scripts/test_hardening.js'],
     }),
 
     apiIntegrationTests: scriptWithGithubChecks({

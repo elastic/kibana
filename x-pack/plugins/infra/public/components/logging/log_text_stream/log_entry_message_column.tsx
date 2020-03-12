@@ -6,7 +6,7 @@
 
 import React, { memo, useMemo } from 'react';
 
-import { euiStyled, css } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../observability/public';
 import {
   isConstantSegment,
   isFieldSegment,
@@ -18,7 +18,13 @@ import {
 } from '../../../utils/log_entry';
 import { ActiveHighlightMarker, highlightFieldValue, HighlightMarker } from './highlighting';
 import { LogEntryColumnContent } from './log_entry_column';
-import { hoveredContentStyle } from './text_styles';
+import {
+  hoveredContentStyle,
+  longWrappedContentStyle,
+  preWrappedContentStyle,
+  unwrappedContentStyle,
+  WrapMode,
+} from './text_styles';
 
 interface LogEntryMessageColumnProps {
   columnValue: LogEntryColumn;
@@ -26,11 +32,11 @@ interface LogEntryMessageColumnProps {
   isActiveHighlight: boolean;
   isHighlighted: boolean;
   isHovered: boolean;
-  isWrapped: boolean;
+  wrapMode: WrapMode;
 }
 
 export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
-  ({ columnValue, highlights, isActiveHighlight, isHighlighted, isHovered, isWrapped }) => {
+  ({ columnValue, highlights, isActiveHighlight, isHighlighted, isHovered, wrapMode }) => {
     const message = useMemo(
       () =>
         isMessageColumn(columnValue)
@@ -40,40 +46,29 @@ export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
     );
 
     return (
-      <MessageColumnContent
-        isHighlighted={isHighlighted}
-        isHovered={isHovered}
-        isWrapped={isWrapped}
-      >
+      <MessageColumnContent isHighlighted={isHighlighted} isHovered={isHovered} wrapMode={wrapMode}>
         {message}
       </MessageColumnContent>
     );
   }
 );
 
-const wrappedContentStyle = css`
-  overflow: visible;
-  white-space: pre-wrap;
-  word-break: break-all;
-`;
-
-const unwrappedContentStyle = css`
-  overflow: hidden;
-  white-space: pre;
-`;
-
 interface MessageColumnContentProps {
   isHovered: boolean;
   isHighlighted: boolean;
-  isWrapped?: boolean;
+  wrapMode: WrapMode;
 }
 
 const MessageColumnContent = euiStyled(LogEntryColumnContent)<MessageColumnContentProps>`
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
   text-overflow: ellipsis;
 
   ${props => (props.isHovered || props.isHighlighted ? hoveredContentStyle : '')};
-  ${props => (props.isWrapped ? wrappedContentStyle : unwrappedContentStyle)};
+  ${props =>
+    props.wrapMode === 'long'
+      ? longWrappedContentStyle
+      : props.wrapMode === 'pre-wrapped'
+      ? preWrappedContentStyle
+      : unwrappedContentStyle};
 `;
 
 const formatMessageSegments = (
