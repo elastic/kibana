@@ -5,13 +5,11 @@
  */
 
 import { VectorLayer } from './vector_layer';
-import { VectorStyle } from './styles/vector/vector_style';
+import { IVectorStyle, VectorStyle } from './styles/vector/vector_style';
+// @ts-ignore
 import { getDefaultDynamicProperties, VECTOR_STYLES } from './styles/vector/vector_style_defaults';
-import {
-  IDynamicStyleProperty,
-  DynamicStyleProperty,
-} from './styles/vector/properties/dynamic_style_property';
-import { StaticStyleProperty } from './styles/vector/properties/static_style_property';
+import { IDynamicStyleProperty } from './styles/vector/properties/dynamic_style_property';
+import { IStyleProperty } from './styles/vector/properties/style_property';
 import {
   COUNT_PROP_LABEL,
   COUNT_PROP_NAME,
@@ -20,37 +18,145 @@ import {
   AGG_TYPE,
   SOURCE_DATA_ID_ORIGIN,
   RENDER_AS,
+  STYLE_TYPE,
 } from '../../common/constants';
-import { ESGeoGridSource } from './sources/es_geo_grid_source';
+import { ESGeoGridSource } from './sources/es_geo_grid_source/es_geo_grid_source';
+// @ts-ignore
 import { canSkipSourceUpdate } from './util/can_skip_fetch';
-import { IVectorLayer } from './vector_layer';
-import { IESSource } from '../sources/es_source';
-import { IESAggSource } from '../sources/es_agg_source';
+import { IVectorLayer, VectorLayerArguments } from './vector_layer';
+import { IESSource } from './sources/es_source';
+import { IESAggSource } from './sources/es_agg_source';
 
 function getAggType(dynamicProperty: IDynamicStyleProperty): AGG_TYPE {
   return dynamicProperty.isOrdinal() ? AGG_TYPE.AVG : AGG_TYPE.TERMS;
 }
 
+function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle): IESAggSource {
+  const clusterSourceDescriptor = ESGeoGridSource.createDescriptor({
+    indexPatternId: documentSource.getIndexPatternId(),
+    geoField: documentSource.getGeoFieldName(),
+    requestType: RENDER_AS.POINT,
+  });
+  clusterSourceDescriptor.metrics = [
+    {
+      type: AGG_TYPE.COUNT,
+      label: COUNT_PROP_LABEL,
+    },
+    ...documentStyle.getDynamicPropertiesArray().map(dynamicProperty => {
+      return {
+        type: getAggType(dynamicProperty),
+        field: dynamicProperty.getFieldName(),
+      };
+    }),
+  ];
+  return new ESGeoGridSource(clusterSourceDescriptor, documentSource.getInspectorAdapters());
+}
+
+function getClusterStyleDescriptor(
+  documentStyle: IVectorStyle,
+  clusterSource: IESAggSource
+): unknown {
+  const defaultDynamicProperties = getDefaultDynamicProperties();
+  const clusterStyleDescriptor: any = {
+    ...documentStyle.getDescriptor(),
+    properties: {
+      [VECTOR_STYLES.LABEL_TEXT]: {
+        type: STYLE_TYPE.DYNAMIC,
+        options: {
+          ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
+          field: {
+            name: COUNT_PROP_NAME,
+            origin: SOURCE_DATA_ID_ORIGIN,
+          },
+        },
+      },
+      [VECTOR_STYLES.ICON_SIZE]: {
+        type: STYLE_TYPE.DYNAMIC,
+        options: {
+          ...defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options,
+          field: {
+            name: COUNT_PROP_NAME,
+            origin: SOURCE_DATA_ID_ORIGIN,
+          },
+        },
+      },
+    },
+  };
+  documentStyle.getAllStyleProperties().forEach((styleProperty: IStyleProperty) => {
+    const styleName = styleProperty.getStyleName();
+    if (
+      [VECTOR_STYLES.LABEL_TEXT, VECTOR_STYLES.ICON_SIZE].includes(styleName) &&
+      (!styleProperty.isDynamic() || !styleProperty.isComplete())
+    ) {
+      // Do not migrate static label and icon size properties to provide unique cluster styling out of the box
+      return;
+    }
+
+    const options = styleProperty.getOptions();
+    if (styleProperty.isDynamic()) {
+      clusterStyleDescriptor.properties[styleName] = {
+        type: STYLE_TYPE.DYNAMIC,
+        options: {
+          ...options,
+          field: {
+            ...options.field,
+            name: clusterSource.getAggKey(
+              getAggType(styleProperty as IDynamicStyleProperty),
+              options.field.name
+            ),
+          },
+        },
+      };
+    } else {
+      clusterStyleDescriptor.properties[styleName] = {
+        type: STYLE_TYPE.STATIC,
+        options: { ...options },
+      };
+    }
+  });
+
+  return clusterStyleDescriptor;
+}
+
 export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   static type = LAYER_TYPE.BLENDED_VECTOR;
 
-  static createDescriptor(options, mapColors) {
+  static createDescriptor(options: VectorLayerArguments, mapColors: string[]) {
     const layerDescriptor = VectorLayer.createDescriptor(options, mapColors);
     layerDescriptor.type = BlendedVectorLayer.type;
     return layerDescriptor;
   }
 
-  private _activeSource;
-  private _activeStyle;
+  private _activeSource: IESSource;
+  private _activeStyle: IVectorStyle;
   private readonly _clusterSource: IESAggSource;
-  private readonly _clusterStyle;
+  private readonly _clusterStyle: IVectorStyle;
   private readonly _documentSource: IESSource;
-  private readonly _documentStyle;
+  private readonly _documentStyle: IVectorStyle;
 
-  constructor(options) {
+  constructor(options: VectorLayerArguments) {
     super(options);
 
-    this._initActiveSourceAndStyle();
+    this._documentSource = this._source; // VectorLayer constructor sets _source as document source
+    this._documentStyle = this._style; // VectorLayer constructor sets _style as document source
+
+    this._clusterSource = getClusterSource(this._documentSource, this._documentStyle);
+    const clusterStyleDescriptor = getClusterStyleDescriptor(
+      this._documentStyle,
+      this._clusterSource
+    );
+    this._clusterStyle = new VectorStyle(clusterStyleDescriptor, this._clusterSource, this);
+
+    this._activeSource = this._documentSource;
+    this._activeStyle = this._documentStyle;
+    const sourceDataRequest = this.getSourceDataRequest();
+    if (sourceDataRequest) {
+      const requestMeta = sourceDataRequest.getMeta();
+      if (requestMeta && requestMeta.sourceType && requestMeta.sourceType === ES_GEO_GRID) {
+        this._activeSource = this._clusterSource;
+        this._activeStyle = this._clusterStyle;
+      }
+    }
   }
 
   destroy() {
@@ -60,107 +166,6 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     if (this._clusterSource) {
       this._clusterSource.destroy();
     }
-  }
-
-  _initActiveSourceAndStyle() {
-    this._documentSource = this._source; // VectorLayer constructor sets _source as document source
-    this._documentStyle = this._style; // VectorLayer constructor sets _style as document source
-
-    this._initClusterSourceAndStyle();
-
-    this._activeSource = this._documentSource;
-    this._activeStyle = this._documentStyle;
-    const sourceDataRequest = this.getSourceDataRequest();
-    if (sourceDataRequest) {
-      const requestMeta = sourceDataRequest.getMeta();
-      if (requestMeta && requestMeta.sourceType === ES_GEO_GRID) {
-        this._activeSource = this._clusterSource;
-        this._activeStyle = this._clusterStyle;
-      }
-    }
-  }
-
-  _initClusterSourceAndStyle() {
-    // derive cluster source from document source
-    const clusterSourceDescriptor = ESGeoGridSource.createDescriptor({
-      indexPatternId: this._documentSource.getIndexPatternId(),
-      geoField: this._documentSource.getGeoFieldName(),
-      requestType: RENDER_AS.POINT,
-    });
-    clusterSourceDescriptor.metrics = [
-      {
-        type: AGG_TYPE.COUNT,
-        label: COUNT_PROP_LABEL,
-      },
-      ...this._documentStyle.getDynamicPropertiesArray().map(dynamicProperty => {
-        return {
-          type: getAggType(dynamicProperty),
-          field: dynamicProperty.getFieldName(),
-        };
-      }),
-    ];
-    this._clusterSource = new ESGeoGridSource(
-      clusterSourceDescriptor,
-      this._documentSource.getInspectorAdapters()
-    );
-
-    // derive cluster style from document style
-    const defaultDynamicProperties = getDefaultDynamicProperties();
-    const clusterStyleDescriptor = {
-      ...this._documentStyle._descriptor,
-      properties: {
-        [VECTOR_STYLES.LABEL_TEXT]: {
-          type: DynamicStyleProperty.type,
-          options: {
-            ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
-            field: {
-              name: COUNT_PROP_NAME,
-              origin: SOURCE_DATA_ID_ORIGIN,
-            },
-          },
-        },
-        [VECTOR_STYLES.ICON_SIZE]: {
-          type: DynamicStyleProperty.type,
-          options: {
-            ...defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options,
-            field: {
-              name: COUNT_PROP_NAME,
-              origin: SOURCE_DATA_ID_ORIGIN,
-            },
-          },
-        },
-      },
-    };
-    this._documentStyle.getAllStyleProperties().forEach(styleProperty => {
-      const styleName = styleProperty.getStyleName();
-      if (
-        [VECTOR_STYLES.LABEL_TEXT, VECTOR_STYLES.ICON_SIZE].includes(styleName) &&
-        (!styleProperty.isDynamic() || !styleProperty.isComplete())
-      ) {
-        // Do not migrate static label and icon size properties to provide unique cluster styling out of the box
-        return;
-      }
-
-      const options = styleProperty.getOptions();
-      if (styleProperty.isDynamic()) {
-        clusterStyleDescriptor.properties[styleName] = {
-          type: DynamicStyleProperty.type,
-          options: {
-            ...options,
-            field: {
-              ...options.field,
-              name: this._clusterSource.getAggKey(getAggType(styleProperty), options.field.name),
-            },
-          },
-        };
-      } else {
-        clusterStyleDescriptor.properties[styleName] = {
-          type: StaticStyleProperty.type,
-          options: { ...options },
-        };
-      }
-    });
-    this._clusterStyle = new VectorStyle(clusterStyleDescriptor, this._clusterSource, this);
   }
 
   isJoinable() {
@@ -191,6 +196,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   }
 
   async syncData(syncContext: unknown) {
+    // @ts-ignore
     const searchFilters = this._getSearchFilters(syncContext.dataFilters);
     const canSkipFetch = await canSkipSourceUpdate({
       source: this.getSource(),

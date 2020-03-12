@@ -6,10 +6,13 @@
 
 import { AbstractESAggSource } from '../es_agg_source';
 import { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
-import { GRID_RESOLUTION } from '../../../../common/constants';
+import { GRID_RESOLUTION, RENDER_AS } from '../../../../common/constants';
 
 export class ESGeoGridSource extends AbstractESAggSource {
+  static createDescriptor({ indexPatternId: string, geoField: string, requestType: RENDER_AS, resolution?: GRID_RESOLUTION }): ESGeoGridSourceDescriptor;
+
   constructor(sourceDescriptor: ESGeoGridSourceDescriptor, inspectorAdapters: unknown);
+
   getGridResolution(): GRID_RESOLUTION;
   getGeoGridPrecision(zoom: number): number;
 }

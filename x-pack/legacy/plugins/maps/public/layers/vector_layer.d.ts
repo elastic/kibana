@@ -8,11 +8,14 @@
 import { AbstractLayer } from './layer';
 import { IVectorSource } from './sources/vector_source';
 import { VectorLayerDescriptor } from '../../common/descriptor_types';
+import { MapFilters, VectorLayerRequestMeta } from '../../common/data_request_descriptor_types';
 import { ILayer } from './layer';
 import { IJoin } from './joins/join';
+import { IVectorStyle } from './styles/vector/vector_style';
 
 type VectorLayerArguments = {
   source: IVectorSource;
+  joins: IJoin[];
   layerDescriptor: VectorLayerDescriptor;
 };
 
@@ -21,8 +24,16 @@ export interface IVectorLayer extends ILayer {
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
+  static createDescriptor(
+    options: VectorLayerArguments,
+    mapColors: string[]
+  ): VectorLayerDescriptor;
+
+  protected readonly _source: IVectorSource;
+  protected readonly _style: IVectorStyle;
+
   constructor(options: VectorLayerArguments);
 
   getValidJoins(): IJoin[];
-  _getSearchFilters(dataFilters: unknown): unknown;
+  _getSearchFilters(dataFilters: MapFilters): VectorLayerRequestMeta;
 }

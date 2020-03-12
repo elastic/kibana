@@ -6,7 +6,7 @@
 /* eslint-disable max-classes-per-file */
 
 import _ from 'lodash';
-import { DataRequestDescriptor } from '../../../common/descriptor_types';
+import { DataRequestDescriptor, DataMeta } from '../../../common/data_request_descriptor_types';
 
 export class DataRequest {
   private readonly _descriptor: DataRequestDescriptor;
@@ -17,7 +17,7 @@ export class DataRequest {
     };
   }
 
-  getData(): object {
+  getData(): object | undefined {
     return this._descriptor.data;
   }
 
@@ -25,7 +25,7 @@ export class DataRequest {
     return !!this._descriptor.dataRequestToken;
   }
 
-  getMeta(): object {
+  getMeta(): DataMeta {
     return this.hasData()
       ? _.get(this._descriptor, 'dataMeta', {})
       : _.get(this._descriptor, 'dataMetaAtStart', {});

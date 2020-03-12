@@ -5,6 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { DataRequestDescriptor } from 'data_request_descriptor_types';
 import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS, SORT_ORDER } from './constants';
 
 export type AbstractSourceDescriptor = {
@@ -91,14 +92,6 @@ export type XYZTMSSourceDescriptor = {
 export type JoinDescriptor = {
   leftField: string;
   right: ESTermSourceDescriptor;
-};
-
-export type DataRequestDescriptor = {
-  dataId: string;
-  dataMetaAtStart?: object;
-  dataRequestToken?: symbol;
-  data?: object;
-  dataMeta?: object;
 };
 
 export type LayerDescriptor = {
