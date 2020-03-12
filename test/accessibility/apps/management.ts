@@ -72,13 +72,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Edit field type', async () => {
+    // Issue: https://github.com/elastic/kibana/issues/60030
+    it.skip('Edit field type', async () => {
       await PageObjects.settings.clickEditFieldFormat();
-      await a11y.testAppSnapshot();
-    });
-
-    it('Saved objects view', async () => {
-      await PageObjects.settings.clickKibanaSavedObjects();
       await a11y.testAppSnapshot();
     });
 
