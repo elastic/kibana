@@ -4,14 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
-import { XYPlot, VerticalGridLines } from 'react-vis';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
+import React, { PureComponent } from 'react';
+import { VerticalGridLines, XYPlot } from 'react-vis';
+import { Mark } from '../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks';
+import { PlotValues } from './plotUtils';
 
-class VerticalLines extends PureComponent {
+interface VerticalLinesProps {
+  marks?: Mark[];
+  plotValues: PlotValues;
+  topTraceDuration: number;
+}
+
+export class VerticalLines extends PureComponent<VerticalLinesProps> {
   render() {
-    const { topTraceDuration, marks } = this.props;
+    const { topTraceDuration, marks = [] } = this.props;
     const {
       width,
       height,
@@ -52,7 +59,7 @@ class VerticalLines extends PureComponent {
           {topTraceDuration > 0 && (
             <VerticalGridLines
               tickValues={[topTraceDuration]}
-              style={{ stroke: theme.gray3euiColorMediumShade }}
+              style={{ stroke: theme.euiColorMediumShade }}
             />
           )}
         </XYPlot>
@@ -60,14 +67,3 @@ class VerticalLines extends PureComponent {
     );
   }
 }
-
-VerticalLines.propTypes = {
-  plotValues: PropTypes.object.isRequired,
-  marks: PropTypes.array
-};
-
-VerticalLines.defaultProps = {
-  marks: []
-};
-
-export default VerticalLines;

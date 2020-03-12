@@ -4,19 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { inRange } from 'lodash';
+import React, { ReactNode } from 'react';
 import { Sticky } from 'react-sticky';
-import { XYPlot, XAxis } from 'react-vis';
-import LastTickValue from './LastTickValue';
-import { Marker } from './Marker';
+import { XAxis, XYPlot } from 'react-vis';
 import { px } from '../../../../style/variables';
 import { getDurationFormatter } from '../../../../utils/formatters';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { Mark } from './';
+import { LastTickValue } from './LastTickValue';
+import { Marker } from './Marker';
+import { PlotValues } from './plotUtils';
 
 // Remove any tick that is too close to topTraceDuration
-const getXAxisTickValues = (tickValues, topTraceDuration) => {
+const getXAxisTickValues = (
+  tickValues: number[],
+  topTraceDuration?: number
+) => {
   if (topTraceDuration == null) {
     return tickValues;
   }
@@ -31,7 +35,18 @@ const getXAxisTickValues = (tickValues, topTraceDuration) => {
   });
 };
 
-function TimelineAxis({ plotValues, marks, topTraceDuration }) {
+interface TimelineAxisProps {
+  header?: ReactNode;
+  plotValues: PlotValues;
+  marks?: Mark[];
+  topTraceDuration: number;
+}
+
+export function TimelineAxis({
+  plotValues,
+  marks = [],
+  topTraceDuration
+}: TimelineAxisProps) {
   const { margins, tickValues, width, xDomain, xMax, xScale } = plotValues;
   const tickFormatter = getDurationFormatter(xMax);
   const xAxisTickValues = getXAxisTickValues(tickValues, topTraceDuration);
@@ -67,7 +82,7 @@ function TimelineAxis({ plotValues, marks, topTraceDuration }) {
                 orientation="top"
                 tickSize={0}
                 tickValues={xAxisTickValues}
-                tickFormat={time => tickFormatter(time).formatted}
+                tickFormat={(time?: number) => tickFormatter(time).formatted}
                 tickPadding={20}
                 style={{
                   text: { fill: theme.euiColorDarkShade }
@@ -92,15 +107,3 @@ function TimelineAxis({ plotValues, marks, topTraceDuration }) {
     </Sticky>
   );
 }
-
-TimelineAxis.propTypes = {
-  header: PropTypes.node,
-  plotValues: PropTypes.object.isRequired,
-  marks: PropTypes.array
-};
-
-TimelineAxis.defaultProps = {
-  marks: []
-};
-
-export default TimelineAxis;
