@@ -15,14 +15,14 @@ import {
 import { StubBrowserStorage } from '../../../../../../src/test_utils/public/stub_browser_storage';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { mockDynamicActionManager } from './test_data';
+import { TEST_SUBJ_DRILLDOWN_ITEM } from '../list_manage_drilldowns';
+import { WELCOME_MESSAGE_TEST_SUBJ } from '../drilldown_hello_bar';
 
 const storage = new Storage(new StubBrowserStorage());
 const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
   advancedUiActions: {
-    actionFactory: {
-      getAll: () => {
-        return [dashboardFactory, urlFactory];
-      },
+    getActionFactories() {
+      return [dashboardFactory, urlFactory];
     },
   } as any,
   storage,
@@ -35,13 +35,16 @@ beforeEach(() => {
   storage.clear();
 });
 
-test('<FlyoutManageDrilldowns/> should render in manage view and should allow to create new drilldown', async () => {
+test('Allows to manage drilldowns', async () => {
   const screen = render(
-    <FlyoutManageDrilldowns context={{}} dynamicActionsManager={mockDynamicActionManager} />
+    <FlyoutManageDrilldowns context={{}} dynamicActionManager={mockDynamicActionManager} />
   );
 
   // wait for initial render. It is async because resolving compatible action factories is async
   await wait(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
+
+  // no drilldowns in the list
+  expect(screen.queryAllByTestId(TEST_SUBJ_DRILLDOWN_ITEM)).toHaveLength(0);
 
   fireEvent.click(screen.getByText(/Create new/i));
 
@@ -52,8 +55,9 @@ test('<FlyoutManageDrilldowns/> should render in manage view and should allow to
   expect(createButton).toBeDisabled();
 
   // input drilldown name
+  const name = 'Test name';
   fireEvent.change(screen.getByLabelText(/name/i), {
-    target: { value: 'Test' },
+    target: { value: name },
   });
 
   // select URL one
@@ -71,25 +75,115 @@ test('<FlyoutManageDrilldowns/> should render in manage view and should allow to
   fireEvent.click(createButton);
 
   expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible();
+
+  await wait(() => expect(screen.queryAllByTestId(TEST_SUBJ_DRILLDOWN_ITEM)).toHaveLength(1));
+  expect(screen.getByText(name)).toBeVisible();
+  const editButton = screen.getByText(/edit/i);
+  fireEvent.click(editButton);
+
+  expect(screen.getByText(/Edit Drilldown/i)).toBeVisible();
+  // check that wizard is prefilled with current drilldown values
+  expect(screen.getByLabelText(/name/i)).toHaveValue(name);
+  expect(screen.getByLabelText(/url/i)).toHaveValue(URL);
+
+  // input new drilldown name
+  const newName = 'New drilldown name';
+  fireEvent.change(screen.getByLabelText(/name/i), {
+    target: { value: newName },
+  });
+  fireEvent.click(screen.getByText(/save/i));
+
+  expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible();
+  await wait(() => screen.getByText(newName));
+
+  // delete drilldown from edit view
+  fireEvent.click(screen.getByText(/edit/i));
+  fireEvent.click(screen.getByText(/delete/i));
+
+  expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible();
+  await wait(() => expect(screen.queryAllByTestId(TEST_SUBJ_DRILLDOWN_ITEM)).toHaveLength(0));
+});
+
+test('Can delete multiple drilldowns', async () => {
+  const screen = render(
+    <FlyoutManageDrilldowns context={{}} dynamicActionManager={mockDynamicActionManager} />
+  );
+  // wait for initial render. It is async because resolving compatible action factories is async
+  await wait(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
+
+  const createDrilldown = async () => {
+    const oldCount = screen.queryAllByTestId(TEST_SUBJ_DRILLDOWN_ITEM).length;
+    fireEvent.click(screen.getByText(/Create new/i));
+    fireEvent.change(screen.getByLabelText(/name/i), {
+      target: { value: 'test' },
+    });
+    fireEvent.click(screen.getByText(/Go to URL/i));
+    fireEvent.change(screen.getByLabelText(/url/i), {
+      target: { value: 'https://elastic.co' },
+    });
+    fireEvent.click(screen.getAllByText(/Create Drilldown/i)[1]);
+    await wait(() =>
+      expect(screen.queryAllByTestId(TEST_SUBJ_DRILLDOWN_ITEM)).toHaveLength(oldCount + 1)
+    );
+  };
+
+  await createDrilldown();
+  await createDrilldown();
+  await createDrilldown();
+
+  const checkboxes = screen.getAllByLabelText(/Select this drilldown/i);
+  expect(checkboxes).toHaveLength(3);
+  checkboxes.forEach(checkbox => fireEvent.click(checkbox));
+  expect(screen.queryByText(/Create/i)).not.toBeInTheDocument();
+  fireEvent.click(screen.getByText(/Delete \(3\)/i));
+
+  await wait(() => expect(screen.queryAllByTestId(TEST_SUBJ_DRILLDOWN_ITEM)).toHaveLength(0));
+});
+
+test('Create only mode', async () => {
+  const onClose = jest.fn();
+  const screen = render(
+    <FlyoutManageDrilldowns
+      context={{}}
+      dynamicActionManager={mockDynamicActionManager}
+      viewMode={'create'}
+      onClose={onClose}
+    />
+  );
+  // wait for initial render. It is async because resolving compatible action factories is async
+  await wait(() => expect(screen.getAllByText(/Create/i).length).toBeGreaterThan(0));
+  fireEvent.change(screen.getByLabelText(/name/i), {
+    target: { value: 'test' },
+  });
+  fireEvent.click(screen.getByText(/Go to URL/i));
+  fireEvent.change(screen.getByLabelText(/url/i), {
+    target: { value: 'https://elastic.co' },
+  });
+  fireEvent.click(screen.getAllByText(/Create Drilldown/i)[1]);
+
+  // TODO: fix act() warnings
+  // Need to wait for success in component before closing the dialog
+  expect(onClose).toBeCalled();
+  expect(await mockDynamicActionManager.count()).toBe(1);
 });
 
 test('Should show drilldown welcome message. Should be able to dismiss it', async () => {
   let screen = render(
-    <FlyoutManageDrilldowns context={{}} dynamicActionsManager={mockDynamicActionManager} />
+    <FlyoutManageDrilldowns context={{}} dynamicActionManager={mockDynamicActionManager} />
   );
 
   // wait for initial render. It is async because resolving compatible action factories is async
   await wait(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
-  const welcomeMessageTestSubj = 'drilldowns-welcome-message-test-subj';
-  expect(screen.getByTestId(welcomeMessageTestSubj)).toBeVisible();
+
+  expect(screen.getByTestId(WELCOME_MESSAGE_TEST_SUBJ)).toBeVisible();
   fireEvent.click(screen.getByText(/hide/i));
-  expect(screen.queryByTestId(welcomeMessageTestSubj)).toBeNull();
+  expect(screen.queryByTestId(WELCOME_MESSAGE_TEST_SUBJ)).toBeNull();
   cleanup();
 
   screen = render(
-    <FlyoutManageDrilldowns context={{}} dynamicActionsManager={mockDynamicActionManager} />
+    <FlyoutManageDrilldowns context={{}} dynamicActionManager={mockDynamicActionManager} />
   );
   // wait for initial render. It is async because resolving compatible action factories is async
   await wait(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
-  expect(screen.queryByTestId(welcomeMessageTestSubj)).toBeNull();
+  expect(screen.queryByTestId(WELCOME_MESSAGE_TEST_SUBJ)).toBeNull();
 });

@@ -41,7 +41,7 @@ export class DrilldownService {
       getIconType,
       execute,
     }) => {
-      advancedUiActions.actionFactory.register({
+      advancedUiActions.registerActionFactory({
         id,
         CollectConfig,
         createConfig,

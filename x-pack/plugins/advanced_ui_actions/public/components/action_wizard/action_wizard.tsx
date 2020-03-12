@@ -17,7 +17,6 @@ import {
 import { txtChangeButton } from './i18n';
 import './action_wizard.scss';
 import { AnyActionFactory } from '../../services';
-import { uiToReactComponent } from '../../../../../../src/plugins/kibana_react/public';
 
 type ActionBaseConfig = object;
 type ActionFactoryBaseContext = object;
@@ -144,7 +143,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
       </header>
       <EuiSpacer size="m" />
       <div>
-        {uiToReactComponent(actionFactory.CollectConfig)({
+        {actionFactory.ReactCollectConfig({
           config,
           onConfig: onConfigChange,
         })}

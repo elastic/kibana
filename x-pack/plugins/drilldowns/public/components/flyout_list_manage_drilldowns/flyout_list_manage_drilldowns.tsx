@@ -18,8 +18,6 @@ export interface FlyoutListManageDrilldownsProps {
   onDelete?: (drilldownIds: string[]) => void;
   showWelcomeMessage?: boolean;
   onWelcomeHideClick?: () => void;
-
-  context?: object; // TODO DrilldownBaseContext? ActionBaseContext?
 }
 
 export function FlyoutListManageDrilldowns({

@@ -19,11 +19,10 @@ import {
   txtSelectDrilldown,
 } from './i18n';
 
-// TODO: interface is temporary
 export interface DrilldownListItem {
   id: string;
-  actionTypeDisplayName: string;
-  name: string;
+  actionName: string;
+  drilldownName: string;
 }
 
 export interface ListManageDrilldownsProps {
@@ -32,8 +31,6 @@ export interface ListManageDrilldownsProps {
   onEdit?: (id: string) => void;
   onCreate?: () => void;
   onDelete?: (ids: string[]) => void;
-
-  context?: object; // TODO DrilldownBaseContext? ActionBaseContext?
 }
 
 const noop = () => {};
@@ -45,18 +42,17 @@ export function ListManageDrilldowns({
   onEdit = noop,
   onCreate = noop,
   onDelete = noop,
-  context = {},
 }: ListManageDrilldownsProps) {
   const [selectedDrilldowns, setSelectedDrilldowns] = useState<string[]>([]);
 
   const columns: Array<EuiBasicTableColumn<DrilldownListItem>> = [
     {
-      field: 'name',
+      field: 'actionName',
       name: 'Name',
       truncateText: true,
     },
     {
-      field: 'actionTypeDisplayName',
+      field: 'drilldownName',
       name: 'Action',
       truncateText: true,
     },

@@ -50,6 +50,10 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
   public async execute(context: EmbeddableContext) {
     const overlays = await this.params.overlays();
     const drilldowns = await this.params.drilldowns();
+    const dynamicActionManager = context.embeddable.dynamicActions;
+    if (!dynamicActionManager) {
+      throw new Error(`Can't execute FlyoutEditDrilldownAction without dynamicActionsManager`);
+    }
 
     const handle = overlays.openFlyout(
       toMountPoint(
@@ -57,7 +61,7 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
           onClose={() => handle.close()}
           context={context}
           viewMode={'manage'}
-          dynamicActionsManager={context.embeddable.dynamicActions!}
+          dynamicActionManager={dynamicActionManager}
         />
       )
     );

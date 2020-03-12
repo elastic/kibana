@@ -22,6 +22,8 @@ export interface DrilldownHelloBarProps {
   onHideClick?: () => void;
 }
 
+export const WELCOME_MESSAGE_TEST_SUBJ = 'drilldowns-welcome-message-test-subj';
+
 export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({
   docsLink,
   onHideClick = () => {},
@@ -29,7 +31,7 @@ export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({
   return (
     <EuiCallOut
       iconType="help"
-      data-test-subj={'drilldowns-welcome-message-test-subj'}
+      data-test-subj={WELCOME_MESSAGE_TEST_SUBJ}
       title={
         <EuiFlexGroup className="drdHelloBar__content">
           <EuiFlexItem grow={true}>

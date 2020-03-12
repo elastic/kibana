@@ -19,10 +19,8 @@ import { mockDynamicActionManager } from './test_data';
 
 const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
   advancedUiActions: {
-    actionFactory: {
-      getAll: () => {
-        return [dashboardFactory, urlFactory];
-      },
+    getActionFactories() {
+      return [dashboardFactory, urlFactory];
     },
   } as any,
   storage: new Storage(new StubBrowserStorage()),
@@ -30,6 +28,6 @@ const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
 
 storiesOf('components/FlyoutManageDrilldowns', module).add('default', () => (
   <EuiFlyout onClose={() => {}}>
-    <FlyoutManageDrilldowns context={{}} dynamicActionsManager={mockDynamicActionManager} />
+    <FlyoutManageDrilldowns context={{}} dynamicActionManager={mockDynamicActionManager} />
   </EuiFlyout>
 ));

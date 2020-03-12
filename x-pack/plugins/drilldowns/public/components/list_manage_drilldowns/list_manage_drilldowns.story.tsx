@@ -7,8 +7,13 @@
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
 import { ListManageDrilldowns } from './list_manage_drilldowns';
-import { drilldowns } from './test_data';
 
 storiesOf('components/ListManageDrilldowns', module).add('default', () => (
-  <ListManageDrilldowns drilldowns={drilldowns} />
+  <ListManageDrilldowns
+    drilldowns={[
+      { id: '1', actionName: 'Dashboard', drilldownName: 'Drilldown 1' },
+      { id: '2', actionName: 'Dashboard', drilldownName: 'Drilldown 2' },
+      { id: '3', actionName: 'Dashboard', drilldownName: 'Drilldown 3' },
+    ]}
+  />
 ));
