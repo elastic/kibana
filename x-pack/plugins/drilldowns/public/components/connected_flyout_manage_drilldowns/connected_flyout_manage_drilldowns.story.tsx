@@ -24,6 +24,16 @@ const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
     },
   } as any,
   storage: new Storage(new StubBrowserStorage()),
+  notifications: {
+    toasts: {
+      addError: (...args: any[]) => {
+        alert(JSON.stringify(args));
+      },
+      addSuccess: (...args: any[]) => {
+        alert(JSON.stringify(args));
+      },
+    } as any,
+  },
 });
 
 storiesOf('components/FlyoutManageDrilldowns', module).add('default', () => (

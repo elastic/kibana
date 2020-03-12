@@ -12,6 +12,7 @@ import {
   AdvancedUiActionsAnyActionFactory as AnyActionFactory,
   AdvancedUiActionsStart,
 } from '../../../../advanced_ui_actions/public';
+import { NotificationsStart } from '../../../../../../src/core/public';
 import { DrilldownWizardConfig, FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
 import { FlyoutListManageDrilldowns } from '../flyout_list_manage_drilldowns';
 import { IStorageWrapper } from '../../../../../../src/plugins/kibana_utils/public';
@@ -21,6 +22,14 @@ import {
   UiActionsSerializedAction,
 } from '../../../../../../src/plugins/ui_actions/public';
 import { DrilldownListItem } from '../list_manage_drilldowns';
+import {
+  toastDrilldownCreated,
+  toastDrilldownDeleted,
+  toastDrilldownEdited,
+  toastDrilldownsCRUDError,
+  toastDrilldownsDeleted,
+  toastDrilldownsFetchError,
+} from './i18n';
 
 interface ConnectedFlyoutManageDrilldownsProps<Context extends object = object> {
   context: Context;
@@ -41,9 +50,11 @@ enum Routes {
 export function createFlyoutManageDrilldowns({
   advancedUiActions,
   storage,
+  notifications,
 }: {
   advancedUiActions: AdvancedUiActionsStart;
   storage: IStorageWrapper;
+  notifications: NotificationsStart;
 }) {
   // fine to assume this is static,
   // because all action factories should be registered in setup phase
@@ -73,13 +84,18 @@ export function createFlyoutManageDrilldowns({
       createDrilldown,
       editDrilldown,
       deleteDrilldown,
-    } = useDrilldownsStateManager(props.dynamicActionManager);
+    } = useDrilldownsStateManager(props.dynamicActionManager, notifications);
 
     /**
      * isCompatible promise is not yet resolved.
      * Skip rendering until it is resolved
      */
     if (!actionFactories) return null;
+    /**
+     * Drilldowns are not fetched yet or error happened during fetching
+     * In case of error user is notified with toast
+     */
+    if (!drilldowns) return null;
 
     /**
      * Needed for edit mode to prefill wizard fields with data from current edited drilldown
@@ -87,7 +103,7 @@ export function createFlyoutManageDrilldowns({
     function resolveInitialDrilldownWizardConfig(): DrilldownWizardConfig | undefined {
       if (route !== Routes.Edit) return undefined;
       if (!currentEditId) return undefined;
-      const drilldownToEdit = drilldowns.find(d => d.eventId === currentEditId);
+      const drilldownToEdit = drilldowns?.find(d => d.eventId === currentEditId);
       if (!drilldownToEdit) return undefined;
 
       return {
@@ -224,25 +240,50 @@ function useWelcomeMessage(storage: IStorageWrapper): [boolean, () => void] {
   ];
 }
 
-function useDrilldownsStateManager(actionManager: DynamicActionManager) {
+function useDrilldownsStateManager(
+  actionManager: DynamicActionManager,
+  notifications: NotificationsStart
+) {
   const [isLoading, setIsLoading] = useState(false);
-  const [drilldowns, setDrilldowns] = useState<UiActionsSerializedEvent[]>([]);
+  const [drilldowns, setDrilldowns] = useState<UiActionsSerializedEvent[]>();
   const isMounted = useMountedState();
+
+  async function run(op: () => Promise<void>) {
+    setIsLoading(true);
+    try {
+      await op();
+    } catch (e) {
+      notifications.toasts.addError(e, {
+        title: toastDrilldownsCRUDError,
+      });
+      if (!isMounted) return;
+      setIsLoading(false);
+      return;
+    }
+
+    await reload();
+  }
 
   async function reload() {
     if (!isMounted) {
       // don't do any side effects anymore because component is already unmounted
       return;
     }
-
-    setIsLoading(true);
-    const drilldownsList = await actionManager.list();
-    if (!isMounted) {
-      return;
+    if (!isLoading) {
+      setIsLoading(true);
     }
-
-    setDrilldowns(drilldownsList);
-    setIsLoading(false);
+    try {
+      const drilldownsList = await actionManager.list();
+      if (!isMounted) {
+        return;
+      }
+      setDrilldowns(drilldownsList);
+      setIsLoading(false);
+    } catch (e) {
+      notifications.toasts.addError(e, {
+        title: toastDrilldownsFetchError,
+      });
+    }
   }
 
   useMount(() => {
@@ -250,9 +291,13 @@ function useDrilldownsStateManager(actionManager: DynamicActionManager) {
   });
 
   async function createDrilldown(action: UiActionsSerializedAction<any>, triggerId?: string) {
-    setIsLoading(true);
-    await actionManager.createEvent(action, triggerId);
-    await reload();
+    await run(async () => {
+      await actionManager.createEvent(action, triggerId);
+      notifications.toasts.addSuccess({
+        title: toastDrilldownCreated.title,
+        text: toastDrilldownCreated.text(action.name),
+      });
+    });
   }
 
   async function editDrilldown(
@@ -260,15 +305,31 @@ function useDrilldownsStateManager(actionManager: DynamicActionManager) {
     action: UiActionsSerializedAction<any>,
     triggerId?: string
   ) {
-    setIsLoading(true);
-    await actionManager.updateEvent(drilldownId, action, triggerId);
-    await reload();
+    await run(async () => {
+      await actionManager.updateEvent(drilldownId, action, triggerId);
+      notifications.toasts.addSuccess({
+        title: toastDrilldownEdited.title,
+        text: toastDrilldownEdited.text(action.name),
+      });
+    });
   }
 
   async function deleteDrilldown(drilldownIds: string | string[]) {
-    setIsLoading(true);
-    await actionManager.deleteEvents(Array.isArray(drilldownIds) ? drilldownIds : [drilldownIds]);
-    await reload();
+    await run(async () => {
+      drilldownIds = Array.isArray(drilldownIds) ? drilldownIds : [drilldownIds];
+      await actionManager.deleteEvents(drilldownIds);
+      notifications.toasts.addSuccess(
+        drilldownIds.length === 1
+          ? {
+              title: toastDrilldownDeleted.title,
+              text: toastDrilldownDeleted.text,
+            }
+          : {
+              title: toastDrilldownsDeleted.title,
+              text: toastDrilldownsDeleted.text(drilldownIds.length),
+            }
+      );
+    });
   }
 
   return { drilldowns, isLoading, createDrilldown, editDrilldown, deleteDrilldown };

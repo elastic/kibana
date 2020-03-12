@@ -17,8 +17,12 @@ import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { mockDynamicActionManager } from './test_data';
 import { TEST_SUBJ_DRILLDOWN_ITEM } from '../list_manage_drilldowns';
 import { WELCOME_MESSAGE_TEST_SUBJ } from '../drilldown_hello_bar';
+import { coreMock } from '../../../../../../src/core/public/mocks';
+import { NotificationsStart } from 'kibana/public';
+import { toastDrilldownsCRUDError, toastDrilldownsFetchError } from './i18n';
 
 const storage = new Storage(new StubBrowserStorage());
+const notifications = coreMock.createStart().notifications;
 const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
   advancedUiActions: {
     getActionFactories() {
@@ -26,6 +30,7 @@ const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
     },
   } as any,
   storage,
+  notifications,
 });
 
 // https://github.com/elastic/kibana/issues/59469
@@ -33,6 +38,8 @@ afterEach(cleanup);
 
 beforeEach(() => {
   storage.clear();
+  (notifications.toasts as jest.Mocked<NotificationsStart['toasts']>).addSuccess.mockClear();
+  (notifications.toasts as jest.Mocked<NotificationsStart['toasts']>).addError.mockClear();
 });
 
 test('Allows to manage drilldowns', async () => {
@@ -161,10 +168,46 @@ test('Create only mode', async () => {
   });
   fireEvent.click(screen.getAllByText(/Create Drilldown/i)[1]);
 
-  // TODO: fix act() warnings
-  // Need to wait for success in component before closing the dialog
+  await wait(() => expect(notifications.toasts.addSuccess).toBeCalled());
   expect(onClose).toBeCalled();
   expect(await mockDynamicActionManager.count()).toBe(1);
+});
+
+test("Error when can't fetch drilldown list", async () => {
+  const error = new Error('Oops');
+  jest.spyOn(mockDynamicActionManager, 'list').mockImplementationOnce(async () => {
+    throw error;
+  });
+  render(<FlyoutManageDrilldowns context={{}} dynamicActionManager={mockDynamicActionManager} />);
+  await wait(() =>
+    expect(notifications.toasts.addError).toBeCalledWith(error, {
+      title: toastDrilldownsFetchError,
+    })
+  );
+});
+
+test("Error when can't save drilldown changes", async () => {
+  const error = new Error('Oops');
+  jest.spyOn(mockDynamicActionManager, 'createEvent').mockImplementationOnce(async () => {
+    throw error;
+  });
+  const screen = render(
+    <FlyoutManageDrilldowns context={{}} dynamicActionManager={mockDynamicActionManager} />
+  );
+  // wait for initial render. It is async because resolving compatible action factories is async
+  await wait(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
+  fireEvent.click(screen.getByText(/Create new/i));
+  fireEvent.change(screen.getByLabelText(/name/i), {
+    target: { value: 'test' },
+  });
+  fireEvent.click(screen.getByText(/Go to URL/i));
+  fireEvent.change(screen.getByLabelText(/url/i), {
+    target: { value: 'https://elastic.co' },
+  });
+  fireEvent.click(screen.getAllByText(/Create Drilldown/i)[1]);
+  await wait(() =>
+    expect(notifications.toasts.addError).toBeCalledWith(error, { title: toastDrilldownsCRUDError })
+  );
 });
 
 test('Should show drilldown welcome message. Should be able to dismiss it', async () => {
