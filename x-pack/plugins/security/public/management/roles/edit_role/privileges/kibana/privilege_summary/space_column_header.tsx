@@ -20,7 +20,15 @@ const SPACES_DISPLAY_COUNT = 4;
 
 export const SpaceColumnHeader = (props: Props) => {
   const isGlobal = isGlobalPrivilegeDefinition(props.entry);
-  const entrySpaces = props.spaces.filter(s => props.entry.spaces.includes(s.id));
+  const entrySpaces = props.entry.spaces.map(spaceId => {
+    return (
+      props.spaces.find(s => s.id === spaceId) ?? {
+        id: spaceId,
+        name: spaceId,
+        disabledFeatures: [],
+      }
+    );
+  });
   return (
     <div>
       {entrySpaces.slice(0, SPACES_DISPLAY_COUNT).map(space => {

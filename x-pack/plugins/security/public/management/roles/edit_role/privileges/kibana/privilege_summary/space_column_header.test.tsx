@@ -61,6 +61,26 @@ describe('SpaceColumnHeader', () => {
     expect(wrapper.text()).toMatchInlineSnapshot(`"G Global(all spaces)"`);
   });
 
+  it('renders a placeholder space when the requested space no longer exists', () => {
+    const wrapper = mountWithIntl(
+      <SpaceColumnHeader
+        spaces={spaces}
+        entry={{
+          base: [],
+          feature: {},
+          spaces: ['space-1', 'missing-space', 'space-3'],
+        }}
+      />
+    );
+
+    expect(wrapper.find(SpacesPopoverList)).toHaveLength(0);
+
+    const avatars = wrapper.find(SpaceAvatar);
+    expect(avatars).toHaveLength(3);
+
+    expect(wrapper.text()).toMatchInlineSnapshot(`"S1 m S3 "`);
+  });
+
   it('renders a space privilege definition with an avatar for each space in the group', () => {
     const wrapper = mountWithIntl(
       <SpaceColumnHeader
