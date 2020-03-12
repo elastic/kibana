@@ -35,11 +35,11 @@ import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { MetricsExplorerOptions } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
-import { MetricsExplorerKueryBar } from '../../metrics_explorer/kuery_bar';
 import { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explorer';
 import { useSource } from '../../../containers/source';
-import { MetricsExplorerGroupBy } from '../../metrics_explorer/group_by';
+import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
+import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
 
 interface AlertContextMeta {
   currentOptions?: Partial<MetricsExplorerOptions>;
