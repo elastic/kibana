@@ -18,7 +18,7 @@ import {
   CommentResponse,
   CommentResponseRt,
 } from '../../../../../../plugins/case/common/api';
-import { ToasterErrors } from '../../hooks/api/throw_if_not_ok';
+import { ToasterError } from '../../components/toasters';
 import { AllCases, Case } from './types';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
@@ -53,7 +53,7 @@ export const convertAllCasesToCamel = (snakeCases: CasesResponse): AllCases => (
   total: snakeCases.total,
 });
 
-export const createToasterPlainError = (message: string) => new ToasterErrors([message]);
+export const createToasterPlainError = (message: string) => new ToasterError([message]);
 
 export const decodeCaseResponse = (respCase?: CaseResponse) =>
   pipe(CaseResponseRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));

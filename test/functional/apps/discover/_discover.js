@@ -23,7 +23,6 @@ export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
-  const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
@@ -188,7 +187,7 @@ export default function({ getService, getPageObjects }) {
       // skipping this until we get an elastic-chart alternative to check the ticks value
       it.skip('should show ticks in the correct time zone after switching', async function() {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
-        await browser.refresh();
+        await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitKibanaChrome();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
 
@@ -213,8 +212,9 @@ export default function({ getService, getPageObjects }) {
       });
       it('should show bars in the correct time zone after switching', async function() {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
-        await browser.refresh();
+        await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitKibanaChrome();
+        await queryBar.setQuery('');
         await PageObjects.timePicker.setDefaultAbsoluteRange();
 
         log.debug(

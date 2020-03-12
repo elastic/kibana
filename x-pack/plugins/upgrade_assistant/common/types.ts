@@ -35,6 +35,13 @@ export interface QueueSettings extends SavedObjectAttributes {
 
 export interface ReindexOptions extends SavedObjectAttributes {
   /**
+   * Whether to treat the index as if it were closed. This instructs the
+   * reindex strategy to first open the index, perform reindexing and
+   * then close the index again.
+   */
+  openAndClose?: boolean;
+
+  /**
    * Set this key to configure a reindex operation as part of a
    * batch to be run in series.
    */
@@ -50,7 +57,6 @@ export interface ReindexOperation extends SavedObjectAttributes {
   reindexTaskId: string | null;
   reindexTaskPercComplete: number | null;
   errorMessage: string | null;
-
   // This field is only used for the singleton IndexConsumerType documents.
   runningReindexCount: number | null;
 
@@ -142,10 +148,57 @@ export interface EnrichedDeprecationInfo extends DeprecationInfo {
   node?: string;
   reindex?: boolean;
   needsDefaultFields?: boolean;
+  /**
+   * Indicate what blockers have been detected for calling reindex
+   * against this index.
+   *
+   * @remark
+   * In future this could be an array of blockers.
+   */
+  blockerForReindexing?: 'index-closed'; // 'index-closed' can be handled automatically, but requires more resources, user should be warned
 }
 
 export interface UpgradeAssistantStatus {
   readyForUpgrade: boolean;
   cluster: EnrichedDeprecationInfo[];
   indices: EnrichedDeprecationInfo[];
+}
+
+export interface ClusterStateIndexAPIResponse {
+  state: 'open' | 'close';
+  settings: {
+    index: {
+      verified_before_close: string;
+      search: {
+        throttled: string;
+      };
+      number_of_shards: string;
+      provided_name: string;
+      frozen: string;
+      creation_date: string;
+      number_of_replicas: string;
+      uuid: string;
+      version: {
+        created: string;
+      };
+    };
+  };
+  mappings: any;
+  aliases: string[];
+}
+
+export interface ClusterStateAPIResponse {
+  cluster_name: string;
+  cluster_uuid: string;
+  metadata: {
+    cluster_uuid: string;
+    cluster_coordination: {
+      term: number;
+      last_committed_config: string[];
+      last_accepted_config: string[];
+      voting_config_exclusions: [];
+    };
+    templates: any;
+    indices: { [indexName: string]: ClusterStateIndexAPIResponse };
+  };
 }

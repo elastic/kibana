@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { gql } from '@apollo/client';
+import gql from 'graphql-tag';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const introspectionQuery = gql`

@@ -10,7 +10,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
-import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines';
+import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
 import { mockTimelineResults } from '../../../mock/timeline_results';
 import { OpenTimelineResult } from '../types';
 import { TimelinesTable, TimelinesTableProps } from '.';
@@ -152,7 +152,7 @@ describe('TimelinesTable', () => {
       wrapper
         .find('thead tr th')
         .at(5)
-        .find('svg[data-test-subj="notes-count-header-icon"]')
+        .find('[data-test-subj="notes-count-header-icon"]')
         .first()
         .exists()
     ).toBe(true);

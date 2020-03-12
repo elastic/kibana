@@ -6,7 +6,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { MockedProvider } from '@apollo/client/testing';
+import { MockedProvider } from 'react-apollo/test-utils';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { timelineQuery } from '../../containers/timeline/index.gql_query';
@@ -302,7 +302,7 @@ describe('Timeline', () => {
         );
 
         wrapper
-          .find('[data-test-subj="providerBadge"] svg')
+          .find('[data-test-subj="providerBadge"] [data-euiicon-type]')
           .first()
           .simulate('click');
 

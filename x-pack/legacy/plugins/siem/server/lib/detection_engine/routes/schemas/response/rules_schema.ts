@@ -48,6 +48,7 @@ import {
   version,
   filters,
   meta,
+  note,
 } from './schemas';
 
 /**
@@ -113,6 +114,7 @@ export const partialRulesSchema = t.partial({
   filters,
   meta,
   index,
+  note,
 });
 
 /**
