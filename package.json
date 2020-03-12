@@ -209,6 +209,7 @@
     "pug": "^2.0.3",
     "querystring-browser": "1.0.4",
     "raw-loader": "0.5.1",
+    "re2": "1.10.5",
     "react": "^16.6.0",
     "react-addons-shallow-compare": "15.6.2",
     "react-anything-sortable": "^1.7.4",
