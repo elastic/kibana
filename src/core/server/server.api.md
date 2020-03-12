@@ -982,7 +982,7 @@ export interface IScopedRenderingClient {
 export interface IUiSettingsClient {
     get: <T = any>(key: string) => Promise<T>;
     getAll: <T = any>() => Promise<Record<string, T>>;
-    getRegistered: () => Readonly<Record<string, Omit<UiSettingsParams, 'schema'>>>;
+    getRegistered: () => Readonly<Record<string, PublicUiSettingsParams>>;
     getUserProvided: <T = any>() => Promise<Record<string, UserProvidedValues<T>>>;
     isOverridden: (key: string) => boolean;
     remove: (key: string) => Promise<void>;
@@ -1426,6 +1426,9 @@ export interface PluginsServiceStart {
     // (undocumented)
     contracts: Map<PluginName, unknown>;
 }
+
+// @public
+export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 
 // Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
 //

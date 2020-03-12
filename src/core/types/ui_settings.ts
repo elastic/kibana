@@ -83,6 +83,12 @@ export interface UiSettingsParams<T = unknown> {
 }
 
 /**
+ * A sub-set of {@link UiSettingsParams} exposed to the client-side.
+ * @public
+ * */
+export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
+
+/**
  * Allows regex objects or a regex string
  * @public
  * */

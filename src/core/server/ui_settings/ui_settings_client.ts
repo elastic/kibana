@@ -22,7 +22,7 @@ import { SavedObjectsErrorHelpers } from '../saved_objects';
 import { SavedObjectsClientContract } from '../saved_objects/types';
 import { Logger } from '../logging';
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
-import { IUiSettingsClient, UiSettingsParams } from './types';
+import { IUiSettingsClient, UiSettingsParams, PublicUiSettingsParams } from './types';
 import { CannotOverrideError } from './ui_settings_errors';
 
 export interface UiSettingsServiceOptions {
@@ -72,7 +72,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   }
 
   getRegistered() {
-    const copiedDefaults: Record<string, Omit<UiSettingsParams, 'schema'>> = {};
+    const copiedDefaults: Record<string, PublicUiSettingsParams> = {};
     for (const [key, value] of Object.entries(this.defaults)) {
       copiedDefaults[key] = omit(value, 'schema');
     }
