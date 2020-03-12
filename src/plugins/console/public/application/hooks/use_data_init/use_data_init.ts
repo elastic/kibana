@@ -43,7 +43,13 @@ export const useDataInit = () => {
     const load = async () => {
       try {
         await migrateToTextObjects({ history, objectStorageClient });
-        const results = await objectStorageClient.text.findAll();
+        const results = await objectStorageClient.text.findAll([
+          'id',
+          'name',
+          'isScratchPad',
+          'createdAt',
+          'updatedAt',
+        ]);
         if (!results.length) {
           const newObject = await objectStorageClient.text.create({
             createdAt: Date.now(),

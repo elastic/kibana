@@ -26,7 +26,9 @@ export const textObjectTypeName = 'text-object';
  * Takes an array of text objects and sorts them according to date created and places
  * scratch pad at as the first element, if one exists in the array.
  */
-export const sortTextObjectsAsc = (textObjects: TextObjectWithId[]): TextObjectWithId[] =>
+export const sortTextObjectsAsc = <O extends Pick<TextObjectWithId, 'isScratchPad' | 'createdAt'>>(
+  textObjects: O[]
+): O[] =>
   textObjects.sort((a, b) =>
     a.isScratchPad ? -1 : b.isScratchPad ? 1 : a.createdAt - b.createdAt
   );
@@ -44,18 +46,6 @@ export const optionalTextObjectProps = {
    * which cannot be renamed or deleted.
    */
   isScratchPad: t.boolean,
-};
-
-export const textObjectProps = {
-  /**
-   * UNIX timestamp of when the object was created.
-   */
-  createdAt: t.number,
-
-  /**
-   * UNIX timestamp of when the object was last updated.
-   */
-  updatedAt: t.number,
 
   /**
    * Text value input by the user.
@@ -65,14 +55,26 @@ export const textObjectProps = {
   text: t.string,
 };
 
+export const requiredTextObjectProps = {
+  /**
+   * UNIX timestamp of when the object was created.
+   */
+  createdAt: t.number,
+
+  /**
+   * UNIX timestamp of when the object was last updated.
+   */
+  updatedAt: t.number,
+};
+
 export const textObjectSchema = t.intersection([
-  t.type(textObjectProps),
+  t.type(requiredTextObjectProps),
   t.partial(optionalTextObjectProps),
 ]);
 
 export const textObjectSchemaWithId = t.intersection([
   t.type({
-    ...textObjectProps,
+    ...requiredTextObjectProps,
     ...idObjectProps,
   }),
   t.partial(optionalTextObjectProps),

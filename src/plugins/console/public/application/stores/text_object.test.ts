@@ -52,10 +52,10 @@ describe('Editor Store', () => {
 
       const s2 = reducer(s1, {
         type: 'upsert',
-        payload: { ...testTextObjects[0], text: 'ok!' },
+        payload: { ...testTextObjects[0], name: 'ok!' },
       });
 
-      expect(s2.textObjects['1'].text).toEqual('ok!');
+      expect(s2.textObjects['1'].name).toEqual('ok!');
     });
 
     it('prevents adding an unknown text object and reports the error', () => {
@@ -67,7 +67,7 @@ describe('Editor Store', () => {
       expect(s1.textObjectsSaveError['1']).toContain('Cannot assign');
     });
 
-    it('deletes and defaults back to existing file', () => {
+    it('deletes and defaults back to existing file if current file is deleted', () => {
       const s1 = reducer(initialValue, {
         type: 'upsertMany',
         payload: testTextObjects,

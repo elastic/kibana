@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { pick } from 'lodash';
 import uuid from 'uuid';
 import { ObjectStorage } from '../../../common/types';
 import { IdObject } from '../../../common/id_object';
@@ -40,6 +40,15 @@ export class LocalObjectStorage<O extends IdObject> implements ObjectStorage<O> 
     return newObj;
   }
 
+  async get<F extends keyof O>(id: string, fieldsToInclude?: F[]): Promise<Pick<O, F>> {
+    const object = await this.client.get<O>(this.getFullEntryName(id));
+    if (!object) {
+      throw new Error(`${id} not found`);
+    }
+
+    return fieldsToInclude ? pick(object, fieldsToInclude) : object;
+  }
+
   async update(obj: Partial<O> & IdObject): Promise<void> {
     const objIdName = this.getFullEntryName(obj.id);
     const currentObj = this.client.get(objIdName);
@@ -50,14 +59,15 @@ export class LocalObjectStorage<O extends IdObject> implements ObjectStorage<O> 
     this.client.delete(this.getFullEntryName(id));
   }
 
-  async findAll(): Promise<O[]> {
+  async findAll<F extends keyof O>(fieldsToInclude?: F[]): Promise<Array<Pick<O, F>>> {
     const allLocalKeys = this.client.keys().filter(key => {
-      return key.includes(this.prefix);
+      return key.indexOf(this.prefix) === 0;
     });
 
     const result = [];
     for (const key of allLocalKeys) {
-      result.push(this.client.get<O>(key));
+      const object = this.client.get<O>(key);
+      result.push(fieldsToInclude ? pick(object, fieldsToInclude) : object);
     }
     return result;
   }

@@ -28,6 +28,8 @@ export interface ObjectStorage<O extends IdObject> {
    */
   create(obj: Omit<O, 'id'>): Promise<O>;
 
+  get<F extends keyof O>(id: string, fieldsToInclude?: F[]): Promise<Pick<O, F>>;
+
   /**
    * This method should update specific object in the persistence layer.
    */
@@ -43,7 +45,7 @@ export interface ObjectStorage<O extends IdObject> {
    *
    * @remarks Unless an error is thrown this function should always return an array (empty if there are not objects present).
    */
-  findAll(): Promise<O[]>;
+  findAll<F extends keyof O>(fieldsToInclude?: F[]): Promise<Array<Pick<O, F>>>;
 }
 
 export interface ObjectStorageClient {

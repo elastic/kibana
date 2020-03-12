@@ -53,7 +53,7 @@ import { registerCommands } from './keyboard_shortcuts';
 import { setupAutosave } from './auto_save';
 
 export interface EditorProps {
-  textObject: TextObjectWithId;
+  textObject: TextObjectWithId & { text: string };
 }
 
 interface QueryParams {
@@ -67,13 +67,6 @@ const abs: CSSProperties = {
   bottom: '0',
   right: '0',
 };
-
-const DEFAULT_INPUT_VALUE = `GET _search
-{
-  "query": {
-    "match_all": {}
-  }
-}`;
 
 /**
  * The current editor implementation does a bad job of cleaning up listeners,
@@ -192,7 +185,7 @@ export const Editor: FunctionComponent<EditorProps> = memo(
       if (initialQueryParams.load_from) {
         loadBufferFromRemote(initialQueryParams.load_from);
       } else {
-        editor.update(textObject.text || DEFAULT_INPUT_VALUE);
+        editor.update(textObject.text!);
       }
 
       // Update component state

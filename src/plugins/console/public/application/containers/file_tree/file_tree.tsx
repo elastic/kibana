@@ -63,8 +63,9 @@ export const FileTree: FunctionComponent = () => {
           setIsFileActionInProgress(true);
           textObjectsCRUD
             .create({
+              // We don't set a text value here so that the default text value is
+              // set for new files
               textObject: {
-                text: '',
                 updatedAt: Date.now(),
                 createdAt: Date.now(),
                 name: fileName,

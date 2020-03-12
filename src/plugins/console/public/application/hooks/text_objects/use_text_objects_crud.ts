@@ -22,7 +22,7 @@ import * as t from 'io-ts';
 import { useServicesContext, useTextObjectsActionContext } from '../../contexts';
 import {
   TextObject,
-  textObjectProps,
+  requiredTextObjectProps,
   optionalTextObjectProps,
   throwIfUnknown,
   textObjectSchema,
@@ -33,7 +33,7 @@ import { idObjectProps } from '../../../../common/id_object';
 const exactTextObjectSchema = t.exact(textObjectSchema);
 const partialTextObjectSchema = t.exact(
   t.intersection([
-    t.partial({ ...textObjectProps, ...optionalTextObjectProps }),
+    t.partial({ ...requiredTextObjectProps, ...optionalTextObjectProps }),
     t.type(idObjectProps),
   ])
 );
@@ -95,7 +95,8 @@ export const useTextObjectsCRUD = () => {
         let timeoutHandle: any;
         try {
           // Update local reference
-          dispatch({ type: 'upsert', payload: textObject });
+          const { text, ...localValues } = textObject;
+          dispatch({ type: 'upsert', payload: localValues });
 
           // Update persistence
 

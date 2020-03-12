@@ -24,7 +24,7 @@ export {
   textObjectTypeName,
   textObjectSchemaWithId,
   optionalTextObjectProps,
-  textObjectProps,
+  requiredTextObjectProps,
   sortTextObjectsAsc,
 } from './text_object';
 export { throwIfUnknown } from './throw_if_unknown';

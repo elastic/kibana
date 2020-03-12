@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useCallback, memo } from 'react';
+import React, { useCallback, memo, useState, useEffect } from 'react';
 import { debounce } from 'lodash';
 import { EuiProgress, EuiControlBar, EuiLoadingSpinner } from '@elastic/eui';
 
@@ -36,10 +36,19 @@ import { NetworkRequestStatusBar, FileSaveErrorIcon, FileSavedIcon } from '../..
 const INITIAL_PANEL_WIDTH = 50;
 const PANEL_MIN_WIDTH = '100px';
 
+const DEFAULT_INPUT_VALUE = `GET _search
+{
+  "query": {
+    "match_all": {}
+  }
+}`;
+
 export const Editor = memo(() => {
   const {
-    services: { storage },
+    services: { storage, objectStorageClient },
   } = useServicesContext();
+
+  const [initialTextValue, setInitialTextValue] = useState<string | undefined>();
 
   const {
     textObjects,
@@ -68,6 +77,15 @@ export const Editor = memo(() => {
     []
   );
 
+  useEffect(() => {
+    setInitialTextValue(undefined);
+    if (currentTextObjectId) {
+      objectStorageClient.text
+        .get(currentTextObjectId, ['text'])
+        .then(({ text }) => setInitialTextValue(text ?? DEFAULT_INPUT_VALUE));
+    }
+  }, [currentTextObjectId, objectStorageClient]);
+
   return (
     <>
       {requestInFlight ? (
@@ -80,9 +98,9 @@ export const Editor = memo(() => {
           style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
           initialWidth={firstPanelWidth}
         >
-          {currentTextObject && (
+          {currentTextObject && initialTextValue != null && (
             <>
-              <EditorUI textObject={currentTextObject} />
+              <EditorUI textObject={{ ...currentTextObject, text: initialTextValue }} />
               <EuiControlBar
                 size="s"
                 position="absolute"
