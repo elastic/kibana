@@ -17,7 +17,6 @@ interface ScheduledExecutionOptions {
   actionGroup: string;
   context: Context;
   state: State;
-  clearState?: boolean;
 }
 export type AlertInstances = Record<string, AlertInstance>;
 export class AlertInstance {

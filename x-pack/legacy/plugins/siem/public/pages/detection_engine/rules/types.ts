@@ -77,7 +77,7 @@ export interface ScheduleStepRule extends StepRuleData {
 export interface ActionsStepRule extends StepRuleData {
   actions: AlertAction[];
   enabled: boolean;
-  throttle: string | null;
+  throttle?: string | null;
 }
 
 export interface DefineStepRuleJson {
@@ -111,7 +111,7 @@ export interface ScheduleStepRuleJson {
 export interface ActionsStepRuleJson {
   actions: AlertAction[];
   enabled: boolean;
-  throttle: string | null;
+  throttle?: string | null;
 }
 
 export type MyRule = Omit<DefineStepRule & ScheduleStepRule & AboutStepRule, 'isNew'> & {

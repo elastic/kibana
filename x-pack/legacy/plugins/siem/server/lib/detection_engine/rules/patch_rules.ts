@@ -53,7 +53,6 @@ export const patchRules = async ({
   }
 
   const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
-    actions,
     description,
     falsePositives,
     query,
@@ -73,7 +72,6 @@ export const patchRules = async ({
     severity,
     tags,
     threat,
-    throttle,
     to,
     type,
     references,
