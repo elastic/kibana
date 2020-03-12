@@ -17,6 +17,7 @@
  * under the License.
  */
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Field } from './discover_field_details';
 import { DiscoverField } from './discover_field';
@@ -99,11 +100,15 @@ export function DiscoverFieldChooser({
     return !field.display && isFieldFiltered(field) && field.type !== '_source';
   };
 
+  const indexAndFieldsAriaLabel = i18n.translate(
+    'kbn.discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel',
+    {
+      defaultMessage: 'Index and fields',
+    }
+  );
+
   return (
-    <section
-      className="sidebar-list"
-      aria-label="{{::'kbn.discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel' | i18n: {defaultMessage: 'Index and fields'} }}"
-    >
+    <section className="sidebar-list" aria-label={indexAndFieldsAriaLabel}>
       <DiscoverIndexPattern
         selectedIndexPattern={selectedIndexPattern}
         setIndexPattern={setIndexPattern}
