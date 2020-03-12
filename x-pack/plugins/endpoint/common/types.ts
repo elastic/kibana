@@ -33,7 +33,9 @@ export class EndpointAppConstants {
   static BASE_API_URL = '/api/endpoint';
   static ENDPOINT_INDEX_NAME = 'endpoint-agent*';
   static ALERT_INDEX_NAME = 'events-endpoint-1';
-  static EVENT_INDEX_NAME = 'events-endpoint-*';
+  static ENDPOINT_PACKAGE_NAME = 'endpoint';
+  static EVENT_DATASET = 'event';
+  static METADATA_DATASET = 'metadata';
   static DEFAULT_TOTAL_HITS = 10000;
   /**
    * Legacy events are stored in indices with endgame-* prefix

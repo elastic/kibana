@@ -6,8 +6,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
+import { EndpointAppConstants } from '../../../common/types';
 import { getPaginationParams } from './utils/pagination';
 import { RelatedEventsQuery } from './queries/related_events';
+import { IndexPatternService } from '../../../../ingest_manager/server';
+import { getIndexPattern } from '../../index_pattern';
 
 interface RelatedEventsQueryParams {
   after?: string;
@@ -42,7 +45,8 @@ export const validateRelatedEvents = {
 };
 
 export function handleRelatedEvents(
-  log: Logger
+  log: Logger,
+  indexPatternService: IndexPatternService
 ): RequestHandler<RelatedEventsPathParams, RelatedEventsQueryParams> {
   return async (context, req, res) => {
     const {
@@ -54,7 +58,15 @@ export function handleRelatedEvents(
 
       const client = context.core.elasticsearch.dataClient;
       // Retrieve the related non-process events for a given process
-      const relatedEventsQuery = new RelatedEventsQuery(legacyEndpointID, pagination);
+      const relatedEventsQuery = new RelatedEventsQuery(
+        await getIndexPattern(
+          indexPatternService,
+          context.core.savedObjects.client,
+          EndpointAppConstants.EVENT_DATASET
+        ),
+        legacyEndpointID,
+        pagination
+      );
       const relatedEvents = await relatedEventsQuery.search(client, id);
 
       const { total, results: events, nextCursor } = relatedEvents;

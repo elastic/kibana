@@ -10,6 +10,9 @@ import { RequestHandler, Logger } from 'kibana/server';
 import { extractParentEntityID } from './utils/normalize';
 import { LifecycleQuery } from './queries/lifecycle';
 import { ResolverEvent } from '../../../common/types';
+import { EndpointAppConstants } from '../../../common/types';
+import { IndexPatternService } from '../../../../ingest_manager/server';
+import { getIndexPattern } from '../../index_pattern';
 
 interface LifecycleQueryParams {
   ancestors: number;
@@ -46,7 +49,8 @@ function getParentEntityID(results: ResolverEvent[]) {
 }
 
 export function handleLifecycle(
-  log: Logger
+  log: Logger,
+  indexPatternService: IndexPatternService
 ): RequestHandler<LifecyclePathParams, LifecycleQueryParams> {
   return async (context, req, res) => {
     const {
@@ -57,7 +61,14 @@ export function handleLifecycle(
       const ancestorLifecycles = [];
       const client = context.core.elasticsearch.dataClient;
 
-      const lifecycleQuery = new LifecycleQuery(legacyEndpointID);
+      const lifecycleQuery = new LifecycleQuery(
+        await getIndexPattern(
+          indexPatternService,
+          context.core.savedObjects.client,
+          EndpointAppConstants.EVENT_DATASET
+        ),
+        legacyEndpointID
+      );
       const { results: processLifecycle } = await lifecycleQuery.search(client, id);
       let nextParentID = getParentEntityID(processLifecycle);
 

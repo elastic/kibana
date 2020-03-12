@@ -61,30 +61,6 @@ export async function getPackageKeysByStatus(
   }, []);
 }
 
-/**
- * Retrieve the datastream name stored in the saved object for an installed package.
- * @param options an object containing the package name, dataset path, and optionally the version of the package.
- */
-export async function getDataStream(options: {
-  savedObjectsClient: SavedObjectsClientContract;
-  pkgName: string;
-  datasetPath: string;
-  version?: string;
-}): Promise<string | undefined> {
-  const { savedObjectsClient, pkgName, datasetPath, version } = options;
-  let installation: Installation | undefined;
-  if (version) {
-    const pkgkey = Registry.pkgToPkgKey({
-      name: pkgName,
-      version,
-    });
-    installation = (await getInstallationObject({ savedObjectsClient, pkgkey }))?.attributes;
-  } else {
-    installation = await findInstalledPackageByName({ savedObjectsClient, pkgName });
-  }
-  return installation?.installed.dataStreams[datasetPath];
-}
-
 export async function getPackageInfo(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;

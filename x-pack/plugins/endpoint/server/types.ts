@@ -5,11 +5,13 @@
  */
 import { LoggerFactory } from 'kibana/server';
 import { EndpointConfigType } from './config';
+import { IngestManagerSetupContract } from '../../ingest_manager/server';
 
 /**
  * The context for Endpoint apps.
  */
 export interface EndpointAppContext {
+  ingestManager: IngestManagerSetupContract;
   logFactory: LoggerFactory;
   config(): Promise<EndpointConfigType>;
 }

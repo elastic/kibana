@@ -52,11 +52,6 @@ export interface GetInfoResponse {
   success: boolean;
 }
 
-export interface GetDataStreamResponse {
-  response: string | null;
-  success: boolean;
-}
-
 export interface InstallPackageRequest {
   params: {
     pkgkey: string;

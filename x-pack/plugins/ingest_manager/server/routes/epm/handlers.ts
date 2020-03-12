@@ -9,13 +9,11 @@ import {
   GetPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
-  GetDataStreamRequestSchema,
   InstallPackageRequestSchema,
   DeletePackageRequestSchema,
 } from '../../types';
 import {
   GetInfoResponse,
-  GetDataStreamResponse,
   InstallPackageResponse,
   DeletePackageResponse,
   GetCategoriesResponse,
@@ -26,7 +24,6 @@ import {
   getPackages,
   getFile,
   getPackageInfo,
-  getDataStream,
   installPackage,
   removeInstallation,
 } from '../../services/epm/packages';
@@ -119,7 +116,7 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
   }
 };
 
-export const getDataStreamHandler: RequestHandler<
+/* export const getDataStreamHandler: RequestHandler<
   TypeOf<typeof GetDataStreamRequestSchema.params>,
   TypeOf<typeof GetDataStreamRequestSchema.query>
 > = async (context, request, response) => {
@@ -139,7 +136,7 @@ export const getDataStreamHandler: RequestHandler<
       body: { message: e.message },
     });
   }
-};
+};*/
 
 export const installPackageHandler: RequestHandler<TypeOf<
   typeof InstallPackageRequestSchema.params
