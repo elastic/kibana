@@ -18,9 +18,11 @@ import { initGetCommentApi } from './cases/comments/get_comment';
 import { initPatchCommentApi } from './cases/comments/patch_comment';
 import { initPostCommentApi } from './cases/comments/post_comment';
 
-import { initGetTagsApi } from './cases/tags/get_tags';
+import { initGetReportersApi } from './cases/reporters/get_reporters';
 
 import { initGetCasesStatusApi } from './cases/status/get_status';
+
+import { initGetTagsApi } from './cases/tags/get_tags';
 
 import { RouteDeps } from './types';
 
@@ -39,8 +41,10 @@ export function initCaseApi(deps: RouteDeps) {
   initGetAllCommentsApi(deps);
   initPatchCommentApi(deps);
   initPostCommentApi(deps);
-  // Tags
-  initGetTagsApi(deps);
+  // Reporters
+  initGetReportersApi(deps);
   // Status
   initGetCasesStatusApi(deps);
+  // Tags
+  initGetTagsApi(deps);
 }

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { User } from '../../../../../../plugins/case/common/api';
+
 export interface Comment {
   id: string;
   createdAt: string;
@@ -38,6 +40,7 @@ export interface FilterOptions {
   search: string;
   status: string;
   tags: string[];
+  reporters: User[];
 }
 
 export interface CasesStatus {

@@ -12,6 +12,7 @@ import {
   CasesStatusResponse,
   CommentRequest,
   CommentResponse,
+  User,
 } from '../../../../../../plugins/case/common/api';
 import { KibanaServices } from '../../lib/kibana';
 import { AllCases, Case, CasesStatus, Comment, FetchCasesProps, SortFieldCase } from './types';
@@ -54,9 +55,18 @@ export const getTags = async (): Promise<string[]> => {
   return response ?? [];
 };
 
+export const getReporters = async (signal: AbortSignal): Promise<User[]> => {
+  const response = await KibanaServices.get().http.fetch<User[]>(`${CASES_URL}/reporters`, {
+    method: 'GET',
+    signal,
+  });
+  return response ?? [];
+};
+
 export const getCases = async ({
   filterOptions = {
     search: '',
+    reporters: [],
     status: 'open',
     tags: [],
   },
@@ -68,6 +78,7 @@ export const getCases = async ({
   },
 }: FetchCasesProps): Promise<AllCases> => {
   const query = {
+    reporters: filterOptions.reporters.map(r => r.username),
     tags: filterOptions.tags,
     ...(filterOptions.status !== '' ? { status: filterOptions.status } : {}),
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),

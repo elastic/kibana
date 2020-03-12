@@ -36,6 +36,7 @@ export const CaseRequestRt = CaseBasicRt;
 export const CasesFindRequestRt = rt.partial({
   tags: rt.union([rt.array(rt.string), rt.string]),
   status: StatusRt,
+  reporters: rt.union([rt.array(rt.string), rt.string]),
   defaultSearchOperator: rt.union([rt.literal('AND'), rt.literal('OR')]),
   fields: rt.array(rt.string),
   page: NumberFromString,

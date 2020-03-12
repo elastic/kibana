@@ -17,6 +17,7 @@ import * as i18n from './translations';
 
 import { FilterOptions } from '../../../../containers/case/types';
 import { useGetTags } from '../../../../containers/case/use_get_tags';
+import { useGetReporters } from '../../../../containers/case/use_get_reporters';
 import { FilterPopover } from '../../../../components/filter_popover';
 
 interface CasesTableFiltersProps {
@@ -33,16 +34,35 @@ interface CasesTableFiltersProps {
  * @param onFilterChanged change listener to be notified on filter changes
  */
 
+const defaultInitial = { search: '', reporters: [], status: 'open', tags: [] };
+
 const CasesTableFiltersComponent = ({
   countClosedCases,
   countOpenCases,
   onFilterChanged,
-  initial = { search: '', tags: [], status: 'open' },
+  initial = defaultInitial,
 }: CasesTableFiltersProps) => {
+  const [selectedReporters, setselectedReporters] = useState(
+    initial.reporters.map(r => r.full_name ?? r.username)
+  );
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
   const [showOpenCases, setShowOpenCases] = useState(initial.status === 'open');
   const { tags } = useGetTags();
+  const { reporters, respReporters } = useGetReporters();
+
+  const handleSelectedReporters = useCallback(
+    newReporters => {
+      if (!isEqual(newReporters, selectedReporters)) {
+        setselectedReporters(newReporters);
+        const reportersObj = respReporters.filter(
+          r => newReporters.includes(r.username) || newReporters.includes(r.full_name)
+        );
+        onFilterChanged({ reporters: reportersObj });
+      }
+    },
+    [selectedReporters, respReporters]
+  );
 
   const handleSelectedTags = useCallback(
     newTags => {
@@ -51,7 +71,7 @@ const CasesTableFiltersComponent = ({
         onFilterChanged({ tags: newTags });
       }
     },
-    [search, selectedTags]
+    [selectedTags]
   );
   const handleOnSearch = useCallback(
     newSearch => {
@@ -61,7 +81,7 @@ const CasesTableFiltersComponent = ({
         onFilterChanged({ search: trimSearch });
       }
     },
-    [search, selectedTags]
+    [search]
   );
   const handleToggleFilter = useCallback(
     showOpen => {
@@ -103,9 +123,9 @@ const CasesTableFiltersComponent = ({
           </EuiFilterButton>
           <FilterPopover
             buttonLabel={i18n.REPORTER}
-            onSelectedOptionsChanged={() => {}}
-            selectedOptions={[]}
-            options={[]}
+            onSelectedOptionsChanged={handleSelectedReporters}
+            selectedOptions={selectedReporters}
+            options={reporters}
             optionsEmptyLabel={i18n.NO_REPORTERS_AVAILABLE}
           />
           <FilterPopover

@@ -91,5 +91,5 @@ export const useGetCasesMockState: UseGetCasesState = {
     sortField: SortFieldCase.createdAt,
     sortOrder: 'desc',
   },
-  filterOptions: { search: '', tags: [], status: 'open' },
+  filterOptions: { search: '', reporters: [], tags: [], status: 'open' },
 };

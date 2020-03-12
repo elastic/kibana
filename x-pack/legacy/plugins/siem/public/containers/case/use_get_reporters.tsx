@@ -6,45 +6,49 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+import { User } from '../../../../../../plugins/case/common/api';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
-import { getCasesStatus } from './api';
+import { getReporters } from './api';
 import * as i18n from './translations';
-import { CasesStatus } from './types';
 
-interface CasesStatusState extends CasesStatus {
+interface ReportersState {
+  reporters: string[];
+  respReporters: User[];
   isLoading: boolean;
   isError: boolean;
 }
 
-const initialData: CasesStatusState = {
-  countClosedCases: null,
-  countOpenCases: null,
+const initialData: ReportersState = {
+  reporters: [],
+  respReporters: [],
   isLoading: true,
   isError: false,
 };
 
-interface UseGetCasesStatus extends CasesStatusState {
-  fetchCasesStatus: () => void;
+interface UseGetReporters extends ReportersState {
+  fetchReporters: () => void;
 }
 
-export const useGetCasesStatus = (): UseGetCasesStatus => {
-  const [casesStatusState, setCasesStatusState] = useState<CasesStatusState>(initialData);
+export const useGetReporters = (): UseGetReporters => {
+  const [reportersState, setReporterState] = useState<ReportersState>(initialData);
+
   const [, dispatchToaster] = useStateToaster();
 
-  const fetchCasesStatus = useCallback(() => {
+  const fetchReporters = useCallback(() => {
     let didCancel = false;
     const abortCtrl = new AbortController();
     const fetchData = async () => {
-      setCasesStatusState({
-        ...casesStatusState,
+      setReporterState({
+        ...reportersState,
         isLoading: true,
       });
       try {
-        const response = await getCasesStatus(abortCtrl.signal);
+        const response = await getReporters(abortCtrl.signal);
         if (!didCancel) {
-          setCasesStatusState({
-            ...response,
-            isLoading: false,
+          setReporterState({
+            reporters: response.map(r => r.full_name ?? r.username ?? 'N/A'),
+            respReporters: response,
+            isLoading: true,
             isError: false,
           });
         }
@@ -55,9 +59,9 @@ export const useGetCasesStatus = (): UseGetCasesStatus => {
             error: error.body && error.body.message ? new Error(error.body.message) : error,
             dispatchToaster,
           });
-          setCasesStatusState({
-            countClosedCases: 0,
-            countOpenCases: 0,
+          setReporterState({
+            reporters: [],
+            respReporters: [],
             isLoading: false,
             isError: true,
           });
@@ -69,14 +73,10 @@ export const useGetCasesStatus = (): UseGetCasesStatus => {
       didCancel = true;
       abortCtrl.abort();
     };
-  }, [casesStatusState]);
+  }, [reportersState]);
 
   useEffect(() => {
-    fetchCasesStatus();
+    fetchReporters();
   }, []);
-
-  return {
-    ...casesStatusState,
-    fetchCasesStatus,
-  };
+  return { ...reportersState, fetchReporters };
 };

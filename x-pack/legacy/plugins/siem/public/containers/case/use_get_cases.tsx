@@ -24,6 +24,7 @@ export interface UseGetCasesState {
 export interface UpdateCase extends UpdateByKey {
   caseId: string;
   version: string;
+  refetchCasesStatus: () => void;
 }
 
 export type Action =
@@ -96,7 +97,13 @@ const initialData: AllCases = {
   total: 0,
 };
 interface UseGetCases extends UseGetCasesState {
-  dispatchUpdateCaseProperty: ({ updateKey, updateValue, caseId, version }: UpdateCase) => void;
+  dispatchUpdateCaseProperty: ({
+    updateKey,
+    updateValue,
+    caseId,
+    version,
+    refetchCasesStatus,
+  }: UpdateCase) => void;
   refetchCases: (filters: FilterOptions, queryParams: QueryParams) => void;
   setFilters: (filters: FilterOptions) => void;
   setQueryParams: (queryParams: QueryParams) => void;
@@ -107,6 +114,7 @@ export const useGetCases = (): UseGetCases => {
     data: initialData,
     filterOptions: {
       search: '',
+      reporters: [],
       status: 'open',
       tags: [],
     },
@@ -172,7 +180,7 @@ export const useGetCases = (): UseGetCases => {
   ]);
 
   const dispatchUpdateCaseProperty = useCallback(
-    ({ updateKey, updateValue, caseId, version }: UpdateCase) => {
+    ({ updateKey, updateValue, caseId, refetchCasesStatus, version }: UpdateCase) => {
       let didCancel = false;
       const fetchData = async () => {
         dispatch({ type: 'FETCH_INIT', payload: 'caseUpdate' });
@@ -185,6 +193,7 @@ export const useGetCases = (): UseGetCases => {
           if (!didCancel) {
             dispatch({ type: 'FETCH_UPDATE_CASE_SUCCESS' });
             fetchCases(state.filterOptions, state.queryParams);
+            refetchCasesStatus();
           }
         } catch (error) {
           if (!didCancel) {

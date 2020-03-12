@@ -16,10 +16,26 @@ import { transformCases, sortToSnake, wrapError, escapeHatch } from '../utils';
 import { RouteDeps } from '../types';
 import { CASE_SAVED_OBJECT } from '../../../saved_object_types';
 
+const combineFilters = (filters: string[], operator: 'OR' | 'AND'): string =>
+  filters?.filter(i => i !== '').join(` ${operator} `);
+
 const getStatusFilter = (status: 'open' | 'closed', appendFilter?: string) =>
   `${CASE_SAVED_OBJECT}.attributes.status: ${status}${
     !isEmpty(appendFilter) ? ` AND ${appendFilter}` : ''
   }`;
+
+const buildFilter = (
+  filters: string | string[] | undefined,
+  field: string,
+  operator: 'OR' | 'AND'
+): string =>
+  filters != null && filters.length > 0
+    ? Array.isArray(filters)
+      ? filters
+          .map(filter => `${CASE_SAVED_OBJECT}.attributes.${field}: ${filter}`)
+          ?.join(` ${operator} `)
+      : `${CASE_SAVED_OBJECT}.attributes.${field}: ${filters}`
+    : '';
 
 export function initFindCasesApi({ caseService, router }: RouteDeps) {
   router.get(
@@ -37,14 +53,12 @@ export function initFindCasesApi({ caseService, router }: RouteDeps) {
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const { tags, status, ...query } = queryParams;
-        const tagsFilter =
-          tags != null && Array.isArray(tags) && tags.length > 0
-            ? tags.map(tag => `${CASE_SAVED_OBJECT}.attributes.tags: ${tag}`)?.join(' OR ')
-            : tags != null && tags.length > 0
-            ? `${CASE_SAVED_OBJECT}.attributes.tags: ${tags}`
-            : '';
-        const filter = status != null ? getStatusFilter(status, tagsFilter) : tagsFilter;
+        const { tags, reporters, status, ...query } = queryParams;
+        const tagsFilter = buildFilter(tags, 'tags', 'OR');
+        const reportersFilters = buildFilter(reporters, 'created_by.username', 'OR');
+
+        const myFilters = combineFilters([tagsFilter, reportersFilters], 'AND');
+        const filter = status != null ? getStatusFilter(status, myFilters) : myFilters;
 
         const args = queryParams
           ? {
@@ -65,7 +79,7 @@ export function initFindCasesApi({ caseService, router }: RouteDeps) {
             fields: [],
             page: 1,
             perPage: 1,
-            filter: getStatusFilter('open', tagsFilter),
+            filter: getStatusFilter('open', myFilters),
           },
         };
 
@@ -75,7 +89,7 @@ export function initFindCasesApi({ caseService, router }: RouteDeps) {
             fields: [],
             page: 1,
             perPage: 1,
-            filter: getStatusFilter('closed', tagsFilter),
+            filter: getStatusFilter('closed', myFilters),
           },
         };
         const [cases, openCases, closesCases] = await Promise.all([

@@ -23,7 +23,7 @@ import * as i18n from './translations';
 
 import { getCasesColumns } from './columns';
 import { Case, FilterOptions, SortFieldCase } from '../../../../containers/case/types';
-import { useGetCases } from '../../../../containers/case/use_get_cases';
+import { useGetCases, UpdateCase } from '../../../../containers/case/use_get_cases';
 import { useGetCasesStatus } from '../../../../containers/case/use_get_cases_status';
 import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
 import { EuiBasicTableOnChange } from '../../../detection_engine/rules/types';
@@ -75,7 +75,12 @@ const getSortField = (field: string): SortFieldCase => {
   return SortFieldCase.createdAt;
 };
 export const AllCases = React.memo(() => {
-  const { countClosedCases, countOpenCases, isLoading: isCasesStatusLoading } = useGetCasesStatus();
+  const {
+    countClosedCases,
+    countOpenCases,
+    isLoading: isCasesStatusLoading,
+    fetchCasesStatus,
+  } = useGetCasesStatus();
   const {
     data,
     dispatchUpdateCaseProperty,
@@ -102,6 +107,7 @@ export const AllCases = React.memo(() => {
   useEffect(() => {
     if (isDeleted) {
       refetchCases(filterOptions, queryParams);
+      fetchCasesStatus();
       dispatchResetIsDeleted();
     }
   }, [isDeleted, filterOptions, queryParams]);
@@ -160,16 +166,23 @@ export const AllCases = React.memo(() => {
         })}
       />
     ),
-    [selectedCaseIds, filterOptions.status]
+    [selectedCaseIds, filterOptions.status, toggleBulkDeleteModal]
   );
+  const handleDispatchUpdate = useCallback(
+    (args: Omit<UpdateCase, 'refetchCasesStatus'>) => {
+      dispatchUpdateCaseProperty({ ...args, refetchCasesStatus: fetchCasesStatus });
+    },
+    [dispatchUpdateCaseProperty, fetchCasesStatus]
+  );
+
   const actions = useMemo(
     () =>
       getActions({
         caseStatus: filterOptions.status,
         deleteCaseOnClick: toggleDeleteModal,
-        dispatchUpdate: dispatchUpdateCaseProperty,
+        dispatchUpdate: handleDispatchUpdate,
       }),
-    [filterOptions.status]
+    [filterOptions.status, toggleDeleteModal, handleDispatchUpdate]
   );
 
   const tableOnChangeCallback = useCallback(
@@ -269,6 +282,7 @@ export const AllCases = React.memo(() => {
           onFilterChanged={onFilterChangedCallback}
           initial={{
             search: filterOptions.search,
+            reporters: filterOptions.reporters,
             tags: filterOptions.tags,
             status: filterOptions.status,
           }}

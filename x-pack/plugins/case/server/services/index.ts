@@ -18,8 +18,9 @@ import {
 } from 'kibana/server';
 
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
-import { CaseAttributes, CommentAttributes, SavedObjectFindOptions } from '../../common/api';
+import { CaseAttributes, CommentAttributes, SavedObjectFindOptions, User } from '../../common/api';
 import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../saved_object_types';
+import { readReporters } from './reporters/read_reporters';
 import { readTags } from './tags/read_tags';
 
 interface ClientArgs {
@@ -86,6 +87,7 @@ export interface CaseServiceSetup {
   getCases(args: GetCasesArgs): Promise<SavedObjectsBulkResponse<CaseAttributes>>;
   getComment(args: GetCommentArgs): Promise<SavedObject<CommentAttributes>>;
   getTags(args: ClientArgs): Promise<string[]>;
+  getReporters(args: ClientArgs): Promise<User[]>;
   getUser(args: GetUserArgs): Promise<AuthenticatedUser>;
   postNewCase(args: PostCaseArgs): Promise<SavedObject<CaseAttributes>>;
   postNewComment(args: PostCommentArgs): Promise<SavedObject<CommentAttributes>>;
@@ -163,6 +165,15 @@ export class CaseService {
         });
       } catch (error) {
         this.log.debug(`Error on GET all comments for case ${caseId}: ${error}`);
+        throw error;
+      }
+    },
+    getReporters: async ({ client }: ClientArgs) => {
+      try {
+        this.log.debug(`Attempting to GET all reporters`);
+        return await readReporters({ client });
+      } catch (error) {
+        this.log.debug(`Error on GET all reporters: ${error}`);
         throw error;
       }
     },

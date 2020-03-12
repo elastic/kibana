@@ -32,8 +32,8 @@ export const transformNewCase = ({
 }: {
   createdDate: string;
   newCase: CaseRequest;
-  full_name?: string | null;
-  username: string | null;
+  full_name?: string;
+  username: string;
 }): CaseAttributes => ({
   comment_ids: [],
   created_at: createdDate,
@@ -46,8 +46,8 @@ export const transformNewCase = ({
 interface NewCommentArgs {
   comment: string;
   createdDate: string;
-  full_name?: string | null;
-  username: string | null;
+  full_name?: string;
+  username: string;
 }
 export const transformNewComment = ({
   comment,

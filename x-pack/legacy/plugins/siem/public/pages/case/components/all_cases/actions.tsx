@@ -12,7 +12,7 @@ import { UpdateCase } from '../../../../containers/case/use_get_cases';
 
 interface GetActions {
   caseStatus: string;
-  dispatchUpdate: Dispatch<UpdateCase>;
+  dispatchUpdate: Dispatch<Omit<UpdateCase, 'refetchCasesStatus'>>;
   deleteCaseOnClick: (deleteCase: Case) => void;
 }
 
