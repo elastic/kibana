@@ -59,14 +59,17 @@ export const ConnectorAddModal = ({
   const setConnector = (value: any) => {
     dispatch({ command: { type: 'setConnector' }, payload: { key: 'connector', value } });
   };
-  const [serverError, setServerError] = useState<{
-    body: { message: string; error: string };
-  } | null>(null);
+  const [serverError, setServerError] = useState<
+    | {
+        body: { message: string; error: string };
+      }
+    | undefined
+  >(undefined);
 
   const closeModal = useCallback(() => {
     setAddModalVisibility(false);
     setConnector(initialConnector);
-    setServerError(null);
+    setServerError(undefined);
   }, [initialConnector, setAddModalVisibility]);
 
   if (!addModalVisible) {

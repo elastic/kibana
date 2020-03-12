@@ -7,8 +7,7 @@
 import { useCallback, useEffect, useReducer } from 'react';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
 import { AllCases, SortFieldCase, FilterOptions, QueryParams, Case } from './types';
-import { errorToToaster } from '../../components/ml/api/error_to_toaster';
-import { useStateToaster } from '../../components/toasters';
+import { errorToToaster, useStateToaster } from '../../components/toasters';
 import * as i18n from './translations';
 import { UpdateByKey } from './use_update_case';
 import { getCases, patchCase } from './api';
@@ -97,7 +96,7 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
         selectedCases: action.payload,
       };
     default:
-      throw new Error();
+      return state;
   }
 };
 
@@ -110,6 +109,7 @@ const initialData: AllCases = {
 interface UseGetCases extends UseGetCasesState {
   dispatchUpdateCaseProperty: ({ updateKey, updateValue, caseId, version }: UpdateCase) => void;
   getCaseCount: (caseState: keyof CaseCount) => void;
+  refetchCases: (filters: FilterOptions, queryParams: QueryParams) => void;
   setFilters: (filters: FilterOptions) => void;
   setQueryParams: (queryParams: QueryParams) => void;
   setSelectedCases: (mySelectedCases: Case[]) => void;
@@ -246,10 +246,17 @@ export const useGetCases = (): UseGetCases => {
     [state.filterOptions, state.queryParams]
   );
 
+  const refetchCases = useCallback(() => {
+    fetchCases(state.filterOptions, state.queryParams);
+    getCaseCount('open');
+    getCaseCount('closed');
+  }, [state.filterOptions, state.queryParams]);
+
   return {
     ...state,
     dispatchUpdateCaseProperty,
     getCaseCount,
+    refetchCases,
     setFilters,
     setQueryParams,
     setSelectedCases,

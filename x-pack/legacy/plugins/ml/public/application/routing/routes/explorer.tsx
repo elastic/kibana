@@ -9,7 +9,7 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { i18n } from '@kbn/i18n';
 
-import { MlJobWithTimeRange } from '../../../../common/types/jobs';
+import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
 import { MlRoute, PageLoader, PageProps } from '../router';
 import { useRefresh } from '../use_refresh';

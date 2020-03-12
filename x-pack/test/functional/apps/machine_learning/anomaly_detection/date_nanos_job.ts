@@ -165,7 +165,7 @@ export default function({ getService }: FtrProviderContext) {
     },
   ];
 
-  // test failures, see #59419
+  // FLAKY: https://github.com/elastic/kibana/issues/59419
   describe.skip('job on data set with date_nanos time field', function() {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
