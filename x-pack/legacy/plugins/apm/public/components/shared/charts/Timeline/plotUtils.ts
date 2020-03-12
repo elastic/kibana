@@ -5,8 +5,21 @@
  */
 
 import { scaleLinear } from 'd3-scale';
+import { Margins } from './';
 
-export function getPlotValues({ width, duration, height, margins }) {
+export type PlotValues = ReturnType<typeof getPlotValues>;
+
+export function getPlotValues({
+  width,
+  duration,
+  height,
+  margins
+}: {
+  width: number;
+  duration: number;
+  height: number;
+  margins: Margins;
+}) {
   const xMin = 0;
   const xMax = duration;
   const xScale = scaleLinear()
