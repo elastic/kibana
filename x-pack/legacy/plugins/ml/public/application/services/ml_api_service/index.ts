@@ -474,7 +474,7 @@ export const ml = {
   /**
    * Gets a list of calendars
    * @param obj
-   * @returns {Promise<unknown>}
+   * @returns {Promise<Calendar[]>}
    */
   calendars(obj?: { calendarId?: CalendarId; calendarIds?: CalendarId[] }) {
     const { calendarId, calendarIds } = obj || {};
