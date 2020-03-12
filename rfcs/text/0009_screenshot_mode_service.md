@@ -94,9 +94,10 @@ in a URL is to use Rison encoding. An example of what that would look like in a
 Kibana URL (with linebreaks added):
 
 ```
-http://localhost:5601/app/kibana#/discover?_g=()
-&_a=(columns:!(_source),index:'6a047550-4e87-11ea-ad93-21278bc67061',interval:auto,query:(language:kuery,query:''),sort:!())
-&screenshots=(enabled:!t,layout:(height:500,width:400),timezone:PST)
+http://localhost:5601/app/kibana
+?screenshots=(enabled:!t,layout:(height:500,width:400),timezone:PST)
+#/discover?_g=()&_a=(columns:!(_source),index:'6a047550-4e87-11ea-ad93-21278bc67061',interval:auto,query:(language:kuery,query:''),sort:!())
+
 ```
 
 That shows an example way of encoding this raw data into the URL as a global
