@@ -86,8 +86,8 @@ export const AlwaysFiringExpression: React.FunctionComponent<AlwaysFiringParamsP
       <EuiFlexGroup gutterSize="s" wrap direction="column">
         <EuiFlexItem grow={true}>
           <EuiFormRow
-            label="Random Instacnes to generate"
-            helpText="How many randomy generates Alert Insatcens do you wish to activate on each alert run?"
+            label="Random Instances to generate"
+            helpText="How many randomly generated Alert Instances do you wish to activate on each alert run?"
           >
             <EuiFieldNumber
               name="instances"

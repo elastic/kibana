@@ -21,6 +21,7 @@ import { Plugin, CoreSetup } from 'kibana/server';
 import { PluginSetupContract as AlertingSetup } from '../../../x-pack/plugins/alerting/server';
 
 import { alertType as alwaysFiringAlert } from './alert_types/always_firing';
+import { alertType as peopleInSpaceAlert } from './alert_types/astros';
 
 // this plugin's dependendencies
 export interface AlertingExampleDeps {
@@ -30,6 +31,7 @@ export interface AlertingExampleDeps {
 export class AlertingExamplePlugin implements Plugin<void, void, AlertingExampleDeps> {
   public setup(core: CoreSetup, { alerting }: AlertingExampleDeps) {
     alerting.registerType(alwaysFiringAlert);
+    alerting.registerType(peopleInSpaceAlert);
   }
 
   public start() {}
