@@ -132,5 +132,23 @@ test(`returns content of generatePng getBuffer base64 encoded`, async () => {
     cancellationToken
   );
 
-  expect(content).toEqual(Buffer.from(testContent).toString('base64'));
+  expect(content).toMatchInlineSnapshot(`
+    Object {
+      "data": Array [
+        116,
+        101,
+        115,
+        116,
+        32,
+        99,
+        111,
+        110,
+        116,
+        101,
+        110,
+        116,
+      ],
+      "type": "Buffer",
+    }
+  `);
 });
