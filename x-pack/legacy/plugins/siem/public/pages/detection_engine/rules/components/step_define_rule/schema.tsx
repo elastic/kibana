@@ -90,4 +90,13 @@ export const schema: FormSchema = {
       },
     ],
   },
+  ruleType: {
+    label: i18n.translate(
+      'xpack.siem.detectionEngine.createRule.stepDefineRule.fieldRuleTypeLabel',
+      {
+        defaultMessage: 'Rule type',
+      }
+    ),
+    validations: [],
+  },
 };

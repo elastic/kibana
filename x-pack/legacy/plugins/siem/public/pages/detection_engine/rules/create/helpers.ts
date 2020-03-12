@@ -16,7 +16,6 @@ import {
   DefineStepRuleJson,
   ScheduleStepRuleJson,
   AboutStepRuleJson,
-  FormatRuleType,
 } from '../types';
 
 const getTimeTypeValue = (time: string): { unit: string; value: number } => {
@@ -40,10 +39,11 @@ const getTimeTypeValue = (time: string): { unit: string; value: number } => {
 };
 
 const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
-  const { queryBar, isNew, ...rest } = defineStepData;
+  const { queryBar, isNew, ruleType, ...rest } = defineStepData;
   const { filters, query, saved_id: savedId } = queryBar;
   return {
     ...rest,
+    type: ruleType,
     language: query.language,
     filters,
     query: query.query as string,
@@ -102,13 +102,10 @@ export const formatRule = (
   aboutStepData: AboutStepRule,
   scheduleData: ScheduleStepRule,
   ruleId?: string
-): NewRule => {
-  const type: FormatRuleType = !isEmpty(defineStepData.queryBar.saved_id) ? 'saved_query' : 'query';
-  const persistData = {
-    type,
-    ...formatDefineStepData(defineStepData),
-    ...formatAboutStepData(aboutStepData),
-    ...formatScheduleStepData(scheduleData),
-  };
-  return ruleId != null ? { id: ruleId, ...persistData } : persistData;
-};
+): NewRule => ({
+  ...(!isEmpty(defineStepData) && ruleId != null ? { id: ruleId } : {}),
+  ...formatDefineStepData(defineStepData),
+  ...formatAboutStepData(aboutStepData),
+  ...formatScheduleStepData(scheduleData),
+  ...(!isEmpty(defineStepData.queryBar.saved_id) ? { type: 'saved_query' } : {}),
+});

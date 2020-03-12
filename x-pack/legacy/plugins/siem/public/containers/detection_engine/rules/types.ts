@@ -6,6 +6,13 @@
 
 import * as t from 'io-ts';
 
+export const RuleTypeSchema = t.union([
+  t.literal('query'),
+  t.literal('saved_query'),
+  t.literal('machine_learning'),
+]);
+export type RuleType = t.TypeOf<typeof RuleTypeSchema>;
+
 export const NewRuleSchema = t.intersection([
   t.type({
     description: t.string,
@@ -18,7 +25,7 @@ export const NewRuleSchema = t.intersection([
     query: t.string,
     risk_score: t.number,
     severity: t.string,
-    type: t.union([t.literal('query'), t.literal('saved_query'), t.literal('machine_learning')]),
+    type: RuleTypeSchema,
   }),
   t.partial({
     anomaly_threshold: t.number,

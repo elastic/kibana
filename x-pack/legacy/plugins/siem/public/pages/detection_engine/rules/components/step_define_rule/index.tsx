@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n as I18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiHorizontalRule,
@@ -25,6 +26,7 @@ import * as RuleI18n from '../../translations';
 import { DefineStepRule, RuleStep, RuleStepProps } from '../../types';
 import { StepRuleDescription } from '../description_step';
 import { QueryBarDefineRule } from '../query_bar';
+import { SelectRuleType } from '../select_rule_type';
 import { StepContentWrapper } from '../step_content_wrapper';
 import {
   Field,
@@ -43,9 +45,10 @@ interface StepDefineRuleProps extends RuleStepProps {
   defaultValues?: DefineStepRule | null;
 }
 
-const stepDefineDefaultValue = {
+const stepDefineDefaultValue: DefineStepRule = {
   index: [],
   isNew: true,
+  ruleType: 'query',
   queryBar: {
     query: { query: '', language: 'kuery' },
     filters: [],
@@ -167,6 +170,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form} data-test-subj="stepDefineRule">
+          <UseField path="ruleType" component={SelectRuleType} componentProps={{}} />
           <CommonUseField
             path="index"
             config={{
