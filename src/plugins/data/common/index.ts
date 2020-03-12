@@ -24,4 +24,5 @@ export * from './index_patterns';
 export * from './es_query';
 export * from './utils';
 export * from './types';
+export * from './search';
 export * from './constants';

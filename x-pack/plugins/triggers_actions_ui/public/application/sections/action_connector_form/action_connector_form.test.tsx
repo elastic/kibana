@@ -9,26 +9,21 @@ import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult, ActionConnector } from '../../../types';
 import { ActionConnectorForm } from './action_connector_form';
+import { ActionsConnectorsContextValue } from '../../context/actions_connectors_context';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 describe('action_connector_form', () => {
-  let deps: any;
+  let deps: ActionsConnectorsContextValue;
   beforeAll(async () => {
     const mocks = coreMock.createSetup();
     const [
       {
-        chrome,
-        docLinks,
         application: { capabilities },
       },
     ] = await mocks.getStartServices();
     deps = {
-      chrome,
-      docLinks,
       toastNotifications: mocks.notifications.toasts,
-      injectedMetadata: mocks.injectedMetadata,
       http: mocks.http,
-      uiSettings: mocks.uiSettings,
       capabilities: {
         ...capabilities,
         actions: {
@@ -37,11 +32,7 @@ describe('action_connector_form', () => {
           show: true,
         },
       },
-      legacy: {
-        MANAGEMENT_BREADCRUMB: { set: () => {} } as any,
-      },
       actionTypeRegistry: actionTypeRegistry as any,
-      alertTypeRegistry: {} as any,
     };
   });
 
@@ -75,7 +66,6 @@ describe('action_connector_form', () => {
           actionTypeName={'my-action-type-name'}
           connector={initialConnector}
           dispatch={() => {}}
-          serverError={null}
           errors={{ name: [] }}
           actionTypeRegistry={deps.actionTypeRegistry}
         />

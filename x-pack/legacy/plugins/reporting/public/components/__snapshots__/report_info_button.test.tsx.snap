@@ -14,25 +14,12 @@ exports[`ReportInfoButton handles button click flyout on click 1`] = `
     size="m"
     type="iInCircle"
   >
-    <EuiIconEmpty
-      aria-hidden={true}
-      className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-      focusable="false"
-      role="img"
-      style={null}
-    >
-      <svg
-        aria-hidden={true}
-        className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-        focusable="false"
-        height={16}
-        role="img"
-        style={null}
-        viewBox="0 0 16 16"
-        width={16}
-        xmlns="http://www.w3.org/2000/svg"
-      />
-    </EuiIconEmpty>
+    <div
+      aria-hidden="true"
+      className="euiButtonIcon__icon"
+      data-euiicon-type="iInCircle"
+      size="m"
+    />
   </EuiIcon>
 </button>
 `;
@@ -154,15 +141,10 @@ Array [
                           data-test-subj="euiFlyoutCloseButton"
                           type="button"
                         >
-                          <svg
+                          <div
                             aria-hidden="true"
-                            class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                            focusable="false"
-                            height="16"
-                            role="img"
-                            viewBox="0 0 16 16"
-                            width="16"
-                            xmlns="http://www.w3.org/2000/svg"
+                            class="euiButtonIcon__icon"
+                            data-euiicon-type="cross"
                           />
                         </button>
                         <div
@@ -182,9 +164,13 @@ Array [
                             class="euiFlyoutBody__overflow"
                           >
                             <div
-                              class="euiText euiText--medium"
+                              class="euiFlyoutBody__overflowContent"
                             >
-                              Could not fetch the job info
+                              <div
+                                class="euiText euiText--medium"
+                              >
+                                Could not fetch the job info
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -215,15 +201,10 @@ Array [
                             data-test-subj="euiFlyoutCloseButton"
                             type="button"
                           >
-                            <svg
+                            <div
                               aria-hidden="true"
-                              class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                              focusable="false"
-                              height="16"
-                              role="img"
-                              viewBox="0 0 16 16"
-                              width="16"
-                              xmlns="http://www.w3.org/2000/svg"
+                              class="euiButtonIcon__icon"
+                              data-euiicon-type="cross"
                             />
                           </button>
                           <div
@@ -243,9 +224,13 @@ Array [
                               class="euiFlyoutBody__overflow"
                             >
                               <div
-                                class="euiText euiText--medium"
+                                class="euiFlyoutBody__overflowContent"
                               >
-                                Could not fetch the job info
+                                <div
+                                  class="euiText euiText--medium"
+                                >
+                                  Could not fetch the job info
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -285,25 +270,12 @@ Array [
                         size="m"
                         type="cross"
                       >
-                        <EuiIconEmpty
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                          focusable="false"
-                          role="img"
-                          style={null}
-                        >
-                          <svg
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                            focusable="false"
-                            height={16}
-                            role="img"
-                            style={null}
-                            viewBox="0 0 16 16"
-                            width={16}
-                            xmlns="http://www.w3.org/2000/svg"
-                          />
-                        </EuiIconEmpty>
+                        <div
+                          aria-hidden="true"
+                          className="euiButtonIcon__icon"
+                          data-euiicon-type="cross"
+                          size="m"
+                        />
                       </EuiIcon>
                     </button>
                   </EuiButtonIcon>
@@ -332,13 +304,17 @@ Array [
                       <div
                         className="euiFlyoutBody__overflow"
                       >
-                        <EuiText>
-                          <div
-                            className="euiText euiText--medium"
-                          >
-                            Could not fetch the job info
-                          </div>
-                        </EuiText>
+                        <div
+                          className="euiFlyoutBody__overflowContent"
+                        >
+                          <EuiText>
+                            <div
+                              className="euiText euiText--medium"
+                            >
+                              Could not fetch the job info
+                            </div>
+                          </EuiText>
+                        </div>
                       </div>
                     </div>
                   </EuiFlyoutBody>
@@ -393,25 +369,12 @@ Array [
           size="m"
           type="cross"
         >
-          <EuiIconEmpty
-            aria-hidden={true}
-            className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-            focusable="false"
-            role="img"
-            style={null}
-          >
-            <svg
-              aria-hidden={true}
-              className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-              focusable="false"
-              height={16}
-              role="img"
-              style={null}
-              viewBox="0 0 16 16"
-              width={16}
-              xmlns="http://www.w3.org/2000/svg"
-            />
-          </EuiIconEmpty>
+          <div
+            aria-hidden="true"
+            className="euiButtonIcon__icon"
+            data-euiicon-type="cross"
+            size="m"
+          />
         </EuiIcon>
       </button>
     </EuiButtonIcon>
@@ -440,13 +403,17 @@ Array [
         <div
           className="euiFlyoutBody__overflow"
         >
-          <EuiText>
-            <div
-              className="euiText euiText--medium"
-            >
-              Could not fetch the job info
-            </div>
-          </EuiText>
+          <div
+            className="euiFlyoutBody__overflowContent"
+          >
+            <EuiText>
+              <div
+                className="euiText euiText--medium"
+              >
+                Could not fetch the job info
+              </div>
+            </EuiText>
+          </div>
         </div>
       </div>
     </EuiFlyoutBody>
@@ -571,15 +538,10 @@ Array [
                           data-test-subj="euiFlyoutCloseButton"
                           type="button"
                         >
-                          <svg
+                          <div
                             aria-hidden="true"
-                            class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                            focusable="false"
-                            height="16"
-                            role="img"
-                            viewBox="0 0 16 16"
-                            width="16"
-                            xmlns="http://www.w3.org/2000/svg"
+                            class="euiButtonIcon__icon"
+                            data-euiicon-type="cross"
                           />
                         </button>
                         <div
@@ -599,8 +561,12 @@ Array [
                             class="euiFlyoutBody__overflow"
                           >
                             <div
-                              class="euiText euiText--medium"
-                            />
+                              class="euiFlyoutBody__overflowContent"
+                            >
+                              <div
+                                class="euiText euiText--medium"
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -630,15 +596,10 @@ Array [
                             data-test-subj="euiFlyoutCloseButton"
                             type="button"
                           >
-                            <svg
+                            <div
                               aria-hidden="true"
-                              class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                              focusable="false"
-                              height="16"
-                              role="img"
-                              viewBox="0 0 16 16"
-                              width="16"
-                              xmlns="http://www.w3.org/2000/svg"
+                              class="euiButtonIcon__icon"
+                              data-euiicon-type="cross"
                             />
                           </button>
                           <div
@@ -658,8 +619,12 @@ Array [
                               class="euiFlyoutBody__overflow"
                             >
                               <div
-                                class="euiText euiText--medium"
-                              />
+                                class="euiFlyoutBody__overflowContent"
+                              >
+                                <div
+                                  class="euiText euiText--medium"
+                                />
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -698,25 +663,12 @@ Array [
                         size="m"
                         type="cross"
                       >
-                        <EuiIconEmpty
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                          focusable="false"
-                          role="img"
-                          style={null}
-                        >
-                          <svg
-                            aria-hidden={true}
-                            className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                            focusable="false"
-                            height={16}
-                            role="img"
-                            style={null}
-                            viewBox="0 0 16 16"
-                            width={16}
-                            xmlns="http://www.w3.org/2000/svg"
-                          />
-                        </EuiIconEmpty>
+                        <div
+                          aria-hidden="true"
+                          className="euiButtonIcon__icon"
+                          data-euiicon-type="cross"
+                          size="m"
+                        />
                       </EuiIcon>
                     </button>
                   </EuiButtonIcon>
@@ -745,11 +697,15 @@ Array [
                       <div
                         className="euiFlyoutBody__overflow"
                       >
-                        <EuiText>
-                          <div
-                            className="euiText euiText--medium"
-                          />
-                        </EuiText>
+                        <div
+                          className="euiFlyoutBody__overflowContent"
+                        >
+                          <EuiText>
+                            <div
+                              className="euiText euiText--medium"
+                            />
+                          </EuiText>
+                        </div>
                       </div>
                     </div>
                   </EuiFlyoutBody>
@@ -804,25 +760,12 @@ Array [
           size="m"
           type="cross"
         >
-          <EuiIconEmpty
-            aria-hidden={true}
-            className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-            focusable="false"
-            role="img"
-            style={null}
-          >
-            <svg
-              aria-hidden={true}
-              className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-              focusable="false"
-              height={16}
-              role="img"
-              style={null}
-              viewBox="0 0 16 16"
-              width={16}
-              xmlns="http://www.w3.org/2000/svg"
-            />
-          </EuiIconEmpty>
+          <div
+            aria-hidden="true"
+            className="euiButtonIcon__icon"
+            data-euiicon-type="cross"
+            size="m"
+          />
         </EuiIcon>
       </button>
     </EuiButtonIcon>
@@ -851,11 +794,15 @@ Array [
         <div
           className="euiFlyoutBody__overflow"
         >
-          <EuiText>
-            <div
-              className="euiText euiText--medium"
-            />
-          </EuiText>
+          <div
+            className="euiFlyoutBody__overflowContent"
+          >
+            <EuiText>
+              <div
+                className="euiText euiText--medium"
+              />
+            </EuiText>
+          </div>
         </div>
       </div>
     </EuiFlyoutBody>

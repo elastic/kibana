@@ -8,9 +8,8 @@ import { noop } from 'lodash/fp';
 import { useEffect, useState, useRef } from 'react';
 
 import { FetchRulesResponse, FilterOptions, PaginationOptions, Rule } from './types';
-import { useStateToaster } from '../../../components/toasters';
+import { errorToToaster, useStateToaster } from '../../../components/toasters';
 import { fetchRules } from './api';
-import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
 import * as i18n from './translations';
 
 export type ReturnRules = [

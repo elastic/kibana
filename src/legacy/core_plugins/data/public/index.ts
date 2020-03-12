@@ -28,11 +28,7 @@ export function plugin() {
 
 /** @public types */
 export { DataSetup, DataStart } from './plugin';
-export {
-  SavedQueryAttributes,
-  SavedQuery,
-  SavedQueryTimeFilter,
-} from '../../../../plugins/data/public';
+export { SavedQuery, SavedQueryTimeFilter } from '../../../../plugins/data/public';
 export {
   // agg_types
   AggParam, // only the type is used externally, only in vis editor
@@ -44,7 +40,6 @@ export {
   IFieldParamType,
   IMetricAggType,
   IpRangeKey, // only used in field formatter deserialization, which will live in data
-  ISchemas,
   OptionedParamEditorProps, // only type is used externally
   OptionedValueProp, // only type is used externally
 } from './search/types';
@@ -67,19 +62,16 @@ export {
   convertIPRangeToString,
   intervalOptions, // only used in Discover
   isDateHistogramBucketAggConfig,
-  setBounds,
   isStringType,
   isType,
   isValidInterval,
-  isValidJson,
   METRIC_TYPES,
   OptionedParamType,
   parentPipelineType,
   propFilter,
-  Schema,
-  Schemas,
   siblingPipelineType,
   termsAggFilter,
+  toAbsoluteDates,
   // search_source
   getRequestInspectorStats,
   getResponseInspectorStats,

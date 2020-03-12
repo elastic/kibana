@@ -55,11 +55,16 @@ export const patchRulesRoute = (router: IRouter) => {
         type,
         threat,
         references,
+        note,
         version,
       } = request.body;
       const siemResponse = buildSiemResponse(response);
 
       try {
+        if (!context.alerting || !context.actions) {
+          return siemResponse.error({ statusCode: 404 });
+        }
+
         const alertsClient = context.alerting.getAlertsClient();
         const actionsClient = context.actions.getActionsClient();
         const savedObjectsClient = context.core.savedObjects.client;
@@ -97,6 +102,7 @@ export const patchRulesRoute = (router: IRouter) => {
           type,
           threat,
           references,
+          note,
           version,
         });
         if (rule != null) {

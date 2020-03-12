@@ -7,10 +7,10 @@
 import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { isFunction, isNil } from 'lodash/fp';
-import { exportRules, ExportDocumentsProps } from '../../containers/detection_engine/rules';
-import { displayErrorToast, useStateToaster } from '../toasters';
 import * as i18n from './translations';
 import { ExportTimelineIds } from '../open_timeline/open_timeline';
+import { exportRules, ExportDocumentsProps } from '../../containers/detection_engine/rules';
+import { useStateToaster, errorToToaster } from '../toasters';
 
 const InvisibleAnchor = styled.a`
   display: none;
@@ -92,7 +92,7 @@ export const RuleDownloaderComponent = ({
           }
         } catch (error) {
           if (isSubscribed) {
-            displayErrorToast(i18n.EXPORT_FAILURE, [error.message], dispatchToaster);
+            errorToToaster({ title: i18n.EXPORT_FAILURE, error, dispatchToaster });
           }
         }
       }

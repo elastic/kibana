@@ -132,16 +132,16 @@ exports[`LoginPage page renders as expected 1`] = `
       >
         <EuiIcon
           size="xxl"
-          type="logoKibana"
+          type="logoElastic"
         />
       </span>
       <EuiTitle
         className="loginWelcome__title"
-        size="l"
+        size="m"
       >
         <h1>
           <FormattedMessage
-            defaultMessage="Welcome to Kibana"
+            defaultMessage="Welcome to Elastic Kibana"
             id="xpack.security.loginPage.welcomeTitle"
             values={Object {}}
           />

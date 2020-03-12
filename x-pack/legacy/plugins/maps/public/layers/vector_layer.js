@@ -61,6 +61,10 @@ export class VectorLayer extends AbstractLayer {
     this._style = new VectorStyle(this._descriptor.style, this._source, this);
   }
 
+  getStyle() {
+    return this._style;
+  }
+
   destroy() {
     if (this._source) {
       this._source.destroy();
@@ -193,19 +197,6 @@ export class VectorLayer extends AbstractLayer {
     return joinFields;
   }
 
-  async getDateFields() {
-    return await this._source.getDateFields();
-  }
-
-  async getNumberFields() {
-    const numberFieldOptions = await this._source.getNumberFields();
-    return [...numberFieldOptions, ...this._getJoinFields()];
-  }
-
-  async getCategoricalFields() {
-    return await this._source.getCategoricalFields();
-  }
-
   async getFields() {
     const sourceFields = await this._source.getFields();
     return [...sourceFields, ...this._getJoinFields()];
@@ -227,7 +218,7 @@ export class VectorLayer extends AbstractLayer {
     return indexPatternIds;
   }
 
-  _findDataRequestById(sourceDataId) {
+  findDataRequestById(sourceDataId) {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
   }
 
@@ -248,7 +239,7 @@ export class VectorLayer extends AbstractLayer {
       sourceQuery: joinSource.getWhereQuery(),
       applyGlobalQuery: joinSource.getApplyGlobalQuery(),
     };
-    const prevDataRequest = this._findDataRequestById(sourceDataId);
+    const prevDataRequest = this.findDataRequestById(sourceDataId);
 
     const canSkipFetch = await canSkipSourceUpdate({
       source: joinSource,
@@ -471,7 +462,7 @@ export class VectorLayer extends AbstractLayer {
       isTimeAware: this._style.isTimeAware() && (await source.isTimeAware()),
       timeFilters: dataFilters.timeFilters,
     };
-    const prevDataRequest = this._findDataRequestById(dataRequestId);
+    const prevDataRequest = this.findDataRequestById(dataRequestId);
     const canSkipFetch = canSkipStyleMetaUpdate({ prevDataRequest, nextMeta });
     if (canSkipFetch) {
       return;
@@ -547,7 +538,7 @@ export class VectorLayer extends AbstractLayer {
     const nextMeta = {
       fieldNames: _.uniq(fieldNames).sort(),
     };
-    const prevDataRequest = this._findDataRequestById(dataRequestId);
+    const prevDataRequest = this.findDataRequestById(dataRequestId);
     const canSkipUpdate = canSkipFormattersUpdate({ prevDataRequest, nextMeta });
     if (canSkipUpdate) {
       return;
