@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useState } from 'react';
+import React, { useEffect, useState, Fragment, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
 import {
@@ -18,15 +18,14 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { getDocLinks } from '../../../../util/dependency_cache';
 
+import { checkGetManagementMlJobs } from '../../../../privilege/check_privilege';
+
+import { getDocLinks } from '../../../../util/dependency_cache';
 // @ts-ignore undeclared module
 import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_view/index';
 import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/analytics_management/components/analytics_list';
 
-interface Props {
-  isMlEnabledInSpace: boolean;
-}
 interface Tab {
   id: string;
   name: string;
@@ -65,11 +64,33 @@ function getTabs(isMlEnabledInSpace: boolean): Tab[] {
   ];
 }
 
-export const JobsListPage: FC<Props> = ({ isMlEnabledInSpace }) => {
-  const docLinks = getDocLinks();
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
+export const JobsListPage: FC = () => {
+  const [initialized, setInitialized] = useState(false);
+  const [isMlEnabledInSpace, setIsMlEnabledInSpace] = useState(false);
   const tabs = getTabs(isMlEnabledInSpace);
   const [currentTabId, setCurrentTabId] = useState(tabs[0].id);
+
+  const check = async () => {
+    try {
+      const checkPrivilege = await checkGetManagementMlJobs();
+      setInitialized(true);
+      setIsMlEnabledInSpace(checkPrivilege.mlFeatureEnabledInSpace);
+    } catch (e) {
+      // Silent fail, `checkGetManagementMlJobs()` should redirect when
+      // there are insufficient permissions.
+    }
+  };
+
+  useEffect(() => {
+    check();
+  }, []);
+
+  if (initialized === false) {
+    return null;
+  }
+
+  const docLinks = getDocLinks();
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const anomalyDetectionJobsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-jobs.html`;
   const anomalyJobsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics.html`;
 
@@ -98,7 +119,7 @@ export const JobsListPage: FC<Props> = ({ isMlEnabledInSpace }) => {
 
   return (
     <I18nContext>
-      <EuiPageContent>
+      <EuiPageContent id="kibanaManagementMLSection">
         <EuiTitle size="l">
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
