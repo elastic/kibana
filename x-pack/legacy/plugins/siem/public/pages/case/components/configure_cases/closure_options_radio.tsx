@@ -24,10 +24,6 @@ const radios: ClosureRadios[] = [
     id: 'close-by-pushing',
     label: i18n.CASE_CLOSURE_OPTIONS_NEW_INCIDENT,
   },
-  // {
-  //   id: `${ID_PREFIX}_closed_incident`,
-  //   label: i18n.CASE_CLOSURE_OPTIONS_CLOSED_INCIDENT,
-  // },
 ];
 
 interface ClosureOptionsRadioComponentProps {
