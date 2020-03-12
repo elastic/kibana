@@ -19,10 +19,7 @@
 
 // @ts-ignore
 import { getQueryParameterActions } from './actions';
-import {
-  FilterManager,
-  IndexPatternsContract,
-} from '../../../../../../../../../plugins/data/public';
+import { FilterManager } from '../../../../../../../../../plugins/data/public';
 import { coreMock } from '../../../../../../../../../core/public/mocks';
 const setupMock = coreMock.createSetup();
 
@@ -35,7 +32,6 @@ let state: {
   };
 };
 let filterManager: FilterManager;
-let indexPatterns: IndexPatternsContract;
 let filterManagerSpy: jest.SpyInstance;
 
 beforeEach(() => {
@@ -82,13 +78,13 @@ describe('context query_parameter actions', function() {
     });
 
     it('should limit the predecessorCount to 0 as a lower bound', () => {
-      const { setPredecessorCount } = getQueryParameterActions(indexPatterns);
+      const { setPredecessorCount } = getQueryParameterActions(filterManager);
       setPredecessorCount(state)(-1);
       expect(state.queryParameters.predecessorCount).toBe(0);
     });
 
     it('should limit the predecessorCount to 10000 as an upper bound', () => {
-      const { setPredecessorCount } = getQueryParameterActions(indexPatterns);
+      const { setPredecessorCount } = getQueryParameterActions(filterManager);
       setPredecessorCount(state)(20000);
       expect(state.queryParameters.predecessorCount).toBe(10000);
     });
