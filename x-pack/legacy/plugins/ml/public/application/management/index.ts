@@ -10,20 +10,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npSetup } from 'ui/new_platform';
-import { management } from 'ui/management';
+import { npSetup, npStart } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import { metadata } from 'ui/metadata';
-import { JOBS_LIST_PATH } from './management_urls';
-import { setDependencyCache } from '../util/dependency_cache';
-import './jobs_list';
+import { take } from 'rxjs/operators';
+
+import { ManagementSetup } from '../../../../../../../src/plugins/management/public';
+
 import {
   LicensingPluginSetup,
   LICENSE_CHECK_STATE,
 } from '../../../../../../plugins/licensing/public';
+
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
+
+import { setDependencyCache } from '../util/dependency_cache';
+
+import { getJobsListBreadcrumbs } from './breadcrumbs';
+import { renderApp } from './jobs_list';
 
 type PluginsSetupExtended = typeof npSetup.plugins & {
   // adds licensing which isn't in the PluginsSetup interface, but does exist
@@ -31,15 +37,14 @@ type PluginsSetupExtended = typeof npSetup.plugins & {
 };
 
 const plugins = npSetup.plugins as PluginsSetupExtended;
-const licencingSubscription = plugins.licensing.license$.subscribe(license => {
+// only need to register once
+const licensing = plugins.licensing.license$.pipe(take(1));
+licensing.subscribe(license => {
   if (license.check(PLUGIN_ID, MINIMUM_FULL_LICENSE).state === LICENSE_CHECK_STATE.Valid) {
-    initManagementSection();
-    // unsubscribe, we only want to register the plugin once.
-    licencingSubscription.unsubscribe();
+    initManagementSection(plugins.management);
   }
 });
-
-function initManagementSection() {
+function initManagementSection(management: ManagementSetup) {
   const legacyBasePath = {
     prepend: chrome.addBasePath,
     get: chrome.getBasePath,
@@ -53,23 +58,27 @@ function initManagementSection() {
   setDependencyCache({
     docLinks: legacyDocLinks as any,
     basePath: legacyBasePath as any,
-    XSRF: chrome.getXsrfToken(),
+    http: npStart.core.http,
   });
 
-  management.register('ml', {
-    display: i18n.translate('xpack.ml.management.mlTitle', {
+  const mlSection = management.sections.register({
+    id: 'ml',
+    title: i18n.translate('xpack.ml.management.mlTitle', {
       defaultMessage: 'Machine Learning',
     }),
     order: 100,
     icon: 'machineLearningApp',
   });
 
-  management.getSection('ml').register('jobsList', {
-    name: 'jobsListLink',
-    order: 10,
-    display: i18n.translate('xpack.ml.management.jobsListTitle', {
+  mlSection.registerApp({
+    id: 'jobsListLink',
+    title: i18n.translate('xpack.ml.management.jobsListTitle', {
       defaultMessage: 'Jobs list',
     }),
-    url: `#${JOBS_LIST_PATH}`,
+    order: 10,
+    async mount({ element, setBreadcrumbs }) {
+      setBreadcrumbs(getJobsListBreadcrumbs());
+      return renderApp(element, {});
+    },
   });
 }

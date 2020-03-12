@@ -4,84 +4,101 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// service for interacting with the server
-
-import { fromFetch } from 'rxjs/fetch';
-import { from, Observable } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
-
-import { getXSRF } from '../util/dependency_cache';
-
-export interface HttpOptions {
-  url?: string;
-}
+import { Observable } from 'rxjs';
+import { HttpFetchOptionsWithPath, HttpFetchOptions } from 'kibana/public';
+import { getHttp } from '../util/dependency_cache';
 
 function getResultHeaders(headers: HeadersInit): HeadersInit {
   return {
-    asSystemRequest: false,
+    asSystemRequest: true,
     'Content-Type': 'application/json',
-    'kbn-version': getXSRF(),
     ...headers,
   } as HeadersInit;
 }
 
-export function http(options: any) {
-  return new Promise((resolve, reject) => {
-    if (options && options.url) {
-      let url = '';
-      url = url + (options.url || '');
-      const headers = getResultHeaders(options.headers ?? {});
-
-      const allHeaders =
-        options.headers === undefined ? headers : { ...options.headers, ...headers };
-      const body = options.data === undefined ? null : JSON.stringify(options.data);
-
-      const payload: RequestInit = {
-        method: options.method || 'GET',
-        headers: allHeaders,
-        credentials: 'same-origin',
-      };
-
-      if (body !== null) {
-        payload.body = body;
-      }
-
-      fetch(url, payload)
-        .then(resp => {
-          resp
-            .json()
-            .then(resp.ok === true ? resolve : reject)
-            .catch(resp.ok === true ? resolve : reject);
-        })
-        .catch(resp => {
-          reject(resp);
-        });
-    } else {
-      reject();
-    }
-  });
-}
-
-interface RequestOptions extends RequestInit {
-  body: BodyInit | any;
-}
-
-export function http$<T>(url: string, options: RequestOptions): Observable<T> {
-  const requestInit: RequestInit = {
-    ...options,
-    credentials: 'same-origin',
-    method: options.method || 'GET',
-    ...(options.body ? { body: JSON.stringify(options.body) as string } : {}),
-    headers: getResultHeaders(options.headers ?? {}),
+function getFetchOptions(
+  options: HttpFetchOptionsWithPath
+): { path: string; fetchOptions: HttpFetchOptions } {
+  if (!options.path) {
+    throw new Error('URL path is missing');
+  }
+  return {
+    path: options.path,
+    fetchOptions: {
+      credentials: 'same-origin',
+      method: options.method || 'GET',
+      ...(options.body ? { body: options.body } : {}),
+      ...(options.query ? { query: options.query } : {}),
+      headers: getResultHeaders(options.headers ?? {}),
+    },
   };
+}
 
-  return fromFetch(url, requestInit).pipe(
-    switchMap(response => {
-      if (response.ok) {
-        return from(response.json() as Promise<T>);
+/**
+ * Function for making HTTP requests to Kibana's backend.
+ * Wrapper for Kibana's HttpHandler.
+ */
+export async function http<T>(options: HttpFetchOptionsWithPath): Promise<T> {
+  const { path, fetchOptions } = getFetchOptions(options);
+  return getHttp().fetch<T>(path, fetchOptions);
+}
+
+/**
+ * Function for making HTTP requests to Kibana's backend which returns an Observable
+ * with request cancellation support.
+ */
+export function http$<T>(options: HttpFetchOptionsWithPath): Observable<T> {
+  const { path, fetchOptions } = getFetchOptions(options);
+  return fromHttpHandler<T>(path, fetchOptions);
+}
+
+/**
+ * Creates an Observable from Kibana's HttpHandler.
+ */
+export function fromHttpHandler<T>(input: string, init?: RequestInit): Observable<T> {
+  return new Observable<T>(subscriber => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    let abortable = true;
+    let unsubscribed = false;
+
+    if (init?.signal) {
+      if (init.signal.aborted) {
+        controller.abort();
       } else {
-        throw new Error(String(response.status));
+        init.signal.addEventListener('abort', () => {
+          if (!signal.aborted) {
+            controller.abort();
+          }
+        });
       }
-    })
-  );
+    }
+
+    const perSubscriberInit: RequestInit = {
+      ...(init ? init : {}),
+      signal,
+    };
+
+    getHttp()
+      .fetch<T>(input, perSubscriberInit)
+      .then(response => {
+        abortable = false;
+        subscriber.next(response);
+        subscriber.complete();
+      })
+      .catch(err => {
+        abortable = false;
+        if (!unsubscribed) {
+          subscriber.error(err);
+        }
+      });
+
+    return () => {
+      unsubscribed = true;
+      if (abortable) {
+        controller.abort();
+      }
+    };
+  });
 }

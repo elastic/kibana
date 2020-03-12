@@ -43,12 +43,12 @@ function getSymbolSizeIcons() {
 }
 
 export class DynamicSizeProperty extends DynamicStyleProperty {
-  constructor(options, styleName, field, getFieldMeta, getFieldFormatter, isSymbolizedAsIcon) {
-    super(options, styleName, field, getFieldMeta, getFieldFormatter);
+  constructor(options, styleName, field, vectorLayer, getFieldFormatter, isSymbolizedAsIcon) {
+    super(options, styleName, field, vectorLayer, getFieldFormatter);
     this._isSymbolizedAsIcon = isSymbolizedAsIcon;
   }
 
-  supportsFeatureState() {
+  supportsMbFeatureState() {
     // mb style "icon-size" does not support feature state
     if (this.getStyleName() === VECTOR_STYLES.ICON_SIZE && this._isSymbolizedAsIcon) {
       return false;
@@ -124,7 +124,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
   }
 
   _getMbDataDrivenSize({ targetName, minSize, maxSize }) {
-    const lookup = this.supportsFeatureState() ? 'feature-state' : 'get';
+    const lookup = this.supportsMbFeatureState() ? 'feature-state' : 'get';
     return [
       'interpolate',
       ['linear'],

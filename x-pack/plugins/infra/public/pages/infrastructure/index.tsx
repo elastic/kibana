@@ -62,22 +62,25 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
           <RoutedTabs
             tabs={[
               {
+                app: 'metrics',
                 title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
                   defaultMessage: 'Inventory',
                 }),
-                path: '/inventory',
+                pathname: '/inventory',
               },
               {
+                app: 'metrics',
                 title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
                   defaultMessage: 'Metrics Explorer',
                 }),
-                path: '/explorer',
+                pathname: '/explorer',
               },
               {
+                app: 'metrics',
                 title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
                   defaultMessage: 'Settings',
                 }),
-                path: '/settings',
+                pathname: '/settings',
               },
             ]}
           />

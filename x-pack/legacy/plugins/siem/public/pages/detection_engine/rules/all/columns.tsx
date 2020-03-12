@@ -11,6 +11,7 @@ import {
   EuiLink,
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
+  EuiText,
   EuiHealth,
 } from '@elastic/eui';
 import * as H from 'history';
@@ -42,7 +43,7 @@ export const getActions = (
 ) => [
   {
     description: i18n.EDIT_RULE_SETTINGS,
-    icon: 'visControls',
+    icon: 'controlsHorizontal',
     name: i18n.EDIT_RULE_SETTINGS,
     onClick: (rowItem: Rule) => editRuleAction(rowItem, history),
     enabled: (rowItem: Rule) => !rowItem.immutable,
@@ -99,7 +100,9 @@ export const getColumns = ({
       field: 'name',
       name: i18n.COLUMN_RULE,
       render: (value: Rule['name'], item: Rule) => (
-        <EuiLink href={getRuleDetailsUrl(item.id)}>{value}</EuiLink>
+        <EuiLink data-test-subj="ruleName" href={getRuleDetailsUrl(item.id)}>
+          {value}
+        </EuiLink>
       ),
       truncateText: true,
       width: '24%',
@@ -107,6 +110,11 @@ export const getColumns = ({
     {
       field: 'risk_score',
       name: i18n.COLUMN_RISK_SCORE,
+      render: (value: Rule['risk_score']) => (
+        <EuiText data-test-subj="riskScore" size="s">
+          {value}
+        </EuiText>
+      ),
       truncateText: true,
       width: '14%',
     },
@@ -150,7 +158,7 @@ export const getColumns = ({
       field: 'tags',
       name: i18n.COLUMN_TAGS,
       render: (value: Rule['tags']) => (
-        <TruncatableText>
+        <TruncatableText data-test-subj="tags">
           {value.map((tag, i) => (
             <EuiBadge color="hollow" key={`${tag}-${i}`}>
               {tag}
@@ -167,6 +175,7 @@ export const getColumns = ({
       name: i18n.COLUMN_ACTIVATE,
       render: (value: Rule['enabled'], item: Rule) => (
         <RuleSwitch
+          data-test-subj="enabled"
           dispatch={dispatch}
           id={item.id}
           enabled={item.enabled}

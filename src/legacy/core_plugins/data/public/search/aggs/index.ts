@@ -27,6 +27,7 @@ export { aggTypes } from './agg_types';
 export { AggConfig } from './agg_config';
 export { AggConfigs } from './agg_configs';
 export { FieldParamType } from './param_types';
+export { getCalculateAutoTimeExpression } from './buckets/lib/date_utils';
 export { MetricAggType } from './metrics/metric_agg_type';
 export { AggTypeFilters } from './filter';
 export { aggTypeFieldFilters, AggTypeFieldFilters } from './param_types/filter';
@@ -43,18 +44,18 @@ export {
 export { AggParamType } from './param_types/agg';
 export { AggGroupNames, aggGroupNamesMap } from './agg_groups';
 export { intervalOptions } from './buckets/_interval_options'; // only used in Discover
-export { isDateHistogramBucketAggConfig, setBounds } from './buckets/date_histogram';
+export { isDateHistogramBucketAggConfig } from './buckets/date_histogram';
 export { termsAggFilter } from './buckets/terms';
 export { isType, isStringType } from './buckets/migrate_include_exclude_format';
 export { CidrMask } from './buckets/lib/cidr_mask';
 export { convertDateRangeToString } from './buckets/date_range';
+export { toAbsoluteDates } from './buckets/lib/date_utils';
 export { convertIPRangeToString } from './buckets/ip_range';
 export { aggTypeFilters, propFilter } from './filter';
 export { OptionedParamType } from './param_types/optioned';
-export { isValidJson, isValidInterval } from './utils';
+export { isValidInterval } from './utils';
 export { BUCKET_TYPES } from './buckets/bucket_agg_types';
 export { METRIC_TYPES } from './metrics/metric_agg_types';
-export { ISchemas, Schema, Schemas } from './schemas';
 
 // types
 export { CreateAggConfigParams, IAggConfig, IAggConfigs } from './types';

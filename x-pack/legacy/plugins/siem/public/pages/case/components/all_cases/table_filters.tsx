@@ -6,20 +6,22 @@
 
 import React, { useCallback, useState } from 'react';
 import { isEqual } from 'lodash/fp';
-import { EuiFieldSearch, EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiFieldSearch,
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import * as i18n from './translations';
 
 import { FilterOptions } from '../../../../containers/case/types';
 import { useGetTags } from '../../../../containers/case/use_get_tags';
-import { TagsFilterPopover } from '../../../../pages/detection_engine/rules/all/rules_table_filters/tags_filter_popover';
+import { FilterPopover } from '../../../../components/filter_popover';
 
-interface Initial {
-  search: string;
-  tags: string[];
-}
 interface CasesTableFiltersProps {
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
-  initial: Initial;
+  initial: FilterOptions;
 }
 
 /**
@@ -31,17 +33,18 @@ interface CasesTableFiltersProps {
 
 const CasesTableFiltersComponent = ({
   onFilterChanged,
-  initial = { search: '', tags: [] },
+  initial = { search: '', tags: [], state: 'open' },
 }: CasesTableFiltersProps) => {
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
-  const [{ isLoading, data }] = useGetTags();
+  const [showOpenCases, setShowOpenCases] = useState(initial.state === 'open');
+  const { tags } = useGetTags();
 
   const handleSelectedTags = useCallback(
     newTags => {
       if (!isEqual(newTags, selectedTags)) {
         setSelectedTags(newTags);
-        onFilterChanged({ search, tags: newTags });
+        onFilterChanged({ tags: newTags });
       }
     },
     [search, selectedTags]
@@ -51,12 +54,20 @@ const CasesTableFiltersComponent = ({
       const trimSearch = newSearch.trim();
       if (!isEqual(trimSearch, search)) {
         setSearch(trimSearch);
-        onFilterChanged({ tags: selectedTags, search: trimSearch });
+        onFilterChanged({ search: trimSearch });
       }
     },
     [search, selectedTags]
   );
-
+  const handleToggleFilter = useCallback(
+    showOpen => {
+      if (showOpen !== showOpenCases) {
+        setShowOpenCases(showOpen);
+        onFilterChanged({ state: showOpen ? 'open' : 'closed' });
+      }
+    },
+    [showOpenCases]
+  );
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
       <EuiFlexItem grow={true}>
@@ -71,11 +82,32 @@ const CasesTableFiltersComponent = ({
 
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
-          <TagsFilterPopover
-            isLoading={isLoading}
-            onSelectedTagsChanged={handleSelectedTags}
-            selectedTags={selectedTags}
-            tags={data}
+          <EuiFilterButton
+            withNext
+            hasActiveFilters={showOpenCases}
+            onClick={handleToggleFilter.bind(null, true)}
+          >
+            {i18n.OPEN_CASES}
+          </EuiFilterButton>
+          <EuiFilterButton
+            hasActiveFilters={!showOpenCases}
+            onClick={handleToggleFilter.bind(null, false)}
+          >
+            {i18n.CLOSED_CASES}
+          </EuiFilterButton>
+          <FilterPopover
+            buttonLabel={i18n.REPORTER}
+            onSelectedOptionsChanged={() => {}}
+            selectedOptions={[]}
+            options={[]}
+            optionsEmptyLabel={i18n.NO_REPORTERS_AVAILABLE}
+          />
+          <FilterPopover
+            buttonLabel={i18n.TAGS}
+            onSelectedOptionsChanged={handleSelectedTags}
+            selectedOptions={selectedTags}
+            options={tags}
+            optionsEmptyLabel={i18n.NO_TAGS_AVAILABLE}
           />
         </EuiFilterGroup>
       </EuiFlexItem>

@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import { npSetup, npStart } from 'ui/new_platform';
-import { PluginInitializerContext } from 'src/core/public';
+import { PluginInitializerContext } from 'kibana/public';
 import { SecurityPluginSetup } from '../../../../plugins/security/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 
@@ -26,8 +25,5 @@ export const setup = pluginInstance.setup(npSetup.core, {
   data: npStart.plugins.data,
   security: setupDependencies.security,
   licensing: setupDependencies.licensing,
-  __LEGACY: {
-    XSRF: chrome.getXsrfToken(),
-  },
 });
 export const start = pluginInstance.start(npStart.core, npStart.plugins);

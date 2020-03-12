@@ -11,9 +11,10 @@ export const useGetCasesMockState: UseGetCasesState = {
   data: {
     cases: [
       {
-        caseId: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
+        id: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
         createdAt: '2020-02-13T19:44:23.627Z',
         createdBy: { username: 'elastic' },
+        commentIds: [],
         comments: [],
         description: 'Security banana Issue',
         state: 'open',
@@ -23,9 +24,10 @@ export const useGetCasesMockState: UseGetCasesState = {
         version: 'WzQ3LDFd',
       },
       {
-        caseId: '362a5c10-4e99-11ea-9290-35d05cb55c15',
+        id: '362a5c10-4e99-11ea-9290-35d05cb55c15',
         createdAt: '2020-02-13T19:44:13.328Z',
         createdBy: { username: 'elastic' },
+        commentIds: [],
         comments: [],
         description: 'Security banana Issue',
         state: 'open',
@@ -35,9 +37,10 @@ export const useGetCasesMockState: UseGetCasesState = {
         version: 'WzQ3LDFd',
       },
       {
-        caseId: '34f8b9e0-4e99-11ea-9290-35d05cb55c15',
+        id: '34f8b9e0-4e99-11ea-9290-35d05cb55c15',
         createdAt: '2020-02-13T19:44:11.328Z',
         createdBy: { username: 'elastic' },
+        commentIds: [],
         comments: [],
         description: 'Security banana Issue',
         state: 'open',
@@ -47,9 +50,10 @@ export const useGetCasesMockState: UseGetCasesState = {
         version: 'WzQ3LDFd',
       },
       {
-        caseId: '31890e90-4e99-11ea-9290-35d05cb55c15',
+        id: '31890e90-4e99-11ea-9290-35d05cb55c15',
         createdAt: '2020-02-13T19:44:05.563Z',
         createdBy: { username: 'elastic' },
+        commentIds: [],
         comments: [],
         description: 'Security banana Issue',
         state: 'closed',
@@ -59,9 +63,10 @@ export const useGetCasesMockState: UseGetCasesState = {
         version: 'WzQ3LDFd',
       },
       {
-        caseId: '2f5b3210-4e99-11ea-9290-35d05cb55c15',
+        id: '2f5b3210-4e99-11ea-9290-35d05cb55c15',
         createdAt: '2020-02-13T19:44:01.901Z',
         createdBy: { username: 'elastic' },
+        commentIds: [],
         comments: [],
         description: 'Security banana Issue',
         state: 'open',
@@ -75,7 +80,12 @@ export const useGetCasesMockState: UseGetCasesState = {
     perPage: 5,
     total: 10,
   },
-  isLoading: false,
+  caseCount: {
+    open: 0,
+    closed: 0,
+  },
+  loading: [],
+  selectedCases: [],
   isError: false,
   queryParams: {
     page: 1,
@@ -83,5 +93,5 @@ export const useGetCasesMockState: UseGetCasesState = {
     sortField: SortFieldCase.createdAt,
     sortOrder: 'desc',
   },
-  filterOptions: { search: '', tags: [] },
+  filterOptions: { search: '', tags: [], state: 'open' },
 };

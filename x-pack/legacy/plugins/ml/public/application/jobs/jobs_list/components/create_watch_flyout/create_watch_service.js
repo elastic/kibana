@@ -39,14 +39,12 @@ function randomNumber(min, max) {
 }
 
 function saveWatch(watchModel) {
-  const basePath = getBasePath();
-  const path = basePath.prepend('/api/watcher');
-  const url = `${path}/watch/${watchModel.id}`;
+  const path = `/api/watcher/watch/${watchModel.id}`;
 
   return http({
-    url,
+    path,
     method: 'PUT',
-    data: watchModel.upstreamJSON,
+    body: JSON.stringify(watchModel.upstreamJSON),
   });
 }
 
@@ -188,11 +186,9 @@ class CreateWatchService {
 
   loadWatch(jobId) {
     const id = `ml-${jobId}`;
-    const basePath = getBasePath();
-    const path = basePath.prepend('/api/watcher');
-    const url = `${path}/watch/${id}`;
+    const path = `/api/watcher/watch/${id}`;
     return http({
-      url,
+      path,
       method: 'GET',
     });
   }

@@ -36,7 +36,7 @@ function getAnnotationsFeatureUnavailableErrorMessage() {
  */
 export function annotationRoutes(
   { router, mlLicense }: RouteInitialization,
-  securityPlugin: SecurityPluginSetup
+  securityPlugin?: SecurityPluginSetup
 ) {
   /**
    * @apiGroup Annotations
@@ -62,7 +62,9 @@ export function annotationRoutes(
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { getAnnotations } = annotationServiceProvider(context);
+        const { getAnnotations } = annotationServiceProvider(
+          context.ml!.mlClient.callAsCurrentUser
+        );
         const resp = await getAnnotations(request.body);
 
         return response.ok({
@@ -100,10 +102,15 @@ export function annotationRoutes(
           throw getAnnotationsFeatureUnavailableErrorMessage();
         }
 
-        const { indexAnnotation } = annotationServiceProvider(context);
-        const user = securityPlugin.authc.getCurrentUser(request) || {};
+        const { indexAnnotation } = annotationServiceProvider(
+          context.ml!.mlClient.callAsCurrentUser
+        );
+
+        const currentUser =
+          securityPlugin !== undefined ? securityPlugin.authc.getCurrentUser(request) : {};
         // @ts-ignore username doesn't exist on {}
-        const resp = await indexAnnotation(request.body, user.username || ANNOTATION_USER_UNKNOWN);
+        const username = currentUser?.username ?? ANNOTATION_USER_UNKNOWN;
+        const resp = await indexAnnotation(request.body, username);
 
         return response.ok({
           body: resp,
@@ -140,7 +147,9 @@ export function annotationRoutes(
         }
 
         const annotationId = request.params.annotationId;
-        const { deleteAnnotation } = annotationServiceProvider(context);
+        const { deleteAnnotation } = annotationServiceProvider(
+          context.ml!.mlClient.callAsCurrentUser
+        );
         const resp = await deleteAnnotation(annotationId);
 
         return response.ok({
