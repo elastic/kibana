@@ -22,6 +22,7 @@ import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { HostListState } from '../../types';
 import { useHostListSelector } from './hooks';
 import { urlFromQueryParams } from './url_from_query_params';
 import { uiQueryParams, detailsData, detailsError } from './../../store/hosts/selectors';
@@ -70,7 +71,7 @@ const HostDetails = memo(({ details }: { details: HostListState }) => {
         }),
         description: (
           <EuiListGroup flush>
-            {details.host.ip.map((ip, index) => (
+            {details.host.ip.map((ip: string, index: number) => (
               <EuiListGroupItem key={index} label={ip} />
             ))}
           </EuiListGroup>

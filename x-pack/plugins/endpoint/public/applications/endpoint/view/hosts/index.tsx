@@ -16,7 +16,7 @@ import {
   EuiPageContentHeaderSection,
   EuiTitle,
   EuiBasicTable,
-  EuiTextColor,
+  EuiText,
   EuiLink,
   EuiHealth,
 } from '@elastic/eui';
@@ -156,13 +156,13 @@ export const HostList = () => {
           <EuiPageContent>
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
-                <EuiTitle>
-                  <h2 data-test-subj="hostListTitle">
+                <EuiTitle size="l">
+                  <h1 data-test-subj="hostListTitle">
                     <FormattedMessage id="xpack.endpoint.host.hosts" defaultMessage="Hosts" />
-                  </h2>
+                  </h1>
                 </EuiTitle>
-                <h4>
-                  <EuiTextColor color="subdued">
+                <h2>
+                  <EuiText color="subdued" size="s">
                     {totalItemCount === 1 ? (
                       <FormattedMessage
                         id="xpack.endpoint.host.list.totalCount"
@@ -176,8 +176,8 @@ export const HostList = () => {
                         values={{ totalItemCount }}
                       />
                     )}
-                  </EuiTextColor>
-                </h4>
+                  </EuiText>
+                </h2>
               </EuiPageContentHeaderSection>
             </EuiPageContentHeader>
             <EuiPageContentBody>
