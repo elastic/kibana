@@ -343,6 +343,7 @@ async function fetchBeatsByType(
       'hits.hits._source.beats_state.state.queue',
       'hits.hits._source.beats_state.state.host',
       'hits.hits._source.beats_state.state.heartbeat',
+      'hits.hits._source.beats_state.state.functionbeat',
       'hits.hits._source.beats_state.beat.type',
     ],
     body: {
