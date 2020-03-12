@@ -17,25 +17,22 @@
  * under the License.
  */
 
-import sinon from 'sinon';
+if (process.noProcessWarnings !== true) {
+  var ignore = ['MaxListenersExceededWarning'];
 
-import { State } from 'ui/state_management/state';
-import { Filter } from '../../../../../../../plugins/data/public';
+  process.on('warning', function(warn) {
+    if (ignore.includes(warn.name)) return;
 
-export class StubState implements State {
-  filters: Filter[];
-  save: sinon.SinonSpy<any[], any>;
+    if (process.traceProcessWarnings === true) {
+      console.error('Node.js process-warning detected - Terminating process...');
+    } else {
+      console.error('Node.js process-warning detected:');
+      console.error();
+      console.error(warn.stack);
+      console.error();
+      console.error('Terminating process...');
+    }
 
-  constructor() {
-    this.save = sinon.stub();
-    this.filters = [];
-  }
-
-  getQueryParamName() {
-    return '_a';
-  }
-
-  translateHashToRison(stateHashOrRison: string | string[]): string | string[] {
-    return '';
-  }
+    process.exit(1);
+  });
 }
