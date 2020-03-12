@@ -155,6 +155,6 @@ export const WARNING_NO_CONNECTOR_MESSAGE = i18n.translate(
   'xpack.siem.case.configureCases.warningMessage',
   {
     defaultMessage:
-      'Configuration seems to be invalid. The selected connector is missing. Did you delete it?',
+      'Configuration seems to be invalid. The selected connector is missing. Did you delete the connector?',
   }
 );
