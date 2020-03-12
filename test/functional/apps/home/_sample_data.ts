@@ -91,7 +91,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should launch sample flights data set dashboard', async () => {
         await PageObjects.home.launchSampleDashboard('flights');
-        await PageObjects.common.sleep(30000);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
         const todayYearMonthDay = moment().format('MMM D, YYYY');

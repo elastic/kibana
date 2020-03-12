@@ -49,7 +49,7 @@ export class User {
         `Expected status code of 200, received ${status} ${statusText}: ${util.inspect(data)}`
       );
     }
-    // this.log.debug(`created user ${username}`);
+    this.log.debug(`created user ${username}`);
   }
 
   public async delete(username: string) {
@@ -62,6 +62,6 @@ export class User {
         `Expected status code of 204, received ${status} ${statusText}: ${util.inspect(data)}`
       );
     }
-    // this.log.debug(`deleted user ${username}`);
+    this.log.debug(`deleted user ${username}`);
   }
 }
