@@ -160,10 +160,10 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       );
       const expectedMemoryWithoutDisk = resp.memory_estimation?.expected_memory_without_disk;
 
-      setEstimatedModelMemoryLimit(expectedMemoryWithoutDisk);
-
       // If sourceIndex has changed load analysis field options again
       if (previousSourceIndex !== sourceIndex || previousJobType !== jobType) {
+        setEstimatedModelMemoryLimit(expectedMemoryWithoutDisk);
+
         const analyzedFieldsOptions: EuiComboBoxOptionOption[] = [];
 
         if (resp.field_selection) {
