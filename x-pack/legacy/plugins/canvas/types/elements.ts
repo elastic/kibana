@@ -10,7 +10,7 @@ import { CanvasElement } from '.';
 export interface ElementSpec {
   name: string;
   image: string;
-  icon: string;
+  icon?: string;
   expression: string;
   displayName?: string;
   type?: string;
