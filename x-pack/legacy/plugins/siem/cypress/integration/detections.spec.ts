@@ -5,12 +5,14 @@
  */
 import {
   NUMBER_OF_SIGNALS,
+  OPEN_CLOSE_SIGNALS_BTN,
   SELECTED_SIGNALS,
   SHOWING_SIGNALS,
   SIGNALS,
 } from '../screens/detections';
 
 import {
+  closeFirstSignal,
   closeSignals,
   goToClosedSignals,
   goToOpenedSignals,
@@ -26,7 +28,7 @@ import { loginAndWaitForPage } from '../tasks/login';
 import { DETECTIONS } from '../urls/navigation';
 
 describe('Detections', () => {
-  before(() => {
+  beforeEach(() => {
     esArchiverLoad('signals');
     loginAndWaitForPage(DETECTIONS);
   });
@@ -109,6 +111,45 @@ describe('Detections', () => {
         cy.get('[data-test-subj="server-side-event-count"]')
           .invoke('text')
           .should('eql', expectedNumberOfOpenedSignals.toString());
+      });
+  });
+
+  it('Closes one signal when more than one opened signals are selected', () => {
+    waitForSignalsToBeLoaded();
+
+    cy.get(NUMBER_OF_SIGNALS)
+      .invoke('text')
+      .then(numberOfSignals => {
+        const numberOfSignalsToBeClosed = 1;
+        const numberOfSignalsToBeSelected = 3;
+
+        cy.get(OPEN_CLOSE_SIGNALS_BTN).should('have.attr', 'disabled');
+        selectNumberOfSignals(numberOfSignalsToBeSelected);
+        cy.get(OPEN_CLOSE_SIGNALS_BTN).should('not.have.attr', 'disabled');
+
+        closeFirstSignal();
+        cy.reload();
+        waitForSignalsToBeLoaded();
+        waitForSignals();
+
+        const expectedNumberOfSignals = +numberOfSignals - numberOfSignalsToBeClosed;
+        cy.get(NUMBER_OF_SIGNALS)
+          .invoke('text')
+          .should('eq', expectedNumberOfSignals.toString());
+        cy.get(SHOWING_SIGNALS)
+          .invoke('text')
+          .should('eql', `Showing ${expectedNumberOfSignals.toString()} signals`);
+
+        goToClosedSignals();
+        waitForSignals();
+
+        cy.get(NUMBER_OF_SIGNALS)
+          .invoke('text')
+          .should('eql', numberOfSignalsToBeClosed.toString());
+        cy.get(SHOWING_SIGNALS)
+          .invoke('text')
+          .should('eql', `Showing ${numberOfSignalsToBeClosed.toString()} signal`);
+        cy.get(SIGNALS).should('have.length', numberOfSignalsToBeClosed);
       });
   });
 });
