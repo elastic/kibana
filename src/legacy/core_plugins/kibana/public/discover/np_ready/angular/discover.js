@@ -45,7 +45,6 @@ import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
-  hasSearchStategyForIndexPattern,
   intervalOptions,
   unhashUrl,
   subscribeWithScope,
@@ -815,7 +814,7 @@ function discoverController(
             title: i18n.translate('kbn.discover.errorLoadingData', {
               defaultMessage: 'Error loading data',
             }),
-            toastMessage: error.shortMessage,
+            toastMessage: error.shortMessage || error.body?.message,
           });
         }
       });
@@ -1115,17 +1114,6 @@ function discoverController(
     }
 
     return loadedIndexPattern;
-  }
-
-  // Block the UI from loading if the user has loaded a rollup index pattern but it isn't
-  // supported.
-  $scope.isUnsupportedIndexPattern =
-    !isDefaultType($route.current.locals.savedObjects.ip.loaded) &&
-    !hasSearchStategyForIndexPattern($route.current.locals.savedObjects.ip.loaded);
-
-  if ($scope.isUnsupportedIndexPattern) {
-    $scope.unsupportedIndexPatternType = $route.current.locals.savedObjects.ip.loaded.type;
-    return;
   }
 
   addHelpMenuToAppChrome(chrome);

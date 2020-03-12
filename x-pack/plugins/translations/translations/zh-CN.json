@@ -1116,7 +1116,6 @@
     "kbn.discover.noResults.indexFailureIndexText": "索引 {failureIndex}",
     "kbn.discover.noResults.indexFailureShardText": "{index}，分片 {failureShard}",
     "kbn.discover.noResults.queryMayNotMatchTitle": "您正在查看的一个或多个索引包含日期字段。您的查询在当前时间范围内可能不匹配任何数据，也可能在当前选定的时间范围内没有任何数据。您可以尝试将时间范围更改为包含数据的时间范围。",
-    "kbn.discover.noResults.requiredPluginIsNotInstalledOrDisabledTitle": "基于 {unsupportedType} 索引的索引模式需要 X-Pack 的 {unsupportedType} 插件，但其未安装或已禁用",
     "kbn.discover.noResults.searchExamples.400to499StatusCodeExampleTitle": "查找所有介于 400-499 之间的状态代码",
     "kbn.discover.noResults.searchExamples.400to499StatusCodeWithPhpExtensionExampleTitle": "查找状态代码 400-499 以及扩展名 php",
     "kbn.discover.noResults.searchExamples.400to499StatusCodeWithPhpOrHtmlExtensionExampleTitle": "查找状态代码 400-499 以及扩展名 php 或 html",
