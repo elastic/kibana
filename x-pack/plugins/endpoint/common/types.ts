@@ -53,7 +53,7 @@ export interface AlertResultList {
   alerts: AlertData[];
 
   /**
-   * The total number of alerts in the index.
+   * The total number of alerts on the page.
    */
   total: number;
 
@@ -305,7 +305,6 @@ export interface EndpointEvent {
   agent: {
     id: string;
     version: string;
-    type: string;
   };
   ecs: {
     version: string;
