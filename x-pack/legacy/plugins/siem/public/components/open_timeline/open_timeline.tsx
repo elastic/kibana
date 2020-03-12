@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
-import React, { useMemo, useCallback } from 'react';
+import { EuiPanel, EuiContextMenuPanel, EuiContextMenuItem, EuiBasicTable } from '@elastic/eui';
+import React, { useMemo, useCallback, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { OpenTimelineProps } from './types';
@@ -56,6 +56,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     title,
     totalSearchResultsCount,
   }) => {
+    const tableRef = useRef<EuiBasicTable>();
     const [, dispatchToaster] = useStateToaster();
 
     const nTimelines = useMemo(
@@ -75,6 +76,15 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       ),
       [totalSearchResultsCount, query]
     );
+    const onCompleteActions = useCallback(
+      (closePopover: () => void) => {
+        closePopover();
+        if (tableRef != null && tableRef.current != null) {
+          tableRef.current.changeSelection([]);
+        }
+      },
+      [tableRef.current]
+    );
 
     const getBatchItemsPopoverContent = useCallback(
       (closePopover: () => void) => {
@@ -84,7 +94,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
               <EuiContextMenuItem key="ExportItemKey" disabled={selectedItems.length === 0}>
                 <TimelineDownloader
                   selectedTimelines={selectedItems}
-                  onDownloadComplete={closePopover}
+                  onDownloadComplete={onCompleteActions.bind(null, closePopover)}
                 />
               </EuiContextMenuItem>,
               <EuiContextMenuItem key="DeleteItemKey" disabled={selectedItems.length === 0}>
@@ -100,7 +110,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
                       ? i18n.SELECTED_TIMELINES(selectedItems.length)
                       : `"${selectedItems[0]?.title}"`
                   }
-                  onComplete={closePopover}
+                  onComplete={onCompleteActions.bind(null, closePopover)}
                 />
               </EuiContextMenuItem>,
             ]}
@@ -182,6 +192,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
             showExtendedColumns={true}
             sortDirection={sortDirection}
             sortField={sortField}
+            tableRef={tableRef}
             totalSearchResultsCount={totalSearchResultsCount}
           />
         </EuiPanel>

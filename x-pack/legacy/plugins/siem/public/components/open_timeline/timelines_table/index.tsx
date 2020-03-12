@@ -94,6 +94,8 @@ export interface TimelinesTableProps {
   showExtendedColumns: boolean;
   sortDirection: 'asc' | 'desc';
   sortField: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  tableRef?: React.MutableRefObject<_EuiBasicTable<any> | undefined>;
   totalSearchResultsCount: number;
 }
 
@@ -118,6 +120,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     showExtendedColumns,
     sortField,
     sortDirection,
+    tableRef,
     totalSearchResultsCount,
   }) => {
     const pagination = {
@@ -145,7 +148,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
         !selectable ? i18n.MISSING_SAVED_OBJECT_ID : undefined,
       onSelectionChange,
     };
-
+    const basicTableProps = tableRef != null ? { ref: tableRef } : {};
     return (
       <BasicTable
         columns={getTimelinesTableColumns({
@@ -169,6 +172,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
         pagination={pagination}
         selection={actionTimelineToShow.includes('selectable') ? selection : undefined}
         sorting={sorting}
+        {...basicTableProps}
       />
     );
   }
