@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { v4 as uuidv4 } from 'uuid';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
@@ -16,6 +17,9 @@ import {
   LOG_ENTRIES_PATH,
   logEntriesRequestRT,
   logEntriesResponseRT,
+  LogTimestampColumn,
+  LogFieldColumn,
+  LogMessageColumn,
 } from '../../../../plugins/infra/common/http_api';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -40,6 +44,7 @@ const COMMON_HEADERS = {
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const sourceConfigurationService = getService('infraOpsSourceConfiguration');
 
   describe('log entry apis', () => {
     before(() => esArchiver.load('infra/metrics_and_logs'));
@@ -83,6 +88,42 @@ export default function({ getService }: FtrProviderContext) {
           // @kbn/expect doesn't have a `lessOrEqualThan` or `moreOrEqualThan` comparators
           expect(firstEntry.cursor.time >= EARLIEST_KEY_WITH_DATA.time).to.be(true);
           expect(lastEntry.cursor.time <= KEY_WITHIN_DATA_RANGE.time).to.be(true);
+        });
+
+        it('Returns the default columns', async () => {
+          const { body } = await supertest
+            .post(LOG_ENTRIES_PATH)
+            .set(COMMON_HEADERS)
+            .send(
+              logEntriesRequestRT.encode({
+                sourceId: 'default',
+                startTimestamp: EARLIEST_KEY_WITH_DATA.time,
+                endTimestamp: LATEST_KEY_WITH_DATA.time,
+                center: KEY_WITHIN_DATA_RANGE,
+              })
+            )
+            .expect(200);
+
+          const logEntriesResponse = pipe(
+            logEntriesResponseRT.decode(body),
+            fold(throwErrors(createPlainError), identity)
+          );
+
+          const entries = logEntriesResponse.data.entries;
+          const entry = entries[0];
+          expect(entry.columns).to.have.length(3);
+
+          const timestampColumn = entry.columns[0] as LogTimestampColumn;
+          expect(timestampColumn).to.have.property('timestamp');
+
+          const eventDatasetColumn = entry.columns[1] as LogFieldColumn;
+          expect(eventDatasetColumn).to.have.property('field');
+          expect(eventDatasetColumn.field).to.be('event.dataset');
+          expect(eventDatasetColumn).to.have.property('value');
+
+          const messageColumn = entry.columns[2] as LogMessageColumn;
+          expect(messageColumn).to.have.property('message');
+          expect(messageColumn.message.length).to.be.greaterThan(0);
         });
 
         it('Paginates correctly with `after`', async () => {
@@ -256,6 +297,82 @@ export default function({ getService }: FtrProviderContext) {
           expect(logEntriesResponse.data.entries).to.have.length(0);
           expect(logEntriesResponse.data.topCursor).to.be(null);
           expect(logEntriesResponse.data.bottomCursor).to.be(null);
+        });
+      });
+
+      describe('with a configured source', () => {
+        before(async () => {
+          await esArchiver.load('empty_kibana');
+          await sourceConfigurationService.createConfiguration('default', {
+            name: 'Test Source',
+            logColumns: [
+              {
+                timestampColumn: {
+                  id: uuidv4(),
+                },
+              },
+              {
+                fieldColumn: {
+                  id: uuidv4(),
+                  field: 'host.name',
+                },
+              },
+              {
+                fieldColumn: {
+                  id: uuidv4(),
+                  field: 'event.dataset',
+                },
+              },
+              {
+                messageColumn: {
+                  id: uuidv4(),
+                },
+              },
+            ],
+          });
+        });
+        after(() => esArchiver.unload('empty_kibana'));
+
+        it('returns the configured columns', async () => {
+          const { body } = await supertest
+            .post(LOG_ENTRIES_PATH)
+            .set(COMMON_HEADERS)
+            .send(
+              logEntriesRequestRT.encode({
+                sourceId: 'default',
+                startTimestamp: EARLIEST_KEY_WITH_DATA.time,
+                endTimestamp: LATEST_KEY_WITH_DATA.time,
+                center: KEY_WITHIN_DATA_RANGE,
+              })
+            )
+            .expect(200);
+
+          const logEntriesResponse = pipe(
+            logEntriesResponseRT.decode(body),
+            fold(throwErrors(createPlainError), identity)
+          );
+
+          const entries = logEntriesResponse.data.entries;
+          const entry = entries[0];
+
+          expect(entry.columns).to.have.length(4);
+
+          const timestampColumn = entry.columns[0] as LogTimestampColumn;
+          expect(timestampColumn).to.have.property('timestamp');
+
+          const hostNameColumn = entry.columns[1] as LogFieldColumn;
+          expect(hostNameColumn).to.have.property('field');
+          expect(hostNameColumn.field).to.be('host.name');
+          expect(hostNameColumn).to.have.property('value');
+
+          const eventDatasetColumn = entry.columns[2] as LogFieldColumn;
+          expect(eventDatasetColumn).to.have.property('field');
+          expect(eventDatasetColumn.field).to.be('event.dataset');
+          expect(eventDatasetColumn).to.have.property('value');
+
+          const messageColumn = entry.columns[3] as LogMessageColumn;
+          expect(messageColumn).to.have.property('message');
+          expect(messageColumn.message.length).to.be.greaterThan(0);
         });
       });
     });
