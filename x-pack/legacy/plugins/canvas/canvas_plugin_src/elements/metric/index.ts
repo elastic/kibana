@@ -12,11 +12,12 @@ import { ElementFactory } from '../../../types';
 export const metric: ElementFactory = () => ({
   name: 'metric',
   displayName: 'Metric',
-  tags: ['text'],
+  type: 'chart',
   help: 'A number with a label',
   width: 200,
   height: 100,
   image: header,
+  icon: 'visMetric',
   expression: `filters
 | demodata
 | math "unique(country)"

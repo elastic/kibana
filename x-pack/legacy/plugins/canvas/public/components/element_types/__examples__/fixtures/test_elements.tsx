@@ -11,7 +11,7 @@ export const testElements = [
     name: 'areaChart',
     displayName: 'Area chart',
     help: 'A line chart with a filled body',
-    tags: ['chart'],
+    type: 'chart',
     image: elasticLogo,
     expression: `filters
     | demodata
@@ -31,7 +31,7 @@ export const testElements = [
   {
     name: 'table',
     displayName: 'Data table',
-    tags: ['text'],
+    type: 'text',
     help: 'A scrollable grid for displaying data in a tabular format',
     image: elasticLogo,
     expression: `filters

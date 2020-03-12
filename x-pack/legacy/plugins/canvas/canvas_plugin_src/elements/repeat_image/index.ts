@@ -10,7 +10,7 @@ import header from './header.png';
 export const repeatImage: ElementFactory = () => ({
   name: 'repeatImage',
   displayName: 'Image repeat',
-  tags: ['graphic', 'proportion'],
+  type: 'image',
   help: 'Repeats an image N times',
   image: header,
   expression: `filters

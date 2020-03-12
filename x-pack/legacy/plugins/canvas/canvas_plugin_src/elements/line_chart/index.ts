@@ -9,10 +9,11 @@ import header from './header.png';
 
 export const lineChart: ElementFactory = () => ({
   name: 'lineChart',
-  displayName: 'Line chart',
-  tags: ['chart'],
+  displayName: 'Line',
+  type: 'chart',
   help: 'A customizable line chart',
   image: header,
+  icon: 'visLine',
   expression: `filters
 | demodata
 | pointseries x="time" y="mean(price)"

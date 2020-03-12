@@ -10,9 +10,10 @@ import header from './header.png';
 export const image: ElementFactory = () => ({
   name: 'image',
   displayName: 'Image',
-  tags: ['graphic'],
+  type: 'image',
   help: 'A static image',
   image: header,
+  icon: 'image',
   expression: `image dataurl=null mode="contain"
 | render`,
 });

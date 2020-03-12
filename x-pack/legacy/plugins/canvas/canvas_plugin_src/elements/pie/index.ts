@@ -9,12 +9,13 @@ import header from './header.png';
 import { ElementFactory } from '../../../types';
 export const pie: ElementFactory = () => ({
   name: 'pie',
-  displayName: 'Pie chart',
-  tags: ['chart', 'proportion'],
+  displayName: 'Pie',
+  type: 'chart',
   width: 300,
   height: 300,
   help: 'A simple pie chart',
   image: header,
+  icon: 'visPie',
   expression: `filters
 | demodata
 | pointseries color="state" size="max(price)"

@@ -6,10 +6,10 @@
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { WorkpadExport } from '../workpad_export';
+import { ViewMenu } from '../view_menu';
 
-storiesOf('components/Export/WorkpadExport', module).add('enabled', () => (
-  <WorkpadExport
+storiesOf('components/Export/ViewMenu', module).add('enabled', () => (
+  <ViewMenu
     onCopy={action('onCopy')}
     onExport={action('onExport')}
     getExportUrl={(type: string) => {

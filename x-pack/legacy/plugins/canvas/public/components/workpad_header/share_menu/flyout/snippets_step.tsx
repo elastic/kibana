@@ -42,7 +42,7 @@ export const SnippetsStep: FC<{ onCopy: OnCopyFn }> = ({ onCopy }) => (
     <EuiSpacer size="s" />
     <Clipboard content={HTML} onCopy={onCopy}>
       <EuiCodeBlock
-        className="canvasWorkpadExport__reportingConfig"
+        className="canvasShareMenu__reportingConfig"
         paddingSize="s"
         fontSize="s"
         language="html"

@@ -6,16 +6,14 @@
 
 import React, { FunctionComponent, useState } from 'react';
 import PropTypes from 'prop-types';
-import { EuiButtonIcon, EuiContextMenu, EuiIcon } from '@elastic/eui';
-// @ts-ignore Untyped local
-import { Popover } from '../../popover';
+import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
+import { Popover, ClosePopoverFn } from '../../popover';
 import { PDFPanel } from './pdf_panel';
 import { ShareWebsiteFlyout } from './flyout';
-
+import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { ComponentStrings } from '../../../../i18n/components';
-const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
 
-type ClosePopoverFn = () => void;
+const { WorkpadHeaderShareMenu: strings } = ComponentStrings;
 
 type CopyTypes = 'pdf' | 'reportingConfig';
 type ExportTypes = 'pdf' | 'json';
@@ -39,29 +37,11 @@ export interface Props {
 /**
  * The Menu for Exporting a Workpad from Canvas.
  */
-export const WorkpadExport: FunctionComponent<Props> = ({ onCopy, onExport, getExportUrl }) => {
+export const ShareMenu: FunctionComponent<Props> = ({ onCopy, onExport, getExportUrl }) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
   const onClose = () => {
     setShowFlyout(false);
-  };
-
-  // TODO: Fix all of this magic from EUI; this code is boilerplate from
-  // EUI examples and isn't easily typed.
-  const flattenPanelTree = (tree: any, array: any[] = []) => {
-    array.push(tree);
-
-    if (tree.items) {
-      tree.items.forEach((item: any) => {
-        const { panel } = item;
-        if (panel) {
-          flattenPanelTree(panel, array);
-          item.panel = panel.id;
-        }
-      });
-    }
-
-    return array;
   };
 
   const getPDFPanel = (closePopover: ClosePopoverFn) => {
@@ -113,11 +93,9 @@ export const WorkpadExport: FunctionComponent<Props> = ({ onCopy, onExport, getE
   });
 
   const exportControl = (togglePopover: React.MouseEventHandler<any>) => (
-    <EuiButtonIcon
-      iconType="share"
-      aria-label={strings.getShareWorkpadMessage()}
-      onClick={togglePopover}
-    />
+    <EuiButtonEmpty size="s" aria-label={strings.getShareWorkpadMessage()} onClick={togglePopover}>
+      {strings.getShareMenuButtonLabel()}
+    </EuiButtonEmpty>
   );
 
   const flyout = showFlyout ? <ShareWebsiteFlyout onClose={onClose} /> : null;
@@ -142,7 +120,7 @@ export const WorkpadExport: FunctionComponent<Props> = ({ onCopy, onExport, getE
   );
 };
 
-WorkpadExport.propTypes = {
+ShareMenu.propTypes = {
   onCopy: PropTypes.func.isRequired,
   onExport: PropTypes.func.isRequired,
   getExportUrl: PropTypes.func.isRequired,

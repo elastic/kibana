@@ -31,9 +31,9 @@ import { renderFunctionNames } from '../../../../../shareable_runtime/supported_
 
 import { ComponentStrings } from '../../../../../i18n/components';
 import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public/';
-import { OnCloseFn } from '../workpad_export';
+import { OnCloseFn } from '../share_menu';
 import { WithKibanaProps } from '../../../../index';
-const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
+const { WorkpadHeaderShareMenu: strings } = ComponentStrings;
 
 const getUnsupportedRenderers = (state: State) => {
   const renderers: string[] = [];

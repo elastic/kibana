@@ -22,8 +22,7 @@ import { CustomElementModal } from '../custom_element_modal';
 import { ToolTipShortcut } from '../tool_tip_shortcut/';
 import { ComponentStrings } from '../../../i18n/components';
 import { ShortcutStrings } from '../../../i18n/shortcuts';
-
-const topBorderClassName = 'canvasContextMenu--topBorder';
+import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../common/lib';
 
 const { SidebarHeader: strings } = ComponentStrings;
 const shortcutHelp = ShortcutStrings.getShortcutHelp();
@@ -282,7 +281,11 @@ export class SidebarHeader extends Component<Props, State> {
     const { bringToFront, bringForward, sendBackward, sendToBack } = this.props;
 
     return {
-      menuItem: { name: strings.getOrderMenuItemLabel(), className: topBorderClassName, panel: 1 },
+      menuItem: {
+        name: strings.getOrderMenuItemLabel(),
+        className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
+        panel: 1,
+      },
       panel: {
         id: 1,
         title: strings.getOrderMenuItemLabel(),
@@ -396,7 +399,7 @@ export class SidebarHeader extends Component<Props, State> {
       ? [
           {
             name: strings.getUngroupMenuItemLabel(),
-            className: topBorderClassName,
+            className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
             onClick: close(ungroupNodes),
           },
         ]
@@ -404,7 +407,7 @@ export class SidebarHeader extends Component<Props, State> {
       ? [
           {
             name: strings.getGroupMenuItemLabel(),
-            className: topBorderClassName,
+            className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
             onClick: close(groupNodes),
           },
         ]
@@ -483,7 +486,7 @@ export class SidebarHeader extends Component<Props, State> {
     items.push({
       name: strings.getSaveElementMenuItemLabel(),
       icon: 'indexOpen',
-      className: topBorderClassName,
+      className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
       onClick: this._showModal,
     });
 

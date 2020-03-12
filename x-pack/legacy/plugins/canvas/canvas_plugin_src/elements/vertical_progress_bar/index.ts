@@ -11,7 +11,7 @@ import header from './header.png';
 export const verticalProgressBar: ElementFactory = () => ({
   name: 'verticalProgressBar',
   displayName: 'Vertical progress bar',
-  tags: ['chart', 'proportion'],
+  type: 'progress',
   help: 'Displays progress as a portion of a vertical bar',
   width: 80,
   height: 400,

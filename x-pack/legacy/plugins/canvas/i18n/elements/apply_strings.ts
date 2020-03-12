@@ -34,17 +34,6 @@ export const applyElementStrings = (elements: ElementFactory[]) => {
       if (displayName) {
         result.displayName = displayName;
       }
-
-      // Set translated tags
-      if (result.tags) {
-        result.tags = result.tags.map(tag => {
-          if (tag in TagStrings) {
-            return TagStrings[tag]();
-          }
-
-          return tag;
-        });
-      }
     }
 
     return () => result;

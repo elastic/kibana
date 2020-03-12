@@ -10,9 +10,10 @@ import { CanvasElement } from '.';
 export interface ElementSpec {
   name: string;
   image: string;
+  icon: string;
   expression: string;
   displayName?: string;
-  tags?: string[];
+  type?: string;
   help?: string;
   filter?: string;
   width?: number;
@@ -43,9 +44,9 @@ export interface CustomElement {
    */
   image?: string;
   /**
-   * tags associated with the element
+   * the type of the element
    */
-  tags?: string[];
+  type?: string;
   /**
    * the element object stringified
    */

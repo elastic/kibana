@@ -9,10 +9,11 @@ import header from './header.png';
 import { ElementFactory } from '../../../types';
 export const markdown: ElementFactory = () => ({
   name: 'markdown',
-  displayName: 'Markdown',
-  tags: ['text'],
-  help: 'Markup from Markdown',
+  displayName: 'Text',
+  type: 'text',
+  help: 'Add text using Markdown',
   image: header,
+  icon: 'visText',
   expression: `filters
 | demodata
 | markdown "### Welcome to the Markdown element

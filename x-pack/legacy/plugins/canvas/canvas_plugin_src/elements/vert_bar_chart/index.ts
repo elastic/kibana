@@ -10,9 +10,10 @@ import header from './header.png';
 export const verticalBarChart: ElementFactory = () => ({
   name: 'verticalBarChart',
   displayName: 'Vertical bar chart',
-  tags: ['chart'],
+  type: 'chart',
   help: 'A customizable vertical bar chart',
   image: header,
+  icon: 'visBarVertical',
   expression: `filters
 | demodata
 | pointseries x="project" y="size(cost)" color="project"

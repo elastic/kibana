@@ -8,7 +8,6 @@ import { applyElementStrings } from '../../i18n/elements';
 import { areaChart } from './area_chart';
 import { bubbleChart } from './bubble_chart';
 import { debug } from './debug';
-import { donut } from './donut';
 import { dropdownFilter } from './dropdown_filter';
 import { horizontalBarChart } from './horizontal_bar_chart';
 import { horizontalProgressBar } from './horizontal_progress_bar';
@@ -26,7 +25,6 @@ import { repeatImage } from './repeat_image';
 import { revealImage } from './reveal_image';
 import { shape } from './shape';
 import { table } from './table';
-import { tiltedPie } from './tilted_pie';
 import { timeFilter } from './time_filter';
 import { verticalBarChart } from './vert_bar_chart';
 import { verticalProgressBar } from './vertical_progress_bar';
@@ -36,7 +34,6 @@ export const elementSpecs = applyElementStrings([
   areaChart,
   bubbleChart,
   debug,
-  donut,
   dropdownFilter,
   image,
   horizontalBarChart,
@@ -54,7 +51,6 @@ export const elementSpecs = applyElementStrings([
   revealImage,
   shape,
   table,
-  tiltedPie,
   timeFilter,
   verticalBarChart,
   verticalProgressBar,

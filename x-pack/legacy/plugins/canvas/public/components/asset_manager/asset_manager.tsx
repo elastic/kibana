@@ -33,13 +33,13 @@ interface Props {
   onAssetCopy: () => void;
   /** Function to invoke when an asset is added */
   onAssetAdd: (asset: File) => void;
+  /** Function to invoke when an asset modal is closed */
+  onClose: () => void;
 }
 
 interface State {
   /** The id of the asset to delete, if applicable.  Is set if the viewer clicks the delete icon */
   deleteId: string | null;
-  /** Determines if the modal is currently visible */
-  isModalVisible: boolean;
   /** Indicates if the modal is currently loading */
   isLoading: boolean;
 }
@@ -51,6 +51,7 @@ export class AssetManager extends PureComponent<Props, State> {
     onAssetAdd: PropTypes.func.isRequired,
     onAssetCopy: PropTypes.func.isRequired,
     onAssetDelete: PropTypes.func.isRequired,
+    onClose: PropTypes.func.isRequired,
   };
 
   public static defaultProps = {
@@ -60,12 +61,11 @@ export class AssetManager extends PureComponent<Props, State> {
   public state = {
     deleteId: null,
     isLoading: false,
-    isModalVisible: false,
   };
 
   public render() {
-    const { isModalVisible, isLoading } = this.state;
-    const { assetValues, onAssetCopy, onAddImageElement } = this.props;
+    const { isLoading } = this.state;
+    const { assetValues, onAssetCopy, onAddImageElement, onClose } = this.props;
 
     const assetModal = (
       <AssetModal
@@ -74,10 +74,10 @@ export class AssetManager extends PureComponent<Props, State> {
         onAssetCopy={onAssetCopy}
         onAssetCreate={(createdAsset: AssetType) => {
           onAddImageElement(createdAsset.id);
-          this.setState({ isModalVisible: false });
+          onClose();
         }}
         onAssetDelete={(asset: AssetType) => this.setState({ deleteId: asset.id })}
-        onClose={() => this.setState({ isModalVisible: false })}
+        onClose={() => onClose()}
         onFileUpload={this.handleFileUpload}
       />
     );
@@ -95,14 +95,12 @@ export class AssetManager extends PureComponent<Props, State> {
 
     return (
       <Fragment>
-        <EuiButtonEmpty onClick={this.showModal}>{strings.getButtonLabel()}</EuiButtonEmpty>
-        {isModalVisible ? assetModal : null}
+        {assetModal}
         {confirmModal}
       </Fragment>
     );
   }
 
-  private showModal = () => this.setState({ isModalVisible: true });
   private resetDelete = () => this.setState({ deleteId: null });
 
   private doDelete = () => {

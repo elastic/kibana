@@ -7,24 +7,27 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
+  EuiModal,
   EuiModalBody,
+  EuiModalFooter,
   EuiTabbedContent,
   EuiEmptyPrompt,
   EuiSearchBar,
   EuiSpacer,
   EuiOverlayMask,
+  EuiButton,
 } from '@elastic/eui';
 import { map, sortBy } from 'lodash';
 import { ConfirmModal } from '../confirm_modal/confirm_modal';
 import { CustomElementModal } from '../custom_element_modal';
-import { getTagsFilter } from '../../lib/get_tags_filter';
+// import { getTagsFilter } from '../../lib/get_tags_filter';
 import { extractSearch } from '../../lib/extract_search';
 import { ComponentStrings } from '../../../i18n';
 import { ElementGrid } from './element_grid';
 
 const { ElementTypes: strings } = ComponentStrings;
 
-const tagType = 'badge';
+// const tagType = 'badge';
 export class ElementTypes extends Component {
   static propTypes = {
     addCustomElement: PropTypes.func.isRequired,
@@ -125,13 +128,17 @@ export class ElementTypes extends Component {
     const {
       search,
       setSearch,
-      addElement,
+      // addElement,
       addCustomElement,
-      filterTags,
+      // filterTags,
       setFilterTags,
+      onClose,
     } = this.props;
-    let { elements, customElements } = this.props;
-    elements = this._sortElements(elements);
+    let {
+      // elements,
+      customElements,
+    } = this.props;
+    // elements = this._sortElements(elements);
 
     let customElementContent = (
       <EuiEmptyPrompt
@@ -156,39 +163,41 @@ export class ElementTypes extends Component {
       );
     }
 
-    const filters = [getTagsFilter(tagType)];
     const onSearch = ({ queryText }) => {
       const { searchTerm, filterTags } = extractSearch(queryText);
       setSearch(searchTerm);
       setFilterTags(filterTags);
     };
 
+    // const filters = [getTagsFilter(tagType)];
+
     const tabs = [
-      {
-        id: 'elements',
-        name: strings.getElementsTitle(),
-        content: (
-          <div className="canvasElements__filter">
-            <EuiSpacer />
-            <EuiSearchBar
-              defaultQuery={search}
-              box={{
-                placeholder: strings.getFindElementPlaceholder(),
-                incremental: true,
-              }}
-              filters={filters}
-              onChange={onSearch}
-            />
-            <EuiSpacer />
-            <ElementGrid
-              elements={elements}
-              filterText={search}
-              filterTags={filterTags}
-              handleClick={addElement}
-            />
-          </div>
-        ),
-      },
+      // TODO: remove element selection code and logic
+      // {
+      //   id: 'elements',
+      //   name: strings.getElementsTitle(),
+      //   content: (
+      //     <div className="canvasElements__filter">
+      //       <EuiSpacer />
+      //       <EuiSearchBar
+      //         defaultQuery={search}
+      //         box={{
+      //           placeholder: strings.getFindElementPlaceholder(),
+      //           incremental: true,
+      //         }}
+      //         filters={filters}
+      //         onChange={onSearch}
+      //       />
+      //       <EuiSpacer />
+      //       <ElementGrid
+      //         elements={elements}
+      //         filterText={search}
+      //         filterTags={filterTags}
+      //         handleClick={addElement}
+      //       />
+      //     </div>
+      //   ),
+      // },
       {
         id: 'customElements',
         name: strings.getMyElementsTitle(),
@@ -212,9 +221,23 @@ export class ElementTypes extends Component {
 
     return (
       <Fragment>
-        <EuiModalBody style={{ paddingRight: '1px' }}>
-          <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
-        </EuiModalBody>
+        <EuiOverlayMask>
+          <EuiModal
+            onClose={onClose}
+            className="canvasModal--fixedSize"
+            maxWidth="1000px"
+            initialFocus=".canvasElements__filter input"
+          >
+            <EuiModalBody style={{ paddingRight: '1px' }}>
+              <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
+            </EuiModalBody>
+            <EuiModalFooter>
+              <EuiButton size="s" onClick={onClose}>
+                {strings.getSavedElementsModalCloseButtonLabel()}
+              </EuiButton>
+            </EuiModalFooter>
+          </EuiModal>
+        </EuiOverlayMask>
 
         {this._renderDeleteModal()}
         {this._renderEditModal()}

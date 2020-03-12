@@ -9,10 +9,11 @@ import header from './header.png';
 
 export const areaChart: ElementFactory = () => ({
   name: 'areaChart',
-  displayName: 'Area chart',
+  displayName: 'Area',
   help: 'A line chart with a filled body',
-  tags: ['chart'],
+  type: 'chart',
   image: header,
+  icon: 'visArea',
   expression: `filters
   | demodata
   | pointseries x="time" y="mean(price)"

@@ -10,8 +10,8 @@ import header from './header.png';
 
 export const progressWheel: ElementFactory = () => ({
   name: 'progressWheel',
-  displayName: 'Progress wheel',
-  tags: ['chart', 'proportion'],
+  displayName: 'Wheel',
+  type: 'progress',
   help: 'Displays progress as a portion of a wheel',
   width: 200,
   height: 200,

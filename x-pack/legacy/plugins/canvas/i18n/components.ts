@@ -337,6 +337,10 @@ export const ComponentStrings = {
       }),
   },
   ElementTypes: {
+    getSavedElementsModalCloseButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeader.addElementModalCloseButtonLabel', {
+        defaultMessage: 'Close',
+      }),
     getEditElementTitle: () =>
       i18n.translate('xpack.canvas.elementTypes.editElementTitle', {
         defaultMessage: 'Edit element',
@@ -652,7 +656,7 @@ export const ComponentStrings = {
         defaultMessage: 'Share on a website',
       }),
     getUnsupportedRendererWarning: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.unsupportedRendererWarning', {
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.unsupportedRendererWarning', {
         defaultMessage:
           'This workpad contains render functions that are not supported by the {CANVAS} Shareable Workpad Runtime. These elements will not be rendered:',
         values: {
@@ -1029,14 +1033,6 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.workpadHeader.addElementButtonLabel', {
         defaultMessage: 'Add element',
       }),
-    getAddElementModalCloseButtonLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeader.addElementModalCloseButtonLabel', {
-        defaultMessage: 'Close',
-      }),
-    getEmbedObjectButtonLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeader.embedObjectButtonLabel', {
-        defaultMessage: 'Embed object',
-      }),
     getFullScreenButtonAriaLabel: () =>
       i18n.translate('xpack.canvas.workpadHeader.fullscreenButtonAriaLabel', {
         defaultMessage: 'View fullscreen',
@@ -1084,6 +1080,10 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.workpadHeaderControlSettings.settingsTooltip', {
         defaultMessage: 'Control settings',
       }),
+    getButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderControlSettings.buttonLabel', {
+        defaultMessage: 'Options',
+      }),
   },
   WorkpadHeaderCustomInterval: {
     getButtonLabel: () =>
@@ -1129,9 +1129,51 @@ export const ComponentStrings = {
         defaultMessage: 'Refresh data',
       }),
   },
-  WorkpadHeaderWorkpadExport: {
+  WorkpadHeaderElementMenu: {
+    getEmbedObjectMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.embedObjectMenuItemLabel', {
+        defaultMessage: 'Add from Visualize library',
+      }),
+    getElementMenuLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.elementMenuLabel', {
+        defaultMessage: 'Add an element',
+      }),
+    getElementMenuButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.elementMenuButtonLabel', {
+        defaultMessage: 'Add element',
+      }),
+    getChartMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.chartMenuItemLabel', {
+        defaultMessage: 'Chart',
+      }),
+    getImageMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.imageMenuItemLabel', {
+        defaultMessage: 'Image',
+      }),
+    getFilterMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.filterMenuItemLabel', {
+        defaultMessage: 'Filter',
+      }),
+    getProgressMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.progressMenuItemLabel', {
+        defaultMessage: 'Progress',
+      }),
+    getOtherMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.otherMenuItemLabel', {
+        defaultMessage: 'Other',
+      }),
+    getMyElementsMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.myElementsMenuItemLabel', {
+        defaultMessage: 'My elements',
+      }),
+    getAssetsMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.manageAssetsMenuItemLabel', {
+        defaultMessage: 'Manage assets',
+      }),
+  },
+  WorkpadHeaderShareMenu: {
     getCopyPDFMessage: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.copyPDFMessage', {
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.copyPDFMessage', {
         defaultMessage: 'The {PDF} generation {URL} was copied to your clipboard.',
         values: {
           PDF,
@@ -1139,15 +1181,15 @@ export const ComponentStrings = {
         },
       }),
     getCopyReportingConfigMessage: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.copyReportingConfigMessage', {
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.copyReportingConfigMessage', {
         defaultMessage: 'Copied reporting configuration to clipboard',
       }),
     getCopyShareConfigMessage: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.copyShareConfigMessage', {
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.copyShareConfigMessage', {
         defaultMessage: 'Copied share markup to clipboard',
       }),
     getExportPDFErrorTitle: (workpadName: string) =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.exportPDFErrorMessage', {
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.exportPDFErrorMessage', {
         defaultMessage: "Failed to create {PDF} for '{workpadName}'",
         values: {
           PDF,
@@ -1155,14 +1197,14 @@ export const ComponentStrings = {
         },
       }),
     getExportPDFMessage: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.exportPDFMessage', {
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.exportPDFMessage', {
         defaultMessage: 'Exporting {PDF}. You can track the progress in Management.',
         values: {
           PDF,
         },
       }),
     getExportPDFTitle: (workpadName: string) =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.exportPDFTitle', {
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.exportPDFTitle', {
         defaultMessage: "{PDF} export of workpad '{workpadName}'",
         values: {
           PDF,
@@ -1170,7 +1212,7 @@ export const ComponentStrings = {
         },
       }),
     getPDFPanelCopyAriaLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.pdfPanelCopyAriaLabel', {
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.pdfPanelCopyAriaLabel', {
         defaultMessage:
           'Alternatively, you can generate a {PDF} from a script or with Watcher by using this {URL}. Press Enter to copy the {URL} to clipboard.',
         values: {
@@ -1179,7 +1221,7 @@ export const ComponentStrings = {
         },
       }),
     getPDFPanelCopyButtonLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.pdfPanelCopyButtonLabel', {
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.pdfPanelCopyButtonLabel', {
         defaultMessage: 'Copy {POST} {URL}',
         values: {
           POST,
@@ -1187,7 +1229,7 @@ export const ComponentStrings = {
         },
       }),
     getPDFPanelCopyDescription: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.pdfPanelCopyDescription', {
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.pdfPanelCopyDescription', {
         defaultMessage:
           'Alternatively, copy this {POST} {URL} to call generation from outside {KIBANA} or from Watcher.',
         values: {
@@ -1197,14 +1239,14 @@ export const ComponentStrings = {
         },
       }),
     getPDFPanelGenerateButtonLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.pdfPanelGenerateButtonLabel', {
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.pdfPanelGenerateButtonLabel', {
         defaultMessage: 'Generate {PDF}',
         values: {
           PDF,
         },
       }),
     getPDFPanelGenerateDescription: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.pdfPanelGenerateDescription', {
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.pdfPanelGenerateDescription', {
         defaultMessage:
           '{PDF}s can take a minute or two to generate based on the size of your workpad.',
         values: {
@@ -1212,7 +1254,7 @@ export const ComponentStrings = {
         },
       }),
     getShareableZipErrorTitle: (workpadName: string) =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.shareWebsiteErrorTitle', {
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareWebsiteErrorTitle', {
         defaultMessage:
           "Failed to create {ZIP} file for '{workpadName}'. The workpad may be too large. You'll need to download the files separately.",
         values: {
@@ -1221,69 +1263,101 @@ export const ComponentStrings = {
         },
       }),
     getShareDownloadJSONTitle: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.shareDownloadJSONTitle', {
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareDownloadJSONTitle', {
         defaultMessage: 'Download as {JSON}',
         values: {
           JSON,
         },
       }),
     getShareDownloadPDFTitle: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.shareDownloadPDFTitle', {
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareDownloadPDFTitle', {
         defaultMessage: '{PDF} reports',
         values: {
           PDF,
         },
       }),
+    getShareMenuButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareMenuButtonLabel', {
+        defaultMessage: 'Share',
+      }),
     getShareWebsiteTitle: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.shareWebsiteTitle', {
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareWebsiteTitle', {
         defaultMessage: 'Share on a website',
       }),
     getShareWorkpadMessage: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.shareWorkpadMessage', {
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareWorkpadMessage', {
         defaultMessage: 'Share this workpad',
       }),
     getUnknownExportErrorMessage: (type: string) =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadExport.unknownExportErrorMessage', {
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.unknownExportErrorMessage', {
         defaultMessage: 'Unknown export type: {type}',
         values: {
           type,
         },
       }),
   },
-  WorkpadHeaderWorkpadZoom: {
+  WorkpadHeaderViewMenu: {
+    getViewMenuLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.viewMenuLabel', {
+        defaultMessage: 'View options',
+      }),
+    getViewMenuButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.viewMenuButtonLabel', {
+        defaultMessage: 'View',
+      }),
+    getFullscreenMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.fullscreenMenuLabel', {
+        defaultMessage: 'Enter fullscreen mode',
+      }),
+    getShowEditModeLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.showEditModeLabel', {
+        defaultMessage: 'Show editing controls',
+      }),
+    getHideEditModeLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.showEditModeLabel', {
+        defaultMessage: 'Hide editing controls',
+      }),
+    getRefreshMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.refreshMenuItemLabel', {
+        defaultMessage: 'Refresh data',
+      }),
+    getZoomMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomMenuItemLabel', {
+        defaultMessage: 'Zoom',
+      }),
     getZoomControlsAriaLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadZoom.zoomControlsAriaLabel', {
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomControlsAriaLabel', {
         defaultMessage: 'Zoom controls',
       }),
     getZoomControlsTooltip: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadZoom.zoomControlsTooltip', {
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomControlsTooltip', {
         defaultMessage: 'Zoom controls',
       }),
     getZoomFitToWindowText: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadZoom.zoomFitToWindowText', {
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomFitToWindowText', {
         defaultMessage: 'Fit to window',
       }),
     getZoomInText: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadZoom.zoomInText', {
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomInText', {
         defaultMessage: 'Zoom in',
       }),
     getZoomOutText: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadZoom.zoomOutText', {
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomOutText', {
         defaultMessage: 'Zoom out',
       }),
     getZoomPanelTitle: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadZoom.zoomPanelTitle', {
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomPanelTitle', {
         defaultMessage: 'Zoom',
       }),
     getZoomPercentage: (scale: number) =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadZoom.zoomResetText', {
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomResetText', {
         defaultMessage: '{scalePercentage}%',
         values: {
           scalePercentage: scale * 100,
         },
       }),
     getZoomResetText: () =>
-      i18n.translate('xpack.canvas.workpadHeaderWorkpadZoom.zoomPrecentageValue', {
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomPrecentageValue', {
         defaultMessage: 'Reset',
       }),
   },

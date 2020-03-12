@@ -9,12 +9,13 @@ import header from './header.png';
 
 export const bubbleChart: ElementFactory = () => ({
   name: 'bubbleChart',
-  displayName: 'Bubble chart',
-  tags: ['chart'],
+  displayName: 'Bubble',
+  type: 'chart',
   help: 'A customizable bubble chart',
   width: 700,
   height: 300,
   image: header,
+  icon: 'heatmap', // TODO: are we should we want to use the heatmap icon for this?
   expression: `filters
 | demodata
 | pointseries x="project" y="sum(price)" color="state" size="size(username)"

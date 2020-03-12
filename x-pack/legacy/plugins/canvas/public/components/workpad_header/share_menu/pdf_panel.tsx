@@ -9,7 +9,7 @@ import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { Clipboard } from '../../clipboard';
 
 import { ComponentStrings } from '../../../../i18n/components';
-const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
+const { WorkpadHeaderShareMenu: strings } = ComponentStrings;
 
 interface Props {
   /** The URL that will invoke PDF Report generation. */
@@ -24,7 +24,7 @@ interface Props {
  * A panel displayed in the Export Menu with options in which to generate PDF Reports.
  */
 export const PDFPanel = ({ pdfURL, onExport, onCopy }: Props) => (
-  <div className="canvasWorkpadExport__panelContent">
+  <div className="canvasShareMenu__panelContent">
     <EuiText size="s">
       <p>{strings.getPDFPanelGenerateDescription()}</p>
     </EuiText>

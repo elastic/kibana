@@ -17,7 +17,7 @@ import {
   downloadWorkpad,
   // @ts-ignore Untyped local
 } from '../../../lib/download_workpad';
-import { WorkpadExport as Component, Props as ComponentProps } from './workpad_export';
+import { ShareMenu as Component, Props as ComponentProps } from './share_menu';
 import { getPdfUrl, createPdf } from './utils';
 import { State, CanvasWorkpad } from '../../../../types';
 // @ts-ignore Untyped local.
@@ -27,7 +27,7 @@ import { WithKibanaProps } from '../../../index';
 
 import { ComponentStrings } from '../../../../i18n';
 
-const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
+const { WorkpadHeaderShareMenu: strings } = ComponentStrings;
 
 const mapStateToProps = (state: State) => ({
   workpad: getWorkpad(state),
@@ -50,7 +50,7 @@ interface Props {
   pageCount: number;
 }
 
-export const WorkpadExport = compose<ComponentProps, {}>(
+export const ShareMenu = compose<ComponentProps, {}>(
   connect(mapStateToProps),
   withKibana,
   withProps(
