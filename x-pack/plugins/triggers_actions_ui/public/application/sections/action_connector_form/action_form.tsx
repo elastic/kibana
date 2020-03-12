@@ -22,6 +22,7 @@ import {
   EuiEmptyPrompt,
   EuiButtonEmpty,
   EuiToolTip,
+  EuiLink,
 } from '@elastic/eui';
 import { HttpSetup, ToastsApi } from 'kibana/public';
 import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
@@ -38,6 +39,7 @@ import { ConnectorAddModal } from './connector_add_modal';
 import { TypeRegistry } from '../../type_registry';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
+import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import './action_form.scss';
 
 interface ActionAccordionFormProps {
@@ -458,6 +460,7 @@ export const ActionForm = ({
   }
 
   let actionTypeNodes = null;
+  let hasDisabledByLicenseActionTypes = false;
   if (actionTypesIndex) {
     actionTypeNodes = actionTypeRegistry
       .list()
@@ -466,7 +469,11 @@ export const ActionForm = ({
       )
       .sort((a, b) => actionTypeCompare(actionTypesIndex[a.id], actionTypesIndex[b.id]))
       .map(function(item, index) {
+        const actionType = actionTypesIndex[item.id];
         const checkEnabledResult = checkActionTypeEnabled(actionTypesIndex[item.id]);
+        if (!actionType.enabledInLicense) {
+          hasDisabledByLicenseActionTypes = true;
+        }
 
         const keyPadItem = (
           <EuiKeyPadMenuItem
@@ -520,10 +527,27 @@ export const ActionForm = ({
         <Fragment>
           <EuiTitle size="xs">
             <h5 id="alertActionTypeTitle">
-              <FormattedMessage
-                defaultMessage="Actions: Select an action type"
-                id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeTitle"
-              />
+              <Fragment>
+                <FormattedMessage
+                  defaultMessage="Actions: Select an action type"
+                  id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeTitle"
+                />
+                {hasDisabledByLicenseActionTypes && (
+                  <Fragment>
+                    <EuiLink
+                      href={VIEW_LICENSE_OPTIONS_LINK}
+                      target="_blank"
+                      className="actActionForm__getMoreActionsLink"
+                    >
+                      <EuiIcon type="starEmptySpace" />
+                      <FormattedMessage
+                        defaultMessage="Get more actions"
+                        id="xpack.triggersActionsUI.sections.actionForm.getMoreActionsTitle"
+                      />
+                    </EuiLink>
+                  </Fragment>
+                )}
+              </Fragment>
             </h5>
           </EuiTitle>
           <EuiSpacer />
