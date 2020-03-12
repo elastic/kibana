@@ -12,4 +12,7 @@
 - name: myalias
   type: alias
   path: user.euid
+- name: invalidalias
+  type: alias
+  path: euid
 

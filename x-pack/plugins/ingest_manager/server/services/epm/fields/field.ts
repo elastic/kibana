@@ -127,9 +127,54 @@ function dedupFields(fields: Fields): Fields {
   return dedupedFields;
 }
 
+/** validateAliasFields takes the given fields and verifies that all fields of type
+ * alias point to existing fields.
+ *
+ * Invalid alias fields are silently removed.
+ */
+
+function validateAliasFields(fields: Fields, allFields: Fields): Fields {
+  const validatedFields: Fields = [];
+
+  fields.forEach(field => {
+    if (field.type === 'alias') {
+      if (field.path && getField(allFields, field.path.split('.'))) {
+        validatedFields.push(field);
+      }
+    } else {
+      validatedFields.push(field);
+    }
+    if (field.fields) {
+      field.fields = validateAliasFields(field.fields, allFields);
+    }
+  });
+  return validatedFields;
+}
+
+const getField = (fields: Fields, pathNames: string[]): Field | undefined => {
+  if (!pathNames.length) return undefined;
+  // get the first rest of path names
+  const [name, ...restPathNames] = pathNames;
+  for (const field of fields) {
+    if (field.name === name) {
+      // check field's fields, passing in the remaining path names
+      if (field.fields && field.fields.length > 0) {
+        return getField(field.fields, restPathNames);
+      }
+      // no nested fields to search, but still more names - not found
+      if (restPathNames.length) {
+        return undefined;
+      }
+      return field;
+    }
+  }
+  return undefined;
+};
+
 export function processFields(fields: Fields): Fields {
   expandFields(fields);
-  return dedupFields(fields);
+  const dedupedFields = dedupFields(fields);
+  return validateAliasFields(dedupedFields, dedupedFields);
 }
 
 const isFields = (path: string) => {

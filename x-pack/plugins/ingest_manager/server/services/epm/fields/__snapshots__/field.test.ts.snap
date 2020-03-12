@@ -1292,51 +1292,15 @@ exports[`tests loading fields.yml: system.yml 1`] = `
         "release": "ga",
         "fields": [
           {
-            "name": "name",
-            "type": "alias",
-            "path": "process.name",
-            "migration": true
-          },
-          {
             "name": "state",
             "type": "keyword",
             "description": "The process state. For example: \\"running\\".\\n"
-          },
-          {
-            "name": "pid",
-            "type": "alias",
-            "path": "process.pid",
-            "migration": true
-          },
-          {
-            "name": "ppid",
-            "type": "alias",
-            "path": "process.ppid",
-            "migration": true
-          },
-          {
-            "name": "pgid",
-            "type": "alias",
-            "path": "process.pgid",
-            "migration": true
           },
           {
             "name": "cmdline",
             "type": "keyword",
             "description": "The full command-line used to start the process, including the arguments separated by space.\\n",
             "ignore_above": 2048
-          },
-          {
-            "name": "username",
-            "type": "alias",
-            "path": "user.name",
-            "migration": true
-          },
-          {
-            "name": "cwd",
-            "type": "alias",
-            "path": "process.working_directory",
-            "migration": true
           },
           {
             "name": "env",
@@ -2213,18 +2177,6 @@ exports[`tests loading fields.yml: system.yml 1`] = `
         "release": "ga",
         "fields": [
           {
-            "name": "direction",
-            "type": "alias",
-            "path": "network.direction",
-            "migration": true
-          },
-          {
-            "name": "family",
-            "type": "alias",
-            "path": "network.type",
-            "migration": true
-          },
-          {
             "name": "local",
             "type": "group",
             "fields": [
@@ -2282,47 +2234,16 @@ exports[`tests loading fields.yml: system.yml 1`] = `
             "type": "group",
             "fields": [
               {
-                "name": "pid",
-                "type": "alias",
-                "path": "process.pid",
-                "migration": true
-              },
-              {
-                "name": "command",
-                "type": "alias",
-                "path": "process.name",
-                "migration": true
-              },
-              {
                 "name": "cmdline",
                 "type": "keyword",
                 "description": "Full command line\\n"
-              },
-              {
-                "name": "exe",
-                "type": "alias",
-                "path": "process.executable",
-                "migration": true
               }
             ]
           },
           {
             "name": "user",
             "type": "group",
-            "fields": [
-              {
-                "name": "id",
-                "type": "alias",
-                "path": "user.id",
-                "migration": true
-              },
-              {
-                "name": "name",
-                "type": "alias",
-                "path": "user.full_name",
-                "migration": true
-              }
-            ]
+            "fields": []
           },
           {
             "name": "summary",
