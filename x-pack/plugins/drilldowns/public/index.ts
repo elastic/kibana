@@ -16,3 +16,5 @@ export {
 export function plugin() {
   return new DrilldownsPlugin();
 }
+
+export { Drilldown as DrilldownsDrilldown } from './types';
