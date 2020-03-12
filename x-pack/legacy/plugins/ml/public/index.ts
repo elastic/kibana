@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializer } from '../../../../../src/core/public';
+import { PluginInitializer } from 'kibana/public';
 import { MlPlugin, Setup, Start } from './plugin';
 
 export const plugin: PluginInitializer<Setup, Start> = () => new MlPlugin();

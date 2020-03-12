@@ -55,6 +55,7 @@ export const patchRulesRoute = (router: IRouter) => {
         type,
         threat,
         references,
+        note,
         version,
       } = request.body;
       const siemResponse = buildSiemResponse(response);
@@ -101,6 +102,7 @@ export const patchRulesRoute = (router: IRouter) => {
           type,
           threat,
           references,
+          note,
           version,
         });
         if (rule != null) {

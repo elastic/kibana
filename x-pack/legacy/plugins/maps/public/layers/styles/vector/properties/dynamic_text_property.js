@@ -25,7 +25,7 @@ export class DynamicTextProperty extends DynamicStyleProperty {
     return false;
   }
 
-  supportsFeatureState() {
+  supportsMbFeatureState() {
     return false;
   }
 

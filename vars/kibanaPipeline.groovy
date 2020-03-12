@@ -223,12 +223,20 @@ def runErrorReporter() {
 }
 
 def call(Map params = [:], Closure closure) {
-  def config = [timeoutMinutes: 135] + params
+  def config = [timeoutMinutes: 135, checkPrChanges: false] + params
 
   stage("Kibana Pipeline") {
     timeout(time: config.timeoutMinutes, unit: 'MINUTES') {
       timestamps {
         ansiColor('xterm') {
+          if (config.checkPrChanges && githubPr.isPr()) {
+            print "Checking PR for changes to determine if CI needs to be run..."
+
+            if (prChanges.areChangesSkippable()) {
+              print "No changes requiring CI found in PR, skipping."
+              return
+            }
+          }
           closure()
         }
       }

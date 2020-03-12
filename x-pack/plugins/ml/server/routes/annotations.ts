@@ -62,7 +62,9 @@ export function annotationRoutes(
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { getAnnotations } = annotationServiceProvider(context);
+        const { getAnnotations } = annotationServiceProvider(
+          context.ml!.mlClient.callAsCurrentUser
+        );
         const resp = await getAnnotations(request.body);
 
         return response.ok({
@@ -100,7 +102,9 @@ export function annotationRoutes(
           throw getAnnotationsFeatureUnavailableErrorMessage();
         }
 
-        const { indexAnnotation } = annotationServiceProvider(context);
+        const { indexAnnotation } = annotationServiceProvider(
+          context.ml!.mlClient.callAsCurrentUser
+        );
 
         const currentUser =
           securityPlugin !== undefined ? securityPlugin.authc.getCurrentUser(request) : {};
@@ -143,7 +147,9 @@ export function annotationRoutes(
         }
 
         const annotationId = request.params.annotationId;
-        const { deleteAnnotation } = annotationServiceProvider(context);
+        const { deleteAnnotation } = annotationServiceProvider(
+          context.ml!.mlClient.callAsCurrentUser
+        );
         const resp = await deleteAnnotation(annotationId);
 
         return response.ok({
