@@ -26,17 +26,12 @@ export const CreateAnalyticsFlyout: FC<CreateAnalyticsFormProps> = ({
   state,
 }) => {
   const { closeModal, createAnalyticsJob, startAnalyticsJob } = actions;
-  const {
-    isJobCreated,
-    isJobStarted,
-    isModalButtonDisabled,
-    isValid,
-    form: { isClone },
-  } = state;
+  const { isJobCreated, isJobStarted, isModalButtonDisabled, isValid, cloneJob } = state;
 
-  const headerText = isClone
+  const headerText = !!cloneJob
     ? i18n.translate('xpack.ml.dataframe.analytics.clone.flyoutHeaderTitle', {
-        defaultMessage: 'Clone analytics job',
+        defaultMessage: 'Clone job from {job_id}',
+        values: { job_id: cloneJob.id },
       })
     : i18n.translate('xpack.ml.dataframe.analytics.create.flyoutHeaderTitle', {
         defaultMessage: 'Create analytics job',

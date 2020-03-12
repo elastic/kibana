@@ -301,6 +301,10 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     dispatch({ type: ACTION.SET_ESTIMATED_MODEL_MEMORY_LIMIT, value });
   };
 
+  const setJobClone = (cloneJob: DataFrameAnalyticsConfig) => {
+    dispatch({ type: ACTION.SET_JOB_CLONE, cloneJob });
+  };
+
   const actions: ActionDispatchers = {
     closeModal,
     createAnalyticsJob,
@@ -313,6 +317,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     startAnalyticsJob,
     switchToAdvancedEditor,
     setEstimatedModelMemoryLimit,
+    setJobClone,
   };
 
   return { state, actions };

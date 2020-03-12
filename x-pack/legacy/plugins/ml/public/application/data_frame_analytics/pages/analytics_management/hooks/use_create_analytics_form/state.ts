@@ -77,7 +77,6 @@ export interface State {
     sourceIndexContainsNumericalFields: boolean;
     sourceIndexFieldsCheckFailed: boolean;
     trainingPercent: number;
-    isClone?: boolean;
   };
   disabled: boolean;
   indexNames: EsIndexName[];
@@ -92,6 +91,7 @@ export interface State {
   jobIds: DataFrameAnalyticsId[];
   requestMessages: FormMessage[];
   estimatedModelMemoryLimit: string;
+  cloneJob?: DataFrameAnalyticsConfig;
 }
 
 export const getInitialState = (): State => ({
@@ -200,7 +200,6 @@ export function getCloneFormStateFromJobConfig(
   const jobType: string = Object.keys(analyticsJobConfig.analysis)[0];
 
   const resultState: Partial<State['form']> = {
-    isClone: true,
     jobType: jobType as AnalyticsJobType,
     description: analyticsJobConfig.description ?? '',
     sourceIndex: Array.isArray(analyticsJobConfig.source.index)

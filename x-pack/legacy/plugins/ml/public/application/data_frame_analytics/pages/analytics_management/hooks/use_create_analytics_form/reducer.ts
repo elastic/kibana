@@ -455,6 +455,12 @@ export function reducer(state: State, action: Action): State {
         ...state,
         estimatedModelMemoryLimit: action.value,
       };
+
+    case ACTION.SET_JOB_CLONE:
+      return {
+        ...state,
+        cloneJob: action.cloneJob,
+      };
   }
 
   return state;

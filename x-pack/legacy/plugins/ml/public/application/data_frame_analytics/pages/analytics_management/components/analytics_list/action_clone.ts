@@ -13,9 +13,22 @@ import { getCloneFormStateFromJobConfig, State } from '../../hooks/use_create_an
 import { DataFrameAnalyticsListRow } from './common';
 
 interface PropDefinition {
+  /**
+   * Indicates if the property is optional
+   */
   optional: boolean;
+  /**
+   * Corresponding property from the form
+   */
   formKey?: keyof State['form'];
+  /**
+   * Default value of the property
+   */
   defaultValue?: any;
+  /**
+   * Indicates if the value has to be ignored
+   * during detecting advanced configuration
+   */
   ignore?: boolean;
 }
 
@@ -136,7 +149,7 @@ const getAnalyticsJobMeta = (config: DataFrameAnalyticsConfig): AnalyticsJobMeta
             },
             prediction_field_name: {
               optional: true,
-              defaultValue: `${config.analysis!.regression!.dependent_variable}_prediction`,
+              defaultValue: `${config.analysis.regression.dependent_variable}_prediction`,
             },
             num_top_feature_importance_values: {
               optional: true,
@@ -242,12 +255,12 @@ function extractCloningConfig(
     id,
     version,
     create_time,
-    ...config
+    ...cloneConfig
   } = originalConfig;
 
   // Reset the destination index
-  config.dest.index = '';
-  return config;
+  cloneConfig.dest.index = '';
+  return cloneConfig;
 }
 
 export function getCloneAction(createAnalyticsForm: CreateAnalyticsFormProps) {
@@ -261,6 +274,8 @@ export function getCloneAction(createAnalyticsForm: CreateAnalyticsFormProps) {
     await actions.openModal();
 
     const config = extractCloningConfig(item.config);
+
+    actions.setJobClone(item.config);
 
     if (isAdvancedConfig(config)) {
       actions.setJobConfig(config);
