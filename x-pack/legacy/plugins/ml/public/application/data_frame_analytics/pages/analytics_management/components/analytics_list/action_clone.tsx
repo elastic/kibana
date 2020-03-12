@@ -45,10 +45,14 @@ interface AnalyticsJobMetaData {
 /**
  * Provides a config definition.
  */
-const getAnalyticsJobMeta = (config: DataFrameAnalyticsConfig): AnalyticsJobMetaData => ({
+const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJobMetaData => ({
   allow_lazy_start: {
     optional: true,
     defaultValue: false,
+  },
+  description: {
+    optional: true,
+    formKey: 'description',
   },
   analysis: {
     ...(isClassificationAnalysis(config.analysis)
@@ -213,7 +217,7 @@ const getAnalyticsJobMeta = (config: DataFrameAnalyticsConfig): AnalyticsJobMeta
  */
 export function isAdvancedConfig(config: any, meta?: AnalyticsJobMetaData): boolean;
 export function isAdvancedConfig(
-  config: DataFrameAnalyticsConfig,
+  config: CloneDataFrameAnalyticsConfig,
   meta: AnalyticsJobMetaData = getAnalyticsJobMeta(config)
 ): boolean {
   for (const configKey in config) {
@@ -221,23 +225,27 @@ export function isAdvancedConfig(
       const fieldConfig = config[configKey as keyof typeof config];
       const fieldMeta = meta[configKey as keyof typeof meta];
 
-      if (fieldMeta) {
-        if (isPropDefinition(fieldMeta)) {
-          const isAdvancedSetting =
-            fieldMeta.formKey === undefined &&
-            fieldMeta.ignore !== true &&
-            !isEqual(fieldMeta.defaultValue, fieldConfig);
+      if (!fieldMeta) {
+        // eslint-disable-next-line no-console
+        console.info(`Property "${configKey}" is unknown.`);
+        return true;
+      }
 
-          if (isAdvancedSetting) {
-            // eslint-disable-next-line no-console
-            console.info(
-              `Property "${configKey}" is not supported by the form or has a different value to the default.`
-            );
-            return true;
-          }
-        } else if (isAdvancedConfig(fieldConfig, fieldMeta)) {
+      if (isPropDefinition(fieldMeta)) {
+        const isAdvancedSetting =
+          fieldMeta.formKey === undefined &&
+          fieldMeta.ignore !== true &&
+          !isEqual(fieldMeta.defaultValue, fieldConfig);
+
+        if (isAdvancedSetting) {
+          // eslint-disable-next-line no-console
+          console.info(
+            `Property "${configKey}" is not supported by the form or has a different value to the default.`
+          );
           return true;
         }
+      } else if (isAdvancedConfig(fieldConfig, fieldMeta)) {
+        return true;
       }
     }
   }

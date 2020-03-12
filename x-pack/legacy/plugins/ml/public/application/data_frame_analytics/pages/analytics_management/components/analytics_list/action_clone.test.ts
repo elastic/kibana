@@ -10,7 +10,6 @@ describe('Analytics job clone action', () => {
   describe('isAdvancedConfig', () => {
     test('should detect a classification job created with the form', () => {
       const formCreatedClassificationJob = {
-        id: 'bank_classification_1',
         description: "Classification job with 'bank-marketing' dataset",
         source: {
           index: ['bank-marketing'],
@@ -36,8 +35,6 @@ describe('Analytics job clone action', () => {
           excludes: [],
         },
         model_memory_limit: '350mb',
-        create_time: 1583417086689,
-        version: '8.0.0',
         allow_lazy_start: false,
       };
 
@@ -46,7 +43,6 @@ describe('Analytics job clone action', () => {
 
     test('should detect a outlier_detection job created with the form', () => {
       const formCreatedOutlierDetectionJob = {
-        id: 'glass_outlier_detection_1',
         description: "Outlier detection job with 'glass' dataset",
         source: {
           index: ['glass_withoutdupl_norm'],
@@ -70,8 +66,6 @@ describe('Analytics job clone action', () => {
           excludes: ['id', 'outlier'],
         },
         model_memory_limit: '1mb',
-        create_time: 1583417347446,
-        version: '8.0.0',
         allow_lazy_start: false,
       };
       expect(isAdvancedConfig(formCreatedOutlierDetectionJob)).toBe(false);
@@ -79,7 +73,6 @@ describe('Analytics job clone action', () => {
 
     test('should detect a regression job created with the form', () => {
       const formCreatedRegressionJob = {
-        id: 'grid_regression_1',
         description: "Regression job with 'electrical-grid-stability' dataset",
         source: {
           index: ['electrical-grid-stability'],
@@ -104,8 +97,6 @@ describe('Analytics job clone action', () => {
           excludes: [],
         },
         model_memory_limit: '150mb',
-        create_time: 1583417178919,
-        version: '8.0.0',
         allow_lazy_start: false,
       };
 
@@ -114,7 +105,6 @@ describe('Analytics job clone action', () => {
 
     test('should detect advanced classification job', () => {
       const advancedClassificationJob = {
-        id: 'bank_classification_1',
         description: "Classification job with 'bank-marketing' dataset",
         source: {
           index: ['bank-marketing'],
@@ -140,8 +130,6 @@ describe('Analytics job clone action', () => {
           excludes: [],
         },
         model_memory_limit: '350mb',
-        create_time: 1583417086689,
-        version: '8.0.0',
         allow_lazy_start: false,
       };
 
@@ -150,7 +138,6 @@ describe('Analytics job clone action', () => {
 
     test('should detect advanced outlier_detection job', () => {
       const advancedOutlierDetectionJob = {
-        id: 'glass_outlier_detection_1',
         description: "Outlier detection job with 'glass' dataset",
         source: {
           index: ['glass_withoutdupl_norm'],
@@ -175,8 +162,6 @@ describe('Analytics job clone action', () => {
           excludes: ['id', 'outlier'],
         },
         model_memory_limit: '1mb',
-        create_time: 1583417347446,
-        version: '8.0.0',
         allow_lazy_start: false,
       };
       expect(isAdvancedConfig(advancedOutlierDetectionJob)).toBe(true);
@@ -184,7 +169,6 @@ describe('Analytics job clone action', () => {
 
     test('should detect a custom query', () => {
       const advancedRegressionJob = {
-        id: 'grid_regression_1',
         description: "Regression job with 'electrical-grid-stability' dataset",
         source: {
           index: ['electrical-grid-stability'],
@@ -211,8 +195,6 @@ describe('Analytics job clone action', () => {
           excludes: [],
         },
         model_memory_limit: '150mb',
-        create_time: 1583417178919,
-        version: '8.0.0',
         allow_lazy_start: false,
       };
 
@@ -236,6 +218,31 @@ describe('Analytics job clone action', () => {
             dependent_variable: 'y',
             training_percent: 71,
             maximum_number_trees: 1500,
+          },
+        },
+        model_memory_limit: '400mb',
+      };
+
+      expect(isAdvancedConfig(config)).toBe(true);
+    });
+
+    test('should detect as advanced if the prop is unknown', () => {
+      const config = {
+        description: "Classification clone with 'bank-marketing' dataset",
+        source: {
+          index: 'bank-marketing',
+        },
+        dest: {
+          index: 'bank_classification4',
+        },
+        analyzed_fields: {
+          excludes: [],
+        },
+        analysis: {
+          classification: {
+            dependent_variable: 'y',
+            training_percent: 71,
+            max_trees: 1500,
           },
         },
         model_memory_limit: '400mb',
