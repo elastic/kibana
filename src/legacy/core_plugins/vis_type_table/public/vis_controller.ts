@@ -21,10 +21,11 @@ import angular, { IModule, auto, IRootScopeService, IScope, ICompileService } fr
 import $ from 'jquery';
 import { isEqual } from 'lodash';
 
-import { Vis, VisParams } from '../../visualizations/public';
+import { VisParams } from '../../visualizations/public';
 import { npStart } from './legacy_imports';
 import { getAngularModule } from './get_inner_angular';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
+import { ExprVis } from '../../visualizations/public/np_ready/public/expressions/vis';
 
 const innerAngularName = 'kibana/table_vis';
 
@@ -32,12 +33,12 @@ export class TableVisualizationController {
   private tableVisModule: IModule | undefined;
   private injector: auto.IInjectorService | undefined;
   el: JQuery<Element>;
-  vis: Vis;
+  vis: ExprVis;
   $rootScope: IRootScopeService | null = null;
   $scope: (IScope & { [key: string]: any }) | undefined;
   $compile: ICompileService | undefined;
 
-  constructor(domeElement: Element, vis: Vis) {
+  constructor(domeElement: Element, vis: ExprVis) {
     this.el = $(domeElement);
     this.vis = vis;
   }
@@ -93,7 +94,7 @@ export class TableVisualizationController {
         this.$scope = this.$rootScope.$new();
         this.$scope.uiState = this.vis.getUiState();
         updateScope();
-        this.el.find('div').append(this.$compile(this.vis.type.visConfig.template)(this.$scope));
+        this.el.find('div').append(this.$compile(this.vis.type!.visConfig.template)(this.$scope));
         this.$scope.$apply();
       } else {
         updateScope();

@@ -47,7 +47,6 @@ function MetricVisOptions({
   setValidity,
   setTouched,
   vis,
-  uiState,
 }: VisOptionsProps<VisParams>) {
   const setMetricValue: <T extends keyof MetricVisParam>(
     paramName: T,
@@ -163,7 +162,7 @@ function MetricVisOptions({
           invertColors={stateParams.metric.invertColors}
           setValue={setMetricValue as SetColorSchemaOptionsValue}
           showHelpText={false}
-          uiState={uiState}
+          vis={vis}
         />
       </EuiPanel>
 

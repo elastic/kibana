@@ -36,7 +36,7 @@ export type SetColorSchemaOptionsValue = <T extends keyof ColorSchemaVislibParam
 interface ColorSchemaOptionsProps extends ColorSchemaVislibParams {
   disabled?: boolean;
   colorSchemas: ColorSchema[];
-  uiState: VisOptionsProps['uiState'];
+  vis: VisOptionsProps['vis'];
   setValue: SetColorSchemaOptionsValue;
   showHelpText?: boolean;
 }
@@ -46,23 +46,23 @@ function ColorSchemaOptions({
   colorSchema,
   colorSchemas,
   invertColors,
-  uiState,
+  vis,
   setValue,
   showHelpText = true,
 }: ColorSchemaOptionsProps) {
-  const [isCustomColors, setIsCustomColors] = useState(() => !!uiState.get('vis.colors'));
+  const [isCustomColors, setIsCustomColors] = useState(() => !!vis.uiState.get('vis.colors'));
 
   useEffect(() => {
-    uiState.on('colorChanged', () => {
+    vis.uiState.on('colorChanged', () => {
       setIsCustomColors(true);
     });
-  }, [uiState]);
+  }, [vis.uiState]);
 
   const resetColorsButton = (
     <EuiText size="xs">
       <EuiLink
         onClick={() => {
-          uiState.set('vis.colors', null);
+          vis.uiState.set('vis.colors', null);
           setIsCustomColors(false);
         }}
       >

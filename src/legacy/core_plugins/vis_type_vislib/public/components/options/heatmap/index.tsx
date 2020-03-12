@@ -39,7 +39,7 @@ import { LabelsPanel } from './labels_panel';
 import { SetColorRangeValue } from '../../common/color_ranges';
 
 function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
-  const { stateParams, vis, uiState, setValue, setValidity, setTouched } = props;
+  const { stateParams, vis, setValue, setValidity, setTouched } = props;
   const [valueAxis] = stateParams.valueAxes;
   const isColorsNumberInvalid = stateParams.colorsNumber < 2 || stateParams.colorsNumber > 10;
   const [isColorRangesValid, setIsColorRangesValid] = useState(false);
@@ -108,7 +108,7 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
           colorSchema={stateParams.colorSchema}
           colorSchemas={vis.type.editorConfig.collections.colorSchemas}
           invertColors={stateParams.invertColors}
-          uiState={uiState}
+          vis={vis}
           setValue={setValue as SetColorSchemaOptionsValue}
         />
         <EuiSpacer size="s" />

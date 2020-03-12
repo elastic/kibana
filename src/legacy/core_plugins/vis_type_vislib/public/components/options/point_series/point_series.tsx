@@ -44,7 +44,9 @@ function PointSeriesOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
         <BasicOptions {...props} />
 
-        {vis.hasSchemaAgg('segment', 'date_histogram') ? (
+        {vis.data.aggs!.aggs.filter(
+          agg => agg.schema === 'segment' && agg.type.name === 'date_histogram'
+        ) ? (
           <SwitchOption
             label={i18n.translate('visTypeVislib.editors.pointSeries.currentTimeMarkerLabel', {
               defaultMessage: 'Current time marker',

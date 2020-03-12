@@ -23,12 +23,15 @@ import { fetchIndexPatternFields } from './lib/fetch_fields';
 import { getSavedObjectsClient, getUISettings, getI18n } from './services';
 
 export class EditorController {
-  constructor(el, savedObj) {
+  constructor(el, vis, embeddableHandler, reloadVisualization) {
     this.el = el;
 
+    this.embeddableHandler = embeddableHandler;
+    this.reloadVisualization = reloadVisualization;
+
     this.state = {
-      savedObj: savedObj,
-      vis: savedObj.vis,
+      fields: [],
+      vis: vis,
       isLoaded: false,
     };
   }
@@ -47,7 +50,7 @@ export class EditorController {
 
     this.state.vis.params.default_index_pattern = title;
     this.state.vis.params.default_timefield = timeFieldName;
-    this.state.vis.fields = await fetchIndexPatternFields(this.state.vis);
+    this.state.fields = await fetchIndexPatternFields(this.state.vis);
 
     this.state.isLoaded = true;
   };
@@ -67,13 +70,14 @@ export class EditorController {
         <Component
           config={getUISettings()}
           vis={this.state.vis}
-          visFields={this.state.vis.fields}
+          visFields={this.state.fields}
           visParams={this.state.vis.params}
-          savedObj={this.state.savedObj}
           timeRange={params.timeRange}
           renderComplete={() => {}}
           isEditorMode={true}
           appState={params.appState}
+          embeddableHandler={this.embeddableHandler}
+          reloadVisualization={this.reloadVisualization}
         />
       </I18nContext>,
       this.el

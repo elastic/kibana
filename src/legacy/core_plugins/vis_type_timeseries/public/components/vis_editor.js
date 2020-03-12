@@ -65,7 +65,7 @@ export class VisEditor extends Component {
   }
 
   get uiState() {
-    return this.props.vis.getUiState();
+    return this.props.vis.uiState;
   }
 
   getConfig = (...args) => {
@@ -73,17 +73,12 @@ export class VisEditor extends Component {
   };
 
   handleUiState = (field, value) => {
-    this.props.vis.uiStateVal(field, value);
+    this.props.vis.uiState.set(field, value);
   };
 
   updateVisState = debounce(() => {
     this.props.vis.params = this.state.model;
-    this.props.vis.updateState();
-    // This check should be redundant, since this method should only be called when we're in editor
-    // mode where there's also an appState passed into us.
-    if (this.props.appState) {
-      this.props.appState.save();
-    }
+    this.props.reloadVisualization();
   }, VIS_STATE_DEBOUNCE_DELAY);
 
   isValidKueryQuery = filterQuery => {
@@ -184,7 +179,8 @@ export class VisEditor extends Component {
               dirty={this.state.dirty}
               autoApply={this.state.autoApply}
               model={model}
-              savedObj={this.props.savedObj}
+              embeddableHandler={this.props.embeddableHandler}
+              vis={this.props.vis}
               timeRange={this.props.timeRange}
               uiState={this.uiState}
               onCommit={this.handleCommit}

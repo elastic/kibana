@@ -26,7 +26,8 @@ import { Positions } from './utils/collections';
 import { VisTypeVislibDependencies } from './plugin';
 import { mountReactNode } from '../../../../core/public/utils';
 import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/legend';
-import { VisParams, Vis } from '../../visualizations/public';
+import { VisParams } from '../../visualizations/public';
+import { ExprVis } from '../../visualizations/public/np_ready/public/expressions/vis';
 
 const legendClassName = {
   top: 'visLib--legend-top',
@@ -45,7 +46,7 @@ export const createVislibVisController = (deps: VisTypeVislibDependencies) => {
     legendEl: HTMLDivElement;
     vislibVis: any;
 
-    constructor(public el: Element, public vis: Vis) {
+    constructor(public el: Element, public vis: ExprVis) {
       this.el = el;
       this.vis = vis;
       this.unmount = null;

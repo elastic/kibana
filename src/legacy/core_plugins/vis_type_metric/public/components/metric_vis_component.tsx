@@ -27,12 +27,13 @@ import { FieldFormatsContentType, IFieldFormat } from '../../../../../plugins/da
 import { KibanaDatatable } from '../../../../../plugins/expressions/public';
 import { getHeatmapColors } from '../../../../../plugins/charts/public';
 import { VisParams, MetricVisMetric } from '../types';
-import { SchemaConfig, Vis } from '../../../visualizations/public';
+import { SchemaConfig } from '../../../visualizations/public';
+import { ExprVis } from '../../../visualizations/public/np_ready/public/expressions/vis';
 
 export interface MetricVisComponentProps {
   visParams: VisParams;
   visData: Input;
-  vis: Vis;
+  vis: ExprVis;
   renderComplete: () => void;
 }
 
