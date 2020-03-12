@@ -34,7 +34,7 @@ export type ESSearchSourceResponseMeta = {
   totalEntities?: number;
 };
 
-export type DataMeta = VectorLayerRequestMeta & ESSearchSourceResponseMeta;
+export type DataMeta = Partial<VectorLayerRequestMeta> & Partial<ESSearchSourceResponseMeta>;
 
 export type DataRequestDescriptor = {
   dataId: string;

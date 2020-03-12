@@ -6,8 +6,7 @@
 
 import { AbstractVectorSource } from './vector_source';
 import { IVectorSource } from './vector_source';
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
-import { SearchSource } from '../../kibana_services';
+import { IndexPattern, SearchSource } from '../../../../../../../src/plugins/data/public';
 import { VectorLayerRequestMeta } from '../../../common/data_request_descriptor_types';
 
 export interface IESSource extends IVectorSource {

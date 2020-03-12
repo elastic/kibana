@@ -92,8 +92,8 @@ function getClusterStyleDescriptor(
       return;
     }
 
-    const options = styleProperty.getOptions();
-    if (styleProperty.isDynamic()) {
+    if (styleProperty.isDynamic() && styleProperty.isComplete()) {
+      const options = (styleProperty as IDynamicStyleProperty).getOptions();
       clusterStyleDescriptor.properties[styleName] = {
         type: STYLE_TYPE.DYNAMIC,
         options: {
@@ -102,6 +102,7 @@ function getClusterStyleDescriptor(
             ...options.field,
             name: clusterSource.getAggKey(
               getAggType(styleProperty as IDynamicStyleProperty),
+              // @ts-ignore styleProperty.isComplete() check ensures options.field.name exists
               options.field.name
             ),
           },
@@ -110,7 +111,7 @@ function getClusterStyleDescriptor(
     } else {
       clusterStyleDescriptor.properties[styleName] = {
         type: STYLE_TYPE.STATIC,
-        options: { ...options },
+        options: { ...styleProperty.getOptions() },
       };
     }
   });
@@ -137,7 +138,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   constructor(options: VectorLayerArguments) {
     super(options);
 
-    this._documentSource = this._source; // VectorLayer constructor sets _source as document source
+    this._documentSource = this._source as IESSource; // VectorLayer constructor sets _source as document source
     this._documentStyle = this._style; // VectorLayer constructor sets _style as document source
 
     this._clusterSource = getClusterSource(this._documentSource, this._documentStyle);
