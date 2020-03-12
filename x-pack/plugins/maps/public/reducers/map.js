@@ -25,7 +25,6 @@ import {
   UPDATE_LAYER_STYLE,
   SET_LAYER_STYLE_META,
   SET_JOINS,
-  TOUCH_LAYER,
   UPDATE_SOURCE_PROP,
   SET_REFRESH_CONFIG,
   TRIGGER_REFRESH_TIMER,
@@ -202,17 +201,6 @@ export function map(state = INITIAL_STATE, action) {
       return updateWithDataResponse(state, action);
     case LAYER_DATA_LOAD_ENDED:
       return updateWithDataResponse(state, action);
-    case TOUCH_LAYER:
-      //action to enforce a reflow of the styles
-      const layer = state.layerList.find(layer => layer.id === action.layerId);
-      if (!layer) {
-        return state;
-      }
-      const indexOfLayer = state.layerList.indexOf(layer);
-      const newLayer = { ...layer };
-      const newLayerList = [...state.layerList];
-      newLayerList[indexOfLayer] = newLayer;
-      return { ...state, layerList: newLayerList };
     case MAP_READY:
       return { ...state, ready: true };
     case MAP_DESTROYED:
