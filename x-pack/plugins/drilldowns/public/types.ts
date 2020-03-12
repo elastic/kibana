@@ -13,13 +13,18 @@ export interface Drilldown<
 >
   extends Pick<
     ActionFactoryDefinition<Config, FactoryContext, ExecutionContext>,
-    'id' | 'createConfig' | 'CollectConfig' | 'isConfigValid' | 'getIconType' | 'getDisplayName'
+    'id' | 'createConfig' | 'CollectConfig' | 'isConfigValid' | 'getDisplayName'
   > {
   /**
    * List of places where this drilldown should be available, e.g "dashboard".
    * If omitted, the drilldown will be shown in all places.
    */
   places?: string[];
+
+  /**
+   * Name of EUI icon to display next to this drilldown.
+   */
+  euiIcon?: string;
 
   /**
    * Implements the "navigation" action when user clicks something in the UI and

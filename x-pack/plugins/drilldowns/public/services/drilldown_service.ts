@@ -38,7 +38,7 @@ export class DrilldownService {
       createConfig,
       isConfigValid,
       getDisplayName,
-      getIconType,
+      euiIcon,
       execute,
     }) => {
       advancedUiActions.actionFactory.register({
@@ -47,11 +47,12 @@ export class DrilldownService {
         createConfig,
         isConfigValid,
         getDisplayName,
-        getIconType,
+        getIconType: () => euiIcon,
         isCompatible: async ({ place }: any) => (!places ? true : places.indexOf(place) > -1),
         create: config => ({
           id: '',
           type: id as any,
+          getIconType: () => euiIcon,
           execute: async context => await execute(config, context),
         }),
       });
@@ -65,6 +66,7 @@ export class DrilldownService {
     */
     registerDrilldown({
       ...urlDrilldownActionFactory,
+      euiIcon: 'link',
       execute: () => alert('URL drilldown!'),
     } as any);
 

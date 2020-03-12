@@ -26,13 +26,15 @@ export class DashboardToDashboardDrilldown
   implements Drilldown<Config, FactoryContext, ActionContext> {
   constructor(protected readonly params: Params) {}
 
+  // public readonly places = ['dashboard'];
+
   public readonly id = DASHBOARD_TO_DASHBOARD_DRILLDOWN;
 
   public readonly order = 100;
 
   public readonly getDisplayName = () => txtGoToDashboard;
 
-  public readonly getIconType = () => 'dashboardApp';
+  public readonly euiIcon = 'dashboardApp';
 
   private readonly ReactCollectConfig: React.FC<CollectConfigProps> = props => (
     <CollectConfigContainer {...props} params={this.params} />
@@ -52,6 +54,6 @@ export class DashboardToDashboardDrilldown
   };
 
   public readonly execute = () => {
-    alert('Go to another drilldown!');
+    alert('Go to another dashboard!');
   };
 }
