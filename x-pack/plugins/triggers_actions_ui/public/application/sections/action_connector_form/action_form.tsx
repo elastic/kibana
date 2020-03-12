@@ -38,6 +38,7 @@ import { SectionLoading } from '../../components/section_loading';
 import { ConnectorAddModal } from './connector_add_modal';
 import { TypeRegistry } from '../../type_registry';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
+import { actionTypeCompare } from '../../lib/action_type_compare';
 import './action_form.scss';
 
 interface ActionAccordionFormProps {
@@ -546,16 +547,6 @@ export const ActionForm = ({
     </Fragment>
   );
 };
-
-function actionTypeCompare(a: ActionType, b: ActionType) {
-  if (a.enabledInLicense === true && b.enabledInLicense === false) {
-    return -1;
-  }
-  if (a.enabledInLicense === false && b.enabledInLicense === true) {
-    return 1;
-  }
-  return 0;
-}
 
 function checkActionTypeEnabled(
   actionType?: ActionType

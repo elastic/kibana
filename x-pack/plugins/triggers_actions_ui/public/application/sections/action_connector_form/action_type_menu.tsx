@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { ActionType, ActionTypeIndex } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
+import { actionTypeCompare } from '../../lib/action_type_compare';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
@@ -74,13 +75,3 @@ export const ActionTypeMenu = ({ onActionTypeChange, actionTypes }: Props) => {
 
   return <EuiFlexGrid columns={2}>{cardNodes}</EuiFlexGrid>;
 };
-
-function actionTypeCompare(a: ActionType, b: ActionType) {
-  if (a.enabledInLicense === true && b.enabledInLicense === false) {
-    return -1;
-  }
-  if (a.enabledInLicense === false && b.enabledInLicense === true) {
-    return 1;
-  }
-  return a.name.localeCompare(b.name);
-}
