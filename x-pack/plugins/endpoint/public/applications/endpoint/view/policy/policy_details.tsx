@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { EuiTitle } from '@elastic/eui';
 import { usePageId } from '../use_page_id';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import { selectPolicyDetails } from '../../store/policy_details/selectors';
@@ -15,10 +16,15 @@ export const PolicyDetails = React.memo(() => {
 
   function policyName() {
     if (policyItem) {
-      return policyItem.name;
+      return <span data-test-subj="policyDetailsName">{policyItem.name}</span>;
     } else {
-      return 'Policy Not Found!';
+      return <span data-test-subj="policyDetailsNotFound">Policy Not Found</span>;
     }
   }
-  return <div>{policyName()}</div>;
+
+  return (
+    <EuiTitle size="l">
+      <h1 data-test-subj="policyDetailsViewTitle">{policyName()}</h1>
+    </EuiTitle>
+  );
 });
