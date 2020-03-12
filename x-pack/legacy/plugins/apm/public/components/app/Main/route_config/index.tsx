@@ -23,7 +23,6 @@ import { resolveUrlParams } from '../../../../context/UrlParamsContext/resolveUr
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../../../../plugins/apm/common/i18n';
 import { TraceLink } from '../../TraceLink';
 import { CustomizeUI } from '../../Settings/CustomizeUI';
-import { useLocation } from '../../../../hooks/useLocation';
 import { AgentConfigurationCreateEdit } from '../../Settings/AgentConfigurations/AgentConfigurationCreateEdit';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { history } from '../../../../utils/history';
