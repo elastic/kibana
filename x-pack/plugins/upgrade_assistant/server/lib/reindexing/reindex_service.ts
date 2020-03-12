@@ -6,6 +6,8 @@
 import { APICaller, Logger } from 'src/core/server';
 import { first } from 'rxjs/operators';
 
+import { LicensingPluginSetup } from '../../../../licensing/server';
+
 import {
   IndexGroup,
   ReindexOptions,
@@ -18,14 +20,16 @@ import { CURRENT_MAJOR_VERSION } from '../../../common/version';
 import { apmReindexScript, isLegacyApmIndex } from '../apm';
 import apmMappings from '../apm/mapping.json';
 
+import { esIndicesStateCheck } from '../es_indices_state_check';
+
 import {
   generateNewIndexName,
   getReindexWarnings,
   sourceNameForIndex,
   transformFlatSettings,
 } from './index_settings';
+
 import { ReindexActions } from './reindex_actions';
-import { LicensingPluginSetup } from '../../../../licensing/server';
 
 import { error } from './error';
 
@@ -322,7 +326,12 @@ export const reindexServiceFactory = (
   const startReindexing = async (reindexOp: ReindexSavedObject) => {
     const { indexName, reindexOptions } = reindexOp.attributes;
 
-    if (reindexOptions?.openAndClose === true) {
+    // Where possible, derive reindex options at the last moment before reindexing
+    // to prevent them from becoming stale as they wait in the queue.
+    const indicesState = await esIndicesStateCheck(callAsUser, [indexName]);
+    const openAndClose = indicesState[indexName] === 'close';
+    if (indicesState[indexName] === 'close') {
+      log.debug(`Detected closed index ${indexName}, opening...`);
       await callAsUser('indices.open', { index: indexName });
     }
 
@@ -353,6 +362,12 @@ export const reindexServiceFactory = (
       lastCompletedStep: ReindexStep.reindexStarted,
       reindexTaskId: startReindex.task,
       reindexTaskPercComplete: 0,
+      reindexOptions: {
+        ...(reindexOptions ?? {}),
+        // Indicate to downstream states whether we opened a closed index that should be
+        // closed again.
+        openAndClose,
+      },
     });
   };
 
@@ -680,9 +695,16 @@ export const reindexServiceFactory = (
           throw new Error(`Reindex operation must be paused in order to be resumed.`);
         }
 
+        const reindexOptions: ReindexOptions | undefined = opts
+          ? {
+              ...(op.attributes.reindexOptions ?? {}),
+              ...opts,
+            }
+          : undefined;
+
         return actions.updateReindexOp(op, {
           status: ReindexStatus.inProgress,
-          reindexOptions: opts ?? op.attributes.reindexOptions,
+          reindexOptions,
         });
       });
     },
