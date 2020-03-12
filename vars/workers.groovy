@@ -125,8 +125,6 @@ def parallelProcesses(Map params) {
   def config = [name: 'parallel-worker', setup: {}, parallelExtra: {}, processes: [:], postProcess: {}, delayBetweenProcesses: 0, label: 'tests-xxl'] + params
 
   ci(label: config.label, name: config.name) {
-    config.setup()
-
     def nextProcessNumber = 1
     def process = { processName, processClosure ->
       def processNumber = nextProcessNumber
@@ -150,7 +148,10 @@ def parallelProcesses(Map params) {
 
     try {
       parallel([
-        parallelPrimary: { parallel(processes) },
+        parallelPrimary: {
+          config.setup()
+          parallel(processes)
+        },
         parallelExtra: config.parallelExtra,
       ])
     } finally {
