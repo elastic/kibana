@@ -11,6 +11,7 @@ import {
   XJsonMode,
 } from '../../../../shared_imports';
 
+// @ts-ignore
 export const xJsonMode = new XJsonMode();
 
 export const useXJsonMode = (json: string) => {

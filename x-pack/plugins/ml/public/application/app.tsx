@@ -7,8 +7,6 @@
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 
-// needed to make syntax highlighting work in ace editors
-// import 'ace';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';

@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { JOB_STATE, DATAFEED_STATE } from '../../../../plugins/ml/common/constants/states';
 import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/common';
-import { Job, Datafeed } from '../../../..//legacy/plugins/ml/common/types/anomaly_detection_jobs';
+import { Job, Datafeed } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
 export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 
