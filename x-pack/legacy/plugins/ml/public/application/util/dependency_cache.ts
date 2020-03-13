@@ -11,7 +11,7 @@ import {
   SavedObjectsClientContract,
   ApplicationStart,
   HttpStart,
-} from 'src/core/public';
+} from 'kibana/public';
 import { IndexPatternsContract, DataPublicPluginStart } from 'src/plugins/data/public';
 import {
   DocLinksStart,

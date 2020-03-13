@@ -42,6 +42,7 @@ export const patchRules = async ({
   to,
   type,
   references,
+  note,
   version,
   throttle,
 }: PatchRuleParams): Promise<PartialAlert | null> => {
@@ -75,6 +76,7 @@ export const patchRules = async ({
     references,
     version,
     throttle,
+    note,
   });
 
   const nextParams = defaults(
@@ -102,6 +104,7 @@ export const patchRules = async ({
       to,
       type,
       references,
+      note,
       version: calculatedVersion,
     }
   );

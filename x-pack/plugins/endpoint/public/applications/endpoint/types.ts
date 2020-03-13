@@ -5,6 +5,7 @@
  */
 
 import { Dispatch, MiddlewareAPI } from 'redux';
+import { IIndexPattern } from 'src/plugins/data/public';
 import {
   EndpointMetadata,
   AlertData,
@@ -12,12 +13,14 @@ import {
   Immutable,
   ImmutableArray,
 } from '../../../common/types';
+import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
 import { CoreStart } from '../../../../../../src/core/public';
 
 export { AppAction };
 export type MiddlewareFactory<S = GlobalState> = (
-  coreStart: CoreStart
+  coreStart: CoreStart,
+  depsStart: EndpointPluginStartDependencies
 ) => (
   api: MiddlewareAPI<Dispatch<AppAction>, S>
 ) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
@@ -101,6 +104,10 @@ export interface EndpointAppLocation {
   key?: string;
 }
 
+interface AlertsSearchBarState {
+  patterns: IIndexPattern[];
+}
+
 export type AlertListData = AlertResultList;
 
 export interface AlertListState {
@@ -121,6 +128,9 @@ export interface AlertListState {
 
   /** Specific Alert data to be shown in the details view */
   readonly alertDetails?: Immutable<AlertData>;
+
+  /** Search bar state including indexPatterns */
+  readonly searchBar: AlertsSearchBarState;
 }
 
 /**
@@ -139,4 +149,7 @@ export interface AlertingIndexUIQueryParams {
    * If any value is present, show the alert detail view for the selected alert. Should be an ID for an alert event.
    */
   selected_alert?: string;
+  query?: string;
+  date_range?: string;
+  filters?: string;
 }

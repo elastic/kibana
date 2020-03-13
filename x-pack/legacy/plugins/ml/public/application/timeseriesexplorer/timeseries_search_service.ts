@@ -138,7 +138,7 @@ function getChartDetails(
       obj.results.entityData.entities = entityFields;
       resolve(obj);
     } else {
-      const entityFieldNames = _.map(blankEntityFields, 'fieldName');
+      const entityFieldNames: string[] = _.map(blankEntityFields, 'fieldName');
       ml.getCardinalityOfFields({
         index: chartConfig.datafeedConfig.indices,
         fieldNames: entityFieldNames,
