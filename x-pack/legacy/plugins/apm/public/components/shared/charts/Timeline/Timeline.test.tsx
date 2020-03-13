@@ -63,7 +63,7 @@ describe('Timeline', () => {
     const props = {
       traceRootDuration: 0,
       width: 1000,
-      duration: 0,
+      xMax: 0,
       height: 116,
       margins: {
         top: 100,
