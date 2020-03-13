@@ -77,7 +77,7 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
     const { annotation } = this.props;
     const toastNotifications = getToastNotifications();
 
-    if (annotation === null) {
+    if (annotation === null || annotation._id === undefined) {
       return;
     }
 
