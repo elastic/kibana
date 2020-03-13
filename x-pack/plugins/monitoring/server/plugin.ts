@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import Boom from 'boom';
 import { combineLatest } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
@@ -335,49 +336,50 @@ export class Plugin {
       log: this.log,
       route: (options: any) => {
         const method = options.method;
-        const handler = router.handleLegacyErrors(
-          async (
-            context: RequestHandlerContext,
-            req: KibanaRequest<any, any, any, any>,
-            res: KibanaResponseFactory
-          ) => {
-            const legacyRequest = {
-              ...req,
-              logger: this.log,
-              getLogger: this.getLogger,
-              payload: req.body,
-              getKibanaStatsCollector: () => this.legacyShimDependencies.kibanaStatsCollector,
-              getUiSettingsService: () => context.core.uiSettings.client,
-              getAlertsClient: () => plugins.alerting.getAlertsClientWithRequest(req),
-              server: {
-                config: legacyConfigWrapper,
-                newPlatform: {
-                  setup: {
-                    plugins,
-                  },
-                },
-                plugins: {
-                  monitoring: {
-                    info: licenseService,
-                  },
-                  elasticsearch: {
-                    getCluster: (name: string) => ({
-                      callWithRequest: async (_req: any, endpoint: string, params: any) => {
-                        const client =
-                          name === 'monitoring'
-                            ? cluster
-                            : this.legacyShimDependencies.esDataClient;
-                        return client.asScoped(req).callAsCurrentUser(endpoint, params);
-                      },
-                    }),
-                  },
+        const handler = async (
+          context: RequestHandlerContext,
+          req: KibanaRequest<any, any, any, any>,
+          res: KibanaResponseFactory
+        ) => {
+          const legacyRequest = {
+            ...req,
+            logger: this.log,
+            getLogger: this.getLogger,
+            payload: req.body,
+            getKibanaStatsCollector: () => this.legacyShimDependencies.kibanaStatsCollector,
+            getUiSettingsService: () => context.core.uiSettings.client,
+            getAlertsClient: () => plugins.alerting.getAlertsClientWithRequest(req),
+            server: {
+              config: legacyConfigWrapper,
+              newPlatform: {
+                setup: {
+                  plugins,
                 },
               },
-            };
-            const result = await options.handler(legacyRequest);
-            return res.ok({ body: result });
+              plugins: {
+                monitoring: {
+                  info: licenseService,
+                },
+                elasticsearch: {
+                  getCluster: (name: string) => ({
+                    callWithRequest: async (_req: any, endpoint: string, params: any) => {
+                      const client =
+                        name === 'monitoring' ? cluster : this.legacyShimDependencies.esDataClient;
+                      return client.asScoped(req).callAsCurrentUser(endpoint, params);
+                    },
+                  }),
+                },
+              },
+            },
+          };
+
+          const result = await options.handler(legacyRequest);
+          if (Boom.isBoom(result)) {
+            return res.customError({ statusCode: result.output.statusCode, body: result });
           }
-        );
+          return res.ok({ body: result });
+        };
+
         const validate: any = get(options, 'config.validate', false);
         if (validate && validate.payload) {
           validate.body = validate.payload;
