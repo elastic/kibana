@@ -7,7 +7,7 @@
 import { EuiButtonIcon, EuiCallOut, EuiPopover } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { JobContent, ReportingAPIClient } from '../lib/reporting_api_client';
+import { JobContent, ReportingAPIClient } from '../../lib/reporting_api_client';
 
 interface Props {
   jobId: string;

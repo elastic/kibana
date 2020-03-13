@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import moment from 'moment';
-import React, { Component, default as React, default as React } from 'react';
+import React, { Component, Fragment } from 'react';
 import { Subscription } from 'rxjs';
 import { ApplicationStart, ToastsSetup } from 'src/core/public';
 import { ILicense, LicensingPluginSetup } from '../../../licensing/public';
@@ -26,10 +26,10 @@ import { JobStatuses, JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG } from '../../c
 import { checkLicense } from '../lib/license_check';
 import { JobQueueEntry, ReportingAPIClient } from '../lib/reporting_api_client';
 import {
-  renderDeleteButton,
-  renderDownloadButton,
-  renderInfoButton,
-  renderReportErrorButton,
+  ReportDeleteButton,
+  ReportDownloadButton,
+  ReportErrorButton,
+  ReportInfoButton,
 } from './buttons';
 
 export interface Job {
@@ -190,38 +190,6 @@ class ReportListingUi extends Component<Props, State> {
     this.setState(current => ({ ...current, jobs: filtered }));
   };
 
-  private renderDeleteButton = (record: Job) => {
-    const handleDelete = async () => {
-      try {
-        // TODO present a modal to verify: this can not be undone
-        this.setState(current => ({ ...current, is_deleting: true }));
-        await this.props.apiClient.deleteReport(record.id);
-        this.removeRecord(record);
-        this.props.toasts.addSuccess(
-          this.props.intl.formatMessage(
-            {
-              id: 'xpack.reporting.listing.table.deleteConfim',
-              defaultMessage: `The {reportTitle} report was deleted`,
-            },
-            { reportTitle: record.object_title }
-          )
-        );
-      } catch (error) {
-        this.props.toasts.addDanger(
-          this.props.intl.formatMessage(
-            {
-              id: 'xpack.reporting.listing.table.deleteFailedErrorMessage',
-              defaultMessage: `The report was not deleted: {error}`,
-            },
-            { error }
-          )
-        );
-        throw error;
-      }
-    };
-    return renderDeleteButton(this.props, handleDelete, record); // FIXME react component
-  };
-
   private renderTable() {
     const { intl } = this.props;
 
@@ -358,9 +326,9 @@ class ReportListingUi extends Component<Props, State> {
               const canDelete = !record.is_deleting;
               return (
                 <div>
-                  {this.renderDownloadButton(record)}
-                  {this.renderReportErrorButton(record)}
-                  {this.renderInfoButton(record)}
+                  <DownloadButton {...this.props} record={record} />
+                  <ReportErrorButton {...this.props} record={record} />
+                  <ReportInfoButton {...this.props} jobId={record.id} />
                   {canDelete ? this.renderDeleteButton(record) : <EuiLoadingSpinner size="m" />}
                 </div>
               );
@@ -401,16 +369,36 @@ class ReportListingUi extends Component<Props, State> {
     );
   }
 
-  private renderDownloadButton = (record: Job) => {
-    return renderDownloadButton(this.props, record); // FIXME react component
-  };
-
-  private renderReportErrorButton = (record: Job) => {
-    return renderReportErrorButton(this.props, record); // FIXME react component
-  };
-
-  private renderInfoButton = (record: Job) => {
-    return renderInfoButton(this.props, record); // FIXME react component
+  private renderDeleteButton = (record: Job) => {
+    const handleDelete = async () => {
+      try {
+        // TODO present a modal to verify: this can not be undone
+        this.setState(current => ({ ...current, is_deleting: true }));
+        await this.props.apiClient.deleteReport(record.id);
+        this.removeRecord(record);
+        this.props.toasts.addSuccess(
+          this.props.intl.formatMessage(
+            {
+              id: 'xpack.reporting.listing.table.deleteConfim',
+              defaultMessage: `The {reportTitle} report was deleted`,
+            },
+            { reportTitle: record.object_title }
+          )
+        );
+      } catch (error) {
+        this.props.toasts.addDanger(
+          this.props.intl.formatMessage(
+            {
+              id: 'xpack.reporting.listing.table.deleteFailedErrorMessage',
+              defaultMessage: `The report was not deleted: {error}`,
+            },
+            { error }
+          )
+        );
+        throw error;
+      }
+    };
+    return <DeleteButton handleDelete={handleDelete} record={record} {...this.props} />;
   };
 
   private onTableChange = ({ page }: { page: { index: number } }) => {
