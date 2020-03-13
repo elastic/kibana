@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 /**
  * The number of alert documents in the es archive.
  */
-const numberOfAlertsInFixture = 2;
+const numberOfAlertsInFixture = 12;
 
 /**
  * The default number of entries returned when no page_size is specified.
@@ -46,7 +46,7 @@ export default function({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .expect(200);
         expect(body.total).to.eql(numberOfAlertsInFixture);
-        expect(body.alerts.length).to.eql(numberOfAlertsInFixture);
+        expect(body.alerts.length).to.eql(defaultPageSize);
         expect(body.request_page_size).to.eql(defaultPageSize);
         /**
          * No page_index was specified. It should return page 0.
@@ -70,7 +70,7 @@ export default function({ getService }: FtrProviderContext) {
          * Skipping the first page (with a size of 1).
          */
         const expectedToBeSkipped = 1;
-        expect(body.alerts.length).to.eql(numberOfAlertsInFixture - expectedToBeSkipped);
+        expect(body.alerts.length).to.eql(pageSize);
         expect(body.request_page_size).to.eql(pageSize);
         expect(body.request_page_index).to.eql(pageIndex);
         expect(body.result_from_index).to.eql(expectedToBeSkipped);
@@ -81,10 +81,11 @@ export default function({ getService }: FtrProviderContext) {
         const requestPageSize = 100;
         const requestPageIndex = 3;
         beforeEach(async () => {
-          body = await supertest
+          const response = await supertest
             .get(`/api/endpoint/alerts?page_size=${requestPageSize}&page_index=${requestPageIndex}`)
             .set('kbn-xsrf', 'xxx')
-            .expect(200).body;
+            .expect(200);
+          body = response.body;
         });
         it('should return accurate total counts', async () => {
           expect(body.total).to.eql(numberOfAlertsInFixture);
@@ -111,7 +112,7 @@ export default function({ getService }: FtrProviderContext) {
           .get('/api/endpoint/alerts?page_index=0')
           .set('kbn-xsrf', 'xxx')
           .expect(200);
-        expect(body.alerts.length).to.eql(10);
+        expect(body.alerts.length).to.eql(defaultPageSize);
         const lastTimestampFirstPage = body.alerts[9]['@timestamp'];
         const lastEventIdFirstPage = body.alerts[9].event.id;
         expect(body.next).to.eql(
@@ -122,11 +123,11 @@ export default function({ getService }: FtrProviderContext) {
       it('should return data using `next` link', async () => {
         const { body } = await supertest
           .get(
-            `/api/endpoint/alerts?${nextPrevPrefix}&after=1542789412000&after=c710bf2d-8686-4038-a2a1-43bdecc06b2a`
+            `/api/endpoint/alerts?${nextPrevPrefix}&after=1584044338719&after=66008e21-2493-4b15-a937-939ea228064a`
           )
           .set('kbn-xsrf', 'xxx')
           .expect(200);
-        expect(body.alerts.length).to.eql(10);
+        expect(body.alerts.length).to.eql(defaultPageSize);
         const firstTimestampNextPage = body.alerts[0]['@timestamp'];
         const firstEventIdNextPage = body.alerts[0].event.id;
         expect(body.prev).to.eql(
@@ -147,7 +148,7 @@ export default function({ getService }: FtrProviderContext) {
       it('should return no results when `before` is requested past beginning of first page', async () => {
         const { body } = await supertest
           .get(
-            `/api/endpoint/alerts?${nextPrevPrefix}&before=1542789473000&before=ffae628e-6236-45ce-ba24-7351e0af219e`
+            `/api/endpoint/alerts?${nextPrevPrefix}&before=1584044338726&before=5ff1a4ec-758e-49e7-89aa-2c6821fe6b54`
           )
           .set('kbn-xsrf', 'xxx')
           .expect(200);
@@ -157,7 +158,7 @@ export default function({ getService }: FtrProviderContext) {
       it('should return no results when `after` is requested past end of last page', async () => {
         const { body } = await supertest
           .get(
-            `/api/endpoint/alerts?${nextPrevPrefix}&after=1542341895000&after=01911945-48aa-478e-9712-f49c92a15f20`
+            `/api/endpoint/alerts?${nextPrevPrefix}&after=1584044338612&after=6d75d498-3cca-45ad-a304-525b95ae0412`
           )
           .set('kbn-xsrf', 'xxx')
           .expect(200);
@@ -167,7 +168,7 @@ export default function({ getService }: FtrProviderContext) {
       it('should return 400 when using `before` by custom sort parameter', async () => {
         await supertest
           .get(
-            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&${nextPrevPrefixOrder}&sort=thread.id&before=2180&before=8362fcde-0b10-476f-97a8-8d6a43865226`
+            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&${nextPrevPrefixOrder}&sort=process.pid&before=1&before=66008e21-2493-4b15-a937-939ea228064a`
           )
           .set('kbn-xsrf', 'xxx')
           .expect(400);
@@ -176,50 +177,54 @@ export default function({ getService }: FtrProviderContext) {
       it('should return data using `after` by custom sort parameter', async () => {
         const { body } = await supertest
           .get(
-            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&${nextPrevPrefixOrder}&sort=thread.id&after=2180&after=8362fcde-0b10-476f-97a8-8d6a43865226`
+            `/api/endpoint/alerts?${nextPrevPrefixDateRange}&${nextPrevPrefixPageSize}&${nextPrevPrefixOrder}&sort=process.pid&after=3&after=66008e21-2493-4b15-a937-939ea228064a`
           )
           .set('kbn-xsrf', 'xxx')
           .expect(200);
         expect(body.alerts.length).to.eql(10);
-        expect(body.alerts[0].thread.id).to.eql(1912);
+        expect(body.alerts[0].process.pid).to.eql(2);
       });
 
       it('should filter results of alert data using rison-encoded filters', async () => {
+        const hostname = 'Host-abmfhmc5ku';
         const { body } = await supertest
           .get(
-            `/api/endpoint/alerts?filters=!((%27%24state%27%3A(store%3AappState)%2Cmeta%3A(alias%3A!n%2Cdisabled%3A!f%2Ckey%3Ahost.hostname%2Cnegate%3A!f%2Cparams%3A(query%3AHD-m3z-4c803698)%2Ctype%3Aphrase)%2Cquery%3A(match_phrase%3A(host.hostname%3AHD-m3z-4c803698))))`
+            `/api/endpoint/alerts?filters=!((%27%24state%27%3A(store%3AappState)%2Cmeta%3A(alias%3A!n%2Cdisabled%3A!f%2Ckey%3Ahost.hostname%2Cnegate%3A!f%2Cparams%3A(query%3A${hostname})%2Ctype%3Aphrase)%2Cquery%3A(match_phrase%3A(host.hostname%3A${hostname}))))`
           )
           .set('kbn-xsrf', 'xxx')
           .expect(200);
-        expect(body.total).to.eql(72);
-        expect(body.alerts.length).to.eql(10);
-        expect(body.request_page_size).to.eql(10);
+        expect(body.total).to.eql(4);
+        expect(body.alerts.length).to.eql(4);
+        expect(body.request_page_size).to.eql(defaultPageSize);
         expect(body.request_page_index).to.eql(0);
         expect(body.result_from_index).to.eql(0);
       });
 
       it('should filter results of alert data using KQL', async () => {
+        const agentID = '7cf9f7a3-28a6-4d1e-bb45-005aa28f18d0';
         const { body } = await supertest
           .get(
-            `/api/endpoint/alerts?query=(language%3Akuery%2Cquery%3A%27agent.id%20%3A%20"c89dc040-2350-4d59-baea-9ff2e369136f"%27)`
+            `/api/endpoint/alerts?query=(language%3Akuery%2Cquery%3A%27agent.id%20%3A%20"${agentID}"%27)`
           )
           .set('kbn-xsrf', 'xxx')
           .expect(200);
-        expect(body.total).to.eql(72);
-        expect(body.alerts.length).to.eql(10);
-        expect(body.request_page_size).to.eql(10);
+        expect(body.total).to.eql(4);
+        expect(body.alerts.length).to.eql(4);
+        expect(body.request_page_size).to.eql(defaultPageSize);
         expect(body.request_page_index).to.eql(0);
         expect(body.result_from_index).to.eql(0);
       });
 
       it('should return alert details by id', async () => {
+        const documentID = 'zbNm0HABdD75WLjLYgcB';
+        const prevDocumentID = '2rNm0HABdD75WLjLYgcU';
         const { body } = await supertest
-          .get('/api/endpoint/alerts/YjUYMHABAJk0XnHd6bqU')
+          .get(`/api/endpoint/alerts/${documentID}`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
-        expect(body.id).to.eql('YjUYMHABAJk0XnHd6bqU');
+        expect(body.id).to.eql(documentID);
+        expect(body.prev).to.eql(`/api/endpoint/alerts/${prevDocumentID}`);
         expect(body.next).to.eql(null); // last alert, no more beyond this
-        expect(body.prev).to.eql('/api/endpoint/alerts/XjUYMHABAJk0XnHd6boX');
       });
 
       it('should return 404 when alert is not found', async () => {
