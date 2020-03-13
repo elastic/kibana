@@ -28,12 +28,12 @@ kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
               print "Error reading previous functional test metrics. Will create a non-optimal test plan."
             }
             kibanaPipeline.bash("source src/dev/ci_setup/setup_env.sh; node scripts/create_functional_test_plan.js", "Create functional test plan")
-            kibanaPipeline.buildOss()
+            // kibanaPipeline.buildOss()
             kibanaPipeline.prepareOssTestQueue(queue)
           },
           parallelExtra: {
             try {
-              kibanaPipeline.buildXpack()
+              // kibanaPipeline.buildXpack()
               kibanaPipeline.prepareXpackTestQueue(queue)
             } finally {
               if (!queue.containsKey('xpack')) {
@@ -107,8 +107,6 @@ kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
                       credentialsId: 'kibana-ci-gcs-plugin',
                       bucket: "gs://kibana-ci-functional-metrics/${kibanaPipeline.getTargetBranch()}",
                       pattern: 'latest.json',
-                      sharedPublicly: true,
-                      showInline: true,
                     )
                   }
                 }

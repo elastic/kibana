@@ -265,35 +265,41 @@ def processFunctionalQueue(queue, finishedSuites, workerNumber, type) {
         print ex.toString()
         continue
       }
-      catchErrorClean {
-        // TODO can we isolate and retry only the failing suite? maybe wrap the retry around this whole block, and have the file reading below also delete successful suites
-        // retryable("kibana-ciGroup${workerNumber}") {
-          def filesString = testSuite.files.collect { "--include-file '${it.file}'" }.join(' ')
-          iteration++
 
-          // TODO runbld
-          bash(
-            """
-              export JOB=${env.JOB}-${iteration}
-              source test/scripts/jenkins_test_setup_${type}.sh
-              node scripts/functional_tests \
-                --config '${testSuite.config}' \
-                --debug \
-                --kibana-install-dir "\$KIBANA_INSTALL_DIR" \
-                ${filesString}
-            """, "${type} tests: ${testSuite.config}"
-          )
-        // }
-      }
+      iteration++
 
-      catchErrorClean {
-        def suites = toJSON(readFile(file: testMetadataPath))
-        suites.each {
+      retryable("kibana-functional-${type}-${workerNumber}-${iteration}") {
+        if (testSuite.files && testSuite.files.size() > 0) {
           catchErrorClean {
-            if (byFile[it.file]) {
-              it.previousDuration = byFile[it.file].duration
+            def filesString = testSuite.files.collect { "--include-file '${it.file}'" }.join(' ')
+
+            // TODO runbld
+            bash(
+              """
+                export JOB=${env.JOB}-${iteration}
+                source test/scripts/jenkins_test_setup_${type}.sh
+                node scripts/functional_tests \
+                  --config '${testSuite.config}' \
+                  --debug \
+                  ${filesString}
+              """, "${type} tests: ${testSuite.config}"
+            )
+
+            // --kibana-install-dir "\$KIBANA_INSTALL_DIR" \
+          }
+
+          catchErrorClean {
+            def suites = toJSON(readFile(file: testMetadataPath))
+            suites.each {
+              catchErrorClean {
+                if (byFile[it.file]) {
+                  it.previousDuration = byFile[it.file].duration
+                }
+                finishedSuites << it
+              }
             }
-            finishedSuites << it
+            testSuite.files = testSuite.files.findAll { suite -> !suites.find { finishedSuite -> finishedSuite.file == suite.file && finishedSuite.success } }
+            print testSuite.files
           }
         }
       }
