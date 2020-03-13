@@ -249,6 +249,7 @@ export interface DataFrameAnalyticsConfig {
   };
   source: {
     index: IndexName | IndexName[];
+    query?: any;
   };
   analysis: AnalysisConfig;
   analyzed_fields: {
@@ -258,6 +259,7 @@ export interface DataFrameAnalyticsConfig {
   model_memory_limit: string;
   create_time: number;
   version: string;
+  allow_lazy_start: boolean;
 }
 
 export enum REFRESH_ANALYTICS_LIST_STATE {

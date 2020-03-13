@@ -331,5 +331,9 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         await testSubjects.missingOrFail('mlAnalyticsCreateJobFlyout');
       });
     },
+
+    async getHeaderText() {
+      return await testSubjects.getVisibleText('mlDataFrameAnalyticsFlyoutHeaderTitle');
+    },
   };
 }
