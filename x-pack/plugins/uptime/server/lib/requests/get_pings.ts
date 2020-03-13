@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isRight } from 'fp-ts/lib/Either';
+import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import {
-  PingResults,
+  HttpResponseBody,
+  PingsResponse,
+  PingsResponseType,
   Ping,
-  HttpBody,
-} from '../../../../../legacy/plugins/uptime/common/graphql/types';
+} from '../../../../../legacy/plugins/uptime/common/types/ping/ping';
 import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
 
 export interface GetPingsParams {
@@ -35,7 +38,7 @@ export interface GetPingsParams {
   location?: string | null;
 }
 
-export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingResults> = async ({
+export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = async ({
   callES,
   dateRangeStart,
   dateRangeEnd,
@@ -94,7 +97,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingResults> = asy
     // Calculate here the length of the content string in bytes, this is easier than in client JS, where
     // we don't have access to Buffer.byteLength. There are some hacky ways to do this in the
     // client but this is cleaner.
-    const httpBody: HttpBody | undefined = _source?.http?.response?.body;
+    const httpBody: HttpResponseBody | undefined = _source?.http?.response?.body;
     if (httpBody && httpBody.content) {
       httpBody.content_bytes = Buffer.byteLength(httpBody.content);
     }
@@ -102,11 +105,15 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingResults> = asy
     return { id: _id, timestamp, ..._source };
   });
 
-  const results: PingResults = {
+  const decoded = PingsResponseType.decode({
     total: total.value,
     locations: locations.buckets.map((bucket: { key: string }) => bucket.key),
     pings,
-  };
-
-  return results;
+  });
+  if (isRight(decoded)) {
+    return decoded.right;
+  } else {
+    ThrowReporter.report(decoded);
+    throw new Error('Unable to parse data');
+  }
 };

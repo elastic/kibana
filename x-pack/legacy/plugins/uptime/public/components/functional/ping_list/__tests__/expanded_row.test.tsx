@@ -7,15 +7,22 @@
 import { mountWithIntl, renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { PingListExpandedRowComponent } from '../expanded_row';
-import { Ping } from '../../../../../common/graphql/types';
+import { Ping } from '../../../../../common/types/ping/ping';
 import { DocLinkForBody } from '../doc_link_body';
 
 describe('PingListExpandedRow', () => {
   let ping: Ping;
   beforeEach(() => {
     ping = {
-      id: '123',
-      timestamp: '19290310',
+      '@timestamp': '19290310',
+      monitor: {
+        duration: {
+          us: 12345,
+        },
+        id: '123',
+        status: 'down',
+        type: 'http',
+      },
       http: {
         response: {
           body: {
@@ -34,7 +41,7 @@ describe('PingListExpandedRow', () => {
 
   it('renders error information when an error field is present', () => {
     ping.error = {
-      code: 403,
+      code: '403',
       message: 'Forbidden',
     };
     expect(shallowWithIntl(<PingListExpandedRowComponent ping={ping} />)).toMatchSnapshot();

@@ -7,9 +7,9 @@
 import { UMElasticsearchQueryFn } from '../adapters';
 import {
   Ping,
-  PingResults,
-  StatesIndexStatus,
-} from '../../../../../legacy/plugins/uptime/common/graphql/types';
+  PingsResponse as PingResults,
+} from '../../../../../legacy/plugins/uptime/common/types/ping/ping';
+import { StatesIndexStatus } from '../../../../../legacy/plugins/uptime/common/graphql/types';
 import {
   GetFilterBarParams,
   GetLatestMonitorParams,

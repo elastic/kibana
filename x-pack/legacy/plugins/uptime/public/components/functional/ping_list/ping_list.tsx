@@ -23,12 +23,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { Ping } from '../../../../common/graphql/types';
+import { Ping } from '../../../../common/types/ping/ping';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
 import { LocationName } from './../location_name';
 import { Pagination } from './../monitor_list';
 import { PingListExpandedRowComponent } from './expanded_row';
-import { GetPingsParams, NewPing } from '../../../../common/types/ping/ping';
+import { GetPingsParams } from '../../../../common/types/ping/ping';
 import { PingListProps } from '../../connected/pings';
 
 interface ExpandedRowMap {
@@ -43,14 +43,14 @@ export const toggleDetails = (
   setItemIdToExpandedRowMap: (update: ExpandedRowMap) => any
 ) => {
   // If the user has clicked on the expanded map, close all expanded rows.
-  if (itemIdToExpandedRowMap[ping.id]) {
+  if (itemIdToExpandedRowMap[ping.monitor.id]) {
     setItemIdToExpandedRowMap({});
     return;
   }
 
   // Otherwise expand this row
   const newItemIdToExpandedRowMap: ExpandedRowMap = {};
-  newItemIdToExpandedRowMap[ping.id] = <PingListExpandedRowComponent ping={ping} />;
+  newItemIdToExpandedRowMap[ping.monitor.id] = <PingListExpandedRowComponent ping={ping} />;
   setItemIdToExpandedRowMap(newItemIdToExpandedRowMap);
 };
 
@@ -64,7 +64,7 @@ interface Props extends PingListProps {
   getPings: (props: GetPingsParams) => void;
   loading: boolean;
   locations: string[];
-  pings: NewPing[];
+  pings: Ping[];
 }
 
 export const PingListComponent = (props: Props) => {
@@ -95,7 +95,7 @@ export const PingListComponent = (props: Props) => {
       size,
       status: status !== 'all' ? status : '',
     });
-  }, [dateRangeStart, dateRangeEnd, monitorId, selectedLocation, size, status]);
+  }, [dateRangeStart, dateRangeEnd, getPings, monitorId, selectedLocation, size, status]);
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ExpandedRowMap>({});
 
@@ -128,7 +128,7 @@ export const PingListComponent = (props: Props) => {
       );
 
   const hasStatus: boolean = pings.reduce(
-    (hasHttpStatus: boolean, currentPing: Ping) =>
+    (hasHttpStatus: boolean, currentPing) =>
       hasHttpStatus || !!currentPing.http?.response?.status_code,
     false
   );
@@ -152,7 +152,7 @@ export const PingListComponent = (props: Props) => {
           </EuiHealth>
           <EuiText size="xs" color="subdued">
             {i18n.translate('xpack.uptime.pingList.recencyMessage', {
-              values: { fromNow: moment(item.timestamp).fromNow() },
+              values: { fromNow: moment(item['@timestamp']).fromNow() },
               defaultMessage: 'Checked {fromNow}',
               description:
                 'A string used to inform our users how long ago Heartbeat pinged the selected host.',
@@ -226,15 +226,15 @@ export const PingListComponent = (props: Props) => {
         return (
           <EuiButtonIcon
             onClick={() => toggleDetails(item, itemIdToExpandedRowMap, setItemIdToExpandedRowMap)}
-            disabled={!item.error && !(item.http?.response?.body?.bytes > 0)}
+            disabled={!item.error && !(item.http?.response?.body?.content_bytes ?? 0 > 0)}
             aria-label={
-              itemIdToExpandedRowMap[item.id]
+              itemIdToExpandedRowMap[item.monitor.id]
                 ? i18n.translate('xpack.uptime.pingList.collapseRow', {
                     defaultMessage: 'Collapse',
                   })
                 : i18n.translate('xpack.uptime.pingList.expandRow', { defaultMessage: 'Expand' })
             }
-            iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+            iconType={itemIdToExpandedRowMap[item.monitor.id] ? 'arrowUp' : 'arrowDown'}
           />
         );
       },

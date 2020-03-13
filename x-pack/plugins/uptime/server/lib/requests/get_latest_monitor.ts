@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isRight } from 'fp-ts/lib/Either';
+import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { UMElasticsearchQueryFn } from '../adapters';
-import { Ping } from '../../../../../legacy/plugins/uptime/common/graphql/types';
+import { PingType, Ping } from '../../../../../legacy/plugins/uptime/common/types/ping/ping';
 import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
 
 export interface GetLatestMonitorParams {
@@ -69,10 +71,14 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
   };
 
   const result = await callES('search', params);
-  const ping: any = result.aggregations.by_id.buckets?.[0]?.latest.hits?.hits?.[0] ?? {};
 
-  return {
-    ...ping?._source,
-    timestamp: ping?._source?.['@timestamp'],
-  };
+  const decoded = PingType.decode(
+    result.aggregations.by_id.buckets?.[0]?.latest.hits?.hits?.[0]?._source ?? {}
+  );
+  if (isRight(decoded)) {
+    return decoded.right;
+  } else {
+    ThrowReporter.report(decoded);
+    throw new Error('Received invalid document');
+  }
 };

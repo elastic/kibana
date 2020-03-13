@@ -17,7 +17,7 @@ import {
 import { MonitorSSLCertificate } from './monitor_ssl_certificate';
 import * as labels from './translations';
 import { StatusByLocations } from './status_by_location';
-import { Ping } from '../../../../../common/graphql/types';
+import { Ping } from '../../../../../common/types/ping/ping';
 import { MonitorLocations } from '../../../../../common/runtime_types';
 
 interface MonitorStatusBarProps {

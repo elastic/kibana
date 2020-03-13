@@ -8,7 +8,7 @@ import moment from 'moment';
 import React from 'react';
 import { renderWithIntl } from 'test_utils/enzyme_helpers';
 import { MonitorStatusBarComponent } from '../monitor_status_bar';
-import { Ping } from '../../../../../common/graphql/types';
+import { Ping } from '../../../../../common/types/ping/ping';
 
 describe('MonitorStatusBar component', () => {
   let monitorStatus: Ping;
@@ -16,15 +16,16 @@ describe('MonitorStatusBar component', () => {
 
   beforeEach(() => {
     monitorStatus = {
-      id: 'id1',
-      timestamp: moment(new Date())
+      '@timestamp': moment(new Date())
         .subtract(15, 'm')
         .toString(),
       monitor: {
         duration: {
           us: 1234567,
         },
+        id: 'id1',
         status: 'up',
+        type: 'http',
       },
       url: {
         full: 'https://www.example.com/',

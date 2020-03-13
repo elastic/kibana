@@ -16,14 +16,14 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Ping, HttpBody } from '../../../../common/graphql/types';
+import { Ping, HttpResponseBody } from '../../../../common/types/ping/ping';
 import { DocLinkForBody } from './doc_link_body';
 
 interface Props {
   ping: Ping;
 }
 
-const BodyDescription = ({ body }: { body: HttpBody }) => {
+const BodyDescription = ({ body }: { body: HttpResponseBody }) => {
   const contentBytes = body.content_bytes || 0;
   const bodyBytes = body.bytes || 0;
 

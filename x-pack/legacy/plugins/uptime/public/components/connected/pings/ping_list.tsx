@@ -5,7 +5,7 @@
  */
 
 import { useSelector, useDispatch } from 'react-redux';
-import React, { useContext } from 'react';
+import React, { useContext, useCallback } from 'react';
 import { selectPingList } from '../../../state/selectors';
 import { getPings } from '../../../state/actions';
 import { GetPingsParams } from '../../../../common/types/ping/ping';
@@ -32,35 +32,30 @@ export const PingList = (props: PingListProps) => {
   const { dateRangeStart: from, dateRangeEnd: to } = useContext(UptimeSettingsContext);
 
   const dispatch = useDispatch();
-  const getPingsHandler = ({
-    dateRangeStart,
-    dateRangeEnd,
-    location,
-    monitorId,
-    size,
-    status,
-  }: GetPingsParams) => {
-    dispatch(
-      getPings({
-        dateRangeStart,
-        dateRangeEnd,
-        location,
-        monitorId,
-        size,
-        status,
-      })
-    );
-  };
+  const getPingsCallback = useCallback(
+    ({ dateRangeStart, dateRangeEnd, location, monitorId, size, status }: GetPingsParams) =>
+      dispatch(
+        getPings({
+          dateRangeStart,
+          dateRangeEnd,
+          location,
+          monitorId,
+          size,
+          status,
+        })
+      ),
+    [dispatch]
+  );
 
   return (
     <PingListComponent
       dateRangeStart={from}
       dateRangeEnd={to}
-      getPings={getPingsHandler}
+      getPings={getPingsCallback}
       loading={loading}
       locations={locations}
       pings={pings}
       {...props}
     />
-   );
+  );
 };

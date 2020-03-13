@@ -9,11 +9,11 @@ import moment from 'moment';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { EuiBadge } from '@elastic/eui';
 import { renderWithIntl } from 'test_utils/enzyme_helpers';
-import { PingTls } from '../../../../../common/graphql/types';
+import { Tls } from '../../../../../common/types/ping/ping';
 import { MonitorSSLCertificate } from '../monitor_status_bar';
 
 describe('MonitorStatusBar component', () => {
-  let monitorTls: PingTls;
+  let monitorTls: Tls;
 
   beforeEach(() => {
     const dateInTwoMonths = moment()

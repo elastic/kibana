@@ -6,204 +6,180 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { PingResults, Ping } from '../../../../../common/graphql/types';
-import { PingList, AllLocationOption, toggleDetails } from '../ping_list';
+import { PingListComponent, AllLocationOption, toggleDetails } from '../ping_list';
 import { ExpandedRowMap } from '../../monitor_list/types';
+import { Ping, PingsResponse } from '../../../../../common/types/ping/ping';
 
 describe('PingList component', () => {
-  let pingList: { allPings: PingResults };
+  let response: PingsResponse;
 
   beforeEach(() => {
-    pingList = {
-      allPings: {
-        total: 9231,
-        pings: [
-          {
-            id: 'id1',
-            timestamp: '2019-01-28T17:47:08.078Z',
-            http: null,
-            error: {
-              message: 'dial tcp 127.0.0.1:9200: connect: connection refused',
-              type: 'io',
-            },
-            monitor: {
-              duration: { us: 1430 },
-              id: 'auto-tcp-0X81440A68E839814C',
-              ip: '127.0.0.1',
-              name: '',
-              scheme: null,
-              status: 'down',
-              type: 'tcp',
-            },
+    response = {
+      total: 9231,
+      locations: ['nyc'],
+      pings: [
+        {
+          '@timestamp': '2019-01-28T17:47:08.078Z',
+          error: {
+            message: 'dial tcp 127.0.0.1:9200: connect: connection refused',
+            type: 'io',
           },
-          {
-            id: 'id2',
-            timestamp: '2019-01-28T17:47:09.075Z',
-            http: null,
-            error: {
-              message: 'dial tcp 127.0.0.1:9200: connect: connection refused',
-              type: 'io',
-            },
-            monitor: {
-              duration: { us: 1370 },
-              id: 'auto-tcp-0X81440A68E839814C',
-              ip: '127.0.0.1',
-              name: '',
-              scheme: null,
-              status: 'down',
-              type: 'tcp',
-            },
+          monitor: {
+            duration: { us: 1430 },
+            id: 'auto-tcp-0X81440A68E839814C',
+            ip: '127.0.0.1',
+            name: '',
+            status: 'down',
+            type: 'tcp',
           },
-          {
-            id: 'id3',
-            timestamp: '2019-01-28T17:47:06.077Z',
-            http: null,
-            error: null,
-            monitor: {
-              duration: { us: 1452 },
-              id: 'auto-tcp-0X81440A68E839814C',
-              ip: '127.0.0.1',
-              name: '',
-              scheme: null,
-              status: 'up',
-              type: 'tcp',
-            },
+        },
+        {
+          '@timestamp': '2019-01-28T17:47:09.075Z',
+          error: {
+            message: 'dial tcp 127.0.0.1:9200: connect: connection refused',
+            type: 'io',
           },
-          {
-            id: 'id4',
-            timestamp: '2019-01-28T17:47:07.075Z',
-            http: null,
-            error: {
-              message: 'dial tcp 127.0.0.1:9200: connect: connection refused',
-              type: 'io',
-            },
-            monitor: {
-              duration: { us: 1094 },
-              id: 'auto-tcp-0X81440A68E839814C',
-              ip: '127.0.0.1',
-              name: '',
-              scheme: null,
-              status: 'down',
-              type: 'tcp',
-            },
+          monitor: {
+            duration: { us: 1370 },
+            id: 'auto-tcp-0X81440A68E839814C',
+            ip: '127.0.0.1',
+            name: '',
+            status: 'down',
+            type: 'tcp',
           },
-          {
-            id: 'id5',
-            timestamp: '2019-01-28T17:47:07.074Z',
-            http: null,
-            error: {
-              message:
-                'Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused',
-              type: 'io',
-            },
-            monitor: {
-              duration: { us: 1597 },
-              id: 'auto-http-0X3675F89EF0612091',
-              ip: '127.0.0.1',
-              name: '',
-              scheme: null,
-              status: 'down',
-              type: 'http',
-            },
+        },
+        {
+          '@timestamp': '2019-01-28T17:47:06.077Z',
+          monitor: {
+            duration: { us: 1452 },
+            id: 'auto-tcp-0X81440A68E839814C',
+            ip: '127.0.0.1',
+            name: '',
+            status: 'up',
+            type: 'tcp',
           },
-          {
-            id: 'id6',
-            timestamp: '2019-01-28T17:47:18.080Z',
-            http: null,
-            error: {
-              message: 'dial tcp 127.0.0.1:9200: connect: connection refused',
-              type: 'io',
-            },
-            monitor: {
-              duration: { us: 1699 },
-              id: 'auto-tcp-0X81440A68E839814C',
-              ip: '127.0.0.1',
-              name: '',
-              scheme: null,
-              status: 'down',
-              type: 'tcp',
-            },
+        },
+        {
+          '@timestamp': '2019-01-28T17:47:07.075Z',
+          error: {
+            message: 'dial tcp 127.0.0.1:9200: connect: connection refused',
+            type: 'io',
           },
-          {
-            id: 'id7',
-            timestamp: '2019-01-28T17:47:19.076Z',
-            http: null,
-            error: {
-              message: 'dial tcp 127.0.0.1:9200: connect: connection refused',
-              type: 'io',
-            },
-            monitor: {
-              duration: { us: 5384 },
-              id: 'auto-tcp-0X81440A68E839814C',
-              ip: '127.0.0.1',
-              name: '',
-              scheme: null,
-              status: 'down',
-              type: 'tcp',
-            },
+          monitor: {
+            duration: { us: 1094 },
+            id: 'auto-tcp-0X81440A68E839814C',
+            ip: '127.0.0.1',
+            name: '',
+            status: 'down',
+            type: 'tcp',
           },
-          {
-            id: 'id8',
-            timestamp: '2019-01-28T17:47:19.076Z',
-            http: null,
-            error: {
-              message:
-                'Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused',
-              type: 'io',
-            },
-            monitor: {
-              duration: { us: 5397 },
-              id: 'auto-http-0X3675F89EF0612091',
-              ip: '127.0.0.1',
-              name: '',
-              scheme: null,
-              status: 'down',
-              type: 'http',
-            },
+        },
+        {
+          '@timestamp': '2019-01-28T17:47:07.074Z',
+          error: {
+            message:
+              'Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused',
+            type: 'io',
           },
-          {
-            id: 'id9',
-            timestamp: '2019-01-28T17:47:19.077Z',
-            http: { response: { status_code: 200 } },
-            error: null,
-            monitor: {
-              duration: { us: 127511 },
-              id: 'auto-http-0X131221E73F825974',
-              ip: '172.217.7.4',
-              name: '',
-              scheme: null,
-              status: 'up',
-              type: 'http',
-            },
+          monitor: {
+            duration: { us: 1597 },
+            id: 'auto-http-0X3675F89EF0612091',
+            ip: '127.0.0.1',
+            name: '',
+            status: 'down',
+            type: 'http',
           },
-          {
-            id: 'id10',
-            timestamp: '2019-01-28T17:47:19.077Z',
-            http: { response: { status_code: 200 } },
-            error: null,
-            monitor: {
-              duration: { us: 287543 },
-              id: 'auto-http-0X9CB71300ABD5A2A8',
-              ip: '192.30.253.112',
-              name: '',
-              scheme: null,
-              status: 'up',
-              type: 'http',
-            },
+        },
+        {
+          '@timestamp': '2019-01-28T17:47:18.080Z',
+          error: {
+            message: 'dial tcp 127.0.0.1:9200: connect: connection refused',
+            type: 'io',
           },
-        ],
-        locations: ['nyc'],
-      },
+          monitor: {
+            duration: { us: 1699 },
+            id: 'auto-tcp-0X81440A68E839814C',
+            ip: '127.0.0.1',
+            name: '',
+            status: 'down',
+            type: 'tcp',
+          },
+        },
+        {
+          '@timestamp': '2019-01-28T17:47:19.076Z',
+          error: {
+            message: 'dial tcp 127.0.0.1:9200: connect: connection refused',
+            type: 'io',
+          },
+          monitor: {
+            duration: { us: 5384 },
+            id: 'auto-tcp-0X81440A68E839814C',
+            ip: '127.0.0.1',
+            name: '',
+            status: 'down',
+            type: 'tcp',
+          },
+        },
+        {
+          '@timestamp': '2019-01-28T17:47:19.076Z',
+          error: {
+            message:
+              'Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused',
+            type: 'io',
+          },
+          monitor: {
+            duration: { us: 5397 },
+            id: 'auto-http-0X3675F89EF0612091',
+            ip: '127.0.0.1',
+            name: '',
+            status: 'down',
+            type: 'http',
+          },
+        },
+        {
+          '@timestamp': '2019-01-28T17:47:19.077Z',
+          http: { response: { status_code: 200 } },
+          monitor: {
+            duration: { us: 127511 },
+            id: 'auto-http-0X131221E73F825974',
+            ip: '172.217.7.4',
+            name: '',
+            status: 'up',
+            type: 'http',
+          },
+        },
+        {
+          '@timestamp': '2019-01-28T17:47:19.077Z',
+          http: { response: { status_code: 200 } },
+          monitor: {
+            duration: { us: 287543 },
+            id: 'auto-http-0X9CB71300ABD5A2A8',
+            ip: '192.30.253.112',
+            name: '',
+            status: 'up',
+            type: 'http',
+          },
+        },
+      ],
     };
   });
 
   it('renders sorted list without errors', () => {
     const component = shallowWithIntl(
-      <PingList
+      <PingListComponent
+        dateRangeStart="now-15m"
+        dateRangeEnd="now"
+        getPings={jest.fn()}
+        loading={false}
+        locations={[]}
+        monitorId="foo"
         onPageCountChange={jest.fn()}
         onSelectedLocationChange={(loc: any[]) => {}}
         onSelectedStatusChange={jest.fn()}
         pageSize={30}
+        pings={response.pings}
+        size={10}
+        status="all"
         selectedOption="down"
         selectedLocation={AllLocationOption.value}
       />
@@ -219,13 +195,13 @@ describe('PingList component', () => {
 
     beforeEach(() => {
       itemIdToExpandedRowMap = {};
-      pings = pingList.allPings.pings;
+      pings = response.pings;
     });
 
     it('should expand an item if empty', () => {
       const ping = pings[0];
       toggleDetails(ping, itemIdToExpandedRowMap, setItemIdToExpandedRowMap);
-      expect(itemIdToExpandedRowMap).toHaveProperty(ping.id);
+      expect(itemIdToExpandedRowMap).toHaveProperty(ping.monitor.id);
     });
 
     it('should un-expand an item if clicked again', () => {
@@ -240,7 +216,7 @@ describe('PingList component', () => {
       const pingB = pings[1];
       toggleDetails(pingA, itemIdToExpandedRowMap, setItemIdToExpandedRowMap);
       toggleDetails(pingB, itemIdToExpandedRowMap, setItemIdToExpandedRowMap);
-      expect(itemIdToExpandedRowMap).toHaveProperty(pingB.id);
+      expect(itemIdToExpandedRowMap).toHaveProperty(pingB.monitor.id);
     });
   });
 });

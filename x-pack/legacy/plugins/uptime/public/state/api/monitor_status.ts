@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isRight } from 'fp-ts/lib/Either';
+import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { getApiPath } from '../../lib/helper';
 import { QueryParams } from '../actions/types';
-import { Ping } from '../../../common/graphql/types';
+import { PingType, Ping } from '../../../common/types/ping/ping';
 
 export interface APIParams {
   basePath: string;
@@ -45,5 +47,10 @@ export const fetchMonitorStatus = async ({
     throw new Error(response.statusText);
   }
   const responseData = await response.json();
-  return responseData;
+  const decoded = PingType.decode(responseData);
+  if (isRight(decoded)) {
+    return decoded.right;
+  }
+  ThrowReporter.report(decoded);
+  throw new Error('Error parsing API response');
 };

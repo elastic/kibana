@@ -12,7 +12,7 @@ import {
   getMonitorStatusSuccess,
   getMonitorStatusFail,
 } from '../actions';
-import { Ping } from '../../../common/graphql/types';
+import { Ping } from '../../../common/types/ping/ping';
 import { QueryParams } from '../actions/types';
 
 export interface MonitorStatusState {

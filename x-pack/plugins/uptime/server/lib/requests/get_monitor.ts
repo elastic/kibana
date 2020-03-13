@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isRight } from 'fp-ts/lib/Either';
+import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { UMElasticsearchQueryFn } from '../adapters';
-import { Ping } from '../../../../../legacy/plugins/uptime/common/graphql/types';
+import { PingType, Ping } from '../../../../../legacy/plugins/uptime/common/types/ping/ping';
 import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
 
 export interface GetMonitorParams {
@@ -22,7 +24,7 @@ export const getMonitor: UMElasticsearchQueryFn<GetMonitorParams, Ping> = async 
     index: INDEX_NAMES.HEARTBEAT,
     body: {
       size: 1,
-      _source: ['url', 'monitor', 'observer'],
+      _source: ['@timestamp', 'url', 'monitor', 'observer'],
       query: {
         bool: {
           filter: [
@@ -45,6 +47,11 @@ export const getMonitor: UMElasticsearchQueryFn<GetMonitorParams, Ping> = async 
   };
 
   const result = await callES('search', params);
-
-  return result.hits.hits[0]?._source;
+  const decoded = PingType.decode(result.hits.hits[0]?._source);
+  if (isRight(decoded)) {
+    return decoded.right;
+  } else {
+    ThrowReporter.report(decoded);
+    throw new Error('Received invalid document');
+  }
 };

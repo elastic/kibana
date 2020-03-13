@@ -6,138 +6,154 @@
 
 import * as t from 'io-ts';
 
-// {
-//   "id": "deQ8cHABC7VDoh7Q0UMK",
-//   "timestamp": "2020-02-23T04:09:57.792Z",
-//   "@timestamp": "2020-02-23T04:09:57.792Z",
-//   "resolve": {
-//       "ip": "127.0.0.1",
-//       "rtt": {
-//           "us": 711
-//       }
-//   },
-//   "url": {
-//       "scheme": "http",
-//       "domain": "localhost",
-//       "port": 5678,
-//       "path": "/pattern",
-//       "query": "r=200x1",
-//       "full": "http://localhost:5678/pattern?r=200x1"
-//   },
-//   "event": {
-//       "dataset": "uptime"
-//   },
-//   "ecs": {
-//       "version": "1.4.0"
-//   },
-//   "summary": {
-//       "up": 0,
-//       "down": 1
-//   },
-//   "monitor": {
-//       "status": "down",
-//       "duration": {
-//           "us": 4259
-//       },
-//       "id": "0099-up",
-//       "name": "Test 0099 - up",
-//       "type": "http",
-//       "timespan": {
-//           "gte": "2020-02-23T04:09:57.792Z",
-//           "lt": "2020-02-23T04:10:27.792Z"
-//       },
-//       "check_group": "48ac99ce-55f2-11ea-ab0b-acde48001122",
-//       "ip": "127.0.0.1"
-//   },
-//   "error": {
-//       "type": "io",
-//       "message": "Get http://localhost:5678/pattern?r=200x1: dial tcp 127.0.0.1:5678: connect: connection refused"
-//   },
-//   "agent": {
-//       "ephemeral_id": "33099805-35cc-48cb-88ef-94f77ceb0efb",
-//       "hostname": "Justins-MacBook-Pro.local",
-//       "id": "5884d7f7-9a49-4b0e-bff2-72a475aa695f",
-//       "version": "8.0.0",
-//       "type": "heartbeat"
-//   },
-//   "observer": {
-//       "hostname": "Justins-MacBook-Pro.local",
-//       "geo": {
-//           "name": "fairbanks",
-//           "location": "37.926868, -78.024902"
-//       }
-//   }
-// }
-
-export const NewPingType = t.type({
-  id: t.string,
-  timestamp: t.string,
-  '@timestamp': t.string,
-  resolve: t.partial({
-    ip: t.string,
-    rtt: t.type({
-      us: t.number,
-    }),
-  }),
-  url: t.partial({
-    scheme: t.string,
-    domain: t.string,
-    port: t.number,
-    path: t.string,
-    query: t.string,
-    full: t.string,
-  }),
-  event: t.partial({
-    dataset: t.string,
-  }),
-  ecs: t.partial({
-    version: t.string,
-  }),
-  summary: t.partial({
-    up: t.number,
-    down: t.number,
-  }),
-  monitor: t.partial({
-    status: t.string,
-    duration: t.partial({
-      us: t.number,
-    }),
-    id: t.string,
-    name: t.string,
-    type: t.string,
-    timespan: t.type({
-      gte: t.string,
-      lt: t.string,
-    }),
-    check_group: t.string,
-    ip: t.string,
-  }),
-  error: t.partial({
-    type: t.string,
-    message: t.string,
-  }),
-  agent: t.partial({
-    ephemeral_id: t.string,
-    hostname: t.string,
-    id: t.string,
-    version: t.string,
-    type: t.string,
-  }),
-  observer: t.partial({
-    hostname: t.string,
-    geo: t.partial({
-      name: t.string,
-      location: t.string,
-    }),
-  }),
+export const HttpResponseBodyType = t.partial({
+  bytes: t.number,
+  content: t.string,
+  content_bytes: t.number,
+  hash: t.string,
 });
 
-export type NewPing = t.TypeOf<typeof NewPingType>;
+export type HttpResponseBody = t.TypeOf<typeof HttpResponseBodyType>;
+
+export const TlsType = t.partial({
+  certificate_not_valid_after: t.string,
+  certificate_not_valid_before: t.string,
+});
+
+export type Tls = t.TypeOf<typeof TlsType>;
+
+export const PingType = t.intersection([
+  t.type({
+    '@timestamp': t.string,
+    monitor: t.intersection([
+      t.type({
+        duration: t.type({
+          us: t.number,
+        }),
+        id: t.string,
+        status: t.string,
+        type: t.string,
+      }),
+      t.partial({
+        check_group: t.string,
+        ip: t.string,
+        name: t.string,
+        timespan: t.partial({
+          gte: t.string,
+          lte: t.string,
+        }),
+      }),
+    ]),
+  }),
+  t.partial({
+    agent: t.intersection([
+      t.type({
+        ephemeral_id: t.string,
+        hostname: t.string,
+        id: t.string,
+        type: t.string,
+        version: t.string,
+      }),
+      t.partial({
+        name: t.string,
+      }),
+    ]),
+    container: t.partial({
+      id: t.string,
+      image: t.partial({
+        name: t.string,
+        tag: t.string,
+      }),
+      name: t.string,
+      runtime: t.string,
+    }),
+    ecs: t.partial({
+      version: t.string,
+    }),
+    error: t.intersection([
+      t.partial({
+        code: t.string,
+        id: t.string,
+        stack_trace: t.string,
+        type: t.string,
+      }),
+      t.type({
+        // this is _always_ on the error field
+        message: t.string,
+      }),
+    ]),
+    http: t.partial({
+      request: t.partial({
+        body: t.partial({
+          bytes: t.number,
+          content: t.partial({
+            text: t.string,
+          }),
+        }),
+        bytes: t.number,
+        method: t.string,
+        referrer: t.string,
+      }),
+      response: t.partial({
+        body: HttpResponseBodyType,
+        bytes: t.number,
+        redirects: t.string,
+        status_code: t.number,
+      }),
+      version: t.string,
+    }),
+    icmp: t.partial({
+      requests: t.number,
+      rtt: t.partial({
+        us: t.number,
+      }),
+    }),
+    kubernetes: t.partial({
+      pod: t.partial({
+        name: t.string,
+        uid: t.string,
+      }),
+    }),
+    observer: t.partial({
+      geo: t.partial({
+        name: t.string,
+      }),
+    }),
+    resolve: t.partial({
+      ip: t.string,
+      rtt: t.partial({
+        us: t.number,
+      }),
+    }),
+    summary: t.partial({
+      down: t.number,
+      up: t.number,
+    }),
+    tags: t.string,
+    tcp: t.partial({
+      rtt: t.partial({
+        connect: t.partial({
+          us: t.number,
+        }),
+      }),
+    }),
+    tls: TlsType,
+    // should this be partial?
+    url: t.partial({
+      domain: t.string,
+      full: t.string,
+      port: t.number,
+      scheme: t.string,
+    }),
+  }),
+]);
+
+export type Ping = t.TypeOf<typeof PingType>;
 
 export const PingsResponseType = t.type({
   total: t.number,
   locations: t.array(t.string),
-  pings: t.array(NewPingType),
+  pings: t.array(PingType),
 });
 
 export type PingsResponse = t.TypeOf<typeof PingsResponseType>;
@@ -150,10 +166,4 @@ export interface GetPingsParams {
   size?: number;
   sort?: string;
   status?: string;
-}
-
-export interface PingsResult {
-  total: number;
-  locations: string[];
-  pings: NewPing[];
 }
