@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Subject } from 'rxjs';
-import { catchError, finalize } from 'rxjs/operators';
+import { BehaviorSubject, fromEvent, throwError } from 'rxjs';
+import { mergeMap, takeUntil, finalize } from 'rxjs/operators';
 import { getCombinedSignal } from '../../common/utils';
 import { IKibanaSearchRequest } from '../../common/search';
 import { ISearchGeneric, ISearchOptions } from './i_search';
@@ -33,7 +33,7 @@ export class SearchInterceptor {
   /**
    * Observable that emits when the number of pending requests changes.
    */
-  private pendingCount$: Subject<number> = new Subject();
+  private pendingCount$ = new BehaviorSubject(0);
 
   /**
    * The IDs from `setTimeout` when scheduling the automatic timeout for each request.
@@ -96,14 +96,14 @@ export class SearchInterceptor {
     const signals = [this.abortController.signal, timeoutSignal, options?.signal];
     const combinedSignal = getCombinedSignal(signals.filter(Boolean));
 
+    // If the request timed out, throw a `RequestTimeoutError`
+    const timeoutError$ = fromEvent(timeoutSignal, 'abort').pipe(
+      mergeMap(() => throwError(new RequestTimeoutError()))
+    );
+
     return search(request as any, { ...options, signal: combinedSignal }).pipe(
-      catchError(error => {
-        // If the request timed out return a `RequestTimeoutError` instead of an `AbortError`
-        throw timeoutSignal.aborted ? new RequestTimeoutError() : error;
-      }),
-      finalize(() => {
-        this.removeTimeoutId(timeoutId);
-      })
+      takeUntil(timeoutError$),
+      finalize(() => this.removeTimeoutId(timeoutId))
     );
   };
 
