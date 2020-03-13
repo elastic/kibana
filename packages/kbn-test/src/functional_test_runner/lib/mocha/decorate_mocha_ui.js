@@ -66,9 +66,9 @@ export function decorateMochaUi(lifecycle, context, config) {
             this._tags = [].concat(this._tags || [], tags);
           };
 
-          const filePath = this.file.replace(REPO_ROOT + sep, '');
-          this.tags(filePath);
-          this.suiteTag = filePath; // The tag that uniquely targets this suite/file
+          const relativeFilePath = this.file.replace(REPO_ROOT + sep, '');
+          this.tags(relativeFilePath);
+          this.suiteTag = relativeFilePath; // The tag that uniquely targets this suite/file
 
           this.ftrConfig = config;
 

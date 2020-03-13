@@ -1,0 +1,101 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`tests loading fields.yml: base.yml 1`] = `
+[
+  {
+    "name": "user",
+    "type": "group",
+    "fields": [
+      {
+        "name": "auid"
+      },
+      {
+        "name": "euid"
+      }
+    ]
+  },
+  {
+    "name": "long",
+    "type": "group",
+    "fields": [
+      {
+        "name": "nested",
+        "type": "group",
+        "fields": [
+          {
+            "name": "foo"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "nested",
+    "type": "group",
+    "fields": [
+      {
+        "name": "bar"
+      }
+    ]
+  }
+]
+`;
+
+exports[`tests loading fields.yml: coredns.logs.yml 1`] = `
+[
+  {
+    "name": "coredns",
+    "type": "group",
+    "description": "coredns fields after normalization\\n",
+    "fields": [
+      {
+        "name": "id",
+        "type": "keyword",
+        "description": "id of the DNS transaction\\n"
+      },
+      {
+        "name": "query.size",
+        "type": "integer",
+        "format": "bytes",
+        "description": "size of the DNS query\\n"
+      },
+      {
+        "name": "query.class",
+        "type": "keyword",
+        "description": "DNS query class\\n"
+      },
+      {
+        "name": "query.name",
+        "type": "keyword",
+        "description": "DNS query name\\n"
+      },
+      {
+        "name": "query.type",
+        "type": "keyword",
+        "description": "DNS query type\\n"
+      },
+      {
+        "name": "response.code",
+        "type": "keyword",
+        "description": "DNS response code\\n"
+      },
+      {
+        "name": "response.flags",
+        "type": "keyword",
+        "description": "DNS response flags\\n"
+      },
+      {
+        "name": "response.size",
+        "type": "integer",
+        "format": "bytes",
+        "description": "size of the DNS response\\n"
+      },
+      {
+        "name": "dnssec_ok",
+        "type": "boolean",
+        "description": "dnssec flag\\n"
+      }
+    ]
+  }
+]
+`;
