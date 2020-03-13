@@ -110,23 +110,6 @@ describe('Ingesting Coverage to Cluster', () => {
             )
           )
         );
-
-        describe(`with a jsonSummaryPath containing the text 'combined'`, () => {
-          const combinedMsg = 'combined';
-
-          const because =
-            'currently, they are all combined, per how we merge them in ci using "nyc"';
-          it(`should always result in a distro of ${combinedMsg}, because: ${because}`, () => {
-            const includesDistroPredicate = x => x.includes('distro');
-            const distroLines = specificLinesOnly(includesDistroPredicate);
-            const distroLinesSplitByNewLine = distroLines(splitByNewLine);
-            const distroLinesSplitByNewLineWithoutBlanks = distroLinesSplitByNewLine(notBlankLines);
-
-            distroLinesSplitByNewLineWithoutBlanks(mutableCoverageIndexChunks)
-              .filter(includesDistroPredicate)
-              .forEach(x => expect(x).to.contain(combinedMsg));
-          });
-        });
       });
 
       describe(`to both indexes in the same push`, () => {
