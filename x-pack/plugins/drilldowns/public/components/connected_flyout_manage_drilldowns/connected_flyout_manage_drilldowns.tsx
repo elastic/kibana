@@ -242,7 +242,7 @@ function useDrilldownsStateManager(
   notifications: NotificationsStart
 ) {
   const [isLoading, setIsLoading] = useState(false);
-  const [drilldowns, setDrilldowns] = useState<UiActionsSerializedEvent[]>();
+  const [drilldowns, setDrilldowns] = useState<readonly UiActionsSerializedEvent[]>();
   const isMounted = useMountedState();
 
   async function run(op: () => Promise<void>) {
