@@ -51,15 +51,12 @@ export class ReplacePanelFlyout extends React.Component<Props> {
     }
 
     this.lastToast = this.props.notifications.toasts.addSuccess({
-      title: i18n.translate(
-        'dashboardEmbeddableContainer.addPanel.savedObjectAddedToContainerSuccessMessageTitle',
-        {
-          defaultMessage: '{savedObjectName} was added',
-          values: {
-            savedObjectName: name,
-          },
-        }
-      ),
+      title: i18n.translate('dashboard.addPanel.savedObjectAddedToContainerSuccessMessageTitle', {
+        defaultMessage: '{savedObjectName} was added',
+        values: {
+          savedObjectName: name,
+        },
+      }),
       'data-test-subj': 'addObjectToContainerSuccess',
     });
   };
@@ -97,12 +94,9 @@ export class ReplacePanelFlyout extends React.Component<Props> {
     const SavedObjectFinder = this.props.savedObjectsFinder;
     const savedObjectsFinder = (
       <SavedObjectFinder
-        noItemsMessage={i18n.translate(
-          'dashboardEmbeddableContainer.addPanel.noMatchingObjectsMessage',
-          {
-            defaultMessage: 'No matching objects found.',
-          }
-        )}
+        noItemsMessage={i18n.translate('dashboard.addPanel.noMatchingObjectsMessage', {
+          defaultMessage: 'No matching objects found.',
+        })}
         savedObjectMetaData={[...this.props.getEmbeddableFactories()]
           .filter(
             embeddableFactory =>
