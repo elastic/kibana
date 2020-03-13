@@ -98,7 +98,8 @@ export class ValidatedDualRange extends Component<Props> {
       value, // eslint-disable-line no-unused-vars
       onChange, // eslint-disable-line no-unused-vars
       allowEmptyRange, // eslint-disable-line no-unused-vars
-      ...rest
+      // @ts-ignore
+      ...rest // TODO: Consider alternatives for spread operator in component
     } = this.props;
 
     return (
@@ -115,6 +116,8 @@ export class ValidatedDualRange extends Component<Props> {
           fullWidth={fullWidth}
           value={this.state.value}
           onChange={this._onChange}
+          // @ts-ignore
+          focusable={false} // remove when #59039 is fixed
           {...rest}
         />
       </EuiFormRow>
