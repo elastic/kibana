@@ -5,15 +5,16 @@
  */
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler } from 'kibana/server';
-import { datasourceService } from '../../services';
+import { appContextService, datasourceService } from '../../services';
+import { ensureInstalledPackage } from '../../services/epm/packages';
 import {
   GetDatasourcesRequestSchema,
   GetOneDatasourceRequestSchema,
   CreateDatasourceRequestSchema,
   UpdateDatasourceRequestSchema,
   DeleteDatasourcesRequestSchema,
-  DeleteDatasourcesResponse,
 } from '../../types';
+import { CreateDatasourceResponse, DeleteDatasourcesResponse } from '../../../common';
 
 export const getDatasourcesHandler: RequestHandler<
   undefined,
@@ -72,10 +73,23 @@ export const createDatasourceHandler: RequestHandler<
   TypeOf<typeof CreateDatasourceRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
+  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   try {
-    const datasource = await datasourceService.create(soClient, request.body);
+    // Make sure the datasource package is installed
+    if (request.body.package?.name) {
+      await ensureInstalledPackage({
+        savedObjectsClient: soClient,
+        pkgName: request.body.package.name,
+        callCluster,
+      });
+    }
+
+    // Create datasource
+    const datasource = await datasourceService.create(soClient, request.body, { user });
+    const body: CreateDatasourceResponse = { item: datasource, success: true };
     return response.ok({
-      body: { item: datasource, success: true },
+      body,
     });
   } catch (e) {
     return response.customError({
@@ -91,11 +105,13 @@ export const updateDatasourceHandler: RequestHandler<
   TypeOf<typeof UpdateDatasourceRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   try {
     const datasource = await datasourceService.update(
       soClient,
       request.params.datasourceId,
-      request.body
+      request.body,
+      { user }
     );
     return response.ok({
       body: { item: datasource, success: true },
@@ -108,16 +124,18 @@ export const updateDatasourceHandler: RequestHandler<
   }
 };
 
-export const deleteDatasourcesHandler: RequestHandler<
+export const deleteDatasourceHandler: RequestHandler<
   unknown,
   unknown,
   TypeOf<typeof DeleteDatasourcesRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   try {
     const body: DeleteDatasourcesResponse = await datasourceService.delete(
       soClient,
-      request.body.datasourceIds
+      request.body.datasourceIds,
+      { user }
     );
     return response.ok({
       body,

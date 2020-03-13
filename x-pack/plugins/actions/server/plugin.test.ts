@@ -10,6 +10,7 @@ import { licensingMock } from '../../licensing/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { eventLogMock } from '../../event_log/server/mocks';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ActionType } from './types';
 import {
   ActionsPlugin,
@@ -19,6 +20,10 @@ import {
 } from './plugin';
 
 describe('Actions Plugin', () => {
+  const usageCollectionMock: jest.Mocked<UsageCollectionSetup> = ({
+    makeUsageCollector: jest.fn(),
+    registerCollector: jest.fn(),
+  } as unknown) as jest.Mocked<UsageCollectionSetup>;
   describe('setup()', () => {
     let context: PluginInitializerContext;
     let plugin: ActionsPlugin;
@@ -29,11 +34,13 @@ describe('Actions Plugin', () => {
       context = coreMock.createPluginInitializerContext();
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
+
       pluginsSetup = {
         taskManager: taskManagerMock.createSetup(),
         encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
         licensing: licensingMock.createSetup(),
         eventLog: eventLogMock.createSetup(),
+        usageCollection: usageCollectionMock,
       };
     });
 
@@ -162,6 +169,7 @@ describe('Actions Plugin', () => {
         encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
         licensing: licensingMock.createSetup(),
         eventLog: eventLogMock.createSetup(),
+        usageCollection: usageCollectionMock,
       };
       pluginsStart = {
         taskManager: taskManagerMock.createStart(),
