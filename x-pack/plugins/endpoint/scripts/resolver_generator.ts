@@ -88,6 +88,12 @@ async function main() {
       type: 'number',
       default: 1,
     },
+    delete: {
+      alias: 'd',
+      describe: 'delete indices and remake them',
+      type: 'boolean',
+      default: false,
+    },
   }).argv;
   const clientOptions: ClientOptions = {
     node: argv.node,
@@ -97,21 +103,34 @@ async function main() {
     clientOptions.auth = { username, password };
   }
   const client = new Client(clientOptions);
+  if (argv.delete) {
+    try {
+      await client.indices.delete({
+        index: [argv.eventIndex, argv.metadataIndex],
+      });
+    } catch (err) {
+      if (err instanceof ResponseError && err.statusCode !== 404) {
+        // eslint-disable-next-line no-console
+        console.log(err);
+        process.exit(1);
+      }
+    }
+  }
   try {
-    await client.indices.delete({
-      index: [argv.eventIndex, argv.metadataIndex],
+    await client.indices.create({
+      index: argv.eventIndex,
+      body: mapping,
     });
   } catch (err) {
-    if (err instanceof ResponseError && err.statusCode !== 404) {
+    if (
+      err instanceof ResponseError &&
+      err.body.error.type !== 'resource_already_exists_exception'
+    ) {
       // eslint-disable-next-line no-console
-      console.log(err);
+      console.log(err.body);
       process.exit(1);
     }
   }
-  await client.indices.create({
-    index: argv.eventIndex,
-    body: mapping,
-  });
 
   const generator = new EndpointDocGenerator(argv.seed);
   for (let i = 0; i < argv.numEndpoints; i++) {
