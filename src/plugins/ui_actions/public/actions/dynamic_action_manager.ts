@@ -74,7 +74,6 @@ export class DynamicActionManager {
       id: actionId,
       isCompatible,
       getDisplayName: () => name,
-      getIconType: context => factory.getIconType(context),
     };
 
     uiActions.addTriggerAction(triggerId as any, actionDefinition);
