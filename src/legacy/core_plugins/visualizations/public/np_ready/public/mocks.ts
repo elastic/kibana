@@ -57,11 +57,6 @@ const createInstance = async () => {
       data: dataPluginMock.createStartContract(),
       expressions: expressionsPluginMock.createStartContract(),
       uiActions: uiActionsPluginMock.createStartContract(),
-      __LEGACY: {
-        aggs: {
-          createAggConfigs: jest.fn(),
-        } as any,
-      },
     });
 
   return {
