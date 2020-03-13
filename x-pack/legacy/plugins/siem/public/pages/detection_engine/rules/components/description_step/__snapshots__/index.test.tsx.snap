@@ -80,6 +80,33 @@ exports[`description_step StepRuleDescriptionComponent renders correctly against
             "description": <ForwardRef(Styled(EuiFlexGroup))
               direction="column"
             >
+              <EuiFlexItem>
+                <ForwardRef
+                  data-test-subj="threatTacticLink"
+                  href="reference1"
+                  target="_blank"
+                >
+                  
+                </ForwardRef>
+                <ForwardRef
+                  alignItems="flexStart"
+                  direction="column"
+                  gutterSize="none"
+                >
+                  <EuiFlexItem>
+                    <ForwardRef(Styled(EuiButtonEmpty))
+                      data-test-subj="threatTechniqueLink"
+                      flush="left"
+                      href="technique reference"
+                      iconType="test-file-stub"
+                      size="xs"
+                      target="_blank"
+                    >
+                      
+                    </ForwardRef(Styled(EuiButtonEmpty))>
+                  </EuiFlexItem>
+                </ForwardRef>
+              </EuiFlexItem>
               <EuiSpacer />
             </ForwardRef(Styled(EuiFlexGroup))>,
             "title": "MITRE ATT&CK™",
@@ -199,6 +226,33 @@ exports[`description_step StepRuleDescriptionComponent renders correctly against
             "description": <ForwardRef(Styled(EuiFlexGroup))
               direction="column"
             >
+              <EuiFlexItem>
+                <ForwardRef
+                  data-test-subj="threatTacticLink"
+                  href="reference1"
+                  target="_blank"
+                >
+                  
+                </ForwardRef>
+                <ForwardRef
+                  alignItems="flexStart"
+                  direction="column"
+                  gutterSize="none"
+                >
+                  <EuiFlexItem>
+                    <ForwardRef(Styled(EuiButtonEmpty))
+                      data-test-subj="threatTechniqueLink"
+                      flush="left"
+                      href="technique reference"
+                      iconType="test-file-stub"
+                      size="xs"
+                      target="_blank"
+                    >
+                      
+                    </ForwardRef(Styled(EuiButtonEmpty))>
+                  </EuiFlexItem>
+                </ForwardRef>
+              </EuiFlexItem>
               <EuiSpacer />
             </ForwardRef(Styled(EuiFlexGroup))>,
             "title": "MITRE ATT&CK™",
@@ -319,6 +373,33 @@ exports[`description_step StepRuleDescriptionComponent renders correctly against
             "description": <ForwardRef(Styled(EuiFlexGroup))
               direction="column"
             >
+              <EuiFlexItem>
+                <ForwardRef
+                  data-test-subj="threatTacticLink"
+                  href="reference1"
+                  target="_blank"
+                >
+                  
+                </ForwardRef>
+                <ForwardRef
+                  alignItems="flexStart"
+                  direction="column"
+                  gutterSize="none"
+                >
+                  <EuiFlexItem>
+                    <ForwardRef(Styled(EuiButtonEmpty))
+                      data-test-subj="threatTechniqueLink"
+                      flush="left"
+                      href="technique reference"
+                      iconType="test-file-stub"
+                      size="xs"
+                      target="_blank"
+                    >
+                      
+                    </ForwardRef(Styled(EuiButtonEmpty))>
+                  </EuiFlexItem>
+                </ForwardRef>
+              </EuiFlexItem>
               <EuiSpacer />
             </ForwardRef(Styled(EuiFlexGroup))>,
             "title": "MITRE ATT&CK™",
