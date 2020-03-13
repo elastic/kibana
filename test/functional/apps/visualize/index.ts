@@ -20,13 +20,11 @@
 import { FtrProviderContext } from '../../ftr_provider_context.d';
 
 // eslint-disable-next-line @typescript-eslint/no-namespace, import/no-default-export
-export default function({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
+export default function({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common']);
-  let isOss = true;
 
   describe('visualize app', () => {
     before(async () => {
@@ -39,7 +37,6 @@ export default function({ getService, getPageObjects, loadTestFile }: FtrProvide
         defaultIndex: 'logstash-*',
         'format:bytes:defaultPattern': '0,0.[000]b',
       });
-      isOss = await PageObjects.common.isOss();
     });
 
     describe('', function() {
@@ -70,22 +67,20 @@ export default function({ getService, getPageObjects, loadTestFile }: FtrProvide
 
       loadTestFile(require.resolve('./_line_chart'));
       loadTestFile(require.resolve('./_pie_chart'));
+      loadTestFile(require.resolve('./_region_map'));
       loadTestFile(require.resolve('./_point_series_options'));
       loadTestFile(require.resolve('./_markdown_vis'));
       loadTestFile(require.resolve('./_shared_item'));
       loadTestFile(require.resolve('./_lab_mode'));
       loadTestFile(require.resolve('./_linked_saved_searches'));
       loadTestFile(require.resolve('./_visualize_listing'));
-      if (!isOss) {
-        loadTestFile(require.resolve('./_tile_map'));
-        loadTestFile(require.resolve('./_region_map'));
-      }
     });
 
     describe('', function() {
       this.tags('ciGroup12');
 
       loadTestFile(require.resolve('./_tag_cloud'));
+      loadTestFile(require.resolve('./_tile_map'));
       loadTestFile(require.resolve('./_vertical_bar_chart'));
       loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
       loadTestFile(require.resolve('./_tsvb_chart'));
