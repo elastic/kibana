@@ -69,4 +69,8 @@ export class SubFeature {
   public get privilegeGroups() {
     return this.config.privilegeGroups;
   }
+
+  public toRaw() {
+    return { ...this.config };
+  }
 }

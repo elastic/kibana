@@ -49,6 +49,7 @@ export const graph: LegacyPluginInitializer = kibana => {
         name: i18n.translate('xpack.graph.featureRegistry.graphFeatureName', {
           defaultMessage: 'Graph',
         }),
+        order: 1200,
         icon: 'graphApp',
         navLinkId: 'graph',
         app: ['graph', 'kibana'],

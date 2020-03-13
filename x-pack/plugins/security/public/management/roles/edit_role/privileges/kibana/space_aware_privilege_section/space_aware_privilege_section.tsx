@@ -10,47 +10,48 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiErrorBoundary,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { Capabilities } from 'src/core/public';
 import { Space } from '../../../../../../../../spaces/public';
-import { Feature } from '../../../../../../../../features/public';
-import { KibanaPrivileges, Role, isRoleReserved } from '../../../../../../../common/model';
-import { KibanaPrivilegeCalculatorFactory } from '../kibana_privilege_calculator';
+import { Role, isRoleReserved } from '../../../../../../../common/model';
 import { RoleValidator } from '../../../validate_role';
-import { PrivilegeMatrix } from './privilege_matrix';
-import { PrivilegeSpaceForm } from './privilege_space_form';
 import { PrivilegeSpaceTable } from './privilege_space_table';
+import { PrivilegeSpaceForm } from './privilege_space_form';
+import { PrivilegeFormCalculator } from '../privilege_form_calculator';
+import { PrivilegeSummary } from '../privilege_summary';
+import { KibanaPrivileges } from '../../../../model';
 
 interface Props {
   kibanaPrivileges: KibanaPrivileges;
   role: Role;
-  privilegeCalculatorFactory: KibanaPrivilegeCalculatorFactory;
   spaces: Space[];
   onChange: (role: Role) => void;
   editable: boolean;
   validator: RoleValidator;
-  intl: InjectedIntl;
   uiCapabilities: Capabilities;
-  features: Feature[];
 }
 
 interface State {
   role: Role | null;
-  editingIndex: number;
+  privilegeIndex: number;
   showSpacePrivilegeEditor: boolean;
   showPrivilegeMatrix: boolean;
 }
 
-class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
+export class SpaceAwarePrivilegeSection extends Component<Props, State> {
   private globalSpaceEntry: Space = {
     id: '*',
-    name: this.props.intl.formatMessage({
-      id: 'xpack.security.management.editRole.spaceAwarePrivilegeForm.globalSpacesName',
-      defaultMessage: '* Global (all spaces)',
-    }),
+    name: i18n.translate(
+      'xpack.security.management.editRole.spaceAwarePrivilegeForm.globalSpacesName',
+      {
+        defaultMessage: '* Global (all spaces)',
+      }
+    ),
     color: '#D3DAE6',
     initials: '*',
     disabledFeatures: [],
@@ -63,12 +64,12 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
       showSpacePrivilegeEditor: false,
       showPrivilegeMatrix: false,
       role: null,
-      editingIndex: -1,
+      privilegeIndex: -1,
     };
   }
 
   public render() {
-    const { uiCapabilities, privilegeCalculatorFactory } = this.props;
+    const { uiCapabilities } = this.props;
 
     if (!uiCapabilities.spaces.manage) {
       return (
@@ -113,22 +114,21 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
     }
 
     return (
-      <Fragment>
-        {this.renderKibanaPrivileges()}
-        {this.state.showSpacePrivilegeEditor && (
-          <PrivilegeSpaceForm
-            role={this.props.role}
-            privilegeCalculatorFactory={privilegeCalculatorFactory}
-            kibanaPrivileges={this.props.kibanaPrivileges}
-            features={this.props.features}
-            intl={this.props.intl}
-            onChange={this.onSpacesPrivilegeChange}
-            onCancel={this.onCancelEditPrivileges}
-            spaces={this.getAvailableSpaces(this.state.editingIndex)}
-            editingIndex={this.state.editingIndex}
-          />
-        )}
-      </Fragment>
+      <EuiErrorBoundary>
+        <Fragment>
+          {this.renderKibanaPrivileges()}
+          {this.state.showSpacePrivilegeEditor && (
+            <PrivilegeSpaceForm
+              role={this.props.role}
+              kibanaPrivileges={this.props.kibanaPrivileges}
+              onChange={this.onSpacesPrivilegeChange}
+              onCancel={this.onCancelEditPrivileges}
+              spaces={this.getAvailableSpaces(this.state.privilegeIndex)}
+              privilegeIndex={this.state.privilegeIndex}
+            />
+          )}
+        </Fragment>
+      </EuiErrorBoundary>
     );
   }
 
@@ -143,10 +143,11 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
         <PrivilegeSpaceTable
           role={this.props.role}
           displaySpaces={this.getDisplaySpaces()}
-          privilegeCalculatorFactory={this.props.privilegeCalculatorFactory}
+          privilegeCalculator={
+            new PrivilegeFormCalculator(this.props.kibanaPrivileges, this.props.role)
+          }
           onChange={this.props.onChange}
           onEdit={this.onEditSpacesPrivileges}
-          intl={this.props.intl}
           disabled={!this.props.editable}
         />
       );
@@ -205,14 +206,10 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
     }
 
     const viewMatrixButton = (
-      <PrivilegeMatrix
+      <PrivilegeSummary
         role={this.props.role}
-        calculatedPrivileges={this.props.privilegeCalculatorFactory
-          .getInstance(this.props.role)
-          .calculateEffectivePrivileges()}
-        features={this.props.features}
         spaces={this.getDisplaySpaces()}
-        intl={this.props.intl}
+        kibanaPrivileges={this.props.kibanaPrivileges}
       />
     );
 
@@ -250,18 +247,18 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
   private addSpacePrivilege = () => {
     this.setState({
       showSpacePrivilegeEditor: true,
-      editingIndex: -1,
+      privilegeIndex: -1,
     });
   };
 
   private onSpacesPrivilegeChange = (role: Role) => {
-    this.setState({ showSpacePrivilegeEditor: false, editingIndex: -1 });
+    this.setState({ showSpacePrivilegeEditor: false, privilegeIndex: -1 });
     this.props.onChange(role);
   };
 
-  private onEditSpacesPrivileges = (spacesIndex: number) => {
+  private onEditSpacesPrivileges = (privilegeIndex: number) => {
     this.setState({
-      editingIndex: spacesIndex,
+      privilegeIndex,
       showSpacePrivilegeEditor: true,
     });
   };
@@ -270,5 +267,3 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
     this.setState({ showSpacePrivilegeEditor: false });
   };
 }
-
-export const SpaceAwarePrivilegeSection = injectI18n(SpaceAwarePrivilegeSectionUI);

@@ -29,6 +29,11 @@ export interface FeatureConfig {
   name: string;
 
   /**
+   * An ordinal used to sort features relative to one another for display.
+   */
+  order?: number;
+
+  /**
    * Whether or not this feature should be excluded from the base privileges.
    * This is primarily helpful when migrating applications with a "legacy" privileges model
    * to use Kibana privileges. We don't want these features to be considered part of the `all`
@@ -137,6 +142,10 @@ export class Feature {
 
   public get name() {
     return this.config.name;
+  }
+
+  public get order() {
+    return this.config.order;
   }
 
   public get navLinkId() {

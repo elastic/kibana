@@ -87,6 +87,7 @@ const schema = Joi.object({
     .invalid(...prohibitedFeatureIds)
     .required(),
   name: Joi.string().required(),
+  order: Joi.number(),
   excludeFromBasePrivileges: Joi.boolean(),
   validLicenses: Joi.array().items(
     Joi.string().valid('basic', 'standard', 'gold', 'platinum', 'enterprise', 'trial')

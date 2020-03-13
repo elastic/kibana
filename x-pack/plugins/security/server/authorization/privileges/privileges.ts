@@ -55,8 +55,7 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
           featurePrivileges[feature.id][featurePrivilege.privilegeId] = [
             actions.login,
             actions.version,
-            ...featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature),
-            ...(featurePrivilege.privilegeId === 'all' ? [actions.allHack] : []),
+            ...uniq(featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature)),
           ];
         }
 
@@ -67,8 +66,7 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
             featurePrivileges[feature.id][`minimal_${featurePrivilege.privilegeId}`] = [
               actions.login,
               actions.version,
-              ...featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature),
-              ...(featurePrivilege.privilegeId === 'all' ? [actions.allHack] : []),
+              ...uniq(featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature)),
             ];
           }
         }
@@ -77,7 +75,7 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
           featurePrivileges[feature.id][subFeaturePrivilege.id] = [
             actions.login,
             actions.version,
-            ...featurePrivilegeBuilder.getActions(subFeaturePrivilege, feature),
+            ...uniq(featurePrivilegeBuilder.getActions(subFeaturePrivilege, feature)),
           ];
         }
 
@@ -97,12 +95,11 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
             actions.ui.get('spaces', 'manage'),
             actions.ui.get('management', 'kibana', 'spaces'),
             ...allActions,
-            actions.allHack,
           ],
           read: [actions.login, actions.version, ...readActions],
         },
         space: {
-          all: [actions.login, actions.version, ...allActions, actions.allHack],
+          all: [actions.login, actions.version, ...allActions],
           read: [actions.login, actions.version, ...readActions],
         },
         reserved: features.reduce((acc: Record<string, string[]>, feature: Feature) => {

@@ -88,6 +88,7 @@ export class Plugin {
       name: i18n.translate('xpack.siem.featureRegistry.linkSiemTitle', {
         defaultMessage: 'SIEM',
       }),
+      order: 1100,
       icon: 'securityAnalyticsApp',
       navLinkId: 'siem',
       app: ['siem', 'kibana'],

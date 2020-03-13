@@ -31,6 +31,7 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
   features.registerFeature({
     id: PLUGIN.ID,
     name: PLUGIN.NAME,
+    order: 1000,
     navLinkId: PLUGIN.ID,
     icon: 'uptimeApp',
     app: ['uptime', 'kibana'],

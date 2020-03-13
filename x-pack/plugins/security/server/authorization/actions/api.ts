@@ -12,10 +12,6 @@ export class ApiActions {
     this.prefix = `api:${versionNumber}:`;
   }
 
-  public get all(): string {
-    return `${this.prefix}*`;
-  }
-
   public get(operation: string) {
     if (!operation || !isString(operation)) {
       throw new Error('operation is required and must be a string');

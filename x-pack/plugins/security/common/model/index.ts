@@ -22,7 +22,6 @@ export {
   prepareRoleClone,
   getExtendedRoleDeprecationNotice,
 } from './role';
-export { KibanaPrivileges } from './kibana_privileges';
 export {
   InlineRoleTemplate,
   StoredRoleTemplate,

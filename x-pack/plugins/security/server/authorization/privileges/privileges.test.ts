@@ -47,12 +47,7 @@ describe('features', () => {
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.foo-feature', {
-      all: [
-        actions.login,
-        actions.version,
-        actions.ui.get('navLinks', 'kibana:foo'),
-        actions.allHack,
-      ],
+      all: [actions.login, actions.version, actions.ui.get('navLinks', 'kibana:foo')],
       read: [actions.login, actions.version, actions.ui.get('navLinks', 'kibana:foo')],
     });
   });
@@ -116,7 +111,6 @@ describe('features', () => {
       actions.savedObject.get('all-savedObject-read-2', 'find'),
       actions.ui.get('foo', 'all-ui-1'),
       actions.ui.get('foo', 'all-ui-2'),
-      actions.allHack,
     ];
 
     const expectedReadPrivileges = [
@@ -306,7 +300,6 @@ describe('features', () => {
         actions.savedObject.get('read-savedObject-read-2', 'find'),
         actions.ui.get('foo', 'read-ui-1'),
         actions.ui.get('foo', 'read-ui-2'),
-        actions.allHack,
       ]);
     });
 
@@ -435,7 +428,6 @@ describe('features', () => {
               actions.ui.get('management', 'kibana', 'spaces'),
             ]
           : []),
-        actions.allHack,
       ]);
       expect(actual).toHaveProperty(`${group}.read`, [actions.login, actions.version]);
     });
@@ -498,7 +490,6 @@ describe('features', () => {
               actions.ui.get('management', 'kibana', 'spaces'),
             ]
           : []),
-        actions.allHack,
       ]);
       expect(actual).toHaveProperty(`${group}.read`, [actions.login, actions.version]);
     });
@@ -562,7 +553,6 @@ describe('features', () => {
               actions.ui.get('management', 'kibana', 'spaces'),
             ]
           : []),
-        actions.allHack,
       ]);
       expect(actual).toHaveProperty(`${group}.read`, [actions.login, actions.version]);
     });
@@ -781,13 +771,11 @@ describe('subFeatures', () => {
         actions.login,
         actions.version,
         actions.ui.get('foo', 'foo'),
-        actions.allHack,
       ]);
       expect(actual.features).toHaveProperty('foo.minimal_all', [
         actions.login,
         actions.version,
         actions.ui.get('foo', 'foo'),
-        actions.allHack,
       ]);
 
       expect(actual.features).toHaveProperty('foo.read', [
@@ -809,7 +797,6 @@ describe('subFeatures', () => {
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
         actions.ui.get('foo', 'foo'),
-        actions.allHack,
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
@@ -821,7 +808,6 @@ describe('subFeatures', () => {
         actions.login,
         actions.version,
         actions.ui.get('foo', 'foo'),
-        actions.allHack,
       ]);
       expect(actual).toHaveProperty('space.read', [
         actions.login,
@@ -920,14 +906,12 @@ describe('subFeatures', () => {
         actions.savedObject.get('read-sub-feature-type', 'find'),
         actions.ui.get('foo', 'foo'),
         actions.ui.get('foo', 'sub-feature-ui'),
-        actions.allHack,
       ]);
 
       expect(actual.features).toHaveProperty(`foo.minimal_all`, [
         actions.login,
         actions.version,
         actions.ui.get('foo', 'foo'),
-        actions.allHack,
       ]);
 
       expect(actual.features).toHaveProperty(`foo.read`, [
@@ -974,7 +958,6 @@ describe('subFeatures', () => {
         actions.savedObject.get('read-sub-feature-type', 'find'),
         actions.ui.get('foo', 'foo'),
         actions.ui.get('foo', 'sub-feature-ui'),
-        actions.allHack,
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
@@ -1010,7 +993,6 @@ describe('subFeatures', () => {
         actions.savedObject.get('read-sub-feature-type', 'find'),
         actions.ui.get('foo', 'foo'),
         actions.ui.get('foo', 'sub-feature-ui'),
-        actions.allHack,
       ]);
       expect(actual).toHaveProperty('space.read', [
         actions.login,
@@ -1120,14 +1102,12 @@ describe('subFeatures', () => {
         actions.savedObject.get('read-sub-feature-type', 'find'),
         actions.ui.get('foo', 'foo'),
         actions.ui.get('foo', 'sub-feature-ui'),
-        actions.allHack,
       ]);
 
       expect(actual.features).toHaveProperty(`foo.minimal_all`, [
         actions.login,
         actions.version,
         actions.ui.get('foo', 'foo'),
-        actions.allHack,
       ]);
 
       expect(actual.features).toHaveProperty(`foo.read`, [
@@ -1161,11 +1141,10 @@ describe('subFeatures', () => {
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
-        actions.allHack,
       ]);
       expect(actual).toHaveProperty('global.read', [actions.login, actions.version]);
 
-      expect(actual).toHaveProperty('space.all', [actions.login, actions.version, actions.allHack]);
+      expect(actual).toHaveProperty('space.all', [actions.login, actions.version]);
       expect(actual).toHaveProperty('space.read', [actions.login, actions.version]);
     });
   });
@@ -1259,14 +1238,12 @@ describe('subFeatures', () => {
         actions.savedObject.get('read-sub-feature-type', 'find'),
         actions.ui.get('foo', 'foo'),
         actions.ui.get('foo', 'sub-feature-ui'),
-        actions.allHack,
       ]);
 
       expect(actual.features).toHaveProperty(`foo.minimal_all`, [
         actions.login,
         actions.version,
         actions.ui.get('foo', 'foo'),
-        actions.allHack,
       ]);
 
       expect(actual.features).toHaveProperty(`foo.read`, [
@@ -1301,7 +1278,6 @@ describe('subFeatures', () => {
         actions.savedObject.get('read-sub-feature-type', 'find'),
         actions.ui.get('foo', 'foo'),
         actions.ui.get('foo', 'sub-feature-ui'),
-        actions.allHack,
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
@@ -1325,7 +1301,6 @@ describe('subFeatures', () => {
         actions.savedObject.get('read-sub-feature-type', 'find'),
         actions.ui.get('foo', 'foo'),
         actions.ui.get('foo', 'sub-feature-ui'),
-        actions.allHack,
       ]);
       expect(actual).toHaveProperty('space.read', [
         actions.login,
@@ -1423,14 +1398,12 @@ describe('subFeatures', () => {
         actions.savedObject.get('read-sub-feature-type', 'find'),
         actions.ui.get('foo', 'foo'),
         actions.ui.get('foo', 'sub-feature-ui'),
-        actions.allHack,
       ]);
 
       expect(actual.features).toHaveProperty(`foo.minimal_all`, [
         actions.login,
         actions.version,
         actions.ui.get('foo', 'foo'),
-        actions.allHack,
       ]);
 
       expect(actual.features).toHaveProperty(`foo.read`, [
@@ -1452,11 +1425,10 @@ describe('subFeatures', () => {
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
-        actions.allHack,
       ]);
       expect(actual).toHaveProperty('global.read', [actions.login, actions.version]);
 
-      expect(actual).toHaveProperty('space.all', [actions.login, actions.version, actions.allHack]);
+      expect(actual).toHaveProperty('space.all', [actions.login, actions.version]);
       expect(actual).toHaveProperty('space.read', [actions.login, actions.version]);
     });
   });
