@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useEffect, useState } from 'react';
-import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiToolTip } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionType, ActionTypeIndex } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';
@@ -73,22 +73,36 @@ export const ActionTypeMenu = ({ onActionTypeChange, actionTypes }: Props) => {
         />
       );
 
+      const cardT = (
+        <EuiCard
+          data-test-subj={`${item.actionType.id}-card`}
+          icon={<EuiIcon size="xl" type={item.iconClass} />}
+          title={item.name}
+          description={item.selectMessage}
+          betaBadgeLabel={i18n.translate(
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.upgradeBadge',
+            { defaultMessage: 'Upgrade' }
+          )}
+          betaBadgeTooltipContent={checkEnabledResult.message}
+          isDisabled={!checkEnabledResult.isEnabled}
+          onClick={() => onActionTypeChange(item.actionType)}
+        />
+      );
+
       return (
         <EuiFlexItem key={index}>
           {checkEnabledResult.isEnabled && card}
-          {checkEnabledResult.isEnabled === false && (
-            // <Fragment>{card}</Fragment>
-            <EuiToolTip position="top" content={checkEnabledResult.message}>
-              <Fragment>{card}</Fragment>
-            </EuiToolTip>
-          )}
+          {checkEnabledResult.isEnabled === false && cardT}
         </EuiFlexItem>
       );
     });
 
   return (
     <div className="actConnectorsListGrid">
-      <EuiFlexGrid columns={2}>{cardNodes}</EuiFlexGrid>
+      <EuiSpacer size="s" />
+      <EuiFlexGrid gutter="xl" columns={2}>
+        {cardNodes}
+      </EuiFlexGrid>
     </div>
   );
 };
