@@ -117,4 +117,13 @@ export const schema: FormSchema = {
     ),
     validations: [],
   },
+  anomalyThreshold: {
+    label: i18n.translate(
+      'xpack.siem.detectionEngine.createRule.stepDefineRule.fieldAnomalyThresholdLabel',
+      {
+        defaultMessage: 'Anomaly score threshold',
+      }
+    ),
+    validations: [],
+  },
 };

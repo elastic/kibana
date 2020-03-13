@@ -132,13 +132,6 @@ const getDescriptionItem = (
       (singleThreat: IMitreEnterpriseAttack) => singleThreat.tactic.name !== 'none'
     );
     return buildThreatDescription({ label, threat });
-  } else if (field === 'description') {
-    return [
-      {
-        title: label,
-        description: get(field, value),
-      },
-    ];
   } else if (field === 'references') {
     const urls: string[] = get(field, value);
     return buildUrlsDescription(label, urls);
@@ -151,13 +144,6 @@ const getDescriptionItem = (
   } else if (field === 'severity') {
     const val: string = get(field, value);
     return buildSeverityDescription(label, val);
-  } else if (field === 'riskScore') {
-    return [
-      {
-        title: label,
-        description: get(field, value),
-      },
-    ];
   } else if (field === 'timeline') {
     const timeline = get(field, value) as FieldValueTimeline;
     return [
@@ -166,12 +152,11 @@ const getDescriptionItem = (
         description: timeline.title ?? DEFAULT_TIMELINE_TITLE,
       },
     ];
-  } else if (field === 'riskScore') {
-    const description: string = get(field, value);
+  } else if (['anomalyThreshold', 'description', 'riskScore'].includes(field)) {
     return [
       {
         title: label,
-        description,
+        description: get(field, value),
       },
     ];
   }

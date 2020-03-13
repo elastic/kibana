@@ -62,6 +62,7 @@ export interface AboutStepRule extends StepRuleData {
 }
 
 export interface DefineStepRule extends StepRuleData {
+  anomalyThreshold: number;
   index: string[];
   queryBar: FieldValueQueryBar;
   ruleType: RuleType;
@@ -75,6 +76,7 @@ export interface ScheduleStepRule extends StepRuleData {
 }
 
 export interface DefineStepRuleJson {
+  anomalyThreshold?: number;
   index: string[];
   filters: Filter[];
   saved_id?: string;

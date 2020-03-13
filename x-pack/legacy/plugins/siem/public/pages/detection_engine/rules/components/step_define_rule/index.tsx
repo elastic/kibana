@@ -38,6 +38,7 @@ import {
 } from '../../../../../shared_imports';
 import { schema } from './schema';
 import * as i18n from './translations';
+import { AnomalyThresholdSlider } from '../anomaly_threshold_slider';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -46,6 +47,7 @@ interface StepDefineRuleProps extends RuleStepProps {
 }
 
 const stepDefineDefaultValue: DefineStepRule = {
+  anomalyThreshold: 50,
   index: [],
   isNew: true,
   ruleType: 'query',
@@ -171,8 +173,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form} data-test-subj="stepDefineRule">
-          <UseField path="ruleType" component={SelectRuleType} componentProps={{}} />
-          <EuiFormRow fullWidth style={{ display: isMlRule ? 'none' : 'inline-block' }}>
+          <UseField path="ruleType" component={SelectRuleType} />
+          <EuiFormRow fullWidth style={{ display: isMlRule ? 'none' : 'flex' }}>
             <>
               <CommonUseField
                 path="index"
@@ -217,6 +219,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   onCloseTimelineSearch: handleCloseTimelineSearch,
                 }}
               />
+            </>
+          </EuiFormRow>
+          <EuiFormRow fullWidth style={{ display: isMlRule ? 'flex' : 'none' }}>
+            <>
+              <UseField path="anomalyThreshold" component={AnomalyThresholdSlider} />
             </>
           </EuiFormRow>
           <FormDataProvider pathsToWatch={['index', 'ruleType']}>
