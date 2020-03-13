@@ -29,6 +29,7 @@ import {
   initLogEntriesItemRoute,
 } from './routes/log_entries';
 import { initInventoryMetaRoute } from './routes/inventory_metadata';
+import { initLogSourceConfigurationRoutes } from './routes/log_sources';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
   const schema = makeExecutableSchema({
@@ -57,4 +58,5 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initMetricExplorerRoute(libs);
   initMetadataRoute(libs);
   initInventoryMetaRoute(libs);
+  initLogSourceConfigurationRoutes(libs);
 };
