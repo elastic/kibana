@@ -19,7 +19,6 @@
 
 export { createSavedObjectClass } from './saved_object';
 export { SavedObjectLoader } from './saved_object_loader';
-export { applyESRespUtil } from './helpers/apply_es_resp';
 export { serializeSavedObject } from './helpers/serialize_saved_object';
 export { checkForDuplicateTitle } from './helpers/check_for_duplicate_title';
 export { createSourceUtil } from './helpers/create_source';

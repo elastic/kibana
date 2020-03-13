@@ -24,7 +24,6 @@ export { getSavedObjectFinder, SavedObjectFinderUi, SavedObjectMetaData } from '
 export {
   SavedObjectLoader,
   createSavedObjectClass,
-  applyESRespUtil,
   serializeSavedObject,
   checkForDuplicateTitle,
   createSourceUtil,

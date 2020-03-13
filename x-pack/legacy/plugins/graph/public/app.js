@@ -140,22 +140,20 @@ export function initGraphApp(angularModule, deps) {
         resolve: {
           savedWorkspace: function($rootScope, $route, $location) {
             return $route.current.params.id
-              ? getSW({ savedObjectsClient, indexPatterns }, $route.current.params.id).catch(
-                  function(e) {
-                    toastNotifications.addError(e, {
-                      title: i18n.translate('xpack.graph.missingWorkspaceErrorMessage', {
-                        defaultMessage: "Couldn't load graph with ID",
-                      }),
-                    });
-                    $rootScope.$eval(() => {
-                      $location.path('/home');
-                      $location.replace();
-                    });
-                    // return promise that never returns to prevent the controller from loading
-                    return new Promise();
-                  }
-                )
-              : getSW({ savedObjectsClient, indexPatterns });
+              ? getSW(savedObjectsClient, $route.current.params.id).catch(function(e) {
+                  toastNotifications.addError(e, {
+                    title: i18n.translate('xpack.graph.missingWorkspaceErrorMessage', {
+                      defaultMessage: "Couldn't load graph with ID",
+                    }),
+                  });
+                  $rootScope.$eval(() => {
+                    $location.path('/home');
+                    $location.replace();
+                  });
+                  // return promise that never returns to prevent the controller from loading
+                  return new Promise();
+                })
+              : getSW(savedObjectsClient);
           },
           indexPatterns: function() {
             return savedObjectsClient

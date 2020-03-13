@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep, assign } from 'lodash';
+import { cloneDeep, assign, defaults } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { IBasePath, OverlayStart, SavedObjectsClientContract } from 'kibana/public';
 
 import {
-  applyESRespUtil,
   SavedObject,
   SavedObjectSaveOpts,
   serializeSavedObject,
@@ -22,18 +21,19 @@ import {
   injectReferences,
   extractReferences,
 } from '../services/persistence/saved_workspace_references';
-import { IndexPatternsContract } from '../../../../../../src/plugins/data/public';
+import { SavedObjectNotFound } from '../../../../../../src/plugins/kibana_utils/public';
+import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 
 const savedWorkspaceType = 'graph-workspace';
 const mapping: Record<string, string> = {
-  title: 'text',
-  description: 'text',
-  numLinks: 'integer',
-  numVertices: 'integer',
-  version: 'integer',
+  title: ES_FIELD_TYPES.TEXT,
+  description: ES_FIELD_TYPES.TEXT,
+  numLinks: ES_FIELD_TYPES.INTEGER,
+  numVertices: ES_FIELD_TYPES.INTEGER,
+  version: ES_FIELD_TYPES.INTEGER,
   wsState: 'json',
 };
-const defaults = {
+const defaultsProps = {
   title: i18n.translate('xpack.graph.savedWorkspace.workspaceNameTitle', {
     defaultMessage: 'New Graph Workspace',
   }),
@@ -47,7 +47,7 @@ const config = {
   mapping,
   type: savedWorkspaceType,
   injectReferences,
-  defaults,
+  defaults: defaultsProps,
 };
 
 const urlFor = (basePath: IBasePath, id: string) =>
@@ -86,51 +86,48 @@ export function findSW(
     });
 }
 
-export async function getSW(
-  {
-    savedObjectsClient,
-    indexPatterns,
-  }: { savedObjectsClient: SavedObjectsClientContract; indexPatterns: IndexPatternsContract },
-  id?: string
-) {
+export async function getSW(savedObjectsClient: SavedObjectsClientContract, id?: string) {
   const savedObject = {
     id,
     copyOnSave: false,
     isSaving: false,
     // NOTE: this.type (not set in this file, but somewhere else) is the sub type, e.g. 'area' or
     // 'data table', while esType is the more generic type - e.g. 'visualization' or 'saved search'.
-    getEsType: () => config.type || '',
+    getEsType: () => savedWorkspaceType,
     // Overwrite the default getDisplayName function which uses type and which is not very
     // user friendly for this object.
     getDisplayName: () => 'graph workspace',
-  };
+  } as { [key: string]: any };
 
   if (!id) {
-    assign(savedObject, defaults);
-    // no need for Graph
-    // await hydrateIndexPattern(config.id || '', savedObject as any, indexPatterns, config);
-    // if (typeof config.afterESResp === 'function') {
-    //    savedObject = await config.afterESResp(savedObject);
-    // }
+    assign(savedObject, defaultsProps);
     return Promise.resolve(savedObject);
   }
 
   const resp = await savedObjectsClient.get(savedWorkspaceType, id);
+  savedObject._source = cloneDeep(resp.attributes);
 
-  const respMapped = {
-    _id: resp.id,
-    _type: resp.type,
-    _source: cloneDeep(resp.attributes),
-    references: resp.references,
-    found: !!resp._version,
-  };
+  if (!resp._version) {
+    throw new SavedObjectNotFound(savedWorkspaceType, id || '');
+  }
 
-  return await applyESRespUtil(indexPatterns, respMapped, savedObject, config);
+  // assign the defaults to the response
+  defaults(savedObject._source, defaultsProps);
 
-  // no need for Graph
-  // if (typeof config.init === 'function') {
-  //   await config.init.call(savedObject);
-  // }
+  // transform the source using JSON.parse
+  if (savedObject._source.wsState) {
+    savedObject._source.wsState = JSON.parse(savedObject._source.wsState);
+  }
+
+  // Give obj all of the values in _source.fields
+  assign(savedObject, savedObject._source);
+  savedObject.lastSavedTitle = savedObject.title;
+
+  if (resp.references && resp.references.length > 0) {
+    injectReferences(savedObject as any, resp.references);
+  }
+
+  return savedObject;
 }
 
 export function deleteWS(savedObjectsClient: SavedObjectsClientContract, ids: string[]) {
