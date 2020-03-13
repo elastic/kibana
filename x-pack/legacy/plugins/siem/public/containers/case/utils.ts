@@ -10,15 +10,19 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import {
+  CasesFindResponse,
+  CasesFindResponseRt,
   CaseResponse,
   CaseResponseRt,
   CasesResponse,
   CasesResponseRt,
+  CasesStatusResponseRt,
+  CasesStatusResponse,
   throwErrors,
   CommentResponse,
   CommentResponseRt,
 } from '../../../../../../plugins/case/common/api';
-import { ToasterErrors } from '../../hooks/api/throw_if_not_ok';
+import { ToasterError } from '../../components/toasters';
 import { AllCases, Case } from './types';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
@@ -46,20 +50,31 @@ export const convertToCamelCase = <T, U extends {}>(snakeCase: T): U =>
     return acc;
   }, {} as U);
 
-export const convertAllCasesToCamel = (snakeCases: CasesResponse): AllCases => ({
+export const convertAllCasesToCamel = (snakeCases: CasesFindResponse): AllCases => ({
   cases: snakeCases.cases.map(snakeCase => convertToCamelCase<CaseResponse, Case>(snakeCase)),
+  countClosedCases: snakeCases.count_closed_cases,
+  countOpenCases: snakeCases.count_open_cases,
   page: snakeCases.page,
   perPage: snakeCases.per_page,
   total: snakeCases.total,
 });
 
-export const createToasterPlainError = (message: string) => new ToasterErrors([message]);
+export const decodeCasesStatusResponse = (respCase?: CasesStatusResponse) =>
+  pipe(
+    CasesStatusResponseRt.decode(respCase),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
+
+export const createToasterPlainError = (message: string) => new ToasterError([message]);
 
 export const decodeCaseResponse = (respCase?: CaseResponse) =>
   pipe(CaseResponseRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
 
-export const decodeCasesResponse = (respCases?: CasesResponse) =>
-  pipe(CasesResponseRt.decode(respCases), fold(throwErrors(createToasterPlainError), identity));
+export const decodeCasesResponse = (respCase?: CasesResponse) =>
+  pipe(CasesResponseRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
+
+export const decodeCasesFindResponse = (respCases?: CasesFindResponse) =>
+  pipe(CasesFindResponseRt.decode(respCases), fold(throwErrors(createToasterPlainError), identity));
 
 export const decodeCommentResponse = (respComment?: CommentResponse) =>
   pipe(CommentResponseRt.decode(respComment), fold(throwErrors(createToasterPlainError), identity));

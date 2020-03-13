@@ -647,6 +647,8 @@ export interface CoreStart {
     // (undocumented)
     capabilities: CapabilitiesStart;
     // (undocumented)
+    elasticsearch: ElasticsearchServiceStart;
+    // (undocumented)
     savedObjects: SavedObjectsServiceStart;
     // (undocumented)
     uiSettings: UiSettingsServiceStart;
@@ -774,9 +776,21 @@ export class ElasticsearchErrorHelpers {
 
 // @public (undocumented)
 export interface ElasticsearchServiceSetup {
+    // @deprecated (undocumented)
     readonly adminClient: IClusterClient;
+    // @deprecated (undocumented)
     readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
+    // @deprecated (undocumented)
     readonly dataClient: IClusterClient;
+}
+
+// @public (undocumented)
+export interface ElasticsearchServiceStart {
+    // (undocumented)
+    legacy: {
+        readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
+        readonly client: IClusterClient;
+    };
 }
 
 // @public (undocumented)
@@ -882,8 +896,10 @@ export interface IContextContainer<THandler extends HandlerFunction<any>> {
     registerContext<TContextName extends keyof HandlerContextType<THandler>>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<THandler, TContextName>): this;
 }
 
+// Warning: (ae-forgotten-export) The symbol "PartialExceptFor" needs to be exported by the entry point index.d.ts
+//
 // @public
-export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: Partial<HandlerContextType<THandler>>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
+export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: PartialExceptFor<HandlerContextType<THandler>, 'core'>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
 
 // @public
 export interface ICspConfig {
@@ -968,7 +984,7 @@ export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolea
 export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
 
 // @public
-export type ISavedObjectTypeRegistry = Pick<SavedObjectTypeRegistry, 'getType' | 'getAllTypes' | 'getIndex' | 'isNamespaceAgnostic' | 'isHidden'>;
+export type ISavedObjectTypeRegistry = Pick<SavedObjectTypeRegistry, 'getType' | 'getAllTypes' | 'getIndex' | 'isNamespaceAgnostic' | 'isHidden' | 'getImportableAndExportableTypes' | 'isImportableAndExportable'>;
 
 // @public
 export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
@@ -1456,6 +1472,7 @@ export interface RequestHandlerContext {
         rendering: IScopedRenderingClient;
         savedObjects: {
             client: SavedObjectsClientContract;
+            typeRegistry: ISavedObjectTypeRegistry;
         };
         elasticsearch: {
             dataClient: IScopedClusterClient;
@@ -2150,10 +2167,24 @@ export interface SavedObjectsType {
     convertToAliasScript?: string;
     hidden: boolean;
     indexPattern?: string;
+    management?: SavedObjectsTypeManagementDefinition;
     mappings: SavedObjectsTypeMappingDefinition;
     migrations?: SavedObjectMigrationMap;
     name: string;
     namespaceAgnostic: boolean;
+}
+
+// @public
+export interface SavedObjectsTypeManagementDefinition {
+    defaultSearchField?: string;
+    getEditUrl?: (savedObject: SavedObject<any>) => string;
+    getInAppUrl?: (savedObject: SavedObject<any>) => {
+        path: string;
+        uiCapabilitiesPath: string;
+    };
+    getTitle?: (savedObject: SavedObject<any>) => string;
+    icon?: string;
+    importableAndExportable?: boolean;
 }
 
 // @public
@@ -2180,9 +2211,11 @@ export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<SavedObjec
 // @public
 export class SavedObjectTypeRegistry {
     getAllTypes(): SavedObjectsType[];
+    getImportableAndExportableTypes(): SavedObjectsType[];
     getIndex(type: string): string | undefined;
     getType(type: string): SavedObjectsType | undefined;
     isHidden(type: string): boolean;
+    isImportableAndExportable(type: string): boolean;
     isNamespaceAgnostic(type: string): boolean;
     registerType(type: SavedObjectsType): void;
     }

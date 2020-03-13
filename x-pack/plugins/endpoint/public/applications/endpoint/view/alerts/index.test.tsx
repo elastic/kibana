@@ -9,32 +9,22 @@ import * as reactTestingLibrary from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n/react';
 import { AlertIndex } from './index';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { appStoreFactory } from '../../store';
-import { coreMock } from 'src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
-import { fireEvent, waitForElement, act } from '@testing-library/react';
+import { fireEvent, act } from '@testing-library/react';
 import { RouteCapture } from '../route_capture';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
 import { AppAction } from '../../types';
 import { mockAlertResultList } from '../../store/alerts/mock_alert_result_list';
+import { DepsStartMock, depsStartMock } from '../../mocks';
 
 describe('when on the alerting page', () => {
   let render: () => reactTestingLibrary.RenderResult;
   let history: MemoryHistory<never>;
   let store: ReturnType<typeof appStoreFactory>;
-
-  /**
-   * @testing-library/react provides `queryByTestId`, but that uses the data attribute
-   * 'data-testid' whereas our FTR and EUI's tests all use 'data-test-subj'. While @testing-library/react
-   * could be configured to use 'data-test-subj', it is not currently configured that way.
-   *
-   * This provides an equivalent function to `queryByTestId` but that uses our 'data-test-subj' attribute.
-   */
-  let queryByTestSubjId: (
-    renderResult: reactTestingLibrary.RenderResult,
-    testSubjId: string
-  ) => Promise<Element | null>;
+  let depsStart: DepsStartMock;
 
   beforeEach(async () => {
     /**
@@ -44,7 +34,10 @@ describe('when on the alerting page', () => {
     /**
      * Create a store, with the middleware disabled. We don't want side effects being created by our code in this test.
      */
-    store = appStoreFactory(coreMock.createStart(), true);
+    store = appStoreFactory();
+
+    depsStart = depsStartMock();
+    depsStart.data.ui.SearchBar.mockImplementation(() => <div />);
 
     /**
      * Render the test component, use this after setting up anything in `beforeEach`.
@@ -58,7 +51,7 @@ describe('when on the alerting page', () => {
        */
       return reactTestingLibrary.render(
         <Provider store={store}>
-          <KibanaContextProvider services={undefined}>
+          <KibanaContextProvider services={{ data: depsStart.data }}>
             <I18nProvider>
               <Router history={history}>
                 <RouteCapture>
@@ -68,17 +61,6 @@ describe('when on the alerting page', () => {
             </I18nProvider>
           </KibanaContextProvider>
         </Provider>
-      );
-    };
-    queryByTestSubjId = async (renderResult, testSubjId) => {
-      return await waitForElement(
-        /**
-         * Use document.body instead of container because EUI renders things like popover out of the DOM heirarchy.
-         */
-        () => document.body.querySelector(`[data-test-subj="${testSubjId}"]`),
-        {
-          container: renderResult.container,
-        }
       );
     };
   });
@@ -147,7 +129,7 @@ describe('when on the alerting page', () => {
         /**
          * Use our helper function to find the flyout's close button, as it uses a different test ID attribute.
          */
-        const closeButton = await queryByTestSubjId(renderResult, 'euiFlyoutCloseButton');
+        const closeButton = await renderResult.findByTestId('euiFlyoutCloseButton');
         if (closeButton) {
           fireEvent.click(closeButton);
         }
@@ -169,16 +151,13 @@ describe('when on the alerting page', () => {
     describe('when the user changes page size to 10', () => {
       beforeEach(async () => {
         const renderResult = render();
-        const paginationButton = await queryByTestSubjId(
-          renderResult,
-          'tablePaginationPopoverButton'
-        );
+        const paginationButton = await renderResult.findByTestId('tablePaginationPopoverButton');
         if (paginationButton) {
           act(() => {
             fireEvent.click(paginationButton);
           });
         }
-        const show10RowsButton = await queryByTestSubjId(renderResult, 'tablePagination-10-rows');
+        const show10RowsButton = await renderResult.findByTestId('tablePagination-10-rows');
         if (show10RowsButton) {
           act(() => {
             fireEvent.click(show10RowsButton);
@@ -188,6 +167,67 @@ describe('when on the alerting page', () => {
       it('should have a page_index of 0', () => {
         expect(history.location.search).toBe('?page_size=10');
       });
+    });
+  });
+  describe('when there are filtering params in the url', () => {
+    let indexPatterns: IIndexPattern[];
+    beforeEach(() => {
+      /**
+       * Dispatch the `serverReturnedSearchBarIndexPatterns` action, which is normally dispatched by the middleware
+       * when the page loads. The SearchBar will not render if there are no indexPatterns in the state.
+       */
+      indexPatterns = [
+        { title: 'endpoint-events-1', fields: [{ name: 'host.hostname', type: 'string' }] },
+      ];
+      reactTestingLibrary.act(() => {
+        const action: AppAction = {
+          type: 'serverReturnedSearchBarIndexPatterns',
+          payload: indexPatterns,
+        };
+        store.dispatch(action);
+      });
+
+      const searchBarQueryParam =
+        '(language%3Akuery%2Cquery%3A%27host.hostname%20%3A%20"DESKTOP-QBBSCUT"%27)';
+      const searchBarDateRangeParam = '(from%3Anow-1y%2Cto%3Anow)';
+      reactTestingLibrary.act(() => {
+        history.push({
+          ...history.location,
+          search: `?query=${searchBarQueryParam}&date_range=${searchBarDateRangeParam}`,
+        });
+      });
+    });
+    it("should render the SearchBar component with the correct 'indexPatterns' prop", async () => {
+      render();
+      const callProps = depsStart.data.ui.SearchBar.mock.calls[0][0];
+      expect(callProps.indexPatterns).toEqual(indexPatterns);
+    });
+    it("should render the SearchBar component with the correct 'query' prop", async () => {
+      render();
+      const callProps = depsStart.data.ui.SearchBar.mock.calls[0][0];
+      const expectedProp = { query: 'host.hostname : "DESKTOP-QBBSCUT"', language: 'kuery' };
+      expect(callProps.query).toEqual(expectedProp);
+    });
+    it("should render the SearchBar component with the correct 'dateRangeFrom' prop", async () => {
+      render();
+      const callProps = depsStart.data.ui.SearchBar.mock.calls[0][0];
+      const expectedProp = 'now-1y';
+      expect(callProps.dateRangeFrom).toEqual(expectedProp);
+    });
+    it("should render the SearchBar component with the correct 'dateRangeTo' prop", async () => {
+      render();
+      const callProps = depsStart.data.ui.SearchBar.mock.calls[0][0];
+      const expectedProp = 'now';
+      expect(callProps.dateRangeTo).toEqual(expectedProp);
+    });
+    it('should render the SearchBar component with the correct display props', async () => {
+      render();
+      const callProps = depsStart.data.ui.SearchBar.mock.calls[0][0];
+      expect(callProps.showFilterBar).toBe(true);
+      expect(callProps.showDatePicker).toBe(true);
+      expect(callProps.showQueryBar).toBe(true);
+      expect(callProps.showQueryInput).toBe(true);
+      expect(callProps.showSaveQuery).toBe(false);
     });
   });
 });

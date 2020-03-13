@@ -17,13 +17,12 @@ import {
   BasicFetchProps,
   ImportRulesProps,
   ExportRulesProps,
-  RuleError,
   RuleStatusResponse,
   ImportRulesResponse,
   PrePackagedRulesStatusResponse,
+  BulkRuleResponse,
 } from './types';
 import { KibanaServices } from '../../../lib/kibana';
-import { throwIfNotOk } from '../../../hooks/api/api';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_PREPACKAGED_URL,
@@ -38,18 +37,15 @@ import * as i18n from '../../../pages/detection_engine/rules/translations';
  *
  * @param rule to add
  * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
  */
-export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule> => {
-  const response = await KibanaServices.get().http.fetch<NewRule>(DETECTION_ENGINE_RULES_URL, {
+export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule> =>
+  KibanaServices.get().http.fetch<NewRule>(DETECTION_ENGINE_RULES_URL, {
     method: rule.id != null ? 'PUT' : 'POST',
     body: JSON.stringify(rule),
-    asResponse: true,
     signal,
   });
-
-  await throwIfNotOk(response.response);
-  return response.body!;
-};
 
 /**
  * Fetches all rules from the Detection Engine API
@@ -58,6 +54,7 @@ export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule>
  * @param pagination desired pagination options (e.g. page/perPage)
  * @param signal to cancel request
  *
+ * @throws An error if response is not OK
  */
 export const fetchRules = async ({
   filterOptions = {
@@ -94,18 +91,14 @@ export const fetchRules = async ({
     ...(filters.length ? { filter: filters.join(' AND ') } : {}),
   };
 
-  const response = await KibanaServices.get().http.fetch<FetchRulesResponse>(
+  return KibanaServices.get().http.fetch<FetchRulesResponse>(
     `${DETECTION_ENGINE_RULES_URL}/_find`,
     {
       method: 'GET',
       query,
       signal,
-      asResponse: true,
     }
   );
-
-  await throwIfNotOk(response.response);
-  return response.body!;
 };
 
 /**
@@ -114,18 +107,14 @@ export const fetchRules = async ({
  * @param id Rule ID's (not rule_id)
  * @param signal to cancel request
  *
+ * @throws An error if response is not OK
  */
-export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rule> => {
-  const response = await KibanaServices.get().http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
+export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rule> =>
+  KibanaServices.get().http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
     method: 'GET',
     query: { id },
-    asResponse: true,
     signal,
   });
-
-  await throwIfNotOk(response.response);
-  return response.body!;
-};
 
 /**
  * Enables/Disables provided Rule ID's
@@ -135,19 +124,11 @@ export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rul
  *
  * @throws An error if response is not OK
  */
-export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<Rule[]> => {
-  const response = await KibanaServices.get().http.fetch<Rule[]>(
-    `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-    {
-      method: 'PATCH',
-      body: JSON.stringify(ids.map(id => ({ id, enabled }))),
-      asResponse: true,
-    }
-  );
-
-  await throwIfNotOk(response.response);
-  return response.body!;
-};
+export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<BulkRuleResponse> =>
+  KibanaServices.get().http.fetch<BulkRuleResponse>(`${DETECTION_ENGINE_RULES_URL}/_bulk_update`, {
+    method: 'PATCH',
+    body: JSON.stringify(ids.map(id => ({ id, enabled }))),
+  });
 
 /**
  * Deletes provided Rule ID's
@@ -156,74 +137,57 @@ export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<R
  *
  * @throws An error if response is not OK
  */
-export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<Array<Rule | RuleError>> => {
-  const response = await KibanaServices.get().http.fetch<Rule[]>(
-    `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
-    {
-      method: 'DELETE',
-      body: JSON.stringify(ids.map(id => ({ id }))),
-      asResponse: true,
-    }
-  );
-
-  await throwIfNotOk(response.response);
-  return response.body!;
-};
+export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<BulkRuleResponse> =>
+  KibanaServices.get().http.fetch<Rule[]>(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`, {
+    method: 'DELETE',
+    body: JSON.stringify(ids.map(id => ({ id }))),
+  });
 
 /**
  * Duplicates provided Rules
  *
  * @param rules to duplicate
+ *
+ * @throws An error if response is not OK
  */
-export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Rule[]> => {
-  const response = await KibanaServices.get().http.fetch<Rule[]>(
-    `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
-    {
-      method: 'POST',
-      body: JSON.stringify(
-        rules.map(rule => ({
-          ...rule,
-          name: `${rule.name} [${i18n.DUPLICATE}]`,
-          created_at: undefined,
-          created_by: undefined,
-          id: undefined,
-          rule_id: undefined,
-          updated_at: undefined,
-          updated_by: undefined,
-          enabled: rule.enabled,
-          immutable: undefined,
-          last_success_at: undefined,
-          last_success_message: undefined,
-          last_failure_at: undefined,
-          last_failure_message: undefined,
-          status: undefined,
-          status_date: undefined,
-        }))
-      ),
-      asResponse: true,
-    }
-  );
-
-  await throwIfNotOk(response.response);
-  return response.body!;
-};
+export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<BulkRuleResponse> =>
+  KibanaServices.get().http.fetch<Rule[]>(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`, {
+    method: 'POST',
+    body: JSON.stringify(
+      rules.map(rule => ({
+        ...rule,
+        name: `${rule.name} [${i18n.DUPLICATE}]`,
+        created_at: undefined,
+        created_by: undefined,
+        id: undefined,
+        rule_id: undefined,
+        updated_at: undefined,
+        updated_by: undefined,
+        enabled: rule.enabled,
+        immutable: undefined,
+        last_success_at: undefined,
+        last_success_message: undefined,
+        last_failure_at: undefined,
+        last_failure_message: undefined,
+        status: undefined,
+        status_date: undefined,
+      }))
+    ),
+  });
 
 /**
  * Create Prepackaged Rules
  *
  * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
  */
 export const createPrepackagedRules = async ({ signal }: BasicFetchProps): Promise<boolean> => {
-  const response = await KibanaServices.get().http.fetch<unknown>(
-    DETECTION_ENGINE_PREPACKAGED_URL,
-    {
-      method: 'PUT',
-      signal,
-      asResponse: true,
-    }
-  );
+  await KibanaServices.get().http.fetch<unknown>(DETECTION_ENGINE_PREPACKAGED_URL, {
+    method: 'PUT',
+    signal,
+  });
 
-  await throwIfNotOk(response.response);
   return true;
 };
 
@@ -244,20 +208,16 @@ export const importRules = async ({
   const formData = new FormData();
   formData.append('file', fileToImport);
 
-  const response = await KibanaServices.get().http.fetch<ImportRulesResponse>(
+  return KibanaServices.get().http.fetch<ImportRulesResponse>(
     `${DETECTION_ENGINE_RULES_URL}/_import`,
     {
       method: 'POST',
       headers: { 'Content-Type': undefined },
       query: { overwrite },
       body: formData,
-      asResponse: true,
       signal,
     }
   );
-
-  await throwIfNotOk(response.response);
-  return response.body!;
 };
 
 /**
@@ -281,22 +241,15 @@ export const exportRules = async ({
       ? JSON.stringify({ objects: ruleIds.map(rule => ({ rule_id: rule })) })
       : undefined;
 
-  const response = await KibanaServices.get().http.fetch<Blob>(
-    `${DETECTION_ENGINE_RULES_URL}/_export`,
-    {
-      method: 'POST',
-      body,
-      query: {
-        exclude_export_details: excludeExportDetails,
-        file_name: filename,
-      },
-      signal,
-      asResponse: true,
-    }
-  );
-
-  await throwIfNotOk(response.response);
-  return response.body!;
+  return KibanaServices.get().http.fetch<Blob>(`${DETECTION_ENGINE_RULES_URL}/_export`, {
+    method: 'POST',
+    body,
+    query: {
+      exclude_export_details: excludeExportDetails,
+      file_name: filename,
+    },
+    signal,
+  });
 };
 
 /**
@@ -313,37 +266,25 @@ export const getRuleStatusById = async ({
 }: {
   id: string;
   signal: AbortSignal;
-}): Promise<RuleStatusResponse> => {
-  const response = await KibanaServices.get().http.fetch<RuleStatusResponse>(
-    DETECTION_ENGINE_RULES_STATUS_URL,
-    {
-      method: 'GET',
-      query: { ids: JSON.stringify([id]) },
-      signal,
-      asResponse: true,
-    }
-  );
-
-  await throwIfNotOk(response.response);
-  return response.body!;
-};
+}): Promise<RuleStatusResponse> =>
+  KibanaServices.get().http.fetch<RuleStatusResponse>(DETECTION_ENGINE_RULES_STATUS_URL, {
+    method: 'GET',
+    query: { ids: JSON.stringify([id]) },
+    signal,
+  });
 
 /**
  * Fetch all unique Tags used by Rules
  *
  * @param signal to cancel request
  *
+ * @throws An error if response is not OK
  */
-export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<string[]> => {
-  const response = await KibanaServices.get().http.fetch<string[]>(DETECTION_ENGINE_TAGS_URL, {
+export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<string[]> =>
+  KibanaServices.get().http.fetch<string[]>(DETECTION_ENGINE_TAGS_URL, {
     method: 'GET',
     signal,
-    asResponse: true,
   });
-
-  await throwIfNotOk(response.response);
-  return response.body!;
-};
 
 /**
  * Get pre packaged rules Status
@@ -356,16 +297,11 @@ export const getPrePackagedRulesStatus = async ({
   signal,
 }: {
   signal: AbortSignal;
-}): Promise<PrePackagedRulesStatusResponse> => {
-  const response = await KibanaServices.get().http.fetch<PrePackagedRulesStatusResponse>(
+}): Promise<PrePackagedRulesStatusResponse> =>
+  KibanaServices.get().http.fetch<PrePackagedRulesStatusResponse>(
     DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
     {
       method: 'GET',
       signal,
-      asResponse: true,
     }
   );
-
-  await throwIfNotOk(response.response);
-  return response.body!;
-};

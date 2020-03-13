@@ -28,9 +28,10 @@ export interface IVectorSource extends ISource {
   ): Promise<GeoJsonWithMeta>;
 
   getFields(): Promise<IField[]>;
+  getFieldByName(fieldName: string): IField;
 }
 
-export class AbstractVectorSource extends AbstractSource {
+export class AbstractVectorSource extends AbstractSource implements IVectorSource {
   getGeoJsonWithMeta(
     layerName: 'string',
     searchFilters: unknown[],
@@ -38,4 +39,5 @@ export class AbstractVectorSource extends AbstractSource {
   ): Promise<GeoJsonWithMeta>;
 
   getFields(): Promise<IField[]>;
+  getFieldByName(fieldName: string): IField;
 }

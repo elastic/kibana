@@ -46,14 +46,16 @@ const metaFields = ['_source', '_id', '_type', '_index', '_score'];
 
 export async function existingFieldsRoute(setup: CoreSetup) {
   const router = setup.http.createRouter();
-  router.get(
+
+  router.post(
     {
       path: `${BASE_API_URL}/existing_fields/{indexPatternId}`,
       validate: {
         params: schema.object({
           indexPatternId: schema.string(),
         }),
-        query: schema.object({
+        body: schema.object({
+          dslQuery: schema.object({}, { allowUnknowns: true }),
           fromDate: schema.maybe(schema.string()),
           toDate: schema.maybe(schema.string()),
           timeFieldName: schema.maybe(schema.string()),
@@ -64,8 +66,8 @@ export async function existingFieldsRoute(setup: CoreSetup) {
       try {
         return res.ok({
           body: await fetchFieldExistence({
-            ...req.query,
             ...req.params,
+            ...req.body,
             context,
           }),
         });
@@ -91,12 +93,14 @@ export async function existingFieldsRoute(setup: CoreSetup) {
 async function fetchFieldExistence({
   context,
   indexPatternId,
+  dslQuery = { match_all: {} },
   fromDate,
   toDate,
   timeFieldName,
 }: {
   indexPatternId: string;
   context: RequestHandlerContext;
+  dslQuery: object;
   fromDate?: string;
   toDate?: string;
   timeFieldName?: string;
@@ -109,10 +113,10 @@ async function fetchFieldExistence({
   } = await fetchIndexPatternDefinition(indexPatternId, context);
 
   const fields = buildFieldList(indexPattern, mappings, fieldDescriptors);
-
   const docs = await fetchIndexPatternStats({
     fromDate,
     toDate,
+    dslQuery,
     client: context.core.elasticsearch.dataClient,
     index: indexPatternTitle,
     timeFieldName: timeFieldName || indexPattern.attributes.timeFieldName,
@@ -197,6 +201,7 @@ export function buildFieldList(
 async function fetchIndexPatternStats({
   client,
   index,
+  dslQuery,
   timeFieldName,
   fromDate,
   toDate,
@@ -204,17 +209,15 @@ async function fetchIndexPatternStats({
 }: {
   client: IScopedClusterClient;
   index: string;
+  dslQuery: object;
   timeFieldName?: string;
   fromDate?: string;
   toDate?: string;
   fields: Field[];
 }) {
-  let query;
-
-  if (timeFieldName && fromDate && toDate) {
-    query = {
-      bool: {
-        filter: [
+  const filter =
+    timeFieldName && fromDate && toDate
+      ? [
           {
             range: {
               [timeFieldName]: {
@@ -223,16 +226,17 @@ async function fetchIndexPatternStats({
               },
             },
           },
-        ],
-      },
-    };
-  } else {
-    query = {
-      match_all: {},
-    };
-  }
-  const scriptedFields = fields.filter(f => f.isScript);
+          dslQuery,
+        ]
+      : [dslQuery];
 
+  const query = {
+    bool: {
+      filter,
+    },
+  };
+
+  const scriptedFields = fields.filter(f => f.isScript);
   const result = await client.callAsCurrentUser('search', {
     index,
     body: {
@@ -251,7 +255,6 @@ async function fetchIndexPatternStats({
       }, {} as Record<string, unknown>),
     },
   });
-
   return result.hits.hits;
 }
 

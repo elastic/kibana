@@ -9,7 +9,6 @@ import { graph } from './legacy/plugins/graph';
 import { monitoring } from './legacy/plugins/monitoring';
 import { reporting } from './legacy/plugins/reporting';
 import { security } from './legacy/plugins/security';
-import { ml } from './legacy/plugins/ml';
 import { tilemap } from './legacy/plugins/tilemap';
 import { grokdebugger } from './legacy/plugins/grokdebugger';
 import { dashboardMode } from './legacy/plugins/dashboard_mode';
@@ -31,7 +30,6 @@ import { crossClusterReplication } from './legacy/plugins/cross_cluster_replicat
 import { upgradeAssistant } from './legacy/plugins/upgrade_assistant';
 import { uptime } from './legacy/plugins/uptime';
 import { encryptedSavedObjects } from './legacy/plugins/encrypted_saved_objects';
-import { transform } from './legacy/plugins/transform';
 import { actions } from './legacy/plugins/actions';
 import { alerting } from './legacy/plugins/alerting';
 import { lens } from './legacy/plugins/lens';
@@ -46,7 +44,6 @@ module.exports = function(kibana) {
     reporting(kibana),
     spaces(kibana),
     security(kibana),
-    ml(kibana),
     tilemap(kibana),
     grokdebugger(kibana),
     dashboardMode(kibana),
@@ -61,7 +58,6 @@ module.exports = function(kibana) {
     infra(kibana),
     taskManager(kibana),
     rollup(kibana),
-    transform(kibana),
     siem(kibana),
     remoteClusters(kibana),
     crossClusterReplication(kibana),
