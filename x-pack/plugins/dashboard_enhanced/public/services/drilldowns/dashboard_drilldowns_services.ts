@@ -34,7 +34,8 @@ export class DashboardDrilldownsService {
   ) {
     const overlays = async () => (await core.getStartServices())[0].overlays;
     const drilldowns = async () => (await core.getStartServices())[1].drilldowns;
-    const savedObjects = async () => (await core.getStartServices())[0].savedObjects.client;
+    const getSavedObjectsClient = async () =>
+      (await core.getStartServices())[0].savedObjects.client;
 
     const actionFlyoutCreateDrilldown = new FlyoutCreateDrilldownAction({ overlays, drilldowns });
     plugins.uiActions.registerAction(actionFlyoutCreateDrilldown);
@@ -45,7 +46,7 @@ export class DashboardDrilldownsService {
     plugins.uiActions.attachAction(CONTEXT_MENU_DRILLDOWNS_TRIGGER, actionFlyoutEditDrilldown);
 
     const dashboardToDashboardDrilldown = new DashboardToDashboardDrilldown({
-      savedObjects,
+      getSavedObjectsClient,
     });
     plugins.drilldowns.registerDrilldown(dashboardToDashboardDrilldown);
   }

@@ -8,6 +8,7 @@ import React, { useState, useEffect } from 'react';
 import { CollectConfigProps } from './types';
 import { DashboardDrilldownConfig } from '../../../components/dashboard_drilldown_config';
 import { Params } from './drilldown';
+import { SimpleSavedObject } from '../../../../../../../src/core/public';
 
 export interface CollectConfigContainerProps extends CollectConfigProps {
   params: Params;
@@ -16,18 +17,36 @@ export interface CollectConfigContainerProps extends CollectConfigProps {
 export const CollectConfigContainer: React.FC<CollectConfigContainerProps> = ({
   config,
   onConfig,
-  params: { savedObjects },
+  params: { getSavedObjectsClient },
 }) => {
-  const [dashboards] = useState([
-    { id: 'dashboard1', title: 'Dashboard 1' },
-    { id: 'dashboard2', title: 'Dashboard 2' },
-    { id: 'dashboard3', title: 'Dashboard 3' },
-    { id: 'dashboard4', title: 'Dashboard 4' },
-  ]);
+  const [dashboards, setDashboards] = useState([]);
+  const [searchString, setSearchString] = useState();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // TODO: Load dashboards...
-  }, [savedObjects]);
+    setIsLoading(true);
+    getSavedObjectsClient().then(savedObjectsClient => {
+      savedObjectsClient
+        .find({
+          type: 'dashboard',
+          search: searchString ? `${searchString}*` : undefined,
+          // todo search by id
+          searchFields: ['title^3', 'description'],
+          defaultSearchOperator: 'AND',
+          perPage: 100,
+        })
+        .then(({ savedObjects }) => {
+          const dashboardList = savedObjects.map(
+            (savedObject: SimpleSavedObject<{ id: string; title: string }>) => ({
+              id: savedObject.id,
+              title: savedObject.attributes.title,
+            })
+          );
+          setDashboards(dashboardList);
+          setIsLoading(false);
+        });
+    });
+  }, [getSavedObjectsClient, searchString]);
 
   return (
     <DashboardDrilldownConfig
@@ -35,9 +54,11 @@ export const CollectConfigContainer: React.FC<CollectConfigContainerProps> = ({
       dashboards={dashboards}
       currentFilters={config.useCurrentDashboardFilters}
       keepRange={config.useCurrentDashboardDataRange}
+      isLoading={isLoading}
       onDashboardSelect={dashboardId => {
         onConfig({ ...config, dashboardId });
       }}
+      onSearchChange={setSearchString}
       onCurrentFiltersToggle={() =>
         onConfig({
           ...config,

@@ -19,7 +19,7 @@ export const dashboards = [
 ];
 
 export interface Params {
-  savedObjects: () => Promise<CoreStart['savedObjects']['client']>;
+  getSavedObjectsClient: () => Promise<CoreStart['savedObjects']['client']>;
 }
 
 export class DashboardToDashboardDrilldown
@@ -43,7 +43,7 @@ export class DashboardToDashboardDrilldown
   public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
 
   public readonly createConfig = () => ({
-    dashboardId: '123',
+    dashboardId: '',
     useCurrentDashboardDataRange: true,
     useCurrentDashboardFilters: true,
   });
