@@ -19,6 +19,7 @@ export interface IFieldType
 |  [displayName](./kibana-plugin-plugins-data-public.ifieldtype.displayname.md) | <code>string</code> |  |
 |  [esTypes](./kibana-plugin-plugins-data-public.ifieldtype.estypes.md) | <code>string[]</code> |  |
 |  [filterable](./kibana-plugin-plugins-data-public.ifieldtype.filterable.md) | <code>boolean</code> |  |
+|  [filterableType](./kibana-plugin-plugins-data-public.ifieldtype.filterabletype.md) | <code>KBN_FILTERABLE_TYPE</code> |  |
 |  [format](./kibana-plugin-plugins-data-public.ifieldtype.format.md) | <code>any</code> |  |
 |  [lang](./kibana-plugin-plugins-data-public.ifieldtype.lang.md) | <code>string</code> |  |
 |  [name](./kibana-plugin-plugins-data-public.ifieldtype.name.md) | <code>string</code> |  |

@@ -175,6 +175,8 @@ export enum ES_FIELD_TYPES {
     // (undocumented)
     HALF_FLOAT = "half_float",
     // (undocumented)
+    HISTOGRAM = "histogram",
+    // (undocumented)
     _ID = "_id",
     // (undocumented)
     _INDEX = "_index",
@@ -367,6 +369,10 @@ export interface IFieldType {
     esTypes?: string[];
     // (undocumented)
     filterable?: boolean;
+    // Warning: (ae-forgotten-export) The symbol "KBN_FILTERABLE_TYPE" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    filterableType?: KBN_FILTERABLE_TYPE;
     // (undocumented)
     format?: any;
     // (undocumented)
@@ -545,6 +551,8 @@ export enum KBN_FIELD_TYPES {
     GEO_POINT = "geo_point",
     // (undocumented)
     GEO_SHAPE = "geo_shape",
+    // (undocumented)
+    HISTOGRAM = "histogram",
     // (undocumented)
     IP = "ip",
     // (undocumented)
