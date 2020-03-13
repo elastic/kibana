@@ -36,7 +36,7 @@ export interface State {
   readonly fetchCount: number;
 
   /**
-   * List of all fetched events. If `null`, means now events have been loaded yet.
+   * List of all fetched events.
    */
   readonly events: readonly SerializedEvent[];
 }
@@ -71,7 +71,7 @@ export const transitions: Transitions = {
 
   addEvent: state => (event: SerializedEvent) => ({
     ...state,
-    events: [...(state.events || []), event],
+    events: [...state.events, event],
   }),
 
   removeEvent: state => (eventId: string) => ({
