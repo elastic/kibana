@@ -1,9 +1,5 @@
 .actActionForm__disabledActionWarningTitle {
-  color: #BD271E;
-  font-size: 14px;
-  margin-left: 10px;
-}
-
-.actActionForm__getMoreActionsLink {
-  float: right;
+  color: $euiColorDanger;
+  @include euiFontSizeS;
+  margin-left: $euiSizeS;
 }
