@@ -52,7 +52,7 @@ export interface VisualizeAppStateTransitions {
   removeSavedQuery: (state: VisualizeAppState) => (defaultQuery: Query) => VisualizeAppState;
   unlinkSavedSearch: (
     state: VisualizeAppState
-  ) => (query: Query, filters: Filter[]) => VisualizeAppState;
+  ) => ({ query, parentFilters }: { query?: Query; parentFilters?: Filter[] }) => VisualizeAppState;
   updateVisState: (state: VisualizeAppState) => (vis: PureVisState) => VisualizeAppState;
   updateFromSavedQuery: (state: VisualizeAppState) => (savedQuery: SavedQuery) => VisualizeAppState;
 }

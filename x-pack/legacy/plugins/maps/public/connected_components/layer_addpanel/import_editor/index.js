@@ -6,8 +6,10 @@
 
 import { connect } from 'react-redux';
 import { ImportEditor } from './view';
-import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
-import { INDEXING_STAGE } from '../../../reducers/ui';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInspectorAdapters } from '../../../../../../../plugins/maps/public/reducers/non_serializable_instances';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { INDEXING_STAGE } from '../../../../../../../plugins/maps/public/reducers/ui';
 import { updateIndexingStage } from '../../../actions/ui_actions';
 import { getIndexingStage } from '../../../selectors/ui_selectors';
 

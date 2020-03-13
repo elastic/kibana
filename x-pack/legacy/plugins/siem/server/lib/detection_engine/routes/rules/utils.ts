@@ -131,6 +131,7 @@ export const transformAlertToRule = (
     to: alert.params.to,
     type: alert.params.type,
     threat: alert.params.threat,
+    note: alert.params.note,
     version: alert.params.version,
     status: ruleStatus?.attributes.status,
     status_date: ruleStatus?.attributes.statusDate,
