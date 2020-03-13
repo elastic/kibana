@@ -108,7 +108,7 @@ export class ReportingPublicPlugin implements Plugin<any, any> {
     const { license$ } = licensing;
 
     const apiClient = new ReportingAPIClient(http);
-    const action = new GetCsvReportPanelAction(core);
+    const action = new GetCsvReportPanelAction(core, license$);
 
     home.featureCatalogue.register({
       id: 'reporting',
