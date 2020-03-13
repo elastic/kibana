@@ -23,7 +23,6 @@ import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { ManagedTable } from '../../../shared/ManagedTable';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
-import { APMLink } from '../../../shared/Links/apm/APMLink';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 import { APMQueryParams } from '../../../shared/Links/url_helpers';
 
