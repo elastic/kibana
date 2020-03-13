@@ -8,7 +8,7 @@ import dateMath from '@elastic/datemath';
 
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
 
-import { anomaliesTableData } from '../../machine_learning';
+import { getAnomalies } from '../../machine_learning';
 
 export const findMlSignals = async (
   jobId: string,
@@ -23,7 +23,7 @@ export const findMlSignals = async (
     earliestMs: dateMath.parse(from)!.valueOf(),
     latestMs: dateMath.parse(to)!.valueOf(),
   };
-  const relevantAnomalies = await anomaliesTableData(params, callCluster);
+  const relevantAnomalies = await getAnomalies(params, callCluster);
 
   return relevantAnomalies;
 };

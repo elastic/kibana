@@ -19,7 +19,7 @@ export interface AnomaliesSearchParams {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Anomaly = any;
 
-export const anomaliesTableData = async (
+export const getAnomalies = async (
   params: AnomaliesSearchParams,
   callCluster: AlertServices['callCluster']
 ): Promise<SearchResponse<Anomaly>> => {
