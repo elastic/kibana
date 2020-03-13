@@ -31,11 +31,10 @@ export type UiActionsStart = PublicMethodsOf<UiActionsService>;
 export class UiActionsPlugin implements Plugin<UiActionsSetup, UiActionsStart> {
   private readonly service = new UiActionsService();
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.service.registerTrigger(selectRangeTrigger);
-  }
+  constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): UiActionsSetup {
+    this.service.registerTrigger(selectRangeTrigger);
     return this.service;
   }
 
