@@ -44,17 +44,3 @@ export interface ActionFactoryDefinition<
     serializedAction: Omit<SerializedAction<Config>, 'factoryId'>
   ): ActionDefinition<ActionContext>;
 }
-
-export type AnyActionFactoryDefinition = ActionFactoryDefinition<any, any, any>;
-
-export type AFDConfig<T> = T extends ActionFactoryDefinition<infer Config, any, any>
-  ? Config
-  : never;
-
-export type AFDFactoryContext<T> = T extends ActionFactoryDefinition<any, infer FactoryContext, any>
-  ? FactoryContext
-  : never;
-
-export type AFDActionContext<T> = T extends ActionFactoryDefinition<any, any, infer ActionContext>
-  ? ActionContext
-  : never;

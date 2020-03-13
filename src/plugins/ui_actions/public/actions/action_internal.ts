@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { Action, ActionContext as Context, AnyActionDefinition } from './action';
+import { Action, ActionContext as Context, ActionDefinition } from './action';
 import { Presentable } from '../util/presentable';
 import { uiToReactComponent } from '../../../kibana_react/public';
 import { ActionType } from '../types';
 
-export class ActionInternal<A extends AnyActionDefinition>
+export class ActionInternal<A extends ActionDefinition = ActionDefinition>
   implements Action<Context<A>>, Presentable<Context<A>> {
   constructor(public readonly definition: A) {}
 
@@ -56,5 +56,3 @@ export class ActionInternal<A extends AnyActionDefinition>
     return this.definition.getHref(context);
   }
 }
-
-export type AnyActionInternal = ActionInternal<any>;

@@ -19,12 +19,10 @@
 
 import { UiComponent } from 'src/plugins/kibana_utils/common';
 
-export type ConfigurableBaseConfig = object;
-
 /**
  * Represents something that can be configured by user using UI.
  */
-export interface Configurable<Config extends ConfigurableBaseConfig = ConfigurableBaseConfig> {
+export interface Configurable<Config extends object = object> {
   /**
    * Create default config for this item, used when item is created for the first time.
    */
@@ -44,9 +42,7 @@ export interface Configurable<Config extends ConfigurableBaseConfig = Configurab
 /**
  * Props provided to `CollectConfig` component on every re-render.
  */
-export interface CollectConfigProps<
-  Config extends ConfigurableBaseConfig = ConfigurableBaseConfig
-> {
+export interface CollectConfigProps<Config extends object = object> {
   /**
    * Current (latest) config of the item.
    */
