@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { mockFatalError } from './subscribe_with_scope.test.mocks';
-
 import * as Rx from 'rxjs';
 import { subscribeWithScope } from './subscribe_with_scope';
 
@@ -73,14 +71,20 @@ it('calls observer.next() if already in a digest cycle, wraps in $scope.$apply i
 });
 
 it('reports fatalError if observer.next() throws', () => {
+  const fatalError = jest.fn();
   const $scope = new Scope();
-  subscribeWithScope($scope as any, Rx.of(undefined), {
-    next() {
-      throw new Error('foo bar');
+  subscribeWithScope(
+    $scope as any,
+    Rx.of(undefined),
+    {
+      next() {
+        throw new Error('foo bar');
+      },
     },
-  });
+    fatalError
+  );
 
-  expect(mockFatalError.mock.calls).toMatchInlineSnapshot(`
+  expect(fatalError.mock.calls).toMatchInlineSnapshot(`
 Array [
   Array [
     [Error: foo bar],
@@ -90,12 +94,13 @@ Array [
 });
 
 it('reports fatal error if observer.error is not defined and observable errors', () => {
+  const fatalError = jest.fn();
   const $scope = new Scope();
   const error = new Error('foo');
   error.stack = `${error.message}\n---stack trace ---`;
-  subscribeWithScope($scope as any, Rx.throwError(error));
+  subscribeWithScope($scope as any, Rx.throwError(error), undefined, fatalError);
 
-  expect(mockFatalError.mock.calls).toMatchInlineSnapshot(`
+  expect(fatalError.mock.calls).toMatchInlineSnapshot(`
 Array [
   Array [
     [Error: Uncaught error in subscribeWithScope(): foo
@@ -106,14 +111,20 @@ Array [
 });
 
 it('reports fatal error if observer.error throws', () => {
+  const fatalError = jest.fn();
   const $scope = new Scope();
-  subscribeWithScope($scope as any, Rx.throwError(new Error('foo')), {
-    error: () => {
-      throw new Error('foo');
+  subscribeWithScope(
+    $scope as any,
+    Rx.throwError(new Error('foo')),
+    {
+      error: () => {
+        throw new Error('foo');
+      },
     },
-  });
+    fatalError
+  );
 
-  expect(mockFatalError.mock.calls).toMatchInlineSnapshot(`
+  expect(fatalError.mock.calls).toMatchInlineSnapshot(`
 Array [
   Array [
     [Error: foo],
@@ -123,25 +134,37 @@ Array [
 });
 
 it('does not report fatal error if observer.error handles the error', () => {
+  const fatalError = jest.fn();
   const $scope = new Scope();
-  subscribeWithScope($scope as any, Rx.throwError(new Error('foo')), {
-    error: () => {
-      // noop, swallow error
+  subscribeWithScope(
+    $scope as any,
+    Rx.throwError(new Error('foo')),
+    {
+      error: () => {
+        // noop, swallow error
+      },
     },
-  });
+    fatalError
+  );
 
-  expect(mockFatalError.mock.calls).toEqual([]);
+  expect(fatalError.mock.calls).toEqual([]);
 });
 
 it('reports fatal error if observer.complete throws', () => {
+  const fatalError = jest.fn();
   const $scope = new Scope();
-  subscribeWithScope($scope as any, Rx.EMPTY, {
-    complete: () => {
-      throw new Error('foo');
+  subscribeWithScope(
+    $scope as any,
+    Rx.EMPTY,
+    {
+      complete: () => {
+        throw new Error('foo');
+      },
     },
-  });
+    fatalError
+  );
 
-  expect(mockFatalError.mock.calls).toMatchInlineSnapshot(`
+  expect(fatalError.mock.calls).toMatchInlineSnapshot(`
 Array [
   Array [
     [Error: foo],

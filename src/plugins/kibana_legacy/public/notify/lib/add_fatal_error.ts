@@ -16,8 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { FatalErrorsSetup } from '../../../../../core/public';
+import {
+  AngularHttpError,
+  formatAngularHttpError,
+  isAngularHttpError,
+} from './format_angular_http_error';
 
-export const mockFatalError = jest.fn();
-jest.mock('ui/notify/fatal_error', () => ({
-  fatalError: mockFatalError,
-}));
+export function addFatalError(
+  fatalErrors: FatalErrorsSetup,
+  error: AngularHttpError | Error | string,
+  location?: string
+) {
+  // add support for angular http errors to newPlatformFatalErrors
+  if (isAngularHttpError(error)) {
+    error = formatAngularHttpError(error);
+  }
+
+  fatalErrors.add(error, location);
+}
