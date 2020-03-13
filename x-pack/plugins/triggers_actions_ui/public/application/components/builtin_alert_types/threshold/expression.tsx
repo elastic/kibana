@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexItem,
   EuiFlexGroup,
+  EuiFormLabel,
   EuiExpression,
   EuiPopover,
   EuiPopoverTitle,
@@ -19,6 +20,8 @@ import {
   EuiComboBoxOptionOption,
   EuiFormRow,
   EuiCallOut,
+  EuiEmptyPrompt,
+  EuiText,
 } from '@elastic/eui';
 import { COMPARATORS, builtInComparators } from '../../../../common/constants';
 import {
@@ -38,6 +41,7 @@ import {
 import { builtInAggregationTypes } from '../../../../common/constants';
 import { IndexThresholdAlertParams } from './types';
 import { AlertsContextValue } from '../../../context/alerts_context';
+import './expression.scss';
 
 const DEFAULT_VALUES = {
   AGGREGATION_TYPE: 'count',
@@ -345,7 +349,15 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
           <EuiSpacer />
         </Fragment>
       ) : null}
-      <EuiFlexGroup gutterSize="s" wrap>
+      <EuiSpacer size="l" />
+      <EuiFormLabel>
+        <FormattedMessage
+          defaultMessage="Select Index to query:"
+          id="xpack.triggersActionsUI.sections.alertAdd.selectIndex"
+        />
+      </EuiFormLabel>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup wrap>
         <EuiFlexItem grow={false}>
           <EuiPopover
             id="indexPopover"
@@ -358,7 +370,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
                     defaultMessage: 'index',
                   }
                 )}
-                value={index || firstFieldOption.text}
+                value={index ? index.join(' ') : firstFieldOption.text}
                 isActive={indexPopoverOpen}
                 onClick={() => {
                   setIndexPopoverOpen(true);
@@ -388,6 +400,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
             </div>
           </EuiPopover>
         </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <WhenExpression
             aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
@@ -409,6 +423,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
             />
           </EuiFlexItem>
         ) : null}
+      </EuiFlexGroup>
+      <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <GroupByExpression
             groupBy={groupBy || DEFAULT_VALUES.GROUP_BY}
@@ -425,11 +441,22 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
             }
           />
         </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xl" />
+      <EuiFormLabel>
+        <FormattedMessage
+          defaultMessage="Define the alert condition:"
+          id="xpack.triggersActionsUI.sections.alertAdd.conditionPrompt"
+        />
+      </EuiFormLabel>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <ThresholdExpression
             thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
             threshold={threshold}
             errors={errors}
+            popupPosition={'upLeft'}
             onChangeSelectedThreshold={selectedThresholds =>
               setAlertParams('threshold', selectedThresholds)
             }
@@ -440,6 +467,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ForLastExpression
+            popupPosition={'upLeft'}
             timeWindowSize={timeWindowSize || 1}
             timeWindowUnit={timeWindowUnit || ''}
             errors={errors}
@@ -452,17 +480,35 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {canShowVizualization ? null : (
-        <Fragment>
-          <ThresholdVisualization
-            alertParams={alertParams}
-            alertInterval={alertInterval}
-            aggregationTypes={builtInAggregationTypes}
-            comparators={builtInComparators}
-            alertsContext={alertsContext}
-          />
-        </Fragment>
-      )}
+      <EuiSpacer size="l" />
+      <div className="actAlertVisualization__chart">
+        {canShowVizualization ? (
+          <Fragment>
+            <EuiSpacer size="xl" />
+            <EuiEmptyPrompt
+              iconType="visBarVertical"
+              body={
+                <EuiText color="subdued">
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.alertAdd.previewAlertVisualizationDescription"
+                    defaultMessage="Complete the expression above to generate a preview"
+                  />
+                </EuiText>
+              }
+            />
+          </Fragment>
+        ) : (
+          <Fragment>
+            <ThresholdVisualization
+              alertParams={alertParams}
+              alertInterval={alertInterval}
+              aggregationTypes={builtInAggregationTypes}
+              comparators={builtInComparators}
+              alertsContext={alertsContext}
+            />
+          </Fragment>
+        )}
+      </div>
     </Fragment>
   );
 };
