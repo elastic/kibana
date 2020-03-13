@@ -19,6 +19,7 @@ import { AlertIndex } from './view/alerts';
 import { ManagementList } from './view/managing';
 import { PolicyList } from './view/policy';
 import { HeaderNavigation } from './components/header_nav';
+import { setupRouteService } from '../../../../ingest_manager/common';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
@@ -28,6 +29,7 @@ export function renderApp(
   depsStart: EndpointPluginStartDependencies,
   { appBasePath, element }: AppMountParameters
 ) {
+  coreStart.http.post(setupRouteService.getSetupPath());
   coreStart.http.get('/api/endpoint/hello-world');
   const store = appStoreFactory({ coreStart, depsStart });
   ReactDOM.render(
