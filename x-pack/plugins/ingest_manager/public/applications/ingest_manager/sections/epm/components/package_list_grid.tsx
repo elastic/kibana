@@ -12,8 +12,10 @@ import {
   EuiTitle,
   // @ts-ignore
   EuiSearchBar,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Loading } from '../../../components';
 import { PackageList } from '../../../types';
 import { useLocalSearch, searchIdField } from '../hooks';
@@ -102,11 +104,24 @@ type GridColumnProps = {
 function GridColumn({ list }: GridColumnProps) {
   return (
     <EuiFlexGrid gutterSize="l" columns={3}>
-      {list.map(item => (
-        <EuiFlexItem key={`${item.name}-${item.version}`}>
-          <PackageCard {...item} />
+      {list.length ? (
+        list.map(item => (
+          <EuiFlexItem key={`${item.name}-${item.version}`}>
+            <PackageCard {...item} />
+          </EuiFlexItem>
+        ))
+      ) : (
+        <EuiFlexItem>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.ingestManager.epmList.noPackagesFoundPlaceholder"
+                defaultMessage="No packages found"
+              />
+            </p>
+          </EuiText>
         </EuiFlexItem>
-      ))}
+      )}
     </EuiFlexGrid>
   );
 }

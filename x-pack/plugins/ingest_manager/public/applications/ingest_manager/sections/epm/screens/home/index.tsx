@@ -61,7 +61,7 @@ function InstalledPackages() {
   const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages();
   const [selectedCategory, setSelectedCategory] = useState('');
   const packages =
-    allPackages && allPackages.response
+    allPackages && allPackages.response && selectedCategory === ''
       ? allPackages.response.filter(pkg => pkg.status === 'installed')
       : [];
 
@@ -82,7 +82,7 @@ function InstalledPackages() {
       title: i18n.translate('xpack.ingestManager.epmList.updatesAvailableFilterLinkText', {
         defaultMessage: 'Updates available',
       }),
-      count: 0,
+      count: 0, // TODO: Update with real count when available
     },
   ];
 
