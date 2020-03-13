@@ -7,7 +7,7 @@ import yargs = require('yargs');
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { EndpointDocGenerator } from '../common/generate_data';
-import { default as mapping } from '../common/mapping.json';
+import { default as mapping } from './mapping.json';
 
 main();
 
