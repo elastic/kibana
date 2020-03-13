@@ -89,102 +89,102 @@ export class ReportInfoButton extends Component<Props, State> {
     const timeout = info.timeout ? info.timeout.toString() : NA;
     const warnings = info.output && info.output.warnings ? info.output.warnings.join(',') : null;
 
-    const jobInfoParts: JobInfoMap = {
-      datetimes: [
-        {
-          title: 'Created By',
-          description: info.created_by || NA,
-        },
-        {
-          title: 'Created At',
-          description: info.created_at || NA,
-        },
-        {
-          title: 'Started At',
-          description: info.started_at || NA,
-        },
-        {
-          title: 'Completed At',
-          description: info.completed_at || NA,
-        },
-        {
-          title: 'Processed By',
-          description:
-            info.kibana_name && info.kibana_id
-              ? `${info.kibana_name} (${info.kibana_id})`
-              : UNKNOWN,
-        },
-        {
-          title: 'Browser Timezone',
-          description: get(info, 'payload.browserTimezone') || NA,
-        },
-      ],
-      payload: [
-        {
-          title: 'Title',
-          description: get(info, 'payload.title') || NA,
-        },
-        {
-          title: 'Type',
-          description: get(info, 'payload.type') || NA,
-        },
-        {
-          title: 'Layout',
-          description: get(info, 'meta.layout') || NA,
-        },
-        {
-          title: 'Dimensions',
-          description: getDimensions(info),
-        },
-        {
-          title: 'Job Type',
-          description: jobType,
-        },
-        {
-          title: 'Content Type',
-          description: get(info, 'output.content_type') || NA,
-        },
-        {
-          title: 'Size in Bytes',
-          description: get(info, 'output.size') || NA,
-        },
-      ],
-      status: [
-        {
-          title: 'Attempts',
-          description: attempts,
-        },
-        {
-          title: 'Max Attempts',
-          description: maxAttempts,
-        },
-        {
-          title: 'Priority',
-          description: priority,
-        },
-        {
-          title: 'Timeout',
-          description: timeout,
-        },
-        {
-          title: 'Status',
-          description: info.status || NA,
-        },
-        {
-          title: 'Browser Type',
-          description: USES_HEADLESS_JOB_TYPES.includes(jobType)
-            ? info.browser_type || UNKNOWN
-            : NA,
-        },
-      ],
-    };
+    const jobInfoDateTimes: JobInfo[] = [
+      {
+        title: 'Created By',
+        description: info.created_by || NA,
+      },
+      {
+        title: 'Created At',
+        description: info.created_at || NA,
+      },
+      {
+        title: 'Started At',
+        description: info.started_at || NA,
+      },
+      {
+        title: 'Completed At',
+        description: info.completed_at || NA,
+      },
+      {
+        title: 'Processed By',
+        description:
+          info.kibana_name && info.kibana_id ? `${info.kibana_name} (${info.kibana_id})` : UNKNOWN,
+      },
+      {
+        title: 'Browser Timezone',
+        description: get(info, 'payload.browserTimezone') || NA,
+      },
+    ];
+    const jobInfoPayload: JobInfo[] = [
+      {
+        title: 'Title',
+        description: get(info, 'payload.title') || NA,
+      },
+      {
+        title: 'Type',
+        description: get(info, 'payload.type') || NA,
+      },
+      {
+        title: 'Layout',
+        description: get(info, 'meta.layout') || NA,
+      },
+      {
+        title: 'Dimensions',
+        description: getDimensions(info),
+      },
+      {
+        title: 'Job Type',
+        description: jobType,
+      },
+      {
+        title: 'Content Type',
+        description: get(info, 'output.content_type') || NA,
+      },
+      {
+        title: 'Size in Bytes',
+        description: get(info, 'output.size') || NA,
+      },
+    ];
+    const jobInfoStatus: JobInfo[] = [
+      {
+        title: 'Attempts',
+        description: attempts,
+      },
+      {
+        title: 'Max Attempts',
+        description: maxAttempts,
+      },
+      {
+        title: 'Priority',
+        description: priority,
+      },
+      {
+        title: 'Timeout',
+        description: timeout,
+      },
+      {
+        title: 'Status',
+        description: info.status || NA,
+      },
+      {
+        title: 'Browser Type',
+        description: USES_HEADLESS_JOB_TYPES.includes(jobType) ? info.browser_type || UNKNOWN : NA,
+      },
+    ];
 
     if (warnings) {
-      jobInfoParts.status.push({
+      jobInfoStatus.push({
         title: 'Errors',
         description: warnings,
       });
     }
+
+    const jobInfoParts: JobInfoMap = {
+      datetimes: jobInfoDateTimes,
+      payload: jobInfoPayload,
+      status: jobInfoStatus,
+    };
 
     return (
       <Fragment>

@@ -285,7 +285,7 @@ class ReportListingUi extends Component<Props, State> {
             return (
               <div>
                 <FormattedMessage
-                  id="xpack.reporting.listing.tableValue.createdAtDetail.statusTimestampText"
+                  id="xpack.reporting.listing.tableValue.statusDetail.statusTimestampText"
                   defaultMessage="{statusLabel} at {statusTimestamp}"
                   values={{
                     statusLabel,
@@ -293,6 +293,7 @@ class ReportListingUi extends Component<Props, State> {
                   }}
                 />
                 {maxSizeReached}
+                {warnings}
               </div>
             );
           }
