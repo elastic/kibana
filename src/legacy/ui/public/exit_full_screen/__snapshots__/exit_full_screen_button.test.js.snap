@@ -12,19 +12,46 @@ exports[`is rendered 1`] = `
     <button
       aria-label="Exit full screen mode"
       class="dshExitFullScreenButton"
+      data-test-subj="exitFullScreenModeLogo"
     >
       <span
-        class="dshExitFullScreenButton__logo"
-        data-test-subj="exitFullScreenModeLogo"
-      />
-      <span
-        class="dshExitFullScreenButton__text"
-        data-test-subj="exitFullScreenModeText"
+        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
       >
-        Exit full screen
         <div
-          data-euiicon-type="arrowLeft"
-        />
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            data-euiicon-type="logoElastic"
+          />
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+          data-test-subj="exitFullScreenModeText"
+        >
+          <div
+            class="euiText euiText--extraSmall"
+          >
+            <div
+              class="euiTextColor euiTextColor--subdued"
+            >
+              <p>
+                Powered by
+              </p>
+            </div>
+          </div>
+          <p
+            class="euiTitle euiTitle--xxsmall"
+          >
+            Elastic Kibana
+          </p>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            data-euiicon-type="cross"
+          />
+        </div>
       </span>
     </button>
   </div>
