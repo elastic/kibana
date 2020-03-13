@@ -5,9 +5,9 @@
  */
 
 import { initDeleteCasesApi } from './cases/delete_cases';
-import { initGetAllCasesApi } from './cases/get_all_cases';
+import { initFindCasesApi } from '././cases/find_cases';
 import { initGetCaseApi } from './cases/get_case';
-import { initPatchCaseApi } from './cases/patch_case';
+import { initPatchCasesApi } from './cases/patch_cases';
 import { initPostCaseApi } from './cases/post_case';
 
 import { initDeleteCommentApi } from './cases/comments/delete_comment';
@@ -18,22 +18,33 @@ import { initGetCommentApi } from './cases/comments/get_comment';
 import { initPatchCommentApi } from './cases/comments/patch_comment';
 import { initPostCommentApi } from './cases/comments/post_comment';
 
+import { initGetReportersApi } from './cases/reporters/get_reporters';
+
+import { initGetCasesStatusApi } from './cases/status/get_status';
+
 import { initGetTagsApi } from './cases/tags/get_tags';
 
 import { RouteDeps } from './types';
 
 export function initCaseApi(deps: RouteDeps) {
+  // Cases
   initDeleteCasesApi(deps);
+  initFindCasesApi(deps);
+  initGetCaseApi(deps);
+  initPatchCasesApi(deps);
+  initPostCaseApi(deps);
+  // Comments
   initDeleteCommentApi(deps);
   initDeleteAllCommentsApi(deps);
   initFindCaseCommentsApi(deps);
-  initGetAllCasesApi(deps);
-  initGetCaseApi(deps);
   initGetCommentApi(deps);
   initGetAllCommentsApi(deps);
-  initGetTagsApi(deps);
-  initPostCaseApi(deps);
-  initPostCommentApi(deps);
-  initPatchCaseApi(deps);
   initPatchCommentApi(deps);
+  initPostCommentApi(deps);
+  // Reporters
+  initGetReportersApi(deps);
+  // Status
+  initGetCasesStatusApi(deps);
+  // Tags
+  initGetTagsApi(deps);
 }
