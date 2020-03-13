@@ -338,12 +338,7 @@ async function fetchBeatsByType(
       'hits.hits._source.beats_stats.beat.host',
       'hits.hits._source.beats_stats.metrics.libbeat.pipeline.events.published',
       'hits.hits._source.beats_stats.metrics.libbeat.output.type',
-      'hits.hits._source.beats_state.state.input',
-      'hits.hits._source.beats_state.state.module',
-      'hits.hits._source.beats_state.state.queue',
-      'hits.hits._source.beats_state.state.host',
-      'hits.hits._source.beats_state.state.heartbeat',
-      'hits.hits._source.beats_state.state.functionbeat',
+      'hits.hits._source.beats_state.state',
       'hits.hits._source.beats_state.beat.type',
     ],
     body: {
