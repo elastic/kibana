@@ -45,7 +45,7 @@ export function getAlertType(): AlertTypeModel {
       if (instances && instances < 0) {
         validationResult.errors.instances.push(
           i18n.translate('AlertingExample.addAlert.error.invalidRandomInstances', {
-            defaultMessage: 'RandomInstances must be equal or greater than zero.',
+            defaultMessage: 'instances must be equal or greater than zero.',
           })
         );
       }

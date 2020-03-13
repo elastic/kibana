@@ -25,7 +25,6 @@ import {
   loadAlert,
   loadAlertState,
   loadAlertTypes,
-  loadAlertNavigation,
 } from '../../../lib/alert_api';
 
 export interface ComponentOpts {
@@ -43,7 +42,6 @@ export interface ComponentOpts {
   deleteAlert: (alert: Alert) => Promise<void>;
   loadAlert: (id: Alert['id']) => Promise<Alert>;
   loadAlertState: (id: Alert['id']) => Promise<AlertTaskState>;
-  loadAlertNavigation: (id: Alert['id']) => Promise<AlertNavigation>;
   loadAlertTypes: () => Promise<AlertType[]>;
 }
 
@@ -108,7 +106,6 @@ export function withBulkAlertOperations<T>(
         deleteAlert={async (alert: Alert) => deleteAlert({ http, id: alert.id })}
         loadAlert={async (alertId: Alert['id']) => loadAlert({ http, alertId })}
         loadAlertState={async (alertId: Alert['id']) => loadAlertState({ http, alertId })}
-        loadAlertNavigation={async (alertId: Alert['id']) => loadAlertNavigation({ http, alertId })}
         loadAlertTypes={async () => loadAlertTypes({ http })}
       />
     );

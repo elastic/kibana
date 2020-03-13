@@ -27,16 +27,6 @@ export async function loadAlert({
   return await http.get(`${BASE_ALERT_API_PATH}/${alertId}`);
 }
 
-export async function loadAlertNavigation({
-  http,
-  alertId,
-}: {
-  http: HttpSetup;
-  alertId: string;
-}): Promise<AlertNavigation> {
-  return await http.get(`${BASE_ALERT_API_PATH}/${alertId}/navigation`);
-}
-
 type EmptyHttpResponse = '';
 export async function loadAlertState({
   http,

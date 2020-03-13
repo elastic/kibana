@@ -25,21 +25,25 @@ export interface PluginStartContract {
 export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginStartContract> {
   private alertNavigationRegistry?: AlertNavigationRegistry;
   public setup(core: CoreSetup) {
-    const alertNavigationRegistry = new AlertNavigationRegistry();
-    this.alertNavigationRegistry = alertNavigationRegistry;
+    this.alertNavigationRegistry = new AlertNavigationRegistry();
+
+    const registerNavigation = async (
+      consumer: string,
+      alertType: string,
+      handler: AlertNavigationHandler
+    ) =>
+      this.alertNavigationRegistry!.register(
+        consumer,
+        await loadAlertType({ http: core.http, id: alertType }),
+        handler
+      );
+
+    const registerDefaultNavigation = async (consumer: string, handler: AlertNavigationHandler) =>
+      this.alertNavigationRegistry!.registerDefault(consumer, handler);
+
     return {
-      registerNavigation: async (
-        consumer: string,
-        alertType: string,
-        handler: AlertNavigationHandler
-      ) =>
-        alertNavigationRegistry.register(
-          consumer,
-          await loadAlertType({ http: core.http, id: alertType }),
-          handler
-        ),
-      registerDefaultNavigation: async (consumer: string, handler: AlertNavigationHandler) =>
-        alertNavigationRegistry.registerDefault(consumer, handler),
+      registerNavigation,
+      registerDefaultNavigation,
     };
   }
 
