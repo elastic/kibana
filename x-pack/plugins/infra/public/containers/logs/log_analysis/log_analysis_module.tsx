@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { useModuleStatus } from './log_analysis_module_status';
@@ -144,6 +144,27 @@ export const useLogAnalysisModule = <JobType extends string>({
     moduleDescriptor,
     spaceId,
     sourceId,
+  ]);
+
+  useEffect(() => {
+    dispatchModuleStatus({
+      type: 'updatedSourceConfiguration',
+      spaceId,
+      sourceId,
+      sourceConfiguration: {
+        timestampField,
+        indexPattern: indices.join(','),
+        bucketSpan: moduleDescriptor.bucketSpan,
+      },
+    });
+  }, [
+    dispatchModuleStatus,
+    indices,
+    moduleDescriptor.bucketSpan,
+    sourceConfiguration,
+    sourceId,
+    spaceId,
+    timestampField,
   ]);
 
   return {
