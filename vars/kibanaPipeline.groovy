@@ -98,7 +98,7 @@ def withGcsArtifactUpload(workerName, closure) {
   def uploadPrefix = "kibana-pipeline-testing/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
     'target/kibana-*',
-    'target/functional_test_suite_metrics.json',
+    'target/test-metrics/*',
     'target/junit/**/*',
     'test/**/screenshots/**/*.png',
     'test/functional/failure_debug/html/*.html',

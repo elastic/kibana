@@ -84,24 +84,27 @@ kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
                 def filename = "metrics-${date}.json"
 
                 writeFile(file: filename, text: metricsJson)
-                googleStorageUpload(
-                  credentialsId: 'kibana-ci-gcs-plugin',
-                  bucket: "gs://kibana-ci-functional-metrics/${kibanaPipeline.getTargetBranch()}",
-                  pattern: filename,
-                  sharedPublicly: true,
-                  showInline: true,
-                )
 
-                def status = buildUtils.getBuildStatus()
-                if (status == 'SUCCESS' || status == 'UNSTABLE') {
-                  sh "cp '${filename}' latest.json"
+                if (!githubPr.isPr()) {
                   googleStorageUpload(
                     credentialsId: 'kibana-ci-gcs-plugin',
                     bucket: "gs://kibana-ci-functional-metrics/${kibanaPipeline.getTargetBranch()}",
-                    pattern: 'latest.json',
+                    pattern: filename,
                     sharedPublicly: true,
                     showInline: true,
                   )
+
+                  def status = buildUtils.getBuildStatus()
+                  if (status == 'SUCCESS' || status == 'UNSTABLE') {
+                    sh "cp '${filename}' latest.json"
+                    googleStorageUpload(
+                      credentialsId: 'kibana-ci-gcs-plugin',
+                      bucket: "gs://kibana-ci-functional-metrics/${kibanaPipeline.getTargetBranch()}",
+                      pattern: 'latest.json',
+                      sharedPublicly: true,
+                      showInline: true,
+                    )
+                  }
                 }
               }
             }
