@@ -7,7 +7,6 @@
 import { schema, Type } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { decode } from 'rison-node';
-import { fromKueryExpression } from '../../../../../src/plugins/data/common';
 import { EndpointAppConstants } from '../types';
 
 /**
@@ -44,10 +43,10 @@ export const alertingIndexGetQuerySchema = schema.object(
       schema.string({
         validate(value) {
           try {
-            fromKueryExpression(value);
+            decode(value);
           } catch (err) {
-            return i18n.translate('xpack.endpoint.alerts.errors.bad_kql', {
-              defaultMessage: 'must be valid KQL',
+            return i18n.translate('xpack.endpoint.alerts.errors.bad_rison', {
+              defaultMessage: 'must be a valid rison-encoded string',
             });
           }
         },
