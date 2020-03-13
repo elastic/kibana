@@ -5,6 +5,8 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
+import { TypeOf } from '@kbn/config-schema';
+import { alertingIndexGetQuerySchema } from './schema/alert_index';
 
 /**
  * A deep readonly type that will make all children of a given object readonly recursively
@@ -24,16 +26,13 @@ export type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
 export type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
 export type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
 
-export enum Direction {
-  asc = 'asc',
-  desc = 'desc',
-}
+export type Direction = 'asc' | 'desc';
 
 export class EndpointAppConstants {
   static BASE_API_URL = '/api/endpoint';
-  static ALERT_INDEX_NAME = 'my-index';
   static ENDPOINT_INDEX_NAME = 'endpoint-agent*';
-  static EVENT_INDEX_NAME = 'endpoint-events-*';
+  static ALERT_INDEX_NAME = 'events-endpoint-1';
+  static EVENT_INDEX_NAME = 'events-endpoint-*';
   static DEFAULT_TOTAL_HITS = 10000;
   /**
    * Legacy events are stored in indices with endgame-* prefix
@@ -45,7 +44,6 @@ export class EndpointAppConstants {
    **/
   static ALERT_LIST_DEFAULT_PAGE_SIZE = 10;
   static ALERT_LIST_DEFAULT_SORT = '@timestamp';
-  static ALERT_LIST_DEFAULT_ORDER = Direction.desc;
 }
 
 export interface AlertResultList {
@@ -168,29 +166,34 @@ export type AlertEvent = Immutable<{
     module: string;
     type: string;
   };
+  endpoint: {
+    policy: {
+      id: string;
+    };
+  };
   process: {
     code_signature: {
       subject_name: string;
       trusted: boolean;
     };
-    command_line: string;
-    domain: string;
+    command_line?: string;
+    domain?: string;
     pid: number;
-    ppid: number;
+    ppid?: number;
     entity_id: string;
-    parent: {
+    parent?: {
       pid: number;
       entity_id: string;
     };
     name: string;
     hash: HashFields;
-    pe: {
+    pe?: {
       imphash: string;
     };
     executable: string;
-    sid: string;
+    sid?: string;
     start: number;
-    malware_classifier: MalwareClassifierFields;
+    malware_classifier?: MalwareClassifierFields;
     token: {
       domain: string;
       type: string;
@@ -198,9 +201,9 @@ export type AlertEvent = Immutable<{
       sid: string;
       integrity_level: number;
       integrity_level_name: string;
-      privileges: PrivilegesFields[];
+      privileges?: PrivilegesFields[];
     };
-    thread: ThreadFields[];
+    thread?: ThreadFields[];
     uptime: number;
     user: string;
   };
@@ -213,32 +216,20 @@ export type AlertEvent = Immutable<{
     created: number;
     size: number;
     hash: HashFields;
-    pe: {
+    pe?: {
       imphash: string;
     };
     code_signature: {
       trusted: boolean;
       subject_name: string;
     };
-    malware_classifier: {
-      features: {
-        data: {
-          buffer: string;
-          decompressed_size: number;
-          encoding: string;
-        };
-      };
-    } & MalwareClassifierFields;
+    malware_classifier: MalwareClassifierFields;
     temp_file_path: string;
   };
   host: HostFields;
-  thread: {};
-  dll: DllFields[];
+  dll?: DllFields[];
 }>;
 
-/**
- * Metadata associated with an alert event.
- */
 interface AlertMetadata {
   id: string;
 
@@ -253,9 +244,9 @@ interface AlertMetadata {
 export type AlertData = AlertEvent & AlertMetadata;
 
 export interface EndpointMetadata {
-  '@timestamp': string;
+  '@timestamp': number;
   event: {
-    created: Date;
+    created: number;
   };
   endpoint: {
     policy: {
@@ -263,8 +254,8 @@ export interface EndpointMetadata {
     };
   };
   agent: {
-    version: string;
     id: string;
+    version: string;
   };
   host: HostFields;
 }
@@ -311,22 +302,32 @@ export interface LegacyEndpointEvent {
 
 export interface EndpointEvent {
   '@timestamp': number;
+  agent: {
+    id: string;
+    version: string;
+    type: string;
+  };
+  ecs: {
+    version: string;
+  };
   event: {
     category: string;
     type: string;
     id: string;
+    kind: string;
   };
-  endpoint: {
-    process: {
-      entity_id: string;
-      parent: {
-        entity_id: string;
-      };
-    };
-  };
-  agent: {
+  host: {
     id: string;
-    type: string;
+    hostname: string;
+    ip: string[];
+    mac: string[];
+    os: OSFields;
+  };
+  process: {
+    entity_id: string;
+    parent?: {
+      entity_id: string;
+    };
   };
 }
 
@@ -336,3 +337,71 @@ export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
  * The PageId type is used for the payload when firing userNavigatedToPage actions
  */
 export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';
+
+/**
+ * Takes a @kbn/config-schema 'schema' type and returns a type that represents valid inputs.
+ * Similar to `TypeOf`, but allows strings as input for `schema.number()` (which is inline
+ * with the behavior of the validator.) Also, for `schema.object`, when a value is a `schema.maybe`
+ * the key will be marked optional (via `?`) so that you can omit keys for optional values.
+ *
+ * Use this when creating a value that will be passed to the schema.
+ * e.g.
+ * ```ts
+ * const input: KbnConfigSchemaInputTypeOf<typeof schema> = value
+ * schema.validate(input) // should be valid
+ * ```
+ * Note that because the types coming from `@kbn/config-schema`'s schemas sometimes have deeply nested
+ * `Type` types, we process the result of `TypeOf` instead, as this will be consistent.
+ */
+type KbnConfigSchemaInputTypeOf<T> = T extends Record<string, unknown>
+  ? KbnConfigSchemaInputObjectTypeOf<
+      T
+    > /** `schema.number()` accepts strings, so this type should accept them as well. */
+  : number extends T
+  ? T | string
+  : T;
+
+/**
+ * Works like ObjectResultType, except that 'maybe' schema will create an optional key.
+ * This allows us to avoid passing 'maybeKey: undefined' when constructing such an object.
+ *
+ * Instead of using this directly, use `InputTypeOf`.
+ */
+type KbnConfigSchemaInputObjectTypeOf<P extends Record<string, unknown>> = {
+  /** Use ? to make the field optional if the prop accepts undefined.
+   * This allows us to avoid writing `field: undefined` for optional fields.
+   */
+  [K in Exclude<keyof P, keyof KbnConfigSchemaNonOptionalProps<P>>]?: KbnConfigSchemaInputTypeOf<
+    P[K]
+  >;
+} &
+  { [K in keyof KbnConfigSchemaNonOptionalProps<P>]: KbnConfigSchemaInputTypeOf<P[K]> };
+
+/**
+ * Takes the props of a schema.object type, and returns a version that excludes
+ * optional values. Used by `InputObjectTypeOf`.
+ *
+ * Instead of using this directly, use `InputTypeOf`.
+ */
+type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pick<
+  Props,
+  {
+    [Key in keyof Props]: undefined extends Props[Key]
+      ? never
+      : null extends Props[Key]
+      ? never
+      : Key;
+  }[keyof Props]
+>;
+
+/**
+ * Query params to pass to the alert API when fetching new data.
+ */
+export type AlertingIndexGetQueryInput = KbnConfigSchemaInputTypeOf<
+  TypeOf<typeof alertingIndexGetQuerySchema>
+>;
+
+/**
+ * Result of the validated query params when handling alert index requests.
+ */
+export type AlertingIndexGetQueryResult = TypeOf<typeof alertingIndexGetQuerySchema>;

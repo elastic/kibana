@@ -69,7 +69,7 @@ const statusCountBody = (filters: any): any => {
               field: 'summary',
             },
           },
-          filters,
+          ...filters,
         ],
       },
     },

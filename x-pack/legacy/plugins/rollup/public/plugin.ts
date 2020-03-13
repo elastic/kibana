@@ -7,14 +7,12 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { AggTypeFilters, AggTypeFieldFilters } from './legacy_imports';
-import { SearchStrategyProvider } from '../../../../../src/plugins/data/public';
 import { ManagementSetup as ManagementSetupLegacy } from '../../../../../src/legacy/core_plugins/management/public/np_ready';
 import { rollupBadgeExtension, rollupToggleExtension } from './extend_index_management';
 // @ts-ignore
 import { RollupIndexPatternCreationConfig } from './index_pattern_creation/rollup_index_pattern_creation_config';
 // @ts-ignore
 import { RollupIndexPatternListConfig } from './index_pattern_list/rollup_index_pattern_list_config';
-import { getRollupSearchStrategy } from './search/rollup_search_strategy';
 // @ts-ignore
 import { initAggTypeFilter } from './visualize/agg_type_filter';
 // @ts-ignore
@@ -37,7 +35,6 @@ export interface RollupPluginSetupDependencies {
   __LEGACY: {
     aggTypeFilters: AggTypeFilters;
     aggTypeFieldFilters: AggTypeFieldFilters;
-    addSearchStrategy: (searchStrategy: SearchStrategyProvider) => void;
     managementLegacy: ManagementSetupLegacy;
   };
   home?: HomePublicPluginSetup;
@@ -49,7 +46,7 @@ export class RollupPlugin implements Plugin {
   setup(
     core: CoreSetup,
     {
-      __LEGACY: { aggTypeFilters, aggTypeFieldFilters, addSearchStrategy, managementLegacy },
+      __LEGACY: { aggTypeFilters, aggTypeFieldFilters, managementLegacy },
       home,
       management,
       indexManagement,
@@ -67,7 +64,6 @@ export class RollupPlugin implements Plugin {
     if (isRollupIndexPatternsEnabled) {
       managementLegacy.indexPattern.creation.add(RollupIndexPatternCreationConfig);
       managementLegacy.indexPattern.list.add(RollupIndexPatternListConfig);
-      addSearchStrategy(getRollupSearchStrategy(core.http.fetch));
       initAggTypeFilter(aggTypeFilters);
       initAggTypeFieldFilter(aggTypeFieldFilters);
     }

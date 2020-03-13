@@ -238,7 +238,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             responsive={false}
           >
             <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
+              <EuiButton fill onClick={onSubmit} isDisabled={isLoading} data-test-subj="continue">
                 {RuleI18n.CONTINUE}
               </EuiButton>
             </EuiFlexItem>

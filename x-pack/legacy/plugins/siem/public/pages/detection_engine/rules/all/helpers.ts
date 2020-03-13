@@ -5,17 +5,16 @@
  */
 
 import {
-  Rule,
-  RuleError,
+  BulkRuleResponse,
   RuleResponseBuckets,
 } from '../../../../containers/detection_engine/rules';
 
 /**
  * Separates rules/errors from bulk rules API response (create/update/delete)
  *
- * @param response Array<Rule | RuleError> from bulk rules API
+ * @param response BulkRuleResponse from bulk rules API
  */
-export const bucketRulesResponse = (response: Array<Rule | RuleError>) =>
+export const bucketRulesResponse = (response: BulkRuleResponse) =>
   response.reduce<RuleResponseBuckets>(
     (acc, cv): RuleResponseBuckets => {
       return 'error' in cv

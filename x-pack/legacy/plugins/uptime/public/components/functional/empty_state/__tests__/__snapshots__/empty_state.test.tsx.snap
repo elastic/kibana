@@ -186,25 +186,11 @@ exports[`EmptyState component does not render empty state with appropriate base 
                       size="xxl"
                       type="uptimeApp"
                     >
-                      <EuiIconEmpty
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
-                        focusable="false"
-                        role="img"
-                        style={null}
-                      >
-                        <svg
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
-                          focusable="false"
-                          height={16}
-                          role="img"
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
-                        />
-                      </EuiIconEmpty>
+                      <div
+                        color="subdued"
+                        data-euiicon-type="uptimeApp"
+                        size="xxl"
+                      />
                     </EuiIcon>
                     <EuiSpacer
                       size="s"
@@ -653,25 +639,11 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                       size="xxl"
                       type="uptimeApp"
                     >
-                      <EuiIconEmpty
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
-                        focusable="false"
-                        role="img"
-                        style={null}
-                      >
-                        <svg
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
-                          focusable="false"
-                          height={16}
-                          role="img"
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
-                        />
-                      </EuiIconEmpty>
+                      <div
+                        color="subdued"
+                        data-euiicon-type="uptimeApp"
+                        size="xxl"
+                      />
                     </EuiIcon>
                     <EuiSpacer
                       size="s"
@@ -962,25 +934,11 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
                       size="xxl"
                       type="securityApp"
                     >
-                      <EuiIconEmpty
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
-                        focusable="false"
-                        role="img"
-                        style={null}
-                      >
-                        <svg
-                          aria-hidden={true}
-                          className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
-                          focusable="false"
-                          height={16}
-                          role="img"
-                          style={null}
-                          viewBox="0 0 16 16"
-                          width={16}
-                          xmlns="http://www.w3.org/2000/svg"
-                        />
-                      </EuiIconEmpty>
+                      <div
+                        color="subdued"
+                        data-euiicon-type="securityApp"
+                        size="xxl"
+                      />
                     </EuiIcon>
                     <EuiSpacer
                       size="s"

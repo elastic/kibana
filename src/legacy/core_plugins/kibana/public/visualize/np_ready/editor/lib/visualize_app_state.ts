@@ -17,21 +17,20 @@
  * under the License.
  */
 
-import { createHashHistory } from 'history';
-import { isFunction, omit } from 'lodash';
+import { isFunction, omit, union } from 'lodash';
 
 import { migrateAppState } from './migrate_app_state';
 import {
-  createKbnUrlStateStorage,
   createStateContainer,
   syncState,
+  IKbnUrlStateStorage,
 } from '../../../../../../../../plugins/kibana_utils/public';
 import { PureVisState, VisualizeAppState, VisualizeAppStateTransitions } from '../../types';
 
 const STATE_STORAGE_KEY = '_a';
 
 interface Arguments {
-  useHash: boolean;
+  kbnUrlStateStorage: IKbnUrlStateStorage;
   stateDefaults: VisualizeAppState;
 }
 
@@ -41,12 +40,7 @@ function toObject(state: PureVisState): PureVisState {
   });
 }
 
-export function useVisualizeAppState({ useHash, stateDefaults }: Arguments) {
-  const history = createHashHistory();
-  const kbnUrlStateStorage = createKbnUrlStateStorage({
-    useHash,
-    history,
-  });
+export function useVisualizeAppState({ stateDefaults, kbnUrlStateStorage }: Arguments) {
   const urlState = kbnUrlStateStorage.get<VisualizeAppState>(STATE_STORAGE_KEY);
   const initialState = migrateAppState({
     ...stateDefaults,
@@ -81,13 +75,18 @@ export function useVisualizeAppState({ useHash, stateDefaults }: Arguments) {
           query: defaultQuery,
         };
       },
-      unlinkSavedSearch: state => (query, filters) => ({
+      unlinkSavedSearch: state => ({ query, parentFilters = [] }) => ({
         ...state,
-        query,
-        filters,
+        query: query || state.query,
+        filters: union(state.filters, parentFilters),
         linked: false,
       }),
       updateVisState: state => newVisState => ({ ...state, vis: toObject(newVisState) }),
+      updateFromSavedQuery: state => savedQuery => ({
+        ...state,
+        savedQuery: savedQuery.id,
+        query: savedQuery.attributes.query,
+      }),
     }
   );
 

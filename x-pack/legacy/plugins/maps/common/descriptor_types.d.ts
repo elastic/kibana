@@ -35,13 +35,13 @@ export type AggDescriptor = {
   type: AGG_TYPE;
 };
 
-export type AbstractESAggDescriptor = AbstractESSourceDescriptor & {
+export type AbstractESAggSourceDescriptor = AbstractESSourceDescriptor & {
   metrics: AggDescriptor[];
 };
 
-export type ESGeoGridSourceDescriptor = AbstractESAggDescriptor & {
-  requestType: RENDER_AS;
-  resolution: GRID_RESOLUTION;
+export type ESGeoGridSourceDescriptor = AbstractESAggSourceDescriptor & {
+  requestType?: RENDER_AS;
+  resolution?: GRID_RESOLUTION;
 };
 
 export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
@@ -54,12 +54,12 @@ export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
   topHitsSize?: number;
 };
 
-export type ESPewPewSourceDescriptor = AbstractESAggDescriptor & {
+export type ESPewPewSourceDescriptor = AbstractESAggSourceDescriptor & {
   sourceGeoField: string;
   destGeoField: string;
 };
 
-export type ESTermSourceDescriptor = AbstractESAggDescriptor & {
+export type ESTermSourceDescriptor = AbstractESAggSourceDescriptor & {
   indexPatternTitle: string;
   term: string; // term field name
 };
