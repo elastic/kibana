@@ -34,6 +34,7 @@ import { UpgradeAssistantProvider } from './upgrade_assistant';
 // @ts-ignore not ts yet
 import { RollupPageProvider } from './rollup_page';
 import { UptimePageProvider } from './uptime_page';
+import { ApiKeysPageProvider } from './api_keys_page';
 import { LicenseManagementPageProvider } from './license_management_page';
 import { IndexManagementPageProvider } from './index_management_page';
 import { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
@@ -46,6 +47,7 @@ import { InfraMetricExplorerProvider } from './infra_metric_explorer';
 import { RoleMappingsPageProvider } from './role_mappings_page';
 import { SpaceSelectorPageProvider } from './space_selector_page';
 import { EndpointPageProvider } from './endpoint_page';
+import { EndpointAlertsPageProvider } from './endpoint_alerts_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -69,6 +71,7 @@ export const pageObjects = {
   upgradeAssistant: UpgradeAssistantProvider,
   uptime: UptimePageProvider,
   rollup: RollupPageProvider,
+  apiKeys: ApiKeysPageProvider,
   licenseManagement: LicenseManagementPageProvider,
   indexManagement: IndexManagementPageProvider,
   indexLifecycleManagement: IndexLifecycleManagementPageProvider,
@@ -79,4 +82,5 @@ export const pageObjects = {
   lens: LensPageProvider,
   roleMappings: RoleMappingsPageProvider,
   endpoint: EndpointPageProvider,
+  endpointAlerts: EndpointAlertsPageProvider,
 };

@@ -8,6 +8,7 @@ import { AlertingPlugin } from './plugin';
 import { coreMock } from '../../../../src/core/server/mocks';
 import { licensingMock } from '../../../plugins/licensing/server/mocks';
 import { encryptedSavedObjectsMock } from '../../../plugins/encrypted_saved_objects/server/mocks';
+import { taskManagerMock } from '../../task_manager/server/mocks';
 
 describe('Alerting Plugin', () => {
   describe('setup()', () => {
@@ -28,6 +29,7 @@ describe('Alerting Plugin', () => {
         {
           licensing: licensingMock.createSetup(),
           encryptedSavedObjects: encryptedSavedObjectsSetup,
+          taskManager: taskManagerMock.createSetup(),
         } as any
       );
 
@@ -64,6 +66,7 @@ describe('Alerting Plugin', () => {
           {
             licensing: licensingMock.createSetup(),
             encryptedSavedObjects: encryptedSavedObjectsSetup,
+            taskManager: taskManagerMock.createSetup(),
           } as any
         );
 
@@ -105,6 +108,7 @@ describe('Alerting Plugin', () => {
           {
             licensing: licensingMock.createSetup(),
             encryptedSavedObjects: encryptedSavedObjectsSetup,
+            taskManager: taskManagerMock.createSetup(),
           } as any
         );
 
