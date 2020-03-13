@@ -27,8 +27,15 @@ interface UserPaginatedHostList {
   payload: HostListPagination;
 }
 
+// https://github.com/elastic/endpoint-app-team/issues/273
+
+interface FakeActionWithNoPayload {
+  type: 'fakeActionWithNoPayLoad';
+}
+
 export type HostAction =
   | ServerReturnedHostList
   | ServerReturnedHostDetails
   | ServerFailedToReturnHostDetails
-  | UserPaginatedHostList;
+  | UserPaginatedHostList
+  | FakeActionWithNoPayload;
