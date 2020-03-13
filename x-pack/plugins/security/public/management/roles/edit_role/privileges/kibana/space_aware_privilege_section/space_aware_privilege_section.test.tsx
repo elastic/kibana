@@ -83,7 +83,7 @@ describe('<SpaceAwarePrivilegeSection>', () => {
     expect(table).toHaveLength(0);
   });
 
-  it('Renders flyout after clicking "Add a privilege" button', () => {
+  it('Renders flyout after clicking "Add space privilege" button', () => {
     const props = buildProps({
       role: {
         elasticsearch: {

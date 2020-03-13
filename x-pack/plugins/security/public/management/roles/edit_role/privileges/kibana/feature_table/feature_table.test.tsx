@@ -503,6 +503,98 @@ describe('FeatureTable', () => {
     `);
   });
 
+  it('renders the most permissive primary feature privilege when multiple are assigned', () => {
+    const role = createRole([
+      {
+        spaces: ['*'],
+        base: ['read'],
+        feature: {},
+      },
+      {
+        spaces: ['foo'],
+        base: [],
+        feature: {
+          with_sub_features: ['read', 'minimal_all', 'all', 'minimal_read'],
+        },
+      },
+    ]);
+    const { displayedPrivileges } = setup({
+      role,
+      features: kibanaFeatures,
+      privilegeIndex: 1,
+      calculateDisplayedPrivileges: true,
+    });
+
+    expect(displayedPrivileges).toMatchInlineSnapshot(`
+      Object {
+        "excluded_from_base": Object {
+          "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [],
+        },
+        "no_sub_features": Object {
+          "primaryFeaturePrivilege": "none",
+        },
+        "with_excluded_sub_features": Object {
+          "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [],
+        },
+        "with_sub_features": Object {
+          "primaryFeaturePrivilege": "all",
+          "subFeaturePrivileges": Array [
+            "with_sub_features_cool_toggle_1",
+            "with_sub_features_cool_toggle_2",
+            "cool_all",
+          ],
+        },
+      }
+    `);
+  });
+
+  it('renders the most permissive sub-feature privilege when multiple are assigned in a mutually-exclusive group', () => {
+    const role = createRole([
+      {
+        spaces: ['*'],
+        base: ['read'],
+        feature: {},
+      },
+      {
+        spaces: ['foo'],
+        base: [],
+        feature: {
+          with_sub_features: ['minimal_read', 'cool_all', 'cool_read'],
+        },
+      },
+    ]);
+    const { displayedPrivileges } = setup({
+      role,
+      features: kibanaFeatures,
+      privilegeIndex: 1,
+      calculateDisplayedPrivileges: true,
+    });
+
+    expect(displayedPrivileges).toMatchInlineSnapshot(`
+      Object {
+        "excluded_from_base": Object {
+          "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [],
+        },
+        "no_sub_features": Object {
+          "primaryFeaturePrivilege": "none",
+        },
+        "with_excluded_sub_features": Object {
+          "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [],
+        },
+        "with_sub_features": Object {
+          "primaryFeaturePrivilege": "read",
+          "subFeaturePrivileges": Array [
+            "cool_all",
+          ],
+        },
+      }
+    `);
+  });
+
   it('renders a row expander only for features with sub-features', () => {
     const role = createRole([
       {
@@ -581,5 +673,30 @@ describe('FeatureTable', () => {
     findTestSubject(wrapper, 'changeAllPrivileges-read').simulate('click');
 
     expect(onChangeAll).toHaveBeenCalledWith(['read']);
+  });
+
+  it('allows all feature privileges to be unassigned via "change all"', () => {
+    const role = createRole([
+      {
+        spaces: ['foo'],
+        base: [],
+        feature: {
+          with_sub_features: ['all'],
+          no_sub_features: ['read'],
+          with_excluded_sub_features: ['all', 'something else'],
+        },
+      },
+    ]);
+    const { wrapper, onChangeAll } = setup({
+      role,
+      features: kibanaFeatures,
+      privilegeIndex: 0,
+      calculateDisplayedPrivileges: false,
+    });
+
+    findTestSubject(wrapper, 'changeAllPrivilegesButton').simulate('click');
+    findTestSubject(wrapper, 'changeAllPrivileges-none').simulate('click');
+
+    expect(onChangeAll).toHaveBeenCalledWith([]);
   });
 });
