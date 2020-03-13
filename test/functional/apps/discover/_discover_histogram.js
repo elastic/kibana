@@ -32,7 +32,7 @@ export default function({ getService, getPageObjects }) {
     'dateFormat:tz': 'Europe/Berlin',
   };
 
-  describe('discover histogram', function describeIndexTests() {
+  describe.only('discover histogram', function describeIndexTests() {
     before(async function() {
       log.debug('load kibana index with default index pattern');
       await PageObjects.common.navigateToApp('home');
@@ -62,6 +62,7 @@ export default function({ getService, getPageObjects }) {
       await esArchiver.unload('long_window_logstash');
       await esArchiver.unload('visualize');
       await esArchiver.unload('discover');
+      await security.testUser.restoreDefaults();
     });
 
     it('should visualize monthly data with different day intervals', async () => {

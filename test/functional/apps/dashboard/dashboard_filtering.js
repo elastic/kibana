@@ -51,6 +51,10 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
+    after(async () => {
+      await security.testUser.restoreDefaults();
+    });
+
     describe('adding a filter that excludes all data', () => {
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
