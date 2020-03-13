@@ -20,7 +20,7 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
       },
       description: 'This is a brand new case of a bad meanie defacing data',
       title: 'Super Bad Security Issue',
-      state: 'open',
+      status: 'open',
       tags: ['defacement'],
       updated_at: '2019-11-25T21:54:48.952Z',
       updated_by: {
@@ -44,7 +44,7 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
       },
       description: 'Oh no, a bad meanie destroying data!',
       title: 'Damaging Data Destruction Detected',
-      state: 'open',
+      status: 'open',
       tags: ['Data Destruction'],
       updated_at: '2019-11-25T22:32:00.900Z',
       updated_by: {
@@ -68,7 +68,7 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
       },
       description: 'Oh no, a bad meanie going LOLBins all over the place!',
       title: 'Another bad one',
-      state: 'open',
+      status: 'open',
       tags: ['LOLBins'],
       updated_at: '2019-11-25T22:32:17.947Z',
       updated_by: {

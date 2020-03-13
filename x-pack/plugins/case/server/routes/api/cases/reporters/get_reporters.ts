@@ -4,21 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { UsersRt } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
 
-export function initGetTagsApi({ caseService, router }: RouteDeps) {
+export function initGetReportersApi({ caseService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases/tags',
+      path: '/api/cases/reporters',
       validate: {},
     },
     async (context, request, response) => {
       try {
-        const tags = await caseService.getTags({
+        const reporters = await caseService.getReporters({
           client: context.core.savedObjects.client,
         });
-        return response.ok({ body: tags });
+        return response.ok({ body: UsersRt.encode(reporters) });
       } catch (error) {
         return response.customError(wrapError(error));
       }
