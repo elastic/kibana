@@ -7,9 +7,9 @@
 import { EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
+import { ToastsSetup } from 'src/core/public';
 import { ReportingPanelContent } from './reporting_panel_content';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
-import { ToastsSetup } from '../../';
 
 interface Props {
   apiClient: ReportingAPIClient;

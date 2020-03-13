@@ -8,9 +8,9 @@ import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@el
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
 import url from 'url';
+import { ToastsSetup } from 'src/core/public';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
-import { ToastsSetup } from '../../';
 
 interface Props {
   apiClient: ReportingAPIClient;

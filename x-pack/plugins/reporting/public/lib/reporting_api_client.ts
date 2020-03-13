@@ -7,8 +7,8 @@
 import { stringify } from 'query-string';
 import rison from 'rison-node';
 
+import { HttpSetup } from 'src/core/public';
 import { add } from './job_completion_notifications';
-import { HttpSetup } from '../../';
 import {
   API_LIST_URL,
   API_BASE_URL,

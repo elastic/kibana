@@ -7,12 +7,12 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
+import { ToastsSetup } from 'src/core/public';
 import { ReportingPanelContent } from '../components/reporting_panel_content';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { checkLicense } from '../lib/license_check';
 import { LicensingPluginSetup } from '../../../licensing/public';
 import { ShareContext } from '../../../../../src/plugins/share/public';
-import { ToastsSetup } from '../..';
 
 interface ReportingProvider {
   apiClient: ReportingAPIClient;

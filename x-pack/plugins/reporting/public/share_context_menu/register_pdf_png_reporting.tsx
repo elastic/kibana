@@ -7,12 +7,12 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import React from 'react';
+import { ToastsSetup, IUiSettingsClient } from 'src/core/public';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { checkLicense } from '../lib/license_check';
 import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content';
 import { LicensingPluginSetup } from '../../../licensing/public';
 import { ShareContext } from '../../../../../src/plugins/share/public';
-import { ToastsSetup, IUiSettingsClient } from '../../';
 
 interface ReportingPDFPNGProvider {
   apiClient: ReportingAPIClient;

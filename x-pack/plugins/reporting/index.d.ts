@@ -13,8 +13,6 @@ import {
   NotificationsStart,
 } from '../../../src/core/public';
 
-export { ToastsSetup, HttpSetup, ApplicationStart, IUiSettingsClient } from 'src/core/public';
-
 export type JobId = string;
 export type JobStatus = 'completed' | 'pending' | 'processing' | 'failed';
 

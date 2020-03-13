@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/public';
+import { PluginInitializerContext } from 'src/core/public';
 import { ReportingPublicPlugin } from './plugin';
 import * as jobCompletionNotifications from './lib/job_completion_notifications';
 

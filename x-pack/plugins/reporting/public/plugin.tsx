@@ -10,6 +10,7 @@ import ReactDOM from 'react-dom';
 import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { ManagementSetup } from 'src/plugins/management/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { UiActionsSetup } from 'src/plugins/ui_actions/public';
 
@@ -30,13 +31,6 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-
-import {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-} from '../../../../src/core/public';
 
 import {
   JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG,

@@ -22,7 +22,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { ToastsSetup, ApplicationStart } from '../../';
+import { ToastsSetup, ApplicationStart } from 'src/core/public';
 import { LicensingPluginSetup, ILicense } from '../../../licensing/public';
 import { Poller } from '../../common/poller';
 import { JobStatuses, JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG } from '../../constants';

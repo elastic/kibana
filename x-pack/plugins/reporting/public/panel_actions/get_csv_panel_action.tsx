@@ -6,11 +6,10 @@
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
+import { CoreSetup } from 'src/core/public';
+import { Action, IncompatibleActionError } from '../../../../../src/plugins/ui_actions/public';
 import { LicensingPluginSetup } from '../../../licensing/public';
 import { checkLicense } from '../lib/license_check';
-
-import { CoreSetup } from '../../../../../src/core/public';
-import { Action, IncompatibleActionError } from '../../../../../src/plugins/ui_actions/public';
 
 import {
   ViewMode,
