@@ -27,6 +27,8 @@ import { DefineStepRule, RuleStep, RuleStepProps } from '../../types';
 import { StepRuleDescription } from '../description_step';
 import { QueryBarDefineRule } from '../query_bar';
 import { SelectRuleType } from '../select_rule_type';
+import { AnomalyThresholdSlider } from '../anomaly_threshold_slider';
+import { MlJobSelect } from '../ml_job_select';
 import { StepContentWrapper } from '../step_content_wrapper';
 import {
   Field,
@@ -38,7 +40,6 @@ import {
 } from '../../../../../shared_imports';
 import { schema } from './schema';
 import * as i18n from './translations';
-import { AnomalyThresholdSlider } from '../anomaly_threshold_slider';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -223,6 +224,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </EuiFormRow>
           <EuiFormRow fullWidth style={{ display: isMlRule ? 'flex' : 'none' }}>
             <>
+              <UseField path="mlJobId" component={MlJobSelect} />
               <UseField path="anomalyThreshold" component={AnomalyThresholdSlider} />
             </>
           </EuiFormRow>

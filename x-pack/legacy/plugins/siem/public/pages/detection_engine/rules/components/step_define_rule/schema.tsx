@@ -126,4 +126,13 @@ export const schema: FormSchema = {
     ),
     validations: [],
   },
+  mlJobId: {
+    label: i18n.translate(
+      'xpack.siem.detectionEngine.createRule.stepDefineRule.fieldMlJobIdLabel',
+      {
+        defaultMessage: 'Machine Learning job',
+      }
+    ),
+    validations: [],
+  },
 };
