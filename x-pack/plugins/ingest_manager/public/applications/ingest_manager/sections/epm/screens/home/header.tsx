@@ -3,14 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import React, { memo } from 'react';
+import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
-import styled from 'styled-components';
 import { useLinks } from '../../hooks';
 
-export function HeroCopy() {
+export const HeroCopy = memo(() => {
   return (
     <EuiFlexGroup direction="column" gutterSize="m" justifyContent="center">
       <EuiFlexItem grow={false}>
@@ -35,9 +34,9 @@ export function HeroCopy() {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-}
+});
 
-export function HeroImage() {
+export const HeroImage = memo(() => {
   const { toAssets } = useLinks();
   const ImageWrapper = styled.div`
     margin-bottom: -38px; // revert to -62px when tabs are restored
@@ -51,4 +50,4 @@ export function HeroImage() {
       />
     </ImageWrapper>
   );
-}
+});
