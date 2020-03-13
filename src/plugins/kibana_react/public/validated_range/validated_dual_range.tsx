@@ -68,8 +68,7 @@ export class ValidatedDualRange extends Component<Props> {
     return null;
   }
 
-  // @ts-ignore state populated by getDerivedStateFromProps
-  state: State = {};
+  state!: State;
 
   _onChange = (value: Value) => {
     const { isValid, errorMessage } = isRangeValid(
@@ -99,7 +98,6 @@ export class ValidatedDualRange extends Component<Props> {
       value, // eslint-disable-line no-unused-vars
       onChange, // eslint-disable-line no-unused-vars
       allowEmptyRange, // eslint-disable-line no-unused-vars
-      // @ts-ignore
       ...rest
     } = this.props;
 
@@ -117,8 +115,6 @@ export class ValidatedDualRange extends Component<Props> {
           fullWidth={fullWidth}
           value={this.state.value}
           onChange={this._onChange}
-          // @ts-ignore
-          focusable={false} // remove when #59039 is fixed
           {...rest}
         />
       </EuiFormRow>
