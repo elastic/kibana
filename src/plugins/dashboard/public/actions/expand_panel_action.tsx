@@ -53,18 +53,12 @@ export class ExpandPanelAction implements ActionByType<typeof ACTION_EXPAND_PANE
     }
 
     return isExpanded(embeddable)
-      ? i18n.translate(
-          'dashboardEmbeddableContainer.actions.toggleExpandPanelMenuItem.expandedDisplayName',
-          {
-            defaultMessage: 'Minimize',
-          }
-        )
-      : i18n.translate(
-          'dashboardEmbeddableContainer.actions.toggleExpandPanelMenuItem.notExpandedDisplayName',
-          {
-            defaultMessage: 'Full screen',
-          }
-        );
+      ? i18n.translate('dashboard.actions.toggleExpandPanelMenuItem.expandedDisplayName', {
+          defaultMessage: 'Minimize',
+        })
+      : i18n.translate('dashboard.actions.toggleExpandPanelMenuItem.notExpandedDisplayName', {
+          defaultMessage: 'Full screen',
+        });
   }
 
   public getIconType({ embeddable }: ExpandPanelActionContext) {

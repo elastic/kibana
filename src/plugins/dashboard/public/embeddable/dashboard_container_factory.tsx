@@ -65,7 +65,7 @@ export class DashboardContainerFactory extends EmbeddableFactory<
   }
 
   public getDisplayName() {
-    return i18n.translate('dashboardEmbeddableContainer.factory.displayName', {
+    return i18n.translate('dashboard.factory.displayName', {
       defaultMessage: 'dashboard',
     });
   }

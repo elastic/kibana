@@ -51,7 +51,7 @@ import {
   DashboardContainerFactory,
   DashboardContainerInput,
   DashboardPanelState,
-} from '../../../../dashboard_embeddable_container/public/np_ready/public';
+} from '../../../../../../plugins/dashboard/public';
 import {
   EmbeddableFactoryNotFoundError,
   ErrorEmbeddable,
