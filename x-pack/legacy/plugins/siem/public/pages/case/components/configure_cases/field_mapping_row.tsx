@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiFlexItem,
   EuiFlexGroup,
@@ -58,12 +58,13 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
   selectedActionType,
   selectedThirdParty,
 }) => {
+  const siemFieldCapitalized = useMemo(() => capitalize(siemField), [siemField]);
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
         <EuiFlexGroup component="span" justifyContent="spaceBetween">
           <EuiFlexItem component="span" grow={false}>
-            {capitalize(siemField)}
+            {siemFieldCapitalized}
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false}>
             <EuiIcon type="sortRight" />
