@@ -19,7 +19,7 @@
 
 import { ActionByType } from './actions/action';
 import { TriggerInternal } from './triggers/trigger_internal';
-import { IEmbeddable } from '../../embeddable/public';
+import { EmbeddableVisTriggerContext } from '../../embeddable/public';
 import { SELECT_RANGE_TRIGGER } from './triggers';
 
 export type TriggerRegistry = Map<TriggerId, TriggerInternal<any>>;
@@ -43,13 +43,4 @@ export type ActionType = keyof ActionContextMapping;
 
 export interface ActionContextMapping {
   [DEFAULT_ACTION]: BaseContext;
-}
-
-export interface EmbeddableVisTriggerContext {
-  embeddable: IEmbeddable;
-  timeFieldName: string;
-  data: {
-    e: MouseEvent;
-    data: unknown;
-  };
 }
