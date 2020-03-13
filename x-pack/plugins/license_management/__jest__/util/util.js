@@ -5,13 +5,19 @@
  */
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 
-import { Provider } from 'react-redux';
-import { licenseManagementStore } from '../../public/application/store/store';
 import React from 'react';
+import { Provider } from 'react-redux';
+
 import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
 import { httpServiceMock } from '../../../../../src/core/public/mocks';
+import { licenseManagementStore } from '../../public/application/store/store';
+import { AppContextProvider } from '../../public/application/app_context';
 
 const highExpirationMillis = new Date('October 13, 2099 00:00:00Z').getTime();
+
+const appDependencies = {
+  docLinks: {},
+};
 
 export const createMockLicense = (type, expiryDateInMillis = highExpirationMillis) => {
   return {
@@ -20,14 +26,17 @@ export const createMockLicense = (type, expiryDateInMillis = highExpirationMilli
     isActive: new Date().getTime() < expiryDateInMillis,
   };
 };
+
 export const getComponent = (initialState, Component) => {
   const services = {
     http: httpServiceMock.createSetupContract(),
   };
   const store = licenseManagementStore(initialState, services);
   return mountWithIntl(
-    <Provider store={store}>
-      <Component />
-    </Provider>
+    <AppContextProvider value={appDependencies}>
+      <Provider store={store}>
+        <Component />
+      </Provider>
+    </AppContextProvider>
   );
 };

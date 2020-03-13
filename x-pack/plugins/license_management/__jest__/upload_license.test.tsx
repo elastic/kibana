@@ -6,19 +6,18 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { httpServiceMock, chromeServiceMock } from '../../../../src/core/public/mocks';
+import { httpServiceMock } from '../../../../src/core/public/mocks';
 import { mountWithIntl } from '../../../test_utils/enzyme_helpers';
 
-jest.mock('ui/new_platform');
+// @ts-ignore
+import { uploadLicense } from '../public/application/store/actions/upload_license';
 
 // @ts-ignore
-import { uploadLicense } from '../public/np_ready/application/store/actions/upload_license';
+import { licenseManagementStore } from '../public/application/store/store';
 
 // @ts-ignore
-import { licenseManagementStore } from '../public/np_ready/application/store/store';
-
-// @ts-ignore
-import { UploadLicense } from '../public/np_ready/application/sections/upload_license';
+import { UploadLicense } from '../public/application/sections/upload_license';
+import { AppContextProvider } from '../public/application/app_context';
 
 import {
   UPLOAD_LICENSE_EXPIRED,
@@ -33,36 +32,42 @@ window.location.reload = () => {};
 
 let store: any = null;
 let component: any = null;
-const services = {
-  legacy: {
-    xPackInfo: {
-      refresh: jest.fn(),
-      get: () => {
-        return { license: { type: 'basic' } };
-      },
+
+const appDependencies = {
+  plugins: {
+    licensing: {
+      refresh: jest.fn().mockResolvedValue({}),
     },
-    refreshXpack: jest.fn(),
   },
+  docLinks: {},
+};
+
+const thunkServices = {
   http: httpServiceMock.createSetupContract(),
-  chrome: chromeServiceMock.createStartContract(),
   history: {
     replace: jest.fn(),
   },
+  breadcrumbService: {
+    setBreadcrumbs() {},
+  },
+  licensing: appDependencies.plugins.licensing,
 };
 
 describe('UploadLicense', () => {
   beforeEach(() => {
-    store = licenseManagementStore({}, services);
+    store = licenseManagementStore({}, thunkServices);
     component = (
-      <Provider store={store}>
-        <UploadLicense />
-      </Provider>
+      <AppContextProvider value={appDependencies as any}>
+        <Provider store={store}>
+          <UploadLicense />
+        </Provider>
+      </AppContextProvider>
     );
   });
 
   afterEach(() => {
-    services.legacy.xPackInfo.refresh.mockReset();
-    services.history.replace.mockReset();
+    appDependencies.plugins.licensing.refresh.mockReset();
+    thunkServices.history.replace.mockReset();
     jest.clearAllMocks();
   });
 
@@ -74,46 +79,46 @@ describe('UploadLicense', () => {
   });
 
   it('should display an error when ES says license is invalid', async () => {
-    services.http.put.mockResolvedValue(JSON.parse(UPLOAD_LICENSE_INVALID[2]));
+    thunkServices.http.put.mockResolvedValue(JSON.parse(UPLOAD_LICENSE_INVALID[2]));
     const rendered = mountWithIntl(component);
     const invalidLicense = JSON.stringify({ license: { type: 'basic' } });
-    await uploadLicense(invalidLicense)(store.dispatch, null, services);
+    await uploadLicense(invalidLicense)(store.dispatch, null, thunkServices);
     rendered.update();
     expect(rendered).toMatchSnapshot();
   });
 
   it('should display an error when ES says license is expired', async () => {
-    services.http.put.mockResolvedValue(JSON.parse(UPLOAD_LICENSE_EXPIRED[2]));
+    thunkServices.http.put.mockResolvedValue(JSON.parse(UPLOAD_LICENSE_EXPIRED[2]));
     const rendered = mountWithIntl(component);
     const invalidLicense = JSON.stringify({ license: { type: 'basic' } });
-    await uploadLicense(invalidLicense)(store.dispatch, null, services);
+    await uploadLicense(invalidLicense)(store.dispatch, null, thunkServices);
     rendered.update();
     expect(rendered).toMatchSnapshot();
   });
 
   it('should display a modal when license requires acknowledgement', async () => {
-    services.http.put.mockResolvedValue(JSON.parse(UPLOAD_LICENSE_REQUIRES_ACK[2]));
+    thunkServices.http.put.mockResolvedValue(JSON.parse(UPLOAD_LICENSE_REQUIRES_ACK[2]));
     const unacknowledgedLicense = JSON.stringify({
       license: { type: 'basic' },
     });
-    await uploadLicense(unacknowledgedLicense, 'trial')(store.dispatch, null, services);
+    await uploadLicense(unacknowledgedLicense, 'trial')(store.dispatch, null, thunkServices);
     const rendered = mountWithIntl(component);
     expect(rendered).toMatchSnapshot();
   });
 
   it('should refresh xpack info and navigate to BASE_PATH when ES accepts new license', async () => {
-    services.http.put.mockResolvedValue(JSON.parse(UPLOAD_LICENSE_SUCCESS[2]));
+    thunkServices.http.put.mockResolvedValue(JSON.parse(UPLOAD_LICENSE_SUCCESS[2]));
     const validLicense = JSON.stringify({ license: { type: 'basic' } });
-    await uploadLicense(validLicense)(store.dispatch, null, services);
-    expect(services.legacy.refreshXpack).toHaveBeenCalled();
-    expect(services.history.replace).toHaveBeenCalled();
+    await uploadLicense(validLicense)(store.dispatch, null, thunkServices);
+    expect(appDependencies.plugins.licensing.refresh).toHaveBeenCalled();
+    expect(thunkServices.history.replace).toHaveBeenCalled();
   });
 
   it('should display error when ES returns error', async () => {
-    services.http.put.mockResolvedValue(JSON.parse(UPLOAD_LICENSE_TLS_NOT_ENABLED[2]));
+    thunkServices.http.put.mockResolvedValue(JSON.parse(UPLOAD_LICENSE_TLS_NOT_ENABLED[2]));
     const rendered = mountWithIntl(component);
     const license = JSON.stringify({ license: { type: 'basic' } });
-    await uploadLicense(license)(store.dispatch, null, services);
+    await uploadLicense(license)(store.dispatch, null, thunkServices);
     rendered.update();
     expect(rendered).toMatchSnapshot();
   });
