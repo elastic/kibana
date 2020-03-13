@@ -5,8 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObject } from '../../../../src/core/server';
+import { SavedObject } from '../../../../src/core/types/saved_objects';
 
 export type MapSavedObjectAttributes = {
   title?: string;
