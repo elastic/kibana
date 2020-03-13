@@ -150,7 +150,7 @@ export const AnomaliesTable: React.FunctionComponent<{
       render: (item: TableItem) => (
         <RowExpansionButton
           isExpanded={item.id in itemIdToExpandedRowMap}
-          item={item.id}
+          item={item}
           onExpand={expandItem}
           onCollapse={collapseItem}
         />
