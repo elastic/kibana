@@ -4,68 +4,157 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { handleCreateIncident, handleUpdateIncident } from './action_handlers';
+import {
+  handleCreateIncident,
+  handleUpdateIncident,
+  handleIncident,
+  createComments,
+} from './action_handlers';
 import { ServiceNow } from './lib';
-import { finalMapping } from './mock';
-import { Incident } from './lib/types';
+import { FinalMapping } from './types';
 
 jest.mock('./lib');
 
 const ServiceNowMock = ServiceNow as jest.Mock;
 
-const incident: Incident = {
-  short_description: 'A title',
-  description: 'A description',
+const finalMapping: FinalMapping = new Map();
+
+finalMapping.set('title', {
+  target: 'short_description',
+  actionType: 'overwrite',
+});
+
+finalMapping.set('description', {
+  target: 'description',
+  actionType: 'overwrite',
+});
+
+finalMapping.set('comments', {
+  target: 'comments',
+  actionType: 'append',
+});
+
+finalMapping.set('short_description', {
+  target: 'title',
+  actionType: 'overwrite',
+});
+
+const params = {
+  caseId: '123',
+  title: 'a title',
+  description: 'a description',
+  createdAt: '2020-03-13T08:34:53.450Z',
+  createdBy: { fullName: 'Elastic User', username: null },
+  updatedAt: null,
+  updatedBy: null,
+  incidentId: null,
+  mappedParams: {
+    short_description: 'a title',
+    description: 'a description',
+  },
+  comments: [
+    {
+      commentId: '456',
+      version: 'WzU3LDFd',
+      comment: 'first comment',
+      createdAt: '2020-03-13T08:34:53.450Z',
+      createdBy: { fullName: 'Elastic User', username: null },
+      updatedAt: null,
+      updatedBy: null,
+    },
+  ],
 };
 
-const comments = [
-  {
-    commentId: '456',
-    version: 'WzU3LDFd',
-    comment: 'A comment',
-    incidentCommentId: undefined,
-  },
-];
+beforeAll(() => {
+  ServiceNowMock.mockImplementation(() => {
+    return {
+      serviceNow: {
+        getUserID: jest.fn().mockResolvedValue('1234'),
+        getIncident: jest.fn().mockResolvedValue({
+          short_description: 'servicenow title',
+          description: 'servicenow desc',
+        }),
+        createIncident: jest.fn().mockResolvedValue({
+          incidentId: '123',
+          number: 'INC01',
+          pushedDate: '2020-03-10T12:24:20.000Z',
+        }),
+        updateIncident: jest.fn().mockResolvedValue({
+          incidentId: '123',
+          number: 'INC01',
+          pushedDate: '2020-03-10T12:24:20.000Z',
+        }),
+        batchCreateComments: jest
+          .fn()
+          .mockResolvedValue([{ commentId: '456', pushedDate: '2020-03-10T12:24:20.000Z' }]),
+      },
+    };
+  });
+});
 
-describe('handleCreateIncident', () => {
-  beforeAll(() => {
-    ServiceNowMock.mockImplementation(() => {
-      return {
-        serviceNow: {
-          getUserID: jest.fn().mockResolvedValue('1234'),
-          createIncident: jest.fn().mockResolvedValue({
-            incidentId: '123',
-            number: 'INC01',
-            pushedDate: '2020-03-10T12:24:20.000Z',
-          }),
-          updateIncident: jest.fn().mockResolvedValue({
-            incidentId: '123',
-            number: 'INC01',
-            pushedDate: '2020-03-10T12:24:20.000Z',
-          }),
-          batchCreateComments: jest
-            .fn()
-            .mockResolvedValue([{ commentId: '456', pushedDate: '2020-03-10T12:24:20.000Z' }]),
-          batchUpdateComments: jest
-            .fn()
-            .mockResolvedValue([{ commentId: '456', pushedDate: '2020-03-10T12:24:20.000Z' }]),
+describe('handleIncident', () => {
+  test('create an incident', async () => {
+    const { serviceNow } = new ServiceNowMock();
+
+    const res = await handleIncident({
+      incidentId: null,
+      serviceNow,
+      params,
+      comments: params.comments,
+      mapping: finalMapping,
+    });
+    expect(res).toEqual({
+      incidentId: '123',
+      number: 'INC01',
+      pushedDate: '2020-03-10T12:24:20.000Z',
+      comments: [
+        {
+          commentId: '456',
+          pushedDate: '2020-03-10T12:24:20.000Z',
         },
-      };
+      ],
     });
   });
+  test('update an incident', async () => {
+    const { serviceNow } = new ServiceNowMock();
 
+    const res = await handleIncident({
+      incidentId: '123',
+      serviceNow,
+      params,
+      comments: params.comments,
+      mapping: finalMapping,
+    });
+    expect(res).toEqual({
+      incidentId: '123',
+      number: 'INC01',
+      pushedDate: '2020-03-10T12:24:20.000Z',
+      comments: [
+        {
+          commentId: '456',
+          pushedDate: '2020-03-10T12:24:20.000Z',
+        },
+      ],
+    });
+  });
+});
+
+describe('handleCreateIncident', () => {
   test('create an incident without comments', async () => {
     const { serviceNow } = new ServiceNowMock();
 
     const res = await handleCreateIncident({
       serviceNow,
-      params: incident,
+      params,
       comments: [],
       mapping: finalMapping,
     });
 
     expect(serviceNow.createIncident).toHaveBeenCalled();
-    expect(serviceNow.createIncident).toHaveBeenCalledWith(incident);
+    expect(serviceNow.createIncident).toHaveBeenCalledWith({
+      short_description: 'a title (created at 2020-03-13T08:34:53.450Z by Elastic User)',
+      description: 'a description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
+    });
     expect(serviceNow.createIncident).toHaveReturned();
     expect(serviceNow.batchCreateComments).not.toHaveBeenCalled();
     expect(res).toEqual({
@@ -80,16 +169,36 @@ describe('handleCreateIncident', () => {
 
     const res = await handleCreateIncident({
       serviceNow,
-      params: incident,
-      comments,
+      params,
+      comments: params.comments,
       mapping: finalMapping,
     });
 
     expect(serviceNow.createIncident).toHaveBeenCalled();
-    expect(serviceNow.createIncident).toHaveBeenCalledWith(incident);
+    expect(serviceNow.createIncident).toHaveBeenCalledWith({
+      description: 'a description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
+      short_description: 'a title (created at 2020-03-13T08:34:53.450Z by Elastic User)',
+    });
     expect(serviceNow.createIncident).toHaveReturned();
     expect(serviceNow.batchCreateComments).toHaveBeenCalled();
-    expect(serviceNow.batchCreateComments).toHaveBeenCalledWith('123', comments, 'comments');
+    expect(serviceNow.batchCreateComments).toHaveBeenCalledWith(
+      '123',
+      [
+        {
+          comment: 'first comment (created at 2020-03-13T08:34:53.450Z by Elastic User)',
+          commentId: '456',
+          createdAt: '2020-03-13T08:34:53.450Z',
+          createdBy: {
+            fullName: 'Elastic User',
+            username: null,
+          },
+          updatedAt: null,
+          updatedBy: null,
+          version: 'WzU3LDFd',
+        },
+      ],
+      'comments'
+    );
     expect(res).toEqual({
       incidentId: '123',
       number: 'INC01',
@@ -102,22 +211,27 @@ describe('handleCreateIncident', () => {
       ],
     });
   });
+});
 
+describe('handleUpdateIncident', () => {
   test('update an incident without comments', async () => {
     const { serviceNow } = new ServiceNowMock();
 
     const res = await handleUpdateIncident({
       incidentId: '123',
       serviceNow,
-      params: incident,
+      params,
       comments: [],
       mapping: finalMapping,
     });
 
     expect(serviceNow.updateIncident).toHaveBeenCalled();
-    expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', incident);
+    expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', {
+      short_description: 'a title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+      description: 'a description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+    });
     expect(serviceNow.updateIncident).toHaveReturned();
-    expect(serviceNow.batchUpdateComments).not.toHaveBeenCalled();
+    expect(serviceNow.batchCreateComments).not.toHaveBeenCalled();
     expect(res).toEqual({
       incidentId: '123',
       number: 'INC01',
@@ -125,23 +239,89 @@ describe('handleCreateIncident', () => {
     });
   });
 
-  test('update an incident and create new comments', async () => {
+  test('update an incident with comments', async () => {
     const { serviceNow } = new ServiceNowMock();
+    serviceNow.batchCreateComments.mockResolvedValue([
+      { commentId: '456', pushedDate: '2020-03-10T12:24:20.000Z' },
+      { commentId: '789', pushedDate: '2020-03-10T12:24:20.000Z' },
+    ]);
 
     const res = await handleUpdateIncident({
       incidentId: '123',
       serviceNow,
-      params: incident,
-      comments,
+      params,
+      comments: [
+        {
+          comment: 'first comment',
+          commentId: '456',
+          createdAt: '2020-03-13T08:34:53.450Z',
+          createdBy: {
+            fullName: 'Elastic User',
+            username: null,
+          },
+          updatedAt: null,
+          updatedBy: null,
+          version: 'WzU3LDFd',
+        },
+        {
+          comment: 'second comment',
+          commentId: '789',
+          createdAt: '2020-03-13T08:34:53.450Z',
+          createdBy: {
+            fullName: 'Elastic User',
+            username: null,
+          },
+          updatedAt: '2020-03-13T08:34:53.450Z',
+          updatedBy: {
+            fullName: 'Elastic User',
+            username: null,
+          },
+          version: 'WzU3LDFd',
+        },
+      ],
       mapping: finalMapping,
     });
 
     expect(serviceNow.updateIncident).toHaveBeenCalled();
-    expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', incident);
+    expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', {
+      description: 'a description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+      short_description: 'a title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+    });
     expect(serviceNow.updateIncident).toHaveReturned();
-    expect(serviceNow.batchUpdateComments).not.toHaveBeenCalled();
-    expect(serviceNow.batchCreateComments).toHaveBeenCalledWith('123', comments, 'comments');
-
+    expect(serviceNow.batchCreateComments).toHaveBeenCalled();
+    expect(serviceNow.batchCreateComments).toHaveBeenCalledWith(
+      '123',
+      [
+        {
+          comment: 'first comment (created at 2020-03-13T08:34:53.450Z by Elastic User)',
+          commentId: '456',
+          createdAt: '2020-03-13T08:34:53.450Z',
+          createdBy: {
+            fullName: 'Elastic User',
+            username: null,
+          },
+          updatedAt: null,
+          updatedBy: null,
+          version: 'WzU3LDFd',
+        },
+        {
+          comment: 'second comment (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+          commentId: '789',
+          createdAt: '2020-03-13T08:34:53.450Z',
+          createdBy: {
+            fullName: 'Elastic User',
+            username: null,
+          },
+          updatedAt: '2020-03-13T08:34:53.450Z',
+          updatedBy: {
+            fullName: 'Elastic User',
+            username: null,
+          },
+          version: 'WzU3LDFd',
+        },
+      ],
+      'comments'
+    );
     expect(res).toEqual({
       incidentId: '123',
       number: 'INC01',
@@ -151,7 +331,487 @@ describe('handleCreateIncident', () => {
           commentId: '456',
           pushedDate: '2020-03-10T12:24:20.000Z',
         },
+        {
+          commentId: '789',
+          pushedDate: '2020-03-10T12:24:20.000Z',
+        },
       ],
     });
+  });
+});
+
+describe('handleUpdateIncident: different action types', () => {
+  test('overwrite & append', async () => {
+    const { serviceNow } = new ServiceNowMock();
+    finalMapping.set('title', {
+      target: 'short_description',
+      actionType: 'overwrite',
+    });
+
+    finalMapping.set('description', {
+      target: 'description',
+      actionType: 'append',
+    });
+
+    finalMapping.set('comments', {
+      target: 'comments',
+      actionType: 'append',
+    });
+
+    finalMapping.set('short_description', {
+      target: 'title',
+      actionType: 'overwrite',
+    });
+
+    const res = await handleUpdateIncident({
+      incidentId: '123',
+      serviceNow,
+      params,
+      comments: [],
+      mapping: finalMapping,
+    });
+
+    expect(serviceNow.updateIncident).toHaveBeenCalled();
+    expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', {
+      short_description: 'a title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+      description:
+        'a description (updated at 2020-03-13T08:34:53.450Z by Elastic User) servicenow desc',
+    });
+    expect(serviceNow.updateIncident).toHaveReturned();
+    expect(serviceNow.batchCreateComments).not.toHaveBeenCalled();
+    expect(res).toEqual({
+      incidentId: '123',
+      number: 'INC01',
+      pushedDate: '2020-03-10T12:24:20.000Z',
+    });
+  });
+  test('nothing & append', async () => {
+    const { serviceNow } = new ServiceNowMock();
+    finalMapping.set('title', {
+      target: 'short_description',
+      actionType: 'nothing',
+    });
+
+    finalMapping.set('description', {
+      target: 'description',
+      actionType: 'append',
+    });
+
+    finalMapping.set('comments', {
+      target: 'comments',
+      actionType: 'append',
+    });
+
+    finalMapping.set('short_description', {
+      target: 'title',
+      actionType: 'nothing',
+    });
+
+    const res = await handleUpdateIncident({
+      incidentId: '123',
+      serviceNow,
+      params,
+      comments: [],
+      mapping: finalMapping,
+    });
+
+    expect(serviceNow.updateIncident).toHaveBeenCalled();
+    expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', {
+      description:
+        'a description (updated at 2020-03-13T08:34:53.450Z by Elastic User) servicenow desc',
+    });
+    expect(serviceNow.updateIncident).toHaveReturned();
+    expect(serviceNow.batchCreateComments).not.toHaveBeenCalled();
+    expect(res).toEqual({
+      incidentId: '123',
+      number: 'INC01',
+      pushedDate: '2020-03-10T12:24:20.000Z',
+    });
+  });
+  test('append & append', async () => {
+    const { serviceNow } = new ServiceNowMock();
+    finalMapping.set('title', {
+      target: 'short_description',
+      actionType: 'append',
+    });
+
+    finalMapping.set('description', {
+      target: 'description',
+      actionType: 'append',
+    });
+
+    finalMapping.set('comments', {
+      target: 'comments',
+      actionType: 'append',
+    });
+
+    finalMapping.set('short_description', {
+      target: 'title',
+      actionType: 'append',
+    });
+
+    const res = await handleUpdateIncident({
+      incidentId: '123',
+      serviceNow,
+      params,
+      comments: [],
+      mapping: finalMapping,
+    });
+
+    expect(serviceNow.updateIncident).toHaveBeenCalled();
+    expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', {
+      short_description:
+        'a title (updated at 2020-03-13T08:34:53.450Z by Elastic User) servicenow title',
+      description:
+        'a description (updated at 2020-03-13T08:34:53.450Z by Elastic User) servicenow desc',
+    });
+    expect(serviceNow.updateIncident).toHaveReturned();
+    expect(serviceNow.batchCreateComments).not.toHaveBeenCalled();
+    expect(res).toEqual({
+      incidentId: '123',
+      number: 'INC01',
+      pushedDate: '2020-03-10T12:24:20.000Z',
+    });
+  });
+  test('nothing & nothing', async () => {
+    const { serviceNow } = new ServiceNowMock();
+    finalMapping.set('title', {
+      target: 'short_description',
+      actionType: 'nothing',
+    });
+
+    finalMapping.set('description', {
+      target: 'description',
+      actionType: 'nothing',
+    });
+
+    finalMapping.set('comments', {
+      target: 'comments',
+      actionType: 'append',
+    });
+
+    finalMapping.set('short_description', {
+      target: 'title',
+      actionType: 'nothing',
+    });
+
+    const res = await handleUpdateIncident({
+      incidentId: '123',
+      serviceNow,
+      params,
+      comments: [],
+      mapping: finalMapping,
+    });
+
+    expect(serviceNow.updateIncident).toHaveBeenCalled();
+    expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', {});
+    expect(serviceNow.updateIncident).toHaveReturned();
+    expect(serviceNow.batchCreateComments).not.toHaveBeenCalled();
+    expect(res).toEqual({
+      incidentId: '123',
+      number: 'INC01',
+      pushedDate: '2020-03-10T12:24:20.000Z',
+    });
+  });
+  test('overwrite & nothing', async () => {
+    const { serviceNow } = new ServiceNowMock();
+    finalMapping.set('title', {
+      target: 'short_description',
+      actionType: 'overwrite',
+    });
+
+    finalMapping.set('description', {
+      target: 'description',
+      actionType: 'nothing',
+    });
+
+    finalMapping.set('comments', {
+      target: 'comments',
+      actionType: 'append',
+    });
+
+    finalMapping.set('short_description', {
+      target: 'title',
+      actionType: 'overwrite',
+    });
+
+    const res = await handleUpdateIncident({
+      incidentId: '123',
+      serviceNow,
+      params,
+      comments: [],
+      mapping: finalMapping,
+    });
+
+    expect(serviceNow.updateIncident).toHaveBeenCalled();
+    expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', {
+      short_description: 'a title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+    });
+    expect(serviceNow.updateIncident).toHaveReturned();
+    expect(serviceNow.batchCreateComments).not.toHaveBeenCalled();
+    expect(res).toEqual({
+      incidentId: '123',
+      number: 'INC01',
+      pushedDate: '2020-03-10T12:24:20.000Z',
+    });
+  });
+  test('overwrite & overwrite', async () => {
+    const { serviceNow } = new ServiceNowMock();
+    finalMapping.set('title', {
+      target: 'short_description',
+      actionType: 'overwrite',
+    });
+
+    finalMapping.set('description', {
+      target: 'description',
+      actionType: 'overwrite',
+    });
+
+    finalMapping.set('comments', {
+      target: 'comments',
+      actionType: 'append',
+    });
+
+    finalMapping.set('short_description', {
+      target: 'title',
+      actionType: 'overwrite',
+    });
+
+    const res = await handleUpdateIncident({
+      incidentId: '123',
+      serviceNow,
+      params,
+      comments: [],
+      mapping: finalMapping,
+    });
+
+    expect(serviceNow.updateIncident).toHaveBeenCalled();
+    expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', {
+      short_description: 'a title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+      description: 'a description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+    });
+    expect(serviceNow.updateIncident).toHaveReturned();
+    expect(serviceNow.batchCreateComments).not.toHaveBeenCalled();
+    expect(res).toEqual({
+      incidentId: '123',
+      number: 'INC01',
+      pushedDate: '2020-03-10T12:24:20.000Z',
+    });
+  });
+  test('nothing & overwrite', async () => {
+    const { serviceNow } = new ServiceNowMock();
+    finalMapping.set('title', {
+      target: 'short_description',
+      actionType: 'nothing',
+    });
+
+    finalMapping.set('description', {
+      target: 'description',
+      actionType: 'overwrite',
+    });
+
+    finalMapping.set('comments', {
+      target: 'comments',
+      actionType: 'append',
+    });
+
+    finalMapping.set('short_description', {
+      target: 'title',
+      actionType: 'nothing',
+    });
+
+    const res = await handleUpdateIncident({
+      incidentId: '123',
+      serviceNow,
+      params,
+      comments: [],
+      mapping: finalMapping,
+    });
+
+    expect(serviceNow.updateIncident).toHaveBeenCalled();
+    expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', {
+      description: 'a description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+    });
+    expect(serviceNow.updateIncident).toHaveReturned();
+    expect(serviceNow.batchCreateComments).not.toHaveBeenCalled();
+    expect(res).toEqual({
+      incidentId: '123',
+      number: 'INC01',
+      pushedDate: '2020-03-10T12:24:20.000Z',
+    });
+  });
+  test('append & overwrite', async () => {
+    const { serviceNow } = new ServiceNowMock();
+    finalMapping.set('title', {
+      target: 'short_description',
+      actionType: 'append',
+    });
+
+    finalMapping.set('description', {
+      target: 'description',
+      actionType: 'overwrite',
+    });
+
+    finalMapping.set('comments', {
+      target: 'comments',
+      actionType: 'append',
+    });
+
+    finalMapping.set('short_description', {
+      target: 'title',
+      actionType: 'append',
+    });
+
+    const res = await handleUpdateIncident({
+      incidentId: '123',
+      serviceNow,
+      params,
+      comments: [],
+      mapping: finalMapping,
+    });
+
+    expect(serviceNow.updateIncident).toHaveBeenCalled();
+    expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', {
+      short_description:
+        'a title (updated at 2020-03-13T08:34:53.450Z by Elastic User) servicenow title',
+      description: 'a description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+    });
+    expect(serviceNow.updateIncident).toHaveReturned();
+    expect(serviceNow.batchCreateComments).not.toHaveBeenCalled();
+    expect(res).toEqual({
+      incidentId: '123',
+      number: 'INC01',
+      pushedDate: '2020-03-10T12:24:20.000Z',
+    });
+  });
+  test('append & nothing', async () => {
+    const { serviceNow } = new ServiceNowMock();
+    finalMapping.set('title', {
+      target: 'short_description',
+      actionType: 'append',
+    });
+
+    finalMapping.set('description', {
+      target: 'description',
+      actionType: 'nothing',
+    });
+
+    finalMapping.set('comments', {
+      target: 'comments',
+      actionType: 'append',
+    });
+
+    finalMapping.set('short_description', {
+      target: 'title',
+      actionType: 'append',
+    });
+
+    const res = await handleUpdateIncident({
+      incidentId: '123',
+      serviceNow,
+      params,
+      comments: [],
+      mapping: finalMapping,
+    });
+
+    expect(serviceNow.updateIncident).toHaveBeenCalled();
+    expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', {
+      short_description:
+        'a title (updated at 2020-03-13T08:34:53.450Z by Elastic User) servicenow title',
+    });
+    expect(serviceNow.updateIncident).toHaveReturned();
+    expect(serviceNow.batchCreateComments).not.toHaveBeenCalled();
+    expect(res).toEqual({
+      incidentId: '123',
+      number: 'INC01',
+      pushedDate: '2020-03-10T12:24:20.000Z',
+    });
+  });
+});
+
+describe('createComments', () => {
+  test('create comments correctly', async () => {
+    const { serviceNow } = new ServiceNowMock();
+    serviceNow.batchCreateComments.mockResolvedValue([
+      { commentId: '456', pushedDate: '2020-03-10T12:24:20.000Z' },
+      { commentId: '789', pushedDate: '2020-03-10T12:24:20.000Z' },
+    ]);
+
+    const comments = [
+      {
+        comment: 'first comment',
+        commentId: '456',
+        createdAt: '2020-03-13T08:34:53.450Z',
+        createdBy: {
+          fullName: 'Elastic User',
+          username: null,
+        },
+        updatedAt: null,
+        updatedBy: null,
+        version: 'WzU3LDFd',
+      },
+      {
+        comment: 'second comment',
+        commentId: '789',
+        createdAt: '2020-03-13T08:34:53.450Z',
+        createdBy: {
+          fullName: 'Elastic User',
+          username: null,
+        },
+        updatedAt: '2020-03-13T08:34:53.450Z',
+        updatedBy: {
+          fullName: 'Elastic User',
+          username: null,
+        },
+        version: 'WzU3LDFd',
+      },
+    ];
+
+    const res = await createComments(serviceNow, '123', 'comments', comments);
+
+    expect(serviceNow.batchCreateComments).toHaveBeenCalled();
+    expect(serviceNow.batchCreateComments).toHaveBeenCalledWith(
+      '123',
+      [
+        {
+          comment: 'first comment',
+          commentId: '456',
+          createdAt: '2020-03-13T08:34:53.450Z',
+          createdBy: {
+            fullName: 'Elastic User',
+            username: null,
+          },
+          updatedAt: null,
+          updatedBy: null,
+          version: 'WzU3LDFd',
+        },
+        {
+          comment: 'second comment',
+          commentId: '789',
+          createdAt: '2020-03-13T08:34:53.450Z',
+          createdBy: {
+            fullName: 'Elastic User',
+            username: null,
+          },
+          updatedAt: '2020-03-13T08:34:53.450Z',
+          updatedBy: {
+            fullName: 'Elastic User',
+            username: null,
+          },
+          version: 'WzU3LDFd',
+        },
+      ],
+      'comments'
+    );
+    expect(res).toEqual([
+      {
+        commentId: '456',
+        pushedDate: '2020-03-10T12:24:20.000Z',
+      },
+      {
+        commentId: '789',
+        pushedDate: '2020-03-10T12:24:20.000Z',
+      },
+    ]);
   });
 });

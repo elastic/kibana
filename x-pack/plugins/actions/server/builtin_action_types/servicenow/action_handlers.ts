@@ -21,7 +21,7 @@ import {
   applyActionTypeToFields,
 } from './helpers';
 
-const createComments = async (
+export const createComments = async (
   serviceNow: ServiceNow,
   incidentId: string,
   key: string,

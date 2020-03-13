@@ -14,13 +14,12 @@ import { configUtilsMock } from '../../actions_config.mock';
 import { ACTION_TYPE_ID } from './constants';
 import * as i18n from './translations';
 
-import { handleCreateIncident, handleUpdateIncident } from './action_handlers';
+import { handleIncident } from './action_handlers';
 import { incidentResponse } from './mock';
 
 jest.mock('./action_handlers');
 
-const handleCreateIncidentMock = handleCreateIncident as jest.Mock;
-const handleUpdateIncidentMock = handleUpdateIncident as jest.Mock;
+const handleIncidentMock = handleIncident as jest.Mock;
 
 const services: Services = {
   callCluster: async (path: string, opts: any) => {},
@@ -63,12 +62,19 @@ const mockOptions = {
     incidentId: 'ceb5986e079f00100e48fbbf7c1ed06d',
     title: 'Incident title',
     description: 'Incident description',
+    createdAt: '2020-03-13T08:34:53.450Z',
+    createdBy: { fullName: 'Elastic User', username: null },
+    updatedAt: null,
+    updatedBy: null,
     comments: [
       {
         commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
         version: 'WzU3LDFd',
         comment: 'A comment',
-        incidentCommentId: '315e1ece071300100e48fbbf7c1ed0d0',
+        createdAt: '2020-03-13T08:34:53.450Z',
+        createdBy: { fullName: 'Elastic User', username: null },
+        updatedAt: null,
+        updatedBy: null,
       },
     ],
   },
@@ -169,8 +175,8 @@ describe('validateParams()', () => {
 
 describe('execute()', () => {
   beforeEach(() => {
-    handleCreateIncidentMock.mockReset();
-    handleUpdateIncidentMock.mockReset();
+    handleIncidentMock.mockReset();
+    handleIncidentMock.mockReset();
   });
 
   test('should create an incident', async () => {
@@ -185,7 +191,7 @@ describe('execute()', () => {
       services,
     };
 
-    handleCreateIncidentMock.mockImplementation(() => incidentResponse);
+    handleIncidentMock.mockImplementation(() => incidentResponse);
 
     const actionResponse = await actionType.executor(executorOptions);
     expect(actionResponse).toEqual({ actionId, status: 'ok', data: incidentResponse });
@@ -205,7 +211,7 @@ describe('execute()', () => {
     };
     const errorMessage = 'Failed to create incident';
 
-    handleCreateIncidentMock.mockImplementation(() => {
+    handleIncidentMock.mockImplementation(() => {
       throw new Error(errorMessage);
     });
 
@@ -243,7 +249,7 @@ describe('execute()', () => {
     };
     const errorMessage = 'Failed to update incident';
 
-    handleUpdateIncidentMock.mockImplementation(() => {
+    handleIncidentMock.mockImplementation(() => {
       throw new Error(errorMessage);
     });
 
