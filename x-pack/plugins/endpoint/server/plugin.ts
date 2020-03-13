@@ -6,6 +6,7 @@
 import { Plugin, CoreSetup, PluginInitializerContext, Logger } from 'kibana/server';
 import { first } from 'rxjs/operators';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
+import { IngestManagerSetupContract } from '../../ingest_manager/server';
 import { createConfig$, EndpointConfigType } from './config';
 import { EndpointAppContext } from './types';
 
@@ -20,6 +21,7 @@ export interface EndpointPluginStartDependencies {} // eslint-disable-line @type
 
 export interface EndpointPluginSetupDependencies {
   features: FeaturesPluginSetupContract;
+  ingestManager: IngestManagerSetupContract;
 }
 
 export class EndpointPlugin
@@ -61,6 +63,7 @@ export class EndpointPlugin
       },
     });
     const endpointContext = {
+      ingestManager: plugins.ingestManager,
       logFactory: this.initializerContext.logger,
       config: (): Promise<EndpointConfigType> => {
         return createConfig$(this.initializerContext)

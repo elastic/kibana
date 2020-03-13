@@ -7,6 +7,9 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'kibana/server';
 import { IngestManagerPlugin } from './plugin';
 
+export { IndexPatternService } from './services';
+export { IngestManagerSetupContract } from './plugin';
+
 export const config = {
   exposeToBrowser: {
     epm: true,

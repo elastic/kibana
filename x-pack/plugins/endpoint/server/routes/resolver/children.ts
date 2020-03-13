@@ -11,6 +11,9 @@ import { extractEntityID } from './utils/normalize';
 import { getPaginationParams } from './utils/pagination';
 import { LifecycleQuery } from './queries/lifecycle';
 import { ChildrenQuery } from './queries/children';
+import { EndpointAppConstants } from '../../../common/types';
+import { IndexPatternService } from '../../../../ingest_manager/server';
+import { getIndexPattern } from '../../index_pattern';
 
 interface ChildrenQueryParams {
   after?: string;
@@ -45,7 +48,8 @@ export const validateChildren = {
 };
 
 export function handleChildren(
-  log: Logger
+  log: Logger,
+  indexPatternService: IndexPatternService
 ): RequestHandler<ChildrenPathParams, ChildrenQueryParams> {
   return async (context, req, res) => {
     const {
@@ -54,10 +58,15 @@ export function handleChildren(
     } = req;
     try {
       const pagination = getPaginationParams(limit, after);
+      const indexPattern = await getIndexPattern(
+        indexPatternService,
+        context.core.savedObjects.client,
+        EndpointAppConstants.EVENT_DATASET
+      );
 
       const client = context.core.elasticsearch.dataClient;
-      const childrenQuery = new ChildrenQuery(legacyEndpointID, pagination);
-      const lifecycleQuery = new LifecycleQuery(legacyEndpointID);
+      const childrenQuery = new ChildrenQuery(indexPattern, legacyEndpointID, pagination);
+      const lifecycleQuery = new LifecycleQuery(indexPattern, legacyEndpointID);
 
       // Retrieve the related child process events for a given process
       const { total, results: events, nextCursor } = await childrenQuery.search(client, id);

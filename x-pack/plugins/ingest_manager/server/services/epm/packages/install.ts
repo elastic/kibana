@@ -18,6 +18,7 @@ import * as Registry from '../registry';
 import { getObject } from './get_objects';
 import { getInstallation, findInstalledPackageByName } from './index';
 import { installTemplates } from '../elasticsearch/template/install';
+import { generateIndexPatterns } from '../elasticsearch/template/template';
 import { installPipelines } from '../elasticsearch/ingest_pipeline/install';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 
@@ -109,16 +110,18 @@ export async function installPackage(options: {
     installTemplatePromises,
   ]);
 
-  const toSave = res.flat();
+  const toSaveRefs: AssetReference[] = res.flat();
+  const toSavePatterns = generateIndexPatterns(registryPackageInfo.datasets);
   // Save those references in the package manager's state saved object
   await saveInstallationReferences({
     savedObjectsClient,
     pkgkey,
     pkgName,
     pkgVersion,
-    toSave,
+    toSaveRefs,
+    toSavePatterns,
   });
-  return toSave;
+  return toSaveRefs;
 }
 
 // TODO: make it an exhaustive list
@@ -145,25 +148,33 @@ export async function saveInstallationReferences(options: {
   pkgkey: string;
   pkgName: string;
   pkgVersion: string;
-  toSave: AssetReference[];
+  toSaveRefs: AssetReference[];
+  toSavePatterns: Record<string, string>;
 }) {
-  const { savedObjectsClient, pkgkey, pkgName, pkgVersion, toSave } = options;
+  const { savedObjectsClient, pkgkey, pkgName, pkgVersion, toSaveRefs, toSavePatterns } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgkey });
-  const savedRefs = installation?.installed || [];
+  const savedRefs = installation?.installed.references || [];
+  const toInstallStreams = Object.assign(installation?.datasetIndexPattern || {}, toSavePatterns);
+
   const mergeRefsReducer = (current: AssetReference[], pending: AssetReference) => {
     const hasRef = current.find(c => c.id === pending.id && c.type === pending.type);
     if (!hasRef) current.push(pending);
     return current;
   };
 
-  const toInstall = toSave.reduce(mergeRefsReducer, savedRefs);
+  const toInstallRefs = toSaveRefs.reduce(mergeRefsReducer, savedRefs);
   await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
-    { installed: toInstall, name: pkgName, version: pkgVersion },
+    {
+      installed: { references: toInstallRefs, patterns: toInstallStreams },
+      name: pkgName,
+      version: pkgVersion,
+    },
     { id: pkgkey, overwrite: true }
   );
 
-  return toInstall;
+  // TODO handle returning both types or merge the install refs into a single object
+  return toInstallRefs;
 }
 
 async function installKibanaSavedObjects({

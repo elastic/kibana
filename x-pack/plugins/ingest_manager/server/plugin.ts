@@ -11,7 +11,9 @@ import {
   Plugin,
   PluginInitializerContext,
   SavedObjectsServiceStart,
+  RecursiveReadonly,
 } from 'kibana/server';
+import { deepFreeze } from '../../../../src/core/utils';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../security/server';
@@ -38,7 +40,14 @@ import {
 } from './routes';
 
 import { IngestManagerConfigType } from '../common';
-import { appContextService } from './services';
+import { appContextService, IndexPatternService } from './services';
+
+/**
+ * Describes public IngestManager plugin contract returned at the `setup` stage.
+ */
+export interface IngestManagerSetupContract {
+  indexPatternService: IndexPatternService;
+}
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -63,7 +72,7 @@ const allSavedObjectTypes = [
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
 ];
 
-export class IngestManagerPlugin implements Plugin {
+export class IngestManagerPlugin implements Plugin<IngestManagerSetupContract> {
   private config$: Observable<IngestManagerConfigType>;
   private security: SecurityPluginSetup | undefined;
 
@@ -71,7 +80,10 @@ export class IngestManagerPlugin implements Plugin {
     this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
   }
 
-  public async setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
+  public async setup(
+    core: CoreSetup,
+    deps: IngestManagerSetupDeps
+  ): Promise<RecursiveReadonly<IngestManagerSetupContract>> {
     if (deps.security) {
       this.security = deps.security;
     }
@@ -128,6 +140,9 @@ export class IngestManagerPlugin implements Plugin {
         basePath: core.http.basePath,
       });
     }
+    return deepFreeze({
+      indexPatternService: new IndexPatternService(),
+    });
   }
 
   public async start(

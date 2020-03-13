@@ -12,6 +12,7 @@ import { handleLifecycle, validateLifecycle } from './resolver/lifecycle';
 
 export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const log = endpointAppContext.logFactory.get('resolver');
+  const indexPatternService = endpointAppContext.ingestManager.indexPatternService;
 
   router.get(
     {
@@ -19,7 +20,7 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       validate: validateRelatedEvents,
       options: { authRequired: true },
     },
-    handleRelatedEvents(log)
+    handleRelatedEvents(log, indexPatternService)
   );
 
   router.get(
@@ -28,7 +29,7 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       validate: validateChildren,
       options: { authRequired: true },
     },
-    handleChildren(log)
+    handleChildren(log, indexPatternService)
   );
 
   router.get(
@@ -37,6 +38,6 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       validate: validateLifecycle,
       options: { authRequired: true },
     },
-    handleLifecycle(log)
+    handleLifecycle(log, indexPatternService)
   );
 }

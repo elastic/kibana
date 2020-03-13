@@ -65,6 +65,22 @@ export function generateTemplateName(dataset: Dataset): string {
   return getDatasetAssetBaseName(dataset);
 }
 
+/**
+ * Returns a map of the dataset path fields to index pattern.
+ * @param datasets an array of Dataset objects
+ */
+export function generateIndexPatterns(datasets: Dataset[] | undefined): Record<string, string> {
+  if (!datasets) {
+    return {};
+  }
+
+  const patterns: Record<string, string> = {};
+  for (const dataset of datasets) {
+    patterns[dataset.path] = generateTemplateName(dataset) + '-*';
+  }
+  return patterns;
+}
+
 function getBaseTemplate(type: string, templateName: string, mappings: Mappings): IndexTemplate {
   return {
     // We need to decide which order we use for the templates
