@@ -57,6 +57,7 @@ interface ActionAccordionFormProps {
   actionTypes?: ActionType[];
   messageVariables?: string[];
   defaultActionMessage?: string;
+  setHasActionsDisabled?: (value: boolean) => void;
 }
 
 interface ActiveActionConnectorState {
@@ -76,6 +77,7 @@ export const ActionForm = ({
   messageVariables,
   defaultActionMessage,
   toastNotifications,
+  setHasActionsDisabled,
 }: ActionAccordionFormProps) => {
   const [addModalVisible, setAddModalVisibility] = useState<boolean>(false);
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
@@ -97,6 +99,12 @@ export const ActionForm = ({
           index[actionTypeItem.id] = actionTypeItem;
         }
         setActionTypesIndex(index);
+        const hasActionsDisabledByLicense = actions.some(
+          action => !index[action.actionTypeId].enabledInLicense
+        );
+        if (setHasActionsDisabled) {
+          setHasActionsDisabled(hasActionsDisabledByLicense);
+        }
       } catch (e) {
         if (toastNotifications) {
           toastNotifications.addDanger({

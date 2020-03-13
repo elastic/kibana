@@ -70,9 +70,16 @@ interface AlertFormProps {
   dispatch: React.Dispatch<AlertReducerAction>;
   errors: IErrorObject;
   canChangeTrigger?: boolean; // to hide Change trigger button
+  setHasActionsDisabled?: (value: boolean) => void;
 }
 
-export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: AlertFormProps) => {
+export const AlertForm = ({
+  alert,
+  canChangeTrigger = true,
+  dispatch,
+  errors,
+  setHasActionsDisabled,
+}: AlertFormProps) => {
   const alertsContext = useAlertsContext();
   const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = alertsContext;
 
@@ -212,6 +219,7 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
       {defaultActionGroupId ? (
         <ActionForm
           actions={alert.actions}
+          setHasActionsDisabled={setHasActionsDisabled}
           messageVariables={
             alertTypesIndex && alertTypesIndex[alert.alertTypeId]
               ? actionVariablesFromAlertType(alertTypesIndex[alert.alertTypeId]).map(av => av.name)

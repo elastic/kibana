@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useReducer, useState } from 'react';
+import React, { Fragment, useCallback, useReducer, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -17,6 +17,8 @@ import {
   EuiFlyoutBody,
   EuiPortal,
   EuiBetaBadge,
+  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAlertsContext } from '../../context/alerts_context';
@@ -38,6 +40,7 @@ export const AlertEdit = ({
 }: AlertEditProps) => {
   const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [hasActionsDisabled, setHasActionsDisabled] = useState<boolean>(false);
 
   const {
     reloadAlerts,
@@ -141,7 +144,26 @@ export const AlertEdit = ({
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <AlertForm alert={alert} dispatch={dispatch} errors={errors} canChangeTrigger={false} />
+          {hasActionsDisabled && (
+            <Fragment>
+              <EuiCallOut
+                color="danger"
+                iconType="alert"
+                title={i18n.translate(
+                  'xpack.triggersActionsUI.sections.alertEdit.disabledActionsWarningTitle',
+                  { defaultMessage: 'This alert has actions that are disabled' }
+                )}
+              />
+              <EuiSpacer />
+            </Fragment>
+          )}
+          <AlertForm
+            alert={alert}
+            dispatch={dispatch}
+            errors={errors}
+            canChangeTrigger={false}
+            setHasActionsDisabled={setHasActionsDisabled}
+          />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
