@@ -83,10 +83,11 @@ export interface PolicyListState {
  * Policy list store state
  */
 export interface PolicyDetailsState {
-  /** Array of policy items  */
+  /** A single policy item  */
   policyItem: PolicyData | undefined;
   /** data is being retrieved from server */
   isLoading: boolean;
+  /** current location of the application */
   location?: Immutable<EndpointAppLocation>;
 }
 
