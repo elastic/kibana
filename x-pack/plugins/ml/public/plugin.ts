@@ -31,8 +31,8 @@ export class MlPlugin implements Plugin<Setup, Start> {
       title: i18n.translate('xpack.ml.plugin.title', {
         defaultMessage: 'Machine Learning',
       }),
+      order: 30,
       euiIconType: PLUGIN_ICON,
-      order: 8001,
       appRoute: '/app/ml',
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();

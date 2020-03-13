@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  // createMlTelemetry,
-  // incrementFileDataVisualizerIndexCreationCount,
-  // ML_TELEMETRY_DOC_ID,
-  MlTelemetry,
-  // storeMlTelemetry,
-} from './ml_telemetry';
+// import {
+//   createMlTelemetry,
+//   incrementFileDataVisualizerIndexCreationCount,
+//   ML_TELEMETRY_DOC_ID,
+//   MlTelemetry,
+//   storeMlTelemetry,
+// } from './ml_telemetry';
 
 describe('ml_telemetry', () => {
   describe('createMlTelemetry', () => {
@@ -25,17 +25,17 @@ describe('ml_telemetry', () => {
   });
 
   describe('storeMlTelemetry', () => {
-    let mlTelemetry: MlTelemetry;
-    let internalRepository: any;
+    // let mlTelemetry: MlTelemetry;
+    // let internalRepository: any;
 
-    beforeEach(() => {
-      internalRepository = { create: jest.fn(), get: jest.fn() };
-      mlTelemetry = {
-        file_data_visualizer: {
-          index_creation_count: 1,
-        },
-      };
-    });
+    // beforeEach(() => {
+    //   internalRepository = { create: jest.fn(), get: jest.fn() };
+    //   mlTelemetry = {
+    //     file_data_visualizer: {
+    //       index_creation_count: 1,
+    //     },
+    //   };
+    // });
 
     it('should call internalRepository create with the given MlTelemetry object', () => {
       // storeMlTelemetry(internalRepository, mlTelemetry);
