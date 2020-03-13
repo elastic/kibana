@@ -33,24 +33,30 @@ export const getKibanaFrameworkAdapter = (
     http: { basePath },
     i18n,
   } = core;
+
   const {
     data: { autocomplete },
     // TODO: after NP migration we can likely fix this typing problem
     // @ts-ignore we don't control this type
     triggers_actions_ui,
   } = plugins;
+
   alertTypeInitializers.forEach(init =>
     triggers_actions_ui.alertTypeRegistry.register(init({ autocomplete }))
   );
+
   let breadcrumbs: ChromeBreadcrumb[] = [];
   core.chrome.getBreadcrumbs$().subscribe((nextBreadcrumbs?: ChromeBreadcrumb[]) => {
     breadcrumbs = nextBreadcrumbs || [];
   });
+
   const { apm, infrastructure, logs } = getIntegratedAppAvailability(
     capabilities,
     INTEGRATED_SOLUTIONS
   );
+
   const canSave = get(capabilities, 'uptime.save', false);
+
   const props: UptimeAppProps = {
     basePath: basePath.get(),
     canSave,
