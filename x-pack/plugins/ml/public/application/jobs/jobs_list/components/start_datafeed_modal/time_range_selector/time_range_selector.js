@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './_time_range_selector.scss';
 import PropTypes from 'prop-types';
 import React, { Component, useState, useEffect } from 'react';
 
