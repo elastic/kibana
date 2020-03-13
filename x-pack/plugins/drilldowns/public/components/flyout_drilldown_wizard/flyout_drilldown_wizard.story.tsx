@@ -38,7 +38,7 @@ storiesOf('components/FlyoutDrilldownWizard', module)
           drilldownActionFactories={[urlFactory, dashboardFactory]}
           initialDrilldownWizardConfig={{
             name: 'My fancy drilldown',
-            actionFactory: urlFactory,
+            actionFactory: urlFactory as any,
             actionConfig: {
               url: 'https://elastic.co',
               openInNewTab: true,
