@@ -7,3 +7,4 @@
 export * from './case';
 export * from './configure';
 export * from './comment';
+export * from './status';

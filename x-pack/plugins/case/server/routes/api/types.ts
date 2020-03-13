@@ -15,6 +15,6 @@ export interface RouteDeps {
 
 export enum SortFieldCase {
   createdAt = 'created_at',
-  state = 'state',
+  status = 'status',
   updatedAt = 'updated_at',
 }

@@ -5,9 +5,9 @@
  */
 
 import { initDeleteCasesApi } from './cases/delete_cases';
-import { initGetAllCasesApi } from './cases/get_all_cases';
+import { initFindCasesApi } from '././cases/find_cases';
 import { initGetCaseApi } from './cases/get_case';
-import { initPatchCaseApi } from './cases/patch_case';
+import { initPatchCasesApi } from './cases/patch_cases';
 import { initPostCaseApi } from './cases/post_case';
 
 import { initDeleteCommentApi } from './cases/comments/delete_comment';
@@ -18,11 +18,9 @@ import { initGetCommentApi } from './cases/comments/get_comment';
 import { initPatchCommentApi } from './cases/comments/patch_comment';
 import { initPostCommentApi } from './cases/comments/post_comment';
 
-import { initCaseConfigureGetActionConnector } from './cases/configure/get_connectors';
-import { initCaseConfigurePatchActionConnector } from './cases/configure/patch_connector';
-import { initGetCaseConfigure } from './cases/configure/get_configure';
-import { initPatchCaseConfigure } from './cases/configure/patch_configure';
-import { initPostCaseConfigure } from './cases/configure/post_configure';
+import { initGetReportersApi } from './cases/reporters/get_reporters';
+
+import { initGetCasesStatusApi } from './cases/status/get_status';
 
 import { initGetTagsApi } from './cases/tags/get_tags';
 
@@ -31,24 +29,22 @@ import { RouteDeps } from './types';
 export function initCaseApi(deps: RouteDeps) {
   // Cases
   initDeleteCasesApi(deps);
-  initFindCaseCommentsApi(deps);
-  initGetAllCasesApi(deps);
+  initFindCasesApi(deps);
   initGetCaseApi(deps);
+  initPatchCasesApi(deps);
   initPostCaseApi(deps);
-  initPatchCaseApi(deps);
-  // Cases Comments
+  // Comments
   initDeleteCommentApi(deps);
   initDeleteAllCommentsApi(deps);
+  initFindCaseCommentsApi(deps);
   initGetCommentApi(deps);
   initGetAllCommentsApi(deps);
-  initPostCommentApi(deps);
   initPatchCommentApi(deps);
-  // Cases Configure
-  initCaseConfigureGetActionConnector(deps);
-  initCaseConfigurePatchActionConnector(deps);
-  initGetCaseConfigure(deps);
-  initPatchCaseConfigure(deps);
-  initPostCaseConfigure(deps);
-  // Cases Tags
+  initPostCommentApi(deps);
+  // Reporters
+  initGetReportersApi(deps);
+  // Status
+  initGetCasesStatusApi(deps);
+  // Tags
   initGetTagsApi(deps);
 }

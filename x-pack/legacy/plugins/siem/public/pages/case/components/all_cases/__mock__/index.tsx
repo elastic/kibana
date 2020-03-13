@@ -9,6 +9,8 @@ import { UseGetCasesState } from '../../../../../containers/case/use_get_cases';
 
 export const useGetCasesMockState: UseGetCasesState = {
   data: {
+    countClosedCases: 0,
+    countOpenCases: 0,
     cases: [
       {
         id: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
@@ -17,7 +19,7 @@ export const useGetCasesMockState: UseGetCasesState = {
         commentIds: [],
         comments: [],
         description: 'Security banana Issue',
-        state: 'open',
+        status: 'open',
         tags: ['defacement'],
         title: 'Another horrible breach',
         updatedAt: null,
@@ -31,7 +33,7 @@ export const useGetCasesMockState: UseGetCasesState = {
         commentIds: [],
         comments: [],
         description: 'Security banana Issue',
-        state: 'open',
+        status: 'open',
         tags: ['phishing'],
         title: 'Bad email',
         updatedAt: null,
@@ -45,7 +47,7 @@ export const useGetCasesMockState: UseGetCasesState = {
         commentIds: [],
         comments: [],
         description: 'Security banana Issue',
-        state: 'open',
+        status: 'open',
         tags: ['phishing'],
         title: 'Bad email',
         updatedAt: null,
@@ -59,7 +61,7 @@ export const useGetCasesMockState: UseGetCasesState = {
         commentIds: [],
         comments: [],
         description: 'Security banana Issue',
-        state: 'closed',
+        status: 'closed',
         tags: ['phishing'],
         title: 'Uh oh',
         updatedAt: null,
@@ -73,7 +75,7 @@ export const useGetCasesMockState: UseGetCasesState = {
         commentIds: [],
         comments: [],
         description: 'Security banana Issue',
-        state: 'open',
+        status: 'open',
         tags: ['phishing'],
         title: 'Uh oh',
         updatedAt: null,
@@ -85,10 +87,6 @@ export const useGetCasesMockState: UseGetCasesState = {
     perPage: 5,
     total: 10,
   },
-  caseCount: {
-    open: 0,
-    closed: 0,
-  },
   loading: [],
   selectedCases: [],
   isError: false,
@@ -98,5 +96,5 @@ export const useGetCasesMockState: UseGetCasesState = {
     sortField: SortFieldCase.createdAt,
     sortOrder: 'desc',
   },
-  filterOptions: { search: '', tags: [], state: 'open' },
+  filterOptions: { search: '', reporters: [], tags: [], status: 'open' },
 };
