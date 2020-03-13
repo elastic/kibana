@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { call, put, takeLatest, select } from 'redux-saga/effects';
+import { call, put, takeLatest } from 'redux-saga/effects';
 import { Action } from 'redux-actions';
 import {
   FETCH_MONITOR_DETAILS,
@@ -15,16 +15,13 @@ import {
   FETCH_MONITOR_LOCATIONS_FAIL,
 } from '../actions/monitor';
 import { fetchMonitorDetails, fetchMonitorLocations } from '../api';
-import { getBasePath } from '../selectors';
 import { MonitorDetailsActionPayload } from '../actions/types';
 
 function* monitorDetailsEffect(action: Action<any>) {
   const { monitorId, dateStart, dateEnd }: MonitorDetailsActionPayload = action.payload;
   try {
-    const basePath = yield select(getBasePath);
     const response = yield call(fetchMonitorDetails, {
       monitorId,
-      basePath,
       dateStart,
       dateEnd,
     });
@@ -37,8 +34,7 @@ function* monitorDetailsEffect(action: Action<any>) {
 function* monitorLocationsEffect(action: Action<any>) {
   const payload = action.payload;
   try {
-    const basePath = yield select(getBasePath);
-    const response = yield call(fetchMonitorLocations, { basePath, ...payload });
+    const response = yield call(fetchMonitorLocations, payload);
     yield put({ type: FETCH_MONITOR_LOCATIONS_SUCCESS, payload: response });
   } catch (error) {
     yield put({ type: FETCH_MONITOR_LOCATIONS_FAIL, payload: error.message });

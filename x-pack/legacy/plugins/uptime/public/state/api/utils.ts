@@ -28,7 +28,7 @@ class ApiService {
     return ApiService.instance;
   }
 
-  public async get(apiUrl: string, params: HttpFetchQuery) {
+  public async get(apiUrl: string, params?: HttpFetchQuery) {
     const response = await this._http!.get(apiUrl, { query: params });
     if (response instanceof Error) {
       throw response;

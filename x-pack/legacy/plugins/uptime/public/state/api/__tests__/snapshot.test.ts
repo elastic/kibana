@@ -9,13 +9,13 @@ import { apiService } from '../utils';
 import { HttpFetchError } from '../../../../../../../../src/core/public/http/http_fetch_error';
 
 describe('snapshot API', () => {
-  let fetchMock: jest.SpyInstance<Promise<Partial<Response>>>;
-  let mockResponse: Partial<Response>;
+  let fetchMock: jest.SpyInstance<Partial<unknown>>;
+  let mockResponse: Partial<unknown>;
 
   beforeEach(() => {
     apiService.http = {
       get: jest.fn(),
-    };
+    } as any;
     fetchMock = jest.spyOn(apiService.http, 'get');
     mockResponse = { up: 3, down: 12, total: 15 };
   });
@@ -63,7 +63,7 @@ describe('snapshot API', () => {
   });
 
   it('throws an error when response is not ok', async () => {
-    mockResponse = new HttpFetchError('There was an error fetching your data.', 'error', {});
+    mockResponse = new HttpFetchError('There was an error fetching your data.', 'error', {} as any);
     fetchMock.mockReturnValue(mockResponse);
     let error: Error | undefined;
     try {
