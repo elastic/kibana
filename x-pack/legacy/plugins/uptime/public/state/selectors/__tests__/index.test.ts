@@ -63,6 +63,7 @@ describe('state selectors', () => {
       loading: false,
       errors: [],
     },
+    toasts: [],
   };
 
   it('selects base path from state', () => {

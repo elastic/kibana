@@ -23,6 +23,7 @@ import { CommonlyUsedRange } from './components/functional/uptime_date_picker';
 import { store } from './state';
 import { setBasePath } from './state/actions';
 import { PageRouter } from './routes';
+import { UptimeToasts } from './pages/uptime_toasts';
 
 export interface UptimeAppColors {
   danger: string;
@@ -97,6 +98,7 @@ const Application = (props: UptimeAppProps) => {
                   <UptimeSettingsContextProvider {...props}>
                     <UptimeThemeContextProvider darkMode={darkMode}>
                       <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
+                        <UptimeToasts />
                         <main>
                           <PageRouter autocomplete={plugins.data.autocomplete} />
                         </main>

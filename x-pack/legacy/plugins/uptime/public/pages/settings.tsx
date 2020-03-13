@@ -17,7 +17,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
-  EuiToast,
   EuiButtonEmpty,
   EuiPage,
   EuiPageBody,
@@ -59,16 +58,6 @@ export const SettingsPageComponent = ({
   }, [dispatchGetDynamicSettings]);
 
   const [formFields, setFormFields] = useState<DynamicSettings | null>(dss.settings || null);
-
-  if (dss.loadError) {
-    // eslint-disable-next-line no-console
-    console.error('Could not load settings', dss.loadError);
-    return (
-      <EuiToast color="danger" iconType="alert" title="Could not load settings">
-        {dss.loadError.name} - {dss.loadError.message}
-      </EuiToast>
-    );
-  }
 
   if (!dss.loadError && formFields == null && dss.settings) {
     setFormFields({ ...dss.settings });

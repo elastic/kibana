@@ -6,7 +6,7 @@
 import { createAction } from 'redux-actions';
 import { DynamicSettings } from '../../../common/runtime_types';
 
-export const getDynamicSettings = createAction<{}>('GET_DYNAMIC_SETTING');
+export const getDynamicSettings = createAction<{}>('GET_DYNAMIC_SETTINGS');
 export const getDynamicSettingsSuccess = createAction<DynamicSettings>(
   'GET_DYNAMIC_SETTINGS_SUCCESS'
 );
@@ -17,3 +17,4 @@ export const setDynamicSettingsSuccess = createAction<DynamicSettings>(
   'SET_DYNAMIC_SETTINGS_SUCCESS'
 );
 export const setDynamicSettingsFail = createAction<Error>('SET_DYNAMIC_SETTINGS_FAIL');
+export const acknowledgeSetDynamicSettings = createAction<{}>('ACKNOWLEDGE_SET_DYNAMIC_SETTINGS');

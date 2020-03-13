@@ -21,6 +21,7 @@ import {
 } from '../api';
 import { DynamicSettings } from '../../../common/runtime_types';
 import { getBasePath } from '../selectors';
+import { createToast } from '../actions/toasts';
 
 export function* fetchDynamicSettingsEffect() {
   yield takeLatest(
@@ -33,15 +34,37 @@ export function* setDynamicSettingsEffect() {
   yield takeLatest(String(setDynamicSettings), function*(action: Action<DynamicSettings>) {
     try {
       if (!action.payload) {
+        const err = 'Cannot fetch effect without a payload';
+        yield put(setDynamicSettingsFail(new Error(err)));
         yield put(
-          setDynamicSettingsFail(new Error('Cannot fetch effect for undefined parameters'))
+          createToast({
+            id: '' + Math.random(),
+            color: 'danger',
+            title: 'Could not save settings',
+            text: JSON.stringify(action),
+          })
         );
         return;
       }
       const basePath = yield select(getBasePath);
       yield call(setDynamicSettingsAPI, { settings: action.payload, basePath });
       yield put(setDynamicSettingsSuccess(action.payload));
+      yield put(
+        createToast({
+          id: '' + Math.random(),
+          color: 'success',
+          title: 'Settings saved!',
+        })
+      );
     } catch (error) {
+      yield put(
+        createToast({
+          id: '' + Math.random(),
+          color: 'danger',
+          title: 'Could not save settings',
+          text: `${error.message}: ${error.stacktrace}`,
+        })
+      );
       yield put(setDynamicSettingsFail(error));
     }
   });

@@ -49,11 +49,13 @@ export const dynamicSettingsReducer = handleActions<DynamicSettingsState, any>(
     }),
     [String(setDynamicSettingsSuccess)]: (state, action: Action<DynamicSettings>) => ({
       settings: action.payload,
+      saveSucceded: true,
       loading: false,
     }),
     [String(setDynamicSettingsFail)]: (state, action: Action<Error>) => ({
       ...state,
       loading: false,
+      saveSucceeded: false,
       saveError: action.payload,
     }),
   },
