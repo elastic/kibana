@@ -68,9 +68,8 @@ export class ValidatedDualRange extends Component<Props> {
     return null;
   }
 
-  state: State = {
-    value: ['0', '0'],
-  };
+  // @ts-ignore state populated by getDerivedStateFromProps
+  state: State = {};
 
   _onChange = (value: Value) => {
     const { isValid, errorMessage } = isRangeValid(
