@@ -18,6 +18,7 @@
  */
 
 import { getFilterableKbnTypeNames, IFieldType } from '../..';
+import { KBN_FILTERABLE_TYPE } from '../../kbn_field_types/types';
 
 const filterableTypes = getFilterableKbnTypeNames();
 
@@ -25,7 +26,10 @@ export function isFilterable(field: IFieldType): boolean {
   return (
     field.name === '_id' ||
     field.scripted ||
-    Boolean(field.searchable && filterableTypes.includes(field.type))
+    Boolean(
+      (field.searchable && filterableTypes[field.type] === KBN_FILTERABLE_TYPE.ALL) ||
+        filterableTypes[field.type] === KBN_FILTERABLE_TYPE.EXISTSONLY
+    )
   );
 }
 

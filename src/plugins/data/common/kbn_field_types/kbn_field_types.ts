@@ -19,7 +19,7 @@
 
 import { createKbnFieldTypes } from './kbn_field_types_factory';
 import { KbnFieldType } from './kbn_field_type';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from './types';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES, KBN_FILTERABLE_TYPE } from './types';
 
 /** @private */
 const registeredKbnTypes = createKbnFieldTypes();
@@ -58,5 +58,8 @@ export const castEsToKbnFieldTypeName = (esType: ES_FIELD_TYPES | string): KBN_F
  *
  *  @return {Array<string>}
  */
-export const getFilterableKbnTypeNames = (): string[] =>
-  registeredKbnTypes.filter(type => type.filterable).map(type => type.name);
+export const getFilterableKbnTypeNames = (): { [key: string]: KBN_FILTERABLE_TYPE } =>
+  registeredKbnTypes.reduce((map: { [key: string]: KBN_FILTERABLE_TYPE }, type: KbnFieldType) => {
+    map[type.name] = type.filterableType;
+    return map;
+  }, {});

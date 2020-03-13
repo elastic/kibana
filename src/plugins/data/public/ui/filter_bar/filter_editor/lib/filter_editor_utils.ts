@@ -19,13 +19,19 @@
 
 import dateMath from '@elastic/datemath';
 import { Ipv4Address } from '../../../../../../kibana_utils/public';
-import { FILTER_OPERATORS, Operator } from './filter_operators';
+import {
+  FILTER_OPERATORS,
+  Operator,
+  doesNotExistOperator,
+  existsOperator,
+} from './filter_operators';
 import {
   isFilterable,
   IIndexPattern,
   IFieldType,
   Filter,
   FieldFilter,
+  KBN_FILTERABLE_TYPE,
 } from '../../../../../common';
 
 export function getFieldFromFilter(filter: FieldFilter, indexPattern: IIndexPattern) {
@@ -43,9 +49,15 @@ export function getFilterableFields(indexPattern: IIndexPattern) {
 }
 
 export function getOperatorOptions(field: IFieldType) {
-  return FILTER_OPERATORS.filter(operator => {
-    return !operator.fieldTypes || operator.fieldTypes.includes(field.type);
-  });
+  switch (field.filterableType) {
+    case KBN_FILTERABLE_TYPE.EXISTSONLY:
+      return [existsOperator, doesNotExistOperator];
+    case KBN_FILTERABLE_TYPE.ALL:
+    default:
+      return FILTER_OPERATORS.filter(operator => {
+        return !operator.fieldTypes || operator.fieldTypes.includes(field.type);
+      });
+  }
 }
 
 export function validateParams(params: any, type: string) {

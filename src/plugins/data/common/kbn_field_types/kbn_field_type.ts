@@ -17,18 +17,20 @@
  * under the License.
  */
 
-import { KbnFieldTypeOptions, ES_FIELD_TYPES, KBN_FIELD_TYPES } from './types';
+import { KbnFieldTypeOptions, ES_FIELD_TYPES, KBN_FIELD_TYPES, KBN_FILTERABLE_TYPE } from './types';
 
 export class KbnFieldType {
   public readonly name: string;
   public readonly sortable: boolean;
   public readonly filterable: boolean;
+  public readonly filterableType: KBN_FILTERABLE_TYPE;
   public readonly esTypes: readonly ES_FIELD_TYPES[];
 
   constructor(options: Partial<KbnFieldTypeOptions> = {}) {
     this.name = options.name || KBN_FIELD_TYPES.UNKNOWN;
     this.sortable = options.sortable || false;
     this.filterable = options.filterable || false;
+    this.filterableType = options.filterableType || KBN_FILTERABLE_TYPE.NONE;
     this.esTypes = Object.freeze((options.esTypes || []).slice());
   }
 }

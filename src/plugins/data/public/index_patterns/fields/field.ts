@@ -28,6 +28,7 @@ import {
   IFieldSubType,
   shortenDottedString,
   FieldFormat,
+  KBN_FILTERABLE_TYPE,
 } from '../../../common';
 
 export type FieldSpec = Record<string, any>;
@@ -43,6 +44,7 @@ export class Field implements IFieldType {
   esTypes?: string[];
   aggregatable?: boolean;
   filterable?: boolean;
+  filterableType?: KBN_FILTERABLE_TYPE;
   searchable?: boolean;
   sortable?: boolean;
   visualizable?: boolean;
@@ -111,6 +113,7 @@ export class Field implements IFieldType {
     const sortable = spec.name === '_score' || ((indexed || aggregatable) && type && type.sortable);
     const filterable =
       spec.name === '_id' || scripted || ((indexed || searchable) && type && type.filterable);
+    const filterableType = type?.filterableType;
     const visualizable = aggregatable;
 
     this.name = '';
@@ -134,6 +137,7 @@ export class Field implements IFieldType {
     obj.comp('format', format);
     obj.comp('sortable', sortable);
     obj.comp('filterable', filterable);
+    obj.comp('filterableType', filterableType);
     obj.comp('visualizable', visualizable);
 
     // computed values

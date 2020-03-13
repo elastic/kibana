@@ -21,8 +21,15 @@
 export interface KbnFieldTypeOptions {
   sortable: boolean;
   filterable: boolean;
+  filterableType: KBN_FILTERABLE_TYPE;
   name: string;
   esTypes: ES_FIELD_TYPES[];
+}
+
+export enum KBN_FILTERABLE_TYPE {
+  ALL = 'all',
+  NONE = 'none',
+  EXISTSONLY = 'existsOnly',
 }
 
 /** @public **/
