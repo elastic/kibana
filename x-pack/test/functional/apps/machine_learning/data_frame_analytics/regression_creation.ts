@@ -12,7 +12,8 @@ export default function({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('regression creation', function() {
-    this.tags(['smoke']);
+    // Firefox OOM https://github.com/elastic/kibana/issues/59454
+    // this.tags(['smoke']);
     before(async () => {
       await esArchiver.load('ml/egs_regression');
       await ml.securityUI.loginAsMlPowerUser();

@@ -25,7 +25,8 @@ export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   describe('heatmap chart', function indexPatternCreation() {
-    this.tags('smoke');
+    // Firefox OOM https://github.com/elastic/kibana/issues/59454
+    // this.tags('smoke');
     const vizName1 = 'Visualization HeatmapChart';
 
     before(async function() {

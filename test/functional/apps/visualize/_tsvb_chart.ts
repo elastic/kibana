@@ -28,7 +28,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker', 'visChart']);
 
   describe('visual builder', function describeIndexTests() {
-    this.tags('smoke');
+    // Firefox OOM https://github.com/elastic/kibana/issues/59454
+    // this.tags('smoke');
     beforeEach(async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisualBuilder();

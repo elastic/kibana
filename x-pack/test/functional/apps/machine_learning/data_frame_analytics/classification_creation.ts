@@ -12,7 +12,8 @@ export default function({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('classification creation', function() {
-    this.tags(['smoke']);
+    // Firefox OOM https://github.com/elastic/kibana/issues/59454
+    // this.tags(['smoke']);
     before(async () => {
       await esArchiver.load('ml/bm_classification');
       await ml.securityUI.loginAsMlPowerUser();

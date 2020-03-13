@@ -18,7 +18,8 @@ export default function({ getService }: FtrProviderContext) {
   const transform = getService('transform');
 
   describe('creation_saved_search', function() {
-    this.tags(['smoke']);
+    // Firefox OOM https://github.com/elastic/kibana/issues/59454
+    // this.tags(['smoke']);
     before(async () => {
       await esArchiver.load('ml/farequote');
       await transform.securityUI.loginAsTransformPowerUser();

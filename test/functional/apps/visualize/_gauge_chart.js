@@ -26,9 +26,9 @@ export default function({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/45089
   describe('gauge chart', function indexPatternCreation() {
-    this.tags('smoke');
+    // Firefox OOM https://github.com/elastic/kibana/issues/59454
+    // this.tags('smoke');
 
     async function initGaugeVis() {
       log.debug('navigateToApp visualize');

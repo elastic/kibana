@@ -11,7 +11,7 @@ kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
         'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
         'x-pack-intake-agent': workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh'),
         'kibana-oss-agent': workers.functional('kibana-oss-tests', { kibanaPipeline.buildOss() }, [
-          // 'oss-firefoxSmoke': kibanaPipeline.functionalTestProcess('kibana-firefoxSmoke', './test/scripts/jenkins_firefox_smoke.sh'),
+          'oss-firefoxSmoke': kibanaPipeline.functionalTestProcess('kibana-firefoxSmoke', './test/scripts/jenkins_firefox_smoke.sh'),
           'oss-ciGroup1': kibanaPipeline.ossCiGroupProcess(1),
           'oss-ciGroup2': kibanaPipeline.ossCiGroupProcess(2),
           'oss-ciGroup3': kibanaPipeline.ossCiGroupProcess(3),
@@ -28,7 +28,7 @@ kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
           // 'oss-visualRegression': kibanaPipeline.functionalTestProcess('visualRegression', './test/scripts/jenkins_visual_regression.sh'),
         ]),
         'kibana-xpack-agent': workers.functional('kibana-xpack-tests', { kibanaPipeline.buildXpack() }, [
-          // 'xpack-firefoxSmoke': kibanaPipeline.functionalTestProcess('xpack-firefoxSmoke', './test/scripts/jenkins_xpack_firefox_smoke.sh'),
+          'xpack-firefoxSmoke': kibanaPipeline.functionalTestProcess('xpack-firefoxSmoke', './test/scripts/jenkins_xpack_firefox_smoke.sh'),
           'xpack-ciGroup1': kibanaPipeline.xpackCiGroupProcess(1),
           'xpack-ciGroup2': kibanaPipeline.xpackCiGroupProcess(2),
           'xpack-ciGroup3': kibanaPipeline.xpackCiGroupProcess(3),

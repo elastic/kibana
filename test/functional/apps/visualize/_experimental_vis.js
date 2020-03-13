@@ -24,7 +24,8 @@ export default ({ getService, getPageObjects }) => {
   const PageObjects = getPageObjects(['visualize']);
 
   describe('visualize app', function() {
-    this.tags('smoke');
+    // Firefox OOM https://github.com/elastic/kibana/issues/59454
+    // this.tags('smoke');
 
     describe('experimental visualizations', () => {
       beforeEach(async () => {

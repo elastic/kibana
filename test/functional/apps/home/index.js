@@ -21,7 +21,8 @@ export default function({ getService, loadTestFile }) {
   const browser = getService('browser');
 
   describe('homepage app', function() {
-    this.tags('ciGroup6');
+    // Firefox OOM https://github.com/elastic/kibana/issues/59454
+    this.tags(['ciGroup6', 'skipFirefox']);
 
     before(function() {
       return browser.setWindowSize(1200, 800);
