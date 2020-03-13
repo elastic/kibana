@@ -220,7 +220,7 @@ export const AllCases = React.memo(() => {
       pageIndex: queryParams.page - 1,
       pageSize: queryParams.perPage,
       totalItemCount: data.total,
-      pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
+      pageSizeOptions: [5, 10, 15, 20, 25],
     }),
     [data, queryParams]
   );
