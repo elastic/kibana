@@ -38,6 +38,10 @@ finalMapping.set('short_description', {
 const params: ParamsType = {
   caseId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
   incidentId: 'ceb5986e079f00100e48fbbf7c1ed06d',
+  createdAt: '2020-03-13T08:34:53.450Z',
+  createdBy: { fullName: 'Elastic User', username: null },
+  updatedAt: '2020-03-13T08:34:53.450Z',
+  updatedBy: { fullName: 'Elastic User', username: null },
   title: 'Incident title',
   description: 'Incident description',
   comments: [
@@ -45,13 +49,19 @@ const params: ParamsType = {
       commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
       version: 'WzU3LDFd',
       comment: 'A comment',
-      incidentCommentId: '263ede42075300100e48fbbf7c1ed047',
+      createdAt: '2020-03-13T08:34:53.450Z',
+      createdBy: { fullName: 'Elastic User', username: null },
+      updatedAt: '2020-03-13T08:34:53.450Z',
+      updatedBy: { fullName: 'Elastic User', username: null },
     },
     {
       commentId: 'e3db587f-ca27-4ae9-ad2e-31f2dcc9bd0d',
       version: 'WlK3LDFd',
       comment: 'Another comment',
-      incidentCommentId: '315e1ece071300100e48fbbf7c1ed0d0',
+      createdAt: '2020-03-13T08:34:53.450Z',
+      createdBy: { fullName: 'Elastic User', username: null },
+      updatedAt: '2020-03-13T08:34:53.450Z',
+      updatedBy: { fullName: 'Elastic User', username: null },
     },
   ],
 };

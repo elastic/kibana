@@ -47,14 +47,13 @@ export const mapParams = (params: any, mapping: FinalMapping) => {
 };
 
 export const appendField = ({ value, prefix = '', suffix = '' }: AppendFieldArgs): string => {
-  return `${prefix} ${value} ${suffix}`;
+  return `${prefix}${value} ${suffix}`;
 };
 
 export const applyActionTypeToFields = ({
   params,
   mapping,
   incident,
-  mode,
 }: ApplyActionTypeToFieldsArgs): Incident => {
   // Ignore fields that have as actionType = nothing
   const filterMappedParams = Object.keys(params.mappedParams)
@@ -69,7 +68,7 @@ export const applyActionTypeToFields = ({
 
   const paramsWithInformation = appendInformationToIncident(
     { ...params, mappedParams: filterMappedParams },
-    mode
+    'update'
   );
 
   return Object.keys(paramsWithInformation).reduce((fields: Incident, paramKey: string) => {

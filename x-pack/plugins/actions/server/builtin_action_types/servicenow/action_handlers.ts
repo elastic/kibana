@@ -7,7 +7,6 @@
 import { zipWith } from 'lodash';
 import { CommentResponse } from './lib/types';
 import {
-  UpdateParamsType,
   IncidentCreationResponse,
   CommentType,
   CommentsZipped,
@@ -67,14 +66,12 @@ export const handleUpdateIncident = async ({
   comments,
   mapping,
 }: UpdateHandlerArguments): Promise<IncidentCreationResponse> => {
-  let mappedParams = appendInformationToIncident(params, 'update');
   const serviceNowIncident = await serviceNow.getIncident(incidentId);
 
-  mappedParams = applyActionTypeToFields({
+  const mappedParams = applyActionTypeToFields({
     params,
     mapping,
     incident: serviceNowIncident,
-    mode: 'update',
   });
 
   const { number, pushedDate } = await serviceNow.updateIncident(incidentId, {

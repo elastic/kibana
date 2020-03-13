@@ -49,7 +49,6 @@ export interface ApplyActionTypeToFieldsArgs {
   params: HandlerParamsType;
   mapping: FinalMapping;
   incident: Record<string, any>;
-  mode: string;
 }
 
 export interface AppendFieldArgs {
