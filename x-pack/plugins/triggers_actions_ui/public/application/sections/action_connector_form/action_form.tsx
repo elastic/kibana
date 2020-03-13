@@ -525,15 +525,21 @@ export const ActionForm = ({
       ) : null}
       {isAddActionPanelOpen ? (
         <Fragment>
-          <EuiTitle size="xs">
-            <h5 id="alertActionTypeTitle">
-              <Fragment>
-                <FormattedMessage
-                  defaultMessage="Actions: Select an action type"
-                  id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeTitle"
-                />
-                {hasDisabledByLicenseActionTypes && (
-                  <Fragment>
+          <EuiFlexGroup id="alertActionTypeTitle" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h5>
+                  <FormattedMessage
+                    defaultMessage="Actions: Select an action type"
+                    id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeTitle"
+                  />
+                </h5>
+              </EuiTitle>
+            </EuiFlexItem>
+            {hasDisabledByLicenseActionTypes && (
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h5>
                     <EuiLink
                       href={VIEW_LICENSE_OPTIONS_LINK}
                       target="_blank"
@@ -545,11 +551,11 @@ export const ActionForm = ({
                         id="xpack.triggersActionsUI.sections.actionForm.getMoreActionsTitle"
                       />
                     </EuiLink>
-                  </Fragment>
-                )}
-              </Fragment>
-            </h5>
-          </EuiTitle>
+                  </h5>
+                </EuiTitle>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
           <EuiSpacer />
           <EuiFlexGroup gutterSize="s" wrap>
             {isLoadingActionTypes ? (
