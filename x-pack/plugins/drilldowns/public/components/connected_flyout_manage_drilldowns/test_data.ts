@@ -49,6 +49,10 @@ class MockDynamicActionManager implements PublicMethodsOf<DynamicActionManager> 
     };
   }
 
+  async deleteEvent() {
+    throw new Error('not implemented');
+  }
+
   async start() {}
   async stop() {}
 }

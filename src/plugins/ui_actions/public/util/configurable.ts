@@ -32,10 +32,8 @@ export interface Configurable<Config extends ConfigurableBaseConfig = Configurab
 
   /**
    * Is this config valid. Used to validate user's input before saving.
-   *
-   * @todo Rename this to `isConfig`?
    */
-  readonly isConfigValid: (config: Config) => config is Config;
+  readonly isConfigValid: (config: Config) => boolean;
 
   /**
    * `UiComponent` to be rendered when collecting configuration for this item.
