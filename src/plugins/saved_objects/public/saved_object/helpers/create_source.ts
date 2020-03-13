@@ -84,7 +84,7 @@ export async function createSource(
 export async function saveWithConfirmation(
   source: SavedObjectAttributes,
   savedObject: {
-    type: string;
+    getEsType(): string;
     title: string;
     displayName: string;
   },
@@ -93,7 +93,7 @@ export async function saveWithConfirmation(
 ) {
   const { savedObjectsClient, overlays } = services;
   try {
-    return await savedObjectsClient.create(savedObject.type, source, options);
+    return await savedObjectsClient.create(savedObject.getEsType(), source, options);
   } catch (err) {
     // record exists, confirm overwriting
     if (_.get(err, 'res.status') === 409) {
@@ -115,7 +115,7 @@ export async function saveWithConfirmation(
 
       return confirmModalPromise(confirmMessage, title, confirmButtonText, overlays)
         .then(() =>
-          savedObjectsClient.create(savedObject.type, source, {
+          savedObjectsClient.create(savedObject.getEsType(), source, {
             overwrite: true,
             ...options,
           })

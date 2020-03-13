@@ -32,7 +32,11 @@ import { asAngularSyncedObservable } from './helpers/as_observable';
 import { colorChoices } from './helpers/style_choices';
 import { createGraphStore, datasourceSelector, hasFieldsSelector } from './state_management';
 import { formatHttpError } from './helpers/format_http_error';
-import { findSW, getSW, deleteWS } from './helpers/saved_workspace_utils';
+import {
+  findSavedWorkspace,
+  getSavedWorkspace,
+  deleteSavedWorkspace,
+} from './helpers/saved_workspace_utils';
 
 export function initGraphApp(angularModule, deps) {
   const {
@@ -113,7 +117,7 @@ export function initGraphApp(angularModule, deps) {
             $location.url(getNewPath());
           };
           $scope.find = search => {
-            return findSW(
+            return findSavedWorkspace(
               { savedObjectsClient, basePath: coreStart.http.basePath },
               search,
               $scope.listingLimit
@@ -124,7 +128,7 @@ export function initGraphApp(angularModule, deps) {
           };
           $scope.getViewUrl = workspace => getEditUrl(addBasePath, workspace);
           $scope.delete = workspaces =>
-            deleteWS(
+            deleteSavedWorkspace(
               savedObjectsClient,
               workspaces.map(({ id }) => id)
             );
@@ -140,7 +144,7 @@ export function initGraphApp(angularModule, deps) {
         resolve: {
           savedWorkspace: function($rootScope, $route, $location) {
             return $route.current.params.id
-              ? getSW(savedObjectsClient, $route.current.params.id).catch(function(e) {
+              ? getSavedWorkspace(savedObjectsClient, $route.current.params.id).catch(function(e) {
                   toastNotifications.addError(e, {
                     title: i18n.translate('xpack.graph.missingWorkspaceErrorMessage', {
                       defaultMessage: "Couldn't load graph with ID",
@@ -153,7 +157,7 @@ export function initGraphApp(angularModule, deps) {
                   // return promise that never returns to prevent the controller from loading
                   return new Promise();
                 })
-              : getSW(savedObjectsClient);
+              : getSavedWorkspace(savedObjectsClient);
           },
           indexPatterns: function() {
             return savedObjectsClient

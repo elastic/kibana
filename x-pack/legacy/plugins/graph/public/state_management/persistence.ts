@@ -22,7 +22,7 @@ import {
 import { updateMetaData, metaDataSelector } from './meta_data';
 import { openSaveModal, SaveWorkspaceHandler } from '../services/save_modal';
 import { getEditPath } from '../services/url';
-import { saveWS } from '../helpers/saved_workspace_utils';
+import { saveSavedWorkspace } from '../helpers/saved_workspace_utils';
 
 const actionCreator = actionCreatorFactory('x-pack/graph');
 
@@ -160,7 +160,7 @@ function showModal(
       canSaveData
     );
     try {
-      const id = await saveWS(savedWorkspace, saveOptions, services);
+      const id = await saveSavedWorkspace(savedWorkspace, saveOptions, services);
       if (id) {
         const title = i18n.translate('xpack.graph.saveWorkspace.successNotificationTitle', {
           defaultMessage: 'Saved "{workspaceTitle}"',

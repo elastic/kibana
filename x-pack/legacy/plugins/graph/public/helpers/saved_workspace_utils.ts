@@ -62,7 +62,7 @@ interface SavedWorkspaceServices {
   savedObjectsClient: SavedObjectsClientContract;
 }
 
-export function findSW(
+export function findSavedWorkspace(
   { savedObjectsClient, basePath }: SavedWorkspaceServices,
   searchString: string,
   size: number = 100
@@ -82,16 +82,13 @@ export function findSW(
     });
 }
 
-export async function getSW(savedObjectsClient: SavedObjectsClientContract, id?: string) {
+export async function getSavedWorkspace(
+  savedObjectsClient: SavedObjectsClientContract,
+  id?: string
+) {
   const savedObject = {
     id,
-    title: '',
-    type: savedWorkspaceType,
-    copyOnSave: false,
-    isSaving: false,
     displayName: 'graph workspace',
-    // NOTE: this.type (not set in this file, but somewhere else) is the sub type, e.g. 'area' or
-    // 'data table', while esType is the more generic type - e.g. 'visualization' or 'saved search'.
     getEsType: () => savedWorkspaceType,
   } as { [key: string]: any };
 
@@ -126,11 +123,14 @@ export async function getSW(savedObjectsClient: SavedObjectsClientContract, id?:
   return savedObject as GraphWorkspaceSavedObject;
 }
 
-export function deleteWS(savedObjectsClient: SavedObjectsClientContract, ids: string[]) {
+export function deleteSavedWorkspace(
+  savedObjectsClient: SavedObjectsClientContract,
+  ids: string[]
+) {
   return Promise.all(ids.map((id: string) => savedObjectsClient.delete(savedWorkspaceType, id)));
 }
 
-export async function saveWS(
+export async function saveSavedWorkspace(
   savedObject: GraphWorkspaceSavedObject,
   {
     confirmOverwrite = false,
@@ -157,10 +157,10 @@ export async function saveWS(
   let attributes: SavedObjectAttributes = {};
 
   forOwn(mapping, (fieldType, fieldName) => {
-    const savedObjectFieldVal = savedObject[fieldName as keyof GraphWorkspaceSavedObject];
+    const savedObjectFieldVal = savedObject[fieldName as keyof GraphWorkspaceSavedObject] as string;
     if (savedObjectFieldVal != null) {
       attributes[fieldName as keyof GraphWorkspaceSavedObject] =
-        fieldType === 'json' ? JSON.stringify(savedObjectFieldVal) : savedObjectFieldVal;
+        fieldName === 'wsState' ? JSON.stringify(savedObjectFieldVal) : savedObjectFieldVal;
     }
   });
   const extractedRefs = extractReferences({ attributes, references: [] });
@@ -192,7 +192,7 @@ export async function saveWS(
           createOpt,
           services as SavedObjectKibanaServices
         )
-      : await services.savedObjectsClient.create(savedObject.type, attributes, {
+      : await services.savedObjectsClient.create(savedObject.getEsType(), attributes, {
           ...createOpt,
           overwrite: true,
         });

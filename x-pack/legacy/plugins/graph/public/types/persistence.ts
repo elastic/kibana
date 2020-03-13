@@ -13,12 +13,12 @@ type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
  * Workspace fetched from server.
  */
 export interface GraphWorkspaceSavedObject {
-  copyOnSave: boolean;
+  copyOnSave?: boolean;
   description: string;
   displayName: string;
   getEsType(): string;
   id?: string;
-  isSaving: boolean;
+  isSaving?: boolean;
   lastSavedTitle?: string;
   migrationVersion?: Record<string, any>;
   numLinks: number;
