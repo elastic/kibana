@@ -20,14 +20,11 @@
 import $ from 'jquery';
 
 // TODO This is an integration test and thus requires a running platform. When moving to the new platform,
-// this test has to be migrated to the newly created integration test environment.
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { npStart } from 'ui/new_platform';
+// this test has to be migrated to a real unit test.
 // @ts-ignore
 import getStubIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 
 import { Vis } from '../../visualizations/public';
-import { fieldFormats } from '../../../../plugins/data/public';
 import {
   setup as visualizationsSetup,
   start as visualizationsStart,
@@ -35,6 +32,16 @@ import {
 import { createMetricVisTypeDefinition } from './metric_vis_type';
 
 jest.mock('ui/new_platform');
+
+jest.mock('./services', () => ({
+  getFormatService: () => ({
+    deserialize: () => {
+      return {
+        convert: (x: unknown) => `<a href="http://ip.info?address={{${x}}">ip[${x}]</a>`,
+      };
+    },
+  }),
+}));
 
 jest.mock('../../vis_default_editor/public/legacy_imports', () => ({
   propFilter: jest.fn(),
@@ -58,12 +65,6 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
 
   beforeAll(() => {
     visualizationsSetup.createReactVisualization(createMetricVisTypeDefinition());
-    (npStart.plugins.data.fieldFormats.getType as jest.Mock).mockImplementation(() => {
-      return fieldFormats.UrlFormat;
-    });
-    (npStart.plugins.data.fieldFormats.deserialize as jest.Mock).mockImplementation(mapping => {
-      return new fieldFormats.UrlFormat(mapping ? mapping.params : {});
-    });
   });
 
   const setup = () => {

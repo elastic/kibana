@@ -22,4 +22,4 @@ import { DataPublicPluginStart } from '../../../../plugins/data/public';
 
 export const [getFormatService, setFormatService] = createGetterSetter<
   DataPublicPluginStart['fieldFormats']
->('data.fieldFormats');
+>('metric data.fieldFormats');
