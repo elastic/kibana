@@ -10,8 +10,6 @@ import { IVectorSource } from '../sources/vector_source';
 import { IEmsFileSource } from '../sources/ems_file_source/ems_file_source';
 
 export class EMSFileField extends AbstractField implements IField {
-  static type = 'EMS_FILE';
-
   private readonly _source: IEmsFileSource;
 
   constructor({

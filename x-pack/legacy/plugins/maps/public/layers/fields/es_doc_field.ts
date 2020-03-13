@@ -15,8 +15,6 @@ import { IESSource } from '../sources/es_source';
 import { IVectorSource } from '../sources/vector_source';
 
 export class ESDocField extends AbstractField implements IField {
-  static type = 'ES_DOC';
-
   private readonly _source: IESSource;
 
   constructor({
@@ -73,7 +71,9 @@ export class ESDocField extends AbstractField implements IField {
       return null;
     }
 
-    const extendedStats: any = {};
+    // TODO remove local typing once Kibana has figured out a core place for Elasticsearch aggregation request types
+    // https://github.com/elastic/kibana/issues/60102
+    const extendedStats: { script?: unknown; field?: string } = {};
     if (indexPatternField.scripted) {
       extendedStats.script = {
         source: indexPatternField.script,
@@ -95,7 +95,9 @@ export class ESDocField extends AbstractField implements IField {
       return null;
     }
 
-    const topTerms: any = {
+    // TODO remove local typing once Kibana has figured out a core place for Elasticsearch aggregation request types
+    // https://github.com/elastic/kibana/issues/60102
+    const topTerms: { size: number; script?: unknown; field?: string } = {
       size: COLOR_PALETTE_MAX_SIZE - 1, // need additional color for the "other"-value
     };
     if (indexPatternField.scripted) {

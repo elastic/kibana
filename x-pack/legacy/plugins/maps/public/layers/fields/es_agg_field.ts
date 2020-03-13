@@ -23,8 +23,6 @@ export interface IESAggField extends IField {
 }
 
 export class ESAggField implements IESAggField {
-  static type = 'ES_AGG';
-
   private _source: IESAggSource;
   private _origin: FIELD_ORIGIN;
   private _label?: string;
