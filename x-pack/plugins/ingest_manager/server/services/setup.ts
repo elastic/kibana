@@ -70,7 +70,7 @@ async function addPackageToConfig(
     savedObjectsClient: soClient,
     pkgkey: `${packageToInstall.name}-${packageToInstall.version}`,
   });
-  const datasource = await datasourceService.create(soClient, {
+  await datasourceService.create(soClient, {
     name: `${packageInfo.name}-1`,
     enabled: true,
     package: {
@@ -82,6 +82,4 @@ async function addPackageToConfig(
     config_id: config.id,
     output_id: defaultOutput.id,
   });
-  // Assign it to the given agent config
-  await agentConfigService.assignDatasources(soClient, datasource.config_id, [datasource.id]);
 }
