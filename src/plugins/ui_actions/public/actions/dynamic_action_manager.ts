@@ -220,7 +220,7 @@ export class DynamicActionManager {
   /**
    * @deprecated
    *
-   * Use `.state.getState()` instead.
+   * Use `.state.get().events` instead.
    */
   public async list(): Promise<readonly SerializedEvent[]> {
     return this.state.get().events;
@@ -229,9 +229,9 @@ export class DynamicActionManager {
   /**
    * @deprecated
    *
-   * Use `.state.getState()` instead.
+   * Use `.state.get().events.length` instead.
    */
   public async count(): Promise<number> {
-    return (await this.list()).length;
+    return this.state.get().events.length;
   }
 }
