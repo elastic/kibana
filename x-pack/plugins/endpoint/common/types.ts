@@ -306,6 +306,7 @@ export interface EndpointEvent {
   agent: {
     id: string;
     version: string;
+    type: string;
   };
   ecs: {
     version: string;

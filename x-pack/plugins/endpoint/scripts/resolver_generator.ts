@@ -5,6 +5,7 @@
  */
 import yargs = require('yargs');
 import { Client, ClientOptions } from '@elastic/elasticsearch';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { EndpointDocGenerator } from '../common/generate_data';
 import { default as mapping } from '../common/mapping.json';
 
@@ -100,19 +101,18 @@ async function main() {
     await client.indices.delete({
       index: [argv.eventIndex, argv.metadataIndex],
     });
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.log(error);
+  } catch (err) {
+    if (err instanceof ResponseError && err.statusCode !== 404) {
+      // eslint-disable-next-line no-console
+      console.log(err);
+      process.exit(1);
+    }
   }
-  try {
-    await client.indices.create({
-      index: argv.eventIndex,
-      body: mapping,
-    });
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.log(error);
-  }
+  await client.indices.create({
+    index: argv.eventIndex,
+    body: mapping,
+  });
+
   const generator = new EndpointDocGenerator(argv.seed);
   for (let i = 0; i < argv.numEndpoints; i++) {
     await client.index({
