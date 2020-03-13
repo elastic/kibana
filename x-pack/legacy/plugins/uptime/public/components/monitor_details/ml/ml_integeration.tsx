@@ -4,16 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
+import { useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { UptimeSettingsContext } from '../../../contexts';
 import { MachineLearningFlyout } from './ml_flyout_container';
+import { hasMLJobSelector } from '../../../state/selectors';
+import { getMLJobAction } from '../../../state/actions';
+import { ML_JOB_ID } from '../../../../common/constants';
 
 export const MLIntegrationComponent = () => {
   const [isMlFlyoutOpen, setIsMlFlyoutOpen] = useState(false);
 
+  let { monitorId } = useParams();
+  monitorId = atob(monitorId || '');
+
+  const dispatch = useDispatch();
+
   const { license } = useContext(UptimeSettingsContext);
+
+  const hasMLJob = useSelector(hasMLJobSelector);
+
+  useEffect(() => {
+    const loadMLJob = (jobId: string) =>
+      dispatch(getMLJobAction.get({ jobId: `${monitorId}_${jobId}` }));
+
+    loadMLJob(ML_JOB_ID);
+  }, [dispatch, monitorId]);
 
   const onButtonClick = () => {
     setIsMlFlyoutOpen(true);
@@ -31,7 +50,7 @@ export const MLIntegrationComponent = () => {
         iconSide="left"
         onClick={onButtonClick}
       >
-        Enable Anomaly Detection
+        {hasMLJob ? 'Disable Anomaly Detection' : 'Enable Anomaly Detection'}
       </EuiButtonEmpty>
       {isMlFlyoutOpen && <MachineLearningFlyout isOpen={isMlFlyoutOpen} onClose={closeFlyout} />}
     </>

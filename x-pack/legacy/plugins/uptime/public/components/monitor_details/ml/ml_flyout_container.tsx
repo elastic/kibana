@@ -68,13 +68,6 @@ export const MachineLearningFlyout: React.FC<Props> = ({ isOpen, onClose }) => {
   const [isDeletingJob, setIsDeletingJob] = useState(false);
 
   useEffect(() => {
-    const loadMLJob = (jobId: string) =>
-      dispatch(getMLJobAction.get({ jobId: `${monitorId}_${jobId}` }));
-
-    loadMLJob(ML_JOB_ID);
-  }, [dispatch, isOpen, monitorId]);
-
-  useEffect(() => {
     if (isCreatingJob && !isMLJobCreating) {
       if (hasMLJob) {
         showMLJobNotification(notifications, true);
