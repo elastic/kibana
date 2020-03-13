@@ -13,7 +13,7 @@ import {
   PluginInitializerContext,
 } from 'kibana/server';
 import { PluginsSetup, RouteInitialization } from './types';
-import { PLUGIN_ID } from '../../../legacy/plugins/ml/common/constants/app';
+import { PLUGIN_ID } from '../common/constants/app';
 
 import { elasticsearchJsPlugin } from './client/elasticsearch_ml';
 import { makeMlUsageCollector } from './lib/ml_telemetry';
@@ -37,7 +37,7 @@ import { jobValidationRoutes } from './routes/job_validation';
 import { notificationRoutes } from './routes/notification_settings';
 import { resultsServiceRoutes } from './routes/results_service';
 import { systemRoutes } from './routes/system';
-import { MlLicense } from '../../../legacy/plugins/ml/common/license';
+import { MlLicense } from '../common/license';
 import { MlServerLicense } from './lib/license';
 import { createSharedServices, SharedServices } from './shared_services';
 

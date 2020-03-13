@@ -15,3 +15,14 @@ export {
   UseRequestConfig,
   useRequest,
 } from '../../../../src/plugins/es_ui_shared/public/request/np_ready_request';
+
+export {
+  CronEditor,
+  DAY,
+} from '../../../../src/plugins/es_ui_shared/public/components/cron_editor';
+
+// Needs to be imported because we're reusing KqlFilterBar which depends on it.
+export { setDependencyCache } from '../../ml/public/application/util/dependency_cache';
+
+// @ts-ignore: could not find declaration file for module
+export { KqlFilterBar } from '../../ml/public/application/components/kql_filter_bar';
