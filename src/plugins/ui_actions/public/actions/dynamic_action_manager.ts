@@ -22,6 +22,8 @@ import { ActionStorage, SerializedEvent } from './dynamic_action_storage';
 import { UiActionsService } from '../service';
 import { SerializedAction } from './types';
 import { ActionDefinition } from './action';
+import { defaultState, transitions, selectors, State } from './dynamic_action_manager_state';
+import { StateContainer, createStateContainer } from '../../../kibana_utils';
 
 export interface DynamicActionManagerParams {
   storage: ActionStorage;
@@ -37,21 +39,25 @@ export class DynamicActionManager {
 
   private readonly idPrefix = `D_ACTION_${DynamicActionManager.idPrefixCounter++}_`;
 
+  private stopped: boolean = false;
+
+  protected readonly stateContainer = createStateContainer(defaultState, transitions, selectors);
+  public readonly state: StateContainer<State> = this.stateContainer;
+
   constructor(protected readonly params: DynamicActionManagerParams) {}
 
-  protected generateActionId(eventId: string): string {
-    return this.idPrefix + eventId;
-  }
-
   public async start() {
-    const events = await this.params.storage.list();
+    if (this.stopped) return;
+    if (this.stateContainer.get().isFetchingEvents) return;
 
-    for (const event of events) {
-      this.reviveAction(event);
-    }
+    this.stateContainer.transitions.startFetching();
+    const events = await this.params.storage.list();
+    for (const event of events) this.reviveAction(event);
+    this.stateContainer.transitions.finishFetching(events);
   }
 
   public async stop() {
+    this.stopped = true;
     const events = await this.params.storage.list();
 
     for (const event of events) {
@@ -66,8 +72,13 @@ export class DynamicActionManager {
       action,
     };
 
-    await this.params.storage.create(event);
-    this.reviveAction(event);
+    this.stateContainer.transitions.addEvent(event);
+    try {
+      await this.params.storage.create(event);
+      this.reviveAction(event);
+    } catch {
+      this.stateContainer.transitions.removeEvent(event.eventId);
+    }
   }
 
   public async updateEvent(
@@ -81,26 +92,65 @@ export class DynamicActionManager {
       action,
     };
 
-    const oldEvent = await this.params.storage.read(eventId);
+    const oldEvent = this.getEvent(eventId);
     this.killAction(oldEvent);
-    await this.params.storage.update(event);
+
     this.reviveAction(event);
+    this.stateContainer.transitions.replaceEvent(event);
+
+    try {
+      await this.params.storage.update(event);
+    } catch {
+      this.killAction(event);
+      this.reviveAction(oldEvent);
+      this.stateContainer.transitions.replaceEvent(oldEvent);
+    }
+  }
+
+  public async deleteEvent(eventId: string) {
+    const event = this.getEvent(eventId);
+
+    this.killAction(event);
+    this.stateContainer.transitions.removeEvent(eventId);
+
+    try {
+      await this.params.storage.remove(eventId);
+    } catch {
+      this.reviveAction(event);
+      this.stateContainer.transitions.addEvent(event);
+    }
   }
 
   public async deleteEvents(eventIds: string[]) {
-    const eventsToKill = (await this.params.storage.list()).filter(event =>
-      eventIds.includes(event.eventId)
-    );
-    await Promise.all(eventIds.map(eventId => this.params.storage.remove(eventId)));
-    eventsToKill.forEach(event => this.killAction(event));
+    await eventIds.map(this.deleteEvent.bind(this));
   }
 
-  public async list(): Promise<SerializedEvent[]> {
-    return await this.params.storage.list();
+  /**
+   * @deprecated
+   *
+   * Use `.state.getState()` instead.
+   */
+  public async list(): Promise<readonly SerializedEvent[]> {
+    return this.state.get().events;
   }
 
+  /**
+   * @deprecated
+   *
+   * Use `.state.getState()` instead.
+   */
   public async count(): Promise<number> {
-    return await this.params.storage.count();
+    return (await this.list()).length;
+  }
+
+  protected getEvent(eventId: string): SerializedEvent {
+    const oldEvent = this.stateContainer.selectors.getEvent(eventId);
+    if (!oldEvent) throw new Error(`Could not find event [eventId = ${eventId}].`);
+    return oldEvent;
+  }
+
+  protected generateActionId(eventId: string): string {
+    return this.idPrefix + eventId;
   }
 
   protected reviveAction(event: SerializedEvent) {
