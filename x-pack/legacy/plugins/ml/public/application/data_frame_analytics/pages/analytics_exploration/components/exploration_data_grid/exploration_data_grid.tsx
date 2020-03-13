@@ -1,0 +1,136 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { Dispatch, FC, SetStateAction, useCallback, useMemo, useState } from 'react';
+
+import { i18n } from '@kbn/i18n';
+
+import { EuiDataGrid, EuiDataGridPaginationProps } from '@elastic/eui';
+
+import { euiDataGridStyle, euiDataGridToolbarSettings } from '../../../../common';
+
+const FEATURE_INFLUENCE = 'feature_influence';
+const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
+
+type Pagination = Pick<EuiDataGridPaginationProps, 'pageIndex' | 'pageSize'>;
+type TableItem = Record<string, any>;
+
+interface ExplorationDataGridProps {
+  colorRange: (d: number) => string;
+  columns: any[];
+  pagination: Pagination;
+  resultsField: string;
+  rowCount: number;
+  selectedFields: string[];
+  setPagination: Dispatch<SetStateAction<Pagination>>;
+  setSelectedFields: Dispatch<SetStateAction<string[]>>;
+  tableItems: TableItem[];
+}
+
+export const ExplorationDataGrid: FC<ExplorationDataGridProps> = ({
+  colorRange,
+  columns,
+  pagination,
+  resultsField,
+  rowCount,
+  selectedFields,
+  setPagination,
+  setSelectedFields,
+  tableItems,
+}) => {
+  const renderCellValue = useMemo(() => {
+    return ({
+      rowIndex,
+      columnId,
+      setCellProps,
+    }: {
+      rowIndex: number;
+      columnId: string;
+      setCellProps: any;
+    }) => {
+      const adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
+
+      const fullItem = tableItems[adjustedRowIndex];
+
+      const cellValue = tableItems.hasOwnProperty(adjustedRowIndex)
+        ? tableItems[adjustedRowIndex][columnId]
+        : null;
+
+      if (typeof cellValue === 'string' || cellValue === null) {
+        return cellValue;
+      }
+
+      if (typeof cellValue === 'boolean') {
+        return cellValue ? 'true' : 'false';
+      }
+
+      if (typeof cellValue === 'object' && cellValue !== null) {
+        return JSON.stringify(cellValue);
+      }
+
+      const split = columnId.split('.');
+      let backgroundColor;
+
+      // column with feature values get color coded by its corresponding influencer value
+      if (fullItem[`${resultsField}.${FEATURE_INFLUENCE}.${columnId}`] !== undefined) {
+        backgroundColor = colorRange(fullItem[`${resultsField}.${FEATURE_INFLUENCE}.${columnId}`]);
+      }
+
+      // column with influencer values get color coded by its own value
+      if (split.length > 2 && split[0] === resultsField && split[1] === FEATURE_INFLUENCE) {
+        backgroundColor = colorRange(cellValue);
+      }
+
+      if (backgroundColor !== undefined) {
+        setCellProps({
+          style: { backgroundColor },
+        });
+      }
+
+      return cellValue;
+    };
+  }, [resultsField, tableItems, pagination.pageIndex, pagination.pageSize]);
+
+  const onChangeItemsPerPage = useCallback(pageSize => setPagination(p => ({ ...p, pageSize })), [
+    setPagination,
+  ]);
+
+  const onChangePage = useCallback(pageIndex => setPagination(p => ({ ...p, pageIndex })), [
+    setPagination,
+  ]);
+
+  const [sortingColumns, setSortingColumns] = useState([]);
+  const onSort = useCallback(
+    sc => {
+      setSortingColumns(sc);
+    },
+    [setSortingColumns]
+  );
+
+  return (
+    <EuiDataGrid
+      aria-label={i18n.translate('xpack.ml.dataframe.analytics.exploration.dataGridAriaLabel', {
+        defaultMessage: 'Outlier detection results table',
+      })}
+      columns={columns}
+      columnVisibility={{
+        visibleColumns: selectedFields,
+        setVisibleColumns: setSelectedFields,
+      }}
+      gridStyle={euiDataGridStyle}
+      rowCount={rowCount}
+      renderCellValue={renderCellValue}
+      sorting={{ columns: sortingColumns, onSort }}
+      toolbarVisibility={euiDataGridToolbarSettings}
+      pagination={{
+        ...pagination,
+        pageSizeOptions: PAGE_SIZE_OPTIONS,
+        onChangeItemsPerPage,
+        onChangePage,
+      }}
+    />
+  );
+};
