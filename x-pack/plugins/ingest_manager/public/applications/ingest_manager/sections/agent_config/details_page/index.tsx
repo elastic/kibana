@@ -14,9 +14,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiTitle,
-  EuiButton,
   EuiButtonEmpty,
-  EuiEmptyPrompt,
   EuiI18nNumber,
   EuiDescriptionList,
   EuiDescriptionListTitle,
@@ -24,15 +22,15 @@ import {
 } from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import styled from 'styled-components';
-import { useCapabilities, useGetOneAgentConfig } from '../../../hooks';
-import { Datasource } from '../../../types';
+import { useGetOneAgentConfig } from '../../../hooks';
 import { Loading } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
 import { ConfigRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
-import { DatasourcesTable, EditConfigFlyout } from './components';
+import { EditConfigFlyout } from './components';
 import { LinkedAgentCount } from '../components';
 import { useAgentConfigLink } from './hooks/use_details_uri';
 import { DETAILS_ROUTER_PATH, DETAILS_ROUTER_SUB_PATH } from './constants';
+import { ConfigDatasourcesView } from './components/datasources';
 
 const Divider = styled.div`
   width: 0;
@@ -57,7 +55,6 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
   const {
     params: { configId, tabId = '' },
   } = useRouteMatch<{ configId: string; tabId?: string }>();
-  const hasWriteCapabilites = useCapabilities().write;
   const agentConfigRequest = useGetOneAgentConfig(configId);
   const agentConfig = agentConfigRequest.data ? agentConfigRequest.data.item : null;
   const { isLoading, error, sendRequest: refreshAgentConfig } = agentConfigRequest;
@@ -67,7 +64,6 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
   const agentStatus = agentStatusRequest.data?.results;
 
   // Links
-  const addDatasourceLink = useAgentConfigLink('add-datasource', { configId });
   const configListLink = useAgentConfigLink('list');
   const configDetailsLink = useAgentConfigLink('details', { configId });
   const configDetailsYamlLink = useAgentConfigLink('details-yaml', { configId });
@@ -300,57 +296,7 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
             <Route
               path={`${DETAILS_ROUTER_PATH}`}
               render={() => {
-                return (
-                  <DatasourcesTable
-                    datasources={agentConfig.datasources as Datasource[]}
-                    message={
-                      !agentConfig.datasources || agentConfig.datasources.length === 0 ? (
-                        <EuiEmptyPrompt
-                          title={
-                            <h2>
-                              <FormattedMessage
-                                id="xpack.ingestManager.configDetails.noDatasourcesPrompt"
-                                defaultMessage="Config has no data sources"
-                              />
-                            </h2>
-                          }
-                          actions={
-                            <EuiButton
-                              isDisabled={!hasWriteCapabilites}
-                              fill
-                              iconType="plusInCircle"
-                              href={addDatasourceLink}
-                            >
-                              <FormattedMessage
-                                id="xpack.ingestManager.configDetails.addDatasourceButtonText"
-                                defaultMessage="Create data source"
-                              />
-                            </EuiButton>
-                          }
-                        />
-                      ) : null
-                    }
-                    search={{
-                      toolsRight: [
-                        <EuiButton
-                          isDisabled={!hasWriteCapabilites}
-                          iconType="plusInCircle"
-                          href={addDatasourceLink}
-                        >
-                          <FormattedMessage
-                            id="xpack.ingestManager.configDetails.addDatasourceButtonText"
-                            defaultMessage="Create data source"
-                          />
-                        </EuiButton>,
-                      ],
-                      box: {
-                        incremental: true,
-                        schema: true,
-                      },
-                    }}
-                    isSelectable={false}
-                  />
-                );
+                return <ConfigDatasourcesView config={agentConfig} />;
               }}
             />
           </Switch>
