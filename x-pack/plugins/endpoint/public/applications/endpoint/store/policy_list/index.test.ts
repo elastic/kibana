@@ -12,19 +12,22 @@ import { policyListMiddlewareFactory } from './middleware';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { CoreStart } from 'kibana/public';
 import { selectIsLoading } from './selectors';
+import { DepsStartMock, depsStartMock } from '../../mocks';
 
 describe('policy list store concerns', () => {
   const sleep = () => new Promise(resolve => setTimeout(resolve, 1000));
   let fakeCoreStart: jest.Mocked<CoreStart>;
+  let depsStart: DepsStartMock;
   let store: Store<PolicyListState>;
   let getState: typeof store['getState'];
   let dispatch: Dispatch<AppAction>;
 
   beforeEach(() => {
     fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
+    depsStart = depsStartMock();
     store = createStore(
       policyListReducer,
-      applyMiddleware(policyListMiddlewareFactory(fakeCoreStart))
+      applyMiddleware(policyListMiddlewareFactory(fakeCoreStart, depsStart))
     );
     getState = store.getState;
     dispatch = store.dispatch;

@@ -26,10 +26,10 @@ import {
   IFieldType,
   getKbnFieldType,
   IFieldSubType,
-  shortenDottedString,
   FieldFormat,
   KBN_FILTERABLE_TYPE,
 } from '../../../common';
+import { shortenDottedString } from '../../../common/utils';
 
 export type FieldSpec = Record<string, any>;
 

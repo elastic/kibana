@@ -24,7 +24,6 @@
  * directly where they are needed.
  */
 
-export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
 export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
@@ -39,4 +38,5 @@ export {
   migrateLegacyQuery,
   PrivateProvider,
   PromiseServiceCreator,
+  subscribeWithScope,
 } from '../../../../../plugins/kibana_legacy/public';

@@ -13,9 +13,9 @@ import { AlertExecutorOptions } from '../../../../alerting/server';
 type AlertInfo = Pick<AlertExecutorOptions, 'name'>;
 
 export interface ActionContext extends BaseActionContext {
-  // a short generic message which may be used in an action message
-  subject: string;
-  // a longer generic message which may be used in an action message
+  // a short pre-constructed message which may be used in an action field
+  title: string;
+  // a longer pre-constructed message which may be used in an action field
   message: string;
 }
 
@@ -34,7 +34,7 @@ export function addMessages(
   baseContext: BaseActionContext,
   params: Params
 ): ActionContext {
-  const subject = i18n.translate(
+  const title = i18n.translate(
     'xpack.alertingBuiltins.indexThreshold.alertTypeContextSubjectTitle',
     {
       defaultMessage: 'alert {name} group {group} exceeded threshold',
@@ -65,5 +65,5 @@ export function addMessages(
     }
   );
 
-  return { ...baseContext, subject, message };
+  return { ...baseContext, title, message };
 }
