@@ -46,6 +46,7 @@ interface Job {
   attempts: number;
   max_attempts: number;
   csv_contains_formulas: boolean;
+  warnings: string[];
 }
 
 interface Props {
@@ -231,7 +232,7 @@ class ReportListingUi extends Component<Props, State> {
             return (
               <div>
                 <FormattedMessage
-                  id="xpack.reporting.listing.tableValue.createdAtDetail.pendingStatusReachedText"
+                  id="xpack.reporting.listing.tableValue.statusDetail.pendingStatusReachedText"
                   defaultMessage="Pending - waiting for job to be processed"
                 />
               </div>
@@ -243,10 +244,24 @@ class ReportListingUi extends Component<Props, State> {
             maxSizeReached = (
               <span>
                 <FormattedMessage
-                  id="xpack.reporting.listing.tableValue.createdAtDetail.maxSizeReachedText"
+                  id="xpack.reporting.listing.tableValue.statusDetail.maxSizeReachedText"
                   defaultMessage=" - Max size reached"
                 />
               </span>
+            );
+          }
+
+          let warnings;
+          if (record.warnings) {
+            warnings = (
+              <EuiText size="s">
+                <EuiTextColor color="subdued">
+                  <FormattedMessage
+                    id="xpack.reporting.listing.tableValue.statusDetail.warningsText"
+                    defaultMessage="Errors occurred: see job info for details."
+                  />
+                </EuiTextColor>
+              </EuiText>
             );
           }
 
@@ -465,6 +480,7 @@ class ReportListingUi extends Component<Props, State> {
               attempts: source.attempts,
               max_attempts: source.max_attempts,
               csv_contains_formulas: get(source, 'output.csv_contains_formulas'),
+              warnings: source.output ? source.output.warnings : undefined,
             };
           }
         ),
