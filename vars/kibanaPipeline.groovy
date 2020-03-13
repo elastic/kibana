@@ -357,4 +357,9 @@ def prepareXpackTestQueue(queue) {
   queue.xpackFirefox = items.xpackFirefox.reverse()
 }
 
+// Only works inside of a worker after scm checkout
+def getTargetBranch() {
+  return env.ghprbTargetBranch ?: (env.GIT_BRANCH - ~/^[^\/]+\//)
+}
+
 return this

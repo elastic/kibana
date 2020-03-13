@@ -15,6 +15,12 @@ kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
         // 'x-pack-intake-agent': kibanaPipeline.intakeWorker('x-pack-intake', './test/scripts/jenkins_xpack.sh'),
         'kibana-functional-agent': workers.functional(
           setup: {
+            googleStorageDownload(
+              credentialsId: 'kibana-ci-gcs-plugin',
+              bucketUri: "gs://kibana-ci-functional-metrics/${kibanaPipeline.getTargetBranch()}/functional_test_suite_metrics.json",
+              localDirectory: 'target',
+              pathPrefix: kibanaPipeline.getTargetBranch(),
+            )
             kibanaPipeline.bash("source src/dev/ci_setup/setup_env.sh; node scripts/create_functional_test_plan.js", "Create functional test plan")
             kibanaPipeline.buildOss()
             kibanaPipeline.prepareOssTestQueue(queue)
@@ -73,7 +79,31 @@ kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
           postProcess: {
             catchError {
               def metricsJson = toJSON(finishedSuites).toString()
-              writeFile(file: "target/functional_test_suite_metrics.json", text: metricsJson)
+              dir('target/test-metrics') {
+                def date = (new Date()).format("yyyyMMdd-HHmmss")
+                def filename = "metrics-${date}.json"
+
+                writeFile(file: filename, text: metricsJson)
+                googleStorageUpload(
+                  credentialsId: 'kibana-ci-gcs-plugin',
+                  bucket: "gs://kibana-ci-functional-metrics/${kibanaPipeline.getTargetBranch()}",
+                  pattern: filename,
+                  sharedPublicly: true,
+                  showInline: true,
+                )
+
+                def status = buildUtils.getBuildStatus()
+                if (status == 'SUCCESS' || status == 'UNSTABLE') {
+                  sh "cp '${filename}' latest.json"
+                  googleStorageUpload(
+                    credentialsId: 'kibana-ci-gcs-plugin',
+                    bucket: "gs://kibana-ci-functional-metrics/${kibanaPipeline.getTargetBranch()}",
+                    pattern: 'latest.json',
+                    sharedPublicly: true,
+                    showInline: true,
+                  )
+                }
+              }
             }
           }
         ),

@@ -27,7 +27,15 @@ import { CI as ALL_OSS } from '../../../test/all_configs';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ALL as ALL_XPACK } from '../../../x-pack/test/all_configs';
 
-const historical = require('../../../test_suites_historical.json'); // TODO
+let historical = {};
+
+try {
+  const historicalJson = fs.readFileSync('target/functional_test_suite_metrics.json'); // TODO
+  historical = JSON.parse(historicalJson);
+} catch (ex) {
+  console.log('Error reading file for functional test metrics:');
+  console.log(ex);
+}
 
 const getTestsTransformed = async (config, overrides = {}) => {
   const suites = await getTests(config, overrides);
