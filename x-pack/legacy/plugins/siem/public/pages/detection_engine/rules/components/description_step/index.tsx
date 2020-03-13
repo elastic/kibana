@@ -5,7 +5,7 @@
  */
 
 import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { isEmpty, chunk, get, pick } from 'lodash/fp';
+import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
 import React, { memo, useState } from 'react';
 
 import {
@@ -152,16 +152,10 @@ const getDescriptionItem = (
         description: timeline.title ?? DEFAULT_TIMELINE_TITLE,
       },
     ];
-  } else if (['anomalyThreshold', 'description', 'riskScore'].includes(field)) {
-    return [
-      {
-        title: label,
-        description: get(field, value),
-      },
-    ];
   }
+
   const description: string = get(field, value);
-  if (!isEmpty(description)) {
+  if (isNumber(description) || !isEmpty(description)) {
     return [
       {
         title: label,
