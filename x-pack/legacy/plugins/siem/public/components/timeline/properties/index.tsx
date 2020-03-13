@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
+import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { Note } from '../../../lib/note';
 import { InputsModelId } from '../../../store/inputs/constants';
@@ -37,7 +38,6 @@ interface Props {
   updateNote: UpdateNote;
   updateTitle: UpdateTitle;
   usersViewing: string[];
-  width: number;
 }
 
 const rightGutter = 60; // px
@@ -50,6 +50,8 @@ const nameWidth = 155;
 const descriptionWidth = 165;
 const noteWidth = 130;
 const settingsWidth = 55;
+
+const useResizeObserverDefault = {};
 
 /** Displays the properties of a timeline, i.e. name, description, notes, etc */
 export const Properties = React.memo<Props>(
@@ -70,51 +72,36 @@ export const Properties = React.memo<Props>(
     updateNote,
     updateTitle,
     usersViewing,
-    width,
   }) => {
+    const { ref, width = 0 } = useResizeObserver<HTMLDivElement>(useResizeObserverDefault);
     const [showActions, setShowActions] = useState(false);
     const [showNotes, setShowNotes] = useState(false);
     const [showTimelineModal, setShowTimelineModal] = useState(false);
 
-    const onButtonClick = useCallback(() => {
-      setShowActions(!showActions);
-    }, [showActions]);
-
-    const onToggleShowNotes = useCallback(() => {
-      setShowNotes(!showNotes);
-    }, [showNotes]);
-
-    const onClosePopover = useCallback(() => {
-      setShowActions(false);
-    }, []);
-
+    const onButtonClick = useCallback(() => setShowActions(!showActions), [showActions]);
+    const onToggleShowNotes = useCallback(() => setShowNotes(!showNotes), [showNotes]);
+    const onClosePopover = useCallback(() => setShowActions(false), []);
+    const onCloseTimelineModal = useCallback(() => setShowTimelineModal(false), []);
+    const onToggleLock = useCallback(() => toggleLock({ linkToId: 'timeline' }), [toggleLock]);
     const onOpenTimelineModal = useCallback(() => {
       onClosePopover();
       setShowTimelineModal(true);
     }, []);
 
-    const onCloseTimelineModal = useCallback(() => {
-      setShowTimelineModal(false);
-    }, []);
+    const datePickerWidth = useMemo(
+      () =>
+        width -
+        rightGutter -
+        starIconWidth -
+        nameWidth -
+        (width >= showDescriptionThreshold ? descriptionWidth : 0) -
+        noteWidth -
+        settingsWidth,
+      [width]
+    );
 
-    const onToggleLock = useCallback(() => {
-      toggleLock({ linkToId: 'timeline' });
-    }, [toggleLock]);
-
-    const datePickerWidth =
-      width -
-      rightGutter -
-      starIconWidth -
-      nameWidth -
-      (width >= showDescriptionThreshold ? descriptionWidth : 0) -
-      noteWidth -
-      settingsWidth;
-
-    // Passing the styles directly to the component because the width is
-    // being calculated and is recommended by Styled Components for performance
-    // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
     return (
-      <TimelineProperties style={{ width }} data-test-subj="timeline-properties">
+      <TimelineProperties ref={ref} data-test-subj="timeline-properties">
         <PropertiesLeft
           associateNote={associateNote}
           datePickerWidth={

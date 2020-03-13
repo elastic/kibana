@@ -44,11 +44,6 @@ const FlyoutHeaderWithCloseButtonComponent: React.FC<{
   </FlyoutHeaderContainer>
 );
 
-export const FlyoutHeaderWithCloseButton = React.memo(
-  FlyoutHeaderWithCloseButtonComponent,
-  (prevProps, nextProps) =>
-    prevProps.timelineId === nextProps.timelineId &&
-    prevProps.usersViewing === nextProps.usersViewing
-);
+export const FlyoutHeaderWithCloseButton = React.memo(FlyoutHeaderWithCloseButtonComponent);
 
 FlyoutHeaderWithCloseButton.displayName = 'FlyoutHeaderWithCloseButton';

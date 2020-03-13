@@ -7,6 +7,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { Resizable, ResizeCallback } from 're-resizable';
+import deepEqual from 'fast-deep-equal';
 
 import { ColumnHeaderOptions } from '../../../../store/timeline/model';
 import { getDraggableFieldId } from '../../../drag_and_drop/helpers';
@@ -117,4 +118,16 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
   );
 };
 
-export const ColumnHeader = React.memo(ColumnHeaderComponent);
+export const ColumnHeader = React.memo(
+  ColumnHeaderComponent,
+  (prevProps, nextProps) =>
+    prevProps.draggableIndex === nextProps.draggableIndex &&
+    prevProps.timelineId === nextProps.timelineId &&
+    prevProps.isDragging === nextProps.isDragging &&
+    prevProps.onColumnRemoved === nextProps.onColumnRemoved &&
+    prevProps.onColumnResized === nextProps.onColumnResized &&
+    prevProps.onColumnSorted === nextProps.onColumnSorted &&
+    prevProps.onFilterChange === nextProps.onFilterChange &&
+    prevProps.sort === nextProps.sort &&
+    deepEqual(prevProps.header, nextProps.header)
+);

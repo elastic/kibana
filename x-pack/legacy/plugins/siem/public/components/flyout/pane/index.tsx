@@ -5,11 +5,10 @@
  */
 
 import { EuiFlyout } from '@elastic/eui';
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { Resizable, ResizeCallback } from 're-resizable';
-import { throttle } from 'lodash/fp';
 
 import { TimelineResizeHandle } from './timeline_resize_handle';
 
@@ -48,7 +47,6 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
   width,
 }) => {
   const dispatch = useDispatch();
-  const [lastDelta, setLastDelta] = useState(0);
 
   const onResizeStop: ResizeCallback = useCallback(
     (e, direction, ref, delta) => {
@@ -58,25 +56,22 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
         dispatch(
           timelineActions.applyDeltaToWidth({
             bodyClientWidthPixels,
-            delta: -(delta.width - lastDelta),
+            delta: -delta.width,
             id: timelineId,
             maxWidthPercent,
             minWidthPixels,
           })
         );
-        setLastDelta(delta.width);
       }
     },
-    [dispatch, maxWidthPercent, minWidthPixels, lastDelta]
+    [dispatch]
   );
-  const resetLastDelta = useCallback(() => setLastDelta(0), [setLastDelta]);
-  const throttledResize = throttle(100, onResizeStop);
   const resizableDefaultSize = useMemo(
     () => ({
       width,
       height: '100%',
     }),
-    [width]
+    []
   );
   const resizableHandleComponent = useMemo(
     () => ({
@@ -101,8 +96,7 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
           minWidth={minWidthPixels}
           maxWidth={`${maxWidthPercent}vw`}
           handleComponent={resizableHandleComponent}
-          onResizeStart={resetLastDelta}
-          onResize={throttledResize}
+          onResizeStop={onResizeStop}
         >
           {children}
         </StyledResizable>

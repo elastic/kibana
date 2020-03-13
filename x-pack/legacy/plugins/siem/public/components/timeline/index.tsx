@@ -217,7 +217,8 @@ const StatefulTimelineComponent = React.memo<Props>(
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
       deepEqual(prevProps.filters, nextProps.filters) &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
-      deepEqual(prevProps.sort, nextProps.sort)
+      deepEqual(prevProps.sort, nextProps.sort) &&
+      deepEqual(prevProps.usersViewing, nextProps.usersViewing)
     );
   }
 );

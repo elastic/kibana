@@ -21,6 +21,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FunctionComponent, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { LoadingPanel } from '../../loading';
 import { OnChangeItemsPerPage, OnLoadMore } from '../events';
@@ -29,7 +30,9 @@ import { LastUpdatedAt } from './last_updated';
 import * as i18n from './translations';
 import { useTimelineTypeContext } from '../timeline_context';
 
-const FixedWidthLastUpdated = styled.div<{ compact: boolean }>`
+export const isCompactFooter = (width: number): boolean => width < 600;
+
+const FixedWidthLastUpdated = styled.div<{ compact?: boolean }>`
   width: ${({ compact }) => (!compact ? 200 : 25)}px;
   overflow: hidden;
   text-align: end;
@@ -37,8 +40,15 @@ const FixedWidthLastUpdated = styled.div<{ compact: boolean }>`
 
 FixedWidthLastUpdated.displayName = 'FixedWidthLastUpdated';
 
-const FooterContainer = styled(EuiFlexGroup)<{ height: number }>`
-  height: ${({ height }) => height}px;
+interface HeightProp {
+  height: number;
+}
+
+const FooterContainer = styled(EuiFlexGroup).attrs<HeightProp>(({ height }) => ({
+  style: {
+    height: `${height}px`,
+  },
+}))<HeightProp>`
   flex: 0;
 `;
 
@@ -174,7 +184,6 @@ export const PagingControl = React.memo(PagingControlComponent);
 PagingControl.displayName = 'PagingControl';
 
 interface FooterProps {
-  compact: boolean;
   getUpdatedAt: () => number;
   hasNextPage: boolean;
   height: number;
@@ -190,9 +199,10 @@ interface FooterProps {
   tieBreaker: string;
 }
 
+const EMPTY_OBJECT = {};
+
 /** Renders a loading indicator and paging controls */
 export const FooterComponent = ({
-  compact,
   getUpdatedAt,
   hasNextPage,
   height,
@@ -207,19 +217,23 @@ export const FooterComponent = ({
   serverSideEventCount,
   tieBreaker,
 }: FooterProps) => {
+  const { ref: measureRef, width = 0 } = useResizeObserver<HTMLDivElement>(EMPTY_OBJECT);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [paginationLoading, setPaginationLoading] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
   const timelineTypeContext = useTimelineTypeContext();
+  const compact = isCompactFooter(width);
 
   const loadMore = useCallback(() => {
     setPaginationLoading(true);
     onLoadMore(nextCursor, tieBreaker);
-  }, [nextCursor, tieBreaker, onLoadMore]);
+  }, [nextCursor, tieBreaker, onLoadMore, setPaginationLoading]);
 
-  const onButtonClick = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
-
-  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+  const onButtonClick = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [
+    isPopoverOpen,
+    setIsPopoverOpen,
+  ]);
+  const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
 
   useEffect(() => {
     if (paginationLoading && !isLoading) {
@@ -262,77 +276,76 @@ export const FooterComponent = ({
     ));
 
   return (
-    <>
-      <FooterContainer
-        data-test-subj="timeline-footer"
-        direction="column"
+    <FooterContainer
+      data-test-subj="timeline-footer"
+      direction="column"
+      gutterSize="none"
+      height={height}
+      justifyContent="spaceAround"
+    >
+      <FooterFlexGroup
+        alignItems="center"
+        data-test-subj="footer-flex-group"
+        direction="row"
         gutterSize="none"
-        height={height}
-        justifyContent="spaceAround"
+        justifyContent="spaceBetween"
+        ref={measureRef}
       >
-        <FooterFlexGroup
-          alignItems="center"
-          data-test-subj="footer-flex-group"
-          direction="row"
-          gutterSize="none"
-          justifyContent="spaceBetween"
-        >
-          <EuiFlexItem data-test-subj="event-count-container" grow={false}>
-            <EuiFlexGroup
-              alignItems="center"
-              data-test-subj="events-count"
-              direction="row"
-              gutterSize="none"
-            >
-              <EventsCount
-                closePopover={closePopover}
-                isOpen={isPopoverOpen}
-                items={rowItems}
-                itemsCount={itemsCount}
-                onClick={onButtonClick}
-                serverSideEventCount={serverSideEventCount}
-              />
-            </EuiFlexGroup>
-          </EuiFlexItem>
+        <EuiFlexItem data-test-subj="event-count-container" grow={false}>
+          <EuiFlexGroup
+            alignItems="center"
+            data-test-subj="events-count"
+            direction="row"
+            gutterSize="none"
+          >
+            <EventsCount
+              closePopover={closePopover}
+              isOpen={isPopoverOpen}
+              items={rowItems}
+              itemsCount={itemsCount}
+              onClick={onButtonClick}
+              serverSideEventCount={serverSideEventCount}
+            />
+          </EuiFlexGroup>
+        </EuiFlexItem>
 
-          <EuiFlexItem data-test-subj="paging-control-container" grow={false}>
-            {isLive ? (
-              <EuiText size="s" data-test-subj="is-live-on-message">
-                <b>
-                  {i18n.AUTO_REFRESH_ACTIVE}{' '}
-                  <EuiIconTip
-                    color="subdued"
-                    content={
-                      <FormattedMessage
-                        id="xpack.siem.footer.autoRefreshActiveTooltip"
-                        defaultMessage="While auto-refresh is enabled, timeline will show you the latest {numberOfItems} events that match your query."
-                        values={{
-                          numberOfItems: itemsCount,
-                        }}
-                      />
-                    }
-                    type="iInCircle"
-                  />
-                </b>
-              </EuiText>
-            ) : (
-              <PagingControl
-                data-test-subj="paging-control"
-                hasNextPage={hasNextPage}
-                isLoading={isLoading}
-                loadMore={loadMore}
-              />
-            )}
-          </EuiFlexItem>
+        <EuiFlexItem data-test-subj="paging-control-container" grow={false}>
+          {isLive ? (
+            <EuiText size="s" data-test-subj="is-live-on-message">
+              <b>
+                {i18n.AUTO_REFRESH_ACTIVE}{' '}
+                <EuiIconTip
+                  color="subdued"
+                  content={
+                    <FormattedMessage
+                      id="xpack.siem.footer.autoRefreshActiveTooltip"
+                      defaultMessage="While auto-refresh is enabled, timeline will show you the latest {numberOfItems} events that match your query."
+                      values={{
+                        numberOfItems: itemsCount,
+                      }}
+                    />
+                  }
+                  type="iInCircle"
+                />
+              </b>
+            </EuiText>
+          ) : (
+            <PagingControl
+              data-test-subj="paging-control"
+              hasNextPage={hasNextPage}
+              isLoading={isLoading}
+              loadMore={loadMore}
+            />
+          )}
+        </EuiFlexItem>
 
-          <EuiFlexItem data-test-subj="last-updated-container" grow={false}>
-            <FixedWidthLastUpdated data-test-subj="fixed-width-last-updated" compact={compact}>
-              <LastUpdatedAt updatedAt={updatedAt || getUpdatedAt()} compact={compact} />
-            </FixedWidthLastUpdated>
-          </EuiFlexItem>
-        </FooterFlexGroup>
-      </FooterContainer>
-    </>
+        <EuiFlexItem data-test-subj="last-updated-container" grow={false}>
+          <FixedWidthLastUpdated data-test-subj="fixed-width-last-updated" compact={compact}>
+            <LastUpdatedAt updatedAt={updatedAt || getUpdatedAt()} compact={compact} />
+          </FixedWidthLastUpdated>
+        </EuiFlexItem>
+      </FooterFlexGroup>
+    </FooterContainer>
   );
 };
 

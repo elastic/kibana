@@ -6,8 +6,9 @@
 
 import { EuiCheckbox } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
+import deepEqual from 'fast-deep-equal';
 
 import { DragEffects } from '../../../drag_and_drop/draggable_wrapper';
 import { DraggableFieldBadge } from '../../../draggables/field_badge';
@@ -131,6 +132,33 @@ export const ColumnHeadersComponent = ({
     [columnHeaders, setDraggingIndex]
   );
 
+  const ColumnHeaderList = useMemo(
+    () =>
+      columnHeaders.map((header, draggableIndex) => (
+        <ColumnHeader
+          key={header.id}
+          draggableIndex={draggableIndex}
+          timelineId={timelineId}
+          header={header}
+          isDragging={draggingIndex === draggableIndex}
+          onColumnRemoved={onColumnRemoved}
+          onColumnSorted={onColumnSorted}
+          onFilterChange={onFilterChange}
+          onColumnResized={onColumnResized}
+          sort={sort}
+        />
+      )),
+    [
+      columnHeaders,
+      timelineId,
+      draggingIndex,
+      onColumnRemoved,
+      onFilterChange,
+      onColumnResized,
+      sort,
+    ]
+  );
+
   return (
     <EventsThead data-test-subj="column-headers">
       <EventsTrHeader>
@@ -190,20 +218,7 @@ export const ColumnHeadersComponent = ({
                 isDragging={snapshot.isDraggingOver}
                 {...dropProvided.droppableProps}
               >
-                {columnHeaders.map((header, draggableIndex) => (
-                  <ColumnHeader
-                    key={header.id}
-                    draggableIndex={draggableIndex}
-                    timelineId={timelineId}
-                    header={header}
-                    isDragging={draggingIndex === draggableIndex}
-                    onColumnRemoved={onColumnRemoved}
-                    onColumnSorted={onColumnSorted}
-                    onFilterChange={onFilterChange}
-                    onColumnResized={onColumnResized}
-                    sort={sort}
-                  />
-                ))}
+                {ColumnHeaderList}
               </EventsThGroupData>
             </>
           )}
@@ -213,4 +228,23 @@ export const ColumnHeadersComponent = ({
   );
 };
 
-export const ColumnHeaders = React.memo(ColumnHeadersComponent);
+export const ColumnHeaders = React.memo(
+  ColumnHeadersComponent,
+  (prevProps, nextProps) =>
+    prevProps.actionsColumnWidth === nextProps.actionsColumnWidth &&
+    prevProps.isEventViewer === nextProps.isEventViewer &&
+    prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
+    prevProps.onColumnRemoved === nextProps.onColumnRemoved &&
+    prevProps.onColumnResized === nextProps.onColumnResized &&
+    prevProps.onColumnSorted === nextProps.onColumnSorted &&
+    prevProps.onSelectAll === nextProps.onSelectAll &&
+    prevProps.onUpdateColumns === nextProps.onUpdateColumns &&
+    prevProps.onFilterChange === nextProps.onFilterChange &&
+    prevProps.showEventsSelect === nextProps.showEventsSelect &&
+    prevProps.showSelectAllCheckbox === nextProps.showSelectAllCheckbox &&
+    prevProps.sort === nextProps.sort &&
+    prevProps.timelineId === nextProps.timelineId &&
+    prevProps.toggleColumn === nextProps.toggleColumn &&
+    deepEqual(prevProps.columnHeaders, nextProps.columnHeaders) &&
+    deepEqual(prevProps.browserFields, nextProps.browserFields)
+);

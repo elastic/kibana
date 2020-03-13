@@ -25,8 +25,7 @@ import {
 } from '../../events';
 import { ExpandableEvent } from '../../expandable_event';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
-import { EventsTrGroup, EventsTrSupplement, OFFSET_SCROLLBAR } from '../../styles';
-import { useTimelineWidthContext } from '../../timeline_context';
+import { EventsTrGroup, EventsTrSupplement } from '../../styles';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { getRowRenderer } from '../renderers/get_row_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
@@ -93,22 +92,14 @@ interface AttributesProps {
   children: React.ReactNode;
 }
 
-const AttributesComponent: React.FC<AttributesProps> = ({ children }) => {
-  const width = useTimelineWidthContext();
-
-  // Passing the styles directly to the component because the width is
-  // being calculated and is recommended by Styled Components for performance
-  // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-  return (
-    <EventsTrSupplement
-      className="siemEventsTable__trSupplement--attributes"
-      data-test-subj="event-details"
-      style={{ width: `${width - OFFSET_SCROLLBAR}px` }}
-    >
-      {children}
-    </EventsTrSupplement>
-  );
-};
+const AttributesComponent: React.FC<AttributesProps> = ({ children }) => (
+  <EventsTrSupplement
+    className="siemEventsTable__trSupplement--attributes"
+    data-test-subj="event-details"
+  >
+    {children}
+  </EventsTrSupplement>
+);
 
 const Attributes = React.memo(AttributesComponent);
 
@@ -233,7 +224,6 @@ const StatefulEventComponent: React.FC<Props> = ({
                     children: (
                       <StatefulEventChild
                         actionsColumnWidth={actionsColumnWidth}
-                        addNoteToEvent={addNoteToEvent}
                         associateNote={associateNote}
                         columnHeaders={columnHeaders}
                         columnRenderers={columnRenderers}

@@ -10,18 +10,16 @@ import uuid from 'uuid';
 import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
 import { ColumnHeaderOptions } from '../../../../store/timeline/model';
-import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
+import { UpdateNote } from '../../../notes/helpers';
 import { NoteCards } from '../../../notes/note_cards';
 import { OnPinEvent, OnColumnResized, OnUnPinEvent, OnRowSelected } from '../../events';
-import { EventsTrSupplement, OFFSET_SCROLLBAR } from '../../styles';
-import { useTimelineWidthContext } from '../../timeline_context';
+import { EventsTrSupplement } from '../../styles';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { EventColumnView } from './event_column_view';
 
 interface Props {
   id: string;
   actionsColumnWidth: number;
-  addNoteToEvent: AddNoteToEvent;
   onPinEvent: OnPinEvent;
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
@@ -56,7 +54,6 @@ export const StatefulEventChild = React.memo<Props>(
     id,
     actionsColumnWidth,
     associateNote,
-    addNoteToEvent,
     onPinEvent,
     columnHeaders,
     columnRenderers,
@@ -79,60 +76,52 @@ export const StatefulEventChild = React.memo<Props>(
     timelineId,
     onToggleShowNotes,
     updateNote,
-  }) => {
-    const width = useTimelineWidthContext();
+  }) => (
+    <>
+      <EventColumnView
+        id={id}
+        actionsColumnWidth={actionsColumnWidth}
+        associateNote={associateNote}
+        columnHeaders={columnHeaders}
+        columnRenderers={columnRenderers}
+        data={data}
+        ecsData={ecsData}
+        expanded={expanded}
+        eventIdToNoteIds={eventIdToNoteIds}
+        getNotesByIds={getNotesByIds}
+        isEventPinned={isEventPinned}
+        isEventViewer={isEventViewer}
+        loading={loading}
+        loadingEventIds={loadingEventIds}
+        onColumnResized={onColumnResized}
+        onEventToggled={onToggleExpanded}
+        onPinEvent={onPinEvent}
+        onRowSelected={onRowSelected}
+        onUnPinEvent={onUnPinEvent}
+        selectedEventIds={selectedEventIds}
+        showCheckboxes={showCheckboxes}
+        showNotes={showNotes}
+        timelineId={timelineId}
+        toggleShowNotes={onToggleShowNotes}
+        updateNote={updateNote}
+      />
 
-    // Passing the styles directly to the component because the width is
-    // being calculated and is recommended by Styled Components for performance
-    // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-    return (
-      <>
-        <EventColumnView
-          id={id}
-          actionsColumnWidth={actionsColumnWidth}
+      <EventsTrSupplement
+        className="siemEventsTable__trSupplement--notes"
+        data-test-subj="event-notes-flex-item"
+      >
+        <NoteCards
           associateNote={associateNote}
-          columnHeaders={columnHeaders}
-          columnRenderers={columnRenderers}
-          data={data}
-          ecsData={ecsData}
-          expanded={expanded}
-          eventIdToNoteIds={eventIdToNoteIds}
+          data-test-subj="note-cards"
+          getNewNoteId={getNewNoteId}
           getNotesByIds={getNotesByIds}
-          isEventPinned={isEventPinned}
-          isEventViewer={isEventViewer}
-          loading={loading}
-          loadingEventIds={loadingEventIds}
-          onColumnResized={onColumnResized}
-          onEventToggled={onToggleExpanded}
-          onPinEvent={onPinEvent}
-          onRowSelected={onRowSelected}
-          onUnPinEvent={onUnPinEvent}
-          selectedEventIds={selectedEventIds}
-          showCheckboxes={showCheckboxes}
-          showNotes={showNotes}
-          timelineId={timelineId}
-          toggleShowNotes={onToggleShowNotes}
+          noteIds={eventIdToNoteIds[id] || emptyNotes}
+          showAddNote={showNotes}
+          toggleShowAddNote={onToggleShowNotes}
           updateNote={updateNote}
         />
-
-        <EventsTrSupplement
-          className="siemEventsTable__trSupplement--notes"
-          data-test-subj="event-notes-flex-item"
-          style={{ width: `${width - OFFSET_SCROLLBAR}px` }}
-        >
-          <NoteCards
-            associateNote={associateNote}
-            data-test-subj="note-cards"
-            getNewNoteId={getNewNoteId}
-            getNotesByIds={getNotesByIds}
-            noteIds={eventIdToNoteIds[id] || emptyNotes}
-            showAddNote={showNotes}
-            toggleShowAddNote={onToggleShowNotes}
-            updateNote={updateNote}
-          />
-        </EventsTrSupplement>
-      </>
-    );
-  }
+      </EventsTrSupplement>
+    </>
+  )
 );
 StatefulEventChild.displayName = 'StatefulEventChild';

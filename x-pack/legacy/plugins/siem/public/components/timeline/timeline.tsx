@@ -8,7 +8,6 @@ import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { FlyoutHeaderWithCloseButton } from '../flyout/header_with_close_button';
 import { BrowserFields } from '../../containers/source';
@@ -49,8 +48,6 @@ const TimelineHeaderContainer = styled.div`
 `;
 
 TimelineHeaderContainer.displayName = 'TimelineHeaderContainer';
-
-export const isCompactFooter = (width: number): boolean => width < 600;
 
 const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   align-items: center;
@@ -145,7 +142,6 @@ export const TimelineComponent: React.FC<Props> = ({
   toggleColumn,
   usersViewing,
 }) => {
-  const { ref: measureRef, width = 0 } = useResizeObserver<HTMLDivElement>({});
   const kibana = useKibana();
   const combinedQueries = combineQueries({
     config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
@@ -160,10 +156,13 @@ export const TimelineComponent: React.FC<Props> = ({
   });
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const timelineQueryFields = useMemo(() => columnsHeader.map(c => c.id), [columnsHeader]);
-  const timelineQuerySortField = {
-    sortFieldId: sort.columnId,
-    direction: sort.sortDirection as Direction,
-  };
+  const timelineQuerySortField = useMemo(
+    () => ({
+      sortFieldId: sort.columnId,
+      direction: sort.sortDirection as Direction,
+    }),
+    [sort.columnId, sort.sortDirection]
+  );
 
   return (
     <TimelineContainer data-test-subj="timeline">
@@ -173,7 +172,7 @@ export const TimelineComponent: React.FC<Props> = ({
           timelineId={id}
           usersViewing={usersViewing}
         />
-        <TimelineHeaderContainer ref={measureRef}>
+        <TimelineHeaderContainer data-test-subj="timelineHeader">
           <TimelineHeader
             browserFields={browserFields}
             id={id}
@@ -187,7 +186,6 @@ export const TimelineComponent: React.FC<Props> = ({
             onToggleDataProviderExcluded={onToggleDataProviderExcluded}
             show={show}
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-            sort={sort}
           />
         </TimelineHeaderContainer>
       </StyledEuiFlyoutHeader>
@@ -213,7 +211,7 @@ export const TimelineComponent: React.FC<Props> = ({
             getUpdatedAt,
             refetch,
           }) => (
-            <ManageTimelineContext loading={loading || loadingIndexName} width={width}>
+            <ManageTimelineContext loading={loading || loadingIndexName}>
               <TimelineRefetch
                 id={id}
                 inputId="timeline"
@@ -251,7 +249,6 @@ export const TimelineComponent: React.FC<Props> = ({
                   nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                   tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
                   getUpdatedAt={getUpdatedAt}
-                  compact={isCompactFooter(width)}
                 />
               </StyledEuiFlyoutFooter>
             </ManageTimelineContext>

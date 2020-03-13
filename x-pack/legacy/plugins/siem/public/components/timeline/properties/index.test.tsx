@@ -7,6 +7,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
+import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { mockGlobalState, apolloClientObservable } from '../../../mock';
 import { createStore, State } from '../../../store';
@@ -14,6 +15,13 @@ import { createStore, State } from '../../../store';
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
 
 jest.mock('../../../lib/kibana');
+
+let mockedWidth = 1000;
+const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
+jest.mock('use-resize-observer/polyfilled');
+mockUseResizeObserver.mockImplementation(() => ({
+  width: mockedWidth,
+}));
 
 describe('Properties', () => {
   const usersViewing = ['elastic'];
@@ -24,6 +32,7 @@ describe('Properties', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     store = createStore(state, apolloClientObservable);
+    mockedWidth = 1000;
   });
 
   test('renders correctly', () => {
@@ -46,7 +55,6 @@ describe('Properties', () => {
           updateTitle={jest.fn()}
           updateNote={jest.fn()}
           usersViewing={usersViewing}
-          width={1000}
         />
       </ReduxStoreProvider>
     );
@@ -73,7 +81,6 @@ describe('Properties', () => {
           updateTitle={jest.fn()}
           updateNote={jest.fn()}
           usersViewing={usersViewing}
-          width={1000}
         />
       </ReduxStoreProvider>
     );
@@ -101,7 +108,6 @@ describe('Properties', () => {
           updateTitle={jest.fn()}
           updateNote={jest.fn()}
           usersViewing={usersViewing}
-          width={1000}
         />
       </ReduxStoreProvider>
     );
@@ -131,7 +137,6 @@ describe('Properties', () => {
           updateTitle={jest.fn()}
           updateNote={jest.fn()}
           usersViewing={usersViewing}
-          width={1000}
         />
       </ReduxStoreProvider>
     );
@@ -164,7 +169,6 @@ describe('Properties', () => {
           updateTitle={jest.fn()}
           updateNote={jest.fn()}
           usersViewing={usersViewing}
-          width={1000}
         />
       </ReduxStoreProvider>
     );
@@ -197,7 +201,6 @@ describe('Properties', () => {
           updateTitle={jest.fn()}
           updateNote={jest.fn()}
           usersViewing={usersViewing}
-          width={1000}
         />
       </ReduxStoreProvider>
     );
@@ -229,7 +232,6 @@ describe('Properties', () => {
           updateTitle={jest.fn()}
           updateNote={jest.fn()}
           usersViewing={usersViewing}
-          width={1000}
         />
       </ReduxStoreProvider>
     );
@@ -243,7 +245,7 @@ describe('Properties', () => {
 
   test('it renders a description on the left when the width is at least as wide as the threshold', () => {
     const description = 'strange';
-    const width = showDescriptionThreshold;
+    mockedWidth = showDescriptionThreshold;
 
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
@@ -264,7 +266,6 @@ describe('Properties', () => {
           updateTitle={jest.fn()}
           updateNote={jest.fn()}
           usersViewing={usersViewing}
-          width={width}
         />
       </ReduxStoreProvider>
     );
@@ -280,7 +281,7 @@ describe('Properties', () => {
 
   test('it does NOT render a description on the left when the width is less than the threshold', () => {
     const description = 'strange';
-    const width = showDescriptionThreshold - 1;
+    mockedWidth = showDescriptionThreshold - 1;
 
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
@@ -301,7 +302,6 @@ describe('Properties', () => {
           updateTitle={jest.fn()}
           updateNote={jest.fn()}
           usersViewing={usersViewing}
-          width={width}
         />
       </ReduxStoreProvider>
     );
@@ -315,7 +315,7 @@ describe('Properties', () => {
   });
 
   test('it renders a notes button on the left when the width is at least as wide as the threshold', () => {
-    const width = showNotesThreshold;
+    // const width = showNotesThreshold;
 
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
@@ -336,7 +336,6 @@ describe('Properties', () => {
           updateTitle={jest.fn()}
           updateNote={jest.fn()}
           usersViewing={usersViewing}
-          width={width}
         />
       </ReduxStoreProvider>
     );
@@ -350,7 +349,7 @@ describe('Properties', () => {
   });
 
   test('it does NOT render a a notes button on the left when the width is less than the threshold', () => {
-    const width = showNotesThreshold - 1;
+    mockedWidth = showNotesThreshold - 1;
 
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
@@ -371,7 +370,6 @@ describe('Properties', () => {
           updateTitle={jest.fn()}
           updateNote={jest.fn()}
           usersViewing={usersViewing}
-          width={width}
         />
       </ReduxStoreProvider>
     );
@@ -404,7 +402,6 @@ describe('Properties', () => {
           updateTitle={jest.fn()}
           updateNote={jest.fn()}
           usersViewing={usersViewing}
-          width={1000}
         />
       </ReduxStoreProvider>
     );
@@ -434,7 +431,6 @@ describe('Properties', () => {
           updateTitle={jest.fn()}
           updateNote={jest.fn()}
           usersViewing={usersViewing}
-          width={1000}
         />
       </ReduxStoreProvider>
     );
@@ -462,7 +458,6 @@ describe('Properties', () => {
           updateTitle={jest.fn()}
           updateNote={jest.fn()}
           usersViewing={usersViewing}
-          width={1000}
         />
       </ReduxStoreProvider>
     );

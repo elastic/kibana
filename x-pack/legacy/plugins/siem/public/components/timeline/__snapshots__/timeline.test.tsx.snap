@@ -17,7 +17,9 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
         ]
       }
     />
-    <TimelineHeaderContainer>
+    <TimelineHeaderContainer
+      data-test-subj="timelineHeader"
+    >
       <Memo(TimelineHeaderComponent)
         browserFields={
           Object {
@@ -692,12 +694,6 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
         onToggleDataProviderExcluded={[MockFunction]}
         show={true}
         showCallOutUnauthorizedMsg={false}
-        sort={
-          Object {
-            "columnId": "@timestamp",
-            "sortDirection": "desc",
-          }
-        }
       />
     </TimelineHeaderContainer>
   </Styled(EuiFlyoutHeader)>

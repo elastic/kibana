@@ -12,12 +12,6 @@ import { EventType } from '../../store/timeline/model';
 import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../drag_and_drop/helpers';
 
 /**
- * OFFSET PIXEL VALUES
- */
-
-export const OFFSET_SCROLLBAR = 17;
-
-/**
  * TIMELINE BODY
  */
 
@@ -210,11 +204,17 @@ export const EventsTdGroupData = styled.div.attrs(({ className = '' }) => ({
 }))`
   display: flex;
 `;
+interface WidthProp {
+  width?: number;
+}
 
-export const EventsTd = styled.div.attrs(({ className = '' }) => ({
+export const EventsTd = styled.div.attrs<WidthProp>(({ className = '', width }) => ({
   className: `siemEventsTable__td ${className}`,
   role: 'cell',
-}))`
+  style: {
+    flexBasis: width ? `${width}px` : 'auto',
+  },
+}))<WidthProp>`
   align-items: center;
   display: flex;
   flex-shrink: 0;

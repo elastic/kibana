@@ -6,7 +6,7 @@
 
 import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { rgba } from 'polished';
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { AndOrBadge } from '../../and_or_badge';
@@ -89,8 +89,13 @@ export const ProviderItemAndDragDrop = React.memo<ProviderItemDropProps>(
     onToggleDataProviderExcluded,
     timelineId,
   }) => {
-    const onMouseEnter = () => onChangeDroppableAndProvider(dataProvider.id);
-    const onMouseLeave = () => onChangeDroppableAndProvider('');
+    const onMouseEnter = useCallback(() => onChangeDroppableAndProvider(dataProvider.id), [
+      onChangeDroppableAndProvider,
+      dataProvider.id,
+    ]);
+    const onMouseLeave = useCallback(() => onChangeDroppableAndProvider(''), [
+      onChangeDroppableAndProvider,
+    ]);
     const hasAndItem = dataProvider.and.length > 0;
     return (
       <EuiFlexGroup

@@ -18,7 +18,7 @@ import {
   EuiOverlayMask,
   EuiToolTip,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import uuid from 'uuid';
 
 import { Note } from '../../../lib/note';
@@ -121,20 +121,24 @@ interface NewTimelineProps {
 }
 
 export const NewTimeline = React.memo<NewTimelineProps>(
-  ({ createTimeline, onClosePopover, timelineId }) => (
-    <EuiButtonEmpty
-      data-test-subj="timeline-new"
-      color="text"
-      iconSide="left"
-      iconType="plusInCircle"
-      onClick={() => {
-        createTimeline({ id: timelineId, show: true });
-        onClosePopover();
-      }}
-    >
-      {i18n.NEW_TIMELINE}
-    </EuiButtonEmpty>
-  )
+  ({ createTimeline, onClosePopover, timelineId }) => {
+    const handleClick = useCallback(() => {
+      createTimeline({ id: timelineId, show: true });
+      onClosePopover();
+    }, [createTimeline, timelineId, onClosePopover]);
+
+    return (
+      <EuiButtonEmpty
+        data-test-subj="timeline-new"
+        color="text"
+        iconSide="left"
+        iconType="plusInCircle"
+        onClick={handleClick}
+      >
+        {i18n.NEW_TIMELINE}
+      </EuiButtonEmpty>
+    );
+  }
 );
 NewTimeline.displayName = 'NewTimeline';
 

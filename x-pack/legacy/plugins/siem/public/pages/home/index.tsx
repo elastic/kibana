@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
 import useResizeObserver from 'use-resize-observer/polyfilled';
@@ -63,10 +63,14 @@ const calculateFlyoutHeight = ({
 
 export const HomePage: React.FC = () => {
   const { ref: measureRef, height: windowHeight = 0 } = useResizeObserver<HTMLDivElement>({});
-  const flyoutHeight = calculateFlyoutHeight({
-    globalHeaderSize: globalHeaderHeightPx,
-    windowHeight,
-  });
+  const flyoutHeight = useMemo(
+    () =>
+      calculateFlyoutHeight({
+        globalHeaderSize: globalHeaderHeightPx,
+        windowHeight,
+      }),
+    [windowHeight]
+  );
 
   const [showTimeline] = useShowTimeline();
 
