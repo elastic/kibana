@@ -8,11 +8,7 @@ import React from 'react';
 import { AlertsContextProvider } from '../../../../../../../plugins/triggers_actions_ui/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
-interface Props {
-  children: any;
-}
-
-export const UptimeAlertsContextProvider = ({ children }: Props) => {
+export const UptimeAlertsContextProvider: React.FC = ({ children }) => {
   const {
     services: {
       data: { fieldFormats },
