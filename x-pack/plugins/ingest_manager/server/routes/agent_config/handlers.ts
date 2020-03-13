@@ -108,16 +108,18 @@ export const createAgentConfigHandler: RequestHandler<
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   const withSysMonitoring = request.query.sys_monitoring ?? false;
   try {
-    const [agentConfig, newSysDatasource] = await Promise.all<
-      AgentConfig,
-      NewDatasource | undefined
-    >([
-      agentConfigService.create(soClient, request.body, {
-        user: user || undefined,
-      }),
-      // If needed, retrieve System package information and build a new Datasource for the system package
-      withSysMonitoring ? buildSystemDatasource(soClient).catch(() => undefined) : undefined,
-    ]);
+    // eslint-disable-next-line prefer-const
+    let [agentConfig, newSysDatasource] = await Promise.all<AgentConfig, NewDatasource | undefined>(
+      [
+        agentConfigService.create(soClient, request.body, {
+          user: user || undefined,
+        }),
+        // If needed, retrieve System package information and build a new Datasource for the system package
+        // NOTE: we ignore failures in attempting to create datasource, since config might have been created
+        // successfully
+        withSysMonitoring ? buildSystemDatasource(soClient).catch(() => undefined) : undefined,
+      ]
+    );
 
     // Create the system monitoring datasource and add it to config.
     if (withSysMonitoring && newSysDatasource !== undefined && agentConfig !== undefined) {
@@ -125,11 +127,17 @@ export const createAgentConfigHandler: RequestHandler<
       const sysDatasource = await datasourceService.create(soClient, newSysDatasource);
 
       if (sysDatasource) {
-        await agentConfigService.assignDatasources(soClient, agentConfig.id, [sysDatasource.id]);
+        agentConfig = await agentConfigService.assignDatasources(soClient, agentConfig.id, [
+          sysDatasource.id,
+        ]);
       }
     }
 
-    const body: CreateAgentConfigResponse = { item: agentConfig, success: true };
+    const body: CreateAgentConfigResponse = {
+      item: agentConfig,
+      success: true,
+    };
+
     return response.ok({
       body,
     });
