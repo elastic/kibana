@@ -7,11 +7,13 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -22,6 +24,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiIcon,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTextColor,
@@ -108,6 +111,45 @@ export class DetailPanel extends Component {
     );
   }
 
+  renderClusterWithDeprecatedSettingWarning({ hasDeprecatedProxySetting }, clusterName) {
+    if (!hasDeprecatedProxySetting) {
+      return null;
+    }
+    return (
+      <>
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.remoteClusters.detailPanel.deprecatedSettingsTitle"
+              defaultMessage={`"{remoteCluster}" contains deprecated settings`}
+              values={{
+                remoteCluster: clusterName,
+              }}
+            />
+          }
+          color="warning"
+          iconType="help"
+        >
+          <FormattedMessage
+            id="xpack.remoteClusters.detailPanel.deprecatedSettingsMessage"
+            defaultMessage="We recommend updating this remote cluster to use the correct settings. {editLink}"
+            values={{
+              editLink: (
+                <EuiLink {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/edit/${clusterName}`)}>
+                  <FormattedMessage
+                    id="xpack.remoteClusters.detailPanel.deprecatedSettingsLinkLabel"
+                    defaultMessage="Edit remote cluster."
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiCallOut>
+        <EuiSpacer size="l" />
+      </>
+    );
+  }
+
   renderCluster({
     isConnected,
     connectedNodesCount,
@@ -165,7 +207,7 @@ export class DetailPanel extends Component {
                 </EuiDescriptionListTitle>
 
                 <EuiDescriptionListDescription data-test-subj="remoteClusterDetailConnectedSocketsCount">
-                  {connectedSocketsCount}
+                  {connectedSocketsCount ? connectedSocketsCount : '-'}
                 </EuiDescriptionListDescription>
               </EuiFlexItem>
             ) : (
@@ -254,7 +296,7 @@ export class DetailPanel extends Component {
                 </EuiDescriptionListTitle>
 
                 <EuiDescriptionListDescription data-test-subj="remoteClusterDetailMaxSocketConnections">
-                  {proxySocketConnections}
+                  {proxySocketConnections ? proxySocketConnections : '-'}
                 </EuiDescriptionListDescription>
               </EuiFlexItem>
             ) : (
@@ -295,7 +337,7 @@ export class DetailPanel extends Component {
   }
 
   renderFlyoutBody() {
-    const { cluster } = this.props;
+    const { cluster, clusterName } = this.props;
 
     return (
       <EuiFlyoutBody>
@@ -303,6 +345,7 @@ export class DetailPanel extends Component {
         {cluster && (
           <Fragment>
             {this.renderClusterConfiguredByNodeWarning(cluster)}
+            {this.renderClusterWithDeprecatedSettingWarning(cluster, clusterName)}
             {this.renderCluster(cluster)}
           </Fragment>
         )}
@@ -384,7 +427,7 @@ export class DetailPanel extends Component {
         onClose={closeDetailPanel}
         aria-labelledby="remoteClusterDetailsFlyoutTitle"
         size="m"
-        maxWidth={400}
+        maxWidth={550}
       >
         <EuiFlyoutHeader>
           <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -400,7 +443,14 @@ export class DetailPanel extends Component {
             {cluster && cluster.mode === PROXY_MODE ? (
               <EuiFlexItem grow={false}>
                 {' '}
-                <EuiBadge color="hollow">{cluster.mode}</EuiBadge>
+                <EuiBadge
+                  color="hollow"
+                  title={i18n.translate('xpack.remoteClusters.detailPanel.proxyBadgeLabel', {
+                    defaultMessage: `This remote cluster was configured with the "proxy" connection mode`,
+                  })}
+                >
+                  {cluster.mode}
+                </EuiBadge>
               </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
