@@ -11,17 +11,17 @@ export type PlotValues = ReturnType<typeof getPlotValues>;
 
 export function getPlotValues({
   width,
-  duration,
+  xMin = 0,
+  xMax,
   height,
   margins
 }: {
   width: number;
-  duration: number;
+  xMin?: number;
+  xMax: number;
   height: number;
   margins: Margins;
 }) {
-  const xMin = 0;
-  const xMax = duration;
   const xScale = scaleLinear()
     .domain([xMin, xMax])
     .range([margins.left, width - margins.right]);
