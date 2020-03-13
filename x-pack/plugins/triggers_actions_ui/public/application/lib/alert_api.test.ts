@@ -39,7 +39,10 @@ describe('loadAlertTypes', () => {
       {
         id: 'test',
         name: 'Test',
-        actionVariables: ['var1'],
+        actionVariables: {
+          context: [{ name: 'var1', description: 'val1' }],
+          state: [{ name: 'var2', description: 'val2' }],
+        },
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
       },
