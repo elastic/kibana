@@ -6,7 +6,7 @@
 
 import { unmountComponentAtNode } from 'react-dom';
 import chrome from 'ui/chrome';
-import { management } from 'ui/management';
+import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { npSetup, npStart } from 'ui/new_platform';
 import routes from 'ui/routes';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
@@ -43,7 +43,13 @@ if (isLicenseOK && isCcrUiEnabled) {
 
   const CCR_REACT_ROOT = 'ccrReactRoot';
 
-  plugin({}).setup(npSetup.core);
+  plugin({}).setup(npSetup.core, {
+    __LEGACY: {
+      chrome,
+      docLinks: npStart.core.docLinks,
+      MANAGEMENT_BREADCRUMB,
+    },
+  });
 
   const unmountReactApp = () => elem && unmountComponentAtNode(elem);
 

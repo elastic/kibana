@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { indexPatterns } from '../../../../../plugins/data/public';
+import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 
 export const INDEX_ILLEGAL_CHARACTERS_VISIBLE = [...indexPatterns.ILLEGAL_CHARACTERS_VISIBLE, '*'];
 

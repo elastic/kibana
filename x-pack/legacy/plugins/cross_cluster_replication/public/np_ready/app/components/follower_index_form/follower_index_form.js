@@ -137,7 +137,7 @@ export class FollowerIndexForm extends PureComponent {
     };
 
     this.cachedAdvancedSettings = {};
-    this.validateIndexName = debounce(this.validateIndexName, 500);
+    this.validateIndexName = debounce(this.validateIndexName, 500, { trailing: true });
   }
 
   toggleRequest = () => {
@@ -222,13 +222,19 @@ export class FollowerIndexForm extends PureComponent {
         isValidatingIndexName: false,
       });
     } catch (error) {
-      // Expect an error in the shape provided by Angular's $http service.
-      if (error && error.data) {
-        // All validation does is check for a name collision, so we can just let the user attempt
-        // to save the follower index and get an error back from the API.
-        return this.setState({
-          isValidatingIndexName: false,
-        });
+      if (error) {
+        if (error.name === 'AbortError') {
+          // Ignore aborted requests
+          return;
+        }
+        // This could be an HTTP error
+        if (error.body) {
+          // All validation does is check for a name collision, so we can just let the user attempt
+          // to save the follower index and get an error back from the API.
+          return this.setState({
+            isValidatingIndexName: false,
+          });
+        }
       }
 
       // This error isn't an HTTP error, so let the fatal error screen tell the user something
