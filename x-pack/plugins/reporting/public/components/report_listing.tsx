@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 
 import { ToastsSetup, ApplicationStart } from '../../';
-import { LicensingPluginSetup, LICENSE_CHECK_STATE, ILicense } from '../../../licensing/public';
+import { LicensingPluginSetup, ILicense } from '../../../licensing/public';
 import { Poller } from '../../common/poller';
 import { JobStatuses, JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG } from '../../constants';
 import { ReportingAPIClient, JobQueueEntry } from '../lib/reporting_api_client';
