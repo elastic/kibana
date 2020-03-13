@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Plugin, CoreStart, CoreSetup, AppMountParameters } from 'kibana/public';
 import { ManagementSetup } from 'src/plugins/management/public';
 
@@ -12,6 +13,7 @@ import { SecurityPluginSetup } from '../../security/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { initManagementSection } from './application/management';
 import { setDependencyCache } from './application/util/dependency_cache';
+import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -25,9 +27,11 @@ export interface MlSetupDependencies {
 export class MlPlugin implements Plugin<Setup, Start> {
   setup(core: CoreSetup<MlStartDependencies>, pluginsSetup: MlSetupDependencies) {
     core.application.register({
-      id: 'ml',
-      title: 'Machine learning',
-      euiIconType: 'machineLearningApp',
+      id: PLUGIN_ID,
+      title: i18n.translate('xpack.ml.plugin.title', {
+        defaultMessage: 'Machine Learning',
+      }),
+      euiIconType: PLUGIN_ICON,
       order: 8001,
       appRoute: '/app/ml',
       mount: async (params: AppMountParameters) => {

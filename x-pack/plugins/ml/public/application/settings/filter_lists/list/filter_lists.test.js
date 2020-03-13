@@ -16,7 +16,7 @@ jest.mock('../../../privilege/check_privilege', () => ({
   checkPermission: () => true,
 }));
 
-jest.mock('../../../../../../../../../src/plugins/kibana_react/public', () => ({
+jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => ({
   withKibana: node => {
     return node;
   },

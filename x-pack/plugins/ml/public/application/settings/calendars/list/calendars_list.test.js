@@ -40,7 +40,7 @@ jest.mock('react', () => {
   return { ...r, memo: x => x };
 });
 
-jest.mock('../../../../../../../../../src/plugins/kibana_react/public', () => ({
+jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => ({
   withKibana: node => {
     return node;
   },

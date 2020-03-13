@@ -13,7 +13,7 @@ import {
   PluginInitializerContext,
 } from 'kibana/server';
 import { PluginsSetup, RouteInitialization } from './types';
-import { PLUGIN_ID } from '../common/constants/app';
+import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
 
 import { elasticsearchJsPlugin } from './client/elasticsearch_ml';
 import { makeMlUsageCollector } from './lib/ml_telemetry';
@@ -69,7 +69,7 @@ export class MlServerPlugin implements Plugin<MlSetupContract, MlStartContract, 
       name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
         defaultMessage: 'Machine Learning',
       }),
-      icon: 'machineLearningApp',
+      icon: PLUGIN_ICON,
       navLinkId: PLUGIN_ID,
       app: [PLUGIN_ID, 'kibana'],
       catalogue: [PLUGIN_ID],

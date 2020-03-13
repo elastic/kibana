@@ -47,7 +47,7 @@ jest.mock('./utils', () => ({
       })
   ),
 }));
-jest.mock('../../../../../../../../../src/plugins/kibana_react/public', () => ({
+jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => ({
   withKibana: comp => {
     return comp;
   },
