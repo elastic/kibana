@@ -4,10 +4,12 @@
 
 .actConnectorsList__tableRowDisabled {
   background-color: $euiColorLightestShade;
+
   .euiTableCellContent__text,
   .euiLink {
     color: $euiColorDarkShade;
   }
+
   .euiLink + .euiIcon {
     margin-left: $euiSizeXS;
   }
