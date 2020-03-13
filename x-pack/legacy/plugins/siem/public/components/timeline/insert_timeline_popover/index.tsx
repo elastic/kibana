@@ -60,7 +60,7 @@ const InsertTimelinePopoverComponent: React.FC<InsertTimelinePopoverProps> = ({
           } as EuiSelectableOption)
       ),
     ],
-    [hideUntitled]
+    []
   );
 
   return (
