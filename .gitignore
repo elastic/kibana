@@ -4,7 +4,6 @@
 /.es
 .DS_Store
 .node_binaries
-.native_modules
 node_modules
 !/src/dev/npm/__tests__/fixtures/fixture1/node_modules
 !/src/dev/notice/__fixtures__/node_modules
