@@ -28,6 +28,21 @@ interface AlertNumberFieldProps {
   setFieldValue: React.Dispatch<React.SetStateAction<number>>;
 }
 
+export const handleAlertFieldNumberChange = (
+  e: React.ChangeEvent<HTMLInputElement>,
+  isInvalid: boolean,
+  setIsInvalid: React.Dispatch<React.SetStateAction<boolean>>,
+  setFieldValue: React.Dispatch<React.SetStateAction<number>>
+) => {
+  const num = parseInt(e.target.value, 10);
+  if (isNaN(num) || num < 1) {
+    setIsInvalid(true);
+  } else {
+    if (isInvalid) setIsInvalid(false);
+    setFieldValue(num);
+  }
+};
+
 export const AlertFieldNumber = ({
   'data-test-subj': dataTestSubj,
   disabled,
@@ -41,15 +56,7 @@ export const AlertFieldNumber = ({
       compressed
       data-test-subj={dataTestSubj}
       min={1}
-      onChange={e => {
-        const num = parseInt(e.target.value, 10);
-        if (isNaN(num) || num < 1) {
-          setIsInvalid(true);
-        } else {
-          if (isInvalid) setIsInvalid(false);
-          setFieldValue(num);
-        }
-      }}
+      onChange={e => handleAlertFieldNumberChange(e, isInvalid, setIsInvalid, setFieldValue)}
       disabled={disabled}
       value={fieldValue}
       isInvalid={isInvalid}

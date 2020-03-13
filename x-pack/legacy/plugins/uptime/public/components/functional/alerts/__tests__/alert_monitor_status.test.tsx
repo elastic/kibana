@@ -5,10 +5,92 @@
  */
 
 import React from 'react';
-import { selectedLocationsToString, AlertFieldNumber } from '../alert_monitor_status';
+import {
+  selectedLocationsToString,
+  AlertFieldNumber,
+  handleAlertFieldNumberChange,
+} from '../alert_monitor_status';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 describe('alert monitor status component', () => {
+  describe('handleAlertFieldNumberChange', () => {
+    let mockSetIsInvalid: jest.Mock<any, any>;
+    let mockSetFieldValue: jest.Mock<any, any>;
+
+    beforeEach(() => {
+      mockSetIsInvalid = jest.fn();
+      mockSetFieldValue = jest.fn();
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('sets a valid number', () => {
+      handleAlertFieldNumberChange(
+        // @ts-ignore no need to implement this entire type here
+        { target: { value: '23' } },
+        false,
+        mockSetIsInvalid,
+        mockSetFieldValue
+      );
+      expect(mockSetIsInvalid).not.toHaveBeenCalled();
+      expect(mockSetFieldValue).toHaveBeenCalledTimes(1);
+      expect(mockSetFieldValue.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            23,
+          ],
+        ]
+      `);
+    });
+
+    it('sets invalid for NaN value', () => {
+      handleAlertFieldNumberChange(
+        // @ts-ignore no need to implement this entire type here
+        { target: { value: 'foo' } },
+        false,
+        mockSetIsInvalid,
+        mockSetFieldValue
+      );
+      expect(mockSetIsInvalid).toHaveBeenCalledTimes(1);
+      expect(mockSetIsInvalid.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            true,
+          ],
+        ]
+      `);
+      expect(mockSetFieldValue).not.toHaveBeenCalled();
+    });
+
+    it('sets invalid to false when a valid value is received and invalid is true', () => {
+      handleAlertFieldNumberChange(
+        // @ts-ignore no need to implement this entire type here
+        { target: { value: '23' } },
+        true,
+        mockSetIsInvalid,
+        mockSetFieldValue
+      );
+      expect(mockSetIsInvalid).toHaveBeenCalledTimes(1);
+      expect(mockSetIsInvalid.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            false,
+          ],
+        ]
+      `);
+      expect(mockSetFieldValue).toHaveBeenCalledTimes(1);
+      expect(mockSetFieldValue.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            23,
+          ],
+        ]
+      `);
+    });
+  });
+
   describe('AlertFieldNumber', () => {
     it('responds with correct number value when a valid number is specified', () => {
       const mockValueHandler = jest.fn();
