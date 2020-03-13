@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectAttributes, SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectAttributes, SavedObjectsClientContract } from 'kibana/server';
 
 export interface MlTelemetry extends SavedObjectAttributes {
   file_data_visualizer: {
@@ -40,7 +40,10 @@ export async function incrementFileDataVisualizerIndexCreationCount(
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> {
   try {
-    const { attributes } = await savedObjectsClient.get('telemetry', 'telemetry');
+    const { attributes } = await savedObjectsClient.get<{ enabled: boolean }>(
+      'telemetry',
+      'telemetry'
+    );
 
     if (attributes.enabled === false) {
       return;

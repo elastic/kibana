@@ -22,7 +22,7 @@ import { RouteInitialization } from '../types';
 import { incrementFileDataVisualizerIndexCreationCount } from '../lib/ml_telemetry';
 
 function analyzeFiles(context: RequestHandlerContext, data: InputData, overrides: InputOverrides) {
-  const { analyzeFile } = fileDataVisualizerProvider(context);
+  const { analyzeFile } = fileDataVisualizerProvider(context.ml!.mlClient.callAsCurrentUser);
   return analyzeFile(data, overrides);
 }
 
@@ -35,7 +35,7 @@ function importData(
   ingestPipeline: InjectPipeline,
   data: InputData
 ) {
-  const { importData: importDataFunc } = importDataProvider(context);
+  const { importData: importDataFunc } = importDataProvider(context.ml!.mlClient.callAsCurrentUser);
   return importDataFunc(id, index, settings, mappings, ingestPipeline, data);
 }
 

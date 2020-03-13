@@ -13,6 +13,7 @@ import { Provider } from 'react-redux';
 import { Store } from 'redux';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { RouteCapture } from './view/route_capture';
+import { EndpointPluginStartDependencies } from '../../plugin';
 import { appStoreFactory } from './store';
 import { AlertIndex } from './view/alerts';
 import { ManagementList } from './view/managing';
@@ -22,10 +23,17 @@ import { HeaderNavigation } from './components/header_nav';
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
  */
-export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMountParameters) {
+export function renderApp(
+  coreStart: CoreStart,
+  depsStart: EndpointPluginStartDependencies,
+  { appBasePath, element }: AppMountParameters
+) {
   coreStart.http.get('/api/endpoint/hello-world');
-  const store = appStoreFactory(coreStart);
-  ReactDOM.render(<AppRoot basename={appBasePath} store={store} coreStart={coreStart} />, element);
+  const store = appStoreFactory({ coreStart, depsStart });
+  ReactDOM.render(
+    <AppRoot basename={appBasePath} store={store} coreStart={coreStart} depsStart={depsStart} />,
+    element
+  );
   return () => {
     ReactDOM.unmountComponentAtNode(element);
   };
@@ -35,13 +43,14 @@ interface RouterProps {
   basename: string;
   store: Store;
   coreStart: CoreStart;
+  depsStart: EndpointPluginStartDependencies;
 }
 
 const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
-  ({ basename, store, coreStart: { http, notifications } }) => (
+  ({ basename, store, coreStart: { http, notifications }, depsStart: { data } }) => (
     <Provider store={store}>
       <I18nProvider>
-        <KibanaContextProvider services={{ http, notifications }}>
+        <KibanaContextProvider services={{ http, notifications, data }}>
           <BrowserRouter basename={basename}>
             <RouteCapture>
               <HeaderNavigation basename={basename} />

@@ -19,7 +19,7 @@ export const deleteAnalytics = async (d: DataFrameAnalyticsListRow) => {
   const toastNotifications = getToastNotifications();
   try {
     if (isDataFrameAnalyticsFailed(d.stats.state)) {
-      await ml.dataFrameAnalytics.stopDataFrameAnalytics(d.config.id, true, true);
+      await ml.dataFrameAnalytics.stopDataFrameAnalytics(d.config.id, true);
     }
     await ml.dataFrameAnalytics.deleteDataFrameAnalytics(d.config.id);
     toastNotifications.addSuccess(

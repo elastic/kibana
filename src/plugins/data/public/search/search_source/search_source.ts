@@ -73,7 +73,7 @@ import _ from 'lodash';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/public';
-import { SearchRequest } from '../..';
+import { IIndexPattern, SearchRequest } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
 import { fetchSoon, FetchOptions, RequestFailure } from '../fetch';
 
@@ -339,11 +339,20 @@ export class SearchSource {
     return searchRequest;
   }
 
+  private getIndexType(index: IIndexPattern) {
+    if (this.searchStrategyId) {
+      return this.searchStrategyId === 'default' ? undefined : this.searchStrategyId;
+    } else {
+      return index?.type;
+    }
+  }
+
   private flatten() {
     const searchRequest = this.mergeProps();
 
     searchRequest.body = searchRequest.body || {};
     const { body, index, fields, query, filters, highlightAll } = searchRequest;
+    searchRequest.indexType = this.getIndexType(index);
 
     const computedFields = index ? index.getComputedFields() : {};
 
