@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
-
 import { isSetupStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
@@ -15,12 +14,23 @@ import {
   MissingSetupPrivilegesPrompt,
   MlUnavailablePrompt,
 } from '../../../components/logging/log_analysis_setup';
+import { SourceErrorPage } from '../../../components/source_error_page';
+import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
+import { useSourceContext } from '../../../containers/source';
 import { LogEntryRateResultsContent } from './page_results_content';
 import { LogEntryRateSetupContent } from './page_setup_content';
 import { useLogEntryRateModuleContext } from './use_log_entry_rate_module';
 
 export const LogEntryRatePageContent = () => {
+  const {
+    hasFailedLoadingSource,
+    isLoadingSource,
+    isUninitialized,
+    loadSource,
+    loadSourceFailureMessage,
+  } = useSourceContext();
+
   const {
     hasLogAnalysisCapabilites,
     hasLogAnalysisReadCapabilities,
@@ -36,7 +46,11 @@ export const LogEntryRatePageContent = () => {
     }
   }, [fetchJobStatus, fetchModuleDefinition, hasLogAnalysisReadCapabilities]);
 
-  if (!hasLogAnalysisCapabilites) {
+  if (isLoadingSource || isUninitialized) {
+    return <SourceLoadingPage />;
+  } else if (hasFailedLoadingSource) {
+    return <SourceErrorPage errorMessage={loadSourceFailureMessage ?? ''} retry={loadSource} />;
+  } else if (!hasLogAnalysisCapabilites) {
     return <MlUnavailablePrompt />;
   } else if (!hasLogAnalysisReadCapabilities) {
     return <MissingResultsPrivilegesPrompt />;
