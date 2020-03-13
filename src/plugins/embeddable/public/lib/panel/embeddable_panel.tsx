@@ -81,6 +81,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   private embeddableRoot: React.RefObject<HTMLDivElement>;
   private parentSubscription?: Subscription;
   private subscription?: Subscription;
+  private drilldownCountSubscription?: Subscription;
   private mounted: boolean = false;
   private generateId = htmlIdGenerator();
 
@@ -154,6 +155,9 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+    if (this.drilldownCountSubscription) {
+      this.drilldownCountSubscription.unsubscribe();
+    }
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();
     }
@@ -210,10 +214,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
 
     const dynamicActions = this.props.embeddable.dynamicActions;
     if (dynamicActions) {
-      dynamicActions.count().then(drilldownCount => {
-        if (this.mounted) {
-          this.setState({ drilldownCount });
-        }
+      this.setState({ drilldownCount: dynamicActions.state.get().events.length });
+      this.drilldownCountSubscription = dynamicActions.state.state$.subscribe(({ events }) => {
+        if (!this.mounted) return;
+        this.setState({ drilldownCount: events.length });
       });
     }
   }

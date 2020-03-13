@@ -48,7 +48,7 @@ export class DashboardToDashboardDrilldown
     useCurrentDashboardFilters: true,
   });
 
-  public readonly isConfigValid = (config: Config) => {
+  public readonly isConfigValid = (config: Config): config is Config => {
     if (!config.dashboardId) return false;
     return true;
   };
