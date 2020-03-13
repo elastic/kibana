@@ -12,6 +12,7 @@ import { MapFilters, VectorLayerRequestMeta } from '../../common/data_request_de
 import { ILayer } from './layer';
 import { IJoin } from './joins/join';
 import { IVectorStyle } from './styles/vector/vector_style';
+import { IField } from './fields/field';
 
 type VectorLayerArguments = {
   source: IVectorSource;
@@ -20,6 +21,8 @@ type VectorLayerArguments = {
 };
 
 export interface IVectorLayer extends ILayer {
+  getFields(): Promise<IField[]>;
+  getStyleEditorFields(): Promise<IField[]>;
   getValidJoins(): IJoin[];
 }
 
@@ -34,6 +37,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
   constructor(options: VectorLayerArguments);
 
+  getFields(): Promise<IField[]>;
+  getStyleEditorFields(): Promise<IField[]>;
   getValidJoins(): IJoin[];
   _getSearchFilters(dataFilters: MapFilters): VectorLayerRequestMeta;
 }

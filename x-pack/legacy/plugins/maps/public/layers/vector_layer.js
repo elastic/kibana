@@ -203,6 +203,11 @@ export class VectorLayer extends AbstractLayer {
     return [...sourceFields, ...this._getJoinFields()];
   }
 
+  async getStyleEditorFields() {
+    const sourceFields = await this.getSourceForEditing().getFields();
+    return [...sourceFields, ...this._getJoinFields()];
+  }
+
   getIndexPatternIds() {
     const indexPatternIds = this.getSource().getIndexPatternIds();
     this.getValidJoins().forEach(join => {

@@ -92,20 +92,23 @@ function getClusterStyleDescriptor(
       return;
     }
 
-    if (styleProperty.isDynamic() && styleProperty.isComplete()) {
+    if (styleProperty.isDynamic()) {
       const options = (styleProperty as IDynamicStyleProperty).getOptions();
+      const field =
+        options && options.field && options.field.name
+          ? {
+              ...options.field,
+              name: clusterSource.getAggKey(
+                getAggType(styleProperty as IDynamicStyleProperty),
+                options.field.name
+              ),
+            }
+          : undefined;
       clusterStyleDescriptor.properties[styleName] = {
         type: STYLE_TYPE.DYNAMIC,
         options: {
           ...options,
-          field: {
-            ...options.field,
-            name: clusterSource.getAggKey(
-              getAggType(styleProperty as IDynamicStyleProperty),
-              // @ts-ignore styleProperty.isComplete() check ensures options.field.name exists
-              options.field.name
-            ),
-          },
+          field,
         },
       };
     } else {
