@@ -10,10 +10,9 @@ import { useHistory } from 'react-router-dom';
 import {
   EuiPage,
   EuiPageBody,
+  EuiPageHeader,
   EuiPageContent,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
+  EuiHorizontalRule,
   EuiTitle,
   EuiBasicTable,
   EuiText,
@@ -21,6 +20,7 @@ import {
   EuiHealth,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createStructuredSelector } from 'reselect';
 import { HostDetailsFlyout } from './details';
@@ -111,6 +111,7 @@ export const HostList = () => {
         name: i18n.translate('xpack.endpoint.host.list.alerts', {
           defaultMessage: 'Alerts',
         }),
+        dataType: 'number',
         render: () => {
           return '0';
         },
@@ -141,6 +142,7 @@ export const HostList = () => {
         name: i18n.translate('xpack.endpoint.host.list.lastActive', {
           defaultMessage: 'Last Active',
         }),
+        dataType: 'date',
         render: () => {
           return 'xxxx';
         },
@@ -148,51 +150,62 @@ export const HostList = () => {
     ];
   }, [queryParams, history]);
 
+  const HostPage = styled(EuiPage)`
+    padding: 0;
+  `;
+
+  const HostHeader = styled(EuiPageHeader)`
+    background-color: #f5f7fa;
+    border-bottom: 1px solid #d3dae6;
+    padding: 33px 0 33px 24px;
+    margin-bottom: 0;
+  `;
+
+  const HostPageContent = styled(EuiPageContent)`
+    border: none;
+  `;
+
   return (
     <>
       {hasSelectedHost && <HostDetailsFlyout />}
-      <EuiPage>
+      <HostPage>
         <EuiPageBody>
-          <EuiPageContent>
-            <EuiPageContentHeader>
-              <EuiPageContentHeaderSection>
-                <EuiTitle size="l">
-                  <h1 data-test-subj="hostListTitle">
-                    <FormattedMessage id="xpack.endpoint.host.hosts" defaultMessage="Hosts" />
-                  </h1>
-                </EuiTitle>
-                <h2>
-                  <EuiText color="subdued" size="s">
-                    {totalItemCount === 1 ? (
-                      <FormattedMessage
-                        id="xpack.endpoint.host.list.totalCount"
-                        defaultMessage="{totalItemCount} Host"
-                        values={{ totalItemCount }}
-                      />
-                    ) : (
-                      <FormattedMessage
-                        id="xpack.endpoint.host.list.totalCounts"
-                        defaultMessage="{totalItemCount} Hosts"
-                        values={{ totalItemCount }}
-                      />
-                    )}
-                  </EuiText>
-                </h2>
-              </EuiPageContentHeaderSection>
-            </EuiPageContentHeader>
-            <EuiPageContentBody>
-              <EuiBasicTable
-                data-test-subj="hostListTable"
-                items={listData}
-                columns={columns}
-                loading={isLoading}
-                pagination={paginationSetup}
-                onChange={onTableChange}
-              />
-            </EuiPageContentBody>
-          </EuiPageContent>
+          <HostHeader>
+            <EuiTitle size="l">
+              <h1 data-test-subj="hostListTitle">
+                <FormattedMessage id="xpack.endpoint.host.hosts" defaultMessage="Hosts" />
+              </h1>
+            </EuiTitle>
+          </HostHeader>
+
+          <HostPageContent>
+            <EuiText color="subdued" size="xs">
+              {totalItemCount === 1 ? (
+                <FormattedMessage
+                  id="xpack.endpoint.host.list.totalCount"
+                  defaultMessage="Showing: {totalItemCount} Host"
+                  values={{ totalItemCount }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.endpoint.host.list.totalCounts"
+                  defaultMessage="Showing: {totalItemCount} Hosts"
+                  values={{ totalItemCount }}
+                />
+              )}
+            </EuiText>
+            <EuiHorizontalRule margin="xs" />
+            <EuiBasicTable
+              data-test-subj="hostListTable"
+              items={listData}
+              columns={columns}
+              loading={isLoading}
+              pagination={paginationSetup}
+              onChange={onTableChange}
+            />
+          </HostPageContent>
         </EuiPageBody>
-      </EuiPage>
+      </HostPage>
     </>
   );
 };

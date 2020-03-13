@@ -120,7 +120,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const values = await pageObjects.endpoint.hostFlyoutDescriptionValues('hostDetailsFlyout');
         expect(values).to.eql([
           'Windows 10',
-          '1/24/2020',
+          'Jan 24, 2020 @11:06 AM',
           '0',
           'C2A9093E-E289-4C0A-AA44-8C32A414FA7A',
           'active',
