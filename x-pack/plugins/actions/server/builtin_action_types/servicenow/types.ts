@@ -31,22 +31,7 @@ export type CommentType = TypeOf<typeof CommentSchema>;
 
 export type FinalMapping = Map<string, any>;
 
-export interface CreateHandlerArguments {
-  serviceNow: ServiceNow;
-  params: any;
-  comments: CommentType[];
-  mapping: FinalMapping;
-}
-
 export type UpdateParamsType = Partial<ParamsType>;
-
-export type UpdateHandlerArguments = CreateHandlerArguments & {
-  incidentId: string;
-};
-
-export type IncidentHandlerArguments = CreateHandlerArguments & {
-  incidentId?: string;
-};
 
 export interface IncidentCreationResponse {
   incidentId: string;
@@ -61,9 +46,10 @@ export interface CommentsZipped {
 }
 
 export interface ApplyActionTypeToFieldsArgs {
-  params: any;
+  params: HandlerParamsType;
   mapping: FinalMapping;
   incident: Record<string, any>;
+  mode: string;
 }
 
 export interface AppendFieldArgs {
@@ -75,3 +61,29 @@ export interface AppendFieldArgs {
 export interface KeyAny {
   [index: string]: string;
 }
+
+export interface AppendInformationFieldArgs {
+  value: string;
+  user: string;
+  date: string;
+  mode: string;
+}
+
+export interface HandlerParamsType extends ParamsType {
+  mappedParams: Record<string, any>;
+}
+
+export interface CreateHandlerArguments {
+  serviceNow: ServiceNow;
+  params: HandlerParamsType;
+  comments: CommentType[];
+  mapping: FinalMapping;
+}
+
+export type UpdateHandlerArguments = CreateHandlerArguments & {
+  incidentId: string;
+};
+
+export type IncidentHandlerArguments = CreateHandlerArguments & {
+  incidentId: string | null;
+};

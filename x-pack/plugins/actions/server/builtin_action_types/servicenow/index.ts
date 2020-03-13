@@ -84,13 +84,13 @@ async function serviceNowExecutor(
   const { comments, incidentId, ...restParams } = params;
 
   const finalMap = buildMap(mapping);
-  const restParamsMapped = mapParams(restParams, finalMap);
+  const mappedParams = mapParams(restParams, finalMap);
   const serviceNow = new ServiceNow({ url: apiUrl, username, password });
 
   const handlerInput = {
     incidentId,
     serviceNow,
-    params: restParamsMapped,
+    params: { ...params, mappedParams },
     comments: comments as CommentType[],
     mapping: finalMap,
   };

@@ -34,11 +34,26 @@ export const SecretsSchemaProps = {
 
 export const SecretsSchema = schema.object(SecretsSchemaProps);
 
+export const UserSchema = schema.object({
+  fullName: schema.nullable(schema.string()),
+  username: schema.nullable(schema.string()),
+});
+
+export const EntityInformationSchema = schema.object({
+  createdAt: schema.string(),
+  createdBy: UserSchema,
+  updatedAt: schema.nullable(schema.string()),
+  updatedBy: schema.nullable(UserSchema),
+});
+
 export const CommentSchema = schema.object({
   commentId: schema.string(),
   comment: schema.string(),
   version: schema.maybe(schema.string()),
-  incidentCommentId: schema.maybe(schema.string()),
+  createdAt: schema.string(),
+  createdBy: UserSchema,
+  updatedAt: schema.nullable(schema.string()),
+  updatedBy: schema.nullable(UserSchema),
 });
 
 export const ExecutorAction = schema.oneOf([
@@ -48,8 +63,12 @@ export const ExecutorAction = schema.oneOf([
 
 export const ParamsSchema = schema.object({
   caseId: schema.string(),
+  title: schema.string(),
   comments: schema.maybe(schema.arrayOf(CommentSchema)),
   description: schema.maybe(schema.string()),
-  title: schema.maybe(schema.string()),
-  incidentId: schema.maybe(schema.string()),
+  incidentId: schema.nullable(schema.string()),
+  createdAt: schema.string(),
+  createdBy: UserSchema,
+  updatedAt: schema.nullable(schema.string()),
+  updatedBy: schema.nullable(UserSchema),
 });

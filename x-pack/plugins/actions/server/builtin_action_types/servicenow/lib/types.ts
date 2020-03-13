@@ -11,9 +11,10 @@ export interface Instance {
 }
 
 export interface Incident {
-  short_description?: string;
+  short_description: string;
   description?: string;
   caller_id?: string;
+  [index: string]: string | undefined;
 }
 
 export interface IncidentResponse {
