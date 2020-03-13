@@ -56,6 +56,7 @@ export const createRulesRoute = (router: IRouter): void => {
         type,
         references,
         note,
+        lists,
       } = request.body;
       const siemResponse = buildSiemResponse(response);
 
@@ -120,6 +121,7 @@ export const createRulesRoute = (router: IRouter): void => {
           references,
           note,
           version: 1,
+          lists,
         });
         const ruleStatuses = await savedObjectsClient.find<
           IRuleSavedAttributesSavedObjectAttributes

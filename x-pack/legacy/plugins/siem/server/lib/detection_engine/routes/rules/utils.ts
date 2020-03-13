@@ -139,6 +139,7 @@ export const transformAlertToRule = (
     last_success_at: ruleStatus?.attributes.lastSuccessAt,
     last_failure_message: ruleStatus?.attributes.lastFailureMessage,
     last_success_message: ruleStatus?.attributes.lastSuccessMessage,
+    lists: alert.params.lists,
   });
 };
 

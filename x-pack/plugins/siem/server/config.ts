@@ -14,6 +14,7 @@ import {
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  listsFeature: schema.boolean({ defaultValue: false }),
   [SIGNALS_INDEX_KEY]: schema.string({ defaultValue: DEFAULT_SIGNALS_INDEX }),
 });
 

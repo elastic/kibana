@@ -18,8 +18,17 @@ import { left } from 'fp-ts/lib/Either';
 import { exactCheck } from './exact_check';
 import { RulesSchema } from './rules_schema';
 import { TypeAndTimelineOnly } from './type_timeline_only_schema';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
 
 describe('check_type_dependents', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   describe('checkTypeDependents', () => {
     test('it should validate a type of "query" without anything extra', () => {
       const payload = getBaseResponsePayload();

@@ -86,6 +86,32 @@ describe('buildBulkBody', () => {
           version: 1,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
+          lists: [
+            {
+              field: 'source.ip',
+              boolean_operator: 'and',
+              values: [
+                {
+                  name: '127.0.0.1',
+                  type: 'value',
+                },
+              ],
+            },
+            {
+              field: 'host.name',
+              boolean_operator: 'and not',
+              values: [
+                {
+                  name: 'rock01',
+                  type: 'value',
+                },
+                {
+                  name: 'mothra',
+                  type: 'value',
+                },
+              ],
+            },
+          ],
         },
       },
     };
@@ -176,6 +202,32 @@ describe('buildBulkBody', () => {
           version: 1,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
+          lists: [
+            {
+              field: 'source.ip',
+              boolean_operator: 'and',
+              values: [
+                {
+                  name: '127.0.0.1',
+                  type: 'value',
+                },
+              ],
+            },
+            {
+              field: 'host.name',
+              boolean_operator: 'and not',
+              values: [
+                {
+                  name: 'rock01',
+                  type: 'value',
+                },
+                {
+                  name: 'mothra',
+                  type: 'value',
+                },
+              ],
+            },
+          ],
         },
       },
     };
@@ -264,6 +316,32 @@ describe('buildBulkBody', () => {
           version: 1,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
+          lists: [
+            {
+              field: 'source.ip',
+              boolean_operator: 'and',
+              values: [
+                {
+                  name: '127.0.0.1',
+                  type: 'value',
+                },
+              ],
+            },
+            {
+              field: 'host.name',
+              boolean_operator: 'and not',
+              values: [
+                {
+                  name: 'rock01',
+                  type: 'value',
+                },
+                {
+                  name: 'mothra',
+                  type: 'value',
+                },
+              ],
+            },
+          ],
         },
       },
     };
@@ -345,6 +423,32 @@ describe('buildBulkBody', () => {
           version: 1,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
+          lists: [
+            {
+              field: 'source.ip',
+              boolean_operator: 'and',
+              values: [
+                {
+                  name: '127.0.0.1',
+                  type: 'value',
+                },
+              ],
+            },
+            {
+              field: 'host.name',
+              boolean_operator: 'and not',
+              values: [
+                {
+                  name: 'rock01',
+                  type: 'value',
+                },
+                {
+                  name: 'mothra',
+                  type: 'value',
+                },
+              ],
+            },
+          ],
         },
       },
     };

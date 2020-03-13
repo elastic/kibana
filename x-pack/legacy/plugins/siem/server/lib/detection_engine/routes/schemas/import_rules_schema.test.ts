@@ -11,8 +11,17 @@ import {
 } from './import_rules_schema';
 import { ThreatParams, ImportRuleAlertRest } from '../../types';
 import { ImportRulesRequestParams } from '../../rules/types';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('import rules schema', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   describe('importRulesSchema', () => {
     test('empty objects do not validate', () => {
       expect(importRulesSchema.validate<Partial<ImportRuleAlertRest>>({}).error).toBeTruthy();

@@ -7,8 +7,17 @@
 import { updateRulesSchema } from './update_rules_schema';
 import { PatchRuleAlertParamsRest } from '../../rules/types';
 import { ThreatParams, RuleAlertParamsRest } from '../../types';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('create rules schema', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   test('empty objects do not validate as they require at least id or rule_id', () => {
     expect(updateRulesSchema.validate<Partial<PatchRuleAlertParamsRest>>({}).error).toBeTruthy();
   });

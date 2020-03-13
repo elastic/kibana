@@ -12,8 +12,17 @@ import {
   PrePackagedRulesStatusSchema,
   prePackagedRulesStatusSchema,
 } from './prepackaged_rules_status_schema';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
 
 describe('prepackaged_rules_schema', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   test('it should validate an empty prepackaged response with defaults', () => {
     const payload: PrePackagedRulesStatusSchema = {
       rules_installed: 0,

@@ -31,6 +31,10 @@ const enabledActionTypes = [
   'test.rate-limit',
 ];
 
+// Temporary feature flag for the lists feature
+// TODO: Remove this once lists land in a Kibana version
+process.env.ELASTIC_XPACK_SIEM_LISTS_FEATURE = 'true';
+
 // eslint-disable-next-line import/no-default-export
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
   const { license = 'trial', disabledPlugins = [], ssl = false } = options;

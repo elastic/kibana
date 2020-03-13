@@ -65,5 +65,6 @@ export const buildRule = ({
     version: ruleParams.version,
     created_at: createdAt,
     updated_at: updatedAt,
+    lists: ruleParams.lists,
   });
 };

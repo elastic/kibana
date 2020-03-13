@@ -36,6 +36,32 @@ export const sampleRuleAlertParams = (
   meta: undefined,
   threat: undefined,
   version: 1,
+  lists: [
+    {
+      field: 'source.ip',
+      boolean_operator: 'and',
+      values: [
+        {
+          name: '127.0.0.1',
+          type: 'value',
+        },
+      ],
+    },
+    {
+      field: 'host.name',
+      boolean_operator: 'and not',
+      values: [
+        {
+          name: 'rock01',
+          type: 'value',
+        },
+        {
+          name: 'mothra',
+          type: 'value',
+        },
+      ],
+    },
+  ],
 });
 
 export const sampleDocNoSortId = (someUuid: string = sampleIdGuid): SignalSourceHit => ({

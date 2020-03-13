@@ -129,3 +129,16 @@ export const rules_custom_installed = PositiveInteger;
 export const rules_not_installed = PositiveInteger;
 export const rules_not_updated = PositiveInteger;
 export const note = t.string;
+
+// NOTE: Experimental list support not being shipped currently and behind a feature flag
+// TODO: Remove this comment once we lists have passed testing and is ready for the release
+export const boolean_operator = t.keyof({ and: null, or: null, 'and not': null, 'or not': null });
+export const list_type = t.keyof({ value: null }); // TODO: Eventually this can be "list" when we support list types
+export const list_value = t.exact(t.type({ name: t.string, type: list_type }));
+export const list = t.exact(
+  t.type({
+    field: t.string,
+    boolean_operator,
+    values: t.array(list_value),
+  })
+);

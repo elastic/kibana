@@ -6,8 +6,17 @@
 
 import { queryRulesSchema } from './query_rules_schema';
 import { PatchRuleAlertParamsRest } from '../../rules/types';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('queryRulesSchema', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   test('empty objects do not validate', () => {
     expect(queryRulesSchema.validate<Partial<PatchRuleAlertParamsRest>>({}).error).toBeTruthy();
   });

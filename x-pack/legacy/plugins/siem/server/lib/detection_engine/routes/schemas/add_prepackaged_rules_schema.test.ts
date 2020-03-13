@@ -6,8 +6,17 @@
 
 import { ThreatParams, PrepackagedRules } from '../../types';
 import { addPrepackagedRulesSchema } from './add_prepackaged_rules_schema';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('add prepackaged rules schema', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   test('empty objects do not validate', () => {
     expect(addPrepackagedRulesSchema.validate<Partial<PrepackagedRules>>({}).error).toBeTruthy();
   });

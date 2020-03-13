@@ -74,6 +74,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
             references,
             note,
             version,
+            lists,
           } = payloadRule;
           const finalIndex = outputIndex ?? siemClient.signalsIndex;
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
@@ -110,6 +111,7 @@ export const updateRulesBulkRoute = (router: IRouter) => {
               references,
               note,
               version,
+              lists,
             });
             if (rule != null) {
               const ruleStatuses = await savedObjectsClient.find<

@@ -6,8 +6,17 @@
 
 import { findRulesSchema } from './find_rules_schema';
 import { FindParamsRest } from '../../rules/types';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('find rules schema', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   test('empty objects do validate', () => {
     expect(findRulesSchema.validate<Partial<FindParamsRest>>({}).error).toBeFalsy();
   });

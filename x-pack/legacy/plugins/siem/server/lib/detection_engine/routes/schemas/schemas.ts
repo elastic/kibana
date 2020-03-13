@@ -106,3 +106,15 @@ export const version = Joi.number()
   .integer()
   .min(1);
 export const note = Joi.string();
+
+// NOTE: Experimental list support not being shipped currently and behind a feature flag
+// TODO: Remove this comment once we lists have passed testing and is ready for the release
+export const boolean_operator = Joi.string().valid('and', 'or', 'and not', 'or not');
+export const list_type = Joi.string().valid('value'); // TODO: Eventually this can be "list" when we support list types
+export const list_value = Joi.object({ name: Joi.string().required(), type: list_type.required() });
+export const list = Joi.object({
+  field: Joi.string().required(),
+  boolean_operator: boolean_operator.required(),
+  values: Joi.array().items(list_value),
+});
+export const lists = Joi.array().items(list.required());

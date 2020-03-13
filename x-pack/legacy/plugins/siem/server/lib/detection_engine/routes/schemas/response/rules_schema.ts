@@ -7,8 +7,9 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import * as t from 'io-ts';
 import { isObject } from 'lodash/fp';
-import { Either } from 'fp-ts/lib/Either';
+import { Either, fold, right, left } from 'fp-ts/lib/Either';
 
+import { pipe } from 'fp-ts/lib/pipeable';
 import { checkTypeDependents } from './check_type_dependents';
 import {
   description,
@@ -50,6 +51,8 @@ import {
   meta,
   note,
 } from './schemas';
+import { ListsDefaultArray } from '../types/lists_default_array';
+import { hasListsFeature } from '../../../feature_flags';
 
 /**
  * This is the required fields for the rules schema response. Put all required properties on
@@ -82,6 +85,7 @@ export const requiredRulesSchema = t.type({
   updated_at,
   created_by,
   version,
+  lists: ListsDefaultArray,
 });
 
 export type RequiredRulesSchema = t.TypeOf<typeof requiredRulesSchema>;
@@ -139,13 +143,37 @@ export const rulesSchema = new t.Type<
   'RulesSchema',
   (input: unknown): input is RulesWithoutTypeDependentsSchema => isObject(input),
   (input): Either<t.Errors, RulesWithoutTypeDependentsSchema> => {
-    return checkTypeDependents(input);
+    const output = checkTypeDependents(input);
+    if (!hasListsFeature()) {
+      // TODO: Remove this after the lists feature is an accepted feature for a particular release
+      return removeList(output);
+    } else {
+      return output;
+    }
   },
   t.identity
 );
 
+// TODO: Remove this after the lists feature is an accepted feature for a particular release
+export const removeList = (
+  decoded: Either<t.Errors, RequiredRulesSchema>
+): Either<t.Errors, RequiredRulesSchema> => {
+  const onLeft = (errors: t.Errors): Either<t.Errors, RequiredRulesSchema> => left(errors);
+  const onRight = (decodedValue: RequiredRulesSchema): Either<t.Errors, RequiredRulesSchema> => {
+    delete decodedValue.lists;
+    return right(decodedValue);
+  };
+  const folded = fold(onLeft, onRight);
+  return pipe(decoded, folded);
+};
+
 /**
  * This is the correct type you want to use for Rules that are outputted from the
  * REST interface. This has all base and all optional properties merged together.
+ *
+ * TODO: Once the lists feature is no longer a feature toggle you can use just this:
+ * export type RulesSchema = t.TypeOf<typeof rulesSchema>
+ *
+ * For now, we force the type into this structure since it is dynamic
  */
 export type RulesSchema = t.TypeOf<typeof rulesSchema>;

@@ -35,10 +35,12 @@ import {
   id,
   note,
   version,
+  lists,
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
 import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
+import { hasListsFeature } from '../../feature_flags';
 
 /**
  * This almost identical to the create_rules_schema except for a few details.
@@ -79,4 +81,7 @@ export const updateRulesSchema = Joi.object({
   references: references.default([]),
   note: note.allow(''),
   version,
+
+  // TODO: Remove the hasListsFeatures once this is ready for release
+  lists: hasListsFeature() ? lists.default([]) : lists.forbidden().default([]),
 }).xor('id', 'rule_id');

@@ -10,10 +10,19 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck } from './exact_check';
 import { rulesSchema, RulesSchema } from './rules_schema';
 import { foldLeftRight, getBaseResponsePayload, getPaths } from './__mocks__/utils';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 
 describe('rules_schema', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   test('it should validate a type of "query" without anything extra', () => {
     const payload = getBaseResponsePayload();
 

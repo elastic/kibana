@@ -76,6 +76,32 @@ describe('utils', () => {
             ],
           },
         ],
+        lists: [
+          {
+            field: 'source.ip',
+            boolean_operator: 'and',
+            values: [
+              {
+                name: '127.0.0.1',
+                type: 'value',
+              },
+            ],
+          },
+          {
+            field: 'host.name',
+            boolean_operator: 'and not',
+            values: [
+              {
+                name: 'rock01',
+                type: 'value',
+              },
+              {
+                name: 'mothra',
+                type: 'value',
+              },
+            ],
+          },
+        ],
         filters: [
           {
             query: {
@@ -157,6 +183,32 @@ describe('utils', () => {
         type: 'query',
         note: '# Investigative notes',
         version: 1,
+        lists: [
+          {
+            field: 'source.ip',
+            boolean_operator: 'and',
+            values: [
+              {
+                name: '127.0.0.1',
+                type: 'value',
+              },
+            ],
+          },
+          {
+            field: 'host.name',
+            boolean_operator: 'and not',
+            values: [
+              {
+                name: 'rock01',
+                type: 'value',
+              },
+              {
+                name: 'mothra',
+                type: 'value',
+              },
+            ],
+          },
+        ],
       };
       expect(omitData).toEqual(expected);
     });
@@ -222,6 +274,32 @@ describe('utils', () => {
         type: 'query',
         note: '# Investigative notes',
         version: 1,
+        lists: [
+          {
+            field: 'source.ip',
+            boolean_operator: 'and',
+            values: [
+              {
+                name: '127.0.0.1',
+                type: 'value',
+              },
+            ],
+          },
+          {
+            field: 'host.name',
+            boolean_operator: 'and not',
+            values: [
+              {
+                name: 'rock01',
+                type: 'value',
+              },
+              {
+                name: 'mothra',
+                type: 'value',
+              },
+            ],
+          },
+        ],
       };
       expect(rule).toEqual(expected);
     });
@@ -287,6 +365,32 @@ describe('utils', () => {
         type: 'query',
         note: '# Investigative notes',
         version: 1,
+        lists: [
+          {
+            field: 'source.ip',
+            boolean_operator: 'and',
+            values: [
+              {
+                name: '127.0.0.1',
+                type: 'value',
+              },
+            ],
+          },
+          {
+            field: 'host.name',
+            boolean_operator: 'and not',
+            values: [
+              {
+                name: 'rock01',
+                type: 'value',
+              },
+              {
+                name: 'mothra',
+                type: 'value',
+              },
+            ],
+          },
+        ],
       };
       expect(rule).toEqual(expected);
     });
@@ -350,6 +454,32 @@ describe('utils', () => {
         type: 'query',
         note: '# Investigative notes',
         version: 1,
+        lists: [
+          {
+            field: 'source.ip',
+            boolean_operator: 'and',
+            values: [
+              {
+                name: '127.0.0.1',
+                type: 'value',
+              },
+            ],
+          },
+          {
+            field: 'host.name',
+            boolean_operator: 'and not',
+            values: [
+              {
+                name: 'rock01',
+                type: 'value',
+              },
+              {
+                name: 'mothra',
+                type: 'value',
+              },
+            ],
+          },
+        ],
       };
       expect(omitData).toEqual(expected);
     });
@@ -405,6 +535,32 @@ describe('utils', () => {
                 'host.name': 'some-host',
               },
             },
+          },
+        ],
+        lists: [
+          {
+            field: 'source.ip',
+            boolean_operator: 'and',
+            values: [
+              {
+                name: '127.0.0.1',
+                type: 'value',
+              },
+            ],
+          },
+          {
+            field: 'host.name',
+            boolean_operator: 'and not',
+            values: [
+              {
+                name: 'rock01',
+                type: 'value',
+              },
+              {
+                name: 'mothra',
+                type: 'value',
+              },
+            ],
           },
         ],
         meta: {
@@ -473,6 +629,32 @@ describe('utils', () => {
             },
           },
         ],
+        lists: [
+          {
+            field: 'source.ip',
+            boolean_operator: 'and',
+            values: [
+              {
+                name: '127.0.0.1',
+                type: 'value',
+              },
+            ],
+          },
+          {
+            field: 'host.name',
+            boolean_operator: 'and not',
+            values: [
+              {
+                name: 'rock01',
+                type: 'value',
+              },
+              {
+                name: 'mothra',
+                type: 'value',
+              },
+            ],
+          },
+        ],
         meta: {
           someMeta: 'someField',
         },
@@ -537,6 +719,32 @@ describe('utils', () => {
                 'host.name': 'some-host',
               },
             },
+          },
+        ],
+        lists: [
+          {
+            field: 'source.ip',
+            boolean_operator: 'and',
+            values: [
+              {
+                name: '127.0.0.1',
+                type: 'value',
+              },
+            ],
+          },
+          {
+            field: 'host.name',
+            boolean_operator: 'and not',
+            values: [
+              {
+                name: 'rock01',
+                type: 'value',
+              },
+              {
+                name: 'mothra',
+                type: 'value',
+              },
+            ],
           },
         ],
         meta: {
@@ -691,6 +899,32 @@ describe('utils', () => {
             },
           },
         ],
+        lists: [
+          {
+            field: 'source.ip',
+            boolean_operator: 'and',
+            values: [
+              {
+                name: '127.0.0.1',
+                type: 'value',
+              },
+            ],
+          },
+          {
+            field: 'host.name',
+            boolean_operator: 'and not',
+            values: [
+              {
+                name: 'rock01',
+                type: 'value',
+              },
+              {
+                name: 'mothra',
+                type: 'value',
+              },
+            ],
+          },
+        ],
         meta: {
           someMeta: 'someField',
         },
@@ -771,6 +1005,32 @@ describe('utils', () => {
                 'host.name': 'some-host',
               },
             },
+          },
+        ],
+        lists: [
+          {
+            field: 'source.ip',
+            boolean_operator: 'and',
+            values: [
+              {
+                name: '127.0.0.1',
+                type: 'value',
+              },
+            ],
+          },
+          {
+            field: 'host.name',
+            boolean_operator: 'and not',
+            values: [
+              {
+                name: 'rock01',
+                type: 'value',
+              },
+              {
+                name: 'mothra',
+                type: 'value',
+              },
+            ],
           },
         ],
         meta: {
@@ -946,6 +1206,32 @@ describe('utils', () => {
             },
           },
         ],
+        lists: [
+          {
+            field: 'source.ip',
+            boolean_operator: 'and',
+            values: [
+              {
+                name: '127.0.0.1',
+                type: 'value',
+              },
+            ],
+          },
+          {
+            field: 'host.name',
+            boolean_operator: 'and not',
+            values: [
+              {
+                name: 'rock01',
+                type: 'value',
+              },
+              {
+                name: 'mothra',
+                type: 'value',
+              },
+            ],
+          },
+        ],
         meta: {
           someMeta: 'someField',
         },
@@ -1058,6 +1344,32 @@ describe('utils', () => {
               ],
             },
           ],
+          lists: [
+            {
+              field: 'source.ip',
+              boolean_operator: 'and',
+              values: [
+                {
+                  name: '127.0.0.1',
+                  type: 'value',
+                },
+              ],
+            },
+            {
+              field: 'host.name',
+              boolean_operator: 'and not',
+              values: [
+                {
+                  name: 'rock01',
+                  type: 'value',
+                },
+                {
+                  name: 'mothra',
+                  type: 'value',
+                },
+              ],
+            },
+          ],
           timeline_id: 'some-timeline-id',
           timeline_title: 'some-timeline-title',
           to: 'now',
@@ -1126,6 +1438,32 @@ describe('utils', () => {
           updated_by: 'elastic',
           note: '# Investigative notes',
           version: 1,
+          lists: [
+            {
+              field: 'source.ip',
+              boolean_operator: 'and',
+              values: [
+                {
+                  name: '127.0.0.1',
+                  type: 'value',
+                },
+              ],
+            },
+            {
+              field: 'host.name',
+              boolean_operator: 'and not',
+              values: [
+                {
+                  name: 'rock01',
+                  type: 'value',
+                },
+                {
+                  name: 'mothra',
+                  type: 'value',
+                },
+              ],
+            },
+          ],
         },
         {
           created_at: '2019-12-13T16:40:33.400Z',
@@ -1175,6 +1513,32 @@ describe('utils', () => {
           updated_by: 'elastic',
           note: '# Investigative notes',
           version: 1,
+          lists: [
+            {
+              field: 'source.ip',
+              boolean_operator: 'and',
+              values: [
+                {
+                  name: '127.0.0.1',
+                  type: 'value',
+                },
+              ],
+            },
+            {
+              field: 'host.name',
+              boolean_operator: 'and not',
+              values: [
+                {
+                  name: 'rock01',
+                  type: 'value',
+                },
+                {
+                  name: 'mothra',
+                  type: 'value',
+                },
+              ],
+            },
+          ],
         },
       ]);
     });

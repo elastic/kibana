@@ -34,10 +34,12 @@ import {
   references,
   note,
   version,
+  lists,
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
 import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
+import { hasListsFeature } from '../../feature_flags';
 
 export const createRulesSchema = Joi.object({
   description: description.required(),
@@ -70,4 +72,7 @@ export const createRulesSchema = Joi.object({
   references: references.default([]),
   note: note.allow(''),
   version: version.default(1),
+
+  // TODO: Remove the hasListsFeatures once this is ready for release
+  lists: hasListsFeature() ? lists.default([]) : lists.forbidden().default([]),
 });
