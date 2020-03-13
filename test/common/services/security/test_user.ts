@@ -81,7 +81,7 @@ export async function createTestUserService(
         });
 
         if (browser && testSubjects) {
-          if (await testSubjects.exists('kibanaChrome')) {
+          if (await testSubjects.exists('kibanaChrome', { timeout: 10000, allowHidden: true })) {
             await browser.refresh();
             await testSubjects.find('kibanaChrome', config.get('timeouts.find') * 10);
           }

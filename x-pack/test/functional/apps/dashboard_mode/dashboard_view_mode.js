@@ -211,7 +211,6 @@ export default function({ getService, getPageObjects }) {
 
       it('is not loaded for a user who is assigned a superuser role', async () => {
         await security.testUser.setRoles(['kibana_dashboard_only_user', 'superuser']);
-        await browser.refresh();
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         if (!(await appsMenu.linkExists('Management'))) {

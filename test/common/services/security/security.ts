@@ -37,5 +37,7 @@ export async function SecurityServiceProvider(context: FtrProviderContext) {
   return new (class SecurityService {
     roleMappings = new RoleMappings(url, log);
     testUser = testUser;
+    role = role;
+    user = user;
   })();
 }
