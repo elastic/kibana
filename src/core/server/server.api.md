@@ -647,6 +647,8 @@ export interface CoreStart {
     // (undocumented)
     capabilities: CapabilitiesStart;
     // (undocumented)
+    elasticsearch: ElasticsearchServiceStart;
+    // (undocumented)
     savedObjects: SavedObjectsServiceStart;
     // (undocumented)
     uiSettings: UiSettingsServiceStart;
@@ -774,9 +776,21 @@ export class ElasticsearchErrorHelpers {
 
 // @public (undocumented)
 export interface ElasticsearchServiceSetup {
+    // @deprecated (undocumented)
     readonly adminClient: IClusterClient;
+    // @deprecated (undocumented)
     readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
+    // @deprecated (undocumented)
     readonly dataClient: IClusterClient;
+}
+
+// @public (undocumented)
+export interface ElasticsearchServiceStart {
+    // (undocumented)
+    legacy: {
+        readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
+        readonly client: IClusterClient;
+    };
 }
 
 // @public (undocumented)

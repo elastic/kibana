@@ -6,6 +6,6 @@
 import * as AgentStatusKueryHelper from './agent_status';
 
 export * from './routes';
-export { packageToConfigDatasourceInputs } from './package_to_config';
+export { packageToConfigDatasourceInputs, packageToConfigDatasource } from './package_to_config';
 export { storedDatasourceToAgentDatasource } from './datasource_to_agent_datasource';
 export { AgentStatusKueryHelper };

@@ -5,12 +5,9 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import {
-  Privileges,
-  getDefaultPrivileges,
-} from '../../../../../legacy/plugins/ml/common/types/privileges';
+import { Privileges, getDefaultPrivileges } from '../../../common/types/privileges';
 import { upgradeCheckProvider } from './upgrade';
-import { MlLicense } from '../../../../../legacy/plugins/ml/common/license';
+import { MlLicense } from '../../../common/license';
 
 import { mlPrivileges } from './privileges';
 

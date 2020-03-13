@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { RequestHandlerContext } from 'kibana/server';
-import { DatafeedOverride, JobOverride } from '../../../../legacy/plugins/ml/common/types/modules';
+import { DatafeedOverride, JobOverride } from '../../common/types/modules';
 import { wrapError } from '../client/error_wrapper';
 import { DataRecognizer } from '../models/data_recognizer';
 import { getModuleIdParamSchema, setupModuleBodySchema } from './schemas/modules';
