@@ -23,6 +23,7 @@ interface PluginDependencies {
 }
 
 export class CrossClusterReplicationServerPlugin implements Plugin {
+  // @ts-ignore
   constructor(private readonly ctx: PluginInitializerContext) {}
   setup({ http }: CoreSetup, { indexManagement, __LEGACY }: PluginDependencies) {
     registerLicenseChecker(__LEGACY);

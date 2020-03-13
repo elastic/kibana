@@ -81,7 +81,7 @@ class AppComponent extends Component {
       });
     } catch (error) {
       // Expect an error in the shape provided by Angular's $http service.
-      if (error && error.data) {
+      if (error && error.body) {
         return this.setState({
           isFetchingPermissions: false,
           fetchPermissionError: error,

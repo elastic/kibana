@@ -54,14 +54,16 @@ export const getAutoFollowPattern = id =>
 export const loadRemoteClusters = () => httpClient.get(API_REMOTE_CLUSTERS_BASE_PATH);
 
 export const createAutoFollowPattern = autoFollowPattern => {
-  const request = httpClient.post(`${API_BASE_PATH}/auto_follow_patterns`, autoFollowPattern);
+  const request = httpClient.post(`${API_BASE_PATH}/auto_follow_patterns`, {
+    body: JSON.stringify(autoFollowPattern),
+  });
   return trackUserRequest(request, UIM_AUTO_FOLLOW_PATTERN_CREATE);
 };
 
 export const updateAutoFollowPattern = (id, autoFollowPattern) => {
   const request = httpClient.put(
     `${API_BASE_PATH}/auto_follow_patterns/${encodeURIComponent(id)}`,
-    autoFollowPattern
+    { body: JSON.stringify(autoFollowPattern) }
   );
   return trackUserRequest(request, UIM_AUTO_FOLLOW_PATTERN_UPDATE);
 };
@@ -107,7 +109,9 @@ export const createFollowerIndex = followerIndex => {
   if (isUsingAdvancedSettings) {
     uiMetrics.push(UIM_FOLLOWER_INDEX_USE_ADVANCED_OPTIONS);
   }
-  const request = httpClient.post(`${API_BASE_PATH}/follower_indices`, followerIndex);
+  const request = httpClient.post(`${API_BASE_PATH}/follower_indices`, {
+    body: JSON.stringify(followerIndex),
+  });
   return trackUserRequest(request, uiMetrics);
 };
 
@@ -143,7 +147,9 @@ export const updateFollowerIndex = (id, followerIndex) => {
   }
   const request = httpClient.put(
     `${API_BASE_PATH}/follower_indices/${encodeURIComponent(id)}`,
-    followerIndex
+    JSON.stringify({
+      body: followerIndex,
+    })
   );
   return trackUserRequest(request, uiMetrics);
 };

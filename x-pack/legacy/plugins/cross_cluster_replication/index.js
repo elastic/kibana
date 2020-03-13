@@ -6,7 +6,7 @@
 
 import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
-import {plugin} from './server/np_ready';
+import { plugin } from './server/np_ready';
 
 export function crossClusterReplication(kibana) {
   return new kibana.Plugin({
@@ -48,6 +48,7 @@ export function crossClusterReplication(kibana) {
       plugin({}).setup(server.newPlatform.setup.core, {
         indexManagement: server.newPlatform.setup.plugins.indexManagement,
         __LEGACY: {
+          server,
           ccrUIEnabled: server.config().get('xpack.ccr.ui.enabled'),
         },
       });

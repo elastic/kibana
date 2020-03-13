@@ -4,25 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { once } from 'lodash';
-import { wrapCustomError } from '../error_wrappers';
+import { RequestHandler } from 'src/core/server';
 import { PLUGIN } from '../../../../common/constants';
 
-export const licensePreRoutingFactory = once(server => {
-  const xpackMainPlugin = server.plugins.xpack_main;
+export const licensePreRoutingFactory = <P, Q, B>({
+  __LEGACY,
+  requestHandler,
+}: {
+  __LEGACY: { server: any };
+  requestHandler: RequestHandler<P, Q, B>;
+}) => {
+  const xpackMainPlugin = __LEGACY.server.plugins.xpack_main;
 
   // License checking and enable/disable logic
-  function licensePreRouting() {
+  const licensePreRouting: RequestHandler<P, Q, B> = (ctx, request, response) => {
     const licenseCheckResults = xpackMainPlugin.info.feature(PLUGIN.ID).getLicenseCheckResults();
     if (!licenseCheckResults.isAvailable) {
-      const error = new Error(licenseCheckResults.message);
-      const statusCode = 403;
-      const wrappedError = wrapCustomError(error, statusCode);
-      return wrappedError;
+      return response.forbidden({
+        body: licenseCheckResults.message,
+      });
     } else {
-      return null;
+      return requestHandler(ctx, request, response);
     }
-  }
+  };
 
   return licensePreRouting;
-});
+};

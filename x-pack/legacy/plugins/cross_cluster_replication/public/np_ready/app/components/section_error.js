@@ -9,7 +9,7 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 export function SectionError(props) {
   const { title, error, ...rest } = props;
-  const data = error.data ? error.data : error;
+  const data = error.body ? error.body : error;
   const {
     error: errorString,
     cause, // wrapEsError() on the server add a "cause" array
