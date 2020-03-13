@@ -9,7 +9,7 @@ import { SearchResponse } from 'elasticsearch';
 
 import { EuiDataGridPaginationProps, EuiDataGridSorting } from '@elastic/eui';
 
-import { IIndexPattern } from '../../../../../../../../../../../src/plugins/data/common/index_patterns';
+import { IndexPattern } from '../../../../../../../../../../../src/plugins/data/public';
 
 import { Dictionary } from '../../../../../../../common/types/common';
 
@@ -38,7 +38,7 @@ type Pagination = Pick<EuiDataGridPaginationProps, 'pageIndex' | 'pageSize'>;
 
 interface UseExploreDataReturnType {
   errorMessage: string;
-  indexPattern: IIndexPattern | undefined;
+  indexPattern: IndexPattern | undefined;
   jobConfig: DataFrameAnalyticsConfig | undefined;
   pagination: Pagination;
   searchQuery: SavedSearchQuery;
@@ -72,7 +72,7 @@ interface SearchResponse7 extends SearchResponse<any> {
 export const useExploreData = (jobId: string): UseExploreDataReturnType => {
   const mlContext = useMlContext();
 
-  const [indexPattern, setIndexPattern] = useState<IIndexPattern | undefined>(undefined);
+  const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(INDEX_STATUS.UNUSED);
@@ -105,9 +105,7 @@ export const useExploreData = (jobId: string): UseExploreDataReturnType => {
       if (jobConfig !== undefined) {
         const sourceIndex = jobConfig.source.index[0];
         const indexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
-        const jobCapsIndexPattern: IIndexPattern = await mlContext.indexPatterns.get(
-          indexPatternId
-        );
+        const jobCapsIndexPattern: IndexPattern = await mlContext.indexPatterns.get(indexPatternId);
         if (jobCapsIndexPattern !== undefined) {
           setIndexPattern(jobCapsIndexPattern);
           await newJobCapsService.initializeFromIndexPattern(jobCapsIndexPattern, false, false);

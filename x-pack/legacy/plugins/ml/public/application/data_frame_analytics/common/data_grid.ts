@@ -11,7 +11,7 @@ export const euiDataGridStyle: EuiDataGridStyle = {
   fontSize: 's',
   cellPadding: 's',
   stripes: false,
-  rowHover: 'highlight',
+  rowHover: 'none',
   header: 'shade',
 };
 

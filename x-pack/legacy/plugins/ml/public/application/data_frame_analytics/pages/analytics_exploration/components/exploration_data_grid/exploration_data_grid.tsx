@@ -63,18 +63,6 @@ export const ExplorationDataGrid: FC<ExplorationDataGridProps> = ({
         ? tableItems[adjustedRowIndex][columnId]
         : null;
 
-      if (typeof cellValue === 'string' || cellValue === null) {
-        return cellValue;
-      }
-
-      if (typeof cellValue === 'boolean') {
-        return cellValue ? 'true' : 'false';
-      }
-
-      if (typeof cellValue === 'object' && cellValue !== null) {
-        return JSON.stringify(cellValue);
-      }
-
       const split = columnId.split('.');
       let backgroundColor;
 
@@ -94,9 +82,21 @@ export const ExplorationDataGrid: FC<ExplorationDataGridProps> = ({
         });
       }
 
+      if (typeof cellValue === 'string' || cellValue === null) {
+        return cellValue;
+      }
+
+      if (typeof cellValue === 'boolean') {
+        return cellValue ? 'true' : 'false';
+      }
+
+      if (typeof cellValue === 'object' && cellValue !== null) {
+        return JSON.stringify(cellValue);
+      }
+
       return cellValue;
     };
-  }, [resultsField, tableItems, pagination.pageIndex, pagination.pageSize]);
+  }, [resultsField, rowCount, tableItems, pagination.pageIndex, pagination.pageSize]);
 
   const onChangeItemsPerPage = useCallback(pageSize => setPagination(p => ({ ...p, pageSize })), [
     setPagination,

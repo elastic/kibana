@@ -84,30 +84,40 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId, job
 
   const columns = [];
 
-  if (jobConfig !== undefined && selectedFields.length > 0 && tableItems.length > 0) {
+  if (
+    jobConfig !== undefined &&
+    indexPattern !== undefined &&
+    selectedFields.length > 0 &&
+    tableItems.length > 0
+  ) {
+    const resultsField = jobConfig.dest.results_field;
+    const removePrefix = new RegExp(`^${resultsField}\.${FEATURE_INFLUENCE}\.`, 'g');
     columns.push(
-      ...tableFields.sort(sortColumns(tableItems[0], jobConfig.dest.results_field)).map(id => {
-        let columnType;
+      ...tableFields.sort(sortColumns(tableItems[0], resultsField)).map(id => {
+        const idWithoutPrefix = id.replace(removePrefix, '');
+        const field = indexPattern.fields.getByName(idWithoutPrefix);
+
+        // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
+        // To fall back to the default string schema it needs to be undefined.
         let schema;
 
-        if (tableItems.length > 0) {
-          columnType = typeof tableItems[0][id];
-        }
-
-        switch (columnType) {
-          case 'Date':
+        switch (field?.type) {
+          case 'date':
             schema = 'datetime';
+            break;
+          case 'geo_point':
+            schema = 'json';
             break;
           case 'number':
             schema = 'numeric';
             break;
         }
 
-        return {
-          id,
-          isExpandable: columnType !== 'boolean',
-          ...(schema !== undefined ? { columnType: schema } : {}),
-        };
+        if (id === `${resultsField}.outlier_score`) {
+          schema = 'numeric';
+        }
+
+        return { id, schema };
       })
     );
   }
