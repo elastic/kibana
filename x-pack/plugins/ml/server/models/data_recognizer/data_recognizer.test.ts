@@ -5,7 +5,7 @@
  */
 
 import { APICaller, SavedObjectsClientContract } from 'kibana/server';
-import { Module } from '../../../../../legacy/plugins/ml/common/types/modules';
+import { Module } from '../../../common/types/modules';
 import { DataRecognizer } from '../data_recognizer';
 
 // FLAKY: https://github.com/elastic/kibana/issues/59541
