@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const PLUGIN_ID = 'painlessLab';
+import * as legacyElasticsearch from 'elasticsearch';
 
-export const API_ROUTE_EXECUTE = '/api/painless_lab/execute';
+const esErrorsParent = legacyElasticsearch.errors._Abstract;
+
+export function isEsError(err: Error) {
+  return err instanceof esErrorsParent;
+}
