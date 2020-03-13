@@ -17,7 +17,6 @@ import {
 import { txtChangeButton } from './i18n';
 import './action_wizard.scss';
 import { AnyActionFactory } from '../../services';
-import { uiToReactComponent } from '../../../../../../src/plugins/kibana_react/public';
 
 type ActionBaseConfig = object;
 type ActionFactoryBaseContext = object;
@@ -144,7 +143,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
       </header>
       <EuiSpacer size="m" />
       <div>
-        {uiToReactComponent(actionFactory.CollectConfig)({
+        {actionFactory.ReactCollectConfig({
           config,
           onConfig: onConfigChange,
         })}
@@ -174,19 +173,21 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
 
   return (
     <EuiFlexGroup wrap>
-      {actionFactories.map(actionFactory => (
-        <EuiKeyPadMenuItemButton
-          className="auaActionWizard__actionFactoryItem"
-          key={actionFactory.id}
-          label={actionFactory.getDisplayName(context)}
-          data-test-subj={TEST_SUBJ_ACTION_FACTORY_ITEM}
-          onClick={() => onActionFactorySelected(actionFactory)}
-        >
-          {actionFactory.getIconType(context) && (
-            <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
-          )}
-        </EuiKeyPadMenuItemButton>
-      ))}
+      {[...actionFactories]
+        .sort((f1, f2) => f1.order - f2.order)
+        .map(actionFactory => (
+          <EuiKeyPadMenuItemButton
+            className="auaActionWizard__actionFactoryItem"
+            key={actionFactory.id}
+            label={actionFactory.getDisplayName(context)}
+            data-test-subj={TEST_SUBJ_ACTION_FACTORY_ITEM}
+            onClick={() => onActionFactorySelected(actionFactory)}
+          >
+            {actionFactory.getIconType(context) && (
+              <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
+            )}
+          </EuiKeyPadMenuItemButton>
+        ))}
     </EuiFlexGroup>
   );
 };

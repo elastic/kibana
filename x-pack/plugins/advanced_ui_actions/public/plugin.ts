@@ -41,16 +41,10 @@ interface StartDependencies {
   uiActions: UiActionsStart;
 }
 
-export interface SetupContract extends UiActionsSetup {
-  actionFactory: {
-    register: UiActionsSetup['registerActionFactory'];
-  };
-}
-export interface StartContract extends UiActionsStart {
-  actionFactory: {
-    getAll: UiActionsStart['getActionFactories'];
-  };
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SetupContract extends UiActionsSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StartContract extends UiActionsStart {}
 
 declare module '../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
@@ -66,9 +60,6 @@ export class AdvancedUiActionsPublicPlugin
   public setup(core: CoreSetup, { uiActions }: SetupDependencies): SetupContract {
     return {
       ...uiActions,
-      actionFactory: {
-        register: uiActions.registerActionFactory,
-      },
     };
   }
 
@@ -94,9 +85,6 @@ export class AdvancedUiActionsPublicPlugin
 
     return {
       ...uiActions,
-      actionFactory: {
-        getAll: uiActions.getActionFactories,
-      },
     };
   }
 

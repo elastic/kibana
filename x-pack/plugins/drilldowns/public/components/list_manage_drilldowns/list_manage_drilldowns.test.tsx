@@ -7,12 +7,21 @@
 import React from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react/pure';
 import '@testing-library/jest-dom/extend-expect'; // TODO: this should be global
-import { drilldowns } from './test_data';
-import { ListManageDrilldowns, TEST_SUBJ_DRILLDOWN_ITEM } from './list_manage_drilldowns';
+import {
+  DrilldownListItem,
+  ListManageDrilldowns,
+  TEST_SUBJ_DRILLDOWN_ITEM,
+} from './list_manage_drilldowns';
 
 // TODO: for some reason global cleanup from RTL doesn't work
 // afterEach is not available for it globally during setup
 afterEach(cleanup);
+
+const drilldowns: DrilldownListItem[] = [
+  { id: '1', actionName: 'Dashboard', drilldownName: 'Drilldown 1' },
+  { id: '2', actionName: 'Dashboard', drilldownName: 'Drilldown 2' },
+  { id: '3', actionName: 'Dashboard', drilldownName: 'Drilldown 3' },
+];
 
 test('Render list of drilldowns', () => {
   const screen = render(<ListManageDrilldowns drilldowns={drilldowns} />);

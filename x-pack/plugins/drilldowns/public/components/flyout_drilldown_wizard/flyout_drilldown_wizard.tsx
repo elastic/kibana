@@ -22,17 +22,13 @@ import {
   AdvancedUiActionsAnyActionFactory as AnyActionFactory,
 } from '../../../../advanced_ui_actions/public';
 
-type ActionBaseConfig = object;
-
 export interface DrilldownWizardConfig<ActionConfig extends object = object> {
   name: string;
   actionFactory?: ActionFactory<ActionFactoryDefinition<ActionConfig, any, any>>;
   actionConfig?: ActionConfig;
 }
 
-export interface FlyoutDrilldownWizardProps<
-  CurrentActionConfig extends ActionBaseConfig = ActionBaseConfig
-> {
+export interface FlyoutDrilldownWizardProps<CurrentActionConfig extends object = object> {
   drilldownActionFactories: AnyActionFactory[];
 
   onSubmit?: (drilldownWizardConfig: Required<DrilldownWizardConfig>) => void;
@@ -49,9 +45,7 @@ export interface FlyoutDrilldownWizardProps<
   actionFactoryContext?: object;
 }
 
-export function FlyoutDrilldownWizard<
-  CurrentActionConfig extends ActionBaseConfig = ActionBaseConfig
->({
+export function FlyoutDrilldownWizard<CurrentActionConfig extends object = object>({
   onClose,
   onBack,
   onSubmit = () => {},

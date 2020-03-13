@@ -5,24 +5,34 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import useMount from 'react-use/lib/useMount';
+import useMountedState from 'react-use/lib/useMountedState';
 import {
-  AdvancedUiActionsActionFactory as ActionFactory,
+  AdvancedUiActionsAnyActionFactory as AnyActionFactory,
   AdvancedUiActionsStart,
 } from '../../../../advanced_ui_actions/public';
+import { NotificationsStart } from '../../../../../../src/core/public';
 import { DrilldownWizardConfig, FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
 import { FlyoutListManageDrilldowns } from '../flyout_list_manage_drilldowns';
 import { IStorageWrapper } from '../../../../../../src/plugins/kibana_utils/public';
-
 import {
-  AnyActionFactory,
   DynamicActionManager,
   UiActionsSerializedEvent,
   UiActionsSerializedAction,
 } from '../../../../../../src/plugins/ui_actions/public';
+import { DrilldownListItem } from '../list_manage_drilldowns';
+import {
+  toastDrilldownCreated,
+  toastDrilldownDeleted,
+  toastDrilldownEdited,
+  toastDrilldownsCRUDError,
+  toastDrilldownsDeleted,
+  toastDrilldownsFetchError,
+} from './i18n';
 
 interface ConnectedFlyoutManageDrilldownsProps<Context extends object = object> {
   context: Context;
-  dynamicActionsManager: DynamicActionManager;
+  dynamicActionManager: DynamicActionManager;
   viewMode?: 'create' | 'manage';
   onClose?: () => void;
 }
@@ -39,13 +49,15 @@ enum Routes {
 export function createFlyoutManageDrilldowns({
   advancedUiActions,
   storage,
+  notifications,
 }: {
   advancedUiActions: AdvancedUiActionsStart;
   storage: IStorageWrapper;
+  notifications: NotificationsStart;
 }) {
-  // This is ok to assume this is static,
+  // fine to assume this is static,
   // because all action factories should be registered in setup phase
-  const allActionFactories = advancedUiActions.actionFactory.getAll();
+  const allActionFactories = advancedUiActions.getActionFactories();
   const allActionFactoriesById = allActionFactories.reduce((acc, next) => {
     acc[next.id] = next;
     return acc;
@@ -71,24 +83,47 @@ export function createFlyoutManageDrilldowns({
       createDrilldown,
       editDrilldown,
       deleteDrilldown,
-    } = useDrilldownsStateManager(props.dynamicActionsManager);
+    } = useDrilldownsStateManager(props.dynamicActionManager, notifications);
 
     /**
      * isCompatible promise is not yet resolved.
      * Skip rendering until it is resolved
      */
     if (!actionFactories) return null;
+    /**
+     * Drilldowns are not fetched yet or error happened during fetching
+     * In case of error user is notified with toast
+     */
+    if (!drilldowns) return null;
 
+    /**
+     * Needed for edit mode to prefill wizard fields with data from current edited drilldown
+     */
     function resolveInitialDrilldownWizardConfig(): DrilldownWizardConfig | undefined {
       if (route !== Routes.Edit) return undefined;
       if (!currentEditId) return undefined;
-      const drilldownToEdit = drilldowns.find(d => d.eventId === currentEditId);
+      const drilldownToEdit = drilldowns?.find(d => d.eventId === currentEditId);
       if (!drilldownToEdit) return undefined;
 
       return {
         actionFactory: allActionFactoriesById[drilldownToEdit.action.factoryId],
-        actionConfig: drilldownToEdit.action.config as object, // TODO: types
+        actionConfig: drilldownToEdit.action.config as object, // TODO: config is unknown, but we know it always extends object
         name: drilldownToEdit.action.name,
+      };
+    }
+
+    /**
+     * Maps drilldown to list item view model
+     */
+    function mapToDrilldownToDrilldownListItem(
+      drilldown: UiActionsSerializedEvent
+    ): DrilldownListItem {
+      const actionFactory = allActionFactoriesById[drilldown.action.factoryId];
+      return {
+        id: drilldown.eventId,
+        drilldownName: drilldown.action.name,
+        actionName: actionFactory?.getDisplayName(props.context) ?? drilldown.action.factoryId,
+        icon: actionFactory?.getIconType(props.context),
       };
     }
 
@@ -145,13 +180,7 @@ export function createFlyoutManageDrilldowns({
           <FlyoutListManageDrilldowns
             showWelcomeMessage={shouldShowWelcomeMessage}
             onWelcomeHideClick={onHideWelcomeMessage}
-            drilldowns={drilldowns.map(drilldown => ({
-              id: drilldown.eventId,
-              name: drilldown.action.name,
-              actionTypeDisplayName:
-                allActionFactoriesById[drilldown.action.factoryId]?.getDisplayName(props.context) ??
-                drilldown.action.factoryId,
-            }))}
+            drilldowns={drilldowns.map(mapToDrilldownToDrilldownListItem)}
             onDelete={ids => {
               setCurrentEditId(null);
               deleteDrilldown(ids);
@@ -165,7 +194,6 @@ export function createFlyoutManageDrilldowns({
               setRoute(Routes.Create);
             }}
             onClose={props.onClose}
-            context={props.context}
           />
         );
     }
@@ -173,12 +201,10 @@ export function createFlyoutManageDrilldowns({
 }
 
 function useCompatibleActionFactoriesForCurrentContext<Context extends object = object>(
-  actionFactories: Array<ActionFactory<any>>,
+  actionFactories: AnyActionFactory[],
   context: Context
 ) {
-  const [compatibleActionFactories, setCompatibleActionFactories] = useState<
-    Array<ActionFactory<any>>
-  >();
+  const [compatibleActionFactories, setCompatibleActionFactories] = useState<AnyActionFactory[]>();
   useEffect(() => {
     let canceled = false;
     async function updateCompatibleFactoriesForContext() {
@@ -211,51 +237,96 @@ function useWelcomeMessage(storage: IStorageWrapper): [boolean, () => void] {
   ];
 }
 
-function useDrilldownsStateManager(actionManager: DynamicActionManager) {
+function useDrilldownsStateManager(
+  actionManager: DynamicActionManager,
+  notifications: NotificationsStart
+) {
   const [isLoading, setIsLoading] = useState(false);
-  const [drilldowns, setDrilldowns] = useState<UiActionsSerializedEvent[]>([]);
+  const [drilldowns, setDrilldowns] = useState<readonly UiActionsSerializedEvent[]>();
+  const isMounted = useMountedState();
 
-  function reload() {
+  async function run(op: () => Promise<void>) {
     setIsLoading(true);
-    actionManager.list().then(res => {
-      setDrilldowns(res);
+    try {
+      await op();
+    } catch (e) {
+      notifications.toasts.addError(e, {
+        title: toastDrilldownsCRUDError,
+      });
+      if (!isMounted) return;
       setIsLoading(false);
-    });
+      return;
+    }
+
+    await reload();
   }
 
-  useEffect(() => {
+  async function reload() {
+    if (!isMounted) {
+      // don't do any side effects anymore because component is already unmounted
+      return;
+    }
+    if (!isLoading) {
+      setIsLoading(true);
+    }
+    try {
+      const drilldownsList = await actionManager.list();
+      if (!isMounted) {
+        return;
+      }
+      setDrilldowns(drilldownsList);
+      setIsLoading(false);
+    } catch (e) {
+      notifications.toasts.addError(e, {
+        title: toastDrilldownsFetchError,
+      });
+    }
+  }
+
+  useMount(() => {
     reload();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
 
-  function createDrilldown(action: UiActionsSerializedAction<any>, triggerId?: string) {
-    setIsLoading(true);
-    actionManager.createEvent(action, triggerId).then(() => {
-      setIsLoading(false);
-      reload();
+  async function createDrilldown(action: UiActionsSerializedAction<any>, triggerId?: string) {
+    await run(async () => {
+      await actionManager.createEvent(action, triggerId);
+      notifications.toasts.addSuccess({
+        title: toastDrilldownCreated.title,
+        text: toastDrilldownCreated.text(action.name),
+      });
     });
   }
 
-  function editDrilldown(
+  async function editDrilldown(
     drilldownId: string,
     action: UiActionsSerializedAction<any>,
     triggerId?: string
   ) {
-    setIsLoading(true);
-    actionManager.updateEvent(drilldownId, action, triggerId).then(() => {
-      setIsLoading(false);
-      reload();
+    await run(async () => {
+      await actionManager.updateEvent(drilldownId, action, triggerId);
+      notifications.toasts.addSuccess({
+        title: toastDrilldownEdited.title,
+        text: toastDrilldownEdited.text(action.name),
+      });
     });
   }
 
-  function deleteDrilldown(drilldownIds: string | string[]) {
-    setIsLoading(true);
-    actionManager
-      .deleteEvents(Array.isArray(drilldownIds) ? drilldownIds : [drilldownIds])
-      .then(() => {
-        setIsLoading(false);
-        reload();
-      });
+  async function deleteDrilldown(drilldownIds: string | string[]) {
+    await run(async () => {
+      drilldownIds = Array.isArray(drilldownIds) ? drilldownIds : [drilldownIds];
+      await actionManager.deleteEvents(drilldownIds);
+      notifications.toasts.addSuccess(
+        drilldownIds.length === 1
+          ? {
+              title: toastDrilldownDeleted.title,
+              text: toastDrilldownDeleted.text,
+            }
+          : {
+              title: toastDrilldownsDeleted.title,
+              text: toastDrilldownsDeleted.text(drilldownIds.length),
+            }
+      );
+    });
   }
 
   return { drilldowns, isLoading, createDrilldown, editDrilldown, deleteDrilldown };

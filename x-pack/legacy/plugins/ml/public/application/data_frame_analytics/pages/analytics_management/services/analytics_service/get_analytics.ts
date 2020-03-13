@@ -5,17 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ml } from '../../../../../services/ml_api_service';
 import {
-  GetDataFrameAnalyticsStatsResponse,
   GetDataFrameAnalyticsStatsResponseError,
   GetDataFrameAnalyticsStatsResponseOk,
-  ml,
-} from '../../../../../services/ml_api_service';
-import {
-  DataFrameAnalyticsConfig,
-  REFRESH_ANALYTICS_LIST_STATE,
-  refreshAnalyticsList$,
-} from '../../../../common';
+} from '../../../../../services/ml_api_service/data_frame_analytics';
+import { REFRESH_ANALYTICS_LIST_STATE, refreshAnalyticsList$ } from '../../../../common';
 
 import {
   DATA_FRAME_MODE,
@@ -26,11 +21,6 @@ import {
   isDataFrameAnalyticsStopped,
 } from '../../components/analytics_list/common';
 import { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
-
-interface GetDataFrameAnalyticsResponse {
-  count: number;
-  data_frame_analytics: DataFrameAnalyticsConfig[];
-}
 
 export const isGetDataFrameAnalyticsStatsResponseOk = (
   arg: any
@@ -125,8 +115,8 @@ export const getAnalyticsFactory = (
       }
 
       try {
-        const analyticsConfigs: GetDataFrameAnalyticsResponse = await ml.dataFrameAnalytics.getDataFrameAnalytics();
-        const analyticsStats: GetDataFrameAnalyticsStatsResponse = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats();
+        const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics();
+        const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats();
 
         const analyticsStatsResult = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
           ? getAnalyticsJobsStats(analyticsStats)

@@ -31,7 +31,7 @@ export interface Configurable<Config extends ConfigurableBaseConfig = Configurab
   readonly createConfig: () => Config;
 
   /**
-   * Is this config valid. Used to validate user's input before saving
+   * Is this config valid. Used to validate user's input before saving.
    */
   readonly isConfigValid: (config: Config) => boolean;
 

@@ -9,21 +9,25 @@ import {
   EuiBasicTableColumn,
   EuiButton,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiSpacer,
+  EuiTextColor,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import {
-  txtEditDrilldown,
   txtCreateDrilldown,
   txtDeleteDrilldowns,
+  txtEditDrilldown,
   txtSelectDrilldown,
 } from './i18n';
 
-// TODO: interface is temporary
 export interface DrilldownListItem {
   id: string;
-  actionTypeDisplayName: string;
-  name: string;
+  actionName: string;
+  drilldownName: string;
+  icon?: string;
 }
 
 export interface ListManageDrilldownsProps {
@@ -32,8 +36,6 @@ export interface ListManageDrilldownsProps {
   onEdit?: (id: string) => void;
   onCreate?: () => void;
   onDelete?: (ids: string[]) => void;
-
-  context?: object; // TODO DrilldownBaseContext? ActionBaseContext?
 }
 
 const noop = () => {};
@@ -45,22 +47,33 @@ export function ListManageDrilldowns({
   onEdit = noop,
   onCreate = noop,
   onDelete = noop,
-  context = {},
 }: ListManageDrilldownsProps) {
   const [selectedDrilldowns, setSelectedDrilldowns] = useState<string[]>([]);
 
   const columns: Array<EuiBasicTableColumn<DrilldownListItem>> = [
     {
-      field: 'name',
+      field: 'drilldownName',
       name: 'Name',
       truncateText: true,
+      width: '50%',
     },
     {
-      field: 'actionTypeDisplayName',
       name: 'Action',
-      truncateText: true,
+      render: (drilldown: DrilldownListItem) => (
+        <EuiFlexGroup responsive={false} alignItems="center" gutterSize={'s'}>
+          {drilldown.icon && (
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={drilldown.icon} />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false} className="eui-textTruncate">
+            <EuiTextColor color="subdued">{drilldown.actionName}</EuiTextColor>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
     },
     {
+      align: 'right',
       render: (drilldown: DrilldownListItem) => (
         <EuiButtonEmpty size="xs" onClick={() => onEdit(drilldown.id)}>
           {txtEditDrilldown}
@@ -76,6 +89,7 @@ export function ListManageDrilldowns({
         itemId="id"
         columns={columns}
         isSelectable={true}
+        responsive={false}
         selection={{
           onSelectionChange: selection => {
             setSelectedDrilldowns(selection.map(drilldown => drilldown.id));

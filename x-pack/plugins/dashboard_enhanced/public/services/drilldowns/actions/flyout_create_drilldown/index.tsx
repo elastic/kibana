@@ -47,6 +47,10 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
   public async execute(context: FlyoutCreateDrilldownActionContext) {
     const overlays = await this.params.overlays();
     const drilldowns = await this.params.drilldowns();
+    const dynamicActionManager = context.embeddable.dynamicActions;
+    if (!dynamicActionManager) {
+      throw new Error(`Can't execute FlyoutCreateDrilldownAction without dynamicActionsManager`);
+    }
 
     const handle = overlays.openFlyout(
       toMountPoint(
@@ -54,7 +58,7 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
           onClose={() => handle.close()}
           context={context}
           viewMode={'create'}
-          dynamicActionsManager={context.embeddable.dynamicActions!}
+          dynamicActionManager={dynamicActionManager}
         />
       )
     );

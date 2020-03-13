@@ -22,6 +22,8 @@ import { ActionStorage, SerializedEvent } from './dynamic_action_storage';
 import { UiActionsService } from '../service';
 import { SerializedAction } from './types';
 import { ActionDefinition } from './action';
+import { defaultState, transitions, selectors, State } from './dynamic_action_manager_state';
+import { StateContainer, createStateContainer } from '../../../kibana_utils';
 
 export interface DynamicActionManagerParams {
   storage: ActionStorage;
@@ -37,70 +39,27 @@ export class DynamicActionManager {
 
   private readonly idPrefix = `D_ACTION_${DynamicActionManager.idPrefixCounter++}_`;
 
+  private stopped: boolean = false;
+
+  /**
+   * UI State of the dynamic action manager.
+   */
+  protected readonly ui = createStateContainer(defaultState, transitions, selectors);
+
   constructor(protected readonly params: DynamicActionManagerParams) {}
 
+  protected getEvent(eventId: string): SerializedEvent {
+    const oldEvent = this.ui.selectors.getEvent(eventId);
+    if (!oldEvent) throw new Error(`Could not find event [eventId = ${eventId}].`);
+    return oldEvent;
+  }
+
+  /**
+   * We prefix action IDs with a unique `.idPrefix`, so we can render the
+   * same dashboard twice on the screen.
+   */
   protected generateActionId(eventId: string): string {
     return this.idPrefix + eventId;
-  }
-
-  public async start() {
-    const events = await this.params.storage.list();
-
-    for (const event of events) {
-      this.reviveAction(event);
-    }
-  }
-
-  public async stop() {
-    const events = await this.params.storage.list();
-
-    for (const event of events) {
-      this.killAction(event);
-    }
-  }
-
-  public async createEvent(action: SerializedAction<unknown>, triggerId = 'VALUE_CLICK_TRIGGER') {
-    const event: SerializedEvent = {
-      eventId: uuidv4(),
-      triggerId,
-      action,
-    };
-
-    await this.params.storage.create(event);
-    this.reviveAction(event);
-  }
-
-  public async updateEvent(
-    eventId: string,
-    action: SerializedAction<unknown>,
-    triggerId = 'VALUE_CLICK_TRIGGER'
-  ) {
-    const event: SerializedEvent = {
-      eventId,
-      triggerId,
-      action,
-    };
-
-    const oldEvent = await this.params.storage.read(eventId);
-    this.killAction(oldEvent);
-    await this.params.storage.update(event);
-    this.reviveAction(event);
-  }
-
-  public async deleteEvents(eventIds: string[]) {
-    const eventsToKill = (await this.params.storage.list()).filter(event =>
-      eventIds.includes(event.eventId)
-    );
-    await Promise.all(eventIds.map(eventId => this.params.storage.remove(eventId)));
-    eventsToKill.forEach(event => this.killAction(event));
-  }
-
-  public async list(): Promise<SerializedEvent[]> {
-    return await this.params.storage.list();
-  }
-
-  public async count(): Promise<number> {
-    return await this.params.storage.count();
   }
 
   protected reviveAction(event: SerializedEvent) {
@@ -115,7 +74,6 @@ export class DynamicActionManager {
       id: actionId,
       isCompatible,
       getDisplayName: () => name,
-      // TODO: Factory and action have different contexts.
       getIconType: context => factory.getIconType(context),
     };
 
@@ -126,5 +84,161 @@ export class DynamicActionManager {
     const { uiActions } = this.params;
     const actionId = this.generateActionId(eventId);
     uiActions.removeTriggerAction(triggerId as any, actionId);
+  }
+
+  // Public API: ---------------------------------------------------------------
+
+  /**
+   * Read-only state container of dynamic action manager. Use it to perform all
+   * *read* operations.
+   */
+  public readonly state: StateContainer<State> = this.ui;
+
+  /**
+   * 1. Loads all events from  @type {DynamicActionStorage} storage.
+   * 2. Creates actions for each event in `ui_actions` registry.
+   * 3. Adds events to UI state.
+   * 4. Does nothing if dynamic action manager was stopped of if event fetching
+   *    is already taking place.
+   */
+  public async start() {
+    if (this.stopped) return;
+    if (this.ui.get().isFetchingEvents) return;
+
+    this.ui.transitions.startFetching();
+    const events = await this.params.storage.list();
+    for (const event of events) this.reviveAction(event);
+    this.ui.transitions.finishFetching(events);
+  }
+
+  /**
+   * 1. Removes all events from `ui_actions` registry.
+   * 2. Puts dynamic action manager is stopped state.
+   */
+  public async stop() {
+    this.stopped = true;
+    const events = await this.params.storage.list();
+
+    for (const event of events) {
+      this.killAction(event);
+    }
+  }
+
+  /**
+   * Creates a new event.
+   *
+   * 1. Stores event in @type {DynamicActionStorage} storage.
+   * 2. Optimistically adds it to UI state, and rolls back on failure.
+   * 3. Adds action to `ui_actions` registry.
+   *
+   * @todo `triggerId` should not be optional.
+   *
+   * @param action Dynamic action for which to create an event.
+   * @param triggerId Trigger to which to attach the action.
+   */
+  public async createEvent(action: SerializedAction<unknown>, triggerId = 'VALUE_CLICK_TRIGGER') {
+    const event: SerializedEvent = {
+      eventId: uuidv4(),
+      triggerId,
+      action,
+    };
+
+    this.ui.transitions.addEvent(event);
+    try {
+      await this.params.storage.create(event);
+      this.reviveAction(event);
+    } catch {
+      this.ui.transitions.removeEvent(event.eventId);
+    }
+  }
+
+  /**
+   * Updates an existing event. Fails if event with given `eventId` does not
+   * exit.
+   *
+   * 1. Updates the event in @type {DynamicActionStorage} storage.
+   * 2. Optimistically replaces the old event by the new one in UI state, and
+   *    rolls back on failure.
+   * 3. Replaces action in `ui_actions` registry with the new event.
+   *
+   *
+   * @param eventId ID of the event to replace.
+   * @param action New action for which to create the event.
+   * @param triggerId New trigger with which to associate the event.
+   */
+  public async updateEvent(
+    eventId: string,
+    action: SerializedAction<unknown>,
+    triggerId = 'VALUE_CLICK_TRIGGER'
+  ) {
+    const event: SerializedEvent = {
+      eventId,
+      triggerId,
+      action,
+    };
+
+    const oldEvent = this.getEvent(eventId);
+    this.killAction(oldEvent);
+
+    this.reviveAction(event);
+    this.ui.transitions.replaceEvent(event);
+
+    try {
+      await this.params.storage.update(event);
+    } catch {
+      this.killAction(event);
+      this.reviveAction(oldEvent);
+      this.ui.transitions.replaceEvent(oldEvent);
+    }
+  }
+
+  /**
+   * Removes existing event. Throws if event does not exist.
+   *
+   * 1. Removes the event from @type {DynamicActionStorage} storage.
+   * 2. Optimistically removes event from UI state, and puts it back on failure.
+   * 3. Removes associated action from `ui_actions` registry.
+   *
+   * @param eventId ID of the event to remove.
+   */
+  public async deleteEvent(eventId: string) {
+    const event = this.getEvent(eventId);
+
+    this.killAction(event);
+    this.ui.transitions.removeEvent(eventId);
+
+    try {
+      await this.params.storage.remove(eventId);
+    } catch {
+      this.reviveAction(event);
+      this.ui.transitions.addEvent(event);
+    }
+  }
+
+  /**
+   * Deletes multiple events at once.
+   *
+   * @param eventIds List of event IDs.
+   */
+  public async deleteEvents(eventIds: string[]) {
+    await Promise.all(eventIds.map(this.deleteEvent.bind(this)));
+  }
+
+  /**
+   * @deprecated
+   *
+   * Use `.state.get().events` instead.
+   */
+  public async list(): Promise<readonly SerializedEvent[]> {
+    return this.state.get().events;
+  }
+
+  /**
+   * @deprecated
+   *
+   * Use `.state.get().events.length` instead.
+   */
+  public async count(): Promise<number> {
+    return this.state.get().events.length;
   }
 }

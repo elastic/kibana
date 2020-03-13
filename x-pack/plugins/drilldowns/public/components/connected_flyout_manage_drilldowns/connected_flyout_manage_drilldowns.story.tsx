@@ -19,17 +19,25 @@ import { mockDynamicActionManager } from './test_data';
 
 const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
   advancedUiActions: {
-    actionFactory: {
-      getAll: () => {
-        return [dashboardFactory, urlFactory];
-      },
+    getActionFactories() {
+      return [dashboardFactory, urlFactory];
     },
   } as any,
   storage: new Storage(new StubBrowserStorage()),
+  notifications: {
+    toasts: {
+      addError: (...args: any[]) => {
+        alert(JSON.stringify(args));
+      },
+      addSuccess: (...args: any[]) => {
+        alert(JSON.stringify(args));
+      },
+    } as any,
+  },
 });
 
 storiesOf('components/FlyoutManageDrilldowns', module).add('default', () => (
   <EuiFlyout onClose={() => {}}>
-    <FlyoutManageDrilldowns context={{}} dynamicActionsManager={mockDynamicActionManager} />
+    <FlyoutManageDrilldowns context={{}} dynamicActionManager={mockDynamicActionManager} />
   </EuiFlyout>
 ));

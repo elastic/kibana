@@ -43,6 +43,7 @@ export class DrilldownsPlugin
       FlyoutManageDrilldowns: createFlyoutManageDrilldowns({
         advancedUiActions: plugins.advancedUiActions,
         storage: new Storage(localStorage),
+        notifications: core.notifications,
       }),
     };
   }
