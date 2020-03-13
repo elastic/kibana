@@ -32,7 +32,7 @@ export default function({ getService, getPageObjects }) {
     'dateFormat:tz': 'Europe/Berlin',
   };
 
-  describe.only('discover histogram', function describeIndexTests() {
+  describe('discover histogram', function describeIndexTests() {
     before(async function() {
       log.debug('load kibana index with default index pattern');
       await PageObjects.common.navigateToApp('home');
