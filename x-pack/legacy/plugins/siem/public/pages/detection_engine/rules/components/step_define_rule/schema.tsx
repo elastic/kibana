@@ -20,8 +20,6 @@ import {
 } from '../../../../../shared_imports';
 import { CUSTOM_QUERY_REQUIRED, INVALID_CUSTOM_QUERY, INDEX_HELPER_TEXT } from './translations';
 
-const { emptyField } = fieldValidators;
-
 export const schema: FormSchema = {
   index: {
     type: FIELD_TYPES.COMBO_BOX,
@@ -34,14 +32,25 @@ export const schema: FormSchema = {
     helpText: <EuiText size="xs">{INDEX_HELPER_TEXT}</EuiText>,
     validations: [
       {
-        validator: emptyField(
-          i18n.translate(
-            'xpack.siem.detectionEngine.createRule.stepDefineRule.outputIndiceNameFieldRequiredError',
-            {
-              defaultMessage: 'A minimum of one index pattern is required.',
-            }
-          )
-        ),
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData }] = args;
+          const needsValidation = formData.ruleType !== 'machine_learning';
+
+          if (!needsValidation) {
+            return;
+          }
+
+          return fieldValidators.emptyField(
+            i18n.translate(
+              'xpack.siem.detectionEngine.createRule.stepDefineRule.outputIndiceNameFieldRequiredError',
+              {
+                defaultMessage: 'A minimum of one index pattern is required.',
+              }
+            )
+          )(...args);
+        },
       },
     ],
   },
@@ -57,8 +66,13 @@ export const schema: FormSchema = {
         validator: (
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ value, path }] = args;
+          const [{ value, path, formData }] = args;
           const { query, filters } = value as FieldValueQueryBar;
+          const needsValidation = formData.ruleType !== 'machine_learning';
+          if (!needsValidation) {
+            return;
+          }
+
           return isEmpty(query.query as string) && isEmpty(filters)
             ? {
                 code: 'ERR_FIELD_MISSING',
@@ -72,8 +86,13 @@ export const schema: FormSchema = {
         validator: (
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ value, path }] = args;
+          const [{ value, path, formData }] = args;
           const { query } = value as FieldValueQueryBar;
+          const needsValidation = formData.ruleType !== 'machine_learning';
+          if (!needsValidation) {
+            return;
+          }
+
           if (!isEmpty(query.query as string) && query.language === 'kuery') {
             try {
               esKuery.fromKueryExpression(query.query);
@@ -85,7 +104,6 @@ export const schema: FormSchema = {
               };
             }
           }
-          return undefined;
         },
       },
     ],

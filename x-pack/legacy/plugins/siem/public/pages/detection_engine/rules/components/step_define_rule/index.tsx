@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n as I18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiButton,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
@@ -99,6 +99,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 }) => {
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [localUseIndicesConfig, setLocalUseIndicesConfig] = useState(false);
+  const [isMlRule, setIsMlRule] = useState(false);
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [mylocalIndicesConfig, setMyLocalIndicesConfig] = useState(
     defaultValues != null ? defaultValues.index : indicesConfig ?? []
@@ -171,51 +172,55 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form} data-test-subj="stepDefineRule">
           <UseField path="ruleType" component={SelectRuleType} componentProps={{}} />
-          <CommonUseField
-            path="index"
-            config={{
-              ...schema.index,
-              labelAppend: !localUseIndicesConfig ? (
-                <MyLabelButton onClick={handleResetIndices} iconType="refresh">
-                  {i18n.RESET_DEFAULT_INDEX}
-                </MyLabelButton>
-              ) : null,
-            }}
-            componentProps={{
-              idAria: 'detectionEngineStepDefineRuleIndices',
-              'data-test-subj': 'detectionEngineStepDefineRuleIndices',
-              euiFieldProps: {
-                fullWidth: true,
-                isDisabled: isLoading,
-                placeholder: '',
-              },
-            }}
-          />
-          <UseField
-            path="queryBar"
-            config={{
-              ...schema.queryBar,
-              labelAppend: (
-                <MyLabelButton onClick={handleOpenTimelineSearch}>
-                  {i18n.IMPORT_TIMELINE_QUERY}
-                </MyLabelButton>
-              ),
-            }}
-            component={QueryBarDefineRule}
-            componentProps={{
-              browserFields,
-              loading: indexPatternLoadingQueryBar,
-              idAria: 'detectionEngineStepDefineRuleQueryBar',
-              indexPattern: indexPatternQueryBar,
-              isDisabled: isLoading,
-              isLoading: indexPatternLoadingQueryBar,
-              dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
-              openTimelineSearch,
-              onCloseTimelineSearch: handleCloseTimelineSearch,
-            }}
-          />
-          <FormDataProvider pathsToWatch="index">
-            {({ index }) => {
+          <EuiFormRow fullWidth style={{ display: isMlRule ? 'none' : 'inline-block' }}>
+            <>
+              <CommonUseField
+                path="index"
+                config={{
+                  ...schema.index,
+                  labelAppend: !localUseIndicesConfig ? (
+                    <MyLabelButton onClick={handleResetIndices} iconType="refresh">
+                      {i18n.RESET_DEFAULT_INDEX}
+                    </MyLabelButton>
+                  ) : null,
+                }}
+                componentProps={{
+                  idAria: 'detectionEngineStepDefineRuleIndices',
+                  'data-test-subj': 'detectionEngineStepDefineRuleIndices',
+                  euiFieldProps: {
+                    fullWidth: true,
+                    isDisabled: isLoading,
+                    placeholder: '',
+                  },
+                }}
+              />
+              <UseField
+                path="queryBar"
+                config={{
+                  ...schema.queryBar,
+                  labelAppend: (
+                    <MyLabelButton onClick={handleOpenTimelineSearch}>
+                      {i18n.IMPORT_TIMELINE_QUERY}
+                    </MyLabelButton>
+                  ),
+                }}
+                component={QueryBarDefineRule}
+                componentProps={{
+                  browserFields,
+                  loading: indexPatternLoadingQueryBar,
+                  idAria: 'detectionEngineStepDefineRuleQueryBar',
+                  indexPattern: indexPatternQueryBar,
+                  isDisabled: isLoading,
+                  isLoading: indexPatternLoadingQueryBar,
+                  dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
+                  openTimelineSearch,
+                  onCloseTimelineSearch: handleCloseTimelineSearch,
+                }}
+              />
+            </>
+          </EuiFormRow>
+          <FormDataProvider pathsToWatch={['index', 'ruleType']}>
+            {({ index, ruleType }) => {
               if (index != null) {
                 if (deepEqual(index, indicesConfig) && !localUseIndicesConfig) {
                   setLocalUseIndicesConfig(true);
@@ -227,6 +232,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   setMyLocalIndicesConfig(index);
                 }
               }
+
+              if (ruleType === 'machine_learning' && !isMlRule) {
+                setIsMlRule(true);
+              } else if (ruleType !== 'machine_learning' && isMlRule) {
+                setIsMlRule(false);
+              }
+
               return null;
             }}
           </FormDataProvider>
