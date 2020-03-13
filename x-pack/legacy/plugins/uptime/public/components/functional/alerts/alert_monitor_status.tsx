@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import { KueryBar } from '../../connected/kuerybar/kuery_bar_container';
 
 interface AlertNumberFieldProps {
@@ -108,7 +109,7 @@ export const selectedLocationsToString = (selectedLocations: any[]) =>
     }, '');
 
 interface AlertMonitorStatusProps {
-  autocomplete: any;
+  autocomplete: DataPublicPluginSetup['autocomplete'];
   enabled: boolean;
   filters: string;
   locations: string[];
