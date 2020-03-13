@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext } from 'kibana/server';
-import { MAX_BYTES } from '../../../../legacy/plugins/ml/common/constants/file_datavisualizer';
+import { MAX_BYTES } from '../../common/constants/file_datavisualizer';
 import { wrapError } from '../client/error_wrapper';
 import {
   InputOverrides,
@@ -22,7 +22,7 @@ import { RouteInitialization } from '../types';
 import { incrementFileDataVisualizerIndexCreationCount } from '../lib/ml_telemetry';
 
 function analyzeFiles(context: RequestHandlerContext, data: InputData, overrides: InputOverrides) {
-  const { analyzeFile } = fileDataVisualizerProvider(context);
+  const { analyzeFile } = fileDataVisualizerProvider(context.ml!.mlClient.callAsCurrentUser);
   return analyzeFile(data, overrides);
 }
 
@@ -35,7 +35,7 @@ function importData(
   ingestPipeline: InjectPipeline,
   data: InputData
 ) {
-  const { importData: importDataFunc } = importDataProvider(context);
+  const { importData: importDataFunc } = importDataProvider(context.ml!.mlClient.callAsCurrentUser);
   return importDataFunc(id, index, settings, mappings, ingestPipeline, data);
 }
 
@@ -132,7 +132,6 @@ export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitializat
         // follow-up import calls to just add additional data will include the `id` of the created
         // index, we'll ignore those and don't increment the counter.
         if (id === undefined) {
-          // @ts-ignore
           await incrementFileDataVisualizerIndexCreationCount(context.core.savedObjects.client);
         }
 

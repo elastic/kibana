@@ -24,8 +24,7 @@ import { Document } from '../../persistence/saved_object_store';
 import { getSavedObjectFormat } from './save';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { generateId } from '../../id_generator';
-import { SavedQuery } from '../../../../../../../src/legacy/core_plugins/data/public';
-import { Filter, Query } from '../../../../../../../src/plugins/data/public';
+import { Filter, Query, SavedQuery } from '../../../../../../../src/plugins/data/public';
 
 export interface EditorFrameProps {
   doc?: Document;

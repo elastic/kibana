@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObjectsClientContract } from 'kibana/server';
+import { AuthenticatedUser } from '../../../security/server';
+import { DeleteDatasourcesResponse, packageToConfigDatasource } from '../../common';
 import { DATASOURCE_SAVED_OBJECT_TYPE } from '../constants';
-import { NewDatasource, Datasource, DeleteDatasourcesResponse, ListWithKuery } from '../types';
+import { NewDatasource, Datasource, ListWithKuery } from '../types';
+import { agentConfigService } from './agent_config';
+import { findInstalledPackageByName, getPackageInfo } from './epm/packages';
+import { outputService } from './output';
 
 const SAVED_OBJECT_TYPE = DATASOURCE_SAVED_OBJECT_TYPE;
 
@@ -13,13 +18,21 @@ class DatasourceService {
   public async create(
     soClient: SavedObjectsClientContract,
     datasource: NewDatasource,
-    options?: { id?: string }
+    options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<Datasource> {
-    const newSo = await soClient.create<Datasource>(
+    const newSo = await soClient.create<Omit<Datasource, 'id'>>(
       SAVED_OBJECT_TYPE,
-      datasource as Datasource,
+      {
+        ...datasource,
+        revision: 1,
+      },
       options
     );
+
+    // Assign it to the given agent config
+    await agentConfigService.assignDatasources(soClient, datasource.config_id, [newSo.id], {
+      user: options?.user,
+    });
 
     return {
       id: newSo.id,
@@ -98,20 +111,47 @@ class DatasourceService {
   public async update(
     soClient: SavedObjectsClientContract,
     id: string,
-    datasource: NewDatasource
+    datasource: NewDatasource,
+    options?: { user?: AuthenticatedUser }
   ): Promise<Datasource> {
-    await soClient.update<Datasource>(SAVED_OBJECT_TYPE, id, datasource);
+    const oldDatasource = await this.get(soClient, id);
+
+    if (!oldDatasource) {
+      throw new Error('Datasource not found');
+    }
+
+    await soClient.update<Datasource>(SAVED_OBJECT_TYPE, id, {
+      ...datasource,
+      revision: oldDatasource.revision + 1,
+    });
+
+    // Bump revision of associated agent config
+    await agentConfigService.bumpRevision(soClient, datasource.config_id, { user: options?.user });
+
     return (await this.get(soClient, id)) as Datasource;
   }
 
   public async delete(
     soClient: SavedObjectsClientContract,
-    ids: string[]
+    ids: string[],
+    options?: { user?: AuthenticatedUser }
   ): Promise<DeleteDatasourcesResponse> {
     const result: DeleteDatasourcesResponse = [];
 
     for (const id of ids) {
       try {
+        const oldDatasource = await this.get(soClient, id);
+        if (!oldDatasource) {
+          throw new Error('Datasource not found');
+        }
+        await agentConfigService.unassignDatasources(
+          soClient,
+          oldDatasource.config_id,
+          [oldDatasource.id],
+          {
+            user: options?.user,
+          }
+        );
         await soClient.delete(SAVED_OBJECT_TYPE, id);
         result.push({
           id,
@@ -126,6 +166,28 @@ class DatasourceService {
     }
 
     return result;
+  }
+
+  public async buildDatasourceFromPackage(
+    soClient: SavedObjectsClientContract,
+    pkgName: string
+  ): Promise<NewDatasource | undefined> {
+    const pkgInstall = await findInstalledPackageByName({
+      savedObjectsClient: soClient,
+      pkgName,
+    });
+    if (pkgInstall) {
+      const [pkgInfo, defaultOutputId] = await Promise.all([
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgkey: `${pkgInstall.name}-${pkgInstall.version}`,
+        }),
+        outputService.getDefaultOutputId(soClient),
+      ]);
+      if (pkgInfo) {
+        return packageToConfigDatasource(pkgInfo, '', defaultOutputId);
+      }
+    }
   }
 }
 
