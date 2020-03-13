@@ -96,11 +96,12 @@ export function Popover({ focusedServiceName }: PopoverProps) {
       style={popoverStyle}
     >
       <Contents
-        selectedNodeData={selectedNodeData}
         isService={isService}
         label={label}
         onFocusClick={deselect}
+        selectedNodeData={selectedNodeData}
         selectedNodeServiceName={selectedNodeServiceName}
+        focusedServiceName={focusedServiceName}
       />
     </EuiPopover>
   );

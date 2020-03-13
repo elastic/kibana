@@ -5,9 +5,9 @@
  */
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface GetFleetSetupRequestSchema {}
+export interface GetFleetSetupRequest {}
 
-export interface CreateFleetSetupRequestSchema {
+export interface CreateFleetSetupRequest {
   body: {
     admin_username: string;
     admin_password: string;

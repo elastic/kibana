@@ -249,7 +249,7 @@ export function createTestServers({
 
   return {
     startES: async () => {
-      await es.start();
+      await es.start(get(settings, 'es.esArgs', []));
 
       if (['gold', 'trial'].includes(license)) {
         await setupUsers({
