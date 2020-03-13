@@ -16,9 +16,10 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  EuiText,
 } from '@elastic/eui';
 import { NewAgentConfig } from '../../../../types';
-import { useCore, sendCreateAgentConfig } from '../../../../hooks';
+import { useCapabilities, useCore, sendCreateAgentConfig } from '../../../../hooks';
 import { AgentConfigForm, agentConfigFormValidation } from '../../components';
 
 interface Props {
@@ -27,11 +28,12 @@ interface Props {
 
 export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
   const { notifications } = useCore();
-
+  const hasWriteCapabilites = useCapabilities().write;
   const [agentConfig, setAgentConfig] = useState<NewAgentConfig>({
     name: '',
     description: '',
     namespace: '',
+    is_default: undefined,
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const validation = agentConfigFormValidation(agentConfig);
@@ -53,10 +55,16 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
         <h2 id="CreateAgentConfigFlyoutTitle">
           <FormattedMessage
             id="xpack.ingestManager.createAgentConfig.flyoutTitle"
-            defaultMessage="Create new agent config"
+            defaultMessage="Create agent configuration"
           />
         </h2>
       </EuiTitle>
+      <EuiText size="s">
+        <FormattedMessage
+          id="xpack.ingestManager.createAgentConfig.flyoutTitleDescription"
+          defaultMessage="Agent configurations are used to manage settings across a group of agents. You can add data sources to your agent configuration to specify what data your agents collect. When you edit an agent configuration, you can use Fleet to deploy updates to a specified group of agents."
+        />
+      </EuiText>
     </EuiFlyoutHeader>
   );
 
@@ -85,7 +93,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
           <EuiButton
             fill
             isLoading={isLoading}
-            disabled={isLoading || Object.keys(validation).length > 0}
+            isDisabled={!hasWriteCapabilites || isLoading || Object.keys(validation).length > 0}
             onClick={async () => {
               setIsLoading(true);
               try {
@@ -125,7 +133,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
           >
             <FormattedMessage
               id="xpack.ingestManager.createAgentConfig.submitButtonLabel"
-              defaultMessage="Continue"
+              defaultMessage="Create agent configuration"
             />
           </EuiButton>
         </EuiFlexItem>
@@ -134,7 +142,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
   );
 
   return (
-    <EuiFlyout onClose={onClose} size="m" maxWidth={400}>
+    <EuiFlyout onClose={onClose} size="l" maxWidth={400}>
       {header}
       {body}
       {footer}
