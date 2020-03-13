@@ -58,6 +58,8 @@ export async function setupMocha(lifecycle, log, config, providers) {
     updateBaselines: config.get('updateBaselines'),
   });
 
+  // Each suite has a tag that is the path relative to the root of the repo
+  // So we just need to take input paths, make them relative to the root, and use them as tags
   filterSuitesByTags({
     log,
     mocha,
