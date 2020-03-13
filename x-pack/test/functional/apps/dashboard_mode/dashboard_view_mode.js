@@ -110,7 +110,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.security.clickSaveEditUser();
       });
 
-      after('logout', async () => {
+      after(async () => {
         await security.testUser.restoreDefaults();
       });
 

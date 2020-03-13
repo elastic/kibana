@@ -370,7 +370,6 @@ export class Field extends PureComponent<FieldProps> {
               ref={this.changeImageForm}
               fullWidth
               data-test-subj={`advancedSetting-editField-${name}`}
-              aria-label={id}
             />
           );
         }

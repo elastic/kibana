@@ -35,9 +35,7 @@ export async function SecurityServiceProvider(context: FtrProviderContext) {
   const testUser = await createTestUserService(role, user, context);
 
   return new (class SecurityService {
-    role = new Role(url, log);
     roleMappings = new RoleMappings(url, log);
-    user = new User(url, log);
     testUser = testUser;
   })();
 }

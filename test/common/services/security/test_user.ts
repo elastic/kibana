@@ -43,9 +43,7 @@ export async function createTestUserService(
     return enabledPlugins.includes('security') && !config.get('security.disableTestUser');
   };
   if (isEnabled()) {
-    log.debug(
-      '====================================================creating roles and users========================='
-    );
+    log.debug('===============creating roles and users===============');
     for (const [name, definition] of Object.entries(config.get('security.roles'))) {
       // create the defined roles (need to map array to create roles)
       await role.create(name, definition);
