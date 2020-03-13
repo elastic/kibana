@@ -76,9 +76,6 @@ export class SpacesClient {
 
       const { username, privileges } = await checkPrivileges.atSpaces(spaceIds, privilege);
 
-      // const authorized = Object.keys(spacePrivileges).filter(spaceId => {
-      //   return spacePrivileges[spaceId][privilege];
-      // });
       const authorized = privileges.filter(x => x.authorized).map(x => x.spaceId);
 
       this.debugLogger(

@@ -7,8 +7,8 @@
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import querystring from 'querystring';
+import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
-import { SAVED_OBJECT_TEST_CASES as CASES } from '../../common/lib/saved_object_test_cases';
 import { expectResponses, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 

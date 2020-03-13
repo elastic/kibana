@@ -5,8 +5,8 @@
  */
 
 import { SuperTest } from 'supertest';
+import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
-import { SAVED_OBJECT_TEST_CASES as CASES } from '../../common/lib/saved_object_test_cases';
 import {
   createRequest,
   expectResponses,
