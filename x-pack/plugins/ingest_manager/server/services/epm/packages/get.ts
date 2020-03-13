@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server/';
+import { SavedObjectsClientContract } from 'kibana/server';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import { Installation, InstallationStatus, PackageInfo } from '../../../types';
 import * as Registry from '../registry';

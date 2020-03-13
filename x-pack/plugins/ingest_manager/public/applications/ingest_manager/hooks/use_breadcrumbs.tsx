@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ChromeBreadcrumb } from '../../../../../../../../../src/core/public';
-import { useCore } from '../../../hooks';
+import { ChromeBreadcrumb } from 'kibana/public';
+import { useCore } from './use_core';
 
 export function useBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]) {
   const { chrome } = useCore();

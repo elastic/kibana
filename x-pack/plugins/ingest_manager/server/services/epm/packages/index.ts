@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject } from '../../../../../../../src/core/server';
+import { SavedObject } from 'kibana/server';
 import {
   AssetType,
   Installable,

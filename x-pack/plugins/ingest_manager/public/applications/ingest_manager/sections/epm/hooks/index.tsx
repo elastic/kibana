@@ -3,8 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-// export { useBreadcrumbs } from './use_breadcrumbs';
 export { useLinks } from './use_links';
 export { useLocalSearch, searchIdField } from './use_local_search';
 export {
