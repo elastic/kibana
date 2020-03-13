@@ -482,6 +482,111 @@ describe('featurePrivilegeIterator', () => {
     ]);
   });
 
+  it('does not duplicate privileges when merging', () => {
+    const feature = new Feature({
+      id: 'foo',
+      name: 'foo',
+      app: [],
+      privileges: {
+        all: {
+          api: ['all-api', 'read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
+          savedObject: {
+            all: ['all-type'],
+            read: ['read-type'],
+          },
+          ui: ['ui-action'],
+        },
+        read: {
+          api: ['read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
+          savedObject: {
+            all: [],
+            read: ['read-type'],
+          },
+          ui: ['ui-action'],
+        },
+      },
+      subFeatures: [
+        {
+          name: 'sub feature 1',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'sub-feature-priv-1',
+                  name: 'first sub feature privilege',
+                  includeIn: 'read',
+                  api: ['read-api'],
+                  app: ['foo'],
+                  catalogue: ['foo-catalogue'],
+                  management: {
+                    section: ['foo-management'],
+                  },
+                  savedObject: {
+                    all: [],
+                    read: ['read-type'],
+                  },
+                  ui: ['ui-action'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const actualPrivileges = Array.from(
+      featurePrivilegeIterator(feature, {
+        augmentWithSubFeaturePrivileges: true,
+      })
+    );
+
+    expect(actualPrivileges).toEqual([
+      {
+        privilegeId: 'all',
+        privilege: {
+          api: ['all-api', 'read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
+          savedObject: {
+            all: ['all-type'],
+            read: ['read-type'],
+          },
+          ui: ['ui-action'],
+        },
+      },
+      {
+        privilegeId: 'read',
+        privilege: {
+          api: ['read-api'],
+          app: ['foo'],
+          catalogue: ['foo-catalogue'],
+          management: {
+            section: ['foo-management'],
+          },
+          savedObject: {
+            all: [],
+            read: ['read-type'],
+          },
+          ui: ['ui-action'],
+        },
+      },
+    ]);
+  });
+
   it('includes sub feature privileges into both all and read when`augmentWithSubFeaturePrivileges` is true and `includeIn: all`', () => {
     const feature = new Feature({
       id: 'foo',

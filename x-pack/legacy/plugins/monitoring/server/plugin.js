@@ -92,6 +92,7 @@ export class Plugin {
       name: i18n.translate('xpack.monitoring.featureRegistry.monitoringFeatureName', {
         defaultMessage: 'Stack Monitoring',
       }),
+      order: 1400,
       icon: 'monitoringApp',
       navLinkId: 'monitoring',
       app: ['monitoring', 'kibana'],

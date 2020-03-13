@@ -68,7 +68,6 @@ Array [
           "dashboard",
           "url",
           "query",
-          "url",
         ],
         "read": Array [
           "index-pattern",
@@ -411,7 +410,6 @@ Array [
       "savedObject": Object {
         "all": Array [
           "visualization",
-          "url",
           "query",
           "lens",
           "url",
@@ -423,7 +421,6 @@ Array [
       },
       "ui": Array [
         "show",
-        "createShortUrl",
         "delete",
         "save",
         "saveQuery",

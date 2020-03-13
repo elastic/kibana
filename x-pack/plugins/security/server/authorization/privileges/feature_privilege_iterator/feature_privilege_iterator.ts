@@ -79,5 +79,5 @@ function mergeWithSubFeatures(
 function mergeArrays(input1: string[] | undefined, input2: string[] | undefined) {
   const first = input1 ?? [];
   const second = input2 ?? [];
-  return [...first, ...second];
+  return Array.from(new Set([...first, ...second]));
 }

@@ -23,6 +23,7 @@ export class MapPlugin {
       name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
         defaultMessage: 'Maps',
       }),
+      order: 600,
       icon: APP_ICON,
       navLinkId: APP_ID,
       app: [APP_ID, 'kibana'],

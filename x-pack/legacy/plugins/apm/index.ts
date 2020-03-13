@@ -82,6 +82,7 @@ export const apm: LegacyPluginInitializer = kibana => {
         name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
           defaultMessage: 'APM'
         }),
+        order: 900,
         icon: 'apmApp',
         navLinkId: 'apm',
         app: ['apm', 'kibana'],
