@@ -53,10 +53,10 @@ describe('CaseView ', () => {
     ).toEqual(data.title);
     expect(
       wrapper
-        .find(`[data-test-subj="case-view-state"]`)
+        .find(`[data-test-subj="case-view-status"]`)
         .first()
         .text()
-    ).toEqual(data.state);
+    ).toEqual(data.status);
     expect(
       wrapper
         .find(`[data-test-subj="case-view-tag-list"] .euiBadge__text`)
@@ -81,6 +81,23 @@ describe('CaseView ', () => {
         .first()
         .prop('raw')
     ).toEqual(data.description);
+  });
+
+  it('should dispatch update state when button is toggled', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <CaseComponent {...caseProps} />
+      </TestProviders>
+    );
+
+    wrapper
+      .find('input[data-test-subj="toggle-case-status"]')
+      .simulate('change', { target: { value: false } });
+
+    expect(updateCaseProperty).toBeCalledWith({
+      updateKey: 'status',
+      updateValue: 'closed',
+    });
   });
 
   it('should render comments', () => {
@@ -115,23 +132,6 @@ describe('CaseView ', () => {
         .first()
         .prop('source')
     ).toEqual(data.comments[0].comment);
-  });
-
-  it('should dispatch update state when button is toggled', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CaseComponent {...caseProps} />
-      </TestProviders>
-    );
-
-    wrapper
-      .find('input[data-test-subj="toggle-case-state"]')
-      .simulate('change', { target: { value: false } });
-
-    expect(updateCaseProperty).toBeCalledWith({
-      updateKey: 'state',
-      updateValue: 'closed',
-    });
   });
 
   it('toggle delete modal and cancel', () => {

@@ -47,7 +47,7 @@ const MySpinner = styled(EuiLoadingSpinner)`
 
 const initialCaseValue: CaseRequest = {
   description: '',
-  state: 'open',
+  status: 'open',
   tags: [],
   title: '',
 };

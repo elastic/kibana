@@ -95,22 +95,22 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
             updateValue: tagsUpdate,
           });
           break;
-        case 'state':
-          const stateUpdate = getTypedPayload<string>(updateValue);
-          if (caseData.state !== updateValue) {
+        case 'status':
+          const statusUpdate = getTypedPayload<string>(updateValue);
+          if (caseData.status !== updateValue) {
             updateCaseProperty({
-              updateKey: 'state',
-              updateValue: stateUpdate,
+              updateKey: 'status',
+              updateValue: statusUpdate,
             });
           }
         default:
           return null;
       }
     },
-    [updateCaseProperty, caseData.state]
+    [updateCaseProperty, caseData.status]
   );
-  const toggleStateCase = useCallback(
-    e => onUpdateField('state', e.target.checked ? 'open' : 'closed'),
+  const toggleStatusCase = useCallback(
+    e => onUpdateField('status', e.target.checked ? 'open' : 'closed'),
     [onUpdateField]
   );
   const onSubmitTitle = useCallback(newTitle => onUpdateField('title', newTitle), [onUpdateField]);
@@ -185,10 +185,10 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
                     <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
                     <EuiDescriptionListDescription>
                       <EuiBadge
-                        color={caseData.state === 'open' ? 'secondary' : 'danger'}
-                        data-test-subj="case-view-state"
+                        color={caseData.status === 'open' ? 'secondary' : 'danger'}
+                        data-test-subj="case-view-status"
                       >
-                        {caseData.state}
+                        {caseData.status}
                       </EuiBadge>
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
@@ -208,12 +208,12 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
               <EuiFlexGroup gutterSize="l" alignItems="center">
                 <EuiFlexItem>
                   <EuiButtonToggle
-                    data-test-subj="toggle-case-state"
-                    iconType={caseData.state === 'open' ? 'checkInCircleFilled' : 'magnet'}
-                    isLoading={isLoading && updateKey === 'state'}
-                    isSelected={caseData.state === 'open'}
-                    label={caseData.state === 'open' ? 'Close case' : 'Reopen case'}
-                    onChange={toggleStateCase}
+                    data-test-subj="toggle-case-status"
+                    iconType={caseData.status === 'open' ? 'checkInCircleFilled' : 'magnet'}
+                    isLoading={isLoading && updateKey === 'status'}
+                    isSelected={caseData.status === 'open'}
+                    label={caseData.status === 'open' ? 'Close case' : 'Reopen case'}
+                    onChange={toggleStatusCase}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false} data-test-subj="case-view-actions">

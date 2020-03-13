@@ -14,7 +14,6 @@ import * as apiHook from '../../../../containers/case/use_get_cases';
 
 describe('AllCases', () => {
   const dispatchUpdateCaseProperty = jest.fn();
-  const getCaseCount = jest.fn();
   const refetchCases = jest.fn();
   const setFilters = jest.fn();
   const setQueryParams = jest.fn();
@@ -34,7 +33,6 @@ describe('AllCases', () => {
     jest.spyOn(apiHook, 'useGetCases').mockReturnValue({
       ...useGetCasesMockState,
       dispatchUpdateCaseProperty,
-      getCaseCount,
       refetchCases,
       setFilters,
       setQueryParams,
