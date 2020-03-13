@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { deserializeAutoFollowPattern } from '../../../common/services/auto_follow_pattern_serialization';
+import { deserializeAutoFollowPattern } from '../../../../common/services/auto_follow_pattern_serialization';
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
-import { getAutoFollowPatternMock, getAutoFollowPatternListMock } from '../../../fixtures';
+import { getAutoFollowPatternMock, getAutoFollowPatternListMock } from '../../../../fixtures';
 import { registerAutoFollowPatternRoutes } from './auto_follow_pattern';
 
 jest.mock('../../lib/call_with_request_factory');

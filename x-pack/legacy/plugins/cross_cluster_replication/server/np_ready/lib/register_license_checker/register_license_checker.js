@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mirrorPluginStatus } from '../../../../../server/lib/mirror_plugin_status';
-import { PLUGIN } from '../../../common/constants';
+import { mirrorPluginStatus } from '../../../../../../server/lib/mirror_plugin_status';
+import { PLUGIN } from '../../../../common/constants';
 import { checkLicense } from '../check_license';
 
-export function registerLicenseChecker(server) {
-  const xpackMainPlugin = server.plugins.xpack_main;
-  const ccrPluggin = server.plugins[PLUGIN.ID];
+export function registerLicenseChecker(__LEGACY) {
+  const xpackMainPlugin = __LEGACY.server.plugins.xpack_main;
+  const ccrPluggin = __LEGACY.server.plugins[PLUGIN.ID];
 
   mirrorPluginStatus(xpackMainPlugin, ccrPluggin);
   xpackMainPlugin.status.once('green', () => {

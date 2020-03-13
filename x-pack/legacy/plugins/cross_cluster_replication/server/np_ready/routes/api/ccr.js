@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 
-import { API_BASE_PATH } from '../../../common/constants';
+import { API_BASE_PATH } from '../../../../common/constants';
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';

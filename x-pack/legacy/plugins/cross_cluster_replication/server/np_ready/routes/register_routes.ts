@@ -7,9 +7,10 @@
 import { registerAutoFollowPatternRoutes } from './api/auto_follow_pattern';
 import { registerFollowerIndexRoutes } from './api/follower_index';
 import { registerCcrRoutes } from './api/ccr';
+import { RouteDependencies } from './types';
 
-export function registerRoutes(server) {
-  registerAutoFollowPatternRoutes(server);
-  registerFollowerIndexRoutes(server);
-  registerCcrRoutes(server);
+export function registerRoutes(deps: RouteDependencies) {
+  registerAutoFollowPatternRoutes(deps);
+  registerFollowerIndexRoutes(deps);
+  registerCcrRoutes(deps);
 }

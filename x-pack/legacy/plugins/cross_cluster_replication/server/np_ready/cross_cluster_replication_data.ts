@@ -3,9 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { APICaller } from 'src/core/server';
+import { Index } from '../../../../../plugins/index_management/server';
 
-export const ccrDataEnricher = async (indicesList, callWithRequest) => {
-  if (!indicesList || !indicesList.length) {
+export const ccrDataEnricher = async (indicesList: Index[], callWithRequest: APICaller) => {
+  if (indicesList?.length) {
     return indicesList;
   }
   const params = {
@@ -18,9 +20,11 @@ export const ccrDataEnricher = async (indicesList, callWithRequest) => {
       params
     );
     return indicesList.map(index => {
-      const isFollowerIndex = !!followerIndices.find(followerIndex => {
-        return followerIndex.follower_index === index.name;
-      });
+      const isFollowerIndex = !!followerIndices.find(
+        (followerIndex: { follower_index: string }) => {
+          return followerIndex.follower_index === index.name;
+        }
+      );
       return {
         ...index,
         isFollowerIndex,

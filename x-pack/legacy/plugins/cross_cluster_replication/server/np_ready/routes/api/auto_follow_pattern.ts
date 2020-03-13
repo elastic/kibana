@@ -3,47 +3,62 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Boom from 'boom';
+
+import { kibanaResponseFactory } from '../../../../../../../../src/core/server';
+// @ts-ignore
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
-import { isEsErrorFactory } from '../../lib/is_es_error_factory';
-import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
+import { isEsError } from '../../lib/is_es_error';
+// @ts-ignore
+import { wrapEsError } from '../../lib/error_wrappers';
 import {
   deserializeAutoFollowPattern,
   deserializeListAutoFollowPatterns,
   serializeAutoFollowPattern,
-} from '../../../common/services/auto_follow_pattern_serialization';
-import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
-import { API_BASE_PATH } from '../../../common/constants';
+  // @ts-ignore
+} from '../../../../common/services/auto_follow_pattern_serialization';
 
-export const registerAutoFollowPatternRoutes = server => {
-  const isEsError = isEsErrorFactory(server);
-  const licensePreRouting = licensePreRoutingFactory(server);
+import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
+import { API_BASE_PATH } from '../../../../common/constants';
+
+import { RouteDependencies } from '../types';
+
+const mapErrorToKibanaHttpResponse = (err: any) => {
+  if (isEsError(err)) {
+    const { statusCode, message } = wrapEsError(err);
+    return response.customError({
+      statusCode,
+      body: message,
+    });
+  }
+  return response.internalError(err);
+};
+
+export const registerAutoFollowPatternRoutes = ({ router, __LEGACY }: RouteDependencies) => {
+  const licensePreRouting = licensePreRoutingFactory(__LEGACY.server);
 
   /**
    * Returns a list of all auto-follow patterns
    */
-  server.route({
-    path: `${API_BASE_PATH}/auto_follow_patterns`,
-    method: 'GET',
-    config: {
-      pre: [licensePreRouting],
+  router.get(
+    {
+      path: `${API_BASE_PATH}/auto_follow_patterns`,
+      validate: false,
     },
-    handler: async request => {
-      const callWithRequest = callWithRequestFactory(server, request);
+    async (ctx, request, response) => {
+      const callWithRequest = callWithRequestFactory(__LEGACY.server, request);
 
       try {
-        const response = await callWithRequest('ccr.autoFollowPatterns');
-        return {
-          patterns: deserializeListAutoFollowPatterns(response.patterns),
-        };
+        const result = await callWithRequest('ccr.autoFollowPatterns');
+        return response.ok({
+          body: {
+            patterns: deserializeListAutoFollowPatterns(result.patterns),
+          },
+        });
       } catch (err) {
-        if (isEsError(err)) {
-          throw wrapEsError(err);
-        }
-        throw wrapUnknownError(err);
+        return mapErrorToKibanaHttpResponse(err);
       }
-    },
-  });
+    }
+  );
 
   /**
    * Create an auto-follow pattern
