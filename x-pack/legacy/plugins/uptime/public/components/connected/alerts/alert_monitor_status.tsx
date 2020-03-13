@@ -6,11 +6,12 @@
 
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import { selectMonitorStatusAlert } from '../../../state/selectors';
 import { AlertMonitorStatusComponent } from '../../functional/alerts/alert_monitor_status';
 
 interface Props {
-  autocomplete: any;
+  autocomplete: DataPublicPluginSetup['autocomplete'];
   enabled: boolean;
   numTimes: number;
   setAlertParams: (key: string, value: any) => void;
