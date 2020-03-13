@@ -15,12 +15,18 @@ kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
         // 'x-pack-intake-agent': kibanaPipeline.intakeWorker('x-pack-intake', './test/scripts/jenkins_xpack.sh'),
         'kibana-functional-agent': workers.functional(
           setup: {
-            googleStorageDownload(
-              credentialsId: 'kibana-ci-gcs-plugin',
-              bucketUri: "gs://kibana-ci-functional-metrics/${kibanaPipeline.getTargetBranch()}/functional_test_suite_metrics.json",
-              localDirectory: 'target',
-              pathPrefix: kibanaPipeline.getTargetBranch(),
-            )
+            try {
+              googleStorageDownload(
+                credentialsId: 'kibana-ci-gcs-plugin',
+                bucketUri: "gs://kibana-ci-functional-metrics/${kibanaPipeline.getTargetBranch()}/functional_test_suite_metrics.json",
+                localDirectory: 'target',
+                pathPrefix: kibanaPipeline.getTargetBranch(),
+              )
+            } catch (ex) {
+              // TODO fall back to master?
+              buildUtils.printStacktrace(ex)
+              print "Error reading previous functional test metrics. Will create a non-optimal test plan."
+            }
             kibanaPipeline.bash("source src/dev/ci_setup/setup_env.sh; node scripts/create_functional_test_plan.js", "Create functional test plan")
             kibanaPipeline.buildOss()
             kibanaPipeline.prepareOssTestQueue(queue)

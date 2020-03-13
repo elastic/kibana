@@ -266,6 +266,7 @@ def processFunctionalQueue(queue, finishedSuites, workerNumber, type) {
         continue
       }
       catchErrorClean {
+        // TODO can we isolate and retry only the failing suite? maybe wrap the retry around this whole block, and have the file reading below also delete successful suites
         // retryable("kibana-ciGroup${workerNumber}") {
           def filesString = testSuite.files.collect { "--include-file '${it.file}'" }.join(' ')
           iteration++
