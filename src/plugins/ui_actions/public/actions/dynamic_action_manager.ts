@@ -41,6 +41,9 @@ export class DynamicActionManager {
 
   private stopped: boolean = false;
 
+  /**
+   * UI State of the dynamic action manager.
+   */
   protected readonly ui = createStateContainer(defaultState, transitions, selectors);
 
   constructor(protected readonly params: DynamicActionManagerParams) {}
@@ -51,6 +54,10 @@ export class DynamicActionManager {
     return oldEvent;
   }
 
+  /**
+   * We prefix action IDs with a unique `.idPrefix`, so we can render the
+   * same dashboard twice on the screen.
+   */
   protected generateActionId(eventId: string): string {
     return this.idPrefix + eventId;
   }
@@ -214,7 +221,7 @@ export class DynamicActionManager {
    * @param eventIds List of event IDs.
    */
   public async deleteEvents(eventIds: string[]) {
-    await eventIds.map(this.deleteEvent.bind(this));
+    await Promise.all(eventIds.map(this.deleteEvent.bind(this)));
   }
 
   /**
