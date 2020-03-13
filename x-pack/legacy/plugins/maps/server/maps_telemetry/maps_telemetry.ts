@@ -19,6 +19,7 @@ import {
   // @ts-ignore
 } from '../../common/constants';
 import { LayerDescriptor } from '../../common/descriptor_types';
+import { MapSavedObject } from '../../common/map_saved_object_types';
 
 interface IStats {
   [key: string]: {
@@ -30,33 +31,6 @@ interface IStats {
 
 interface ILayerTypeCount {
   [key: string]: number;
-}
-
-interface IMapSavedObject {
-  [key: string]: any;
-  fields: IFieldType[];
-  title: string;
-  id?: string;
-  type?: string;
-  timeFieldName?: string;
-  fieldFormatMap?: Record<
-    string,
-    {
-      id: string;
-      params: unknown;
-    }
-  >;
-  attributes?: {
-    title?: string;
-    description?: string;
-    mapStateJSON?: string;
-    layerListJSON?: string;
-    uiStateJSON?: string;
-    bounds?: {
-      type?: string;
-      coordinates?: [];
-    };
-  };
 }
 
 function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: number) {
@@ -102,7 +76,7 @@ export function buildMapsTelemetry({
   indexPatternSavedObjects,
   settings,
 }: {
-  mapSavedObjects: IMapSavedObject[];
+  mapSavedObjects: MapSavedObject[];
   indexPatternSavedObjects: IIndexPattern[];
   settings: SavedObjectAttribute;
 }): SavedObjectAttributes {
@@ -114,6 +88,7 @@ export function buildMapsTelemetry({
   const mapsCount = layerLists.length;
 
   const dataSourcesCount = layerLists.map(lList => {
+    // @ts-ignore
     const sourceIdList = lList.map((layer: LayerDescriptor) => layer.sourceDescriptor.id);
     return _.uniq(sourceIdList).length;
   });
@@ -183,7 +158,7 @@ export async function getMapsTelemetry(
   savedObjectsClient: SavedObjectsClientContract,
   config: Function
 ) {
-  const mapSavedObjects: IMapSavedObject[] = await getMapSavedObjects(savedObjectsClient);
+  const mapSavedObjects: MapSavedObject[] = await getMapSavedObjects(savedObjectsClient);
   const indexPatternSavedObjects: IIndexPattern[] = await getIndexPatternSavedObjects(
     savedObjectsClient
   );

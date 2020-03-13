@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { DataRequestDescriptor } from './data_request_descriptor_types';
-import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS, SORT_ORDER } from './constants';
+import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS, SORT_ORDER, SCALING_TYPES } from './constants';
 
 export type AbstractSourceDescriptor = {
   id?: string;
@@ -50,7 +50,7 @@ export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
   tooltipProperties?: string[];
   sortField?: string;
   sortOrder?: SORT_ORDER;
-  useTopHits?: boolean;
+  scalingType?: SCALING_TYPES;
   topHitsSplitField?: string;
   topHitsSize?: number;
 };
@@ -89,6 +89,18 @@ export type XYZTMSSourceDescriptor = {
   urlTemplate: string;
 };
 
+export type SourceDescriptor =
+  | EMSTMSSourceDescriptor
+  | EMSFileSourceDescriptor
+  | ESGeoGridSourceDescriptor
+  | ESSearchSourceDescriptor
+  | ESPewPewSourceDescriptor
+  | ESTermSourceDescriptor
+  | KibanaRegionmapSourceDescriptor
+  | KibanaTilemapSourceDescriptor
+  | WMSSourceDescriptor
+  | XYZTMSSourceDescriptor;
+
 export type JoinDescriptor = {
   leftField: string;
   right: ESTermSourceDescriptor;
@@ -103,7 +115,7 @@ export type LayerDescriptor = {
   label?: string;
   minZoom?: number;
   maxZoom?: number;
-  sourceDescriptor: AbstractSourceDescriptor;
+  sourceDescriptor: SourceDescriptor;
   type?: string;
   visible?: boolean;
 };
