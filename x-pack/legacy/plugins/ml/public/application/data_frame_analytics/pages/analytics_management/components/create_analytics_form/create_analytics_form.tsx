@@ -57,7 +57,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   const mlContext = useMlContext();
   const { form, indexPatternsMap, isAdvancedEditorEnabled, isJobCreated, requestMessages } = state;
 
-  let myInput: any = useRef(null);
+  const forceInput = useRef<HTMLInputElement | null>(null);
 
   const {
     createIndexPattern,
@@ -335,9 +335,12 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
 
   // Temp effect to close the context menu popover on Clone button click
   useEffect(() => {
+    if (forceInput.current === null) {
+      return;
+    }
     const evt = document.createEvent('MouseEvents');
     evt.initEvent('mouseup', true, true);
-    myInput.dispatchEvent(evt);
+    forceInput.current.dispatchEvent(evt);
   }, []);
 
   return (
@@ -409,7 +412,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
             <EuiFieldText
               inputRef={input => {
                 if (input) {
-                  myInput = input;
+                  forceInput.current = input;
                 }
               }}
               disabled={isJobCreated}

@@ -41,7 +41,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
     jobIdValid,
   } = state.form;
 
-  let myInput: any = useRef();
+  const forceInput = useRef<HTMLInputElement | null>(null);
 
   const onChange = (str: string) => {
     setAdvancedEditorRawString(str);
@@ -55,9 +55,12 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
 
   // Temp effect to close the context menu popover on Clone button click
   useEffect(() => {
+    if (forceInput.current === null) {
+      return;
+    }
     const evt = document.createEvent('MouseEvents');
     evt.initEvent('mouseup', true, true);
-    myInput.dispatchEvent(evt);
+    forceInput.current.dispatchEvent(evt);
   }, []);
 
   return (
@@ -109,7 +112,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
             <EuiFieldText
               inputRef={input => {
                 if (input) {
-                  myInput = input;
+                  forceInput.current = input;
                 }
               }}
               disabled={isJobCreated}
