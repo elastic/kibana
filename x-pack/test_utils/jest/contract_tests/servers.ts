@@ -64,7 +64,13 @@ export async function _createSharedServer() {
   const servers = await kbnTestServer.createTestServers({
     // adjustTimeout function is required by createTestServers fn
     adjustTimeout: (t: number) => {},
-    settings: TestKbnServerConfig,
+    settings: {
+      ...TestKbnServerConfig,
+      es: {
+        ...TestKbnServerConfig.es,
+        esArgs: ['xpack.security.authc.api_key.enabled=true'],
+      },
+    },
   });
   ESServer = await servers.startES();
   const { hosts, username, password } = ESServer;
@@ -101,19 +107,21 @@ export function getSharedESServer(): ESServerConfig {
 export async function createKibanaServer(xpackOption = {}) {
   if (jest && jest.setTimeout) {
     // Allow kibana to start
-    jest.setTimeout(120000);
+    jest.setTimeout(240000);
   }
   const root = kbnTestServer.createRootWithCorePlugins({
     elasticsearch: { ...getSharedESServer() },
     plugins: { paths: [PLUGIN_PATHS] },
     xpack: xpackOption,
+    oss: false,
   });
+
   await root.setup();
   await root.start();
   const { server } = (root as any).server.legacy.kbnServer;
 
   return {
-    shutdown: () => root.shutdown(),
+    shutdown: async () => await root.shutdown(),
     kbnServer: server,
     root,
   };
