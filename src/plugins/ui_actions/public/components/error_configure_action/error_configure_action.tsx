@@ -20,12 +20,12 @@
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { txtSorryActionConfigurationError } from './i18n';
-import { AnyActionInternal } from '../../actions';
 import { ActionIdentifier } from './action_identifier';
+import { ActionInternal } from '../../actions';
 
 export interface ErrorConfigureActionProps {
   msg?: React.ReactNode;
-  action?: AnyActionInternal;
+  action?: ActionInternal;
 }
 
 export const ErrorConfigureAction: React.FC<ErrorConfigureActionProps> = ({

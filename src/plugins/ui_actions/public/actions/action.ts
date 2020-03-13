@@ -91,5 +91,4 @@ export interface ActionDefinition<Context extends object = object>
   execute(context: Context): Promise<void>;
 }
 
-export type AnyActionDefinition = ActionDefinition<any>;
 export type ActionContext<A> = A extends ActionDefinition<infer Context> ? Context : never;

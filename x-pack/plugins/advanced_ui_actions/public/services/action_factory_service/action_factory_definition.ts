@@ -7,6 +7,5 @@
 /* eslint-disable */
 
 export {
-  ActionFactoryDefinition,
-  AnyActionFactoryDefinition,
+  ActionFactoryDefinition
 } from '../../../../../../src/plugins/ui_actions/public/actions/action_factory_definition';

@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 import useMountedState from 'react-use/lib/useMountedState';
 import {
-  AdvancedUiActionsAnyActionFactory as AnyActionFactory,
+  AdvancedUiActionsActionFactory as ActionFactory,
   AdvancedUiActionsStart,
 } from '../../../../advanced_ui_actions/public';
 import { NotificationsStart } from '../../../../../../src/core/public';
@@ -61,7 +61,7 @@ export function createFlyoutManageDrilldowns({
   const allActionFactoriesById = allActionFactories.reduce((acc, next) => {
     acc[next.id] = next;
     return acc;
-  }, {} as Record<string, AnyActionFactory>);
+  }, {} as Record<string, ActionFactory>);
 
   return (props: ConnectedFlyoutManageDrilldownsProps) => {
     const isCreateOnly = props.viewMode === 'create';
@@ -201,10 +201,12 @@ export function createFlyoutManageDrilldowns({
 }
 
 function useCompatibleActionFactoriesForCurrentContext<Context extends object = object>(
-  actionFactories: AnyActionFactory[],
+  actionFactories: Array<ActionFactory<any>>,
   context: Context
 ) {
-  const [compatibleActionFactories, setCompatibleActionFactories] = useState<AnyActionFactory[]>();
+  const [compatibleActionFactories, setCompatibleActionFactories] = useState<
+    Array<ActionFactory<any>>
+  >();
   useEffect(() => {
     let canceled = false;
     async function updateCompatibleFactoriesForContext() {

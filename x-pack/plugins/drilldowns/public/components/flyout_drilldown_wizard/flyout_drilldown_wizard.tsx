@@ -16,20 +16,16 @@ import {
   txtEditDrilldownTitle,
 } from './i18n';
 import { DrilldownHelloBar } from '../drilldown_hello_bar';
-import {
-  AdvancedUiActionsActionFactoryDefinition as ActionFactoryDefinition,
-  AdvancedUiActionsActionFactory as ActionFactory,
-  AdvancedUiActionsAnyActionFactory as AnyActionFactory,
-} from '../../../../advanced_ui_actions/public';
+import { AdvancedUiActionsActionFactory as ActionFactory } from '../../../../advanced_ui_actions/public';
 
 export interface DrilldownWizardConfig<ActionConfig extends object = object> {
   name: string;
-  actionFactory?: ActionFactory<ActionFactoryDefinition<ActionConfig, any, any>>;
+  actionFactory?: ActionFactory;
   actionConfig?: ActionConfig;
 }
 
 export interface FlyoutDrilldownWizardProps<CurrentActionConfig extends object = object> {
-  drilldownActionFactories: AnyActionFactory[];
+  drilldownActionFactories: Array<ActionFactory<any>>;
 
   onSubmit?: (drilldownWizardConfig: Required<DrilldownWizardConfig>) => void;
   onDelete?: () => void;
