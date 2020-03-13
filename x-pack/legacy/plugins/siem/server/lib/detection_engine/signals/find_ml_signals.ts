@@ -20,10 +20,8 @@ export const findMlSignals = async (
   const params = {
     jobIds: [jobId],
     threshold: anomalyThreshold,
-    // earliestMs: dateMath.parse(from)!.valueOf(),
-    // latestMs: dateMath.parse(to)!.valueOf(),
-    earliestMs: 1583431900000,
-    latestMs: 1583431900000 + 86400000,
+    earliestMs: dateMath.parse(from)!.valueOf(),
+    latestMs: dateMath.parse(to)!.valueOf(),
   };
   const relevantAnomalies = await anomaliesTableData(params, callCluster);
 
