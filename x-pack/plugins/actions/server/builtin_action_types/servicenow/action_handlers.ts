@@ -83,7 +83,12 @@ export const handleUpdateIncident = async ({
 
   const res: IncidentCreationResponse = { incidentId, number, pushedDate };
 
-  if (comments && Array.isArray(comments) && comments.length > 0) {
+  if (
+    comments &&
+    Array.isArray(comments) &&
+    comments.length > 0 &&
+    mapping.get('comments').actionType !== 'nothing'
+  ) {
     const commentsToCreate = appendInformationToComments(
       comments.filter(c => !c.updatedAt),
       params,
