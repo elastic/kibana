@@ -19,7 +19,6 @@
 
 import { DiscoverNoResults } from './no_results';
 import { DiscoverUninitialized } from './uninitialized';
-import { DiscoverUnsupportedIndexPattern } from './unsupported_index_pattern';
 import { DiscoverHistogram } from './histogram';
 import { getAngularModule, wrapInI18nContext } from '../../../kibana_services';
 
@@ -31,10 +30,6 @@ app.directive('discoverNoResults', reactDirective =>
 
 app.directive('discoverUninitialized', reactDirective =>
   reactDirective(wrapInI18nContext(DiscoverUninitialized))
-);
-
-app.directive('discoverUnsupportedIndexPattern', reactDirective =>
-  reactDirective(wrapInI18nContext(DiscoverUnsupportedIndexPattern), ['unsupportedType'])
 );
 
 app.directive('discoverHistogram', reactDirective => reactDirective(DiscoverHistogram));

@@ -34,7 +34,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xpackFunctionalTestsConfig.get('esTestCluster.serverArgs'),
         // define custom es server here
-        'xpack.security.authc.api_key.enabled=true',
+        // API Keys is enabled at the top level
         'xpack.security.enabled=true',
       ],
     },
