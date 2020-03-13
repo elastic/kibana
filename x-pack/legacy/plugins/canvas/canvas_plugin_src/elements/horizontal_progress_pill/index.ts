@@ -6,7 +6,6 @@
 
 import { openSans } from '../../../common/lib/fonts';
 import { ElementFactory } from '../../../types';
-import header from './header.png';
 
 export const horizontalProgressPill: ElementFactory = () => ({
   name: 'horizontalProgressPill',
@@ -15,8 +14,6 @@ export const horizontalProgressPill: ElementFactory = () => ({
   help: 'Displays progress as a portion of a horizontal pill',
   width: 400,
   height: 30,
-  image: header,
-  icon: '',
   expression: `filters
 | demodata
 | math "mean(percent_uptime)"

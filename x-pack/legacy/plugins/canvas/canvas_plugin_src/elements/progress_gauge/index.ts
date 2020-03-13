@@ -6,7 +6,6 @@
 
 import { openSans } from '../../../common/lib/fonts';
 import { ElementFactory } from '../../../types';
-import header from './header.png';
 
 export const progressGauge: ElementFactory = () => ({
   name: 'progressGauge',
@@ -15,7 +14,6 @@ export const progressGauge: ElementFactory = () => ({
   help: 'Displays progress as a portion of a gauge',
   width: 200,
   height: 200,
-  image: header,
   icon: 'visGoal',
   expression: `filters
 | demodata

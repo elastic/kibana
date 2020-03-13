@@ -5,7 +5,6 @@
  */
 
 import { openSans } from '../../../common/lib/fonts';
-import header from './header.png';
 import { getAdvancedSettings } from '../../../public/lib/kibana_advanced_settings';
 
 import { ElementFactory } from '../../../types';
@@ -16,7 +15,6 @@ export const metric: ElementFactory = () => ({
   help: 'A number with a label',
   width: 200,
   height: 100,
-  image: header,
   icon: 'visMetric',
   expression: `filters
 | demodata

@@ -5,7 +5,6 @@
  */
 
 import { ElementFactory } from '../../../types';
-import header from './header.png';
 
 export const bubbleChart: ElementFactory = () => ({
   name: 'bubbleChart',
@@ -14,7 +13,6 @@ export const bubbleChart: ElementFactory = () => ({
   help: 'A customizable bubble chart',
   width: 700,
   height: 300,
-  image: header,
   icon: 'heatmap', // TODO: are we should we want to use the heatmap icon for this?
   expression: `filters
 | demodata

@@ -5,14 +5,12 @@
  */
 
 import { ElementFactory } from '../../../types';
-import header from './header.png';
 
 export const areaChart: ElementFactory = () => ({
   name: 'areaChart',
   displayName: 'Area',
   help: 'A line chart with a filled body',
   type: 'chart',
-  image: header,
   icon: 'visArea',
   expression: `filters
   | demodata

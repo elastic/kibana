@@ -5,7 +5,6 @@
  */
 
 import { ElementFactory } from '../../../types';
-import header from './header.png';
 
 export const shape: ElementFactory = () => ({
   name: 'shape',
@@ -14,7 +13,6 @@ export const shape: ElementFactory = () => ({
   help: 'A customizable shape',
   width: 200,
   height: 200,
-  image: header,
   icon: 'node',
   expression:
     'shape "square" fill="#4cbce4" border="rgba(255,255,255,0)" borderWidth=0 maintainAspect=false | render',

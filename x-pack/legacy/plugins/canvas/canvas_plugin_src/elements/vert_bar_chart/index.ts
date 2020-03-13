@@ -5,14 +5,12 @@
  */
 
 import { ElementFactory } from '../../../types';
-import header from './header.png';
 
 export const verticalBarChart: ElementFactory = () => ({
   name: 'verticalBarChart',
   displayName: 'Vertical bar chart',
   type: 'chart',
   help: 'A customizable vertical bar chart',
-  image: header,
   icon: 'visBarVertical',
   expression: `filters
 | demodata
