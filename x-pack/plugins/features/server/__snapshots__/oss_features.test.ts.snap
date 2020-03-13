@@ -68,7 +68,6 @@ Array [
           "dashboard",
           "url",
           "query",
-          "url",
         ],
         "read": Array [
           "index-pattern",
