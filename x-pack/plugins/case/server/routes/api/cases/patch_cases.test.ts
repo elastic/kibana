@@ -14,21 +14,29 @@ import {
   mockCases,
   mockCaseComments,
 } from '../__fixtures__';
-import { initPatchCaseApi } from './patch_case';
+import { initPatchCasesApi } from './patch_cases';
 
-describe('PATCH case', () => {
+describe('PATCH cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
-    routeHandler = await createRoute(initPatchCaseApi, 'patch');
+    routeHandler = await createRoute(initPatchCasesApi, 'patch');
+    const spyOnDate = jest.spyOn(global, 'Date') as jest.SpyInstance<{}, []>;
+    spyOnDate.mockImplementation(() => ({
+      toISOString: jest.fn().mockReturnValue('2019-11-25T21:54:48.952Z'),
+    }));
   });
   it(`Patch a case`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases',
       method: 'patch',
       body: {
-        id: 'mock-id-1',
-        state: 'closed',
-        version: 'WzAsMV0=',
+        cases: [
+          {
+            id: 'mock-id-1',
+            status: 'closed',
+            version: 'WzAsMV0=',
+          },
+        ],
       },
     });
 
@@ -40,17 +48,35 @@ describe('PATCH case', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(typeof response.payload.updated_at).toBe('string');
-    expect(response.payload.state).toEqual('closed');
+    expect(response.payload).toEqual([
+      {
+        comment_ids: ['mock-comment-1'],
+        comments: [],
+        created_at: '2019-11-25T21:54:48.952Z',
+        created_by: { full_name: 'elastic', username: 'elastic' },
+        description: 'This is a brand new case of a bad meanie defacing data',
+        id: 'mock-id-1',
+        status: 'closed',
+        tags: ['defacement'],
+        title: 'Super Bad Security Issue',
+        updated_at: '2019-11-25T21:54:48.952Z',
+        updated_by: { full_name: 'Awesome D00d', username: 'awesome' },
+        version: 'WzE3LDFd',
+      },
+    ]);
   });
   it(`Fails with 409 if version does not match`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases',
       method: 'patch',
       body: {
-        id: 'mock-id-1',
-        case: { state: 'closed' },
-        version: 'badv=',
+        cases: [
+          {
+            id: 'mock-id-1',
+            case: { status: 'closed' },
+            version: 'badv=',
+          },
+        ],
       },
     });
 
@@ -68,9 +94,13 @@ describe('PATCH case', () => {
       path: '/api/cases',
       method: 'patch',
       body: {
-        id: 'mock-id-1',
-        case: { state: 'open' },
-        version: 'WzAsMV0=',
+        cases: [
+          {
+            id: 'mock-id-1',
+            case: { status: 'open' },
+            version: 'WzAsMV0=',
+          },
+        ],
       },
     });
 
@@ -89,9 +119,13 @@ describe('PATCH case', () => {
       path: '/api/cases',
       method: 'patch',
       body: {
-        id: 'mock-id-does-not-exist',
-        state: 'closed',
-        version: 'WzAsMV0=',
+        cases: [
+          {
+            id: 'mock-id-does-not-exist',
+            status: 'closed',
+            version: 'WzAsMV0=',
+          },
+        ],
       },
     });
 

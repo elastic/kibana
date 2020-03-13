@@ -13,12 +13,12 @@ import {
   createRouteContext,
   mockCases,
 } from '../__fixtures__';
-import { initGetAllCasesApi } from './get_all_cases';
+import { initFindCasesApi } from './find_cases';
 
 describe('GET all cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
-    routeHandler = await createRoute(initGetAllCasesApi, 'get');
+    routeHandler = await createRoute(initFindCasesApi, 'get');
   });
   it(`gets all the cases`, async () => {
     const request = httpServerMock.createKibanaRequest({
