@@ -48,7 +48,6 @@ interface StepDefineRuleProps extends RuleStepProps {
 }
 
 const stepDefineDefaultValue: DefineStepRule = {
-  anomalyThreshold: 50,
   index: [],
   isNew: true,
   ruleType: 'query',

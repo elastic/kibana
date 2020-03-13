@@ -62,9 +62,9 @@ export interface AboutStepRule extends StepRuleData {
 }
 
 export interface DefineStepRule extends StepRuleData {
-  anomalyThreshold: number;
+  anomalyThreshold?: number;
   index: string[];
-  mlJobId: string;
+  mlJobId?: string;
   queryBar: FieldValueQueryBar;
   ruleType: RuleType;
 }
