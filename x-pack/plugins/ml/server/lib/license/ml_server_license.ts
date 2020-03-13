@@ -10,7 +10,7 @@ import {
   RequestHandlerContext,
 } from 'kibana/server';
 
-import { MlLicense } from '../../../../../legacy/plugins/ml/common/license';
+import { MlLicense } from '../../../common/license';
 
 export class MlServerLicense extends MlLicense {
   public fullLicenseAPIGuard(handler: RequestHandler<any, any, any>) {
