@@ -11,7 +11,7 @@ import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
   ML_ANNOTATIONS_INDEX_PATTERN,
-} from '../../../../../legacy/plugins/ml/common/constants/index_patterns';
+} from '../../../common/constants/index_patterns';
 
 // Annotations Feature is available if:
 // - ML_ANNOTATIONS_INDEX_PATTERN index is present

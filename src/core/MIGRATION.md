@@ -1157,33 +1157,32 @@ In client code, we have a series of plugins which house shared application servi
 The contracts for these plugins are exposed for you to consume in your own plugin; we have created dedicated exports for the `setup` and `start` contracts in a file called `legacy`. By passing these contracts to your plugin's `setup` and `start` methods, you can mimic the functionality that will eventually be provided in the new platform.
 
 ```ts
-import { setup, start } from '../core_plugins/data/public/legacy';
-import { setup, start } from '../core_plugins/embeddables/public/legacy';
 import { setup, start } from '../core_plugins/visualizations/public/legacy';
 ```
 
 | Legacy Platform                                   | New Platform                                                 | Notes                                                                                                                                |
 | ------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `import 'ui/management'`                          | `management.sections`                                        |                                                                                                                                      |
 | `import 'ui/apply_filters'`                       | N/A. Replaced by triggering an APPLY_FILTER_TRIGGER trigger. | Directive is deprecated.                                                                                                             |
 | `import 'ui/filter_bar'`                          | `import { FilterBar } from '../data/public'`                 | Directive is deprecated.                                                                                                             |
 | `import 'ui/query_bar'`                           | `import { QueryStringInput } from '../data/public'`          | Directives are deprecated.                                                                                                           |
 | `import 'ui/search_bar'`                          | `import { SearchBar } from '../data/public'`                 | Directive is deprecated.                                                                                                             |
 | `import 'ui/kbn_top_nav'`                         | `import { TopNavMenu } from '../navigation/public'`          | Directive was moved to `src/plugins/kibana_legacy`.                                                                                    |
 | `ui/saved_objects/components/saved_object_finder` | `import { SavedObjectFinder } from '../saved_objects/public'` |                                                                                                                                      |
-| `core_plugins/interpreter`                        | `data.expressions`                                           | still in progress                                                                                                                    |
-| `ui/courier`                                      | `data.search`                                                | still in progress                                                                                                                    |
-| `ui/embeddable`                                   | `embeddables`                                                | still in progress                                                                                                                    |
-| `ui/filter_manager`                               | `data.filter`                                                | --                                                                                                                                   |
-| `ui/index_patterns`                               | `data.indexPatterns`                                         | still in progress                                                                                                                    |
-| `ui/registry/field_formats`                       | `data.fieldFormats`                                          |                                                                                                                                      |
-| `ui/registry/feature_catalogue`                   | `home.featureCatalogue.register`                             | Must add `home` as a dependency in your kibana.json.                                                                                 |
-| `ui/registry/vis_types`                           | `visualizations`                                       | --                                                                                                                                   |
-| `ui/vis`                                          | `visualizations`                                       | --                                                                                                                                   |
-| `ui/share`                                        | `share`                                                      | `showShareContextMenu` is now called `toggleShareContextMenu`, `ShareContextMenuExtensionsRegistryProvider` is now called `register` |
-| `ui/vis/vis_factory`                              | `visualizations`                                       | --                                                                                                                                   |
-| `ui/vis/vis_filters`                              | `visualizations.filters`                                     | --                                                                                                                                   |
-| `ui/utils/parse_es_interval`                      | `import { parseEsInterval } from '../data/public'`           | `parseEsInterval`, `ParsedInterval`, `InvalidEsCalendarIntervalError`, `InvalidEsIntervalFormatError` items were moved to the `Data Plugin` as a static code |
+| `core_plugins/interpreter`                        | `plugins.data.expressions`                                           |
+| `ui/courier`                                      | `plugins.data.search`                                                |
+| `ui/agg_types`                                    | `plugins.data.search.aggs`                                           | Most code is available for static import. Stateful code is part of the `search` service.
+| `ui/embeddable`                                   | `plugins.embeddables`                                                |
+| `ui/filter_manager`                               | `plugins.data.filter`                                                | --                                                                                                                                   |
+| `ui/index_patterns`                               | `plugins.data.indexPatterns`                                         |
+| `import 'ui/management'`                          | `plugins.management.sections`                                        |                                                                                                                                      |
+| `ui/registry/field_formats`                       | `plugins.data.fieldFormats`                                          |                                                                                                                                      |
+| `ui/registry/feature_catalogue`                   | `plugins.home.featureCatalogue.register`                             | Must add `home` as a dependency in your kibana.json.                                                                                 |
+| `ui/registry/vis_types`                           | `plugins.visualizations`                                       | --                                                                                                                                   |
+| `ui/vis`                                          | `plugins.visualizations`                                       | --                                                                                                                                   |
+| `ui/share`                                        | `plugins.share`                                                      | `showShareContextMenu` is now called `toggleShareContextMenu`, `ShareContextMenuExtensionsRegistryProvider` is now called `register` |
+| `ui/vis/vis_factory`                              | `plugins.visualizations`                                       | --                                                                                                                                   |
+| `ui/vis/vis_filters`                              | `plugins.visualizations.filters`                                     | --                                                                                                                                   |
+| `ui/utils/parse_es_interval`                      | `import { search: { aggs: { parseEsInterval } } } from '../data/public'`           | `parseEsInterval`, `ParsedInterval`, `InvalidEsCalendarIntervalError`, `InvalidEsIntervalFormatError` items were moved to the `Data Plugin` as a static code |
 
 #### Server-side
 
@@ -1262,7 +1261,7 @@ This table shows where these uiExports have moved to in the New Platform. In mos
 | `validations`                |                                                                                                                           | Part of SavedObjects, see [#33587](https://github.com/elastic/kibana/issues/33587)                                                    |
 | `visEditorTypes`             |                                                                                                                           |                                                                                                                                       |
 | `visTypeEnhancers`           |                                                                                                                           |                                                                                                                                       |
-| `visTypes`                   |                                                                                                                           |                                                                                                                                       |
+| `visTypes`                   | `plugins.visualizations.types`                                                                                                                          |                                                                                                                                       |
 | `visualize`                  |                                                                                                                           |                                                                                                                                       |
 
 Examples:
