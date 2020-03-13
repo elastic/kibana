@@ -89,18 +89,6 @@ export type XYZTMSSourceDescriptor = {
   urlTemplate: string;
 };
 
-export type SourceDescriptor =
-  | EMSTMSSourceDescriptor
-  | EMSFileSourceDescriptor
-  | ESGeoGridSourceDescriptor
-  | ESSearchSourceDescriptor
-  | ESPewPewSourceDescriptor
-  | ESTermSourceDescriptor
-  | KibanaRegionmapSourceDescriptor
-  | KibanaTilemapSourceDescriptor
-  | WMSSourceDescriptor
-  | XYZTMSSourceDescriptor;
-
 export type JoinDescriptor = {
   leftField: string;
   right: ESTermSourceDescriptor;
@@ -115,7 +103,7 @@ export type LayerDescriptor = {
   label?: string;
   minZoom?: number;
   maxZoom?: number;
-  sourceDescriptor: SourceDescriptor;
+  sourceDescriptor: AbstractSourceDescriptor;
   type?: string;
   visible?: boolean;
 };
