@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { User } from '../../../../../../plugins/case/common/api';
+
 export interface Comment {
   id: string;
   createdAt: string;
@@ -20,7 +22,7 @@ export interface Case {
   createdAt: string;
   createdBy: ElasticUser;
   description: string;
-  state: string;
+  status: string;
   tags: string[];
   title: string;
   updatedAt: string;
@@ -36,11 +38,17 @@ export interface QueryParams {
 
 export interface FilterOptions {
   search: string;
-  state: string;
+  status: string;
   tags: string[];
+  reporters: User[];
 }
 
-export interface AllCases {
+export interface CasesStatus {
+  countClosedCases: number | null;
+  countOpenCases: number | null;
+}
+
+export interface AllCases extends CasesStatus {
   cases: Case[];
   page: number;
   perPage: number;
