@@ -108,7 +108,6 @@ export function Popover({ focusedServiceName }: PopoverProps) {
         onFocusClick={isAlreadyFocused ? centerSelectedNode : deselect}
         selectedNodeData={selectedNodeData}
         selectedNodeServiceName={selectedNodeServiceName}
-        focusedServiceName={focusedServiceName}
       />
     </EuiPopover>
   );
