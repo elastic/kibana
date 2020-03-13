@@ -15,7 +15,6 @@ import {
   disableAlert,
   enableAlert,
   loadAlert,
-  loadAlertNavigation,
   loadAlerts,
   loadAlertState,
   loadAlertTypes,
@@ -81,19 +80,6 @@ describe('loadAlert', () => {
 
     expect(await loadAlert({ http, alertId })).toEqual(resolvedValue);
     expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}`);
-  });
-});
-
-describe('loadAlertNavigation', () => {
-  test('should call get API with base parameters', async () => {
-    const alertId = uuid.v4();
-    const resolvedValue = {
-      url: 'about:blank',
-    };
-    http.get.mockResolvedValueOnce(resolvedValue);
-
-    expect(await loadAlertNavigation({ http, alertId })).toEqual(resolvedValue);
-    expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}/navigation`);
   });
 });
 

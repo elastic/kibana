@@ -6,7 +6,6 @@
 
 import React from 'react';
 
-import { AlertNavigation } from '../../../../../../alerting/common';
 import { Alert, AlertType, AlertTaskState } from '../../../../types';
 import { useAppDependencies } from '../../../app_context';
 import {
