@@ -23,7 +23,8 @@ export { IAggConfig, AggGroupNames, Schemas } from 'ui/agg_types';
 export { PaginateDirectiveProvider } from 'ui/directives/paginate';
 // @ts-ignore
 export { PaginateControlsDirectiveProvider } from 'ui/directives/paginate';
-export { tabifyAggResponse, tabifyGetColumns } from '../../data/public';
+import { search } from '../../../../plugins/data/public';
+export const { tabifyAggResponse, tabifyGetColumns } = search;
 export {
   configureAppAngularModule,
   KbnAccessibleClickProvider,
