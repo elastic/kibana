@@ -18,6 +18,7 @@ import { appReducer } from './reducer';
 import { alertMiddlewareFactory } from './alerts/middleware';
 import { managementMiddlewareFactory } from './managing';
 import { policyListMiddlewareFactory } from './policy_list';
+import { policyDetailsMiddlewareFactory } from './policy_details';
 import { GlobalState } from '../types';
 import { AppAction } from './action';
 
@@ -71,6 +72,10 @@ export const appStoreFactory: (
             substateMiddlewareFactory(
               globalState => globalState.policyList,
               policyListMiddlewareFactory(coreStart)
+            ),
+            substateMiddlewareFactory(
+              globalState => globalState.policyDetails,
+              policyDetailsMiddlewareFactory(coreStart, depsStart)
             ),
             substateMiddlewareFactory(
               globalState => globalState.alertList,
