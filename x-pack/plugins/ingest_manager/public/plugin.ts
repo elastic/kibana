@@ -6,15 +6,16 @@
 import {
   AppMountParameters,
   CoreSetup,
-  CoreStart,
   Plugin,
   PluginInitializerContext,
+  CoreStart,
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
-import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID } from '../common/constants';
+
 import { IngestManagerConfigType } from '../common/types';
 
 export { IngestManagerConfigType } from '../common/types';
@@ -27,6 +28,10 @@ export interface IngestManagerSetupDeps {
   data: DataPublicPluginSetup;
 }
 
+export interface IngestManagerStartDeps {
+  data: DataPublicPluginStart;
+}
+
 export class IngestManagerPlugin implements Plugin {
   private config: IngestManagerConfigType;
 
@@ -36,7 +41,6 @@ export class IngestManagerPlugin implements Plugin {
 
   public setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
     const config = this.config;
-
     // Register main Ingest Manager app
     core.application.register({
       id: PLUGIN_ID,
@@ -44,9 +48,12 @@ export class IngestManagerPlugin implements Plugin {
       title: i18n.translate('xpack.ingestManager.appTitle', { defaultMessage: 'Ingest Manager' }),
       euiIconType: 'savedObjectsApp',
       async mount(params: AppMountParameters) {
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, startDeps] = (await core.getStartServices()) as [
+          CoreStart,
+          IngestManagerStartDeps
+        ];
         const { renderApp } = await import('./applications/ingest_manager');
-        return renderApp(coreStart, params, deps, config);
+        return renderApp(coreStart, params, deps, startDeps, config);
       },
     });
   }
