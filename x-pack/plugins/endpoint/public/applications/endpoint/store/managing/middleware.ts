@@ -17,7 +17,7 @@ export const managementMiddlewareFactory: MiddlewareFactory<HostListState> = cor
       (action.type === 'userChangedUrl' &&
         isOnHostPage(state) &&
         hasSelectedHost(state) !== true) ||
-      action.type === 'userPaginatedManagementList'
+      action.type === 'userPaginatedHostList'
     ) {
       const managementPageIndex = pageIndex(state);
       const managementPageSize = pageSize(state);
@@ -31,7 +31,7 @@ export const managementMiddlewareFactory: MiddlewareFactory<HostListState> = cor
       });
       response.request_page_index = managementPageIndex;
       dispatch({
-        type: 'serverReturnedManagementList',
+        type: 'serverReturnedHostList',
         payload: response,
       });
     }
@@ -40,12 +40,12 @@ export const managementMiddlewareFactory: MiddlewareFactory<HostListState> = cor
       try {
         const response = await coreStart.http.get(`/api/endpoint/metadata/${selectedHost}`);
         dispatch({
-          type: 'serverReturnedManagementDetails',
+          type: 'serverReturnedHostDetails',
           payload: response,
         });
       } catch (error) {
         dispatch({
-          type: 'serverFailedToReturnManagementDetails',
+          type: 'serverFailedToReturnHostDetails',
           payload: error,
         });
       }

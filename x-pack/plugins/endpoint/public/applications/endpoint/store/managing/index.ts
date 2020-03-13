@@ -5,5 +5,5 @@
  */
 
 export { managementListReducer } from './reducer';
-export { ManagementAction } from './action';
+export { HostAction } from './action';
 export { managementMiddlewareFactory } from './middleware';
