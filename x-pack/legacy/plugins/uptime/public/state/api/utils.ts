@@ -8,15 +8,19 @@ import { HttpFetchQuery, HttpSetup } from '../../../../../../../target/types/cor
 
 class ApiService {
   private static instance: ApiService;
-  public http: HttpSetup;
+  private _http!: HttpSetup;
+
+  public get http() {
+    return this._http;
+  }
 
   public set http(httpSetup: HttpSetup) {
-    this.http = httpSetup;
+    this._http = httpSetup;
   }
 
   private constructor() {}
 
-  static getInstance(): ActionsBus {
+  static getInstance(): ApiService {
     if (!ApiService.instance) {
       ApiService.instance = new ApiService();
     }
@@ -25,7 +29,7 @@ class ApiService {
   }
 
   public async get(apiUrl: string, params: HttpFetchQuery) {
-    const response = await this.http!.get(apiUrl, { query: params });
+    const response = await this._http!.get(apiUrl, { query: params });
     if (response instanceof Error) {
       throw response;
     }
@@ -33,7 +37,7 @@ class ApiService {
   }
 
   public async post(apiUrl: string, data: any) {
-    const response = await this.http!.post(apiUrl, {
+    const response = await this._http!.post(apiUrl, {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -44,7 +48,7 @@ class ApiService {
   }
 
   public async delete(apiUrl: string) {
-    const response = await this.http!.delete(apiUrl);
+    const response = await this._http!.delete(apiUrl);
     if (response instanceof Error) {
       throw response;
     }

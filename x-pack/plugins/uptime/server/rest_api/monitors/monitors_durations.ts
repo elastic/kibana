@@ -11,7 +11,6 @@ import { API_URLS } from '../../../../../legacy/plugins/uptime/common/constants/
 
 export const createGetMonitorDurationRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/monitor/duration',
   path: API_URLS.MONITOR_DURATION,
 
   validate: {
