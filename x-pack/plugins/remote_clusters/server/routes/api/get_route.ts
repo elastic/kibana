@@ -40,6 +40,7 @@ export const register = (deps: RouteDependencies): void => {
 
         // Pre-7.6, ES supported an undocumented "proxy" field
         // ES does not handle migrating this to the new implementation, so we need to surface it in the UI
+        // This value is not available via the GET /_remote/info API, so we get it from the cluster settings
         const deprecatedProxyAddress = isPersistent
           ? get(clusterSettings, `persistent.cluster.remote[${clusterName}].proxy`, undefined)
           : undefined;

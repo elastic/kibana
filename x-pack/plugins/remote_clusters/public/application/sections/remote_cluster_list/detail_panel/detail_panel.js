@@ -36,6 +36,7 @@ import { PROXY_MODE } from '../../../../../common/constants';
 import { getRouterLinkProps } from '../../../services';
 import { ConfiguredByNodeWarning } from '../../components';
 import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';
+import { proxyModeUrl } from '../../../services/documentation';
 
 export class DetailPanel extends Component {
   static propTypes = {
@@ -111,7 +112,10 @@ export class DetailPanel extends Component {
     );
   }
 
-  renderClusterWithDeprecatedSettingWarning({ hasDeprecatedProxySetting }, clusterName) {
+  renderClusterWithDeprecatedSettingWarning(
+    { hasDeprecatedProxySetting, isConfiguredByNode },
+    clusterName
+  ) {
     if (!hasDeprecatedProxySetting) {
       return null;
     }
@@ -121,7 +125,7 @@ export class DetailPanel extends Component {
           title={
             <FormattedMessage
               id="xpack.remoteClusters.detailPanel.deprecatedSettingsTitle"
-              defaultMessage={`"{remoteCluster}" contains deprecated settings`}
+              defaultMessage='"{remoteCluster}" contains deprecated settings'
               values={{
                 remoteCluster: clusterName,
               }}
@@ -132,12 +136,20 @@ export class DetailPanel extends Component {
         >
           <FormattedMessage
             id="xpack.remoteClusters.detailPanel.deprecatedSettingsMessage"
-            defaultMessage="We recommend updating this remote cluster to use the correct settings. {editLink}"
+            defaultMessage="We recommend updating this remote cluster to use the correct settings. {helpLink}"
             values={{
-              editLink: (
+              helpLink: isConfiguredByNode ? (
+                // A remote cluster is not editable if configured in elasticsearch.yml, so we direct the user to documentation instead
+                <EuiLink href={proxyModeUrl} target="_blank">
+                  <FormattedMessage
+                    id="xpack.remoteClusters.detailPanel.deprecatedSettingsLearnMoreLinkLabel"
+                    defaultMessage="Learn more."
+                  />
+                </EuiLink>
+              ) : (
                 <EuiLink {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/edit/${clusterName}`)}>
                   <FormattedMessage
-                    id="xpack.remoteClusters.detailPanel.deprecatedSettingsLinkLabel"
+                    id="xpack.remoteClusters.detailPanel.deprecatedSettingsEditLinkLabel"
                     defaultMessage="Edit remote cluster."
                   />
                 </EuiLink>

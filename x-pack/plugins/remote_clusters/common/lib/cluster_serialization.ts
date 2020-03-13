@@ -6,19 +6,64 @@
 
 import { PROXY_MODE } from '../constants';
 
-// interface ClusterEs {
-//   seeds?: string[];
-// }
+export interface ClusterEs {
+  seeds?: string[];
+  mode?: 'proxy' | 'sniff';
+  connected?: boolean;
+  num_nodes_connected?: number;
+  max_connections_per_cluster?: number;
+  initial_connect_timeout?: string;
+  skip_unavailable?: boolean;
+  transport?: {
+    ping_schedule?: string;
+    compress?: boolean;
+  };
+  address?: string;
+  max_socket_connections?: number;
+  num_sockets_connected?: number;
+}
 
-// interface Cluster {}
-
-// interface ClusterPayload {}
+export interface Cluster {
+  name: string;
+  seeds?: string[];
+  skipUnavailable?: boolean;
+  nodeConnections?: number;
+  proxyAddress?: string;
+  proxySocketConnections?: number;
+  serverName?: string;
+  mode?: 'proxy' | 'sniff';
+  isConnected?: boolean;
+  transportPingSchedule?: string;
+  transportCompress?: boolean;
+  connectedNodesCount?: number;
+  maxConnectionsPerCluster?: number;
+  initialConnectTimeout?: string;
+  connectedSocketsCount?: number;
+  hasDeprecatedProxySetting?: boolean;
+}
+export interface ClusterPayload {
+  persistent: {
+    cluster: {
+      remote: {
+        [key: string]: {
+          skip_unavailable?: boolean | null;
+          mode?: 'sniff' | 'proxy' | null;
+          proxy_address?: string | null;
+          proxy_socket_connections?: number | null;
+          server_name?: string | null;
+          seeds?: string[] | null;
+          node_connections?: number | null;
+        };
+      };
+    };
+  };
+}
 
 export function deserializeCluster(
   name: string,
-  esClusterObject: any,
+  esClusterObject: ClusterEs,
   deprecatedProxyAddress?: string | undefined
-): any {
+): Cluster {
   if (!name || !esClusterObject || typeof esClusterObject !== 'object') {
     throw new Error('Unable to deserialize cluster');
   }
@@ -37,7 +82,7 @@ export function deserializeCluster(
     num_sockets_connected: connectedSocketsCount,
   } = esClusterObject;
 
-  let deserializedClusterObject: any = {
+  let deserializedClusterObject: Cluster = {
     name,
     mode,
     isConnected,
@@ -75,15 +120,15 @@ export function deserializeCluster(
 
   // It's unnecessary to send undefined values back to the client, so we can remove them.
   Object.keys(deserializedClusterObject).forEach(key => {
-    if (deserializedClusterObject[key] === undefined) {
-      delete deserializedClusterObject[key];
+    if (deserializedClusterObject[key as keyof Cluster] === undefined) {
+      delete deserializedClusterObject[key as keyof Cluster];
     }
   });
 
   return deserializedClusterObject;
 }
 
-export function serializeCluster(deserializedClusterObject: any): any {
+export function serializeCluster(deserializedClusterObject: Cluster): ClusterPayload {
   if (!deserializedClusterObject || typeof deserializedClusterObject !== 'object') {
     throw new Error('Unable to serialize cluster');
   }

@@ -9,6 +9,7 @@ import { deserializeCluster, serializeCluster } from './cluster_serialization';
 describe('cluster_serialization', () => {
   describe('deserializeCluster()', () => {
     it('should throw an error for invalid arguments', () => {
+      // @ts-ignore
       expect(() => deserializeCluster('foo', 'bar')).toThrowError();
     });
 
@@ -117,6 +118,7 @@ describe('cluster_serialization', () => {
 
   describe('serializeCluster()', () => {
     it('should throw an error for invalid arguments', () => {
+      // @ts-ignore
       expect(() => serializeCluster('foo')).toThrowError();
     });
 

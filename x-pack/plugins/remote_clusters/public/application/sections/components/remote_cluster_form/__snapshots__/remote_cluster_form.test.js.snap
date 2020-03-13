@@ -736,6 +736,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         >
                           <EuiFieldText
                             aria-describedby="mockId-help"
+                            data-test-subj="remoteClusterFormProxyAddressInput"
                             fullWidth={true}
                             id="mockId"
                             isInvalid={false}
@@ -761,6 +762,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                     <input
                                       aria-describedby="mockId-help"
                                       className="euiFieldText euiFieldText--fullWidth"
+                                      data-test-subj="remoteClusterFormProxyAddressInput"
                                       id="mockId"
                                       onBlur={[Function]}
                                       onChange={[Function]}

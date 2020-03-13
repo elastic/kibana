@@ -9,7 +9,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { RequestHandler } from 'src/core/server';
 
-import { serializeCluster } from '../../../common/lib';
+import { serializeCluster, Cluster } from '../../../common/lib';
 import { doesClusterExist } from '../../lib/does_cluster_exist';
 import { API_BASE_PATH, PROXY_MODE, SNIFF_MODE } from '../../../common/constants';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
@@ -55,7 +55,7 @@ export const register = (deps: RouteDependencies): void => {
         });
       }
 
-      const addClusterPayload = serializeCluster(request.body);
+      const addClusterPayload = serializeCluster(request.body as Cluster);
       const updateClusterResponse = await callAsCurrentUser('cluster.putSettings', {
         body: addClusterPayload,
       });

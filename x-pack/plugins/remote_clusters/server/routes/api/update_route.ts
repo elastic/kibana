@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { RequestHandler } from 'src/core/server';
 
 import { API_BASE_PATH, SNIFF_MODE, PROXY_MODE } from '../../../common/constants';
-import { serializeCluster, deserializeCluster } from '../../../common/lib';
+import { serializeCluster, deserializeCluster, Cluster, ClusterEs } from '../../../common/lib';
 import { doesClusterExist } from '../../lib/does_cluster_exist';
 import { RouteDependencies } from '../../types';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
@@ -61,14 +61,14 @@ export const register = (deps: RouteDependencies): void => {
       }
 
       // Update cluster as new settings
-      const updateClusterPayload = serializeCluster({ ...request.body, name });
+      const updateClusterPayload = serializeCluster({ ...request.body, name } as Cluster);
 
       const updateClusterResponse = await callAsCurrentUser('cluster.putSettings', {
         body: updateClusterPayload,
       });
 
       const acknowledged = get(updateClusterResponse, 'acknowledged');
-      const cluster = get(updateClusterResponse, `persistent.cluster.remote.${name}`);
+      const cluster = get(updateClusterResponse, `persistent.cluster.remote.${name}`) as ClusterEs;
 
       if (acknowledged && cluster) {
         const body = {
