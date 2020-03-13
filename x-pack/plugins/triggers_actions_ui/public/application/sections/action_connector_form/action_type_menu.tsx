@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionType, ActionTypeIndex } from '../../../types';
@@ -11,6 +11,7 @@ import { loadActionTypes } from '../../lib/action_connector_api';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
+import './action_type_menu.scss';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
@@ -76,13 +77,18 @@ export const ActionTypeMenu = ({ onActionTypeChange, actionTypes }: Props) => {
         <EuiFlexItem key={index}>
           {checkEnabledResult.isEnabled && card}
           {checkEnabledResult.isEnabled === false && (
+            // <Fragment>{card}</Fragment>
             <EuiToolTip position="top" content={checkEnabledResult.message}>
-              {card}
+              <Fragment>{card}</Fragment>
             </EuiToolTip>
           )}
         </EuiFlexItem>
       );
     });
 
-  return <EuiFlexGrid columns={2}>{cardNodes}</EuiFlexGrid>;
+  return (
+    <div className="actConnectorsListGrid">
+      <EuiFlexGrid columns={2}>{cardNodes}</EuiFlexGrid>
+    </div>
+  );
 };
