@@ -20,7 +20,6 @@ import { debounce } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
@@ -58,6 +57,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   const { form, indexPatternsMap, isAdvancedEditorEnabled, isJobCreated, requestMessages } = state;
 
   const forceInput = useRef<HTMLInputElement | null>(null);
+  const firstUpdate = useRef<boolean>(true);
 
   const {
     createIndexPattern,
@@ -148,6 +148,10 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   };
 
   const debouncedGetExplainData = debounce(async () => {
+    const shouldUpdateModelMemoryLimit = !firstUpdate.current || !modelMemoryLimit;
+    if (firstUpdate.current) {
+      firstUpdate.current = false;
+    }
     // Reset if sourceIndex or jobType changes (jobType requires dependent_variable to be set -
     // which won't be the case if switching from outlier detection)
     if (previousSourceIndex !== sourceIndex || previousJobType !== jobType) {
@@ -166,10 +170,12 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       );
       const expectedMemoryWithoutDisk = resp.memory_estimation?.expected_memory_without_disk;
 
+      if (shouldUpdateModelMemoryLimit) {
+        setEstimatedModelMemoryLimit(expectedMemoryWithoutDisk);
+      }
+
       // If sourceIndex has changed load analysis field options again
       if (previousSourceIndex !== sourceIndex || previousJobType !== jobType) {
-        setEstimatedModelMemoryLimit(expectedMemoryWithoutDisk);
-
         const analyzedFieldsOptions: EuiComboBoxOptionOption[] = [];
 
         if (resp.field_selection) {
@@ -181,7 +187,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
         }
 
         setFormState({
-          ...(!modelMemoryLimit ? { modelMemoryLimit: expectedMemoryWithoutDisk } : {}),
+          ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemoryWithoutDisk } : {}),
           excludesOptions: analyzedFieldsOptions,
           loadingFieldOptions: false,
           fieldOptionsFetchFail: false,
@@ -189,7 +195,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
         });
       } else {
         setFormState({
-          ...(!modelMemoryLimit ? { modelMemoryLimit: expectedMemoryWithoutDisk } : {}),
+          ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemoryWithoutDisk } : {}),
         });
       }
     } catch (e) {
@@ -211,7 +217,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
         fieldOptionsFetchFail: true,
         maxDistinctValuesError: errorMessage,
         loadingFieldOptions: false,
-        modelMemoryLimit: fallbackModelMemoryLimit,
+        ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: fallbackModelMemoryLimit } : {}),
       });
     }
   }, 400);
@@ -316,7 +322,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     }
   }, [sourceIndex, jobType, sourceIndexNameEmpty]);
 
-  useUpdateEffect(() => {
+  useEffect(() => {
     const hasBasicRequiredFields =
       jobType !== undefined && sourceIndex !== '' && sourceIndexNameValid === true;
 

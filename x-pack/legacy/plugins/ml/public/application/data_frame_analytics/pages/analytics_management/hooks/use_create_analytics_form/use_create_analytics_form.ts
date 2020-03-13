@@ -318,6 +318,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       switchToAdvancedEditor();
     } else {
       setFormState(getCloneFormStateFromJobConfig(config));
+      setEstimatedModelMemoryLimit(config.model_memory_limit);
     }
 
     dispatch({ type: ACTION.SET_JOB_CLONE, cloneJob });
