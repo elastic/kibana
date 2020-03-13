@@ -197,7 +197,7 @@ def buildOss() {
   // return
   sh 'cp -R ./. ../kibana-oss'
   dir('../kibana-oss') {
-    runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
+    // runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
   }
 }
 
