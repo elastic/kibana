@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject } from '../../../../../../src/plugins/saved_objects/public';
 import { AdvancedSettings, UrlTemplate, WorkspaceField } from './app_state';
 import { WorkspaceNode, WorkspaceEdge } from './workspace_state';
 
@@ -12,15 +11,23 @@ type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
 /**
  * Workspace fetched from server.
- * This type is returned by `SavedWorkspacesProvider#get`.
  */
-export interface GraphWorkspaceSavedObject extends SavedObject {
-  title: string;
+export interface GraphWorkspaceSavedObject {
+  copyOnSave: boolean;
   description: string;
+  displayName: string;
+  getEsType(): string;
+  id?: string;
+  isSaving: boolean;
+  lastSavedTitle?: string;
+  migrationVersion?: Record<string, any>;
   numLinks: number;
   numVertices: number;
-  version: number;
+  title: string;
+  type: string;
+  version?: number;
   wsState: string;
+  _source: Record<string, unknown>;
 }
 
 export interface SerializedWorkspaceState {

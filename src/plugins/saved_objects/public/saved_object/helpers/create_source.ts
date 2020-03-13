@@ -81,15 +81,19 @@ export async function createSource(
   }
 }
 
-export async function createSourceUtil(
+export async function saveWithConfirmation(
   source: SavedObjectAttributes,
-  savedObject: SavedObject,
+  savedObject: {
+    type: string;
+    title: string;
+    displayName: string;
+  },
   options: SavedObjectsCreateOptions,
   services: SavedObjectKibanaServices
 ) {
   const { savedObjectsClient, overlays } = services;
   try {
-    return await savedObjectsClient.create(savedObject.getEsType(), source, options);
+    return await savedObjectsClient.create(savedObject.type, source, options);
   } catch (err) {
     // record exists, confirm overwriting
     if (_.get(err, 'res.status') === 409) {
@@ -103,7 +107,7 @@ export async function createSourceUtil(
 
       const title = i18n.translate('savedObjects.confirmModal.overwriteTitle', {
         defaultMessage: 'Overwrite {name}?',
-        values: { name: savedObject.getDisplayName() },
+        values: { name: savedObject.displayName },
       });
       const confirmButtonText = i18n.translate('savedObjects.confirmModal.overwriteButtonLabel', {
         defaultMessage: 'Overwrite',
@@ -111,7 +115,7 @@ export async function createSourceUtil(
 
       return confirmModalPromise(confirmMessage, title, confirmButtonText, overlays)
         .then(() =>
-          savedObjectsClient.create(savedObject.getEsType(), source, {
+          savedObjectsClient.create(savedObject.type, source, {
             overwrite: true,
             ...options,
           })

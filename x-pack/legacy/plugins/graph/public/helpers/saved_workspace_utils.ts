@@ -4,16 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep, assign, defaults } from 'lodash';
+import { cloneDeep, assign, defaults, forOwn } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { IBasePath, OverlayStart, SavedObjectsClientContract } from 'kibana/public';
+import {
+  IBasePath,
+  OverlayStart,
+  SavedObjectsClientContract,
+  SavedObjectAttributes,
+} from 'kibana/public';
 
 import {
-  SavedObject,
   SavedObjectSaveOpts,
-  serializeSavedObject,
   checkForDuplicateTitle,
-  createSourceUtil,
+  saveWithConfirmation,
   isErrorNonFatal,
   SavedObjectKibanaServices,
 } from '../../../../../../src/plugins/saved_objects/public';
@@ -22,15 +25,15 @@ import {
   extractReferences,
 } from '../services/persistence/saved_workspace_references';
 import { SavedObjectNotFound } from '../../../../../../src/plugins/kibana_utils/public';
-import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
+import { GraphWorkspaceSavedObject } from '../types';
 
 const savedWorkspaceType = 'graph-workspace';
 const mapping: Record<string, string> = {
-  title: ES_FIELD_TYPES.TEXT,
-  description: ES_FIELD_TYPES.TEXT,
-  numLinks: ES_FIELD_TYPES.INTEGER,
-  numVertices: ES_FIELD_TYPES.INTEGER,
-  version: ES_FIELD_TYPES.INTEGER,
+  title: 'text',
+  description: 'text',
+  numLinks: 'integer',
+  numVertices: 'integer',
+  version: 'integer',
   wsState: 'json',
 };
 const defaultsProps = {
@@ -41,13 +44,6 @@ const defaultsProps = {
   numVertices: 0,
   wsState: '{}',
   version: 1,
-};
-
-const config = {
-  mapping,
-  type: savedWorkspaceType,
-  injectReferences,
-  defaults: defaultsProps,
 };
 
 const urlFor = (basePath: IBasePath, id: string) =>
@@ -89,14 +85,14 @@ export function findSW(
 export async function getSW(savedObjectsClient: SavedObjectsClientContract, id?: string) {
   const savedObject = {
     id,
+    title: '',
+    type: savedWorkspaceType,
     copyOnSave: false,
     isSaving: false,
+    displayName: 'graph workspace',
     // NOTE: this.type (not set in this file, but somewhere else) is the sub type, e.g. 'area' or
     // 'data table', while esType is the more generic type - e.g. 'visualization' or 'saved search'.
     getEsType: () => savedWorkspaceType,
-    // Overwrite the default getDisplayName function which uses type and which is not very
-    // user friendly for this object.
-    getDisplayName: () => 'graph workspace',
   } as { [key: string]: any };
 
   if (!id) {
@@ -104,7 +100,7 @@ export async function getSW(savedObjectsClient: SavedObjectsClientContract, id?:
     return Promise.resolve(savedObject);
   }
 
-  const resp = await savedObjectsClient.get(savedWorkspaceType, id);
+  const resp = await savedObjectsClient.get<Record<string, unknown>>(savedWorkspaceType, id);
   savedObject._source = cloneDeep(resp.attributes);
 
   if (!resp._version) {
@@ -116,7 +112,7 @@ export async function getSW(savedObjectsClient: SavedObjectsClientContract, id?:
 
   // transform the source using JSON.parse
   if (savedObject._source.wsState) {
-    savedObject._source.wsState = JSON.parse(savedObject._source.wsState);
+    savedObject._source.wsState = JSON.parse(savedObject._source.wsState as string);
   }
 
   // Give obj all of the values in _source.fields
@@ -124,10 +120,10 @@ export async function getSW(savedObjectsClient: SavedObjectsClientContract, id?:
   savedObject.lastSavedTitle = savedObject.title;
 
   if (resp.references && resp.references.length > 0) {
-    injectReferences(savedObject as any, resp.references);
+    injectReferences(savedObject, resp.references);
   }
 
-  return savedObject;
+  return savedObject as GraphWorkspaceSavedObject;
 }
 
 export function deleteWS(savedObjectsClient: SavedObjectsClientContract, ids: string[]) {
@@ -135,7 +131,7 @@ export function deleteWS(savedObjectsClient: SavedObjectsClientContract, ids: st
 }
 
 export async function saveWS(
-  savedObject: SavedObject,
+  savedObject: GraphWorkspaceSavedObject,
   {
     confirmOverwrite = false,
     isTitleDuplicateConfirmed = false,
@@ -158,16 +154,26 @@ export async function saveWS(
     delete savedObject.id;
   }
 
-  // Here we want to extract references and set them within "references" attribute
-  let { attributes, references } = serializeSavedObject(savedObject, config);
-  if (extractReferences) {
-    ({ attributes, references } = extractReferences({ attributes, references }));
+  let attributes: SavedObjectAttributes = {};
+
+  forOwn(mapping, (fieldType, fieldName) => {
+    const savedObjectFieldVal = savedObject[fieldName as keyof GraphWorkspaceSavedObject];
+    if (savedObjectFieldVal != null) {
+      attributes[fieldName as keyof GraphWorkspaceSavedObject] =
+        fieldType === 'json' ? JSON.stringify(savedObjectFieldVal) : savedObjectFieldVal;
+    }
+  });
+  const extractedRefs = extractReferences({ attributes, references: [] });
+  const references = extractedRefs.references;
+  attributes = extractedRefs.attributes;
+
+  if (!references) {
+    throw new Error('References not returned from extractReferences');
   }
-  if (!references) throw new Error('References not returned from extractReferences');
 
   try {
     await checkForDuplicateTitle(
-      savedObject,
+      savedObject as any,
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
       services as SavedObjectKibanaServices
@@ -180,13 +186,13 @@ export async function saveWS(
       references,
     };
     const resp = confirmOverwrite
-      ? await createSourceUtil(
+      ? await saveWithConfirmation(
           attributes,
           savedObject,
           createOpt,
           services as SavedObjectKibanaServices
         )
-      : await services.savedObjectsClient.create(savedObject.getEsType(), attributes, {
+      : await services.savedObjectsClient.create(savedObject.type, attributes, {
           ...createOpt,
           overwrite: true,
         });

@@ -26,7 +26,7 @@ export {
   createSavedObjectClass,
   serializeSavedObject,
   checkForDuplicateTitle,
-  createSourceUtil,
+  saveWithConfirmation,
   isErrorNonFatal,
 } from './saved_object';
 export { SavedObjectSaveOpts, SavedObjectKibanaServices, SavedObject } from './types';
