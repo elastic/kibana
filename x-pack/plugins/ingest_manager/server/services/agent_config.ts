@@ -5,37 +5,29 @@
  */
 import { SavedObjectsClientContract } from 'kibana/server';
 import { AuthenticatedUser } from '../../../security/server';
+import { DEFAULT_AGENT_CONFIG, AGENT_CONFIG_SAVED_OBJECT_TYPE } from '../constants';
 import {
-  DEFAULT_AGENT_CONFIG_ID,
-  DEFAULT_AGENT_CONFIG,
-  AGENT_CONFIG_SAVED_OBJECT_TYPE,
-} from '../constants';
-import {
+  Datasource,
   NewAgentConfig,
   AgentConfig,
+  FullAgentConfig,
   AgentConfigStatus,
-  AgentConfigUpdateHandler,
   ListWithKuery,
-  DeleteAgentConfigsResponse,
 } from '../types';
+import { DeleteAgentConfigsResponse, storedDatasourceToAgentDatasource } from '../../common';
 import { datasourceService } from './datasource';
+import { outputService } from './output';
+import { agentConfigUpdateEventHandler } from './agent_config_update';
 
 const SAVED_OBJECT_TYPE = AGENT_CONFIG_SAVED_OBJECT_TYPE;
 
 class AgentConfigService {
-  private eventsHandler: AgentConfigUpdateHandler[] = [];
-
-  public registerAgentConfigUpdateHandler(handler: AgentConfigUpdateHandler) {
-    this.eventsHandler.push(handler);
-  }
-
-  public triggerAgentConfigUpdatedEvent: AgentConfigUpdateHandler = async (
-    action,
-    agentConfigId
+  private triggerAgentConfigUpdatedEvent = async (
+    soClient: SavedObjectsClientContract,
+    action: string,
+    agentConfigId: string
   ) => {
-    for (const handler of this.eventsHandler) {
-      await handler(action, agentConfigId);
-    }
+    return agentConfigUpdateEventHandler(soClient, action, agentConfigId);
   };
 
   private async _update(
@@ -44,37 +36,51 @@ class AgentConfigService {
     agentConfig: Partial<AgentConfig>,
     user?: AuthenticatedUser
   ): Promise<AgentConfig> {
+    const oldAgentConfig = await this.get(soClient, id, false);
+
+    if (!oldAgentConfig) {
+      throw new Error('Agent config not found');
+    }
+
+    if (
+      oldAgentConfig.status === AgentConfigStatus.Inactive &&
+      agentConfig.status !== AgentConfigStatus.Active
+    ) {
+      throw new Error(
+        `Agent config ${id} cannot be updated because it is ${oldAgentConfig.status}`
+      );
+    }
+
     await soClient.update<AgentConfig>(SAVED_OBJECT_TYPE, id, {
       ...agentConfig,
+      revision: oldAgentConfig.revision + 1,
       updated_on: new Date().toString(),
       updated_by: user ? user.username : 'system',
     });
 
-    await this.triggerAgentConfigUpdatedEvent('updated', id);
+    await this.triggerAgentConfigUpdatedEvent(soClient, 'updated', id);
 
     return (await this.get(soClient, id)) as AgentConfig;
   }
 
   public async ensureDefaultAgentConfig(soClient: SavedObjectsClientContract) {
-    let defaultAgentConfig;
+    const configs = await soClient.find<AgentConfig>({
+      type: AGENT_CONFIG_SAVED_OBJECT_TYPE,
+      filter: 'agent_configs.attributes.is_default:true',
+    });
 
-    try {
-      defaultAgentConfig = await this.get(soClient, DEFAULT_AGENT_CONFIG_ID);
-    } catch (err) {
-      if (!err.isBoom || err.output.statusCode !== 404) {
-        throw err;
-      }
-    }
-
-    if (!defaultAgentConfig) {
+    if (configs.total === 0) {
       const newDefaultAgentConfig: NewAgentConfig = {
         ...DEFAULT_AGENT_CONFIG,
       };
 
-      await this.create(soClient, newDefaultAgentConfig, {
-        id: DEFAULT_AGENT_CONFIG_ID,
-      });
+      return this.create(soClient, newDefaultAgentConfig);
     }
+
+    return {
+      id: configs.saved_objects[0].id,
+      ...configs.saved_objects[0].attributes,
+    };
   }
 
   public async create(
@@ -86,13 +92,16 @@ class AgentConfigService {
       SAVED_OBJECT_TYPE,
       {
         ...agentConfig,
+        revision: 1,
         updated_on: new Date().toISOString(),
         updated_by: options?.user?.username || 'system',
       } as AgentConfig,
       options
     );
 
-    await this.triggerAgentConfigUpdatedEvent('created', newSo.id);
+    if (!agentConfig.is_default) {
+      await this.triggerAgentConfigUpdatedEvent(soClient, 'created', newSo.id);
+    }
 
     return {
       id: newSo.id,
@@ -100,7 +109,11 @@ class AgentConfigService {
     };
   }
 
-  public async get(soClient: SavedObjectsClientContract, id: string): Promise<AgentConfig | null> {
+  public async get(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    withDatasources: boolean = true
+  ): Promise<AgentConfig | null> {
     const agentConfigSO = await soClient.get<AgentConfig>(SAVED_OBJECT_TYPE, id);
     if (!agentConfigSO) {
       return null;
@@ -110,15 +123,20 @@ class AgentConfigService {
       throw new Error(agentConfigSO.error.message);
     }
 
-    return {
+    const agentConfig: AgentConfig = {
       id: agentConfigSO.id,
       ...agentConfigSO.attributes,
-      datasources:
+    };
+
+    if (withDatasources) {
+      agentConfig.datasources =
         (await datasourceService.getByIDs(
           soClient,
           (agentConfigSO.attributes.datasources as string[]) || []
-        )) || [],
-    };
+        )) || [];
+    }
+
+    return agentConfig;
   }
 
   public async list(
@@ -159,22 +177,15 @@ class AgentConfigService {
     agentConfig: Partial<AgentConfig>,
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentConfig> {
-    const oldAgentConfig = await this.get(soClient, id);
-
-    if (!oldAgentConfig) {
-      throw new Error('Agent config not found');
-    }
-
-    if (
-      oldAgentConfig.status === AgentConfigStatus.Inactive &&
-      agentConfig.status !== AgentConfigStatus.Active
-    ) {
-      throw new Error(
-        `Agent config ${id} cannot be updated because it is ${oldAgentConfig.status}`
-      );
-    }
-
     return this._update(soClient, id, agentConfig, options?.user);
+  }
+
+  public async bumpRevision(
+    soClient: SavedObjectsClientContract,
+    id: string,
+    options?: { user?: AuthenticatedUser }
+  ): Promise<AgentConfig> {
+    return this._update(soClient, id, {}, options?.user);
   }
 
   public async assignDatasources(
@@ -183,7 +194,7 @@ class AgentConfigService {
     datasourceIds: string[],
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentConfig> {
-    const oldAgentConfig = await this.get(soClient, id);
+    const oldAgentConfig = await this.get(soClient, id, false);
 
     if (!oldAgentConfig) {
       throw new Error('Agent config not found');
@@ -206,7 +217,7 @@ class AgentConfigService {
     datasourceIds: string[],
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentConfig> {
-    const oldAgentConfig = await this.get(soClient, id);
+    const oldAgentConfig = await this.get(soClient, id, false);
 
     if (!oldAgentConfig) {
       throw new Error('Agent config not found');
@@ -225,20 +236,34 @@ class AgentConfigService {
     );
   }
 
+  public async getDefaultAgentConfigId(soClient: SavedObjectsClientContract) {
+    const configs = await soClient.find({
+      type: AGENT_CONFIG_SAVED_OBJECT_TYPE,
+      filter: 'agent_configs.attributes.is_default:true',
+    });
+
+    if (configs.saved_objects.length === 0) {
+      throw new Error('No default agent config');
+    }
+
+    return configs.saved_objects[0].id;
+  }
+
   public async delete(
     soClient: SavedObjectsClientContract,
     ids: string[]
   ): Promise<DeleteAgentConfigsResponse> {
     const result: DeleteAgentConfigsResponse = [];
+    const defaultConfigId = await this.getDefaultAgentConfigId(soClient);
 
-    if (ids.includes(DEFAULT_AGENT_CONFIG_ID)) {
+    if (ids.includes(defaultConfigId)) {
       throw new Error('The default agent configuration cannot be deleted');
     }
 
     for (const id of ids) {
       try {
         await soClient.delete(SAVED_OBJECT_TYPE, id);
-        await this.triggerAgentConfigUpdatedEvent('deleted', id);
+        await this.triggerAgentConfigUpdatedEvent(soClient, 'deleted', id);
         result.push({
           id,
           success: true,
@@ -252,6 +277,50 @@ class AgentConfigService {
     }
 
     return result;
+  }
+
+  public async getFullConfig(
+    soClient: SavedObjectsClientContract,
+    id: string
+  ): Promise<FullAgentConfig | null> {
+    let config;
+
+    try {
+      config = await this.get(soClient, id);
+    } catch (err) {
+      if (!err.isBoom || err.output.statusCode !== 404) {
+        throw err;
+      }
+    }
+
+    if (!config) {
+      return null;
+    }
+
+    const agentConfig: FullAgentConfig = {
+      id: config.id,
+      outputs: {
+        // TEMPORARY as we only support a default output
+        ...[
+          await outputService.get(soClient, await outputService.getDefaultOutputId(soClient)),
+        ].reduce((outputs, { config: outputConfig, name, type, hosts, ca_sha256, api_key }) => {
+          outputs[name] = {
+            type,
+            hosts,
+            ca_sha256,
+            api_key,
+            ...outputConfig,
+          };
+          return outputs;
+        }, {} as FullAgentConfig['outputs']),
+      },
+      datasources: (config.datasources as Datasource[]).map(ds =>
+        storedDatasourceToAgentDatasource(ds)
+      ),
+      revision: config.revision,
+    };
+
+    return agentConfig;
   }
 }
 

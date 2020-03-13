@@ -5,17 +5,18 @@
  */
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler } from 'kibana/server';
-import { DEFAULT_OUTPUT_ID } from '../../constants';
 import { outputService, agentConfigService } from '../../services';
 import { CreateFleetSetupRequestSchema, CreateFleetSetupResponse } from '../../types';
+import { setup } from '../../services/setup';
+import { generateEnrollmentAPIKey } from '../../services/api_keys';
 
 export const getFleetSetupHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const successBody: CreateFleetSetupResponse = { isInitialized: true };
   const failureBody: CreateFleetSetupResponse = { isInitialized: false };
   try {
-    const output = await outputService.get(soClient, DEFAULT_OUTPUT_ID);
-    if (output) {
+    const adminUser = await outputService.getAdminUser(soClient);
+    if (adminUser) {
       return response.ok({
         body: successBody,
       });
@@ -38,11 +39,31 @@ export const createFleetSetupHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    await outputService.createDefaultOutput(soClient, {
-      username: request.body.admin_username,
-      password: request.body.admin_password,
+    await outputService.updateOutput(soClient, await outputService.getDefaultOutputId(soClient), {
+      admin_username: request.body.admin_username,
+      admin_password: request.body.admin_password,
     });
-    await agentConfigService.ensureDefaultAgentConfig(soClient);
+    await generateEnrollmentAPIKey(soClient, {
+      name: 'Default',
+      configId: await agentConfigService.getDefaultAgentConfigId(soClient),
+    });
+
+    return response.ok({
+      body: { isInitialized: true },
+    });
+  } catch (e) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const ingestManagerSetupHandler: RequestHandler = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
+  try {
+    await setup(soClient, callCluster);
     return response.ok({
       body: { isInitialized: true },
     });
