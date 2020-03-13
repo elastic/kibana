@@ -8,10 +8,10 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'reporting']);
+export default function({ getService /* , getPageObjects */ }: FtrProviderContext) {
+  // const PageObjects = getPageObjects(['common', 'dashboard', 'reporting']);
   const esArchiver = getService('esArchiver');
-  const listingTable = getService('listingTable');
+  // const listingTable = getService('listingTable');
 
   describe('lens reporting', () => {
     before(async () => {
