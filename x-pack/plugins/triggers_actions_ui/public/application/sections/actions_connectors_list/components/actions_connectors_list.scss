@@ -3,11 +3,12 @@
 }
 
 .actConnectorsList__tableRowDisabled {
-  background-color:#F5F7FA;
-  .euiTableCellContent__text, .euiLink {
-    color:#69707D;
+  background-color: $euiColorLightestShade;
+  .euiTableCellContent__text,
+  .euiLink {
+    color: $euiColorDarkShade;
   }
   .euiLink + .euiIcon {
-    margin-left: 5px;
+    margin-left: $euiSizeXS;
   }
 }
