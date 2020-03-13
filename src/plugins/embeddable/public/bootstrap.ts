@@ -24,14 +24,12 @@ import {
   contextMenuDrilldownsTrigger,
   createFilterAction,
   panelBadgeTrigger,
-  selectRangeTrigger,
   valueClickTrigger,
   EmbeddableVisTriggerContext,
   IEmbeddable,
   EmbeddableContext,
   APPLY_FILTER_TRIGGER,
   VALUE_CLICK_TRIGGER,
-  SELECT_RANGE_TRIGGER,
   CONTEXT_MENU_TRIGGER,
   CONTEXT_MENU_DRILLDOWNS_TRIGGER,
   PANEL_BADGE_TRIGGER,
@@ -46,7 +44,6 @@ import {
 
 declare module '../../ui_actions/public' {
   export interface TriggerContextMapping {
-    [SELECT_RANGE_TRIGGER]: EmbeddableVisTriggerContext;
     [VALUE_CLICK_TRIGGER]: EmbeddableVisTriggerContext;
     [APPLY_FILTER_TRIGGER]: {
       embeddable: IEmbeddable;
@@ -76,7 +73,6 @@ export const bootstrap = (uiActions: UiActionsSetup) => {
   uiActions.registerTrigger(contextMenuDrilldownsTrigger);
   uiActions.registerTrigger(applyFilterTrigger);
   uiActions.registerTrigger(panelBadgeTrigger);
-  uiActions.registerTrigger(selectRangeTrigger);
   uiActions.registerTrigger(valueClickTrigger);
 
   const actionApplyFilter = createFilterAction();

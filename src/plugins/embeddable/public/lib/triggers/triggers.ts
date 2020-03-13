@@ -33,13 +33,6 @@ export interface EmbeddableVisTriggerContext {
   };
 }
 
-export const SELECT_RANGE_TRIGGER = 'SELECT_RANGE_TRIGGER';
-export const selectRangeTrigger: Trigger<'SELECT_RANGE_TRIGGER'> = {
-  id: SELECT_RANGE_TRIGGER,
-  title: 'Select range',
-  description: 'Applies a range filter',
-};
-
 export const VALUE_CLICK_TRIGGER = 'VALUE_CLICK_TRIGGER';
 export const valueClickTrigger: Trigger<'VALUE_CLICK_TRIGGER'> = {
   id: VALUE_CLICK_TRIGGER,

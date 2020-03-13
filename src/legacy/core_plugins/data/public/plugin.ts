@@ -43,11 +43,14 @@ import {
   ValueClickActionContext,
 } from './actions/value_click_action';
 import {
-  SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/embeddable/public/lib/triggers';
-import { UiActionsSetup, UiActionsStart } from '../../../../plugins/ui_actions/public';
+import {
+  UiActionsSetup,
+  UiActionsStart,
+  SELECT_RANGE_TRIGGER,
+} from '../../../../plugins/ui_actions/public';
 
 import { SearchSetup, SearchStart, SearchService } from './search/search_service';
 

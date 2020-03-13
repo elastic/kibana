@@ -43,6 +43,6 @@ export {
   Configurable as UiActionsConfigurable,
   CollectConfigProps as UiActionsCollectConfigProps,
 } from './util';
-export { Trigger, TriggerContext } from './triggers';
+export { Trigger, TriggerContext, SELECT_RANGE_TRIGGER, selectRangeTrigger } from './triggers';
 export { TriggerContextMapping, TriggerId, ActionContextMapping, ActionType } from './types';
 export { ActionByType, DynamicActionManager as UiActionsDynamicActionManager } from './actions';

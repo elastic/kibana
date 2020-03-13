@@ -63,8 +63,6 @@ export {
   PanelNotFoundError,
   PanelState,
   PropertySpec,
-  SELECT_RANGE_TRIGGER,
-  selectRangeTrigger,
   VALUE_CLICK_TRIGGER,
   valueClickTrigger,
   ViewMode,

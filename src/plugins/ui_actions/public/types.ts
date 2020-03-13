@@ -20,6 +20,8 @@
 import { ActionInternal } from './actions/action_internal';
 import { TriggerInternal } from './triggers/trigger_internal';
 import { ActionFactory } from './actions';
+import { IEmbeddable } from '../../embeddable/public';
+import { SELECT_RANGE_TRIGGER } from './triggers';
 
 export type TriggerRegistry = Map<TriggerId, TriggerInternal<any>>;
 export type ActionRegistry = Map<string, ActionInternal>;
@@ -35,6 +37,7 @@ export type TriggerContext = BaseContext;
 
 export interface TriggerContextMapping {
   [DEFAULT_TRIGGER]: TriggerContext;
+  [SELECT_RANGE_TRIGGER]: EmbeddableVisTriggerContext;
 }
 
 const DEFAULT_ACTION = '';
@@ -42,4 +45,13 @@ export type ActionType = keyof ActionContextMapping;
 
 export interface ActionContextMapping {
   [DEFAULT_ACTION]: BaseContext;
+}
+
+export interface EmbeddableVisTriggerContext {
+  embeddable: IEmbeddable;
+  timeFieldName: string;
+  data: {
+    e: MouseEvent;
+    data: unknown;
+  };
 }
