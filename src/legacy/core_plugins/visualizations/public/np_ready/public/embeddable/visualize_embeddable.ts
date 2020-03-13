@@ -46,7 +46,7 @@ import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { VisSavedObject } from '../types';
-import { VIS_EVENT_TO_TRIGGER, VisEventToTrigger } from './events';
+import { VIS_EVENT_TO_TRIGGER } from './events';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
