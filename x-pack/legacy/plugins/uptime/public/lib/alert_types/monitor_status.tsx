@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import React from 'react';
 import DateMath from '@elastic/datemath';
 import { isRight } from 'fp-ts/lib/Either';
@@ -26,9 +26,9 @@ export const validate = (alertParams: any): ValidationResult => {
    * When the UI initially loads, this validate function is called with an
    * empty set of params, we don't want to type check against that.
    */
-  if (Object.keys(alertParams).length && !isRight(decoded)) {
+  if (!isRight(decoded)) {
     errors.typeCheckFailure = 'Provided parameters do not conform to the expected type.';
-    ThrowReporter.report(decoded);
+    PathReporter.report(decoded);
   }
 
   if (isRight(decoded)) {
