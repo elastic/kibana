@@ -217,7 +217,7 @@ describe('Analytics job clone action', () => {
           classification: {
             dependent_variable: 'y',
             training_percent: 71,
-            maximum_number_trees: 1500,
+            max_trees: 1500,
           },
         },
         model_memory_limit: '400mb',
@@ -242,7 +242,7 @@ describe('Analytics job clone action', () => {
           classification: {
             dependent_variable: 'y',
             training_percent: 71,
-            max_trees: 1500,
+            maximum_number_trees: 1500,
           },
         },
         model_memory_limit: '400mb',

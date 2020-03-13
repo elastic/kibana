@@ -72,7 +72,7 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
             feature_bag_fraction: {
               optional: true,
             },
-            maximum_number_trees: {
+            max_trees: {
               optional: true,
             },
             gamma: {
@@ -144,7 +144,7 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
             feature_bag_fraction: {
               optional: true,
             },
-            maximum_number_trees: {
+            max_trees: {
               optional: true,
             },
             gamma: {
