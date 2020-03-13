@@ -20,9 +20,7 @@ export {
 export { ActionWizard } from './components';
 export {
   ActionFactoryDefinition as AdvancedUiActionsActionFactoryDefinition,
-  AnyActionFactoryDefinition as AdvancedUiActionsAnyActionFactoryDefinition,
   ActionFactory as AdvancedUiActionsActionFactory,
-  AnyActionFactory as AdvancedUiActionsAnyActionFactory,
 } from './services/action_factory_service';
 export {
   Configurable as AdvancedUiActionsConfigurable,
