@@ -21,7 +21,7 @@ import {
 } from '../api';
 import { DynamicSettings } from '../../../common/runtime_types';
 import { getBasePath } from '../selectors';
-import { createToast } from '../actions/toasts';
+import { uptimeKibanaCore } from '../../uptime_app';
 
 export function* fetchDynamicSettingsEffect() {
   yield takeLatest(
@@ -34,37 +34,21 @@ export function* setDynamicSettingsEffect() {
   yield takeLatest(String(setDynamicSettings), function*(action: Action<DynamicSettings>) {
     try {
       if (!action.payload) {
-        const err = 'Cannot fetch effect without a payload';
-        yield put(setDynamicSettingsFail(new Error(err)));
-        yield put(
-          createToast({
-            id: '' + Math.random(),
-            color: 'danger',
-            title: 'Could not save settings',
-            text: JSON.stringify(action),
-          })
-        );
+        const err = new Error('Cannot fetch effect without a payload');
+        yield put(setDynamicSettingsFail(err));
+        yield uptimeKibanaCore?.notifications.toasts.addError(err, {
+          title: 'Could not save settings!',
+        });
         return;
       }
       const basePath = yield select(getBasePath);
       yield call(setDynamicSettingsAPI, { settings: action.payload, basePath });
       yield put(setDynamicSettingsSuccess(action.payload));
-      yield put(
-        createToast({
-          id: '' + Math.random(),
-          color: 'success',
-          title: 'Settings saved!',
-        })
-      );
+      yield uptimeKibanaCore?.notifications.toasts.addSuccess('Settings saved!');
     } catch (error) {
-      yield put(
-        createToast({
-          id: '' + Math.random(),
-          color: 'danger',
-          title: 'Could not save settings',
-          text: `${error.message}: ${error.stacktrace}`,
-        })
-      );
+      yield uptimeKibanaCore?.notifications.toasts.addError(error, {
+        title: 'Could not save settings!',
+      });
       yield put(setDynamicSettingsFail(error));
     }
   });
