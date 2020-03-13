@@ -17,13 +17,12 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { coreMock } from '../../../../src/core/public/mocks';
 import { Plugin, DataPublicPluginSetup, DataPublicPluginStart, IndexPatternsContract } from '.';
 import { fieldFormatsMock } from '../common/field_formats/mocks';
 import { searchSetupMock } from './search/mocks';
+import { AggTypeFieldFilters } from './search/aggs';
+import { searchAggsStartMock } from './search/aggs/mocks';
 import { queryServiceMock } from './query/mocks';
-import { getCalculateAutoTimeExpression } from './search/aggs/buckets/lib/date_utils';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
@@ -53,17 +52,24 @@ const createSetupContract = (): Setup => {
 };
 
 const createStartContract = (): Start => {
-  const coreStart = coreMock.createStart();
   const queryStartMock = queryServiceMock.createStartContract();
   const startContract = {
+    actions: {
+      createFiltersFromEvent: jest.fn().mockResolvedValue(['yes']),
+    },
     autocomplete: autocompleteMock,
     getSuggestions: jest.fn(),
     search: {
-      aggs: {
-        calculateAutoTimeExpression: getCalculateAutoTimeExpression(coreStart.uiSettings),
-      },
+      aggs: searchAggsStartMock(),
       search: jest.fn(),
       __LEGACY: {
+        AggConfig: jest.fn() as any,
+        AggType: jest.fn(),
+        aggTypeFieldFilters: new AggTypeFieldFilters(),
+        FieldParamType: jest.fn(),
+        MetricAggType: jest.fn(),
+        parentPipelineAggHelper: jest.fn() as any,
+        siblingPipelineAggHelper: jest.fn() as any,
         esClient: {
           search: jest.fn(),
           msearch: jest.fn(),
@@ -95,7 +101,7 @@ const createStartContract = (): Start => {
 };
 
 export { searchSourceMock } from './search/mocks';
-export { getCalculateAutoTimeExpression } from './search/aggs/buckets/lib/date_utils';
+export { getCalculateAutoTimeExpression } from './search/aggs';
 
 export const dataPluginMock = {
   createSetupContract,
