@@ -243,7 +243,7 @@ interface AlertMetadata {
  */
 export type AlertData = AlertEvent & AlertMetadata;
 
-export interface EndpointMetadata {
+export type EndpointMetadata = Immutable<{
   '@timestamp': number;
   event: {
     created: number;
@@ -258,7 +258,7 @@ export interface EndpointMetadata {
     version: string;
   };
   host: HostFields;
-}
+}>;
 
 /**
  * Represents `total` response from Elasticsearch after ES 7.0.

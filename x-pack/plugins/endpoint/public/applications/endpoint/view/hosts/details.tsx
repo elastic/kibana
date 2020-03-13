@@ -23,13 +23,13 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { HostListState } from '../../types';
+import { EndpointMetadata } from '../../../../../common/types';
 import { useHostListSelector } from './hooks';
 import { urlFromQueryParams } from './url_from_query_params';
 import { FormattedDateAndTime } from '../formatted_date_time';
 import { uiQueryParams, detailsData, detailsError } from './../../store/hosts/selectors';
 
-const HostDetails = memo(({ details }: { details: HostListState }) => {
+const HostDetails = memo(({ details }: { details: EndpointMetadata }) => {
   const HostIds = styled(EuiListGroupItem)`
     margin-top: 0;
     .euiListGroupItem__text {
@@ -61,15 +61,6 @@ const HostDetails = memo(({ details }: { details: HostListState }) => {
   }, [details]);
 
   const detailsResultsLower = useMemo(() => {
-    const ipStrings = () => {
-      details.host.ip.reduce((ips, ip, index) => {
-        if (index === details.host.ip.length - 1) {
-          return ip;
-        } else {
-          return ip + ', ';
-        }
-      }, '');
-    };
     return [
       {
         title: i18n.translate('xpack.endpoint.host.details.policy', {

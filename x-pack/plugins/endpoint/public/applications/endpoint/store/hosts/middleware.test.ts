@@ -15,7 +15,7 @@ import { listData } from './selectors';
 import { DepsStartMock, depsStartMock } from '../../mocks';
 import { mockHostResultList } from './mock_host_result_list';
 
-describe('endpoint list saga', () => {
+describe('host list middleware', () => {
   const sleep = (ms = 100) => new Promise(wakeup => setTimeout(wakeup, ms));
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;
@@ -39,14 +39,14 @@ describe('endpoint list saga', () => {
     depsStart = depsStartMock();
     fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
     store = createStore(
-      managementListReducer,
-      applyMiddleware(managementMiddlewareFactory(fakeCoreStart, depsStart))
+      hostListReducer,
+      applyMiddleware(hostMiddlewareFactory(fakeCoreStart, depsStart))
     );
     getState = store.getState;
     dispatch = store.dispatch;
     history = createBrowserHistory();
   });
-  test('it handles `userChangedUrl`', async () => {
+  test('handles `userChangedUrl`', async () => {
     const apiResponse = getEndpointListApiResponse();
     fakeHttpServices.post.mockResolvedValue(apiResponse);
     expect(fakeHttpServices.post).not.toHaveBeenCalled();

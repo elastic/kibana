@@ -69,8 +69,8 @@ export const appStoreFactory: (middlewareDeps?: {
     middleware = composeWithReduxDevTools(
       applyMiddleware(
         substateMiddlewareFactory(
-          globalState => globalState.managementList,
-          managementMiddlewareFactory(coreStart, depsStart)
+          globalState => globalState.hostList,
+          hostMiddlewareFactory(coreStart, depsStart)
         ),
         substateMiddlewareFactory(
           globalState => globalState.policyList,
