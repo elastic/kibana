@@ -6,6 +6,7 @@
 
 // export { useBreadcrumbs } from './use_breadcrumbs';
 export { useLinks } from './use_links';
+export { useLocalSearch, searchIdField } from './use_local_search';
 export {
   PackageInstallProvider,
   useDeletePackage,

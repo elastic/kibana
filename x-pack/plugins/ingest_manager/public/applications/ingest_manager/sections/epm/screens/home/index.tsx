@@ -4,136 +4,145 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { useState } from 'react';
+import { useRouteMatch } from 'react-router-dom';
+import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiHorizontalRule,
-  // @ts-ignore
-  EuiSearchBar,
-  EuiSpacer,
-} from '@elastic/eui';
-import React, { Fragment, useState } from 'react';
-import { useGetCategories, useGetPackages } from '../../../../hooks';
+  EPM_LIST_ALL_PACKAGES_PATH,
+  EPM_LIST_INSTALLED_PACKAGES_PATH,
+} from '../../../../constants';
+import { useLink, useGetCategories, useGetPackages } from '../../../../hooks';
 import { WithHeaderLayout } from '../../../../layouts';
-import { CategorySummaryItem, PackageList } from '../../../../types';
+import { CategorySummaryItem } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
-// import { useBreadcrumbs, useLinks } from '../../hooks';
 import { CategoryFacets } from './category_facets';
 import { HeroCopy, HeroImage } from './header';
-import { useAllPackages, useInstalledPackages, useLocalSearch } from './hooks';
-import { SearchPackages } from './search_packages';
 
-export function Home() {
-  // useBreadcrumbs([{ text: PLUGIN.TITLE, href: toListView() }]);
+export function EPMHomePage() {
+  const {
+    params: { tabId },
+  } = useRouteMatch<{ tabId?: string }>();
 
-  const state = useHomeState();
-  const searchBar = (
-    <EuiSearchBar
-      query={state.searchTerm}
-      key="search-input"
-      box={{
-        placeholder: 'Find a new package, or one you already use.',
-        incremental: true,
-      }}
-      onChange={({ queryText: userInput }: { queryText: string }) => {
-        state.setSearchTerm(userInput);
-      }}
-    />
-  );
-  const body = state.searchTerm ? (
-    <SearchPackages
-      searchTerm={state.searchTerm}
-      localSearchRef={state.localSearchRef}
-      allPackages={state.allPackages}
-    />
-  ) : (
-    <Fragment>
-      {state.installedPackages.length ? (
-        <Fragment>
-          <InstalledPackages list={state.installedPackages} />
-          <EuiHorizontalRule margin="xxl" />
-        </Fragment>
-      ) : null}
-      <AvailablePackages {...state} />
-    </Fragment>
-  );
+  const ALL_PACKAGES_URI = useLink(EPM_LIST_ALL_PACKAGES_PATH);
+  const INSTALLED_PACKAGES_URI = useLink(EPM_LIST_INSTALLED_PACKAGES_PATH);
 
   return (
     <WithHeaderLayout
       leftColumn={<HeroCopy />}
       rightColumn={<HeroImage />}
-      // tabs={[
-      //   {
-      //     id: 'all_packages',
-      //     name: 'All packages',
-      //     isSelected: true,
-      //   },
-      //   {
-      //     id: 'installed_packages',
-      //     name: 'Installed packages',
-      //   },
-      // ]}
+      tabs={
+        ([
+          {
+            id: 'all_packages',
+            name: i18n.translate('xpack.ingestManager.epmList.allPackagesTabText', {
+              defaultMessage: 'All packages',
+            }),
+            href: ALL_PACKAGES_URI,
+            isSelected: !tabId,
+          },
+          {
+            id: 'installed_packages',
+            name: i18n.translate('xpack.ingestManager.epmList.installedPackagesTabText', {
+              defaultMessage: 'Installed packages',
+            }),
+            href: INSTALLED_PACKAGES_URI,
+            isSelected: tabId === 'installed',
+          },
+        ] as unknown) as EuiTabProps[]
+      }
     >
-      {searchBar}
-      <EuiSpacer size="m" />
-      {body}
+      {tabId === 'installed' ? <InstalledPackages /> : <AvailablePackages />}
     </WithHeaderLayout>
   );
 }
 
-type HomeState = ReturnType<typeof useHomeState>;
-
-export function useHomeState() {
-  const [searchTerm, setSearchTerm] = useState('');
+function InstalledPackages() {
+  const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages();
   const [selectedCategory, setSelectedCategory] = useState('');
-  const { data: categoriesRes } = useGetCategories();
-  const categories = categoriesRes?.response;
-  const { data: categoryPackagesRes } = useGetPackages({ category: selectedCategory });
-  const categoryPackages = categoryPackagesRes?.response;
-  const [allPackages, setAllPackages] = useAllPackages(selectedCategory, categoryPackages);
-  const localSearchRef = useLocalSearch(allPackages);
-  const [installedPackages, setInstalledPackages] = useInstalledPackages(allPackages);
+  const packages =
+    allPackages && allPackages.response
+      ? allPackages.response.filter(pkg => pkg.status === 'installed')
+      : [];
 
-  return {
-    searchTerm,
-    setSearchTerm,
-    selectedCategory,
-    setSelectedCategory,
-    categories,
-    allPackages,
-    setAllPackages,
-    installedPackages,
-    localSearchRef,
-    setInstalledPackages,
-    categoryPackages,
-  };
+  const title = i18n.translate('xpack.ingestManager.epmList.installedPackagesTitle', {
+    defaultMessage: 'Installed packages',
+  });
+
+  const categories = [
+    {
+      id: '',
+      title: i18n.translate('xpack.ingestManager.epmList.allPackagesFilterLinkText', {
+        defaultMessage: 'All',
+      }),
+      count: packages.length,
+    },
+    {
+      id: 'updates_available',
+      title: i18n.translate('xpack.ingestManager.epmList.updatesAvailableFilterLinkText', {
+        defaultMessage: 'Updates available',
+      }),
+      count: 0,
+    },
+  ];
+
+  const controls = (
+    <CategoryFacets
+      categories={categories}
+      selectedCategory={selectedCategory}
+      onCategoryChange={({ id }: CategorySummaryItem) => setSelectedCategory(id)}
+    />
+  );
+
+  return (
+    <PackageListGrid
+      isLoading={isLoadingPackages}
+      controls={controls}
+      title={title}
+      list={packages}
+    />
+  );
 }
 
-function InstalledPackages({ list }: { list: PackageList }) {
-  const title = 'Your Packages';
+function AvailablePackages() {
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const { data: categoryPackagesRes, isLoading: isLoadingPackages } = useGetPackages({
+    category: selectedCategory,
+  });
+  const { data: categoriesRes, isLoading: isLoadingCategories } = useGetCategories();
+  const packages =
+    categoryPackagesRes && categoryPackagesRes.response ? categoryPackagesRes.response : [];
 
-  return <PackageListGrid title={title} list={list} />;
-}
+  const title = i18n.translate('xpack.ingestManager.epmList.allPackagesTitle', {
+    defaultMessage: 'All packages',
+  });
 
-function AvailablePackages({
-  allPackages,
-  categories,
-  categoryPackages,
-  selectedCategory,
-  setSelectedCategory,
-}: HomeState) {
-  const title = 'Available Packages';
-  const noFilter = {
-    id: '',
-    title: 'All',
-    count: allPackages.length,
-  };
+  const categories = [
+    {
+      id: '',
+      title: i18n.translate('xpack.ingestManager.epmList.allPackagesFilterLinkText', {
+        defaultMessage: 'All',
+      }),
+      count: packages.length,
+    },
+    ...(categoriesRes ? categoriesRes.response : []),
+  ];
 
   const controls = categories ? (
     <CategoryFacets
-      categories={[noFilter, ...categories]}
+      isLoading={isLoadingCategories}
+      categories={categories}
       selectedCategory={selectedCategory}
       onCategoryChange={({ id }: CategorySummaryItem) => setSelectedCategory(id)}
     />
   ) : null;
 
-  return <PackageListGrid title={title} controls={controls} list={categoryPackages || []} />;
+  return (
+    <PackageListGrid
+      isLoading={isLoadingPackages}
+      title={title}
+      controls={controls}
+      list={packages}
+    />
+  );
 }

@@ -39,7 +39,7 @@ export const HeroCopy = memo(() => {
 export const HeroImage = memo(() => {
   const { toAssets } = useLinks();
   const ImageWrapper = styled.div`
-    margin-bottom: -38px; // revert to -62px when tabs are restored
+    margin-bottom: -62px;
   `;
 
   return (

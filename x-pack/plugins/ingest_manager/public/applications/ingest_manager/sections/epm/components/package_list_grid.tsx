@@ -3,25 +3,74 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { Fragment, ReactNode } from 'react';
+import React, { Fragment, ReactNode, useState } from 'react';
+import {
+  EuiFlexGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  // @ts-ignore
+  EuiSearchBar,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { Loading } from '../../../components';
 import { PackageList } from '../../../types';
+import { useLocalSearch, searchIdField } from '../hooks';
 import { BadgeProps, PackageCard } from './package_card';
 
 type ListProps = {
+  isLoading?: boolean;
   controls?: ReactNode;
   title: string;
   list: PackageList;
 } & BadgeProps;
 
-export function PackageListGrid({ controls, title, list, showInstalledBadge }: ListProps) {
+export function PackageListGrid({
+  isLoading,
+  controls,
+  title,
+  list,
+  showInstalledBadge,
+}: ListProps) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const localSearchRef = useLocalSearch(list);
+
   const controlsContent = <ControlsColumn title={title} controls={controls} />;
-  const gridContent = <GridColumn list={list} showInstalledBadge={showInstalledBadge} />;
+  let gridContent: JSX.Element;
+
+  if (isLoading || !localSearchRef.current) {
+    gridContent = <Loading />;
+  } else {
+    const filteredList = searchTerm
+      ? list.filter(item =>
+          (localSearchRef.current!.search(searchTerm) as PackageList)
+            .map(match => match[searchIdField])
+            .includes(item[searchIdField])
+        )
+      : list;
+    gridContent = <GridColumn list={filteredList} showInstalledBadge={showInstalledBadge} />;
+  }
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup alignItems="flexStart">
       <EuiFlexItem grow={1}>{controlsContent}</EuiFlexItem>
-      <EuiFlexItem grow={3}>{gridContent}</EuiFlexItem>
+      <EuiFlexItem grow={3}>
+        <EuiSearchBar
+          query={searchTerm}
+          box={{
+            placeholder: i18n.translate('xpack.ingestManager.epmList.searchPackagesPlaceholder', {
+              defaultMessage: 'Search for a package',
+            }),
+            incremental: true,
+          }}
+          onChange={({ queryText: userInput }: { queryText: string }) => {
+            setSearchTerm(userInput);
+          }}
+        />
+        <EuiSpacer />
+        {gridContent}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
@@ -34,9 +83,9 @@ interface ControlsColumnProps {
 function ControlsColumn({ controls, title }: ControlsColumnProps) {
   return (
     <Fragment>
-      <EuiText>
+      <EuiTitle size="s">
         <h2>{title}</h2>
-      </EuiText>
+      </EuiTitle>
       <EuiSpacer size="l" />
       <EuiFlexGroup>
         <EuiFlexItem grow={2}>{controls}</EuiFlexItem>
