@@ -118,12 +118,12 @@ export function createFlyoutManageDrilldowns({
     function mapToDrilldownToDrilldownListItem(
       drilldown: UiActionsSerializedEvent
     ): DrilldownListItem {
+      const actionFactory = allActionFactoriesById[drilldown.action.factoryId];
       return {
         id: drilldown.eventId,
         drilldownName: drilldown.action.name,
-        actionName:
-          allActionFactoriesById[drilldown.action.factoryId]?.getDisplayName(props.context) ??
-          drilldown.action.factoryId,
+        actionName: actionFactory?.getDisplayName(props.context) ?? drilldown.action.factoryId,
+        icon: actionFactory?.getIconType(props.context),
       };
     }
 
