@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { PureComponent } from 'react';
 import { EuiScreenReaderOnly, keyCodes } from '@elastic/eui';
-import { EuiIcon, EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiIcon, EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 export interface ExitFullScreenButtonProps {
   onExitFullScreenMode: () => void;
