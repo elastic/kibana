@@ -31,7 +31,7 @@ import {
   UpdateAgentConfigResponse,
   DeleteAgentConfigsResponse,
   GetFullAgentConfigResponse,
-  packageToConfigDatasourceInputs,
+  packageToConfigDatasource,
 } from '../../../common';
 import { findInstalledPackageByName, getPackageInfo } from '../../services/epm/packages';
 
@@ -247,18 +247,7 @@ const buildSystemDatasource = async (
       outputService.getDefaultOutputId(soClient),
     ]);
     if (sysPkgInfo) {
-      return {
-        name: `${sysPkgInfo.name}-1`,
-        package: {
-          name: sysPkgInfo.name,
-          title: sysPkgInfo.title,
-          version: sysPkgInfo.version,
-        },
-        enabled: true,
-        config_id: '',
-        output_id: defaultOutputId,
-        inputs: packageToConfigDatasourceInputs(sysPkgInfo),
-      };
+      return packageToConfigDatasource(sysPkgInfo, '', defaultOutputId, `${sysPkgInfo.name}-1`);
     }
   }
 };
