@@ -7,7 +7,7 @@
 import { isEmpty, isNumber } from 'lodash/fp';
 import moment from 'moment';
 
-import { NewRule } from '../../../../containers/detection_engine/rules';
+import { NewRule, RuleType } from '../../../../containers/detection_engine/rules';
 
 import {
   AboutStepRule,
@@ -39,17 +39,26 @@ const getTimeTypeValue = (time: string): { unit: string; value: number } => {
 };
 
 const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
-  const { anomalyThreshold, mlJobId, queryBar, isNew, ruleType, ...rest } = defineStepData;
+  const { anomalyThreshold, mlJobId, queryBar, index, isNew, ruleType, ...rest } = defineStepData;
   const { filters, query, saved_id: savedId } = queryBar;
+  const typeProps =
+    ruleType === 'machine_learning'
+      ? {
+          ...(isNumber(anomalyThreshold) ? { anomaly_threshold: anomalyThreshold } : {}),
+          ...(mlJobId ? { ml_job_id: mlJobId } : {}),
+        }
+      : {
+          index,
+          filters,
+          language: query.language,
+          query: query.query as string,
+          ...(!isEmpty(savedId) ? { saved_id: savedId, type: 'saved_query' as RuleType } : {}),
+        };
+
   return {
     ...rest,
     type: ruleType,
-    language: query.language,
-    filters,
-    query: query.query as string,
-    ...(savedId != null && savedId !== '' ? { saved_id: savedId } : {}),
-    ...(isNumber(anomalyThreshold) ? { anomaly_threshold: anomalyThreshold } : {}),
-    ...(mlJobId ? { ml_job_id: mlJobId } : {}),
+    ...typeProps,
   };
 };
 
@@ -102,13 +111,9 @@ const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson =>
 export const formatRule = (
   defineStepData: DefineStepRule,
   aboutStepData: AboutStepRule,
-  scheduleData: ScheduleStepRule,
-  ruleId?: string
+  scheduleData: ScheduleStepRule
 ): NewRule => ({
-  ...(!isEmpty(defineStepData) && ruleId != null ? { id: ruleId } : {}),
   ...formatDefineStepData(defineStepData),
   ...formatAboutStepData(aboutStepData),
   ...formatScheduleStepData(scheduleData),
-  ...(!isEmpty(defineStepData.queryBar.saved_id) ? { type: 'saved_query' } : {}),
-  // TODO: FILTER OUT MUTEX FIELDS
 });

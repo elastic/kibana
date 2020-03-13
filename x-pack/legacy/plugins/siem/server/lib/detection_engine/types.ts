@@ -33,7 +33,7 @@ export interface RuleAlertParams {
   filters: PartialFilter[] | undefined | null;
   from: string;
   immutable: boolean;
-  index: string[];
+  index: string[] | undefined | null;
   interval: string;
   ruleId: string | undefined | null;
   language: string | undefined | null;

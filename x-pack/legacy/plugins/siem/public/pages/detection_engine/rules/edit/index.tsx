@@ -195,8 +195,8 @@ const EditRulePageComponent: FC = () => {
 
     if (invalidForms.length === 0 && activeForm != null) {
       setTabHasError([]);
-      setRule(
-        formatRule(
+      setRule({
+        ...formatRule(
           (activeFormId === RuleStep.defineRule
             ? activeForm.data
             : myDefineRuleForm.data) as DefineStepRule,
@@ -205,10 +205,10 @@ const EditRulePageComponent: FC = () => {
             : myAboutRuleForm.data) as AboutStepRule,
           (activeFormId === RuleStep.scheduleRule
             ? activeForm.data
-            : myScheduleRuleForm.data) as ScheduleStepRule,
-          ruleId
-        )
-      );
+            : myScheduleRuleForm.data) as ScheduleStepRule
+        ),
+        ...(ruleId ? { id: ruleId } : {}),
+      });
     } else {
       setTabHasError(invalidForms);
     }

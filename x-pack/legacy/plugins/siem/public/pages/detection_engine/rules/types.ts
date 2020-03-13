@@ -78,12 +78,12 @@ export interface ScheduleStepRule extends StepRuleData {
 
 export interface DefineStepRuleJson {
   anomaly_threshold?: number;
-  index: string[];
-  filters: Filter[];
+  index?: string[];
+  filters?: Filter[];
   ml_job_id?: string;
   saved_id?: string;
-  query: string;
-  language: string;
+  query?: string;
+  language?: string;
   type: RuleType;
 }
 
