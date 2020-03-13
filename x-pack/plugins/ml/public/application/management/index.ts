@@ -18,7 +18,7 @@ import { MlStartDependencies, MlSetupDependencies } from '../../plugin';
 
 import { LICENSE_CHECK_STATE } from '../../../../licensing/public';
 
-import { PLUGIN_ID } from '../../../common/constants/app';
+import { PLUGIN_ID, PLUGIN_ICON } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 
 import { getJobsListBreadcrumbs } from './breadcrumbs';
@@ -38,7 +38,7 @@ export function initManagementSection(
           defaultMessage: 'Machine Learning',
         }),
         order: 100,
-        icon: 'machineLearningApp',
+        icon: PLUGIN_ICON,
       });
 
       mlSection.registerApp({
