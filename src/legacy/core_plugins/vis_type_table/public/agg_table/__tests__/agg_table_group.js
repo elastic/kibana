@@ -35,22 +35,35 @@ describe('Table Vis - AggTableGroup Directive', function() {
   const tabifiedData = {};
 
   const init = () => {
-    const vis1 = visualizationsStart.createVis(indexPattern, 'table');
-    tabifiedData.metricOnly = tabifyAggResponse(vis1.aggs, metricOnly);
-
-    const vis2 = visualizationsStart.createVis(indexPattern, {
-      type: 'pie',
-      aggs: [
-        { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-        { type: 'terms', schema: 'split', params: { field: 'extension' } },
-        { type: 'terms', schema: 'segment', params: { field: 'geo.src' } },
-        { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
-      ],
+    const searchSource = {
+      getField: name => {
+        if (name === 'index') {
+          return indexPattern;
+        }
+      },
+    };
+    const vis1 = visualizationsStart.createVis('table', {
+      type: 'table',
+      data: { searchSource, aggs: [] },
     });
-    vis2.aggs.aggs.forEach(function(agg, i) {
+    tabifiedData.metricOnly = tabifyAggResponse(vis1.data.aggs, metricOnly);
+
+    const vis2 = visualizationsStart.createVis('pie', {
+      type: 'pie',
+      data: {
+        aggs: [
+          { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+          { type: 'terms', schema: 'split', params: { field: 'extension' } },
+          { type: 'terms', schema: 'segment', params: { field: 'geo.src' } },
+          { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
+        ],
+        searchSource,
+      },
+    });
+    vis2.data.aggs.aggs.forEach(function(agg, i) {
       agg.id = 'agg_' + (i + 1);
     });
-    tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.aggs, threeTermBuckets);
+    tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.data.aggs, threeTermBuckets);
   };
 
   const initLocalAngular = () => {

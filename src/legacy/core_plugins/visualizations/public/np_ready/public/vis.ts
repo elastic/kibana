@@ -102,11 +102,11 @@ export class Vis extends EventEmitter {
     // move to migration script
     updateVisualizationConfig(state.params, this.params);
 
-    if (state.data.searchSource) {
+    if (state.data && state.data.searchSource) {
       this.data.searchSource = state.data.searchSource!;
       this.data.indexPattern = this.data.searchSource.getField('index');
     }
-    if (state.data.aggs) {
+    if (state.data && state.data.aggs) {
       let configStates = state.data.aggs;
       configStates = this.initializeDefaultsFromSchemas(configStates, this.type.schemas.all || []);
       if (!this.data.indexPattern) {

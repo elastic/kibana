@@ -22,7 +22,6 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
 import { createVegaVisualization } from '../vega_visualization';
-import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { ImageComparator } from 'test_utils/image_comparator';
 
 import vegaliteGraph from '!!raw-loader!./vegalite_graph.hjson';
@@ -57,7 +56,6 @@ const PIXEL_DIFF = 30;
 describe('VegaVisualizations', () => {
   let domNode;
   let VegaVisualization;
-  let indexPattern;
   let vis;
   let imageComparator;
   let vegaVisualizationDependencies;
@@ -71,7 +69,7 @@ describe('VegaVisualizations', () => {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(
-    ngMock.inject((Private, $injector) => {
+    ngMock.inject($injector => {
       vegaVisualizationDependencies = {
         serviceSettings: $injector.get('serviceSettings'),
         core: {
@@ -99,7 +97,6 @@ describe('VegaVisualizations', () => {
       }
 
       VegaVisualization = createVegaVisualization(vegaVisualizationDependencies);
-      indexPattern = Private(LogstashIndexPatternStubProvider);
     })
   );
 
@@ -108,7 +105,7 @@ describe('VegaVisualizations', () => {
       setupDOM('512px', '512px');
       imageComparator = new ImageComparator();
 
-      vis = visualizationsStart.createVis(indexPattern, { type: 'vega' });
+      vis = visualizationsStart.createVis('vega', { type: 'vega' });
     });
 
     afterEach(function() {

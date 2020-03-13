@@ -47,57 +47,73 @@ describe('Table Vis - AggTable Directive', function() {
   const tabifiedData = {};
 
   const init = () => {
-    const vis1 = visualizationsStart.createVis(indexPattern, 'table');
-    tabifiedData.metricOnly = tabifyAggResponse(vis1.aggs, metricOnly);
+    const searchSource = {
+      getField: name => {
+        if (name === 'index') {
+          return indexPattern;
+        }
+      },
+    };
+    const vis1 = visualizationsStart.createVis('table', {
+      type: 'table',
+      data: { searchSource, aggs: [] },
+    });
+    tabifiedData.metricOnly = tabifyAggResponse(vis1.data.aggs, metricOnly);
 
-    const vis2 = visualizationsStart.createVis(indexPattern, {
+    const vis2 = visualizationsStart.createVis('table', {
       type: 'table',
       params: {
         showMetricsAtAllLevels: true,
       },
-      aggs: [
-        { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-        { type: 'terms', schema: 'bucket', params: { field: 'extension' } },
-        { type: 'terms', schema: 'bucket', params: { field: 'geo.src' } },
-        { type: 'terms', schema: 'bucket', params: { field: 'machine.os' } },
-      ],
+      data: {
+        aggs: [
+          { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+          { type: 'terms', schema: 'bucket', params: { field: 'extension' } },
+          { type: 'terms', schema: 'bucket', params: { field: 'geo.src' } },
+          { type: 'terms', schema: 'bucket', params: { field: 'machine.os' } },
+        ],
+        searchSource,
+      },
     });
-    vis2.aggs.aggs.forEach(function(agg, i) {
+    vis2.data.aggs.aggs.forEach(function(agg, i) {
       agg.id = 'agg_' + (i + 1);
     });
-    tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.aggs, threeTermBuckets, {
+    tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.data.aggs, threeTermBuckets, {
       metricsAtAllLevels: true,
     });
 
-    const vis3 = visualizationsStart.createVis(indexPattern, {
+    const vis3 = visualizationsStart.createVis('table', {
       type: 'table',
-      aggs: [
-        { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
-        { type: 'min', schema: 'metric', params: { field: '@timestamp' } },
-        { type: 'terms', schema: 'bucket', params: { field: 'extension' } },
-        {
-          type: 'date_histogram',
-          schema: 'bucket',
-          params: { field: '@timestamp', interval: 'd' },
-        },
-        {
-          type: 'derivative',
-          schema: 'metric',
-          params: { metricAgg: 'custom', customMetric: { id: '5-orderAgg', type: 'count' } },
-        },
-        {
-          type: 'top_hits',
-          schema: 'metric',
-          params: { field: 'bytes', aggregate: { val: 'min' }, size: 1 },
-        },
-      ],
+      data: {
+        aggs: [
+          { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+          { type: 'min', schema: 'metric', params: { field: '@timestamp' } },
+          { type: 'terms', schema: 'bucket', params: { field: 'extension' } },
+          {
+            type: 'date_histogram',
+            schema: 'bucket',
+            params: { field: '@timestamp', interval: 'd' },
+          },
+          {
+            type: 'derivative',
+            schema: 'metric',
+            params: { metricAgg: 'custom', customMetric: { id: '5-orderAgg', type: 'count' } },
+          },
+          {
+            type: 'top_hits',
+            schema: 'metric',
+            params: { field: 'bytes', aggregate: { val: 'min' }, size: 1 },
+          },
+        ],
+        searchSource,
+      },
     });
-    vis3.aggs.aggs.forEach(function(agg, i) {
+    vis3.data.aggs.aggs.forEach(function(agg, i) {
       agg.id = 'agg_' + (i + 1);
     });
 
     tabifiedData.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = tabifyAggResponse(
-      vis3.aggs,
+      vis3.data.aggs,
       oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative
     );
   };

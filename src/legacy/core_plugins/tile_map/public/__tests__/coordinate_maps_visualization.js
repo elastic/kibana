@@ -19,7 +19,6 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { ImageComparator } from 'test_utils/image_comparator';
 import dummyESResponse from './dummy_es_response.json';
 import initial from './initial.png';
@@ -32,13 +31,11 @@ import EMS_TILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_
 import EMS_STYLE_ROAD_MAP_BRIGHT from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_bright';
 import EMS_STYLE_ROAD_MAP_DESATURATED from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_desaturated';
 import EMS_STYLE_DARK_MAP from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_dark';
-import {
-  setup as visualizationsSetup,
-  start as visualizationsStart,
-} from '../../../visualizations/public/np_ready/public/legacy';
+import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
 
 import { createTileMapVisualization } from '../tile_map_visualization';
 import { createTileMapTypeDefinition } from '../tile_map_type';
+import { ExprVis } from '../../../visualizations/public/np_ready/public/expressions/vis';
 
 function mockRawData() {
   const stack = [dummyESResponse];
@@ -67,7 +64,6 @@ let visRegComplete = false;
 describe('CoordinateMapsVisualizationTest', function() {
   let domNode;
   let CoordinateMapsVisualization;
-  let indexPattern;
   let vis;
   let dependencies;
 
@@ -92,7 +88,6 @@ describe('CoordinateMapsVisualizationTest', function() {
       }
 
       CoordinateMapsVisualization = createTileMapVisualization(dependencies);
-      indexPattern = Private(LogstashIndexPatternStubProvider);
 
       getManifestStub = serviceSettings.__debugStubManifestCalls(async url => {
         //simulate network calls
@@ -124,7 +119,7 @@ describe('CoordinateMapsVisualizationTest', function() {
       setupDOM('512px', '512px');
 
       imageComparator = new ImageComparator();
-      vis = visualizationsStart.createVis(indexPattern, {
+      vis = new ExprVis({
         type: 'tile_map',
       });
       vis.params = {
