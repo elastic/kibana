@@ -9,5 +9,5 @@ export const PLUGIN = {
   title: i18n.translate('xpack.licenseMgmt.managementSectionDisplayName', {
     defaultMessage: 'License Management',
   }),
-  id: 'license_management',
+  id: 'licenseManagement',
 };
