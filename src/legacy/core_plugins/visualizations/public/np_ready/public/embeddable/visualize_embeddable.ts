@@ -292,17 +292,16 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         }
 
         if (!this.input.disableTriggers) {
-          const triggerId = VIS_EVENT_TO_TRIGGER[event.name as keyof VisEventToTrigger];
-          if (triggerId) {
-            const context: EmbeddableVisTriggerContext = {
-              embeddable: this,
-              timeFieldName: this.vis.indexPattern.timeFieldName,
-              data: event.data,
-            };
-            getUiActions()
-              .getTrigger(triggerId)
-              .exec(context);
-          }
+          const triggerId =
+            event.name === 'brush' ? VIS_EVENT_TO_TRIGGER.brush : VIS_EVENT_TO_TRIGGER.filter;
+          const context: EmbeddableVisTriggerContext = {
+            embeddable: this,
+            timeFieldName: this.vis.indexPattern.timeFieldName,
+            data: event.data,
+          };
+          getUiActions()
+            .getTrigger(triggerId)
+            .exec(context);
         }
       })
     );
