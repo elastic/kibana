@@ -5,23 +5,17 @@
  */
 
 import { MiddlewareFactory } from '../../types';
-import {
-  pageIndex,
-  pageSize,
-  isOnManagementPage,
-  hasSelectedHost,
-  uiQueryParams,
-} from './selectors';
-import { ManagementListState } from '../../types';
+import { pageIndex, pageSize, isOnHostPage, hasSelectedHost, uiQueryParams } from './selectors';
+import { HostListState } from '../../types';
 import { AppAction } from '../action';
 
-export const managementMiddlewareFactory: MiddlewareFactory<ManagementListState> = coreStart => {
+export const managementMiddlewareFactory: MiddlewareFactory<HostListState> = coreStart => {
   return ({ getState, dispatch }) => next => async (action: AppAction) => {
     next(action);
     const state = getState();
     if (
       (action.type === 'userChangedUrl' &&
-        isOnManagementPage(state) &&
+        isOnHostPage(state) &&
         hasSelectedHost(state) !== true) ||
       action.type === 'userPaginatedManagementList'
     ) {

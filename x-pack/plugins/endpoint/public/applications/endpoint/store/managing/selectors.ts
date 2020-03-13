@@ -6,38 +6,38 @@
 import querystring from 'querystring';
 import { createSelector } from 'reselect';
 import { Immutable } from '../../../../../common/types';
-import { ManagementListState, ManagingIndexUIQueryParams } from '../../types';
+import { HostListState, HostIndexUIQueryParams } from '../../types';
 
-export const listData = (state: ManagementListState) => state.endpoints;
+export const listData = (state: HostListState) => state.endpoints;
 
-export const pageIndex = (state: ManagementListState) => state.pageIndex;
+export const pageIndex = (state: HostListState) => state.pageIndex;
 
-export const pageSize = (state: ManagementListState) => state.pageSize;
+export const pageSize = (state: HostListState) => state.pageSize;
 
-export const totalHits = (state: ManagementListState) => state.total;
+export const totalHits = (state: HostListState) => state.total;
 
-export const isLoading = (state: ManagementListState) => state.loading;
+export const isLoading = (state: HostListState) => state.loading;
 
-export const detailsError = (state: ManagementListState) => state.detailsError;
+export const detailsError = (state: HostListState) => state.detailsError;
 
-export const detailsData = (state: ManagementListState) => {
+export const detailsData = (state: HostListState) => {
   return state.details;
 };
 
-export const isOnManagementPage = (state: ManagementListState) =>
-  state.location ? state.location.pathname === '/management' : false;
+export const isOnHostPage = (state: HostListState) =>
+  state.location ? state.location.pathname === '/hosts' : false;
 
 export const uiQueryParams: (
-  state: ManagementListState
-) => Immutable<ManagingIndexUIQueryParams> = createSelector(
-  (state: ManagementListState) => state.location,
-  (location: ManagementListState['location']) => {
-    const data: ManagingIndexUIQueryParams = {};
+  state: HostListState
+) => Immutable<HostIndexUIQueryParams> = createSelector(
+  (state: HostListState) => state.location,
+  (location: HostListState['location']) => {
+    const data: HostIndexUIQueryParams = {};
     if (location) {
       // Removes the `?` from the beginning of query string if it exists
       const query = querystring.parse(location.search.slice(1));
 
-      const keys: Array<keyof ManagingIndexUIQueryParams> = ['selected_host'];
+      const keys: Array<keyof HostIndexUIQueryParams> = ['selected_host'];
 
       for (const key of keys) {
         const value = query[key];
@@ -52,7 +52,7 @@ export const uiQueryParams: (
   }
 );
 
-export const hasSelectedHost: (state: ManagementListState) => boolean = createSelector(
+export const hasSelectedHost: (state: HostListState) => boolean = createSelector(
   uiQueryParams,
   ({ selected_host: selectedHost }) => {
     return selectedHost !== undefined;
