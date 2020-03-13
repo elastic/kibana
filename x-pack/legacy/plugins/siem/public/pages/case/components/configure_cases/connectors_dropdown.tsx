@@ -60,7 +60,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                 <span>{connector.name}</span>
               </>
             ),
-            'data-test-subj': 'servicenow-connector',
+            'data-test-subj': connector.id,
           },
         ],
         [noConnectorOption]
