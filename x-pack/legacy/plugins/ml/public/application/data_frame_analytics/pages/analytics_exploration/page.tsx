@@ -37,7 +37,7 @@ export const Page: FC<{
   <Fragment>
     <NavigationMenu tabId="data_frame_analytics" />
     <EuiPage data-test-subj="mlPageDataFrameAnalyticsExploration">
-      <EuiPageBody>
+      <EuiPageBody style={{ maxWidth: 'calc(100% - 0px)' }}>
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
             <EuiTitle>
@@ -65,7 +65,7 @@ export const Page: FC<{
             </EuiTitle>
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
-        <EuiPageContentBody>
+        <EuiPageContentBody style={{ maxWidth: 'calc(100% - 0px)' }}>
           <EuiSpacer size="l" />
           {analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && (
             <OutlierExploration jobId={jobId} jobStatus={jobStatus} />

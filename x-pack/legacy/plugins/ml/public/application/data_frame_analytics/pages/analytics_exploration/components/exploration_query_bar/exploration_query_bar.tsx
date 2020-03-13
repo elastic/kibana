@@ -62,11 +62,11 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
       onSubmit={searchSubmitHandler}
       placeholder={
         searchInput.language === QUERY_LANGUAGE_KUERY
-          ? i18n.translate('xpack.transform.stepDefineForm.queryPlaceholderKql', {
+          ? i18n.translate('xpack.ml.stepDefineForm.queryPlaceholderKql', {
               defaultMessage: 'e.g. {example}',
               values: { example: 'method : "GET" or status : "404"' },
             })
-          : i18n.translate('xpack.transform.stepDefineForm.queryPlaceholderLucene', {
+          : i18n.translate('xpack.ml.stepDefineForm.queryPlaceholderLucene', {
               defaultMessage: 'e.g. {example}',
               values: { example: 'method:GET OR status:404' },
             })

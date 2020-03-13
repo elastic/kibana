@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Dispatch, FC, SetStateAction, useCallback, useMemo, useState } from 'react';
+import React, { Dispatch, FC, SetStateAction, useCallback, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiDataGrid, EuiDataGridPaginationProps } from '@elastic/eui';
+import { EuiDataGrid, EuiDataGridPaginationProps, EuiDataGridSorting } from '@elastic/eui';
 
 import { euiDataGridStyle, euiDataGridToolbarSettings } from '../../../../common';
 
@@ -27,6 +27,8 @@ interface ExplorationDataGridProps {
   selectedFields: string[];
   setPagination: Dispatch<SetStateAction<Pagination>>;
   setSelectedFields: Dispatch<SetStateAction<string[]>>;
+  setSortingColumns: Dispatch<SetStateAction<EuiDataGridSorting['columns']>>;
+  sortingColumns: EuiDataGridSorting['columns'];
   tableItems: TableItem[];
 }
 
@@ -39,6 +41,8 @@ export const ExplorationDataGrid: FC<ExplorationDataGridProps> = ({
   selectedFields,
   setPagination,
   setSelectedFields,
+  setSortingColumns,
+  sortingColumns,
   tableItems,
 }) => {
   const renderCellValue = useMemo(() => {
@@ -102,7 +106,6 @@ export const ExplorationDataGrid: FC<ExplorationDataGridProps> = ({
     setPagination,
   ]);
 
-  const [sortingColumns, setSortingColumns] = useState([]);
   const onSort = useCallback(
     sc => {
       setSortingColumns(sc);

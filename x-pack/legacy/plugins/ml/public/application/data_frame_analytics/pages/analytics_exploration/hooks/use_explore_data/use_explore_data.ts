@@ -7,9 +7,11 @@
 import { useEffect, useState, Dispatch, SetStateAction } from 'react';
 import { SearchResponse } from 'elasticsearch';
 
-import { EuiDataGridPaginationProps } from '@elastic/eui';
+import { EuiDataGridPaginationProps, EuiDataGridSorting } from '@elastic/eui';
 
 import { IIndexPattern } from '../../../../../../../../../../../src/plugins/data/common/index_patterns';
+
+import { Dictionary } from '../../../../../../../common/types/common';
 
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { ml } from '../../../../../services/ml_api_service';
@@ -25,7 +27,6 @@ import {
   EsFieldName,
   INDEX_STATUS,
   defaultSearchQuery,
-  SearchQuery,
 } from '../../../../common';
 import { isKeywordAndTextType } from '../../../../common/fields';
 
@@ -46,11 +47,17 @@ interface UseExploreDataReturnType {
   setPagination: Dispatch<SetStateAction<Pagination>>;
   setSearchQuery: Dispatch<SetStateAction<SavedSearchQuery>>;
   setSelectedFields: Dispatch<SetStateAction<EsFieldName[]>>;
+  setSortingColumns: Dispatch<SetStateAction<EuiDataGridSorting['columns']>>;
   rowCount: number;
+  sortingColumns: EuiDataGridSorting['columns'];
   status: INDEX_STATUS;
   tableFields: string[];
   tableItems: TableItem[];
 }
+
+type EsSorting = Dictionary<{
+  order: 'asc' | 'desc';
+}>;
 
 // The types specified in `@types/elasticsearch` are out of date and still have `total: number`.
 interface SearchResponse7 extends SearchResponse<any> {
@@ -63,6 +70,8 @@ interface SearchResponse7 extends SearchResponse<any> {
 }
 
 export const useExploreData = (jobId: string): UseExploreDataReturnType => {
+  const mlContext = useMlContext();
+
   const [indexPattern, setIndexPattern] = useState<IIndexPattern | undefined>(undefined);
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
   const [errorMessage, setErrorMessage] = useState('');
@@ -75,6 +84,7 @@ export const useExploreData = (jobId: string): UseExploreDataReturnType => {
 
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
   const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
+  const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
 
   // get analytics configuration
   useEffect(() => {
@@ -89,8 +99,7 @@ export const useExploreData = (jobId: string): UseExploreDataReturnType => {
     })();
   }, []);
 
-  const mlContext = useMlContext();
-
+  // get index pattern and field caps
   useEffect(() => {
     (async () => {
       if (jobConfig !== undefined) {
@@ -107,6 +116,13 @@ export const useExploreData = (jobId: string): UseExploreDataReturnType => {
     })();
   }, [jobConfig && jobConfig.id]);
 
+  // initialize sorting: reverse sort on outlier score column
+  useEffect(() => {
+    if (jobConfig !== undefined) {
+      setSortingColumns([{ id: getOutlierScoreFieldName(jobConfig), direction: 'desc' }]);
+    }
+  }, [jobConfig && jobConfig.id]);
+
   // update data grid data
   useEffect(() => {
     (async () => {
@@ -117,37 +133,26 @@ export const useExploreData = (jobId: string): UseExploreDataReturnType => {
         try {
           const resultsField = jobConfig.dest.results_field;
 
-          const outlierScoreFieldName = getOutlierScoreFieldName(jobConfig);
-          const outlierScoreFieldSelected = selectedFields.includes(outlierScoreFieldName);
-          let requiresKeyword = false;
-
-          const field = outlierScoreFieldSelected ? outlierScoreFieldName : selectedFields[0];
-          const direction = outlierScoreFieldSelected ? 'desc' : 'asc';
-
-          if (outlierScoreFieldSelected === false) {
-            requiresKeyword = isKeywordAndTextType(field);
-          }
-
-          const body: SearchQuery = {
-            query: searchQuery,
-          };
-
-          if (field !== undefined) {
-            body.sort = [
-              {
-                [`${field}${requiresKeyword ? '.keyword' : ''}`]: {
-                  order: direction,
-                },
-              },
-            ];
-          }
+          const sort: EsSorting = sortingColumns
+            .map(column => {
+              const { id } = column;
+              column.id = isKeywordAndTextType(id) ? `${id}.keyword` : id;
+              return column;
+            })
+            .reduce((s, column) => {
+              s[column.id] = { order: column.direction };
+              return s;
+            }, {} as EsSorting);
 
           const { pageIndex, pageSize } = pagination;
           const resp: SearchResponse7 = await ml.esSearch({
             index: jobConfig.dest.index,
-            from: pageIndex * pageSize,
-            size: pageSize,
-            body,
+            body: {
+              query: searchQuery,
+              from: pageIndex * pageSize,
+              size: pageSize,
+              ...(Object.keys(sort).length > 0 ? { sort } : {}),
+            },
           });
 
           setRowCount(resp.hits.total.value);
@@ -206,7 +211,7 @@ export const useExploreData = (jobId: string): UseExploreDataReturnType => {
         }
       }
     })();
-  }, [jobConfig && jobConfig.id, pagination, searchQuery, selectedFields]);
+  }, [jobConfig && jobConfig.id, pagination, searchQuery, selectedFields, sortingColumns]);
 
   return {
     errorMessage,
@@ -220,6 +225,8 @@ export const useExploreData = (jobId: string): UseExploreDataReturnType => {
     setPagination,
     setSearchQuery,
     setSelectedFields,
+    setSortingColumns,
+    sortingColumns,
     status,
     tableFields,
     tableItems,

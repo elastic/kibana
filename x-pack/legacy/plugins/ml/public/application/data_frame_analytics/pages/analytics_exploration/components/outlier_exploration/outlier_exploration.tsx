@@ -74,6 +74,8 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId, job
     setPagination,
     setSearchQuery,
     setSelectedFields,
+    setSortingColumns,
+    sortingColumns,
     rowCount,
     status,
     tableFields,
@@ -151,21 +153,18 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId, job
   }
 
   return (
-    <EuiPanel
-      grow={false}
-      data-test-subj="mlDFAnalyticsOutlierExplorationTablePanel"
-      style={{ width: '1200px' }}
-    >
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+    <EuiPanel data-test-subj="mlDFAnalyticsOutlierExplorationTablePanel">
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        responsive={false}
+        gutterSize="s"
+      >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <ExplorationTitle jobId={jobConfig.id} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <span>{getTaskStateBadge(jobStatus)}</span>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <ExplorationTitle jobId={jobConfig.id} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <span>{getTaskStateBadge(jobStatus)}</span>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiHorizontalRule margin="xs" />
@@ -199,6 +198,8 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId, job
               selectedFields={selectedFields}
               setPagination={setPagination}
               setSelectedFields={setSelectedFields}
+              setSortingColumns={setSortingColumns}
+              sortingColumns={sortingColumns}
               tableItems={tableItems}
             />
           )}
