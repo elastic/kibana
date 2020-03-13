@@ -18,19 +18,6 @@ import { AlertTypeInitializer } from '.';
 import { StatusCheckExecutorParamsType } from '../../../common/runtime_types';
 import { AlertMonitorStatus } from '../../components/connected/alerts';
 
-/**
- * Check if params have properties.
- * @param params the alert params
- */
-const hasProps = (params: any): boolean => {
-  for (const p in params) {
-    if (Object.prototype.hasOwnProperty.call(params, p)) {
-      return true;
-    }
-  }
-  return false;
-};
-
 export const validate = (alertParams: any): ValidationResult => {
   const errors: Record<string, any> = {};
   const decoded = StatusCheckExecutorParamsType.decode(alertParams);
@@ -39,7 +26,7 @@ export const validate = (alertParams: any): ValidationResult => {
    * When the UI initially loads, this validate function is called with an
    * empty set of params, we don't want to type check against that.
    */
-  if (hasProps(alertParams) && !isRight(decoded)) {
+  if (Object.keys(alertParams).length && !isRight(decoded)) {
     errors.typeCheckFailure = 'Provided parameters do not conform to the expected type.';
     ThrowReporter.report(decoded);
   }
