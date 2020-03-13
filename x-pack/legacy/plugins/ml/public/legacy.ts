@@ -5,7 +5,7 @@
  */
 
 import { npSetup, npStart } from 'ui/new_platform';
-import { PluginInitializerContext } from 'src/core/public';
+import { PluginInitializerContext } from 'kibana/public';
 import { SecurityPluginSetup } from '../../../../plugins/security/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 
