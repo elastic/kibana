@@ -9,7 +9,7 @@ import { listAgents } from './crud';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { unenrollAgents } from './unenroll';
 
-export async function updateAgentsForPolicyId(
+export async function updateAgentsForConfigId(
   soClient: SavedObjectsClientContract,
   configId: string
 ) {
@@ -37,7 +37,7 @@ export async function updateAgentsForPolicyId(
   }
 }
 
-export async function unenrollForPolicyId(soClient: SavedObjectsClientContract, configId: string) {
+export async function unenrollForConfigId(soClient: SavedObjectsClientContract, configId: string) {
   let hasMore = true;
   let page = 1;
   while (hasMore) {

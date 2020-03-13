@@ -75,6 +75,7 @@ export const savedObjectMappings = {
       datasources: { type: 'keyword' },
       updated_on: { type: 'keyword' },
       updated_by: { type: 'keyword' },
+      revision: { type: 'integer' },
     },
   },
   [ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE]: {
@@ -138,6 +139,7 @@ export const savedObjectMappings = {
           },
         },
       },
+      revision: { type: 'integer' },
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {

@@ -15,7 +15,6 @@ export const storedDatasourceToAgentDatasource = (
     namespace,
     enabled,
     use_output: DEFAULT_OUTPUT.name, // TODO: hardcoded to default output for now
-    package: undefined,
     inputs: inputs
       .filter(input => input.enabled)
       .map(input => ({
@@ -46,8 +45,6 @@ export const storedDatasourceToAgentDatasource = (
       name: pkg.name,
       version: pkg.version,
     };
-  } else {
-    delete fullDatasource.package;
   }
 
   return fullDatasource;

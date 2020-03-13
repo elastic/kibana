@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForConfigId } from './api_keys';
-import { updateAgentsForPolicyId, unenrollForPolicyId } from './agents';
+import { updateAgentsForConfigId, unenrollForConfigId } from './agents';
 
 export async function agentConfigUpdateEventHandler(
   soClient: SavedObjectsClientContract,
@@ -20,11 +20,11 @@ export async function agentConfigUpdateEventHandler(
   }
 
   if (action === 'updated') {
-    await updateAgentsForPolicyId(soClient, configId);
+    await updateAgentsForConfigId(soClient, configId);
   }
 
   if (action === 'deleted') {
-    await unenrollForPolicyId(soClient, configId);
+    await unenrollForConfigId(soClient, configId);
     await deleteEnrollmentApiKeyForConfigId(soClient, configId);
   }
 }

@@ -36,4 +36,7 @@ export interface NewDatasource {
   inputs: DatasourceInput[];
 }
 
-export type Datasource = NewDatasource & { id: string };
+export type Datasource = NewDatasource & {
+  id: string;
+  revision: number;
+};
