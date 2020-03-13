@@ -24,7 +24,6 @@ import { promisify } from 'util';
 
 import execa from 'execa';
 import { ToolingLog } from '@kbn/dev-utils';
-import isPathInside from 'is-path-inside';
 
 import { readYarnLock, YarnLock } from './yarn_lock';
 import { ProjectMap } from '../utils/projects';
