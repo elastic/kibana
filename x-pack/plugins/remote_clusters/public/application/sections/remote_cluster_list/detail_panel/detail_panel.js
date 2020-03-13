@@ -162,7 +162,7 @@ export class DetailPanel extends Component {
     );
   }
 
-  renderCluster({
+  renderSniffModeDescriptionList({
     isConnected,
     connectedNodesCount,
     skipUnavailable,
@@ -170,10 +170,229 @@ export class DetailPanel extends Component {
     maxConnectionsPerCluster,
     initialConnectTimeout,
     mode,
+  }) {
+    return (
+      <EuiDescriptionList data-test-subj="remoteClusterDetailPanelStatusValues">
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiDescriptionListTitle>
+              <EuiTitle size="xs">
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.connectedLabel"
+                  defaultMessage="Connection"
+                />
+              </EuiTitle>
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription data-test-subj="remoteClusterDetailIsConnected">
+              <ConnectionStatus isConnected={isConnected} mode={mode} />
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiDescriptionListTitle>
+              <EuiTitle size="xs">
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.connectedNodesLabel"
+                  defaultMessage="Connected nodes"
+                />
+              </EuiTitle>
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription data-test-subj="remoteClusterDetailConnectedNodesCount">
+              {connectedNodesCount}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="s" />
+
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiDescriptionListTitle>
+              <EuiTitle size="xs">
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.seedsLabel"
+                  defaultMessage="Seeds"
+                />
+              </EuiTitle>
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription data-test-subj="remoteClusterDetailSeeds">
+              {seeds.map(seed => (
+                <EuiText key={seed}>{seed}</EuiText>
+              ))}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiDescriptionListTitle>
+              <EuiTitle size="xs">
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.skipUnavailableLabel"
+                  defaultMessage="Skip unavailable"
+                />
+              </EuiTitle>
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription data-test-subj="remoteClusterDetailSkipUnavailable">
+              {this.renderSkipUnavailableValue(skipUnavailable)}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="s" />
+
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiDescriptionListTitle>
+              <EuiTitle size="xs">
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.maxConnectionsPerClusterLabel"
+                  defaultMessage="Maximum number of connections"
+                />
+              </EuiTitle>
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription data-test-subj="remoteClusterDetailMaxConnections">
+              {maxConnectionsPerCluster}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiDescriptionListTitle>
+              <EuiTitle size="xs">
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.initialConnectTimeoutLabel"
+                  defaultMessage="Initial connect timeout"
+                />
+              </EuiTitle>
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription data-test-subj="remoteClusterDetailInitialConnectTimeout">
+              {initialConnectTimeout}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiDescriptionList>
+    );
+  }
+
+  renderProxyModeDescriptionList({
+    isConnected,
+    skipUnavailable,
+    initialConnectTimeout,
     proxyAddress,
     proxySocketConnections,
     connectedSocketsCount,
+    mode,
   }) {
+    return (
+      <EuiDescriptionList data-test-subj="remoteClusterDetailPanelStatusValues">
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiDescriptionListTitle>
+              <EuiTitle size="xs">
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.connectedLabel"
+                  defaultMessage="Connection"
+                />
+              </EuiTitle>
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription data-test-subj="remoteClusterDetailIsConnected">
+              <ConnectionStatus isConnected={isConnected} mode={mode} />
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiDescriptionListTitle>
+              <EuiTitle size="xs">
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.connectedSocketsLabel"
+                  defaultMessage="Connected sockets"
+                />
+              </EuiTitle>
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription data-test-subj="remoteClusterDetailConnectedSocketsCount">
+              {connectedSocketsCount ? connectedSocketsCount : '-'}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="s" />
+
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiDescriptionListTitle>
+              <EuiTitle size="xs">
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.proxyAddressLabel"
+                  defaultMessage="Proxy address"
+                />
+              </EuiTitle>
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription data-test-subj="remoteClusterDetailProxyAddress">
+              {proxyAddress}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiDescriptionListTitle>
+              <EuiTitle size="xs">
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.skipUnavailableLabel"
+                  defaultMessage="Skip unavailable"
+                />
+              </EuiTitle>
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription data-test-subj="remoteClusterDetailSkipUnavailable">
+              {this.renderSkipUnavailableValue(skipUnavailable)}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="s" />
+
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiDescriptionListTitle>
+              <EuiTitle size="xs">
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.maxSocketConnectionsLabel"
+                  defaultMessage="Maximum number of socket connections"
+                />
+              </EuiTitle>
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription data-test-subj="remoteClusterDetailMaxSocketConnections">
+              {proxySocketConnections ? proxySocketConnections : '-'}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiDescriptionListTitle>
+              <EuiTitle size="xs">
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.initialConnectTimeoutLabel"
+                  defaultMessage="Initial connect timeout"
+                />
+              </EuiTitle>
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription data-test-subj="remoteClusterDetailInitialConnectTimeout">
+              {initialConnectTimeout}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiDescriptionList>
+    );
+  }
+
+  renderCluster(cluster) {
     return (
       <section
         aria-labelledby="xpack.remoteClusters.detailPanel.statusTitle"
@@ -190,160 +409,9 @@ export class DetailPanel extends Component {
 
         <EuiSpacer size="s" />
 
-        <EuiDescriptionList data-test-subj="remoteClusterDetailPanelStatusValues">
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiDescriptionListTitle>
-                <EuiTitle size="xs">
-                  <FormattedMessage
-                    id="xpack.remoteClusters.detailPanel.connectedLabel"
-                    defaultMessage="Connection"
-                  />
-                </EuiTitle>
-              </EuiDescriptionListTitle>
-
-              <EuiDescriptionListDescription data-test-subj="remoteClusterDetailIsConnected">
-                <ConnectionStatus isConnected={isConnected} mode={mode} />
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
-
-            {mode === PROXY_MODE ? (
-              <EuiFlexItem>
-                <EuiDescriptionListTitle>
-                  <EuiTitle size="xs">
-                    <FormattedMessage
-                      id="xpack.remoteClusters.detailPanel.connectedSocketsLabel"
-                      defaultMessage="Connected sockets"
-                    />
-                  </EuiTitle>
-                </EuiDescriptionListTitle>
-
-                <EuiDescriptionListDescription data-test-subj="remoteClusterDetailConnectedSocketsCount">
-                  {connectedSocketsCount ? connectedSocketsCount : '-'}
-                </EuiDescriptionListDescription>
-              </EuiFlexItem>
-            ) : (
-              <EuiFlexItem>
-                <EuiDescriptionListTitle>
-                  <EuiTitle size="xs">
-                    <FormattedMessage
-                      id="xpack.remoteClusters.detailPanel.connectedNodesLabel"
-                      defaultMessage="Connected nodes"
-                    />
-                  </EuiTitle>
-                </EuiDescriptionListTitle>
-
-                <EuiDescriptionListDescription data-test-subj="remoteClusterDetailConnectedNodesCount">
-                  {connectedNodesCount}
-                </EuiDescriptionListDescription>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-
-          <EuiSpacer size="s" />
-
-          <EuiFlexGroup>
-            {mode === PROXY_MODE ? (
-              <EuiFlexItem>
-                <EuiDescriptionListTitle>
-                  <EuiTitle size="xs">
-                    <FormattedMessage
-                      id="xpack.remoteClusters.detailPanel.proxyAddressLabel"
-                      defaultMessage="Proxy address"
-                    />
-                  </EuiTitle>
-                </EuiDescriptionListTitle>
-
-                <EuiDescriptionListDescription data-test-subj="remoteClusterDetailProxyAddress">
-                  {proxyAddress}
-                </EuiDescriptionListDescription>
-              </EuiFlexItem>
-            ) : (
-              <EuiFlexItem>
-                <EuiDescriptionListTitle>
-                  <EuiTitle size="xs">
-                    <FormattedMessage
-                      id="xpack.remoteClusters.detailPanel.seedsLabel"
-                      defaultMessage="Seeds"
-                    />
-                  </EuiTitle>
-                </EuiDescriptionListTitle>
-
-                <EuiDescriptionListDescription data-test-subj="remoteClusterDetailSeeds">
-                  {seeds.map(seed => (
-                    <EuiText key={seed}>{seed}</EuiText>
-                  ))}
-                </EuiDescriptionListDescription>
-              </EuiFlexItem>
-            )}
-
-            <EuiFlexItem>
-              <EuiDescriptionListTitle>
-                <EuiTitle size="xs">
-                  <FormattedMessage
-                    id="xpack.remoteClusters.detailPanel.skipUnavailableLabel"
-                    defaultMessage="Skip unavailable"
-                  />
-                </EuiTitle>
-              </EuiDescriptionListTitle>
-
-              <EuiDescriptionListDescription data-test-subj="remoteClusterDetailSkipUnavailable">
-                {this.renderSkipUnavailableValue(skipUnavailable)}
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
-          <EuiSpacer size="s" />
-
-          <EuiFlexGroup>
-            {mode === PROXY_MODE ? (
-              <EuiFlexItem>
-                <EuiDescriptionListTitle>
-                  <EuiTitle size="xs">
-                    <FormattedMessage
-                      id="xpack.remoteClusters.detailPanel.maxSocketConnectionsLabel"
-                      defaultMessage="Maximum number of socket connections"
-                    />
-                  </EuiTitle>
-                </EuiDescriptionListTitle>
-
-                <EuiDescriptionListDescription data-test-subj="remoteClusterDetailMaxSocketConnections">
-                  {proxySocketConnections ? proxySocketConnections : '-'}
-                </EuiDescriptionListDescription>
-              </EuiFlexItem>
-            ) : (
-              <EuiFlexItem>
-                <EuiDescriptionListTitle>
-                  <EuiTitle size="xs">
-                    <FormattedMessage
-                      id="xpack.remoteClusters.detailPanel.maxConnectionsPerClusterLabel"
-                      defaultMessage="Maximum number of connections"
-                    />
-                  </EuiTitle>
-                </EuiDescriptionListTitle>
-
-                <EuiDescriptionListDescription data-test-subj="remoteClusterDetailMaxConnections">
-                  {maxConnectionsPerCluster}
-                </EuiDescriptionListDescription>
-              </EuiFlexItem>
-            )}
-
-            <EuiFlexItem>
-              <EuiDescriptionListTitle>
-                <EuiTitle size="xs">
-                  <FormattedMessage
-                    id="xpack.remoteClusters.detailPanel.initialConnectTimeoutLabel"
-                    defaultMessage="Initial connect timeout"
-                  />
-                </EuiTitle>
-              </EuiDescriptionListTitle>
-
-              <EuiDescriptionListDescription data-test-subj="remoteClusterDetailInitialConnectTimeout">
-                {initialConnectTimeout}
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiDescriptionList>
+        {cluster.mode === PROXY_MODE
+          ? this.renderProxyModeDescriptionList(cluster)
+          : this.renderSniffModeDescriptionList(cluster)}
       </section>
     );
   }
