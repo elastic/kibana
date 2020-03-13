@@ -6,16 +6,18 @@
 
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { MachineLearningFlyoutView } from '../../functional';
+import { useParams } from 'react-router-dom';
 import { hasMLJobSelector, isMLJobCreatingSelector, mlSelector } from '../../../state/selectors';
 import { createMLJobAction, deleteMLJobAction, getMLJobAction } from '../../../state/actions';
-import { MLJobLink } from '../../functional/ml/ml_job_link';
+import { MLJobLink } from './ml_job_link';
 import * as labels from './translations';
 import { ML_JOB_ID } from '../../../../common/constants';
 import {
   useKibana,
   KibanaReactNotifications,
 } from '../../../../../../../../src/plugins/kibana_react/public';
+import { MachineLearningFlyoutView } from './ml_flyout';
+import { ConfirmJobDeletion } from './confirm_delete';
 
 interface Props {
   isOpen: boolean;
@@ -55,17 +57,22 @@ export const MachineLearningFlyout: React.FC<Props> = ({ isOpen, onClose }) => {
   const hasMLJob = useSelector(hasMLJobSelector);
   const isMLJobCreating = useSelector(isMLJobCreatingSelector);
 
-  const createMLJob = () => dispatch(createMLJobAction.get());
+  let { monitorId } = useParams();
+  monitorId = atob(monitorId || '');
 
-  const deleteMLJob = () => dispatch(deleteMLJobAction.get());
+  const createMLJob = () => dispatch(createMLJobAction.get({ monitorId }));
+
+  const deleteMLJob = () => dispatch(deleteMLJobAction.get({ monitorId }));
 
   const [isCreatingJob, setIsCreatingJob] = useState(false);
+  const [isDeletingJob, setIsDeletingJob] = useState(false);
 
   useEffect(() => {
-    const loadMLJob = (jobId: string) => dispatch(getMLJobAction.get({ jobId }));
+    const loadMLJob = (jobId: string) =>
+      dispatch(getMLJobAction.get({ jobId: `${monitorId}_${jobId}` }));
 
     loadMLJob(ML_JOB_ID);
-  }, [dispatch, isOpen]);
+  }, [dispatch, isOpen, monitorId]);
 
   useEffect(() => {
     if (isCreatingJob && !isMLJobCreating) {
@@ -89,13 +96,28 @@ export const MachineLearningFlyout: React.FC<Props> = ({ isOpen, onClose }) => {
     createMLJob();
   };
 
+  const confirmDeleteMLJob = () => {
+    setIsDeletingJob(true);
+  };
+
   return (
-    <MachineLearningFlyoutView
-      isCreatingJob={isMLJobCreating}
-      onClickCreate={createAnomalyJob}
-      onClickDelete={deleteMLJob}
-      onClose={onClose}
-      hasMLJob={hasMLJob}
-    />
+    <>
+      <MachineLearningFlyoutView
+        isCreatingJob={isMLJobCreating}
+        onClickCreate={createAnomalyJob}
+        onClickDelete={confirmDeleteMLJob}
+        onClose={onClose}
+        hasMLJob={hasMLJob}
+      />
+      {isDeletingJob && (
+        <ConfirmJobDeletion
+          onConfirm={deleteMLJob}
+          loading={isMLJobCreating}
+          onCancel={() => {
+            setIsDeletingJob(false);
+          }}
+        />
+      )}
+    </>
   );
 };

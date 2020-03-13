@@ -5,11 +5,11 @@
  */
 
 import { fetchGet, fetchPost } from './utils';
-import { INDEX_NAMES, ML_JOB_ID } from '../../../common/constants';
+import { INDEX_NAMES, ML_BY_GEO_JOB_ID, ML_JOB_ID, ML_MODULE_ID } from '../../../common/constants';
 import { BaseParams } from './types';
 
-export const fetchMLJob = async () => {
-  const url = `/api/ml/anomaly_detectors/${ML_JOB_ID}`;
+export const fetchMLJob = async ({ jobId }: { jobId: string }) => {
+  const url = `/api/ml/anomaly_detectors/${jobId}`;
   try {
     return await fetchGet(url);
   } catch (error) {
@@ -20,17 +20,28 @@ export const fetchMLJob = async () => {
   }
 };
 
-export const createMLJob = async () => {
-  const url = `/api/ml/modules/setup/${ML_JOB_ID}`;
+export const createMLJob = async ({ monitorId }: { monitorId: string }) => {
+  const url = `/api/ml/modules/setup/${ML_MODULE_ID}`;
 
   const dateRange = await getIndexDateRange();
 
   const data = {
-    prefix: '',
+    prefix: `${monitorId}_`,
     useDedicatedIndex: false,
     startDatafeed: true,
     start: dateRange?.[0],
     indexPatternName: INDEX_NAMES.HEARTBEAT,
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              'monitor.id': monitorId,
+            },
+          },
+        ],
+      },
+    },
   };
 
   const response = await fetchPost(url, data);
@@ -43,10 +54,10 @@ export const createMLJob = async () => {
   }
 };
 
-export const deleteMLJob = async () => {
+export const deleteMLJob = async ({ monitorId }: { monitorId: string }) => {
   const url = `/api/ml/jobs/delete_jobs`;
 
-  const data = { jobIds: [ML_JOB_ID] };
+  const data = { jobIds: [`${monitorId}_${ML_JOB_ID}`, `${monitorId}_${ML_BY_GEO_JOB_ID}`] };
 
   const response = await fetchPost(url, data);
   if (response?.[ML_JOB_ID]?.deleted) {
@@ -72,7 +83,7 @@ export const fetchAnomalyRecords = async (params: BaseParams) => {
   const url = `/api/ml/results/anomalies_table_data`;
   try {
     const data = {
-      jobIds: [ML_JOB_ID],
+      jobIds: [`${monitorId}_${ML_JOB_ID}`, `${monitorId}_${ML_BY_GEO_JOB_ID}`],
       criteriaFields: [],
       influencers: [],
       aggregationInterval: 'auto',

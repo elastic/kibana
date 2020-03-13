@@ -7,8 +7,8 @@
 import React, { useContext, useState } from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
-import { MachineLearningFlyout } from '../../connected/ml/machine_learning_flyout';
 import { UptimeSettingsContext } from '../../../contexts';
+import { MachineLearningFlyout } from './ml_flyout_container';
 
 export const MLIntegrationComponent = () => {
   const [isMlFlyoutOpen, setIsMlFlyoutOpen] = useState(false);
@@ -26,7 +26,7 @@ export const MLIntegrationComponent = () => {
   return (
     <>
       <EuiButtonEmpty
-        disabled={!license?.getFeature('ml')?.isAvailable}
+        // disabled={!license?.getFeature('ml')?.isAvailable}
         iconType="machineLearningApp"
         iconSide="left"
         onClick={onButtonClick}

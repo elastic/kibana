@@ -13,4 +13,3 @@ export { OverviewPageParsingErrorCallout } from './overview_page_parsing_error_c
 export { PingList } from './ping_list';
 export { PingHistogramComponent } from './charts';
 export { StatusPanel } from './status_panel';
-export { MachineLearningFlyoutView } from './ml/machine_learning_flyout/machine_learning_flyout';

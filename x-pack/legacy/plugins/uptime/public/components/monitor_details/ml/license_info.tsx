@@ -19,6 +19,7 @@ export const ShowLicenseInfo = () => {
         <EuiButton
           color="primary"
           href={basePath + `/app/kibana#/management/elasticsearch/license_management/home`}
+          target="_blank"
         >
           Start free 14-day trial
         </EuiButton>

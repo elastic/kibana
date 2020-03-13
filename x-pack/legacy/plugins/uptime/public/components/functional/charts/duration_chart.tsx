@@ -18,7 +18,8 @@ import { useUrlParams } from '../../../hooks';
 import { getTickFormat } from './get_tick_format';
 import { ChartEmptyState } from './chart_empty_state';
 import { DurationAnomaliesBar } from './duration_line_bar_list';
-import { MLJobLink } from '../ml/ml_job_link';
+import { MLJobLink } from '../../monitor_details/ml/ml_job_link';
+import { MLIntegrationComponent } from '../../monitor_details/ml/ml_integeration';
 
 interface DurationChartProps {
   /**
@@ -87,8 +88,11 @@ export const DurationChartComponent = ({
               </h4>
             </EuiTitle>
           </EuiFlexItem>
+          {/* <EuiFlexItem grow={false}>*/}
+          {/*  <MLJobLink fill={true}>Explore in ML</MLJobLink>*/}
+          {/* </EuiFlexItem>*/}
           <EuiFlexItem grow={false}>
-            <MLJobLink fill={true}>Explore in ML</MLJobLink>
+            <MLIntegrationComponent />
           </EuiFlexItem>
         </EuiFlexGroup>
 

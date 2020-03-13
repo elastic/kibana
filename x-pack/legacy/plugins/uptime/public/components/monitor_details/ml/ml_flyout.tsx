@@ -21,10 +21,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { MLJobLink } from '../ml_job_link';
-import * as labels from '../translations';
-import { UptimeSettingsContext } from '../../../../contexts';
-import { ShowLicenseInfo } from '../license_info';
+import { MLJobLink } from './ml_job_link';
+import * as labels from './translations';
+import { UptimeSettingsContext } from '../../../contexts';
+import { ShowLicenseInfo } from './license_info';
 
 interface Props {
   isCreatingJob: boolean;

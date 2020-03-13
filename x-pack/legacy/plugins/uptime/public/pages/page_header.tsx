@@ -12,7 +12,7 @@ import { UptimeDatePicker } from '../components/functional/uptime_date_picker';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useUrlParams } from '../hooks';
-import { MLIntegrationComponent } from '../components/functional/ml/ml_integeration';
+import { MLIntegrationComponent } from '../components/monitor_details/ml/ml_integeration';
 import { UptimeUrlParams } from '../lib/helper';
 
 interface PageHeaderProps {
@@ -60,9 +60,6 @@ export const PageHeader = ({ headingText, breadcrumbs, datePicker = true }: Page
           <EuiTitle>
             <h1>{headingText}</h1>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <MLIntegrationComponent />
         </EuiFlexItem>
         {datePickerComponent}
       </EuiFlexGroup>

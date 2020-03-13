@@ -1,18 +1,18 @@
 {
   "job_type": "anomaly_detector",
   "groups": ["uptime"],
-  "description": "Uptime Heartbeat: Identify monitors that are exhibiting higher than normal latency.",
+  "description": "Uptime Heartbeat: Identify periods of increased latency across geographical regions.",
   "analysis_config": {
-    "bucket_span": "15m",
+    "bucket_span": "2m",
     "detectors": [
       {
         "detector_description": "increased latency",
         "function": "high_mean",
         "field_name": "monitor.duration.us",
-        "partition_field_name": "monitor.id"
+        "partition_field_name": "observer.geo.name"
       }
     ],
-    "influencers": ["monitor.id", "monitor.name"]
+    "influencers": ["monitor.id", "monitor.name", "observer.geo.name"]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
