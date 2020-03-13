@@ -130,6 +130,7 @@ describe('WebhookActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="webhookUrlText"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="webhookUserInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="webhookPasswordInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="webhookAddVariableButton"]').length > 0).toBeTruthy();
   });
 });
 
