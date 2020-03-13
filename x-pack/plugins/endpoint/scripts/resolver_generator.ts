@@ -147,9 +147,12 @@ async function main() {
         argv.percentWithRelated,
         argv.percentTerminated
       );
-      const body = resolverDocs
-        .map(doc => [{ index: { _index: argv.eventIndex } }, doc])
-        .reduce((array, value) => (array.push(...value), array), []);
+      const body = resolverDocs.reduce(
+        (array: Array<Record<string, any>>, doc) => (
+          array.push({ index: { _index: argv.eventIndex } }, doc), array
+        ),
+        []
+      );
 
       await client.bulk({ body });
     }
