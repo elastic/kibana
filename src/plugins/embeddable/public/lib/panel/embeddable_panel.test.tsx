@@ -244,7 +244,7 @@ test('HelloWorldContainer in edit mode hides disabledActions', async () => {
   const fooContextMenuActionItem1 = findTestSubject(component1, 'embeddablePanelAction-FOO');
   const fooContextMenuActionItem2 = findTestSubject(component2, 'embeddablePanelAction-FOO');
 
-  expect(fooContextMenuActionItem1.length).toBe(1);
+  expect(fooContextMenuActionItem1.length).toBe(2);
   expect(fooContextMenuActionItem2.length).toBe(0);
 });
 
