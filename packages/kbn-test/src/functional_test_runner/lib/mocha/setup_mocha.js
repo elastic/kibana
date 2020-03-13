@@ -18,6 +18,9 @@
  */
 
 import Mocha from 'mocha';
+import { realpathSync } from 'fs';
+import { sep } from 'path';
+import { REPO_ROOT } from '@kbn/dev-utils';
 
 import { loadTestFiles } from './load_test_files';
 import { filterSuitesByTags } from './filter_suites_by_tags';
@@ -49,9 +52,21 @@ export async function setupMocha(lifecycle, log, config, providers) {
     log,
     lifecycle,
     providers,
+    config,
     paths: config.get('testFiles'),
     excludePaths: config.get('excludeTestFiles'),
     updateBaselines: config.get('updateBaselines'),
+  });
+
+  filterSuitesByTags({
+    log,
+    mocha,
+    include: config
+      .get('suiteFiles.include')
+      .map(f => realpathSync(f).replace(REPO_ROOT + sep, '')),
+    exclude: config
+      .get('suiteFiles.exclude')
+      .map(f => realpathSync(f).replace(REPO_ROOT + sep, '')),
   });
 
   filterSuitesByTags({

@@ -16,12 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { sep } from 'path';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { createAssignmentProxy } from './assignment_proxy';
 import { wrapFunction } from './wrap_function';
 import { wrapRunnableArgs } from './wrap_runnable_args';
 
-export function decorateMochaUi(lifecycle, context) {
+export function decorateMochaUi(lifecycle, context, config) {
   // incremented at the start of each suite, decremented after
   // so that in each non-suite call we can know if we are within
   // a suite, or that when a suite is defined it is within a suite
@@ -64,6 +65,12 @@ export function decorateMochaUi(lifecycle, context) {
           this.tags = tags => {
             this._tags = [].concat(this._tags || [], tags);
           };
+
+          const filePath = this.file.replace(REPO_ROOT + sep, '');
+          this.tags(filePath);
+          this.suiteTag = filePath; // The tag that uniquely targets this suite/file
+
+          this.ftrConfig = config;
 
           provider.call(this);
 
