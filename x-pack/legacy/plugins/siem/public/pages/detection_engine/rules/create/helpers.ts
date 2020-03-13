@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, isNumber } from 'lodash/fp';
 import moment from 'moment';
 
 import { NewRule } from '../../../../containers/detection_engine/rules';
@@ -39,7 +39,7 @@ const getTimeTypeValue = (time: string): { unit: string; value: number } => {
 };
 
 const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
-  const { queryBar, isNew, ruleType, ...rest } = defineStepData;
+  const { anomalyThreshold, mlJobId, queryBar, isNew, ruleType, ...rest } = defineStepData;
   const { filters, query, saved_id: savedId } = queryBar;
   return {
     ...rest,
@@ -48,6 +48,8 @@ const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJso
     filters,
     query: query.query as string,
     ...(savedId != null && savedId !== '' ? { saved_id: savedId } : {}),
+    ...(isNumber(anomalyThreshold) ? { anomaly_threshold: anomalyThreshold } : {}),
+    ...(mlJobId ? { ml_job_id: mlJobId } : {}),
   };
 };
 
@@ -108,4 +110,5 @@ export const formatRule = (
   ...formatAboutStepData(aboutStepData),
   ...formatScheduleStepData(scheduleData),
   ...(!isEmpty(defineStepData.queryBar.saved_id) ? { type: 'saved_query' } : {}),
+  // TODO: FILTER OUT MUTEX FIELDS
 });
