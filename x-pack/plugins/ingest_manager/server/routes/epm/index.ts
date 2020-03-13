@@ -5,71 +5,74 @@
  */
 import { IRouter } from 'kibana/server';
 import { PLUGIN_ID, EPM_API_ROUTES } from '../../constants';
+import {
+  getCategoriesHandler,
+  getListHandler,
+  getFileHandler,
+  getInfoHandler,
+  installPackageHandler,
+  deletePackageHandler,
+} from './handlers';
+import {
+  GetPackagesRequestSchema,
+  GetFileRequestSchema,
+  GetInfoRequestSchema,
+  InstallPackageRequestSchema,
+  DeletePackageRequestSchema,
+} from '../../types';
 
 export const registerRoutes = (router: IRouter) => {
   router.get(
     {
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
       validate: false,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    async (context, req, res) => {
-      return res.ok({ body: { hello: 'world' } });
-    }
+    getCategoriesHandler
   );
 
   router.get(
     {
       path: EPM_API_ROUTES.LIST_PATTERN,
-      validate: false,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      validate: GetPackagesRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    async (context, req, res) => {
-      return res.ok({ body: { hello: 'world' } });
-    }
+    getListHandler
   );
 
   router.get(
     {
-      path: `${EPM_API_ROUTES.INFO_PATTERN}/{filePath*}`,
-      validate: false,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      path: EPM_API_ROUTES.FILEPATH_PATTERN,
+      validate: GetFileRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    async (context, req, res) => {
-      return res.ok({ body: { hello: 'world' } });
-    }
+    getFileHandler
   );
 
   router.get(
     {
       path: EPM_API_ROUTES.INFO_PATTERN,
-      validate: false,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      validate: GetInfoRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    async (context, req, res) => {
-      return res.ok({ body: { hello: 'world' } });
-    }
+    getInfoHandler
   );
 
-  router.get(
+  router.post(
     {
       path: EPM_API_ROUTES.INSTALL_PATTERN,
-      validate: false,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      validate: InstallPackageRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    async (context, req, res) => {
-      return res.ok({ body: { hello: 'world' } });
-    }
+    installPackageHandler
   );
 
-  router.get(
+  router.delete(
     {
       path: EPM_API_ROUTES.DELETE_PATTERN,
-      validate: false,
-      options: { tags: [`access:${PLUGIN_ID}`] },
+      validate: DeletePackageRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    async (context, req, res) => {
-      return res.ok({ body: { hello: 'world' } });
-    }
+    deletePackageHandler
   );
 };
