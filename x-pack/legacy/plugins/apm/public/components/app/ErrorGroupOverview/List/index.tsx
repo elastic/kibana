@@ -25,12 +25,17 @@ import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { APMLink } from '../../../shared/Links/apm/APMLink';
 import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
+import { APMQueryParams } from '../../../shared/Links/url_helpers';
 
 const GroupIdLink = styled(ErrorDetailLink)`
   font-family: ${fontFamilyCode};
 `;
 
 const MessageAndCulpritCell = styled.div`
+  ${truncate('100%')};
+`;
+
+const ErrorLink = styled(ErrorOverviewLink)`
   ${truncate('100%')};
 `;
 
@@ -50,9 +55,8 @@ interface Props {
 
 const ErrorGroupList: React.FC<Props> = props => {
   const { items } = props;
-  const {
-    urlParams: { serviceName }
-  } = useUrlParams();
+  const { urlParams } = useUrlParams();
+  const { serviceName } = urlParams;
 
   if (!serviceName) {
     throw new Error('Service name is required');
@@ -81,16 +85,20 @@ const ErrorGroupList: React.FC<Props> = props => {
         }),
         field: 'type',
         sortable: false,
-        //width: px(unit * 6),
-        render: (type: any, item: ErrorGroupListAPIResponse[0]) => {
-          console.log(type);
+        render: (type: string, item: ErrorGroupListAPIResponse[0]) => {
           return (
-            <ErrorOverviewLink
+            <ErrorLink
+              title={type}
               serviceName={serviceName}
-              query={{ 'error.exception.type': type }}
+              query={
+                {
+                  ...urlParams,
+                  kuery: `error.exception.type:${type}`
+                } as APMQueryParams
+              }
             >
               {type}
-            </ErrorOverviewLink>
+            </ErrorLink>
           );
         }
       },
@@ -171,9 +179,9 @@ const ErrorGroupList: React.FC<Props> = props => {
           )
       }
     ],
-    [serviceName]
+    [serviceName, urlParams]
   );
-  console.log(items);
+
   return (
     <ManagedTable
       noItemsMessage={i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
