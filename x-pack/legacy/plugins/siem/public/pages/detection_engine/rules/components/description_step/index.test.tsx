@@ -25,6 +25,7 @@ import * as i18n from './translations';
 
 import { schema } from '../step_about_rule/schema';
 import { ListItems } from './types';
+import { AboutStepRule } from '../../types';
 
 describe('description_step', () => {
   const setupMock = coreMock.createSetup();
@@ -37,6 +38,7 @@ describe('description_step', () => {
     }
   };
   let mockFilterManager: FilterManager;
+  let mockAboutStep: AboutStepRule;
 
   beforeEach(() => {
     // jest carries state between mocked implementations when using
@@ -48,12 +50,13 @@ describe('description_step', () => {
 
     setupMock.uiSettings.get.mockImplementation(uiSettingsMock(true));
     mockFilterManager = new FilterManager(setupMock.uiSettings);
+    mockAboutStep = mockAboutStepRule();
   });
 
   describe('StepRuleDescriptionComponent', () => {
     test('renders correctly against snapshot when columns is `multi`', () => {
       const wrapper = shallow(
-        <StepRuleDescriptionComponent columns="multi" data={mockAboutStepRule} schema={schema} />
+        <StepRuleDescriptionComponent columns="multi" data={mockAboutStep} schema={schema} />
       );
       expect(wrapper).toMatchSnapshot();
       expect(wrapper.find('[data-test-subj="listItemColumnStepRuleDescription"]')).toHaveLength(2);
@@ -61,7 +64,7 @@ describe('description_step', () => {
 
     test('renders correctly against snapshot when columns is `single`', () => {
       const wrapper = shallow(
-        <StepRuleDescriptionComponent columns="single" data={mockAboutStepRule} schema={schema} />
+        <StepRuleDescriptionComponent columns="single" data={mockAboutStep} schema={schema} />
       );
       expect(wrapper).toMatchSnapshot();
       expect(wrapper.find('[data-test-subj="listItemColumnStepRuleDescription"]')).toHaveLength(1);
@@ -69,11 +72,7 @@ describe('description_step', () => {
 
     test('renders correctly against snapshot when columns is `singleSplit', () => {
       const wrapper = shallow(
-        <StepRuleDescriptionComponent
-          columns="singleSplit"
-          data={mockAboutStepRule}
-          schema={schema}
-        />
+        <StepRuleDescriptionComponent columns="singleSplit" data={mockAboutStep} schema={schema} />
       );
       expect(wrapper).toMatchSnapshot();
       expect(wrapper.find('[data-test-subj="listItemColumnStepRuleDescription"]')).toHaveLength(1);
@@ -262,7 +261,7 @@ describe('description_step', () => {
 
   describe('buildListItems', () => {
     test('returns expected ListItems array when given valid inputs', () => {
-      const result: ListItems[] = buildListItems(mockAboutStepRule, schema, mockFilterManager);
+      const result: ListItems[] = buildListItems(mockAboutStep, schema, mockFilterManager);
 
       expect(result.length).toEqual(10);
     });
@@ -273,7 +272,7 @@ describe('description_step', () => {
       const result: ListItems[] = getDescriptionItem(
         'tags',
         'Tags label',
-        mockAboutStepRule,
+        mockAboutStep,
         mockFilterManager
       );
 
@@ -285,7 +284,7 @@ describe('description_step', () => {
       const result: ListItems[] = getDescriptionItem(
         'description',
         'Description label',
-        mockAboutStepRule,
+        mockAboutStep,
         mockFilterManager
       );
 
@@ -297,7 +296,7 @@ describe('description_step', () => {
       const result: ListItems[] = getDescriptionItem(
         'jibberjabber',
         'JibberJabber label',
-        mockAboutStepRule,
+        mockAboutStep,
         mockFilterManager
       );
 
@@ -334,7 +333,7 @@ describe('description_step', () => {
         const result: ListItems[] = getDescriptionItem(
           'threat',
           'Threat label',
-          mockAboutStepRule,
+          mockAboutStep,
           mockFilterManager
         );
 
@@ -343,8 +342,8 @@ describe('description_step', () => {
       });
 
       test('filters out threats with tactic.name of `none`', () => {
-        const mockAboutStep = {
-          ...mockAboutStepRule,
+        const mockStep = {
+          ...mockAboutStep,
           threat: [
             {
               framework: 'mockFramework',
@@ -366,7 +365,7 @@ describe('description_step', () => {
         const result: ListItems[] = getDescriptionItem(
           'threat',
           'Threat label',
-          mockAboutStep,
+          mockStep,
           mockFilterManager
         );
 
@@ -379,7 +378,7 @@ describe('description_step', () => {
         const result: ListItems[] = getDescriptionItem(
           'references',
           'Reference label',
-          mockAboutStepRule,
+          mockAboutStep,
           mockFilterManager
         );
 
@@ -393,7 +392,7 @@ describe('description_step', () => {
         const result: ListItems[] = getDescriptionItem(
           'falsePositives',
           'False positives label',
-          mockAboutStepRule,
+          mockAboutStep,
           mockFilterManager
         );
 
@@ -407,7 +406,7 @@ describe('description_step', () => {
         const result: ListItems[] = getDescriptionItem(
           'severity',
           'Severity label',
-          mockAboutStepRule,
+          mockAboutStep,
           mockFilterManager
         );
 
@@ -421,12 +420,12 @@ describe('description_step', () => {
         const result: ListItems[] = getDescriptionItem(
           'riskScore',
           'Risk score label',
-          mockAboutStepRule,
+          mockAboutStep,
           mockFilterManager
         );
 
         expect(result[0].title).toEqual('Risk score label');
-        expect(result[0].description).toEqual(1);
+        expect(result[0].description).toEqual(21);
       });
     });
 
@@ -435,7 +434,7 @@ describe('description_step', () => {
         const result: ListItems[] = getDescriptionItem(
           'timeline',
           'Timeline label',
-          mockAboutStepRule,
+          mockAboutStep,
           mockFilterManager
         );
 
@@ -444,8 +443,8 @@ describe('description_step', () => {
       });
 
       test('returns default timeline title if none exists', () => {
-        const mockAboutStep = {
-          ...mockAboutStepRule,
+        const mockStep = {
+          ...mockAboutStep,
           timeline: {
             id: '12345',
           },
@@ -453,7 +452,7 @@ describe('description_step', () => {
         const result: ListItems[] = getDescriptionItem(
           'timeline',
           'Timeline label',
-          mockAboutStep,
+          mockStep,
           mockFilterManager
         );
 
@@ -467,7 +466,7 @@ describe('description_step', () => {
         const result: ListItems[] = getDescriptionItem(
           'note',
           'Investigation notes',
-          mockAboutStepRule,
+          mockAboutStep,
           mockFilterManager
         );
 

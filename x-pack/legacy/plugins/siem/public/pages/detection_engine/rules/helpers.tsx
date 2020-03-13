@@ -12,10 +12,22 @@ import { useLocation } from 'react-router-dom';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
 import { Rule } from '../../../containers/detection_engine/rules';
 import { FormData, FormHook, FormSchema } from '../../../shared_imports';
-import { AboutStepRule, DefineStepRule, IMitreEnterpriseAttack, ScheduleStepRule } from './types';
+import {
+  AboutStepRule,
+  AboutStepRuleDetails,
+  DefineStepRule,
+  IMitreEnterpriseAttack,
+  ScheduleStepRule,
+} from './types';
 
 export interface GetStepsData {
   aboutRuleData: AboutStepRule | null;
+  defineRuleData: DefineStepRule | null;
+  scheduleRuleData: ScheduleStepRule | null;
+}
+export interface GetStepsDataDetails {
+  aboutRuleData: AboutStepRule | null;
+  aboutRuleDataDetails: AboutStepRuleDetails;
   defineRuleData: DefineStepRule | null;
   scheduleRuleData: ScheduleStepRule | null;
 }
@@ -44,7 +56,13 @@ export const getStepsData = ({
       ? {
           isNew: false,
           ...pick(['description', 'name', 'references', 'severity', 'tags', 'threat'], rule),
-          ...(detailsView ? { name: '' } : {}),
+          ...(detailsView
+            ? {
+                name: '',
+                description: '',
+                note: '',
+              }
+            : { note: rule.note ?? '' }),
           threat: rule.threat as IMitreEnterpriseAttack[],
           falsePositives: rule.false_positives,
           riskScore: rule.risk_score,
@@ -52,7 +70,6 @@ export const getStepsData = ({
             id: rule.timeline_id ?? null,
             title: rule.timeline_title ?? null,
           },
-          note: rule.note ?? '',
         }
       : null;
 
@@ -78,6 +95,24 @@ export const getStepsData = ({
       : null;
 
   return { aboutRuleData, defineRuleData, scheduleRuleData };
+};
+
+export const getStepsDataDetails = (rule: Rule): GetStepsDataDetails => {
+  const { defineRuleData, aboutRuleData, scheduleRuleData } = getStepsData({
+    rule,
+    detailsView: true,
+  });
+  const modifiedAboutStepRuleData = {
+    note: rule.note ?? '',
+    description: rule.description ?? '',
+  };
+
+  return {
+    aboutRuleData,
+    aboutRuleDataDetails: modifiedAboutStepRuleData,
+    defineRuleData,
+    scheduleRuleData,
+  };
 };
 
 export const useQuery = () => new URLSearchParams(useLocation().search);

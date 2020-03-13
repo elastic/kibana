@@ -34,10 +34,10 @@ import {
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   &.euiDescriptionList--column .euiDescriptionList__title {
-    width: 25%;
+    width: 30%;
   }
   &.euiDescriptionList--column .euiDescriptionList__description {
-    width: 75%;
+    width: 70%;
   }
 `;
 

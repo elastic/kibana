@@ -24,7 +24,7 @@ exports[`description_step StepRuleDescriptionComponent renders correctly against
             "title": "Severity",
           },
           Object {
-            "description": 1,
+            "description": 21,
             "title": "Risk score",
           },
           Object {
@@ -43,67 +43,43 @@ exports[`description_step StepRuleDescriptionComponent renders correctly against
       listItems={
         Array [
           Object {
-            "description": <ForwardRef
-              alignItems="flexStart"
-              direction="column"
-              gutterSize="none"
+            "description": <EuiText
+              size="s"
             >
-              <EuiFlexItem>
-                <ForwardRef(Styled(EuiButtonEmpty))
+              <ul>
+                <li
                   data-test-subj="urlsDescriptionReferenceLinkItem"
-                  flush="left"
-                  href="www.test.co"
-                  iconType="link"
-                  size="xs"
-                  target="_blank"
                 >
-                  www.test.co
-                </ForwardRef(Styled(EuiButtonEmpty))>
-              </EuiFlexItem>
-            </ForwardRef>,
+                  <ForwardRef
+                    external={true}
+                    href="www.test.co"
+                    target="_blank"
+                  >
+                    www.test.co
+                  </ForwardRef>
+                </li>
+              </ul>
+            </EuiText>,
             "title": "Reference URLs",
           },
           Object {
-            "description": <ul>
-              <li
-                data-test-subj="unorderedListArrayDescriptionItem"
-              >
-                test
-              </li>
-            </ul>,
+            "description": <EuiText
+              size="s"
+            >
+              <ul>
+                <li
+                  data-test-subj="unorderedListArrayDescriptionItem"
+                >
+                  test
+                </li>
+              </ul>
+            </EuiText>,
             "title": "False positive examples",
           },
           Object {
             "description": <ForwardRef(Styled(EuiFlexGroup))
               direction="column"
             >
-              <EuiFlexItem>
-                <ForwardRef
-                  data-test-subj="threatTacticLink"
-                  href="reference1"
-                  target="_blank"
-                >
-                  
-                </ForwardRef>
-                <ForwardRef
-                  alignItems="flexStart"
-                  direction="column"
-                  gutterSize="none"
-                >
-                  <EuiFlexItem>
-                    <ForwardRef(Styled(EuiButtonEmpty))
-                      data-test-subj="threatTechniqueLink"
-                      flush="left"
-                      href="technique reference"
-                      iconType="test-file-stub"
-                      size="xs"
-                      target="_blank"
-                    >
-                      
-                    </ForwardRef(Styled(EuiButtonEmpty))>
-                  </EuiFlexItem>
-                </ForwardRef>
-              </EuiFlexItem>
               <EuiSpacer />
             </ForwardRef(Styled(EuiFlexGroup))>,
             "title": "MITRE ATT&CK™",
@@ -143,7 +119,7 @@ exports[`description_step StepRuleDescriptionComponent renders correctly against
                 className="eui-yScrollWithShadows"
                 data-test-subj="noteDescriptionItem"
               >
-                # test documentation
+                # this is some markdown documentation
               </div>
             </ForwardRef(Styled(EuiFlexItem))>,
             "title": "Investigation notes",
@@ -178,7 +154,7 @@ exports[`description_step StepRuleDescriptionComponent renders correctly against
             "title": "Severity",
           },
           Object {
-            "description": 1,
+            "description": 21,
             "title": "Risk score",
           },
           Object {
@@ -186,67 +162,43 @@ exports[`description_step StepRuleDescriptionComponent renders correctly against
             "title": "Timeline template",
           },
           Object {
-            "description": <ForwardRef
-              alignItems="flexStart"
-              direction="column"
-              gutterSize="none"
+            "description": <EuiText
+              size="s"
             >
-              <EuiFlexItem>
-                <ForwardRef(Styled(EuiButtonEmpty))
+              <ul>
+                <li
                   data-test-subj="urlsDescriptionReferenceLinkItem"
-                  flush="left"
-                  href="www.test.co"
-                  iconType="link"
-                  size="xs"
-                  target="_blank"
                 >
-                  www.test.co
-                </ForwardRef(Styled(EuiButtonEmpty))>
-              </EuiFlexItem>
-            </ForwardRef>,
+                  <ForwardRef
+                    external={true}
+                    href="www.test.co"
+                    target="_blank"
+                  >
+                    www.test.co
+                  </ForwardRef>
+                </li>
+              </ul>
+            </EuiText>,
             "title": "Reference URLs",
           },
           Object {
-            "description": <ul>
-              <li
-                data-test-subj="unorderedListArrayDescriptionItem"
-              >
-                test
-              </li>
-            </ul>,
+            "description": <EuiText
+              size="s"
+            >
+              <ul>
+                <li
+                  data-test-subj="unorderedListArrayDescriptionItem"
+                >
+                  test
+                </li>
+              </ul>
+            </EuiText>,
             "title": "False positive examples",
           },
           Object {
             "description": <ForwardRef(Styled(EuiFlexGroup))
               direction="column"
             >
-              <EuiFlexItem>
-                <ForwardRef
-                  data-test-subj="threatTacticLink"
-                  href="reference1"
-                  target="_blank"
-                >
-                  
-                </ForwardRef>
-                <ForwardRef
-                  alignItems="flexStart"
-                  direction="column"
-                  gutterSize="none"
-                >
-                  <EuiFlexItem>
-                    <ForwardRef(Styled(EuiButtonEmpty))
-                      data-test-subj="threatTechniqueLink"
-                      flush="left"
-                      href="technique reference"
-                      iconType="test-file-stub"
-                      size="xs"
-                      target="_blank"
-                    >
-                      
-                    </ForwardRef(Styled(EuiButtonEmpty))>
-                  </EuiFlexItem>
-                </ForwardRef>
-              </EuiFlexItem>
               <EuiSpacer />
             </ForwardRef(Styled(EuiFlexGroup))>,
             "title": "MITRE ATT&CK™",
@@ -286,7 +238,7 @@ exports[`description_step StepRuleDescriptionComponent renders correctly against
                 className="eui-yScrollWithShadows"
                 data-test-subj="noteDescriptionItem"
               >
-                # test documentation
+                # this is some markdown documentation
               </div>
             </ForwardRef(Styled(EuiFlexItem))>,
             "title": "Investigation notes",
@@ -322,7 +274,7 @@ exports[`description_step StepRuleDescriptionComponent renders correctly against
             "title": "Severity",
           },
           Object {
-            "description": 1,
+            "description": 21,
             "title": "Risk score",
           },
           Object {
@@ -330,67 +282,43 @@ exports[`description_step StepRuleDescriptionComponent renders correctly against
             "title": "Timeline template",
           },
           Object {
-            "description": <ForwardRef
-              alignItems="flexStart"
-              direction="column"
-              gutterSize="none"
+            "description": <EuiText
+              size="s"
             >
-              <EuiFlexItem>
-                <ForwardRef(Styled(EuiButtonEmpty))
+              <ul>
+                <li
                   data-test-subj="urlsDescriptionReferenceLinkItem"
-                  flush="left"
-                  href="www.test.co"
-                  iconType="link"
-                  size="xs"
-                  target="_blank"
                 >
-                  www.test.co
-                </ForwardRef(Styled(EuiButtonEmpty))>
-              </EuiFlexItem>
-            </ForwardRef>,
+                  <ForwardRef
+                    external={true}
+                    href="www.test.co"
+                    target="_blank"
+                  >
+                    www.test.co
+                  </ForwardRef>
+                </li>
+              </ul>
+            </EuiText>,
             "title": "Reference URLs",
           },
           Object {
-            "description": <ul>
-              <li
-                data-test-subj="unorderedListArrayDescriptionItem"
-              >
-                test
-              </li>
-            </ul>,
+            "description": <EuiText
+              size="s"
+            >
+              <ul>
+                <li
+                  data-test-subj="unorderedListArrayDescriptionItem"
+                >
+                  test
+                </li>
+              </ul>
+            </EuiText>,
             "title": "False positive examples",
           },
           Object {
             "description": <ForwardRef(Styled(EuiFlexGroup))
               direction="column"
             >
-              <EuiFlexItem>
-                <ForwardRef
-                  data-test-subj="threatTacticLink"
-                  href="reference1"
-                  target="_blank"
-                >
-                  
-                </ForwardRef>
-                <ForwardRef
-                  alignItems="flexStart"
-                  direction="column"
-                  gutterSize="none"
-                >
-                  <EuiFlexItem>
-                    <ForwardRef(Styled(EuiButtonEmpty))
-                      data-test-subj="threatTechniqueLink"
-                      flush="left"
-                      href="technique reference"
-                      iconType="test-file-stub"
-                      size="xs"
-                      target="_blank"
-                    >
-                      
-                    </ForwardRef(Styled(EuiButtonEmpty))>
-                  </EuiFlexItem>
-                </ForwardRef>
-              </EuiFlexItem>
               <EuiSpacer />
             </ForwardRef(Styled(EuiFlexGroup))>,
             "title": "MITRE ATT&CK™",
@@ -430,7 +358,7 @@ exports[`description_step StepRuleDescriptionComponent renders correctly against
                 className="eui-yScrollWithShadows"
                 data-test-subj="noteDescriptionItem"
               >
-                # test documentation
+                # this is some markdown documentation
               </div>
             </ForwardRef(Styled(EuiFlexItem))>,
             "title": "Investigation notes",

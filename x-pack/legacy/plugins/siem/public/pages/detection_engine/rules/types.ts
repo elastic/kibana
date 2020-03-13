@@ -61,6 +61,11 @@ export interface AboutStepRule extends StepRuleData {
   note: string;
 }
 
+export interface AboutStepRuleDetails {
+  note: string;
+  description: string;
+}
+
 export interface DefineStepRule extends StepRuleData {
   index: string[];
   queryBar: FieldValueQueryBar;

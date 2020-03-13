@@ -9,9 +9,10 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiButtonEmpty,
   EuiSpacer,
+  EuiLink,
+  EuiText,
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash/fp';
@@ -111,13 +112,6 @@ const TechniqueLinkItem = styled(EuiButtonEmpty)`
   }
 `;
 
-const ReferenceLinkItem = styled(EuiButtonEmpty)`
-  .euiIcon {
-    width: 12px;
-    height: 12px;
-  }
-`;
-
 export const buildThreatDescription = ({ label, threat }: BuildThreatDescription): ListItems[] => {
   if (threat.length > 0) {
     return [
@@ -177,15 +171,17 @@ export const buildUnorderedListArrayDescription = (
       {
         title: label,
         description: (
-          <ul>
-            {values.map((val: string) =>
-              isEmpty(val) ? null : (
-                <li data-test-subj="unorderedListArrayDescriptionItem" key={`${field}-${val}`}>
-                  {val}
-                </li>
-              )
-            )}
-          </ul>
+          <EuiText size="s">
+            <ul>
+              {values.map((val: string) =>
+                isEmpty(val) ? null : (
+                  <li data-test-subj="unorderedListArrayDescriptionItem" key={`${field}-${val}`}>
+                    {val}
+                  </li>
+                )
+              )}
+            </ul>
+          </EuiText>
         ),
       },
     ];
@@ -234,22 +230,19 @@ export const buildUrlsDescription = (label: string, values: string[]): ListItems
       {
         title: label,
         description: (
-          <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
-            {values.map((val: string) => (
-              <EuiFlexItem>
-                <ReferenceLinkItem
-                  href={val}
-                  target="_blank"
-                  iconType="link"
-                  size="xs"
-                  flush="left"
-                  data-test-subj="urlsDescriptionReferenceLinkItem"
-                >
-                  {val}
-                </ReferenceLinkItem>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
+          <EuiText size="s">
+            <ul>
+              {values
+                .filter(v => !isEmpty(v))
+                .map((val: string, index: number) => (
+                  <li data-test-subj="urlsDescriptionReferenceLinkItem" key={`${index}-${val}`}>
+                    <EuiLink href={val} external target="_blank">
+                      {val}
+                    </EuiLink>
+                  </li>
+                ))}
+            </ul>
+          </EuiText>
         ),
       },
     ];

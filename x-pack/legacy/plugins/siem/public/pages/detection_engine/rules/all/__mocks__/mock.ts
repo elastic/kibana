@@ -146,8 +146,8 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   version: 1,
 });
 
-export const mockAboutStepRule: AboutStepRule = {
-  isNew: false,
+export const mockAboutStepRule = (isNew = false): AboutStepRule => ({
+  isNew,
   name: 'Query with rule-id',
   description: '24/7',
   severity: 'low',
@@ -177,21 +177,21 @@ export const mockAboutStepRule: AboutStepRule = {
     },
   ],
   note: '# this is some markdown documentation',
-};
+});
 
-export const mockDefineStepRule: DefineStepRule = {
-  isNew: false,
+export const mockDefineStepRule = (isNew = false): DefineStepRule => ({
+  isNew,
   index: ['filebeat-'],
   queryBar: mockQueryBar,
-};
+});
 
-export const mockScheduleStepRule: ScheduleStepRule = {
-  isNew: false,
-  enabled: false,
+export const mockScheduleStepRule = (isNew = false, enabled = false): ScheduleStepRule => ({
+  isNew,
+  enabled,
   interval: '5m',
   from: '6m',
   to: 'now',
-};
+});
 
 export const mockRuleError = (id: string): RuleError => ({
   rule_id: id,

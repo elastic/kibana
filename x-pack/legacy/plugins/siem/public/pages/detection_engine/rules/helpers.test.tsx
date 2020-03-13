@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GetStepsData, getStepsData } from './helpers';
+import { GetStepsData, getStepsData, getStepsDataDetails } from './helpers';
 import { mockRuleWithEverything, mockRule } from './all/__mocks__/mock';
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
 
@@ -137,13 +137,15 @@ describe('rule helpers', () => {
         expect(result.aboutRuleData?.timeline.title).toBeNull();
       });
 
-      test('returns name as empty string if detailsView is true', () => {
+      test('returns name, description, and note as empty string if detailsView is true', () => {
         const result: GetStepsData = getStepsData({
           rule: mockRuleWithEverything('test-id'),
           detailsView: true,
         });
 
         expect(result.aboutRuleData?.name).toEqual('');
+        expect(result.aboutRuleData?.description).toEqual('');
+        expect(result.aboutRuleData?.note).toEqual('');
       });
 
       test('returns note as empty string if property does not exist on rule', () => {
@@ -151,7 +153,6 @@ describe('rule helpers', () => {
         delete mockedRule.note;
         const result: GetStepsData = getStepsData({
           rule: mockedRule,
-          detailsView: true,
         });
 
         expect(result.aboutRuleData?.note).toEqual('');
@@ -215,6 +216,87 @@ describe('rule helpers', () => {
         expect(result.scheduleRuleData?.from).toEqual('5m');
         expect(result.scheduleRuleData?.interval).toEqual('randomstring');
       });
+    });
+  });
+
+  describe('getStepsDataDetails', () => {
+    test('returns object with about, about details, define, and schedule step properties formatted', () => {
+      const result = getStepsDataDetails(mockRuleWithEverything('test-id'));
+      const defineRuleStepData = {
+        isNew: false,
+        index: ['auditbeat-*'],
+        queryBar: {
+          query: {
+            query: 'user.name: root or user.name: admin',
+            language: 'kuery',
+          },
+          filters: [
+            {
+              $state: {
+                store: esFilters.FilterStateStore.GLOBAL_STATE,
+              },
+              meta: {
+                alias: null,
+                disabled: false,
+                key: 'event.category',
+                negate: false,
+                params: {
+                  query: 'file',
+                },
+                type: 'phrase',
+              },
+              query: {
+                match_phrase: {
+                  'event.category': 'file',
+                },
+              },
+            },
+          ],
+          saved_id: 'test123',
+        },
+      };
+      const aboutRuleStepData = {
+        description: '',
+        falsePositives: ['test'],
+        isNew: false,
+        name: '',
+        note: '',
+        references: ['www.test.co'],
+        riskScore: 21,
+        severity: 'low',
+        tags: ['tag1', 'tag2'],
+        threat: [
+          {
+            framework: 'mockFramework',
+            tactic: {
+              id: '1234',
+              name: 'tactic1',
+              reference: 'reference1',
+            },
+            technique: [
+              {
+                id: '456',
+                name: 'technique1',
+                reference: 'technique reference',
+              },
+            ],
+          },
+        ],
+        timeline: {
+          id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
+          title: 'Titled timeline',
+        },
+      };
+      const aboutRuleDataDetails = {
+        note: '# this is some markdown documentation',
+        description: '24/7',
+      };
+      const scheduleRuleStepData = { enabled: true, from: '0s', interval: '5m', isNew: false };
+
+      expect(result.defineRuleData).toEqual(defineRuleStepData);
+      expect(result.aboutRuleData).toEqual(aboutRuleStepData);
+      expect(result.aboutRuleDataDetails).toEqual(aboutRuleDataDetails);
+      expect(result.scheduleRuleData).toEqual(scheduleRuleStepData);
     });
   });
 });
