@@ -4,14 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TypeOf } from '@kbn/config-schema';
-import { RequestHandler, SavedObjectsClientContract } from 'kibana/server';
+import { RequestHandler } from 'kibana/server';
 import bluebird from 'bluebird';
-import {
-  appContextService,
-  agentConfigService,
-  datasourceService,
-  outputService,
-} from '../../services';
+import { appContextService, agentConfigService, datasourceService } from '../../services';
 import { listAgents } from '../../services/agents';
 import {
   GetAgentConfigsRequestSchema,
@@ -31,9 +26,7 @@ import {
   UpdateAgentConfigResponse,
   DeleteAgentConfigsResponse,
   GetFullAgentConfigResponse,
-  packageToConfigDatasource,
 } from '../../../common';
-import { findInstalledPackageByName, getPackageInfo } from '../../services/epm/packages';
 
 export const getAgentConfigsHandler: RequestHandler<
   undefined,
@@ -117,7 +110,11 @@ export const createAgentConfigHandler: RequestHandler<
         // If needed, retrieve System package information and build a new Datasource for the system package
         // NOTE: we ignore failures in attempting to create datasource, since config might have been created
         // successfully
-        withSysMonitoring ? buildSystemDatasource(soClient).catch(() => undefined) : undefined,
+        withSysMonitoring
+          ? datasourceService
+              .buildDatasourceFromPackage(soClient, DefaultPackages.system)
+              .catch(() => undefined)
+          : undefined,
       ]
     );
 
@@ -228,26 +225,5 @@ export const getFullAgentConfig: RequestHandler<TypeOf<
       statusCode: 500,
       body: { message: e.message },
     });
-  }
-};
-
-const buildSystemDatasource = async (
-  soClient: SavedObjectsClientContract
-): Promise<NewDatasource | undefined> => {
-  const sysPkgInstall = await findInstalledPackageByName({
-    savedObjectsClient: soClient,
-    pkgName: DefaultPackages.system,
-  });
-  if (sysPkgInstall) {
-    const [sysPkgInfo, defaultOutputId] = await Promise.all([
-      getPackageInfo({
-        savedObjectsClient: soClient,
-        pkgkey: `${sysPkgInstall.name}-${sysPkgInstall.version}`,
-      }),
-      outputService.getDefaultOutputId(soClient),
-    ]);
-    if (sysPkgInfo) {
-      return packageToConfigDatasource(sysPkgInfo, '', defaultOutputId, `${sysPkgInfo.name}-1`);
-    }
   }
 };
