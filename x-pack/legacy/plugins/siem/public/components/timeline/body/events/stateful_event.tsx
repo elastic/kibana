@@ -25,12 +25,14 @@ import {
 } from '../../events';
 import { ExpandableEvent } from '../../expandable_event';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
-import { EventsTrGroup, EventsTrSupplement } from '../../styles';
+import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { getRowRenderer } from '../renderers/get_row_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
 import { getEventType } from '../helpers';
-import { StatefulEventChild } from './stateful_event_child';
+import { NoteCards } from '../../../notes/note_cards';
+import { useEventDetailsWidthContext } from '../../../events_viewer/event_details_width_context';
+import { EventColumnView } from './event_column_view';
 
 interface Props {
   actionsColumnWidth: number;
@@ -88,20 +90,14 @@ const TOP_OFFSET = 50;
  */
 const BOTTOM_OFFSET = -500;
 
-interface AttributesProps {
-  children: React.ReactNode;
-}
+const emptyNotes: string[] = [];
 
-const AttributesComponent: React.FC<AttributesProps> = ({ children }) => (
-  <EventsTrSupplement
-    className="siemEventsTable__trSupplement--attributes"
-    data-test-subj="event-details"
-  >
-    {children}
-  </EventsTrSupplement>
-);
+const EventsTrSupplementContainerWrapper = React.memo(({ children }) => {
+  const width = useEventDetailsWidthContext();
+  return <EventsTrSupplementContainer width={width}>{children}</EventsTrSupplementContainer>;
+});
 
-const Attributes = React.memo(AttributesComponent);
+EventsTrSupplementContainerWrapper.displayName = 'EventsTrSupplementContainerWrapper';
 
 const StatefulEventComponent: React.FC<Props> = ({
   actionsColumnWidth,
@@ -212,59 +208,75 @@ const StatefulEventComponent: React.FC<Props> = ({
                   data-test-subj="event"
                   eventType={getEventType(event.ecs)}
                   showLeftBorder={!isEventViewer}
-                  ref={c => {
-                    if (c != null) {
-                      divElement.current = c;
-                    }
-                  }}
+                  ref={divElement}
                 >
-                  {getRowRenderer(event.ecs, rowRenderers).renderRow({
-                    browserFields,
-                    data: event.ecs,
-                    children: (
-                      <StatefulEventChild
-                        actionsColumnWidth={actionsColumnWidth}
+                  <EventColumnView
+                    id={event._id}
+                    actionsColumnWidth={actionsColumnWidth}
+                    associateNote={associateNote}
+                    columnHeaders={columnHeaders}
+                    columnRenderers={columnRenderers}
+                    data={event.data}
+                    ecsData={event.ecs}
+                    expanded={!!expanded[event._id]}
+                    eventIdToNoteIds={eventIdToNoteIds}
+                    getNotesByIds={getNotesByIds}
+                    isEventPinned={isEventPinned}
+                    isEventViewer={isEventViewer}
+                    loading={loading}
+                    loadingEventIds={loadingEventIds}
+                    onColumnResized={onColumnResized}
+                    onEventToggled={onToggleExpanded}
+                    onPinEvent={onPinEvent}
+                    onRowSelected={onRowSelected}
+                    onUnPinEvent={onUnPinEvent}
+                    selectedEventIds={selectedEventIds}
+                    showCheckboxes={showCheckboxes}
+                    showNotes={!!showNotes[event._id]}
+                    timelineId={timelineId}
+                    toggleShowNotes={onToggleShowNotes}
+                    updateNote={updateNote}
+                  />
+
+                  <EventsTrSupplementContainerWrapper>
+                    <EventsTrSupplement
+                      className="siemEventsTable__trSupplement--notes"
+                      data-test-subj="event-notes-flex-item"
+                    >
+                      <NoteCards
                         associateNote={associateNote}
-                        columnHeaders={columnHeaders}
-                        columnRenderers={columnRenderers}
-                        data={event.data}
-                        ecsData={event.ecs}
-                        eventIdToNoteIds={eventIdToNoteIds}
-                        expanded={!!expanded[event._id]}
+                        data-test-subj="note-cards"
+                        getNewNoteId={getNewNoteId}
                         getNotesByIds={getNotesByIds}
-                        id={event._id}
-                        isEventPinned={isEventPinned}
-                        isEventViewer={isEventViewer}
-                        loading={loading}
-                        loadingEventIds={loadingEventIds}
-                        onColumnResized={onColumnResized}
-                        onPinEvent={onPinEvent}
-                        onRowSelected={onRowSelected}
-                        onToggleExpanded={onToggleExpanded}
-                        onToggleShowNotes={onToggleShowNotes}
-                        onUnPinEvent={onUnPinEvent}
-                        selectedEventIds={selectedEventIds}
-                        showCheckboxes={showCheckboxes}
-                        showNotes={!!showNotes[event._id]}
-                        timelineId={timelineId}
+                        noteIds={eventIdToNoteIds[event._id] || emptyNotes}
+                        showAddNote={!!showNotes[event._id]}
+                        toggleShowAddNote={onToggleShowNotes}
                         updateNote={updateNote}
                       />
-                    ),
-                    timelineId,
-                  })}
+                    </EventsTrSupplement>
 
-                  <Attributes>
-                    <ExpandableEvent
-                      browserFields={browserFields}
-                      columnHeaders={columnHeaders}
-                      event={detailsData || emptyDetails}
-                      forceExpand={!!expanded[event._id] && !loading}
-                      id={event._id}
-                      onUpdateColumns={onUpdateColumns}
-                      timelineId={timelineId}
-                      toggleColumn={toggleColumn}
-                    />
-                  </Attributes>
+                    {getRowRenderer(event.ecs, rowRenderers).renderRow({
+                      browserFields,
+                      data: event.ecs,
+                      timelineId,
+                    })}
+
+                    <EventsTrSupplement
+                      className="siemEventsTable__trSupplement--attributes"
+                      data-test-subj="event-details"
+                    >
+                      <ExpandableEvent
+                        browserFields={browserFields}
+                        columnHeaders={columnHeaders}
+                        event={detailsData || emptyDetails}
+                        forceExpand={!!expanded[event._id] && !loading}
+                        id={event._id}
+                        onUpdateColumns={onUpdateColumns}
+                        timelineId={timelineId}
+                        toggleColumn={toggleColumn}
+                      />
+                    </EventsTrSupplement>
+                  </EventsTrSupplementContainerWrapper>
                 </EventsTrGroup>
               )}
             </TimelineDetailsQuery>
@@ -276,10 +288,7 @@ const StatefulEventComponent: React.FC<Props> = ({
               ? `${divElement.current.clientHeight}px`
               : DEFAULT_ROW_HEIGHT;
 
-          // height is being inlined directly in here because of performance with StyledComponents
-          // involving quick and constant changes to the DOM.
-          // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-          return <SkeletonRow cellCount={columnCount} style={{ height }} />;
+          return <SkeletonRow cellCount={columnCount} rowHeight={height} />;
         }
       }}
     </VisibilitySensor>

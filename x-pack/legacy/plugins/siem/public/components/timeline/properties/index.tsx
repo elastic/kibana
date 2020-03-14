@@ -5,8 +5,8 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import useResizeObserver from 'use-resize-observer/polyfilled';
 
+import { useThrottledResizeObserver } from '../../utils';
 import { Note } from '../../../lib/note';
 import { InputsModelId } from '../../../store/inputs/constants';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
@@ -51,8 +51,6 @@ const descriptionWidth = 165;
 const noteWidth = 130;
 const settingsWidth = 55;
 
-const useResizeObserverDefault = {};
-
 /** Displays the properties of a timeline, i.e. name, description, notes, etc */
 export const Properties = React.memo<Props>(
   ({
@@ -73,7 +71,7 @@ export const Properties = React.memo<Props>(
     updateTitle,
     usersViewing,
   }) => {
-    const { ref, width = 0 } = useResizeObserver<HTMLDivElement>(useResizeObserverDefault);
+    const { ref, width = 0 } = useThrottledResizeObserver(300);
     const [showActions, setShowActions] = useState(false);
     const [showNotes, setShowNotes] = useState(false);
     const [showTimelineModal, setShowTimelineModal] = useState(false);

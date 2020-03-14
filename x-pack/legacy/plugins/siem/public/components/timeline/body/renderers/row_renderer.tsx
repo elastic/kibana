@@ -26,12 +26,10 @@ export interface RowRenderer {
   renderRow: ({
     browserFields,
     data,
-    children,
     timelineId,
   }: {
     browserFields: BrowserFields;
     data: Ecs;
-    children: React.ReactNode;
     timelineId: string;
   }) => React.ReactNode;
 }

@@ -25,6 +25,7 @@ import { Footer, footerHeight } from '../timeline/footer';
 import { combineQueries } from '../timeline/helpers';
 import { TimelineRefetch } from '../timeline/refetch_timeline';
 import { ManageTimelineContext, TimelineTypeContextProps } from '../timeline/timeline_context';
+import { EventDetailsWidthProvider } from './event_details_width_context';
 import * as i18n from './translations';
 import {
   Filter,
@@ -125,86 +126,89 @@ const EventsViewerComponent: React.FC<Props> = ({
   return (
     <StyledEuiPanel data-test-subj="events-viewer-panel">
       {combinedQueries != null ? (
-        <TimelineQuery
-          fields={queryFields}
-          filterQuery={combinedQueries.filterQuery}
-          id={id}
-          indexPattern={indexPattern}
-          limit={itemsPerPage}
-          sortField={sortField}
-          sourceId="default"
-        >
-          {({
-            events,
-            getUpdatedAt,
-            inspect,
-            loading,
-            loadMore,
-            pageInfo,
-            refetch,
-            totalCount = 0,
-          }) => {
-            const totalCountMinusDeleted = totalCount > 0 ? totalCount - deletedEventIds.length : 0;
+        <EventDetailsWidthProvider>
+          <TimelineQuery
+            fields={queryFields}
+            filterQuery={combinedQueries.filterQuery}
+            id={id}
+            indexPattern={indexPattern}
+            limit={itemsPerPage}
+            sortField={sortField}
+            sourceId="default"
+          >
+            {({
+              events,
+              getUpdatedAt,
+              inspect,
+              loading,
+              loadMore,
+              pageInfo,
+              refetch,
+              totalCount = 0,
+            }) => {
+              const totalCountMinusDeleted =
+                totalCount > 0 ? totalCount - deletedEventIds.length : 0;
 
-            const subtitle = `${
-              i18n.SHOWING
-            }: ${totalCountMinusDeleted.toLocaleString()} ${timelineTypeContext.unit?.(
-              totalCountMinusDeleted
-            ) ?? i18n.UNIT(totalCountMinusDeleted)}`;
+              const subtitle = `${
+                i18n.SHOWING
+              }: ${totalCountMinusDeleted.toLocaleString()} ${timelineTypeContext.unit?.(
+                totalCountMinusDeleted
+              ) ?? i18n.UNIT(totalCountMinusDeleted)}`;
 
-            return (
-              <>
-                <HeaderSection
-                  id={id}
-                  subtitle={utilityBar ? undefined : subtitle}
-                  title={timelineTypeContext?.title ?? i18n.EVENTS}
-                >
-                  {headerFilterGroup}
-                </HeaderSection>
+              return (
+                <>
+                  <HeaderSection
+                    id={id}
+                    subtitle={utilityBar ? undefined : subtitle}
+                    title={timelineTypeContext?.title ?? i18n.EVENTS}
+                  >
+                    {headerFilterGroup}
+                  </HeaderSection>
 
-                {utilityBar?.(refetch, totalCountMinusDeleted)}
+                  {utilityBar?.(refetch, totalCountMinusDeleted)}
 
-                <EventsContainerLoading data-test-subj={`events-container-loading-${loading}`}>
-                  <ManageTimelineContext loading={loading} type={timelineTypeContext}>
-                    <TimelineRefetch
-                      id={id}
-                      inputId="global"
-                      inspect={inspect}
-                      loading={loading}
-                      refetch={refetch}
-                    />
+                  <EventsContainerLoading data-test-subj={`events-container-loading-${loading}`}>
+                    <ManageTimelineContext loading={loading} type={timelineTypeContext}>
+                      <TimelineRefetch
+                        id={id}
+                        inputId="global"
+                        inspect={inspect}
+                        loading={loading}
+                        refetch={refetch}
+                      />
 
-                    <StatefulBody
-                      browserFields={browserFields}
-                      data={events.filter(e => !deletedEventIds.includes(e._id))}
-                      id={id}
-                      isEventViewer={true}
-                      height={height}
-                      sort={sort}
-                      toggleColumn={toggleColumn}
-                    />
+                      <StatefulBody
+                        browserFields={browserFields}
+                        data={events.filter(e => !deletedEventIds.includes(e._id))}
+                        id={id}
+                        isEventViewer={true}
+                        height={height}
+                        sort={sort}
+                        toggleColumn={toggleColumn}
+                      />
 
-                    <Footer
-                      getUpdatedAt={getUpdatedAt}
-                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                      height={footerHeight}
-                      isLive={isLive}
-                      isLoading={loading}
-                      itemsCount={events.length}
-                      itemsPerPage={itemsPerPage}
-                      itemsPerPageOptions={itemsPerPageOptions}
-                      onChangeItemsPerPage={onChangeItemsPerPage}
-                      onLoadMore={loadMore}
-                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                      serverSideEventCount={totalCountMinusDeleted}
-                      tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                    />
-                  </ManageTimelineContext>
-                </EventsContainerLoading>
-              </>
-            );
-          }}
-        </TimelineQuery>
+                      <Footer
+                        getUpdatedAt={getUpdatedAt}
+                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                        height={footerHeight}
+                        isLive={isLive}
+                        isLoading={loading}
+                        itemsCount={events.length}
+                        itemsPerPage={itemsPerPage}
+                        itemsPerPageOptions={itemsPerPageOptions}
+                        onChangeItemsPerPage={onChangeItemsPerPage}
+                        onLoadMore={loadMore}
+                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                        serverSideEventCount={totalCountMinusDeleted}
+                        tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
+                      />
+                    </ManageTimelineContext>
+                  </EventsContainerLoading>
+                </>
+              );
+            }}
+          </TimelineQuery>
+        </EventDetailsWidthProvider>
       ) : null}
     </StyledEuiPanel>
   );

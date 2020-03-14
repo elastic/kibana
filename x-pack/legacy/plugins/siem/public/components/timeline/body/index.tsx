@@ -96,9 +96,10 @@ export const Body = React.memo<BodyProps>(
   }) => {
     const containerElementRef = useRef<HTMLDivElement>(null);
     const timelineTypeContext = useTimelineTypeContext();
-    const additionalActionWidth =
-      timelineTypeContext.timelineActions?.reduce((acc, v) => acc + v.width, 0) ?? 0;
-
+    const additionalActionWidth = useMemo(
+      () => timelineTypeContext.timelineActions?.reduce((acc, v) => acc + v.width, 0) ?? 0,
+      [timelineTypeContext.timelineActions]
+    );
     const actionsColumnWidth = useMemo(
       () => getActionsColumnWidth(isEventViewer, showCheckboxes, additionalActionWidth),
       [isEventViewer, showCheckboxes, additionalActionWidth]

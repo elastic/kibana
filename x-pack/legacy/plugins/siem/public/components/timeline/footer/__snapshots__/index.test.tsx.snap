@@ -77,15 +77,9 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
       data-test-subj="last-updated-container"
       grow={false}
     >
-      <FixedWidthLastUpdated
-        compact={true}
-        data-test-subj="fixed-width-last-updated"
-      >
-        <LastUpdatedAt
-          compact={true}
-          updatedAt={1546878704036}
-        />
-      </FixedWidthLastUpdated>
+      <FixedWidthLastUpdatedContainer
+        updatedAt={1546878704036}
+      />
     </EuiFlexItem>
   </FooterFlexGroup>
 </FooterContainer>

@@ -7,8 +7,8 @@
 import React, { useMemo } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
-import useResizeObserver from 'use-resize-observer/polyfilled';
 
+import { useThrottledResizeObserver } from '../../components/utils';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout } from '../../components/flyout';
 import { HeaderGlobal } from '../../components/header_global';
@@ -62,7 +62,7 @@ const calculateFlyoutHeight = ({
 }): number => Math.max(0, windowHeight - globalHeaderSize);
 
 export const HomePage: React.FC = () => {
-  const { ref: measureRef, height: windowHeight = 0 } = useResizeObserver<HTMLDivElement>({});
+  const { ref: measureRef, height: windowHeight = 0 } = useThrottledResizeObserver();
   const flyoutHeight = useMemo(
     () =>
       calculateFlyoutHeight({

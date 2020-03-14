@@ -7,19 +7,18 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
-import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { mockGlobalState, apolloClientObservable } from '../../../mock';
 import { createStore, State } from '../../../store';
+import { useThrottledResizeObserver } from '../../utils';
 
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
 
 jest.mock('../../../lib/kibana');
 
 let mockedWidth = 1000;
-const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
-jest.mock('use-resize-observer/polyfilled');
-mockUseResizeObserver.mockImplementation(() => ({
+jest.mock('../../utils');
+useThrottledResizeObserver.mockImplementation(() => ({
   width: mockedWidth,
 }));
 
@@ -315,7 +314,7 @@ describe('Properties', () => {
   });
 
   test('it renders a notes button on the left when the width is at least as wide as the threshold', () => {
-    // const width = showNotesThreshold;
+    mockedWidth = showNotesThreshold;
 
     const wrapper = mount(
       <ReduxStoreProvider store={store}>

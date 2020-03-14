@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { rgba } from 'polished';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
@@ -54,13 +54,9 @@ const DropAndTargetDataProviders = styled.div<{ hasAndItem: boolean }>`
 
 DropAndTargetDataProviders.displayName = 'DropAndTargetDataProviders';
 
-// Ref: https://github.com/elastic/eui/issues/1655
-// const NumberProviderAndBadge = styled(EuiBadge)`
-//   margin: 0px 5px;
-// `;
-const NumberProviderAndBadge = (props: EuiBadgeProps) => (
-  <EuiBadge {...props} style={{ margin: '0px 5px' }} />
-);
+const NumberProviderAndBadge = styled(EuiBadge)`
+  margin: 0px 5px;
+`;
 
 NumberProviderAndBadge.displayName = 'NumberProviderAndBadge';
 

@@ -123,7 +123,7 @@ export const ColumnHeadersComponent = ({
         >
           <DraggableContainer onMount={onMount} onUnmount={onUnmount}>
             <DragEffects>
-              <DraggableFieldBadge fieldId={header.id} fieldWidth={`${header.width}px`} />
+              <DraggableFieldBadge fieldId={header.id} fieldWidth={header.width} />
             </DragEffects>
           </DraggableContainer>
         </EventsTh>

@@ -19,9 +19,8 @@ import {
   EuiPopoverProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { FunctionComponent, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
-import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { LoadingPanel } from '../../loading';
 import { OnChangeItemsPerPage, OnLoadMore } from '../events';
@@ -29,8 +28,28 @@ import { OnChangeItemsPerPage, OnLoadMore } from '../events';
 import { LastUpdatedAt } from './last_updated';
 import * as i18n from './translations';
 import { useTimelineTypeContext } from '../timeline_context';
+import { useEventDetailsWidthContext } from '../../events_viewer/event_details_width_context';
 
 export const isCompactFooter = (width: number): boolean => width < 600;
+
+interface FixedWidthLastUpdatedContainerProps {
+  updatedAt: number;
+}
+
+const FixedWidthLastUpdatedContainer = React.memo<FixedWidthLastUpdatedContainerProps>(
+  ({ updatedAt }) => {
+    const width = useEventDetailsWidthContext();
+    const compact = useMemo(() => isCompactFooter(width), [width]);
+
+    return (
+      <FixedWidthLastUpdated data-test-subj="fixed-width-last-updated" compact={compact}>
+        <LastUpdatedAt updatedAt={updatedAt} compact={compact} />
+      </FixedWidthLastUpdated>
+    );
+  }
+);
+
+FixedWidthLastUpdatedContainer.displayName = 'FixedWidthLastUpdatedContainer';
 
 const FixedWidthLastUpdated = styled.div<{ compact?: boolean }>`
   width: ${({ compact }) => (!compact ? 200 : 25)}px;
@@ -67,7 +86,7 @@ const LoadingPanelContainer = styled.div`
 
 LoadingPanelContainer.displayName = 'LoadingPanelContainer';
 
-const PopoverRowItems = styled((EuiPopover as unknown) as FunctionComponent)<
+const PopoverRowItems = styled((EuiPopover as unknown) as FC)<
   EuiPopoverProps & {
     className?: string;
     id?: string;
@@ -199,8 +218,6 @@ interface FooterProps {
   tieBreaker: string;
 }
 
-const EMPTY_OBJECT = {};
-
 /** Renders a loading indicator and paging controls */
 export const FooterComponent = ({
   getUpdatedAt,
@@ -217,12 +234,10 @@ export const FooterComponent = ({
   serverSideEventCount,
   tieBreaker,
 }: FooterProps) => {
-  const { ref: measureRef, width = 0 } = useResizeObserver<HTMLDivElement>(EMPTY_OBJECT);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [paginationLoading, setPaginationLoading] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
   const timelineTypeContext = useTimelineTypeContext();
-  const compact = isCompactFooter(width);
 
   const loadMore = useCallback(() => {
     setPaginationLoading(true);
@@ -289,7 +304,6 @@ export const FooterComponent = ({
         direction="row"
         gutterSize="none"
         justifyContent="spaceBetween"
-        ref={measureRef}
       >
         <EuiFlexItem data-test-subj="event-count-container" grow={false}>
           <EuiFlexGroup
@@ -340,9 +354,7 @@ export const FooterComponent = ({
         </EuiFlexItem>
 
         <EuiFlexItem data-test-subj="last-updated-container" grow={false}>
-          <FixedWidthLastUpdated data-test-subj="fixed-width-last-updated" compact={compact}>
-            <LastUpdatedAt updatedAt={updatedAt || getUpdatedAt()} compact={compact} />
-          </FixedWidthLastUpdated>
+          <FixedWidthLastUpdatedContainer updatedAt={updatedAt || getUpdatedAt()} />
         </EuiFlexItem>
       </FooterFlexGroup>
     </FooterContainer>

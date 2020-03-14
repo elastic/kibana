@@ -181,6 +181,14 @@ export const EventsTrData = styled.div.attrs(({ className = '' }) => ({
   display: flex;
 `;
 
+const TIMELINE_EVENT_DETAILS_OFFSET = 40;
+
+export const EventsTrSupplementContainer = styled.div.attrs<WidthProp>(({ width }) => ({
+  style: {
+    width: `${width! - TIMELINE_EVENT_DETAILS_OFFSET}px`,
+  },
+}))<WidthProp>``;
+
 export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__trSupplement ${className}`,
 }))<{ className: string }>`

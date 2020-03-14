@@ -4,15 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import {
-  EuiBadge,
-  EuiBadgeProps,
-  EuiDescriptionList,
-  EuiFlexGroup,
-  EuiIcon,
-  EuiPage,
-} from '@elastic/eui';
+import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiIcon, EuiPage } from '@elastic/eui';
 import styled, { createGlobalStyle } from 'styled-components';
 
 /*
@@ -161,13 +153,9 @@ export const Pane1FlexContent = styled.div`
 
 Pane1FlexContent.displayName = 'Pane1FlexContent';
 
-// Ref: https://github.com/elastic/eui/issues/1655
-// const Badge = styled(EuiBadge)`
-//   margin-left: 5px;
-// `;
-export const CountBadge = (props: EuiBadgeProps) => (
-  <EuiBadge {...props} style={{ marginLeft: '5px' }} />
-);
+export const CountBadge = styled(EuiBadge)`
+  margin-left: 5px;
+`;
 
 CountBadge.displayName = 'CountBadge';
 
@@ -177,13 +165,9 @@ export const Spacer = styled.span`
 
 Spacer.displayName = 'Spacer';
 
-// Ref: https://github.com/elastic/eui/issues/1655
-// export const Badge = styled(EuiBadge)`
-//   vertical-align: top;
-// `;
-export const Badge = (props: EuiBadgeProps) => (
-  <EuiBadge {...props} style={{ verticalAlign: 'top' }} />
-);
+export const Badge = styled(EuiBadge)`
+  vertical-align: top;
+`;
 
 Badge.displayName = 'Badge';
 

@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import { Resizable, ResizeCallback } from 're-resizable';
 
 import { TimelineResizeHandle } from './timeline_resize_handle';
+import { EventDetailsWidthProvider } from '../../events_viewer/event_details_width_context';
 
 import * as i18n from './translations';
 import { timelineActions } from '../../../store/actions';
@@ -98,7 +99,7 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
           handleComponent={resizableHandleComponent}
           onResizeStop={onResizeStop}
         >
-          {children}
+          <EventDetailsWidthProvider>{children}</EventDetailsWidthProvider>
         </StyledResizable>
       </EuiFlyout>
     </EuiFlyoutContainer>

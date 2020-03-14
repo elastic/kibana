@@ -6,7 +6,6 @@
 
 import {
   EuiBadge,
-  EuiBadgeProps,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -20,6 +19,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import uuid from 'uuid';
+import styled from 'styled-components';
 
 import { Note } from '../../../lib/note';
 import { Notes } from '../../notes';
@@ -32,13 +32,10 @@ export const historyToolTip = 'The chronological history of actions related to t
 export const streamLiveToolTip = 'Update the Timeline as new data arrives';
 export const newTimelineToolTip = 'Create a new timeline';
 
-// Ref: https://github.com/elastic/eui/issues/1655
-// const NotesCountBadge = styled(EuiBadge)`
-//   margin-left: 5px;
-// `;
-const NotesCountBadge = (props: EuiBadgeProps) => (
-  <EuiBadge {...props} style={{ marginLeft: '5px' }} />
-);
+const NotesCountBadge = styled(EuiBadge)`
+  margin-left: 5px;
+`;
+
 NotesCountBadge.displayName = 'NotesCountBadge';
 
 type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
