@@ -25,10 +25,10 @@ export const ABOUT_TIMELINE = 3;
 export const DEFINITION_CUSTOM_QUERY = 1;
 
 export const DEFINITION_DESCRIPTION =
-  '[data-test-subj="definition"] .euiDescriptionList__description';
+  '[data-test-subj="listItemColumnStepRuleDescription"] .euiDescriptionList__description';
 
 export const DEFINITION_INDEX_PATTERNS =
-  '[data-test-subj="definition"] .euiDescriptionList__description .euiBadge__text';
+  '[data-test-subj="listItemColumnStepRuleDescription"] .euiDescriptionList__description .euiBadge__text';
 
 export const RULE_NAME_HEADER = '[data-test-subj="header-page-title"]';
 

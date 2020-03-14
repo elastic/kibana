@@ -12,6 +12,8 @@ import {
   EuiSpacer,
   EuiFlexItem,
   EuiText,
+  EuiFlexGroup,
+  EuiResizeObserver,
 } from '@elastic/eui';
 import React, { memo, useState } from 'react';
 import styled from 'styled-components';
@@ -23,9 +25,30 @@ import { AboutStepRule, AboutStepRuleDetails } from '../../types';
 import * as i18n from './translations';
 import { StepAboutRule } from '../step_about_rule/';
 
+const MyPanel = styled(EuiPanel)`
+  position: relative;
+`;
+
+const FlexGroupFullHeight = styled(EuiFlexGroup)`
+  height: 100%;
+`;
+
+const VerticalOverflowContainer = styled.div((props: { maxHeight: number }) => ({
+  'max-height': `${props.maxHeight ?? '200'}px`,
+  'overflow-y': 'hidden',
+}));
+
+const VerticalOverflowContent = styled.div((props: { maxHeight: number }) => ({
+  'max-height': `${props.maxHeight}px`,
+}));
+
+const AboutContent = styled.div`
+  height: 100%;
+`;
+
 const toggleOptions: EuiButtonGroupOption[] = [
   {
-    id: 'about',
+    id: 'details',
     label: i18n.ABOUT_PANEL_DETAILS_TAB,
   },
   {
@@ -40,25 +63,17 @@ interface StepPanelProps {
   loading: boolean;
 }
 
-const MyPanel = styled(EuiPanel)`
-  position: relative;
-`;
-
-const AboutDescriptionContainer = styled(EuiFlexItem)`
-  max-height: 550px;
-  overflow-y: hidden;
-`;
-
-const AboutDescriptionScrollContainer = styled.div`
-  overflow-x: hidden;
-`;
-
 const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
   stepData,
   stepDataDetails,
   loading,
 }) => {
-  const [selectedToggleOption, setToggleOption] = useState('about');
+  const [selectedToggleOption, setToggleOption] = useState('details');
+  const [aboutPanelHeight, setAboutPanelHeight] = useState();
+
+  const onResize = (e: { height: number; width: number }) => {
+    setAboutPanelHeight(e.height);
+  };
 
   return (
     <MyPanel>
@@ -69,40 +84,61 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
         </>
       )}
       {stepData != null && stepDataDetails != null && (
-        <>
-          <HeaderSection title={i18n.ABOUT_TEXT}>
-            {!isEmpty(stepDataDetails.note) && (
-              <EuiButtonGroup
-                options={toggleOptions}
-                idSelected={selectedToggleOption}
-                onChange={val => {
-                  setToggleOption(val);
-                }}
-              />
-            )}
-          </HeaderSection>
-          <AboutDescriptionContainer>
-            <AboutDescriptionScrollContainer className="eui-yScrollWithShadows">
-              {selectedToggleOption === 'about' ? (
-                <>
-                  <EuiSpacer size="xs" />
-                  <EuiText size="s" data-test-subj="stepAboutRuleDetailsToggleDescriptionText">
-                    <p>{stepDataDetails.description}</p>
-                  </EuiText>
-                  <EuiSpacer size="m" />
-                  <StepAboutRule
-                    descriptionColumns="singleSplit"
-                    isReadOnlyView={true}
-                    isLoading={false}
-                    defaultValues={stepData}
-                  />
-                </>
-              ) : (
-                <Markdown raw={stepDataDetails.note} />
+        <FlexGroupFullHeight gutterSize="xs" direction="column">
+          <EuiFlexItem grow={1}>
+            <HeaderSection title={i18n.ABOUT_TEXT}>
+              {!isEmpty(stepDataDetails.note) && (
+                <EuiButtonGroup
+                  options={toggleOptions}
+                  idSelected={selectedToggleOption}
+                  onChange={val => {
+                    setToggleOption(val);
+                  }}
+                  data-test-subj="stepAboutDetailsToggle"
+                />
               )}
-            </AboutDescriptionScrollContainer>
-          </AboutDescriptionContainer>
-        </>
+            </HeaderSection>
+          </EuiFlexItem>
+          <EuiFlexItem grow={5}>
+            {selectedToggleOption === 'details' ? (
+              <EuiResizeObserver data-test-subj="stepAboutDetailsContent" onResize={onResize}>
+                {resizeRef => (
+                  <AboutContent ref={resizeRef}>
+                    <VerticalOverflowContainer maxHeight={120}>
+                      <VerticalOverflowContent maxHeight={120} className="eui-yScrollWithShadows">
+                        <EuiText
+                          size="s"
+                          data-test-subj="stepAboutRuleDetailsToggleDescriptionText"
+                        >
+                          {stepDataDetails.description}
+                        </EuiText>
+                      </VerticalOverflowContent>
+                    </VerticalOverflowContainer>
+                    <EuiSpacer size="m" />
+                    <StepAboutRule
+                      descriptionColumns="singleSplit"
+                      isReadOnlyView={true}
+                      isLoading={false}
+                      defaultValues={stepData}
+                    />
+                  </AboutContent>
+                )}
+              </EuiResizeObserver>
+            ) : (
+              <VerticalOverflowContainer
+                data-test-subj="stepAboutDetailsNoteContent"
+                maxHeight={aboutPanelHeight}
+              >
+                <VerticalOverflowContent
+                  maxHeight={aboutPanelHeight}
+                  className="eui-yScrollWithShadows"
+                >
+                  <Markdown raw={stepDataDetails.note} />
+                </VerticalOverflowContent>
+              </VerticalOverflowContainer>
+            )}
+          </EuiFlexItem>
+        </FlexGroupFullHeight>
       )}
     </MyPanel>
   );

@@ -87,13 +87,9 @@ describe('StepAboutRuleToggleDetails', () => {
         />
       );
 
-      expect(wrapper.find(EuiButtonGroup).exists()).toBeFalsy();
-      expect(
-        wrapper
-          .find('EuiText[data-test-subj="stepAboutRuleDetailsToggleDescriptionText"] p')
-          .at(0)
-          .text()
-      ).toEqual(mockAboutStepWithoutNote.description);
+      expect(wrapper.find('[data-test-subj="stepAboutDetailsToggle"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="stepAboutDetailsNoteContent"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="stepAboutDetailsContent"]').exists()).toBeTruthy();
     });
 
     test('it does not render description as part of the description list', () => {
@@ -124,7 +120,7 @@ describe('StepAboutRuleToggleDetails', () => {
   });
 
   describe('note value does exist', () => {
-    test('it renders toggle buttons, defaulted to `about`', () => {
+    test('it renders toggle buttons, defaulted to `details`', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <StepAboutRuleToggleDetails
@@ -141,7 +137,7 @@ describe('StepAboutRuleToggleDetails', () => {
       expect(wrapper.find(EuiButtonGroup).exists()).toBeTruthy();
       expect(
         wrapper
-          .find('EuiButtonToggle[id="about"]')
+          .find('EuiButtonToggle[id="details"]')
           .at(0)
           .prop('isSelected')
       ).toBeTruthy();
@@ -153,7 +149,7 @@ describe('StepAboutRuleToggleDetails', () => {
       ).toBeFalsy();
     });
 
-    test('it allows users to toggle between `about` and `note`', () => {
+    test('it allows users to toggle between `details` and `note`', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <StepAboutRuleToggleDetails
@@ -167,7 +163,7 @@ describe('StepAboutRuleToggleDetails', () => {
         </ThemeProvider>
       );
 
-      expect(wrapper.find('EuiButtonGroup[idSelected="about"]').exists()).toBeTruthy();
+      expect(wrapper.find('EuiButtonGroup[idSelected="details"]').exists()).toBeTruthy();
       expect(wrapper.find('EuiButtonGroup[idSelected="notes"]').exists()).toBeFalsy();
 
       wrapper
@@ -175,7 +171,7 @@ describe('StepAboutRuleToggleDetails', () => {
         .at(0)
         .simulate('change', { target: { value: 'notes' } });
 
-      expect(wrapper.find('EuiButtonGroup[idSelected="about"]').exists()).toBeFalsy();
+      expect(wrapper.find('EuiButtonGroup[idSelected="details"]').exists()).toBeFalsy();
       expect(wrapper.find('EuiButtonGroup[idSelected="notes"]').exists()).toBeTruthy();
     });
 
