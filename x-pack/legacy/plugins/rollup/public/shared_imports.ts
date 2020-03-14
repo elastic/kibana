@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 export {
   findIllegalCharactersInIndexName,
   INDEX_ILLEGAL_CHARACTERS_VISIBLE,
