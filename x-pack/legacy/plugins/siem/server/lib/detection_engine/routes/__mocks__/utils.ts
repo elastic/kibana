@@ -77,3 +77,89 @@ export const buildHapiStream = (string: string, filename = 'file.ndjson'): HapiR
 
   return stream;
 };
+
+export const getOutputRuleAlertForRest = (): OutputRuleAlertRest => ({
+  created_by: 'elastic',
+  created_at: '2019-12-13T16:40:33.400Z',
+  updated_at: '2019-12-13T16:40:33.400Z',
+  description: 'Detecting root and admin users',
+  enabled: true,
+  false_positives: [],
+  from: 'now-6m',
+  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+  immutable: false,
+  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  interval: '5m',
+  risk_score: 50,
+  rule_id: 'rule-1',
+  language: 'kuery',
+  max_signals: 100,
+  name: 'Detect Root/Admin Users',
+  output_index: '.siem-signals',
+  query: 'user.name: root or user.name: admin',
+  references: ['http://www.example.com', 'https://ww.example.com'],
+  severity: 'high',
+  updated_by: 'elastic',
+  tags: [],
+  threat: [
+    {
+      framework: 'MITRE ATT&CK',
+      tactic: {
+        id: 'TA0040',
+        name: 'impact',
+        reference: 'https://attack.mitre.org/tactics/TA0040/',
+      },
+      technique: [
+        {
+          id: 'T1499',
+          name: 'endpoint denial of service',
+          reference: 'https://attack.mitre.org/techniques/T1499/',
+        },
+      ],
+    },
+  ],
+  lists: [
+    {
+      field: 'source.ip',
+      boolean_operator: 'and',
+      values: [
+        {
+          name: '127.0.0.1',
+          type: 'value',
+        },
+      ],
+    },
+    {
+      field: 'host.name',
+      boolean_operator: 'and not',
+      values: [
+        {
+          name: 'rock01',
+          type: 'value',
+        },
+        {
+          name: 'mothra',
+          type: 'value',
+        },
+      ],
+    },
+  ],
+  filters: [
+    {
+      query: {
+        match_phrase: {
+          'host.name': 'some-host',
+        },
+      },
+    },
+  ],
+  meta: {
+    someMeta: 'someField',
+  },
+  timeline_id: 'some-timeline-id',
+  timeline_title: 'some-timeline-title',
+  to: 'now',
+  type: 'query',
+  note: '# Investigative notes',
+  version: 1,
+});
