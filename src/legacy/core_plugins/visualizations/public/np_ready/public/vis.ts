@@ -27,21 +27,25 @@
  * Not to be confused with vislib/vis.js.
  */
 
-import { EventEmitter } from 'events';
-import _ from 'lodash';
+import { isFunction, defaults, cloneDeep } from 'lodash';
 import { PersistedState } from '../../../../../../../src/plugins/visualizations/public';
 // @ts-ignore
 import { updateVisualizationConfig } from './legacy/vis_update';
 import { getTypes, getAggs } from './services';
 import { VisType } from './vis_types';
-import { IAggConfigs, IndexPattern, ISearchSource } from '../../../../../../plugins/data/public';
-import { AggConfigOptions } from '../../../../../../plugins/data/public/search/aggs/agg_config';
+import {
+  IAggConfigs,
+  IndexPattern,
+  ISearchSource,
+  AggConfigOptions,
+} from '../../../../../../plugins/data/public';
 
 export interface SerializedVisData {
   expression?: string;
   aggs: AggConfigOptions[];
   indexPattern?: string;
   searchSource?: ISearchSource;
+  savedSearchId?: string;
 }
 
 export interface SerializedVis {
@@ -58,13 +62,14 @@ export interface VisData {
   aggs?: IAggConfigs;
   indexPattern?: IndexPattern;
   searchSource?: ISearchSource;
+  savedSearchId?: string;
 }
 
 export interface VisParams {
   [key: string]: any;
 }
 
-export class Vis extends EventEmitter {
+export class Vis {
   public readonly type: VisType;
   public title: string = '';
   public description: string = '';
@@ -77,8 +82,6 @@ export class Vis extends EventEmitter {
   public readonly uiState: PersistedState;
 
   constructor(visType: string, visState: SerializedVis = {} as any) {
-    super();
-
     this.type = getTypes().get(visType);
     if (!this.type) {
       throw new Error(`Invalid type "${visType}"`);
@@ -93,10 +96,10 @@ export class Vis extends EventEmitter {
     this.title = state.title || '';
     this.description = state.description || '';
 
-    this.params = _.defaults(
+    this.params = defaults(
       {},
-      _.cloneDeep(state.params || {}),
-      _.cloneDeep(this.type.visConfig.defaults || {})
+      cloneDeep(state.params || {}),
+      cloneDeep(this.type.visConfig.defaults || {})
     );
 
     // move to migration script
@@ -105,6 +108,7 @@ export class Vis extends EventEmitter {
     if (state.data && state.data.searchSource) {
       this.data.searchSource = state.data.searchSource!;
       this.data.indexPattern = this.data.searchSource.getField('index');
+      this.data.savedSearchId = state.data.savedSearchId;
     }
     if (state.data && state.data.aggs) {
       let configStates = state.data.aggs;
@@ -129,7 +133,7 @@ export class Vis extends EventEmitter {
     return {
       title: this.title,
       type: this.type.name,
-      params: _.cloneDeep(this.params) as any,
+      params: cloneDeep(this.params) as any,
       uiState: this.uiState.getChanges(),
       data: {
         aggs: aggs as any,
@@ -145,7 +149,7 @@ export class Vis extends EventEmitter {
 
   // deprecated
   isHierarchical() {
-    if (_.isFunction(this.type.hierarchicalData)) {
+    if (isFunction(this.type.hierarchicalData)) {
       return !!this.type.hierarchicalData(this);
     } else {
       return !!this.type.hierarchicalData;
@@ -163,8 +167,8 @@ export class Vis extends EventEmitter {
       .filter((schema: any) => Array.isArray(schema.defaults) && schema.defaults.length > 0)
       .filter((schema: any) => !configStates.find(agg => agg.schema && agg.schema === schema.name))
       .forEach((schema: any) => {
-        const defaults = schema.defaults.slice(0, schema.max);
-        defaults.forEach((d: any) => newConfigs.push(d));
+        const defaultSchemaConfig = schema.defaults.slice(0, schema.max);
+        defaultSchemaConfig.forEach((d: any) => newConfigs.push(d));
       });
     return newConfigs;
   }

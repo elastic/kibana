@@ -30,6 +30,7 @@ import { LegacyCoreStart } from 'kibana/public';
 import { Vis } from 'src/legacy/core_plugins/visualizations/public';
 import { VisSavedObject } from '../legacy_imports';
 import { SavedVisState } from '../../../../visualizations/public/np_ready/public/types';
+import { SavedSearch } from '../../../../../../plugins/discover/public';
 
 export type PureVisState = SavedVisState;
 
@@ -67,6 +68,7 @@ export interface EditorRenderProps {
   uiState: PersistedState;
   timeRange: TimeRange;
   query?: Query;
+  savedSearch?: SavedSearch;
   /**
    * Flag to determine if visualiztion is linked to the saved search
    */

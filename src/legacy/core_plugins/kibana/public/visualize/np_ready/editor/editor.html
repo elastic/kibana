@@ -91,15 +91,17 @@
   <visualization-editor
     ng-if="isVisible"
     vis="vis"
+    saved-search="savedSearch"
     embeddable-handler="embeddableHandler"
     reload-visualization="reloadVisualization"
     unlink-from-saved-search="unlinkFromSavedSearch"
+    update-editor-observable="updateEditorObservable"
+    set-dirty="setDirty"
     ui-state="uiState"
     time-range="timeRange"
     filters="filters"
     query="query"
     class="visEditor__content"
-    app-state="appState"
   />
 
 </visualize-app>

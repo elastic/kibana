@@ -33,12 +33,14 @@ function DefaultEditor({
   uiState,
   timeRange,
   filters,
-  appState,
   optionTabs,
   query,
   embeddableHandler,
   reloadVisualization,
   unlinkFromSavedSearch,
+  setDirty,
+  updateEditorObservable,
+  savedSearch,
 }: DefaultEditorControllerState & Omit<EditorRenderProps, 'data' | 'core'>) {
   const visRef = useRef<HTMLDivElement>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -53,9 +55,12 @@ function DefaultEditor({
     }
 
     embeddableHandler.render(visRef.current);
+    setTimeout(() => {
+      setDirty(false);
+    });
 
     return () => embeddableHandler.destroy();
-  }, [embeddableHandler]);
+  }, [embeddableHandler, setDirty]);
 
   const editorInitialWidth = getInitialWidth(vis.type.editorConfig.defaultSize);
 
@@ -79,8 +84,11 @@ function DefaultEditor({
           onClickCollapse={onClickCollapse}
           optionTabs={optionTabs}
           vis={vis}
+          savedSearch={savedSearch}
           unlinkFromSavedSearch={unlinkFromSavedSearch}
           reloadVisualization={reloadVisualization}
+          updateEditorObservable={updateEditorObservable}
+          notifyDirty={setDirty}
         />
       </Panel>
     </PanelsContainer>

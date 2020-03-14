@@ -27,10 +27,12 @@ export function initVisEditorDirective(app, deps) {
         timeRange: '=',
         filters: '=',
         query: '=',
-        appState: '=',
+        savedSearch: '=',
         embeddableHandler: '=',
         reloadVisualization: '=',
         unlinkFromSavedSearch: '=',
+        updateEditorObservable: '=',
+        setDirty: '=',
       },
       link: function($scope, element) {
         const Editor = $scope.vis.type.editor || deps.DefaultVisualizationEditor;
@@ -39,7 +41,9 @@ export function initVisEditorDirective(app, deps) {
           $scope.vis,
           $scope.embeddableHandler,
           $scope.reloadVisualization,
-          $scope.unlinkFromSavedSearch
+          $scope.unlinkFromSavedSearch,
+          $scope.updateEditorObservable,
+          $scope.setDirty
         );
 
         $scope.renderFunction = () => {
@@ -51,7 +55,7 @@ export function initVisEditorDirective(app, deps) {
             timeRange: $scope.timeRange,
             filters: $scope.filters,
             query: $scope.query,
-            appState: $scope.appState,
+            savedSearch: $scope.savedSearch,
           });
         };
 

@@ -505,8 +505,8 @@ export const buildPipeline = async (
   if (filters) {
     pipeline += prepareJson('filters', filters);
   }
-  if (vis.data.searchSource && vis.data.searchSource.getParent()) {
-    pipeline += prepareString('savedSearchId', vis.data.searchSource.getParent()!.getId());
+  if (vis.data.savedSearchId) {
+    pipeline += prepareString('savedSearchId', vis.data.savedSearchId);
   }
   pipeline += '| ';
 

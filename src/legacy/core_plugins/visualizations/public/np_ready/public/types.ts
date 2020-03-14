@@ -18,9 +18,8 @@
  */
 
 import { SavedObject } from '../../../../../../plugins/saved_objects/public';
-import { ISearchSource } from '../../../../../../plugins/data/public/';
+import { ISearchSource, AggConfigOptions } from '../../../../../../plugins/data/public';
 import { SerializedVis, Vis, VisParams } from './vis';
-import { AggConfigOptions } from '../../../../data/public/search/aggs/agg_config';
 
 export { Vis, SerializedVis, VisParams };
 

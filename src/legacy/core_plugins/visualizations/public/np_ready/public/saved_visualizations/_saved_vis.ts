@@ -41,12 +41,13 @@ import { createSavedSearchesLoader } from '../../../../../../../plugins/discover
 import { getChrome, getOverlays, getIndexPatterns, getSavedObjects } from '../services';
 
 export const convertToSerializedVis = async (savedVis: ISavedVis): Promise<SerializedVis> => {
-  const searchSource = await getSearchSource(savedVis.searchSource!, savedVis.savedSearchId);
+  const searchSource =
+    savedVis.searchSource && (await getSearchSource(savedVis.searchSource, savedVis.savedSearchId));
 
   const indexPattern =
-    savedVis.searchSource && savedVis.searchSource.getField('index')
-      ? savedVis.searchSource && savedVis.searchSource.getField('index')!.id
-      : undefined;
+    searchSource && searchSource.getField('index') ? searchSource.getField('index')!.id : undefined;
+
+  const aggs = indexPattern ? savedVis.visState.aggs || [] : savedVis.visState.aggs;
 
   return {
     title: savedVis.title,
@@ -56,8 +57,9 @@ export const convertToSerializedVis = async (savedVis: ISavedVis): Promise<Seria
     uiState: JSON.parse(savedVis.uiStateJSON || '{}'),
     data: {
       indexPattern,
-      aggs: savedVis.visState.aggs,
+      aggs,
       searchSource,
+      savedSearchId: savedVis.savedSearchId,
     },
   };
 };
@@ -73,9 +75,7 @@ export const convertFromSerializedVis = (vis: SerializedVis): ISavedVis => {
     },
     uiStateJSON: JSON.stringify(vis.uiState),
     searchSource: vis.data.searchSource!,
-    savedSearchId: vis.data.searchSource!.getParent()
-      ? vis.data.searchSource!.getParent()!.getId()
-      : undefined,
+    savedSearchId: vis.data.savedSearchId,
   };
 };
 
@@ -91,7 +91,7 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
       overlays: getOverlays(),
     }).get(savedSearchId);
 
-    searchSource.setParent(savedSearch);
+    searchSource.setParent(savedSearch.searchSource);
   }
   searchSource!.setField('size', 0);
   return searchSource;

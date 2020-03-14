@@ -40,6 +40,7 @@ import {
   getCreateBreadcrumbs,
   getEditBreadcrumbs,
 } from './breadcrumbs';
+import { createSavedSearchesLoader } from '../../../../../../plugins/discover/public';
 
 export function initVisualizeApp(app, deps) {
   initVisualizeAppDirective(app, deps);
@@ -144,6 +145,19 @@ export function initVisualizeApp(app, deps) {
               })
               .then(embeddableHandler => {
                 results.embeddableHandler = embeddableHandler;
+                if (results.vis.data.savedSearchId) {
+                  return createSavedSearchesLoader({
+                    savedObjectsClient: core.savedObjects.client,
+                    indexPatterns: data.indexPatterns,
+                    chrome: core.chrome,
+                    overlays: core.overlays,
+                  }).get(results.vis.data.savedSearchId);
+                }
+              })
+              .then(savedSearch => {
+                if (savedSearch) {
+                  results.savedSearch = savedSearch;
+                }
                 return results;
               })
               .catch(
@@ -188,6 +202,19 @@ export function initVisualizeApp(app, deps) {
               })
               .then(embeddableHandler => {
                 results.embeddableHandler = embeddableHandler;
+                if (results.vis.data.savedSearchId) {
+                  return createSavedSearchesLoader({
+                    savedObjectsClient: core.savedObjects.client,
+                    indexPatterns: data.indexPatterns,
+                    chrome: core.chrome,
+                    overlays: core.overlays,
+                  }).get(results.vis.data.savedSearchId);
+                }
+              })
+              .then(savedSearch => {
+                if (savedSearch) {
+                  results.savedSearch = savedSearch;
+                }
                 return results;
               })
               .catch(

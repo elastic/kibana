@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 
@@ -35,6 +36,8 @@ export interface DefaultEditorControllerState {
   vis: Vis;
   reloadVisualization: any;
   unlinkFromSavedSearch: any;
+  updateEditorObservable: Observable<any>;
+  setDirty: any;
   embeddableHandler: any;
   optionTabs: OptionTab[];
 }
@@ -48,7 +51,9 @@ class DefaultEditorController {
     vis: Vis,
     embeddableHandler: any,
     reloadVisualization: any,
-    unlinkFromSavedSearch: any
+    unlinkFromSavedSearch: any,
+    updateEditorObservable: Observable<any>,
+    setDirty: any
   ) {
     this.el = el;
     const { type: visType } = vis;
@@ -85,6 +90,8 @@ class DefaultEditorController {
       embeddableHandler,
       reloadVisualization,
       unlinkFromSavedSearch,
+      updateEditorObservable,
+      setDirty,
     };
   }
 

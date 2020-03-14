@@ -19,7 +19,7 @@
 
 import angular from 'angular';
 import _ from 'lodash';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 
@@ -108,7 +108,7 @@ function VisualizeAppController(
   );
 
   // Retrieve the resolved SavedVis instance.
-  const { vis, savedVis, embeddableHandler } = $route.current.locals.resolved;
+  const { vis, savedVis, savedSearch, embeddableHandler } = $route.current.locals.resolved;
 
   // vis is instance of src/legacy/ui/public/vis/vis.js.
   // SearchSource is a promise-based stream of search results that can inherit from other search sources.
@@ -120,7 +120,14 @@ function VisualizeAppController(
     dirty: !savedVis.id,
   };
 
-  $scope.dirty = !savedVis.id;
+  $scope.dirty = false;
+  $scope.setDirty = value => {
+    $scope.dirty = value;
+    $scope.$apply();
+  };
+
+  const updateEditor = new Subject();
+  $scope.updateEditorObservable = updateEditor.asObservable();
 
   $scope.embeddableHandler = embeddableHandler;
 
@@ -238,7 +245,6 @@ function VisualizeAppController(
       }),
       testId: 'openInspectorButton',
       disableButton() {
-        // todo: needs to use embeddable
         return !embeddableHandler.hasInspector || !embeddableHandler.hasInspector();
       },
       run() {
@@ -323,7 +329,15 @@ function VisualizeAppController(
   // appState then they won't be equal.
   if (!_.isEqual(stateContainer.getState().vis, stateDefaults.vis)) {
     try {
-      vis.setState(stateContainer.getState().vis);
+      const visState = stateContainer.getState().vis;
+      const state = {
+        type: visState.type,
+        params: visState.params,
+        data: {
+          aggs: visState.aggs,
+        },
+      };
+      vis.setState(state);
     } catch (error) {
       // stop syncing url updtes with the state to prevent extra syncing
       stopAllSyncing();
@@ -450,12 +464,10 @@ function VisualizeAppController(
           data: {
             aggs: state.vis.aggs,
             indexPattern: vis.data.indexPattern.id,
-            searchSouyrce: vis.data.searchSource,
+            searchSource: vis.data.searchSource,
           },
         });
-        // todo: replace with embeddable
-        embeddableHandler.reload();
-        // vis.emit('updateEditor');
+        updateEditor.next();
       }
 
       $appStatus.dirty = true;
@@ -510,6 +522,7 @@ function VisualizeAppController(
       handleLinkedSearch(linked);
       vis.data.searchSource.setField('query', query);
       vis.data.searchSource.setField('filter', filters);
+      // $scope.$broadcast('render');
       embeddableHandler.reload();
     };
 
@@ -700,14 +713,22 @@ function VisualizeAppController(
     searchSource.setField('index', currentIndex);
     searchSource.setParent(searchSourceGrandparent);
 
+    delete savedVis.savedSearchId;
+    delete vis.data.savedSearchId;
+
     stateContainer.transitions.unlinkSavedSearch({
       query: searchSourceParent.getField('query'),
       parentFilters: searchSourceParent.getOwnField('filter'),
     });
 
+    $scope.$broadcast('render');
+
     toastNotifications.addSuccess(
       i18n.translate('kbn.visualize.linkedToSearch.unlinkSuccessNotificationText', {
-        defaultMessage: `Unlinked from saved search`,
+        defaultMessage: `Unlinked from saved search '{searchTitle}'`,
+        values: {
+          searchTitle: savedSearch.title,
+        },
       })
     );
   };

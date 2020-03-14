@@ -49,7 +49,7 @@ interface SidebarTitleProps {
   vis: Vis;
 }
 
-export function LinkedSearch({ savedSearch, vis, unlinkFromSavedSearch }: LinkedSearchProps) {
+export function LinkedSearch({ vis, savedSearch, unlinkFromSavedSearch }: LinkedSearchProps) {
   const [showPopover, setShowPopover] = useState(false);
   const closePopover = useCallback(() => setShowPopover(false), []);
   const onClickButtonLink = useCallback(() => setShowPopover(v => !v), []);
@@ -117,7 +117,11 @@ export function LinkedSearch({ savedSearch, vis, unlinkFromSavedSearch }: Linked
           <div style={{ width: 260 }}>
             <EuiText size="s">
               <p>
-                <EuiButtonEmpty flush="left" href={`#/discover/${savedSearch.id}`} size="xs">
+                <EuiButtonEmpty
+                  flush="left"
+                  href={`#/discover/${vis.data.savedSearchId}`}
+                  size="xs"
+                >
                   <FormattedMessage
                     id="visDefaultEditor.sidebar.savedSearch.goToDiscoverButtonText"
                     defaultMessage="View this search in Discover"
@@ -152,11 +156,11 @@ export function LinkedSearch({ savedSearch, vis, unlinkFromSavedSearch }: Linked
   );
 }
 
-function SidebarTitle({ savedSearch, vis, unlinkFromSavedSearch }: SidebarTitleProps) {
-  return savedSearch ? (
+function SidebarTitle({ vis, savedSearch, unlinkFromSavedSearch }: SidebarTitleProps) {
+  return vis.data.savedSearchId ? (
     <LinkedSearch
-      savedSearch={savedSearch}
       vis={vis}
+      savedSearch={savedSearch || ({} as any)}
       unlinkFromSavedSearch={unlinkFromSavedSearch}
     />
   ) : vis.type.options.showIndexSelection ? (
