@@ -16,13 +16,11 @@ import { ExportSelectedData } from '../../generic_downloader';
 import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
 import { TimelineDownloader } from './export_timeline';
 import { DeleteTimelineModalButton } from '../delete_timeline_modal';
-export interface ExportTimelineIds {
-  timelineId: string | null | undefined;
-}
+
 export interface ExportTimeline {
   disableExportTimelineDownloader: () => void;
   enableExportTimelineDownloader: () => void;
-  exportedIds: ExportTimelineIds[] | undefined;
+  exportedIds: string[] | undefined;
   getExportedData: ExportSelectedData;
   isEnableDownloader: boolean;
   setIsEnableDownloader: Dispatch<SetStateAction<boolean>>;
@@ -63,9 +61,10 @@ export const useExportTimeline = ({
   const getExportedIds = useCallback(
     (selectedTimelines: OpenTimelineResult | OpenTimelineResult[]) => {
       const array = Array.isArray(selectedTimelines) ? selectedTimelines : [selectedTimelines];
-      return array.map(item => ({
-        timelineId: item.savedObjectId,
-      }));
+      return array.reduce(
+        (acc, item) => (item.savedObjectId ? [...acc, item.savedObjectId] : [...acc]),
+        [] as string[]
+      );
     },
     [selectedItems]
   );
@@ -96,7 +95,7 @@ const EditTimelineActionsComponent: React.FC<{
   actionItem: OpenTimelineResult | undefined;
   deleteTimelines: DeleteTimelines | undefined;
   disableExportTimelineDownloader: DisableExportTimelineDownloader;
-  exportedIds: ExportTimelineIds[] | undefined;
+  exportedIds: string[] | undefined;
   getExportedData: ExportSelectedData;
   isEnableDownloader: boolean;
   onCloseDeleteTimelineModal: OnCloseDeleteTimelineModal;

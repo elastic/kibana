@@ -30,7 +30,7 @@ describe('useExportTimeline', () => {
     });
 
     test('exportedIds should include timelineId', () => {
-      expect(get('exportedIds[0].timelineId', exportTimelineRes)).toEqual(
+      expect(get('exportedIds[0]', exportTimelineRes)).toEqual(
         mockSelectedTimeline[0].savedObjectId
       );
     });

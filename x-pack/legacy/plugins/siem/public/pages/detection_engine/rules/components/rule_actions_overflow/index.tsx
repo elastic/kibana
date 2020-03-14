@@ -131,7 +131,7 @@ const RuleActionsOverflowComponent = ({
       </EuiPopover>
       <GenericDownloader
         filename={`${i18nActions.EXPORT_FILENAME}.ndjson`}
-        ruleIds={rulesToExport}
+        ids={rulesToExport}
         onExportSuccess={exportCount => {
           displaySuccessToast(
             i18nActions.SUCCESSFULLY_EXPORTED_RULES(exportCount),

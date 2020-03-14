@@ -10,13 +10,12 @@ import { OpenTimelineResult, DisableExportTimelineDownloader } from '../types';
 import { GenericDownloader, ExportSelectedData } from '../../generic_downloader';
 import * as i18n from '../translations';
 import { useStateToaster } from '../../toasters';
-import { ExportTimelineIds } from '.';
 
 const ExportTimeline: React.FC<{
   isEnableDownloader: boolean;
   onDownloadComplete?: () => void;
   selectedItems: OpenTimelineResult[] | undefined;
-  exportedIds: ExportTimelineIds[] | undefined;
+  exportedIds: string[] | undefined;
   getExportedData: ExportSelectedData;
   disableExportTimelineDownloader: DisableExportTimelineDownloader;
 }> = ({

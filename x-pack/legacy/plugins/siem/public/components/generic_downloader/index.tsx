@@ -11,7 +11,6 @@ import * as i18n from './translations';
 
 import { exportRules, ExportDocumentsProps } from '../../containers/detection_engine/rules';
 import { useStateToaster, errorToToaster } from '../toasters';
-import { ExportTimelineIds } from '../open_timeline/export_timeline';
 
 const InvisibleAnchor = styled.a`
   display: none;
@@ -26,10 +25,9 @@ export type ExportSelectedData = ({
 
 export interface GenericDownloaderProps {
   filename: string;
-  ids?: ExportTimelineIds[];
-  ruleIds?: string[];
+  ids?: string[];
   exportSelectedData?: ExportSelectedData;
-  onExportSuccess: (exportCount: number) => void;
+  onExportSuccess?: (exportCount: number) => void;
   onExportFailure?: () => void;
 }
 
@@ -45,7 +43,6 @@ export const GenericDownloaderComponent = ({
   exportSelectedData,
   filename,
   ids,
-  ruleIds,
   onExportSuccess,
   onExportFailure,
 }: GenericDownloaderProps) => {
@@ -60,13 +57,13 @@ export const GenericDownloaderComponent = ({
       if (
         anchorRef &&
         anchorRef.current &&
-        ((ruleIds != null && ruleIds.length > 0) || (ids != null && ids.length > 0))
+        ((ids != null && ids.length > 0) || (ids != null && ids.length > 0))
       ) {
         let exportResponse;
         try {
           if (isNil(exportSelectedData)) {
             exportResponse = await exportRules({
-              ruleIds,
+              ids,
               signal: abortCtrl.signal,
             });
           } else {
@@ -89,8 +86,7 @@ export const GenericDownloaderComponent = ({
             }
 
             if (onExportSuccess != null) {
-              if (ruleIds != null) onExportSuccess(ruleIds.length);
-              else if (ids != null) onExportSuccess(ids.length);
+              onExportSuccess(ids.length);
             }
           }
         } catch (error) {

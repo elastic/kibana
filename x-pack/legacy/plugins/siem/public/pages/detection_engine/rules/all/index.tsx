@@ -246,7 +246,7 @@ export const AllRules = React.memo<AllRulesProps>(
       <>
         <GenericDownloader
           filename={`${i18n.EXPORT_FILENAME}.ndjson`}
-          ruleIds={exportRuleIds}
+          ids={exportRuleIds}
           onExportSuccess={exportCount => {
             dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
             dispatchToaster({
