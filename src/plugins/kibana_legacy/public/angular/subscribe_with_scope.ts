@@ -19,9 +19,11 @@
 
 import { IScope } from 'angular';
 import * as Rx from 'rxjs';
-import { fatalError } from 'ui/notify/fatal_error';
+import { AngularHttpError } from '../notify/lib';
 
-function callInDigest($scope: IScope, fn: () => void) {
+type FatalErrorFn = (error: AngularHttpError | Error | string, location?: string) => void;
+
+function callInDigest($scope: IScope, fn: () => void, fatalError?: FatalErrorFn) {
   try {
     // this is terrible, but necessary to synchronously deliver subscription values
     // to angular scopes. This is required by some APIs, like the `config` service,
@@ -35,7 +37,9 @@ function callInDigest($scope: IScope, fn: () => void) {
       $scope.$apply(() => fn());
     }
   } catch (error) {
-    fatalError(error);
+    if (fatalError) {
+      fatalError(error);
+    }
   }
 }
 
@@ -46,30 +50,35 @@ function callInDigest($scope: IScope, fn: () => void) {
 export function subscribeWithScope<T>(
   $scope: IScope,
   observable: Rx.Observable<T>,
-  observer?: Rx.PartialObserver<T>
+  observer?: Rx.PartialObserver<T>,
+  fatalError?: FatalErrorFn
 ) {
   return observable.subscribe({
     next(value) {
       if (observer && observer.next) {
-        callInDigest($scope, () => observer.next!(value));
+        callInDigest($scope, () => observer.next!(value), fatalError);
       }
     },
     error(error) {
-      callInDigest($scope, () => {
-        if (observer && observer.error) {
-          observer.error(error);
-        } else {
-          throw new Error(
-            `Uncaught error in subscribeWithScope(): ${
-              error ? error.stack || error.message : error
-            }`
-          );
-        }
-      });
+      callInDigest(
+        $scope,
+        () => {
+          if (observer && observer.error) {
+            observer.error(error);
+          } else {
+            throw new Error(
+              `Uncaught error in subscribeWithScope(): ${
+                error ? error.stack || error.message : error
+              }`
+            );
+          }
+        },
+        fatalError
+      );
     },
     complete() {
       if (observer && observer.complete) {
-        callInDigest($scope, () => observer.complete!());
+        callInDigest($scope, () => observer.complete!(), fatalError);
       }
     },
   });
