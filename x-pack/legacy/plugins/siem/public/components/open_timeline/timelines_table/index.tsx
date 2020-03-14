@@ -56,15 +56,14 @@ export const getTimelinesTableColumns = ({
   itemIdToExpandedNotesRowMap,
   onOpenDeleteTimelineModal,
   onOpenTimeline,
-  onSelectionChange,
   onToggleShowNotes,
   showExtendedColumns,
 }: {
   actionTimelineToShow: ActionTimelineToShow[];
   deleteTimelines?: DeleteTimelines;
-  enableExportTimelineDownloader: EnableExportTimelineDownloader;
+  enableExportTimelineDownloader?: EnableExportTimelineDownloader;
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
-  onOpenDeleteTimelineModal: OnOpenDeleteTimelineModal;
+  onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
   onSelectionChange: OnSelectionChange;
   onToggleShowNotes: OnToggleShowNotes;
@@ -94,8 +93,8 @@ export interface TimelinesTableProps {
   defaultPageSize: number;
   loading: boolean;
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
-  enableExportTimelineDownloader: EnableExportTimelineDownloader;
-  onOpenDeleteTimelineModal: OnOpenDeleteTimelineModal;
+  enableExportTimelineDownloader?: EnableExportTimelineDownloader;
+  onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
   onSelectionChange: OnSelectionChange;
   onTableChange: OnTableChange;

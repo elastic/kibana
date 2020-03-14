@@ -10,12 +10,13 @@ import { OpenTimelineResult, DisableExportTimelineDownloader } from '../types';
 import { GenericDownloader, ExportSelectedData } from '../../generic_downloader';
 import * as i18n from '../translations';
 import { useStateToaster } from '../../toasters';
+import { ExportTimelineIds } from '.';
 
 const ExportTimeline: React.FC<{
   isEnableDownloader: boolean;
   onDownloadComplete?: () => void;
   selectedItems: OpenTimelineResult[] | undefined;
-  exportedIds: string;
+  exportedIds: ExportTimelineIds[] | undefined;
   getExportedData: ExportSelectedData;
   disableExportTimelineDownloader: DisableExportTimelineDownloader;
 }> = ({
@@ -29,27 +30,33 @@ const ExportTimeline: React.FC<{
   const [, dispatchToaster] = useStateToaster();
   return (
     <>
-      {selectedItems != null && exportedIds != null && isEnableDownloader && (
-        <GenericDownloader
-          data-test-subj="export-timeline-downloader"
-          exportSelectedData={getExportedData}
-          filename={`${i18n.EXPORT_FILENAME}.ndjson`}
-          ids={exportedIds}
-          onExportComplete={exportCount => {
-            disableExportTimelineDownloader();
-            if (typeof onDownloadComplete === 'function') onDownloadComplete();
-            dispatchToaster({
-              type: 'addToaster',
-              toast: {
-                id: uuid.v4(),
-                title: i18n.SUCCESSFULLY_EXPORTED_TIMELINES(exportCount),
-                color: 'success',
-                iconType: 'check',
-              },
-            });
-          }}
-        />
-      )}
+      {selectedItems != null &&
+        selectedItems.length !== 0 &&
+        exportedIds != null &&
+        isEnableDownloader && (
+          <GenericDownloader
+            data-test-subj="export-timeline-downloader"
+            exportSelectedData={getExportedData}
+            filename={`${i18n.EXPORT_FILENAME}.ndjson`}
+            ids={exportedIds}
+            onExportSuccess={exportCount => {
+              disableExportTimelineDownloader();
+              if (typeof onDownloadComplete === 'function') onDownloadComplete();
+              dispatchToaster({
+                type: 'addToaster',
+                toast: {
+                  id: uuid.v4(),
+                  title: i18n.SUCCESSFULLY_EXPORTED_TIMELINES(exportCount),
+                  color: 'success',
+                  iconType: 'check',
+                },
+              });
+            }}
+            onExportFailure={() => {
+              disableExportTimelineDownloader();
+            }}
+          />
+        )}
     </>
   );
 };

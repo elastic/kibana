@@ -11,80 +11,21 @@ import { DeleteTimelineModalButton } from '.';
 
 describe('DeleteTimelineModal', () => {
   const savedObjectId = 'abcd';
+  const defaultProps = {
+    closeModal: jest.fn(),
+    deleteTimelines: jest.fn(),
+    isModalOpen: true,
+    savedObjectIds: [savedObjectId],
+    title: 'Privilege Escalation',
+  };
 
   describe('showModalState', () => {
-    test('it disables the delete icon if deleteTimelines is not provided', () => {
-      const wrapper = mountWithIntl(
-        <DeleteTimelineModalButton savedObjectIds={[savedObjectId]} title="Privilege Escalation" />
-      );
-
-      const props = wrapper
-        .find('[data-test-subj="delete-timeline-wrapper"]')
-        .first()
-        .props();
-
-      expect(props.disabled).toBe(true);
-    });
-
-    test('it disables the delete icon if savedObjectId is null', () => {
-      const wrapper = mountWithIntl(
-        <DeleteTimelineModalButton
-          deleteTimelines={jest.fn()}
-          savedObjectIds={null}
-          title="Privilege Escalation"
-        />
-      );
-
-      const props = wrapper
-        .find('[data-test-subj="delete-timeline-wrapper"]')
-        .first()
-        .props();
-
-      expect(props.disabled).toBe(true);
-    });
-
-    test('it disables the delete icon if savedObjectId is an empty string', () => {
-      const wrapper = mountWithIntl(
-        <DeleteTimelineModalButton
-          deleteTimelines={jest.fn()}
-          savedObjectIds={['']}
-          title="Privilege Escalation"
-        />
-      );
-
-      const props = wrapper
-        .find('[data-test-subj="delete-timeline-wrapper"]')
-        .first()
-        .props();
-
-      expect(props.disabled).toBe(true);
-    });
-
-    test('it enables the delete icon if savedObjectId is NOT an empty string', () => {
-      const wrapper = mountWithIntl(
-        <DeleteTimelineModalButton
-          deleteTimelines={jest.fn()}
-          savedObjectIds={['not an empty string']}
-          title="Privilege Escalation"
-        />
-      );
-
-      const props = wrapper
-        .find('[data-test-subj="delete-timeline-wrapper"]')
-        .first()
-        .props();
-
-      expect(props.disabled).toBe(false);
-    });
-
-    test('it does NOT render the modal when showModal is false', () => {
-      const wrapper = mountWithIntl(
-        <DeleteTimelineModalButton
-          deleteTimelines={jest.fn()}
-          savedObjectIds={[savedObjectId]}
-          title="Privilege Escalation"
-        />
-      );
+    test('it does NOT render the modal when isModalOpen is false', () => {
+      const testProps = {
+        ...defaultProps,
+        isModalOpen: false,
+      };
+      const wrapper = mountWithIntl(<DeleteTimelineModalButton {...testProps} />);
 
       expect(
         wrapper
@@ -94,23 +35,23 @@ describe('DeleteTimelineModal', () => {
       ).toBe(false);
     });
 
-    test('it renders the modal when showModal is clicked', () => {
-      const wrapper = mountWithIntl(
-        <DeleteTimelineModalButton
-          deleteTimelines={jest.fn()}
-          savedObjectIds={[savedObjectId]}
-          title="Privilege Escalation"
-        />
-      );
-
-      wrapper
-        .find('[data-test-subj="delete-timeline"]')
-        .first()
-        .simulate('click');
+    test('it renders the modal when isModalOpen is true', () => {
+      const wrapper = mountWithIntl(<DeleteTimelineModalButton {...defaultProps} />);
 
       expect(
         wrapper
           .find('[data-test-subj="delete-timeline-modal"]')
+          .first()
+          .exists()
+      ).toBe(true);
+    });
+
+    test('it hides popover when isModalOpen is true', () => {
+      const wrapper = mountWithIntl(<DeleteTimelineModalButton {...defaultProps} />);
+
+      expect(
+        wrapper
+          .find('[data-test-subj="remove-popover"]')
           .first()
           .exists()
       ).toBe(true);

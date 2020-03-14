@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiContextMenuPanel, EuiContextMenuItem, EuiBasicTable } from '@elastic/eui';
-import React, { useMemo, useCallback, useRef, useState } from 'react';
+import { EuiPanel, EuiBasicTable } from '@elastic/eui';
+import React, { useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { OpenTimelineProps, OpenTimelineResult } from './types';
@@ -15,8 +15,7 @@ import { TitleRow } from './title_row';
 
 import * as i18n from './translations';
 import { useStateToaster } from '../toasters';
-import { TimelineDownloader } from './export_timeline/export_timeline';
-import { DeleteTimelineModalButton } from './delete_timeline_modal';
+import { EditTimelineActions } from './export_timeline/.';
 import {
   UtilityBarGroup,
   UtilityBarText,
@@ -24,13 +23,8 @@ import {
   UtilityBarSection,
   UtilityBarAction,
 } from '../utility_bar';
-import { useExportTimeline } from './export_timeline';
-export interface ExportTimelineIds {
-  timelineId: string | null | undefined;
-  pinnedEventIds: string[] | null | undefined;
-  noteIds: string[] | null | undefined;
-}
-
+import { useEditTimelinBatcheActions } from './edit_timeline_batch_actions';
+import { useEditTimelineActions } from './edit_timeline_actions';
 export const OpenTimeline = React.memo<OpenTimelineProps>(
   ({
     deleteTimelines,
@@ -57,40 +51,27 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     title,
     totalSearchResultsCount,
   }) => {
-    const tableRef = useRef<EuiBasicTable>();
+    const tableRef = useRef<EuiBasicTable<OpenTimelineResult>>();
     const [, dispatchToaster] = useStateToaster();
-    const [isDeleteTimelineModalOpen, setIsDeleteTimelineModalOpen] = useState<boolean>(false);
-    const [actionItem, setActionTimeline] = useState<undefined | OpenTimelineResult>(undefined);
+
     const {
-      isEnableDownloader,
-      setIsEnableDownloader,
+      actionItem,
+      disableExportTimelineDownloader,
+      enableExportTimelineDownloader,
       exportedIds,
       getExportedData,
-    } = useExportTimeline(actionItem ? [actionItem] : selectedItems);
-    const enableExportTimelineDownloader = useCallback(
-      (selectedActionItem?: OpenTimelineResult) => {
-        setIsEnableDownloader(true);
-        setActionTimeline(selectedActionItem);
-      },
-      [setIsEnableDownloader, setActionTimeline]
-    );
+      isEnableDownloader,
+      isDeleteTimelineModalOpen,
+      onOpenDeleteTimelineModal,
+      onCloseDeleteTimelineModal,
+    } = useEditTimelineActions();
 
-    const disableExportTimelineDownloader = useCallback(() => {
-      setIsEnableDownloader(false);
-    }, [setIsEnableDownloader]);
-
-    const onCloseDeleteTimelineModal = useCallback(() => {
-      setIsDeleteTimelineModalOpen(false);
-      setActionTimeline(undefined);
-    }, [setIsDeleteTimelineModalOpen]);
-
-    const onOpenDeleteTimelineModal = useCallback(
-      (selectedActionItem?: OpenTimelineResult) => {
-        setIsDeleteTimelineModalOpen(true);
-        setActionTimeline(selectedActionItem);
-      },
-      [setIsDeleteTimelineModalOpen, setActionTimeline]
-    );
+    const { onCompleteBatchActions, getBatchItemsPopoverContent } = useEditTimelinBatcheActions({
+      deleteTimelines,
+      dispatchToaster,
+      selectedItems,
+      tableRef,
+    });
 
     const nTimelines = useMemo(
       () => (
@@ -109,107 +90,21 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       ),
       [totalSearchResultsCount, query]
     );
-    const onCompleteBatchActions = useCallback(
-      (closePopover?: () => void) => {
-        if (closePopover != null) closePopover();
-        if (tableRef != null && tableRef.current != null) {
-          tableRef.current.changeSelection([]);
-        }
-      },
-      [tableRef.current]
-    );
-
-    const getBatchItemsPopoverContent = useCallback(
-      (closePopover: () => void) => {
-        return (
-          <>
-            <TimelineDownloader
-              exportedIds={exportedIds}
-              getExportedData={getExportedData}
-              isEnableDownloader={isEnableDownloader}
-              onDownloadComplete={onCompleteBatchActions.bind(null, closePopover)}
-              selectedItems={selectedItems}
-              disableExportTimelineDownloader={disableExportTimelineDownloader}
-            />
-            {deleteTimelines != null && (
-              <DeleteTimelineModalButton
-                closeModal={onCloseDeleteTimelineModal}
-                deleteTimelines={deleteTimelines}
-                onComplete={onCompleteBatchActions.bind(null, closePopover)}
-                isModalOpen={isDeleteTimelineModalOpen}
-                savedObjectIds={selectedItems?.reduce(
-                  (acc, item) => (item.savedObjectId != null ? [...acc, item.savedObjectId] : acc),
-                  [] as string[]
-                )}
-                title={
-                  selectedItems.length > 1
-                    ? i18n.SELECTED_TIMELINES(selectedItems.length)
-                    : `"${selectedItems[0]?.title}"`
-                }
-              />
-            )}
-            <EuiContextMenuPanel
-              items={[
-                <EuiContextMenuItem
-                  disabled={selectedItems.length === 0}
-                  icon="exportAction"
-                  key="ExportItemKey"
-                  onClick={() => {
-                    enableExportTimelineDownloader();
-                  }}
-                >
-                  {i18n.EXPORT_SELECTED}
-                </EuiContextMenuItem>,
-                <EuiContextMenuItem
-                  disabled={selectedItems.length === 0}
-                  icon="trash"
-                  key="DeleteItemKey"
-                  onClick={() => {
-                    onOpenDeleteTimelineModal();
-                  }}
-                >
-                  {i18n.DELETE_SELECTED}
-                </EuiContextMenuItem>,
-              ]}
-            />
-          </>
-        );
-      },
-      [
-        actionItem,
-        deleteTimelines,
-        dispatchToaster,
-        history,
-        isEnableDownloader,
-        isDeleteTimelineModalOpen,
-        selectedItems,
-        onCloseDeleteTimelineModal,
-        onCompleteBatchActions,
-        exportedIds,
-        getExportedData,
-      ]
-    );
 
     return (
       <>
-        <TimelineDownloader
+        <EditTimelineActions
           exportedIds={exportedIds}
           getExportedData={getExportedData}
           isEnableDownloader={isEnableDownloader}
-          onDownloadComplete={onCompleteBatchActions}
-          selectedItems={[actionItem]}
+          onCompleteBatchActions={onCompleteBatchActions}
+          actionItem={actionItem}
           disableExportTimelineDownloader={disableExportTimelineDownloader}
+          onCloseDeleteTimelineModal={onCloseDeleteTimelineModal}
+          deleteTimelines={deleteTimelines}
+          isDeleteTimelineModalOpen={isDeleteTimelineModalOpen}
         />
-        {deleteTimelines != null && (
-          <DeleteTimelineModalButton
-            closeModal={onCloseDeleteTimelineModal}
-            deleteTimelines={deleteTimelines}
-            onComplete={onCompleteBatchActions}
-            isModalOpen={isDeleteTimelineModalOpen}
-            savedObjectIds={[actionItem?.savedObjectId]}
-            title={`"${actionItem?.title}"`}
-          />
-        )}
+
         <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>
           <TitleRow
             data-test-subj="title-row"

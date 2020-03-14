@@ -6,12 +6,12 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { RuleDownloaderComponent } from './index';
+import { GenericDownloaderComponent } from './index';
 
 describe('GenericDownloader', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <RuleDownloaderComponent filename={'export_rules.ndjson'} onExportComplete={jest.fn()} />
+      <GenericDownloaderComponent filename={'export_rules.ndjson'} onExportSuccess={jest.fn()} />
     );
     expect(wrapper).toMatchSnapshot();
   });

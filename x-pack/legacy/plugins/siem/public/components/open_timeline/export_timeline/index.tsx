@@ -4,29 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useCallback, Dispatch, SetStateAction } from 'react';
-import { keys } from 'lodash/fp';
-import { OpenTimelineResult } from '../types';
+import React, { useState, useCallback, Dispatch, SetStateAction } from 'react';
+import {
+  OpenTimelineResult,
+  DeleteTimelines,
+  DisableExportTimelineDownloader,
+  OnCloseDeleteTimelineModal,
+} from '../types';
 import { KibanaServices } from '../../../lib/kibana';
 import { ExportSelectedData } from '../../generic_downloader';
 import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
-
+import { TimelineDownloader } from './export_timeline';
+import { DeleteTimelineModalButton } from '../delete_timeline_modal';
+export interface ExportTimelineIds {
+  timelineId: string | null | undefined;
+}
 export interface ExportTimeline {
+  disableExportTimelineDownloader: () => void;
+  enableExportTimelineDownloader: () => void;
+  exportedIds: ExportTimelineIds[] | undefined;
+  getExportedData: ExportSelectedData;
   isEnableDownloader: boolean;
   setIsEnableDownloader: Dispatch<SetStateAction<boolean>>;
-  exportedIds:
-    | Array<{
-        timelineId: string | null | undefined;
-        pinnedEventIds: string[] | null | undefined;
-        noteIds: string[] | undefined;
-      }>
-    | undefined;
-  getExportedData: ExportSelectedData;
 }
 
-export const useExportTimeline = (
-  selectedItems?: OpenTimelineResult | OpenTimelineResult[]
-): ExportTimeline => {
+export const useExportTimeline = ({
+  selectedItems,
+  setActionTimeline,
+}: {
+  selectedItems?: OpenTimelineResult | OpenTimelineResult[];
+  setActionTimeline: Dispatch<SetStateAction<undefined | OpenTimelineResult>>;
+}): ExportTimeline => {
   const [isEnableDownloader, setIsEnableDownloader] = useState(false);
   const exportSelectedTimeline: ExportSelectedData = useCallback(
     async ({
@@ -57,21 +65,75 @@ export const useExportTimeline = (
       const array = Array.isArray(selectedTimelines) ? selectedTimelines : [selectedTimelines];
       return array.map(item => ({
         timelineId: item.savedObjectId,
-        pinnedEventIds:
-          item.pinnedEventIds != null ? keys(item.pinnedEventIds) : item.pinnedEventIds,
-        noteIds: item?.notes?.reduce(
-          (acc, note) => (note.noteId != null ? [...acc, note.noteId] : acc),
-          [] as string[]
-        ),
       }));
     },
     [selectedItems]
   );
 
+  const enableExportTimelineDownloader = useCallback(
+    (selectedActionItem?: OpenTimelineResult) => {
+      setIsEnableDownloader(true);
+      setActionTimeline(selectedActionItem);
+    },
+    [setIsEnableDownloader, setActionTimeline]
+  );
+
+  const disableExportTimelineDownloader = useCallback(() => {
+    setIsEnableDownloader(false);
+  }, [setIsEnableDownloader]);
+
   return {
-    isEnableDownloader,
-    setIsEnableDownloader,
+    disableExportTimelineDownloader,
+    enableExportTimelineDownloader,
     exportedIds: selectedItems != null ? getExportedIds(selectedItems) : undefined,
     getExportedData: exportSelectedTimeline,
+    isEnableDownloader,
+    setIsEnableDownloader,
   };
 };
+
+const EditTimelineActionsComponent: React.FC<{
+  actionItem: OpenTimelineResult | undefined;
+  deleteTimelines: DeleteTimelines | undefined;
+  disableExportTimelineDownloader: DisableExportTimelineDownloader;
+  exportedIds: ExportTimelineIds[] | undefined;
+  getExportedData: ExportSelectedData;
+  isEnableDownloader: boolean;
+  onCloseDeleteTimelineModal: OnCloseDeleteTimelineModal;
+  onCompleteBatchActions: () => void;
+  isDeleteTimelineModalOpen: boolean;
+}> = ({
+  actionItem,
+  deleteTimelines,
+  exportedIds,
+  getExportedData,
+  isEnableDownloader,
+  onCompleteBatchActions,
+  disableExportTimelineDownloader,
+  onCloseDeleteTimelineModal,
+  isDeleteTimelineModalOpen,
+}) =>
+  actionItem ? (
+    <>
+      <TimelineDownloader
+        exportedIds={exportedIds}
+        getExportedData={getExportedData}
+        isEnableDownloader={isEnableDownloader}
+        onDownloadComplete={onCompleteBatchActions}
+        selectedItems={[actionItem]}
+        disableExportTimelineDownloader={disableExportTimelineDownloader}
+      />
+      {deleteTimelines != null && actionItem.savedObjectId && (
+        <DeleteTimelineModalButton
+          closeModal={onCloseDeleteTimelineModal}
+          deleteTimelines={deleteTimelines}
+          onComplete={onCompleteBatchActions}
+          isModalOpen={isDeleteTimelineModalOpen}
+          savedObjectIds={[actionItem.savedObjectId]}
+          title={`"${actionItem?.title}"`}
+        />
+      )}
+    </>
+  ) : null;
+
+export const EditTimelineActions = React.memo(EditTimelineActionsComponent);

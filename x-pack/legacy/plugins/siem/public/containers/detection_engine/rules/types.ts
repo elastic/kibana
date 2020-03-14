@@ -5,7 +5,7 @@
  */
 
 import * as t from 'io-ts';
-import { ExportTimelineIds } from '../../../components/open_timeline/open_timeline';
+import { ExportTimelineIds } from '../../../components/open_timeline/export_timeline';
 
 export const NewRuleSchema = t.intersection([
   t.type({

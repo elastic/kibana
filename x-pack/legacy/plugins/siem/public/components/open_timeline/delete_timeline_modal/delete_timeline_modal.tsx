@@ -6,9 +6,10 @@
 
 import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 
 import * as i18n from '../translations';
+import { OpenTimelineResult, SetActionTimeline } from '../types';
 
 interface Props {
   title?: string | JSX.Element | null;
@@ -31,6 +32,12 @@ const getDeletedTitles = (title: string | JSX.Element | null | undefined) => {
  */
 export const DeleteTimelineModal = React.memo<Props>(({ title, closeModal, onDelete }) => (
   <EuiConfirmModal
+    buttonColor="danger"
+    cancelButtonText={i18n.CANCEL}
+    confirmButtonText={i18n.DELETE}
+    defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+    onCancel={closeModal}
+    onConfirm={onDelete}
     title={
       <FormattedMessage
         id="xpack.siem.open.timeline.deleteTimelineModalTitle"
@@ -41,15 +48,36 @@ export const DeleteTimelineModal = React.memo<Props>(({ title, closeModal, onDel
         }}
       />
     }
-    onCancel={closeModal}
-    onConfirm={onDelete}
-    cancelButtonText={i18n.CANCEL}
-    confirmButtonText={i18n.DELETE}
-    buttonColor="danger"
-    defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
   >
     <div data-test-subj="warning">{i18n.DELETE_WARNING}</div>
   </EuiConfirmModal>
 ));
 
 DeleteTimelineModal.displayName = 'DeleteTimelineModal';
+
+export const useDeleteTimeline = ({
+  setActionTimeline,
+}: {
+  setActionTimeline: SetActionTimeline;
+}) => {
+  const [isDeleteTimelineModalOpen, setIsDeleteTimelineModalOpen] = useState<boolean>(false);
+
+  const onCloseDeleteTimelineModal = useCallback(() => {
+    setIsDeleteTimelineModalOpen(false);
+    setActionTimeline(undefined);
+  }, [setIsDeleteTimelineModalOpen]);
+
+  const onOpenDeleteTimelineModal = useCallback(
+    (selectedActionItem?: OpenTimelineResult) => {
+      setIsDeleteTimelineModalOpen(true);
+      setActionTimeline(selectedActionItem);
+    },
+    [setIsDeleteTimelineModalOpen, setActionTimeline]
+  );
+  return {
+    isDeleteTimelineModalOpen,
+    setIsDeleteTimelineModalOpen,
+    onCloseDeleteTimelineModal,
+    onOpenDeleteTimelineModal,
+  };
+};

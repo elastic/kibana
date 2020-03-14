@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SetStateAction, Dispatch } from 'react';
 import { AllTimelinesVariables } from '../../containers/timeline/all';
 import { TimelineModel } from '../../store/timeline/model';
 import { NoteResult } from '../../graphql/types';
@@ -78,8 +79,15 @@ export type OnOpenTimeline = ({
   timelineId: string;
 }) => void;
 
+export interface DeleteTimeline {
+  isDeleteTimelineModalOpen: boolean;
+  setIsDeleteTimelineModalOpen: Dispatch<SetStateAction<boolean>>;
+  onCloseDeleteTimelineModal: () => void;
+  onOpenDeleteTimelineModal: (selectedActionItem?: OpenTimelineResult | undefined) => void;
+}
 export type OnOpenDeleteTimelineModal = (selectedItem: OpenTimelineResult) => void;
 export type OnCloseDeleteTimelineModal = () => void;
+export type SetActionTimeline = Dispatch<SetStateAction<OpenTimelineResult | undefined>>;
 export type DisableExportTimelineDownloader = () => void;
 export type EnableExportTimelineDownloader = (selectedItem: OpenTimelineResult) => void;
 /** Invoked when the user presses enters to submit the text in the search input */

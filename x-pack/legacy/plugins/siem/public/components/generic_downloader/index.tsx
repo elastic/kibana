@@ -8,9 +8,10 @@ import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { isFunction, isNil } from 'lodash/fp';
 import * as i18n from './translations';
-import { ExportTimelineIds } from '../open_timeline/open_timeline';
+
 import { exportRules, ExportDocumentsProps } from '../../containers/detection_engine/rules';
 import { useStateToaster, errorToToaster } from '../toasters';
+import { ExportTimelineIds } from '../open_timeline/export_timeline';
 
 const InvisibleAnchor = styled.a`
   display: none;
@@ -23,12 +24,13 @@ export type ExportSelectedData = ({
   signal,
 }: ExportDocumentsProps) => Promise<Blob>;
 
-export interface RuleDownloaderProps {
+export interface GenericDownloaderProps {
   filename: string;
   ids?: ExportTimelineIds[];
   ruleIds?: string[];
   exportSelectedData?: ExportSelectedData;
-  onExportComplete: (exportCount: number) => void;
+  onExportSuccess: (exportCount: number) => void;
+  onExportFailure?: () => void;
 }
 
 /**
@@ -39,13 +41,14 @@ export interface RuleDownloaderProps {
  *
  */
 
-export const RuleDownloaderComponent = ({
+export const GenericDownloaderComponent = ({
   exportSelectedData,
   filename,
   ids,
   ruleIds,
-  onExportComplete,
-}: RuleDownloaderProps) => {
+  onExportSuccess,
+  onExportFailure,
+}: GenericDownloaderProps) => {
   const anchorRef = useRef<HTMLAnchorElement>(null);
   const [, dispatchToaster] = useStateToaster();
 
@@ -85,13 +88,14 @@ export const RuleDownloaderComponent = ({
               window.URL.revokeObjectURL(objectURL);
             }
 
-            if (typeof onExportComplete === 'function') {
-              if (ruleIds != null) onExportComplete(ruleIds.length);
-              else if (ids != null) onExportComplete(ids.length);
+            if (onExportSuccess != null) {
+              if (ruleIds != null) onExportSuccess(ruleIds.length);
+              else if (ids != null) onExportSuccess(ids.length);
             }
           }
         } catch (error) {
           if (isSubscribed) {
+            if (onExportFailure != null) onExportFailure();
             errorToToaster({ title: i18n.EXPORT_FAILURE, error, dispatchToaster });
           }
         }
@@ -109,8 +113,8 @@ export const RuleDownloaderComponent = ({
   return <InvisibleAnchor ref={anchorRef} />;
 };
 
-RuleDownloaderComponent.displayName = 'RuleDownloaderComponent';
+GenericDownloaderComponent.displayName = 'GenericDownloaderComponent';
 
-export const GenericDownloader = React.memo(RuleDownloaderComponent);
+export const GenericDownloader = React.memo(GenericDownloaderComponent);
 
 GenericDownloader.displayName = 'GenericDownloader';

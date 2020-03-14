@@ -14,7 +14,10 @@ describe('useExportTimeline', () => {
   describe('call with selected timelines', () => {
     let exportTimelineRes: ExportTimeline;
     const TestHook = () => {
-      exportTimelineRes = useExportTimeline(mockSelectedTimeline);
+      exportTimelineRes = useExportTimeline({
+        selectedItems: mockSelectedTimeline,
+        setActionTimeline: jest.fn(),
+      });
       return <div />;
     };
 
@@ -23,7 +26,7 @@ describe('useExportTimeline', () => {
     });
 
     test('Downloader should be disabled by default', () => {
-      expect(exportTimelineRes.enableDownloader).toBeFalsy();
+      expect(exportTimelineRes.isEnableDownloader).toBeFalsy();
     });
 
     test('exportedIds should include timelineId', () => {
@@ -31,25 +34,15 @@ describe('useExportTimeline', () => {
         mockSelectedTimeline[0].savedObjectId
       );
     });
-
-    test('exportedIds should include noteIds', () => {
-      expect(get('exportedIds[0].noteIds', exportTimelineRes)).toEqual([
-        mockSelectedTimeline[0].notes[0].noteId,
-        mockSelectedTimeline[0].notes[1].noteId,
-      ]);
-    });
-
-    test('exportedIds should include pinnedEventIds', () => {
-      expect(get('exportedIds[0].pinnedEventIds', exportTimelineRes)).toEqual(
-        Object.keys(mockSelectedTimeline[0].pinnedEventIds)
-      );
-    });
   });
 
   describe('call without selected timelines', () => {
     let exportTimelineRes: ExportTimeline;
     const TestHook = () => {
-      exportTimelineRes = useExportTimeline(undefined);
+      exportTimelineRes = useExportTimeline({
+        selectedItems: undefined,
+        setActionTimeline: jest.fn(),
+      });
       return <div />;
     };
 

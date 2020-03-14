@@ -7,7 +7,6 @@ import { EuiModal, EuiOverlayMask, EuiIcon, EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { DeleteTimelineModal, DELETE_TIMELINE_MODAL_WIDTH } from './delete_timeline_modal';
-import * as i18n from '../translations';
 import { DeleteTimelines } from '../types';
 const RemovePopover = createGlobalStyle`
 div.euiPopover__panel-isOpen {
@@ -21,12 +20,12 @@ export const ActionListIcon = styled(EuiIcon)`
   margin-right: 8px;
 `;
 interface Props {
-  deleteTimelines: DeleteTimelines;
-  isModalOpen: boolean;
   closeModal: () => void;
+  deleteTimelines: DeleteTimelines;
+  onComplete?: () => void;
+  isModalOpen: boolean;
   savedObjectIds?: string[] | null | undefined;
   title: string | JSX.Element | null;
-  onComplete?: () => void;
 }
 /**
  * Renders a button that when clicked, displays the `Delete Timeline` modal
@@ -48,7 +47,7 @@ export const DeleteTimelineModalButton = React.memo<Props>(
     }, [closeModal, deleteTimelines, savedObjectIds]);
     return (
       <>
-        {isModalOpen && <RemovePopover />}
+        {isModalOpen && <RemovePopover data-test-subj="remove-popover" />}
         {isModalOpen ? (
           <EuiOverlayMask>
             <EuiModal maxWidth={DELETE_TIMELINE_MODAL_WIDTH} onClose={closeModal}>

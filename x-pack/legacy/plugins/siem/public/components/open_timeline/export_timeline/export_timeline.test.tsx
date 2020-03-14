@@ -25,7 +25,14 @@ jest.mock('.', () => {
 
 describe('TimelineDownloader', () => {
   let wrapper: ReactWrapper;
-  describe('render without selected timeline', () => {
+  const defaultTestProps = {
+    disableExportTimelineDownloader: jest.fn(),
+    exportedIds: [{ timelineId: 'baa20980-6301-11ea-9223-95b6d4dd806c' }],
+    getExportedData: jest.fn(),
+    isEnableDownloader: true,
+    selectedItems: undefined,
+  };
+  describe('should not render a downloader', () => {
     beforeAll(() => {
       ((useExportTimeline as unknown) as jest.Mock).mockReturnValue({
         enableDownloader: false,
@@ -33,68 +40,59 @@ describe('TimelineDownloader', () => {
         exportedIds: {},
         getExportedData: jest.fn(),
       });
-      wrapper = mount(<TimelineDownloader selectedTimelines={[]} />);
     });
 
     afterAll(() => {
       ((useExportTimeline as unknown) as jest.Mock).mockReset();
     });
 
-    test('Should render title', () => {
-      expect(wrapper.text()).toEqual('EXPORT_SELECTED');
+    test('Without selectedItems', () => {
+      const testProps = {
+        ...defaultTestProps,
+      };
+      wrapper = mount(<TimelineDownloader {...testProps} />);
+      expect(wrapper.find('[data-test-subj="export-timeline-downloader"]').exists()).toBeFalsy();
     });
 
-    test('should render exportIcon', () => {
-      expect(wrapper.find('[data-test-subj="export-timeline-icon"]').exists()).toBeTruthy();
+    test('Without exportedIds', () => {
+      const testProps = {
+        ...defaultTestProps,
+        exportedIds: undefined,
+      };
+      wrapper = mount(<TimelineDownloader {...testProps} />);
+      expect(wrapper.find('[data-test-subj="export-timeline-downloader"]').exists()).toBeFalsy();
     });
 
-    test('should not be clickable', () => {
-      expect(
-        wrapper
-          .find('[data-test-subj="export-timeline"]')
-          .first()
-          .prop('disabled')
-      ).toBeTruthy();
-    });
-
-    test('should not render a downloader', () => {
+    test('With isEnableDownloader is false', () => {
+      const testProps = {
+        ...defaultTestProps,
+        isEnableDownloader: false,
+      };
+      wrapper = mount(<TimelineDownloader {...testProps} />);
       expect(wrapper.find('[data-test-subj="export-timeline-downloader"]').exists()).toBeFalsy();
     });
   });
 
-  describe('render with a selected timeline', () => {
+  describe('should render a downloader', () => {
     beforeAll(() => {
       ((useExportTimeline as unknown) as jest.Mock).mockReturnValue({
-        enableDownloader: true,
+        enableDownloader: false,
         setEnableDownloader: jest.fn(),
         exportedIds: {},
         getExportedData: jest.fn(),
       });
-      wrapper = mount(<TimelineDownloader selectedTimelines={mockSelectedTimeline} />);
     });
 
     afterAll(() => {
       ((useExportTimeline as unknown) as jest.Mock).mockReset();
     });
 
-    test('Should render title', () => {
-      expect(wrapper.text()).toEqual('EXPORT_SELECTED');
-    });
-
-    test('should render exportIcon', () => {
-      expect(wrapper.find('[data-test-subj="export-timeline-icon"]').exists()).toBeTruthy();
-    });
-
-    test('should be clickable', () => {
-      expect(
-        wrapper
-          .find('[data-test-subj="export-timeline"]')
-          .first()
-          .prop('disabled')
-      ).toBeFalsy();
-    });
-
-    test('should render a downloader', () => {
+    test('With selectedItems and exportedIds is given and isEnableDownloader is true', () => {
+      const testProps = {
+        ...defaultTestProps,
+        selectedItems: mockSelectedTimeline,
+      };
+      wrapper = mount(<TimelineDownloader {...testProps} />);
       expect(wrapper.find('[data-test-subj="export-timeline-downloader"]').exists()).toBeTruthy();
     });
   });

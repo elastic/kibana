@@ -16,7 +16,7 @@ import { getEmptyValue } from '../../empty_value';
 import { OpenTimelineResult } from '../types';
 import { mockTimelineResults } from '../../../mock/timeline_results';
 import { NotePreviews } from '../note_previews';
-import { TimelinesTable } from '.';
+import { TimelinesTable, TimelinesTableProps } from '.';
 
 import * as i18n from '../translations';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
@@ -26,7 +26,26 @@ jest.mock('../../../lib/kibana');
 describe('#getCommonColumns', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let mockResults: OpenTimelineResult[];
-
+  const getDefaultProps = (mockOpenTimelineResults: OpenTimelineResult[]): TimelinesTableProps => ({
+    actionTimelineToShow: ['delete', 'duplicate', 'selectable'],
+    deleteTimelines: jest.fn(),
+    defaultPageSize: DEFAULT_SEARCH_RESULTS_PER_PAGE,
+    enableExportTimelineDownloader: jest.fn(),
+    itemIdToExpandedNotesRowMap: {},
+    loading: false,
+    onOpenDeleteTimelineModal: jest.fn(),
+    onOpenTimeline: jest.fn(),
+    onSelectionChange: jest.fn(),
+    onTableChange: jest.fn(),
+    onToggleShowNotes: jest.fn(),
+    pageIndex: 0,
+    pageSize: DEFAULT_SEARCH_RESULTS_PER_PAGE,
+    searchResults: mockOpenTimelineResults,
+    showExtendedColumns: true,
+    sortDirection: DEFAULT_SORT_DIRECTION,
+    sortField: DEFAULT_SORT_FIELD,
+    totalSearchResultsCount: mockOpenTimelineResults.length,
+  });
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);
   });
@@ -35,25 +54,13 @@ describe('#getCommonColumns', () => {
     test('it renders the expand button when the timelineResult has notes', () => {
       const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(hasNotes),
+      };
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={hasNotes}
-          showExtendedColumns={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={hasNotes.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
       );
 
       expect(wrapper.find('[data-test-subj="expand-notes"]').exists()).toBe(true);
@@ -62,25 +69,13 @@ describe('#getCommonColumns', () => {
     test('it does NOT render the expand button when the timelineResult notes are undefined', () => {
       const missingNotes: OpenTimelineResult[] = [omit('notes', { ...mockResults[0] })];
 
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(missingNotes),
+      };
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={missingNotes}
-          showExtendedColumns={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={missingNotes.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
       );
 
       expect(wrapper.find('[data-test-subj="expand-notes"]').exists()).toBe(false);
@@ -89,25 +84,13 @@ describe('#getCommonColumns', () => {
     test('it does NOT render the expand button when the timelineResult notes are null', () => {
       const nullNotes: OpenTimelineResult[] = [{ ...mockResults[0], notes: null }];
 
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(nullNotes),
+      };
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={nullNotes}
-          showExtendedColumns={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={nullNotes.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
       );
 
       expect(wrapper.find('[data-test-subj="expand-notes"]').exists()).toBe(false);
@@ -116,25 +99,13 @@ describe('#getCommonColumns', () => {
     test('it does NOT render the expand button when the notes are empty', () => {
       const emptylNotes: OpenTimelineResult[] = [{ ...mockResults[0], notes: [] }];
 
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(emptylNotes),
+      };
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={emptylNotes}
-          showExtendedColumns={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={emptylNotes.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
       );
 
       expect(wrapper.find('[data-test-subj="expand-notes"]').exists()).toBe(false);
@@ -144,26 +115,13 @@ describe('#getCommonColumns', () => {
       const missingSavedObjectId: OpenTimelineResult[] = [
         omit('savedObjectId', { ...mockResults[0] }),
       ];
-
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(missingSavedObjectId),
+      };
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={missingSavedObjectId}
-          showExtendedColumns={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={missingSavedObjectId.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
       );
 
       expect(wrapper.find('[data-test-subj="expand-notes"]').exists()).toBe(false);
@@ -172,25 +130,13 @@ describe('#getCommonColumns', () => {
     test('it does NOT render the expand button when the timelineResult savedObjectId is null', () => {
       const nullSavedObjectId: OpenTimelineResult[] = [{ ...mockResults[0], savedObjectId: null }];
 
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(nullSavedObjectId),
+      };
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={nullSavedObjectId}
-          showExtendedColumns={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={nullSavedObjectId.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
       );
 
       expect(wrapper.find('[data-test-subj="expand-notes"]').exists()).toBe(false);
@@ -199,25 +145,13 @@ describe('#getCommonColumns', () => {
     test('it renders the right arrow expander when the row is not expanded', () => {
       const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(hasNotes),
+      };
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={hasNotes}
-          showExtendedColumns={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={hasNotes.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
       );
 
       const props = wrapper
@@ -235,26 +169,13 @@ describe('#getCommonColumns', () => {
         [mockResults[0].savedObjectId!]: <NotePreviews notes={mockResults[0].notes} />,
       };
 
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(hasNotes),
+        itemIdToExpandedNotesRowMap,
+      };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <TimelinesTable
-            actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-            deleteTimelines={jest.fn()}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            loading={false}
-            itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-            onOpenTimeline={jest.fn()}
-            onSelectionChange={jest.fn()}
-            onTableChange={jest.fn()}
-            onToggleShowNotes={jest.fn()}
-            pageIndex={0}
-            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            searchResults={hasNotes}
-            showExtendedColumns={true}
-            sortDirection={DEFAULT_SORT_DIRECTION}
-            sortField={DEFAULT_SORT_FIELD}
-            totalSearchResultsCount={hasNotes.length}
-          />
+          <TimelinesTable {...testProps} />
         </ThemeProvider>
       );
 
@@ -275,25 +196,15 @@ describe('#getCommonColumns', () => {
         abc: <div />,
       };
 
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(hasNotes),
+        itemIdToExpandedNotesRowMap,
+        onToggleShowNotes,
+      };
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={onToggleShowNotes}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={hasNotes}
-          showExtendedColumns={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={hasNotes.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
       );
 
       wrapper
@@ -317,26 +228,14 @@ describe('#getCommonColumns', () => {
         'saved-timeline-11': <NotePreviews notes={hasNotes[0].notes} />,
       };
 
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(hasNotes),
+        itemIdToExpandedNotesRowMap,
+        onToggleShowNotes,
+      };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <TimelinesTable
-            actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-            deleteTimelines={jest.fn()}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            loading={false}
-            itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-            onOpenTimeline={jest.fn()}
-            onSelectionChange={jest.fn()}
-            onTableChange={jest.fn()}
-            onToggleShowNotes={onToggleShowNotes}
-            pageIndex={0}
-            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            searchResults={hasNotes}
-            showExtendedColumns={true}
-            sortDirection={DEFAULT_SORT_DIRECTION}
-            sortField={DEFAULT_SORT_FIELD}
-            totalSearchResultsCount={hasNotes.length}
-          />
+          <TimelinesTable {...testProps} />
         </ThemeProvider>
       );
 
@@ -353,26 +252,12 @@ describe('#getCommonColumns', () => {
 
   describe('Timeline Name column', () => {
     test('it renders the expected column name', () => {
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(mockResults),
+      };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <TimelinesTable
-            actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-            deleteTimelines={jest.fn()}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            loading={false}
-            itemIdToExpandedNotesRowMap={{}}
-            onOpenTimeline={jest.fn()}
-            onSelectionChange={jest.fn()}
-            onTableChange={jest.fn()}
-            onToggleShowNotes={jest.fn()}
-            pageIndex={0}
-            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            searchResults={mockResults}
-            showExtendedColumns={true}
-            sortDirection={DEFAULT_SORT_DIRECTION}
-            sortField={DEFAULT_SORT_FIELD}
-            totalSearchResultsCount={mockResults.length}
-          />
+          <TimelinesTable {...testProps} />
         </ThemeProvider>
       );
 
@@ -385,26 +270,12 @@ describe('#getCommonColumns', () => {
     });
 
     test('it renders the title when the timeline has a title and a saved object id', () => {
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(mockResults),
+      };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <TimelinesTable
-            actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-            deleteTimelines={jest.fn()}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            loading={false}
-            itemIdToExpandedNotesRowMap={{}}
-            onOpenTimeline={jest.fn()}
-            onSelectionChange={jest.fn()}
-            onTableChange={jest.fn()}
-            onToggleShowNotes={jest.fn()}
-            pageIndex={0}
-            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            searchResults={mockResults}
-            showExtendedColumns={true}
-            sortDirection={DEFAULT_SORT_DIRECTION}
-            sortField={DEFAULT_SORT_FIELD}
-            totalSearchResultsCount={mockResults.length}
-          />
+          <TimelinesTable {...testProps} />
         </ThemeProvider>
       );
 
@@ -421,25 +292,13 @@ describe('#getCommonColumns', () => {
         omit('savedObjectId', { ...mockResults[0] }),
       ];
 
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(missingSavedObjectId),
+      };
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={missingSavedObjectId}
-          showExtendedColumns={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={missingSavedObjectId.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
       );
 
       expect(
@@ -453,25 +312,13 @@ describe('#getCommonColumns', () => {
     test('it renders an Untitled Timeline title when the timeline has no title and a saved object id', () => {
       const missingTitle: OpenTimelineResult[] = [omit('title', { ...mockResults[0] })];
 
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(missingTitle),
+      };
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={missingTitle}
-          showExtendedColumns={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={missingTitle.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
       );
 
       expect(
@@ -487,25 +334,13 @@ describe('#getCommonColumns', () => {
         omit(['title', 'savedObjectId'], { ...mockResults[0] }),
       ];
 
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(withMissingSavedObjectIdAndTitle),
+      };
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={withMissingSavedObjectIdAndTitle}
-          showExtendedColumns={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={withMissingSavedObjectIdAndTitle.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
       );
 
       expect(
@@ -521,25 +356,13 @@ describe('#getCommonColumns', () => {
         { ...mockResults[0], title: '      ' },
       ];
 
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(withJustWhitespaceTitle),
+      };
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={withJustWhitespaceTitle}
-          showExtendedColumns={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={withJustWhitespaceTitle.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
       );
 
       expect(
@@ -555,25 +378,13 @@ describe('#getCommonColumns', () => {
         omit('savedObjectId', { ...mockResults[0], title: '      ' }),
       ];
 
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(withMissingSavedObjectId),
+      };
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={withMissingSavedObjectId}
-          showExtendedColumns={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={withMissingSavedObjectId.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
       );
 
       expect(
@@ -587,24 +398,7 @@ describe('#getCommonColumns', () => {
     test('it renders a hyperlink when the timeline has a saved object id', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <TimelinesTable
-            actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-            deleteTimelines={jest.fn()}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            loading={false}
-            itemIdToExpandedNotesRowMap={{}}
-            onOpenTimeline={jest.fn()}
-            onSelectionChange={jest.fn()}
-            onTableChange={jest.fn()}
-            onToggleShowNotes={jest.fn()}
-            pageIndex={0}
-            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            searchResults={mockResults}
-            showExtendedColumns={true}
-            sortDirection={DEFAULT_SORT_DIRECTION}
-            sortField={DEFAULT_SORT_FIELD}
-            totalSearchResultsCount={mockResults.length}
-          />
+          <TimelinesTable {...getDefaultProps(mockResults)} />
         </ThemeProvider>
       );
 
@@ -621,25 +415,13 @@ describe('#getCommonColumns', () => {
         omit('savedObjectId', { ...mockResults[0] }),
       ];
 
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(missingSavedObjectId),
+      };
       const wrapper = mountWithIntl(
-        <TimelinesTable
-          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={missingSavedObjectId}
-          showExtendedColumns={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={missingSavedObjectId.length}
-        />
+        <ThemeProvider theme={theme}>
+          <TimelinesTable {...testProps} />
+        </ThemeProvider>
       );
 
       expect(
@@ -653,26 +435,13 @@ describe('#getCommonColumns', () => {
     test('it invokes `onOpenTimeline` when the hyperlink is clicked', () => {
       const onOpenTimeline = jest.fn();
 
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(mockResults),
+        onOpenTimeline,
+      };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <TimelinesTable
-            actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-            deleteTimelines={jest.fn()}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            loading={false}
-            itemIdToExpandedNotesRowMap={{}}
-            onOpenTimeline={onOpenTimeline}
-            onSelectionChange={jest.fn()}
-            onTableChange={jest.fn()}
-            onToggleShowNotes={jest.fn()}
-            pageIndex={0}
-            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            searchResults={mockResults}
-            showExtendedColumns={true}
-            sortDirection={DEFAULT_SORT_DIRECTION}
-            sortField={DEFAULT_SORT_FIELD}
-            totalSearchResultsCount={mockResults.length}
-          />
+          <TimelinesTable {...testProps} />
         </ThemeProvider>
       );
 
@@ -692,24 +461,7 @@ describe('#getCommonColumns', () => {
     test('it renders the expected column name', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <TimelinesTable
-            actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-            deleteTimelines={jest.fn()}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            loading={false}
-            itemIdToExpandedNotesRowMap={{}}
-            onOpenTimeline={jest.fn()}
-            onSelectionChange={jest.fn()}
-            onTableChange={jest.fn()}
-            onToggleShowNotes={jest.fn()}
-            pageIndex={0}
-            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            searchResults={mockResults}
-            showExtendedColumns={true}
-            sortDirection={DEFAULT_SORT_DIRECTION}
-            sortField={DEFAULT_SORT_FIELD}
-            totalSearchResultsCount={mockResults.length}
-          />
+          <TimelinesTable {...getDefaultProps(mockResults)} />
         </ThemeProvider>
       );
 
@@ -724,24 +476,7 @@ describe('#getCommonColumns', () => {
     test('it renders the description when the timeline has a description', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <TimelinesTable
-            actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-            deleteTimelines={jest.fn()}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            loading={false}
-            itemIdToExpandedNotesRowMap={{}}
-            onOpenTimeline={jest.fn()}
-            onSelectionChange={jest.fn()}
-            onTableChange={jest.fn()}
-            onToggleShowNotes={jest.fn()}
-            pageIndex={0}
-            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            searchResults={mockResults}
-            showExtendedColumns={true}
-            sortDirection={DEFAULT_SORT_DIRECTION}
-            sortField={DEFAULT_SORT_FIELD}
-            totalSearchResultsCount={mockResults.length}
-          />
+          <TimelinesTable {...getDefaultProps(mockResults)} />
         </ThemeProvider>
       );
 
@@ -758,24 +493,7 @@ describe('#getCommonColumns', () => {
 
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <TimelinesTable
-            actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-            deleteTimelines={jest.fn()}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            loading={false}
-            itemIdToExpandedNotesRowMap={{}}
-            onOpenTimeline={jest.fn()}
-            onSelectionChange={jest.fn()}
-            onTableChange={jest.fn()}
-            onToggleShowNotes={jest.fn()}
-            pageIndex={0}
-            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            searchResults={missingDescription}
-            showExtendedColumns={true}
-            sortDirection={DEFAULT_SORT_DIRECTION}
-            sortField={DEFAULT_SORT_FIELD}
-            totalSearchResultsCount={missingDescription.length}
-          />
+          <TimelinesTable {...getDefaultProps(missingDescription)} />
         </ThemeProvider>
       );
       expect(
@@ -791,26 +509,12 @@ describe('#getCommonColumns', () => {
         { ...mockResults[0], description: '      ' },
       ];
 
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(justWhitespaceDescription),
+      };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <TimelinesTable
-            actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-            deleteTimelines={jest.fn()}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            loading={false}
-            itemIdToExpandedNotesRowMap={{}}
-            onOpenTimeline={jest.fn()}
-            onSelectionChange={jest.fn()}
-            onTableChange={jest.fn()}
-            onToggleShowNotes={jest.fn()}
-            pageIndex={0}
-            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            searchResults={justWhitespaceDescription}
-            showExtendedColumns={true}
-            sortDirection={DEFAULT_SORT_DIRECTION}
-            sortField={DEFAULT_SORT_FIELD}
-            totalSearchResultsCount={justWhitespaceDescription.length}
-          />
+          <TimelinesTable {...testProps} />
         </ThemeProvider>
       );
       expect(
@@ -826,24 +530,7 @@ describe('#getCommonColumns', () => {
     test('it renders the expected column name', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <TimelinesTable
-            actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-            deleteTimelines={jest.fn()}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            loading={false}
-            itemIdToExpandedNotesRowMap={{}}
-            onOpenTimeline={jest.fn()}
-            onSelectionChange={jest.fn()}
-            onTableChange={jest.fn()}
-            onToggleShowNotes={jest.fn()}
-            pageIndex={0}
-            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            searchResults={mockResults}
-            showExtendedColumns={true}
-            sortDirection={DEFAULT_SORT_DIRECTION}
-            sortField={DEFAULT_SORT_FIELD}
-            totalSearchResultsCount={mockResults.length}
-          />
+          <TimelinesTable {...getDefaultProps(mockResults)} />
         </ThemeProvider>
       );
 
@@ -858,24 +545,7 @@ describe('#getCommonColumns', () => {
     test('it renders the last modified (updated) date when the timeline has an updated property', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <TimelinesTable
-            actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-            deleteTimelines={jest.fn()}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            loading={false}
-            itemIdToExpandedNotesRowMap={{}}
-            onOpenTimeline={jest.fn()}
-            onSelectionChange={jest.fn()}
-            onTableChange={jest.fn()}
-            onToggleShowNotes={jest.fn()}
-            pageIndex={0}
-            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            searchResults={mockResults}
-            showExtendedColumns={true}
-            sortDirection={DEFAULT_SORT_DIRECTION}
-            sortField={DEFAULT_SORT_FIELD}
-            totalSearchResultsCount={mockResults.length}
-          />
+          <TimelinesTable {...getDefaultProps(mockResults)} />
         </ThemeProvider>
       );
 
@@ -893,24 +563,7 @@ describe('#getCommonColumns', () => {
 
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <TimelinesTable
-          actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          loading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onOpenTimeline={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          searchResults={missingUpdated}
-          showExtendedColumns={true}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          totalSearchResultsCount={missingUpdated.length}
-        />
+        <TimelinesTable {...getDefaultProps(missingUpdated)} />
       </ThemeProvider>
     );
     expect(

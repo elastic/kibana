@@ -132,7 +132,7 @@ const RuleActionsOverflowComponent = ({
       <GenericDownloader
         filename={`${i18nActions.EXPORT_FILENAME}.ndjson`}
         ruleIds={rulesToExport}
-        onExportComplete={exportCount => {
+        onExportSuccess={exportCount => {
           displaySuccessToast(
             i18nActions.SUCCESSFULLY_EXPORTED_RULES(exportCount),
             dispatchToaster

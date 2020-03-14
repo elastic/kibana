@@ -29,8 +29,8 @@ export const getActionsColumns = ({
 }: {
   actionTimelineToShow: ActionTimelineToShow[];
   deleteTimelines?: DeleteTimelines;
-  enableExportTimelineDownloader: EnableExportTimelineDownloader;
-  onOpenDeleteTimelineModal: OnOpenDeleteTimelineModal;
+  enableExportTimelineDownloader?: EnableExportTimelineDownloader;
+  onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
 }): [TimelineActionsOverflowColumns] => {
   const openAsDuplicateColumn = {
@@ -51,7 +51,7 @@ export const getActionsColumns = ({
     name: i18n.EXPORT_SELECTED,
     icon: 'exportAction',
     onClick: (selectedTimeline: OpenTimelineResult) => {
-      enableExportTimelineDownloader(selectedTimeline);
+      if (enableExportTimelineDownloader != null) enableExportTimelineDownloader(selectedTimeline);
     },
     enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
     description: i18n.EXPORT_SELECTED,
@@ -61,10 +61,11 @@ export const getActionsColumns = ({
     name: i18n.DELETE_SELECTED,
     icon: 'trash',
     onClick: (selectedTimeline: OpenTimelineResult) => {
-      onOpenDeleteTimelineModal(selectedTimeline);
+      if (onOpenDeleteTimelineModal != null) onOpenDeleteTimelineModal(selectedTimeline);
     },
     enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
     description: i18n.DELETE_SELECTED,
+    'data-test-subj': 'delete-timeline',
   };
 
   return [

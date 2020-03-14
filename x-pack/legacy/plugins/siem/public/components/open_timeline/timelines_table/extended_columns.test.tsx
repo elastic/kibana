@@ -15,7 +15,7 @@ import { getEmptyValue } from '../../empty_value';
 import { mockTimelineResults } from '../../../mock/timeline_results';
 import { OpenTimelineResult } from '../types';
 
-import { TimelinesTable } from '.';
+import { TimelinesTable, TimelinesTableProps } from '.';
 
 import * as i18n from '../translations';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
@@ -26,32 +26,39 @@ describe('#getExtendedColumns', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let mockResults: OpenTimelineResult[];
 
+  const getDefaultProps = (mockOpenTimelineResults: OpenTimelineResult[]): TimelinesTableProps => ({
+    actionTimelineToShow: ['delete', 'duplicate', 'selectable'],
+    deleteTimelines: jest.fn(),
+    defaultPageSize: DEFAULT_SEARCH_RESULTS_PER_PAGE,
+    enableExportTimelineDownloader: jest.fn(),
+    itemIdToExpandedNotesRowMap: {},
+    loading: false,
+    onOpenDeleteTimelineModal: jest.fn(),
+    onOpenTimeline: jest.fn(),
+    onSelectionChange: jest.fn(),
+    onTableChange: jest.fn(),
+    onToggleShowNotes: jest.fn(),
+    pageIndex: 0,
+    pageSize: DEFAULT_SEARCH_RESULTS_PER_PAGE,
+    searchResults: mockOpenTimelineResults,
+    showExtendedColumns: true,
+    sortDirection: DEFAULT_SORT_DIRECTION,
+    sortField: DEFAULT_SORT_FIELD,
+    totalSearchResultsCount: mockOpenTimelineResults.length,
+  });
+
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);
   });
 
   describe('Modified By column', () => {
     test('it renders the expected column name', () => {
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(mockResults),
+      };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <TimelinesTable
-            actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-            deleteTimelines={jest.fn()}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            loading={false}
-            itemIdToExpandedNotesRowMap={{}}
-            onOpenTimeline={jest.fn()}
-            onSelectionChange={jest.fn()}
-            onTableChange={jest.fn()}
-            onToggleShowNotes={jest.fn()}
-            pageIndex={0}
-            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            searchResults={mockResults}
-            showExtendedColumns={true}
-            sortDirection={DEFAULT_SORT_DIRECTION}
-            sortField={DEFAULT_SORT_FIELD}
-            totalSearchResultsCount={mockResults.length}
-          />
+          <TimelinesTable {...testProps} />
         </ThemeProvider>
       );
 
@@ -64,26 +71,12 @@ describe('#getExtendedColumns', () => {
     });
 
     test('it renders the username when the timeline has an updatedBy property', () => {
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(mockResults),
+      };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <TimelinesTable
-            actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-            deleteTimelines={jest.fn()}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            loading={false}
-            itemIdToExpandedNotesRowMap={{}}
-            onOpenTimeline={jest.fn()}
-            onSelectionChange={jest.fn()}
-            onTableChange={jest.fn()}
-            onToggleShowNotes={jest.fn()}
-            pageIndex={0}
-            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            searchResults={mockResults}
-            showExtendedColumns={true}
-            sortDirection={DEFAULT_SORT_DIRECTION}
-            sortField={DEFAULT_SORT_FIELD}
-            totalSearchResultsCount={mockResults.length}
-          />
+          <TimelinesTable {...testProps} />
         </ThemeProvider>
       );
 
@@ -97,27 +90,12 @@ describe('#getExtendedColumns', () => {
 
     test('it renders a placeholder when the timeline is missing the updatedBy property', () => {
       const missingUpdatedBy: OpenTimelineResult[] = [omit('updatedBy', { ...mockResults[0] })];
-
+      const testProps: TimelinesTableProps = {
+        ...getDefaultProps(missingUpdatedBy),
+      };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <TimelinesTable
-            actionTimelineToShow={['delete', 'duplicate', 'selectable']}
-            deleteTimelines={jest.fn()}
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            loading={false}
-            itemIdToExpandedNotesRowMap={{}}
-            onOpenTimeline={jest.fn()}
-            onSelectionChange={jest.fn()}
-            onTableChange={jest.fn()}
-            onToggleShowNotes={jest.fn()}
-            pageIndex={0}
-            pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            searchResults={missingUpdatedBy}
-            showExtendedColumns={true}
-            sortDirection={DEFAULT_SORT_DIRECTION}
-            sortField={DEFAULT_SORT_FIELD}
-            totalSearchResultsCount={missingUpdatedBy.length}
-          />
+          <TimelinesTable {...testProps} />
         </ThemeProvider>
       );
 
