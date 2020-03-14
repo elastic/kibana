@@ -29,8 +29,9 @@ import {
   KBN_FIELD_TYPES,
 } from '../../../../../../../../plugins/data/public';
 import { getMapsAppUrl, isFieldVisualizable, isMapsAppRegistered } from './lib/visualize_url_utils';
+import { getServices } from '../../../kibana_services';
 
-export function createFieldChooserDirective($location, config) {
+export function createFieldChooserDirective($location) {
   return {
     restrict: 'E',
     scope: {
@@ -156,7 +157,9 @@ export function createFieldChooserDirective($location, config) {
             groups.unpopular = groups.unpopular || [];
 
             // move excess popular fields to un-popular list
-            const extras = groups.popular.splice(config.get('fields:popularLimit'));
+            const extras = groups.popular.splice(
+              getServices().uiSettings.get('fields:popularLimit')
+            );
             groups.unpopular = extras.concat(groups.unpopular);
           })
           .each(function(group, name) {
@@ -213,7 +216,7 @@ export function createFieldChooserDirective($location, config) {
             schema: 'segment',
             params: {
               field: field.name,
-              size: parseInt(config.get('discover:aggs:terms:size'), 10),
+              size: parseInt(getServices().uiSettings.get('discover:aggs:terms:size'), 10),
               orderBy: '2',
             },
           };

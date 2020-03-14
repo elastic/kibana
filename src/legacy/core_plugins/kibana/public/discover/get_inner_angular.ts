@@ -23,9 +23,7 @@
 import angular from 'angular';
 import { EuiIcon } from '@elastic/eui';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
-// @ts-ignore
-import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
+import { CoreStart, LegacyCoreStart } from 'kibana/public';
 // @ts-ignore
 import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
@@ -108,7 +106,6 @@ export function initializeInnerAngularModule(
     createLocalI18nModule();
     createLocalPrivateModule();
     createLocalPromiseModule();
-    createLocalConfigModule(core.uiSettings);
     createLocalKbnUrlModule();
     createLocalTopNavModule(navigation);
     createLocalStorageModule();
@@ -143,7 +140,6 @@ export function initializeInnerAngularModule(
       'ngRoute',
       'react',
       'ui.bootstrap',
-      'discoverConfig',
       'discoverI18n',
       'discoverPrivate',
       'discoverPromise',
@@ -175,21 +171,6 @@ function createLocalKbnUrlModule() {
     .module('discoverKbnUrl', ['discoverPrivate', 'ngRoute'])
     .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider))
     .service('redirectWhenMissing', (Private: IPrivate) => Private(RedirectWhenMissingProvider));
-}
-
-function createLocalConfigModule(uiSettings: IUiSettingsClient) {
-  angular
-    .module('discoverConfig', ['discoverPrivate'])
-    .provider('stateManagementConfig', StateManagementConfigProvider)
-    .provider('config', () => {
-      return {
-        $get: () => ({
-          get: (value: string) => {
-            return uiSettings ? uiSettings.get(value) : undefined;
-          },
-        }),
-      };
-    });
 }
 
 function createLocalPromiseModule() {
@@ -230,7 +211,7 @@ const createLocalStorageService = function(type: string) {
 
 function createElasticSearchModule(data: DataPublicPluginStart) {
   angular
-    .module('discoverEs', ['discoverConfig'])
+    .module('discoverEs', [])
     // Elasticsearch client used for requesting data.  Connects to the /elasticsearch proxy
     .service('es', () => {
       return data.search.__LEGACY.esClient;
@@ -243,12 +224,7 @@ function createPagerFactoryModule() {
 
 function createDocTableModule() {
   angular
-    .module('discoverDocTable', [
-      'discoverKbnUrl',
-      'discoverConfig',
-      'discoverPagerFactory',
-      'react',
-    ])
+    .module('discoverDocTable', ['discoverKbnUrl', 'discoverPagerFactory', 'react'])
     .directive('docTable', createDocTableDirective)
     .directive('kbnTableHeader', createTableHeaderDirective)
     .directive('toolBarPagerText', createToolBarPagerTextDirective)

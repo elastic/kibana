@@ -16,11 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IUiSettingsClient } from 'kibana/public';
 import { TableHeader } from './table_header/table_header';
-import { wrapInI18nContext } from '../../../../kibana_services';
+import { wrapInI18nContext, getServices } from '../../../../kibana_services';
 
-export function createTableHeaderDirective(reactDirective: any, config: IUiSettingsClient) {
+export function createTableHeaderDirective(reactDirective: any) {
   return reactDirective(
     wrapInI18nContext(TableHeader),
     [
@@ -35,9 +34,9 @@ export function createTableHeaderDirective(reactDirective: any, config: IUiSetti
     ],
     { restrict: 'A' },
     {
-      hideTimeColumn: config.get('doc_table:hideTimeColumn'),
-      isShortDots: config.get('shortDots:enable'),
-      defaultSortOrder: config.get('discover:sort:defaultOrder'),
+      hideTimeColumn: getServices().uiSettings.get('doc_table:hideTimeColumn'),
+      isShortDots: getServices().uiSettings.get('shortDots:enable'),
+      defaultSortOrder: getServices().uiSettings.get('discover:sort:defaultOrder'),
     }
   );
 }
