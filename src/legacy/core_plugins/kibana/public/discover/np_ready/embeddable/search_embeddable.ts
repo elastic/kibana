@@ -20,7 +20,10 @@ import _ from 'lodash';
 import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { UiActionsStart, APPLY_FILTER_TRIGGER } from 'src/plugins/ui_actions/public';
+import {
+  UiActionsStart,
+  APPLY_FILTER_TRIGGER,
+} from '../../../../../../..//plugins/ui_actions/public';
 import { RequestAdapter, Adapters } from '../../../../../../../plugins/inspector/public';
 import {
   esFilters,
