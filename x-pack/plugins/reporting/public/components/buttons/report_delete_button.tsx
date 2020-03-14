@@ -4,44 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import React from 'react';
-import { JobStatuses } from '../../../constants';
-import { Job as ListingJob, Props as ListingProps } from '../report_listing';
+import { EuiButton } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
+import { Job, Props as ListingProps } from '../report_listing';
 
-const { COMPLETED, FAILED } = JobStatuses;
-type DeleteHandler = () => Promise<void>;
+type DeleteFn = () => Promise<void>;
+type Props = { jobsToDelete: Job[]; performDelete: DeleteFn } & ListingProps;
 
-export const ReportDeleteButton = ({
-  record,
-  handleDelete,
-  ...props
-}: { record: ListingJob; handleDelete: DeleteHandler } & ListingProps) => {
-  if (!([COMPLETED, FAILED] as string[]).includes(record.status)) {
-    return null;
-  }
+export const ReportDeleteButton: FunctionComponent<Props> = (props: Props) => {
+  const { jobsToDelete, performDelete, intl } = props;
 
-  const { intl } = props;
-  const button = (
-    <EuiButtonIcon
-      onClick={handleDelete}
-      iconType="trash"
-      color={'danger'}
-      aria-label={intl.formatMessage({
-        id: 'xpack.reporting.listing.table.deleteReportButton',
-        defaultMessage: 'Delete report',
-      })}
-    />
-  );
+  if (jobsToDelete.length === 0) return null;
+
+  const message =
+    jobsToDelete.length > 1
+      ? intl.formatMessage(
+          {
+            id: 'xpack.reporting.listing.table.deleteReportButton',
+            defaultMessage: `Delete {num} reports`,
+          },
+          { num: jobsToDelete.length }
+        )
+      : intl.formatMessage({
+          id: 'xpack.reporting.listing.table.deleteReportButton',
+          defaultMessage: `Delete report`,
+        });
+
   return (
-    <EuiToolTip
-      position="top"
-      content={intl.formatMessage({
-        id: 'xpack.reporting.listing.table.deleteReportAriaLabel',
-        defaultMessage: 'Delete report',
-      })}
-    >
-      {button}
-    </EuiToolTip>
+    <EuiButton onClick={performDelete} iconType="trash" color={'danger'}>
+      {message}
+    </EuiButton>
   );
 };

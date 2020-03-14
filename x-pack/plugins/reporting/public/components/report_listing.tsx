@@ -5,8 +5,7 @@
  */
 
 import {
-  EuiBasicTable,
-  EuiLoadingSpinner,
+  EuiInMemoryTable,
   EuiPageContent,
   EuiSpacer,
   EuiText,
@@ -17,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import moment from 'moment';
-import React, { Component, Fragment } from 'react';
+import { Component, default as React, Fragment } from 'react';
 import { Subscription } from 'rxjs';
 import { ApplicationStart, ToastsSetup } from 'src/core/public';
 import { ILicense, LicensingPluginSetup } from '../../../licensing/public';
@@ -63,6 +62,7 @@ interface State {
   page: number;
   total: number;
   jobs: Job[];
+  selectedJobs: Job[];
   isLoading: boolean;
   showLinks: boolean;
   enableLinks: boolean;
@@ -115,6 +115,7 @@ class ReportListingUi extends Component<Props, State> {
       page: 0,
       total: 0,
       jobs: [],
+      selectedJobs: [],
       isLoading: false,
       showLinks: false,
       enableLinks: false,
@@ -184,10 +185,8 @@ class ReportListingUi extends Component<Props, State> {
     });
   };
 
-  private removeRecord = (record: Job) => {
-    const { jobs } = this.state;
-    const filtered = jobs.filter(j => j.id !== record.id);
-    this.setState(current => ({ ...current, jobs: filtered }));
+  private onSelectionChange = (jobs: Job[]) => {
+    this.setState(current => ({ ...current, selectedJobs: jobs }));
   };
 
   private renderTable() {
@@ -323,13 +322,11 @@ class ReportListingUi extends Component<Props, State> {
         actions: [
           {
             render: (record: Job) => {
-              const canDelete = !record.is_deleting;
               return (
                 <div>
-                  <DownloadButton {...this.props} record={record} />
+                  <ReportDownloadButton {...this.props} record={record} />
                   <ReportErrorButton {...this.props} record={record} />
                   <ReportInfoButton {...this.props} jobId={record.id} />
-                  {canDelete ? this.renderDeleteButton(record) : <EuiLoadingSpinner size="m" />}
                 </div>
               );
             },
@@ -345,60 +342,88 @@ class ReportListingUi extends Component<Props, State> {
       hidePerPageOptions: true,
     };
 
+    const selection = {
+      itemId: 'id',
+      onSelectionChange: this.onSelectionChange,
+    };
+
     return (
-      <EuiBasicTable
-        itemId={'id'}
-        items={this.state.jobs}
-        loading={this.state.isLoading}
-        columns={tableColumns}
-        noItemsMessage={
-          this.state.isLoading
-            ? intl.formatMessage({
-                id: 'xpack.reporting.listing.table.loadingReportsDescription',
-                defaultMessage: 'Loading reports',
-              })
-            : intl.formatMessage({
-                id: 'xpack.reporting.listing.table.noCreatedReportsDescription',
-                defaultMessage: 'No reports have been created',
-              })
-        }
-        pagination={pagination}
-        onChange={this.onTableChange}
-        data-test-subj="reportJobListing"
-      />
+      <Fragment>
+        {this.renderDeleteButton()}
+        <EuiSpacer size="m" />
+        <EuiInMemoryTable
+          itemId="id"
+          items={this.state.jobs}
+          loading={this.state.isLoading}
+          columns={tableColumns}
+          message={
+            this.state.isLoading
+              ? intl.formatMessage({
+                  id: 'xpack.reporting.listing.table.loadingReportsDescription',
+                  defaultMessage: 'Loading reports',
+                })
+              : intl.formatMessage({
+                  id: 'xpack.reporting.listing.table.noCreatedReportsDescription',
+                  defaultMessage: 'No reports have been created',
+                })
+          }
+          pagination={pagination}
+          selection={selection}
+          isSelectable={true}
+          onChange={this.onTableChange}
+          data-test-subj="reportJobListing"
+        />
+      </Fragment>
     );
   }
 
-  private renderDeleteButton = (record: Job) => {
-    const handleDelete = async () => {
-      try {
-        // TODO present a modal to verify: this can not be undone
-        this.setState(current => ({ ...current, is_deleting: true }));
-        await this.props.apiClient.deleteReport(record.id);
-        this.removeRecord(record);
-        this.props.toasts.addSuccess(
-          this.props.intl.formatMessage(
-            {
-              id: 'xpack.reporting.listing.table.deleteConfim',
-              defaultMessage: `The {reportTitle} report was deleted`,
-            },
-            { reportTitle: record.object_title }
-          )
-        );
-      } catch (error) {
-        this.props.toasts.addDanger(
-          this.props.intl.formatMessage(
-            {
-              id: 'xpack.reporting.listing.table.deleteFailedErrorMessage',
-              defaultMessage: `The report was not deleted: {error}`,
-            },
-            { error }
-          )
-        );
-        throw error;
+  private removeRecord = (record: Job) => {
+    const { jobs } = this.state;
+    const filtered = jobs.filter(j => j.id !== record.id);
+    this.setState(current => ({ ...current, jobs: filtered }));
+  };
+
+  private renderDeleteButton = () => {
+    const { selectedJobs } = this.state;
+    if (selectedJobs.length === 0) return null;
+
+    const performDelete = async () => {
+      for (const record of selectedJobs) {
+        try {
+          this.setState(current => ({ ...current, is_deleting: true }));
+          await this.props.apiClient.deleteReport(record.id);
+          this.removeRecord(record);
+          this.props.toasts.addSuccess(
+            this.props.intl.formatMessage(
+              {
+                id: 'xpack.reporting.listing.table.deleteConfim',
+                defaultMessage: `The {reportTitle} report was deleted`,
+              },
+              { reportTitle: record.object_title }
+            )
+          );
+        } catch (error) {
+          this.props.toasts.addDanger(
+            this.props.intl.formatMessage(
+              {
+                id: 'xpack.reporting.listing.table.deleteFailedErrorMessage',
+                defaultMessage: `The report was not deleted: {error}`,
+              },
+              { error }
+            )
+          );
+          throw error;
+        }
       }
     };
-    return <DeleteButton handleDelete={handleDelete} record={record} {...this.props} />;
+
+    return (
+      <ReportDeleteButton
+        jobsToDelete={selectedJobs}
+        performDelete={performDelete}
+        {...this.props}
+      />
+    );
   };
 
   private onTableChange = ({ page }: { page: { index: number } }) => {
