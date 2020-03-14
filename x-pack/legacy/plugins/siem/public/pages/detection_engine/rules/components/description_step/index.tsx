@@ -13,7 +13,6 @@ import {
   Filter,
   esFilters,
   FilterManager,
-  Query,
 } from '../../../../../../../../../../src/plugins/data/public';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/translations';
 import { useKibana } from '../../../../../lib/kibana';
@@ -117,7 +116,7 @@ const getDescriptionItem = (
 ): ListItems[] => {
   if (field === 'queryBar') {
     const filters = addFilterStateIfNotThere(get('queryBar.filters', data) ?? []);
-    const query = get('queryBar.query', data) as Query;
+    const query = get('queryBar.query.query', data);
     const savedId = get('queryBar.saved_id', data);
     return buildQueryBarDescription({
       field,

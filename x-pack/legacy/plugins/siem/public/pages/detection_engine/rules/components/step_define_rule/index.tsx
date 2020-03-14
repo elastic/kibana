@@ -40,6 +40,7 @@ import {
 } from '../../../../../shared_imports';
 import { schema } from './schema';
 import * as i18n from './translations';
+import { filterRuleFieldsForType } from '../../create/helpers';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -48,13 +49,15 @@ interface StepDefineRuleProps extends RuleStepProps {
 }
 
 const stepDefineDefaultValue: DefineStepRule = {
+  anomalyThreshold: 50,
   index: [],
   isNew: true,
+  mlJobId: '',
   ruleType: 'query',
   queryBar: {
     query: { query: '', language: 'kuery' },
     filters: [],
-    saved_id: null,
+    saved_id: undefined,
   },
 };
 
@@ -160,13 +163,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setOpenTimelineSearch(false);
   }, []);
 
-  return isReadOnlyView && myStepData?.queryBar != null ? (
+  return isReadOnlyView ? (
     <StepContentWrapper addPadding={addPadding}>
       <StepRuleDescription
         direction={descriptionDirection}
         indexPatterns={indexPatternQueryBar as IIndexPattern}
-        schema={schema}
-        data={myStepData}
+        // @ts-ignore schema is insufficiently typed, but this works
+        schema={filterRuleFieldsForType(schema, myStepData.ruleType)}
+        data={filterRuleFieldsForType(myStepData, myStepData.ruleType)}
       />
     </StepContentWrapper>
   ) : (

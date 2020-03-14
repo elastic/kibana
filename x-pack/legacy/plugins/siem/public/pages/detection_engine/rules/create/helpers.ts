@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, isNumber } from 'lodash/fp';
+import { has, omit, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
 import { NewRule, RuleType } from '../../../../containers/detection_engine/rules';
@@ -38,28 +38,48 @@ const getTimeTypeValue = (time: string): { unit: string; value: number } => {
   return timeObj;
 };
 
-const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
-  const { anomalyThreshold, mlJobId, queryBar, index, isNew, ruleType, ...rest } = defineStepData;
-  const { filters, query, saved_id: savedId } = queryBar;
-  const typeProps =
-    ruleType === 'machine_learning'
-      ? {
-          ...(isNumber(anomalyThreshold) ? { anomaly_threshold: anomalyThreshold } : {}),
-          ...(mlJobId ? { ml_job_id: mlJobId } : {}),
-        }
-      : {
-          index,
-          filters,
-          language: query.language,
-          query: query.query as string,
-          ...(!isEmpty(savedId) ? { saved_id: savedId, type: 'saved_query' as RuleType } : {}),
-        };
+interface RuleFields {
+  anomalyThreshold: unknown;
+  mlJobId: unknown;
+  queryBar: unknown;
+  index: unknown;
+  ruleType: unknown;
+}
+type QueryRuleFields<T> = Omit<T, 'anomalyThreshold' | 'mlJobId'>;
+type MlRuleFields<T> = Omit<T, 'queryBar' | 'index'>;
 
-  return {
-    ...rest,
-    type: ruleType,
-    ...typeProps,
-  };
+const isMlFields = <T>(fields: QueryRuleFields<T> | MlRuleFields<T>): fields is MlRuleFields<T> =>
+  has('anomalyThreshold', fields);
+
+export const filterRuleFieldsForType = <T extends RuleFields>(fields: T, type: RuleType) => {
+  return type === 'machine_learning'
+    ? omit(['index', 'queryBar'], fields)
+    : omit(['anomalyThreshold', 'mlJobId'], fields);
+};
+
+const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
+  const ruleFields = filterRuleFieldsForType(defineStepData, defineStepData.ruleType);
+
+  if (isMlFields(ruleFields)) {
+    const { anomalyThreshold, mlJobId, isNew, ruleType, ...rest } = ruleFields;
+    return {
+      ...rest,
+      type: ruleType,
+      anomaly_threshold: anomalyThreshold,
+      ml_job_id: mlJobId,
+    };
+  } else {
+    const { index, queryBar, isNew, ruleType, ...rest } = ruleFields;
+    return {
+      ...rest,
+      type: ruleType,
+      filters: queryBar?.filters,
+      language: queryBar?.query?.language,
+      query: queryBar?.query?.query as string,
+      saved_id: queryBar?.saved_id,
+      ...(ruleType === 'query' && queryBar?.saved_id ? { type: 'saved_query' as RuleType } : {}),
+    };
+  }
 };
 
 const formatScheduleStepData = (scheduleData: ScheduleStepRule): ScheduleStepRuleJson => {

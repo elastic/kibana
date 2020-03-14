@@ -72,12 +72,12 @@ export const buildQueryBarDescription = ({
       },
     ];
   }
-  if (!isEmpty(query.query)) {
+  if (!isEmpty(query)) {
     items = [
       ...items,
       {
         title: <>{i18n.QUERY_LABEL} </>,
-        description: <>{query.query} </>,
+        description: <>{query} </>,
       },
     ];
   }
