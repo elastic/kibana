@@ -77,7 +77,7 @@ export const searchAfterAndBulkCreate = async ({
   // If the total number of hits for the overall search result is greater than
   // maxSignals, default to requesting a total of maxSignals, otherwise use the
   // totalHits in the response from the searchAfter query.
-  const maxTotalHitsSize = Math.max(totalHits, ruleParams.maxSignals);
+  const maxTotalHitsSize = Math.min(totalHits, ruleParams.maxSignals);
 
   // number of docs in the current search result
   let hitsSize = someResult.hits.hits.length;
