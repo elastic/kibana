@@ -21,6 +21,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
     it('loads the Alert List Page', async () => {
       await testSubjects.existOrFail('alertListPage');
+      const alertsTitle = await testSubjects.getVisibleText('alertsViewTitle');
+      expect(alertsTitle).to.equal('Alerts');
     });
     it('includes alerts search bar', async () => {
       await testSubjects.existOrFail('alertsSearchBar');
