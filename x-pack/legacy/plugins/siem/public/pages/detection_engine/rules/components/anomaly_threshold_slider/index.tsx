@@ -19,7 +19,7 @@ type EventArg = Event | React.MouseEvent<HTMLButtonElement>;
 const Wrapper = styled(EuiFormRow)``;
 
 export const AnomalyThresholdSlider = ({ field }: AnomalyThresholdSliderProps) => {
-  const [localThreshold, setLocalThreshold] = useState<number>(50);
+  const [localThreshold, setLocalThreshold] = useState<number>(field.value as number);
   const onThresholdChange = useCallback(
     (event: EventArg) => {
       const threshold = Number((event as Event).target.value);

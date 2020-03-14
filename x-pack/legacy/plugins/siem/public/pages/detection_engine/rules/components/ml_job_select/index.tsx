@@ -26,7 +26,7 @@ const JobDisplay = ({ title, description }: { title: string; description: string
 );
 
 export const MlJobSelect = ({ field }: MlJobSelectProps) => {
-  const [localJobId, setLocalJobId] = useState<string>('query');
+  const [localJobId, setLocalJobId] = useState<string>(field.value as string);
   const [isLoading, siemJobs] = useSiemJobs(false);
   const handleJobChange = useCallback(
     (jobId: string) => {
