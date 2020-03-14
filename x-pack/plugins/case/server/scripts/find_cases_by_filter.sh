@@ -6,14 +6,8 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
-set -e
-./check_env_variables.sh
-
-FILTER=${1:-'cases.attributes.state:%20closed'}
-
-# The %20 is just an encoded space that is typical of URL's.
-# The %22 is just an encoded quote of "
-# Table of them for testing if needed: https://www.w3schools.com/tags/ref_urlencode.asp
+# Example:
+# ./find_cases_by_filter.sh
 
 # Example get all open cases:
 # ./find_cases_by_filter.sh "cases.attributes.state:%20open"
@@ -23,6 +17,11 @@ FILTER=${1:-'cases.attributes.state:%20closed'}
 
 # Exampe get everything that has phishing
 # ./find_cases_by_filter.sh "cases.attributes.tags:phishing"
+
+set -e
+./check_env_variables.sh
+
+FILTER=${1:-'cases.attributes.state:%20closed'}
 
 curl -s -k \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \

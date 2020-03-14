@@ -6,12 +6,11 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
+# returns case data as { id, version }
 # Example:
-# ./find_cases.sh
+# ./generate_case_data.sh
 
 set -e
 ./check_env_variables.sh
+./post_case.sh | jq '{ id: .id, version: .version }' -j;
 
-curl -s -k \
- -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- -X GET ${KIBANA_URL}${SPACE_URL}/api/cases/_find | jq .

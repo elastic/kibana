@@ -6,19 +6,18 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
-# Example:
-# ./find_cases_sort.sh
+# Creates a new case and then gets it if no CASE_ID is specified
 
-# Example with sort args:
-# ./find_cases_sort.sh createdAt desc
+# Example:
+# ./get_tags.sh
+
 
 set -e
 ./check_env_variables.sh
 
-SORT=${1:-'createdAt'}
-ORDER=${2:-'asc'}
-
 curl -s -k \
- -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- -X GET "${KIBANA_URL}${SPACE_URL}/api/cases/_find?sortField=$SORT&sortOrder=$ORDER" \
- | jq .
+-H 'Content-Type: application/json' \
+-H 'kbn-xsrf: 123' \
+-u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
+-X GET "${KIBANA_URL}${SPACE_URL}/api/cases/status" \
+| jq .;

@@ -6,15 +6,21 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
+# Example:
+# ./post_case.sh
+
+# Example:
+# ./post_case.sh ./mock/case/post_case.json
+
+# Example glob:
+# ./post_case.sh ./mock/case/*
+
 set -e
 ./check_env_variables.sh
 
 # Uses a default if no argument is specified
 CASES=(${@:-./mock/case/post_case.json})
 
-# Example: ./post_case.sh
-# Example: ./post_case.sh ./mock/case/post_case.json
-# Example glob: ./post_case.sh ./mock/case/*
 for CASE in "${CASES[@]}"
 do {
   [ -e "$CASE" ] || continue
