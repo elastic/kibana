@@ -16,13 +16,13 @@
 // So it's best to not turn it on unless you are developing code.
 export const listsEnvFeatureFlagName = 'ELASTIC_XPACK_SIEM_LISTS_FEATURE';
 
+// This is for setFeatureFlagsForTestsOnly and unSetFeatureFlagsForTestsOnly only to use
+let setFeatureFlagsForTestsOnlyCalled = false;
+
 // Use this to detect if the lists feature is enabled or not
 export const hasListsFeature = (): boolean => {
   return process.env[listsEnvFeatureFlagName]?.trim().toLowerCase() === 'true';
 };
-
-// This is for tests only to use
-let setFeatureFlagsForTestsOnlyCalled = false;
 
 // This is for tests only to use in your beforeAll() calls
 export const setFeatureFlagsForTestsOnly = (): void => {
