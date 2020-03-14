@@ -18,7 +18,7 @@ jest.mock('../../../lib/kibana');
 
 let mockedWidth = 1000;
 jest.mock('../../utils');
-useThrottledResizeObserver.mockImplementation(() => ({
+(useThrottledResizeObserver as jest.Mock).mockImplementation(() => ({
   width: mockedWidth,
 }));
 

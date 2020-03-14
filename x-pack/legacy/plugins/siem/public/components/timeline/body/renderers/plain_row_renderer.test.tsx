@@ -34,4 +34,18 @@ describe('plain_row_renderer', () => {
   test('should always return isInstance true', () => {
     expect(plainRowRenderer.isInstance(mockDatum)).toBe(true);
   });
+
+  test('should render a plain row', () => {
+    const children = plainRowRenderer.renderRow({
+      browserFields: mockBrowserFields,
+      data: mockDatum,
+      timelineId: 'test',
+    });
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+        <span>{children}</span>
+      </ThemeProvider>
+    );
+    expect(wrapper.text()).toEqual('');
+  });
 });
