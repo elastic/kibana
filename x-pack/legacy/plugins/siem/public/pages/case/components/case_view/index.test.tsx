@@ -12,11 +12,17 @@ import { caseProps, data } from './__mock__';
 import { TestProviders } from '../../../../mock';
 
 describe('CaseView ', () => {
-  const dispatchUpdateCaseProperty = jest.fn();
+  const updateCaseProperty = jest.fn();
 
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.spyOn(apiHook, 'useUpdateCase').mockReturnValue([{ data }, dispatchUpdateCaseProperty]);
+    jest.spyOn(apiHook, 'useUpdateCase').mockReturnValue({
+      caseData: data,
+      isLoading: false,
+      isError: false,
+      updateKey: null,
+      updateCaseProperty,
+    });
   });
 
   it('should render CaseComponent', () => {
@@ -33,10 +39,10 @@ describe('CaseView ', () => {
     ).toEqual(data.title);
     expect(
       wrapper
-        .find(`[data-test-subj="case-view-state"]`)
+        .find(`[data-test-subj="case-view-status"]`)
         .first()
         .text()
-    ).toEqual(data.state);
+    ).toEqual(data.status);
     expect(
       wrapper
         .find(`[data-test-subj="case-view-tag-list"] .euiBadge__text`)
@@ -71,12 +77,46 @@ describe('CaseView ', () => {
     );
 
     wrapper
-      .find('input[data-test-subj="toggle-case-state"]')
+      .find('input[data-test-subj="toggle-case-status"]')
       .simulate('change', { target: { value: false } });
 
-    expect(dispatchUpdateCaseProperty).toBeCalledWith({
-      updateKey: 'state',
+    expect(updateCaseProperty).toBeCalledWith({
+      updateKey: 'status',
       updateValue: 'closed',
     });
+  });
+
+  it('should render comments', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <CaseComponent {...caseProps} />
+      </TestProviders>
+    );
+    expect(
+      wrapper
+        .find(
+          `div[data-test-subj="user-action-${data.comments[0].id}-avatar"] [data-test-subj="user-action-avatar"]`
+        )
+        .first()
+        .prop('name')
+    ).toEqual(data.comments[0].createdBy.fullName);
+
+    expect(
+      wrapper
+        .find(
+          `div[data-test-subj="user-action-${data.comments[0].id}"] [data-test-subj="user-action-title"] strong`
+        )
+        .first()
+        .text()
+    ).toEqual(data.comments[0].createdBy.username);
+
+    expect(
+      wrapper
+        .find(
+          `div[data-test-subj="user-action-${data.comments[0].id}"] [data-test-subj="markdown"]`
+        )
+        .first()
+        .prop('source')
+    ).toEqual(data.comments[0].comment);
   });
 });

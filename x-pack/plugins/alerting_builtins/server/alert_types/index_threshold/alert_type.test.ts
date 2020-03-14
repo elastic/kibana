@@ -6,6 +6,7 @@
 
 import { loggingServiceMock } from '../../../../../../src/core/server/mocks';
 import { getAlertType } from './alert_type';
+import { Params } from './alert_type_params';
 
 describe('alertType', () => {
   const service = {
@@ -21,15 +22,44 @@ describe('alertType', () => {
     expect(alertType.id).toBe('.index-threshold');
     expect(alertType.name).toBe('Index Threshold');
     expect(alertType.actionGroups).toEqual([{ id: 'threshold met', name: 'Threshold Met' }]);
+
+    expect(alertType.actionVariables).toMatchInlineSnapshot(`
+      Object {
+        "context": Array [
+          Object {
+            "description": "A pre-constructed message for the alert.",
+            "name": "message",
+          },
+          Object {
+            "description": "A pre-constructed title for the alert.",
+            "name": "title",
+          },
+          Object {
+            "description": "The group that exceeded the threshold.",
+            "name": "group",
+          },
+          Object {
+            "description": "The date the alert exceeded the threshold.",
+            "name": "date",
+          },
+          Object {
+            "description": "The value that exceeded the threshold.",
+            "name": "value",
+          },
+        ],
+      }
+    `);
   });
 
   it('validator succeeds with valid params', async () => {
-    const params = {
+    const params: Partial<Writable<Params>> = {
       index: 'index-name',
       timeField: 'time-field',
       aggType: 'count',
-      window: '5m',
-      comparator: 'greaterThan',
+      groupBy: 'all',
+      timeWindowSize: 5,
+      timeWindowUnit: 'm',
+      thresholdComparator: '<',
       threshold: [0],
     };
 
@@ -40,12 +70,14 @@ describe('alertType', () => {
     const paramsSchema = alertType.validate?.params;
     if (!paramsSchema) throw new Error('params validator not set');
 
-    const params = {
+    const params: Partial<Writable<Params>> = {
       index: 'index-name',
       timeField: 'time-field',
       aggType: 'foo',
-      window: '5m',
-      comparator: 'greaterThan',
+      groupBy: 'all',
+      timeWindowSize: 5,
+      timeWindowUnit: 'm',
+      thresholdComparator: '>',
       threshold: [0],
     };
 

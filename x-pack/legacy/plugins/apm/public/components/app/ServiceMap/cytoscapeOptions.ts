@@ -13,18 +13,11 @@ export const animationOptions: cytoscape.AnimationOptions = {
   easing: theme.euiAnimSlightBounce
 };
 const lineColor = '#C5CCD7';
+const zIndexNode = 200;
+const zIndexEdge = 100;
+const zIndexEdgeHighlight = 110;
+const zIndexEdgeHover = 120;
 export const nodeHeight = parseInt(theme.avatarSizing.l.size, 10);
-
-const layout = {
-  name: 'dagre',
-  nodeDimensionsIncludeLabels: true,
-  rankDir: 'LR',
-  animate: true,
-  animationEasing: animationOptions.easing,
-  animationDuration: animationOptions.duration,
-  fit: true,
-  padding: nodeHeight
-};
 
 function isService(el: cytoscape.NodeSingular) {
   return el.data('type') === 'service';
@@ -42,19 +35,23 @@ const style: cytoscape.Stylesheet[] = [
       'background-image': (el: cytoscape.NodeSingular) =>
         iconForNode(el) ?? defaultIcon,
       'background-height': (el: cytoscape.NodeSingular) =>
-        isService(el) ? '85%' : '40%',
+        isService(el) ? '60%' : '40%',
       'background-width': (el: cytoscape.NodeSingular) =>
-        isService(el) ? '85%' : '40%',
+        isService(el) ? '60%' : '40%',
       'border-color': (el: cytoscape.NodeSingular) =>
         el.hasClass('primary') || el.selected()
           ? theme.euiColorPrimary
           : theme.euiColorMediumShade,
-      'border-width': 1,
+      'border-width': 2,
       color: theme.textColors.default,
       // theme.euiFontFamily doesn't work here for some reason, so we're just
       // specifying a subset of the fonts for the label text.
       'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
       'font-size': theme.euiFontSizeXS,
+      ghost: 'yes',
+      'ghost-offset-x': 0,
+      'ghost-offset-y': 2,
+      'ghost-opacity': 0.15,
       height: nodeHeight,
       label: 'data(label)',
       'min-zoomed-font-size': theme.euiSizeL,
@@ -69,13 +66,16 @@ const style: cytoscape.Stylesheet[] = [
       'text-max-width': '200px',
       'text-valign': 'bottom',
       'text-wrap': 'ellipsis',
-      width: theme.avatarSizing.l.size
+      width: theme.avatarSizing.l.size,
+      'z-index': zIndexNode
     }
   },
   {
     selector: 'edge',
     style: {
-      'curve-style': 'bezier',
+      'curve-style': 'taxi',
+      // @ts-ignore
+      'taxi-direction': 'rightward',
       'line-color': lineColor,
       'overlay-opacity': 0,
       'target-arrow-color': lineColor,
@@ -86,7 +86,8 @@ const style: cytoscape.Stylesheet[] = [
       // @ts-ignore
       'target-distance-from-node': theme.paddingSizes.xs,
       width: 1,
-      'source-arrow-shape': 'none'
+      'source-arrow-shape': 'none',
+      'z-index': zIndexEdge
     }
   },
   {
@@ -99,13 +100,42 @@ const style: cytoscape.Stylesheet[] = [
       'source-distance-from-node': theme.paddingSizes.xs,
       'target-distance-from-node': theme.paddingSizes.xs
     }
+  },
+  // @ts-ignore
+  {
+    selector: '.invisible',
+    style: { visibility: 'hidden' }
+  },
+  {
+    selector: 'edge.nodeHover',
+    style: {
+      width: 4,
+      // @ts-ignore
+      'z-index': zIndexEdgeHover
+    }
+  },
+  {
+    selector: 'node.hover',
+    style: {
+      'border-width': 4
+    }
+  },
+  {
+    selector: 'edge.highlight',
+    style: {
+      width: 2,
+      'line-color': theme.euiColorPrimary,
+      'source-arrow-color': theme.euiColorPrimary,
+      'target-arrow-color': theme.euiColorPrimary,
+      // @ts-ignore
+      'z-index': zIndexEdgeHighlight
+    }
   }
 ];
 
 export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
   autoungrabify: true,
   boxSelectionEnabled: false,
-  layout,
   maxZoom: 3,
   minZoom: 0.2,
   style

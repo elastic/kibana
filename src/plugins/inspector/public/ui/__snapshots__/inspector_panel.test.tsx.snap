@@ -270,25 +270,12 @@ exports[`InspectorPanel should render as expected 1`] = `
                                 size="m"
                                 type="arrowDown"
                               >
-                                <EuiIconEmpty
-                                  aria-hidden={true}
-                                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
-                                  focusable="false"
-                                  role="img"
-                                  style={null}
-                                >
-                                  <svg
-                                    aria-hidden={true}
-                                    className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
-                                    focusable="false"
-                                    height={16}
-                                    role="img"
-                                    style={null}
-                                    viewBox="0 0 16 16"
-                                    width={16}
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  />
-                                </EuiIconEmpty>
+                                <div
+                                  aria-hidden="true"
+                                  className="euiButtonEmpty__icon"
+                                  data-euiicon-type="arrowDown"
+                                  size="m"
+                                />
                               </EuiIcon>
                               <span
                                 className="euiButtonEmpty__text"
@@ -326,21 +313,25 @@ exports[`InspectorPanel should render as expected 1`] = `
       <div
         className="euiFlyoutBody__overflow"
       >
-        <component
-          adapters={
-            Object {
-              "bardapter": Object {},
-              "foodapter": Object {
-                "foo": [Function],
-              },
-            }
-          }
-          title="Inspector"
+        <div
+          className="euiFlyoutBody__overflowContent"
         >
-          <h1>
-            View 1
-          </h1>
-        </component>
+          <component
+            adapters={
+              Object {
+                "bardapter": Object {},
+                "foodapter": Object {
+                  "foo": [Function],
+                },
+              }
+            }
+            title="Inspector"
+          >
+            <h1>
+              View 1
+            </h1>
+          </component>
+        </div>
       </div>
     </div>
   </EuiFlyoutBody>

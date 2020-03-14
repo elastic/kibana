@@ -19,7 +19,8 @@
 
 import { Vis, VisState, VisParams } from './vis';
 import { VisType } from './vis_types';
-import { IIndexPattern } from '../../../../../../plugins/data/common';
+import { IAggConfig, IIndexPattern } from '../../../../../../plugins/data/public';
+import { Schema } from '../../../../vis_default_editor/public';
 
 type InitVisStateType =
   | Partial<VisState>
@@ -43,6 +44,8 @@ export declare class VisImpl implements Vis {
     params: VisParams;
     aggs: Array<{ [key: string]: any }>;
   };
+
+  private initializeDefaultsFromSchemas(configStates: IAggConfig[], schemas: Schema[]);
 
   // Since we haven't typed everything here yet, we basically "any" the rest
   // of that interface. This should be removed as soon as this type definition

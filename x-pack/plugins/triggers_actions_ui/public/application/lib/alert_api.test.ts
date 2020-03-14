@@ -38,7 +38,10 @@ describe('loadAlertTypes', () => {
       {
         id: 'test',
         name: 'Test',
-        actionVariables: ['var1'],
+        actionVariables: {
+          context: [{ name: 'var1', description: 'val1' }],
+          state: [{ name: 'var2', description: 'val2' }],
+        },
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
       },
@@ -443,7 +446,7 @@ describe('updateAlert', () => {
       Array [
         "/api/alert/123",
         Object {
-          "body": "{\\"throttle\\":\\"1m\\",\\"consumer\\":\\"alerting\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[],\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
+          "body": "{\\"throttle\\":\\"1m\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[]}",
         },
       ]
     `);

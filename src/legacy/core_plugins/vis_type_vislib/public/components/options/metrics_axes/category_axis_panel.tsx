@@ -23,21 +23,25 @@ import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from '../../../../../vis_default_editor/public';
-import { BasicVislibParams, Axis } from '../../../types';
+import { VisOptionsProps } from 'src/legacy/core_plugins/vis_default_editor/public';
+import { Axis } from '../../../types';
 import { SelectOption, SwitchOption } from '../../common';
-import { LabelOptions } from './label_options';
+import { LabelOptions, SetAxisLabel } from './label_options';
 import { Positions } from '../../../utils/collections';
 
-export interface CategoryAxisPanelProps extends VisOptionsProps<BasicVislibParams> {
+export interface CategoryAxisPanelProps {
   axis: Axis;
   onPositionChanged: (position: Positions) => void;
   setCategoryAxis: (value: Axis) => void;
+  vis: VisOptionsProps['vis'];
 }
 
-function CategoryAxisPanel(props: CategoryAxisPanelProps) {
-  const { axis, onPositionChanged, vis, setCategoryAxis } = props;
-
+function CategoryAxisPanel({
+  axis,
+  onPositionChanged,
+  vis,
+  setCategoryAxis,
+}: CategoryAxisPanelProps) {
   const setAxis = useCallback(
     <T extends keyof Axis>(paramName: T, value: Axis[T]) => {
       const updatedAxis = {
@@ -46,7 +50,7 @@ function CategoryAxisPanel(props: CategoryAxisPanelProps) {
       };
       setCategoryAxis(updatedAxis);
     },
-    [setCategoryAxis]
+    [setCategoryAxis, axis]
   );
 
   const setPosition = useCallback(
@@ -55,6 +59,17 @@ function CategoryAxisPanel(props: CategoryAxisPanelProps) {
       onPositionChanged(value);
     },
     [setAxis, onPositionChanged]
+  );
+
+  const setAxisLabel: SetAxisLabel = useCallback(
+    (paramName, value) => {
+      const labels = {
+        ...axis.labels,
+        [paramName]: value,
+      };
+      setAxis('labels', labels);
+    },
+    [axis.labels, setAxis]
   );
 
   return (
@@ -89,7 +104,13 @@ function CategoryAxisPanel(props: CategoryAxisPanelProps) {
         setValue={setAxis}
       />
 
-      {axis.show && <LabelOptions axis={axis} axesName="categoryAxes" index={0} {...props} />}
+      {axis.show && (
+        <LabelOptions
+          axisLabels={axis.labels}
+          axisFilterCheckboxName={`xAxisFilterLabelsCheckbox${axis.id}`}
+          setAxisLabel={setAxisLabel}
+        />
+      )}
     </EuiPanel>
   );
 }

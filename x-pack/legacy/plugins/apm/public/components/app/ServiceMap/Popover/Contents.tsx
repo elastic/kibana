@@ -19,7 +19,6 @@ import { ServiceMetricFetcher } from './ServiceMetricFetcher';
 const popoverMinWidth = 280;
 
 interface ContentsProps {
-  focusedServiceName?: string;
   isService: boolean;
   label: string;
   onFocusClick: () => void;
@@ -29,12 +28,12 @@ interface ContentsProps {
 
 export function Contents({
   selectedNodeData,
-  focusedServiceName,
   isService,
   label,
   onFocusClick,
   selectedNodeServiceName
 }: ContentsProps) {
+  const frameworkName = selectedNodeData.frameworkName;
   return (
     <EuiFlexGroup
       direction="column"
@@ -49,14 +48,16 @@ export function Contents({
       </EuiFlexItem>
       <EuiFlexItem>
         {isService ? (
-          <ServiceMetricFetcher serviceName={selectedNodeServiceName} />
+          <ServiceMetricFetcher
+            frameworkName={frameworkName}
+            serviceName={selectedNodeServiceName}
+          />
         ) : (
           <Info {...selectedNodeData} />
         )}
       </EuiFlexItem>
       {isService && (
         <Buttons
-          focusedServiceName={focusedServiceName}
           onFocusClick={onFocusClick}
           selectedNodeServiceName={selectedNodeServiceName}
         />

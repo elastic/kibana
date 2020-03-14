@@ -8,10 +8,9 @@ import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-import { JOB_STATE, DATAFEED_STATE } from '../../../../legacy/plugins/ml/common/constants/states';
-import { DATA_FRAME_TASK_STATE } from '../../../../legacy/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/common';
-import { Job } from '../../../..//legacy/plugins/ml/public/application/jobs/new_job/common/job_creator/configs/job';
-import { Datafeed } from '../../../..//legacy/plugins/ml/public/application/jobs/new_job/common/job_creator/configs/datafeed';
+import { JOB_STATE, DATAFEED_STATE } from '../../../../plugins/ml/common/constants/states';
+import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { Job, Datafeed } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
 export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 

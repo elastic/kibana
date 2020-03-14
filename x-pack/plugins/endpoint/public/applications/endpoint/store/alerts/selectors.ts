@@ -9,19 +9,19 @@ import {
   createSelector,
   createStructuredSelector as createStructuredSelectorWithBadType,
 } from 'reselect';
-import {
-  AlertListState,
-  AlertingIndexUIQueryParams,
-  AlertsAPIQueryParams,
-  CreateStructuredSelector,
-} from '../../types';
-import { Immutable, LegacyEndpointEvent } from '../../../../../common/types';
+import { encode, decode } from 'rison-node';
+import { Query, TimeRange, Filter } from 'src/plugins/data/public';
+import { AlertListState, AlertingIndexUIQueryParams, CreateStructuredSelector } from '../../types';
+import { Immutable, AlertingIndexGetQueryInput } from '../../../../../common/types';
 
 const createStructuredSelector: CreateStructuredSelector = createStructuredSelectorWithBadType;
+
 /**
  * Returns the Alert Data array from state
  */
 export const alertListData = (state: AlertListState) => state.alerts;
+
+export const selectedAlertDetailsData = (state: AlertListState) => state.alertDetails;
 
 /**
  * Returns the alert list pagination data from state
@@ -61,6 +61,9 @@ export const uiQueryParams: (
         'page_size',
         'page_index',
         'selected_alert',
+        'query',
+        'date_range',
+        'filters',
       ];
       for (const key of keys) {
         const value = query[key];
@@ -76,18 +79,88 @@ export const uiQueryParams: (
 );
 
 /**
+ * Parses the ui query params and returns a object that represents the query used by the SearchBar component.
+ * If the query url param is undefined, a default is returned.
+ */
+export const searchBarQuery: (state: AlertListState) => Query = createSelector(
+  uiQueryParams,
+  ({ query }) => {
+    if (query !== undefined) {
+      return (decode(query) as unknown) as Query;
+    } else {
+      return { query: '', language: 'kuery' };
+    }
+  }
+);
+
+/**
+ * Parses the ui query params and returns a rison encoded string that represents the search bar's date range.
+ * A default is provided if 'date_range' is not present in the url params.
+ */
+export const encodedSearchBarDateRange: (state: AlertListState) => string = createSelector(
+  uiQueryParams,
+  ({ date_range: dateRange }) => {
+    if (dateRange === undefined) {
+      return encode({ from: 'now-24h', to: 'now' });
+    } else {
+      return dateRange;
+    }
+  }
+);
+
+/**
+ * Parses the ui query params and returns a object that represents the dateRange used by the SearchBar component.
+ */
+export const searchBarDateRange: (state: AlertListState) => TimeRange = createSelector(
+  encodedSearchBarDateRange,
+  encodedDateRange => {
+    return (decode(encodedDateRange) as unknown) as TimeRange;
+  }
+);
+
+/**
+ * Parses the ui query params and returns an array of filters used by the SearchBar component.
+ * If the 'filters' param is not present, a default is returned.
+ */
+export const searchBarFilters: (state: AlertListState) => Filter[] = createSelector(
+  uiQueryParams,
+  ({ filters }) => {
+    if (filters !== undefined) {
+      return (decode(filters) as unknown) as Filter[];
+    } else {
+      return [];
+    }
+  }
+);
+
+/**
+ * Returns the indexPatterns used by the SearchBar component
+ */
+export const searchBarIndexPatterns = (state: AlertListState) => state.searchBar.patterns;
+
+/**
  * query params to use when requesting alert data.
  */
 export const apiQueryParams: (
   state: AlertListState
-) => Immutable<AlertsAPIQueryParams> = createSelector(
+) => Immutable<AlertingIndexGetQueryInput> = createSelector(
   uiQueryParams,
-  ({ page_size, page_index }) => ({
+  encodedSearchBarDateRange,
+  ({ page_size, page_index, query, filters }, encodedDateRange) => ({
     page_size,
     page_index,
+    query,
+    // Always send a default date range param to the API
+    // even if there is no date_range param in the url
+    date_range: encodedDateRange,
+    filters,
   })
 );
 
+/**
+ * True if the user has selected an alert to see details about.
+ * Populated via the browsers query params.
+ */
 export const hasSelectedAlert: (state: AlertListState) => boolean = createSelector(
   uiQueryParams,
   ({ selected_alert: selectedAlert }) => selectedAlert !== undefined
@@ -96,20 +169,11 @@ export const hasSelectedAlert: (state: AlertListState) => boolean = createSelect
 /**
  * Determine if the alert event is most likely compatible with LegacyEndpointEvent.
  */
-function isAlertEventLegacyEndpointEvent(event: { endgame?: {} }): event is LegacyEndpointEvent {
-  return event.endgame !== undefined && 'unique_pid' in event.endgame;
-}
-
-export const selectedEvent: (
+export const selectedAlertIsLegacyEndpointEvent: (
   state: AlertListState
-) => LegacyEndpointEvent | undefined = createSelector(
-  uiQueryParams,
-  alertListData,
-  ({ selected_alert: selectedAlert }, alertList) => {
-    const found = alertList.find(alert => alert.event.id === selectedAlert);
-    if (!found) {
-      return found;
-    }
-    return isAlertEventLegacyEndpointEvent(found) ? found : undefined;
+) => boolean = createSelector(selectedAlertDetailsData, function(event) {
+  if (event === undefined) {
+    return false;
   }
-);
+  return 'endgame' in event;
+});

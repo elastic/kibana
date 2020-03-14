@@ -87,6 +87,8 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     async clearAdvancedSettings(propertyName: string) {
       await testSubjects.click(`advancedSetting-resetField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click(`advancedSetting-saveButton`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async setAdvancedSettingsSelect(propertyName: string, propertyValue: string) {
@@ -653,6 +655,10 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async clickConfirmChanges() {
       await testSubjects.click('importSavedObjectsConfirmBtn');
+    }
+
+    async clickEditFieldFormat() {
+      await testSubjects.click('editFieldFormat');
     }
 
     async associateIndexPattern(oldIndexPatternId: string, newIndexPatternTitle: string) {

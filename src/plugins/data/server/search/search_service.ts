@@ -32,7 +32,7 @@ import {
   TRegisterSearchStrategyProvider,
 } from './i_search_strategy';
 import { IRouteHandlerSearchContext } from './i_route_handler_search_context';
-import { esSearchService } from './es_search';
+import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
@@ -55,7 +55,7 @@ export class SearchService implements Plugin<ISearchSetup, void> {
 
     core.http.registerRouteHandlerContext<'search'>('search', context => {
       return createApi({
-        caller: context.core!.elasticsearch.dataClient.callAsCurrentUser,
+        caller: context.core.elasticsearch.dataClient.callAsCurrentUser,
         searchStrategies: this.searchStrategies,
       });
     });
@@ -71,15 +71,6 @@ export class SearchService implements Plugin<ISearchSetup, void> {
     const api: ISearchSetup = {
       registerSearchStrategyContext: this.contextContainer!.registerContext,
       registerSearchStrategyProvider,
-      __LEGACY: {
-        search: (caller, request, strategyName) => {
-          const searchAPI = createApi({
-            caller,
-            searchStrategies: this.searchStrategies,
-          });
-          return searchAPI.search(request, {}, strategyName);
-        },
-      },
     };
 
     api.registerSearchStrategyContext(this.initializerContext.opaqueId, 'core', () => core);
@@ -89,10 +80,11 @@ export class SearchService implements Plugin<ISearchSetup, void> {
       () => this.initializerContext.config.legacy.globalConfig$
     );
 
-    // ES search capabilities are written in a way that it could easily be a separate plugin,
-    // however these two plugins are tightly coupled due to the default search strategy using
-    // es search types.
-    esSearchService(this.initializerContext).setup(core, { search: api });
+    api.registerSearchStrategyProvider(
+      this.initializerContext.opaqueId,
+      ES_SEARCH_STRATEGY,
+      esSearchStrategyProvider
+    );
 
     return api;
   }

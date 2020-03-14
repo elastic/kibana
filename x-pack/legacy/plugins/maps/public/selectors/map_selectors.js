@@ -12,8 +12,14 @@ import { VectorLayer } from '../layers/vector_layer';
 import { HeatmapLayer } from '../layers/heatmap_layer';
 import { ALL_SOURCES } from '../layers/sources/all_sources';
 import { timefilter } from 'ui/timefilter';
-import { getInspectorAdapters } from '../reducers/non_serializable_instances';
-import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInspectorAdapters } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
+import {
+  copyPersistentState,
+  TRACKED_LAYER_DESCRIPTOR,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/reducers/util';
+import { InnerJoin } from '../layers/joins/inner_join';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
@@ -22,7 +28,14 @@ function createLayerInstance(layerDescriptor, inspectorAdapters) {
     case TileLayer.type:
       return new TileLayer({ layerDescriptor, source });
     case VectorLayer.type:
-      return new VectorLayer({ layerDescriptor, source });
+      const joins = [];
+      if (layerDescriptor.joins) {
+        layerDescriptor.joins.forEach(joinDescriptor => {
+          const join = new InnerJoin(joinDescriptor, source);
+          joins.push(join);
+        });
+      }
+      return new VectorLayer({ layerDescriptor, source, joins });
     case VectorTileLayer.type:
       return new VectorTileLayer({ layerDescriptor, source });
     case HeatmapLayer.type:

@@ -6,7 +6,7 @@
 
 import React, { Fragment, Component } from 'react';
 
-import { RENDER_AS } from './render_as';
+import { RENDER_AS } from '../../../../common/constants';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { indexPatternService } from '../../../kibana_services';
 import { ResolutionEditor } from './resolution_editor';

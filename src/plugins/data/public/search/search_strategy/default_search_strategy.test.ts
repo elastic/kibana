@@ -18,6 +18,7 @@
  */
 
 import { IUiSettingsClient } from '../../../../../core/public';
+import { ISearchStart } from '../types';
 import { SearchStrategySearchParams } from './types';
 import { defaultSearchStrategy } from './default_search_strategy';
 
@@ -62,7 +63,7 @@ describe('defaultSearchStrategy', function() {
           },
         ],
         esShardTimeout: 0,
-        searchService: {
+        searchService: ({
           search: newSearchMock,
           __LEGACY: {
             esClient: {
@@ -70,7 +71,7 @@ describe('defaultSearchStrategy', function() {
               msearch: msearchMock,
             },
           },
-        },
+        } as unknown) as jest.Mocked<ISearchStart>,
       };
 
       es = searchArgs.searchService.__LEGACY.esClient;
@@ -117,8 +118,7 @@ describe('defaultSearchStrategy', function() {
     test('should call new search service', () => {
       const config = getConfigStub();
       search({ ...searchArgs, config });
-      expect(searchMock).toHaveBeenCalled();
-      expect(newSearchMock).toHaveBeenCalledTimes(0);
+      expect(newSearchMock).toHaveBeenCalledTimes(1);
     });
 
     test('should properly abort with new search service', async () => {

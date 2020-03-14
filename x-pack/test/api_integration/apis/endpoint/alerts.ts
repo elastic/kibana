@@ -10,11 +10,12 @@ export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
+  const nextPrevPrefixQuery = "query=(language:kuery,query:'')";
   const nextPrevPrefixDateRange = "date_range=(from:'2018-01-10T00:00:00.000Z',to:now)";
   const nextPrevPrefixSort = 'sort=@timestamp';
   const nextPrevPrefixOrder = 'order=desc';
   const nextPrevPrefixPageSize = 'page_size=10';
-  const nextPrevPrefix = `${nextPrevPrefixDateRange}&${nextPrevPrefixSort}&${nextPrevPrefixOrder}&${nextPrevPrefixPageSize}`;
+  const nextPrevPrefix = `${nextPrevPrefixQuery}&${nextPrevPrefixDateRange}&${nextPrevPrefixSort}&${nextPrevPrefixOrder}&${nextPrevPrefixPageSize}`;
 
   describe('test alerts api', () => {
     describe('Tests for alerts API', () => {
@@ -70,7 +71,7 @@ export default function({ getService }: FtrProviderContext) {
           .get('/api/endpoint/alerts?page_size=0')
           .set('kbn-xsrf', 'xxx')
           .expect(400);
-        expect(body.message).to.contain('Value is [0] but it must be equal to or greater than [1]');
+        expect(body.message).to.contain('Value must be equal to or greater than [1]');
       });
 
       it('alerts api should return links to the next and previous pages using cursor-based pagination', async () => {
@@ -167,7 +168,9 @@ export default function({ getService }: FtrProviderContext) {
 
       it('alerts api should filter results of alert data using KQL', async () => {
         const { body } = await supertest
-          .get(`/api/endpoint/alerts?query=agent.id:c89dc040-2350-4d59-baea-9ff2e369136f`)
+          .get(
+            `/api/endpoint/alerts?query=(language%3Akuery%2Cquery%3A%27agent.id%20%3A%20"c89dc040-2350-4d59-baea-9ff2e369136f"%27)`
+          )
           .set('kbn-xsrf', 'xxx')
           .expect(200);
         expect(body.total).to.eql(72);

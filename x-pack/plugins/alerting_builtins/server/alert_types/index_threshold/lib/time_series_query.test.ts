@@ -9,28 +9,30 @@
 import { loggingServiceMock } from '../../../../../../../src/core/server/mocks';
 import { coreMock } from '../../../../../../../src/core/server/mocks';
 import { AlertingBuiltinsPlugin } from '../../../plugin';
-import { TimeSeriesQueryParameters, TimeSeriesResult } from './time_series_query';
+import { TimeSeriesQueryParameters, TimeSeriesResult, TimeSeriesQuery } from './time_series_query';
 
-type TimeSeriesQuery = (params: TimeSeriesQueryParameters) => Promise<TimeSeriesResult>;
+type TimeSeriesQueryFn = (query: TimeSeriesQueryParameters) => Promise<TimeSeriesResult>;
 
-const DefaultQueryParams = {
+const DefaultQueryParams: TimeSeriesQuery = {
   index: 'index-name',
   timeField: 'time-field',
   aggType: 'count',
   aggField: undefined,
-  window: '5m',
+  timeWindowSize: 5,
+  timeWindowUnit: 'm',
   dateStart: undefined,
   dateEnd: undefined,
   interval: undefined,
-  groupField: undefined,
-  groupLimit: undefined,
+  groupBy: 'all',
+  termField: undefined,
+  termSize: undefined,
 };
 
 describe('timeSeriesQuery', () => {
   let params: TimeSeriesQueryParameters;
   const mockCallCluster = jest.fn();
 
-  let timeSeriesQuery: TimeSeriesQuery;
+  let timeSeriesQueryFn: TimeSeriesQueryFn;
 
   beforeEach(async () => {
     // rather than use the function from an import, retrieve it from the plugin
@@ -38,26 +40,26 @@ describe('timeSeriesQuery', () => {
     const plugin = new AlertingBuiltinsPlugin(context);
     const coreStart = coreMock.createStart();
     const service = await plugin.start(coreStart);
-    timeSeriesQuery = service.indexThreshold.timeSeriesQuery;
+    timeSeriesQueryFn = service.indexThreshold.timeSeriesQuery;
 
     mockCallCluster.mockReset();
     params = {
       logger: loggingServiceMock.create().get(),
       callCluster: mockCallCluster,
-      query: { ...DefaultQueryParams },
+      query: DefaultQueryParams,
     };
   });
 
   it('fails as expected when the callCluster call fails', async () => {
     mockCallCluster.mockRejectedValue(new Error('woopsie'));
-    expect(timeSeriesQuery(params)).rejects.toThrowErrorMatchingInlineSnapshot(
+    expect(timeSeriesQueryFn(params)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"error running search"`
     );
   });
 
   it('fails as expected when the query params are invalid', async () => {
     params.query = { ...params.query, dateStart: 'x' };
-    expect(timeSeriesQuery(params)).rejects.toThrowErrorMatchingInlineSnapshot(
+    expect(timeSeriesQueryFn(params)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"invalid date format for dateStart: \\"x\\""`
     );
   });

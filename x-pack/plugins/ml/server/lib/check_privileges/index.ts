@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { privilegesProvider } from './check_privileges';
+export { privilegesProvider, MlCapabilities } from './check_privileges';

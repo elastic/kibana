@@ -33,7 +33,7 @@ import {
   getUseField,
   UseField,
   useForm,
-} from '../../../../shared_imports';
+} from '../../../../../shared_imports';
 import { schema } from './schema';
 import * as i18n from './translations';
 
@@ -238,7 +238,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             responsive={false}
           >
             <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
+              <EuiButton fill onClick={onSubmit} isDisabled={isLoading} data-test-subj="continue">
                 {RuleI18n.CONTINUE}
               </EuiButton>
             </EuiFlexItem>

@@ -274,7 +274,7 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                             <EuiFlexItem grow={false}>
                               <EuiButton
                                 href={getEditRuleUrl(ruleId ?? '')}
-                                iconType="visControls"
+                                iconType="controlsHorizontal"
                                 isDisabled={(userHasNoPermissions || rule?.immutable) ?? true}
                               >
                                 {ruleI18n.EDIT_RULE_SETTINGS}
@@ -309,7 +309,7 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                             </StepPanel>
                           </EuiFlexItem>
 
-                          <EuiFlexItem component="section" grow={2}>
+                          <EuiFlexItem data-test-subj="aboutRule" component="section" grow={2}>
                             <StepPanel loading={isLoading} title={ruleI18n.ABOUT}>
                               {aboutRuleData != null && (
                                 <StepAboutRule
@@ -322,7 +322,7 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                             </StepPanel>
                           </EuiFlexItem>
 
-                          <EuiFlexItem component="section" grow={1}>
+                          <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
                             <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
                               {scheduleRuleData != null && (
                                 <StepScheduleRule

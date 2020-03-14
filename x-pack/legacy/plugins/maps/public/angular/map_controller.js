@@ -17,7 +17,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
-import { createMapStore } from '../reducers/store';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createMapStore } from '../../../../../plugins/maps/public/reducers/store';
 import { GisMap } from '../connected_components/gis_map';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import {
@@ -28,7 +29,11 @@ import {
   setQuery,
   clearTransientLayerStateAndCloseFlyout,
 } from '../actions/map_actions';
-import { DEFAULT_IS_LAYER_TOC_OPEN, FLYOUT_STATE } from '../reducers/ui';
+import {
+  DEFAULT_IS_LAYER_TOC_OPEN,
+  FLYOUT_STATE,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/reducers/ui';
 import {
   enableFullScreen,
   updateFlyout,
@@ -37,13 +42,15 @@ import {
   setOpenTOCDetails,
 } from '../actions/ui_actions';
 import { getIsFullScreen } from '../selectors/ui_selectors';
-import { copyPersistentState } from '../reducers/util';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { copyPersistentState } from '../../../../../plugins/maps/public/reducers/util';
 import {
   getQueryableUniqueIndexPatternIds,
   hasDirtyState,
   getLayerListRaw,
 } from '../selectors/map_selectors';
-import { getInspectorAdapters } from '../reducers/non_serializable_instances';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInspectorAdapters } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import { docTitle } from 'ui/doc_title';
 import { indexPatternService, getInspector } from '../kibana_services';
 import { toastNotifications } from 'ui/notify';
@@ -595,6 +602,7 @@ app.controller(
                     title={savedMap.title}
                     showCopyOnSave={savedMap.id ? true : false}
                     objectType={MAP_SAVED_OBJECT_TYPE}
+                    showDescription={false}
                   />
                 );
                 showSaveModal(saveModal, npStart.core.i18n.Context);
