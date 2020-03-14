@@ -27,7 +27,6 @@ export const getAnomalies = async (
 
   return callCluster('search', {
     index: '.ml-anomalies-*',
-    rest_total_hits_as_int: true,
     size: params.maxRecords || 100,
     body: {
       query: {
