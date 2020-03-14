@@ -12,7 +12,7 @@ export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   describe('classification cloning', function() {
-    this.tags(['smoke', 'dima']);
+    this.tags(['smoke']);
 
     const testDataList: Array<{
       suiteTitle: string;
@@ -65,11 +65,15 @@ export default function({ getService }: FtrProviderContext) {
 
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function() {
+        const cloneJobId = `clone_${testData.job.id}`;
+        const cloneDestIndex = `clone_${testData.job!.dest!.index}`;
+
         before(async () => {
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToDataFrameAnalytics();
           await ml.dataFrameAnalyticsTable.waitForAnalyticsToLoad();
           await ml.dataFrameAnalyticsTable.filterWithSearchString(testData.job.id as string);
+          await ml.dataFrameAnalyticsTable.cloneJob(testData.job.id as string);
         });
 
         after(async () => {
@@ -77,9 +81,49 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('should open the flyout with a proper header', async () => {
-          await ml.dataFrameAnalyticsTable.cloneJob(testData.job.id as string);
           expect(await ml.dataFrameAnalyticsCreation.getHeaderText()).to.be(
-            'Clone job from bm_classification_job'
+            `Clone job from ${testData.job.id}`
+          );
+        });
+
+        it('should have correct init form values', async () => {
+          await ml.dataFrameAnalyticsCreation.assertInitialCloneJobForm(
+            testData.job as DataFrameAnalyticsConfig
+          );
+        });
+
+        it('should have disabled Create button on open', async () => {
+          expect(await ml.dataFrameAnalyticsCreation.isCreateButtonDisabled()).to.be(true);
+        });
+
+        it('should enable Create button on a valid form input', async () => {
+          await ml.dataFrameAnalyticsCreation.setJobId(cloneJobId);
+          await ml.dataFrameAnalyticsCreation.setDestIndex(cloneDestIndex);
+          expect(await ml.dataFrameAnalyticsCreation.isCreateButtonDisabled()).to.be(false);
+        });
+
+        it('should create a clone job', async () => {
+          await ml.dataFrameAnalyticsCreation.createAnalyticsJob();
+        });
+
+        it('should start the clone analytics job', async () => {
+          await ml.dataFrameAnalyticsCreation.assertStartButtonExists();
+          await ml.dataFrameAnalyticsCreation.startAnalyticsJob();
+        });
+
+        it('should close the create job flyout', async () => {
+          await ml.dataFrameAnalyticsCreation.assertCloseButtonExists();
+          await ml.dataFrameAnalyticsCreation.closeCreateAnalyticsJobFlyout();
+        });
+
+        it('displays the created job in the analytics table', async () => {
+          await ml.dataFrameAnalyticsTable.refreshAnalyticsTable();
+          await ml.dataFrameAnalyticsTable.filterWithSearchString(cloneJobId);
+          const rows = await ml.dataFrameAnalyticsTable.parseAnalyticsTable();
+          const filteredRows = rows.filter(row => row.id === cloneJobId);
+          expect(filteredRows).to.have.length(
+            1,
+            `Filtered analytics table should have 1 row for job id '${cloneJobId}' (got matching items '${filteredRows}')`
           );
         });
       });
