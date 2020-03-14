@@ -25,7 +25,7 @@ export const ExplorerNoJobsFound = () => (
       <EuiButton color="primary" fill href="ml#/jobs">
         <FormattedMessage
           id="xpack.ml.explorer.createNewJobLinkText"
-          defaultMessage="Create new job"
+          defaultMessage="Create job"
         />
       </EuiButton>
     }
