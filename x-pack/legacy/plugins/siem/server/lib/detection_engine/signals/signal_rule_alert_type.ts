@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, ObjectType } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
@@ -22,7 +22,6 @@ import { SignalRuleAlertTypeDefinition } from './types';
 import { getGapBetweenRuns } from './utils';
 import { ruleStatusSavedObjectType } from '../rules/saved_object_mappings';
 import { IRuleSavedAttributesSavedObjectAttributes } from '../rules/types';
-import { hasListsFeature } from '../feature_flags';
 
 interface AlertAttributes {
   enabled: boolean;
@@ -43,15 +42,6 @@ export const signalRulesAlertType = ({
   logger: Logger;
   version: string;
 }): SignalRuleAlertTypeDefinition => {
-  // TODO: Remove this once we support lists
-  const lists: ObjectType<{}> | {} = hasListsFeature()
-    ? {
-        lists: schema.nullable(
-          schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true })))
-        ),
-      }
-    : {};
-
   return {
     id: SIGNALS_ID,
     name: 'SIEM Signals',
@@ -89,7 +79,7 @@ export const signalRulesAlertType = ({
         type: schema.string(),
         references: schema.arrayOf(schema.string(), { defaultValue: [] }),
         version: schema.number({ defaultValue: 1 }),
-        ...lists,
+        lists: schema.maybe(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
       }),
     },
     // fun fact: previousStartedAt is not actually a Date but a String of a date

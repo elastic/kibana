@@ -8,6 +8,7 @@ import path from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
+import { listsEnvFeatureFlagName } from '../../../legacy/plugins/siem/server/lib/detection_engine/feature_flags';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -33,7 +34,7 @@ const enabledActionTypes = [
 
 // Temporary feature flag for the lists feature
 // TODO: Remove this once lists land in a Kibana version
-process.env.ELASTIC_XPACK_SIEM_LISTS_FEATURE = 'true';
+process.env[listsEnvFeatureFlagName] = 'true';
 
 // eslint-disable-next-line import/no-default-export
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {

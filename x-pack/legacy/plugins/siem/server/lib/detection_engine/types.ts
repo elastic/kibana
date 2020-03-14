@@ -56,7 +56,7 @@ export interface RuleAlertParams {
   type: 'query' | 'saved_query';
   version: number;
   throttle?: string;
-  lists: ListsDefaultArraySchema;
+  lists: ListsDefaultArraySchema | null | undefined;
 }
 
 export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval' | 'tags'>;

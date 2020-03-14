@@ -28,6 +28,7 @@ import {
   createImportErrorObject,
   OutputError,
 } from '../utils';
+import { hasListsFeature } from '../../feature_flags';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -139,7 +140,8 @@ export const transformAlertToRule = (
     last_success_at: ruleStatus?.attributes.lastSuccessAt,
     last_failure_message: ruleStatus?.attributes.lastFailureMessage,
     last_success_message: ruleStatus?.attributes.lastSuccessMessage,
-    lists: alert.params.lists,
+    // TODO: Remove this once we have a stable lists for the correct version
+    lists: hasListsFeature() ? alert.params.lists : null,
   });
 };
 
