@@ -20,3 +20,4 @@
 export * from './trigger';
 export * from './trigger_contract';
 export * from './trigger_internal';
+export * from './select_range_trigger';

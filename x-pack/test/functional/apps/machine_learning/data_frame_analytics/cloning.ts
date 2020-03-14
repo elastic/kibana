@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { DataFrameAnalyticsConfig } from '../../../../../legacy/plugins/ml/public/application/data_frame_analytics/common';
+import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -76,7 +76,7 @@ export default function({ getService }: FtrProviderContext) {
           await ml.api.deleteIndices(testData.job.dest!.index);
         });
 
-        it('should opens the flyout with a proper header', async () => {
+        it('should open the flyout with a proper header', async () => {
           await ml.dataFrameAnalyticsTable.cloneJob(testData.job.id as string);
           expect(await ml.dataFrameAnalyticsCreation.getHeaderText()).to.be(
             'Clone job from bm_classification_job'
