@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { findIllegalCharactersInIndexName } from '../../../../legacy_imports';
+import { findIllegalCharactersInIndexName } from '../../../../shared_imports';
 
 export function validateRollupIndex(rollupIndex, indexPattern) {
   if (!rollupIndex || !rollupIndex.trim()) {

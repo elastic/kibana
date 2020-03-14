@@ -17,25 +17,11 @@
  * under the License.
  */
 
-import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from '../constants';
+import { indexPatterns } from '../../../data/public';
 
-// Names beginning with periods are reserved for system indices.
-export function indexNameBeginsWithPeriod(indexName = '') {
-  return indexName[0] === '.';
-}
+export const INDEX_ILLEGAL_CHARACTERS_VISIBLE = [...indexPatterns.ILLEGAL_CHARACTERS_VISIBLE, '*'];
 
-export function findIllegalCharactersInIndexName(indexName) {
-  const illegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.reduce((chars, char) => {
-    if (indexName.includes(char)) {
-      chars.push(char);
-    }
-
-    return chars;
-  }, []);
-
-  return illegalCharacters;
-}
-
-export function indexNameContainsSpaces(indexName) {
-  return indexName.includes(' ');
-}
+// Insert the comma into the middle, so it doesn't look as if it has grammatical meaning when
+// these characters are rendered in the UI.
+const insertionIndex = Math.floor(indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.length / 2);
+INDEX_ILLEGAL_CHARACTERS_VISIBLE.splice(insertionIndex, 0, ',');

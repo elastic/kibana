@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 import { fatalError } from 'ui/notify';
 
 import {
@@ -30,6 +29,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../../../src/plugins/es_ui_shared/indices';
 import { indexNameValidator, leaderIndexValidator } from '../../services/input_validation';
 import routing from '../../services/routing';
 import { loadIndices } from '../../services/api';

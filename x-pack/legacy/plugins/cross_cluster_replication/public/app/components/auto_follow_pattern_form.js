@@ -29,7 +29,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
+import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../../src/plugins/es_ui_shared/indices';
+import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 
 import routing from '../services/routing';
 import { extractQueryParams } from '../services/query_params';
@@ -44,7 +45,6 @@ import {
 } from '../services/auto_follow_pattern_validators';
 
 import { AutoFollowPatternRequestFlyout } from './auto_follow_pattern_request_flyout';
-import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 
 const indexPatternIllegalCharacters = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 const indexNameIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
