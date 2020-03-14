@@ -62,7 +62,7 @@ export function ParametersTab({ contextSetup, onContextChange }: Props) {
       >
         <EuiPanel paddingSize="s">
           <CodeEditor
-            languageId="javascript"
+            languageId="json"
             height={600}
             value={contextSetup.params}
             onChange={(value: string) => onContextChange({ contextSetup: { params: value } })}
