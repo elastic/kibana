@@ -18,12 +18,28 @@
  */
 
 import { template, escape, keys } from 'lodash';
-// @ts-ignore
-import { noWhiteSpace } from '../../../../../legacy/core_plugins/kibana/common/utils/no_white_space';
 import { shortenDottedString } from '../../utils';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+
+/**
+ * Remove all of the whitespace between html tags
+ * so that inline elements don't have extra spaces.
+ *
+ * If you have inline elements (span, a, em, etc.) and any
+ * amount of whitespace around them in your markup, then the
+ * browser will push them apart. This is ugly in certain
+ * scenarios and is only fixed by removing the whitespace
+ * from the html in the first place (or ugly css hacks).
+ *
+ * @param  {string} html - the html to modify
+ * @return {string} - modified html
+ */
+function noWhiteSpace(html: string) {
+  const TAGS_WITH_WS = />\s+</g;
+  return html.replace(TAGS_WITH_WS, '><');
+}
 
 const templateHtml = `
   <dl class="source truncate-by-height">
