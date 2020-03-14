@@ -15,20 +15,36 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { Response, ContextSetup, Context, ContextChangeHandler } from '../../common/types';
+import { Response } from '../../common/types';
 import { OutputTab } from './output_tab';
 import { ParametersTab } from './parameters_tab';
 import { ContextTab } from './context_tab';
 
 interface Props {
-  context: Context;
-  contextSetup: ContextSetup;
   isLoading: boolean;
-  onContextChange: ContextChangeHandler;
   response?: Response;
+  context: string;
+  parameters: string;
+  index: string;
+  document: string;
+  onContextChange: (change: string) => void;
+  onParametersChange: (change: string) => void;
+  onIndexChange: (change: string) => void;
+  onDocumentChange: (change: string) => void;
 }
 
-export function OutputPane({ response, context, contextSetup, onContextChange, isLoading }: Props) {
+export function OutputPane({
+  isLoading,
+  response,
+  context,
+  parameters,
+  index,
+  document,
+  onContextChange,
+  onParametersChange,
+  onIndexChange,
+  onDocumentChange,
+}: Props) {
   const outputTabLabel = (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -67,7 +83,7 @@ export function OutputPane({ response, context, contextSetup, onContextChange, i
               defaultMessage: 'Parameters',
             }),
             content: (
-              <ParametersTab contextSetup={contextSetup} onContextChange={onContextChange} />
+              <ParametersTab parameters={parameters} onParametersChange={onParametersChange} />
             ),
           },
           {
@@ -78,8 +94,11 @@ export function OutputPane({ response, context, contextSetup, onContextChange, i
             content: (
               <ContextTab
                 context={context}
-                contextSetup={contextSetup}
+                index={index}
+                document={document}
                 onContextChange={onContextChange}
+                onIndexChange={onIndexChange}
+                onDocumentChange={onDocumentChange}
               />
             ),
           },

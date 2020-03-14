@@ -21,15 +21,24 @@ import { i18n } from '@kbn/i18n';
 
 import { CodeEditor } from '../../../../../../../src/plugins/kibana_react/public';
 import { painlessContextOptions } from '../../common/constants';
-import { ContextChangeHandler, ContextSetup } from '../../common/types';
 
 interface Props {
-  context: string;
-  contextSetup: ContextSetup;
-  onContextChange: ContextChangeHandler;
+  context: any;
+  index: string;
+  document: string;
+  onContextChange: (change: any) => void;
+  onIndexChange: (change: string) => void;
+  onDocumentChange: (change: string) => void;
 }
 
-export const ContextTab = ({ context, contextSetup, onContextChange }: Props) => (
+export const ContextTab = ({
+  context,
+  index,
+  document,
+  onContextChange,
+  onIndexChange,
+  onDocumentChange,
+}: Props) => (
   <>
     <EuiSpacer size="m" />
     <EuiFormRow
@@ -65,7 +74,7 @@ export const ContextTab = ({ context, contextSetup, onContextChange }: Props) =>
       <EuiSuperSelect
         options={painlessContextOptions}
         valueOfSelected={context}
-        onChange={(value: any) => onContextChange({ context: value })}
+        onChange={onContextChange}
         itemLayoutAlign="top"
         hasDividers
         fullWidth
@@ -88,15 +97,7 @@ export const ContextTab = ({ context, contextSetup, onContextChange }: Props) =>
         }
         fullWidth
       >
-        <EuiFieldText
-          fullWidth
-          value={contextSetup.index || ''}
-          onChange={e => {
-            onContextChange({
-              contextSetup: Object.assign({}, contextSetup, { index: e.target.value }),
-            });
-          }}
-        />
+        <EuiFieldText fullWidth value={index || ''} onChange={e => onIndexChange(e.target.value)} />
       </EuiFormRow>
     )}
     {['filter', 'score'].indexOf(context) !== -1 && (
@@ -122,11 +123,8 @@ export const ContextTab = ({ context, contextSetup, onContextChange }: Props) =>
           <CodeEditor
             languageId="json"
             height={400}
-            value={contextSetup.document || ''}
-            onChange={(value: string) => {
-              const newContextSetup = Object.assign({}, contextSetup, { document: value });
-              onContextChange({ contextSetup: newContextSetup });
-            }}
+            value={document}
+            onChange={onDocumentChange}
             options={{
               fontSize: 12,
               minimap: {

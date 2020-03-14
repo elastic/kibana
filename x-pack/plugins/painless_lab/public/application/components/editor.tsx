@@ -8,10 +8,10 @@ import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   code: string;
-  setCode: (code: string) => void;
+  onChange: (code: string) => void;
 }
 
-export function Editor({ code, setCode }: Props) {
+export function Editor({ code, onChange }: Props) {
   return (
     <CodeEditor
       languageId="painless"
@@ -19,7 +19,7 @@ export function Editor({ code, setCode }: Props) {
       width="99%"
       height="100%"
       value={code}
-      onChange={setCode}
+      onChange={onChange}
       options={{
         fontSize: 12,
         minimap: {

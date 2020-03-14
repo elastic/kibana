@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Response, Request, ExecutionError, JsonObject } from '../common/types';
+
+import { RequestPayloadConfig, Response, ExecutionError } from '../common/types';
 
 export function parseJSON(text: string) {
   try {
@@ -13,51 +14,35 @@ export function parseJSON(text: string) {
   }
 }
 
-export function buildRequestPayload(
-  code: string,
-  context: string,
-  contextSetup: Record<string, string>
-) {
-  const request: Request = {
-    script: {
-      source: code,
-    },
-  };
-  if (contextSetup.params) {
-    request.script.params = parseJSON(contextSetup?.params);
-  }
-  if (context === 'filter' || context === 'score') {
-    request.context = context;
-    request.context_setup = {
-      index: contextSetup.index,
-      document: parseJSON(contextSetup.document),
-    };
-    return request;
-  }
-
-  return request;
-}
-
 /**
- * Retrieves a value from the browsers local storage, provides a default
- * if none is given. With the parse flag you can parse textual JSON to an object
+ * Values should be preserved as strings so that floating point precision,
+ * e.g. 1.0, is preserved instead of being coerced to an integer, e.g. 1.
  */
-export function getFromLocalStorage(
-  key: string,
-  defaultValue: string | JsonObject = '',
-  parse = false
-) {
-  const value = localStorage.getItem(key);
-  if (value && parse) {
-    try {
-      return JSON.parse(value);
-    } catch (e) {
-      return defaultValue;
-    }
-  } else if (value) {
-    return value;
+export function buildRequestPayload({
+  code,
+  context,
+  parameters,
+  index,
+  document,
+}: RequestPayloadConfig): string {
+  const isAdvancedContext = context === 'filter' || context === 'score';
+  const requestPayload = `{
+  "script": {
+    "source": "${code}",
+    ${parameters ? `"params": ${parameters}` : ``}
+  }${
+    isAdvancedContext
+      ? `,
+  "context": ${context},
+  "context_setup": {
+    "index": ${index},
+    "document": ${document}
+  }`
+      : ``
   }
-  return defaultValue;
+}`;
+
+  return requestPayload;
 }
 
 /**
