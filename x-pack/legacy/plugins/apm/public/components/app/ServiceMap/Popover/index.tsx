@@ -85,6 +85,14 @@ export function Popover({ focusedServiceName }: PopoverProps) {
     }
   }, [popoverRef, x, y]);
 
+  const centerSelectedNode = useCallback(() => {
+    if (cy) {
+      cy.center(cy.getElementById(selectedNodeServiceName));
+    }
+  }, [cy, selectedNodeServiceName]);
+
+  const isAlreadyFocused = focusedServiceName === selectedNodeServiceName;
+
   return (
     <EuiPopover
       anchorPosition={'upCenter'}
@@ -97,10 +105,9 @@ export function Popover({ focusedServiceName }: PopoverProps) {
       <Contents
         isService={isService}
         label={label}
-        onFocusClick={deselect}
+        onFocusClick={isAlreadyFocused ? centerSelectedNode : deselect}
         selectedNodeData={selectedNodeData}
         selectedNodeServiceName={selectedNodeServiceName}
-        focusedServiceName={focusedServiceName}
       />
     </EuiPopover>
   );

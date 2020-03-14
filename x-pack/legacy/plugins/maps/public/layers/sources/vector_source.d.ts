@@ -27,7 +27,7 @@ export interface IVectorSource extends ISource {
   getFieldByName(fieldName: string): IField;
 }
 
-export class AbstractVectorSource extends AbstractSource {
+export class AbstractVectorSource extends AbstractSource implements IVectorSource {
   getGeoJsonWithMeta(
     layerName: 'string',
     searchFilters: unknown[],
