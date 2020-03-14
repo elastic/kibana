@@ -78,6 +78,10 @@ export type OnOpenTimeline = ({
   timelineId: string;
 }) => void;
 
+export type OnOpenDeleteTimelineModal = (selectedItem: OpenTimelineResult) => void;
+export type OnCloseDeleteTimelineModal = () => void;
+export type DisableExportTimelineDownloader = () => void;
+export type EnableExportTimelineDownloader = (selectedItem: OpenTimelineResult) => void;
 /** Invoked when the user presses enters to submit the text in the search input */
 export type OnQueryChange = (query: EuiSearchBarQuery) => void;
 

@@ -17,6 +17,8 @@ import {
   OnTableChange,
   OnToggleShowNotes,
   OpenTimelineResult,
+  EnableExportTimelineDownloader,
+  OnOpenDeleteTimelineModal,
 } from '../types';
 import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
@@ -50,15 +52,21 @@ const getExtendedColumnsIfEnabled = (showExtendedColumns: boolean) =>
 export const getTimelinesTableColumns = ({
   actionTimelineToShow,
   deleteTimelines,
+  enableExportTimelineDownloader,
   itemIdToExpandedNotesRowMap,
+  onOpenDeleteTimelineModal,
   onOpenTimeline,
+  onSelectionChange,
   onToggleShowNotes,
   showExtendedColumns,
 }: {
   actionTimelineToShow: ActionTimelineToShow[];
   deleteTimelines?: DeleteTimelines;
+  enableExportTimelineDownloader: EnableExportTimelineDownloader;
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
+  onOpenDeleteTimelineModal: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
+  onSelectionChange: OnSelectionChange;
   onToggleShowNotes: OnToggleShowNotes;
   showExtendedColumns: boolean;
 }) => {
@@ -71,9 +79,11 @@ export const getTimelinesTableColumns = ({
     ...getExtendedColumnsIfEnabled(showExtendedColumns),
     ...getIconHeaderColumns(),
     ...getActionsColumns({
-      deleteTimelines,
-      onOpenTimeline,
       actionTimelineToShow,
+      deleteTimelines,
+      enableExportTimelineDownloader,
+      onOpenDeleteTimelineModal,
+      onOpenTimeline,
     }),
   ];
 };
@@ -84,6 +94,8 @@ export interface TimelinesTableProps {
   defaultPageSize: number;
   loading: boolean;
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
+  enableExportTimelineDownloader: EnableExportTimelineDownloader;
+  onOpenDeleteTimelineModal: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
   onSelectionChange: OnSelectionChange;
   onTableChange: OnTableChange;
@@ -110,6 +122,8 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     defaultPageSize,
     loading: isLoading,
     itemIdToExpandedNotesRowMap,
+    enableExportTimelineDownloader,
+    onOpenDeleteTimelineModal,
     onOpenTimeline,
     onSelectionChange,
     onTableChange,
@@ -155,7 +169,10 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
           actionTimelineToShow,
           deleteTimelines,
           itemIdToExpandedNotesRowMap,
+          enableExportTimelineDownloader,
+          onOpenDeleteTimelineModal,
           onOpenTimeline,
+          onSelectionChange,
           onToggleShowNotes,
           showExtendedColumns,
         })}

@@ -6,28 +6,31 @@
 
 /* eslint-disable react/display-name */
 
-import React from 'react';
-
 import {
   ActionTimelineToShow,
   DeleteTimelines,
+  EnableExportTimelineDownloader,
   OnOpenTimeline,
   OpenTimelineResult,
+  OnOpenDeleteTimelineModal,
   TimelineActionsOverflowColumns,
 } from '../types';
 import * as i18n from '../translations';
-import { DeleteTimelineModalButton } from '../delete_timeline_modal';
-import { TimelineDownloader } from '../export_timeline/export_timeline';
+
 /**
  * Returns the action columns (e.g. delete, open duplicate timeline)
  */
 export const getActionsColumns = ({
   actionTimelineToShow,
-  onOpenTimeline,
   deleteTimelines,
+  enableExportTimelineDownloader,
+  onOpenDeleteTimelineModal,
+  onOpenTimeline,
 }: {
   actionTimelineToShow: ActionTimelineToShow[];
   deleteTimelines?: DeleteTimelines;
+  enableExportTimelineDownloader: EnableExportTimelineDownloader;
+  onOpenDeleteTimelineModal: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
 }): [TimelineActionsOverflowColumns] => {
   const openAsDuplicateColumn = {
@@ -47,21 +50,20 @@ export const getActionsColumns = ({
   const exportTimelineAction = {
     name: i18n.EXPORT_SELECTED,
     icon: 'exportAction',
-    render: (selectedTimeline: OpenTimelineResult) => (
-      <TimelineDownloader selectedTimelines={[selectedTimeline]} />
-    ),
+    onClick: (selectedTimeline: OpenTimelineResult) => {
+      enableExportTimelineDownloader(selectedTimeline);
+    },
+    enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
     description: i18n.EXPORT_SELECTED,
   };
 
   const deleteTimelineColumn = {
     name: i18n.DELETE_SELECTED,
-    render: ({ savedObjectId, title }: OpenTimelineResult) => (
-      <DeleteTimelineModalButton
-        deleteTimelines={deleteTimelines}
-        savedObjectIds={savedObjectId != null ? [savedObjectId] : undefined}
-        title={title}
-      />
-    ),
+    icon: 'trash',
+    onClick: (selectedTimeline: OpenTimelineResult) => {
+      onOpenDeleteTimelineModal(selectedTimeline);
+    },
+    enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
     description: i18n.DELETE_SELECTED,
   };
 

@@ -6,31 +6,37 @@
 
 import React from 'react';
 import uuid from 'uuid';
-import { OpenTimelineResult } from '../types';
-import { GenericDownloader } from '../../generic_downloader';
+import { OpenTimelineResult, DisableExportTimelineDownloader } from '../types';
+import { GenericDownloader, ExportSelectedData } from '../../generic_downloader';
 import * as i18n from '../translations';
-import { ActionListIcon, TimelineCustomAction } from '../delete_timeline_modal';
-import { useExportTimeline } from '.';
 import { useStateToaster } from '../../toasters';
 
 const ExportTimeline: React.FC<{
-  selectedTimelines: OpenTimelineResult[] | undefined;
+  isEnableDownloader: boolean;
   onDownloadComplete?: () => void;
-}> = ({ selectedTimelines, onDownloadComplete }) => {
-  const { enableDownloader, setEnableDownloader, exportedIds, getExportedData } = useExportTimeline(
-    selectedTimelines
-  );
+  selectedItems: OpenTimelineResult[] | undefined;
+  exportedIds: string;
+  getExportedData: ExportSelectedData;
+  disableExportTimelineDownloader: DisableExportTimelineDownloader;
+}> = ({
+  onDownloadComplete,
+  isEnableDownloader,
+  disableExportTimelineDownloader,
+  selectedItems,
+  exportedIds,
+  getExportedData,
+}) => {
   const [, dispatchToaster] = useStateToaster();
   return (
     <>
-      {selectedTimelines != null && exportedIds != null && enableDownloader && (
+      {selectedItems != null && exportedIds != null && isEnableDownloader && (
         <GenericDownloader
           data-test-subj="export-timeline-downloader"
           exportSelectedData={getExportedData}
           filename={`${i18n.EXPORT_FILENAME}.ndjson`}
           ids={exportedIds}
           onExportComplete={exportCount => {
-            setEnableDownloader(false);
+            disableExportTimelineDownloader();
             if (typeof onDownloadComplete === 'function') onDownloadComplete();
             dispatchToaster({
               type: 'addToaster',
@@ -44,20 +50,6 @@ const ExportTimeline: React.FC<{
           }}
         />
       )}
-      <TimelineCustomAction
-        aria-label={i18n.DELETE_SELECTED}
-        color="text"
-        disabled={selectedTimelines == null || selectedTimelines.length === 0}
-        onClick={() => {
-          setEnableDownloader(true);
-        }}
-        data-test-subj="export-timeline"
-      >
-        <>
-          <ActionListIcon size="m" type="exportAction" data-test-subj="export-timeline-icon" />
-          {i18n.EXPORT_SELECTED}
-        </>
-      </TimelineCustomAction>
     </>
   );
 };

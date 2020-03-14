@@ -12,8 +12,8 @@ import { ExportSelectedData } from '../../generic_downloader';
 import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
 
 export interface ExportTimeline {
-  enableDownloader: boolean;
-  setEnableDownloader: Dispatch<SetStateAction<boolean>>;
+  isEnableDownloader: boolean;
+  setIsEnableDownloader: Dispatch<SetStateAction<boolean>>;
   exportedIds:
     | Array<{
         timelineId: string | null | undefined;
@@ -25,10 +25,9 @@ export interface ExportTimeline {
 }
 
 export const useExportTimeline = (
-  selectedItems: OpenTimelineResult[] | undefined
+  selectedItems?: OpenTimelineResult | OpenTimelineResult[]
 ): ExportTimeline => {
-  const [enableDownloader, setEnableDownloader] = useState(false);
-
+  const [isEnableDownloader, setIsEnableDownloader] = useState(false);
   const exportSelectedTimeline: ExportSelectedData = useCallback(
     async ({
       excludeExportDetails = false,
@@ -54,8 +53,9 @@ export const useExportTimeline = (
   );
 
   const getExportedIds = useCallback(
-    (selectedTimelines: OpenTimelineResult[]) => {
-      return selectedTimelines.map(item => ({
+    (selectedTimelines: OpenTimelineResult | OpenTimelineResult[]) => {
+      const array = Array.isArray(selectedTimelines) ? selectedTimelines : [selectedTimelines];
+      return array.map(item => ({
         timelineId: item.savedObjectId,
         pinnedEventIds:
           item.pinnedEventIds != null ? keys(item.pinnedEventIds) : item.pinnedEventIds,
@@ -69,8 +69,8 @@ export const useExportTimeline = (
   );
 
   return {
-    enableDownloader,
-    setEnableDownloader,
+    isEnableDownloader,
+    setIsEnableDownloader,
     exportedIds: selectedItems != null ? getExportedIds(selectedItems) : undefined,
     getExportedData: exportSelectedTimeline,
   };
