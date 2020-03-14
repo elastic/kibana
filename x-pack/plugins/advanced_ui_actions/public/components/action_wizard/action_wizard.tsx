@@ -134,7 +134,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
           </EuiFlexItem>
           {showDeselect && (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" onClick={() => onDeselect()}>
+              <EuiButtonEmpty size="xs" onClick={() => onDeselect()}>
                 {txtChangeButton}
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -172,7 +172,7 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
   }
 
   return (
-    <EuiFlexGroup wrap>
+    <EuiFlexGroup gutterSize="xs" wrap>
       {[...actionFactories]
         .sort((f1, f2) => f1.order - f2.order)
         .map(actionFactory => (

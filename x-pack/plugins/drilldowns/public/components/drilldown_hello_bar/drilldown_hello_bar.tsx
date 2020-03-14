@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTextColor,
+  EuiText,
   EuiLink,
   EuiSpacer,
   EuiButtonEmpty,
@@ -35,7 +36,9 @@ export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({
       title={
         <EuiFlexGroup className="drdHelloBar__content">
           <EuiFlexItem grow={true}>
-            <EuiTextColor color="subdued">{txtHelpText}</EuiTextColor>
+            <EuiText size={'s'}>
+              <EuiTextColor color="subdued">{txtHelpText}</EuiTextColor>
+            </EuiText>
             {docsLink && (
               <>
                 <EuiSpacer size={'xs'} />
@@ -45,7 +48,7 @@ export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty size="xs" onClick={onHideClick}>
-              <EuiTextColor color="subdued">{txtHideHelpButtonLabel}</EuiTextColor>
+              {txtHideHelpButtonLabel}
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
