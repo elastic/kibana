@@ -17,7 +17,11 @@
  * under the License.
  */
 
-export * from './trigger';
-export * from './trigger_contract';
-export * from './trigger_internal';
-export * from './select_range_trigger';
+import { Trigger } from '.';
+
+export const SELECT_RANGE_TRIGGER = 'SELECT_RANGE_TRIGGER';
+export const selectRangeTrigger: Trigger<'SELECT_RANGE_TRIGGER'> = {
+  id: SELECT_RANGE_TRIGGER,
+  title: 'Select range',
+  description: 'Applies a range filter',
+};
