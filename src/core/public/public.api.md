@@ -337,6 +337,7 @@ export interface ChromeStart {
     getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
     getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
     getIsCollapsed$(): Observable<boolean>;
+    getIsNavDrawerLocked$(): Observable<boolean>;
     getIsVisible$(): Observable<boolean>;
     navControls: ChromeNavControls;
     navLinks: ChromeNavLinks;

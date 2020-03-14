@@ -57,6 +57,7 @@ core.chrome.setHelpExtension(elem => {
 |  [getBreadcrumbs$()](./kibana-plugin-core-public.chromestart.getbreadcrumbs_.md) | Get an observable of the current list of breadcrumbs |
 |  [getHelpExtension$()](./kibana-plugin-core-public.chromestart.gethelpextension_.md) | Get an observable of the current custom help conttent |
 |  [getIsCollapsed$()](./kibana-plugin-core-public.chromestart.getiscollapsed_.md) | Get an observable of the current collapsed state of the chrome. |
+|  [getIsNavDrawerLocked$()](./kibana-plugin-core-public.chromestart.getisnavdrawerlocked_.md) | Get an observable of the current locked state of the nav drawer. |
 |  [getIsVisible$()](./kibana-plugin-core-public.chromestart.getisvisible_.md) | Get an observable of the current visibility state of the chrome. |
 |  [removeApplicationClass(className)](./kibana-plugin-core-public.chromestart.removeapplicationclass.md) | Remove a className added with <code>addApplicationClass()</code>. If className is unknown it is ignored. |
 |  [setAppTitle(appTitle)](./kibana-plugin-core-public.chromestart.setapptitle.md) | Sets the current app's title |
