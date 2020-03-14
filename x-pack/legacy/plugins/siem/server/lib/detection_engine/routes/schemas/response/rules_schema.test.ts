@@ -8,7 +8,7 @@ import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import { exactCheck } from './exact_check';
-import { rulesSchema, RulesSchema } from './rules_schema';
+import { rulesSchema, RulesSchema, removeList } from './rules_schema';
 import { foldLeftRight, getBaseResponsePayload, getPaths } from './__mocks__/utils';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
 
@@ -204,5 +204,45 @@ describe('rules_schema', () => {
       'Invalid value "undefined" supplied to "timeline_title"',
     ]);
     expect(message.schema).toEqual({});
+  });
+
+  // TODO: Remove this test once the feature flag is deployed
+  test('it should remove lists when we need it to be removed because the feature is off but there exists a list in the data', () => {
+    const payload = getBaseResponsePayload();
+    const decoded = rulesSchema.decode(payload);
+    const listRemoved = removeList(decoded);
+    const message = pipe(listRemoved, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual({
+      id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
+      created_at: '2020-02-20T03:57:54.037Z',
+      updated_at: '2020-02-20T03:57:54.037Z',
+      created_by: 'elastic',
+      description: 'some description',
+      enabled: true,
+      false_positives: ['false positive 1', 'false positive 2'],
+      from: 'now-6m',
+      immutable: false,
+      name: 'Query with a rule id',
+      query: 'user.name: root or user.name: admin',
+      references: ['test 1', 'test 2'],
+      severity: 'high',
+      updated_by: 'elastic_kibana',
+      tags: [],
+      to: 'now',
+      type: 'query',
+      threat: [],
+      version: 1,
+      output_index: '.siem-signals-hassanabad-frank-default',
+      max_signals: 100,
+      risk_score: 55,
+      language: 'kuery',
+      rule_id: 'query-rule-id',
+      interval: '5m',
+      status: 'succeeded',
+      status_date: '2020-02-22T16:47:50.047Z',
+      last_success_at: '2020-02-22T16:47:50.047Z',
+      last_success_message: 'succeeded',
+    });
   });
 });

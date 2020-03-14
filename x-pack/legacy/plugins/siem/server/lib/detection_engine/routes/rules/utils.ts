@@ -140,7 +140,7 @@ export const transformAlertToRule = (
     last_success_at: ruleStatus?.attributes.lastSuccessAt,
     last_failure_message: ruleStatus?.attributes.lastFailureMessage,
     last_success_message: ruleStatus?.attributes.lastSuccessMessage,
-    // TODO: Remove this once we have a stable lists for the correct version
+    // TODO: Remove hasListsFeature() check once we have lists available for a release
     lists: hasListsFeature() ? alert.params.lists : null,
   });
 };

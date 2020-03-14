@@ -63,7 +63,32 @@ export const getBaseResponsePayload = (anchorDate: string = ANCHOR_DATE): RulesS
   language: 'kuery',
   rule_id: 'query-rule-id',
   interval: '5m',
-  lists: [],
+  lists: [
+    {
+      field: 'source.ip',
+      boolean_operator: 'and',
+      values: [
+        {
+          name: '127.0.0.1',
+          type: 'value',
+        },
+      ],
+    },
+    {
+      field: 'host.name',
+      boolean_operator: 'and not',
+      values: [
+        {
+          name: 'rock01',
+          type: 'value',
+        },
+        {
+          name: 'mothra',
+          type: 'value',
+        },
+      ],
+    },
+  ],
 });
 
 export const getRulesBulkPayload = (): RulesBulkSchema => [getBaseResponsePayload()];

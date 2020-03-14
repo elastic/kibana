@@ -170,10 +170,5 @@ export const removeList = (
 /**
  * This is the correct type you want to use for Rules that are outputted from the
  * REST interface. This has all base and all optional properties merged together.
- *
- * TODO: Once the lists feature is no longer a feature toggle you can use just this:
- * export type RulesSchema = t.TypeOf<typeof rulesSchema>
- *
- * For now, we force the type into this structure since it is dynamic
  */
 export type RulesSchema = t.TypeOf<typeof rulesSchema>;
