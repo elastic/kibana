@@ -9,7 +9,6 @@ import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
 import { ManageUserInfo } from './components/user_info';
 import { CreateRulePage } from './rules/create';
-import { CreateMLRulePage } from './rules/create_ml';
 import { DetectionEnginePage } from './detection_engine';
 import { EditRulePage } from './rules/edit';
 import { RuleDetailsPage } from './rules/details';
@@ -35,9 +34,6 @@ const DetectionEngineContainerComponent: React.FC<Props> = () => (
       </Route>
       <Route exact path={`${detectionEnginePath}/rules/create`}>
         <CreateRulePage />
-      </Route>
-      <Route exact path={`${detectionEnginePath}/rules/create_ml`}>
-        <CreateMLRulePage />
       </Route>
       <Route exact path={`${detectionEnginePath}/rules/id/:detailName`}>
         <RuleDetailsPage />
