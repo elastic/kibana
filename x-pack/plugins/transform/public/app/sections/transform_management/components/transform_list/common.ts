@@ -4,18 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface Clause {
-  type: string;
-  value: string;
-  match: string;
-}
-
-export interface Query {
-  ast: {
-    clauses: Clause[];
-  };
-  text: string;
-  syntax: any;
-}
+export { Query } from '@elastic/eui';
+export { Clause } from '@elastic/eui/src/components/search_bar/query/ast';
 
 export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;

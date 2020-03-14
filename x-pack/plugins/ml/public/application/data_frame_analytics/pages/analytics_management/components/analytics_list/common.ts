@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Query } from '@elastic/eui';
 import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
 
 export enum DATA_FRAME_TASK_STATE {
@@ -21,9 +20,8 @@ export enum DATA_FRAME_MODE {
   CONTINUOUS = 'continuous',
 }
 
-export type Clause = Parameters<typeof Query['isMust']>[0];
-
-export { Query };
+export { Query } from '@elastic/eui';
+export { Clause } from '@elastic/eui/src/components/search_bar/query/ast';
 
 interface ProgressSection {
   phase: string;
