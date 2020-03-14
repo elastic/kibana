@@ -167,6 +167,8 @@ Bootstrap Kibana and install all the dependencies
 yarn kbn bootstrap
 ```
 
+> Node.js native modules could be in use and node-gyp is the tool used to build them. There are tools you need to install per platform and python versions you need to be using. Please see https://github.com/nodejs/node-gyp#installation and follow the guide according your platform.
+
 (You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-pm.)
 
 Start elasticsearch from a nightly snapshot.
