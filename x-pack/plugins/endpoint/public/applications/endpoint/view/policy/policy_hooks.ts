@@ -5,8 +5,14 @@
  */
 
 import { useSelector } from 'react-redux';
-import { GlobalState, PolicyListState } from '../../types';
+import { GlobalState, PolicyListState, PolicyDetailsState } from '../../types';
 
 export function usePolicyListSelector<TSelected>(selector: (state: PolicyListState) => TSelected) {
   return useSelector((state: GlobalState) => selector(state.policyList));
+}
+
+export function usePolicyDetailsSelector<TSelected>(
+  selector: (state: PolicyDetailsState) => TSelected
+) {
+  return useSelector((state: GlobalState) => selector(state.policyDetails));
 }
