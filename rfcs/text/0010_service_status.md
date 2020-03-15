@@ -226,17 +226,28 @@ function getPluginStatus() {
   else if any core service is `unavailable`, return `unavailable`
   else if any core service is `degraded`, return `degraded`
 
-  if any required dep is `critical`, return `critical`
-  else if any required dep is `unavailable`, return `unavailable`
+  if any required dep is `unavailable`, return `unavailable`
   else if any required dep is `degraded`, return `degraded`
 
-  if any optional dep is `critical`, return `degraded`
-  else if any optional dep is `unavailable`, return `degraded`
+  if any optional dep is `unavailable`, return `degraded`
   else if any optional dep is `degraded`, return `degraded`
 
   return 'available'
 }
 ```
+
+This can be summarized by the following matrix:
+
+| core           | required       | optional       | inherited   |
+|----------------|----------------|----------------|-------------|
+| critical       | _any_          | _any_          | critical    |
+| unavailable    | <= unavailable | <= unavailable | unavailable |
+| degraded       | <= degraded    | <= degraded    | degraded    |
+| <= unavailable | unavailable    | <= unavailable | unavailable |
+| <= degraded    | degraded       | <= degraded    | degraded    |
+| <= degraded    | <= degraded    | unavailable    | degraded    |
+| <= degraded    | <= degraded    | degraded       | degraded    |
+| available      | available      | available      | available   |
 
 If a plugin calls the `StatusSetup#set` API, the inherited status is completely overridden. They status the plugin specifies is the source of truth. If a plugin wishes to "merge" its custom status with the inherited status calculated by Core, it may do so by using the `StatusSetup#inherited$` property in its calculated status.
 
