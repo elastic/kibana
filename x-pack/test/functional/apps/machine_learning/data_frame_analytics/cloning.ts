@@ -17,36 +17,44 @@ export default function({ getService }: FtrProviderContext) {
     const testDataList: Array<{
       suiteTitle: string;
       job: Partial<DataFrameAnalyticsConfig>;
-    }> = [
-      {
-        suiteTitle: 'classification job supported by the form',
-        job: {
-          id: 'bm_classification_job',
-          source: {
-            index: ['bank-marketing'],
-            query: {
-              match_all: {},
+    }> = (() => {
+      const timestamp = Date.now();
+
+      return [
+        {
+          suiteTitle: 'classification job supported by the form',
+          job: {
+            id: `bm_1_${timestamp}`,
+            description:
+              "Classification job based on 'bank-marketing' dataset with dependentVariable 'y' and trainingPercent '20'",
+            source: {
+              index: ['bank-marketing*'],
+              query: {
+                match_all: {},
+              },
             },
-          },
-          dest: {
-            index: 'dest_bank_1',
-            results_field: 'ml',
-          },
-          analysis: {
-            classification: {
-              dependent_variable: 'y',
-              training_percent: 2,
+            dest: {
+              get index(): string {
+                return `user-bm_1_${timestamp}`;
+              },
+              results_field: 'ml',
             },
+            analysis: {
+              classification: {
+                dependent_variable: 'y',
+                training_percent: 2,
+              },
+            },
+            analyzed_fields: {
+              includes: [],
+              excludes: [],
+            },
+            model_memory_limit: '350mb',
+            allow_lazy_start: false,
           },
-          analyzed_fields: {
-            includes: [],
-            excludes: [],
-          },
-          model_memory_limit: '350mb',
-          allow_lazy_start: false,
         },
-      },
-    ];
+      ];
+    })();
 
     before(async () => {
       await esArchiver.load('ml/bm_classification');
@@ -60,13 +68,17 @@ export default function({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      // Clean destination indices of the original jobs
+      for (const testData of testDataList) {
+        await ml.api.deleteIndices(testData.job.dest!.index);
+      }
       await esArchiver.unload('ml/bm_classification');
     });
 
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function() {
-        const cloneJobId = `clone_${testData.job.id}`;
-        const cloneDestIndex = `clone_${testData.job!.dest!.index}`;
+        const cloneJobId = `${testData.job.id}_clone`;
+        const cloneDestIndex = `${testData.job!.dest!.index}_clone`;
 
         before(async () => {
           await ml.navigation.navigateToMl();
@@ -77,7 +89,7 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         after(async () => {
-          await ml.api.deleteIndices(testData.job.dest!.index);
+          await ml.api.deleteIndices(cloneDestIndex);
         });
 
         it('should open the flyout with a proper header', async () => {
