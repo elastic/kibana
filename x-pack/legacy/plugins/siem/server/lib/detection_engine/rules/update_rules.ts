@@ -10,6 +10,7 @@ import { IRuleSavedAttributesSavedObjectAttributes, UpdateRuleParams } from './t
 import { addTags } from './add_tags';
 import { ruleStatusSavedObjectType } from './saved_object_mappings';
 import { calculateVersion } from './utils';
+import { hasListsFeature } from '../feature_flags';
 
 export const updateRules = async ({
   alertsClient,
@@ -44,6 +45,7 @@ export const updateRules = async ({
   version,
   throttle,
   note,
+  lists,
 }: UpdateRuleParams): Promise<PartialAlert | null> => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
@@ -78,6 +80,9 @@ export const updateRules = async ({
     note,
   });
 
+  // TODO: Remove this and use regular lists once the feature is stable for a release
+  const listsParam = hasListsFeature() ? { lists } : {};
+
   const update = await alertsClient.update({
     id: rule.id,
     data: {
@@ -110,6 +115,7 @@ export const updateRules = async ({
         references,
         note,
         version: calculatedVersion,
+        ...listsParam,
       },
     },
   });
