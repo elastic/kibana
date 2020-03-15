@@ -16,7 +16,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { TermClause, FieldClause } from '@elastic/eui/src/components/search_bar/query/ast';
 
 import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
@@ -29,6 +28,8 @@ import {
   DATA_FRAME_TASK_STATE,
   Query,
   Clause,
+  TermClause,
+  FieldClause,
 } from './common';
 import { getAnalyticsFactory } from '../../services/analytics_service';
 import { getColumns } from './columns';

@@ -128,6 +128,7 @@ exports[`CcrShard that it renders normally 1`] = `
     </EuiFlexGroup>
     <EuiHorizontalRule />
     <EuiAccordion
+      arrowDisplay="left"
       buttonContent={
         <EuiTitle>
           <h2>

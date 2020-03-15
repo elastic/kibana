@@ -224,7 +224,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 </span>
               </div>
             </th>
-            <th
+            <td
               class="euiTableHeaderCell"
               data-test-subj="tableHeaderCell_monitor_id_4"
               role="columnheader"
@@ -238,7 +238,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   class="euiTableCellContent__text"
                 />
               </div>
-            </th>
+            </td>
           </tr>
         </thead>
         <tbody>

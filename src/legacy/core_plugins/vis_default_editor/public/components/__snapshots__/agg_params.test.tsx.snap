@@ -42,6 +42,7 @@ exports[`DefaultEditorAggParams component should init with the default set of pa
     size="m"
   />
   <EuiAccordion
+    arrowDisplay="left"
     buttonContent="Advanced"
     data-test-subj="advancedParams-undefined"
     id="advancedAccordion"

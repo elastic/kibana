@@ -118,6 +118,7 @@ exports[`ValueAxisOptions component should init with the default set of props 1`
   />
   <EuiAccordion
     aria-label="Toggle custom extents"
+    arrowDisplay="left"
     buttonContent="Custom extents"
     buttonContentClassName="euiText euiText--small"
     className="visEditorSidebar__section visEditorSidebar__collapsible"

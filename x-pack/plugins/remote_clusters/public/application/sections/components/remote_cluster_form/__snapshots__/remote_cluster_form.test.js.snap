@@ -5,26 +5,21 @@ Array [
   <div
     class="euiForm"
   >
-    <fieldset
+    <div
       class="euiDescribedFormGroup euiDescribedFormGroup--fullWidth"
+      role="group"
     >
-      <legend
-        class="euiScreenReaderOnly"
-      />
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
         <div
           class="euiFlexItem"
         >
-          <span>
-            <h2
-              aria-hidden="true"
-              class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
-            >
-              Name
-            </h2>
-          </span>
+          <h2
+            class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+          >
+            Name
+          </h2>
           <div
             class="euiText euiText--small euiDescribedFormGroup__description"
           >
@@ -83,27 +78,22 @@ Array [
           </div>
         </div>
       </div>
-    </fieldset>
-    <fieldset
+    </div>
+    <div
       class="euiDescribedFormGroup euiDescribedFormGroup--fullWidth"
+      role="group"
     >
-      <legend
-        class="euiScreenReaderOnly"
-      />
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
         <div
           class="euiFlexItem"
         >
-          <span>
-            <h2
-              aria-hidden="true"
-              class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
-            >
-              Seed nodes for cluster discovery
-            </h2>
-          </span>
+          <h2
+            class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+          >
+            Seed nodes for cluster discovery
+          </h2>
           <div
             class="euiText euiText--small euiDescribedFormGroup__description"
           >
@@ -197,27 +187,22 @@ Array [
           </div>
         </div>
       </div>
-    </fieldset>
-    <fieldset
+    </div>
+    <div
       class="euiDescribedFormGroup euiDescribedFormGroup--fullWidth"
+      role="group"
     >
-      <legend
-        class="euiScreenReaderOnly"
-      />
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
         <div
           class="euiFlexItem"
         >
-          <span>
-            <h2
-              aria-hidden="true"
-              class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
-            >
-              Make remote cluster optional
-            </h2>
-          </span>
+          <h2
+            class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+          >
+            Make remote cluster optional
+          </h2>
           <div
             class="euiText euiText--small euiDescribedFormGroup__description"
           >
@@ -294,7 +279,7 @@ Array [
           </div>
         </div>
       </div>
-    </fieldset>
+    </div>
   </div>,
   <div
     class="euiSpacer euiSpacer--l"

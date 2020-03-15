@@ -22,7 +22,6 @@ import {
   EuiPopover,
   EuiTitle,
 } from '@elastic/eui';
-import { TermClause, FieldClause, Value } from '@elastic/eui/src/components/search_bar/query/ast';
 
 import { TransformId, TRANSFORM_STATE } from '../../../../../../common';
 
@@ -41,7 +40,7 @@ import { DeleteAction } from './action_delete';
 import { StartAction } from './action_start';
 import { StopAction } from './action_stop';
 
-import { ItemIdToExpandedRowMap, Clause } from './common';
+import { ItemIdToExpandedRowMap, Clause, TermClause, FieldClause, Value } from './common';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
 

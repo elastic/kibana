@@ -8,6 +8,7 @@ exports[`Storyshots components/FileUpload default 1`] = `
     className="euiFilePicker__wrap"
   >
     <input
+      aria-describedby="generated-id"
       className="euiFilePicker__input"
       id=""
       onChange={[Function]}
@@ -18,6 +19,7 @@ exports[`Storyshots components/FileUpload default 1`] = `
     />
     <div
       className="euiFilePicker__prompt"
+      id="generated-id"
     >
       <div
         aria-hidden="true"

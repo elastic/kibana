@@ -61,6 +61,12 @@ jest.mock('@elastic/eui/packages/react-datepicker', () => {
   };
 });
 
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
+  return {
+    htmlIdGenerator: () => () => `generated-id`,
+  };
+});
+
 jest.mock('plugins/interpreter/registries', () => ({}));
 
 // Disabling this test due to https://github.com/elastic/eui/issues/2242
