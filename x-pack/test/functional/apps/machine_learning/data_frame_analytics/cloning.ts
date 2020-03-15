@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
-  describe('data frame analytics jobs cloning supported by UI form', function() {
+  describe('jobs cloning supported by UI form', function() {
     this.tags(['smoke']);
 
     const testDataList: Array<{
@@ -119,21 +119,11 @@ export default function({ getService }: FtrProviderContext) {
     })();
 
     before(async () => {
-      // Create jobs for cloning
-      for (const testData of testDataList) {
-        await esArchiver.load(testData.archive);
-        await ml.api.createDataFrameAnalyticsJob(testData.job as DataFrameAnalyticsConfig);
-      }
       await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      // Clean destination indices of the original jobs
-      for (const testData of testDataList) {
-        await ml.api.deleteIndices(testData.job.dest!.index as string);
-        await esArchiver.unload(testData.archive);
-      }
     });
 
     for (const testData of testDataList) {
@@ -142,6 +132,9 @@ export default function({ getService }: FtrProviderContext) {
         const cloneDestIndex = `${testData.job!.dest!.index}_clone`;
 
         before(async () => {
+          await esArchiver.load(testData.archive);
+          await ml.api.createDataFrameAnalyticsJob(testData.job as DataFrameAnalyticsConfig);
+
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToDataFrameAnalytics();
           await ml.dataFrameAnalyticsTable.waitForAnalyticsToLoad();
@@ -151,6 +144,8 @@ export default function({ getService }: FtrProviderContext) {
 
         after(async () => {
           await ml.api.deleteIndices(cloneDestIndex);
+          await ml.api.deleteIndices(testData.job.dest!.index as string);
+          await esArchiver.unload(testData.archive);
         });
 
         it('should open the flyout with a proper header', async () => {

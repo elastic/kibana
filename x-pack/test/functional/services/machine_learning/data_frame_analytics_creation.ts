@@ -329,11 +329,8 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async isCreateButtonDisabled() {
-      const attrValue = await testSubjects.getAttribute(
-        'mlAnalyticsCreateJobFlyoutCreateButton',
-        'disabled'
-      );
-      return attrValue === '';
+      const isEnabled = await testSubjects.isEnabled('mlAnalyticsCreateJobFlyoutCreateButton');
+      return !isEnabled;
     },
 
     async createAnalyticsJob() {
