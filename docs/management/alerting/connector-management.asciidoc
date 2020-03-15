@@ -26,7 +26,7 @@ The *type* dropdown also lets you filter to a subset of action types.
 [role="screenshot"]
 image::images/connector-filter-by-type.png[Filtering the connector list by types of actions]
 
-The *Actions* column indicates the number of actions that reference the connector.  This count helps you confirm a connector is unused before you delete it, and tells you how many actions will be affected when a connector is modified. 
+The *Actions* column indicates the number of actions that reference the connector. This count helps you confirm a connector is unused before you delete it, and tells you how many actions will be affected when a connector is modified. 
 
 [role="screenshot"]
 image::images/connector-action-count.png[Filtering the connector list by types of actions]
@@ -44,4 +44,4 @@ When this happens the action will fail to execute, and appear as errors in the {
 
 ==== Creating a new connector
 
-New connectors can be created by clicking the *Create connector* button, which will guide you to select the type of connector and configure it's properties.  Refer to <<action-types>> for the types of connectors available and how to configure them. Once you create a connector it will be made available to you anytime you set up an action in the current space.  
+New connectors can be created by clicking the *Create connector* button, which will guide you to select the type of connector and configure it's properties. Refer to <<action-types>> for the types of connectors available and how to configure them. Once you create a connector it will be made available to you anytime you set up an action in the current space.
