@@ -43,6 +43,7 @@ import {
   ElasticsearchServiceSetup,
   IScopedClusterClient,
   configSchema as elasticsearchConfigSchema,
+  ElasticsearchServiceStart,
 } from './elasticsearch';
 
 import { HttpServiceSetup } from './http';
@@ -93,6 +94,7 @@ export {
   ElasticsearchError,
   ElasticsearchErrorHelpers,
   ElasticsearchServiceSetup,
+  ElasticsearchServiceStart,
   APICaller,
   FakeRequest,
   ScopeableRequest,
@@ -368,6 +370,8 @@ export interface CoreSetup<TPluginsStart extends object = object> {
 export interface CoreStart {
   /** {@link CapabilitiesStart} */
   capabilities: CapabilitiesStart;
+  /** {@link ElasticsearchServiceStart} */
+  elasticsearch: ElasticsearchServiceStart;
   /** {@link SavedObjectsServiceStart} */
   savedObjects: SavedObjectsServiceStart;
   /** {@link UiSettingsServiceStart} */

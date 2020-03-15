@@ -647,6 +647,8 @@ export interface CoreStart {
     // (undocumented)
     capabilities: CapabilitiesStart;
     // (undocumented)
+    elasticsearch: ElasticsearchServiceStart;
+    // (undocumented)
     savedObjects: SavedObjectsServiceStart;
     // (undocumented)
     uiSettings: UiSettingsServiceStart;
@@ -774,9 +776,21 @@ export class ElasticsearchErrorHelpers {
 
 // @public (undocumented)
 export interface ElasticsearchServiceSetup {
+    // @deprecated (undocumented)
     readonly adminClient: IClusterClient;
+    // @deprecated (undocumented)
     readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
+    // @deprecated (undocumented)
     readonly dataClient: IClusterClient;
+}
+
+// @public (undocumented)
+export interface ElasticsearchServiceStart {
+    // (undocumented)
+    legacy: {
+        readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
+        readonly client: IClusterClient;
+    };
 }
 
 // @public (undocumented)
@@ -882,8 +896,10 @@ export interface IContextContainer<THandler extends HandlerFunction<any>> {
     registerContext<TContextName extends keyof HandlerContextType<THandler>>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<THandler, TContextName>): this;
 }
 
+// Warning: (ae-forgotten-export) The symbol "PartialExceptFor" needs to be exported by the entry point index.d.ts
+//
 // @public
-export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: Partial<HandlerContextType<THandler>>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
+export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: PartialExceptFor<HandlerContextType<THandler>, 'core'>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
 
 // @public
 export interface ICspConfig {
