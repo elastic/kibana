@@ -31,7 +31,7 @@ Filter by the type action the alert triggers
 Drill down to the <<alert-details, alert details>>
 
 [role="screenshot"]
-image:management/alerting/images/alerts-and-actions-ui.png["Example alert listing in the Alerts and Actions UI"]
+image:management/alerting/images/alerts-and-actions-ui.png[Example alert listing in the Alerts and Actions UI]
 
 
 
@@ -40,11 +40,11 @@ image:management/alerting/images/alerts-and-actions-ui.png["Example alert listin
 
 The alert listing allows you to quickly mute/unmute, disable/enable, and delete individual alerts from the actions button at the right of each row. 
 
-image:management/alerting/images/individual-mute-disable.png["The actions button allows an individual alert to be muted, disabled, or deleted"]
+image:management/alerting/images/individual-mute-disable.png[The actions button allows an individual alert to be muted, disabled, or deleted]
 
 These operations can also be performed in bulk by multi-selecting alerts and clicking the *Manage alerts* button:
 
-image:management/alerting/images/bulk-mute-disable.png["The Manage alerts button lets you mute/unmute, enable/disable, and delete in bulk"]
+image:management/alerting/images/bulk-mute-disable.png[The Manage alerts button lets you mute/unmute, enable/disable, and delete in bulk]
 
 
 
@@ -56,6 +56,6 @@ You can create index threshold alerts.
 Editing an alert will re-open the same view use
 
 Note:
-Specific alerts can be created in each Kibana app, such as Metrics, APM, and uptime. 
+Specific alerts can be created in each {kib} app, such as Metrics, APM, and uptime. 
 
-image:management/alerting/images/alerts-and-actions-ui.png["Example alert listing in the Alerts and Actions UI"]
+image:management/alerting/images/alerts-and-actions-ui.png[Example alert listing in the Alerts and Actions UI]
