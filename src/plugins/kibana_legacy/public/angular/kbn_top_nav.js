@@ -93,7 +93,6 @@ export const createTopNavHelper = ({ TopNavMenu }) => (reactDirective) => {
 
     // All modifiers default to true.
     // Set to false to hide subcomponents.
-    'showTopNavMenu',
     'showSearchBar',
     'showQueryBar',
     'showQueryInput',
