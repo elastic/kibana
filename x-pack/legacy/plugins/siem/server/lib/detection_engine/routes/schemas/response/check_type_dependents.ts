@@ -35,12 +35,36 @@ export const addTimelineTitle = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mi
   }
 };
 
+export const addQueryFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
+  if (typeAndTimelineOnly.type === 'query' || typeAndTimelineOnly.type === 'saved_query') {
+    return [
+      t.exact(t.type({ query: dependentRulesSchema.props.query })),
+      t.exact(t.type({ language: dependentRulesSchema.props.language })),
+    ];
+  } else {
+    return [];
+  }
+};
+
+export const addMlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
+  if (typeAndTimelineOnly.type === 'machine_learning') {
+    return [
+      t.exact(t.type({ anomaly_threshold: dependentRulesSchema.props.anomaly_threshold })),
+      t.exact(t.type({ ml_job_id: dependentRulesSchema.props.ml_job_id })),
+    ];
+  } else {
+    return [];
+  }
+};
+
 export const getDependents = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed => {
   const dependents: t.Mixed[] = [
     t.exact(requiredRulesSchema),
     t.exact(partialRulesSchema),
     ...addSavedId(typeAndTimelineOnly),
     ...addTimelineTitle(typeAndTimelineOnly),
+    ...addQueryFields(typeAndTimelineOnly),
+    ...addMlFields(typeAndTimelineOnly),
   ];
 
   if (dependents.length > 1) {

@@ -67,6 +67,18 @@ export const getBaseResponsePayload = (anchorDate: string = ANCHOR_DATE): RulesS
 
 export const getRulesBulkPayload = (): RulesBulkSchema => [getBaseResponsePayload()];
 
+export const getMlRuleResponsePayload = (anchorDate: string = ANCHOR_DATE): RulesSchema => {
+  const basePayload = getBaseResponsePayload(anchorDate);
+  const { filters, index, query, language, ...rest } = basePayload;
+
+  return {
+    ...rest,
+    type: 'machine_learning',
+    anomaly_threshold: 59,
+    ml_job_id: 'some_ml_job_id',
+  };
+};
+
 export const getErrorPayload = (
   id: string = '819eded6-e9c8-445b-a647-519aea39e063'
 ): ErrorSchema => ({

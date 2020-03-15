@@ -45,6 +45,8 @@ export const output_index = t.string;
 export const saved_id = t.string;
 export const timeline_id = t.string;
 export const timeline_title = t.string;
+export const anomaly_threshold = PositiveInteger;
+export const ml_job_id = t.string;
 
 /**
  * Note that this is a plain unknown object because we allow the UI

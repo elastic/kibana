@@ -11,6 +11,7 @@ import { Either } from 'fp-ts/lib/Either';
 
 import { checkTypeDependents } from './check_type_dependents';
 import {
+  anomaly_threshold,
   description,
   enabled,
   false_positives,
@@ -24,6 +25,7 @@ import {
   name,
   output_index,
   max_signals,
+  ml_job_id,
   query,
   references,
   severity,
@@ -65,12 +67,10 @@ export const requiredRulesSchema = t.type({
   immutable,
   interval,
   rule_id,
-  language,
   output_index,
   max_signals,
   risk_score,
   name,
-  query,
   references,
   severity,
   updated_by,
@@ -91,12 +91,20 @@ export type RequiredRulesSchema = t.TypeOf<typeof requiredRulesSchema>;
  * check_type_dependents file for whichever REST flow it is going through.
  */
 export const dependentRulesSchema = t.partial({
+  // query fields
+  language,
+  query,
+
   // when type = saved_query, saved_is is required
   saved_id,
 
   // These two are required together or not at all.
   timeline_id,
   timeline_title,
+
+  // ML fields
+  anomaly_threshold,
+  ml_job_id,
 });
 
 /**
