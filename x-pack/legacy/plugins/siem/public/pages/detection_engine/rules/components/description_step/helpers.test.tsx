@@ -157,7 +157,7 @@ describe('helpers', () => {
       expect(filterLabelComponent.prop('filter')).toEqual(mockQueryBar.filters[0]);
     });
 
-    test('returns expected array of ListItems when `query.query` exists', () => {
+    test('returns expected array of ListItems when "query.query" exists', () => {
       const mockQueryBarWithQuery = {
         ...mockQueryBar,
         filters: [],
@@ -174,7 +174,7 @@ describe('helpers', () => {
       expect(result[0].description).toEqual(<>{mockQueryBarWithQuery.query.query} </>);
     });
 
-    test('returns expected array of ListItems when `savedId` exists', () => {
+    test('returns expected array of ListItems when "savedId" exists', () => {
       const mockQueryBarWithSavedId = {
         ...mockQueryBar,
         query: {
@@ -201,7 +201,6 @@ describe('helpers', () => {
       expect(result).toHaveLength(0);
     });
 
-    // Not sure that this is the desired functionality, but just added tests per existing logic
     test('returns empty tactic link if no corresponding tactic id found', () => {
       const result: ListItems[] = buildThreatDescription({
         label: 'Mitre Attack',
@@ -221,7 +220,6 @@ describe('helpers', () => {
       );
     });
 
-    // Not sure that this is the desired functionality, but just added tests per existing logic
     test('returns empty technique link if no corresponding technique id found', () => {
       const result: ListItems[] = buildThreatDescription({
         label: 'Mitre Attack',
@@ -291,7 +289,7 @@ describe('helpers', () => {
   });
 
   describe('buildUnorderedListArrayDescription', () => {
-    test('returns empty array if `values` is empty array', () => {
+    test('returns empty array if "values" is empty array', () => {
       const result: ListItems[] = buildUnorderedListArrayDescription(
         'Test label',
         'falsePositives',
@@ -314,7 +312,7 @@ describe('helpers', () => {
   });
 
   describe('buildStringArrayDescription', () => {
-    test('returns empty array if `values` is empty array', () => {
+    test('returns empty array if "values" is empty array', () => {
       const result: ListItems[] = buildStringArrayDescription('Test label', 'tags', []);
       expect(result).toHaveLength(0);
     });
@@ -354,7 +352,7 @@ describe('helpers', () => {
   });
 
   describe('buildUrlsDescription', () => {
-    test('returns empty array if `values` is empty array', () => {
+    test('returns empty array if "values" is empty array', () => {
       const result: ListItems[] = buildUrlsDescription('Test label', []);
       expect(result).toHaveLength(0);
     });

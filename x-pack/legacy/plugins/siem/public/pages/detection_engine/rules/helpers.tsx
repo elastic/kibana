@@ -27,7 +27,7 @@ export interface GetStepsData {
 }
 export interface GetStepsDataDetails {
   aboutRuleData: AboutStepRule | null;
-  aboutRuleDataDetails: AboutStepRuleDetails;
+  aboutRuleDataDetails: AboutStepRuleDetails | null;
   defineRuleData: DefineStepRule | null;
   scheduleRuleData: ScheduleStepRule | null;
 }
@@ -102,10 +102,13 @@ export const getStepsDataDetails = (rule: Rule): GetStepsDataDetails => {
     rule,
     detailsView: true,
   });
-  const modifiedAboutStepRuleData = {
-    note: rule.note ?? '',
-    description: rule.description ?? '',
-  };
+  const modifiedAboutStepRuleData: AboutStepRuleDetails | null =
+    rule != null
+      ? {
+          note: rule.note ?? '',
+          description: rule.description,
+        }
+      : null;
 
   return {
     aboutRuleData,

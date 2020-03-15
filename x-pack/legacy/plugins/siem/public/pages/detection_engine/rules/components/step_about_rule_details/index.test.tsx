@@ -31,7 +31,7 @@ describe('StepAboutRuleToggleDetails', () => {
     mockRule = mockAboutStepRule();
   });
 
-  test('it renders loading component when `loading` is true', () => {
+  test('it renders loading component when "loading" is true', () => {
     const wrapper = shallow(
       <StepAboutRuleToggleDetails
         loading={true}
@@ -70,7 +70,7 @@ describe('StepAboutRuleToggleDetails', () => {
     expect(wrapper.find(StepAboutRule).exists()).toBeFalsy();
   });
 
-  describe('note value does NOT exist', () => {
+  describe('note value is empty string', () => {
     test('it does not render toggle buttons', () => {
       const mockAboutStepWithoutNote = {
         ...mockRule,
@@ -91,36 +91,10 @@ describe('StepAboutRuleToggleDetails', () => {
       expect(wrapper.find('[data-test-subj="stepAboutDetailsNoteContent"]').exists()).toBeFalsy();
       expect(wrapper.find('[data-test-subj="stepAboutDetailsContent"]').exists()).toBeTruthy();
     });
-
-    test('it does not render description as part of the description list', () => {
-      const mockAboutStepWithoutNote = {
-        ...mockRule,
-        note: '',
-      };
-      const wrapper = mount(
-        <ThemeProvider theme={theme}>
-          <StepAboutRuleToggleDetails
-            loading={false}
-            stepDataDetails={{
-              note: mockRule.note,
-              description: mockRule.description,
-            }}
-            stepData={mockAboutStepWithoutNote}
-          />
-        </ThemeProvider>
-      );
-
-      expect(
-        wrapper
-          .find('[data-test-subj="stepAboutRuleDetailsToggleDescriptionText"]')
-          .at(0)
-          .text()
-      ).toEqual(mockAboutStepWithoutNote.description);
-    });
   });
 
   describe('note value does exist', () => {
-    test('it renders toggle buttons, defaulted to `details`', () => {
+    test('it renders toggle buttons, defaulted to "details"', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <StepAboutRuleToggleDetails
@@ -149,7 +123,7 @@ describe('StepAboutRuleToggleDetails', () => {
       ).toBeFalsy();
     });
 
-    test('it allows users to toggle between `details` and `note`', () => {
+    test('it allows users to toggle between "details" and "note"', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <StepAboutRuleToggleDetails
@@ -175,7 +149,7 @@ describe('StepAboutRuleToggleDetails', () => {
       expect(wrapper.find('EuiButtonGroup[idSelected="notes"]').exists()).toBeTruthy();
     });
 
-    test('it displays notes markdown when user toggles to `notes`', () => {
+    test('it displays notes markdown when user toggles to "notes"', () => {
       const wrapper = mount(
         <ThemeProvider theme={theme}>
           <StepAboutRuleToggleDetails

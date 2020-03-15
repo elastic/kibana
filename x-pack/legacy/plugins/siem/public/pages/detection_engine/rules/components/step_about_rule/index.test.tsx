@@ -16,9 +16,7 @@ import { stepAboutDefaultValue } from './default_value';
 const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
 describe('StepAboutRuleComponent', () => {
-  test('it renders StepRuleDescription if isReadOnlyView is true and `name` property exists', () => {
-    // see mockAboutStepRule for name property
-    // Note: is the name check for old rules? It's required so no rules should ever not include it
+  test('it renders StepRuleDescription if isReadOnlyView is true and "name" property exists', () => {
     const wrapper = shallow(
       <StepAboutRule
         addPadding={false}
@@ -32,7 +30,7 @@ describe('StepAboutRuleComponent', () => {
     expect(wrapper.find(StepRuleDescription).exists()).toBeTruthy();
   });
 
-  test('it prevents user from clicking continue if no `description` defined', () => {
+  test('it prevents user from clicking continue if no "description" defined', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <StepAboutRule
@@ -79,7 +77,7 @@ describe('StepAboutRuleComponent', () => {
     ).toBeTruthy();
   });
 
-  test('it prevents user from clicking continue if no `name` defined', () => {
+  test('it prevents user from clicking continue if no "name" defined', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <StepAboutRule
@@ -126,7 +124,7 @@ describe('StepAboutRuleComponent', () => {
     ).toBeTruthy();
   });
 
-  test('it allows user to click continue if `name` and `description` are defined', () => {
+  test('it allows user to click continue if "name" and "description" are defined', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <StepAboutRule
@@ -154,12 +152,4 @@ describe('StepAboutRuleComponent', () => {
     const nextButton = wrapper.find('button[data-test-subj="about-continue"]').at(0);
     nextButton.simulate('click');
   });
-
-  describe('advanced settings', () => {
-    test('it renders advanced settings collapsed initially', () => {});
-
-    test('it expands to show advanced fields', () => {});
-  });
-
-  describe('submission', () => {});
 });

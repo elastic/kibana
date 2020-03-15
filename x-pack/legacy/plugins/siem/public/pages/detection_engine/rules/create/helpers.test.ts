@@ -65,7 +65,7 @@ describe('helpers', () => {
       expect(result).toEqual({ unit: 'm', value: 5 });
     });
 
-    test('returns timeObj with value of 0 and unit of `` if random string passed in', () => {
+    test('returns timeObj with value of 0 and unit of "" if random string passed in', () => {
       const result = getTimeTypeValue('random');
 
       expect(result).toEqual({ unit: '', value: 0 });
@@ -134,7 +134,7 @@ describe('helpers', () => {
       expect(result).toEqual(expected);
     });
 
-    test('returns formatted object with `to` as `now` if `to` not supplied', () => {
+    test('returns formatted object with "to" as "now" if "to" not supplied', () => {
       const mockStepData = {
         ...mockData,
       };
@@ -153,7 +153,7 @@ describe('helpers', () => {
       expect(result).toEqual(expected);
     });
 
-    test('returns formatted object with `to` as `now` if `to` random string', () => {
+    test('returns formatted object with "to" as "now" if "to" random string', () => {
       const mockStepData = {
         ...mockData,
         to: 'random',
@@ -172,8 +172,7 @@ describe('helpers', () => {
       expect(result).toEqual(expected);
     });
 
-    // Note: do we want from to default to anything if it somehow ends up being unparsable string?
-    test('returns formatted object  if `from` random string', () => {
+    test('returns formatted object  if "from" random string', () => {
       const mockStepData = {
         ...mockData,
         from: 'random',
@@ -192,8 +191,7 @@ describe('helpers', () => {
       expect(result).toEqual(expected);
     });
 
-    // Note: do we want interval to default to anything if it somehow ends up being unparsable string?
-    test('returns formatted object  if `interval` random string', () => {
+    test('returns formatted object  if "interval" random string', () => {
       const mockStepData = {
         ...mockData,
         interval: 'random',
@@ -370,8 +368,7 @@ describe('helpers', () => {
       expect(result).toEqual(expected);
     });
 
-    // Note: is this desired behavior? Should we also check for empty string?
-    test('returns formatted object with timeline_id and timeline_title if timeline.id is ``', () => {
+    test('returns formatted object with timeline_id and timeline_title if timeline.id is "', () => {
       const mockStepData = {
         ...mockData,
         timeline: {
@@ -454,8 +451,7 @@ describe('helpers', () => {
       expect(result).toEqual(expected);
     });
 
-    // Note: is this desired behavior? Should we also check for empty string?
-    test('returns formatted object with timeline_id and timeline_title if timeline.title is ``', () => {
+    test('returns formatted object with timeline_id and timeline_title if timeline.title is "', () => {
       const mockStepData = {
         ...mockData,
         timeline: {
@@ -487,7 +483,7 @@ describe('helpers', () => {
       expect(result).toEqual(expected);
     });
 
-    test('returns formatted object with threats filtered out where tactic.name is `none`', () => {
+    test('returns formatted object with threats filtered out where tactic.name is "none"', () => {
       const mockStepData = {
         ...mockData,
         threat: [

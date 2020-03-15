@@ -54,7 +54,7 @@ describe('description_step', () => {
   });
 
   describe('StepRuleDescriptionComponent', () => {
-    test('renders correctly against snapshot when columns is `multi`', () => {
+    test('renders correctly against snapshot when columns is "multi"', () => {
       const wrapper = shallow(
         <StepRuleDescriptionComponent columns="multi" data={mockAboutStep} schema={schema} />
       );
@@ -62,7 +62,7 @@ describe('description_step', () => {
       expect(wrapper.find('[data-test-subj="listItemColumnStepRuleDescription"]')).toHaveLength(2);
     });
 
-    test('renders correctly against snapshot when columns is `single`', () => {
+    test('renders correctly against snapshot when columns is "single"', () => {
       const wrapper = shallow(
         <StepRuleDescriptionComponent columns="single" data={mockAboutStep} schema={schema} />
       );
@@ -70,7 +70,7 @@ describe('description_step', () => {
       expect(wrapper.find('[data-test-subj="listItemColumnStepRuleDescription"]')).toHaveLength(1);
     });
 
-    test('renders correctly against snapshot when columns is `singleSplit', () => {
+    test('renders correctly against snapshot when columns is "singleSplit', () => {
       const wrapper = shallow(
         <StepRuleDescriptionComponent columns="singleSplit" data={mockAboutStep} schema={schema} />
       );
@@ -292,7 +292,7 @@ describe('description_step', () => {
       expect(result[0].description).toEqual('24/7');
     });
 
-    test('returns empty array when `value` is a non-existant property in `field`', () => {
+    test('returns empty array when "value" is a non-existant property in "field"', () => {
       const result: ListItems[] = getDescriptionItem(
         'jibberjabber',
         'JibberJabber label',
@@ -341,7 +341,7 @@ describe('description_step', () => {
         expect(React.isValidElement(result[0].description)).toBeTruthy();
       });
 
-      test('filters out threats with tactic.name of `none`', () => {
+      test('filters out threats with tactic.name of "none"', () => {
         const mockStep = {
           ...mockAboutStep,
           threat: [
@@ -462,7 +462,7 @@ describe('description_step', () => {
     });
 
     describe('note', () => {
-      test('returns default `note` description', () => {
+      test('returns default "note" description', () => {
         const result: ListItems[] = getDescriptionItem(
           'note',
           'Investigation notes',

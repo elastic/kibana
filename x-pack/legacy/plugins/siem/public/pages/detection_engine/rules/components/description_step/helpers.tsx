@@ -173,7 +173,7 @@ export const buildUnorderedListArrayDescription = (
         description: (
           <EuiText size="s">
             <ul>
-              {values.map((val: string) =>
+              {values.map(val =>
                 isEmpty(val) ? null : (
                   <li data-test-subj="unorderedListArrayDescriptionItem" key={`${field}-${val}`}>
                     {val}
