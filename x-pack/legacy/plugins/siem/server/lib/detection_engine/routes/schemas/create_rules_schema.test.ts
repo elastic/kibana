@@ -1326,49 +1326,110 @@ describe('create rules schema', () => {
 
     // TODO: We can enable this once we change the schema's to not be global per module but rather functions that can create the schema
     // on demand. Since they are per module, we have a an issue where the ENV variables do not take effect. It is better we change all the
-    // schema's to be function calls to avoid global side effects.
-    test.skip('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and lists] does validate', () => {
-      expect(
-        createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-          rule_id: 'rule-1',
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'low',
-          interval: '5m',
-          type: 'query',
-          risk_score: 50,
-          note: '# some markdown',
-          lists: [
-            {
-              field: 'source.ip',
-              boolean_operator: 'and',
-              values: [
-                {
-                  name: '127.0.0.1',
-                  type: 'value',
-                },
-              ],
-            },
-            {
-              field: 'host.name',
-              boolean_operator: 'and not',
-              values: [
-                {
-                  name: 'rock01',
-                  type: 'value',
-                },
-                {
-                  name: 'mothra',
-                  type: 'value',
-                },
-              ],
-            },
-          ],
-        }).error
-      ).toBeFalsy();
+    // schema's to be function calls to avoid global side effects or just wait until the feature is available. If you want to test this early,
+    // you can remove the .skip and set your env variable of export ELASTIC_XPACK_SIEM_LISTS_FEATURE=true locally
+    describe.skip('lists', () => {
+      test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and lists] does validate', () => {
+        expect(
+          createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+            rule_id: 'rule-1',
+            description: 'some description',
+            from: 'now-5m',
+            to: 'now',
+            index: ['index-1'],
+            name: 'some-name',
+            severity: 'low',
+            interval: '5m',
+            type: 'query',
+            risk_score: 50,
+            note: '# some markdown',
+            lists: [
+              {
+                field: 'source.ip',
+                boolean_operator: 'and',
+                values: [
+                  {
+                    name: '127.0.0.1',
+                    type: 'value',
+                  },
+                ],
+              },
+              {
+                field: 'host.name',
+                boolean_operator: 'and not',
+                values: [
+                  {
+                    name: 'rock01',
+                    type: 'value',
+                  },
+                  {
+                    name: 'mothra',
+                    type: 'value',
+                  },
+                ],
+              },
+            ],
+          }).error
+        ).toBeFalsy();
+      });
+
+      test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and empty lists] does validate', () => {
+        expect(
+          createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
+            rule_id: 'rule-1',
+            description: 'some description',
+            from: 'now-5m',
+            to: 'now',
+            index: ['index-1'],
+            name: 'some-name',
+            severity: 'low',
+            interval: '5m',
+            type: 'query',
+            risk_score: 50,
+            note: '# some markdown',
+            lists: [],
+          }).error
+        ).toBeFalsy();
+      });
+
+      test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and invalid lists] does NOT validate', () => {
+        expect(
+          createRulesSchema.validate<Partial<Omit<RuleAlertParamsRest, 'lists'>>>({
+            rule_id: 'rule-1',
+            description: 'some description',
+            from: 'now-5m',
+            to: 'now',
+            index: ['index-1'],
+            name: 'some-name',
+            severity: 'low',
+            interval: '5m',
+            type: 'query',
+            risk_score: 50,
+            note: '# some markdown',
+            lists: [{ invalid_value: 'invalid value' }],
+          }).error.message
+        ).toEqual(
+          'child "lists" fails because ["lists" at position 0 fails because [child "field" fails because ["field" is required]]]'
+        );
+      });
+
+      test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and non-existent lists] does validate with empty lists', () => {
+        expect(
+          createRulesSchema.validate<Partial<Omit<RuleAlertParamsRest, 'lists'>>>({
+            rule_id: 'rule-1',
+            description: 'some description',
+            from: 'now-5m',
+            to: 'now',
+            index: ['index-1'],
+            name: 'some-name',
+            severity: 'low',
+            interval: '5m',
+            type: 'query',
+            risk_score: 50,
+            note: '# some markdown',
+          }).value.lists
+        ).toEqual([]);
+      });
     });
   });
 });

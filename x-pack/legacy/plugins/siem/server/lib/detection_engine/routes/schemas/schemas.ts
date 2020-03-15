@@ -117,4 +117,4 @@ export const list = Joi.object({
   boolean_operator: boolean_operator.required(),
   values: Joi.array().items(list_value),
 });
-export const lists = Joi.array().items(list.required());
+export const lists = Joi.array().items(list);
