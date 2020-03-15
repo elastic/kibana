@@ -59,7 +59,7 @@ export class TelemetryPlugin {
     registerTelemetryPluginUsageCollector(usageCollection, server);
     registerLocalizationUsageCollector(usageCollection, server);
     registerTelemetryUsageCollector(usageCollection, server);
-    registerUiMetricUsageCollector(usageCollection, server);
+    registerUiMetricUsageCollector(usageCollection, getSavedObjectsClient);
     registerManagementUsageCollector(usageCollection, server);
     registerApplicationUsageCollector(usageCollection, getSavedObjectsClient);
   }
