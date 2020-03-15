@@ -69,11 +69,17 @@ export interface PostAgentEnrollResponse {
 
 export interface PostAgentAcksRequest {
   body: {
-    action_ids: string[];
+    events: AgentEvent[];
   };
   params: {
     agentId: string;
   };
+}
+
+export interface PostAgentAcksResponse {
+  action: string;
+  success: boolean;
+  items: AgentAction[];
 }
 
 export interface PostAgentUnenrollRequest {
