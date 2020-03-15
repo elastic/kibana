@@ -34,10 +34,10 @@ import {
   EmbeddableOutput,
   Embeddable,
   Container,
-  selectRangeTrigger,
   valueClickTrigger,
   EmbeddableVisTriggerContext,
 } from '../../../../../../../plugins/embeddable/public';
+import { selectRangeTrigger } from '../../../../../../../plugins/ui_actions/public';
 import { dispatchRenderComplete } from '../../../../../../../plugins/kibana_utils/public';
 import {
   IExpressionLoaderParams,

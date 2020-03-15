@@ -20,6 +20,6 @@ export function usePagination() {
   return {
     pagination,
     setPagination,
-    pageSizeOptions: 20,
+    pageSizeOptions: [5, 20, 50],
   };
 }

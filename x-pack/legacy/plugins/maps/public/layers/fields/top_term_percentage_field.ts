@@ -64,6 +64,14 @@ export class TopTermPercentageField implements IESAggField {
     return false;
   }
 
+  async getOrdinalFieldMetaRequest(): Promise<unknown> {
+    return null;
+  }
+
+  async getCategoricalFieldMetaRequest(): Promise<unknown> {
+    return null;
+  }
+
   canValueBeFormatted(): boolean {
     return false;
   }
