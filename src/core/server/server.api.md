@@ -1635,6 +1635,7 @@ export interface SavedObjectReference {
 // @public (undocumented)
 export interface SavedObjectsAddNamespacesOptions {
     refresh?: MutatingOperationRefreshSetting;
+    validateExistingNamespaces?: (existingNamespaces: string[]) => Promise<void>;
     version?: string;
 }
 

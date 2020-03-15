@@ -381,6 +381,24 @@ describe('SavedObjectsRepository', () => {
         await expectNotFoundError(type, id, [newNs1, newNs2]);
         expect(callAdminCluster).toHaveBeenCalledTimes(2);
       });
+
+      it(`throws when validateExistingNamespaces fails`, async () => {
+        mockGetResponse(type, id); // this._callCluster('get', ...)
+        const error = new Error('validation error');
+        const validateExistingNamespaces = jest.fn();
+        validateExistingNamespaces.mockImplementation(async () => {
+          throw error;
+        });
+
+        await expect(
+          savedObjectsRepository.addNamespaces(type, id, [newNs1, newNs2], {
+            validateExistingNamespaces,
+          })
+        ).rejects.toThrowError(error);
+        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expect(validateExistingNamespaces).toHaveBeenCalledTimes(1);
+        expect(validateExistingNamespaces).toHaveBeenCalledWith([currentNs1, currentNs2]);
+      });
     });
 
     describe('migration', () => {

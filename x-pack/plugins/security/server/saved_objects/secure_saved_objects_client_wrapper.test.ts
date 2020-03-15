@@ -260,19 +260,25 @@ describe('#addNamespaces', () => {
   const newNs2 = 'bar-namespace';
   const namespaces = [newNs1, newNs2];
   const existingNs = 'baz-namespace';
-  const privilege1 = `mock-saved_object:${type}/update`;
-  const privilege2 = `mock-saved_object:${type}/create`;
+  const privilege1 = `mock-saved_object:${type}/create`;
+  const privilege2 = `mock-saved_object:${type}/update`;
+  const apiCallReturnValue = Symbol();
 
   beforeEach(() => {
-    const apiCallReturnValue = { namespaces: [existingNs] };
-    clientOpts.baseClient.get.mockReturnValue(apiCallReturnValue as any);
+    clientOpts.baseClient.addNamespaces.mockImplementation(
+      async (...args: Parameters<typeof clientOpts.baseClient.addNamespaces>) => {
+        const { validateExistingNamespaces } = args[3]!;
+        await validateExistingNamespaces!([existingNs]);
+        return apiCallReturnValue;
+      }
+    );
   });
 
   test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
     await expectGeneralError(client.addNamespaces, { type, id, namespaces });
   });
 
-  test(`throws decorated ForbiddenError when unauthorized to update in existing space`, async () => {
+  test(`throws decorated ForbiddenError when unauthorized to create in new space`, async () => {
     clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
       getMockCheckPrivilegesFailure
     );
@@ -285,21 +291,21 @@ describe('#addNamespaces', () => {
     expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
     expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
       USERNAME,
-      'addNamespacesUpdate',
+      'addNamespacesCreate',
       [type],
-      [existingNs],
-      [{ privilege: privilege1, spaceId: existingNs }],
+      namespaces.sort(),
+      [{ privilege: privilege1, spaceId: newNs1 }],
       { id, type, namespaces, options: {} }
     );
     expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
   });
 
-  test(`throws decorated ForbiddenError when unauthorized to create in new space`, async () => {
+  test(`throws decorated ForbiddenError when unauthorized to update in existing space`, async () => {
     clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementationOnce(
-      getMockCheckPrivilegesSuccess // update
+      getMockCheckPrivilegesSuccess // create
     );
     clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
-      getMockCheckPrivilegesFailure // create
+      getMockCheckPrivilegesFailure // update
     );
 
     await expect(client.addNamespaces(type, id, namespaces)).rejects.toThrowError(
@@ -312,25 +318,16 @@ describe('#addNamespaces', () => {
       clientOpts.auditLogger.savedObjectsAuthorizationFailure
     ).toHaveBeenLastCalledWith(
       USERNAME,
-      'addNamespacesCreate',
+      'addNamespacesUpdate',
       [type],
-      namespaces.sort(),
-      [{ privilege: privilege2, spaceId: newNs1 }],
+      [existingNs],
+      [{ privilege: privilege2, spaceId: existingNs }],
       { id, type, namespaces, options: {} }
     );
     expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(1);
   });
 
-  test(`calls baseClient.get with type and id`, async () => {
-    await client.addNamespaces(type, id, namespaces);
-    expect(clientOpts.baseClient.get).toHaveBeenCalledTimes(1);
-    expect(clientOpts.baseClient.get).toHaveBeenCalledWith(type, id);
-  });
-
   test(`returns result of baseClient.addNamespaces when authorized`, async () => {
-    const apiCallReturnValue = Symbol();
-    clientOpts.baseClient.addNamespaces.mockReturnValue(apiCallReturnValue as any);
-
     const result = await client.addNamespaces(type, id, namespaces);
     expect(result).toBe(apiCallReturnValue);
 
@@ -339,27 +336,27 @@ describe('#addNamespaces', () => {
     expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenNthCalledWith(
       1,
       USERNAME,
-      'addNamespacesUpdate', // action for privilege check is 'update', but auditAction is 'addNamespacesUpdate'
+      'addNamespacesCreate', // action for privilege check is 'create', but auditAction is 'addNamespacesCreate'
       [type],
-      [existingNs],
+      namespaces.sort(),
       { type, id, namespaces, options: {} }
     );
     expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenNthCalledWith(
       2,
       USERNAME,
-      'addNamespacesCreate', // action for privilege check is 'create', but auditAction is 'addNamespacesCreate'
+      'addNamespacesUpdate', // action for privilege check is 'update', but auditAction is 'addNamespacesUpdate'
       [type],
-      namespaces.sort(),
+      [existingNs],
       { type, id, namespaces, options: {} }
     );
   });
 
   test(`checks privileges for user, actions, and namespace`, async () => {
     clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementationOnce(
-      getMockCheckPrivilegesSuccess // update
+      getMockCheckPrivilegesSuccess // create
     );
     clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
-      getMockCheckPrivilegesFailure // create
+      getMockCheckPrivilegesFailure // update
     );
 
     await expect(client.addNamespaces(type, id, namespaces)).rejects.toThrow(); // test is simpler with error case
@@ -368,12 +365,12 @@ describe('#addNamespaces', () => {
     expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenNthCalledWith(
       1,
       [privilege1],
-      [existingNs]
+      namespaces
     );
     expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenNthCalledWith(
       2,
       [privilege2],
-      namespaces
+      [existingNs]
     );
   });
 });

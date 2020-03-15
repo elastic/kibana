@@ -144,16 +144,17 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     namespaces: string[],
     options: SavedObjectsAddNamespacesOptions = {}
   ) {
-    const savedObject = await this.baseClient.get(type, id);
-    const existing = savedObject.namespaces || [];
-
     const args = { type, id, namespaces, options };
-    // to share an object, the user must have the "update" permission in one or more of the source namespaces
-    await this.ensureAuthorized(type, 'update', existing, args, 'addNamespacesUpdate', false);
-    // to share an object, the user must also have the "create" permission in all of the destination namespaces
+    // to share an object, the user must have the "create" permission in all of the destination namespaces
     await this.ensureAuthorized(type, 'create', namespaces, args, 'addNamespacesCreate');
 
-    return await this.baseClient.addNamespaces(type, id, namespaces, options);
+    return await this.baseClient.addNamespaces(type, id, namespaces, {
+      ...options,
+      validateExistingNamespaces: async (existing: string[]) => {
+        // to share an object, the user must also have the "update" permission in one or more of the source namespaces
+        await this.ensureAuthorized(type, 'update', existing, args, 'addNamespacesUpdate', false);
+      },
+    });
   }
 
   public async removeNamespaces(

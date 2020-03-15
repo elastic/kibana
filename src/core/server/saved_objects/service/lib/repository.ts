@@ -1005,8 +1005,13 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const existingNamespaces = getResponse._source.namespaces as string[] | undefined;
-    if (existingNamespaces) {
+    const existingNamespaces = (getResponse?._source?.namespaces || []) as string[];
+    if (options.validateExistingNamespaces) {
+      await options.validateExistingNamespaces(existingNamespaces);
+    }
+    if (existingNamespaces.length) {
+      // there should never be a case where a multi-namespace object does not have any existing namespaces
+      // however, it is a possibility if someone manually modifies the document in Elasticsearch
       const intersection = existingNamespaces.filter(x => namespaces.includes(x));
       if (intersection.length) {
         throw SavedObjectsErrorHelpers.createBadRequestError(

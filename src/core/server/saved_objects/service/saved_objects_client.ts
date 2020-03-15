@@ -116,6 +116,8 @@ export interface SavedObjectsAddNamespacesOptions {
   version?: string;
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+  /** A callback to validate the existing namespaces of this saved object. Can be used for implementing authorization checks. */
+  validateExistingNamespaces?: (existingNamespaces: string[]) => Promise<void>;
 }
 
 /**
