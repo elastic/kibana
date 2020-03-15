@@ -17,9 +17,11 @@
  * under the License.
  */
 
-export * from './trigger';
-export * from './trigger_contract';
-export * from './trigger_internal';
-export * from './select_range_trigger';
-export * from './value_click_trigger';
-export * from './apply_filter_trigger';
+import { Trigger } from '.';
+
+export const VALUE_CLICK_TRIGGER = 'VALUE_CLICK_TRIGGER';
+export const valueClickTrigger: Trigger<'VALUE_CLICK_TRIGGER'> = {
+  id: VALUE_CLICK_TRIGGER,
+  title: 'Value clicked',
+  description: 'Value was clicked',
+};
