@@ -15,10 +15,7 @@ import { HelpCenterContent } from '../../components/help_center_content';
 import { AppNavigation } from '../../components/navigation/app_navigation';
 import { RoutedTabs } from '../../components/navigation/routed_tabs';
 import { ColumnarPage } from '../../components/page';
-import { SourceErrorPage } from '../../components/source_error_page';
-import { SourceLoadingPage } from '../../components/source_loading_page';
 import { useLogAnalysisCapabilitiesContext } from '../../containers/logs/log_analysis';
-import { useSourceContext } from '../../containers/source';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
 import { LogEntryCategoriesPage } from './log_entry_categories';
 import { LogEntryRatePage } from './log_entry_rate';
@@ -27,7 +24,6 @@ import { StreamPage } from './stream';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
-  const source = useSourceContext();
   const logAnalysisCapabilities = useLogAnalysisCapabilitiesContext();
 
   const streamTab = {
@@ -68,35 +64,22 @@ export const LogsPageContent: React.FunctionComponent = () => {
         ]}
         readOnlyBadge={!uiCapabilities?.logs?.save}
       />
-      {source.isLoadingSource ||
-      (!source.isLoadingSource && !source.hasFailedLoadingSource && source.source === undefined) ? (
-        <SourceLoadingPage />
-      ) : source.hasFailedLoadingSource ? (
-        <SourceErrorPage
-          errorMessage={source.loadSourceFailureMessage || ''}
-          retry={source.loadSource}
+      <AppNavigation aria-label={pageTitle}>
+        <RoutedTabs
+          tabs={
+            logAnalysisCapabilities.hasLogAnalysisCapabilites
+              ? [streamTab, logRateTab, logCategoriesTab, settingsTab]
+              : [streamTab, settingsTab]
+          }
         />
-      ) : (
-        <>
-          <AppNavigation aria-label={pageTitle}>
-            <RoutedTabs
-              tabs={
-                logAnalysisCapabilities.hasLogAnalysisCapabilites
-                  ? [streamTab, logRateTab, logCategoriesTab, settingsTab]
-                  : [streamTab, settingsTab]
-              }
-            />
-          </AppNavigation>
-
-          <Switch>
-            <Route path={streamTab.pathname} component={StreamPage} />
-            <Route path={logRateTab.pathname} component={LogEntryRatePage} />
-            <Route path={logCategoriesTab.pathname} component={LogEntryCategoriesPage} />
-            <Route path={settingsTab.pathname} component={LogsSettingsPage} />
-            <RedirectWithQueryParams from={'/analysis'} to={logRateTab.pathname} exact />
-          </Switch>
-        </>
-      )}
+      </AppNavigation>
+      <Switch>
+        <Route path={streamTab.pathname} component={StreamPage} />
+        <Route path={logRateTab.pathname} component={LogEntryRatePage} />
+        <Route path={logCategoriesTab.pathname} component={LogEntryCategoriesPage} />
+        <Route path={settingsTab.pathname} component={LogsSettingsPage} />
+        <RedirectWithQueryParams from={'/analysis'} to={logRateTab.pathname} exact />
+      </Switch>
     </ColumnarPage>
   );
 };

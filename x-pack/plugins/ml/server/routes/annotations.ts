@@ -20,7 +20,7 @@ import {
   indexAnnotationSchema,
 } from './schemas/annotations_schema';
 
-import { ANNOTATION_USER_UNKNOWN } from '../../../../legacy/plugins/ml/common/constants/annotations';
+import { ANNOTATION_USER_UNKNOWN } from '../../common/constants/annotations';
 
 function getAnnotationsFeatureUnavailableErrorMessage() {
   return Boom.badRequest(
