@@ -1,0 +1,12 @@
+[role="xpack"]
+[[connector-management]]
+=== Managing Connectors
+
+beta[]
+
+Connectors allow alerts to route action and notifications to different destinations like log files, ticketing systems, or messaging tools. While each Kibana app can offer its own specific types of alerts, they share the same connectors. The connectors tab offers a central place to view and manage a space's connectors.  
+
+For more information, see <<xpack-security-authorization>>.
+
+[role="screenshot"]
+image::images/management-index-read-only-badge.png[Example of Index Pattern Management's read only access indicator in Kibana's header]

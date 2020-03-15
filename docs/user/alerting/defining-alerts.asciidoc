@@ -1,0 +1,3 @@
+[role="xpack"]
+[[defining-alerts]]
+== Defining alerts

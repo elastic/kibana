@@ -1,0 +1,3 @@
+[role="xpack"]
+[[alerting-scale-performance]]
+== Scale and performance

@@ -1,0 +1,3 @@
+[role="xpack"]
+[[action-types]]
+== Action types

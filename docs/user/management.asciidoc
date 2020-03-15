@@ -92,6 +92,10 @@ Create and manage the index patterns that help you retrieve your data from {es}.
 Monitor the generation of reports&mdash;PDF, PNG, and CSV&mdash;and download reports that you previously generated.
 A report can contain a dashboard, visualization, saved search, or Canvas workpad.
 
+| <<managing-alerts-and-actions, *Alerts and Actions*>>
+
+Centrally manage your alerts from across Kibana. Create and manage re-usable connectors for triggering actions. 
+
 | <<managing-saved-objects, *Saved Objects*>>
 
 Copy, edit, delete, import, and export your saved objects.
@@ -110,6 +114,14 @@ so you can tailor it to your needs without impacting others.
 --
 
 include::{kib-repo-dir}/management/advanced-options.asciidoc[]
+
+include::{kib-repo-dir}/management/alerting/alerts-and-actions-intro.asciidoc[]
+
+include::{kib-repo-dir}/management/alerting/alert-management.asciidoc[]
+
+include::{kib-repo-dir}/management/alerting/alert-details.asciidoc[]
+
+include::{kib-repo-dir}/management/alerting/connector-management.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-beats.asciidoc[]
 

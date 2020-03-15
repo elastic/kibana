@@ -1,0 +1,22 @@
+[role="xpack"]
+[[alert-details]]
+=== Alert Details
+
+beta[]
+
+If you're working with time series data, you don't want to continually dump
+everything into a single index. Instead, you might periodically roll over the
+data to a new index to keep it from growing so big it's slow and expensive.
+As the index ages and you query it less frequently, you’ll likely move it to
+less expensive hardware and reduce the number of shards and replicas.
+
+{kib}’s *Index Lifecycle Policies* walks you through the process for creating
+and configuring a policy. Before using this feature, you should be familiar
+with index lifecycle management:
+
+* For an introduction, refer to
+{ref}/getting-started-index-lifecycle-management.html[Getting started with index
+lifecycle management].
+* To dig into the concepts and technical details, see
+{ref}/index-lifecycle-management.html[Managing the index lifecycle].
+* To check out the APIs, see {ref}/index-lifecycle-management-api.html[Index lifecycle management API].
