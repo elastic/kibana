@@ -10,15 +10,13 @@ import { ExternalRouteDeps } from '.';
 import { SPACE_ID_REGEX } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
 
+const uniq = <T>(arr: T[]): T[] => Array.from(new Set<T>(arr));
 export function initShareAddSpacesApi(deps: ExternalRouteDeps) {
   const { externalRouter, getSavedObjects } = deps;
 
   externalRouter.post(
     {
       path: '/api/spaces/_share_saved_object_add',
-      options: {
-        tags: ['access:shareSavedObjectsToSpacesAdd'],
-      },
       validate: {
         body: schema.object({
           spaces: schema.arrayOf(
@@ -33,7 +31,7 @@ export function initShareAddSpacesApi(deps: ExternalRouteDeps) {
               validate: spaceIds => {
                 if (!spaceIds.length) {
                   return 'must specify one or more space ids';
-                } else if (_.uniq(spaceIds).length !== spaceIds.length) {
+                } else if (uniq(spaceIds).length !== spaceIds.length) {
                   return 'duplicate space ids are not allowed';
                 }
               },
@@ -54,7 +52,7 @@ export function initShareAddSpacesApi(deps: ExternalRouteDeps) {
       const { type, id } = request.body.object;
 
       try {
-        scopedClient.addNamespaces(type, id, spaces);
+        await scopedClient.addNamespaces(type, id, spaces);
       } catch (error) {
         if (SavedObjectsClient.errors.isNotFoundError(error)) {
           return response.notFound();

@@ -237,10 +237,10 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
         missingPrivileges,
         args
       );
-      const msg = `Unable to ${action} ${missingPrivileges
-        .map(({ privilege }) => actionsToTypesMap.get(privilege))
-        .sort()
-        .join(',')}`;
+      const targetTypes = uniq(
+        missingPrivileges.map(({ privilege }) => actionsToTypesMap.get(privilege)).sort()
+      ).join(',');
+      const msg = `Unable to ${action} ${targetTypes}`;
       throw this.errors.decorateForbiddenError(new Error(msg));
     }
   }

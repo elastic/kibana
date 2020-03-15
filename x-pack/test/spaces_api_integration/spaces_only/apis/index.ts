@@ -11,12 +11,14 @@ export default function spacesOnlyTestSuite({ loadTestFile }: TestInvoker) {
   describe('spaces api without security', function() {
     this.tags('ciGroup5');
 
+    loadTestFile(require.resolve('./add_namespaces'));
     loadTestFile(require.resolve('./copy_to_space'));
     loadTestFile(require.resolve('./resolve_copy_to_space_conflicts'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./get_all'));
     loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./remove_namespaces'));
     loadTestFile(require.resolve('./update'));
   });
 }
