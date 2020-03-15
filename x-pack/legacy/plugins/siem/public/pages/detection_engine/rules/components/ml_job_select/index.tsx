@@ -8,7 +8,7 @@ import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 
-import { FieldHook } from '../../../../../shared_imports';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../../shared_imports';
 import { useSiemJobs } from '../../../../../components/ml_popover/hooks/use_siem_jobs';
 
 interface MlJobSelectProps {
@@ -26,6 +26,7 @@ const JobDisplay = ({ title, description }: { title: string; description: string
 );
 
 export const MlJobSelect = ({ field }: MlJobSelectProps) => {
+  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const [localJobId, setLocalJobId] = useState<string>(field.value as string);
   const [isLoading, siemJobs] = useSiemJobs(false);
   const handleJobChange = useCallback(
@@ -43,7 +44,7 @@ export const MlJobSelect = ({ field }: MlJobSelectProps) => {
   }));
 
   return (
-    <Wrapper label={field.label} fullWidth>
+    <Wrapper fullWidth label={field.label} isInvalid={isInvalid} error={errorMessage}>
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiSuperSelect

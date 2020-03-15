@@ -134,6 +134,25 @@ export const schema: FormSchema = {
         defaultMessage: 'Machine Learning job',
       }
     ),
-    validations: [],
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData }] = args;
+          const needsValidation = isMlRule(formData.ruleType);
+
+          if (!needsValidation) {
+            return;
+          }
+
+          return fieldValidators.emptyField(
+            i18n.translate('xpack.siem.detectionEngine.createRule.stepDefineRule.mlJobIdRequired', {
+              defaultMessage: 'A Machine Learning job is required.',
+            })
+          )(...args);
+        },
+      },
+    ],
   },
 };
