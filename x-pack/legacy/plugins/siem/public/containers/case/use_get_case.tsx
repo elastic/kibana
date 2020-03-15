@@ -7,8 +7,6 @@
 import { useEffect, useReducer } from 'react';
 
 import { Case } from './types';
-import { FETCH_INIT, FETCH_FAILURE, FETCH_SUCCESS } from './constants';
-import { getTypedPayload } from './utils';
 import * as i18n from './translations';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { getCase } from './api';
@@ -18,52 +16,55 @@ interface CaseState {
   isLoading: boolean;
   isError: boolean;
 }
-interface Action {
-  type: string;
-  payload?: Case;
-}
+
+type Action =
+  | { type: 'FETCH_INIT' }
+  | { type: 'FETCH_SUCCESS'; payload: Case }
+  | { type: 'FETCH_FAILURE' };
 
 const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
   switch (action.type) {
-    case FETCH_INIT:
+    case 'FETCH_INIT':
       return {
         ...state,
         isLoading: true,
         isError: false,
       };
-    case FETCH_SUCCESS:
+    case 'FETCH_SUCCESS':
       return {
         ...state,
         isLoading: false,
         isError: false,
-        data: getTypedPayload<Case>(action.payload),
+        data: action.payload,
       };
-    case FETCH_FAILURE:
+    case 'FETCH_FAILURE':
       return {
         ...state,
         isLoading: false,
         isError: true,
       };
     default:
-      throw new Error();
+      return state;
   }
 };
 const initialData: Case = {
   id: '',
   createdAt: '',
   comments: [],
+  commentIds: [],
   createdBy: {
     username: '',
   },
   description: '',
-  state: '',
+  status: '',
   tags: [],
   title: '',
-  updatedAt: '',
+  updatedAt: null,
+  updatedBy: null,
   version: '',
 };
 
-export const useGetCase = (caseId: string): [CaseState] => {
+export const useGetCase = (caseId: string): CaseState => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: true,
     isError: false,
@@ -74,11 +75,11 @@ export const useGetCase = (caseId: string): [CaseState] => {
   const callFetch = () => {
     let didCancel = false;
     const fetchData = async () => {
-      dispatch({ type: FETCH_INIT });
+      dispatch({ type: 'FETCH_INIT' });
       try {
         const response = await getCase(caseId);
         if (!didCancel) {
-          dispatch({ type: FETCH_SUCCESS, payload: response });
+          dispatch({ type: 'FETCH_SUCCESS', payload: response });
         }
       } catch (error) {
         if (!didCancel) {
@@ -87,7 +88,7 @@ export const useGetCase = (caseId: string): [CaseState] => {
             error: error.body && error.body.message ? new Error(error.body.message) : error,
             dispatchToaster,
           });
-          dispatch({ type: FETCH_FAILURE });
+          dispatch({ type: 'FETCH_FAILURE' });
         }
       }
     };
@@ -100,5 +101,5 @@ export const useGetCase = (caseId: string): [CaseState] => {
   useEffect(() => {
     callFetch();
   }, [caseId]);
-  return [state];
+  return state;
 };
