@@ -24,13 +24,31 @@ In order to provide the user with as much detail as possible about any systems t
 
 # Detailed design
 
-## Types
+## Failure Guidelines
+
+While this RFC primarily describes how status information is signaled from individual services and plugins to Core, it's first important to define how Core expects these services and plugins to behave in the face of failure more broadly.
+
+Core is designed to be resilient and adaptive to change. When at all possible, Kibana should automatically recover from failure, rather than requiring any kind of intervention by the user or administrator.
+
+Given this goal, Core expects the following from plugins:
+- During initialization, `setup`, and `start` plugins should only throw an exception if a truly unrecoverable issue is encountered. Examples: HTTP port is unavailable, server does not have the appropriate file permissions.
+- Temporary error conditions should always be retried automatically. A user should not have to restart Kibana in order to resolve a problem when avoidable. This means all initialization code should include error handling and automated retries. Examples: creating an Elasticsearch index, connecting to an external service.
+  - It's important to note that some issues do require manual intervention in _other services_ (eg. Elasticsearch). Kibana should still recover without restarting once that external issue is resolved.
+- Unhandled promise rejections are not permitted. In the future, Node.js will crash on unhandled promise rejections. It is impossible for Core to be able to properly handle and retry these situations, so all services and plugins should handle all rejected promises and retry when necessary.
+- Plugins should only crash the Kibana server when absolutely necessary. Some features are considered "mission-critical" to customers and may need to halt Kibana if they are not functioning correctly. Example: audit logging.
+
+## API Design
+
+### Types
 
 ```ts
 /**
  * The current status of a service at a point in time.
+ * 
+ * @typeParam Meta - JSON-serializable object. Plugins should export this type to allow other plugins to read the `meta`
+ *                   field in a type-safe way.
  */
-type ServiceStatus = {
+type ServiceStatus<Meta extends Record<string, any> = unknown> = {
   /**
    * The current availability level of the service.
    */
@@ -51,13 +69,13 @@ type ServiceStatus = {
    * Any JSON-serializable data to be included in the HTTP API response. Useful for providing more fine-grained, 
    * machine-readable information about the service status. May include status information for underlying features.
    */
-  meta?: JSONObject;
+  meta?: Meta;
 } | {
   level: ServiceStatusLevel;
   summary: string; // required when level !== available
   detail?: string;
   documentationUrl?: string;
-  meta?: object;
+  meta?: Meta;
 }
 
 /**
@@ -101,8 +119,6 @@ type JSONValue = string | number | boolean | null | JSONValue[] | JSONObject;
 type JSONObject = Record<string, JSONValue>;
 ```
 
-## API Design
-
 ### Plugin API
 
 ```ts
@@ -128,12 +144,13 @@ interface StatusSetup {
   plugins$: Observable<Record<string, ServiceStatus>>;
 
   /**
-   * The default status of the plugin as specified in the "Status inheritance"
-   * section below.
+   * The status of this plugin as derived from its dependencies.
    * 
-   * Useful when overriding the defaults with `set`.
+   * @remarks
+   * By default, plugins inherit this derived status from their dependencies.
+   * Calling {@link StatusSetup.set} overrides this default status.
    */
-  inherited$: Observable<ServiceStatus>;
+  derivedStatus$: Observable<ServiceStatus>;
 }
 ```
 
@@ -178,16 +195,16 @@ Each member of the `ServiceStatusLevel` enum has specific behaviors associated w
   - All endpoints and apps associated with the service are accessible
 - **`degraded`**:
   - All endpoints and apps are available by default
-  - Some APIs may return `503 Unavailable` responses. This must be implemented directly by the service.
-  - Some plugin contract APIs may throw errors. This must be implemented directly by the service.
+  - Some APIs may return `503 Unavailable` responses. This is not automatic, must be implemented directly by the service.
+  - Some plugin contract APIs may throw errors. This is not automatic, must be implemented directly by the service.
 - **`unavailable`**:
   - All endpoints (with some exceptions in Core) in Kibana return a `503 Unavailable` responses by default. This is automatic.
   - When trying to access any app associated with the unavailable service, the user is presented with an error UI with detail about the outage.
-  - Some plugin contract APIs may throw errors. This must be implemented directly by the service.
+  - Some plugin contract APIs may throw errors. This is not automatic, must be implemented directly by the service.
 - **`critical`**:
   - All endpoints (with some exceptions in Core) in Kibana return a `503 Unavailable` response by default. This is automatic.
   - All applications redirect to the system-wide status page with detail about which services are down and any relevant detail. This is automatic.
-  - Some plugin contract APIs may throw errors. This must be implemented directly by the service.
+  - Some plugin contract APIs may throw errors. This is not automatic, must be implemented directly by the service.
   - This level is reserved for Core services only.
 
 ### Overall status calculation
@@ -233,6 +250,32 @@ As specified in the [_Levels section_](#levels), a service's HTTP endpoints will
 
 In both the `critical` and `unavailable` levels, all of a service's endpoints will return 503s. However, in the `degraded` level, it is up to service authors to decide which endpoints should return a 503. This may be implemented directly in the route handler logic or by using any of the [utilities provided](#status-utilities).
 
+When a 503 is returned either via the default behavior or behavior implemented using the [provided utilities](#status-utilities), the HTTP response will include the following:
+- `Retry-After` header, set to `60` seconds
+- A body with mime type `application/json` containing the status of the service the HTTP route belongs to:
+    ```json5
+    {
+      "error": "Unavailable",
+      // `ServiceStatus#summary`
+      "message": "Newsfeed API cannot be reached",
+      "attributes": {
+        "status": {
+          // Human readable form of `ServiceStatus#level`
+          "level": "critical",
+          // `ServiceStatus#summary`
+          "summary": "Newsfeed API cannot be reached",
+          // `ServiceStatus#detail` or null
+          "detail": null,
+          // `ServiceStatus#documentationUrl` or null
+          "documentationUrl": null,
+          // JSON-serialized from `ServiceStatus#meta` or null
+          "meta": {}
+        }
+      },
+      "statusCode": 503
+    }
+    ```
+
 ## Status Utilities
 
 Though many plugins should be able to rely on the default status inheritance and associated behaviors, there are common patterns and overrides that some plugins will need. The status service should provide some utilities for these common patterns out-of-the-box.
@@ -272,11 +315,15 @@ interface StatusSetup {
      *                  returns a 503. When a function is specified, if that
      *                  function returns `true`, a 503 is returned.
      * @param handler The route handler to execute when a 503 is not returned.
+     * @param options.retryAfter Number of seconds to set the `Retry-After`
+     *                           header to when the endpoint is unavailable.
+     *                           Defaults to `60`.
      */
     unavailableWhen<P, Q, B>(
       predicate: ServiceStatusLevel |
         (self: ServiceStatus, core: CoreStatus, plugins: Record<string, ServiceStatus>) => boolean,
-      handler: RouteHandler<P, Q, B>
+      handler: RouteHandler<P, Q, B>,
+      options?: { retryAfter?: number }
     ): RouteHandler<P, Q, B>;
   }
 }
@@ -325,8 +372,6 @@ We could somewhat reduce the complexity of the status inheritance by leveraging 
 By default, most plugins would not need to do much at all. Today, very few plugins leverage the legacy status system. The majority of ones that do, simply call the `mirrorPluginStatus` utility to follow the status of the legacy elasticsearch plugin.
 
 Plugins that wish to expose more detail about their availability will easily be able to do so, including providing detailed information such as links to documentation to resolve the problem.
-
-Depending on [Drawback #3](#drawbacks), we may need to break the existing status API, however this seems unlikely. This could have a large impact on users who use this API for checking Kibana node health in load balancer configurations.
 
 # How we teach this
 
