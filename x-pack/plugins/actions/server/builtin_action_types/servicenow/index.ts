@@ -18,7 +18,7 @@ import { ServiceNow } from './lib';
 import * as i18n from './translations';
 
 import { ACTION_TYPE_ID } from './constants';
-import { ConfigType, SecretsType, ParamsType, CommentType } from './types';
+import { ConfigType, SecretsType, Comment, ExecutorParams } from './types';
 
 import { ConfigSchemaProps, SecretsSchemaProps, ParamsSchema } from './schema';
 
@@ -77,22 +77,22 @@ async function serviceNowExecutor(
   const actionId = execOptions.actionId;
   const {
     apiUrl,
-    casesConfiguration: { mapping },
+    casesConfiguration: { mapping: configurationMapping },
   } = execOptions.config as ConfigType;
   const { username, password } = execOptions.secrets as SecretsType;
-  const params = execOptions.params as ParamsType;
+  const params = execOptions.params as ExecutorParams;
   const { comments, incidentId, ...restParams } = params;
 
-  const finalMap = buildMap(mapping);
-  const mappedParams = mapParams(restParams, finalMap);
+  const mapping = buildMap(configurationMapping);
+  const incident = mapParams(restParams, mapping);
   const serviceNow = new ServiceNow({ url: apiUrl, username, password });
 
   const handlerInput = {
     incidentId,
     serviceNow,
-    params: { ...params, mappedParams },
-    comments: comments as CommentType[],
-    mapping: finalMap,
+    params: { ...params, incident },
+    comments: comments as Comment[],
+    mapping,
   };
 
   const res: Pick<ActionTypeExecutorResult, 'status'> &

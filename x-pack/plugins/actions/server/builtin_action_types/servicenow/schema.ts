@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const MapsSchema = schema.object({
+export const MapEntrySchema = schema.object({
   source: schema.string(),
   target: schema.string(),
   actionType: schema.oneOf([
@@ -17,7 +17,7 @@ export const MapsSchema = schema.object({
 });
 
 export const CasesConfigurationSchema = schema.object({
-  mapping: schema.arrayOf(MapsSchema),
+  mapping: schema.arrayOf(MapEntrySchema),
 });
 
 export const ConfigSchemaProps = {

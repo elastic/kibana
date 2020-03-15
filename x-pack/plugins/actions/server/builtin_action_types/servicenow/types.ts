@@ -11,7 +11,7 @@ import {
   SecretsSchema,
   ParamsSchema,
   CasesConfigurationSchema,
-  MapsSchema,
+  MapEntrySchema,
   CommentSchema,
 } from './schema';
 
@@ -24,32 +24,42 @@ export type ConfigType = TypeOf<typeof ConfigSchema>;
 // secrets definition
 export type SecretsType = TypeOf<typeof SecretsSchema>;
 
-export type ParamsType = TypeOf<typeof ParamsSchema>;
+export type ExecutorParams = TypeOf<typeof ParamsSchema>;
 
 export type CasesConfigurationType = TypeOf<typeof CasesConfigurationSchema>;
-export type MapsType = TypeOf<typeof MapsSchema>;
-export type CommentType = TypeOf<typeof CommentSchema>;
+export type MapEntry = TypeOf<typeof MapEntrySchema>;
+export type Comment = TypeOf<typeof CommentSchema>;
 
-export type FinalMapping = Map<string, any>;
+export type Mapping = Map<string, any>;
 
-export type UpdateParamsType = Partial<ParamsType>;
+export interface Params extends ExecutorParams {
+  incident: Record<string, any>;
+}
+export interface CreateHandlerArguments {
+  serviceNow: ServiceNow;
+  params: Params;
+  comments: Comment[];
+  mapping: Mapping;
+}
 
-export interface IncidentCreationResponse {
+export type UpdateHandlerArguments = CreateHandlerArguments & {
+  incidentId: string;
+};
+
+export type IncidentHandlerArguments = CreateHandlerArguments & {
+  incidentId: string | null;
+};
+
+export interface HandlerResponse {
   incidentId: string;
   number: string;
-  comments?: CommentsZipped[];
+  comments?: SimpleComment[];
   pushedDate: string;
 }
 
-export interface CommentsZipped {
+export interface SimpleComment {
   commentId: string;
   pushedDate: string;
-}
-
-export interface ApplyActionTypeToFieldsArgs {
-  params: HandlerParamsType;
-  mapping: FinalMapping;
-  incident: Record<string, any>;
 }
 
 export interface AppendFieldArgs {
@@ -69,25 +79,6 @@ export interface AppendInformationFieldArgs {
   mode: string;
 }
 
-export interface HandlerParamsType extends ParamsType {
-  mappedParams: Record<string, any>;
-}
-
-export interface CreateHandlerArguments {
-  serviceNow: ServiceNow;
-  params: HandlerParamsType;
-  comments: CommentType[];
-  mapping: FinalMapping;
-}
-
-export type UpdateHandlerArguments = CreateHandlerArguments & {
-  incidentId: string;
-};
-
-export type IncidentHandlerArguments = CreateHandlerArguments & {
-  incidentId: string | null;
-};
-
 export interface TransformerArgs {
   value: string;
   date?: string;
@@ -96,8 +87,8 @@ export interface TransformerArgs {
 }
 
 export interface PrepareFieldsForTransformArgs {
-  params: HandlerParamsType;
-  mapping: FinalMapping;
+  params: Params;
+  mapping: Mapping;
   append?: boolean;
   defaultPipes?: string[];
 }
@@ -110,7 +101,7 @@ export interface PipedField {
 }
 
 export interface TransformFieldsArgs {
-  params: HandlerParamsType;
+  params: Params;
   fields: PipedField[];
   currentIncident?: Incident;
 }

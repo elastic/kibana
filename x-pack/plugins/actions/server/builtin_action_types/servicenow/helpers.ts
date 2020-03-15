@@ -7,29 +7,29 @@ import { flow } from 'lodash';
 
 import { SUPPORTED_SOURCE_FIELDS } from './constants';
 import {
-  MapsType,
-  FinalMapping,
+  MapEntry,
+  Mapping,
   AppendFieldArgs,
-  ApplyActionTypeToFieldsArgs,
   AppendInformationFieldArgs,
-  HandlerParamsType,
-  CommentType,
+  Params,
+  Comment,
   TransformFieldsArgs,
   PipedField,
   PrepareFieldsForTransformArgs,
+  KeyAny,
 } from './types';
 import { Incident } from './lib/types';
 
 import * as transformers from './transformers';
 
-export const normalizeMapping = (fields: string[], mapping: MapsType[]): MapsType[] => {
+export const normalizeMapping = (supportedFields: string[], mapping: MapEntry[]): MapEntry[] => {
   // Prevent prototype pollution and remove unsupported fields
   return mapping.filter(
-    m => m.source !== '__proto__' && m.target !== '__proto__' && fields.includes(m.source)
+    m => m.source !== '__proto__' && m.target !== '__proto__' && supportedFields.includes(m.source)
   );
 };
 
-export const buildMap = (mapping: MapsType[]): FinalMapping => {
+export const buildMap = (mapping: MapEntry[]): Mapping => {
   return normalizeMapping(SUPPORTED_SOURCE_FIELDS, mapping).reduce((fieldsMap, field) => {
     const { source, target, actionType } = field;
     fieldsMap.set(source, { target, actionType });
@@ -38,11 +38,7 @@ export const buildMap = (mapping: MapsType[]): FinalMapping => {
   }, new Map());
 };
 
-interface KeyAny {
-  [key: string]: unknown;
-}
-
-export const mapParams = (params: any, mapping: FinalMapping) => {
+export const mapParams = (params: any, mapping: Mapping) => {
   return Object.keys(params).reduce((prev: KeyAny, curr: string): KeyAny => {
     const field = mapping.get(curr);
     if (field) {
@@ -56,7 +52,7 @@ export const appendField = ({ value, prefix = '', suffix = '' }: AppendFieldArgs
   return `${prefix}${value} ${suffix}`;
 };
 
-const t = { ...transformers } as { [index: string]: Function };
+const t = { ...transformers } as { [index: string]: Function }; // TODO: Find a better solution exists.
 
 export const prepareFieldsForTransformation = ({
   params,
@@ -64,20 +60,22 @@ export const prepareFieldsForTransformation = ({
   append = false,
   defaultPipes = ['informationCreated'],
 }: PrepareFieldsForTransformArgs): PipedField[] => {
-  let fields = Object.keys(params.mappedParams)
+  let fields = Object.keys(params.incident)
     .filter(p => mapping.get(p).actionType !== 'nothing')
     .map(p => ({
       key: p,
-      value: params.mappedParams[p],
+      value: params.incident[p],
       actionType: mapping.get(p).actionType,
       pipes: [...defaultPipes],
     }));
+
   if (append) {
     fields = fields.map(p => ({
       ...p,
       pipes: p.actionType === 'append' ? [...p.pipes, 'append'] : p.pipes,
     }));
   }
+
   return fields;
 };
 

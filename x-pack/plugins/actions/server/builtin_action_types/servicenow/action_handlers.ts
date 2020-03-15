@@ -7,29 +7,25 @@
 import { zipWith } from 'lodash';
 import { CommentResponse } from './lib/types';
 import {
-  IncidentCreationResponse,
-  CommentType,
-  CommentsZipped,
+  HandlerResponse,
+  Comment,
+  SimpleComment,
   CreateHandlerArguments,
   UpdateHandlerArguments,
   IncidentHandlerArguments,
 } from './types';
 import { ServiceNow } from './lib';
-import {
-  appendInformationToComments,
-  transformFields,
-  prepareFieldsForTransformation,
-} from './helpers';
+import { transformFields, prepareFieldsForTransformation, transformComments } from './helpers';
 
 export const createComments = async (
   serviceNow: ServiceNow,
   incidentId: string,
   key: string,
-  comments: CommentType[]
-): Promise<CommentsZipped[]> => {
+  comments: Comment[]
+): Promise<SimpleComment[]> => {
   const createdComments = await serviceNow.batchCreateComments(incidentId, comments, key);
 
-  return zipWith(comments, createdComments, (a: CommentType, b: CommentResponse) => ({
+  return zipWith(comments, createdComments, (a: Comment, b: CommentResponse) => ({
     commentId: a.commentId,
     pushedDate: b.pushedDate,
   }));
@@ -40,22 +36,22 @@ export const handleCreateIncident = async ({
   params,
   comments,
   mapping,
-}: CreateHandlerArguments): Promise<IncidentCreationResponse> => {
+}: CreateHandlerArguments): Promise<HandlerResponse> => {
   const fields = prepareFieldsForTransformation({
     params,
     mapping,
   });
 
-  const mappedParams = transformFields({
+  const incident = transformFields({
     params,
     fields,
   });
 
   const { incidentId, number, pushedDate } = await serviceNow.createIncident({
-    ...mappedParams,
+    ...incident,
   });
 
-  const res: IncidentCreationResponse = { incidentId, number, pushedDate };
+  const res: HandlerResponse = { incidentId, number, pushedDate };
 
   if (comments && Array.isArray(comments) && comments.length > 0) {
     comments = transformComments(
@@ -77,7 +73,7 @@ export const handleUpdateIncident = async ({
   params,
   comments,
   mapping,
-}: UpdateHandlerArguments): Promise<IncidentCreationResponse> => {
+}: UpdateHandlerArguments): Promise<HandlerResponse> => {
   const currentIncident = await serviceNow.getIncident(incidentId);
   const fields = prepareFieldsForTransformation({
     params,
@@ -86,17 +82,17 @@ export const handleUpdateIncident = async ({
     defaultPipes: ['informationUpdated'],
   });
 
-  const mappedParams = transformFields({
+  const incident = transformFields({
     params,
     fields,
     currentIncident,
   });
 
   const { number, pushedDate } = await serviceNow.updateIncident(incidentId, {
-    ...mappedParams,
+    ...incident,
   });
 
-  const res: IncidentCreationResponse = { incidentId, number, pushedDate };
+  const res: HandlerResponse = { incidentId, number, pushedDate };
 
   if (
     comments &&
@@ -133,7 +129,7 @@ export const handleIncident = async ({
   params,
   comments,
   mapping,
-}: IncidentHandlerArguments): Promise<IncidentCreationResponse> => {
+}: IncidentHandlerArguments): Promise<HandlerResponse> => {
   if (!incidentId) {
     return await handleCreateIncident({ serviceNow, params, comments, mapping });
   } else {

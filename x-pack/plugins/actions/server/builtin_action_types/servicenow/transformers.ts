@@ -10,22 +10,23 @@ export const informationCreated = ({
   value,
   date,
   user,
-  previousValue,
+  ...rest
 }: TransformerArgs): TransformerArgs => ({
   value: `${value} (created at ${date} by ${user})`,
-  previousValue,
+  ...rest,
 });
 
 export const informationUpdated = ({
   value,
   date,
   user,
-  previousValue,
+  ...rest
 }: TransformerArgs): TransformerArgs => ({
   value: `${value} (updated at ${date} by ${user})`,
-  previousValue,
+  ...rest,
 });
 
-export const append = ({ value, previousValue }: TransformerArgs): TransformerArgs => ({
+export const append = ({ value, previousValue, ...rest }: TransformerArgs): TransformerArgs => ({
   value: `${value} ${previousValue}`,
+  ...rest,
 });
