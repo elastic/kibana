@@ -11,6 +11,7 @@ import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiIcon, EuiFormRow } from '@elastic
 import { FieldHook } from '../../../../../shared_imports';
 import { RuleType } from '../../../../../containers/detection_engine/rules/types';
 import * as i18n from './translations';
+import { isMlRule } from '../../helpers';
 
 interface SelectRuleTypeProps {
   field: FieldHook;
@@ -41,7 +42,7 @@ export const SelectRuleType = ({ field }: SelectRuleTypeProps) => {
             icon={<EuiIcon size="l" type="search" />}
             selectable={{
               onClick: setQuery,
-              isSelected: ruleType === 'query',
+              isSelected: !isMlRule(ruleType),
             }}
           />
         </EuiFlexItem>
@@ -53,7 +54,7 @@ export const SelectRuleType = ({ field }: SelectRuleTypeProps) => {
             icon={<EuiIcon size="l" type="machineLearningApp" />}
             selectable={{
               onClick: setMl,
-              isSelected: ruleType === 'machine_learning',
+              isSelected: isMlRule(ruleType),
             }}
           />
         </EuiFlexItem>

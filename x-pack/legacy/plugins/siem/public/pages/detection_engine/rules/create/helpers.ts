@@ -17,6 +17,7 @@ import {
   ScheduleStepRuleJson,
   AboutStepRuleJson,
 } from '../types';
+import { isMlRule } from '../helpers';
 
 const getTimeTypeValue = (time: string): { unit: string; value: number } => {
   const timeObj = {
@@ -52,7 +53,7 @@ const isMlFields = <T>(fields: QueryRuleFields<T> | MlRuleFields<T>): fields is 
   has('anomalyThreshold', fields);
 
 export const filterRuleFieldsForType = <T extends RuleFields>(fields: T, type: RuleType) => {
-  return type === 'machine_learning'
+  return isMlRule(type)
     ? omit(['index', 'queryBar'], fields)
     : omit(['anomalyThreshold', 'mlJobId'], fields);
 };

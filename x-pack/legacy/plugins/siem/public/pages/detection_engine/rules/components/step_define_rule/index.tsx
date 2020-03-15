@@ -21,7 +21,7 @@ import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/pu
 import { useFetchIndexPatterns } from '../../../../../containers/detection_engine/rules';
 import { DEFAULT_INDEX_KEY } from '../../../../../../common/constants';
 import { useUiSetting$ } from '../../../../../lib/kibana';
-import { setFieldValue } from '../../helpers';
+import { setFieldValue, isMlRule } from '../../helpers';
 import * as RuleI18n from '../../translations';
 import { DefineStepRule, RuleStep, RuleStepProps } from '../../types';
 import { StepRuleDescription } from '../description_step';
@@ -104,7 +104,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 }) => {
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [localUseIndicesConfig, setLocalUseIndicesConfig] = useState(false);
-  const [isMlRule, setIsMlRule] = useState(false);
+  const [localIsMlRule, setIsMlRule] = useState(false);
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [mylocalIndicesConfig, setMyLocalIndicesConfig] = useState(
     defaultValues != null ? defaultValues.index : indicesConfig ?? []
@@ -121,6 +121,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     options: { stripEmptyFields: false },
     schema,
   });
+  const clearErrors = useCallback(() => form.reset({ resetValues: false }), [form]);
 
   const onSubmit = useCallback(async () => {
     if (setStepData) {
@@ -178,7 +179,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form} data-test-subj="stepDefineRule">
           <UseField path="ruleType" component={SelectRuleType} />
-          <EuiFormRow fullWidth style={{ display: isMlRule ? 'none' : 'flex' }}>
+          <EuiFormRow fullWidth style={{ display: localIsMlRule ? 'none' : 'flex' }}>
             <>
               <CommonUseField
                 path="index"
@@ -225,7 +226,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               />
             </>
           </EuiFormRow>
-          <EuiFormRow fullWidth style={{ display: isMlRule ? 'flex' : 'none' }}>
+          <EuiFormRow fullWidth style={{ display: localIsMlRule ? 'flex' : 'none' }}>
             <>
               <UseField path="mlJobId" component={MlJobSelect} />
               <UseField path="anomalyThreshold" component={AnomalyThresholdSlider} />
@@ -245,10 +246,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 }
               }
 
-              if (ruleType === 'machine_learning' && !isMlRule) {
+              if (isMlRule(ruleType) && !localIsMlRule) {
                 setIsMlRule(true);
-              } else if (ruleType !== 'machine_learning' && isMlRule) {
+                clearErrors();
+              } else if (!isMlRule(ruleType) && localIsMlRule) {
                 setIsMlRule(false);
+                clearErrors();
               }
 
               return null;

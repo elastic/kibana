@@ -19,6 +19,7 @@ import {
   ValidationFunc,
 } from '../../../../../shared_imports';
 import { CUSTOM_QUERY_REQUIRED, INVALID_CUSTOM_QUERY, INDEX_HELPER_TEXT } from './translations';
+import { isMlRule } from '../../helpers';
 
 export const schema: FormSchema = {
   index: {
@@ -36,7 +37,7 @@ export const schema: FormSchema = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData }] = args;
-          const needsValidation = formData.ruleType !== 'machine_learning';
+          const needsValidation = !isMlRule(formData.ruleType);
 
           if (!needsValidation) {
             return;
@@ -68,7 +69,7 @@ export const schema: FormSchema = {
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ value, path, formData }] = args;
           const { query, filters } = value as FieldValueQueryBar;
-          const needsValidation = formData.ruleType !== 'machine_learning';
+          const needsValidation = !isMlRule(formData.ruleType);
           if (!needsValidation) {
             return;
           }
@@ -88,7 +89,7 @@ export const schema: FormSchema = {
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ value, path, formData }] = args;
           const { query } = value as FieldValueQueryBar;
-          const needsValidation = formData.ruleType !== 'machine_learning';
+          const needsValidation = !isMlRule(formData.ruleType);
           if (!needsValidation) {
             return;
           }

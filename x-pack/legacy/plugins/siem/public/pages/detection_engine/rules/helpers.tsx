@@ -10,7 +10,7 @@ import moment from 'moment';
 import { useLocation } from 'react-router-dom';
 
 import { Filter } from '../../../../../../../../src/plugins/data/public';
-import { Rule } from '../../../containers/detection_engine/rules';
+import { Rule, RuleType } from '../../../containers/detection_engine/rules';
 import { FormData, FormHook, FormSchema } from '../../../shared_imports';
 import { AboutStepRule, DefineStepRule, IMitreEnterpriseAttack, ScheduleStepRule } from './types';
 
@@ -138,6 +138,8 @@ export const setFieldValue = (
       form.setFieldValue(key, val);
     }
   });
+
+export const isMlRule = (ruleType: RuleType) => ruleType === 'machine_learning';
 
 export const redirectToDetections = (
   isSignalIndexExists: boolean | null,
