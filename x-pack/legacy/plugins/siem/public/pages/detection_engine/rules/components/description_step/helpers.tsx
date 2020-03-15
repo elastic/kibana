@@ -33,8 +33,7 @@ const NoteDescriptionContainer = styled(EuiFlexItem)`
   overflow-y: hidden;
 `;
 
-export const isNotEmptyArray = (values: string[]) =>
-  !isEmpty(values) && values.filter(val => !isEmpty(val)).length > 0;
+export const isNotEmptyArray = (values: string[]) => !isEmpty(values.join(''));
 
 const EuiBadgeWrap = styled(EuiBadge)`
   .euiBadge__text {
