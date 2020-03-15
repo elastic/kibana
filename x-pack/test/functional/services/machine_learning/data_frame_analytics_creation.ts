@@ -4,17 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
 import {
-  DataFrameAnalyticsConfig,
-  getAnalysisType,
-} from '../../../../plugins/ml/public/application/data_frame_analytics/common';
-import {
-  isClassificationAnalysis,
-  isRegressionAnalysis,
+  ClassificationAnalysis,
+  RegressionAnalysis,
 } from '../../../../plugins/ml/public/application/data_frame_analytics/common/analytics';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlCommon } from './common';
+
+enum ANALYSIS_CONFIG_TYPE {
+  OUTLIER_DETECTION = 'outlier_detection',
+  REGRESSION = 'regression',
+  CLASSIFICATION = 'classification',
+}
+
+const isRegressionAnalysis = (arg: any): arg is RegressionAnalysis => {
+  const keys = Object.keys(arg);
+  return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.REGRESSION;
+};
+
+const isClassificationAnalysis = (arg: any): arg is ClassificationAnalysis => {
+  const keys = Object.keys(arg);
+  return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
+};
 
 export function MachineLearningDataFrameAnalyticsCreationProvider(
   { getService }: FtrProviderContext,
@@ -363,7 +376,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertInitialCloneJobForm(job: DataFrameAnalyticsConfig) {
-      const jobType = getAnalysisType(job.analysis);
+      const jobType = Object.keys(job.analysis)[0];
       await this.assertJobTypeSelection(jobType);
       await this.assertJobIdValue(''); // id should be empty
       await this.assertJobDescriptionValue(String(job.description));

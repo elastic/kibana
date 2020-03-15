@@ -35,7 +35,7 @@ interface Regression {
   training_percent?: number;
   prediction_field_name?: string;
 }
-interface RegressionAnalysis {
+export interface RegressionAnalysis {
   [key: string]: Regression;
   regression: Regression;
 }
@@ -46,7 +46,7 @@ interface Classification {
   num_top_classes?: string;
   prediction_field_name?: string;
 }
-interface ClassificationAnalysis {
+export interface ClassificationAnalysis {
   [key: string]: Classification;
   classification: Classification;
 }
