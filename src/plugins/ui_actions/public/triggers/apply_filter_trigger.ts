@@ -17,9 +17,11 @@
  * under the License.
  */
 
-export * from './trigger';
-export * from './trigger_contract';
-export * from './trigger_internal';
-export * from './select_range_trigger';
-export * from './value_click_trigger';
-export * from './apply_filter_trigger';
+import { Trigger } from '.';
+
+export const APPLY_FILTER_TRIGGER = 'FILTER_TRIGGER';
+export const applyFilterTrigger: Trigger<'FILTER_TRIGGER'> = {
+  id: APPLY_FILTER_TRIGGER,
+  title: 'Filter click',
+  description: 'Triggered when user applies filter to an embeddable.',
+};
