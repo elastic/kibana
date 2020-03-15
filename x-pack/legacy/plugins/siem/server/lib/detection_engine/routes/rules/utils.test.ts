@@ -29,10 +29,19 @@ import { createPromiseFromStreams } from '../../../../../../../../../src/legacy/
 import { PartialAlert } from '../../../../../../../../plugins/alerting/server';
 import { SanitizedAlert } from '../../../../../../../../plugins/alerting/server/types';
 import { RuleAlertType } from '../../rules/types';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
 describe('utils', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   describe('transformAlertToRule', () => {
     test('should work with a full data set', () => {
       const fullRule = getResult();

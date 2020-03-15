@@ -12,8 +12,17 @@ import {
 } from '../routes/__mocks__/request_responses';
 import * as readRules from './read_rules';
 import { alertsClientMock } from '../../../../../../../plugins/alerting/server/mocks';
+import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../feature_flags';
 
 describe('get_export_by_object_ids', () => {
+  beforeAll(() => {
+    setFeatureFlagsForTestsOnly();
+  });
+
+  afterAll(() => {
+    unSetFeatureFlagsForTestsOnly();
+  });
+
   beforeEach(() => {
     jest.resetAllMocks();
     jest.restoreAllMocks();
