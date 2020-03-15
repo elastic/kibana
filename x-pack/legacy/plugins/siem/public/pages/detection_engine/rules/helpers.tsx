@@ -31,11 +31,14 @@ export const getStepsData = ({
     rule != null
       ? {
           isNew: false,
-          index: rule.index,
+          ruleType: rule.type,
+          anomalyThreshold: rule.anomaly_threshold ?? 50,
+          mlJobId: rule.ml_job_id ?? '',
+          index: rule.index ?? [],
           queryBar: {
-            query: { query: rule.query as string, language: rule.language },
-            filters: rule.filters as Filter[],
-            saved_id: rule.saved_id ?? null,
+            query: { query: rule.query ?? '', language: rule.language ?? '' },
+            filters: (rule.filters ?? []) as Filter[],
+            saved_id: rule.saved_id,
           },
         }
       : null;
