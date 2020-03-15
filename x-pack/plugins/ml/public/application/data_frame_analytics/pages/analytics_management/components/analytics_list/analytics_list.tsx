@@ -254,7 +254,8 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     expandedRowItemIds,
     setExpandedRowItemIds,
     isManagementTable,
-    isMlEnabledInSpace
+    isMlEnabledInSpace,
+    createAnalyticsForm
   );
 
   const sorting = {
@@ -375,6 +376,10 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           })}
         />
       </div>
+
+      {!isManagementTable && createAnalyticsForm?.state.isModalVisible && (
+        <CreateAnalyticsFlyoutWrapper {...createAnalyticsForm} />
+      )}
     </Fragment>
   );
 };
