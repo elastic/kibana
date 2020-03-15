@@ -20,7 +20,6 @@ export const ActionListIcon = styled(EuiIcon)`
   margin-right: 8px;
 `;
 interface Props {
-  closeModal: () => void;
   deleteTimelines: DeleteTimelines;
   onComplete?: () => void;
   isModalOpen: boolean;
@@ -30,27 +29,25 @@ interface Props {
 /**
  * Renders a button that when clicked, displays the `Delete Timeline` modal
  */
-export const DeleteTimelineModalButton = React.memo<Props>(
-  ({ closeModal, deleteTimelines, isModalOpen, savedObjectIds, title, onComplete }) => {
+export const DeleteTimelineModalOverlay = React.memo<Props>(
+  ({ deleteTimelines, isModalOpen, savedObjectIds, title, onComplete }) => {
     const internalCloseModal = useCallback(() => {
-      closeModal();
       if (onComplete != null) {
         onComplete();
       }
-    }, [closeModal, onComplete]);
+    }, [onComplete]);
     const onDelete = useCallback(() => {
       if (deleteTimelines != null && savedObjectIds != null) {
         deleteTimelines(savedObjectIds);
       }
-      closeModal();
       if (onComplete != null) onComplete();
-    }, [closeModal, deleteTimelines, savedObjectIds]);
+    }, [deleteTimelines, savedObjectIds, onComplete]);
     return (
       <>
         {isModalOpen && <RemovePopover data-test-subj="remove-popover" />}
         {isModalOpen ? (
           <EuiOverlayMask>
-            <EuiModal maxWidth={DELETE_TIMELINE_MODAL_WIDTH} onClose={closeModal}>
+            <EuiModal maxWidth={DELETE_TIMELINE_MODAL_WIDTH} onClose={internalCloseModal}>
               <DeleteTimelineModal
                 data-test-subj="delete-timeline-modal"
                 onDelete={onDelete}
@@ -64,4 +61,4 @@ export const DeleteTimelineModalButton = React.memo<Props>(
     );
   }
 );
-DeleteTimelineModalButton.displayName = 'DeleteTimelineModalButton';
+DeleteTimelineModalOverlay.displayName = 'DeleteTimelineModalOverlay';

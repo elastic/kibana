@@ -37,6 +37,11 @@ type Props = Pick<
   'onlyFavorites' | 'onQueryChange' | 'onToggleOnlyFavorites' | 'query' | 'totalSearchResultsCount'
 >;
 
+const searchBox = {
+  placeholder: i18n.SEARCH_PLACEHOLDER,
+  incremental: false,
+};
+
 /**
  * Renders the row containing the search input and Only Favorites filter
  */
@@ -46,14 +51,7 @@ export const SearchRow = React.memo<Props>(
       <SearchRowContainer>
         <SearchRowFlexGroup gutterSize="s">
           <EuiFlexItem>
-            <EuiSearchBar
-              data-test-subj="search-bar"
-              box={{
-                placeholder: i18n.SEARCH_PLACEHOLDER,
-                incremental: false,
-              }}
-              onChange={onQueryChange}
-            />
+            <EuiSearchBar data-test-subj="search-bar" box={searchBox} onChange={onQueryChange} />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>

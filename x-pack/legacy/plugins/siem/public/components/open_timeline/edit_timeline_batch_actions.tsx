@@ -7,14 +7,14 @@
 import { EuiContextMenuPanel, EuiContextMenuItem, EuiBasicTable } from '@elastic/eui';
 import React, { useCallback, Dispatch } from 'react';
 import { TimelineDownloader } from './export_timeline/export_timeline';
-import { DeleteTimelineModalButton } from './delete_timeline_modal';
+import { DeleteTimelineModalOverlay } from './delete_timeline_modal';
 import * as i18n from './translations';
 import { DeleteTimeline, DeleteTimelines, OpenTimelineResult } from './types';
 import { ExportTimeline } from './export_timeline';
 import { useEditTimelineActions } from './edit_timeline_actions';
 import { ActionToaster } from '../toasters';
 
-export const useEditTimelinBatcheActions = ({
+export const useEditTimelinBatchActions = ({
   deleteTimelines,
   dispatchToaster,
   selectedItems,
@@ -41,6 +41,8 @@ export const useEditTimelinBatcheActions = ({
       if (tableRef != null && tableRef.current != null) {
         tableRef.current.changeSelection([]);
       }
+      disableExportTimelineDownloader();
+      onCloseDeleteTimelineModal();
     },
     [tableRef.current]
   );
@@ -53,13 +55,10 @@ export const useEditTimelinBatcheActions = ({
             exportedIds={exportedIds}
             getExportedData={getExportedData}
             isEnableDownloader={isEnableDownloader}
-            onDownloadComplete={onCompleteBatchActions.bind(null, closePopover)}
-            selectedItems={selectedItems}
-            disableExportTimelineDownloader={disableExportTimelineDownloader}
+            onComplete={onCompleteBatchActions.bind(null, closePopover)}
           />
           {deleteTimelines != null && (
-            <DeleteTimelineModalButton
-              closeModal={onCloseDeleteTimelineModal}
+            <DeleteTimelineModalOverlay
               deleteTimelines={deleteTimelines}
               onComplete={onCompleteBatchActions.bind(null, closePopover)}
               isModalOpen={isDeleteTimelineModalOpen}

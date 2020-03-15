@@ -20,11 +20,12 @@ interface Props {
 export const DELETE_TIMELINE_MODAL_WIDTH = 600; // px
 
 const getDeletedTitles = (title: string | JSX.Element | null | undefined) => {
-  if (title == null) return `"${i18n.UNTITLED_TIMELINE}"`;
-
-  if (typeof title === 'string') {
-    return title.trim().length > 0 ? title.trim() : `"${i18n.UNTITLED_TIMELINE}"`;
-  } else return title;
+  if (title != null && React.isValidElement(title)) {
+    return title;
+  } else if (title != null && typeof title === 'string' && title.trim().length > 0) {
+    return title.trim();
+  }
+  return i18n.UNTITLED_TIMELINE;
 };
 
 /**

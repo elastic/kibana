@@ -5,7 +5,7 @@
  */
 
 import { EuiPanel, EuiBasicTable } from '@elastic/eui';
-import React, { useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { OpenTimelineProps, OpenTimelineResult } from './types';
@@ -23,7 +23,7 @@ import {
   UtilityBarSection,
   UtilityBarAction,
 } from '../utility_bar';
-import { useEditTimelinBatcheActions } from './edit_timeline_batch_actions';
+import { useEditTimelinBatchActions } from './edit_timeline_batch_actions';
 import { useEditTimelineActions } from './edit_timeline_actions';
 export const OpenTimeline = React.memo<OpenTimelineProps>(
   ({
@@ -56,17 +56,16 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
 
     const {
       actionItem,
-      disableExportTimelineDownloader,
       enableExportTimelineDownloader,
       exportedIds,
       getExportedData,
       isEnableDownloader,
       isDeleteTimelineModalOpen,
       onOpenDeleteTimelineModal,
-      onCloseDeleteTimelineModal,
+      onCompleteEditTimelineAction,
     } = useEditTimelineActions();
 
-    const { onCompleteBatchActions, getBatchItemsPopoverContent } = useEditTimelinBatcheActions({
+    const { getBatchItemsPopoverContent } = useEditTimelinBatchActions({
       deleteTimelines,
       dispatchToaster,
       selectedItems,
@@ -94,15 +93,13 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     return (
       <>
         <EditTimelineActions
+          actionItem={actionItem}
+          deleteTimelines={deleteTimelines}
           exportedIds={exportedIds}
           getExportedData={getExportedData}
-          isEnableDownloader={isEnableDownloader}
-          onCompleteBatchActions={onCompleteBatchActions}
-          actionItem={actionItem}
-          disableExportTimelineDownloader={disableExportTimelineDownloader}
-          onCloseDeleteTimelineModal={onCloseDeleteTimelineModal}
-          deleteTimelines={deleteTimelines}
           isDeleteTimelineModalOpen={isDeleteTimelineModalOpen}
+          isEnableDownloader={isEnableDownloader}
+          onComplete={onCompleteEditTimelineAction}
         />
 
         <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>
@@ -144,9 +141,9 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
                 <UtilityBarAction
                   iconSide="right"
                   iconType="refresh"
-                  onClick={() => {
+                  onClick={useCallback(() => {
                     if (typeof refetch === 'function') refetch();
-                  }}
+                  }, [refetch])}
                 >
                   {i18n.REFRESH}
                 </UtilityBarAction>
@@ -155,11 +152,13 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           </UtilityBar>
 
           <TimelinesTable
-            actionTimelineToShow={
-              onDeleteSelected != null && deleteTimelines != null
-                ? ['delete', 'duplicate', 'export', 'selectable']
-                : ['duplicate', 'export', 'selectable']
-            }
+            actionTimelineToShow={useMemo(
+              () =>
+                onDeleteSelected != null && deleteTimelines != null
+                  ? ['delete', 'duplicate', 'export', 'selectable']
+                  : ['duplicate', 'export', 'selectable'],
+              [onDeleteSelected, deleteTimelines]
+            )}
             data-test-subj="timelines-table"
             deleteTimelines={deleteTimelines}
             defaultPageSize={defaultPageSize}

@@ -5,17 +5,12 @@
  */
 
 import React, { useState, useCallback, Dispatch, SetStateAction } from 'react';
-import {
-  OpenTimelineResult,
-  DeleteTimelines,
-  DisableExportTimelineDownloader,
-  OnCloseDeleteTimelineModal,
-} from '../types';
+import { OpenTimelineResult, DeleteTimelines } from '../types';
 import { KibanaServices } from '../../../lib/kibana';
 import { ExportSelectedData } from '../../generic_downloader';
 import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
 import { TimelineDownloader } from './export_timeline';
-import { DeleteTimelineModalButton } from '../delete_timeline_modal';
+import { DeleteTimelineModalOverlay } from '../delete_timeline_modal';
 
 export interface ExportTimeline {
   disableExportTimelineDownloader: () => void;
@@ -94,23 +89,19 @@ export const useExportTimeline = ({
 const EditTimelineActionsComponent: React.FC<{
   actionItem: OpenTimelineResult | undefined;
   deleteTimelines: DeleteTimelines | undefined;
-  disableExportTimelineDownloader: DisableExportTimelineDownloader;
   exportedIds: string[] | undefined;
   getExportedData: ExportSelectedData;
   isEnableDownloader: boolean;
-  onCloseDeleteTimelineModal: OnCloseDeleteTimelineModal;
-  onCompleteBatchActions: () => void;
   isDeleteTimelineModalOpen: boolean;
+  onComplete: () => void;
 }> = ({
   actionItem,
   deleteTimelines,
   exportedIds,
   getExportedData,
   isEnableDownloader,
-  onCompleteBatchActions,
-  disableExportTimelineDownloader,
-  onCloseDeleteTimelineModal,
   isDeleteTimelineModalOpen,
+  onComplete,
 }) =>
   actionItem ? (
     <>
@@ -118,16 +109,13 @@ const EditTimelineActionsComponent: React.FC<{
         exportedIds={exportedIds}
         getExportedData={getExportedData}
         isEnableDownloader={isEnableDownloader}
-        onDownloadComplete={onCompleteBatchActions}
-        selectedItems={[actionItem]}
-        disableExportTimelineDownloader={disableExportTimelineDownloader}
+        onComplete={onComplete}
       />
       {deleteTimelines != null && actionItem.savedObjectId && (
-        <DeleteTimelineModalButton
-          closeModal={onCloseDeleteTimelineModal}
+        <DeleteTimelineModalOverlay
           deleteTimelines={deleteTimelines}
-          onComplete={onCompleteBatchActions}
           isModalOpen={isDeleteTimelineModalOpen}
+          onComplete={onComplete}
           savedObjectIds={[actionItem.savedObjectId]}
           title={`"${actionItem?.title}"`}
         />

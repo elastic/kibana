@@ -53,7 +53,7 @@ export const GenericDownloaderComponent = ({
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
-    async function exportData() {
+    const exportData = async () => {
       if (
         anchorRef &&
         anchorRef.current &&
@@ -96,7 +96,7 @@ export const GenericDownloaderComponent = ({
           }
         }
       }
-    }
+    };
 
     exportData();
 

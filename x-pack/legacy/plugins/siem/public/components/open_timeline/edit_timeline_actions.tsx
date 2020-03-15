@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useExportTimeline, ExportTimeline } from './export_timeline/.';
 import { OpenTimelineResult, DeleteTimeline } from './types';
 import { useDeleteTimeline } from './delete_timeline_modal/delete_timeline_modal';
@@ -20,8 +20,14 @@ export const useEditTimelineActions = (selectedItems?: OpenTimelineResult[] | un
     setActionTimeline,
   });
 
+  const onCompleteEditTimelineAction = useCallback(() => {
+    deleteTimeline.onCloseDeleteTimelineModal();
+    exportTimeline.disableExportTimelineDownloader();
+  }, [deleteTimeline.onCloseDeleteTimelineModal, exportTimeline.disableExportTimelineDownloader]);
+
   return {
     actionItem,
+    onCompleteEditTimelineAction,
     setActionTimeline,
     ...deleteTimeline,
     ...exportTimeline,
