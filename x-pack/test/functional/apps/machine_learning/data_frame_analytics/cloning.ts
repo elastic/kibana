@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { DeepPartial } from '../../../../../plugins/ml/common/types/common';
 import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -11,18 +12,20 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
-  describe('classification cloning', function() {
+  describe('data frame analytics jobs cloning supported by UI form', function() {
     this.tags(['smoke']);
 
     const testDataList: Array<{
       suiteTitle: string;
-      job: Partial<DataFrameAnalyticsConfig>;
+      archive: string;
+      job: DeepPartial<DataFrameAnalyticsConfig>;
     }> = (() => {
       const timestamp = Date.now();
 
       return [
         {
           suiteTitle: 'classification job supported by the form',
+          archive: 'ml/bm_classification',
           job: {
             id: `bm_1_${timestamp}`,
             description:
@@ -42,7 +45,7 @@ export default function({ getService }: FtrProviderContext) {
             analysis: {
               classification: {
                 dependent_variable: 'y',
-                training_percent: 2,
+                training_percent: 20,
               },
             },
             analyzed_fields: {
@@ -53,16 +56,74 @@ export default function({ getService }: FtrProviderContext) {
             allow_lazy_start: false,
           },
         },
+        {
+          suiteTitle: 'outlier detection job supported by the form',
+          archive: 'ml/ihp_outlier',
+          job: {
+            id: `ihp_1_${timestamp}`,
+            description: 'This is the job description',
+            source: {
+              index: ['ihp_outlier'],
+              query: {
+                match_all: {},
+              },
+            },
+            dest: {
+              get index(): string {
+                return `user-ihp_1_${timestamp}`;
+              },
+              results_field: 'ml',
+            },
+            analysis: {
+              outlier_detection: {},
+            },
+            analyzed_fields: {
+              includes: [],
+              excludes: [],
+            },
+            model_memory_limit: '55mb',
+          },
+        },
+        {
+          suiteTitle: 'regression job supported by the form',
+          archive: 'ml/egs_regression',
+          job: {
+            id: `egs_1_${timestamp}`,
+            description: 'This is the job description',
+            source: {
+              index: ['egs_regression'],
+              query: {
+                match_all: {},
+              },
+            },
+            dest: {
+              get index(): string {
+                return `user-egs_1_${timestamp}`;
+              },
+              results_field: 'ml',
+            },
+            analysis: {
+              regression: {
+                dependent_variable: 'stab',
+                training_percent: 20,
+              },
+            },
+            analyzed_fields: {
+              includes: [],
+              excludes: [],
+            },
+            model_memory_limit: '105mb',
+          },
+        },
       ];
     })();
 
     before(async () => {
-      await esArchiver.load('ml/bm_classification');
       // Create jobs for cloning
       for (const testData of testDataList) {
+        await esArchiver.load(testData.archive);
         await ml.api.createDataFrameAnalyticsJob(testData.job as DataFrameAnalyticsConfig);
       }
-
       await ml.securityUI.loginAsMlPowerUser();
     });
 
@@ -70,9 +131,9 @@ export default function({ getService }: FtrProviderContext) {
       await ml.api.cleanMlIndices();
       // Clean destination indices of the original jobs
       for (const testData of testDataList) {
-        await ml.api.deleteIndices(testData.job.dest!.index);
+        await ml.api.deleteIndices(testData.job.dest!.index as string);
+        await esArchiver.unload(testData.archive);
       }
-      await esArchiver.unload('ml/bm_classification');
     });
 
     for (const testData of testDataList) {
