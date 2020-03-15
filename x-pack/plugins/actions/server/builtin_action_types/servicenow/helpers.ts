@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { flow } from 'lodash';
 
 import { SUPPORTED_SOURCE_FIELDS } from './constants';
 import {
@@ -13,8 +14,13 @@ import {
   AppendInformationFieldArgs,
   HandlerParamsType,
   CommentType,
+  TransformFieldsArgs,
+  PipedField,
+  PrepareFieldsForTransformArgs,
 } from './types';
 import { Incident } from './lib/types';
+
+import * as transformers from './transformers';
 
 export const normalizeMapping = (fields: string[], mapping: MapsType[]): MapsType[] => {
   // Prevent prototype pollution and remove unsupported fields
@@ -50,41 +56,45 @@ export const appendField = ({ value, prefix = '', suffix = '' }: AppendFieldArgs
   return `${prefix}${value} ${suffix}`;
 };
 
-export const applyActionTypeToFields = ({
+const t = { ...transformers } as { [index: string]: Function };
+
+export const prepareFieldsForTransformation = ({
   params,
   mapping,
-  incident,
-}: ApplyActionTypeToFieldsArgs): Incident => {
-  // Ignore fields that have as actionType = nothing
-  const filterMappedParams = Object.keys(params.mappedParams)
-    .filter((p: string) => mapping.get(p).actionType !== 'nothing')
-    .reduce((fields: KeyAny, paramKey: string) => {
-      fields[paramKey] = params.mappedParams[paramKey];
-      return fields;
-    }, {} as KeyAny);
+  append = false,
+  defaultPipes = ['informationCreated'],
+}: PrepareFieldsForTransformArgs): PipedField[] => {
+  let fields = Object.keys(params.mappedParams)
+    .filter(p => mapping.get(p).actionType !== 'nothing')
+    .map(p => ({
+      key: p,
+      value: params.mappedParams[p],
+      actionType: mapping.get(p).actionType,
+      pipes: [...defaultPipes],
+    }));
+  if (append) {
+    fields = fields.map(p => ({
+      ...p,
+      pipes: p.actionType === 'append' ? [...p.pipes, 'append'] : p.pipes,
+    }));
+  }
+  return fields;
+};
 
-  // Append previous incident's value to fields that have as actionType = append
-  // otherwise overwrite
-
-  const paramsWithInformation = appendInformationToIncident(
-    { ...params, mappedParams: filterMappedParams },
-    'update'
-  );
-
-  return Object.keys(paramsWithInformation).reduce((fields: Incident, paramKey: string) => {
-    const actionType = mapping.get(paramKey).actionType;
-    const incidentCurrentFieldValue = incident[paramKey] ?? '';
-
-    if (actionType === 'append') {
-      fields[paramKey] = appendField({
-        value: paramsWithInformation[paramKey] as string,
-        suffix: incidentCurrentFieldValue,
-      });
-    } else {
-      fields[paramKey] = paramsWithInformation[paramKey] as string;
-    }
-
-    return fields;
+export const transformFields = ({
+  params,
+  fields,
+  currentIncident,
+}: TransformFieldsArgs): Incident => {
+  return fields.reduce((prev: Incident, cur) => {
+    const transform = flow(...cur.pipes.map(p => t[p]));
+    prev[cur.key] = transform({
+      value: cur.value,
+      date: params.createdAt,
+      user: params.createdBy.fullName ?? '',
+      previousValue: currentIncident ? currentIncident[cur.key] : '',
+    }).value;
+    return prev;
   }, {} as Incident);
 };
 
@@ -101,30 +111,17 @@ export const appendInformationToField = ({
   });
 };
 
-export const appendInformationToIncident = (params: HandlerParamsType, mode: string): Incident => {
-  return Object.keys(params.mappedParams).reduce((fields: Incident, paramKey: string) => {
-    fields[paramKey] = appendInformationToField({
-      value: params.mappedParams[paramKey],
-      user: params.createdBy.fullName ?? '',
-      date: params.createdAt,
-      mode,
-    });
-    return fields;
-  }, {} as Incident);
-};
-
-export const appendInformationToComments = (
-  comments: CommentType[],
-  params: HandlerParamsType,
-  mode: string
-): CommentType[] => {
+export const transformComments = (
+  comments: Comment[],
+  params: Params,
+  pipes: string[]
+): Comment[] => {
   return comments.map(c => ({
     ...c,
-    comment: appendInformationToField({
+    comment: flow(...pipes.map(p => t[p]))({
       value: c.comment,
-      user: params.createdBy.fullName ?? '',
       date: params.createdAt,
-      mode,
-    }),
+      user: params.createdBy.fullName ?? '',
+    }).value,
   }));
 };

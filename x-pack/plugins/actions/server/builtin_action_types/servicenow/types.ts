@@ -16,6 +16,7 @@ import {
 } from './schema';
 
 import { ServiceNow } from './lib';
+import { Incident } from './lib/types';
 
 // config definition
 export type ConfigType = TypeOf<typeof ConfigSchema>;
@@ -86,3 +87,30 @@ export type UpdateHandlerArguments = CreateHandlerArguments & {
 export type IncidentHandlerArguments = CreateHandlerArguments & {
   incidentId: string | null;
 };
+
+export interface TransformerArgs {
+  value: string;
+  date?: string;
+  user?: string;
+  previousValue?: string;
+}
+
+export interface PrepareFieldsForTransformArgs {
+  params: HandlerParamsType;
+  mapping: FinalMapping;
+  append?: boolean;
+  defaultPipes?: string[];
+}
+
+export interface PipedField {
+  key: string;
+  value: string;
+  actionType: string;
+  pipes: string[];
+}
+
+export interface TransformFieldsArgs {
+  params: HandlerParamsType;
+  fields: PipedField[];
+  currentIncident?: Incident;
+}

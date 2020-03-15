@@ -16,9 +16,9 @@ import {
 } from './types';
 import { ServiceNow } from './lib';
 import {
-  appendInformationToIncident,
   appendInformationToComments,
-  applyActionTypeToFields,
+  transformFields,
+  prepareFieldsForTransformation,
 } from './helpers';
 
 export const createComments = async (
@@ -41,7 +41,15 @@ export const handleCreateIncident = async ({
   comments,
   mapping,
 }: CreateHandlerArguments): Promise<IncidentCreationResponse> => {
-  const mappedParams = appendInformationToIncident(params, 'create');
+  const fields = prepareFieldsForTransformation({
+    params,
+    mapping,
+  });
+
+  const mappedParams = transformFields({
+    params,
+    fields,
+  });
 
   const { incidentId, number, pushedDate } = await serviceNow.createIncident({
     ...mappedParams,
@@ -50,7 +58,11 @@ export const handleCreateIncident = async ({
   const res: IncidentCreationResponse = { incidentId, number, pushedDate };
 
   if (comments && Array.isArray(comments) && comments.length > 0) {
-    comments = appendInformationToComments(comments, params, 'create');
+    comments = transformComments(
+      comments.filter(c => !c.updatedAt),
+      params,
+      ['informationCreated']
+    );
     res.comments = [
       ...(await createComments(serviceNow, incidentId, mapping.get('comments').target, comments)),
     ];
@@ -66,12 +78,18 @@ export const handleUpdateIncident = async ({
   comments,
   mapping,
 }: UpdateHandlerArguments): Promise<IncidentCreationResponse> => {
-  const serviceNowIncident = await serviceNow.getIncident(incidentId);
-
-  const mappedParams = applyActionTypeToFields({
+  const currentIncident = await serviceNow.getIncident(incidentId);
+  const fields = prepareFieldsForTransformation({
     params,
     mapping,
-    incident: serviceNowIncident,
+    append: true,
+    defaultPipes: ['informationUpdated'],
+  });
+
+  const mappedParams = transformFields({
+    params,
+    fields,
+    currentIncident,
   });
 
   const { number, pushedDate } = await serviceNow.updateIncident(incidentId, {
@@ -86,16 +104,18 @@ export const handleUpdateIncident = async ({
     comments.length > 0 &&
     mapping.get('comments').actionType !== 'nothing'
   ) {
-    const commentsToCreate = appendInformationToComments(
+    const commentsToCreate = transformComments(
       comments.filter(c => !c.updatedAt),
       params,
-      'create'
+      ['informationCreated']
     );
-    const commentsToUpdate = appendInformationToComments(
+
+    const commentsToUpdate = transformComments(
       comments.filter(c => c.updatedAt),
       params,
-      'update'
+      ['informationUpdated']
     );
+
     res.comments = [
       ...(await createComments(serviceNow, incidentId, mapping.get('comments').target, [
         ...commentsToCreate,
