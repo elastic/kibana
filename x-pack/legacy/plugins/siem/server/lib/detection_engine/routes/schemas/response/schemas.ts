@@ -26,10 +26,19 @@ export const file_name = t.string;
 export const filters = t.array(t.unknown); // Filters are not easily type-able yet
 
 /**
- * TODO: Right now the actions is an "unknown", when it could more than likely
- * become the actual AlertAction as a type.
+ * Params is an "object", since it is a type of AlertActionParams which is action templates.
+ * @see x-pack/plugins/alerting/common/alert.ts
  */
-export const actions = t.array(t.unknown); // Actions are not easily type-able yet
+export const action = t.exact(
+  t.type({
+    group: t.string,
+    id: t.string,
+    actionTypeId: t.string,
+    params: t.object,
+  })
+);
+
+export const actions = t.array(action);
 
 // TODO: Create a regular expression type or custom date math part type here
 export const from = t.string;
