@@ -17,7 +17,15 @@ export default function({ getService }: FtrProviderContext) {
   const nextPrevPrefixPageSize = 'page_size=10';
   const nextPrevPrefix = `${nextPrevPrefixQuery}&${nextPrevPrefixDateRange}&${nextPrevPrefixSort}&${nextPrevPrefixOrder}&${nextPrevPrefixPageSize}`;
 
-  describe('test alerts api', () => {
+  function wait(ms){
+    var start = new Date().getTime();
+    var end = start;
+    while(end < start + ms) {
+      end = new Date().getTime();
+    }
+  }
+
+  describe.only('test alerts api', () => {
     describe('Tests for alerts API', () => {
       before(() => esArchiver.load('endpoint/alerts/api_feature'));
       after(() => esArchiver.unload('endpoint/alerts/api_feature'));
@@ -180,7 +188,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.result_from_index).to.eql(0);
       });
 
-      it('alerts api should return alert details by id', async () => {
+      it('alerts api should return alert details by id, getting last alert', async () => {
         const { body } = await supertest
           .get('/api/endpoint/alerts/YjUYMHABAJk0XnHd6bqU')
           .set('kbn-xsrf', 'xxx')
@@ -188,6 +196,16 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.id).to.eql('YjUYMHABAJk0XnHd6bqU');
         expect(body.next).to.eql(null); // last alert, no more beyond this
         expect(body.prev).to.eql('/api/endpoint/alerts/XjUYMHABAJk0XnHd6boX');
+      });
+
+      it('alerts api should return alert details by id, getting first alert', async () => {
+        const { body } = await supertest
+          .get('/api/endpoint/alerts/xDUYMHABAJk0XnHd8rrd')
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        expect(body.id).to.eql('xDUYMHABAJk0XnHd8rrd');
+        expect(body.next).to.eql('/api/endpoint/alerts/njUYMHABAJk0XnHd77ph');
+        expect(body.prev).to.eql(null); // first alert, no more before this
       });
 
       it('alerts api should return 404 when alert is not found', async () => {
