@@ -23,10 +23,9 @@ import {
   CoreStart,
   Plugin,
   Logger,
-  SavedObjectsType,
 } from '../../../core/server';
 
-import { migrations } from './migrations';
+import { visualizationSavedObjectType } from './saved_objects';
 
 import { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
 
@@ -40,41 +39,6 @@ export class VisualizationsPlugin
 
   public setup(core: CoreSetup) {
     this.logger.debug('visualizations: Setup');
-
-    const visualizationSavedObjectType: SavedObjectsType = {
-      name: 'visualization',
-      hidden: false,
-      namespaceAgnostic: false,
-      management: {
-        icon: 'visualizeApp',
-        defaultSearchField: 'title',
-        importableAndExportable: true,
-        getTitle(obj) {
-          return obj.attributes.title;
-        },
-        getEditUrl(obj) {
-          return `/management/kibana/objects/savedVisualizations/${encodeURIComponent(obj.id)}`;
-        },
-        getInAppUrl(obj) {
-          return {
-            path: `/app/kibana#/visualize/edit/${encodeURIComponent(obj.id)}`,
-            uiCapabilitiesPath: 'visualize.show',
-          };
-        },
-      },
-      mappings: {
-        properties: {
-          description: { type: 'text' },
-          kibanaSavedObjectMeta: { properties: { searchSourceJSON: { type: 'text' } } },
-          savedSearchRefName: { type: 'keyword' },
-          title: { type: 'text' },
-          uiStateJSON: { type: 'text' },
-          version: { type: 'integer' },
-          visState: { type: 'text' },
-        },
-      },
-      migrations,
-    };
 
     core.savedObjects.registerType(visualizationSavedObjectType);
 

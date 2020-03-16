@@ -17,49 +17,12 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin, SavedObjectsType } from 'kibana/server';
+import { CoreSetup, Plugin } from 'kibana/server';
 import { registerRoutes } from './routes';
-import { migrations } from './migrations';
+import { indexPatternSavedObjectType } from '../saved_objects';
 
 export class IndexPatternsService implements Plugin<void> {
   public setup(core: CoreSetup) {
-    const indexPatternSavedObjectType: SavedObjectsType = {
-      name: 'index-pattern',
-      hidden: false,
-      namespaceAgnostic: false,
-      management: {
-        icon: 'indexPatternApp',
-        defaultSearchField: 'title',
-        importableAndExportable: true,
-        getTitle(obj) {
-          return obj.attributes.title;
-        },
-        getEditUrl(obj) {
-          return `/management/kibana/index_patterns/${encodeURIComponent(obj.id)}`;
-        },
-        getInAppUrl(obj) {
-          return {
-            path: `/app/kibana#/management/kibana/index_patterns/${encodeURIComponent(obj.id)}`,
-            uiCapabilitiesPath: 'management.kibana.index_patterns',
-          };
-        },
-      },
-      mappings: {
-        properties: {
-          fieldFormatMap: { type: 'text' },
-          fields: { type: 'text' },
-          intervalName: { type: 'keyword' },
-          notExpandable: { type: 'boolean' },
-          sourceFilters: { type: 'text' },
-          timeFieldName: { type: 'keyword' },
-          title: { type: 'text' },
-          type: { type: 'keyword' },
-          typeMeta: { type: 'keyword' },
-        },
-      },
-      migrations,
-    };
-
     core.savedObjects.registerType(indexPatternSavedObjectType);
 
     registerRoutes(core.http);

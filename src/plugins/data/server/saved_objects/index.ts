@@ -17,13 +17,6 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
-import { querySavedObjectType } from '../saved_objects';
-
-export class QueryService implements Plugin<void> {
-  public setup(core: CoreSetup) {
-    core.savedObjects.registerType(querySavedObjectType);
-  }
-
-  public start() {}
-}
+export { searchSavedObjectType } from './search';
+export { querySavedObjectType } from './query';
+export { indexPatternSavedObjectType } from './index_patterns';

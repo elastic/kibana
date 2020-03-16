@@ -18,13 +18,13 @@
  */
 
 import { SavedObjectMigrationContext } from 'kibana/server';
-import { migrations } from './migrations';
+import { indexPatternSavedObjectTypeMigrations } from './index_pattern_migrations';
 
 const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
 
 describe('migration index-pattern', () => {
   describe('6.5.0', () => {
-    const migrationFn = migrations['6.5.0'];
+    const migrationFn = indexPatternSavedObjectTypeMigrations['6.5.0'];
 
     test('adds "type" and "typeMeta" properties to object when not declared', () => {
       expect(
@@ -71,7 +71,7 @@ Object {
   });
 
   describe('7.6.0', () => {
-    const migrationFn = migrations['7.6.0'];
+    const migrationFn = indexPatternSavedObjectTypeMigrations['7.6.0'];
 
     test('should remove the parent property and update the subType prop on every field that has them', () => {
       const input = {

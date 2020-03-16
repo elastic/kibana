@@ -539,7 +539,7 @@ const migrateTableSplits: SavedObjectMigrationFn = doc => {
   }
 };
 
-export const migrations = {
+export const visualizationSavedObjectTypeMigrations = {
   /**
    * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
    * after it. The reason for that is, that this migration has been introduced once 7.0.0 was already

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { migrations } from './migrations';
+import { visualizationSavedObjectTypeMigrations } from './visualization_migrations';
 import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'kibana/server';
 
 const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
@@ -25,7 +25,7 @@ const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationCon
 describe('migration visualization', () => {
   describe('6.7.2', () => {
     const migrate = (doc: any) =>
-      migrations['6.7.2'](
+      visualizationSavedObjectTypeMigrations['6.7.2'](
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -155,7 +155,7 @@ describe('migration visualization', () => {
 
   describe('7.0.0', () => {
     const migrate = (doc: any) =>
-      migrations['7.0.0'](
+      visualizationSavedObjectTypeMigrations['7.0.0'](
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -740,7 +740,7 @@ Object {
   describe('7.2.0', () => {
     describe('date histogram custom interval removal', () => {
       const migrate = (doc: any) =>
-        migrations['7.2.0'](
+        visualizationSavedObjectTypeMigrations['7.2.0'](
           doc as Parameters<SavedObjectMigrationFn>[0],
           savedObjectMigrationContext
         );
@@ -892,7 +892,10 @@ Object {
     } as unknown) as SavedObjectMigrationContext;
 
     const migrate = (doc: any) =>
-      migrations['7.3.0'](doc as Parameters<SavedObjectMigrationFn>[0], logger);
+      visualizationSavedObjectTypeMigrations['7.3.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        logger
+      );
 
     it('migrates type = gauge verticalSplit: false to alignment: vertical', () => {
       const migratedDoc = migrate({
@@ -1080,7 +1083,7 @@ Array [
 
   describe('7.3.0 tsvb', () => {
     const migrate = (doc: any) =>
-      migrations['7.3.0'](
+      visualizationSavedObjectTypeMigrations['7.3.0'](
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -1176,7 +1179,7 @@ Array [
 
   describe('7.3.1', () => {
     const migrate = (doc: any) =>
-      migrations['7.3.1'](
+      visualizationSavedObjectTypeMigrations['7.3.1'](
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
@@ -1220,7 +1223,7 @@ Array [
 
   describe('7.4.2 tsvb split_filters migration', () => {
     const migrate = (doc: any) =>
-      migrations['7.4.2'](
+      visualizationSavedObjectTypeMigrations['7.4.2'](
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );

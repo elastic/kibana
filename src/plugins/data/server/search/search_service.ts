@@ -22,7 +22,6 @@ import {
   Plugin,
   CoreSetup,
   IContextContainer,
-  SavedObjectsType,
 } from '../../../../core/server';
 import { registerSearchRoute } from './routes';
 import { ISearchSetup } from './i_search_setup';
@@ -35,7 +34,7 @@ import {
 import { IRouteHandlerSearchContext } from './i_route_handler_search_context';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
 
-import { migrations } from './migrations';
+import { searchSavedObjectType } from '../saved_objects';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
@@ -55,45 +54,6 @@ export class SearchService implements Plugin<ISearchSetup, void> {
     registerSearchRoute(router);
 
     this.contextContainer = core.context.createContextContainer();
-
-    const searchSavedObjectType: SavedObjectsType = {
-      name: 'search',
-      hidden: false,
-      namespaceAgnostic: false,
-      management: {
-        icon: 'discoverApp',
-        defaultSearchField: 'title',
-        importableAndExportable: true,
-        getTitle(obj) {
-          return obj.attributes.title;
-        },
-        getEditUrl(obj) {
-          return `/management/kibana/objects/savedSearches/${encodeURIComponent(obj.id)}`;
-        },
-        getInAppUrl(obj) {
-          return {
-            path: `/app/kibana#/discover/${encodeURIComponent(obj.id)}`,
-            uiCapabilitiesPath: 'discover.show',
-          };
-        },
-      },
-      mappings: {
-        properties: {
-          columns: { type: 'keyword' },
-          description: { type: 'text' },
-          hits: { type: 'integer' },
-          kibanaSavedObjectMeta: {
-            properties: {
-              searchSourceJSON: { type: 'text' },
-            },
-          },
-          sort: { type: 'keyword' },
-          title: { type: 'text' },
-          version: { type: 'integer' },
-        },
-      },
-      migrations,
-    };
 
     core.savedObjects.registerType(searchSavedObjectType);
 
