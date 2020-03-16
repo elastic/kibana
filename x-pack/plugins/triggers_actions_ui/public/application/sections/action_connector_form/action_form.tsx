@@ -496,7 +496,7 @@ export const ActionForm = ({
         );
 
         return (
-          <Fragment>
+          <Fragment key={`keypad-${item.id}`}>
             {checkEnabledResult.isEnabled && keyPadItem}
             {checkEnabledResult.isEnabled === false && (
               <EuiToolTip position="top" content={checkEnabledResult.message}>
