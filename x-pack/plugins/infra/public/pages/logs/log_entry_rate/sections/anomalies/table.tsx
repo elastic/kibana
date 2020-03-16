@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -20,8 +20,8 @@ import { LogEntryRateResults } from '../../use_log_entry_rate_results';
 import { AnomaliesTableExpandedRow } from './expanded_row';
 
 interface TableItem {
-  id: string;
-  partition: string;
+  partitionName: string;
+  partitionId: string;
   topAnomalyScore: number;
 }
 
@@ -55,11 +55,10 @@ export const AnomaliesTable: React.FunctionComponent<{
   const tableItems: TableItem[] = useMemo(() => {
     return Object.entries(results.partitionBuckets).map(([key, value]) => {
       return {
-        // Note: EUI's table expanded rows won't work with a key of '' in itemIdToExpandedRowMap, so we have to use the friendly name here
-        id: getFriendlyNameForPartitionId(key),
         // The real ID
         partitionId: key,
-        partition: getFriendlyNameForPartitionId(key),
+        // Note: EUI's table expanded rows won't work with a key of '' in itemIdToExpandedRowMap, so we have to use the friendly name here
+        partitionName: getFriendlyNameForPartitionId(key),
         topAnomalyScore: formatAnomalyScore(value.topAnomalyScore),
       };
     });
@@ -91,8 +90,8 @@ export const AnomaliesTable: React.FunctionComponent<{
 
   const sortedTableItems = useMemo(() => {
     let sortedItems: TableItem[] = [];
-    if (sorting.sort.field === 'partition') {
-      sortedItems = tableItems.sort((a, b) => (a.partition > b.partition ? 1 : -1));
+    if (sorting.sort.field === 'partitionName') {
+      sortedItems = tableItems.sort((a, b) => (a.partitionId > b.partitionId ? 1 : -1));
     } else if (sorting.sort.field === 'topAnomalyScore') {
       sortedItems = tableItems.sort((a, b) => a.topAnomalyScore - b.topAnomalyScore);
     }
@@ -100,10 +99,10 @@ export const AnomaliesTable: React.FunctionComponent<{
   }, [tableItems, sorting]);
 
   const expandItem = useCallback(
-    item => {
+    (item: TableItem) => {
       const newItemIdToExpandedRowMap = {
         ...itemIdToExpandedRowMap,
-        [item.id]: (
+        [item.partitionName]: (
           <AnomaliesTableExpandedRow
             partitionId={item.partitionId}
             results={results}
@@ -120,18 +119,21 @@ export const AnomaliesTable: React.FunctionComponent<{
   );
 
   const collapseItem = useCallback(
-    item => {
-      if (itemIdToExpandedRowMap[item.id]) {
-        const { [item.id]: toggledItem, ...remainingExpandedRowMap } = itemIdToExpandedRowMap;
+    (item: TableItem) => {
+      if (itemIdToExpandedRowMap[item.partitionName]) {
+        const {
+          [item.partitionName]: toggledItem,
+          ...remainingExpandedRowMap
+        } = itemIdToExpandedRowMap;
         setItemIdToExpandedRowMap(remainingExpandedRowMap);
       }
     },
     [itemIdToExpandedRowMap]
   );
 
-  const columns = [
+  const columns: Array<EuiBasicTableColumn<TableItem>> = [
     {
-      field: 'partition',
+      field: 'partitionName',
       name: partitionColumnName,
       sortable: true,
       truncateText: true,
@@ -149,7 +151,7 @@ export const AnomaliesTable: React.FunctionComponent<{
       isExpander: true,
       render: (item: TableItem) => (
         <RowExpansionButton
-          isExpanded={item.id in itemIdToExpandedRowMap}
+          isExpanded={item.partitionName in itemIdToExpandedRowMap}
           item={item}
           onExpand={expandItem}
           onCollapse={collapseItem}
@@ -161,7 +163,7 @@ export const AnomaliesTable: React.FunctionComponent<{
   return (
     <StyledEuiBasicTable
       items={sortedTableItems}
-      itemId="id"
+      itemId="partitionName"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       isExpandable={true}
       hasActions={true}
