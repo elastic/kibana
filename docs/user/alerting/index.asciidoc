@@ -6,18 +6,41 @@ beta[]
 
 --
 
-You can generate a report that contains a {kib} dashboard, visualization,
-saved search, or Canvas workpad. Depending on the object type, you can export the data as
-a PDF, PNG, or CSV document, which you can keep for yourself, or share with others.
-
-Reporting is available from the *Share* menu
-in *Discover*, *Visualize*, *Dashboard*, and *Canvas*.
+Alerting allows you to detect complex conditions within different {kib} apps and trigger actions when those conditions are met. Alerting is integrated with <<xpack-apm,*APM*>>, <<xpack-infra,*Metrics*>>, <<xpack-siem,*SIEM*>>, <<xpack-uptime,*Uptime*>>, and can be centrally managed from the <<management,*Management*>> UI. {kib} provides an API to control both alerts and actions, and comes with a set of <<action-types, prebuilt actions>> for you to use.
 
 [role="screenshot"]
-image::user/reporting/images/share-button.png["Share"]
+image::images/alerting-overview.png[Alerts and actions UI]
+
+[IMPORTANT]
+==============================================
+To make sure you can access alerting and actions, see the <<alerting-setup-prerequisites, setup and pre-requisites>> section.
+==============================================
 
 [float]
-== Setup
+== Concepts and terminology
+
+Describe
+* Terminology
+* Spaces
+* Relationship between connectors, alerts, and actions
+
+the alert definition:  what conditions you want to detect, and how frequently to check 
+the action:  what happens when  those conditions occur 
+
+
+[float]
+== Differences from Watcher
+
+How is alerting different from watcher alerts?
+
+
+Alerting cuts across all our products and use cases. If you have live data, there’s a case for alerting. This is why we built Watcher and why it’s been successful. Yet when we look across use cases it’s clear there’s no one-size-fits-all alerting.
+
+From products like Elastic Logs, SIEM, APM, Uptime, Infrastructure, and Maps, to features like monitoring and machine learning to a multitude of Kibana dashboards, alerts and notifications play a critical role, yet each has unique needs for detecting conditions, expressing them, and showing them in context. Effective alerting and monitoring requires deep integration with a product. As the stack and its uses have evolved, it’s become clear that Elasticsearch alerting needs a complement that allows for tightly integrated, rich expression of alerts within each use case.
+
+[float]
+[[alerting-setup-prerequisites]]
+== Setup and prerequisites
 
 {reporting} is automatically enabled in {kib}. The first time {kib} runs, it extracts a custom build for the Chromium web browser, which
 runs on the server in headless mode to load {kib} and capture the rendered {kib} charts as images.
@@ -27,53 +50,6 @@ works with minimal setup. However, the {kib} server OS might still require addit
 <<reporting-troubleshooting-system-dependencies, Reporting troubleshooting>> section for more information about the system dependencies
 for different operating systems.
 
-[float]
-== Roles and privileges
-
-To generate a report, you must have the `reporting_user` role. You also need
-the appropriate {kib} privileges to access the objects that you
-want to report on and the {es} indices.  See <<secure-reporting, Reporting and security>>
-for an example.
-
-[float]
-== Generate a report manually
-
-. Open the dashboard, visualization, Canvas workpad, or saved search that you want to include in the report.
-
-. In the {kib} toolbar, click *Share*.  If you are working in Canvas,
-click the share icon image:user/reporting/images/canvas-share-button.png["Canvas Share button"].
-
-. Select the option appropriate for your object. You can export:
-+
-** A dashboard or visualization as either a PNG or PDF document
-** A Canvas workpad as a PDF document
-** A saved search as a CSV document
-
-. Generate the report.
-+
-A notification appears when the report is complete.
-
-[float]
-== Layout and sizing
-The layout and size of the PDF or PNG image depends on the {kib} app
-with which the Reporting plugin is integrated. For Canvas, the
-worksheet dimensions determine the size for Reporting. In other apps,
-the dimensions are taken on the fly by looking at
-the size of the visualization elements or panels on the page.
-
-The size dimensions are part of the reporting job parameters. Therefore, to
-make the report output larger or smaller, you can change the size of the browser.
-This resizes the shareable container before generating the
-report, so the desired dimensions are passed in the job parameters.
-
-In the following {kib} dashboard, the shareable container is highlighted.
-The shareable container is captured when you click the
-*Generate* or *Copy POST URL* button. It might take some trial and error
-before you're satisfied with the layout and dimensions in the resulting
-PNG or PDF image.
-
-[role="screenshot"]
-image::user/reporting/images/shareable-container.png["Shareable Container"]
 
 --
 
