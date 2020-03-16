@@ -8,7 +8,7 @@ import axios, { AxiosInstance, Method, AxiosResponse } from 'axios';
 
 import { INCIDENT_URL, USER_URL, COMMENT_URL } from './constants';
 import { Instance, Incident, IncidentResponse, UpdateIncident, CommentResponse } from './types';
-import { CommentType } from '../types';
+import { Comment } from '../types';
 
 const validStatusCodes = [200, 201];
 
@@ -68,49 +68,77 @@ class ServiceNow {
     return `${date} GMT`;
   }
 
+  private _getErrorMessage(msg: string) {
+    return `[Action][ServiceNow]: ${msg}`;
+  }
+
   async getUserID(): Promise<string> {
-    const res = await this._request({ url: `${this.userUrl}${this.instance.username}` });
-    return res.data.result[0].sys_id;
+    try {
+      const res = await this._request({ url: `${this.userUrl}${this.instance.username}` });
+      return res.data.result[0].sys_id;
+    } catch (error) {
+      throw new Error(this._getErrorMessage(`Unable to get user id. Error: ${error.message}`));
+    }
   }
 
   async getIncident(incidentId: string) {
-    const res = await this._request({
-      url: `${this.incidentUrl}/${incidentId}`,
-    });
+    try {
+      const res = await this._request({
+        url: `${this.incidentUrl}/${incidentId}`,
+      });
 
-    return { ...res.data.result };
+      return { ...res.data.result };
+    } catch (error) {
+      throw new Error(
+        this._getErrorMessage(
+          `Unable to get incident with id ${incidentId}. Error: ${error.message}`
+        )
+      );
+    }
   }
 
   async createIncident(incident: Incident): Promise<IncidentResponse> {
-    const res = await this._request({
-      url: `${this.incidentUrl}`,
-      method: 'post',
-      data: { ...incident },
-    });
+    try {
+      const res = await this._request({
+        url: `${this.incidentUrl}`,
+        method: 'post',
+        data: { ...incident },
+      });
 
-    return {
-      number: res.data.result.number,
-      incidentId: res.data.result.sys_id,
-      pushedDate: new Date(this._addTimeZoneToDate(res.data.result.sys_created_on)).toISOString(),
-    };
+      return {
+        number: res.data.result.number,
+        incidentId: res.data.result.sys_id,
+        pushedDate: new Date(this._addTimeZoneToDate(res.data.result.sys_created_on)).toISOString(),
+      };
+    } catch (error) {
+      throw new Error(this._getErrorMessage(`Unable to create incident. Error: ${error.message}`));
+    }
   }
 
   async updateIncident(incidentId: string, incident: UpdateIncident): Promise<IncidentResponse> {
-    const res = await this._patch({
-      url: `${this.incidentUrl}/${incidentId}`,
-      data: { ...incident },
-    });
+    try {
+      const res = await this._patch({
+        url: `${this.incidentUrl}/${incidentId}`,
+        data: { ...incident },
+      });
 
-    return {
-      number: res.data.result.number,
-      incidentId: res.data.result.sys_id,
-      pushedDate: new Date(this._addTimeZoneToDate(res.data.result.sys_updated_on)).toISOString(),
-    };
+      return {
+        number: res.data.result.number,
+        incidentId: res.data.result.sys_id,
+        pushedDate: new Date(this._addTimeZoneToDate(res.data.result.sys_updated_on)).toISOString(),
+      };
+    } catch (error) {
+      throw new Error(
+        this._getErrorMessage(
+          `Unable to update incident with id ${incidentId}. Error: ${error.message}`
+        )
+      );
+    }
   }
 
   async batchCreateComments(
     incidentId: string,
-    comments: CommentType[],
+    comments: Comment[],
     field: string
   ): Promise<CommentResponse[]> {
     const res = await Promise.all(comments.map(c => this.createComment(incidentId, c, field)));
@@ -119,18 +147,26 @@ class ServiceNow {
 
   async createComment(
     incidentId: string,
-    comment: CommentType,
+    comment: Comment,
     field: string
   ): Promise<CommentResponse> {
-    const res = await this._patch({
-      url: `${this.commentUrl}/${incidentId}`,
-      data: { [field]: comment.comment },
-    });
+    try {
+      const res = await this._patch({
+        url: `${this.commentUrl}/${incidentId}`,
+        data: { [field]: comment.comment },
+      });
 
-    return {
-      commentId: comment.commentId,
-      pushedDate: new Date(this._addTimeZoneToDate(res.data.result.sys_updated_on)).toISOString(),
-    };
+      return {
+        commentId: comment.commentId,
+        pushedDate: new Date(this._addTimeZoneToDate(res.data.result.sys_updated_on)).toISOString(),
+      };
+    } catch (error) {
+      throw new Error(
+        this._getErrorMessage(
+          `Unable to create comment at incident with id ${incidentId}. Error: ${error.message}`
+        )
+      );
+    }
   }
 }
 
