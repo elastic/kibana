@@ -28,14 +28,15 @@ export { UiActionsSetup, UiActionsStart } from './plugin';
 export { UiActionsServiceParams, UiActionsService } from './service';
 export {
   Action,
-  createAction,
-  IncompatibleActionError,
   ActionDefinition as UiActionsActionDefinition,
+  ActionFactoryDefinition as UiActionsActionFactoryDefinition,
   ActionInternal as UiActionsActionInternal,
   ActionStorage as UiActionsActionStorage,
-  SerializedEvent as UiActionsSerializedEvent,
-  SerializedAction as UiActionsSerializedAction,
+  createAction,
   DynamicActionManager,
+  IncompatibleActionError,
+  SerializedAction as UiActionsSerializedAction,
+  SerializedEvent as UiActionsSerializedEvent,
 } from './actions';
 export { buildContextMenuForActions, contextMenuSeparatorAction } from './context_menu';
 export {
