@@ -70,6 +70,9 @@ export class UiSettingsService
   }
 
   public async start(): Promise<InternalUiSettingsServiceStart> {
+    this.validatesDefinitions();
+    this.validatesOverrides();
+
     return {
       asScopedToClient: this.getScopedClientFactory(),
     };
@@ -100,5 +103,22 @@ export class UiSettingsService
       }
       this.uiSettingsDefaults.set(key, value);
     });
+  }
+
+  private validatesDefinitions() {
+    for (const [key, definition] of this.uiSettingsDefaults) {
+      if (definition.schema) {
+        definition.schema.validate(definition.value, {}, `ui settings defaults [${key}]`);
+      }
+    }
+  }
+
+  private validatesOverrides() {
+    for (const [key, value] of Object.entries(this.overrides)) {
+      const definition = this.uiSettingsDefaults.get(key);
+      if (definition?.schema) {
+        definition.schema.validate(value, {}, `ui settings overrides [${key}]`);
+      }
+    }
   }
 }
