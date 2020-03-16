@@ -89,9 +89,7 @@ describe('MonitorListPagination component', () => {
           },
         },
       ],
-      totalSummaryCount: {
-        count: 2,
-      },
+      totalSummaryCount: 2,
     };
   });
 
