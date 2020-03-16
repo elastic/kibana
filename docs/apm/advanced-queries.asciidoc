@@ -2,12 +2,12 @@
 === Advanced queries
 
 When querying, you're simply searching and selecting data from fields in Elasticsearch documents.
-It may be helpful to view some of your documents in {kibana-ref}/discover.html[Discover] to better understand how APM data is stored in Elasticsearch. 
+It may be helpful to view some of your documents in {kibana-ref}/discover.html[Discover] to better understand how APM data is stored in Elasticsearch.
 
 Queries entered into the query bar are also added as parameters to the URL,
 so it's easy to share a specific query or view with others.
 
-In the screenshot below, you can begin to see some of the transaction fields available for filtering on:  
+You can begin to see some of the transaction fields available for filtering:
 
 [role="screenshot"]
 image::apm/images/apm-query-bar.png[Example of the Kibana Query bar in APM UI in Kibana]

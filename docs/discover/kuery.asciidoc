@@ -2,13 +2,13 @@
 === Kibana Query Language
 
 In Kibana 6.3, we introduced a number of exciting experimental query language enhancements. These
-features are now available by default in 7.0. Out of the box, Kibana's query language now includes scripted field support and a 
-simplified, easier to use syntax. If you have a Basic license or above, autocomplete functionality will also be enabled. 
+features are now available by default in 7.0. Out of the box, Kibana's query language now includes scripted field support and a
+simplified, easier to use syntax. If you have a Basic license or above, autocomplete functionality will also be enabled.
 
 ==== Language Syntax
 
-If you're familiar with Kibana's old lucene query syntax, you should feel right at home with the new syntax. The basics
-stay the same, we've simply refined things to make the query language easier to use. Read about the changes below.
+If you're familiar with Kibana's old Lucene query syntax, you should feel right at home with the new syntax. The basics
+stay the same, we've simply refined things to make the query language easier to use.
 
 `response:200` will match documents where the response field matches the value 200.
 
@@ -19,8 +19,8 @@ they appear. This means documents with "quick brown fox" will match, but so will
 to search for a phrase.
 
 The query parser will no longer split on whitespace. Multiple search terms must be separated by explicit
-boolean operators. Lucene will combine search terms with an `or` by default, so `response:200 extension:php` would 
-become `response:200 or extension:php` in KQL. This will match documents where response matches 200, extension matches php, or both. 
+boolean operators. Lucene will combine search terms with an `or` by default, so `response:200 extension:php` would
+become `response:200 or extension:php` in KQL. This will match documents where response matches 200, extension matches php, or both.
 Note that boolean operators are not case sensitive.
 
 We can make terms required by using `and`.
@@ -48,9 +48,9 @@ Entire groups can also be inverted.
 
 `response:200 and not (extension:php or extension:css)`
 
-Ranges are similar to lucene with a small syntactical difference. 
+Ranges are similar to lucene with a small syntactical difference.
 
-Instead of `bytes:>1000`, we omit the colon: `bytes > 1000`. 
+Instead of `bytes:>1000`, we omit the colon: `bytes > 1000`.
 
 `>, >=, <, <=` are all valid range operators.
 
@@ -71,4 +71,3 @@ Terms without fields will be matched against the default field in your index set
 set these terms will be matched against all fields. For example, a query for `response:200` will search for the value 200
 in the response field, but a query for just `200` will search for 200 across all fields in your index.
 ============
-
