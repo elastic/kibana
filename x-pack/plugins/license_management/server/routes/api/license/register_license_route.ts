@@ -7,11 +7,12 @@
 import { schema } from '@kbn/config-schema';
 import { putLicense } from '../../../lib/license';
 import { RouteDependencies } from '../../../types';
+import { addBasePath } from '../../helpers';
 
 export function registerLicenseRoute({ router, pluggins: { licensing } }: RouteDependencies) {
   router.put(
     {
-      path: '/api/license',
+      path: addBasePath('/'),
       validate: {
         query: schema.object({ acknowledge: schema.string() }),
         body: schema.object({

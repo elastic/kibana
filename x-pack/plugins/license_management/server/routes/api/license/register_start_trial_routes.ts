@@ -6,9 +6,10 @@
 
 import { canStartTrial, startTrial } from '../../../lib/start_trial';
 import { RouteDependencies } from '../../../types';
+import { addBasePath } from '../../helpers';
 
 export function registerStartTrialRoutes({ router, pluggins: { licensing } }: RouteDependencies) {
-  router.get({ path: '/api/license/start_trial', validate: false }, async (ctx, req, res) => {
+  router.get({ path: addBasePath('/start_trial'), validate: false }, async (ctx, req, res) => {
     const { callAsCurrentUser } = ctx.core.elasticsearch.adminClient;
     try {
       return res.ok({ body: await canStartTrial(callAsCurrentUser) });
@@ -17,7 +18,7 @@ export function registerStartTrialRoutes({ router, pluggins: { licensing } }: Ro
     }
   });
 
-  router.post({ path: '/api/license/start_trial', validate: false }, async (ctx, req, res) => {
+  router.post({ path: addBasePath('/start_trial'), validate: false }, async (ctx, req, res) => {
     const { callAsCurrentUser } = ctx.core.elasticsearch.adminClient;
     try {
       return res.ok({

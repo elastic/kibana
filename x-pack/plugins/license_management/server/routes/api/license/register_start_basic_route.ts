@@ -7,11 +7,12 @@
 import { schema } from '@kbn/config-schema';
 import { startBasic } from '../../../lib/start_basic';
 import { RouteDependencies } from '../../../types';
+import { addBasePath } from '../../helpers';
 
 export function registerStartBasicRoute({ router, pluggins: { licensing } }: RouteDependencies) {
   router.post(
     {
-      path: '/api/license/start_basic',
+      path: addBasePath('/start_basic'),
       validate: { query: schema.object({ acknowledge: schema.string() }) },
     },
     async (ctx, req, res) => {

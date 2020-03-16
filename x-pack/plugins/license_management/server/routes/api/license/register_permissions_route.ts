@@ -6,12 +6,13 @@
 
 import { getPermissions } from '../../../lib/permissions';
 import { RouteDependencies } from '../../../types';
+import { addBasePath } from '../../helpers';
 
 export function registerPermissionsRoute({
   router,
   config: { isSecurityEnabled },
 }: RouteDependencies) {
-  router.post({ path: '/api/license/permissions', validate: false }, async (ctx, req, res) => {
+  router.post({ path: addBasePath('/permissions'), validate: false }, async (ctx, req, res) => {
     const { callAsCurrentUser } = ctx.core.elasticsearch.adminClient;
 
     try {
