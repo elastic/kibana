@@ -22,7 +22,8 @@ export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
 
-  describe('authentications', () => {
+  // TODO: unskip
+  describe.skip('authentications', () => {
     before(() => esArchiver.load('auditbeat/hosts'));
     after(() => esArchiver.unload('auditbeat/hosts'));
 

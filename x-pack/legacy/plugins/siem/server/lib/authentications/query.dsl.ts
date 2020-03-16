@@ -64,7 +64,7 @@ export const buildQuery = ({
           terms: {
             size: querySize,
             field: 'user.name',
-            order: [{ successes: 'desc' }, { failures: 'desc' }],
+            order: [{ 'successes.doc_count': 'desc' }, { 'failures.doc_count': 'desc' }],
           },
           aggs: {
             failures: {
