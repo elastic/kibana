@@ -49,8 +49,8 @@ export function runFtrCli() {
             installDir: parseInstallDir(flags),
           },
           suiteFiles: {
-            include: toArray(flags['include-file'] as string | string[]),
-            exclude: toArray(flags['exclude-file'] as string | string[]),
+            include: toArray(flags['include-file'] as string | string[]).map(makeAbsolutePath),
+            exclude: toArray(flags['exclude-file'] as string | string[]).map(makeAbsolutePath),
           },
           suiteTags: {
             include: toArray(flags['include-tag'] as string | string[]),

@@ -18,8 +18,7 @@
  */
 
 import Mocha from 'mocha';
-import { realpathSync } from 'fs';
-import { sep } from 'path';
+import { relative } from 'path';
 import { REPO_ROOT } from '@kbn/dev-utils';
 
 import { loadTestFiles } from './load_test_files';
@@ -59,15 +58,13 @@ export async function setupMocha(lifecycle, log, config, providers) {
 
   // Each suite has a tag that is the path relative to the root of the repo
   // So we just need to take input paths, make them relative to the root, and use them as tags
+  // Also, this is a separate filterSuitesByTags() call so that the test suites will be filtered first by
+  //  files, then by tags. This way, you can target tags (like smoke) in a specific file.
   filterSuitesByTags({
     log,
     mocha,
-    include: config
-      .get('suiteFiles.include')
-      .map(f => realpathSync(f).replace(REPO_ROOT + sep, '')),
-    exclude: config
-      .get('suiteFiles.exclude')
-      .map(f => realpathSync(f).replace(REPO_ROOT + sep, '')),
+    include: config.get('suiteFiles.include').map(file => relative(REPO_ROOT, file)),
+    exclude: config.get('suiteFiles.exclude').map(file => relative(REPO_ROOT, file)),
   });
 
   filterSuitesByTags({
