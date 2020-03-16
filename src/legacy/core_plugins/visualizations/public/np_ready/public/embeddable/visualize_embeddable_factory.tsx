@@ -88,7 +88,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     });
   }
 
-  public isEditable() {
+  public async isEditable() {
     return getCapabilities().visualize.save as boolean;
   }
 
@@ -121,13 +121,14 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
       const indexPatterns = indexPattern ? [indexPattern] : [];
       const [, { uiActions }] = await this.getServices();
 
+      const editable = await this.isEditable();
       return new VisualizeEmbeddable(
         getTimeFilter(),
         {
           savedVisualization: savedObject,
           indexPatterns,
           editUrl,
-          editable: this.isEditable(),
+          editable,
           appState: input.appState,
           uiState: input.uiState,
           uiActions,

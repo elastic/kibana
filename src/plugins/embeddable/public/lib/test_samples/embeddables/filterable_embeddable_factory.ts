@@ -29,7 +29,7 @@ import { IContainer } from '../../containers';
 export class FilterableEmbeddableFactory extends EmbeddableFactory<FilterableEmbeddableInput> {
   public readonly type = FILTERABLE_EMBEDDABLE;
 
-  public isEditable() {
+  public async isEditable() {
     return true;
   }
 

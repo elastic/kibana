@@ -42,7 +42,7 @@ import {
 } from './services';
 import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeEmbeddableFactory } from './embeddable';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../../../plugins/expressions/public';
-import { IEmbeddableSetup } from '../../../../../../plugins/embeddable/public';
+import { EmbeddableSetup } from '../../../../../../plugins/embeddable/public';
 import { visualization as visualizationFunction } from './expressions/visualization_function';
 import { visualization as visualizationRenderer } from './expressions/visualization_renderer';
 import {
@@ -73,7 +73,7 @@ export interface VisualizationsStart extends TypesStart {
 
 export interface VisualizationsSetupDeps {
   expressions: ExpressionsSetup;
-  embeddable: IEmbeddableSetup;
+  embeddable: EmbeddableSetup;
   usageCollection: UsageCollectionSetup;
   data: DataPublicPluginSetup;
 }

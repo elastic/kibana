@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '../../../../core/public';
-import { IEmbeddable, ViewMode, IEmbeddableStart } from '../embeddable_plugin';
+import { IEmbeddable, ViewMode, EmbeddableStart } from '../embeddable_plugin';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 import { ActionByType, IncompatibleActionError } from '../ui_actions_plugin';
 import { openReplacePanelFlyout } from './open_replace_panel_flyout';
@@ -43,7 +43,7 @@ export class ReplacePanelAction implements ActionByType<typeof ACTION_REPLACE_PA
     private core: CoreStart,
     private savedobjectfinder: React.ComponentType<any>,
     private notifications: CoreStart['notifications'],
-    private getEmbeddableFactories: IEmbeddableStart['getEmbeddableFactories']
+    private getEmbeddableFactories: EmbeddableStart['getEmbeddableFactories']
   ) {}
 
   public getDisplayName({ embeddable }: ReplacePanelActionContext) {

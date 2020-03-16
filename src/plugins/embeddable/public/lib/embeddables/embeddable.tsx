@@ -21,6 +21,7 @@ import * as Rx from 'rxjs';
 import { Adapters, ViewMode } from '../types';
 import { IContainer } from '../containers';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import { TriggerContextMapping } from '../ui_actions';
 import { EmbeddableActionStorage } from './embeddable_action_storage';
 import {
   UiActionsDynamicActionManager,
@@ -249,5 +250,9 @@ export abstract class Embeddable<
     });
 
     this.onResetInput(newInput);
+  }
+
+  public supportedTriggers(): Array<keyof TriggerContextMapping> {
+    return [];
   }
 }
