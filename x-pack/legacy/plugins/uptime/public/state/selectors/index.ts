@@ -30,7 +30,7 @@ export const selectMonitorStatus = (state: AppState) => {
 };
 
 export const selectIndexPattern = ({ indexPattern }: AppState) => {
-  return indexPattern.index_pattern;
+  return { indexPattern: indexPattern.index_pattern, loading: indexPattern.loading };
 };
 
 export const selectPingHistogram = ({ ping, ui }: AppState) => {
@@ -46,4 +46,8 @@ export const selectPingList = ({ pingList }: AppState) => pingList;
 
 export const selectDurationLines = ({ monitorDuration }: AppState) => {
   return monitorDuration;
+};
+
+export const indexStatusSelector = ({ indexStatus }: AppState) => {
+  return indexStatus;
 };

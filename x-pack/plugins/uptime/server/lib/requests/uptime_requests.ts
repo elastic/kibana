@@ -9,7 +9,6 @@ import {
   Ping,
   PingsResponse as PingResults,
 } from '../../../../../legacy/plugins/uptime/common/types/ping/ping';
-import { StatesIndexStatus } from '../../../../../legacy/plugins/uptime/common/graphql/types';
 import {
   GetFilterBarParams,
   GetLatestMonitorParams,
@@ -26,6 +25,7 @@ import {
   MonitorDetails,
   MonitorLocations,
   Snapshot,
+  StatesIndexStatus,
 } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 import { GetMonitorStatesResult } from './get_monitor_states';
 import { GetSnapshotCountParams } from './get_snapshot_counts';

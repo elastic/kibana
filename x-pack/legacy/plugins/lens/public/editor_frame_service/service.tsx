@@ -12,10 +12,7 @@ import {
   ExpressionsSetup,
   ExpressionsStart,
 } from '../../../../../../src/plugins/expressions/public';
-import {
-  IEmbeddableSetup,
-  IEmbeddableStart,
-} from '../../../../../../src/plugins/embeddable/public';
+import { EmbeddableSetup, EmbeddableStart } from '../../../../../../src/plugins/embeddable/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -35,13 +32,13 @@ import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 
 export interface EditorFrameSetupPlugins {
   data: DataPublicPluginSetup;
-  embeddable: IEmbeddableSetup;
+  embeddable: EmbeddableSetup;
   expressions: ExpressionsSetup;
 }
 
 export interface EditorFrameStartPlugins {
   data: DataPublicPluginStart;
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   expressions: ExpressionsStart;
 }
 
@@ -63,9 +60,26 @@ export class EditorFrameService {
   private readonly datasources: Array<Datasource | Promise<Datasource>> = [];
   private readonly visualizations: Array<Visualization | Promise<Visualization>> = [];
 
-  public setup(core: CoreSetup, plugins: EditorFrameSetupPlugins): EditorFrameSetup {
+  public setup(
+    core: CoreSetup<EditorFrameStartPlugins>,
+    plugins: EditorFrameSetupPlugins
+  ): EditorFrameSetup {
     plugins.expressions.registerFunction(() => mergeTables);
     plugins.expressions.registerFunction(() => formatColumn);
+
+    const getStartServices = async () => {
+      const [coreStart, deps] = await core.getStartServices();
+      return {
+        capabilities: coreStart.application.capabilities,
+        savedObjectsClient: coreStart.savedObjects.client,
+        coreHttp: coreStart.http,
+        timefilter: deps.data.query.timefilter.timefilter,
+        expressionRenderer: deps.expressions.ReactExpressionRenderer,
+        indexPatternService: deps.data.indexPatterns,
+      };
+    };
+
+    plugins.embeddable.registerEmbeddableFactory('lens', new EmbeddableFactory(getStartServices));
 
     return {
       registerDatasource: datasource => {
@@ -78,18 +92,6 @@ export class EditorFrameService {
   }
 
   public start(core: CoreStart, plugins: EditorFrameStartPlugins): EditorFrameStart {
-    plugins.embeddable.registerEmbeddableFactory(
-      'lens',
-      new EmbeddableFactory(
-        plugins.data.query.timefilter.timefilter,
-        core.http,
-        core.application.capabilities,
-        core.savedObjects.client,
-        plugins.expressions.ReactExpressionRenderer,
-        plugins.data.indexPatterns
-      )
-    );
-
     const createInstance = async (): Promise<EditorFrameInstance> => {
       let domElement: Element;
       const [resolvedDatasources, resolvedVisualizations] = await Promise.all([

@@ -12,7 +12,7 @@ For each property, you can specify whether to use a constant or data driven valu
 
 Use static styling to specificy a constant value for a style property.
 
-The image below shows an example of static styling using the <<add-sample-data, Kibana sample web logs>> data set.
+This image shows an example of static styling using the <<add-sample-data, Kibana sample web logs>> data set.
 The *kibana_sample_data_logs* layer uses static styling for all properties.
 
 [role="screenshot"]
@@ -26,7 +26,7 @@ image::maps/images/vector_style_static.png[]
 Use data driven styling to symbolize features by property values.
 To enable data driven styling for a style property, change the selected value from *Fixed* or *Solid* to *By value*.
 
-The image below shows an example of data driven styling using the <<add-sample-data, Kibana sample web logs>> data set.
+This image shows an example of data driven styling using the <<add-sample-data, Kibana sample web logs>> data set.
 The *kibana_sample_data_logs* layer uses data driven styling for fill color and symbol size style properties.
 
 * The `hour_of_day` property determines the fill color for each feature based on where the value fits on a linear scale.
@@ -87,7 +87,7 @@ Qualitative data driven styling is available for the following styling propertie
 
 Qualitative data driven styling uses a {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation] to retrieve the top nine categories for the property. Feature values within the top categories are assigned a unique color. Feature values outside of the top categories are grouped into the *Other* category. A feature is assigned the *Other* category when the property value is undefined.
 
-The image below shows an example of quantitative data driven styling using the <<add-sample-data, Kibana sample web logs>> data set.
+This image shows an example of quantitative data driven styling using the <<add-sample-data, Kibana sample web logs>> data set.
 The `machine.os.keyword` property determines the color of each symbol based on category.
 
 [role="screenshot"]
@@ -101,7 +101,7 @@ image::maps/images/quantitative_data_driven_styling.png[]
 Class styling symbolizes features by class and requires multiple layers.
 Use <<maps-layer-based-filtering, layer filtering>> to define the class for each layer, and <<maps-vector-style-static, static styling>> to symbolize each class.
 
-The image below shows an example of class styling using the <<add-sample-data, Kibana sample web logs>> data set.
+This image shows an example of class styling using the <<add-sample-data, Kibana sample web logs>> data set.
 
 * The *Mac OS requests* layer applies the filter `machine.os : osx` so the layer only contains Mac OS requests.
 The fill color is a static value of green.

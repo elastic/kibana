@@ -12,6 +12,7 @@ import { fetchMonitorStatusEffect } from './monitor_status';
 import { fetchIndexPatternEffect } from './index_pattern';
 import { fetchPingsEffect, fetchPingHistogramEffect } from './ping';
 import { fetchMonitorDurationEffect } from './monitor_duration';
+import { fetchIndexStatusEffect } from './index_status';
 
 export function* rootEffect() {
   yield fork(fetchMonitorDetailsEffect);
@@ -22,4 +23,5 @@ export function* rootEffect() {
   yield fork(fetchPingsEffect);
   yield fork(fetchPingHistogramEffect);
   yield fork(fetchMonitorDurationEffect);
+  yield fork(fetchIndexStatusEffect);
 }
