@@ -459,35 +459,76 @@ export default function({ getService, getPageObjects }) {
     });
 
     describe('date histogram interval', () => {
-      beforeEach(async () => await PageObjects.visEditor.toggleAccordion('visEditorAggAccordion2'));
-
-      it('should update accordion label when collapsed', async () => {
-        await PageObjects.visEditor.toggleAccordion('visEditorAggAccordion2', false);
-        const accordionLabel = await (
-          await find.byCssSelector(
-            '[data-test-subj="visEditorAggAccordion2"] .visEditorSidebar__aggGroupAccordionButtonContent'
-          )
-        ).getVisibleText();
-        expect(accordionLabel).to.include.string('per month');
+      before(async () => {
+        await PageObjects.visualize.loadSavedVisualization(vizName1);
+        await PageObjects.visChart.waitForVisualization();
       });
 
-      it('should update label inside when scaled to milliseconds', async () => {
-        await PageObjects.visEditor.setInterval('Millisecond');
-        const accordionLabel = await (
-          await find.byCssSelector('[data-test-subj="currentlyScaledText"]')
-        ).getVisibleText();
-        expect(accordionLabel).to.include.string('to week');
-      });
-
-      it('should scale to 10 minutes and display the correct label when time range is changed and custom interval is set to 10s', async () => {
+      beforeEach(async () => {
         const fromTime = 'Sep 20, 2015 @ 00:00:00.000';
         const toTime = 'Sep 20, 2015 @ 23:30:00.000';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.visEditor.setInterval('10s', { type: 'custom' });
-        const accordionLabel = await (
-          await find.byCssSelector('[data-test-subj="currentlyScaledText"]')
-        ).getVisibleText();
-        expect(accordionLabel).to.include.string('to 10 minutes');
+      });
+
+      it('should update collapsed accordion label when time range is changed', async () => {
+        const accordionLabel = await find.byCssSelector(
+          '[data-test-subj="visEditorAggAccordion2"] .visEditorSidebar__aggGroupAccordionButtonContent'
+        );
+        let accordionLabelText = await accordionLabel.getVisibleText();
+        expect(accordionLabelText).to.include.string('per 30 minutes');
+        const fromTime = 'Sep 20, 2015 @ 08:30:00.000';
+        const toTime = 'Sep 20, 2015 @ 23:30:00.000';
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        accordionLabelText = await accordionLabel.getVisibleText();
+        expect(accordionLabelText).to.include.string('per 10 minutes');
+      });
+
+      describe('expanded accordion', () => {
+        before(async () => await PageObjects.visEditor.toggleAccordion('visEditorAggAccordion2'));
+
+        it('should update label inside the opened accordion when scaled to milliseconds', async () => {
+          const isHelperScaledLabelExists = await find.existsByCssSelector(
+            '[data-test-subj="currentlyScaledText"]'
+          );
+          expect(isHelperScaledLabelExists).to.be(false);
+          await PageObjects.visEditor.setInterval('Millisecond');
+          const helperScaledLabelText = await (
+            await find.byCssSelector('[data-test-subj="currentlyScaledText"]')
+          ).getVisibleText();
+          expect(helperScaledLabelText).to.include.string('to 10 minutes');
+        });
+
+        it('should display updated scaled label text after time range is changed', async () => {
+          await PageObjects.visEditor.setInterval('Millisecond');
+          const isHelperScaledLabelExists = await find.existsByCssSelector(
+            '[data-test-subj="currentlyScaledText"]'
+          );
+          expect(isHelperScaledLabelExists).to.be(true);
+          const helperScaledLabel = await find.byCssSelector(
+            '[data-test-subj="currentlyScaledText"]'
+          );
+          let helperScaledLabelText = await helperScaledLabel.getVisibleText();
+          expect(helperScaledLabelText).to.include.string('to 10 minutes');
+          const fromTime = 'Sep 20, 2015 @ 22:30:00.000';
+          const toTime = 'Sep 20, 2015 @ 23:30:00.000';
+          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+          helperScaledLabelText = await helperScaledLabel.getVisibleText();
+          expect(helperScaledLabelText).to.include.string('to 30 seconds');
+        });
+
+        it('should update scaled label text after custom interval is set and time range is changed', async () => {
+          await PageObjects.visEditor.setInterval('10s', { type: 'custom' });
+          const helperScaledLabel = await find.byCssSelector(
+            '[data-test-subj="currentlyScaledText"]'
+          );
+          let helperScaledLabelText = await helperScaledLabel.getVisibleText();
+          expect(helperScaledLabelText).to.include.string('to 10 minutes');
+          const fromTime = 'Sep 20, 2015 @ 21:30:00.000';
+          const toTime = 'Sep 20, 2015 @ 23:30:00.000';
+          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+          helperScaledLabelText = await helperScaledLabel.getVisibleText();
+          expect(helperScaledLabelText).to.include.string('to minute');
+        });
       });
     });
   });
