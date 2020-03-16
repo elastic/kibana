@@ -5,7 +5,7 @@
  */
 
 import { APICaller } from 'kibana/server';
-import { INDEX_META_DATA_CREATED_BY } from '../../../../../legacy/plugins/ml/common/constants/file_datavisualizer';
+import { INDEX_META_DATA_CREATED_BY } from '../../../common/constants/file_datavisualizer';
 import { InputData } from './file_data_visualizer';
 
 export interface Settings {
