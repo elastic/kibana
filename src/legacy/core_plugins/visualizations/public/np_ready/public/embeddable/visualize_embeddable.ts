@@ -36,10 +36,6 @@ import {
   Container,
   EmbeddableVisTriggerContext,
 } from '../../../../../../../plugins/embeddable/public';
-import {
-  selectRangeTrigger,
-  valueClickTrigger,
-} from '../../../../../../../plugins/ui_actions/public';
 import { dispatchRenderComplete } from '../../../../../../../plugins/kibana_utils/public';
 import {
   IExpressionLoaderParams,
@@ -398,10 +394,29 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   };
 
   public supportedTriggers() {
-    // TODO: Report a correct list of triggers. Now it just hard-codes the list
-    // TODO: to one trigger that we know for sure all vis_types have.
-    const supportedTriggers = [VIS_EVENT_TO_TRIGGER.filter];
-
-    return supportedTriggers;
+    // TODO: Report a correct list of triggers for each vis_type.
+    switch (this.vis.type.name) {
+      case 'histogram':
+      case 'line':
+      case 'pie':
+      case 'area':
+      case 'heatmap':
+      case 'horizontal_bar':
+      case 'gauge':
+      case 'goal':
+        return [VIS_EVENT_TO_TRIGGER.filter];
+      case 'input_control_vis':
+      case 'markdown':
+      case 'metric':
+      case 'metrics':
+      case 'table':
+      case 'tagcloud':
+      case 'timelion':
+      case 'region_map':
+      case 'tile_map':
+      case 'vega':
+      default:
+        return [];
+    }
   }
 }
