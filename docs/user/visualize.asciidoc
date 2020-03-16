@@ -134,7 +134,6 @@ include::{kib-repo-dir}/visualize/most-frequent.asciidoc[]
 include::{kib-repo-dir}/visualize/tsvb.asciidoc[]
 include::{kib-repo-dir}/visualize/timelion.asciidoc[]
 
-include::{kib-repo-dir}/visualize/tilemap.asciidoc[]
 include::{kib-repo-dir}/visualize/heatmap.asciidoc[]
 
 include::{kib-repo-dir}/visualize/for-dashboard.asciidoc[]
