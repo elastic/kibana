@@ -9,6 +9,7 @@ import { useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { SimpleSavedObject } from 'kibana/public';
+import { isErrorResponse } from '../../../../../../../common/types/errors';
 import { ml } from '../../../../../services/ml_api_service';
 import { useMlContext } from '../../../../../contexts/ml';
 
@@ -39,25 +40,16 @@ export interface CreateAnalyticsFormProps {
   state: State;
 }
 
-interface ErrorResponse {
-  body: {
-    statusCode: number;
-    error: string;
-    message: string;
-  };
-  name: string;
-}
-
-const isErrorResponse = (arg: any): arg is ErrorResponse => {
-  return arg?.body?.error !== undefined && arg?.body?.message !== undefined;
-};
-
 export function getErrorMessage(error: any) {
   if (isErrorResponse(error)) {
     return `${error.body.error}: ${error.body.message}`;
-  } else {
-    return JSON.stringify(error, null, 2);
   }
+
+  if (typeof error === 'object' && typeof error.message === 'string') {
+    return error.message;
+  }
+
+  return JSON.stringify(error);
 }
 
 export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {

@@ -158,12 +158,14 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     title: i18n.translate('xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.state', {
       defaultMessage: 'State',
     }),
-    items: Object.entries(stateValues).map(s => {
-      if (s[0].toString() === 'state') {
-        return { title: s[0].toString(), description: getTaskStateBadge(getItemDescription(s[1])) };
-      } else {
-        return { title: s[0].toString(), description: getItemDescription(s[1]) };
+    items: Object.entries(stateValues).map(([stateKey, stateValue]) => {
+      if (stateKey.toString() === 'state') {
+        return {
+          title: stateKey.toString(),
+          description: getTaskStateBadge(getItemDescription(stateValue)),
+        };
       }
+      return { title: stateKey.toString(), description: getItemDescription(stateValue) };
     }),
     position: 'left',
   };
