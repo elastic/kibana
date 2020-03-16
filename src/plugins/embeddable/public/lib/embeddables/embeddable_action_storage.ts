@@ -17,11 +17,16 @@
  * under the License.
  */
 
-import { UiActionsActionStorage, UiActionsSerializedEvent } from '../../../../ui_actions/public';
+import {
+  UiActionsAbstractActionStorage,
+  UiActionsSerializedEvent,
+} from '../../../../ui_actions/public';
 import { Embeddable } from '..';
 
-export class EmbeddableActionStorage implements UiActionsActionStorage {
-  constructor(private readonly embbeddable: Embeddable<any, any>) {}
+export class EmbeddableActionStorage extends UiActionsAbstractActionStorage {
+  constructor(private readonly embbeddable: Embeddable<any, any>) {
+    super();
+  }
 
   async create(event: UiActionsSerializedEvent) {
     const input = this.embbeddable.getInput();
@@ -94,10 +99,6 @@ export class EmbeddableActionStorage implements UiActionsActionStorage {
   private __list() {
     const input = this.embbeddable.getInput();
     return (input.events || []) as UiActionsSerializedEvent[];
-  }
-
-  async count(): Promise<number> {
-    return this.__list().length;
   }
 
   async list(): Promise<UiActionsSerializedEvent[]> {

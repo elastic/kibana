@@ -58,21 +58,25 @@ export abstract class Embeddable<
   // to update input when the parent changes.
   private parentSubscription?: Rx.Subscription;
 
+  private storageSubscription?: Rx.Subscription;
+
   // TODO: Rename to destroyed.
   private destoyed: boolean = false;
 
-  private __dynamicActions?: UiActionsDynamicActionManager;
+  private storage = new EmbeddableActionStorage(this);
+
+  private cachedDynamicActions?: UiActionsDynamicActionManager;
   public get dynamicActions(): UiActionsDynamicActionManager | undefined {
     if (!this.params.uiActions) return undefined;
-    if (!this.__dynamicActions) {
-      this.__dynamicActions = new UiActionsDynamicActionManager({
+    if (!this.cachedDynamicActions) {
+      this.cachedDynamicActions = new UiActionsDynamicActionManager({
         isCompatible: async ({ embeddable }: any) => embeddable.runtimeId === this.runtimeId,
-        storage: new EmbeddableActionStorage(this),
+        storage: this.storage,
         uiActions: this.params.uiActions,
       });
     }
 
-    return this.__dynamicActions;
+    return this.cachedDynamicActions;
   }
 
   constructor(
@@ -111,6 +115,9 @@ export abstract class Embeddable<
         console.log('Failed to start embeddable dynamic actions', this);
         console.error(error);
         /* eslint-enable */
+      });
+      this.storageSubscription = this.input$.subscribe(() => {
+        this.storage.reload$.next();
       });
     }
   }
@@ -199,6 +206,10 @@ export abstract class Embeddable<
         console.error(error);
         /* eslint-enable */
       });
+    }
+
+    if (this.storageSubscription) {
+      this.storageSubscription.unsubscribe();
     }
 
     if (this.parentSubscription) {

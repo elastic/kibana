@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Observable, Subject } from 'rxjs';
 import { SerializedAction } from './types';
 
 /**
@@ -29,7 +30,7 @@ export interface SerializedEvent {
 }
 
 /**
- * This interface needs to be implemented by dynamic action users if they
+ * This CRUD interface needs to be implemented by dynamic action users if they
  * want to persist the dynamic actions. It has a default implementation in
  * Embeddables, however one can use the dynamic actions without Embeddables,
  * in that case they have to implement this interface.
@@ -41,4 +42,23 @@ export interface ActionStorage {
   read(eventId: string): Promise<SerializedEvent>;
   count(): Promise<number>;
   list(): Promise<SerializedEvent[]>;
+
+  /**
+   * Triggered every time events changed in storage and should be re-loaded.
+   */
+  readonly reload$?: Observable<void>;
+}
+
+export abstract class AbstractActionStorage implements ActionStorage {
+  public readonly reload$: Observable<void> & Pick<Subject<void>, 'next'> = new Subject<void>();
+
+  public async count(): Promise<number> {
+    return (await this.list()).length;
+  }
+
+  abstract create(event: SerializedEvent): Promise<void>;
+  abstract update(event: SerializedEvent): Promise<void>;
+  abstract remove(eventId: string): Promise<void>;
+  abstract read(eventId: string): Promise<SerializedEvent>;
+  abstract list(): Promise<SerializedEvent[]>;
 }
