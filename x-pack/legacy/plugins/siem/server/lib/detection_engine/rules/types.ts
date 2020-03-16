@@ -201,15 +201,3 @@ export const isRuleStatusFindTypes = (
 ): obj is Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>> => {
   return obj ? obj.every(ruleStatus => isRuleStatusFindType(ruleStatus)) : false;
 };
-
-export interface RuleAlertAttributes {
-  enabled: boolean;
-  name: string;
-  tags: string[];
-  createdBy: string;
-  createdAt: string;
-  updatedBy: string;
-  schedule: {
-    interval: string;
-  };
-}
