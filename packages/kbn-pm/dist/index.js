@@ -57011,6 +57011,7 @@ function getProjectPaths({
     projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'x-pack'));
     projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'x-pack/plugins/*'));
     projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'x-pack/legacy/plugins/*'));
+    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'x-pack/test/functional_with_es_ssl/fixtures/plugins/*'));
   }
 
   if (!skipKibanaPlugins) {
