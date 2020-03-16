@@ -197,7 +197,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
   });
   // TODO: replace this button with a proper Eui component, when it will be ready
   const getMessageVariables = (paramsProperty: string) =>
-    messageVariables?.map((variable: string, i: number) => (
+    messageVariables?.map((variable: string) => (
       <EuiContextMenuItem
         key={variable}
         icon="empty"
@@ -213,6 +213,34 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
         {`{{${variable}}}`}
       </EuiContextMenuItem>
     ));
+
+  const getAddVariableComponent = (paramsProperty: string, buttonName: string) => {
+    return (
+      <EuiPopover
+        button={
+          <EuiButtonIcon
+            data-test-subj="dedupKeyAddVariableButton"
+            onClick={() => setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, dedupKey: true })}
+            iconType="indexOpen"
+            aria-label={i18n.translate(
+              `xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.${buttonName}`,
+              {
+                defaultMessage: 'Add variable',
+              }
+            )}
+          />
+        }
+        isOpen={isVariablesPopoverOpen[paramsProperty]}
+        closePopover={() =>
+          setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, [paramsProperty]: false })
+        }
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+      >
+        <EuiContextMenuPanel items={getMessageVariables(paramsProperty)} />
+      </EuiPopover>
+    );
+  };
   return (
     <Fragment>
       <EuiFlexGroup>
@@ -269,33 +297,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
                 defaultMessage: 'DedupKey (optional)',
               }
             )}
-            labelAppend={
-              <EuiPopover
-                button={
-                  <EuiButtonIcon
-                    data-test-subj="dedupKeyAddVariableButton"
-                    onClick={() =>
-                      setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, dedupKey: true })
-                    }
-                    iconType="indexOpen"
-                    aria-label={i18n.translate(
-                      'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariablePopoverButton1',
-                      {
-                        defaultMessage: 'Add variable',
-                      }
-                    )}
-                  />
-                }
-                isOpen={isVariablesPopoverOpen.dedupKey}
-                closePopover={() =>
-                  setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, dedupKey: false })
-                }
-                panelPaddingSize="none"
-                anchorPosition="downLeft"
-              >
-                <EuiContextMenuPanel items={getMessageVariables('dedupKey')} />
-              </EuiPopover>
-            }
+            labelAppend={getAddVariableComponent('dedupKey', 'addVariablePopoverButton1')}
           >
             <EuiFieldText
               fullWidth
@@ -322,33 +324,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
                 defaultMessage: 'Timestamp (optional)',
               }
             )}
-            labelAppend={
-              <EuiPopover
-                button={
-                  <EuiButtonIcon
-                    data-test-subj="timestampAddVariableButton"
-                    onClick={() =>
-                      setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, timestamp: true })
-                    }
-                    iconType="indexOpen"
-                    aria-label={i18n.translate(
-                      'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariablePopoverButton2',
-                      {
-                        defaultMessage: 'Add variable',
-                      }
-                    )}
-                  />
-                }
-                isOpen={isVariablesPopoverOpen.timestamp}
-                closePopover={() =>
-                  setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, timestamp: false })
-                }
-                panelPaddingSize="none"
-                anchorPosition="downLeft"
-              >
-                <EuiContextMenuPanel items={getMessageVariables('timestamp')} />
-              </EuiPopover>
-            }
+            labelAppend={getAddVariableComponent('timestamp', 'addVariablePopoverButton2')}
           >
             <EuiFieldText
               fullWidth
@@ -375,33 +351,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Component (optional)',
           }
         )}
-        labelAppend={
-          <EuiPopover
-            button={
-              <EuiButtonIcon
-                data-test-subj="componentAddVariableButton"
-                onClick={() =>
-                  setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, component: true })
-                }
-                iconType="indexOpen"
-                aria-label={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariablePopoverButton3',
-                  {
-                    defaultMessage: 'Add variable',
-                  }
-                )}
-              />
-            }
-            isOpen={isVariablesPopoverOpen.component}
-            closePopover={() =>
-              setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, component: false })
-            }
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenuPanel items={getMessageVariables('component')} />
-          </EuiPopover>
-        }
+        labelAppend={getAddVariableComponent('component', 'addVariablePopoverButton7')}
       >
         <EuiFieldText
           fullWidth
@@ -426,33 +376,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Group (optional)',
           }
         )}
-        labelAppend={
-          <EuiPopover
-            button={
-              <EuiButtonIcon
-                data-test-subj="groupAddVariableButton"
-                onClick={() =>
-                  setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, group: true })
-                }
-                iconType="indexOpen"
-                aria-label={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariablePopoverButton4',
-                  {
-                    defaultMessage: 'Add variable',
-                  }
-                )}
-              />
-            }
-            isOpen={isVariablesPopoverOpen.group}
-            closePopover={() =>
-              setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, group: false })
-            }
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenuPanel items={getMessageVariables('group')} />
-          </EuiPopover>
-        }
+        labelAppend={getAddVariableComponent('group', 'addVariablePopoverButton3')}
       >
         <EuiFieldText
           fullWidth
@@ -477,33 +401,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Source (optional)',
           }
         )}
-        labelAppend={
-          <EuiPopover
-            button={
-              <EuiButtonIcon
-                data-test-subj="sourceAddVariableButton"
-                onClick={() =>
-                  setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, source: true })
-                }
-                iconType="indexOpen"
-                aria-label={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariablePopoverButton5',
-                  {
-                    defaultMessage: 'Add variable',
-                  }
-                )}
-              />
-            }
-            isOpen={isVariablesPopoverOpen.source}
-            closePopover={() =>
-              setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, source: false })
-            }
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenuPanel items={getMessageVariables('source')} />
-          </EuiPopover>
-        }
+        labelAppend={getAddVariableComponent('source', 'addVariablePopoverButton6')}
       >
         <EuiFieldText
           fullWidth
@@ -531,33 +429,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Summary',
           }
         )}
-        labelAppend={
-          <EuiPopover
-            button={
-              <EuiButtonIcon
-                data-test-subj="summaryAddVariableButton"
-                onClick={() =>
-                  setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, summary: true })
-                }
-                iconType="indexOpen"
-                aria-label={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariablePopoverButton6',
-                  {
-                    defaultMessage: 'Add variable',
-                  }
-                )}
-              />
-            }
-            isOpen={isVariablesPopoverOpen.summary}
-            closePopover={() =>
-              setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, summary: false })
-            }
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenuPanel items={getMessageVariables('summary')} />
-          </EuiPopover>
-        }
+        labelAppend={getAddVariableComponent('summary', 'addVariablePopoverButton4')}
       >
         <EuiFieldText
           fullWidth
@@ -584,33 +456,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Class (optional)',
           }
         )}
-        labelAppend={
-          <EuiPopover
-            button={
-              <EuiButtonIcon
-                data-test-subj="classAddVariableButton"
-                onClick={() =>
-                  setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, class: true })
-                }
-                iconType="indexOpen"
-                aria-label={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariablePopoverButton7',
-                  {
-                    defaultMessage: 'Add variable',
-                  }
-                )}
-              />
-            }
-            isOpen={isVariablesPopoverOpen.class}
-            closePopover={() =>
-              setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, class: false })
-            }
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenuPanel items={getMessageVariables('class')} />
-          </EuiPopover>
-        }
+        labelAppend={getAddVariableComponent('class', 'addVariablePopoverButton5')}
       >
         <EuiFieldText
           fullWidth
