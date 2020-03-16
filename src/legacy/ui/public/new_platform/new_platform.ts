@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { IScope } from 'angular';
 
 import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
@@ -29,6 +30,16 @@ import {
   ScopedHistory,
 } from '../../../../core/public';
 import { Plugin as DataPlugin } from '../../../../plugins/data/public';
+import {
+  setIndexPatterns,
+  setQueryService,
+  setUiSettings,
+  setInjectedMetadata,
+  setFieldFormats,
+  setSearchService,
+  setOverlays,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/data/public/services';
 import { Plugin as ExpressionsPlugin } from '../../../../plugins/expressions/public';
 import {
   Setup as InspectorSetup,
@@ -118,11 +129,24 @@ export function __setup__(coreSetup: LegacyCoreSetup, plugins: PluginsSetup) {
 
   // Setup compatibility layer for AppService in legacy platform
   npSetup.core.application.register = legacyAppRegister;
+
+  // Services that need to be set in the legacy platform since the legacy data plugin
+  // which previously provided them has been removed.
+  setInjectedMetadata(npSetup.core.injectedMetadata);
 }
 
 export function __start__(coreStart: LegacyCoreStart, plugins: PluginsStart) {
   npStart.core = coreStart;
   npStart.plugins = plugins;
+
+  // Services that need to be set in the legacy platform since the legacy data plugin
+  // which previously provided them has been removed.
+  setUiSettings(npStart.core.uiSettings);
+  setQueryService(npStart.plugins.data.query);
+  setIndexPatterns(npStart.plugins.data.indexPatterns);
+  setFieldFormats(npStart.plugins.data.fieldFormats);
+  setSearchService(npStart.plugins.data.search);
+  setOverlays(npStart.core.overlays);
 }
 
 /** Flag used to ensure `legacyAppRegister` is only called once. */

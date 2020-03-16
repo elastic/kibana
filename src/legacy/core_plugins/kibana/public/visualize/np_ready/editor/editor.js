@@ -31,8 +31,8 @@ import { getEditBreadcrumbs } from '../breadcrumbs';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 import { unhashUrl } from '../../../../../../../plugins/kibana_utils/public';
-import { kbnBaseUrl } from '../../../../../../../plugins/kibana_legacy/public';
 import { MarkdownSimple, toMountPoint } from '../../../../../../../plugins/kibana_react/public';
+import { addFatalError, kbnBaseUrl } from '../../../../../../../plugins/kibana_legacy/public';
 import {
   SavedObjectSaveModal,
   showSaveModal,
@@ -88,7 +88,7 @@ function VisualizeAppController(
     toastNotifications,
     chrome,
     getBasePath,
-    core: { docLinks },
+    core: { docLinks, fatalErrors },
     savedQueryService,
     uiSettings,
     I18nContext,
@@ -468,16 +468,26 @@ function VisualizeAppController(
     const subscriptions = new Subscription();
 
     subscriptions.add(
-      subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
-        next: () => {
-          $scope.refreshInterval = timefilter.getRefreshInterval();
+      subscribeWithScope(
+        $scope,
+        timefilter.getRefreshIntervalUpdate$(),
+        {
+          next: () => {
+            $scope.refreshInterval = timefilter.getRefreshInterval();
+          },
         },
-      })
+        error => addFatalError(fatalErrors, error)
+      )
     );
     subscriptions.add(
-      subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
-        next: updateTimeRange,
-      })
+      subscribeWithScope(
+        $scope,
+        timefilter.getTimeUpdate$(),
+        {
+          next: updateTimeRange,
+        },
+        error => addFatalError(fatalErrors, error)
+      )
     );
 
     subscriptions.add(
@@ -500,16 +510,26 @@ function VisualizeAppController(
 
     // update the searchSource when filters update
     subscriptions.add(
-      subscribeWithScope($scope, filterManager.getUpdates$(), {
-        next: () => {
-          $scope.filters = filterManager.getFilters();
+      subscribeWithScope(
+        $scope,
+        filterManager.getUpdates$(),
+        {
+          next: () => {
+            $scope.filters = filterManager.getFilters();
+          },
         },
-      })
+        error => addFatalError(fatalErrors, error)
+      )
     );
     subscriptions.add(
-      subscribeWithScope($scope, filterManager.getFetches$(), {
-        next: $scope.fetch,
-      })
+      subscribeWithScope(
+        $scope,
+        filterManager.getFetches$(),
+        {
+          next: $scope.fetch,
+        },
+        error => addFatalError(fatalErrors, error)
+      )
     );
 
     $scope.$on('$destroy', () => {

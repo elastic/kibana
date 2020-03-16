@@ -62,6 +62,26 @@ export function KueryBar() {
 
   const { indexPattern } = useDynamicIndexPattern(processorEvent);
 
+  const placeholder = i18n.translate('xpack.apm.kueryBar.placeholder', {
+    defaultMessage: `Search {event, select,
+            transaction {transactions}
+            metric {metrics}
+            error {errors}
+            other {transactions, errors and metrics}
+          } (E.g. {queryExample})`,
+    values: {
+      queryExample: example,
+      event: processorEvent
+    }
+  });
+
+  // The bar should be disabled when viewing the service map
+  const disabled = /\/service-map$/.test(location.pathname);
+  const disabledPlaceholder = i18n.translate(
+    'xpack.apm.kueryBar.disabledPlaceholder',
+    { defaultMessage: 'Search is not available for service maps' }
+  );
+
   async function onChange(inputValue: string, selectionStart: number) {
     if (indexPattern == null) {
       return;
@@ -123,23 +143,13 @@ export function KueryBar() {
   return (
     <Container>
       <Typeahead
+        disabled={disabled}
         isLoading={state.isLoadingSuggestions}
         initialValue={urlParams.kuery}
         onChange={onChange}
         onSubmit={onSubmit}
         suggestions={state.suggestions}
-        placeholder={i18n.translate('xpack.apm.kueryBar.placeholder', {
-          defaultMessage: `Search {event, select,
-            transaction {transactions}
-            metric {metrics}
-            error {errors}
-            other {transactions, errors and metrics}
-          } (E.g. {queryExample})`,
-          values: {
-            queryExample: example,
-            event: processorEvent
-          }
-        })}
+        placeholder={disabled ? disabledPlaceholder : placeholder}
       />
     </Container>
   );
