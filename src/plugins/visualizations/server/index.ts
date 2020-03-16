@@ -17,25 +17,14 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { Legacy } from '../../../../kibana';
+import { PluginInitializerContext } from '../../../core/server';
+import { VisualizationsPlugin } from './plugin';
 
-// eslint-disable-next-line import/no-default-export
-export default function DataPlugin(kibana: any) {
-  const config: Legacy.PluginSpecOptions = {
-    id: 'data',
-    require: ['elasticsearch'],
-    publicDir: resolve(__dirname, 'public'),
-    config: (Joi: any) => {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-      }).default();
-    },
-    init: (server: Legacy.Server) => ({}),
-    uiExports: {
-      injectDefaultVars: () => ({}),
-    },
-  };
+//  This exports static code and TypeScript types,
+//  as well as, Kibana Platform `plugin()` initializer.
 
-  return new kibana.Plugin(config);
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new VisualizationsPlugin(initializerContext);
 }
+
+export { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';

@@ -17,22 +17,23 @@
  * under the License.
  */
 
-import { get } from 'lodash';
-import { migrations730 as dashboardMigrations730 } from '../public/dashboard/migrations';
+import { flow, get } from 'lodash';
+import { SavedObjectMigrationFn } from 'kibana/server';
 
-function migrateIndexPattern(doc) {
+const migrateIndexPattern: SavedObjectMigrationFn = doc => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
   if (typeof searchSourceJSON !== 'string') {
-    return;
+    return doc;
   }
   let searchSource;
   try {
     searchSource = JSON.parse(searchSourceJSON);
   } catch (e) {
     // Let it go, the data is invalid and we'll leave it as is
-    return;
+    return doc;
   }
-  if (searchSource.index) {
+
+  if (searchSource.index && Array.isArray(doc.references)) {
     searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
     doc.references.push({
       name: searchSource.indexRefName,
@@ -42,8 +43,8 @@ function migrateIndexPattern(doc) {
     delete searchSource.index;
   }
   if (searchSource.filter) {
-    searchSource.filter.forEach((filterRow, i) => {
-      if (!filterRow.meta || !filterRow.meta.index) {
+    searchSource.filter.forEach((filterRow: any, i: number) => {
+      if (!filterRow.meta || !filterRow.meta.index || !Array.isArray(doc.references)) {
         return;
       }
       filterRow.meta.indexRefName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
@@ -55,48 +56,37 @@ function migrateIndexPattern(doc) {
       delete filterRow.meta.index;
     });
   }
+
   doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
-}
 
-export const migrations = {
-  dashboard: {
-    '7.0.0': doc => {
-      // Set new "references" attribute
-      doc.references = doc.references || [];
+  return doc;
+};
 
-      // Migrate index pattern
-      migrateIndexPattern(doc);
-      // Migrate panels
-      const panelsJSON = get(doc, 'attributes.panelsJSON');
-      if (typeof panelsJSON !== 'string') {
-        return doc;
-      }
-      let panels;
-      try {
-        panels = JSON.parse(panelsJSON);
-      } catch (e) {
-        // Let it go, the data is invalid and we'll leave it as is
-        return doc;
-      }
-      if (!Array.isArray(panels)) {
-        return doc;
-      }
-      panels.forEach((panel, i) => {
-        if (!panel.type || !panel.id) {
-          return;
-        }
-        panel.panelRefName = `panel_${i}`;
-        doc.references.push({
-          name: `panel_${i}`,
-          type: panel.type,
-          id: panel.id,
-        });
-        delete panel.type;
-        delete panel.id;
-      });
-      doc.attributes.panelsJSON = JSON.stringify(panels);
-      return doc;
+const setNewReferences: SavedObjectMigrationFn = (doc, context) => {
+  doc.references = doc.references || [];
+  // Migrate index pattern
+  return migrateIndexPattern(doc, context);
+};
+
+const migrateSearchSortToNestedArray: SavedObjectMigrationFn = doc => {
+  const sort = get(doc, 'attributes.sort');
+  if (!sort) return doc;
+
+  // Don't do anything if we already have a two dimensional array
+  if (Array.isArray(sort) && sort.length > 0 && Array.isArray(sort[0])) {
+    return doc;
+  }
+
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      sort: [doc.attributes.sort],
     },
-    '7.3.0': dashboardMigrations730,
-  },
+  };
+};
+
+export const searchSavedObjectTypeMigrations = {
+  '7.0.0': flow<SavedObjectMigrationFn>(setNewReferences),
+  '7.4.0': flow<SavedObjectMigrationFn>(migrateSearchSortToNestedArray),
 };

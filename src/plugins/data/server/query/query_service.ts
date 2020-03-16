@@ -17,34 +17,13 @@
  * under the License.
  */
 
-export const mappings = {
-  query: {
-    properties: {
-      title: {
-        type: 'text',
-      },
-      description: {
-        type: 'text',
-      },
-      query: {
-        properties: {
-          language: {
-            type: 'keyword',
-          },
-          query: {
-            type: 'keyword',
-            index: false,
-          },
-        },
-      },
-      filters: {
-        type: 'object',
-        enabled: false,
-      },
-      timefilter: {
-        type: 'object',
-        enabled: false,
-      },
-    },
-  },
-};
+import { CoreSetup, Plugin } from 'kibana/server';
+import { querySavedObjectType } from '../saved_objects';
+
+export class QueryService implements Plugin<void> {
+  public setup(core: CoreSetup) {
+    core.savedObjects.registerType(querySavedObjectType);
+  }
+
+  public start() {}
+}
