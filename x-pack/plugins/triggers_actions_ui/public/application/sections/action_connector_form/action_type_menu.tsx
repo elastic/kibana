@@ -16,9 +16,14 @@ import './action_type_menu.scss';
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
   actionTypes?: ActionType[];
+  setHasActionsDisabledByLicense?: (value: boolean) => void;
 }
 
-export const ActionTypeMenu = ({ onActionTypeChange, actionTypes }: Props) => {
+export const ActionTypeMenu = ({
+  onActionTypeChange,
+  actionTypes,
+  setHasActionsDisabledByLicense,
+}: Props) => {
   const { http, toastNotifications, actionTypeRegistry } = useActionsConnectorsContext();
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
 
@@ -31,6 +36,12 @@ export const ActionTypeMenu = ({ onActionTypeChange, actionTypes }: Props) => {
           index[actionTypeItem.id] = actionTypeItem;
         }
         setActionTypesIndex(index);
+        if (setHasActionsDisabledByLicense) {
+          const hasActionsDisabledByLicense = availableActionTypes.some(
+            action => !index[action.id].enabledInLicense
+          );
+          setHasActionsDisabledByLicense(hasActionsDisabledByLicense);
+        }
       } catch (e) {
         if (toastNotifications) {
           toastNotifications.addDanger({

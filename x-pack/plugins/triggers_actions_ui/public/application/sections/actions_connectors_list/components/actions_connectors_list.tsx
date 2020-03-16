@@ -412,7 +412,6 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
         }}
       >
         <ConnectorAddFlyout
-          actionTypes={actionTypesIndex && Object.values(actionTypesIndex)}
           addFlyoutVisible={addFlyoutVisible}
           setAddFlyoutVisibility={setAddFlyoutVisibility}
         />

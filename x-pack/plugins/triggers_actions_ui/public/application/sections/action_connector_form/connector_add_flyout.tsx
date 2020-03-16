@@ -52,6 +52,7 @@ export const ConnectorAddFlyout = ({
     reloadConnectors,
   } = useActionsConnectorsContext();
   const [actionType, setActionType] = useState<ActionType | undefined>(undefined);
+  const [hasActionsDisabledByLicense, setHasActionsDisabledByLicense] = useState<boolean>(false);
 
   // hooks
   const initialConnector = {
@@ -90,7 +91,11 @@ export const ConnectorAddFlyout = ({
   let actionTypeModel;
   if (!actionType) {
     currentForm = (
-      <ActionTypeMenu onActionTypeChange={onActionTypeChange} actionTypes={actionTypes} />
+      <ActionTypeMenu
+        onActionTypeChange={onActionTypeChange}
+        actionTypes={actionTypes}
+        setHasActionsDisabledByLicense={setHasActionsDisabledByLicense}
+      />
     );
   } else {
     actionTypeModel = actionTypeRegistry.get(actionType.id);
@@ -208,12 +213,7 @@ export const ConnectorAddFlyout = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody
-        banner={
-          !actionType &&
-          actionTypes &&
-          hasActionTypesDisabledByLicense(actionTypes) &&
-          upgradeYourLicenseCallOut
-        }
+        banner={!actionType && hasActionsDisabledByLicense && upgradeYourLicenseCallOut}
       >
         {currentForm}
       </EuiFlyoutBody>
@@ -264,10 +264,6 @@ export const ConnectorAddFlyout = ({
     </EuiFlyout>
   );
 };
-
-function hasActionTypesDisabledByLicense(actionTypes: ActionType[]) {
-  return actionTypes.some(actionType => !actionType.enabledInLicense);
-}
 
 const upgradeYourLicenseCallOut = (
   <EuiCallOut

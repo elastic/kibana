@@ -99,11 +99,9 @@ export const ActionForm = ({
           index[actionTypeItem.id] = actionTypeItem;
         }
         setActionTypesIndex(index);
-        const hasActionsDisabledByLicense = actions.some(
-          action => !index[action.actionTypeId].enabledInLicense
-        );
+        const hasActionsDisabled = actions.some(action => !index[action.actionTypeId].enabled);
         if (setHasActionsDisabled) {
-          setHasActionsDisabled(hasActionsDisabledByLicense);
+          setHasActionsDisabled(hasActionsDisabled);
         }
       } catch (e) {
         if (toastNotifications) {

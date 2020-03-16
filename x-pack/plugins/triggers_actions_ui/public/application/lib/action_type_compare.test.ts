@@ -7,7 +7,7 @@
 import { ActionType } from '../../types';
 import { actionTypeCompare } from './action_type_compare';
 
-test('should short enabled action types first', async () => {
+test('should sort enabled action types first', async () => {
   const actionTypes: ActionType[] = [
     {
       id: '1',
