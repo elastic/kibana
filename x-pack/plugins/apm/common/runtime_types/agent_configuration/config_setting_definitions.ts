@@ -71,7 +71,7 @@ export const settingDefinitions: SettingDefinition[] = [
     }),
     helpText: i18n.translate('xpack.apm.agentConfig.active.helpText', {
       defaultMessage:
-        'A boolean specifying if the agent should be active or not.\nWhen active, the agent instruments incoming HTTP requests, tracks errors and collects and sends metrics.\nWhen inactive, the agent works as a noop, not collecting data and not communicating with the APM sever.\nAs this is a reversible switch, agent threads are not being killed when inactivated, but they will be \nmostly idle in this state, so the overhead should be negligible.\n\nYou can use this setting to dynamically disable Elastic APM at runtime.'
+        'A boolean specifying if the agent should be active or not.\nWhen active, the agent instruments incoming HTTP requests, tracks errors and collects and sends metrics.\nWhen inactive, the agent works as a noop, not collecting data and not communicating with the APM Server.\nAs this is a reversible switch, agent threads are not being killed when inactivated, but they will be \nmostly idle in this state, so the overhead should be negligible.\n\nYou can use this setting to dynamically disable Elastic APM at runtime.'
     })
   },
 
