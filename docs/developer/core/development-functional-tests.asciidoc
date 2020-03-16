@@ -69,7 +69,7 @@ node scripts/functional_tests_server.js
 node ../scripts/functional_test_runner.js
 ----------
 
-** Selenium tests are run in headless mode on CI. Locally the same tests will be executed in a real browser. You can activate headless mode by setting the environment variable below:
+** Selenium tests are run in headless mode on CI. Locally the same tests will be executed in a real browser. You can activate headless mode by setting the environment variable:
 +
 ["source", "shell"]
 ----------
@@ -181,7 +181,7 @@ node scripts/functional_test_runner --config test/functional/config.firefox.js
 [float]
 ===== Anatomy of a test file
 
-The annotated example file below shows the basic structure every test suite uses. It starts by importing https://github.com/elastic/kibana/tree/master/packages/kbn-expect[`@kbn/expect`] and defining its default export: an anonymous Test Provider. The test provider then destructures the Provider API for the `getService()` and `getPageObjects()` functions. It uses these functions to collect the dependencies of this suite. The rest of the test file will look pretty normal to mocha.js users. `describe()`, `it()`, `before()` and the lot are used to define suites that happen to automate a browser via services and objects of type `PageObject`.
+This annotated example file shows the basic structure every test suite uses. It starts by importing https://github.com/elastic/kibana/tree/master/packages/kbn-expect[`@kbn/expect`] and defining its default export: an anonymous Test Provider. The test provider then destructures the Provider API for the `getService()` and `getPageObjects()` functions. It uses these functions to collect the dependencies of this suite. The rest of the test file will look pretty normal to mocha.js users. `describe()`, `it()`, `before()` and the lot are used to define suites that happen to automate a browser via services and objects of type `PageObject`.
 
 ["source","js"]
 ----
