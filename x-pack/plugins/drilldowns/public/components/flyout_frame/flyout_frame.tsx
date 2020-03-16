@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiFlyout,
 } from '@elastic/eui';
 import { txtClose, txtBack } from './i18n';
 
@@ -25,8 +24,6 @@ export interface FlyoutFrameProps {
   onClose?: () => void;
   onBack?: () => void;
 }
-
-const noop = () => {};
 
 /**
  * @todo This component can be moved to `kibana_react`.
@@ -86,10 +83,10 @@ export const FlyoutFrame: React.FC<FlyoutFrameProps> = ({
   );
 
   return (
-    <EuiFlyout ownFocus onClose={onClose || noop}>
+    <>
       {headerFragment}
       <EuiFlyoutBody banner={banner}>{children}</EuiFlyoutBody>
       {footerFragment}
-    </EuiFlyout>
+    </>
   );
 };

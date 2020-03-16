@@ -63,7 +63,10 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
           viewMode={'manage'}
           dynamicActionManager={dynamicActionManager}
         />
-      )
+      ),
+      {
+        ownFocus: true,
+      }
     );
   }
 }
