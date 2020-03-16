@@ -87,37 +87,3 @@ To load a saved search into Discover:
 If the saved search is associated with a different index pattern than is currently
 selected, opening the saved search changes the selected index pattern. The query language
 used for the saved search will also be automatically selected.
-
-
-[[select-pattern]]
-=== Changing Which Indices You're Searching
-When you submit a search request, the indices that match the currently-selected
-index pattern are searched. The current index pattern is shown below the toolbar.
-To change which indices you are searching, click the index pattern and select a
-different index pattern.
-
-For more information about index patterns, see <<settings-create-pattern,
-Creating an Index Pattern>>.
-
-[[autorefresh]]
-=== Refreshing the Search Results
-As more documents are added to the indices you're searching, the search results
-shown in Discover and used to display visualizations get stale. You can
-configure a refresh interval to periodically resubmit your searches to
-retrieve the latest results.
-
-To enable auto refresh:
-
-. Click the *Time Picker* image:images/time-picker.jpg[Time Picker] in the
-Kibana toolbar.
-. Click *Auto refresh*.
-. Choose a refresh interval from the list.
-+
-image::images/autorefresh-intervals.png[]
-
-When auto refresh is enabled, the refresh interval is displayed next to the
-Time Picker, along with a Pause button. To temporarily disable auto refresh,
-click *Pause*.
-
-NOTE: If auto refresh is not enabled, you can manually refresh visualizations
-by clicking *Refresh*.

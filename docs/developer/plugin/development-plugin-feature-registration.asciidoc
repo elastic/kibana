@@ -45,8 +45,8 @@ Registering a feature consists of the following fields. For more information, co
 |An array of applications this feature enables. Typically, all of your plugin's apps (from `uiExports`) will be included here.
 
 |`privileges` (required)
-|{repo}blob/{branch}/x-pack/legacy/plugins/xpack_main/server/lib/feature_registry/feature_registry.ts[`FeatureWithAllOrReadPrivileges`].
-|see examples below
+|{repo}blob/{branch}/x-pack/plugins/features/server/feature.ts[`FeatureWithAllOrReadPrivileges`].
+|See <<example-1-canvas,Example 1>> and <<example-2-dev-tools,Example 2>>
 |The set of privileges this feature requires to function.
 
 |`icon`
@@ -80,6 +80,7 @@ if (canUserSave) {
 }
 -----------
 
+[[example-1-canvas]]
 ==== Example 1: Canvas Application
 ["source","javascript"]
 -----------
@@ -134,6 +135,7 @@ if (canUserSave) {
 
 Because the `read` privilege does not define the `save` capability, users with read-only access will have their `uiCapabilities.canvas.save` flag set to `false`.
 
+[[example-2-dev-tools]]
 ==== Example 2: Dev Tools
 
 ["source","javascript"]
