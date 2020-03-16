@@ -21,6 +21,7 @@ import * as i18n from './translations';
 import {
   ActionsConnectorsContextProvider,
   ConnectorAddFlyout,
+  ActionType,
 } from '../../../../../../../../plugins/triggers_actions_ui/public';
 import { Connector } from '../../../../containers/case/configure/types';
 import { useKibana } from '../../../../lib/kibana';
@@ -41,11 +42,14 @@ interface Props {
   refetchConnectors: () => void;
   selectedConnector: string;
 }
-const actionTypes = [
+const actionTypes: ActionType[] = [
   {
     id: '.servicenow',
     name: 'ServiceNow',
     enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+    minimumLicenseRequired: 'platinum',
   },
 ];
 
