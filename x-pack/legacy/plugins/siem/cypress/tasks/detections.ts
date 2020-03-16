@@ -40,6 +40,12 @@ export const goToOpenedSignals = () => {
   cy.get(OPENED_SIGNALS_BTN).click({ force: true });
 };
 
+export const openFirstSignal = () => {
+  cy.get(OPEN_CLOSE_SIGNAL_BTN)
+    .first()
+    .click({ force: true });
+};
+
 export const openSignals = () => {
   cy.get(OPEN_CLOSE_SIGNALS_BTN).click({ force: true });
 };
