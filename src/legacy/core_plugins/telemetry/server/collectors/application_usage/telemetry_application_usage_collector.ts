@@ -20,12 +20,8 @@
 import moment from 'moment';
 import { APPLICATION_USAGE_TYPE } from '../../../common/constants';
 import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/server';
-import {
-  ISavedObjectsRepository,
-  SavedObjectAttributes,
-  SavedObjectsFindOptions,
-  SavedObject,
-} from '../../../../../../core/server';
+import { ISavedObjectsRepository, SavedObjectAttributes } from '../../../../../../core/server';
+import { findAll } from '../find_all';
 
 /**
  * Roll indices every 24h
@@ -61,22 +57,6 @@ interface ApplicationUsageTelemetryReport {
     minutes_on_screen_30_days: number;
     minutes_on_screen_90_days: number;
   };
-}
-
-async function findAll<T extends SavedObjectAttributes>(
-  savedObjectsClient: ISavedObjectsRepository,
-  opts: SavedObjectsFindOptions
-): Promise<Array<SavedObject<T>>> {
-  const { page = 1, perPage = 100, ...options } = opts;
-  const { saved_objects: savedObjects, total } = await savedObjectsClient.find<T>({
-    ...options,
-    page,
-    perPage,
-  });
-  if (page * perPage >= total) {
-    return savedObjects;
-  }
-  return [...savedObjects, ...(await findAll<T>(savedObjectsClient, { ...opts, page: page + 1 }))];
 }
 
 export function registerApplicationUsageCollector(
