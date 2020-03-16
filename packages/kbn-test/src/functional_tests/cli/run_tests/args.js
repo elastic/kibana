@@ -46,11 +46,11 @@ const options = {
   updateBaselines: {
     desc: 'Replace baseline screenshots with whatever is generated from the test.',
   },
-  'include-file': {
+  include: {
     arg: '<file>',
     desc: 'Files that must included to be run, can be included multiple times.',
   },
-  'exclude-file': {
+  exclude: {
     arg: '<file>',
     desc: 'Files that must NOT be included to be run, can be included multiple times.',
   },
@@ -124,11 +124,11 @@ export function processOptions(userOptions, defaultConfigPaths) {
   }
 
   userOptions.suiteFiles = {
-    include: [].concat(userOptions['include-file'] || []),
-    exclude: [].concat(userOptions['exclude-file'] || []),
+    include: [].concat(userOptions.include || []),
+    exclude: [].concat(userOptions.exclude || []),
   };
-  delete userOptions['include-file'];
-  delete userOptions['exclude-file'];
+  delete userOptions.include;
+  delete userOptions.exclude;
 
   userOptions.suiteTags = {
     include: [].concat(userOptions['include-tag'] || []),

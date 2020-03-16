@@ -52,7 +52,6 @@ export async function setupMocha(lifecycle, log, config, providers) {
     lifecycle,
     providers,
     paths: config.get('testFiles'),
-    excludePaths: config.get('excludeTestFiles'),
     updateBaselines: config.get('updateBaselines'),
   });
 
