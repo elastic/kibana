@@ -16,7 +16,7 @@ interface Props {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   reportType: string;
-  layoutId: string;
+  layoutId: string | undefined;
   objectId?: string;
   objectType: string;
   getJobParams: () => any;
@@ -54,7 +54,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
   };
 
   public componentDidUpdate(prevProps: Props, prevState: State) {
-    if (this.props.layoutId !== prevState.layoutId) {
+    if (this.props.layoutId && this.props.layoutId !== prevState.layoutId) {
       this.setState({
         ...prevState,
         absoluteUrl: this.getAbsoluteReportGenerationUrl(this.props),
