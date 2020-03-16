@@ -18,10 +18,11 @@
  */
 
 import angular from 'angular';
+import { fatalError } from 'ui/notify/fatal_error';
 import chrome from '../chrome';
 import { isPlainObject } from 'lodash';
 import { uiModules } from '../modules';
-import { subscribeWithScope } from '../utils/subscribe_with_scope';
+import { subscribeWithScope } from '../../../../plugins/kibana_legacy/public';
 
 const module = uiModules.get('kibana/config');
 
@@ -52,12 +53,17 @@ module.service(`config`, function($rootScope, Promise) {
   //* angular specific methods *
   //////////////////////////////
 
-  const subscription = subscribeWithScope($rootScope, uiSettings.getUpdate$(), {
-    next: ({ key, newValue, oldValue }) => {
-      $rootScope.$broadcast('change:config', newValue, oldValue, key, this);
-      $rootScope.$broadcast(`change:config.${key}`, newValue, oldValue, key, this);
+  const subscription = subscribeWithScope(
+    $rootScope,
+    uiSettings.getUpdate$(),
+    {
+      next: ({ key, newValue, oldValue }) => {
+        $rootScope.$broadcast('change:config', newValue, oldValue, key, this);
+        $rootScope.$broadcast(`change:config.${key}`, newValue, oldValue, key, this);
+      },
     },
-  });
+    fatalError
+  );
   $rootScope.$on('$destroy', () => subscription.unsubscribe());
 
   this.watchAll = function(handler, scope = $rootScope) {

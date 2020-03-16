@@ -51,7 +51,7 @@ import {
   DashboardContainerFactory,
   DashboardContainerInput,
   DashboardPanelState,
-} from '../../../../dashboard_embeddable_container/public/np_ready/public';
+} from '../../../../../../plugins/dashboard/public';
 import {
   EmbeddableFactoryNotFoundError,
   ErrorEmbeddable,
@@ -78,7 +78,11 @@ import {
   removeQueryParam,
   unhashUrl,
 } from '../../../../../../plugins/kibana_utils/public';
-import { KibanaLegacyStart } from '../../../../../../plugins/kibana_legacy/public';
+import {
+  addFatalError,
+  AngularHttpError,
+  KibanaLegacyStart,
+} from '../../../../../../plugins/kibana_legacy/public';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
@@ -115,6 +119,7 @@ export class DashboardAppController {
       overlays,
       chrome,
       injectedMetadata,
+      fatalErrors,
       uiSettings,
       savedObjects,
       http,
@@ -592,21 +597,31 @@ export class DashboardAppController {
     $scope.timefilterSubscriptions$ = new Subscription();
 
     $scope.timefilterSubscriptions$.add(
-      subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
-        next: () => {
-          updateState();
-          refreshDashboardContainer();
+      subscribeWithScope(
+        $scope,
+        timefilter.getRefreshIntervalUpdate$(),
+        {
+          next: () => {
+            updateState();
+            refreshDashboardContainer();
+          },
         },
-      })
+        (error: AngularHttpError | Error | string) => addFatalError(fatalErrors, error)
+      )
     );
 
     $scope.timefilterSubscriptions$.add(
-      subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
-        next: () => {
-          updateState();
-          refreshDashboardContainer();
+      subscribeWithScope(
+        $scope,
+        timefilter.getTimeUpdate$(),
+        {
+          next: () => {
+            updateState();
+            refreshDashboardContainer();
+          },
         },
-      })
+        (error: AngularHttpError | Error | string) => addFatalError(fatalErrors, error)
+      )
     );
 
     function updateViewMode(newMode: ViewMode) {

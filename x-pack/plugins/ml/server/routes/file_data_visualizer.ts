@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext } from 'kibana/server';
-import { MAX_BYTES } from '../../../../legacy/plugins/ml/common/constants/file_datavisualizer';
+import { MAX_BYTES } from '../../common/constants/file_datavisualizer';
 import { wrapError } from '../client/error_wrapper';
 import {
   InputOverrides,
@@ -132,7 +132,6 @@ export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitializat
         // follow-up import calls to just add additional data will include the `id` of the created
         // index, we'll ignore those and don't increment the counter.
         if (id === undefined) {
-          // @ts-ignore
           await incrementFileDataVisualizerIndexCreationCount(context.core.savedObjects.client);
         }
 
