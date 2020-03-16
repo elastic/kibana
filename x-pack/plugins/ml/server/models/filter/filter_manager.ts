@@ -7,10 +7,7 @@
 import Boom from 'boom';
 import { IScopedClusterClient } from 'kibana/server';
 
-import {
-  DetectorRule,
-  DetectorRuleScope,
-} from '../../../../../legacy/plugins/ml/common/types/detector_rules';
+import { DetectorRule, DetectorRuleScope } from '../../../common/types/detector_rules';
 
 export interface Filter {
   filter_id: string;

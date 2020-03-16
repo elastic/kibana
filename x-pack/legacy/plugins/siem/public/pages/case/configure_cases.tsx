@@ -5,17 +5,14 @@
  */
 
 import React from 'react';
-import styled, { css } from 'styled-components';
 
 import { WrapperPage } from '../../components/wrapper_page';
 import { CaseHeaderPage } from './components/case_header_page';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { getCaseUrl } from '../../components/link_to';
 import { WhitePageWrapper, SectionWrapper } from './components/wrappers';
-import { Connectors } from './components/configure_cases/connectors';
 import * as i18n from './translations';
-import { ClosureOptions } from './components/configure_cases/closure_options';
-import { FieldMapping } from './components/configure_cases/field_mapping';
+import { ConfigureCases } from './components/configure_cases';
 
 const backOptions = {
   href: getCaseUrl(),
@@ -28,17 +25,6 @@ const wrapperPageStyle: Record<string, string> = {
   paddingBottom: '0',
 };
 
-const FormWrapper = styled.div`
-  ${({ theme }) => css`
-    & > * {
-      margin-top 40px;
-    }
-
-    padding-top: ${theme.eui.paddingSizes.l};
-    padding-bottom: ${theme.eui.paddingSizes.l};
-  `}
-`;
-
 const ConfigureCasesPageComponent: React.FC = () => (
   <>
     <WrapperPage style={wrapperPageStyle}>
@@ -46,17 +32,7 @@ const ConfigureCasesPageComponent: React.FC = () => (
         <CaseHeaderPage title={i18n.CONFIGURE_CASES_PAGE_TITLE} backOptions={backOptions} />
       </SectionWrapper>
       <WhitePageWrapper>
-        <FormWrapper>
-          <SectionWrapper>
-            <Connectors />
-          </SectionWrapper>
-          <SectionWrapper>
-            <ClosureOptions />
-          </SectionWrapper>
-          <SectionWrapper>
-            <FieldMapping />
-          </SectionWrapper>
-        </FormWrapper>
+        <ConfigureCases />
       </WhitePageWrapper>
     </WrapperPage>
     <SpyRoute />

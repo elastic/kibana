@@ -22,8 +22,7 @@ import _ from 'lodash';
 import { Optional } from '@kbn/utility-types';
 
 import { IndexedArray } from 'ui/indexed_array';
-import { AggGroupNames } from '../../data/public/search/aggs/agg_groups';
-import { AggParam } from '../../data/public/search/aggs/agg_params';
+import { AggGroupNames, AggParam, IAggGroupNames } from '../../../../plugins/data/public';
 
 export interface ISchemas {
   [AggGroupNames.Buckets]: Schema[];
@@ -34,7 +33,7 @@ export interface ISchemas {
 export interface Schema {
   aggFilter: string[];
   editor: boolean | string;
-  group: AggGroupNames;
+  group: IAggGroupNames;
   max: number;
   min: number;
   name: string;
