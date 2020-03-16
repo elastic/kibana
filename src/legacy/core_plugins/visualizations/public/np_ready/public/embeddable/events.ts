@@ -17,12 +17,17 @@
  * under the License.
  */
 
-// eslint-disable-next-line
-import { npSetup } from '../../../../../../../../src/legacy/ui/public/new_platform';
-// eslint-disable-next-line
-import { HelloWorldEmbeddableFactory, HELLO_WORLD_EMBEDDABLE } from '../../../../../../../../examples/embeddable_examples/public';
+import {
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+} from '../../../../../../../plugins/ui_actions/public';
 
-npSetup.plugins.embeddable.registerEmbeddableFactory(
-  HELLO_WORLD_EMBEDDABLE,
-  new HelloWorldEmbeddableFactory()
-);
+export interface VisEventToTrigger {
+  ['brush']: typeof SELECT_RANGE_TRIGGER;
+  ['filter']: typeof VALUE_CLICK_TRIGGER;
+}
+
+export const VIS_EVENT_TO_TRIGGER: VisEventToTrigger = {
+  brush: SELECT_RANGE_TRIGGER,
+  filter: VALUE_CLICK_TRIGGER,
+};
