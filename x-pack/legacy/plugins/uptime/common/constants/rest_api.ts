@@ -6,6 +6,7 @@
 
 export enum API_URLS {
   INDEX_PATTERN = `/api/uptime/index_pattern`,
+  INDEX_STATUS = '/api/uptime/index_status',
   MONITOR_LOCATIONS = `/api/uptime/monitor/locations`,
   MONITOR_DURATION = `/api/uptime/monitor/duration`,
   MONITOR_DETAILS = `/api/uptime/monitor/details`,
