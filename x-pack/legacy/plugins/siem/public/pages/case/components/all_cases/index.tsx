@@ -8,7 +8,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
-  EuiButtonIcon,
   EuiContextMenuPanel,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -259,16 +258,14 @@ export const AllCases = React.memo(() => {
             />
           </FlexItemDivider>
           <EuiFlexItem grow={false}>
-            <EuiButton fill href={getCreateCaseUrl()} iconType="plusInCircle">
-              {i18n.CREATE_TITLE}
+            <EuiButton href={getConfigureCasesUrl()} iconType="controlsHorizontal">
+              {i18n.CONFIGURE_CASES_BUTTON}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              aria-label={i18n.CONFIGURE_CASES_BUTTON}
-              href={getConfigureCasesUrl()}
-              iconType="gear"
-            />
+            <EuiButton fill href={getCreateCaseUrl()} iconType="plusInCircle">
+              {i18n.CREATE_TITLE}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </CaseHeaderPage>
