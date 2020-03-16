@@ -417,7 +417,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
           >
             <h2>
               <FormattedMessage
-                defaultMessage="Connection mode settings"
+                defaultMessage="Connection mode"
                 id="xpack.remoteClusters.remoteClusterForm.sectionModeTitle"
                 values={Object {}}
               />
@@ -433,7 +433,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
               <legend
                 className="euiScreenReaderOnly"
               >
-                Connection mode settings
+                Connection mode
               </legend>
             </EuiScreenReaderOnly>
             <EuiFlexGroup
@@ -462,11 +462,11 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                             className="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
                           >
                             <FormattedMessage
-                              defaultMessage="Connection mode settings"
+                              defaultMessage="Connection mode"
                               id="xpack.remoteClusters.remoteClusterForm.sectionModeTitle"
                               values={Object {}}
                             >
-                              Connection mode settings
+                              Connection mode
                             </FormattedMessage>
                           </h2>
                         </EuiTitle>
@@ -1525,7 +1525,7 @@ Array [
               aria-hidden="true"
               class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
             >
-              Connection mode settings
+              Connection mode
             </h2>
           </span>
           <div
@@ -1676,7 +1676,7 @@ Array [
                 >
                   transport port
                 </button>
-                 of the remote cluster.
+                 of the remote cluster. Specify multiple seed nodes so discovery doesn't fail if a node is unavailable.
               </div>
             </div>
           </div>
@@ -2016,7 +2016,7 @@ Array [
         >
           transport port
         </button>
-         of the remote cluster.
+         of the remote cluster. Specify multiple seed nodes so discovery doesn't fail if a node is unavailable.
       </div>
     </div>
   </div>,
