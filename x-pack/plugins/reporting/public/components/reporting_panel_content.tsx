@@ -16,7 +16,7 @@ interface Props {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   reportType: string;
-  layoutId: string | undefined;
+  layoutId: string;
   objectId?: string;
   objectType: string;
   getJobParams: () => any;
