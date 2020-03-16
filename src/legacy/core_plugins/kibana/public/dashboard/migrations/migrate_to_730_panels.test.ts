@@ -48,7 +48,7 @@ import {
 import {
   DEFAULT_PANEL_WIDTH,
   DEFAULT_PANEL_HEIGHT,
-} from '../../../../dashboard_embeddable_container/public/np_ready/public';
+} from '../../../../../../plugins/dashboard/public';
 
 test('6.0 migrates uiState, sort, scales, and gridData', async () => {
   const uiState = {
