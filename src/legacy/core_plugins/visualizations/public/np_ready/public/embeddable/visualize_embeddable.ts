@@ -396,24 +396,24 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   public supportedTriggers() {
     // TODO: Report a correct list of triggers for each vis_type.
     switch (this.vis.type.name) {
-      case 'histogram':
-      case 'line':
-      case 'pie':
       case 'area':
       case 'heatmap':
+      case 'histogram':
       case 'horizontal_bar':
+      case 'line':
+      case 'pie':
+      case 'table':
+      case 'tagcloud':
+        return [VIS_EVENT_TO_TRIGGER.filter];
       case 'gauge':
       case 'goal':
-        return [VIS_EVENT_TO_TRIGGER.filter];
       case 'input_control_vis':
       case 'markdown':
       case 'metric':
       case 'metrics':
-      case 'table':
-      case 'tagcloud':
-      case 'timelion':
       case 'region_map':
       case 'tile_map':
+      case 'timelion':
       case 'vega':
       default:
         return [];
