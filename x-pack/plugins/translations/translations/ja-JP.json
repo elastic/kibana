@@ -7073,7 +7073,6 @@
     "xpack.maps.feature.appDescription": "Elasticsearch と Elastic Maps Service の地理空間データを閲覧します",
     "xpack.maps.featureRegistry.mapsFeatureName": "マップ",
     "xpack.maps.geoGrid.resolutionLabel": "グリッド解像度",
-    "xpack.maps.geometryFilterForm.geoFieldLabel": "フィルタリングされたフィールド",
     "xpack.maps.geometryFilterForm.geometryLabelLabel": "ジオメトリラベル",
     "xpack.maps.geometryFilterForm.relationLabel": "空間関係",
     "xpack.maps.heatmap.colorRampLabel": "色の範囲",
