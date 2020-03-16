@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import apm from 'elastic-apm-node';
 import { groupBy } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
@@ -96,7 +95,6 @@ export function generatePdfObservableFactory(
           logger.debug(`PDF buffer byte length: ${buffer?.byteLength || 0}`);
           tracker.endGetBuffer();
         } catch (err) {
-          apm.captureError(err);
           logger.error(`Could not generate the PDF buffer! ${err}`);
         }
 

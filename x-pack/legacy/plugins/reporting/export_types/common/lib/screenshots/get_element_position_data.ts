@@ -68,7 +68,6 @@ export const getElementPositionAndAttributes = async (
       );
     }
   } catch (err) {
-    apm.captureError(err);
     elementsPositionAndAttributes = null;
   }
 

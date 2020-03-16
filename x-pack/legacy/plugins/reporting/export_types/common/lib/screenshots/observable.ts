@@ -92,7 +92,6 @@ export function screenshotsObservableFactory(
                 }));
               }),
               catchError(err => {
-                apm.captureError(err);
                 logger.error(err);
                 return Rx.of({ elementsPositionAndAttributes: null, timeRange: null, error: err });
               })
