@@ -176,6 +176,7 @@ export function AgentConfigurationList({
       name: '',
       render: (config: Config) => (
         <EuiButtonIcon
+          aria-label="Edit"
           iconType="pencil"
           href={editAgentConfigurationHref(config.service)}
         />
@@ -186,6 +187,7 @@ export function AgentConfigurationList({
       name: '',
       render: (config: Config) => (
         <EuiButtonIcon
+          aria-label="Delete"
           iconType="trash"
           onClick={() => setConfigToBeDeleted(config)}
         />

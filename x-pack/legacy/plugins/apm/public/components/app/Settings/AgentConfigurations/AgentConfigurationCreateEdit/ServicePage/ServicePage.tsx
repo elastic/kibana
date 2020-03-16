@@ -61,7 +61,6 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
     async callApmApi => {
       const serviceName = newConfig.service.name;
 
-      // TODO: perhaps use service name validator
       if (!isString(serviceName) || serviceName.length === 0) {
         return;
       }
@@ -71,7 +70,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
         params: { query: { serviceName } }
       });
 
-      setNewConfig(prev => ({ ...prev, agentName }));
+      setNewConfig(prev => ({ ...prev, agent_name: agentName }));
     },
     [newConfig.service.name, setNewConfig]
   );

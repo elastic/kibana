@@ -19,10 +19,12 @@ import {
 } from '@elastic/eui';
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { AgentName } from '../../../../../../../../../../plugins/apm/typings/es_schemas/ui/fields/agent';
 import { history } from '../../../../../../utils/history';
 import { AgentConfigurationIntake } from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/configuration_types';
 import {
-  settingDefinitions,
+  filterByAgent,
+  configSettingDefinitions,
   isValid
 } from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/config_setting_definitions';
 import { saveConfig } from './saveConfig';
@@ -53,7 +55,7 @@ export function SettingsPage({
 
   const isFormValid = useMemo(() => {
     return (
-      settingDefinitions
+      configSettingDefinitions
         // only validate settings that are not empty
         .filter(({ key }) => {
           const value = newConfig.settings[key];
@@ -150,23 +152,28 @@ export function SettingsPage({
 
             <EuiSpacer size="m" />
 
-            {settingDefinitions.map(setting => (
-              <SettingFormRow
-                isUnsaved={unsavedChanges.hasOwnProperty(setting.key)}
-                key={setting.key}
-                setting={setting}
-                value={newConfig.settings[setting.key]}
-                onChange={(key, value) => {
-                  setNewConfig(prev => ({
-                    ...prev,
-                    settings: {
-                      ...prev.settings,
-                      [key]: value
-                    }
-                  }));
-                }}
-              />
-            ))}
+            {configSettingDefinitions
+
+              // filter out agent specific items that are not applicable
+              // to the selected service
+              .filter(filterByAgent(newConfig.agent_name as AgentName))
+              .map(setting => (
+                <SettingFormRow
+                  isUnsaved={unsavedChanges.hasOwnProperty(setting.key)}
+                  key={setting.key}
+                  setting={setting}
+                  value={newConfig.settings[setting.key]}
+                  onChange={(key, value) => {
+                    setNewConfig(prev => ({
+                      ...prev,
+                      settings: {
+                        ...prev.settings,
+                        [key]: value
+                      }
+                    }));
+                  }}
+                />
+              ))}
           </EuiPanel>
         </form>
       </EuiForm>

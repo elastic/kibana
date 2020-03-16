@@ -17,14 +17,12 @@ import {
   EuiIconTip
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isValid } from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/config_setting_definitions';
 import {
   amountAndUnitToString,
   amountAndUnitToObject
 } from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/amount_and_unit';
-import {
-  SettingDefinition,
-  isValid
-} from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/config_setting_definitions';
+import { ConfigSettingDefinition } from '../../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/config_setting_definitions';
 import { SelectWithPlaceholder } from '../../../../../shared/SelectWithPlaceholder';
 
 function FormRow({
@@ -32,7 +30,7 @@ function FormRow({
   value,
   onChange
 }: {
-  setting: SettingDefinition;
+  setting: ConfigSettingDefinition;
   value?: string;
   onChange: (key: string, value: string) => void;
 }) {
@@ -138,7 +136,7 @@ export function SettingFormRow({
   onChange
 }: {
   isUnsaved: boolean;
-  setting: SettingDefinition;
+  setting: ConfigSettingDefinition;
   value?: string;
   onChange: (key: string, value: string) => void;
 }) {

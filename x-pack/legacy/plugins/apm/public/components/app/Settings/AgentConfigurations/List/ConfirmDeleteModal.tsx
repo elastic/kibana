@@ -29,7 +29,9 @@ export function ConfirmDeleteModal({ config, onCancel, onConfirm }: Props) {
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
-        title="Do this destructive thing"
+        title={i18n.translate('xpack.apm.agentConfig.deleteModal.title', {
+          defaultMessage: `Delete configuration`
+        })}
         onCancel={onCancel}
         onConfirm={async () => {
           setIsDeleting(true);
@@ -37,14 +39,27 @@ export function ConfirmDeleteModal({ config, onCancel, onConfirm }: Props) {
           setIsDeleting(false);
           onConfirm();
         }}
-        cancelButtonText="No, don't do it"
-        confirmButtonText="Yes, do it"
+        cancelButtonText={i18n.translate(
+          'xpack.apm.agentConfig.deleteModal.cancel',
+          { defaultMessage: `No, cancel` }
+        )}
+        confirmButtonText={i18n.translate(
+          'xpack.apm.agentConfig.deleteModal.confirm',
+          { defaultMessage: `Yes, delete` }
+        )}
         confirmButtonDisabled={isDeleting}
         buttonColor="danger"
         defaultFocusedButton="confirm"
       >
-        <p>You&rsquo;re about to destroy something.</p>
-        <p>Are you sure you want to do this?</p>
+        <p>
+          {i18n.translate('xpack.apm.agentConfig.deleteModal.text', {
+            defaultMessage: `You are about to delete the configuration for service "{serviceName}" and environment "{environment}". Do you wish to continue?`,
+            values: {
+              serviceName: getOptionLabel(config.service.name),
+              environment: getOptionLabel(config.service.environment)
+            }
+          })}
+        </p>
       </EuiConfirmModal>
     </EuiOverlayMask>
   );

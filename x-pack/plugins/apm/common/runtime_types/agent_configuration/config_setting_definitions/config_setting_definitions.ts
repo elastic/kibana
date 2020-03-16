@@ -6,13 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
-import { isRight } from 'fp-ts/lib/Either';
-import { transactionSampleRateRt } from './transaction_sample_rate_rt';
-import { getIntegerRt, integerRt } from './integer_rt';
-import { captureBodyRt } from './capture_body_rt';
-import { booleanRt } from './boolean_rt';
-import { BYTE_UNITS, bytesRt } from './bytes_rt';
-import { DURATION_UNITS, durationRt } from './duration_rt';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { transactionSampleRateRt } from '../transaction_sample_rate_rt';
+import { getIntegerRt } from '../integer_rt';
+import { captureBodyRt } from '../capture_body_rt';
+import { BYTE_UNITS, bytesRt } from '../bytes_rt';
+import { DURATION_UNITS, durationRt } from '../duration_rt';
 
 interface BaseSetting {
   key: string;
@@ -20,8 +19,10 @@ interface BaseSetting {
   defaultValue?: string;
   helpText: string;
   placeholder?: string;
-  validation: t.Type<any, any, unknown>;
+  validation?: t.Type<any, string, unknown>;
   validationError?: string;
+  includeAgents?: AgentName[];
+  excludeAgents?: AgentName[];
 }
 
 interface TextSetting extends BaseSetting {
@@ -48,7 +49,7 @@ interface AmountAndUnit extends BaseSetting {
   units: string[];
 }
 
-export type SettingDefinition =
+export type RawConfigSettingDefinition =
   | TextSetting
   | IntegerSetting
   | SelectSetting
@@ -59,11 +60,10 @@ export type SettingDefinition =
  * Settings added here will automatically be added to  `agent_configuration/agent_configuration_intake_rt.ts`
  * and validated both client and server-side
  */
-export const settingDefinitions: SettingDefinition[] = [
+export const rawConfigSettingDefinitions: RawConfigSettingDefinition[] = [
   // Active
   {
     key: 'active',
-    validation: booleanRt,
     type: 'boolean',
     defaultValue: 'true',
     label: i18n.translate('xpack.apm.agentConfig.active.label', {
@@ -72,7 +72,8 @@ export const settingDefinitions: SettingDefinition[] = [
     helpText: i18n.translate('xpack.apm.agentConfig.active.helpText', {
       defaultMessage:
         'A boolean specifying if the agent should be active or not.\nWhen active, the agent instruments incoming HTTP requests, tracks errors and collects and sends metrics.\nWhen inactive, the agent works as a noop, not collecting data and not communicating with the APM Server.\nAs this is a reversible switch, agent threads are not being killed when inactivated, but they will be \nmostly idle in this state, so the overhead should be negligible.\n\nYou can use this setting to dynamically disable Elastic APM at runtime.'
-    })
+    }),
+    excludeAgents: ['js-base', 'rum-js']
   },
 
   // API Request Size
@@ -92,7 +93,8 @@ export const settingDefinitions: SettingDefinition[] = [
     helpText: i18n.translate('xpack.apm.agentConfig.apiRequestSize.helpText', {
       defaultMessage:
         'The maximum total compressed size of the request body which is sent to the APM server intake api via a chunked encoding (HTTP streaming).\nNote that a small overshoot is possible.\n\nAllowed byte units are `b`, `kb` and `mb`. `1kb` is equal to `1024b`.'
-    })
+    }),
+    excludeAgents: ['js-base', 'rum-js']
   },
 
   // API Request Time
@@ -112,14 +114,14 @@ export const settingDefinitions: SettingDefinition[] = [
     helpText: i18n.translate('xpack.apm.agentConfig.apiRequestTime.helpText', {
       defaultMessage:
         "Maximum time to keep an HTTP request to the APM Server open for.\n\nNOTE: This value has to be lower than the APM Server's `read_timeout` setting."
-    })
+    }),
+    excludeAgents: ['js-base', 'rum-js']
   },
 
   // Capture headers
   {
     key: 'capture_headers',
     type: 'boolean',
-    validation: booleanRt,
     defaultValue: 'true',
     label: i18n.translate('xpack.apm.agentConfig.captureHeaders.label', {
       defaultMessage: 'Capture Headers'
@@ -127,14 +129,14 @@ export const settingDefinitions: SettingDefinition[] = [
     helpText: i18n.translate('xpack.apm.agentConfig.captureHeaders.helpText', {
       defaultMessage:
         'If set to `true`, the agent will capture request and response headers, including cookies.\n\nNOTE: Setting this to `false` reduces network bandwidth, disk space and object allocations.'
-    })
+    }),
+    excludeAgents: ['js-base', 'rum-js']
   },
 
   // ENABLE_LOG_CORRELATION
   {
     key: 'enable_log_correlation',
     type: 'boolean',
-    validation: booleanRt,
     defaultValue: 'false',
     label: i18n.translate('xpack.apm.agentConfig.enableLogCorrelation.label', {
       defaultMessage: 'Enable log correlation'
@@ -145,14 +147,14 @@ export const settingDefinitions: SettingDefinition[] = [
         defaultMessage:
           "A boolean specifying if the agent should integrate into SLF4J's https://www.slf4j.org/api/org/slf4j/MDC.html[MDC] to enable trace-log correlation.\nIf set to `true`, the agent will set the `trace.id` and `transaction.id` for the currently active spans and transactions to the MDC.\nSee <<log-correlation>> for more details.\n\nNOTE: While it's allowed to enable this setting at runtime, you can't disable it without a restart."
       }
-    )
+    ),
+    excludeAgents: ['js-base', 'rum-js']
   },
 
   // LOG_LEVEL
   {
     key: 'log_level',
     type: 'text',
-    validation: t.string,
     validationError: '',
     defaultValue: 'info',
     label: i18n.translate('xpack.apm.agentConfig.logLevel.label', {
@@ -160,7 +162,8 @@ export const settingDefinitions: SettingDefinition[] = [
     }),
     helpText: i18n.translate('xpack.apm.agentConfig.logLevel.helpText', {
       defaultMessage: 'Sets the logging level for the agent'
-    })
+    }),
+    excludeAgents: ['js-base', 'rum-js']
   },
 
   // SERVER_TIMEOUT
@@ -182,7 +185,8 @@ export const settingDefinitions: SettingDefinition[] = [
     helpText: i18n.translate('xpack.apm.agentConfig.serverTimeout.helpText', {
       defaultMessage:
         'If a request to the APM server takes longer than the configured timeout,\nthe request is cancelled and the event (exception or transaction) is discarded.\nSet to 0 to disable timeouts.\n\nWARNING: If timeouts are disabled or set to a high value, your app could experience memory issues if the APM server times out.'
-    })
+    }),
+    excludeAgents: ['js-base', 'rum-js']
   },
 
   // SPAN_FRAMES_MIN_DURATION
@@ -207,14 +211,14 @@ export const settingDefinitions: SettingDefinition[] = [
         defaultMessage:
           'In its default settings, the APM agent will collect a stack trace with every recorded span.\nWhile this is very helpful to find the exact place in your code that causes the span, collecting this stack trace does have some overhead. \nWhen setting this option to a negative value, like `-1ms`, stack traces will be collected for all spans. Setting it to a positive value, e.g. `5ms`, will limit stack trace collection to spans with durations equal to or longer than the given value, e.g. 5 milliseconds.\n\nTo disable stack trace collection for spans completely, set the value to `0ms`.'
       }
-    )
+    ),
+    excludeAgents: ['js-base', 'rum-js']
   },
 
   // STACK_TRACE_LIMIT
   {
     key: 'stack_trace_limit',
     type: 'integer',
-    validation: integerRt,
     validationError: i18n.translate(
       'xpack.apm.agentConfig.stackTraceLimit.errorText',
       { defaultMessage: 'Must be a valid number' }
@@ -226,14 +230,14 @@ export const settingDefinitions: SettingDefinition[] = [
     helpText: i18n.translate('xpack.apm.agentConfig.stackTraceLimit.helpText', {
       defaultMessage:
         'Setting it to 0 will disable stack trace collection. Any positive integer value will be used as the maximum number of frames to collect. Setting it -1 means that all frames will be collected.'
-    })
+    }),
+    includeAgents: ['java']
   },
 
   // TRACE_METHODS_DURATION_THRESHOLD
   {
     key: 'trace_methods_duration_threshold',
     type: 'integer',
-    validation: integerRt,
     validationError: i18n.translate(
       'xpack.apm.agentConfig.traceMethodsDurationThreshold.errorText',
       { defaultMessage: 'Must be a valid number' }
@@ -250,7 +254,8 @@ export const settingDefinitions: SettingDefinition[] = [
         defaultMessage:
           'If trace_methods config option is set, provides a threshold to limit spans based on duration. When set to a value greater than 0, spans representing methods traced based on trace_methods will be discarded by default.'
       }
-    )
+    ),
+    includeAgents: ['java']
   },
 
   // Transaction sample rate
@@ -293,7 +298,8 @@ export const settingDefinitions: SettingDefinition[] = [
       { text: 'errors' },
       { text: 'transactions' },
       { text: 'all' }
-    ]
+    ],
+    excludeAgents: ['js-base', 'rum-js']
   },
 
   // Transaction max spans
@@ -317,10 +323,7 @@ export const settingDefinitions: SettingDefinition[] = [
       }
     ),
     min: 0,
-    max: 32000
+    max: 32000,
+    excludeAgents: ['js-base', 'rum-js']
   }
 ];
-
-export function isValid(setting: SettingDefinition, value: unknown) {
-  return isRight(setting.validation.decode(value));
-}
