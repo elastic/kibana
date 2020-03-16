@@ -123,7 +123,9 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
             <UtilityBarSection>
               <UtilityBarGroup>
                 <UtilityBarText data-test-subj="query-message">
-                  {`${i18n.SHOWING} ${nTimelines}`}
+                  <>
+                    {i18n.SHOWING} {nTimelines}
+                  </>
                 </UtilityBarText>
               </UtilityBarGroup>
 

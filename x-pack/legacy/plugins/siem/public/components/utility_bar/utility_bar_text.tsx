@@ -9,7 +9,7 @@ import React from 'react';
 import { BarText } from './styles';
 
 export interface UtilityBarTextProps {
-  children: string;
+  children: string | JSX.Element;
   dataTestSubj?: string;
 }
 
