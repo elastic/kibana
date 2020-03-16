@@ -110,8 +110,11 @@ export class DynamicActionManager {
     (async () => {
       const syncId = ++this.syncId;
       const events = await this.params.storage.list();
+
+      if (this.stopped) return;
       if (syncId !== this.syncId) return;
       if (compareEvents(events, this.ui.get().events)) return;
+
       for (const event of this.ui.get().events) this.killAction(event);
       for (const event of events) this.reviveAction(event);
       this.ui.transitions.finishFetching(events);
