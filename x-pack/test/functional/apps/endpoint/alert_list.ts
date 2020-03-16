@@ -22,7 +22,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     it('loads the Alert List Page', async () => {
       await testSubjects.existOrFail('alertListPage');
     });
-    it('loads verifies the Alert List Page title', async () => {
+    it('verifies the Alert List Page title', async () => {
       const alertsTitle = await testSubjects.getVisibleText('alertsViewTitle');
       expect(alertsTitle).to.equal('Alerts');
     });
