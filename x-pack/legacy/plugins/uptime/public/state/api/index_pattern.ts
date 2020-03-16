@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { API_URLS } from '../../../common/constants/rest_api';
+import { API_URLS } from '../../../common/constants';
 import { apiService } from './utils';
 
 export const fetchIndexPattern = async () => {
