@@ -63,14 +63,16 @@ export const anomalyDetectionUpdateJobSchema = {
   groups: schema.maybe(schema.arrayOf(schema.maybe(schema.string()))),
 };
 
+export const analysisConfigSchema = schema.object({
+  bucket_span: schema.maybe(schema.string()),
+  summary_count_field_name: schema.maybe(schema.string()),
+  detectors: schema.arrayOf(detectorSchema),
+  influencers: schema.arrayOf(schema.maybe(schema.string())),
+  categorization_field_name: schema.maybe(schema.string()),
+});
+
 export const anomalyDetectionJobSchema = {
-  analysis_config: schema.object({
-    bucket_span: schema.maybe(schema.string()),
-    summary_count_field_name: schema.maybe(schema.string()),
-    detectors: schema.arrayOf(detectorSchema),
-    influencers: schema.arrayOf(schema.maybe(schema.string())),
-    categorization_field_name: schema.maybe(schema.string()),
-  }),
+  analysis_config: analysisConfigSchema,
   analysis_limits: schema.maybe(
     schema.object({
       categorization_examples_limit: schema.maybe(schema.number()),

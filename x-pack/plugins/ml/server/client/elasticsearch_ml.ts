@@ -413,6 +413,14 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     method: 'POST',
   });
 
+  ml.estimateModelMemory = ca({
+    url: {
+      fmt: '_ml/anomaly_detectors/_estimate_model_memory',
+    },
+    needBody: true,
+    method: 'POST',
+  });
+
   ml.datafeedPreview = ca({
     url: {
       fmt: '/_ml/datafeeds/<%=datafeedId%>/_preview',

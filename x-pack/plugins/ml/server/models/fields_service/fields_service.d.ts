@@ -16,6 +16,6 @@ export function fieldsServiceProvider(
     timeFieldName: string,
     earliestMs: number,
     latestMs: number
-  ) => Promise<any>;
+  ) => Promise<{ [key: string]: number }>;
   getTimeFieldRange: (index: string[] | string, timeFieldName: string, query: any) => Promise<any>;
 };

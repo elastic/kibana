@@ -22,6 +22,7 @@ import {
   Datafeed,
   CombinedJob,
   Detector,
+  AnalysisConfig,
 } from '../../../../common/types/anomaly_detection_jobs';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { FieldRequestConfig } from '../../datavisualizer/index_based/common';
@@ -532,30 +533,24 @@ export const ml = {
   },
 
   calculateModelMemoryLimit({
+    analysisConfig,
     indexPattern,
-    splitFieldName,
     query,
-    fieldNames,
-    influencerNames,
     timeFieldName,
     earliestMs,
     latestMs,
   }: {
+    analysisConfig: AnalysisConfig;
     indexPattern: string;
-    splitFieldName: string;
     query: any;
-    fieldNames: string[];
-    influencerNames: string[];
     timeFieldName: string;
     earliestMs: number;
     latestMs: number;
   }) {
     const body = JSON.stringify({
+      analysisConfig,
       indexPattern,
-      splitFieldName,
       query,
-      fieldNames,
-      influencerNames,
       timeFieldName,
       earliestMs,
       latestMs,

@@ -29,23 +29,12 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
     context: RequestHandlerContext,
     payload: CalculateModelMemoryLimitPayload
   ) {
-    const {
-      indexPattern,
-      splitFieldName,
-      query,
-      fieldNames,
-      influencerNames,
-      timeFieldName,
-      earliestMs,
-      latestMs,
-    } = payload;
+    const { analysisConfig, indexPattern, query, timeFieldName, earliestMs, latestMs } = payload;
 
     return calculateModelMemoryLimitProvider(context.ml!.mlClient.callAsCurrentUser)(
+      analysisConfig,
       indexPattern,
-      splitFieldName,
       query,
-      fieldNames,
-      influencerNames,
       timeFieldName,
       earliestMs,
       latestMs
@@ -102,7 +91,7 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
    *
    * @api {post} /api/ml/validate/calculate_model_memory_limit Calculates model memory limit
    * @apiName CalculateModelMemoryLimit
-   * @apiDescription Calculates the model memory limit
+   * @apiDescription Calls _estimate_model_memory endpoint to retrieve model memory estimation.
    *
    * @apiSuccess {String} modelMemoryLimit
    */

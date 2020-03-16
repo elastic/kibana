@@ -93,11 +93,9 @@ export class MultiMetricJobCreator extends JobCreator {
       this.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
     } else {
       const { modelMemoryLimit } = await ml.calculateModelMemoryLimit({
+        analysisConfig: this.jobConfig.analysis_config,
         indexPattern: this._indexPatternTitle,
-        splitFieldName: this._splitField.name,
         query: this._datafeed_config.query,
-        fieldNames: this.fields.map(f => f.id),
-        influencerNames: this._influencers,
         timeFieldName: this._job_config.data_description.time_field,
         earliestMs: this._start,
         latestMs: this._end,
