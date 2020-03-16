@@ -5,9 +5,9 @@
  */
 
 import { estimateBucketSpanFactory } from '../../models/bucket_span_estimator';
-import { mlFunctionToESAggregation } from '../../../../../legacy/plugins/ml/common/util/job_utils';
-import { SKIP_BUCKET_SPAN_ESTIMATION } from '../../../../../legacy/plugins/ml/common/constants/validation';
-import { parseInterval } from '../../../../../legacy/plugins/ml/common/util/parse_interval';
+import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
+import { SKIP_BUCKET_SPAN_ESTIMATION } from '../../../common/constants/validation';
+import { parseInterval } from '../../../common/util/parse_interval';
 
 import { validateJobObject } from './validate_job_object';
 
