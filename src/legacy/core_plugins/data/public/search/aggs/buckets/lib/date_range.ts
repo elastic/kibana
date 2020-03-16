@@ -23,10 +23,10 @@ export interface DateRangeKey {
 }
 
 export const convertDateRangeToString = (
-  range: DateRangeKey | string,
+  range: DateRangeKey | string | number,
   format: (val: any) => string
 ) => {
-  if (typeof range === 'string') {
+  if (!range.from && !range.to) {
     return range;
   }
   const { from, to } = range;

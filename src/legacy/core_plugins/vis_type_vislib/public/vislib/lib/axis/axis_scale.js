@@ -243,7 +243,13 @@ export class AxisScale {
     const range = this.getRange(length);
     const padding = config.get('style.rangePadding');
     const outerPadding = config.get('style.rangeOuterPadding');
-    this.scale = scale.domain(domain);
+    let domainSanitized = domain;
+    if (_.get(config, 'data.data.xAxisFormat.id', '') === 'date_range' && !config.isYExtents()) {
+      domainSanitized = domain.map(value => {
+        return config.data.data.xAxisFormatter(value);
+      });
+    }
+    this.scale = scale.domain(domainSanitized);
 
     if (config.isOrdinal()) {
       this.scale.rangeBands(range, padding, outerPadding);
