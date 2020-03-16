@@ -9,13 +9,6 @@ import { AdvancedUiActionsSetup } from '../../../advanced_ui_actions/public';
 import { Drilldown, DrilldownFactoryContext } from '../types';
 import { UiActionsActionFactoryDefinition as ActionFactoryDefinition } from '../../../../../src/plugins/ui_actions/public';
 
-// TODO: MOCK DATA
-import {
-  // dashboardDrilldownActionFactory,
-  urlDrilldownActionFactory,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../advanced_ui_actions/public/components/action_wizard/test_data';
-
 export interface DrilldownServiceSetupDeps {
   advancedUiActions: AdvancedUiActionsSetup;
 }
@@ -78,13 +71,6 @@ export class DrilldownService {
 
       advancedUiActions.registerActionFactory(actionFactory);
     };
-
-    // TODO: disable this
-    registerDrilldown({
-      ...urlDrilldownActionFactory,
-      euiIcon: 'link',
-      execute: () => alert('URL drilldown!'),
-    } as any);
 
     return {
       registerDrilldown,
