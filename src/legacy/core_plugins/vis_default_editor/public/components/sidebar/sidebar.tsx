@@ -111,7 +111,7 @@ function DefaultEditorSideBar({
     vis.setState({
       ...vis.serialize(),
       params: state.params,
-      data: { aggs: state.data.aggs!.aggs.map(agg => agg.toJSON()) as any },
+      data: { aggs: state.data.aggs ? (state.data.aggs.aggs.map(agg => agg.toJSON()) as any) : [] },
     });
     setDirty(false);
     notifyDirty(false);
