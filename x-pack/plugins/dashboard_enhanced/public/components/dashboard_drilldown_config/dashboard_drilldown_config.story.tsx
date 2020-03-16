@@ -11,9 +11,9 @@ import { storiesOf } from '@storybook/react';
 import { DashboardDrilldownConfig } from '.';
 
 export const dashboards = [
-  { id: 'dashboard1', title: 'Dashboard 1' },
-  { id: 'dashboard2', title: 'Dashboard 2' },
-  { id: 'dashboard3', title: 'Dashboard 3' },
+  { value: 'dashboard1', label: 'Dashboard 1' },
+  { value: 'dashboard2', label: 'Dashboard 2' },
+  { value: 'dashboard3', label: 'Dashboard 3' },
 ];
 
 const InteractiveDemo: React.FC = () => {
