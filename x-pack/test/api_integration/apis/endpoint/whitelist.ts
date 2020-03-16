@@ -19,7 +19,6 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should return whitelist rules when the GET method is called', async () => {
         const resp = await supertest.get('/api/endpoint/whitelist').set('kbn-xsrf', 'xxx');
-
         expect(resp.statusCode).to.equal(200);
         const responseBody = JSON.parse(resp.text);
         expect(responseBody.entries.length).to.equal(sizeOfFixture);
@@ -27,7 +26,6 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should return the whitelist manifest when the GET method is called', async () => {
         const resp = await supertest.get('/api/endpoint/manifest').set('kbn-xsrf', 'xxx');
-
         expect(resp.statusCode).to.equal(200);
         const responseBody = JSON.parse(resp.text);
         const cachedWhitelist = responseBody.artifacts['global-whitelist'];
@@ -36,8 +34,16 @@ export default function({ getService }: FtrProviderContext) {
         expect(cachedWhitelist.url).to.contain(cachedWhitelist.sha256);
       });
 
+      it('should respond with a bad request if an invalid whitelist hash is given for download', async () => {
+        const resp = await supertest
+          .get('/api/endpoint/whitelist/download/1a2b3c4d5e6') // A fake hash
+          .set('kbn-xsrf', 'xxx');
+        expect(resp.statusCode).to.equal(400);
+      });
+
       it('should insert a whilelist rule into elasticsearch properly', async () => {
-        let whitelistManifestSize = 0;
+        let whitelistManifestSize: number = 0;
+        let whitelistHash: string = '';
         await supertest
           .post('/api/endpoint/whitelist')
           .set('kbn-xsrf', 'xxx')
@@ -64,6 +70,7 @@ export default function({ getService }: FtrProviderContext) {
                 const manifest = JSON.parse(manifestResp.text);
                 const whitelist = manifest.artifacts['global-whitelist'];
                 whitelistManifestSize = whitelist.size;
+                whitelistHash = whitelist.sha256;
                 expect(whitelistManifestSize).to.greaterThan(0);
                 expect(whitelist.encoding).to.equal('xz');
                 expect(whitelist.url).to.contain(whitelist.sha256);
@@ -71,13 +78,15 @@ export default function({ getService }: FtrProviderContext) {
           })
           .then(async function() {
             await supertest
-              .get('/api/endpoint/whitelist/download/123')
+              .get(`/api/endpoint/whitelist/download/${whitelistHash}`)
               .set('kbn-xsrf', 'xxx')
               .then(function(downloadResp) {
                 const dl: Buffer = downloadResp.body;
-                expect(downloadResp.headers['content-type']).to.equal('application/octet-stream');
+                // TODO
+                // expect(downloadResp.headers['content-encoding']).to.equal('xz');
                 // The content-length header should equal the length of the body which should equal
                 // to the size in the manifest from before.
+                expect(downloadResp.statusCode).to.equal(200);
                 expect(+downloadResp.headers['content-length']).to.equal(dl.length);
                 expect(dl.length).to.equal(whitelistManifestSize);
               });
@@ -107,6 +116,56 @@ export default function({ getService }: FtrProviderContext) {
                 const getRespBody = JSON.parse(getResp.text);
                 expect(getRespBody.entries.length).to.equal(sizeOfFixture + 3);
               });
+          });
+      });
+
+      it('should delete a whitelist rule properly', async () => {
+        let createdID: string = '';
+        await supertest
+          .post('/api/endpoint/whitelist') // Creates a rule
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            event_types: ['malware'],
+            sha256: 'somesha256hash',
+          })
+          .then(function(res: { statusCode: any; text: string }) {
+            expect(res.statusCode).to.equal(200);
+            const responseBody = JSON.parse(res.text);
+            expect(responseBody.length).to.equal(1);
+            createdID = responseBody[0].id;
+          })
+          .then(async function() {
+            await supertest
+              .delete('/api/endpoint/whitelist') // Deletes a rule
+              .set('kbn-xsrf', 'xxx')
+              .send({
+                whitelist_id: createdID,
+              })
+              .then(function(delResp) {
+                expect(delResp.statusCode).to.equal(200);
+              });
+          })
+          .then(async function() {
+            await supertest
+              .get('/api/endpoint/whitelist') // Checks that the rule was deleted
+              .set('kbn-xsrf', 'xxx')
+              .then(function(getResp) {
+                const getRespBody = JSON.parse(getResp.text);
+                expect(getResp.statusCode).to.equal(200);
+                expect(getRespBody.entries.length).to.equal(sizeOfFixture);
+              });
+          });
+      });
+
+      it('should handle a request to delete a whitelist rule that does not exist', async () => {
+        await supertest
+          .delete('/api/endpoint/whitelist')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            whitelist_id: 'xyz2345', // does not exist
+          })
+          .then(function(delResp) {
+            expect(delResp.statusCode).to.equal(400);
           });
       });
     });

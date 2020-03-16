@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter, RequestHandlerContext, APICaller } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { SearchResponse } from 'elasticsearch';
 import { createHash } from 'crypto';
@@ -19,7 +19,12 @@ let whitelistArtifactCache: Buffer = Buffer.from([]);
 /**
  * Registers the whitelist routes for the API
  */
-export function registerWhitelistRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
+export function registerWhitelistRoutes(
+  router: IRouter,
+  endpointAppContext: EndpointAppContext,
+  cl: APICaller
+) {
+  hydrateWhitelistCache(cl);
   router.get(
     {
       path: '/api/endpoint/whitelist',
@@ -40,8 +45,12 @@ export function registerWhitelistRoutes(router: IRouter, endpointAppContext: End
 
   router.get(
     {
-      path: '/api/endpoint/whitelist/download/{id}',
-      validate: {},
+      path: '/api/endpoint/whitelist/download/{hash}',
+      validate: {
+        params: schema.object({
+          hash: schema.string(),
+        }),
+      },
       options: { authRequired: true },
     },
     handleWhitelistDownload // TODO
@@ -53,7 +62,7 @@ export function registerWhitelistRoutes(router: IRouter, endpointAppContext: End
       validate: {
         body: schema.object({
           comment: schema.maybe(schema.string()), // Optional comment explaining reason for whitelist
-          event_types: schema.arrayOf(schema.string()),
+          event_types: schema.maybe(schema.arrayOf(schema.string())), // TODO
           file_path: schema.maybe(schema.string()),
           signer: schema.maybe(schema.string()),
           sha256: schema.maybe(schema.string()),
@@ -64,12 +73,25 @@ export function registerWhitelistRoutes(router: IRouter, endpointAppContext: End
     },
     handleWhitelistPost
   );
+
+  router.delete(
+    {
+      path: '/api/endpoint/whitelist',
+      validate: {
+        body: schema.object({
+          whitelist_id: schema.string(),
+        }),
+      },
+      options: { authRequired: true },
+    },
+    handleWhitelistItemDeletion
+  );
 }
 
 /**
  * Handles the POST request for whitelist additions
  */
-async function handleWhitelistPost(context, req, res) {
+async function handleWhitelistPost(context: RequestHandlerContext, req, res) {
   try {
     const eventTypes: string[] = req.body.eventTypes;
     const whitelistAttributeMap: Record<string, string> = {
@@ -78,7 +100,6 @@ async function handleWhitelistPost(context, req, res) {
       signer: 'malware.file.signer',
       sha256: 'malware.file.hashes.sha256',
     };
-
     const newRules: WhitelistRule[] = [];
     Object.keys(whitelistAttributeMap).forEach(k => {
       if (req.body[k]) {
@@ -100,11 +121,18 @@ async function handleWhitelistPost(context, req, res) {
       return res.badRequest({ error: 'no whitelist rules could be created from request.' });
     }
 
-    const errors = await addWhitelistRule(context, newRules); // TODO handle
-    if (errors) {
+    const createdItemIDs = await addWhitelistRule(context, newRules); // TODO handle
+    if (createdItemIDs.length === 0) {
       return res.internalError({ error: 'unable to create whitelist rule.' });
     } else {
-      await hydrateWhitelistCache(context);
+      const cl = context.core.elasticsearch.dataClient.callAsCurrentUser;
+      hydrateWhitelistCache(cl);
+
+      let idx = 0;
+      createdItemIDs.forEach((id: string) => {
+        newRules[idx].id = id;
+        idx++;
+      });
       return res.ok({ body: newRules });
     }
   } catch (err) {
@@ -117,7 +145,7 @@ async function handleWhitelistPost(context, req, res) {
  * @param ctx App context
  * @param whitelistRules List of whitelist rules to apply
  */
-async function addWhitelistRule(ctx, whitelistRules: WhitelistRule[]): Promise<boolean> {
+async function addWhitelistRule(ctx, whitelistRules: WhitelistRule[]): Promise<string[]> {
   let body = '';
   whitelistRules.forEach(rule => {
     body = body.concat(`{ "index" : {}}\n ${JSON.stringify(rule)}\n`);
@@ -128,11 +156,17 @@ async function addWhitelistRule(ctx, whitelistRules: WhitelistRule[]): Promise<b
     refresh: 'true',
     body,
   });
+
   const errors: boolean = response.errors;
   if (errors) {
     // TODO log errors
+  } else {
+    // Responses from `bulk` are guaranteed to be in order https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
+    return response.items.map(indexResponse => {
+      return indexResponse.index._id;
+    });
   }
-  return errors;
+  return [];
 }
 
 /**
@@ -140,7 +174,8 @@ async function addWhitelistRule(ctx, whitelistRules: WhitelistRule[]): Promise<b
  */
 async function handleWhitelistGet(context, req, res) {
   try {
-    const whitelist: WhitelistSet = await getWhitelist(context);
+    const cl: APICaller = context.core.elasticsearch.dataClient.callAsCurrentUser;
+    const whitelist: WhitelistSet = await getWhitelist(cl);
     return res.ok({ body: whitelist });
   } catch (err) {
     return res.internalError({ body: err });
@@ -151,8 +186,8 @@ async function handleWhitelistGet(context, req, res) {
  * Retrieve the global whitelist
  * @param ctx App context
  */
-async function getWhitelist(ctx): Promise<WhitelistSet> {
-  const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser('search', {
+async function getWhitelist(client: APICaller): Promise<WhitelistSet> {
+  const response = (await client('search', {
     index: whitelistIdx,
     body: {},
     size: 1000, // TODO
@@ -185,7 +220,7 @@ async function handleWhitelistManifest(context, req, res) {
  */
 async function getWhitelistManifest(ctx) {
   if (whitelistArtifactCache.length === 0) {
-    hydrateWhitelistCache(ctx);
+    hydrateWhitelistCache(ctx.core.elasticsearch.dataClient.callAsCurrentUser);
   }
   const hash = createHash('sha256')
     .update(whitelistArtifactCache.toString('utf8'), 'utf8')
@@ -209,8 +244,7 @@ async function getWhitelistManifest(ctx) {
 /**
  * Compresses the whitelist and puts it into the in memory cache
  */
-function cacheWhitelistArtifact(ctx, whitelist: WhitelistSet) {
-  // TODO time and log
+function cacheWhitelistArtifact(whitelist: WhitelistSet) {
   lzma.compress(JSON.stringify(whitelist), (res: Buffer) => {
     whitelistArtifactCache = res;
   });
@@ -219,14 +253,12 @@ function cacheWhitelistArtifact(ctx, whitelist: WhitelistSet) {
 /**
  * Hydrate the in memory whitelist cache
  */
-function hydrateWhitelistCache(ctx) {
-  getWhitelist(ctx)
+function hydrateWhitelistCache(client: APICaller) {
+  getWhitelist(client)
     .then((wl: WhitelistSet) => {
-      cacheWhitelistArtifact(ctx, wl);
+      cacheWhitelistArtifact(wl);
     })
-    .catch(e => {
-      console.log(e);
-    });
+    .catch(e => {}); // TODO log
 }
 
 /**
@@ -234,10 +266,43 @@ function hydrateWhitelistCache(ctx) {
  */
 async function handleWhitelistDownload(context, req, res) {
   try {
-    if (whitelistArtifactCache.length === 0) {
-      hydrateWhitelistCache(context);
+    const whitelistHash: string = req.params.hash;
+    const bufferHash = createHash('sha256')
+      .update(whitelistArtifactCache.toString('utf8'), 'utf8')
+      .digest('hex');
+    if (whitelistHash !== bufferHash) {
+      return res.badRequest({
+        body: `The requested artifact with hash ${whitelistHash} does not match current hash of ${bufferHash}`,
+      });
     }
-    return res.ok({ body: whitelistArtifactCache }); // TODO
+    return res.ok({ body: whitelistArtifactCache, headers: { 'content-encoding': 'xz' } });
+  } catch (err) {
+    return res.internalError({ body: err });
+  }
+}
+
+/**
+ * Handles the DELETE request for removing a whitelist rule from the whitelist
+ */
+async function handleWhitelistItemDeletion(context, req, res) {
+  try {
+    const whitelistID: string = req.body.whitelist_id;
+    return context.core.elasticsearch.dataClient
+      .callAsCurrentUser('delete', {
+        index: whitelistIdx,
+        id: whitelistID,
+        refresh: 'true',
+      })
+      .then(r => {
+        return res.ok({ body: `Successfully deleted ${whitelistID}` });
+      })
+      .catch(e => {
+        if (e.status === 404) {
+          return res.badRequest({ body: `No item with id ${whitelistID} in global whitelist` });
+        } else {
+          return res.internalError({});
+        }
+      });
   } catch (err) {
     return res.internalError({ body: err });
   }
