@@ -24,6 +24,7 @@ import {
   loadEvalData,
   Eval,
 } from '../../../../common';
+import { getTaskStateBadge } from './columns';
 import { isCompletedAnalyticsJob } from './common';
 import {
   isRegressionAnalysis,
@@ -158,7 +159,11 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       defaultMessage: 'State',
     }),
     items: Object.entries(stateValues).map(s => {
-      return { title: s[0].toString(), description: getItemDescription(s[1]) };
+      if (s[0].toString() === 'state') {
+        return { title: s[0].toString(), description: getTaskStateBadge(getItemDescription(s[1])) };
+      } else {
+        return { title: s[0].toString(), description: getItemDescription(s[1]) };
+      }
     }),
     position: 'left',
   };

@@ -177,12 +177,22 @@ export class FileDataVisualizerView extends Component {
       });
     } catch (error) {
       console.error(error);
+
+      let serverErrorMsg;
+      const isErrorResponse =
+        error?.body?.error !== undefined && error?.body?.message !== undefined;
+      if (isErrorResponse === true) {
+        serverErrorMsg = `${error.body.error}: ${error.body.message}`;
+      } else {
+        serverErrorMsg = JSON.stringify(error, null, 2);
+      }
+
       this.setState({
         results: undefined,
         loaded: false,
         loading: false,
         fileCouldNotBeRead: true,
-        serverErrorMessage: error.message,
+        serverErrorMessage: serverErrorMsg,
       });
 
       // as long as the previous overrides are different to the current overrides,

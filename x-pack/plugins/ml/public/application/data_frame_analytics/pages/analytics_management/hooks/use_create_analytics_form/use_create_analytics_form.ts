@@ -39,12 +39,25 @@ export interface CreateAnalyticsFormProps {
   state: State;
 }
 
-export function getErrorMessage(error: any) {
-  if (typeof error === 'object' && typeof error.message === 'string') {
-    return error.message;
-  }
+interface ErrorResponse {
+  body: {
+    statusCode: number;
+    error: string;
+    message: string;
+  };
+  name: string;
+}
 
-  return JSON.stringify(error);
+const isErrorResponse = (arg: any): arg is ErrorResponse => {
+  return arg?.body?.error !== undefined && arg?.body?.message !== undefined;
+};
+
+export function getErrorMessage(error: any) {
+  if (isErrorResponse(error)) {
+    return `${error.body.error}: ${error.body.message}`;
+  } else {
+    return JSON.stringify(error, null, 2);
+  }
 }
 
 export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {

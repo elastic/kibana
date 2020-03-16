@@ -4,27 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC } from 'react';
+import React, { FC } from 'react';
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 
 import { FormMessage } from '../../hooks/use_create_analytics_form/state'; // State
 
 interface Props {
-  messages: any; // TODO: fix --> something like State['requestMessages'];
+  messages: FormMessage[];
 }
 
-export const Messages: FC<Props> = ({ messages }) =>
-  messages.map((requestMessage: FormMessage, i: number) => (
-    <Fragment key={i}>
-      <EuiCallOut
-        title={requestMessage.message}
-        color={requestMessage.error !== undefined ? 'danger' : 'primary'}
-        iconType={requestMessage.error !== undefined ? 'alert' : 'checkInCircleFilled'}
-        size="s"
-      >
-        {requestMessage.error !== undefined ? <p>{requestMessage.error}</p> : null}
-      </EuiCallOut>
-      <EuiSpacer size="s" />
-    </Fragment>
-  ));
+export const Messages: FC<Props> = ({ messages }) => {
+  return (
+    <>
+      {messages.map((requestMessage, i) => (
+        <>
+          <EuiCallOut
+            title={requestMessage.message}
+            color={requestMessage.error !== undefined ? 'danger' : 'primary'}
+            iconType={requestMessage.error !== undefined ? 'alert' : 'checkInCircleFilled'}
+            size="s"
+          >
+            {requestMessage.error !== undefined && (
+              <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable>
+                {requestMessage.error}
+              </EuiCodeBlock>
+            )}
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      ))}
+    </>
+  );
+};
