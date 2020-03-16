@@ -18,6 +18,7 @@ Table of Contents
 		- [Methods](#methods)
 		- [Executor](#executor)
 		- [Example](#example)
+	- [Alert Navigation](#alert-navigation)
 	- [RESTful API](#restful-api)
 		- [`POST /api/alert`: Create alert](#post-apialert-create-alert)
 		- [`DELETE /api/alert/{id}`: Delete alert](#delete-apialertid-delete-alert)
@@ -267,6 +268,61 @@ server.newPlatform.setup.plugins.alerting.registerType({
 	},
 });
 ```
+
+## Alert Navigation
+When registering an Alert Type, you'll likely want to provide a way of viewing alerts of that type within your own plugin, or perhaps you want to provide a view for all alerts created fro mwithin your solution within your own UI.
+
+In order for the Alerting framework to know that your plugin has its own interna; view for displaying an alert, you must resigter a navigation handler within the framework.
+
+A navigation handler is nothing more than a function that receives an Alert and its corresponding AlertType, and is expected to then return the path *within your plugin* which knows how to display this alert.
+
+The signature of such a handler is:
+
+```
+type AlertNavigationHandler = (
+  alert: SanitizedAlert,
+  alertType: AlertType
+) => string;
+```
+
+There are two ways to register this handler.
+By specifying _alerting_ as a dependency of your *public* (client side) plugin, you'll gain access to two apis: _alerting.registerNavigation_ and _alerting.registerDefaultNavigation_.
+
+### registerNavigation
+The _registerNavigation_ api allows you to register a handler for a specific alert type within your solution:
+
+```
+alerting.registerNavigation(
+	'my-application-id',
+	'my-application-id.my-alert-type',
+	(alert: SanitizedAlert, alertType: AlertType) => `/my-unique-alert/${alert.id}`
+);
+```
+
+This tells the Alerting framework that, given an alert of the AlertType whose ID is `my-application-id.my-unique-alert-type`, if that Alert's `consumer` value (which is set when the alert is created by your plugin) is your application (whose id is `my-application-id`), then it will navigate to your application using the path `/my-unique-alert/${the id of the alert}`.
+
+The navigation is handled using the `navigateToApp` api, meaning that the path will be automatically picked up by your `react-router-dom` **Route** component, so all you have top do is configure a Route that handles the path `/my-unique-alert/:id`.
+
+You can look at the `alerting-example` plugin to see an example of using this API, which is enabled using the `--run-examples` flag when you run `yarn start`.
+
+### registerNavigation
+The _registerDefaultNavigation_ api allows you to register a handler for any alert type within your solution:
+
+```
+alerting.registerDefaultNavigation(
+	'my-application-id',
+	(alert: SanitizedAlert, alertType: AlertType) => `/my-other-alerts/${alert.id}`
+);
+```
+
+This tells the Alerting framework that, given any alert whose `consumer` value is your application, as long as  then it will navigate to your application using the path `/my-other-alerts/${the id of the alert}`.
+
+### balancing both APIs side by side
+As we mentioned, using `registerDefaultNavigation` will tell the Alerting Framework that your application can handle any type of Alert we throw at it, as long as your application created it, using the handler your provide it.
+
+The only case in which this handler will not be used to evaluate the navigation for an alert (assuming your application is the `consumer`) is if you have also used `registerNavigation` api, along side your `registerDefaultNavigation` usage, to handle that alert's specific AlertType.
+
+You can use the `registerNavigation` api to specify as many AlertType specific handlers as you like, but you can only use it once per AlertType as we wouldn't know which handler to use if you specified two for the same AlertType. For the same reason, you can only use `registerDefaultNavigation` once per plugin, as it covers all cases for your specific plugin.
 
 ## RESTful API
 
