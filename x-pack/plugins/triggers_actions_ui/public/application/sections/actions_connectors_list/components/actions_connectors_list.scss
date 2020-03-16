@@ -5,8 +5,7 @@
 .actConnectorsList__tableRowDisabled {
   background-color: $euiColorLightestShade;
 
-  .euiTableCellContent__text,
-  .euiLink {
+  .actConnectorsList__tableCellDisabled {
     color: $euiColorDarkShade;
   }
 

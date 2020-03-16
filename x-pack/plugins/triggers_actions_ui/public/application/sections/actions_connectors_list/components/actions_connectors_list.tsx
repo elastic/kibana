@@ -240,8 +240,12 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
             : '',
         'data-test-subj': 'connectors-row',
       })}
-      cellProps={() => ({
+      cellProps={(item: ActionConnectorTableItem) => ({
         'data-test-subj': 'cell',
+        className:
+          !actionTypesIndex || !actionTypesIndex[item.actionTypeId].enabled
+            ? 'actConnectorsList__tableCellDisabled'
+            : '',
       })}
       data-test-subj="actionsTable"
       pagination={true}
