@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { ElasticSearchHit, IndexPattern } from '../../../kibana_services';
 import { DocProps } from './doc';
 
@@ -62,7 +62,7 @@ export function useEsDocSearch({
   const [status, setStatus] = useState(ElasticRequestState.Loading);
   const [hit, setHit] = useState<ElasticSearchHit | null>(null);
 
-  async function requestData() {
+  const requestData = useCallback(async () => {
     try {
       const indexPatternEntity = await indexPatternService.get(indexPatternId);
       setIndexPattern(indexPatternEntity);
@@ -87,11 +87,11 @@ export function useEsDocSearch({
         setStatus(ElasticRequestState.Error);
       }
     }
-  }
+  }, [esClient, id, index, indexPatternId, indexPatternService]);
 
   useEffect(() => {
     requestData();
-  });
+  }, [requestData]);
 
   return [status, hit, indexPattern];
 }
