@@ -5,8 +5,17 @@
  */
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiInMemoryTable, EuiInMemoryTableProps, EuiBadge, EuiTextColor } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiInMemoryTable,
+  EuiInMemoryTableProps,
+  EuiBadge,
+  EuiTextColor,
+  EuiContextMenuItem,
+} from '@elastic/eui';
 import { Datasource } from '../../../../../types';
+import { TableRowActions } from '../../../components/table_row_actions';
+import { DangerEuiContextMenuItem } from '../../../components/danger_eui_context_menu_item';
 
 interface InMemoryDatasource extends Datasource {
   streams: { total: number; enabled: number };
@@ -125,14 +134,50 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
         },
       },
       {
-        field: 'Action here', // FIXME: implement actions
         name: i18n.translate(
           'xpack.ingestManager.configDetails.datasourcesTable.actionsColumnTitle',
           {
             defaultMessage: 'Actions',
           }
         ),
-        render: () => 'FIXME: actions',
+        actions: [
+          {
+            render: () => (
+              <TableRowActions
+                items={[
+                  // FIXME: implement View datasource action
+                  <EuiContextMenuItem disabled icon="inspect" onClick={() => {}}>
+                    <FormattedMessage
+                      id="xpack.ingestManager.configDetails.datasourcesTable.viewActionTitle"
+                      defaultMessage="View data source"
+                    />
+                  </EuiContextMenuItem>,
+                  // FIXME: implement Edit datasource action
+                  <EuiContextMenuItem disabled icon="pencil" onClick={() => {}}>
+                    <FormattedMessage
+                      id="xpack.ingestManager.configDetails.datasourcesTable.editActionTitle"
+                      defaultMessage="Edit data source"
+                    />
+                  </EuiContextMenuItem>,
+                  // FIXME: implement Copy datasource action
+                  <EuiContextMenuItem disabled icon="copy" onClick={() => {}}>
+                    <FormattedMessage
+                      id="xpack.ingestManager.configDetails.datasourcesTable.copyActionTitle"
+                      defaultMessage="Copy data source"
+                    />
+                  </EuiContextMenuItem>,
+                  // FIXME: implement Copy datasource action
+                  <DangerEuiContextMenuItem icon="trash" onClick={() => {}}>
+                    <FormattedMessage
+                      id="xpack.ingestManager.configDetails.datasourcesTable.deleteActionTitle"
+                      defaultMessage="Delete data source"
+                    />
+                  </DangerEuiContextMenuItem>,
+                ]}
+              />
+            ),
+          },
+        ],
       },
     ],
     []
