@@ -23,11 +23,11 @@ import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
 import { EuiButton } from '@elastic/eui';
 import { EuiPopover } from '@elastic/eui';
+import { EuiButtonProps } from '@elastic/eui';
+import { EuiButtonEmptyProps } from '@elastic/eui';
 import { TopNavMenuData } from './top_nav_menu_data';
 
 export function TopNavMenuItem(props: TopNavMenuData) {
-  const [isPopoverOpen, setPopoverOpen] = useState(false);
-
   function isDisabled(): boolean {
     const val = isFunction(props.disableButton) ? props.disableButton() : props.disableButton;
     return val!;
@@ -40,51 +40,30 @@ export function TopNavMenuItem(props: TopNavMenuData) {
 
   function handleClick(e: MouseEvent<HTMLButtonElement>) {
     if (isDisabled()) return;
-    if (props.popOverContents) {
-      setPopoverOpen(true);
-    } else if (props.run) {
-      props.run(e.currentTarget);
-    }
+    props.run(e.currentTarget);
   }
 
   const commonButtonProps = {
     isDisabled: isDisabled(),
     onClick: handleClick,
     iconType: props.iconType,
+    iconSide: (props.iconRight ? 'right' : 'left') as 'right' | 'left' | undefined,
     'data-test-subj': props.testId,
   };
 
-  let btn = props.emphasize ? (
-    <EuiButton size="s" fill {...commonButtonProps}>
+  const btn = props.emphasize ? (
+    <EuiButton {...commonButtonProps} size="s" style={{ fontSize: 'smaller' }}>
       {capitalize(props.label || props.id!)}
     </EuiButton>
   ) : (
-    <EuiButtonEmpty size="xs" {...commonButtonProps}>
+    <EuiButtonEmpty {...commonButtonProps} size="xs">
       {capitalize(props.label || props.id!)}
     </EuiButtonEmpty>
   );
 
-  if (props.popOverContents) {
-    btn = (
-      <EuiPopover
-        id={`${props.id}-popover`}
-        button={btn}
-        isOpen={isPopoverOpen}
-        anchorPosition="downLeft"
-        closePopover={() => setPopoverOpen(false)}
-      >
-        {props.popOverContents}
-      </EuiPopover>
-    );
-  }
-
   const tooltip = getTooltip();
   if (tooltip) {
-    btn = (
-      <EuiToolTip content={tooltip} position={props.popOverContents ? 'top' : 'bottom'}>
-        {btn}
-      </EuiToolTip>
-    );
+    return <EuiToolTip content={tooltip}>{btn}</EuiToolTip>;
   }
   return btn;
 }

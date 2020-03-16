@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { ViewMode } from '../../../../../../../plugins/embeddable/public';
 import { TopNavIds } from './top_nav_ids';
 import { NavAction } from '../types';
-import { AddPanelPopover } from './add_panel_popover';
+import { AddPanelPopover } from './show_add_popover';
 
 /**
  * @param actions - A mapping of TopNavIds to an action function that should run when the
@@ -49,7 +49,7 @@ export function getTopNavConfig(
           ];
     case ViewMode.EDIT:
       return [
-        getAddConfig(actions[TopNavIds.ADD], actions[TopNavIds.VISUALIZE]),
+        getAddConfig(actions[TopNavIds.ADD_PANEL]),
         getSaveConfig(actions[TopNavIds.SAVE]),
         getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
         getOptionsConfig(actions[TopNavIds.OPTIONS]),
@@ -148,13 +148,12 @@ function getCloneConfig(action: NavAction) {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getAddConfig(addExistingAction: NavAction, addNewAction: NavAction) {
+function getAddConfig(action: NavAction) {
   return {
     emphasize: true,
     iconType: 'arrowDown',
     iconRight: true,
     id: 'add',
-    popOverContents: AddPanelPopover({ addExistingAction, addNewAction }),
     label: i18n.translate('kbn.dashboard.topNave.addButtonAriaLabel', {
       defaultMessage: 'Add Panel',
     }),
@@ -162,6 +161,7 @@ function getAddConfig(addExistingAction: NavAction, addNewAction: NavAction) {
       defaultMessage: 'Add a panel to the dashboard',
     }),
     testId: 'dashboardAddPanelButton',
+    run: action,
   };
 }
 

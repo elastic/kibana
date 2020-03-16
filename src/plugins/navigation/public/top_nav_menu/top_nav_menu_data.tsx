@@ -31,7 +31,6 @@ export interface TopNavMenuData {
   emphasize?: boolean;
   iconType?: string;
   iconRight?: boolean;
-  popOverContents?: Element;
 }
 
 export interface RegisteredTopNavMenuData extends TopNavMenuData {
