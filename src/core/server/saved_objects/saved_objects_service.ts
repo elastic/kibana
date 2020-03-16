@@ -450,9 +450,7 @@ export class SavedObjectsService
     };
   }
 
-  public async stop() {
-    this.migrator$.complete();
-  }
+  public async stop() {}
 
   private createMigrator(
     kibanaConfig: KibanaConfigType,
