@@ -271,7 +271,7 @@ def processFunctionalQueue(queue, finishedSuites, workerNumber, type) {
       retryable("kibana-functional-${type}-${workerNumber}-${iteration}") {
         if (testSuite.files && testSuite.files.size() > 0) {
           catchErrorClean {
-            def filesString = testSuite.files.collect { "--include-file '${it.file}'" }.join(' ')
+            def filesString = testSuite.files.collect { "--include '${it.file}'" }.join(' ')
 
             // TODO runbld
             bash(
