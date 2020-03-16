@@ -12,11 +12,11 @@ import {
   kibanaRequestToMetadataListESQuery,
   kibanaRequestToMetadataGetESQuery,
 } from '../services/endpoint/metadata_query_builders';
-import { EndpointMetadata, EndpointResultList } from '../../common/types';
+import { HostMetadata, HostResultList } from '../../common/types';
 import { EndpointAppContext } from '../types';
 
 interface HitSource {
-  _source: EndpointMetadata;
+  _source: HostMetadata;
 }
 
 export function registerEndpointRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
@@ -57,8 +57,8 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
         const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
           'search',
           queryParams
-        )) as SearchResponse<EndpointMetadata>;
-        return res.ok({ body: mapToEndpointResultList(queryParams, response) });
+        )) as SearchResponse<HostMetadata>;
+        return res.ok({ body: mapToHostResultList(queryParams, response) });
       } catch (err) {
         return res.internalError({ body: err });
       }
@@ -79,7 +79,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
         const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
           'search',
           query
-        )) as SearchResponse<EndpointMetadata>;
+        )) as SearchResponse<HostMetadata>;
 
         if (response.hits.hits.length === 0) {
           return res.notFound({ body: 'Endpoint Not Found' });
@@ -93,16 +93,16 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
   );
 }
 
-function mapToEndpointResultList(
+function mapToHostResultList(
   queryParams: Record<string, any>,
-  searchResponse: SearchResponse<EndpointMetadata>
-): EndpointResultList {
+  searchResponse: SearchResponse<HostMetadata>
+): HostResultList {
   const totalNumberOfEndpoints = searchResponse?.aggregations?.total?.value || 0;
   if (searchResponse.hits.hits.length > 0) {
     return {
       request_page_size: queryParams.size,
       request_page_index: queryParams.from,
-      endpoints: searchResponse.hits.hits
+      hosts: searchResponse.hits.hits
         .map(response => response.inner_hits.most_recent.hits.hits)
         .flatMap(data => data as HitSource)
         .map(entry => entry._source),
@@ -113,7 +113,7 @@ function mapToEndpointResultList(
       request_page_size: queryParams.size,
       request_page_index: queryParams.from,
       total: totalNumberOfEndpoints,
-      endpoints: [],
+      hosts: [],
     };
   }
 }

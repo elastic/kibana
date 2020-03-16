@@ -83,9 +83,9 @@ export interface AlertResultList {
   prev: string | null;
 }
 
-export interface EndpointResultList {
+export interface HostResultList {
   /* the endpoints restricted by the page size */
-  endpoints: EndpointMetadata[];
+  hosts: HostMetadata[];
   /* the total number of unique endpoints in the index */
   total: number;
   /* the page size requested */
@@ -243,7 +243,7 @@ interface AlertMetadata {
  */
 export type AlertData = AlertEvent & AlertMetadata;
 
-export type EndpointMetadata = Immutable<{
+export type HostMetadata = Immutable<{
   '@timestamp': number;
   event: {
     created: number;

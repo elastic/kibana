@@ -136,7 +136,7 @@ async function main() {
   for (let i = 0; i < argv.numEndpoints; i++) {
     await client.index({
       index: argv.metadataIndex,
-      body: generator.generateEndpointMetadata(),
+      body: generator.generateHostMetadata(),
     });
     for (let j = 0; j < argv.alertsPerEndpoint; j++) {
       const resolverDocs = generator.generateFullResolverTree(

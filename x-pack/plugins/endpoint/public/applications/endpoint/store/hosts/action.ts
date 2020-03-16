@@ -5,16 +5,16 @@
  */
 
 import { HostListPagination, ServerApiError } from '../../types';
-import { EndpointResultList, EndpointMetadata } from '../../../../../common/types';
+import { HostResultList, HostMetadata } from '../../../../../common/types';
 
 interface ServerReturnedHostList {
   type: 'serverReturnedHostList';
-  payload: EndpointResultList;
+  payload: HostResultList;
 }
 
 interface ServerReturnedHostDetails {
   type: 'serverReturnedHostDetails';
-  payload: EndpointMetadata;
+  payload: HostMetadata;
 }
 
 interface ServerFailedToReturnHostDetails {
@@ -27,8 +27,7 @@ interface UserPaginatedHostList {
   payload: HostListPagination;
 }
 
-// https://github.com/elastic/endpoint-app-team/issues/273
-
+// Why is FakeActionWithNoPayload here, see: https://github.com/elastic/endpoint-app-team/issues/273
 interface FakeActionWithNoPayload {
   type: 'fakeActionWithNoPayLoad';
 }

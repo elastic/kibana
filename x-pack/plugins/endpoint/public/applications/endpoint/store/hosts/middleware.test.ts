@@ -8,7 +8,7 @@ import { applyMiddleware, createStore, Dispatch, Store } from 'redux';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { History, createBrowserHistory } from 'history';
 import { hostListReducer, hostMiddlewareFactory } from './index';
-import { EndpointResultList } from '../../../../../common/types';
+import { HostResultList } from '../../../../../common/types';
 import { HostListState } from '../../types';
 import { AppAction } from '../action';
 import { listData } from './selectors';
@@ -31,7 +31,7 @@ describe('host list middleware', () => {
   };
 
   let history: History<never>;
-  const getEndpointListApiResponse = (): EndpointResultList => {
+  const getEndpointListApiResponse = (): HostResultList => {
     return mockHostResultList({ request_page_size: 1, request_page_index: 1, total: 10 });
   };
   beforeEach(() => {
@@ -64,6 +64,6 @@ describe('host list middleware', () => {
         paging_properties: [{ page_index: 0 }, { page_size: 10 }],
       }),
     });
-    expect(listData(getState())).toEqual(apiResponse.endpoints);
+    expect(listData(getState())).toEqual(apiResponse.hosts);
   });
 });

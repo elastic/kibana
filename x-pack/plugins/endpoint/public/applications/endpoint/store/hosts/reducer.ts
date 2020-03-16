@@ -10,7 +10,7 @@ import { AppAction } from '../action';
 
 const initialState = (): HostListState => {
   return {
-    endpoints: [],
+    hosts: [],
     pageSize: 10,
     pageIndex: 0,
     total: 0,
@@ -27,14 +27,14 @@ export const hostListReducer: Reducer<HostListState, AppAction> = (
 ) => {
   if (action.type === 'serverReturnedHostList') {
     const {
-      endpoints,
+      hosts,
       total,
       request_page_size: pageSize,
       request_page_index: pageIndex,
     } = action.payload;
     return {
       ...state,
-      endpoints,
+      hosts,
       total,
       pageSize,
       pageIndex,

@@ -6,7 +6,7 @@
 
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
-import { AlertEvent, EndpointEvent, EndpointMetadata, OSFields, HostFields } from './types';
+import { AlertEvent, EndpointEvent, HostMetadata, OSFields } from './types';
 
 export type Event = AlertEvent | EndpointEvent;
 
@@ -129,7 +129,7 @@ export class EndpointDocGenerator {
     };
   }
 
-  public generateEndpointMetadata(ts = new Date().getTime()): EndpointMetadata {
+  public generateHostMetadata(ts = new Date().getTime()): HostMetadata {
     return {
       '@timestamp': ts,
       event: {

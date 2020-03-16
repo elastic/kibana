@@ -8,7 +8,7 @@ import { createSelector } from 'reselect';
 import { Immutable } from '../../../../../common/types';
 import { HostListState, HostIndexUIQueryParams } from '../../types';
 
-export const listData = (state: HostListState) => state.endpoints;
+export const listData = (state: HostListState) => state.hosts;
 
 export const pageIndex = (state: HostListState) => state.pageIndex;
 

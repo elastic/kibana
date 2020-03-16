@@ -38,7 +38,7 @@ describe('HostList store concerns', () => {
 
     test('it creates default state', () => {
       expect(store.getState()).toEqual({
-        endpoints: [],
+        hosts: [],
         pageSize: 10,
         pageIndex: 0,
         total: 0,
@@ -58,7 +58,7 @@ describe('HostList store concerns', () => {
       });
 
       const currentState = store.getState();
-      expect(currentState.endpoints).toEqual(payload.endpoints);
+      expect(currentState.hosts).toEqual(payload.hosts);
       expect(currentState.pageSize).toEqual(payload.request_page_size);
       expect(currentState.pageIndex).toEqual(payload.request_page_index);
       expect(currentState.total).toEqual(payload.total);
@@ -73,7 +73,7 @@ describe('HostList store concerns', () => {
 
     test('it selects `hostListData`', () => {
       const currentState = store.getState();
-      expect(listData(currentState)).toEqual(currentState.endpoints);
+      expect(listData(currentState)).toEqual(currentState.hosts);
     });
   });
 });

@@ -150,49 +150,26 @@ export const HostList = () => {
     ];
   }, [queryParams, history]);
 
-  const HostPage = styled(EuiPage)`
-    padding: 0;
-  `;
-
-  const HostHeader = styled(EuiPageHeader)`
-    background-color: #f5f7fa;
-    border-bottom: 1px solid #d3dae6;
-    padding: 33px 0 33px 24px;
-    margin-bottom: 0;
-  `;
-
-  const HostPageContent = styled(EuiPageContent)`
-    border: none;
-  `;
-
   return (
-    <>
+    <HostPage>
       {hasSelectedHost && <HostDetailsFlyout />}
-      <HostPage>
+      <EuiPage className="hostPage">
         <EuiPageBody>
-          <HostHeader>
+          <EuiPageHeader className="hostHeader">
             <EuiTitle size="l">
               <h1 data-test-subj="hostListTitle">
                 <FormattedMessage id="xpack.endpoint.host.hosts" defaultMessage="Hosts" />
               </h1>
             </EuiTitle>
-          </HostHeader>
+          </EuiPageHeader>
 
-          <HostPageContent>
+          <EuiPageContent className="hostPageContent">
             <EuiText color="subdued" size="xs">
-              {totalItemCount === 1 ? (
-                <FormattedMessage
-                  id="xpack.endpoint.host.list.totalCount"
-                  defaultMessage="Showing: {totalItemCount} Host"
-                  values={{ totalItemCount }}
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.endpoint.host.list.totalCounts"
-                  defaultMessage="Showing: {totalItemCount} Hosts"
-                  values={{ totalItemCount }}
-                />
-              )}
+              <FormattedMessage
+                id="xpack.endpoint.host.list.totalCount"
+                defaultMessage="Showing: {totalItemCount, plural, one {# Host} other {# Hosts}}"
+                values={{ totalItemCount }}
+              />
             </EuiText>
             <EuiHorizontalRule margin="xs" />
             <EuiBasicTable
@@ -203,9 +180,30 @@ export const HostList = () => {
               pagination={paginationSetup}
               onChange={onTableChange}
             />
-          </HostPageContent>
+          </EuiPageContent>
         </EuiPageBody>
-      </HostPage>
-    </>
+      </EuiPage>
+    </HostPage>
   );
 };
+
+const HostPage = styled.div`
+  .hostPage {
+    padding: 0;
+  }
+  .hostHeader {
+    background-color: ${props => props.theme.eui.euiColorLightestShade};
+    border-bottom: ${props => props.theme.eui.euiBorderThin};
+    padding: ${props =>
+      props.theme.eui.euiSizeXL +
+      ' ' +
+      0 +
+      props.theme.eui.euiSizeXL +
+      ' ' +
+      props.theme.eui.euiSizeL};
+    margin-bottom: 0;
+  }
+  .hostPageContent {
+    border: none;
+  }
+`;
