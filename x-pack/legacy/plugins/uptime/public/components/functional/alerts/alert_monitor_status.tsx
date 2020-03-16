@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import { KueryBar } from '../../connected/kuerybar/kuery_bar_container';
 
-interface AlertNumberFieldProps {
+interface AlertFieldNumberProps {
   'data-test-subj': string;
   disabled: boolean;
   fieldValue: number;
@@ -48,7 +48,7 @@ export const AlertFieldNumber = ({
   disabled,
   fieldValue,
   setFieldValue,
-}: AlertNumberFieldProps) => {
+}: AlertFieldNumberProps) => {
   const [isInvalid, setIsInvalid] = useState<boolean>(false);
 
   return (
@@ -95,7 +95,7 @@ const AlertExpressionPopover: React.FC<AlertExpressionPopoverProps> = ({
         />
       }
       isOpen={isOpen}
-      closePopover={() => setIsOpen(!isOpen)}
+      closePopover={() => setIsOpen(false)}
     >
       {content}
     </EuiPopover>
@@ -133,10 +133,10 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
   const [numTimes, setNumTimes] = useState<number>(5);
   const [numMins, setNumMins] = useState<number>(15);
   const [allLabels, setAllLabels] = useState<boolean>(true);
+
   // locations is an array of `Option[]`, but that type doesn't seem to be exported by EUI
   const [selectedLocations, setSelectedLocations] = useState<any[]>(
     locations.map(location => ({
-      checked: 'off',
       disabled: allLabels,
       label: location,
     }))
@@ -260,14 +260,6 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
                   }}
                   singleSelection={true}
                   listProps={{
-                    // this code tells the selectable which item should be highlighted as "active".
-                    // the selectable component is very general, so some features require additional computation like this
-                    activeOptionIndex: timerangeUnitOptions.reduce(
-                      (acc, { checked }, ind) => (checked === 'on' ? ind : acc),
-                      // if we pass -1 the component doesn't highlight any item. This shouldn't happen but
-                      // the behavior will be acceptable in this case.
-                      -1
-                    ),
                     showIcons: true,
                   }}
                 >
