@@ -41,7 +41,7 @@ export default async function ({ readConfigFile }) {
   ];
 
   return {
-    testFiles: [require.resolve('./apis')],
+    testFiles: [require.resolve('./apis/saml_only')],
     servers: xPackAPITestsConfig.get('servers'),
     services: {
       chance: kibanaAPITestsConfig.get('services.chance'),

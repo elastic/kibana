@@ -134,7 +134,7 @@ class Authenticator {
     const existingSession = await this._session.get(request);
 
     let authenticationResult;
-    for (const [providerType, provider] of this._providerIterator(existingSession)) {
+    for (const [providerType, provider] of this._providerIterator(existingSession, request)) {
       // Check if current session has been set by this provider.
       const ownsSession = existingSession && existingSession.provider === providerType;
 
@@ -208,7 +208,7 @@ class Authenticator {
     // SP associated with the current user session to do the logout. So if Kibana (without active session)
     // receives such a request it shouldn't redirect user to the home page, but rather redirect back to IdP
     // with correct logout response and only Elasticsearch knows how to do that.
-    if (request.query.SAMLRequest && this._providers.has('saml')) {
+    if (this._isSAMLRequest(request) && this._providers.has('saml')) {
       return this._providers.get('saml').deauthenticate(request);
     }
 
@@ -234,19 +234,22 @@ class Authenticator {
   /**
    * Returns provider iterator where providers are sorted in the order of priority (based on the session ownership).
    * @param {Object} sessionValue Current session value.
+   * @param {Hapi.Request} request HapiJS request instance.
    * @returns {Iterator.<Object>}
    */
-  *_providerIterator(sessionValue) {
-    // If there is no session to predict which provider to use first, let's use the order
-    // providers are configured in. Otherwise return provider that owns session first, and only then the rest
-    // of providers.
-    if (!sessionValue) {
+  *_providerIterator(sessionValue, request) {
+    // If there is no way to predict which provider to use first, let's use the order providers are configured in.
+    // Otherwise return provider that either owns session or can handle 3rd-party login request first, and only then
+    // the rest of providers.
+    const shouldHandleSAMLResponse = this._isSAMLResponse(request) && this._providers.has('saml');
+    if (!sessionValue && !shouldHandleSAMLResponse) {
       yield* this._providers;
     } else {
-      yield [sessionValue.provider, this._providers.get(sessionValue.provider)];
+      const provider = shouldHandleSAMLResponse ? 'saml' : sessionValue.provider;
+      yield [provider, this._providers.get(provider)];
 
       for (const [providerType, provider] of this._providers) {
-        if (providerType !== sessionValue.provider) {
+        if (providerType !== provider) {
           yield [providerType, provider];
         }
       }
@@ -272,6 +275,26 @@ class Authenticator {
     }
 
     return sessionValue;
+  }
+
+  /**
+   * Checks whether specified request represents SAML Request.
+   * @param {Hapi.Request} request HapiJS request instance.
+   * @returns {boolean}
+   * @private
+   */
+  _isSAMLRequest(request) {
+    return !!(request.query && request.query.SAMLRequest);
+  }
+
+  /**
+   * Checks whether specified request represents SAML Response.
+   * @param {Hapi.Request} request HapiJS request instance.
+   * @returns {boolean}
+   * @private
+   */
+  _isSAMLResponse(request) {
+    return !!(request.payload && request.payload.SAMLResponse);
   }
 }
 
