@@ -57,9 +57,11 @@ export function redirectWhenMissing({
     localMappingObject = mapping;
   }
 
-  return (error: SavedObjectNotFound | Error) => {
+  return (error: SavedObjectNotFound) => {
     // if this error is not "404", rethrow
-    if (!(error instanceof SavedObjectNotFound)) {
+    // we can't check "error instanceof SavedObjectNotFound" since this class can live in a separate bundle
+    // and the error will be an instance of other class with the same interface (actually the copy of SavedObjectNotFound class)
+    if (!error.savedObjectType) {
       throw error;
     }
 
