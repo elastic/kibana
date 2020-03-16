@@ -9,8 +9,14 @@ import styled, { css } from 'styled-components';
 
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { noop, isEmpty } from 'lodash/fp';
+import { useKibana } from '../../../../lib/kibana';
 import { useConnectors } from '../../../../containers/case/configure/use_connectors';
 import { useCaseConfigure } from '../../../../containers/case/configure/use_configure';
+import {
+  ActionsConnectorsContextProvider,
+  ConnectorAddFlyout,
+} from '../../../../../../../../plugins/triggers_actions_ui/public';
+
 import {
   ClosureType,
   CasesConfigurationMapping,
@@ -40,8 +46,20 @@ const initialState: State = {
   mapping: null,
 };
 
+const actionTypes = [
+  {
+    id: '.servicenow',
+    name: 'ServiceNow',
+    enabled: true,
+  },
+];
+
 const ConfigureCasesComponent: React.FC = () => {
   const [connectorIsValid, setConnectorIsValid] = useState(true);
+  const { http, triggers_actions_ui, notifications, application } = useKibana().services;
+  const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
+
+  const handleShowAddFlyout = useCallback(() => setAddFlyoutVisibility(true), []);
 
   const [{ connectorId, closureType, mapping }, dispatch] = useReducer(
     configureCasesReducer(),
@@ -80,6 +98,7 @@ const ConfigureCasesComponent: React.FC = () => {
     updateConnector,
   } = useConnectors();
 
+  const reloadConnectors = useCallback(async () => refetchConnectors(), []);
   const isLoadingAny = isLoadingConnectors || persistLoading || loadingCaseConfigure;
 
   const handleSubmit = useCallback(
@@ -139,7 +158,7 @@ const ConfigureCasesComponent: React.FC = () => {
           disabled={persistLoading || isLoadingConnectors}
           isLoading={isLoadingConnectors}
           onChangeConnector={setConnectorId}
-          refetchConnectors={refetchConnectors}
+          handleShowFlyout={handleShowAddFlyout}
           selectedConnector={connectorId}
         />
       </SectionWrapper>
@@ -194,6 +213,21 @@ const ConfigureCasesComponent: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </SectionWrapper>
+      <ActionsConnectorsContextProvider
+        value={{
+          http,
+          actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
+          toastNotifications: notifications.toasts,
+          capabilities: application.capabilities,
+          reloadConnectors,
+        }}
+      >
+        <ConnectorAddFlyout
+          addFlyoutVisible={addFlyoutVisible}
+          setAddFlyoutVisibility={setAddFlyoutVisibility}
+          actionTypes={actionTypes}
+        />
+      </ActionsConnectorsContextProvider>
     </FormWrapper>
   );
 };
