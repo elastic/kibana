@@ -54,8 +54,6 @@ export const postAgentAcksHandlerBuilder = function(
 
       return response.ok({ body });
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log(JSON.stringify(e.message));
       if (e.isBoom) {
         return response.customError({
           statusCode: e.output.statusCode,
