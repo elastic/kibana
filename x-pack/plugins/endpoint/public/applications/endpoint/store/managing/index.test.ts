@@ -20,7 +20,7 @@ describe('endpoint_list store concerns', () => {
     dispatch = store.dispatch;
   };
   const generateEndpoint = (): EndpointMetadata => {
-    return generator.generateEndpointMetadata(new Date().getTime());
+    return generator.generateEndpointMetadata();
   };
   const loadDataToStore = () => {
     dispatch({

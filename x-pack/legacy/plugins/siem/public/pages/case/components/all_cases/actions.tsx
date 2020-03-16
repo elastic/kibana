@@ -12,19 +12,20 @@ import { UpdateCase } from '../../../../containers/case/use_get_cases';
 
 interface GetActions {
   caseStatus: string;
-  dispatchUpdate: Dispatch<UpdateCase>;
+  dispatchUpdate: Dispatch<Omit<UpdateCase, 'refetchCasesStatus'>>;
+  deleteCaseOnClick: (deleteCase: Case) => void;
 }
 
 export const getActions = ({
   caseStatus,
   dispatchUpdate,
+  deleteCaseOnClick,
 }: GetActions): Array<DefaultItemIconButtonAction<Case>> => [
   {
     description: i18n.DELETE,
     icon: 'trash',
     name: i18n.DELETE,
-    // eslint-disable-next-line no-console
-    onClick: ({ id }: Case) => console.log('TO DO Delete case', id),
+    onClick: deleteCaseOnClick,
     type: 'icon',
     'data-test-subj': 'action-delete',
   },
@@ -35,7 +36,7 @@ export const getActions = ({
         name: i18n.CLOSE_CASE,
         onClick: (theCase: Case) =>
           dispatchUpdate({
-            updateKey: 'state',
+            updateKey: 'status',
             updateValue: 'closed',
             caseId: theCase.id,
             version: theCase.version,
@@ -49,7 +50,7 @@ export const getActions = ({
         name: i18n.REOPEN_CASE,
         onClick: (theCase: Case) =>
           dispatchUpdate({
-            updateKey: 'state',
+            updateKey: 'status',
             updateValue: 'open',
             caseId: theCase.id,
             version: theCase.version,

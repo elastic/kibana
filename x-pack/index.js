@@ -9,7 +9,6 @@ import { graph } from './legacy/plugins/graph';
 import { monitoring } from './legacy/plugins/monitoring';
 import { reporting } from './legacy/plugins/reporting';
 import { security } from './legacy/plugins/security';
-import { ml } from './legacy/plugins/ml';
 import { tilemap } from './legacy/plugins/tilemap';
 import { grokdebugger } from './legacy/plugins/grokdebugger';
 import { dashboardMode } from './legacy/plugins/dashboard_mode';
@@ -45,7 +44,6 @@ module.exports = function(kibana) {
     reporting(kibana),
     spaces(kibana),
     security(kibana),
-    ml(kibana),
     tilemap(kibana),
     grokdebugger(kibana),
     dashboardMode(kibana),
