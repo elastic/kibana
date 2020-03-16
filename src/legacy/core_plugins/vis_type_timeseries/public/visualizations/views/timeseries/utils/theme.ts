@@ -62,7 +62,7 @@ function getGrayFromRelLum(relLum: number) {
 }
 
 function getGrayRGBfromGray(gray: number) {
-  const g = Math.round(gray * 256);
+  const g = Math.round(gray * 255);
   return `rgb(${g},${g},${g})`;
 }
 
@@ -92,10 +92,23 @@ function findBestContrastColor(
   return getAAAGray(bgColor, darkFgColor, ratio);
 }
 
-export function getTheme(darkMode: boolean, bgColor?: string): Theme {
-  if (typeof bgColor !== 'string') {
+function isValidColor(color: string | null | undefined): color is string {
+  if (typeof color !== 'string') {
+    return false;
+  }
+  try {
+    colorJS(color);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function getTheme(darkMode: boolean, bgColor?: string | null): Theme {
+  if (!isValidColor(bgColor)) {
     return darkMode ? DARK_THEME : LIGHT_THEME;
   }
+
   const bgLuminosity = computeRelativeLuminosity(bgColor);
   const mainTheme = bgLuminosity <= 0.179 ? DARK_THEME : LIGHT_THEME;
   const color = findBestContrastColor(
