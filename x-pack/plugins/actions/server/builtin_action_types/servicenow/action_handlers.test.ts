@@ -11,13 +11,13 @@ import {
   createComments,
 } from './action_handlers';
 import { ServiceNow } from './lib';
-import { FinalMapping } from './types';
+import { Mapping } from './types';
 
 jest.mock('./lib');
 
 const ServiceNowMock = ServiceNow as jest.Mock;
 
-const finalMapping: FinalMapping = new Map();
+const finalMapping: Mapping = new Map();
 
 finalMapping.set('title', {
   target: 'short_description',
@@ -48,7 +48,7 @@ const params = {
   updatedAt: null,
   updatedBy: null,
   incidentId: null,
-  mappedParams: {
+  incident: {
     short_description: 'a title',
     description: 'a description',
   },

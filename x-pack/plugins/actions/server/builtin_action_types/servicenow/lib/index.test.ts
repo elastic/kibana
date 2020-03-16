@@ -132,7 +132,10 @@ describe('ServiceNow lib', () => {
       commentId: '456',
       version: 'WzU3LDFd',
       comment: 'A comment',
-      incidentCommentId: undefined,
+      createdAt: '2020-03-13T08:34:53.450Z',
+      createdBy: { fullName: 'Elastic User', username: null },
+      updatedAt: null,
+      updatedBy: null,
     };
 
     const res = await serviceNow.createComment('123', comment, 'comments');
@@ -173,13 +176,19 @@ describe('ServiceNow lib', () => {
         commentId: '123',
         version: 'WzU3LDFd',
         comment: 'A comment',
-        incidentCommentId: undefined,
+        createdAt: '2020-03-13T08:34:53.450Z',
+        createdBy: { fullName: 'Elastic User', username: null },
+        updatedAt: null,
+        updatedBy: null,
       },
       {
         commentId: '456',
         version: 'WzU3LDFd',
         comment: 'A second comment',
-        incidentCommentId: undefined,
+        createdAt: '2020-03-13T08:34:53.450Z',
+        createdBy: { fullName: 'Elastic User', username: null },
+        updatedAt: null,
+        updatedBy: null,
       },
     ];
     const res = await serviceNow.batchCreateComments('000', comments, 'comments');

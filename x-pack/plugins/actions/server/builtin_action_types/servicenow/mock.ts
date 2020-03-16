@@ -4,38 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MapsType, FinalMapping, ParamsType } from './types';
+import { MapEntry, Mapping, ExecutorParams } from './types';
 import { Incident } from './lib/types';
 
-const mapping: MapsType[] = [
-  { source: 'title', target: 'short_description', actionType: 'nothing' },
-  { source: 'description', target: 'description', actionType: 'nothing' },
-  { source: 'comments', target: 'comments', actionType: 'nothing' },
+const mapping: MapEntry[] = [
+  { source: 'title', target: 'short_description', actionType: 'overwrite' },
+  { source: 'description', target: 'description', actionType: 'append' },
+  { source: 'comments', target: 'comments', actionType: 'append' },
 ];
 
-const finalMapping: FinalMapping = new Map();
+const finalMapping: Mapping = new Map();
 
 finalMapping.set('title', {
   target: 'short_description',
-  actionType: 'nothing',
+  actionType: 'overwrite',
 });
 
 finalMapping.set('description', {
   target: 'description',
-  actionType: 'nothing',
+  actionType: 'append',
 });
 
 finalMapping.set('comments', {
   target: 'comments',
-  actionType: 'nothing',
+  actionType: 'append',
 });
 
 finalMapping.set('short_description', {
   target: 'title',
-  actionType: 'nothing',
+  actionType: 'overwrite',
 });
 
-const params: ParamsType = {
+const params: ExecutorParams = {
   caseId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
   incidentId: 'ceb5986e079f00100e48fbbf7c1ed06d',
   createdAt: '2020-03-13T08:34:53.450Z',

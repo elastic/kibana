@@ -10,22 +10,22 @@ import {
   mapParams,
   appendField,
   appendInformationToField,
-  appendInformationToIncident,
-  applyActionTypeToFields,
-  appendInformationToComments,
+  prepareFieldsForTransformation,
+  transformFields,
+  transformComments,
 } from './helpers';
 import { mapping, finalMapping } from './mock';
 import { SUPPORTED_SOURCE_FIELDS } from './constants';
-import { MapsType } from './types';
+import { MapEntry, Params, Comment } from './types';
 
-const maliciousMapping: MapsType[] = [
+const maliciousMapping: MapEntry[] = [
   { source: '__proto__', target: 'short_description', actionType: 'nothing' },
   { source: 'description', target: '__proto__', actionType: 'nothing' },
   { source: 'comments', target: 'comments', actionType: 'nothing' },
   { source: 'unsupportedSource', target: 'comments', actionType: 'nothing' },
 ];
 
-const fullParams = {
+const fullParams: Params = {
   caseId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
   title: 'a title',
   description: 'a description',
@@ -34,7 +34,7 @@ const fullParams = {
   updatedAt: null,
   updatedBy: null,
   incidentId: null,
-  mappedParams: {
+  incident: {
     short_description: 'a title',
     description: 'a description',
   },
@@ -59,6 +59,7 @@ const fullParams = {
     },
   ],
 };
+
 describe('sanitizeMapping', () => {
   test('remove malicious fields', () => {
     const sanitizedMapping = normalizeMapping(SUPPORTED_SOURCE_FIELDS, maliciousMapping);
@@ -125,6 +126,114 @@ describe('mapParams', () => {
   });
 });
 
+describe('prepareFieldsForTransformation', () => {
+  test('prepare fields with defaults', () => {
+    const res = prepareFieldsForTransformation({
+      params: fullParams,
+      mapping: finalMapping,
+    });
+    expect(res).toEqual([
+      {
+        key: 'short_description',
+        value: 'a title',
+        actionType: 'overwrite',
+        pipes: ['informationCreated'],
+      },
+      {
+        key: 'description',
+        value: 'a description',
+        actionType: 'append',
+        pipes: ['informationCreated'],
+      },
+    ]);
+  });
+
+  test('prepare fields with append', () => {
+    const res = prepareFieldsForTransformation({
+      params: fullParams,
+      mapping: finalMapping,
+      append: true,
+    });
+    expect(res).toEqual([
+      {
+        key: 'short_description',
+        value: 'a title',
+        actionType: 'overwrite',
+        pipes: ['informationCreated'],
+      },
+      {
+        key: 'description',
+        value: 'a description',
+        actionType: 'append',
+        pipes: ['informationCreated', 'append'],
+      },
+    ]);
+  });
+
+  test('prepare fields with default pipes', () => {
+    const res = prepareFieldsForTransformation({
+      params: fullParams,
+      mapping: finalMapping,
+      append: true,
+      defaultPipes: ['myTestPipe'],
+    });
+    expect(res).toEqual([
+      {
+        key: 'short_description',
+        value: 'a title',
+        actionType: 'overwrite',
+        pipes: ['myTestPipe'],
+      },
+      {
+        key: 'description',
+        value: 'a description',
+        actionType: 'append',
+        pipes: ['myTestPipe', 'append'],
+      },
+    ]);
+  });
+});
+
+describe('transformFields', () => {
+  test('transform fields for creation correctly', () => {
+    const fields = prepareFieldsForTransformation({
+      params: fullParams,
+      mapping: finalMapping,
+    });
+
+    const res = transformFields({
+      params: fullParams,
+      fields,
+    });
+    expect(res).toEqual({
+      short_description: 'a title (created at 2020-03-13T08:34:53.450Z by Elastic User)',
+      description: 'a description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
+    });
+  });
+
+  test('transform fields for update correctly', () => {
+    const fields = prepareFieldsForTransformation({
+      params: fullParams,
+      mapping: finalMapping,
+      append: true,
+      defaultPipes: ['informationUpdated'],
+    });
+
+    const res = transformFields({
+      params: fullParams,
+      fields,
+      currentIncident: {
+        short_description: 'first title',
+        description: 'first description',
+      },
+    });
+    expect(res).toEqual({
+      short_description: 'a title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+      description:
+        'a description (updated at 2020-03-13T08:34:53.450Z by Elastic User) first description',
+    });
+  });
+});
 describe('appendField', () => {
   test('prefix correctly', () => {
     expect('my_prefixmy_value ').toEqual(appendField({ value: 'my_value', prefix: 'my_prefix' }));
@@ -163,97 +272,56 @@ describe('appendInformationToField', () => {
   });
 });
 
-describe('appendInformationToIncident', () => {
-  test('append information correctly on creation mode', () => {
-    const res = appendInformationToIncident(fullParams, 'create');
-    expect(res).toEqual({
-      short_description: 'a title (created at 2020-03-13T08:34:53.450Z by Elastic User)',
-      description: 'a description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
-    });
+describe('transformComments', () => {
+  test('transform creation comments', () => {
+    const comments: Comment[] = [
+      {
+        commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
+        version: 'WzU3LDFd',
+        comment: 'first comment',
+        createdAt: '2020-03-13T08:34:53.450Z',
+        createdBy: { fullName: 'Elastic User', username: null },
+        updatedAt: null,
+        updatedBy: null,
+      },
+    ];
+    const res = transformComments(comments, fullParams, ['informationCreated']);
+    expect(res).toEqual([
+      {
+        commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
+        version: 'WzU3LDFd',
+        comment: 'first comment (created at 2020-03-13T08:34:53.450Z by Elastic User)',
+        createdAt: '2020-03-13T08:34:53.450Z',
+        createdBy: { fullName: 'Elastic User', username: null },
+        updatedAt: null,
+        updatedBy: null,
+      },
+    ]);
   });
 
-  test('append information correctly on update mode', () => {
-    const res = appendInformationToIncident(fullParams, 'update');
-    expect(res).toEqual({
-      short_description: 'a title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
-      description: 'a description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
-    });
-  });
-});
-
-describe('applyActionTypeToFields', () => {
-  test('remove fields with nothing as action type', () => {
-    const map: Map<string, any> = new Map();
-    map.set('short_description', { target: 'title', actionType: 'nothing' });
-    map.set('description', { target: 'description', actionType: 'append' });
-
-    const incident = { title: 'a title', short_description: 'a description' };
-    const res = applyActionTypeToFields({
-      params: fullParams,
-      mapping: map,
-      incident,
-    });
-    expect(res).toEqual(expect.not.objectContaining({ short_description: 'a description' }));
-  });
-
-  test('appends correctly a field', () => {
-    const map: Map<string, any> = new Map();
-    map.set('short_description', { target: 'title', actionType: 'append' });
-    map.set('description', { target: 'description', actionType: 'append' });
-
-    const incident = {
-      short_description: 'a title (created at 2020-03-13T08:34:53.450Z by Elastic User)',
-      description: 'a description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
-    };
-    const res = applyActionTypeToFields({
-      params: { ...fullParams, title: 'update title', description: 'update description' },
-      mapping: map,
-      incident,
-    });
-
-    expect(res).toEqual({
-      short_description:
-        'a title (updated at 2020-03-13T08:34:53.450Z by Elastic User) a title (created at 2020-03-13T08:34:53.450Z by Elastic User)',
-      description:
-        'a description (updated at 2020-03-13T08:34:53.450Z by Elastic User) a description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
-    });
-  });
-
-  test('overwrites correctly a field', () => {
-    const map: Map<string, any> = new Map();
-    map.set('short_description', { target: 'title', actionType: 'overwrite' });
-    map.set('description', { target: 'description', actionType: 'append' });
-
-    const incident = {
-      short_description: 'a title (created at 2020-03-13T08:34:53.450Z by Elastic User)',
-      description: 'a description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
-    };
-    const res = applyActionTypeToFields({
-      params: { ...fullParams, title: 'update title', description: 'update description' },
-      mapping: map,
-      incident,
-    });
-
-    expect(res).toEqual({
-      short_description: 'a title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
-      description:
-        'a description (updated at 2020-03-13T08:34:53.450Z by Elastic User) a description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
-    });
-  });
-});
-
-describe('appendInformationToComments', () => {
-  test('append information to comments correctly on creation mode', () => {
-    const res = appendInformationToComments([fullParams.comments[0]], fullParams, 'create');
-    expect(res[0].comment).toEqual(
-      'first comment (created at 2020-03-13T08:34:53.450Z by Elastic User)'
-    );
-  });
-
-  test('append information to comments correctly on update mode', () => {
-    const res = appendInformationToComments([fullParams.comments[1]], fullParams, 'update');
-    expect(res[0].comment).toEqual(
-      'second comment (updated at 2020-03-13T08:34:53.450Z by Elastic User)'
-    );
+  test('transform update comments', () => {
+    const comments: Comment[] = [
+      {
+        commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
+        version: 'WzU3LDFd',
+        comment: 'first comment',
+        createdAt: '2020-03-13T08:34:53.450Z',
+        createdBy: { fullName: 'Elastic User', username: null },
+        updatedAt: null,
+        updatedBy: null,
+      },
+    ];
+    const res = transformComments(comments, fullParams, ['informationUpdated']);
+    expect(res).toEqual([
+      {
+        commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
+        version: 'WzU3LDFd',
+        comment: 'first comment (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+        createdAt: '2020-03-13T08:34:53.450Z',
+        createdBy: { fullName: 'Elastic User', username: null },
+        updatedAt: null,
+        updatedBy: null,
+      },
+    ]);
   });
 });
