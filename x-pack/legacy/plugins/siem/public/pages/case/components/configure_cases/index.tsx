@@ -100,12 +100,7 @@ const ConfigureCasesComponent: React.FC = () => {
     setConnectorId,
     setClosureType,
   });
-  const {
-    loading: isLoadingConnectors,
-    connectors,
-    refetchConnectors,
-    updateConnector,
-  } = useConnectors();
+  const { loading: isLoadingConnectors, connectors, refetchConnectors } = useConnectors();
 
   const reloadConnectors = useCallback(async () => refetchConnectors(), []);
   const isLoadingAny = isLoadingConnectors || persistLoading || loadingCaseConfigure;
@@ -114,7 +109,6 @@ const ConfigureCasesComponent: React.FC = () => {
     // TO DO give a warning/error to user when field are not mapped so they have chance to do it
     () => {
       persistCaseConfigure({ connectorId, closureType });
-      updateConnector(connectorId, mapping ?? []);
     },
     [connectorId, closureType, mapping]
   );
