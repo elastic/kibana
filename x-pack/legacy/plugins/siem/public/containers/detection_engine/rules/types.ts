@@ -5,7 +5,6 @@
  */
 
 import * as t from 'io-ts';
-import { ExportTimelineIds } from '../../../components/open_timeline/export_timeline';
 
 export const NewRuleSchema = t.intersection([
   t.type({
@@ -180,8 +179,7 @@ export interface ImportRulesResponse {
 }
 
 export interface ExportDocumentsProps {
-  ids?: ExportTimelineIds[] | undefined;
-  ruleIds?: string[];
+  ids: string[];
   filename?: string;
   excludeExportDetails?: boolean;
   signal: AbortSignal;

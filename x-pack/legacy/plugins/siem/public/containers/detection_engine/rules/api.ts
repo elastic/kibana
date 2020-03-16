@@ -233,13 +233,11 @@ export const importRules = async ({
 export const exportRules = async ({
   excludeExportDetails = false,
   filename = `${i18n.EXPORT_FILENAME}.ndjson`,
-  ruleIds = [],
+  ids = [],
   signal,
 }: ExportDocumentsProps): Promise<Blob> => {
   const body =
-    ruleIds.length > 0
-      ? JSON.stringify({ objects: ruleIds.map(rule => ({ rule_id: rule })) })
-      : undefined;
+    ids.length > 0 ? JSON.stringify({ objects: ids.map(rule => ({ rule_id: rule })) }) : undefined;
 
   return KibanaServices.get().http.fetch<Blob>(`${DETECTION_ENGINE_RULES_URL}/_export`, {
     method: 'POST',
