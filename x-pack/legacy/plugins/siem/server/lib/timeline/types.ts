@@ -10,7 +10,10 @@ import * as runtimeTypes from 'io-ts';
 
 import { unionWithNullType } from '../framework';
 import { NoteSavedObjectToReturnRuntimeType, NoteSavedObject } from '../note/types';
-import { PinnedEventToReturnSavedObjectRuntimeType } from '../pinned_event/types';
+import {
+  PinnedEventToReturnSavedObjectRuntimeType,
+  PinnedEventSavedObject,
+} from '../pinned_event/types';
 import { SavedObjectsClient, KibanaRequest } from '../../../../../../../src/core/server';
 
 /*
@@ -202,7 +205,7 @@ export interface AllTimelineSavedObject
   extends runtimeTypes.TypeOf<typeof AllTimelineSavedObjectRuntimeType> {}
 
 export interface ExportTimelineRequestParams {
-  body: { objects: Array<{ timelineId: string; noteIds: string[]; pinnedEventIds: string[] }> };
+  body: { objects: string[] };
   query: {
     file_name: string;
     exclude_export_details: boolean;
@@ -246,3 +249,6 @@ export interface BulkGetInput {
   type: string;
   id: string;
 }
+
+export type PinnedEventsByTimelineId = Record<string, PinnedEventSavedObject[]>;
+export type NotesByTimelineId = Record<string, NoteSavedObject[]>;
