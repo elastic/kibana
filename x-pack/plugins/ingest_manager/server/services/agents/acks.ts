@@ -36,7 +36,7 @@ export async function acknowledgeAgentActions(
   const matchedUpdatedActions: AgentAction[] = [];
 
   agentEvents.forEach(agentEvent => {
-    if (ALLOWED_ACKNOWLEDGEMENT_TYPE.indexOf(agentEvent.type) < 0) {
+    if (!isAllowedType(agentEvent.type)) {
       throw Boom.badRequest(`${agentEvent.type} not allowed for acknowledgment only ACTION_RESULT`);
     }
     if (agentActionMap.has(agentEvent.action_id!)) {
@@ -57,6 +57,10 @@ export async function acknowledgeAgentActions(
   }
 
   return matchedUpdatedActions;
+}
+
+function isAllowedType(eventType: string): boolean {
+  return ALLOWED_ACKNOWLEDGEMENT_TYPE.indexOf(eventType) >= 0;
 }
 
 export async function saveAgentEvents(
