@@ -4,19 +4,31 @@
 
 beta[]
 
-If you're working with time series data, you don't want to continually dump
-everything into a single index. Instead, you might periodically roll over the
-data to a new index to keep it from growing so big it's slow and expensive.
-As the index ages and you query it less frequently, you’ll likely move it to
-less expensive hardware and reduce the number of shards and replicas.
+The *Alert details* page tells you about the state of the alert and provides granular control over the actions it is taking. 
 
-{kib}’s *Index Lifecycle Policies* walks you through the process for creating
-and configuring a policy. Before using this feature, you should be familiar
-with index lifecycle management:
+[role="screenshot"]
+image::images/alerts-details-instances-active.png[Alert details page with three alert instances]
 
-* For an introduction, refer to
-{ref}/getting-started-index-lifecycle-management.html[Getting started with index
-lifecycle management].
-* To dig into the concepts and technical details, see
-{ref}/index-lifecycle-management.html[Managing the index lifecycle].
-* To check out the APIs, see {ref}/index-lifecycle-management-api.html[Index lifecycle management API].
+In the example above, an alert detects when a site serves more than a threshold number of bytes in a 24 hour period. The *alert details* view show that three sites are above the threshold. These are called *alert instances* - occurences of the condition being detected - and the instance name, status, time of detection, and duration of the condition are shown in this view. 
+
+Upon detection, each instance can trigger one or more actions. If the condition persists, the same actions will trigger either on the next scheduled alert check, or (if defined) after the re-notify period on the alert has passed. To prevent re-notification, you can suppress future actions by clicking on the eye icon to mute an individual alert instance. Muting means that the alert checks continue to run on a schedule, but that instance will not trigger any action.
+
+[role="screenshot"]
+image::images/alerts-details-instance-muting.png[Muting an alert instance]
+
+Alert instances will come and go from the list depending on whether they meet the alert conditions or not - unless they are muted. If a muted instance no longer meets the alert conditions, it will appear as "inactive" in the list. This prevents an instance from triggering actions if it reappears in the future. 
+
+[role="screenshot"]
+image::images/alerts-details-instances-inactive.png[Alert details page with three inactive alert instances]
+
+If you want to suppress actions on all current and future instances, you can mute the entire alert. Alert checks continue to run and the instance list will update as instances activate or deactivate, but no actions will be triggered.
+
+[role="screenshot"]
+image::images/alerts-details-muting.png[Use the mute toggle to suppress all action on current and future instances]
+
+You can also disable an alert altogether. When disabled, the alert stops running checks altogether and will clear any instances it is tracking. You may want to disable alerts that are not currently needed to reduce the load on {kib} and {es}.
+
+[role="screenshot"]
+image::images/alerts-details-disabling.png[Use the disable toggle to turn off alert checks and clear instances tracked]
+
+* For further information on alerting concepts and examples, see <<alerting-getting-started>>.
