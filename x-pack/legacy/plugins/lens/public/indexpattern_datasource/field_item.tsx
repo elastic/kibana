@@ -46,7 +46,7 @@ import { DragDrop } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { BucketedAggregation, FieldStatsResponse } from '../../../../../plugins/lens/common';
 import { IndexPattern, IndexPatternField } from './types';
-import { getColorForDataType, LensFieldIcon } from './lens_field_icon';
+import { LensFieldIcon } from './lens_field_icon';
 import { trackUiEvent } from '../lens_ui_telemetry';
 
 export interface FieldItemProps {
@@ -177,6 +177,7 @@ export function FieldItem(props: FieldItemProps) {
       container={document.querySelector<HTMLElement>('.application') || undefined}
       button={
         <DragDrop
+          label={field.name}
           value={{ field, indexPatternId: indexPattern.id } as DraggedField}
           data-test-subj="lnsFieldListPanelField"
           draggable
@@ -294,11 +295,6 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     );
   }
 
-  const euiButtonColor =
-    field.type === 'string' ? 'accent' : field.type === 'number' ? 'secondary' : 'primary';
-  const euiTextColor =
-    field.type === 'string' ? 'accent' : field.type === 'number' ? 'secondary' : 'default';
-
   const fromDate = DateMath.parse(dateRange.fromDate);
   const toDate = DateMath.parse(dateRange.toDate);
 
@@ -391,8 +387,6 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     const specId = i18n.translate('xpack.lens.indexPattern.fieldStatsCountLabel', {
       defaultMessage: 'Count',
     });
-    const expectedColor = getColorForDataType(field.type);
-    const seriesColors = expectedColor ? [expectedColor] : undefined;
 
     if (field.type === 'date') {
       return wrapInPopover(
@@ -429,7 +423,6 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
             yAccessors={['count']}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
-            customSeriesColors={seriesColors}
             timeZone="local"
           />
         </Chart>
@@ -453,7 +446,6 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
             yAccessors={['count']}
             xScaleType={ScaleType.Linear}
             yScaleType={ScaleType.Linear}
-            customSeriesColors={seriesColors}
           />
         </Chart>
       );
@@ -486,7 +478,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
                   )}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs" textAlign="left" color={euiTextColor}>
+                  <EuiText size="xs" textAlign="left" color="accent">
                     {Math.round((topValue.count / props.sampledValues!) * 100)}%
                   </EuiText>
                 </EuiFlexItem>
@@ -497,7 +489,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
                 value={topValue.count / props.sampledValues!}
                 max={1}
                 size="s"
-                color={euiButtonColor}
+                color="accent"
               />
             </div>
           );

@@ -40,8 +40,7 @@ import {
 } from './agg_params_state';
 import { DefaultEditorCommonProps } from './agg_common_props';
 import { EditorParamConfig, TimeIntervalParam, FixedParam, getEditorConfig } from './utils';
-import { useKibana } from '../../../../../plugins/kibana_react/public';
-import { VisDefaultEditorKibanaServices } from '../types';
+import { Schema, getSchemaByName } from '../schemas';
 
 const FIXED_VALUE_PROP = 'fixedValue';
 const DEFAULT_PROP = 'default';
@@ -59,6 +58,9 @@ export interface DefaultEditorAggParamsProps extends DefaultEditorCommonProps {
   indexPattern: IndexPattern;
   setValidity: (isValid: boolean) => void;
   setTouched: (isTouched: boolean) => void;
+  schemas: Schema[];
+  allowedAggs?: string[];
+  hideCustomLabel?: boolean;
 }
 
 function DefaultEditorAggParams({
@@ -77,24 +79,22 @@ function DefaultEditorAggParams({
   onAggTypeChange,
   setTouched,
   setValidity,
+  schemas,
+  allowedAggs = [],
+  hideCustomLabel = false,
 }: DefaultEditorAggParamsProps) {
-  const {
-    services: {
-      dataShim: {
-        search: {
-          aggs: { types: aggTypes, aggTypeFieldFilters },
-        },
-      },
-    },
-  } = useKibana<VisDefaultEditorKibanaServices>();
+  const schema = getSchemaByName(schemas, agg.schema);
+  const { title } = schema;
+  const aggFilter = [...allowedAggs, ...(schema.aggFilter || [])];
   const groupedAggTypeOptions = useMemo(
-    () => getAggTypeOptions(aggTypes, agg, indexPattern, groupName),
-    [agg, indexPattern, groupName, aggTypes]
+    () => getAggTypeOptions(agg, indexPattern, groupName, aggFilter),
+    [agg, indexPattern, groupName, aggFilter]
   );
+
   const error = aggIsTooLow
     ? i18n.translate('visDefaultEditor.aggParams.errors.aggWrongRunOrderErrorMessage', {
         defaultMessage: '"{schema}" aggs must run before all other buckets!',
-        values: { schema: agg.schema.title },
+        values: { schema: title },
       })
     : '';
   const aggTypeName = agg.type?.name;
@@ -105,8 +105,8 @@ function DefaultEditorAggParams({
     fieldName,
   ]);
   const params = useMemo(
-    () => getAggParamsToRender({ agg, editorConfig, metricAggs, state }, aggTypeFieldFilters),
-    [agg, editorConfig, metricAggs, state, aggTypeFieldFilters]
+    () => getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas, hideCustomLabel }),
+    [agg, editorConfig, metricAggs, state, schemas, hideCustomLabel]
   );
   const allParams = [...params.basic, ...params.advanced];
   const [paramsState, onChangeParamsState] = useReducer(

@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { Vis, VisState } from './vis';
-import { VisType } from './types';
-import { IIndexPattern } from '../../../../../../plugins/data/common';
+import { Vis, VisState, VisParams } from './vis';
+import { VisType } from './vis_types';
+import { IAggConfig, IIndexPattern } from '../../../../../../plugins/data/public';
+import { Schema } from '../../../../vis_default_editor/public';
 
 type InitVisStateType =
   | Partial<VisState>
@@ -35,6 +36,16 @@ export declare class VisImpl implements Vis {
   constructor(indexPattern: IIndexPattern, visState?: InitVisStateType);
 
   type: VisType;
+  getCurrentState: (
+    includeDisabled?: boolean
+  ) => {
+    title: string;
+    type: string;
+    params: VisParams;
+    aggs: Array<{ [key: string]: any }>;
+  };
+
+  private initializeDefaultsFromSchemas(configStates: IAggConfig[], schemas: Schema[]);
 
   // Since we haven't typed everything here yet, we basically "any" the rest
   // of that interface. This should be removed as soon as this type definition

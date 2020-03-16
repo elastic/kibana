@@ -5,81 +5,73 @@
  */
 
 import { useEffect, useReducer } from 'react';
-import chrome from 'ui/chrome';
-import { useStateToaster } from '../../components/toasters';
-import { errorToToaster } from '../../components/ml/api/error_to_toaster';
+
+import { errorToToaster, useStateToaster } from '../../components/toasters';
+import { getTags } from './api';
 import * as i18n from './translations';
-import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
-import { throwIfNotOk } from '../../hooks/api/api';
 
 interface TagsState {
-  data: string[];
+  tags: string[];
   isLoading: boolean;
   isError: boolean;
 }
-interface Action {
-  type: string;
-  payload?: string[];
-}
+type Action =
+  | { type: 'FETCH_INIT' }
+  | { type: 'FETCH_SUCCESS'; payload: string[] }
+  | { type: 'FETCH_FAILURE' };
 
 const dataFetchReducer = (state: TagsState, action: Action): TagsState => {
   switch (action.type) {
-    case FETCH_INIT:
+    case 'FETCH_INIT':
       return {
         ...state,
         isLoading: true,
         isError: false,
       };
-    case FETCH_SUCCESS:
-      const getTypedPayload = (a: Action['payload']) => a as string[];
+    case 'FETCH_SUCCESS':
       return {
         ...state,
         isLoading: false,
         isError: false,
-        data: getTypedPayload(action.payload),
+        tags: action.payload,
       };
-    case FETCH_FAILURE:
+    case 'FETCH_FAILURE':
       return {
         ...state,
         isLoading: false,
         isError: true,
       };
     default:
-      throw new Error();
+      return state;
   }
 };
 const initialData: string[] = [];
 
-export const useGetTags = (): [TagsState] => {
+export const useGetTags = (): TagsState => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
-    data: initialData,
+    tags: initialData,
   });
   const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {
     let didCancel = false;
     const fetchData = async () => {
-      dispatch({ type: FETCH_INIT });
+      dispatch({ type: 'FETCH_INIT' });
       try {
-        const response = await fetch(`${chrome.getBasePath()}/api/cases/tags`, {
-          method: 'GET',
-          credentials: 'same-origin',
-          headers: {
-            'content-type': 'application/json',
-            'kbn-system-api': 'true',
-          },
-        });
+        const response = await getTags();
         if (!didCancel) {
-          await throwIfNotOk(response);
-          const responseJson = await response.json();
-          dispatch({ type: FETCH_SUCCESS, payload: responseJson });
+          dispatch({ type: 'FETCH_SUCCESS', payload: response });
         }
       } catch (error) {
         if (!didCancel) {
-          errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
-          dispatch({ type: FETCH_FAILURE });
+          errorToToaster({
+            title: i18n.ERROR_TITLE,
+            error: error.body && error.body.message ? new Error(error.body.message) : error,
+            dispatchToaster,
+          });
+          dispatch({ type: 'FETCH_FAILURE' });
         }
       }
     };
@@ -88,5 +80,5 @@ export const useGetTags = (): [TagsState] => {
       didCancel = true;
     };
   }, []);
-  return [state];
+  return state;
 };

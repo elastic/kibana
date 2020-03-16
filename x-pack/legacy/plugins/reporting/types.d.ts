@@ -122,6 +122,11 @@ export interface CaptureConfig {
   maxAttempts: number;
   networkPolicy: NetworkPolicy;
   loadDelay: number;
+  timeouts: {
+    openUrl: number;
+    waitForElements: number;
+    renderComplet: number;
+  };
 }
 
 export interface BrowserConfig {
@@ -219,8 +224,9 @@ export interface JobSource<JobParamsType> {
 export interface JobDocOutput {
   content_type: string;
   content: string | null;
-  max_size_reached: boolean;
   size: number;
+  max_size_reached?: boolean;
+  warnings?: string[];
 }
 
 export interface ESQueueWorker {
@@ -311,8 +317,9 @@ export interface ExportTypeDefinition<
 }
 
 export { CancellationToken } from './common/cancellation_token';
-export { HeadlessChromiumDriver } from './server/browsers/chromium/driver';
-export { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
+
+export { HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from './server/browsers';
+
 export { ExportTypesRegistry } from './server/lib/export_types_registry';
 // Prefer to import this type using: `import { LevelLogger } from 'relative/path/server/lib';`
 export { LevelLogger as Logger };

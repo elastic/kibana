@@ -26,16 +26,11 @@ import {
   SchemaConfig,
   Schemas,
 } from './build_pipeline';
-import { Vis, VisState } from '..';
-import { IAggConfig } from '../../../legacy_imports';
-import { searchSourceMock } from '../../../legacy_mocks';
+import { Vis } from '..';
+import { searchSourceMock, dataPluginMock } from '../../../../../../../plugins/data/public/mocks';
+import { IAggConfig } from '../../../../../../../plugins/data/public';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/agg_types', () => ({
-  setBounds: () => {},
-  dateHistogramBucketAgg: () => {},
-  isDateHistogramBucketAggConfig: () => true,
-}));
 
 describe('visualize loader pipeline helpers: build pipeline', () => {
   describe('prepareJson', () => {
@@ -83,7 +78,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
   });
 
   describe('buildPipelineVisFunction', () => {
-    let visStateDef: VisState;
+    let visStateDef: ReturnType<Vis['getCurrentState']>;
     let schemaConfig: SchemaConfig;
     let schemasDef: Schemas;
     let uiState: any;
@@ -94,7 +89,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         // @ts-ignore
         type: 'type',
         params: {},
-      };
+      } as ReturnType<Vis['getCurrentState']>;
 
       schemaConfig = {
         accessor: 0,
@@ -348,8 +343,10 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
   });
 
   describe('buildPipeline', () => {
+    const dataStart = dataPluginMock.createStartContract();
+
     it('calls toExpression on vis_type if it exists', async () => {
-      const vis: Vis = {
+      const vis = ({
         getCurrentState: () => {},
         getUiState: () => null,
         isHierarchical: () => false,
@@ -360,13 +357,18 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         type: {
           toExpression: () => 'testing custom expressions',
         },
-      };
-      const expression = await buildPipeline(vis, { searchSource: searchSourceMock });
+      } as unknown) as Vis;
+      const expression = await buildPipeline(vis, {
+        searchSource: searchSourceMock,
+        timefilter: dataStart.query.timefilter.timefilter,
+      });
       expect(expression).toMatchSnapshot();
     });
   });
 
   describe('buildVislibDimensions', () => {
+    const dataStart = dataPluginMock.createStartContract();
+
     let aggs: IAggConfig[];
     let visState: any;
     let vis: Vis;
@@ -381,20 +383,17 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
             type: 'metrics',
             name: 'count',
           },
-          schema: {
-            name: 'metric',
-          },
+          schema: 'metric',
           params: {},
         } as IAggConfig,
       ];
 
       params = {
         searchSource: null,
+        timefilter: dataStart.query.timefilter.timefilter,
         timeRange: null,
       };
     });
-
-    // todo: cover basic buildVislibDimensions's functionalities
 
     describe('test y dimension format for histogram chart', () => {
       beforeEach(() => {

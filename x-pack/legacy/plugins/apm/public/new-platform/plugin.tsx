@@ -37,7 +37,9 @@ import { getConfigFromInjectedMetadata } from './getConfigFromInjectedMetadata';
 import { setHelpExtension } from './setHelpExtension';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { setReadonlyBadge } from './updateBadge';
-import { Permission } from '../components/app/Permission';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { APMIndicesPermission } from '../components/app/APMIndicesPermission';
+import { createCallApmApi } from '../services/rest/createCallApmApi';
 
 export const REACT_APP_ROOT_ID = 'react-apm-root';
 
@@ -52,14 +54,13 @@ const App = () => {
     <MainContainer data-test-subj="apmMainContainer" role="main">
       <UpdateBreadcrumbs routes={routes} />
       <Route component={ScrollToTopOnPathChange} />
-      {/* Check if user has the appropriate permissions to use the APM UI. */}
-      <Permission>
+      <APMIndicesPermission>
         <Switch>
           {routes.map((route, i) => (
             <ApmRoute key={i} {...route} />
           ))}
         </Switch>
-      </Permission>
+      </APMIndicesPermission>
     </MainContainer>
   );
 };
@@ -104,6 +105,7 @@ export class ApmPlugin
   public start(core: CoreStart) {
     const i18nCore = core.i18n;
     const plugins = this.setupPlugins;
+    createCallApmApi(core.http);
 
     // Once we're actually an NP plugin we'll get the config from the
     // initializerContext like:
@@ -135,27 +137,29 @@ export class ApmPlugin
 
     ReactDOM.render(
       <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <i18nCore.Context>
-          <Router history={history}>
-            <LocationProvider>
-              <MatchedRouteProvider routes={routes}>
-                <UrlParamsProvider>
-                  <LoadingIndicatorProvider>
-                    <LicenseProvider>
-                      <App />
-                    </LicenseProvider>
-                  </LoadingIndicatorProvider>
-                </UrlParamsProvider>
-              </MatchedRouteProvider>
-            </LocationProvider>
-          </Router>
-        </i18nCore.Context>
+        <KibanaContextProvider services={{ ...core, ...plugins }}>
+          <i18nCore.Context>
+            <Router history={history}>
+              <LocationProvider>
+                <MatchedRouteProvider routes={routes}>
+                  <UrlParamsProvider>
+                    <LoadingIndicatorProvider>
+                      <LicenseProvider>
+                        <App />
+                      </LicenseProvider>
+                    </LoadingIndicatorProvider>
+                  </UrlParamsProvider>
+                </MatchedRouteProvider>
+              </LocationProvider>
+            </Router>
+          </i18nCore.Context>
+        </KibanaContextProvider>
       </ApmPluginContext.Provider>,
       document.getElementById(REACT_APP_ROOT_ID)
     );
 
     // create static index pattern and store as saved object. Not needed by APM UI but for legacy reasons in Discover, Dashboard etc.
-    createStaticIndexPattern(core.http).catch(e => {
+    createStaticIndexPattern().catch(e => {
       // eslint-disable-next-line no-console
       console.log('Error fetching static index pattern', e);
     });

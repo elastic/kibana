@@ -20,6 +20,7 @@ import {
   ActionToaster,
   displayErrorToast,
   displaySuccessToast,
+  errorToToaster,
 } from '../../../../components/toasters';
 import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../../lib/telemetry';
 
@@ -32,56 +33,61 @@ export const editRuleAction = (rule: Rule, history: H.History) => {
 
 export const duplicateRulesAction = async (
   rules: Rule[],
+  ruleIds: string[],
   dispatch: React.Dispatch<Action>,
   dispatchToaster: Dispatch<ActionToaster>
 ) => {
   try {
-    const ruleIds = rules.map(r => r.id);
-    dispatch({ type: 'updateLoading', ids: ruleIds, isLoading: true });
-    const duplicatedRules = await duplicateRules({ rules });
-    dispatch({ type: 'refresh' });
-    displaySuccessToast(
-      i18n.SUCCESSFULLY_DUPLICATED_RULES(duplicatedRules.length),
-      dispatchToaster
-    );
-  } catch (e) {
-    displayErrorToast(i18n.DUPLICATE_RULE_ERROR, [e.message], dispatchToaster);
+    dispatch({ type: 'loadingRuleIds', ids: ruleIds, actionType: 'duplicate' });
+    const response = await duplicateRules({ rules });
+    const { errors } = bucketRulesResponse(response);
+    if (errors.length > 0) {
+      displayErrorToast(
+        i18n.DUPLICATE_RULE_ERROR,
+        errors.map(e => e.error.message),
+        dispatchToaster
+      );
+    } else {
+      displaySuccessToast(i18n.SUCCESSFULLY_DUPLICATED_RULES(ruleIds.length), dispatchToaster);
+    }
+    dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
+  } catch (error) {
+    dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
+    errorToToaster({ title: i18n.DUPLICATE_RULE_ERROR, error, dispatchToaster });
   }
 };
 
-export const exportRulesAction = async (rules: Rule[], dispatch: React.Dispatch<Action>) => {
-  dispatch({ type: 'setExportPayload', exportPayload: rules });
+export const exportRulesAction = (exportRuleId: string[], dispatch: React.Dispatch<Action>) => {
+  dispatch({ type: 'exportRuleIds', ids: exportRuleId });
 };
 
 export const deleteRulesAction = async (
-  ids: string[],
+  ruleIds: string[],
   dispatch: React.Dispatch<Action>,
   dispatchToaster: Dispatch<ActionToaster>,
   onRuleDeleted?: () => void
 ) => {
   try {
-    dispatch({ type: 'loading', isLoading: true });
-
-    const response = await deleteRules({ ids });
+    dispatch({ type: 'loadingRuleIds', ids: ruleIds, actionType: 'delete' });
+    const response = await deleteRules({ ids: ruleIds });
     const { errors } = bucketRulesResponse(response);
-
-    dispatch({ type: 'refresh' });
+    dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
     if (errors.length > 0) {
       displayErrorToast(
-        i18n.BATCH_ACTION_DELETE_SELECTED_ERROR(ids.length),
+        i18n.BATCH_ACTION_DELETE_SELECTED_ERROR(ruleIds.length),
         errors.map(e => e.error.message),
         dispatchToaster
       );
-    } else {
-      // FP: See https://github.com/typescript-eslint/typescript-eslint/issues/1138#issuecomment-566929566
-      onRuleDeleted?.(); // eslint-disable-line no-unused-expressions
+    } else if (onRuleDeleted) {
+      onRuleDeleted();
     }
-  } catch (e) {
-    displayErrorToast(
-      i18n.BATCH_ACTION_DELETE_SELECTED_ERROR(ids.length),
-      [e.message],
-      dispatchToaster
-    );
+  } catch (error) {
+    dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
+    errorToToaster({
+      title: i18n.BATCH_ACTION_DELETE_SELECTED_ERROR(ruleIds.length),
+      error,
+      dispatchToaster,
+    });
   }
 };
 
@@ -96,7 +102,7 @@ export const enableRulesAction = async (
     : i18n.BATCH_ACTION_DEACTIVATE_SELECTED_ERROR(ids.length);
 
   try {
-    dispatch({ type: 'updateLoading', ids, isLoading: true });
+    dispatch({ type: 'loadingRuleIds', ids, actionType: enabled ? 'enable' : 'disable' });
 
     const response = await enableRules({ ids, enabled });
     const { rules, errors } = bucketRulesResponse(response);
@@ -125,6 +131,6 @@ export const enableRulesAction = async (
     }
   } catch (e) {
     displayErrorToast(errorTitle, [e.message], dispatchToaster);
-    dispatch({ type: 'updateLoading', ids, isLoading: false });
+    dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
   }
 };

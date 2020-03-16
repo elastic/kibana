@@ -18,34 +18,30 @@
  */
 
 /* `ui/agg_types` dependencies */
+export { BUCKET_TYPES, METRIC_TYPES } from '../../../../plugins/data/public';
 export {
-  IAggType,
-  IAggConfig,
-  IAggConfigs,
-  AggParam,
   AggGroupNames,
   aggGroupNamesMap,
-  IFieldParamType,
-  BUCKET_TYPES,
-  METRIC_TYPES,
-  ISchemas,
-  Schema,
-  termsAggFilter,
-  aggTypeFilters,
-  propFilter,
+  AggParam,
   AggParamType,
-  IMetricAggType,
-  parentPipelineType,
-  siblingPipelineType,
-  isType,
-  isStringType,
-  OptionedValueProp,
-  OptionedParamEditorProps,
-  OptionedParamType,
-  isValidJson,
-  isValidInterval,
-  AggParamOption,
-  CidrMask,
-} from '../../data/public';
-
-export { PersistedState } from 'ui/persisted_state';
+  AggType,
+  aggTypes,
+  createAggConfigs,
+  FieldParamType,
+  IAggConfig,
+  IAggConfigs,
+  IAggGroupNames,
+  IAggType,
+  IFieldParamType,
+  termsAggFilter,
+} from 'ui/agg_types';
+export { aggTypeFilters, propFilter } from 'ui/agg_types';
+export { aggTypeFieldFilters } from 'ui/agg_types';
+export { MetricAggType, IMetricAggType } from 'ui/agg_types';
+export { parentPipelineType } from 'ui/agg_types';
+export { siblingPipelineType } from 'ui/agg_types';
+export { isType, isStringType } from 'ui/agg_types';
+export { OptionedValueProp, OptionedParamEditorProps, OptionedParamType } from 'ui/agg_types';
+export { isValidInterval } from 'ui/agg_types';
+export { AggParamOption } from 'ui/agg_types';
+export { CidrMask } from 'ui/agg_types';

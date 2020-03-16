@@ -14,6 +14,12 @@ export interface Dependencies {
   usageCollection: UsageCollectionSetup;
 }
 
+export interface ClientConfigType {
+  ui: {
+    enabled: boolean;
+  };
+}
+
 export { RegisterManagementAppArgs };
 
 export { I18nStart };

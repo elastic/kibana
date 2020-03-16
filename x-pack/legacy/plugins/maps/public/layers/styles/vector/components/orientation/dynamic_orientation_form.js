@@ -24,8 +24,10 @@ export function DynamicOrientationForm({
   };
 
   return (
-    <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-      <EuiFlexItem grow={false}>{staticDynamicSelect}</EuiFlexItem>
+    <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
+      <EuiFlexItem grow={false} className="mapStyleSettings__fixedBox">
+        {staticDynamicSelect}
+      </EuiFlexItem>
       <EuiFlexItem>
         <FieldSelect
           fields={fields}

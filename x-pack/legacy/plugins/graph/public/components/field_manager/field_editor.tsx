@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ButtonHTMLAttributes } from 'react';
 import {
   EuiPopover,
   EuiFormRow,
@@ -23,7 +23,6 @@ import {
   EuiForm,
   EuiSpacer,
   EuiIconTip,
-  EuiComboBoxOptionProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
@@ -224,23 +223,29 @@ export function FieldEditor({
                     }}
                     singleSelection={{ asPlainText: true }}
                     isClearable={false}
-                    options={
-                      toOptions(allFields, initialField) as Array<EuiComboBoxOptionProps<string>>
-                    }
+                    options={toOptions(allFields, initialField)}
                     selectedOptions={[
                       {
                         value: currentField.name,
                         label: currentField.name,
-                        type: currentField.type,
+                        type: currentField.type as ButtonHTMLAttributes<HTMLButtonElement>['type'],
                       },
                     ]}
                     renderOption={(option, searchValue, contentClassName) => {
                       const { type, label } = option;
                       return (
-                        <span className={contentClassName}>
-                          <FieldIcon type={type!} size="m" useColor />{' '}
-                          <EuiHighlight search={searchValue}>{label}</EuiHighlight>
-                        </span>
+                        <EuiFlexGroup
+                          className={contentClassName}
+                          gutterSize="s"
+                          alignItems="center"
+                        >
+                          <EuiFlexItem grow={null}>
+                            <FieldIcon type={type!} fill="none" />
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <EuiHighlight search={searchValue}>{label}</EuiHighlight>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
                       );
                     }}
                     compressed
@@ -371,12 +376,12 @@ export function FieldEditor({
 function toOptions(
   fields: WorkspaceField[],
   currentField: WorkspaceField
-): Array<{ label: string; value: string; type: string }> {
+): Array<{ label: string; value: string; type: ButtonHTMLAttributes<HTMLButtonElement>['type'] }> {
   return fields
     .filter(field => !field.selected || field === currentField)
     .map(({ name, type }) => ({
       label: name,
       value: name,
-      type,
+      type: type as ButtonHTMLAttributes<HTMLButtonElement>['type'],
     }));
 }

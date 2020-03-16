@@ -16,6 +16,7 @@ import {
 } from 'src/plugins/data/public';
 
 import { UrlInputsModel } from '../../store/inputs/model';
+import { TimelineUrl } from '../../store/timeline/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { DispatchUpdateTimeline } from '../open_timeline/types';
 import { NavTab } from '../navigation/types';
@@ -75,17 +76,12 @@ export type LocationTypes =
   | CONSTANTS.timelinePage
   | CONSTANTS.unknown;
 
-export interface Timeline {
-  id: string;
-  isOpen: boolean;
-}
-
 export interface UrlState {
   [CONSTANTS.appQuery]?: Query;
   [CONSTANTS.filters]?: Filter[];
   [CONSTANTS.savedQuery]?: string;
   [CONSTANTS.timerange]: UrlInputsModel;
-  [CONSTANTS.timeline]: Timeline;
+  [CONSTANTS.timeline]: TimelineUrl;
 }
 export type KeyUrlState = keyof UrlState;
 

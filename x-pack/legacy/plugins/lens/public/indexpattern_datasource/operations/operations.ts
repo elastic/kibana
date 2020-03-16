@@ -202,6 +202,7 @@ export function buildColumn({
   layerId,
   indexPattern,
   suggestedPriority,
+  previousColumn,
 }: {
   op?: OperationType;
   columns: Partial<Record<string, IndexPatternColumn>>;
@@ -209,6 +210,7 @@ export function buildColumn({
   layerId: string;
   indexPattern: IndexPattern;
   field: IndexPatternField;
+  previousColumn?: IndexPatternColumn;
 }): IndexPatternColumn {
   let operationDefinition: GenericOperationDefinition | undefined;
 
@@ -229,16 +231,19 @@ export function buildColumn({
     suggestedPriority,
     layerId,
     indexPattern,
+    previousColumn,
   };
 
   if (!field) {
     throw new Error(`Invariant error: ${operationDefinition.type} operation requires field`);
   }
 
-  return operationDefinition.buildColumn({
+  const newColumn = operationDefinition.buildColumn({
     ...baseOptions,
     field,
   });
+
+  return newColumn;
 }
 
 export { operationDefinitionMap } from './definitions';

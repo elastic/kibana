@@ -21,7 +21,11 @@ import $ from 'jquery';
 import moment from 'moment';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import fixtures from 'fixtures/fake_hierarchical_data';
+import {
+  metricOnly,
+  threeTermBuckets,
+  oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative,
+} from 'fixtures/fake_hierarchical_data';
 import sinon from 'sinon';
 import { tabifyAggResponse, npStart } from '../../legacy_imports';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
@@ -43,10 +47,10 @@ describe('Table Vis - AggTable Directive', function() {
   const tabifiedData = {};
 
   const init = () => {
-    const vis1 = new visualizationsStart.Vis(indexPattern, 'table');
-    tabifiedData.metricOnly = tabifyAggResponse(vis1.aggs, fixtures.metricOnly);
+    const vis1 = visualizationsStart.createVis(indexPattern, 'table');
+    tabifiedData.metricOnly = tabifyAggResponse(vis1.aggs, metricOnly);
 
-    const vis2 = new visualizationsStart.Vis(indexPattern, {
+    const vis2 = visualizationsStart.createVis(indexPattern, {
       type: 'table',
       params: {
         showMetricsAtAllLevels: true,
@@ -61,11 +65,11 @@ describe('Table Vis - AggTable Directive', function() {
     vis2.aggs.aggs.forEach(function(agg, i) {
       agg.id = 'agg_' + (i + 1);
     });
-    tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.aggs, fixtures.threeTermBuckets, {
+    tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.aggs, threeTermBuckets, {
       metricsAtAllLevels: true,
     });
 
-    const vis3 = new visualizationsStart.Vis(indexPattern, {
+    const vis3 = visualizationsStart.createVis(indexPattern, {
       type: 'table',
       aggs: [
         { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
@@ -94,7 +98,7 @@ describe('Table Vis - AggTable Directive', function() {
 
     tabifiedData.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative = tabifyAggResponse(
       vis3.aggs,
-      fixtures.oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative
+      oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative
     );
   };
 
@@ -106,7 +110,7 @@ describe('Table Vis - AggTable Directive', function() {
   beforeEach(initLocalAngular);
 
   ngMock.inject(function() {
-    visualizationsSetup.types.createBaseVisualization(tableVisTypeDefinition);
+    visualizationsSetup.createBaseVisualization(tableVisTypeDefinition);
   });
 
   beforeEach(ngMock.module('kibana/table_vis'));

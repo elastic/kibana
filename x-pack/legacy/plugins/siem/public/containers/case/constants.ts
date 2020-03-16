@@ -5,12 +5,6 @@
  */
 
 export const CASES_URL = `/api/cases`;
+export const CASES_CONFIGURE_URL = `/api/cases/configure`;
 export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
 export const DEFAULT_TABLE_LIMIT = 5;
-export const FETCH_FAILURE = 'FETCH_FAILURE';
-export const FETCH_INIT = 'FETCH_INIT';
-export const FETCH_SUCCESS = 'FETCH_SUCCESS';
-export const POST_NEW_CASE = 'POST_NEW_CASE';
-export const UPDATE_CASE_PROPERTY = 'UPDATE_CASE_PROPERTY';
-export const UPDATE_FILTER_OPTIONS = 'UPDATE_FILTER_OPTIONS';
-export const UPDATE_QUERY_PARAMS = 'UPDATE_QUERY_PARAMS';

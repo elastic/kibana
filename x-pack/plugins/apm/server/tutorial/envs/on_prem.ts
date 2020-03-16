@@ -13,7 +13,7 @@ import {
   createStartServerUnix,
   createDownloadServerRpm,
   createDownloadServerDeb,
-  createDownloadServerOsx,
+  createDownloadServerOsx
 } from '../instructions/apm_server_instructions';
 import {
   createNodeAgentInstructions,
@@ -24,7 +24,7 @@ import {
   createJsAgentInstructions,
   createGoAgentInstructions,
   createJavaAgentInstructions,
-  createDotNetAgentInstructions,
+  createDotNetAgentInstructions
 } from '../instructions/apm_agent_instructions';
 
 export function onPremInstructions({
@@ -32,7 +32,7 @@ export function onPremInstructions({
   transactionIndices,
   metricsIndices,
   sourcemapIndices,
-  onboardingIndices,
+  onboardingIndices
 }: {
   errorIndices: string;
   transactionIndices: string;
@@ -48,139 +48,199 @@ export function onPremInstructions({
     instructionSets: [
       {
         title: i18n.translate('xpack.apm.tutorial.apmServer.title', {
-          defaultMessage: 'APM Server',
+          defaultMessage: 'APM Server'
         }),
         callOut: {
           title: i18n.translate('xpack.apm.tutorial.apmServer.callOut.title', {
-            defaultMessage: 'Important: Updating to 7.0 or higher',
+            defaultMessage: 'Important: Updating to 7.0 or higher'
           }),
-          message: i18n.translate('xpack.apm.tutorial.apmServer.callOut.message', {
-            defaultMessage: `Please make sure your APM Server is updated to 7.0 or higher. \
-            You can also migrate your 6.x data with the migration assistant found in Kibana's management section.`,
-          }),
-          iconType: 'alert',
+          message: i18n.translate(
+            'xpack.apm.tutorial.apmServer.callOut.message',
+            {
+              defaultMessage: `Please make sure your APM Server is updated to 7.0 or higher. \
+            You can also migrate your 6.x data with the migration assistant found in Kibana's management section.`
+            }
+          ),
+          iconType: 'alert'
         },
         instructionVariants: [
           {
             id: INSTRUCTION_VARIANT.OSX,
-            instructions: [createDownloadServerOsx(), EDIT_CONFIG, START_SERVER_UNIX],
+            instructions: [
+              createDownloadServerOsx(),
+              EDIT_CONFIG,
+              START_SERVER_UNIX
+            ]
           },
           {
             id: INSTRUCTION_VARIANT.DEB,
-            instructions: [createDownloadServerDeb(), EDIT_CONFIG, START_SERVER_UNIX_SYSV],
+            instructions: [
+              createDownloadServerDeb(),
+              EDIT_CONFIG,
+              START_SERVER_UNIX_SYSV
+            ]
           },
           {
             id: INSTRUCTION_VARIANT.RPM,
-            instructions: [createDownloadServerRpm(), EDIT_CONFIG, START_SERVER_UNIX_SYSV],
+            instructions: [
+              createDownloadServerRpm(),
+              EDIT_CONFIG,
+              START_SERVER_UNIX_SYSV
+            ]
           },
           {
             id: INSTRUCTION_VARIANT.WINDOWS,
-            instructions: createWindowsServerInstructions(),
-          },
+            instructions: createWindowsServerInstructions()
+          }
         ],
         statusCheck: {
-          title: i18n.translate('xpack.apm.tutorial.apmServer.statusCheck.title', {
-            defaultMessage: 'APM Server status',
-          }),
-          text: i18n.translate('xpack.apm.tutorial.apmServer.statusCheck.text', {
-            defaultMessage:
-              'Make sure APM Server is running before you start implementing the APM agents.',
-          }),
-          btnLabel: i18n.translate('xpack.apm.tutorial.apmServer.statusCheck.btnLabel', {
-            defaultMessage: 'Check APM Server status',
-          }),
-          success: i18n.translate('xpack.apm.tutorial.apmServer.statusCheck.successMessage', {
-            defaultMessage: 'You have correctly setup APM Server',
-          }),
-          error: i18n.translate('xpack.apm.tutorial.apmServer.statusCheck.errorMessage', {
-            defaultMessage:
-              'No APM Server detected. Please make sure it is running and you have updated to 7.0 or higher.',
-          }),
+          title: i18n.translate(
+            'xpack.apm.tutorial.apmServer.statusCheck.title',
+            {
+              defaultMessage: 'APM Server status'
+            }
+          ),
+          text: i18n.translate(
+            'xpack.apm.tutorial.apmServer.statusCheck.text',
+            {
+              defaultMessage:
+                'Make sure APM Server is running before you start implementing the APM agents.'
+            }
+          ),
+          btnLabel: i18n.translate(
+            'xpack.apm.tutorial.apmServer.statusCheck.btnLabel',
+            {
+              defaultMessage: 'Check APM Server status'
+            }
+          ),
+          success: i18n.translate(
+            'xpack.apm.tutorial.apmServer.statusCheck.successMessage',
+            {
+              defaultMessage: 'You have correctly setup APM Server'
+            }
+          ),
+          error: i18n.translate(
+            'xpack.apm.tutorial.apmServer.statusCheck.errorMessage',
+            {
+              defaultMessage:
+                'No APM Server detected. Please make sure it is running and you have updated to 7.0 or higher.'
+            }
+          ),
           esHitsCheck: {
             index: onboardingIndices,
             query: {
               bool: {
                 filter: [
                   { term: { 'processor.event': 'onboarding' } },
-                  { range: { 'observer.version_major': { gte: 7 } } },
-                ],
-              },
-            },
-          },
-        },
+                  { range: { 'observer.version_major': { gte: 7 } } }
+                ]
+              }
+            }
+          }
+        }
       },
       {
         title: i18n.translate('xpack.apm.tutorial.apmAgents.title', {
-          defaultMessage: 'APM Agents',
+          defaultMessage: 'APM Agents'
         }),
         instructionVariants: [
           {
             id: INSTRUCTION_VARIANT.JAVA,
-            instructions: createJavaAgentInstructions(),
+            instructions: createJavaAgentInstructions()
           },
           {
             id: INSTRUCTION_VARIANT.JS,
-            instructions: createJsAgentInstructions(),
+            instructions: createJsAgentInstructions()
           },
           {
             id: INSTRUCTION_VARIANT.NODE,
-            instructions: createNodeAgentInstructions(),
+            instructions: createNodeAgentInstructions()
           },
           {
             id: INSTRUCTION_VARIANT.DJANGO,
-            instructions: createDjangoAgentInstructions(),
+            instructions: createDjangoAgentInstructions()
           },
           {
             id: INSTRUCTION_VARIANT.FLASK,
-            instructions: createFlaskAgentInstructions(),
+            instructions: createFlaskAgentInstructions()
           },
           {
             id: INSTRUCTION_VARIANT.RAILS,
-            instructions: createRailsAgentInstructions(),
+            instructions: createRailsAgentInstructions()
           },
           {
             id: INSTRUCTION_VARIANT.RACK,
-            instructions: createRackAgentInstructions(),
+            instructions: createRackAgentInstructions()
           },
           {
             id: INSTRUCTION_VARIANT.GO,
-            instructions: createGoAgentInstructions(),
+            instructions: createGoAgentInstructions()
           },
           {
             id: INSTRUCTION_VARIANT.DOTNET,
-            instructions: createDotNetAgentInstructions(),
-          },
+            instructions: createDotNetAgentInstructions()
+          }
         ],
         statusCheck: {
-          title: i18n.translate('xpack.apm.tutorial.apmAgents.statusCheck.title', {
-            defaultMessage: 'Agent status',
-          }),
-          text: i18n.translate('xpack.apm.tutorial.apmAgents.statusCheck.text', {
-            defaultMessage:
-              'Make sure your application is running and the agents are sending data.',
-          }),
-          btnLabel: i18n.translate('xpack.apm.tutorial.apmAgents.statusCheck.btnLabel', {
-            defaultMessage: 'Check agent status',
-          }),
-          success: i18n.translate('xpack.apm.tutorial.apmAgents.statusCheck.successMessage', {
-            defaultMessage: 'Data successfully received from one or more agents',
-          }),
-          error: i18n.translate('xpack.apm.tutorial.apmAgents.statusCheck.errorMessage', {
-            defaultMessage: 'No data has been received from agents yet',
-          }),
+          title: i18n.translate(
+            'xpack.apm.tutorial.apmAgents.statusCheck.title',
+            {
+              defaultMessage: 'Agent status'
+            }
+          ),
+          text: i18n.translate(
+            'xpack.apm.tutorial.apmAgents.statusCheck.text',
+            {
+              defaultMessage:
+                'Make sure your application is running and the agents are sending data.'
+            }
+          ),
+          btnLabel: i18n.translate(
+            'xpack.apm.tutorial.apmAgents.statusCheck.btnLabel',
+            {
+              defaultMessage: 'Check agent status'
+            }
+          ),
+          success: i18n.translate(
+            'xpack.apm.tutorial.apmAgents.statusCheck.successMessage',
+            {
+              defaultMessage:
+                'Data successfully received from one or more agents'
+            }
+          ),
+          error: i18n.translate(
+            'xpack.apm.tutorial.apmAgents.statusCheck.errorMessage',
+            {
+              defaultMessage: 'No data has been received from agents yet'
+            }
+          ),
           esHitsCheck: {
-            index: [errorIndices, transactionIndices, metricsIndices, sourcemapIndices],
+            index: [
+              errorIndices,
+              transactionIndices,
+              metricsIndices,
+              sourcemapIndices
+            ],
             query: {
               bool: {
                 filter: [
-                  { terms: { 'processor.event': ['error', 'transaction', 'metric', 'sourcemap'] } },
-                  { range: { 'observer.version_major': { gte: 7 } } },
-                ],
-              },
-            },
-          },
-        },
-      },
-    ],
+                  {
+                    terms: {
+                      'processor.event': [
+                        'error',
+                        'transaction',
+                        'metric',
+                        'sourcemap'
+                      ]
+                    }
+                  },
+                  { range: { 'observer.version_major': { gte: 7 } } }
+                ]
+              }
+            }
+          }
+        }
+      }
+    ]
   };
 }

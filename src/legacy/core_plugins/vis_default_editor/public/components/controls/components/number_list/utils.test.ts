@@ -19,13 +19,12 @@
 
 import {
   getInitModelList,
-  getUpdatedModels,
-  validateOrder,
   hasInvalidValues,
   parse,
   validateValue,
   getNextModel,
   getRange,
+  getValidatedModels,
 } from './utils';
 import { NumberListRange } from './range';
 import { NumberRowModel } from './number_row';
@@ -33,6 +32,7 @@ import { NumberRowModel } from './number_row';
 describe('NumberList utils', () => {
   let modelList: NumberRowModel[];
   let range: NumberListRange;
+  let invalidEntry: NumberRowModel;
 
   beforeEach(() => {
     modelList = [
@@ -45,6 +45,12 @@ describe('NumberList utils', () => {
       minInclusive: true,
       maxInclusive: true,
       within: jest.fn(() => true),
+    };
+    invalidEntry = {
+      value: expect.any(Number),
+      isInvalid: true,
+      error: expect.any(String),
+      id: expect.any(String),
     };
   });
 
@@ -65,27 +71,27 @@ describe('NumberList utils', () => {
     });
   });
 
-  describe('getUpdatedModels', () => {
+  describe('getValidatedModels', () => {
     test('should return model list when number list is empty', () => {
-      const updatedModelList = getUpdatedModels([], modelList, range);
+      const updatedModelList = getValidatedModels([], modelList, range);
 
       expect(updatedModelList).toEqual([{ value: 0, id: expect.any(String), isInvalid: false }]);
     });
 
     test('should not update model list when number list is the same', () => {
-      const updatedModelList = getUpdatedModels([1, 2], modelList, range);
+      const updatedModelList = getValidatedModels([1, 2], modelList, range);
 
       expect(updatedModelList).toEqual(modelList);
     });
 
     test('should update model list when number list was changed', () => {
-      const updatedModelList = getUpdatedModels([1, 3], modelList, range);
+      const updatedModelList = getValidatedModels([1, 3], modelList, range);
       modelList[1].value = 3;
       expect(updatedModelList).toEqual(modelList);
     });
 
     test('should update model list when number list increased', () => {
-      const updatedModelList = getUpdatedModels([1, 2, 3], modelList, range);
+      const updatedModelList = getValidatedModels([1, 2, 3], modelList, range);
       expect(updatedModelList).toEqual([
         ...modelList,
         { value: 3, id: expect.any(String), isInvalid: false },
@@ -93,45 +99,46 @@ describe('NumberList utils', () => {
     });
 
     test('should update model list when number list decreased', () => {
-      const updatedModelList = getUpdatedModels([2], modelList, range);
+      const updatedModelList = getValidatedModels([2], modelList, range);
       expect(updatedModelList).toEqual([{ value: 2, id: '1', isInvalid: false }]);
     });
 
     test('should update model list when number list has undefined value', () => {
-      const updatedModelList = getUpdatedModels([1, undefined], modelList, range);
+      const updatedModelList = getValidatedModels([1, undefined], modelList, range);
       modelList[1].value = '';
       modelList[1].isInvalid = true;
       expect(updatedModelList).toEqual(modelList);
     });
 
-    test('should update model list when number order is invalid', () => {
-      const updatedModelList = getUpdatedModels([1, 3, 2], modelList, range, 2);
-      expect(updatedModelList).toEqual([
-        modelList[0],
-        { ...modelList[1], value: 3 },
-        { value: 2, id: expect.any(String), isInvalid: true },
-      ]);
-    });
-  });
-
-  describe('validateOrder', () => {
-    test('should return true when order is valid', () => {
-      expect(validateOrder([1, 2])).toEqual({
-        isValidOrder: true,
-      });
+    test('should identify when a number is out of order', () => {
+      const updatedModelList = getValidatedModels([1, 3, 2], modelList, range, true);
+      expect(updatedModelList[2]).toEqual(invalidEntry);
     });
 
-    test('should return true when a number is undefined', () => {
-      expect(validateOrder([1, undefined])).toEqual({
-        isValidOrder: true,
-      });
+    test('should identify when many numbers are out of order', () => {
+      const updatedModelList = getValidatedModels([1, 3, 2, 3, 4, 2], modelList, range, true);
+      expect(updatedModelList[2]).toEqual(invalidEntry);
+      expect(updatedModelList[5]).toEqual(invalidEntry);
     });
 
-    test('should return false when order is invalid', () => {
-      expect(validateOrder([2, 1])).toEqual({
-        isValidOrder: false,
-        modelIndex: 1,
-      });
+    test('should identify a duplicate', () => {
+      const updatedModelList = getValidatedModels([1, 2, 3, 6, 2], modelList, range, false, true);
+      expect(updatedModelList[4]).toEqual(invalidEntry);
+    });
+
+    test('should identify many duplicates', () => {
+      const updatedModelList = getValidatedModels(
+        [2, 2, 2, 3, 4, 5, 2, 2, 3],
+        modelList,
+        range,
+        false,
+        true
+      );
+      expect(updatedModelList[1]).toEqual(invalidEntry);
+      expect(updatedModelList[2]).toEqual(invalidEntry);
+      expect(updatedModelList[6]).toEqual(invalidEntry);
+      expect(updatedModelList[7]).toEqual(invalidEntry);
+      expect(updatedModelList[8]).toEqual(invalidEntry);
     });
   });
 

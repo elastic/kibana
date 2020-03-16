@@ -20,8 +20,10 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 import { EditorRenderProps } from '../../kibana/public/visualize/np_ready/types';
-import { VisualizeEmbeddable } from '../../visualizations/public/embeddable';
-import { VisualizeEmbeddableFactory } from '../../visualizations/public/embeddable/visualize_embeddable_factory';
+import {
+  VisualizeEmbeddableContract as VisualizeEmbeddable,
+  VisualizeEmbeddableFactoryContract as VisualizeEmbeddableFactory,
+} from '../../visualizations/public/';
 import { PanelsContainer, Panel } from '../../../../plugins/kibana_react/public';
 
 import './vis_type_agg_filter';
@@ -38,12 +40,13 @@ function DefaultEditor({
   appState,
   optionTabs,
   query,
-}: DefaultEditorControllerState & Omit<EditorRenderProps, 'data' | 'dataShim' | 'core'>) {
+  linked,
+}: DefaultEditorControllerState & Omit<EditorRenderProps, 'data' | 'core'>) {
   const visRef = useRef<HTMLDivElement>(null);
   const visHandler = useRef<VisualizeEmbeddable | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [factory, setFactory] = useState<VisualizeEmbeddableFactory | null>(null);
-  const { vis } = savedObj;
+  const { vis, savedSearch } = savedObj;
 
   const onClickCollapse = useCallback(() => {
     setIsCollapsed(value => !value);
@@ -115,6 +118,8 @@ function DefaultEditor({
           optionTabs={optionTabs}
           vis={vis}
           uiState={uiState}
+          isLinkedSearch={linked}
+          savedSearch={savedSearch}
         />
       </Panel>
     </PanelsContainer>

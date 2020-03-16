@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import uuid from 'uuid';
-import { omit, mapValues } from 'lodash';
+import { omit, mapValues, range, flatten } from 'lodash';
 import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -204,9 +204,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it.skip('renders the active alert instances', async () => {
-        const testBeganAt = moment().utc();
-
+      it('renders the active alert instances', async () => {
         // Verify content
         await testSubjects.existOrFail('alertInstancesList');
 
@@ -218,30 +216,42 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             meta: {
               lastScheduledActions: { date },
             },
-          }) => moment(date).utc()
+          }) => date
         );
+
+        log.debug(`API RESULT: ${JSON.stringify(dateOnAllInstances)}`);
 
         const instancesList = await pageObjects.alertDetailsUI.getAlertInstancesList();
         expect(instancesList.map(instance => omit(instance, 'duration'))).to.eql([
           {
             instance: 'us-central',
             status: 'Active',
-            start: dateOnAllInstances['us-central'].format('D MMM YYYY @ HH:mm:ss'),
+            start: moment(dateOnAllInstances['us-central'])
+              .utc()
+              .format('D MMM YYYY @ HH:mm:ss'),
           },
           {
             instance: 'us-east',
             status: 'Active',
-            start: dateOnAllInstances['us-east'].format('D MMM YYYY @ HH:mm:ss'),
+            start: moment(dateOnAllInstances['us-east'])
+              .utc()
+              .format('D MMM YYYY @ HH:mm:ss'),
           },
           {
             instance: 'us-west',
             status: 'Active',
-            start: dateOnAllInstances['us-west'].format('D MMM YYYY @ HH:mm:ss'),
+            start: moment(dateOnAllInstances['us-west'])
+              .utc()
+              .format('D MMM YYYY @ HH:mm:ss'),
           },
         ]);
 
+        const durationEpoch = moment(
+          await pageObjects.alertDetailsUI.getAlertInstanceDurationEpoch()
+        ).utc();
+
         const durationFromInstanceTillPageLoad = mapValues(dateOnAllInstances, date =>
-          moment.duration(testBeganAt.diff(moment(date).utc()))
+          moment.duration(durationEpoch.diff(moment(date).utc()))
         );
         instancesList
           .map(alertInstance => ({
@@ -329,6 +339,97 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         log.debug(`Ensuring eu-east is removed from list`);
         await pageObjects.alertDetailsUI.ensureAlertInstanceExistance('eu-east', false);
+      });
+    });
+
+    describe('Alert Instance Pagination', function() {
+      const testRunUuid = uuid.v4();
+      let alert: any;
+
+      before(async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
+
+        const actions = await Promise.all([
+          alerting.actions.createAction({
+            name: `server-log-${testRunUuid}-${0}`,
+            actionTypeId: '.server-log',
+            config: {},
+            secrets: {},
+          }),
+          alerting.actions.createAction({
+            name: `server-log-${testRunUuid}-${1}`,
+            actionTypeId: '.server-log',
+            config: {},
+            secrets: {},
+          }),
+        ]);
+
+        const instances = flatten(
+          range(10).map(index => [
+            { id: `us-central-${index}` },
+            { id: `us-east-${index}` },
+            { id: `us-west-${index}` },
+          ])
+        );
+        alert = await alerting.alerts.createAlwaysFiringWithActions(
+          `test-alert-${testRunUuid}`,
+          actions.map(action => ({
+            id: action.id,
+            group: 'default',
+            params: {
+              message: 'from alert 1s',
+              level: 'warn',
+            },
+          })),
+          {
+            instances,
+          }
+        );
+
+        // refresh to see alert
+        await browser.refresh();
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // Verify content
+        await testSubjects.existOrFail('alertsList');
+
+        // click on first alert
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+
+        // await first run to complete so we have an initial state
+        await retry.try(async () => {
+          const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
+          expect(Object.keys(alertInstances).length).to.eql(instances.length);
+        });
+      });
+
+      const PAGE_SIZE = 10;
+      it('renders the first page', async () => {
+        // Verify content
+        await testSubjects.existOrFail('alertInstancesList');
+
+        const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
+
+        const items = await pageObjects.alertDetailsUI.getAlertInstancesList();
+        expect(items.length).to.eql(PAGE_SIZE);
+
+        const [firstItem] = items;
+        expect(firstItem.instance).to.eql(Object.keys(alertInstances)[0]);
+      });
+
+      it('navigates to the next page', async () => {
+        // Verify content
+        await testSubjects.existOrFail('alertInstancesList');
+
+        const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
+
+        await pageObjects.alertDetailsUI.clickPaginationNextPage();
+
+        await retry.try(async () => {
+          const [firstItem] = await pageObjects.alertDetailsUI.getAlertInstancesList();
+          expect(firstItem.instance).to.eql(Object.keys(alertInstances)[PAGE_SIZE]);
+        });
       });
     });
   });

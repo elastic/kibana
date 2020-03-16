@@ -1,0 +1,22 @@
+server:
+  autoListen: false
+  port: 8274
+logging:
+  loggers:
+    - context: root
+      appenders:
+        - file
+      level: debug
+  appenders:
+    file:
+      kind: file
+      layout:
+        kind: pattern
+  root:
+    level: debug
+optimize:
+  enabled: false
+plugins:
+  initialize: false
+migrations:
+  skip: true

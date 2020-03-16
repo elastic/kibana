@@ -14,6 +14,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
         "get": [Function],
         "prepend": [Function],
         "remove": [Function],
+        "serverBasePath": "",
       },
       "delete": [MockFunction],
       "fetch": [MockFunction],
@@ -376,6 +377,7 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
         "get": [Function],
         "prepend": [Function],
         "remove": [Function],
+        "serverBasePath": "",
       },
       "delete": [MockFunction],
       "fetch": [MockFunction],
@@ -685,25 +687,12 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                     size="m"
                     type="arrowDown"
                   >
-                    <EuiIconEmpty
-                      aria-hidden={true}
-                      className="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
-                      focusable="false"
-                      role="img"
-                      style={null}
-                    >
-                      <svg
-                        aria-hidden={true}
-                        className="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
-                        focusable="false"
-                        height={16}
-                        role="img"
-                        style={null}
-                        viewBox="0 0 16 16"
-                        width={16}
-                        xmlns="http://www.w3.org/2000/svg"
-                      />
-                    </EuiIconEmpty>
+                    <div
+                      aria-hidden="true"
+                      className="euiButton__icon"
+                      data-euiicon-type="arrowDown"
+                      size="m"
+                    />
                   </EuiIcon>
                   <span
                     className="euiButton__text"
@@ -735,6 +724,7 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
         "get": [Function],
         "prepend": [Function],
         "remove": [Function],
+        "serverBasePath": "",
       },
       "delete": [MockFunction],
       "fetch": [MockFunction],

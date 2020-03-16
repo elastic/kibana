@@ -16,7 +16,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   describe('security feature controls', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
-      await PageObjects.settings.setNavType('individual');
     });
 
     after(async () => {
@@ -57,7 +56,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows management navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.contain('Stack Management');
+        expect(navLinks).to.contain('Management');
       });
 
       it(`displays Spaces management section`, async () => {
@@ -135,7 +134,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows management navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.contain('Stack Management');
+        expect(navLinks).to.contain('Management');
       });
 
       it(`doesn't display Spaces management section`, async () => {

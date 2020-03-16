@@ -15,6 +15,7 @@ export default function({ getService }: FtrProviderContext) {
     this.tags(['smoke']);
     before(async () => {
       await esArchiver.load('ml/ihp_outlier');
+      await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
@@ -30,7 +31,7 @@ export default function({ getService }: FtrProviderContext) {
         jobDescription: 'This is the job description',
         source: 'ihp_outlier',
         get destinationIndex(): string {
-          return `dest_${this.jobId}`;
+          return `user-${this.jobId}`;
         },
         modelMemory: '55mb',
         createIndexPattern: true,

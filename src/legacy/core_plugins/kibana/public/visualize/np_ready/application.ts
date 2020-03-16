@@ -22,22 +22,18 @@ import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 
 import { AppMountContext } from 'kibana/public';
 import {
-  AppStateProvider,
-  AppState,
   configureAppAngularModule,
-  createTopNavDirective,
-  createTopNavHelper,
-  EventsProvider,
-  GlobalStateProvider,
   KbnUrlProvider,
   RedirectWhenMissingProvider,
   IPrivate,
-  PersistedState,
   PrivateProvider,
   PromiseServiceCreator,
-  StateManagementConfigProvider,
 } from '../legacy_imports';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
+import {
+  createTopNavDirective,
+  createTopNavHelper,
+} from '../../../../../../plugins/kibana_legacy/public';
 
 // @ts-ignore
 import { initVisualizeApp } from './legacy_app';
@@ -89,55 +85,18 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
   createLocalI18nModule();
   createLocalPrivateModule();
   createLocalPromiseModule();
-  createLocalConfigModule(core);
   createLocalKbnUrlModule();
-  createLocalStateModule();
-  createLocalPersistedStateModule();
   createLocalTopNavModule(navigation);
 
   const visualizeAngularModule: IModule = angular.module(moduleName, [
     ...thirdPartyAngularDependencies,
-    'app/visualize/Config',
     'app/visualize/I18n',
     'app/visualize/Private',
-    'app/visualize/PersistedState',
     'app/visualize/TopNav',
-    'app/visualize/State',
+    'app/visualize/KbnUrl',
+    'app/visualize/Promise',
   ]);
   return visualizeAngularModule;
-}
-
-function createLocalStateModule() {
-  angular
-    .module('app/visualize/State', [
-      'app/visualize/Private',
-      'app/visualize/Config',
-      'app/visualize/KbnUrl',
-      'app/visualize/Promise',
-      'app/visualize/PersistedState',
-    ])
-    .factory('AppState', function(Private: IPrivate) {
-      return Private(AppStateProvider);
-    })
-    .service('getAppState', function(Private: IPrivate) {
-      return Private<AppState>(AppStateProvider).getAppState;
-    })
-    .service('globalState', function(Private: IPrivate) {
-      return Private(GlobalStateProvider);
-    });
-}
-
-function createLocalPersistedStateModule() {
-  angular
-    .module('app/visualize/PersistedState', ['app/visualize/Private', 'app/visualize/Promise'])
-    .factory('PersistedState', (Private: IPrivate) => {
-      const Events = Private(EventsProvider);
-      return class AngularPersistedState extends PersistedState {
-        constructor(value: any, path: any) {
-          super(value, path, Events);
-        }
-      };
-    });
 }
 
 function createLocalKbnUrlModule() {
@@ -145,19 +104,6 @@ function createLocalKbnUrlModule() {
     .module('app/visualize/KbnUrl', ['app/visualize/Private', 'ngRoute'])
     .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider))
     .service('redirectWhenMissing', (Private: IPrivate) => Private(RedirectWhenMissingProvider));
-}
-
-function createLocalConfigModule(core: AppMountContext['core']) {
-  angular
-    .module('app/visualize/Config', ['app/visualize/Private'])
-    .provider('stateManagementConfig', StateManagementConfigProvider)
-    .provider('config', () => {
-      return {
-        $get: () => ({
-          get: core.uiSettings.get.bind(core.uiSettings),
-        }),
-      };
-    });
 }
 
 function createLocalPromiseModule() {

@@ -19,6 +19,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
+import { filter, map } from 'rxjs/operators';
 
 import {
   AppMountParameters,
@@ -33,7 +34,7 @@ import { Storage, createKbnUrlTracker } from '../../../../../plugins/kibana_util
 import {
   DataPublicPluginStart,
   DataPublicPluginSetup,
-  getQueryStateContainer,
+  esFilters,
 } from '../../../../../plugins/data/public';
 import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
@@ -50,11 +51,10 @@ import {
   HomePublicPluginSetup,
 } from '../../../../../plugins/home/public';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
-import { DataStart } from '../../../data/public';
+import { DefaultEditorController } from '../../../vis_default_editor/public';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
-  dataShim: DataStart;
   embeddable: IEmbeddableStart;
   navigation: NavigationStart;
   share: SharePluginStart;
@@ -71,7 +71,6 @@ export interface VisualizePluginSetupDependencies {
 export class VisualizePlugin implements Plugin {
   private startDependencies: {
     data: DataPublicPluginStart;
-    dataShim: DataStart;
     embeddable: IEmbeddableStart;
     navigation: NavigationStart;
     savedObjectsClient: SavedObjectsClientContract;
@@ -87,9 +86,6 @@ export class VisualizePlugin implements Plugin {
     core: CoreSetup,
     { home, kibanaLegacy, usageCollection, data }: VisualizePluginSetupDependencies
   ) {
-    const { querySyncStateContainer, stop: stopQuerySyncStateContainer } = getQueryStateContainer(
-      data.query
-    );
     const { appMounted, appUnMounted, stop: stopUrlTracker, setActiveUrl } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
       defaultSubUrl: '#/visualize',
@@ -99,12 +95,19 @@ export class VisualizePlugin implements Plugin {
       stateParams: [
         {
           kbnUrlKey: '_g',
-          stateUpdate$: querySyncStateContainer.state$,
+          stateUpdate$: data.query.state$.pipe(
+            filter(
+              ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
+            ),
+            map(({ state }) => ({
+              ...state,
+              filters: state.filters?.filter(esFilters.isFilterPinned),
+            }))
+          ),
         },
       ],
     });
     this.stopUrlTracking = () => {
-      stopQuerySyncStateContainer();
       stopUrlTracker();
     };
 
@@ -126,7 +129,6 @@ export class VisualizePlugin implements Plugin {
           embeddable,
           navigation,
           visualizations,
-          dataShim,
           data: dataStart,
           share,
         } = this.startDependencies;
@@ -136,7 +138,6 @@ export class VisualizePlugin implements Plugin {
           addBasePath: coreStart.http.basePath.prepend,
           core: coreStart,
           chrome: coreStart.chrome,
-          dataShim,
           data: dataStart,
           embeddable,
           getBasePath: core.http.basePath.get,
@@ -144,7 +145,7 @@ export class VisualizePlugin implements Plugin {
           localStorage: new Storage(localStorage),
           navigation,
           savedObjectsClient,
-          savedVisualizations: visualizations.getSavedVisualizationsLoader(),
+          savedVisualizations: visualizations.savedVisualizationsLoader,
           savedQueryService: dataStart.query.savedQueries,
           share,
           toastNotifications: coreStart.notifications.toasts,
@@ -155,6 +156,7 @@ export class VisualizePlugin implements Plugin {
           usageCollection,
           I18nContext: coreStart.i18n.Context,
           setActiveUrl,
+          DefaultVisualizationEditor: DefaultEditorController,
         };
         setServices(deps);
 
@@ -183,18 +185,10 @@ export class VisualizePlugin implements Plugin {
 
   public start(
     core: CoreStart,
-    {
-      embeddable,
-      navigation,
-      data,
-      dataShim,
-      share,
-      visualizations,
-    }: VisualizePluginStartDependencies
+    { embeddable, navigation, data, share, visualizations }: VisualizePluginStartDependencies
   ) {
     this.startDependencies = {
       data,
-      dataShim,
       embeddable,
       navigation,
       savedObjectsClient: core.savedObjects.client,

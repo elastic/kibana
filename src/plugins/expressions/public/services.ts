@@ -24,7 +24,7 @@ import { Start as IInspector } from '../../inspector/public';
 import { ExpressionsSetup } from './plugin';
 import { ExpressionsService } from '../common';
 
-export const { getCoreStart, setCoreStart, savedObjects } = createKibanaUtilsCore();
+export const { getCoreStart, setCoreStart } = createKibanaUtilsCore();
 
 export const [getInspector, setInspector] = createGetterSetter<IInspector>('Inspector');
 

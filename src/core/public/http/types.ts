@@ -94,6 +94,13 @@ export interface IBasePath {
    * Removes the prepended basePath from the `path`.
    */
   remove: (url: string) => string;
+
+  /**
+   * Returns the server's root basePath as configured, without any namespace prefix.
+   *
+   * See {@link BasePath.get} for getting the basePath value for a specific request
+   */
+  readonly serverBasePath: string;
 }
 
 /**
@@ -198,7 +205,12 @@ export interface HttpRequestInit {
 
 /** @public */
 export interface HttpFetchQuery {
-  [key: string]: string | number | boolean | undefined;
+  [key: string]:
+    | string
+    | number
+    | boolean
+    | undefined
+    | Array<string | number | boolean | undefined>;
 }
 
 /**

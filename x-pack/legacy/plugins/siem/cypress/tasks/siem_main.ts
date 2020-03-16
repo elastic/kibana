@@ -5,7 +5,10 @@
  */
 
 import { MAIN_PAGE, TIMELINE_TOGGLE_BUTTON } from '../screens/siem_main';
-import { DEFAULT_TIMEOUT } from '../tasks/login';
+
+export const openTimeline = () => {
+  cy.get(TIMELINE_TOGGLE_BUTTON).click();
+};
 
 export const openTimelineIfClosed = () => {
   cy.get(MAIN_PAGE).then($page => {
@@ -13,8 +16,4 @@ export const openTimelineIfClosed = () => {
       openTimeline();
     }
   });
-};
-
-export const openTimeline = () => {
-  cy.get(TIMELINE_TOGGLE_BUTTON, { timeout: DEFAULT_TIMEOUT }).click();
 };

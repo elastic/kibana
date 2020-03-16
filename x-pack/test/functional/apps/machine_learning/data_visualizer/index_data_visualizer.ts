@@ -5,8 +5,8 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { ML_JOB_FIELD_TYPES } from '../../../../../legacy/plugins/ml/common/constants/field_types';
-import { FieldVisConfig } from '../../../../../legacy/plugins/ml/public/application/datavisualizer/index_based/common';
+import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
+import { FieldVisConfig } from '../../../../../plugins/ml/public/application/datavisualizer/index_based/common';
 
 interface TestData {
   suiteTitle: string;
@@ -379,6 +379,7 @@ export default function({ getService }: FtrProviderContext) {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('ml/farequote');
+      await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {

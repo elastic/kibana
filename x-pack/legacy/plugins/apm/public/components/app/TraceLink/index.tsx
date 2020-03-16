@@ -9,8 +9,8 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 import url from 'url';
-import { TRACE_ID } from '../../../../common/elasticsearch_fieldnames';
-import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
+import { TRACE_ID } from '../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
+import { Transaction } from '../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 

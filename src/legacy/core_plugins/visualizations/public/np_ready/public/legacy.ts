@@ -17,12 +17,9 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
-
-/* eslint-disable @kbn/eslint/no-restricted-paths */
+// eslint-disable-next-line
 import { npSetup, npStart } from 'ui/new_platform';
-/* eslint-enable @kbn/eslint/no-restricted-paths */
-
+import { PluginInitializerContext } from '../../../../../../core/public';
 import { plugin } from '.';
 
 const pluginInstance = plugin({} as PluginInitializerContext);

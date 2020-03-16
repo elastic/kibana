@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PartialAlert } from '../../../../../alerting/server/types';
+import { PartialAlert } from '../../../../../../../plugins/alerting/server';
 import { readRules } from './read_rules';
 import { IRuleSavedAttributesSavedObjectAttributes, UpdateRuleParams } from './types';
 import { addTags } from './add_tags';
@@ -42,6 +42,8 @@ export const updateRules = async ({
   type,
   references,
   version,
+  throttle,
+  note,
 }: UpdateRuleParams): Promise<PartialAlert | null> => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
@@ -72,6 +74,8 @@ export const updateRules = async ({
     type,
     references,
     version,
+    throttle,
+    note,
   });
 
   const update = await alertsClient.update({
@@ -81,6 +85,7 @@ export const updateRules = async ({
       name,
       schedule: { interval },
       actions: rule.actions,
+      throttle: throttle ?? rule.throttle ?? null,
       params: {
         description,
         ruleId: rule.params.ruleId,
@@ -103,6 +108,7 @@ export const updateRules = async ({
         to,
         type,
         references,
+        note,
         version: calculatedVersion,
       },
     },

@@ -13,7 +13,7 @@ import {
   UtilityBarGroup,
   UtilityBarSection,
   UtilityBarText,
-} from '../../../../../components/detection_engine/utility_bar';
+} from '../../../../../components/utility_bar';
 import * as i18n from './translations';
 import { useUiSetting$ } from '../../../../../lib/kibana';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../../common/constants';
@@ -114,6 +114,7 @@ const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
 export const SignalsUtilityBar = React.memo(
   SignalsUtilityBarComponent,
   (prevProps, nextProps) =>
+    prevProps.areEventsLoading === nextProps.areEventsLoading &&
     prevProps.selectedEventIds === nextProps.selectedEventIds &&
     prevProps.totalCount === nextProps.totalCount &&
     prevProps.showClearSelection === nextProps.showClearSelection

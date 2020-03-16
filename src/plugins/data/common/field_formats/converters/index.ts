@@ -19,7 +19,6 @@
 
 export { UrlFormat } from './url';
 export { BytesFormat } from './bytes';
-export { DateFormat } from './date_server';
 export { DateNanosFormat } from './date_nanos';
 export { RelativeDateFormat } from './relative_date';
 export { DurationFormat } from './duration';

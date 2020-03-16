@@ -8,7 +8,7 @@ import { Location } from 'history';
 import { pick, isEmpty } from 'lodash';
 import moment from 'moment';
 import url from 'url';
-import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { getDiscoverHref } from '../Links/DiscoverLinks/DiscoverLink';
 import { getDiscoverQuery } from '../Links/DiscoverLinks/DiscoverTransactionLink';
@@ -82,6 +82,7 @@ export const getSections = ({
         { defaultMessage: 'Pod logs' }
       ),
       href: getInfraHref({
+        app: 'logs',
         basePath,
         path: `/link-to/pod-logs/${podId}`,
         query: { time }
@@ -95,6 +96,7 @@ export const getSections = ({
         { defaultMessage: 'Pod metrics' }
       ),
       href: getInfraHref({
+        app: 'metrics',
         basePath,
         path: `/link-to/pod-detail/${podId}`,
         query: infraMetricsQuery
@@ -111,6 +113,7 @@ export const getSections = ({
         { defaultMessage: 'Container logs' }
       ),
       href: getInfraHref({
+        app: 'logs',
         basePath,
         path: `/link-to/container-logs/${containerId}`,
         query: { time }
@@ -124,6 +127,7 @@ export const getSections = ({
         { defaultMessage: 'Container metrics' }
       ),
       href: getInfraHref({
+        app: 'metrics',
         basePath,
         path: `/link-to/container-detail/${containerId}`,
         query: infraMetricsQuery
@@ -140,6 +144,7 @@ export const getSections = ({
         { defaultMessage: 'Host logs' }
       ),
       href: getInfraHref({
+        app: 'logs',
         basePath,
         path: `/link-to/host-logs/${hostName}`,
         query: { time }
@@ -153,6 +158,7 @@ export const getSections = ({
         { defaultMessage: 'Host metrics' }
       ),
       href: getInfraHref({
+        app: 'metrics',
         basePath,
         path: `/link-to/host-detail/${hostName}`,
         query: infraMetricsQuery
@@ -169,6 +175,7 @@ export const getSections = ({
         { defaultMessage: 'Trace logs' }
       ),
       href: getInfraHref({
+        app: 'logs',
         basePath,
         path: `/link-to/logs`,
         query: {

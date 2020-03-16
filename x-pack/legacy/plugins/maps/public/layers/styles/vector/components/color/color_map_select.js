@@ -6,10 +6,11 @@
 
 import React, { Component, Fragment } from 'react';
 
-import { EuiSuperSelect, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiSelect, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ColorStopsOrdinal } from './color_stops_ordinal';
 import { COLOR_MAP_TYPE } from '../../../../../../common/constants';
 import { ColorStopsCategorical } from './color_stops_categorical';
+import { i18n } from '@kbn/i18n';
 
 const CUSTOM_COLOR_MAP = 'CUSTOM_COLOR_MAP';
 
@@ -25,6 +26,43 @@ export class ColorMapSelect extends Component {
       prevPropsCustomColorMap: nextProps.customColorMap, // reset tracker to latest value
       customColorMap: nextProps.customColorMap, // reset customColorMap to latest value
     };
+  }
+
+  _renderColorMapToggle() {
+    const options = [
+      {
+        value: COLOR_MAP_TYPE.ORDINAL,
+        text: i18n.translate('xpack.maps.styles.dynamicColorSelect.quantitativeLabel', {
+          defaultMessage: 'As number',
+        }),
+      },
+      {
+        value: COLOR_MAP_TYPE.CATEGORICAL,
+        text: i18n.translate('xpack.maps.styles.dynamicColorSelect.qualitativeLabel', {
+          defaultMessage: 'As category',
+        }),
+      },
+    ];
+
+    const selectedValue = this.props.styleProperty.isOrdinal()
+      ? COLOR_MAP_TYPE.ORDINAL
+      : COLOR_MAP_TYPE.CATEGORICAL;
+
+    return (
+      <EuiSelect
+        options={options}
+        value={selectedValue}
+        onChange={this.props.onColorMapTypeChange}
+        aria-label={i18n.translate(
+          'xpack.maps.styles.dynamicColorSelect.qualitativeOrQuantitativeAriaLabel',
+          {
+            defaultMessage:
+              'Choose `As number` to map by number in a color range, or `As category`to categorize by color palette.',
+          }
+        )}
+        compressed
+      />
+    );
   }
 
   _onColorMapSelect = selectedValue => {
@@ -55,32 +93,32 @@ export class ColorMapSelect extends Component {
       return null;
     }
 
+    let colorStopEditor;
     if (this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
-      return (
-        <Fragment>
-          <EuiSpacer size="s" />
-          <ColorStopsOrdinal
-            colorStops={this.state.customColorMap}
-            onChange={this._onCustomColorMapChange}
-          />
-        </Fragment>
+      colorStopEditor = (
+        <ColorStopsOrdinal
+          colorStops={this.state.customColorMap}
+          onChange={this._onCustomColorMapChange}
+        />
       );
-    }
-
-    return (
-      <Fragment>
-        <EuiSpacer size="s" />
+    } else
+      colorStopEditor = (
         <ColorStopsCategorical
           colorStops={this.state.customColorMap}
           field={this.props.styleProperty.getField()}
           getValueSuggestions={this.props.styleProperty.getValueSuggestions}
           onChange={this._onCustomColorMapChange}
         />
-      </Fragment>
+      );
+
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem>{colorStopEditor}</EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
-  render() {
+  _renderColorMapSelections() {
     const colorMapOptionsWithCustom = [
       {
         value: CUSTOM_COLOR_MAP,
@@ -98,14 +136,31 @@ export class ColorMapSelect extends Component {
         : '';
     }
 
+    const toggle = this.props.showColorMapTypeToggle ? (
+      <EuiFlexItem grow={false}>{this._renderColorMapToggle()}</EuiFlexItem>
+    ) : null;
+
+    return (
+      <EuiFlexGroup gutterSize={'none'}>
+        {toggle}
+        <EuiFlexItem>
+          <EuiSuperSelect
+            compressed
+            options={colorMapOptionsWithCustom}
+            onChange={this._onColorMapSelect}
+            valueOfSelected={valueOfSelected}
+            hasDividers={true}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  render() {
     return (
       <Fragment>
-        <EuiSuperSelect
-          options={colorMapOptionsWithCustom}
-          onChange={this._onColorMapSelect}
-          valueOfSelected={valueOfSelected}
-          hasDividers={true}
-        />
+        {this._renderColorMapSelections()}
+        <EuiSpacer size="s" />
         {this._renderColorStopsInput()}
       </Fragment>
     );

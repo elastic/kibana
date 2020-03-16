@@ -1,0 +1,34 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+export {
+  AGENT_TYPE_PERMANENT,
+  AGENT_TYPE_EPHEMERAL,
+  AGENT_TYPE_TEMPORARY,
+  AGENT_POLLING_THRESHOLD_MS,
+  AGENT_POLLING_INTERVAL,
+  // Routes
+  PLUGIN_ID,
+  EPM_API_ROUTES,
+  DATASOURCE_API_ROUTES,
+  AGENT_API_ROUTES,
+  AGENT_CONFIG_API_ROUTES,
+  FLEET_SETUP_API_ROUTES,
+  ENROLLMENT_API_KEY_ROUTES,
+  INSTALL_SCRIPT_API_ROUTES,
+  SETUP_API_ROUTE,
+  // Saved object types
+  AGENT_EVENT_SAVED_OBJECT_TYPE,
+  AGENT_SAVED_OBJECT_TYPE,
+  AGENT_CONFIG_SAVED_OBJECT_TYPE,
+  DATASOURCE_SAVED_OBJECT_TYPE,
+  OUTPUT_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+  // Defaults
+  DEFAULT_AGENT_CONFIG,
+  DEFAULT_OUTPUT,
+} from '../../common';

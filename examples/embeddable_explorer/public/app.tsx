@@ -23,11 +23,21 @@ import { BrowserRouter as Router, Route, withRouter, RouteComponentProps } from 
 
 import { EuiPage, EuiPageSideBar, EuiSideNav } from '@elastic/eui';
 
-import { IEmbeddableStart } from 'src/plugins/embeddable/public';
-import { AppMountContext, AppMountParameters, CoreStart } from '../../../src/core/public';
+import { IEmbeddableStart } from '../../../src/plugins/embeddable/public';
+import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
+import { Start as InspectorStartContract } from '../../../src/plugins/inspector/public';
+import {
+  AppMountContext,
+  AppMountParameters,
+  CoreStart,
+  SavedObjectsStart,
+  IUiSettingsClient,
+  OverlayStart,
+} from '../../../src/core/public';
 import { HelloWorldEmbeddableExample } from './hello_world_embeddable_example';
 import { TodoEmbeddableExample } from './todo_embeddable_example';
 import { ListContainerExample } from './list_container_example';
+import { EmbeddablePanelExample } from './embeddable_panel_example';
 
 interface PageDef {
   title: string;
@@ -61,15 +71,29 @@ const Nav = withRouter(({ history, navigateToApp, pages }: NavProps) => {
   );
 });
 
+interface Props {
+  basename: string;
+  navigateToApp: CoreStart['application']['navigateToApp'];
+  embeddableApi: IEmbeddableStart;
+  uiActionsApi: UiActionsStart;
+  overlays: OverlayStart;
+  notifications: CoreStart['notifications'];
+  inspector: InspectorStartContract;
+  savedObject: SavedObjectsStart;
+  uiSettingsClient: IUiSettingsClient;
+}
+
 const EmbeddableExplorerApp = ({
   basename,
   navigateToApp,
   embeddableApi,
-}: {
-  basename: string;
-  navigateToApp: CoreStart['application']['navigateToApp'];
-  embeddableApi: IEmbeddableStart;
-}) => {
+  inspector,
+  uiSettingsClient,
+  savedObject,
+  overlays,
+  uiActionsApi,
+  notifications,
+}: Props) => {
   const pages: PageDef[] = [
     {
       title: 'Hello world embeddable',
@@ -90,6 +114,22 @@ const EmbeddableExplorerApp = ({
       id: 'listContainerSection',
       component: <ListContainerExample getEmbeddableFactory={embeddableApi.getEmbeddableFactory} />,
     },
+    {
+      title: 'Dynamically adding children to a container',
+      id: 'embeddablePanelExamplae',
+      component: (
+        <EmbeddablePanelExample
+          uiActionsApi={uiActionsApi}
+          getAllEmbeddableFactories={embeddableApi.getEmbeddableFactories}
+          getEmbeddableFactory={embeddableApi.getEmbeddableFactory}
+          overlays={overlays}
+          uiSettingsClient={uiSettingsClient}
+          savedObject={savedObject}
+          notifications={notifications}
+          inspector={inspector}
+        />
+      ),
+    },
   ];
 
   const routes = pages.map((page, i) => (
@@ -108,19 +148,8 @@ const EmbeddableExplorerApp = ({
   );
 };
 
-export const renderApp = (
-  core: CoreStart,
-  embeddableApi: IEmbeddableStart,
-  { appBasePath, element }: AppMountParameters
-) => {
-  ReactDOM.render(
-    <EmbeddableExplorerApp
-      basename={appBasePath}
-      navigateToApp={core.application.navigateToApp}
-      embeddableApi={embeddableApi}
-    />,
-    element
-  );
+export const renderApp = (props: Props, element: AppMountParameters['element']) => {
+  ReactDOM.render(<EmbeddableExplorerApp {...props} />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

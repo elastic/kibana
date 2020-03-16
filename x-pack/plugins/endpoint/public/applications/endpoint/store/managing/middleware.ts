@@ -5,20 +5,29 @@
  */
 
 import { MiddlewareFactory } from '../../types';
-import { pageIndex, pageSize } from './selectors';
+import {
+  pageIndex,
+  pageSize,
+  isOnManagementPage,
+  hasSelectedHost,
+  uiQueryParams,
+} from './selectors';
 import { ManagementListState } from '../../types';
 import { AppAction } from '../action';
 
 export const managementMiddlewareFactory: MiddlewareFactory<ManagementListState> = coreStart => {
   return ({ getState, dispatch }) => next => async (action: AppAction) => {
     next(action);
+    const state = getState();
     if (
-      (action.type === 'userNavigatedToPage' && action.payload === 'managementPage') ||
+      (action.type === 'userChangedUrl' &&
+        isOnManagementPage(state) &&
+        hasSelectedHost(state) !== true) ||
       action.type === 'userPaginatedManagementList'
     ) {
-      const managementPageIndex = pageIndex(getState());
-      const managementPageSize = pageSize(getState());
-      const response = await coreStart.http.post('/api/endpoint/endpoints', {
+      const managementPageIndex = pageIndex(state);
+      const managementPageSize = pageSize(state);
+      const response = await coreStart.http.post('/api/endpoint/metadata', {
         body: JSON.stringify({
           paging_properties: [
             { page_index: managementPageIndex },
@@ -31,6 +40,21 @@ export const managementMiddlewareFactory: MiddlewareFactory<ManagementListState>
         type: 'serverReturnedManagementList',
         payload: response,
       });
+    }
+    if (action.type === 'userChangedUrl' && hasSelectedHost(state) !== false) {
+      const { selected_host: selectedHost } = uiQueryParams(state);
+      try {
+        const response = await coreStart.http.get(`/api/endpoint/metadata/${selectedHost}`);
+        dispatch({
+          type: 'serverReturnedManagementDetails',
+          payload: response,
+        });
+      } catch (error) {
+        dispatch({
+          type: 'serverFailedToReturnManagementDetails',
+          payload: error,
+        });
+      }
     }
   };
 };

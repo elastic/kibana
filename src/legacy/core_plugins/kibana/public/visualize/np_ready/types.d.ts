@@ -17,22 +17,59 @@
  * under the License.
  */
 
-import { TimeRange, Query, Filter, DataPublicPluginStart } from 'src/plugins/data/public';
+import {
+  TimeRange,
+  Query,
+  Filter,
+  DataPublicPluginStart,
+  SavedQuery,
+} from 'src/plugins/data/public';
 import { IEmbeddableStart } from 'src/plugins/embeddable/public';
+import { PersistedState } from 'src/plugins/visualizations/public';
 import { LegacyCoreStart } from 'kibana/public';
-import { VisSavedObject, AppState, PersistedState } from '../legacy_imports';
-import { DataStart } from '../../../../data/public';
+import { Vis } from 'src/legacy/core_plugins/visualizations/public';
+import { VisSavedObject } from '../legacy_imports';
+
+export type PureVisState = ReturnType<Vis['getCurrentState']>;
+
+export interface VisualizeAppState {
+  filters: Filter[];
+  uiState: PersistedState;
+  vis: PureVisState;
+  query: Query;
+  savedQuery?: string;
+  linked: boolean;
+}
+
+export interface VisualizeAppStateTransitions {
+  set: (
+    state: VisualizeAppState
+  ) => <T extends keyof VisualizeAppState>(
+    prop: T,
+    value: VisualizeAppState[T]
+  ) => VisualizeAppState;
+  setVis: (state: VisualizeAppState) => (vis: Partial<PureVisState>) => VisualizeAppState;
+  removeSavedQuery: (state: VisualizeAppState) => (defaultQuery: Query) => VisualizeAppState;
+  unlinkSavedSearch: (
+    state: VisualizeAppState
+  ) => ({ query, parentFilters }: { query?: Query; parentFilters?: Filter[] }) => VisualizeAppState;
+  updateVisState: (state: VisualizeAppState) => (vis: PureVisState) => VisualizeAppState;
+  updateFromSavedQuery: (state: VisualizeAppState) => (savedQuery: SavedQuery) => VisualizeAppState;
+}
 
 export interface EditorRenderProps {
-  appState: AppState;
+  appState: { save(): void };
   core: LegacyCoreStart;
   data: DataPublicPluginStart;
-  dataShim: DataStart;
   embeddable: IEmbeddableStart;
   filters: Filter[];
   uiState: PersistedState;
   timeRange: TimeRange;
   query?: Query;
+  /**
+   * Flag to determine if visualiztion is linked to the saved search
+   */
+  linked: boolean;
 }
 
 export interface SavedVisualizations {

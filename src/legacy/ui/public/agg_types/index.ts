@@ -20,52 +20,54 @@
 /**
  * Nothing to see here!
  *
- * Agg Types have moved to the data plugin, and are being
+ * Agg Types have moved to the new platform, and are being
  * re-exported from ui/agg_types for backwards compatibility.
  */
 
-import { start as dataStart } from '../../../core_plugins/data/public/legacy';
+import { npStart } from 'ui/new_platform';
 
 // runtime contracts
+const { types } = npStart.plugins.data.search.aggs;
+export const aggTypes = types.getAll();
+export const { createAggConfigs } = npStart.plugins.data.search.aggs;
 export const {
-  types: aggTypes,
   AggConfig,
-  AggConfigs,
   AggType,
   aggTypeFieldFilters,
   FieldParamType,
   MetricAggType,
   parentPipelineAggHelper,
   siblingPipelineAggHelper,
-  setBounds,
-} = dataStart.search.aggs;
+} = npStart.plugins.data.search.__LEGACY;
 
 // types
 export {
+  AggGroupNames,
+  AggParam,
+  AggParamOption,
+  AggParamType,
+  AggTypeFieldFilters,
+  AggTypeFilters,
+  BUCKET_TYPES,
+  DateRangeKey,
   IAggConfig,
   IAggConfigs,
+  IAggGroupNames,
   IAggType,
   IFieldParamType,
   IMetricAggType,
-  AggParam,
-  AggParamOption,
-  BUCKET_TYPES,
-  DateRangeKey,
   IpRangeKey,
-  ISchemas,
   METRIC_TYPES,
   OptionedParamEditorProps,
+  OptionedParamType,
   OptionedValueProp,
-} from '../../../core_plugins/data/public';
+} from '../../../../plugins/data/public';
 
 // static code
-export {
-  AggParamType,
-  AggTypeFilters,
-  aggTypeFilters,
-  AggTypeFieldFilters,
-  AggGroupNames,
+import { search } from '../../../../plugins/data/public';
+export const {
   aggGroupNamesMap,
+  aggTypeFilters,
   CidrMask,
   convertDateRangeToString,
   convertIPRangeToString,
@@ -74,12 +76,10 @@ export {
   isStringType,
   isType,
   isValidInterval,
-  isValidJson,
-  OptionedParamType,
   parentPipelineType,
   propFilter,
-  Schema,
-  Schemas,
   siblingPipelineType,
   termsAggFilter,
-} from '../../../core_plugins/data/public';
+} = search.aggs;
+
+export { ISchemas, Schemas, Schema } from '../../../core_plugins/vis_default_editor/public/schemas';

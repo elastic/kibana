@@ -8,24 +8,33 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart, AppMountParameters } from 'kibana/public';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
-import { Route, BrowserRouter, Switch } from 'react-router-dom';
+import { Route, Switch, BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { Store } from 'redux';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { RouteCapture } from './view/route_capture';
+import { EndpointPluginStartDependencies } from '../../plugin';
 import { appStoreFactory } from './store';
 import { AlertIndex } from './view/alerts';
 import { ManagementList } from './view/managing';
 import { PolicyList } from './view/policy';
+import { PolicyDetails } from './view/policy';
+import { HeaderNavigation } from './components/header_nav';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
  */
-export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMountParameters) {
+export function renderApp(
+  coreStart: CoreStart,
+  depsStart: EndpointPluginStartDependencies,
+  { appBasePath, element }: AppMountParameters
+) {
   coreStart.http.get('/api/endpoint/hello-world');
-
-  const store = appStoreFactory(coreStart);
-
-  ReactDOM.render(<AppRoot basename={appBasePath} store={store} />, element);
-
+  const store = appStoreFactory({ coreStart, depsStart });
+  ReactDOM.render(
+    <AppRoot basename={appBasePath} store={store} coreStart={coreStart} depsStart={depsStart} />,
+    element
+  );
   return () => {
     ReactDOM.unmountComponentAtNode(element);
   };
@@ -34,32 +43,48 @@ export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMou
 interface RouterProps {
   basename: string;
   store: Store;
+  coreStart: CoreStart;
+  depsStart: EndpointPluginStartDependencies;
 }
 
-const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename, store }) => (
-  <Provider store={store}>
-    <I18nProvider>
-      <BrowserRouter basename={basename}>
-        <Switch>
-          <Route
-            exact
-            path="/"
-            render={() => (
-              <h1 data-test-subj="welcomeTitle">
-                <FormattedMessage id="xpack.endpoint.welcomeTitle" defaultMessage="Hello World" />
-              </h1>
-            )}
-          />
-          <Route path="/management" component={ManagementList} />
-          <Route path="/alerts" component={AlertIndex} />
-          <Route path="/policy" exact component={PolicyList} />
-          <Route
-            render={() => (
-              <FormattedMessage id="xpack.endpoint.notFound" defaultMessage="Page Not Found" />
-            )}
-          />
-        </Switch>
-      </BrowserRouter>
-    </I18nProvider>
-  </Provider>
-));
+const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
+  ({ basename, store, coreStart: { http, notifications }, depsStart: { data } }) => (
+    <Provider store={store}>
+      <I18nProvider>
+        <KibanaContextProvider services={{ http, notifications, data }}>
+          <BrowserRouter basename={basename}>
+            <RouteCapture>
+              <HeaderNavigation basename={basename} />
+              <Switch>
+                <Route
+                  exact
+                  path="/"
+                  render={() => (
+                    <h1 data-test-subj="welcomeTitle">
+                      <FormattedMessage
+                        id="xpack.endpoint.welcomeTitle"
+                        defaultMessage="Hello World"
+                      />
+                    </h1>
+                  )}
+                />
+                <Route path="/management" component={ManagementList} />
+                <Route path="/alerts" component={AlertIndex} />
+                <Route path="/policy" exact component={PolicyList} />
+                <Route path="/policy/:id" exact component={PolicyDetails} />
+                <Route
+                  render={() => (
+                    <FormattedMessage
+                      id="xpack.endpoint.notFound"
+                      defaultMessage="Page Not Found"
+                    />
+                  )}
+                />
+              </Switch>
+            </RouteCapture>
+          </BrowserRouter>
+        </KibanaContextProvider>
+      </I18nProvider>
+    </Provider>
+  )
+);

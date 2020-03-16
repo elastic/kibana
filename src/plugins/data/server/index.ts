@@ -57,6 +57,7 @@ import {
   fromKueryExpression,
   toElasticsearchQuery,
   buildEsQuery,
+  buildQueryFromFilters,
   getEsQueryConfig,
 } from '../common';
 
@@ -67,6 +68,7 @@ export const esKuery = {
 };
 
 export const esQuery = {
+  buildQueryFromFilters,
   getEsQueryConfig,
   buildEsQuery,
 };
@@ -83,7 +85,6 @@ import {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateFormat,
   DateNanosFormat,
   DurationFormat,
   IpFormat,
@@ -101,13 +102,10 @@ import {
 export const fieldFormats = {
   FieldFormatsRegistry,
   FieldFormat,
-
   serializeFieldFormat,
-
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateFormat,
   DateNanosFormat,
   DurationFormat,
   IpFormat,
@@ -146,14 +144,50 @@ export {
   IFieldSubType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
+  IndexPatternAttributes,
 } from '../common';
 
 /**
  * Search
  */
 
-export { IRequestTypesMap, IResponseTypesMap } from './search';
-export * from './search';
+import {
+  dateHistogramInterval,
+  InvalidEsCalendarIntervalError,
+  InvalidEsIntervalFormatError,
+  isValidEsInterval,
+  isValidInterval,
+  parseEsInterval,
+  parseInterval,
+  toAbsoluteDates,
+} from '../common';
+
+export { ParsedInterval } from '../common';
+
+export {
+  ISearch,
+  ICancel,
+  ISearchOptions,
+  IRequestTypesMap,
+  IResponseTypesMap,
+  ISearchContext,
+  TSearchStrategyProvider,
+  getDefaultSearchParams,
+} from './search';
+
+// Search namespace
+export const search = {
+  aggs: {
+    dateHistogramInterval,
+    InvalidEsCalendarIntervalError,
+    InvalidEsIntervalFormatError,
+    isValidEsInterval,
+    isValidInterval,
+    parseEsInterval,
+    parseInterval,
+    toAbsoluteDates,
+  },
+};
 
 /**
  * Types to be shared externally

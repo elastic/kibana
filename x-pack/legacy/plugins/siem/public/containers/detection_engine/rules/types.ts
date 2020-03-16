@@ -64,7 +64,6 @@ export const RuleSchema = t.intersection([
     language: t.string,
     name: t.string,
     max_signals: t.number,
-    meta: MetaRule,
     query: t.string,
     references: t.array(t.string),
     risk_score: t.number,
@@ -80,6 +79,7 @@ export const RuleSchema = t.intersection([
   t.partial({
     last_failure_at: t.string,
     last_failure_message: t.string,
+    meta: MetaRule,
     output_index: t.string,
     saved_id: t.string,
     status: t.string,
@@ -96,9 +96,12 @@ export type Rule = t.TypeOf<typeof RuleSchema>;
 export type Rules = t.TypeOf<typeof RulesSchema>;
 
 export interface RuleError {
-  rule_id: string;
+  id?: string;
+  rule_id?: string;
   error: { status_code: number; message: string };
 }
+
+export type BulkRuleResponse = Array<Rule | RuleError>;
 
 export interface RuleResponseBuckets {
   rules: Rule[];

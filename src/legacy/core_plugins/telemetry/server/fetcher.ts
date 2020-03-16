@@ -21,19 +21,26 @@ import moment from 'moment';
 // @ts-ignore
 import fetch from 'node-fetch';
 import { telemetryCollectionManager } from './collection_manager';
-import { getTelemetryOptIn, getTelemetrySendUsageFrom } from './telemetry_config';
+import {
+  getTelemetryOptIn,
+  getTelemetrySendUsageFrom,
+  getTelemetryFailureDetails,
+} from './telemetry_config';
 import { getTelemetrySavedObject, updateTelemetrySavedObject } from './telemetry_repository';
 import { REPORT_INTERVAL_MS } from '../common/constants';
 
 export class FetcherTask {
-  private readonly checkDurationMs = 60 * 1000 * 5;
+  private readonly initialCheckDelayMs = 60 * 1000 * 5;
+  private readonly checkIntervalMs = 60 * 1000 * 60 * 12;
   private intervalId?: NodeJS.Timeout;
   private lastReported?: number;
+  private currentVersion: string;
   private isSending = false;
   private server: any;
 
   constructor(server: any) {
     this.server = server;
+    this.currentVersion = this.server.config().get('pkg.version');
   }
 
   private getInternalRepository = () => {
@@ -52,6 +59,9 @@ export class FetcherTask {
     const allowChangingOptInStatus = config.get('telemetry.allowChangingOptInStatus');
     const configTelemetryOptIn = config.get('telemetry.optIn');
     const telemetryUrl = config.get('telemetry.url') as string;
+    const { failureCount, failureVersion } = await getTelemetryFailureDetails({
+      telemetrySavedObject,
+    });
 
     return {
       telemetryOptIn: getTelemetryOptIn({
@@ -65,6 +75,8 @@ export class FetcherTask {
         configTelemetrySendUsageFrom,
       }),
       telemetryUrl,
+      failureCount,
+      failureVersion,
     };
   };
 
@@ -72,11 +84,31 @@ export class FetcherTask {
     const internalRepository = this.getInternalRepository();
     this.lastReported = Date.now();
     updateTelemetrySavedObject(internalRepository, {
+      reportFailureCount: 0,
       lastReported: this.lastReported,
     });
   };
 
-  private shouldSendReport = ({ telemetryOptIn, telemetrySendUsageFrom }: any) => {
+  private updateReportFailure = async ({ failureCount }: { failureCount: number }) => {
+    const internalRepository = this.getInternalRepository();
+
+    updateTelemetrySavedObject(internalRepository, {
+      reportFailureCount: failureCount + 1,
+      reportFailureVersion: this.currentVersion,
+    });
+  };
+
+  private shouldSendReport = ({
+    telemetryOptIn,
+    telemetrySendUsageFrom,
+    reportFailureCount,
+    currentVersion,
+    reportFailureVersion,
+  }: any) => {
+    if (reportFailureCount > 2 && reportFailureVersion === currentVersion) {
+      return false;
+    }
+
     if (telemetryOptIn && telemetrySendUsageFrom === 'server') {
       if (!this.lastReported || Date.now() - this.lastReported > REPORT_INTERVAL_MS) {
         return true;
@@ -98,6 +130,14 @@ export class FetcherTask {
 
   private sendTelemetry = async (url: string, cluster: any): Promise<void> => {
     this.server.log(['debug', 'telemetry', 'fetcher'], `Sending usage stats.`);
+    /**
+     * send OPTIONS before sending usage data.
+     * OPTIONS is less intrusive as it does not contain any payload and is used here to check if the endpoint is reachable.
+     */
+    await fetch(url, {
+      method: 'options',
+    });
+
     await fetch(url, {
       method: 'post',
       body: cluster,
@@ -108,21 +148,23 @@ export class FetcherTask {
     if (this.isSending) {
       return;
     }
-    try {
-      const telemetryConfig = await this.getCurrentConfigs();
-      if (!this.shouldSendReport(telemetryConfig)) {
-        return;
-      }
+    const telemetryConfig = await this.getCurrentConfigs();
+    if (!this.shouldSendReport(telemetryConfig)) {
+      return;
+    }
 
-      // mark that we are working so future requests are ignored until we're done
+    try {
       this.isSending = true;
       const clusters = await this.fetchTelemetry();
+      const { telemetryUrl } = telemetryConfig;
       for (const cluster of clusters) {
-        await this.sendTelemetry(telemetryConfig.telemetryUrl, cluster);
+        await this.sendTelemetry(telemetryUrl, cluster);
       }
 
       await this.updateLastReported();
     } catch (err) {
+      await this.updateReportFailure(telemetryConfig);
+
       this.server.log(
         ['warning', 'telemetry', 'fetcher'],
         `Error sending telemetry usage data: ${err}`
@@ -132,8 +174,12 @@ export class FetcherTask {
   };
 
   public start = () => {
-    this.intervalId = setInterval(() => this.sendIfDue(), this.checkDurationMs);
+    setTimeout(() => {
+      this.sendIfDue();
+      this.intervalId = setInterval(() => this.sendIfDue(), this.checkIntervalMs);
+    }, this.initialCheckDelayMs);
   };
+
   public stop = () => {
     if (this.intervalId) {
       clearInterval(this.intervalId);

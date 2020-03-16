@@ -8,9 +8,10 @@ import Boom from 'boom';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { BaseAuthenticationProvider } from './base';
 import { canRedirectRequest } from '../can_redirect_request';
+import { getHTTPAuthenticationScheme } from '../get_http_authentication_scheme';
 import { Tokens, TokenPair } from '../tokens';
+import { BaseAuthenticationProvider } from './base';
 
 /**
  * Describes the parameters that are required by the provider to process the initial login request.
@@ -34,12 +35,6 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
    */
   static readonly type = 'token';
 
-  /**
-   * Performs initial login request using username and password.
-   * @param request Request instance.
-   * @param loginAttempt Login attempt description.
-   * @param [state] Optional state object associated with the provider.
-   */
   /**
    * Performs initial login request using username and password.
    * @param request Request instance.
@@ -87,18 +82,13 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
     this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
-    // if there isn't a payload, try header-based token auth
-    const {
-      authenticationResult: headerAuthResult,
-      headerNotRecognized,
-    } = await this.authenticateViaHeader(request);
-    if (headerNotRecognized) {
-      return headerAuthResult;
+    if (getHTTPAuthenticationScheme(request) != null) {
+      this.logger.debug('Cannot authenticate requests with `Authorization` header.');
+      return AuthenticationResult.notHandled();
     }
 
-    let authenticationResult = headerAuthResult;
-    // if we still can't attempt auth, try authenticating via state (session token)
-    if (authenticationResult.notHandled() && state) {
+    let authenticationResult = AuthenticationResult.notHandled();
+    if (state) {
       authenticationResult = await this.authenticateViaState(request, state);
       if (
         authenticationResult.failed() &&
@@ -111,6 +101,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
     // finally, if authentication still can not be handled for this
     // request/state combination, redirect to the login page if appropriate
     if (authenticationResult.notHandled() && canRedirectRequest(request)) {
+      this.logger.debug('Redirecting request to Login page.');
       authenticationResult = AuthenticationResult.redirectTo(this.getLoginPageURL(request));
     }
 
@@ -144,37 +135,11 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
-   * Validates whether request contains `Bearer ***` Authorization header and just passes it
-   * forward to Elasticsearch backend.
-   * @param request Request instance.
+   * Returns HTTP authentication scheme (`Bearer`) that's used within `Authorization` HTTP header
+   * that provider attaches to all successfully authenticated requests to Elasticsearch.
    */
-  private async authenticateViaHeader(request: KibanaRequest) {
-    this.logger.debug('Trying to authenticate via header.');
-
-    const authorization = request.headers.authorization;
-    if (!authorization || typeof authorization !== 'string') {
-      this.logger.debug('Authorization header is not presented.');
-      return { authenticationResult: AuthenticationResult.notHandled() };
-    }
-
-    const authenticationSchema = authorization.split(/\s+/)[0];
-    if (authenticationSchema.toLowerCase() !== 'bearer') {
-      this.logger.debug(`Unsupported authentication schema: ${authenticationSchema}`);
-      return { authenticationResult: AuthenticationResult.notHandled(), headerNotRecognized: true };
-    }
-
-    try {
-      const user = await this.getUser(request);
-
-      this.logger.debug('Request has been authenticated via header.');
-
-      // We intentionally do not store anything in session state because token
-      // header auth can only be used on a request by request basis.
-      return { authenticationResult: AuthenticationResult.succeeded(user) };
-    } catch (err) {
-      this.logger.debug(`Failed to authenticate request via header: ${err.message}`);
-      return { authenticationResult: AuthenticationResult.failed(err) };
-    }
+  public getHTTPAuthenticationScheme() {
+    return 'bearer';
   }
 
   /**

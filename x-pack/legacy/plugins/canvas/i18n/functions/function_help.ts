@@ -5,7 +5,8 @@
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
-import { UnionToIntersection, CanvasFunction } from '../../types';
+import { UnionToIntersection } from '@kbn/utility-types';
+import { CanvasFunction } from '../../types';
 
 import { help as all } from './dict/all';
 import { help as alterColumn } from './dict/alter_column';

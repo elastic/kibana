@@ -22,7 +22,17 @@ import { SignalRuleAlertTypeDefinition } from './types';
 import { getGapBetweenRuns } from './utils';
 import { ruleStatusSavedObjectType } from '../rules/saved_object_mappings';
 import { IRuleSavedAttributesSavedObjectAttributes } from '../rules/types';
-
+interface AlertAttributes {
+  enabled: boolean;
+  name: string;
+  tags: string[];
+  createdBy: string;
+  createdAt: string;
+  updatedBy: string;
+  schedule: {
+    interval: string;
+  };
+}
 export const signalRulesAlertType = ({
   logger,
   version,
@@ -41,9 +51,11 @@ export const signalRulesAlertType = ({
         }),
       },
     ],
+    defaultActionGroupId: 'default',
     validate: {
       params: schema.object({
         description: schema.string(),
+        note: schema.nullable(schema.string()),
         falsePositives: schema.arrayOf(schema.string(), { defaultValue: [] }),
         from: schema.string(),
         ruleId: schema.string(),
@@ -82,7 +94,7 @@ export const signalRulesAlertType = ({
         type,
       } = params;
       // TODO: Remove this hard extraction of name once this is fixed: https://github.com/elastic/kibana/issues/50522
-      const savedObject = await services.savedObjectsClient.get('alert', alertId);
+      const savedObject = await services.savedObjectsClient.get<AlertAttributes>('alert', alertId);
       const ruleStatusSavedObjects = await services.savedObjectsClient.find<
         IRuleSavedAttributesSavedObjectAttributes
       >({
@@ -123,15 +135,15 @@ export const signalRulesAlertType = ({
         );
       }
 
-      const name: string = savedObject.attributes.name;
-      const tags: string[] = savedObject.attributes.tags;
+      const name = savedObject.attributes.name;
+      const tags = savedObject.attributes.tags;
 
-      const createdBy: string = savedObject.attributes.createdBy;
-      const createdAt: string = savedObject.attributes.createdAt;
-      const updatedBy: string = savedObject.attributes.updatedBy;
-      const updatedAt: string = savedObject.updated_at ?? '';
-      const interval: string = savedObject.attributes.schedule.interval;
-      const enabled: boolean = savedObject.attributes.enabled;
+      const createdBy = savedObject.attributes.createdBy;
+      const createdAt = savedObject.attributes.createdAt;
+      const updatedBy = savedObject.attributes.updatedBy;
+      const updatedAt = savedObject.updated_at ?? '';
+      const interval = savedObject.attributes.schedule.interval;
+      const enabled = savedObject.attributes.enabled;
       const gap = getGapBetweenRuns({
         previousStartedAt: previousStartedAt != null ? moment(previousStartedAt) : null, // TODO: Remove this once previousStartedAt is no longer a string
         interval,

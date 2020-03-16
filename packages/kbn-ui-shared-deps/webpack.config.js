@@ -59,6 +59,17 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
         test: /\.css$/,
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
+      {
+        include: [require.resolve('./monaco.ts')],
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+            },
+          },
+        ],
+      },
     ],
   },
 

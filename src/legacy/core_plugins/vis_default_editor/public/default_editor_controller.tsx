@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import { EditorRenderProps } from 'src/legacy/core_plugins/kibana/public/visualize/np_ready/types';
-import { VisSavedObject } from 'src/legacy/core_plugins/visualizations/public/embeddable/visualize_embeddable';
+import { VisSavedObject } from 'src/legacy/core_plugins/visualizations/public/';
 import { Storage } from '../../../../plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../plugins/kibana_react/public';
 import { DefaultEditor } from './default_editor';

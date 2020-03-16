@@ -47,6 +47,19 @@ export interface FieldSetting {
 }
 
 // until eui searchbar and query are typed
+
+export interface SettingsChanges {
+  [key: string]: any;
+}
+
+export interface FieldState {
+  value?: any;
+  changeImage?: boolean;
+  loading?: boolean;
+  isInvalid?: boolean;
+  error?: string | null;
+}
+
 export interface IQuery {
   ast: any; // incomplete
   text: string;

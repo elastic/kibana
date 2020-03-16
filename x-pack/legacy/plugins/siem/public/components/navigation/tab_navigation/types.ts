@@ -6,8 +6,8 @@
 
 import { UrlInputsModel } from '../../../store/inputs/model';
 import { CONSTANTS } from '../../url_state/constants';
-import { Timeline } from '../../url_state/types';
 import { HostsTableType } from '../../../store/hosts/model';
+import { TimelineUrl } from '../../../store/timeline/model';
 import { Filter, Query } from '../../../../../../../../src/plugins/data/public';
 
 import { SiemNavigationProps } from '../types';
@@ -20,7 +20,7 @@ export interface TabNavigationProps extends SiemNavigationProps {
   [CONSTANTS.filters]?: Filter[];
   [CONSTANTS.savedQuery]?: string;
   [CONSTANTS.timerange]: UrlInputsModel;
-  [CONSTANTS.timeline]: Timeline;
+  [CONSTANTS.timeline]: TimelineUrl;
 }
 
 export interface TabNavigationItemProps {

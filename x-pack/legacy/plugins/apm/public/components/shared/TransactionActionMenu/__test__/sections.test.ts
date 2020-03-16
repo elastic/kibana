@@ -5,12 +5,14 @@
  */
 import { Location } from 'history';
 import { getSections } from '../sections';
-import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
+import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import { AppMountContextBasePath } from '../../../../context/ApmPluginContext';
 
 describe('Transaction action menu', () => {
   const basePath = ({
-    prepend: jest.fn()
+    prepend: (url: string) => {
+      return `some-basepath${url}`;
+    }
   } as unknown) as AppMountContextBasePath;
   const date = '2020-02-06T11:00:00.000Z';
   const timestamp = { us: new Date(date).getTime() };
@@ -40,7 +42,7 @@ describe('Transaction action menu', () => {
               key: 'traceLogs',
               label: 'Trace logs',
               href:
-                '#/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20123',
+                'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20123',
               condition: true
             }
           ]
@@ -54,7 +56,7 @@ describe('Transaction action menu', () => {
               key: 'sampleDocument',
               label: 'View sample document',
               href:
-                '#/discover?_g=(refreshInterval:(pause:true,value:\'0\'),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
+                'some-basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:\'0\'),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true
             }
           ]
@@ -89,14 +91,15 @@ describe('Transaction action menu', () => {
             {
               key: 'podLogs',
               label: 'Pod logs',
-              href: '#/link-to/pod-logs/123?time=1580986800',
+              href:
+                'some-basepath/app/logs/link-to/pod-logs/123?time=1580986800',
               condition: true
             },
             {
               key: 'podMetrics',
               label: 'Pod metrics',
               href:
-                '#/link-to/pod-detail/123?from=1580986500000&to=1580987100000',
+                'some-basepath/app/metrics/link-to/pod-detail/123?from=1580986500000&to=1580987100000',
               condition: true
             }
           ]
@@ -110,7 +113,7 @@ describe('Transaction action menu', () => {
               key: 'traceLogs',
               label: 'Trace logs',
               href:
-                '#/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20123',
+                'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20123',
               condition: true
             }
           ]
@@ -124,7 +127,7 @@ describe('Transaction action menu', () => {
               key: 'sampleDocument',
               label: 'View sample document',
               href:
-                '#/discover?_g=(refreshInterval:(pause:true,value:\'0\'),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
+                'some-basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:\'0\'),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true
             }
           ]
@@ -158,14 +161,15 @@ describe('Transaction action menu', () => {
             {
               key: 'hostLogs',
               label: 'Host logs',
-              href: '#/link-to/host-logs/foo?time=1580986800',
+              href:
+                'some-basepath/app/logs/link-to/host-logs/foo?time=1580986800',
               condition: true
             },
             {
               key: 'hostMetrics',
               label: 'Host metrics',
               href:
-                '#/link-to/host-detail/foo?from=1580986500000&to=1580987100000',
+                'some-basepath/app/metrics/link-to/host-detail/foo?from=1580986500000&to=1580987100000',
               condition: true
             }
           ]
@@ -179,7 +183,7 @@ describe('Transaction action menu', () => {
               key: 'traceLogs',
               label: 'Trace logs',
               href:
-                '#/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20123',
+                'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20123',
               condition: true
             }
           ]
@@ -193,7 +197,7 @@ describe('Transaction action menu', () => {
               key: 'sampleDocument',
               label: 'View sample document',
               href:
-                '#/discover?_g=(refreshInterval:(pause:true,value:\'0\'),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
+                'some-basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:\'0\'),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true
             }
           ]

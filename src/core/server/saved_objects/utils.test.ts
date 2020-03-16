@@ -20,7 +20,8 @@
 import { legacyServiceMock } from '../legacy/legacy_service.mock';
 import { convertLegacyTypes, convertTypesToLegacySchema } from './utils';
 import { SavedObjectsLegacyUiExports, SavedObjectsType } from './types';
-import { LegacyConfig } from 'kibana/server';
+import { LegacyConfig, SavedObjectMigrationContext } from 'kibana/server';
+import { SavedObjectUnsanitizedDoc } from './serialization';
 
 describe('convertLegacyTypes', () => {
   let legacyConfig: ReturnType<typeof legacyServiceMock.createLegacyConfig>;
@@ -190,8 +191,117 @@ describe('convertLegacyTypes', () => {
 
     const converted = convertLegacyTypes(uiExports, legacyConfig);
     expect(converted.length).toEqual(2);
-    expect(converted[0].migrations).toEqual(migrationsA);
-    expect(converted[1].migrations).toEqual(migrationsB);
+    expect(Object.keys(converted[0]!.migrations!)).toEqual(Object.keys(migrationsA));
+    expect(Object.keys(converted[1]!.migrations!)).toEqual(Object.keys(migrationsB));
+  });
+
+  it('converts the migration to the new format', () => {
+    const legacyMigration = jest.fn();
+    const migrationsA = {
+      '1.0.0': legacyMigration,
+    };
+
+    const uiExports: SavedObjectsLegacyUiExports = {
+      savedObjectMappings: [
+        {
+          pluginId: 'pluginA',
+          properties: {
+            typeA: {
+              properties: {
+                fieldA: { type: 'text' },
+              },
+            },
+          },
+        },
+      ],
+      savedObjectMigrations: {
+        typeA: migrationsA,
+      },
+      savedObjectSchemas: {},
+      savedObjectValidations: {},
+      savedObjectsManagement: {},
+    };
+
+    const converted = convertLegacyTypes(uiExports, legacyConfig);
+    expect(Object.keys(converted[0]!.migrations!)).toEqual(['1.0.0']);
+
+    const migration = converted[0]!.migrations!['1.0.0']!;
+
+    const doc = {} as SavedObjectUnsanitizedDoc;
+    const context = { log: {} } as SavedObjectMigrationContext;
+    migration(doc, context);
+
+    expect(legacyMigration).toHaveBeenCalledTimes(1);
+    expect(legacyMigration).toHaveBeenCalledWith(doc, context.log);
+  });
+
+  it('imports type management information', () => {
+    const uiExports: SavedObjectsLegacyUiExports = {
+      savedObjectMappings: [
+        {
+          pluginId: 'pluginA',
+          properties: {
+            typeA: {
+              properties: {
+                fieldA: { type: 'text' },
+              },
+            },
+          },
+        },
+        {
+          pluginId: 'pluginB',
+          properties: {
+            typeB: {
+              properties: {
+                fieldB: { type: 'text' },
+              },
+            },
+            typeC: {
+              properties: {
+                fieldC: { type: 'text' },
+              },
+            },
+          },
+        },
+      ],
+      savedObjectsManagement: {
+        typeA: {
+          isImportableAndExportable: true,
+          icon: 'iconA',
+          defaultSearchField: 'searchFieldA',
+          getTitle: savedObject => savedObject.id,
+        },
+        typeB: {
+          isImportableAndExportable: false,
+          icon: 'iconB',
+          getEditUrl: savedObject => `/some-url/${savedObject.id}`,
+          getInAppUrl: savedObject => ({ path: 'path', uiCapabilitiesPath: 'ui-path' }),
+        },
+      },
+      savedObjectMigrations: {},
+      savedObjectSchemas: {},
+      savedObjectValidations: {},
+    };
+
+    const converted = convertLegacyTypes(uiExports, legacyConfig);
+    expect(converted.length).toEqual(3);
+    const [typeA, typeB, typeC] = converted;
+
+    expect(typeA.management).toEqual({
+      importableAndExportable: true,
+      icon: 'iconA',
+      defaultSearchField: 'searchFieldA',
+      getTitle: uiExports.savedObjectsManagement.typeA.getTitle,
+    });
+
+    expect(typeB.management).toEqual({
+      importableAndExportable: false,
+      icon: 'iconB',
+      getEditUrl: uiExports.savedObjectsManagement.typeB.getEditUrl,
+      getInAppUrl: uiExports.savedObjectsManagement.typeB.getInAppUrl,
+    });
+
+    expect(typeC.management).toBeUndefined();
   });
 
   it('merges everything when all are present', () => {

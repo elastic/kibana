@@ -6,14 +6,13 @@
 
 import { useEffect, useState } from 'react';
 
-import { useStateToaster, displaySuccessToast } from '../../../components/toasters';
-import { errorToToaster } from '../../../components/ml/api/error_to_toaster';
+import { errorToToaster, useStateToaster, displaySuccessToast } from '../../../components/toasters';
 import { getPrePackagedRulesStatus, createPrepackagedRules } from './api';
 import * as i18n from './translations';
 
 type Func = () => void;
 export type CreatePreBuiltRules = () => Promise<boolean>;
-interface Return {
+export interface ReturnPrePackagedRules {
   createPrePackagedRules: null | CreatePreBuiltRules;
   loading: boolean;
   loadingCreatePrePackagedRules: boolean;
@@ -50,10 +49,10 @@ export const usePrePackagedRules = ({
   isAuthenticated,
   hasEncryptionKey,
   isSignalIndexExists,
-}: UsePrePackagedRuleProps): Return => {
+}: UsePrePackagedRuleProps): ReturnPrePackagedRules => {
   const [rulesStatus, setRuleStatus] = useState<
     Pick<
-      Return,
+      ReturnPrePackagedRules,
       | 'createPrePackagedRules'
       | 'refetchPrePackagedRulesStatus'
       | 'rulesCustomInstalled'
@@ -167,6 +166,8 @@ export const usePrePackagedRules = ({
                 }, 300);
               timeoutId = reFetch();
             }
+          } else {
+            resolve(false);
           }
         } catch (error) {
           if (isSubscribed) {

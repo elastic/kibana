@@ -28,6 +28,11 @@ export const distDir: string;
 export const distFilename: string;
 
 /**
+ * Filename of the unthemed css file in the distributable directory
+ */
+export const baseCssDistFilename: string;
+
+/**
  * Filename of the dark-theme css file in the distributable directory
  */
 export const darkCssDistFilename: string;

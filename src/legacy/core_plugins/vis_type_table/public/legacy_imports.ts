@@ -19,10 +19,13 @@
 
 export { npSetup, npStart } from 'ui/new_platform';
 export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
-export { IAggConfig, AggGroupNames, Schemas } from '../../data/public';
-export { tabifyGetColumns } from 'ui/agg_response/tabify/_get_columns';
+export { IAggConfig, AggGroupNames, Schemas } from 'ui/agg_types';
 // @ts-ignore
-export { tabifyAggResponse } from 'ui/agg_response/tabify';
+export { PaginateDirectiveProvider } from 'ui/directives/paginate';
+// @ts-ignore
+export { PaginateControlsDirectiveProvider } from 'ui/directives/paginate';
+import { search } from '../../../../plugins/data/public';
+export const { tabifyAggResponse, tabifyGetColumns } = search;
 export {
   configureAppAngularModule,
   KbnAccessibleClickProvider,

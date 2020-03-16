@@ -5,8 +5,8 @@
  */
 
 import { groupBy } from 'lodash';
-import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
+import { Span } from '../../../../../../../../../../../plugins/apm/typings/es_schemas/ui/span';
+import { Transaction } from '../../../../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import {
   getClockSkew,
   getOrderedWaterfallItems,
@@ -15,7 +15,7 @@ import {
   IWaterfallTransaction,
   IWaterfallError
 } from './waterfall_helpers';
-import { APMError } from '../../../../../../../../typings/es_schemas/ui/APMError';
+import { APMError } from '../../../../../../../../../../../plugins/apm/typings/es_schemas/ui/apm_error';
 
 describe('waterfall_helpers', () => {
   describe('getWaterfall', () => {

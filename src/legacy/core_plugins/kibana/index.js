@@ -115,7 +115,7 @@ export default function(kibana) {
         {
           id: 'kibana:stack_management',
           title: i18n.translate('kbn.managementTitle', {
-            defaultMessage: 'Stack Management',
+            defaultMessage: 'Management',
           }),
           order: 9003,
           url: `${kbnBaseUrl}#/management`,
@@ -199,18 +199,6 @@ export default function(kibana) {
           isImportableAndExportable: true,
           getTitle(obj) {
             return `/goto/${encodeURIComponent(obj.id)}`;
-          },
-        },
-        config: {
-          isImportableAndExportable: true,
-          getInAppUrl() {
-            return {
-              path: `/app/kibana#/management/kibana/settings`,
-              uiCapabilitiesPath: 'advancedSettings.show',
-            };
-          },
-          getTitle(obj) {
-            return `Advanced Settings [${obj.id}]`;
           },
         },
       },
