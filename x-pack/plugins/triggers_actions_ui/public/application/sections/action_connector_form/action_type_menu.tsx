@@ -11,7 +11,6 @@ import { loadActionTypes } from '../../lib/action_connector_api';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
-import './action_type_menu.scss';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
@@ -76,7 +75,7 @@ export const ActionTypeMenu = ({
       const card = (
         <EuiCard
           data-test-subj={`${item.actionType.id}-card`}
-          icon={<EuiIcon size="xl" type={item.iconClass} />}
+          icon={<EuiIcon size="l" type={item.iconClass} />}
           title={item.name}
           description={item.selectMessage}
           isDisabled={!checkEnabledResult.isEnabled}
@@ -101,7 +100,7 @@ export const ActionTypeMenu = ({
   return (
     <div className="actConnectorsListGrid">
       <EuiSpacer size="s" />
-      <EuiFlexGrid gutterSize="xl" columns={2}>
+      <EuiFlexGrid gutterSize="xl" columns={3}>
         {cardNodes}
       </EuiFlexGrid>
     </div>
