@@ -156,7 +156,7 @@ describe('MetricsExplorerChartContextMenu', () => {
         chartOptions,
         derivedIndexPattern,
       });
-      expect(component.find('button').length).toBe(0);
+      expect(component.find('button').length).toBe(1);
     });
   });
 
