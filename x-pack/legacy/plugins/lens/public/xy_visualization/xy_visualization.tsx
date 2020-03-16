@@ -146,13 +146,13 @@ export const xyVisualization: Visualization<State, PersistableState> = {
 
   getPersistableState: state => state,
 
-  getLayerOptions(props) {
+  getConfiguration(props) {
     const layer = props.state.layers.find(l => l.layerId === props.layerId)!;
     return {
-      dimensions: [
+      groups: [
         {
-          dimensionId: 'x',
-          dimensionLabel: i18n.translate('xpack.lens.xyChart.xAxisLabel', {
+          groupId: 'x',
+          groupLabel: i18n.translate('xpack.lens.xyChart.xAxisLabel', {
             defaultMessage: 'X-axis',
           }),
           accessors: layer.xAccessor ? [layer.xAccessor] : [],
@@ -163,8 +163,8 @@ export const xyVisualization: Visualization<State, PersistableState> = {
           dataTestSubj: 'lnsXY_xDimensionPanel',
         },
         {
-          dimensionId: 'y',
-          dimensionLabel: i18n.translate('xpack.lens.xyChart.yAxisLabel', {
+          groupId: 'y',
+          groupLabel: i18n.translate('xpack.lens.xyChart.yAxisLabel', {
             defaultMessage: 'Y-axis',
           }),
           accessors: layer.accessors,
@@ -174,8 +174,8 @@ export const xyVisualization: Visualization<State, PersistableState> = {
           dataTestSubj: 'lnsXY_yDimensionPanel',
         },
         {
-          dimensionId: 'breakdown',
-          dimensionLabel: i18n.translate('xpack.lens.xyChart.splitSeries', {
+          groupId: 'breakdown',
+          groupLabel: i18n.translate('xpack.lens.xyChart.splitSeries', {
             defaultMessage: 'Break down by',
           }),
           accessors: layer.splitAccessor ? [layer.splitAccessor] : [],
@@ -188,19 +188,19 @@ export const xyVisualization: Visualization<State, PersistableState> = {
     };
   },
 
-  setDimension({ prevState, layerId, columnId, dimensionId }) {
+  setDimension({ prevState, layerId, columnId, groupId }) {
     const newLayer = prevState.layers.find(l => l.layerId === layerId);
     if (!newLayer) {
       return prevState;
     }
 
-    if (dimensionId === 'x') {
+    if (groupId === 'x') {
       newLayer.xAccessor = columnId;
     }
-    if (dimensionId === 'y') {
+    if (groupId === 'y') {
       newLayer.accessors = [...newLayer.accessors.filter(a => a !== columnId), columnId];
     }
-    if (dimensionId === 'breakdown') {
+    if (groupId === 'breakdown') {
       newLayer.splitAccessor = columnId;
     }
 
@@ -210,20 +210,18 @@ export const xyVisualization: Visualization<State, PersistableState> = {
     };
   },
 
-  removeDimension({ prevState, layerId, columnId, dimensionId }) {
+  removeDimension({ prevState, layerId, columnId }) {
     const newLayer = prevState.layers.find(l => l.layerId === layerId);
     if (!newLayer) {
       return prevState;
     }
 
-    if (dimensionId === 'x') {
+    if (newLayer.xAccessor === columnId) {
       delete newLayer.xAccessor;
-    }
-    if (dimensionId === 'y') {
-      newLayer.accessors = newLayer.accessors.filter(a => a !== columnId);
-    }
-    if (dimensionId === 'breakdown') {
+    } else if (newLayer.splitAccessor === columnId) {
       delete newLayer.splitAccessor;
+    } else if (newLayer.accessors.includes(columnId)) {
+      newLayer.accessors = newLayer.accessors.filter(a => a !== columnId);
     }
 
     return {

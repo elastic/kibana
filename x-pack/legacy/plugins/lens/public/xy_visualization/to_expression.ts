@@ -9,6 +9,10 @@ import { ScaleType } from '@elastic/charts';
 import { State, LayerConfig } from './types';
 import { FramePublicAPI, OperationMetadata } from '../types';
 
+interface ValidLayer extends LayerConfig {
+  xAccessor: NonNullable<LayerConfig['xAccessor']>;
+}
+
 function xyTitles(layer: LayerConfig, frame: FramePublicAPI) {
   const defaults = {
     xTitle: 'x',
@@ -98,7 +102,9 @@ export const buildExpression = (
   frame?: FramePublicAPI,
   { xTitle, yTitle }: { xTitle: string; yTitle: string } = { xTitle: '', yTitle: '' }
 ): Ast | null => {
-  const validLayers = state.layers.filter(layer => layer.xAccessor && layer.accessors.length);
+  const validLayers = state.layers.filter((layer): layer is ValidLayer =>
+    Boolean(layer.xAccessor && layer.accessors.length)
+  );
   if (!validLayers.length) {
     return null;
   }
@@ -144,7 +150,7 @@ export const buildExpression = (
 
             const xAxisOperation =
               frame &&
-              frame.datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor!);
+              frame.datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor);
 
             const isHistogramDimension = Boolean(
               xAxisOperation &&
@@ -164,15 +170,15 @@ export const buildExpression = (
 
                     hide: [Boolean(layer.hide)],
 
-                    xAccessor: [layer.xAccessor!],
+                    xAccessor: [layer.xAccessor],
                     yScaleType: [
                       getScaleType(metadata[layer.layerId][layer.accessors[0]], ScaleType.Ordinal),
                     ],
                     xScaleType: [
-                      getScaleType(metadata[layer.layerId][layer.xAccessor!], ScaleType.Linear),
+                      getScaleType(metadata[layer.layerId][layer.xAccessor], ScaleType.Linear),
                     ],
                     isHistogram: [isHistogramDimension],
-                    splitAccessor: [layer.splitAccessor!],
+                    splitAccessor: layer.splitAccessor ? [layer.splitAccessor] : [],
                     seriesType: [layer.seriesType],
                     accessors: layer.accessors,
                     columnToLabel: [JSON.stringify(columnToLabel)],

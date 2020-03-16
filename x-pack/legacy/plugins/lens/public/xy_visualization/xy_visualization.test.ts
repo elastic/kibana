@@ -10,8 +10,6 @@ import { Operation } from '../types';
 import { State, SeriesType } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
 
-jest.mock('../id_generator');
-
 function exampleState(): State {
   return {
     legend: { position: Position.Bottom, isVisible: true },
@@ -187,7 +185,7 @@ describe('xy_visualization', () => {
             ],
           },
           layerId: 'first',
-          dimensionId: 'x',
+          groupId: 'x',
           columnId: 'newCol',
         }).layers[0]
       ).toEqual({
@@ -213,7 +211,7 @@ describe('xy_visualization', () => {
             ],
           },
           layerId: 'first',
-          dimensionId: 'x',
+          groupId: 'x',
           columnId: 'newCol',
         }).layers[0]
       ).toEqual({
@@ -241,8 +239,7 @@ describe('xy_visualization', () => {
             ],
           },
           layerId: 'first',
-          dimensionId: 'x',
-          columnId: 'newCol',
+          columnId: 'a',
         }).layers[0]
       ).toEqual({
         layerId: 'first',
@@ -253,7 +250,7 @@ describe('xy_visualization', () => {
     });
   });
 
-  describe('#getLayerOptions', () => {
+  describe('#getConfiguration', () => {
     let mockDatasource: ReturnType<typeof createMockDatasource>;
     let frame: ReturnType<typeof createMockFramePublicAPI>;
 
@@ -274,24 +271,22 @@ describe('xy_visualization', () => {
     });
 
     it('should return options for 3 dimensions', () => {
-      const options = xyVisualization.getLayerOptions({
+      const options = xyVisualization.getConfiguration({
         state: exampleState(),
         frame,
         layerId: 'first',
-        setState: jest.fn,
-      }).dimensions;
+      }).groups;
       expect(options).toHaveLength(3);
-      expect(options.map(o => o.dimensionId)).toEqual(['x', 'y', 'breakdown']);
+      expect(options.map(o => o.groupId)).toEqual(['x', 'y', 'breakdown']);
     });
 
     it('should only accept bucketed operations for x', () => {
-      const options = xyVisualization.getLayerOptions({
+      const options = xyVisualization.getConfiguration({
         state: exampleState(),
         frame,
         layerId: 'first',
-        setState: jest.fn,
-      }).dimensions;
-      const filterOperations = options.find(o => o.dimensionId === 'x')!.filterOperations;
+      }).groups;
+      const filterOperations = options.find(o => o.groupId === 'x')!.filterOperations;
 
       const exampleOperation: Operation = {
         dataType: 'number',
@@ -315,23 +310,21 @@ describe('xy_visualization', () => {
     });
 
     it('should not allow anything to be added to x', () => {
-      const options = xyVisualization.getLayerOptions({
+      const options = xyVisualization.getConfiguration({
         state: exampleState(),
         frame,
         layerId: 'first',
-        setState: jest.fn,
-      }).dimensions;
-      expect(options.find(o => o.dimensionId === 'x')?.supportsMoreColumns).toBe(false);
+      }).groups;
+      expect(options.find(o => o.groupId === 'x')?.supportsMoreColumns).toBe(false);
     });
 
     it('should allow number operations on y', () => {
-      const options = xyVisualization.getLayerOptions({
+      const options = xyVisualization.getConfiguration({
         state: exampleState(),
         frame,
         layerId: 'first',
-        setState: jest.fn,
-      }).dimensions;
-      const filterOperations = options.find(o => o.dimensionId === 'y')!.filterOperations;
+      }).groups;
+      const filterOperations = options.find(o => o.groupId === 'y')!.filterOperations;
       const exampleOperation: Operation = {
         dataType: 'number',
         isBucketed: false,

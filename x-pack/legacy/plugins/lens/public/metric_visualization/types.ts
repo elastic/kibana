@@ -6,7 +6,7 @@
 
 export interface State {
   layerId: string;
-  accessor: string | undefined;
+  accessor?: string;
 }
 
 export interface MetricConfig extends State {

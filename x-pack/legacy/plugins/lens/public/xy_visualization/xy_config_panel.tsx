@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import { State, SeriesType, visualizationTypes } from './types';
-import { VisualizationLayerConfigProps } from '../types';
+import { VisualizationLayerWidgetProps } from '../types';
 import { isHorizontalChart, isHorizontalSeries } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 
@@ -25,7 +25,7 @@ function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: n
   };
 }
 
-export function LayerContextMenu(props: VisualizationLayerConfigProps<State>) {
+export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
   const { state, layerId } = props;
   const horizontalOnly = isHorizontalChart(state.layers);
   const index = state.layers.findIndex(l => l.layerId === layerId);

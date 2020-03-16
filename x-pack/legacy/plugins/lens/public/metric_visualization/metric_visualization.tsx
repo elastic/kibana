@@ -86,12 +86,12 @@ export const metricVisualization: Visualization<State, PersistableState> = {
 
   getPersistableState: state => state,
 
-  getLayerOptions(props) {
+  getConfiguration(props) {
     return {
-      dimensions: [
+      groups: [
         {
-          dimensionId: 'metric',
-          dimensionLabel: i18n.translate('xpack.lens.metric.label', { defaultMessage: 'Metric' }),
+          groupId: 'metric',
+          groupLabel: i18n.translate('xpack.lens.metric.label', { defaultMessage: 'Metric' }),
           layerId: props.state.layerId,
           accessors: props.state.accessor ? [props.state.accessor] : [],
           supportsMoreColumns: false,

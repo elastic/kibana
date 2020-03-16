@@ -128,10 +128,10 @@ export const datatableVisualization: Visualization<
     ];
   },
 
-  getLayerOptions({ state, frame, layerId }) {
+  getConfiguration({ state, frame, layerId }) {
     const layer = state.layers.find(l => l.layerId === layerId);
     if (!layer) {
-      return { dimensions: [] };
+      return { groups: [] };
     }
 
     const datasource = frame.datasourceLayers[layer.layerId];
@@ -140,14 +140,14 @@ export const datatableVisualization: Visualization<
     const sortedColumns = Array.from(new Set(originalOrder.concat(layer.columns)));
 
     return {
-      dimensions: [
+      groups: [
         {
-          layerId: state.layers[0].layerId,
-          accessors: sortedColumns,
-          dimensionId: 'columns',
-          dimensionLabel: i18n.translate('xpack.lens.datatable.columns', {
+          groupId: 'columns',
+          groupLabel: i18n.translate('xpack.lens.datatable.columns', {
             defaultMessage: 'Columns',
           }),
+          layerId: state.layers[0].layerId,
+          accessors: sortedColumns,
           supportsMoreColumns: true,
           filterOperations: () => true,
         },
@@ -155,7 +155,7 @@ export const datatableVisualization: Visualization<
     };
   },
 
-  setDimension({ layerId, columnId, prevState }) {
+  setDimension({ prevState, layerId, columnId }) {
     return {
       ...prevState,
       layers: prevState.layers.map(l => {
@@ -166,7 +166,7 @@ export const datatableVisualization: Visualization<
       }),
     };
   },
-  removeDimension({ prevState, columnId, layerId }) {
+  removeDimension({ prevState, layerId, columnId }) {
     return {
       ...prevState,
       layers: prevState.layers.map(l =>

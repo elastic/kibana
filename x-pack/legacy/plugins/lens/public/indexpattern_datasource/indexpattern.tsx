@@ -274,10 +274,34 @@ export function getIndexPatternDatasource({
       );
     },
 
+    renderLayerPanel: (
+      domElement: Element,
+      props: DatasourceLayerPanelProps<IndexPatternPrivateState>
+    ) => {
+      render(
+        <LayerPanel
+          state={props.state}
+          onChangeIndexPattern={indexPatternId => {
+            changeLayerIndexPattern({
+              savedObjectsClient,
+              indexPatternId,
+              setState: props.setState,
+              state: props.state,
+              layerId: props.layerId,
+              onError: onIndexPatternLoadError,
+              replaceIfPossible: true,
+            });
+          }}
+          {...props}
+        />,
+        domElement
+      );
+    },
+
     canHandleDrop,
     onDrop,
 
-    getPublicAPI({ state, setState, layerId }: PublicAPIProps<IndexPatternPrivateState>) {
+    getPublicAPI({ state, layerId }: PublicAPIProps<IndexPatternPrivateState>) {
       const columnLabelMap = uniqueLabels(state.layers);
 
       return {
@@ -293,27 +317,6 @@ export function getIndexPatternDatasource({
             return columnToOperation(layer.columns[columnId], columnLabelMap[columnId]);
           }
           return null;
-        },
-
-        renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps) => {
-          render(
-            <LayerPanel
-              state={state}
-              onChangeIndexPattern={indexPatternId => {
-                changeLayerIndexPattern({
-                  savedObjectsClient,
-                  indexPatternId,
-                  setState,
-                  state,
-                  layerId: props.layerId,
-                  onError: onIndexPatternLoadError,
-                  replaceIfPossible: true,
-                });
-              }}
-              {...props}
-            />,
-            domElement
-          );
         },
       };
     },

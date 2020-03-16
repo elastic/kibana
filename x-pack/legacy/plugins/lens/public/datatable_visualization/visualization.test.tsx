@@ -203,39 +203,35 @@ describe('Datatable Visualization', () => {
     });
   });
 
-  describe('#getLayerOptions', () => {
+  describe('#getConfiguration', () => {
     it('returns a single layer option', () => {
-      const setState = jest.fn();
       const datasource = createMockDatasource('test');
       const frame = mockFrame();
       frame.datasourceLayers = { first: datasource.publicAPIMock };
 
       expect(
-        datatableVisualization.getLayerOptions({
+        datatableVisualization.getConfiguration({
           layerId: 'first',
           state: {
             layers: [{ layerId: 'first', columns: [] }],
           },
-          setState,
           frame,
-        }).dimensions
+        }).groups
       ).toHaveLength(1);
     });
 
     it('allows all kinds of operations', () => {
-      const setState = jest.fn();
       const datasource = createMockDatasource('test');
       const frame = mockFrame();
       frame.datasourceLayers = { first: datasource.publicAPIMock };
 
-      const filterOperations = datatableVisualization.getLayerOptions({
+      const filterOperations = datatableVisualization.getConfiguration({
         layerId: 'first',
         state: {
           layers: [{ layerId: 'first', columns: [] }],
         },
-        setState,
         frame,
-      }).dimensions[0].filterOperations;
+      }).groups[0].filterOperations;
 
       const baseOperation: Operation = {
         dataType: 'string',
@@ -260,12 +256,11 @@ describe('Datatable Visualization', () => {
       datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'c' }, { columnId: 'b' }]);
 
       expect(
-        datatableVisualization.getLayerOptions({
+        datatableVisualization.getConfiguration({
           layerId: 'a',
           state: { layers: [layer] },
-          setState: jest.fn(),
           frame,
-        }).dimensions[0].accessors
+        }).groups[0].accessors
       ).toEqual(['c', 'b']);
     });
   });
@@ -278,7 +273,6 @@ describe('Datatable Visualization', () => {
           prevState: { layers: [layer] },
           layerId: 'layer1',
           columnId: 'b',
-          dimensionId: '',
         })
       ).toEqual({
         layers: [
@@ -299,7 +293,7 @@ describe('Datatable Visualization', () => {
           prevState: { layers: [layer] },
           layerId: 'layer1',
           columnId: 'd',
-          dimensionId: '',
+          groupId: '',
         })
       ).toEqual({
         layers: [
@@ -318,7 +312,7 @@ describe('Datatable Visualization', () => {
           prevState: { layers: [layer] },
           layerId: 'layer1',
           columnId: 'b',
-          dimensionId: '',
+          groupId: '',
         })
       ).toEqual({
         layers: [

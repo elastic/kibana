@@ -376,7 +376,7 @@ describe('editor_frame', () => {
         );
       });
 
-      expect(mockVisualization.getLayerOptions).toHaveBeenCalledWith(
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({ state: initialState })
       );
     });
@@ -615,14 +615,14 @@ describe('editor_frame', () => {
         );
       });
       const updatedState = {};
-      const setVisualizationState = (mockVisualization.getLayerOptions as jest.Mock).mock
-        .calls[0][0].setState;
+      const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
+        .setState;
       act(() => {
-        setVisualizationState(updatedState);
+        setDatasourceState(updatedState);
       });
 
-      expect(mockVisualization.getLayerOptions).toHaveBeenCalledTimes(2);
-      expect(mockVisualization.getLayerOptions).toHaveBeenLastCalledWith(
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
+      expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: updatedState,
         })
@@ -689,8 +689,6 @@ describe('editor_frame', () => {
 
       const updatedPublicAPI: DatasourcePublicAPI = {
         datasourceId: 'testDatasource',
-        renderLayerPanel: jest.fn(),
-        // renderDimensionPanel: jest.fn(),
         getOperationForColumnId: jest.fn(),
         getTableSpec: jest.fn(),
       };
@@ -702,8 +700,8 @@ describe('editor_frame', () => {
         setDatasourceState({});
       });
 
-      expect(mockVisualization.getLayerOptions).toHaveBeenCalledTimes(2);
-      expect(mockVisualization.getLayerOptions).toHaveBeenLastCalledWith(
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
+      expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           frame: expect.objectContaining({
             datasourceLayers: {
@@ -756,10 +754,10 @@ describe('editor_frame', () => {
         );
       });
 
-      expect(mockVisualization.getLayerOptions).toHaveBeenCalled();
+      expect(mockVisualization.getConfiguration).toHaveBeenCalled();
 
       const datasourceLayers =
-        mockVisualization.getLayerOptions.mock.calls[0][0].frame.datasourceLayers;
+        mockVisualization.getConfiguration.mock.calls[0][0].frame.datasourceLayers;
       expect(datasourceLayers.first).toBe(mockDatasource.publicAPIMock);
       expect(datasourceLayers.second).toBe(mockDatasource2.publicAPIMock);
       expect(datasourceLayers.third).toBe(mockDatasource2.publicAPIMock);
@@ -812,21 +810,18 @@ describe('editor_frame', () => {
       expect(mockDatasource.getPublicAPI).toHaveBeenCalledWith(
         expect.objectContaining({
           state: datasource1State,
-          setState: expect.anything(),
           layerId: 'first',
         })
       );
       expect(mockDatasource2.getPublicAPI).toHaveBeenCalledWith(
         expect.objectContaining({
           state: datasource2State,
-          setState: expect.anything(),
           layerId: 'second',
         })
       );
       expect(mockDatasource2.getPublicAPI).toHaveBeenCalledWith(
         expect.objectContaining({
           state: datasource2State,
-          setState: expect.anything(),
           layerId: 'third',
         })
       );
@@ -859,44 +854,8 @@ describe('editor_frame', () => {
       expect(mockDatasource.getPublicAPI).toHaveBeenCalledWith({
         dateRange,
         state: datasourceState,
-        setState: expect.any(Function),
         layerId: 'first',
       });
-    });
-
-    it('should re-create the public api after state has been set', async () => {
-      mockDatasource.getLayers.mockReturnValue(['first']);
-
-      await act(async () => {
-        mount(
-          <EditorFrame
-            {...getDefaultProps()}
-            visualizationMap={{
-              testVis: mockVisualization,
-            }}
-            datasourceMap={{
-              testDatasource: mockDatasource,
-            }}
-            initialDatasourceId="testDatasource"
-            initialVisualizationId="testVis"
-            ExpressionRenderer={expressionRendererMock}
-          />
-        );
-      });
-
-      const updatedState = {};
-      const setDatasourceState = mockDatasource.getPublicAPI.mock.calls[0][0].setState;
-      act(() => {
-        setDatasourceState(updatedState);
-      });
-
-      expect(mockDatasource.getPublicAPI).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          state: updatedState,
-          setState: expect.any(Function),
-          layerId: 'first',
-        })
-      );
     });
   });
 
@@ -1022,7 +981,7 @@ describe('editor_frame', () => {
 
       expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
       expect(mockVisualization2.initialize).toHaveBeenCalledWith(expect.anything(), initialState);
-      expect(mockVisualization2.getLayerOptions).toHaveBeenCalledWith(
+      expect(mockVisualization2.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({ state: { initial: true } })
       );
     });
@@ -1039,7 +998,7 @@ describe('editor_frame', () => {
           datasourceLayers: expect.objectContaining({ first: mockDatasource.publicAPIMock }),
         })
       );
-      expect(mockVisualization2.getLayerOptions).toHaveBeenCalledWith(
+      expect(mockVisualization2.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({ state: { initial: true } })
       );
     });
@@ -1238,8 +1197,8 @@ describe('editor_frame', () => {
           .simulate('click');
       });
 
-      expect(mockVisualization.getLayerOptions).toHaveBeenCalledTimes(1);
-      expect(mockVisualization.getLayerOptions).toHaveBeenCalledWith(
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(1);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           state: suggestionVisState,
         })
@@ -1304,7 +1263,7 @@ describe('editor_frame', () => {
           .simulate('drop');
       });
 
-      expect(mockVisualization.getLayerOptions).toHaveBeenCalledWith(
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           state: suggestionVisState,
         })
@@ -1381,7 +1340,7 @@ describe('editor_frame', () => {
         });
       });
 
-      expect(mockVisualization2.getLayerOptions).toHaveBeenCalledWith(
+      expect(mockVisualization2.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           state: suggestionVisState,
         })
@@ -1480,7 +1439,7 @@ describe('editor_frame', () => {
         });
       });
 
-      expect(mockVisualization3.getLayerOptions).toHaveBeenCalledWith(
+      expect(mockVisualization3.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           state: suggestionVisState,
         })

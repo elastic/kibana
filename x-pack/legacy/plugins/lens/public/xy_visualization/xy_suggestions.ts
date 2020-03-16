@@ -355,7 +355,7 @@ function buildSuggestion({
     layerId,
     seriesType,
     xAccessor: xValue.columnId,
-    splitAccessor: splitBy ? splitBy.columnId : undefined,
+    splitAccessor: splitBy?.columnId,
     accessors: yValues.map(col => col.columnId),
   };
 

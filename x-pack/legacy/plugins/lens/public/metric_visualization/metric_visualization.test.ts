@@ -81,7 +81,7 @@ describe('metric_visualization', () => {
             layerId: 'l1',
           },
           layerId: 'l1',
-          dimensionId: '',
+          groupId: '',
           columnId: 'newDimension',
         })
       ).toEqual({
@@ -100,7 +100,6 @@ describe('metric_visualization', () => {
             layerId: 'l1',
           },
           layerId: 'l1',
-          dimensionId: '',
           columnId: 'a',
         })
       ).toEqual({

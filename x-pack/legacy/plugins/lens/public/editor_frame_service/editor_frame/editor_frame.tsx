@@ -91,21 +91,11 @@ export function EditorFrame(props: EditorFrameProps) {
 
       const layers = datasource.getLayers(datasourceState);
       layers.forEach(layer => {
-        const publicAPI = props.datasourceMap[id].getPublicAPI({
+        datasourceLayers[layer] = props.datasourceMap[id].getPublicAPI({
           state: datasourceState,
-          setState: (newState: unknown) => {
-            dispatch({
-              type: 'UPDATE_DATASOURCE_STATE',
-              datasourceId: id,
-              updater: newState,
-              clearStagedPreview: true,
-            });
-          },
           layerId: layer,
           dateRange: props.dateRange,
         });
-
-        datasourceLayers[layer] = publicAPI;
       });
     });
 

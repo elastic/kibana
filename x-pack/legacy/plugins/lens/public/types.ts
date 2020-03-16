@@ -17,7 +17,6 @@ export type ErrorCallback = (e: { message: string }) => void;
 
 export interface PublicAPIProps<T> {
   state: T;
-  setState: StateSetter<T>;
   layerId: string;
   dateRange: DateRange;
 }
@@ -141,6 +140,7 @@ export interface Datasource<T = unknown, P = unknown> {
   renderDataPanel: (domElement: Element, props: DatasourceDataPanelProps<T>) => void;
   renderDimensionTrigger: (domElement: Element, props: DatasourceDimensionTriggerProps<T>) => void;
   renderDimensionEditor: (domElement: Element, props: DatasourceDimensionEditorProps<T>) => void;
+  renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps<T>) => void;
   canHandleDrop: (props: DatasourceDimensionDropProps<T>) => boolean;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => boolean;
 
@@ -161,9 +161,6 @@ export interface DatasourcePublicAPI {
   datasourceId: string;
   getTableSpec: () => Array<{ columnId: string }>;
   getOperationForColumnId: (columnId: string) => Operation | null;
-
-  // Render can be called many times
-  renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps) => void;
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {
@@ -176,26 +173,30 @@ export interface DatasourceDataPanelProps<T = unknown> {
   filters: Filter[];
 }
 
-export interface DatasourceDimensionProps<T> {
-  layerId: string;
-  columnId: string;
-
-  // Visualizations can restrict operations based on their own rules
+interface SharedDimensionProps {
+  /** Visualizations can restrict operations based on their own rules.
+   * For example, limiting to only bucketed or only numeric operations.
+   */
   filterOperations: (operation: OperationMetadata) => boolean;
 
-  // Visualizations can hint at the role this dimension would play, which
-  // affects the default ordering of the query
+  /** Visualizations can hint at the role this dimension would play, which
+   * affects the default ordering of the query
+   */
   suggestedPriority?: DimensionPriority;
 
-  onRemove?: (accessor: string) => void;
-
-  // Some dimension editors will allow users to change the operation grouping
-  // from the panel, and this lets the visualization hint that it doesn't want
-  // users to have that level of control
+  /** Some dimension editors will allow users to change the operation grouping
+   * from the panel, and this lets the visualization hint that it doesn't want
+   * users to have that level of control
+   */
   hideGrouping?: boolean;
-
-  state: T;
 }
+
+export type DatasourceDimensionProps<T> = SharedDimensionProps & {
+  layerId: string;
+  columnId: string;
+  onRemove?: (accessor: string) => void;
+  state: T;
+};
 
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
@@ -209,21 +210,19 @@ export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T> & {
   togglePopover: () => void;
 };
 
-export interface DatasourceLayerPanelProps {
+export interface DatasourceLayerPanelProps<T> {
   layerId: string;
+  state: T;
+  setState: StateSetter<T>;
 }
 
-export interface DatasourceDimensionDropProps<T> {
+export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
   layerId: string;
   columnId: string;
-  // Visualizations can restrict operations based on their own rules
-  filterOperations: (operation: OperationMetadata) => boolean;
-  suggestedPriority?: DimensionPriority;
-
   state: T;
   setState: StateSetter<T>;
   dragDropContext: DragContextState;
-}
+};
 
 export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProps<T> & {
   droppedItem: unknown;
@@ -262,37 +261,32 @@ export interface LensMultiTable {
   };
 }
 
-export interface VisualizationLayerConfigProps<T = unknown> {
+export interface VisualizationConfigProps<T = unknown> {
   layerId: string;
   frame: FramePublicAPI;
   state: T;
-  setState: (newState: T) => void;
 }
 
-interface VisualizationDimensionConfig {
-  dimensionId: string;
-  // Displayed to user
-  dimensionLabel: string;
+export type VisualizationLayerWidgetProps<T = unknown> = VisualizationConfigProps<T> & {
+  setState: (newState: T) => void;
+};
 
-  supportsMoreColumns: boolean;
+type VisualizationDimensionGroupConfig = SharedDimensionProps & {
+  groupLabel: string;
+
+  /** ID is passed back to visualization. For example, `x` */
+  groupId: string;
   accessors: string[];
-
-  // Visualizations can restrict operations based on their own rules
-  filterOperations: (operation: OperationMetadata) => boolean;
-
-  // Visualizations can hint at the role this dimension would play, which
-  // affects the default ordering of the query
-  suggestedPriority?: DimensionPriority;
-  onRemove?: (accessor: string) => void;
-
-  // Some dimension editors will allow users to change the operation grouping
-  // from the panel, and this lets the visualization hint that it doesn't want
-  // users to have that level of control
-  hideGrouping?: boolean;
-
+  supportsMoreColumns: boolean;
+  /** If required, a warning will appear if accessors are empty */
   required?: boolean;
-
   dataTestSubj?: string;
+};
+
+interface VisualizationDimensionChangeProps<T> {
+  layerId: string;
+  columnId: string;
+  prevState: T;
 }
 
 /**
@@ -384,11 +378,11 @@ export interface Visualization<T = unknown, P = unknown> {
   // Layer context menu is used by visualizations for styling the entire layer
   // For example, the XY visualization uses this to have multiple chart types
   getLayerContextMenuIcon?: (opts: { state: T; layerId: string }) => IconType | undefined;
-  renderLayerContextMenu?: (domElement: Element, props: VisualizationLayerConfigProps<T>) => void;
+  renderLayerContextMenu?: (domElement: Element, props: VisualizationLayerWidgetProps<T>) => void;
 
-  getLayerOptions: (
-    props: VisualizationLayerConfigProps<T>
-  ) => { dimensions: VisualizationDimensionConfig[] };
+  getConfiguration: (
+    props: VisualizationConfigProps<T>
+  ) => { groups: VisualizationDimensionGroupConfig[] };
 
   getDescription: (
     state: T
@@ -405,18 +399,12 @@ export interface Visualization<T = unknown, P = unknown> {
   getPersistableState: (state: T) => P;
 
   // Actions triggered by the frame which tell the datasource that a dimension is being changed
-  setDimension: (props: {
-    layerId: string;
-    dimensionId: string;
-    columnId: string;
-    prevState: T;
-  }) => T;
-  removeDimension: (props: {
-    layerId: string;
-    dimensionId: string;
-    columnId: string;
-    prevState: T;
-  }) => T;
+  setDimension: (
+    props: VisualizationDimensionChangeProps<T> & {
+      groupId: string;
+    }
+  ) => T;
+  removeDimension: (props: VisualizationDimensionChangeProps<T>) => T;
 
   toExpression: (state: T, frame: FramePublicAPI) => Ast | string | null;
 

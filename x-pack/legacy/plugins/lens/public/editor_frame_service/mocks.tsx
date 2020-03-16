@@ -33,12 +33,12 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
     getPersistableState: jest.fn(_state => _state),
     getSuggestions: jest.fn(_options => []),
     initialize: jest.fn((_frame, _state?) => ({})),
-    getLayerOptions: jest.fn(props => ({
-      dimensions: [
+    getConfiguration: jest.fn(props => ({
+      groups: [
         {
+          groupId: 'a',
+          groupLabel: 'a',
           layerId: 'layer1',
-          dimensionId: 'a',
-          dimensionLabel: 'a',
           supportsMoreColumns: true,
           accessors: [],
           filterOperations: jest.fn(() => true),
@@ -63,7 +63,6 @@ export function createMockDatasource(id: string): DatasourceMock {
     datasourceId: id,
     getTableSpec: jest.fn(() => []),
     getOperationForColumnId: jest.fn(),
-    renderLayerPanel: jest.fn(),
   };
 
   return {
@@ -75,6 +74,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     getPublicAPI: jest.fn().mockReturnValue(publicAPIMock),
     initialize: jest.fn((_state?) => Promise.resolve()),
     renderDataPanel: jest.fn(),
+    renderLayerPanel: jest.fn(),
     toExpression: jest.fn((_frame, _state) => null),
     insertLayer: jest.fn((_state, _newLayerId) => {}),
     removeLayer: jest.fn((_state, _layerId) => {}),

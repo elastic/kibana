@@ -26,7 +26,7 @@ import {
   Visualization,
   FramePublicAPI,
   Datasource,
-  VisualizationLayerConfigProps,
+  VisualizationLayerWidgetProps,
   DatasourceDimensionEditorProps,
   StateSetter,
 } from '../../types';
@@ -113,6 +113,32 @@ function LayerPanels(
     },
     [props.dispatch]
   );
+  const updateAll = useMemo(
+    () => (datasourceId: string, newDatasourceState: unknown, newVisualizationState: unknown) => {
+      props.dispatch({
+        type: 'UPDATE_STATE',
+        subType: 'UPDATE_ALL_STATES',
+        updater: prevState => {
+          return {
+            ...prevState,
+            datasourceStates: {
+              ...prevState.datasourceStates,
+              [datasourceId]: {
+                state: newDatasourceState,
+                isLoading: false,
+              },
+            },
+            visualization: {
+              activeId: activeVisualization.id,
+              state: newVisualizationState,
+            },
+            stagedPreview: undefined,
+          };
+        },
+      });
+    },
+    [props.dispatch]
+  );
   const layerIds = activeVisualization.getLayerIds(visualizationState);
 
   return (
@@ -126,6 +152,7 @@ function LayerPanels(
           visualizationState={visualizationState}
           updateVisualization={setVisualizationState}
           updateDatasource={updateDatasource}
+          updateAll={updateAll}
           frame={framePublicAPI}
           isOnlyLayer={layerIds.length === 1}
           onRemoveLayer={() => {
@@ -197,6 +224,11 @@ function LayerPanel(
     visualizationState: unknown;
     updateVisualization: StateSetter<unknown>;
     updateDatasource: (datasourceId: string, newState: unknown) => void;
+    updateAll: (
+      datasourceId: string,
+      newDatasourcestate: unknown,
+      newVisualizationState: unknown
+    ) => void;
     onRemoveLayer: () => void;
   }
 ) {
@@ -204,13 +236,12 @@ function LayerPanel(
   const { framePublicAPI, layerId, activeVisualization, isOnlyLayer, onRemoveLayer } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
   if (!datasourcePublicAPI) {
-    return <></>;
+    return null;
   }
   const layerVisualizationConfigProps = {
     layerId,
     dragDropContext,
     state: props.visualizationState,
-    setState: props.updateVisualization,
     frame: props.framePublicAPI,
     dateRange: props.framePublicAPI.dateRange,
   };
@@ -236,34 +267,33 @@ function LayerPanel(
   const [popoverState, setPopoverState] = useState<{
     isOpen: boolean;
     openId: string | null;
-    addingToDimensionId: string | null;
+    addingToGroupId: string | null;
   }>({
     isOpen: false,
     openId: null,
-    addingToDimensionId: null,
+    addingToGroupId: null,
   });
 
-  const { dimensions } = activeVisualization.getLayerOptions(layerVisualizationConfigProps);
-  const isEmptyLayer = !dimensions.some(d => d.accessors.length > 0);
+  const { groups } = activeVisualization.getConfiguration(layerVisualizationConfigProps);
+  const isEmptyLayer = !groups.some(d => d.accessors.length > 0);
 
   function wrapInPopover(
     id: string,
-    dimensionId: string,
+    groupId: string,
     trigger: React.ReactElement,
     panel: React.ReactElement
   ) {
-    const noMatch = popoverState.isOpen ? !dimensions.some(d => d.accessors.includes(id)) : false;
+    const noMatch = popoverState.isOpen ? !groups.some(d => d.accessors.includes(id)) : false;
     return (
       <EuiPopover
         className="lnsConfigPanel__popover"
         anchorClassName="lnsConfigPanel__trigger"
         isOpen={
           popoverState.isOpen &&
-          (popoverState.openId === id ||
-            (noMatch && popoverState.addingToDimensionId === dimensionId))
+          (popoverState.openId === id || (noMatch && popoverState.addingToGroupId === groupId))
         }
         closePopover={() => {
-          setPopoverState({ isOpen: false, openId: null, addingToDimensionId: null });
+          setPopoverState({ isOpen: false, openId: null, addingToGroupId: null });
         }}
         button={trigger}
         anchorPosition="leftUp"
@@ -282,16 +312,49 @@ function LayerPanel(
           <EuiFlexItem grow={false}>
             <LayerSettings
               layerId={layerId}
-              layerConfigProps={layerVisualizationConfigProps}
+              layerConfigProps={{
+                ...layerVisualizationConfigProps,
+                setState: props.updateVisualization,
+              }}
               activeVisualization={activeVisualization}
             />
           </EuiFlexItem>
 
-          {datasourcePublicAPI && (
+          {layerDatasource && (
             <EuiFlexItem className="eui-textTruncate">
               <NativeRenderer
-                render={datasourcePublicAPI.renderLayerPanel}
-                nativeProps={{ layerId }}
+                render={layerDatasource.renderLayerPanel}
+                nativeProps={{
+                  layerId,
+                  state: layerDatasourceState,
+                  setState: (updater: unknown) => {
+                    const newState =
+                      typeof updater === 'function' ? updater(layerDatasourceState) : updater;
+                    // Look for removed columns
+                    const nextPublicAPI = layerDatasource.getPublicAPI({
+                      state: newState,
+                      layerId,
+                      dateRange: props.framePublicAPI.dateRange,
+                    });
+                    const nextTable = new Set(
+                      nextPublicAPI.getTableSpec().map(({ columnId }) => columnId)
+                    );
+                    const removed = datasourcePublicAPI
+                      .getTableSpec()
+                      .map(({ columnId }) => columnId)
+                      .filter(columnId => !nextTable.has(columnId));
+                    let nextVisState = props.visualizationState;
+                    removed.forEach(columnId => {
+                      nextVisState = activeVisualization.removeDimension({
+                        layerId,
+                        columnId,
+                        prevState: nextVisState,
+                      });
+                    });
+
+                    props.updateAll(datasourceId, newState, nextVisState);
+                  },
+                }}
               />
             </EuiFlexItem>
           )}
@@ -299,13 +362,13 @@ function LayerPanel(
 
         <EuiSpacer size="s" />
 
-        {dimensions.map((dimension, index) => {
+        {groups.map((group, index) => {
           const newId = generateId();
-          const isMissing = !isEmptyLayer && dimension.required && dimension.accessors.length === 0;
+          const isMissing = !isEmptyLayer && group.required && group.accessors.length === 0;
           return (
             <EuiFormRow
               className="lnsConfigPanel__row"
-              label={dimension.dimensionLabel}
+              label={group.groupLabel}
               key={index}
               isInvalid={isMissing}
               error={
@@ -317,17 +380,17 @@ function LayerPanel(
               }
             >
               <>
-                {dimension.accessors.map(accessor => (
+                {group.accessors.map(accessor => (
                   <DragDrop
                     key={accessor}
                     className="lnsConfigPanel__dimension"
-                    data-test-subj={dimension.dataTestSubj}
+                    data-test-subj={group.dataTestSubj}
                     droppable={
                       dragDropContext.dragging &&
                       layerDatasource.canHandleDrop({
                         ...layerDatasourceDropProps,
                         columnId: accessor,
-                        filterOperations: dimension.filterOperations,
+                        filterOperations: group.filterOperations,
                       })
                     }
                     onDrop={droppedItem => {
@@ -335,32 +398,32 @@ function LayerPanel(
                         ...layerDatasourceDropProps,
                         droppedItem,
                         columnId: accessor,
-                        filterOperations: dimension.filterOperations,
+                        filterOperations: group.filterOperations,
                       });
                     }}
                   >
                     {wrapInPopover(
                       accessor,
-                      dimension.dimensionId,
+                      group.groupId,
                       <NativeRenderer
                         render={props.datasourceMap[datasourceId].renderDimensionTrigger}
                         nativeProps={{
                           ...layerDatasourceConfigProps,
                           columnId: accessor,
-                          filterOperations: dimension.filterOperations,
-                          suggestedPriority: dimension.suggestedPriority,
+                          filterOperations: group.filterOperations,
+                          suggestedPriority: group.suggestedPriority,
                           togglePopover: () => {
                             if (popoverState.isOpen) {
                               setPopoverState({
                                 isOpen: false,
                                 openId: null,
-                                addingToDimensionId: null,
+                                addingToGroupId: null,
                               });
                             } else {
                               setPopoverState({
                                 isOpen: true,
                                 openId: accessor,
-                                addingToDimensionId: null, // not set for existing dimension
+                                addingToGroupId: null, // not set for existing dimension
                               });
                             }
                           },
@@ -372,7 +435,7 @@ function LayerPanel(
                           ...layerDatasourceConfigProps,
                           core: props.core,
                           columnId: accessor,
-                          filterOperations: dimension.filterOperations,
+                          filterOperations: group.filterOperations,
                         }}
                       />
                     )}
@@ -391,18 +454,15 @@ function LayerPanel(
                       })}
                       onClick={() => {
                         trackUiEvent('indexpattern_dimension_removed');
-                        props.updateDatasource(
+                        props.updateAll(
                           datasourceId,
                           layerDatasource.removeColumn({
                             layerId,
                             columnId: accessor,
                             prevState: layerDatasourceState,
-                          })
-                        );
-                        props.updateVisualization(
+                          }),
                           props.activeVisualization.removeDimension({
                             layerId,
-                            dimensionId: dimension.dimensionId,
                             columnId: accessor,
                             prevState: props.visualizationState,
                           })
@@ -411,16 +471,16 @@ function LayerPanel(
                     />
                   </DragDrop>
                 ))}
-                {dimension.supportsMoreColumns ? (
+                {group.supportsMoreColumns ? (
                   <DragDrop
                     className="lnsConfigPanel__dimension"
-                    data-test-subj={dimension.dataTestSubj}
+                    data-test-subj={group.dataTestSubj}
                     droppable={
                       dragDropContext.dragging &&
                       layerDatasource.canHandleDrop({
                         ...layerDatasourceDropProps,
                         columnId: newId,
-                        filterOperations: dimension.filterOperations,
+                        filterOperations: group.filterOperations,
                       })
                     }
                     onDrop={droppedItem => {
@@ -428,13 +488,13 @@ function LayerPanel(
                         ...layerDatasourceDropProps,
                         droppedItem,
                         columnId: newId,
-                        filterOperations: dimension.filterOperations,
+                        filterOperations: group.filterOperations,
                       });
                       if (dropSuccess) {
                         props.updateVisualization(
                           activeVisualization.setDimension({
                             layerId,
-                            dimensionId: dimension.dimensionId,
+                            groupId: group.groupId,
                             columnId: newId,
                             prevState: props.visualizationState,
                           })
@@ -444,7 +504,7 @@ function LayerPanel(
                   >
                     {wrapInPopover(
                       newId,
-                      dimension.dimensionId,
+                      group.groupId,
                       <div className="lnsConfigPanel__triggerLink">
                         <EuiButtonEmpty
                           iconType="plusInCircleFilled"
@@ -460,13 +520,13 @@ function LayerPanel(
                               setPopoverState({
                                 isOpen: false,
                                 openId: null,
-                                addingToDimensionId: null,
+                                addingToGroupId: null,
                               });
                             } else {
                               setPopoverState({
                                 isOpen: true,
                                 openId: newId,
-                                addingToDimensionId: dimension.dimensionId,
+                                addingToGroupId: group.groupId,
                               });
                             }
                           }}
@@ -484,23 +544,24 @@ function LayerPanel(
                           ...layerDatasourceConfigProps,
                           core: props.core,
                           columnId: newId,
-                          filterOperations: dimension.filterOperations,
-                          suggestedPriority: dimension.suggestedPriority,
+                          filterOperations: group.filterOperations,
+                          suggestedPriority: group.suggestedPriority,
 
                           setState: (newState: unknown) => {
-                            props.updateVisualization(
+                            props.updateAll(
+                              datasourceId,
+                              newState,
                               activeVisualization.setDimension({
                                 layerId,
-                                dimensionId: dimension.dimensionId,
+                                groupId: group.groupId,
                                 columnId: newId,
                                 prevState: props.visualizationState,
                               })
                             );
-                            props.updateDatasource(datasourceId, newState);
                             setPopoverState({
                               isOpen: true,
                               openId: newId,
-                              addingToDimensionId: null, // clear now that dimension exists
+                              addingToGroupId: null, // clear now that dimension exists
                             });
                           },
                         }}
@@ -529,7 +590,7 @@ function LayerPanel(
                 // activeElement does not have blur so, we need to do some casting + safeguards.
                 const el = (document.activeElement as unknown) as { blur: () => void };
 
-                if (el && el.blur) {
+                if (el?.blur) {
                   el.blur();
                 }
 
@@ -558,7 +619,7 @@ function LayerSettings({
 }: {
   layerId: string;
   activeVisualization: Visualization;
-  layerConfigProps: VisualizationLayerConfigProps;
+  layerConfigProps: VisualizationLayerWidgetProps;
 }) {
   const [isOpen, setIsOpen] = useState(false);
 

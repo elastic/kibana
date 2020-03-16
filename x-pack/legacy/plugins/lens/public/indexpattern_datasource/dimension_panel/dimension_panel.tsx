@@ -54,9 +54,10 @@ type Props = Pick<
   DatasourceDimensionDropProps<IndexPatternPrivateState>,
   'layerId' | 'columnId' | 'state' | 'filterOperations'
 >;
-const getOperationFieldSupportMatrix = /* _.memoize( */ (
-  props: Props
-): OperationFieldSupportMatrix => {
+
+// TODO: This code has historically been memoized, as a potentially performance
+// sensitive task. If we can add memoization without breaking the behavior, we should.
+const getOperationFieldSupportMatrix = (props: Props): OperationFieldSupportMatrix => {
   const layerId = props.layerId;
   const currentIndexPattern = props.state.indexPatterns[props.state.layers[layerId].indexPatternId];
 
@@ -86,12 +87,7 @@ const getOperationFieldSupportMatrix = /* _.memoize( */ (
     operationByField: _.mapValues(supportedOperationsByField, _.uniq),
     fieldByOperation: _.mapValues(supportedFieldsByOperation, _.uniq),
   };
-}; /* ,
-
-  (props: Props) => {
-    return props.layerId + ' ' + props.columnId;
-  }
-);*/
+};
 
 export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPrivateState>) {
   const operationFieldSupportMatrix = getOperationFieldSupportMatrix(props);
