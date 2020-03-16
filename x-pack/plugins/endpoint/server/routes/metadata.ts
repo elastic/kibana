@@ -12,8 +12,9 @@ import {
   kibanaRequestToMetadataListESQuery,
   kibanaRequestToMetadataGetESQuery,
 } from '../services/endpoint/metadata_query_builders';
-import { EndpointMetadata, EndpointResultList } from '../../common/types';
+import { EndpointMetadata, EndpointResultList, EndpointAppConstants } from '../../common/types';
 import { EndpointAppContext } from '../types';
+import { getIndexPattern } from '../index_pattern';
 
 interface HitSource {
   _source: EndpointMetadata;
@@ -53,7 +54,15 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       try {
-        const queryParams = await kibanaRequestToMetadataListESQuery(req, endpointAppContext);
+        const queryParams = await kibanaRequestToMetadataListESQuery(
+          req,
+          endpointAppContext,
+          await getIndexPattern(
+            endpointAppContext.ingestManager.indexPatternService,
+            context.core.savedObjects.client,
+            EndpointAppConstants.METADATA_DATASET
+          )
+        );
         const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
           'search',
           queryParams
@@ -75,7 +84,15 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       try {
-        const query = kibanaRequestToMetadataGetESQuery(req, endpointAppContext);
+        const query = kibanaRequestToMetadataGetESQuery(
+          req,
+          endpointAppContext,
+          await getIndexPattern(
+            endpointAppContext.ingestManager.indexPatternService,
+            context.core.savedObjects.client,
+            EndpointAppConstants.METADATA_DATASET
+          )
+        );
         const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
           'search',
           query

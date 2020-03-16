@@ -9,7 +9,10 @@ import {
   kibanaRequestToMetadataListESQuery,
   kibanaRequestToMetadataGetESQuery,
 } from './metadata_query_builders';
+import { IndexPatternService } from '../../../../ingest_manager/server';
 import { EndpointAppConstants } from '../../../common/types';
+
+const indexPattern = 'metadata-endpoint-*';
 
 describe('query builder', () => {
   describe('MetadataListESQuery', () => {
@@ -17,10 +20,15 @@ describe('query builder', () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         body: {},
       });
-      const query = await kibanaRequestToMetadataListESQuery(mockRequest, {
-        logFactory: loggingServiceMock.create(),
-        config: () => Promise.resolve(EndpointConfigSchema.validate({})),
-      });
+      const query = await kibanaRequestToMetadataListESQuery(
+        mockRequest,
+        {
+          ingestManager: { indexPatternService: new IndexPatternService() },
+          logFactory: loggingServiceMock.create(),
+          config: () => Promise.resolve(EndpointConfigSchema.validate({})),
+        },
+        indexPattern
+      );
       expect(query).toEqual({
         body: {
           query: {
@@ -51,7 +59,7 @@ describe('query builder', () => {
         },
         from: 0,
         size: 10,
-        index: EndpointAppConstants.ENDPOINT_INDEX_NAME,
+        index: indexPattern,
       } as Record<string, any>);
     });
   });
@@ -63,10 +71,15 @@ describe('query builder', () => {
           filter: 'not host.ip:10.140.73.246',
         },
       });
-      const query = await kibanaRequestToMetadataListESQuery(mockRequest, {
-        logFactory: loggingServiceMock.create(),
-        config: () => Promise.resolve(EndpointConfigSchema.validate({})),
-      });
+      const query = await kibanaRequestToMetadataListESQuery(
+        mockRequest,
+        {
+          ingestManager: { indexPatternService: new IndexPatternService() },
+          logFactory: loggingServiceMock.create(),
+          config: () => Promise.resolve(EndpointConfigSchema.validate({})),
+        },
+        indexPattern
+      );
       expect(query).toEqual({
         body: {
           query: {
@@ -123,10 +136,15 @@ describe('query builder', () => {
           id: mockID,
         },
       });
-      const query = kibanaRequestToMetadataGetESQuery(mockRequest, {
-        logFactory: loggingServiceMock.create(),
-        config: () => Promise.resolve(EndpointConfigSchema.validate({})),
-      });
+      const query = kibanaRequestToMetadataGetESQuery(
+        mockRequest,
+        {
+          ingestManager: { indexPatternService: new IndexPatternService() },
+          logFactory: loggingServiceMock.create(),
+          config: () => Promise.resolve(EndpointConfigSchema.validate({})),
+        },
+        indexPattern
+      );
       expect(query).toEqual({
         body: {
           query: { match: { 'host.id.keyword': mockID } },

@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { KibanaRequest } from 'kibana/server';
-import { EndpointAppConstants } from '../../../common/types';
 import { EndpointAppContext } from '../../types';
 import { esKuery } from '../../../../../../src/plugins/data/server';
 
 export const kibanaRequestToMetadataListESQuery = async (
   request: KibanaRequest<any, any, any>,
-  endpointAppContext: EndpointAppContext
+  endpointAppContext: EndpointAppContext,
+  index: string
 ): Promise<Record<string, any>> => {
   const pagingProperties = await getPagingProperties(request, endpointAppContext);
   return {
@@ -41,7 +41,7 @@ export const kibanaRequestToMetadataListESQuery = async (
     },
     from: pagingProperties.pageIndex * pagingProperties.pageSize,
     size: pagingProperties.pageSize,
-    index: EndpointAppConstants.ENDPOINT_INDEX_NAME,
+    index,
   };
 };
 
@@ -76,7 +76,8 @@ function buildQueryBody(request: KibanaRequest<any, any, any>): Record<string, a
 
 export const kibanaRequestToMetadataGetESQuery = (
   request: KibanaRequest<any, any, any>,
-  endpointAppContext: EndpointAppContext
+  endpointAppContext: EndpointAppContext,
+  index: string
 ) => {
   return {
     body: {
@@ -94,6 +95,6 @@ export const kibanaRequestToMetadataGetESQuery = (
       ],
       size: 1,
     },
-    index: EndpointAppConstants.ENDPOINT_INDEX_NAME,
+    index,
   };
 };
