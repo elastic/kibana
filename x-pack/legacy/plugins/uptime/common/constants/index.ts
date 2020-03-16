@@ -13,3 +13,4 @@ export * from './capabilities';
 export { PLUGIN } from './plugin';
 export { QUERY, STATES } from './query';
 export * from './ui';
+export * from './rest_api';

@@ -9,7 +9,6 @@ import React, { useContext, useEffect } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import {
-  EmptyState,
   MonitorList,
   OverviewPageParsingErrorCallout,
   StatusPanel,
@@ -19,13 +18,13 @@ import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../../../plugins/observability/public';
 import { DataPublicPluginSetup, IIndexPattern } from '../../../../../../src/plugins/data/public';
 import { UptimeThemeContext } from '../contexts';
-import { FilterGroup, KueryBar } from '../components/connected';
+import { EmptyState, FilterGroup, KueryBar } from '../components/connected';
 import { useUpdateKueryString } from '../hooks';
 import { PageHeader } from './page_header';
 
 interface OverviewPageProps {
   autocomplete: DataPublicPluginSetup['autocomplete'];
-  indexPattern: IIndexPattern;
+  indexPattern: IIndexPattern | null;
   setEsKueryFilters: (esFilters: string) => void;
 }
 
@@ -81,7 +80,7 @@ export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFi
   return (
     <>
       <PageHeader headingText={heading} breadcrumbs={[]} datePicker={true} />
-      <EmptyState implementsCustomErrorState={true} variables={{}}>
+      <EmptyState>
         <EuiFlexGroup gutterSize="xs" wrap responsive>
           <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>
             <KueryBar autocomplete={autocomplete} data-test-subj="xpack.uptime.filterBar" />

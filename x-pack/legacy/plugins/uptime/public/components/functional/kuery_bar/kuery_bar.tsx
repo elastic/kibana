@@ -34,9 +34,12 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
 
 interface Props {
   autocomplete: DataPublicPluginSetup['autocomplete'];
-  'data-test-subj': string;
   loadIndexPattern: any;
   indexPattern: any;
+  'data-test-subj': string;
+  loadIndexPattern: () => void;
+  indexPattern: IIndexPattern | null;
+  loading: boolean;
 }
 
 export function KueryBarComponent({
@@ -44,6 +47,7 @@ export function KueryBarComponent({
   'data-test-subj': dataTestSubj,
   loadIndexPattern,
   indexPattern,
+  loading,
 }: Props) {
   useEffect(() => {
     if (!indexPattern) {
@@ -55,19 +59,13 @@ export function KueryBarComponent({
     suggestions: [],
     isLoadingIndexPattern: true,
   });
-  const [isLoadingIndexPattern, setIsLoadingIndexPattern] = useState<boolean>(true);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState<boolean>(false);
   let currentRequestCheck: string;
 
-  useEffect(() => {
-    if (indexPattern !== undefined) {
-      setIsLoadingIndexPattern(false);
-    }
-  }, [indexPattern]);
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { search: kuery } = getUrlParams();
 
-  const indexPatternMissing = !isLoadingIndexPattern && !indexPattern;
+  const indexPatternMissing = loading && !indexPattern;
 
   async function onChange(inputValue: string, selectionStart: number) {
     if (!indexPattern) {
@@ -127,7 +125,7 @@ export function KueryBarComponent({
       <Typeahead
         data-test-subj={dataTestSubj}
         disabled={indexPatternMissing}
-        isLoading={isLoadingSuggestions}
+        isLoading={isLoadingSuggestions || loading}
         initialValue={kuery}
         onChange={onChange}
         onSubmit={onSubmit}

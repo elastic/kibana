@@ -24,7 +24,6 @@ interface ReindexHandlerArgs {
   headers: Record<string, any>;
   credentialStore: CredentialStore;
   reindexOptions?: {
-    openAndClose?: boolean;
     enqueue?: boolean;
   };
 }
@@ -56,7 +55,6 @@ export const reindexHandler = async ({
 
   const opts: ReindexOptions | undefined = reindexOptions
     ? {
-        openAndClose: reindexOptions.openAndClose,
         queueSettings: reindexOptions.enqueue ? { queuedAt: Date.now() } : undefined,
       }
     : undefined;

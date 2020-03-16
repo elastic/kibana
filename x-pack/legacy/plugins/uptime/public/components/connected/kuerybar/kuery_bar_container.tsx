@@ -10,7 +10,7 @@ import { selectIndexPattern } from '../../../state/selectors';
 import { getIndexPattern } from '../../../state/actions';
 import { KueryBarComponent } from '../../functional/kuery_bar/kuery_bar';
 
-const mapStateToProps = (state: AppState) => ({ indexPattern: selectIndexPattern(state) });
+const mapStateToProps = (state: AppState) => ({ ...selectIndexPattern(state) });
 
 const mapDispatchToProps = (dispatch: any) => ({
   loadIndexPattern: () => {

@@ -10,7 +10,7 @@ export { showApiError, showApiWarning } from './api_errors';
 
 export { initRedirect, redirect } from './redirect';
 
-export { isSeedNodeValid, isSeedNodePortValid } from './validate_seed_node';
+export { isAddressValid, isPortValid } from './validate_address';
 
 export { extractQueryParams } from './query_params';
 

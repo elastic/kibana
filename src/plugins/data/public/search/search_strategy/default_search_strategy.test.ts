@@ -18,6 +18,7 @@
  */
 
 import { IUiSettingsClient } from '../../../../../core/public';
+import { ISearchStart } from '../types';
 import { SearchStrategySearchParams } from './types';
 import { defaultSearchStrategy } from './default_search_strategy';
 
@@ -62,10 +63,7 @@ describe('defaultSearchStrategy', function() {
           },
         ],
         esShardTimeout: 0,
-        searchService: {
-          aggs: {
-            calculateAutoTimeExpression: jest.fn().mockReturnValue('1d'),
-          },
+        searchService: ({
           search: newSearchMock,
           __LEGACY: {
             esClient: {
@@ -73,7 +71,7 @@ describe('defaultSearchStrategy', function() {
               msearch: msearchMock,
             },
           },
-        },
+        } as unknown) as jest.Mocked<ISearchStart>,
       };
 
       es = searchArgs.searchService.__LEGACY.esClient;

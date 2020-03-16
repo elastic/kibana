@@ -5,11 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import {
-  Ping,
-  PingResults,
-  StatesIndexStatus,
-} from '../../../../../legacy/plugins/uptime/common/graphql/types';
+import { Ping, PingResults } from '../../../../../legacy/plugins/uptime/common/graphql/types';
 import {
   GetFilterBarParams,
   GetLatestMonitorParams,
@@ -28,6 +24,7 @@ import {
   MonitorDetails,
   MonitorLocations,
   Snapshot,
+  StatesIndexStatus,
 } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 import { GetMonitorStatesResult } from './get_monitor_states';
 import { GetSnapshotCountParams } from './get_snapshot_counts';
