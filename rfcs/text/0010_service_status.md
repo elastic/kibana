@@ -218,23 +218,7 @@ The `summary` property is calculated as follows:
 
 ### Status inheritance
 
-By default, plugins inherit their status from all Core services and their dependencies on other plugins. The default status for a plugin follows this algorithm:
-```js
-// pseudo-code
-function getPluginStatus() {
-  if any core service is `critical`, return `critical`
-  else if any core service is `unavailable`, return `unavailable`
-  else if any core service is `degraded`, return `degraded`
-
-  if any required dep is `unavailable`, return `unavailable`
-  else if any required dep is `degraded`, return `degraded`
-
-  if any optional dep is `unavailable`, return `degraded`
-  else if any optional dep is `degraded`, return `degraded`
-
-  return 'available'
-}
-```
+By default, plugins inherit their status from all Core services and their dependencies on other plugins.
 
 This can be summarized by the following matrix:
 
