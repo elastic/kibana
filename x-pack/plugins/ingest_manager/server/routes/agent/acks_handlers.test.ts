@@ -89,12 +89,6 @@ describe('test acks handlers', () => {
     expect(mockResponse.ok.mock.calls[0][0]?.body as PostAgentAcksResponse).toEqual({
       action: 'acks',
       success: true,
-      items: [
-        {
-          type: 'CONFIG_CHANGE',
-          id: 'action1',
-        },
-      ],
     });
   });
 });

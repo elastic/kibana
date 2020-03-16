@@ -79,7 +79,6 @@ export interface PostAgentAcksRequest {
 export interface PostAgentAcksResponse {
   action: string;
   success: boolean;
-  items: AgentAction[];
 }
 
 export interface PostAgentUnenrollRequest {
