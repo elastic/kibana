@@ -219,15 +219,10 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
       <EuiPopover
         button={
           <EuiButtonIcon
-            data-test-subj="dedupKeyAddVariableButton"
+            data-test-subj={`${buttonName}AddVariableButton`}
             onClick={() => setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, dedupKey: true })}
             iconType="indexOpen"
-            aria-label={i18n.translate(
-              `xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.${buttonName}`,
-              {
-                defaultMessage: 'Add variable',
-              }
-            )}
+            aria-label={buttonName}
           />
         }
         isOpen={isVariablesPopoverOpen[paramsProperty]}
@@ -297,7 +292,15 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
                 defaultMessage: 'DedupKey (optional)',
               }
             )}
-            labelAppend={getAddVariableComponent('dedupKey', 'addVariablePopoverButton1')}
+            labelAppend={getAddVariableComponent(
+              'dedupKey',
+              i18n.translate(
+                'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariablePopoverButton1',
+                {
+                  defaultMessage: 'Add variable',
+                }
+              )
+            )}
           >
             <EuiFieldText
               fullWidth
@@ -324,7 +327,15 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
                 defaultMessage: 'Timestamp (optional)',
               }
             )}
-            labelAppend={getAddVariableComponent('timestamp', 'addVariablePopoverButton2')}
+            labelAppend={getAddVariableComponent(
+              'timestamp',
+              i18n.translate(
+                'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariablePopoverButton2',
+                {
+                  defaultMessage: 'Add variable',
+                }
+              )
+            )}
           >
             <EuiFieldText
               fullWidth
@@ -351,7 +362,15 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Component (optional)',
           }
         )}
-        labelAppend={getAddVariableComponent('component', 'addVariablePopoverButton7')}
+        labelAppend={getAddVariableComponent(
+          'component',
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariablePopoverButton3',
+            {
+              defaultMessage: 'Add variable',
+            }
+          )
+        )}
       >
         <EuiFieldText
           fullWidth
@@ -376,7 +395,15 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Group (optional)',
           }
         )}
-        labelAppend={getAddVariableComponent('group', 'addVariablePopoverButton3')}
+        labelAppend={getAddVariableComponent(
+          'group',
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariablePopoverButton4',
+            {
+              defaultMessage: 'Add variable',
+            }
+          )
+        )}
       >
         <EuiFieldText
           fullWidth
@@ -401,7 +428,15 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Source (optional)',
           }
         )}
-        labelAppend={getAddVariableComponent('source', 'addVariablePopoverButton6')}
+        labelAppend={getAddVariableComponent(
+          'source',
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariablePopoverButton5',
+            {
+              defaultMessage: 'Add variable',
+            }
+          )
+        )}
       >
         <EuiFieldText
           fullWidth
@@ -429,7 +464,15 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Summary',
           }
         )}
-        labelAppend={getAddVariableComponent('summary', 'addVariablePopoverButton4')}
+        labelAppend={getAddVariableComponent(
+          'summary',
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariablePopoverButton6',
+            {
+              defaultMessage: 'Add variable',
+            }
+          )
+        )}
       >
         <EuiFieldText
           fullWidth
@@ -456,7 +499,15 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Class (optional)',
           }
         )}
-        labelAppend={getAddVariableComponent('class', 'addVariablePopoverButton5')}
+        labelAppend={getAddVariableComponent(
+          'class',
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariablePopoverButton7',
+            {
+              defaultMessage: 'Add variable',
+            }
+          )
+        )}
       >
         <EuiFieldText
           fullWidth
