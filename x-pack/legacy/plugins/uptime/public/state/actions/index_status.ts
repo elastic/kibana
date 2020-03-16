@@ -4,4 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { EmptyState } from './empty_state';
+import { createAsyncAction } from './utils';
+import { StatesIndexStatus } from '../../../common/runtime_types';
+
+export const indexStatusAction = createAsyncAction<StatesIndexStatus & Error>('GET INDEX STATUS');
