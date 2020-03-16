@@ -22,6 +22,18 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
         type: 'serverReturnedPolicyDetailsData',
         payload: {
           policyItem,
+          policyConfig: {
+            windows: {
+              malware: {
+                mode: 'detect',
+              },
+              eventing: {
+                process: true,
+              },
+            },
+            mac: {},
+            linux: {},
+          },
         },
       });
     }

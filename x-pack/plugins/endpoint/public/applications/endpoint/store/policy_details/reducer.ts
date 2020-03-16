@@ -21,6 +21,18 @@ const initialPolicyDetailsState = (): PolicyDetailsState => {
       updated_by: '',
       updated: '',
     },
+    policyConfig: {
+      windows: {
+        malware: {
+          mode: 'detect',
+        },
+        eventing: {
+          process: true,
+        },
+      },
+      mac: {},
+      linux: {},
+    },
     isLoading: false,
   };
 };
@@ -41,6 +53,13 @@ export const policyDetailsReducer: Reducer<PolicyDetailsState, AppAction> = (
     return {
       ...state,
       location: action.payload,
+    };
+  }
+
+  if (action.type === 'userChangedPolicyConfig') {
+    return {
+      ...state,
+      policyConfig: action.payload.policyConfig,
     };
   }
 

@@ -80,15 +80,37 @@ export interface PolicyListState {
 }
 
 /**
- * Policy list store state
+ * Policy details store state
  */
 export interface PolicyDetailsState {
   /** A single policy item  */
   policyItem: PolicyData | undefined;
   /** data is being retrieved from server */
+  policyConfig: PolicyDetailsConfig;
   isLoading: boolean;
   /** current location of the application */
   location?: Immutable<EndpointAppLocation>;
+}
+
+export interface PolicyDetailsConfig {
+  windows: WindowsPolicyConfig;
+  mac: {};
+  linux: {};
+}
+
+// export type PolicyConfig = Record<'windows' | 'mac' | 'linux', WindowsPolicyConfig | {}>
+
+export interface WindowsPolicyConfig {
+  malware: MalwareConfig;
+  eventing: WindowsEventingConfig;
+}
+
+export interface MalwareConfig {
+  mode: string;
+}
+
+export interface WindowsEventingConfig {
+  process: boolean;
 }
 
 export interface GlobalState {

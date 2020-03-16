@@ -9,6 +9,7 @@ import { EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import { selectPolicyDetails } from '../../store/policy_details/selectors';
+import { Eventing } from './policy_forms/eventing';
 
 export const PolicyDetails = React.memo(() => {
   const policyItem = usePolicyDetailsSelector(selectPolicyDetails);
@@ -29,8 +30,11 @@ export const PolicyDetails = React.memo(() => {
   }
 
   return (
-    <EuiTitle size="l">
-      <h1 data-test-subj="policyDetailsViewTitle">{policyName()}</h1>
-    </EuiTitle>
+    <>
+      <EuiTitle size="l">
+        <h1 data-test-subj="policyDetailsViewTitle">{policyName()}</h1>
+      </EuiTitle>
+      <Eventing />
+    </>
   );
 });

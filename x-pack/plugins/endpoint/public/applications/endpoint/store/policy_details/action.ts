@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PolicyData } from '../../types';
+import { PolicyData, PolicyDetailsConfig } from '../../types';
 
 interface ServerReturnedPolicyDetailsData {
   type: 'serverReturnedPolicyDetailsData';
@@ -13,4 +13,11 @@ interface ServerReturnedPolicyDetailsData {
   };
 }
 
-export type PolicyDetailsAction = ServerReturnedPolicyDetailsData;
+interface UserChangedPolicyConfig {
+  type: 'userChangedPolicyConfig';
+  payload: {
+    policyConfig: PolicyDetailsConfig;
+  };
+}
+
+export type PolicyDetailsAction = ServerReturnedPolicyDetailsData | UserChangedPolicyConfig;
