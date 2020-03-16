@@ -17,10 +17,12 @@
  * under the License.
  */
 
-import { Subject } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { BehaviorSubject, fromEvent, throwError } from 'rxjs';
+import { mergeMap, takeUntil, finalize } from 'rxjs/operators';
+import { getCombinedSignal } from '../../common/utils';
 import { IKibanaSearchRequest } from '../../common/search';
-import { ISearch, ISearchOptions } from './i_search';
+import { ISearchGeneric, ISearchOptions } from './i_search';
+import { RequestTimeoutError } from './request_timeout_error';
 
 export class SearchInterceptor {
   /**
@@ -29,54 +31,91 @@ export class SearchInterceptor {
   private abortController = new AbortController();
 
   /**
-   * Number of in-progress search requests.
-   */
-  private pendingCount: number = 0;
-
-  /**
    * Observable that emits when the number of pending requests changes.
    */
-  private pendingCount$: Subject<number> = new Subject();
+  private pendingCount$ = new BehaviorSubject(0);
+
+  /**
+   * The IDs from `setTimeout` when scheduling the automatic timeout for each request.
+   */
+  private timeoutIds: Set<number> = new Set();
+
+  /**
+   * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
+   * requests are initiated that they should automatically cancel.
+   * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
+   */
+  constructor(private readonly requestTimeout?: number) {}
 
   /**
    * Abort our `AbortController`, which in turn aborts any intercepted searches.
    */
-  cancelPending = () => {
+  public cancelPending = () => {
     this.abortController.abort();
     this.abortController = new AbortController();
   };
 
   /**
-   * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort
-   * either when `cancelPending` is called, or when the original `AbortSignal` is aborted. Updates
-   * the `pendingCount` when the request is started/finalized.
+   * Un-schedule timing out all of the searches intercepted.
    */
-  search = (search: ISearch<any>, request: IKibanaSearchRequest, options?: ISearchOptions) => {
-    this.pendingCount$.next(++this.pendingCount);
-
-    // Create a new `AbortController` that will abort when our either our private `AbortController`
-    // aborts, or the given `AbortSignal` aborts.
-    const abortController = new AbortController();
-    if (options?.signal) {
-      options.signal.addEventListener('abort', () => {
-        abortController.abort();
-      });
-    }
-    this.abortController.signal.addEventListener('abort', () => {
-      abortController.abort();
-    });
-    const { signal } = abortController;
-
-    return search(request as any, { ...options, signal }).pipe(
-      finalize(() => this.pendingCount$.next(--this.pendingCount))
-    );
+  public runBeyondTimeout = () => {
+    this.timeoutIds.forEach(clearTimeout);
+    this.timeoutIds.clear();
   };
 
   /**
-   * Returns the current number of pending searches. This could mean either one of the search
-   * requests is still in flight, or that it has only received partial responses.
+   * Returns an `Observable` over the current number of pending searches. This could mean that one
+   * of the search requests is still in flight, or that it has only received partial responses.
    */
-  getPendingCount$ = () => {
+  public getPendingCount$ = () => {
     return this.pendingCount$.asObservable();
   };
+
+  /**
+   * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort
+   * either when `cancelPending` is called, when the request times out, or when the original
+   * `AbortSignal` is aborted. Updates the `pendingCount` when the request is started/finalized.
+   */
+  public search = (
+    search: ISearchGeneric,
+    request: IKibanaSearchRequest,
+    options?: ISearchOptions
+  ) => {
+    // Schedule this request to automatically timeout after some interval
+    const timeoutController = new AbortController();
+    const { signal: timeoutSignal } = timeoutController;
+    const timeoutId = window.setTimeout(() => {
+      timeoutController.abort();
+    }, this.requestTimeout);
+    this.addTimeoutId(timeoutId);
+
+    // Get a combined `AbortSignal` that will be aborted whenever the first of the following occurs:
+    // 1. The user manually aborts (via `cancelPending`)
+    // 2. The request times out
+    // 3. The passed-in signal aborts (e.g. when re-fetching, or whenever the app determines)
+    const signals = [this.abortController.signal, timeoutSignal, options?.signal].filter(
+      Boolean
+    ) as AbortSignal[];
+    const combinedSignal = getCombinedSignal(signals);
+
+    // If the request timed out, throw a `RequestTimeoutError`
+    const timeoutError$ = fromEvent(timeoutSignal, 'abort').pipe(
+      mergeMap(() => throwError(new RequestTimeoutError()))
+    );
+
+    return search(request as any, { ...options, signal: combinedSignal }).pipe(
+      takeUntil(timeoutError$),
+      finalize(() => this.removeTimeoutId(timeoutId))
+    );
+  };
+
+  private addTimeoutId(id: number) {
+    this.timeoutIds.add(id);
+    this.pendingCount$.next(this.timeoutIds.size);
+  }
+
+  private removeTimeoutId(id: number) {
+    this.timeoutIds.delete(id);
+    this.pendingCount$.next(this.timeoutIds.size);
+  }
 }

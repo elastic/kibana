@@ -35,6 +35,7 @@ export const searchStartMock: jest.Mocked<ISearchStart> = {
       subscribe: jest.fn(),
     } as any;
   }),
+  runBeyondTimeout: jest.fn(),
   aggs: searchAggsStartMock(),
   search: jest.fn(),
   __LEGACY: {

@@ -17,20 +17,14 @@
  * under the License.
  */
 
-export { ISearchSetup } from './i_search_setup';
-
-export { ISearchContext } from './i_search_context';
-
-export {
-  ISearch,
-  ISearchCancel,
-  ISearchOptions,
-  IRequestTypesMap,
-  IResponseTypesMap,
-} from './i_search';
-
-export { TStrategyTypes } from './strategy_types';
-
-export { TSearchStrategyProvider } from './i_search_strategy';
-
-export { getDefaultSearchParams } from './es_search';
+/**
+ * Class used to signify that a request timed out. Useful for applications to conditionally handle
+ * this type of error differently than other errors.
+ */
+export class RequestTimeoutError extends Error {
+  constructor(message = 'Request timed out') {
+    super(message);
+    this.message = message;
+    this.name = 'RequestTimeoutError';
+  }
+}

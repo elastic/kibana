@@ -26,3 +26,4 @@ export * from './query';
 export * from './search';
 export * from './search/aggs';
 export * from './types';
+export * from './utils';
