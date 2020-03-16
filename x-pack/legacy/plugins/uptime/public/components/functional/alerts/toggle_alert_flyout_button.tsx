@@ -7,6 +7,7 @@
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   setAlertFlyoutVisible: (value: boolean) => void;
@@ -14,6 +15,8 @@ interface Props {
 
 export const ToggleAlertFlyoutButtonComponent = ({ setAlertFlyoutVisible }: Props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const kibana = useKibana();
+
   return (
     <EuiPopover
       button={
@@ -25,7 +28,7 @@ export const ToggleAlertFlyoutButtonComponent = ({ setAlertFlyoutVisible }: Prop
         >
           <FormattedMessage
             id="xpack.uptime.alerts.toggleAlertFlyoutButtonText"
-            defaultMessage="Manage alerts"
+            defaultMessage="Alerting"
           />
         </EuiButtonEmpty>
       }
@@ -48,6 +51,19 @@ export const ToggleAlertFlyoutButtonComponent = ({ setAlertFlyoutVisible }: Prop
           </EuiContextMenuItem>,
         ]}
       />
+      <EuiContextMenuItem
+        data-test-subj="xpack.uptime.navigateToAlertingUi"
+        icon="gear"
+        key="navigate-to-alerting"
+        href={kibana.services?.application?.getUrlForApp(
+          'kibana#/management/kibana/triggersActions/alerts'
+        )}
+      >
+        <FormattedMessage
+          id="xpack.uptime.navigateToAlertingButton.content"
+          defaultMessage="Manage alerts"
+        />
+      </EuiContextMenuItem>
     </EuiPopover>
   );
 };
