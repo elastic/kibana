@@ -20,13 +20,15 @@ import {
   getQuery,
   getDataRequestDescriptor,
 } from '../selectors/map_selectors';
-import { FLYOUT_STATE } from '../reducers/ui';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { FLYOUT_STATE } from '../../../../../plugins/maps/public/reducers/ui';
 import {
   cancelRequest,
   registerCancelCallback,
   unregisterCancelCallback,
   getEventHandlers,
-} from '../reducers/non_serializable_instances';
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import { updateFlyout } from '../actions/ui_actions';
 import {
   FEATURE_ID_PROPERTY_NAME,
@@ -34,48 +36,52 @@ import {
   SOURCE_DATA_ID_ORIGIN,
 } from '../../common/constants';
 
-export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
-export const SET_TRANSIENT_LAYER = 'SET_TRANSIENT_LAYER';
-export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
-export const ADD_LAYER = 'ADD_LAYER';
-export const SET_LAYER_ERROR_STATUS = 'SET_LAYER_ERROR_STATUS';
-export const ADD_WAITING_FOR_MAP_READY_LAYER = 'ADD_WAITING_FOR_MAP_READY_LAYER';
-export const CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST = 'CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST';
-export const REMOVE_LAYER = 'REMOVE_LAYER';
-export const SET_LAYER_VISIBILITY = 'SET_LAYER_VISIBILITY';
-export const MAP_EXTENT_CHANGED = 'MAP_EXTENT_CHANGED';
-export const MAP_READY = 'MAP_READY';
-export const MAP_DESTROYED = 'MAP_DESTROYED';
-export const LAYER_DATA_LOAD_STARTED = 'LAYER_DATA_LOAD_STARTED';
-export const LAYER_DATA_LOAD_ENDED = 'LAYER_DATA_LOAD_ENDED';
-export const LAYER_DATA_LOAD_ERROR = 'LAYER_DATA_LOAD_ERROR';
-export const UPDATE_SOURCE_DATA_REQUEST = 'UPDATE_SOURCE_DATA_REQUEST';
-export const SET_JOINS = 'SET_JOINS';
-export const SET_QUERY = 'SET_QUERY';
-export const TRIGGER_REFRESH_TIMER = 'TRIGGER_REFRESH_TIMER';
-export const UPDATE_LAYER_PROP = 'UPDATE_LAYER_PROP';
-export const UPDATE_LAYER_STYLE = 'UPDATE_LAYER_STYLE';
-export const SET_LAYER_STYLE_META = 'SET_LAYER_STYLE_META';
-export const TOUCH_LAYER = 'TOUCH_LAYER';
-export const UPDATE_SOURCE_PROP = 'UPDATE_SOURCE_PROP';
-export const SET_REFRESH_CONFIG = 'SET_REFRESH_CONFIG';
-export const SET_MOUSE_COORDINATES = 'SET_MOUSE_COORDINATES';
-export const CLEAR_MOUSE_COORDINATES = 'CLEAR_MOUSE_COORDINATES';
-export const SET_GOTO = 'SET_GOTO';
-export const CLEAR_GOTO = 'CLEAR_GOTO';
-export const TRACK_CURRENT_LAYER_STATE = 'TRACK_CURRENT_LAYER_STATE';
-export const ROLLBACK_TO_TRACKED_LAYER_STATE = 'ROLLBACK_TO_TRACKED_LAYER_STATE';
-export const REMOVE_TRACKED_LAYER_STATE = 'REMOVE_TRACKED_LAYER_STATE';
-export const SET_OPEN_TOOLTIPS = 'SET_OPEN_TOOLTIPS';
-export const UPDATE_DRAW_STATE = 'UPDATE_DRAW_STATE';
-export const SET_SCROLL_ZOOM = 'SET_SCROLL_ZOOM';
-export const SET_MAP_INIT_ERROR = 'SET_MAP_INIT_ERROR';
-export const SET_INTERACTIVE = 'SET_INTERACTIVE';
-export const DISABLE_TOOLTIP_CONTROL = 'DISABLE_TOOLTIP_CONTROL';
-export const HIDE_TOOLBAR_OVERLAY = 'HIDE_TOOLBAR_OVERLAY';
-export const HIDE_LAYER_CONTROL = 'HIDE_LAYER_CONTROL';
-export const HIDE_VIEW_CONTROL = 'HIDE_VIEW_CONTROL';
-export const SET_WAITING_FOR_READY_HIDDEN_LAYERS = 'SET_WAITING_FOR_READY_HIDDEN_LAYERS';
+import {
+  SET_SELECTED_LAYER,
+  SET_TRANSIENT_LAYER,
+  UPDATE_LAYER_ORDER,
+  ADD_LAYER,
+  SET_LAYER_ERROR_STATUS,
+  ADD_WAITING_FOR_MAP_READY_LAYER,
+  CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
+  REMOVE_LAYER,
+  SET_LAYER_VISIBILITY,
+  MAP_EXTENT_CHANGED,
+  MAP_READY,
+  MAP_DESTROYED,
+  LAYER_DATA_LOAD_STARTED,
+  LAYER_DATA_LOAD_ENDED,
+  LAYER_DATA_LOAD_ERROR,
+  UPDATE_SOURCE_DATA_REQUEST,
+  SET_JOINS,
+  SET_QUERY,
+  TRIGGER_REFRESH_TIMER,
+  UPDATE_LAYER_PROP,
+  UPDATE_LAYER_STYLE,
+  SET_LAYER_STYLE_META,
+  UPDATE_SOURCE_PROP,
+  SET_REFRESH_CONFIG,
+  SET_MOUSE_COORDINATES,
+  CLEAR_MOUSE_COORDINATES,
+  SET_GOTO,
+  CLEAR_GOTO,
+  TRACK_CURRENT_LAYER_STATE,
+  ROLLBACK_TO_TRACKED_LAYER_STATE,
+  REMOVE_TRACKED_LAYER_STATE,
+  SET_OPEN_TOOLTIPS,
+  UPDATE_DRAW_STATE,
+  SET_SCROLL_ZOOM,
+  SET_MAP_INIT_ERROR,
+  SET_INTERACTIVE,
+  DISABLE_TOOLTIP_CONTROL,
+  HIDE_TOOLBAR_OVERLAY,
+  HIDE_LAYER_CONTROL,
+  HIDE_VIEW_CONTROL,
+  SET_WAITING_FOR_READY_HIDDEN_LAYERS,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/actions/map_actions';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+export * from '../../../../../plugins/maps/public/actions/map_actions';
 
 function getLayerLoadingCallbacks(dispatch, getState, layerId) {
   return {
