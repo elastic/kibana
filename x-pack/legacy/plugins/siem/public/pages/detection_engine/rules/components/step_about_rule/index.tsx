@@ -127,7 +127,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   }, [form]);
 
   return isReadOnlyView && myStepData.name != null ? (
-    <StepContentWrapper addPadding={addPadding}>
+    <StepContentWrapper data-test-subj="aboutStep" addPadding={addPadding}>
       <StepRuleDescription columns={descriptionColumns} schema={schema} data={myStepData} />
     </StepContentWrapper>
   ) : (

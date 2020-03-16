@@ -155,7 +155,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, []);
 
   return isReadOnlyView && myStepData?.queryBar != null ? (
-    <StepContentWrapper addPadding={addPadding}>
+    <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
         columns={descriptionColumns}
         indexPatterns={indexPatternQueryBar as IIndexPattern}
