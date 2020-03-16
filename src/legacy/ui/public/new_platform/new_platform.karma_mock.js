@@ -322,6 +322,9 @@ export const npStart = {
         getHideWriteControls: sinon.fake(),
       },
     },
+    dashboard: {
+      getSavedDashboardLoader: sinon.fake(),
+    },
     data: {
       actions: {
         createFiltersFromEvent: Promise.resolve(['yes']),

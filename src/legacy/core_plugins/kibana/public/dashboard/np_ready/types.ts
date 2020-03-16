@@ -25,18 +25,10 @@ import {
   RawSavedDashboardPanel630,
   RawSavedDashboardPanel640To720,
   RawSavedDashboardPanel730ToLatest,
-} from '../migrations/types';
+} from '../../../../../../plugins/dashboard/public';
 import { Query, Filter } from '../../../../../../plugins/data/public';
 
 export type NavAction = (anchorElement?: any) => void;
-
-export interface GridData {
-  w: number;
-  h: number;
-  x: number;
-  y: number;
-  i: string;
-}
 
 /**
  * This should always represent the latest dashboard panel shape, after all possible migrations.

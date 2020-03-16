@@ -20,16 +20,11 @@ import {
   createSavedObjectClass,
   SavedObject,
   SavedObjectKibanaServices,
-} from '../../../../../../plugins/saved_objects/public';
+} from '../../../../plugins/saved_objects/public';
 import { extractReferences, injectReferences } from './saved_dashboard_references';
 
-import {
-  Filter,
-  ISearchSource,
-  Query,
-  RefreshInterval,
-} from '../../../../../../plugins/data/public';
-import { createDashboardEditUrl } from '..';
+import { Filter, ISearchSource, Query, RefreshInterval } from '../../../../plugins/data/public';
+import { createDashboardEditUrl } from '../dashboard_constants';
 
 export interface SavedObjectDashboard extends SavedObject {
   id?: string;
@@ -49,7 +44,9 @@ export interface SavedObjectDashboard extends SavedObject {
 }
 
 // Used only by the savedDashboards service, usually no reason to change this
-export function createSavedDashboardClass(services: SavedObjectKibanaServices) {
+export function createSavedDashboardClass(
+  services: SavedObjectKibanaServices
+): new (id: string) => SavedObjectDashboard {
   const SavedObjectClass = createSavedObjectClass(services);
   class SavedDashboard extends SavedObjectClass {
     // save these objects with the 'dashboard' type
@@ -121,5 +118,7 @@ export function createSavedDashboardClass(services: SavedObjectKibanaServices) {
     }
   }
 
-  return SavedDashboard;
+  // Unfortunately this throws a typescript error without the casting.  I think it's due to the
+  // convoluted way SavedObjects are created.
+  return (SavedDashboard as unknown) as new (id: string) => SavedObjectDashboard;
 }

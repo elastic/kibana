@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { RefreshInterval, TimefilterContract } from 'src/plugins/data/public';
 import { FilterUtils } from './filter_utils';
-import { SavedObjectDashboard } from '../../saved_dashboard/saved_dashboard';
+import { SavedObjectDashboard } from '../../../../../../../plugins/dashboard/public';
 import { DashboardAppState } from '../types';
 
 export function updateSavedDashboard(

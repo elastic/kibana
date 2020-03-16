@@ -23,7 +23,10 @@ import { Observable, Subscription } from 'rxjs';
 import { Moment } from 'moment';
 import { History } from 'history';
 
-import { DashboardContainer } from 'src/plugins/dashboard/public';
+import {
+  DashboardContainer,
+  SavedObjectDashboard,
+} from '../../../../../../plugins/dashboard/public';
 import { ViewMode } from '../../../../../../plugins/embeddable/public';
 import { migrateLegacyQuery } from '../legacy_imports';
 import {
@@ -35,8 +38,6 @@ import {
 import { getAppStateDefaults, migrateAppState } from './lib';
 import { convertPanelStateToSavedDashboardPanel } from './lib/embeddable_saved_object_converters';
 import { FilterUtils } from './lib/filter_utils';
-import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
-
 import {
   DashboardAppState,
   DashboardAppStateDefaults,
