@@ -35,6 +35,8 @@ const compareEvents = (
   return true;
 };
 
+export type DynamicActionManagerState = State;
+
 export interface DynamicActionManagerParams {
   storage: ActionStorage;
   uiActions: Pick<

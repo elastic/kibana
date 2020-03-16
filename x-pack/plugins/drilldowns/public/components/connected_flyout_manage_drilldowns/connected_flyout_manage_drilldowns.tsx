@@ -5,7 +5,6 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import useMount from 'react-use/lib/useMount';
 import useMountedState from 'react-use/lib/useMountedState';
 import {
   AdvancedUiActionsActionFactory as ActionFactory,
@@ -20,6 +19,7 @@ import {
   UiActionsSerializedEvent,
   UiActionsSerializedAction,
 } from '../../../../../../src/plugins/ui_actions/public';
+import { useContainerState } from '../../../../../../src/plugins/kibana_utils/common';
 import { DrilldownListItem } from '../list_manage_drilldowns';
 import {
   toastDrilldownCreated,
@@ -27,7 +27,6 @@ import {
   toastDrilldownEdited,
   toastDrilldownsCRUDError,
   toastDrilldownsDeleted,
-  toastDrilldownsFetchError,
 } from './i18n';
 
 interface ConnectedFlyoutManageDrilldownsProps<Context extends object = object> {
@@ -243,8 +242,8 @@ function useDrilldownsStateManager(
   actionManager: DynamicActionManager,
   notifications: NotificationsStart
 ) {
+  const { events: drilldowns } = useContainerState(actionManager.state);
   const [isLoading, setIsLoading] = useState(false);
-  const [drilldowns, setDrilldowns] = useState<readonly UiActionsSerializedEvent[]>();
   const isMounted = useMountedState();
 
   async function run(op: () => Promise<void>) {
@@ -259,35 +258,7 @@ function useDrilldownsStateManager(
       setIsLoading(false);
       return;
     }
-
-    await reload();
   }
-
-  async function reload() {
-    if (!isMounted) {
-      // don't do any side effects anymore because component is already unmounted
-      return;
-    }
-    if (!isLoading) {
-      setIsLoading(true);
-    }
-    try {
-      const drilldownsList = await actionManager.list();
-      if (!isMounted) {
-        return;
-      }
-      setDrilldowns(drilldownsList);
-      setIsLoading(false);
-    } catch (e) {
-      notifications.toasts.addError(e, {
-        title: toastDrilldownsFetchError,
-      });
-    }
-  }
-
-  useMount(() => {
-    reload();
-  });
 
   async function createDrilldown(action: UiActionsSerializedAction<any>, triggerId?: string) {
     await run(async () => {

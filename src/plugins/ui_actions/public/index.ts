@@ -35,6 +35,7 @@ export {
   AbstractActionStorage as UiActionsAbstractActionStorage,
   createAction,
   DynamicActionManager,
+  DynamicActionManagerState,
   IncompatibleActionError,
   SerializedAction as UiActionsSerializedAction,
   SerializedEvent as UiActionsSerializedEvent,
