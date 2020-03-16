@@ -12,3 +12,17 @@ export const txtChooseDestinationDashboard = i18n.translate(
     defaultMessage: 'Choose destination dashboard',
   }
 );
+
+export const txtUseCurrentFilters = i18n.translate(
+  'xpack.dashboard.components.DashboardDrilldownConfig.useCurrentFilters',
+  {
+    defaultMessage: "Use current dashboard's filters",
+  }
+);
+
+export const txtUseCurrentDateRange = i18n.translate(
+  'xpack.dashboard.components.DashboardDrilldownConfig.useCurrentDateRange',
+  {
+    defaultMessage: "Use current dashboard's date range",
+  }
+);

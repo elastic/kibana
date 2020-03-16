@@ -5,17 +5,16 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSwitch, EuiComboBox } from '@elastic/eui';
-import { txtChooseDestinationDashboard } from './i18n';
-
-export interface DashboardItem {
-  id: string;
-  title: string;
-}
+import { EuiFormRow, EuiSwitch, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import {
+  txtChooseDestinationDashboard,
+  txtUseCurrentFilters,
+  txtUseCurrentDateRange,
+} from './i18n';
 
 export interface DashboardDrilldownConfigProps {
   activeDashboardId?: string;
-  dashboards: DashboardItem[];
+  dashboards: Array<EuiComboBoxOptionOption<string>>;
   currentFilters?: boolean;
   keepRange?: boolean;
   onDashboardSelect: (dashboardId: string) => void;
@@ -36,9 +35,8 @@ export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> =
   onSearchChange,
   isLoading,
 }) => {
-  // TODO: use i18n below.
-  // todo - don't assume selectedTitle is in set
-  const selectedTitle = dashboards.find(item => item.id === activeDashboardId)?.title || '';
+  const selectedTitle = dashboards.find(item => item.value === activeDashboardId)?.label || '';
+
   return (
     <>
       <EuiFormRow label={txtChooseDestinationDashboard}>
@@ -47,7 +45,7 @@ export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> =
           selectedOptions={
             activeDashboardId ? [{ label: selectedTitle, value: activeDashboardId }] : []
           }
-          options={dashboards.map(({ id, title }) => ({ label: title, value: id }))}
+          options={dashboards}
           onChange={([{ value = '' } = { value: '' }]) => onDashboardSelect(value)}
           onSearchChange={onSearchChange}
           isLoading={isLoading}
@@ -58,7 +56,7 @@ export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> =
         <EuiFormRow hasChildLabel={false}>
           <EuiSwitch
             name="useCurrentFilters"
-            label="Use current dashboard's filters"
+            label={txtUseCurrentFilters}
             checked={!!currentFilters}
             onChange={onCurrentFiltersToggle}
           />
@@ -68,7 +66,7 @@ export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> =
         <EuiFormRow hasChildLabel={false}>
           <EuiSwitch
             name="useCurrentDateRange"
-            label="Use current dashboard's date range"
+            label={txtUseCurrentDateRange}
             checked={!!keepRange}
             onChange={onKeepRangeToggle}
           />

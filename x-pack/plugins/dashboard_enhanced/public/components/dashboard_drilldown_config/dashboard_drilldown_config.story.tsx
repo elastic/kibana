@@ -30,6 +30,8 @@ const InteractiveDemo: React.FC = () => {
       onDashboardSelect={id => setActiveDashboardId(id)}
       onCurrentFiltersToggle={() => setCurrentFilters(old => !old)}
       onKeepRangeToggle={() => setKeepRange(old => !old)}
+      onSearchChange={() => {}}
+      isLoading={false}
     />
   );
 };
@@ -40,6 +42,8 @@ storiesOf('components/DashboardDrilldownConfig', module)
       activeDashboardId={'dashboard2'}
       dashboards={dashboards}
       onDashboardSelect={e => console.log('onDashboardSelect', e)}
+      onSearchChange={() => {}}
+      isLoading={false}
     />
   ))
   .add('with switches', () => (
@@ -49,6 +53,8 @@ storiesOf('components/DashboardDrilldownConfig', module)
       onDashboardSelect={e => console.log('onDashboardSelect', e)}
       onCurrentFiltersToggle={() => console.log('onCurrentFiltersToggle')}
       onKeepRangeToggle={() => console.log('onKeepRangeToggle')}
+      onSearchChange={() => {}}
+      isLoading={false}
     />
   ))
   .add('interactive demo', () => <InteractiveDemo />);
