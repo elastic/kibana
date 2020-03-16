@@ -49,21 +49,21 @@ export const ToggleAlertFlyoutButtonComponent = ({ setAlertFlyoutVisible }: Prop
               defaultMessage="Create alert"
             />
           </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            data-test-subj="xpack.uptime.navigateToAlertingUi"
+            icon="gear"
+            key="navigate-to-alerting"
+            href={kibana.services?.application?.getUrlForApp(
+              'kibana#/management/kibana/triggersActions/alerts'
+            )}
+          >
+            <FormattedMessage
+              id="xpack.uptime.navigateToAlertingButton.content"
+              defaultMessage="Manage alerts"
+            />
+          </EuiContextMenuItem>,
         ]}
       />
-      <EuiContextMenuItem
-        data-test-subj="xpack.uptime.navigateToAlertingUi"
-        icon="gear"
-        key="navigate-to-alerting"
-        href={kibana.services?.application?.getUrlForApp(
-          'kibana#/management/kibana/triggersActions/alerts'
-        )}
-      >
-        <FormattedMessage
-          id="xpack.uptime.navigateToAlertingButton.content"
-          defaultMessage="Manage alerts"
-        />
-      </EuiContextMenuItem>
     </EuiPopover>
   );
 };
