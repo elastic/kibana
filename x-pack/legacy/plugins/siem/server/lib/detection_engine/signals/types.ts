@@ -145,3 +145,15 @@ export interface SignalHit {
   event: object;
   signal: Partial<Signal>;
 }
+
+export interface AlertAttributes {
+  enabled: boolean;
+  name: string;
+  tags: string[];
+  createdBy: string;
+  createdAt: string;
+  updatedBy: string;
+  schedule: {
+    interval: string;
+  };
+}
