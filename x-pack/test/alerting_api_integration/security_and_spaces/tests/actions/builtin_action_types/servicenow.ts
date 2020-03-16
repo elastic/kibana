@@ -18,18 +18,18 @@ import {
 const mapping = [
   {
     source: 'title',
-    target: 'description',
-    actionType: 'nothing',
+    target: 'short_description',
+    actionType: 'overwrite',
   },
   {
     source: 'description',
-    target: 'short_description',
-    actionType: 'nothing',
+    target: 'description',
+    actionType: 'append',
   },
   {
     source: 'comments',
     target: 'comments',
-    actionType: 'nothing',
+    actionType: 'append',
   },
 ];
 
@@ -49,19 +49,23 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
       username: 'changeme',
     },
     params: {
-      caseId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
-      title: 'A title',
-      description: 'A description',
+      caseId: '123',
+      title: 'a title',
+      description: 'a description',
+      createdAt: '2020-03-13T08:34:53.450Z',
+      createdBy: { fullName: 'Elastic User', username: null },
+      updatedAt: null,
+      updatedBy: null,
+      incidentId: null,
       comments: [
         {
-          commentId: '123',
-          version: 'WzU3LDFd',
-          comment: 'A comment',
-        },
-        {
           commentId: '456',
-          version: 'WzU5LVFd',
-          comment: 'Another comment',
+          version: 'WzU3LDFd',
+          comment: 'first comment',
+          createdAt: '2020-03-13T08:34:53.450Z',
+          createdBy: { fullName: 'Elastic User', username: null },
+          updatedAt: null,
+          updatedBy: null,
         },
       ],
     },
@@ -283,7 +287,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         .post(`/api/action/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
-          params: { caseId: 'success' },
+          params: { ...mockServiceNow.params, title: 'success', comments: [] },
         })
         .expect(200);
 
