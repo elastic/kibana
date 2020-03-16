@@ -77,6 +77,11 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "resolutions": {
+    "**/@mapbox/geojsonhint/minimist": "^1.2.5",
+    "**/geojson-flatten/minimist": "^1.2.5",
+    "**/gonzales-pe-sl/minimist": "^1.2.5",
+    "**/mkdirp/minimist": "^1.2.5",
+    "**/sharkdown/minimist": "^0.2.1",
     "**/@types/node": ">=10.17.17 <10.20.0",
     "**/@types/react": "^16.9.36",
     "**/@types/hapi": "^17.0.18",
