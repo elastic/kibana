@@ -28,7 +28,7 @@ export const getBreadcrumbs = (params: RouteSpyState): Breadcrumb[] => {
     breadcrumb = [
       ...breadcrumb,
       {
-        text: params.detailName,
+        text: params.state?.caseTitle ?? params.detailName,
         href: getCaseDetailsUrl(params.detailName),
       },
     ];

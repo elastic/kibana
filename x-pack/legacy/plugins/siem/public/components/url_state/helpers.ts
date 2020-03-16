@@ -113,35 +113,6 @@ export const getTitle = (
   return navTabs[pageName] != null ? navTabs[pageName].name : '';
 };
 
-export const getCurrentLocation = (
-  pageName: string,
-  detailName: string | undefined
-): LocationTypes => {
-  if (pageName === SiemPageName.overview) {
-    return CONSTANTS.overviewPage;
-  } else if (pageName === SiemPageName.hosts) {
-    if (detailName != null) {
-      return CONSTANTS.hostsDetails;
-    }
-    return CONSTANTS.hostsPage;
-  } else if (pageName === SiemPageName.network) {
-    if (detailName != null) {
-      return CONSTANTS.networkDetails;
-    }
-    return CONSTANTS.networkPage;
-  } else if (pageName === SiemPageName.detections) {
-    return CONSTANTS.detectionsPage;
-  } else if (pageName === SiemPageName.timelines) {
-    return CONSTANTS.timelinePage;
-  } else if (pageName === SiemPageName.case) {
-    if (detailName != null) {
-      return CONSTANTS.caseDetails;
-    }
-    return CONSTANTS.casePage;
-  }
-  return CONSTANTS.unknown;
-};
-
 export const makeMapStateToProps = () => {
   const getInputsSelector = inputsSelectors.inputsSelector();
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();

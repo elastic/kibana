@@ -36,6 +36,7 @@ import { WhitePageWrapper } from '../wrappers';
 import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
 import { SiemPageName } from '../../../home/types';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
+import { SpyRoute } from '../../../../utils/route/spy_routes';
 
 interface Props {
   caseId: string;
@@ -251,6 +252,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
         </MyWrapper>
       </WhitePageWrapper>
       {confirmDeleteModal}
+      <SpyRoute state={{ caseTitle: caseData.title }} />
     </>
   );
 });

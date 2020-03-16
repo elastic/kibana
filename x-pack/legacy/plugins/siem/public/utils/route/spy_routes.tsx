@@ -56,6 +56,7 @@ export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
               detailName,
               tabName,
               search,
+              state,
               pathName: pathname,
               history,
               flowTarget,
