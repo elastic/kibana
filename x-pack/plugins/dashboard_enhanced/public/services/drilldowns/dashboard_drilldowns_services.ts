@@ -12,7 +12,6 @@ import {
 } from '../../../../../../src/plugins/embeddable/public';
 import {
   FlyoutCreateDrilldownAction,
-  FlyoutCreateDrilldownActionContext,
   FlyoutEditDrilldownAction,
   OPEN_FLYOUT_ADD_DRILLDOWN,
   OPEN_FLYOUT_EDIT_DRILLDOWN,
@@ -22,7 +21,7 @@ import { DashboardToDashboardDrilldown } from './dashboard_to_dashboard_drilldow
 
 declare module '../../../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
-    [OPEN_FLYOUT_ADD_DRILLDOWN]: FlyoutCreateDrilldownActionContext;
+    [OPEN_FLYOUT_ADD_DRILLDOWN]: EmbeddableContext;
     [OPEN_FLYOUT_EDIT_DRILLDOWN]: EmbeddableContext;
   }
 }
