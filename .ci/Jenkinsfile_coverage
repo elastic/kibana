@@ -40,11 +40,11 @@ kibanaPipeline(timeoutMinutes: 180) {
         ]) {
 
           def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
-          withGcpServiceAccount.fromVaultSecret(vaultSecret, 'host') {
-            withGcpServiceAccount.fromVaultSecret(vaultSecret, 'username') {
-              withGcpServiceAccount.fromVaultSecret(vaultSecret, 'password') {
+          withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
+            withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
+              withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
                 kibanaPipeline.bash(
-                  """
+                """
                 source src/dev/ci_setup/setup_env.sh
 
                 # bootstrap from x-pack folder
@@ -64,8 +64,7 @@ kibanaPipeline(timeoutMinutes: 180) {
 
                 . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${BUILD_NUMBER} ${env.BUILD_URL}
 
-              """,
-                  "### Run `yarn kbn bootstrap && merge coverage` AND Ingest Code Coverage to ES Cluster AND Boot Coverage App"
+                """, "### Bootstrap shell and kibana env, merge and ingest code coverage"
                 )
               }
             }
