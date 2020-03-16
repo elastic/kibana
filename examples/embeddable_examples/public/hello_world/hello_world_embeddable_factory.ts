@@ -33,7 +33,7 @@ export class HelloWorldEmbeddableFactory extends EmbeddableFactory {
    * embeddables should check the UI Capabilities service to be sure of
    * the right permissions.
    */
-  public isEditable() {
+  public async isEditable() {
     return true;
   }
 
