@@ -31,7 +31,7 @@ export const writeGapErrorToSavedObject = async ({
   ruleId,
   gap,
   name,
-}: WriteGapErrorToSavedObjectParams) => {
+}: WriteGapErrorToSavedObjectParams): Promise<void> => {
   if (gap != null && gap.asMilliseconds() > 0) {
     logger.warn(
       `Signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}" has a time gap of ${gap.humanize()} (${gap.asMilliseconds()}ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.`

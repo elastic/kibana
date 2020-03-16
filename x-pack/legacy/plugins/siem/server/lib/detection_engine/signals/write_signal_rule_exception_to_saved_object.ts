@@ -30,7 +30,7 @@ export const writeSignalRuleExceptionToSavedObject = async ({
   ruleStatusSavedObjects,
   ruleId,
   name,
-}: SignalRuleExceptionParams) => {
+}: SignalRuleExceptionParams): Promise<void> => {
   logger.error(
     `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}" message: ${message}`
   );
