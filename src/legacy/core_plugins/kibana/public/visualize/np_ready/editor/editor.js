@@ -115,6 +115,7 @@ function VisualizeAppController(
   const searchSource = vis.data.searchSource;
 
   $scope.vis = vis;
+  $scope.savedSearch = savedSearch;
 
   const $appStatus = {
     dirty: !savedVis.id,
