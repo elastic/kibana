@@ -405,11 +405,13 @@ function VisualizeAppController(
     const handleLinkedSearch = linked => {
       if (linked && !savedVis.savedSearchId && savedSearch) {
         savedVis.savedSearchId = savedSearch.id;
-        vis.savedSearchId = savedSearch.id;
+        vis.data.savedSearchId = savedSearch.id;
         searchSource.setParent(savedSearch.searchSource);
+        updateEditor.next();
       } else if (!linked && savedVis.savedSearchId) {
         delete savedVis.savedSearchId;
-        delete vis.savedSearchId;
+        delete vis.data.savedSearchId;
+        updateEditor.next();
       }
     };
 
@@ -722,7 +724,7 @@ function VisualizeAppController(
       parentFilters: searchSourceParent.getOwnField('filter'),
     });
 
-    $scope.$broadcast('render');
+    updateEditor.next();
 
     toastNotifications.addSuccess(
       i18n.translate('kbn.visualize.linkedToSearch.unlinkSuccessNotificationText', {

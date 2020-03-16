@@ -139,6 +139,7 @@ export class Vis {
         aggs: aggs as any,
         indexPattern: indexPattern ? indexPattern.id : undefined,
         searchSource: this.data.searchSource!.createCopy(),
+        savedSearchId: this.data.savedSearchId,
       },
     };
   }

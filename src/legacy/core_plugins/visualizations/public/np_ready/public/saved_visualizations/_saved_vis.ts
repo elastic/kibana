@@ -41,19 +41,20 @@ import { createSavedSearchesLoader } from '../../../../../../../plugins/discover
 import { getChrome, getOverlays, getIndexPatterns, getSavedObjects } from '../services';
 
 export const convertToSerializedVis = async (savedVis: ISavedVis): Promise<SerializedVis> => {
+  const visState = updateOldState(savedVis.visState);
   const searchSource =
     savedVis.searchSource && (await getSearchSource(savedVis.searchSource, savedVis.savedSearchId));
 
   const indexPattern =
     searchSource && searchSource.getField('index') ? searchSource.getField('index')!.id : undefined;
 
-  const aggs = indexPattern ? savedVis.visState.aggs || [] : savedVis.visState.aggs;
+  const aggs = indexPattern ? visState.aggs || [] : visState.aggs;
 
   return {
     title: savedVis.title,
-    type: savedVis.visState.type,
+    type: visState.type,
     description: savedVis.description,
-    params: savedVis.visState.params,
+    params: visState.params,
     uiState: JSON.parse(savedVis.uiStateJSON || '{}'),
     data: {
       indexPattern,

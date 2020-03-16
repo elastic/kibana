@@ -59,16 +59,20 @@ function DefaultEditorSideBar({
   const [selectedTab, setSelectedTab] = useState(optionTabs[0].name);
   const [isDirty, setDirty] = useState(false);
 
-  const dirtyStateChange = ({ isDirty: dirty }: { isDirty: boolean }) => {
-    setDirty(dirty);
-    notifyDirty(dirty);
-    if (!dirty) {
-      resetValidity();
-    }
-  };
+  const { formState, setTouched, setValidity, resetValidity } = useEditorFormState();
+
+  const dirtyStateChange = useCallback(
+    ({ isDirty: dirty }: { isDirty: boolean }) => {
+      setDirty(dirty);
+      notifyDirty(dirty);
+      if (!dirty) {
+        resetValidity();
+      }
+    },
+    [setDirty, notifyDirty, resetValidity]
+  );
 
   const [state, dispatch] = useEditorReducer(vis, dirtyStateChange);
-  const { formState, setTouched, setValidity, resetValidity } = useEditorFormState();
 
   const responseAggs = useMemo(() => (state.data.aggs ? state.data.aggs.getResponseAggs() : []), [
     state.data.aggs,
@@ -113,22 +117,10 @@ function DefaultEditorSideBar({
       params: state.params,
       data: { aggs: state.data.aggs ? (state.data.aggs.aggs.map(agg => agg.toJSON()) as any) : [] },
     });
-    setDirty(false);
-    notifyDirty(false);
-    resetValidity();
+    dirtyStateChange({ isDirty: false });
     reloadVisualization();
     setTouched(false);
-  }, [
-    reloadVisualization,
-    state,
-    formState.invalid,
-    setTouched,
-    setDirty,
-    notifyDirty,
-    resetValidity,
-    isDirty,
-    vis,
-  ]);
+  }, [reloadVisualization, state, formState.invalid, setTouched, dirtyStateChange, isDirty, vis]);
 
   const onSubmit: KeyboardEventHandler<HTMLFormElement> = useCallback(
     event => {
