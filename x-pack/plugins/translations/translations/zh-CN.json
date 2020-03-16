@@ -7073,7 +7073,6 @@
     "xpack.maps.feature.appDescription": "从 Elasticsearch 和 Elastic 地图服务浏览地理空间数据",
     "xpack.maps.featureRegistry.mapsFeatureName": "Maps",
     "xpack.maps.geoGrid.resolutionLabel": "网格分辨率",
-    "xpack.maps.geometryFilterForm.geoFieldLabel": "已筛选字段",
     "xpack.maps.geometryFilterForm.geometryLabelLabel": "几何标签",
     "xpack.maps.geometryFilterForm.relationLabel": "空间关系",
     "xpack.maps.heatmap.colorRampLabel": "颜色范围",
