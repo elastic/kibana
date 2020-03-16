@@ -28,6 +28,7 @@ import { hasShowActionsCapability, hasShowAlertsCapability } from './lib/capabil
 
 import { ActionsConnectorsList } from './sections/actions_connectors_list/components/actions_connectors_list';
 import { AlertsList } from './sections/alerts_list/components/alerts_list';
+import { SecurityEnabledCallOut } from './components/security_call_out';
 
 interface MatchParams {
   section: Section;
@@ -39,7 +40,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
-  const { chrome, capabilities, setBreadcrumbs } = useAppDependencies();
+  const { chrome, capabilities, setBreadcrumbs, http } = useAppDependencies();
 
   const canShowActions = hasShowActionsCapability(capabilities);
   const canShowAlerts = hasShowAlertsCapability(capabilities);
@@ -86,6 +87,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     <EuiPageBody>
       <EuiPageContent>
         <EuiPageContentHeader>
+          <SecurityEnabledCallOut http={http} />
           <EuiPageContentHeaderSection>
             <EuiTitle size="m">
               <h1 data-test-subj="appTitle">
