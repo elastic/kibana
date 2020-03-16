@@ -76,7 +76,7 @@ export const signalRulesAlertType = ({
 
       const gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
 
-      writeGapErrorToSavedObject({
+      await writeGapErrorToSavedObject({
         alertId,
         logger,
         ruleId: ruleId ?? '(unknown rule id)',
@@ -153,7 +153,7 @@ export const signalRulesAlertType = ({
             logger.debug(
               `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
             );
-            writeCurrentStatusSucceeded({
+            await writeCurrentStatusSucceeded({
               services,
               currentStatusSavedObject,
             });
