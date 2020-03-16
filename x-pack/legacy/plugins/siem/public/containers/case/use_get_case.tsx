@@ -56,10 +56,11 @@ const initialData: Case = {
     username: '',
   },
   description: '',
-  state: '',
+  status: '',
   tags: [],
   title: '',
-  updatedAt: '',
+  updatedAt: null,
+  updatedBy: null,
   version: '',
 };
 
