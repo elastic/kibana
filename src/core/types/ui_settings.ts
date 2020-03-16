@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { SavedObjectAttribute } from './saved_objects';
+import { Type } from '@kbn/config-schema';
 
 /**
  * UI element type to represent the settings.
@@ -49,11 +48,11 @@ export interface DeprecationSettings {
  * UiSettings parameters defined by the plugins.
  * @public
  * */
-export interface UiSettingsParams {
+export interface UiSettingsParams<T = unknown> {
   /** title in the UI */
   name?: string;
   /** default value to fall back to if a user doesn't provide any */
-  value?: SavedObjectAttribute;
+  value?: T;
   /** description provided to a user in UI */
   description?: string;
   /** used to group the configured setting in the UI */
@@ -73,9 +72,21 @@ export interface UiSettingsParams {
   /*
    * Allows defining a custom validation applicable to value change on the client.
    * @deprecated
+   * Use schema instead.
    */
   validation?: ImageValidation | StringValidation;
+  /*
+   * Value validation schema
+   * Used to validate value on write and read.
+   */
+  schema: Type<T>;
 }
+
+/**
+ * A sub-set of {@link UiSettingsParams} exposed to the client-side.
+ * @public
+ * */
+export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 
 /**
  * Allows regex objects or a regex string

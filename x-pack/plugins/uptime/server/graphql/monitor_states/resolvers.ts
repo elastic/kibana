@@ -10,9 +10,8 @@ import { UMResolver } from '../../../../../legacy/plugins/uptime/common/graphql/
 import {
   GetMonitorStatesQueryArgs,
   MonitorSummaryResult,
-  StatesIndexStatus,
 } from '../../../../../legacy/plugins/uptime/common/graphql/types';
-import { CONTEXT_DEFAULTS } from '../../../../../legacy/plugins/uptime/common/constants/context_defaults';
+import { CONTEXT_DEFAULTS } from '../../../../../legacy/plugins/uptime/common/constants';
 
 export type UMGetMonitorStatesResolver = UMResolver<
   MonitorSummaryResult | Promise<MonitorSummaryResult>,
@@ -21,19 +20,11 @@ export type UMGetMonitorStatesResolver = UMResolver<
   UMContext
 >;
 
-export type UMStatesIndexExistsResolver = UMResolver<
-  StatesIndexStatus | Promise<StatesIndexStatus>,
-  any,
-  {},
-  UMContext
->;
-
 export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
   libs: UMServerLibs
 ): {
   Query: {
     getMonitorStates: UMGetMonitorStatesResolver;
-    getStatesIndexStatus: UMStatesIndexExistsResolver;
   };
 } => {
   return {
@@ -64,7 +55,7 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
           }),
         ]);
 
-        const totalSummaryCount = indexStatus?.docCount ?? { count: undefined };
+        const totalSummaryCount = indexStatus?.docCount ?? 0;
 
         return {
           summaries,
@@ -72,9 +63,6 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
           prevPagePagination,
           totalSummaryCount,
         };
-      },
-      async getStatesIndexStatus(_resolver, {}, { APICaller }): Promise<StatesIndexStatus> {
-        return await libs.requests.getIndexStatus({ callES: APICaller });
       },
     },
   };

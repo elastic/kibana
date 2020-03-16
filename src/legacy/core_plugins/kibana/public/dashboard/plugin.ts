@@ -35,7 +35,7 @@ import {
   DataPublicPluginSetup,
   esFilters,
 } from '../../../../../plugins/data/public';
-import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
+import { EmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { DashboardConstants } from './np_ready/dashboard_constants';
@@ -54,7 +54,7 @@ import { createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public'
 
 export interface DashboardPluginStartDependencies {
   data: DataPublicPluginStart;
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   navigation: NavigationStart;
   share: SharePluginStart;
   kibanaLegacy: KibanaLegacyStart;
@@ -70,7 +70,7 @@ export class DashboardPlugin implements Plugin {
   private startDependencies: {
     data: DataPublicPluginStart;
     savedObjectsClient: SavedObjectsClientContract;
-    embeddable: IEmbeddableStart;
+    embeddable: EmbeddableStart;
     navigation: NavigationStart;
     share: SharePluginStart;
     dashboardConfig: KibanaLegacyStart['dashboardConfig'];

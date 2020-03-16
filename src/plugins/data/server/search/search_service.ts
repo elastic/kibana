@@ -34,6 +34,8 @@ import {
 import { IRouteHandlerSearchContext } from './i_route_handler_search_context';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
 
+import { searchSavedObjectType } from '../saved_objects';
+
 declare module 'kibana/server' {
   interface RequestHandlerContext {
     search?: IRouteHandlerSearchContext;
@@ -52,6 +54,8 @@ export class SearchService implements Plugin<ISearchSetup, void> {
     registerSearchRoute(router);
 
     this.contextContainer = core.context.createContextContainer();
+
+    core.savedObjects.registerType(searchSavedObjectType);
 
     core.http.registerRouteHandlerContext<'search'>('search', context => {
       return createApi({
