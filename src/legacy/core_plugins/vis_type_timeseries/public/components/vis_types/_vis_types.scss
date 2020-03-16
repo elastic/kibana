@@ -8,13 +8,19 @@
     overflow: hidden;
   }
   .tvbVisTimeSeriesDark {
+    .echReactiveChart_unavailable {
+      color: #DFE5EF;
+    }
     .echLegendItem  {
-      color: #DFE5EF !important;
+      color: #DFE5EF;
     }
   }
   .tvbVisTimeSeriesLight {
+    .echReactiveChart_unavailable {
+      color: #343741;
+    }
     .echLegendItem  {
-      color: #343741 !important;
+      color: #343741;
     }
   }
 }
