@@ -4,32 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useState, useCallback } from 'react';
 import { EuiPopover, EuiFormRow, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+const TakeActionButton = memo(({ onClick }: { onClick: () => void }) => (
+  <EuiButton
+    iconType="arrowDown"
+    iconSide="right"
+    data-test-subj="alertDetailTakeActionDropdownButton"
+    onClick={onClick}
+  >
+    <FormattedMessage
+      id="xpack.endpoint.application.endpoint.alertDetails.takeAction.title"
+      defaultMessage="Take Action"
+    />
+  </EuiButton>
+));
 
 export const TakeActionDropdown = memo(() => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const TakeActionButton = useMemo(() => {
-    return (
-      <EuiButton
-        iconType="arrowDown"
-        iconSide="right"
-        data-test-subj="alertDetailTakeActionDropdownButton"
-        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-      >
-        <FormattedMessage
-          id="xpack.endpoint.application.endpoint.alertDetails.takeAction.title"
-          defaultMessage="Take Action"
-        />
-      </EuiButton>
-    );
+  const onClick = useCallback(() => {
+    setIsDropdownOpen(!isDropdownOpen);
   }, [isDropdownOpen]);
 
   return (
     <EuiPopover
-      button={TakeActionButton}
+      button={<TakeActionButton onClick={onClick} />}
       isOpen={isDropdownOpen}
       anchorPosition="downRight"
       closePopover={() => setIsDropdownOpen(false)}
