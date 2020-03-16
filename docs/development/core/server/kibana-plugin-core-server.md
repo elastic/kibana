@@ -74,6 +74,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [DiscoveredPlugin](./kibana-plugin-core-server.discoveredplugin.md) | Small container object used to expose information about discovered plugins that may or may not have been started. |
 |  [ElasticsearchError](./kibana-plugin-core-server.elasticsearcherror.md) |  |
 |  [ElasticsearchServiceSetup](./kibana-plugin-core-server.elasticsearchservicesetup.md) |  |
+|  [ElasticsearchServiceStart](./kibana-plugin-core-server.elasticsearchservicestart.md) |  |
 |  [EnvironmentMode](./kibana-plugin-core-server.environmentmode.md) |  |
 |  [ErrorHttpResponseOptions](./kibana-plugin-core-server.errorhttpresponseoptions.md) | HTTP response parameters |
 |  [FakeRequest](./kibana-plugin-core-server.fakerequest.md) | Fake request object created manually by Kibana plugins. |

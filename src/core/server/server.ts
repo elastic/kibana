@@ -179,18 +179,16 @@ export class Server {
     const savedObjectsStart = await this.savedObjects.start({});
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
-
-    const pluginsStart = await this.plugins.start({
-      capabilities: capabilitiesStart,
-      savedObjects: savedObjectsStart,
-      uiSettings: uiSettingsStart,
-    });
+    const elasticsearchStart = await this.elasticsearch.start();
 
     this.coreStart = {
       capabilities: capabilitiesStart,
+      elasticsearch: elasticsearchStart,
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
     };
+
+    const pluginsStart = await this.plugins.start(this.coreStart!);
 
     await this.legacy.start({
       core: {

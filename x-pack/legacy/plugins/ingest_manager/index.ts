@@ -9,6 +9,7 @@ import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_CONFIG_SAVED_OBJECT_TYPE,
   DATASOURCE_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
 } from '../../../plugins/ingest_manager/server';
 
 // TODO https://github.com/elastic/kibana/issues/46373
@@ -31,6 +32,10 @@ export function ingestManager(kibana: any) {
           // indexPattern: INDEX_NAMES.INGEST,
         },
         [DATASOURCE_SAVED_OBJECT_TYPE]: {
+          isNamespaceAgnostic: true,
+          // indexPattern: INDEX_NAMES.INGEST,
+        },
+        [PACKAGES_SAVED_OBJECT_TYPE]: {
           isNamespaceAgnostic: true,
           // indexPattern: INDEX_NAMES.INGEST,
         },
