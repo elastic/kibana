@@ -894,7 +894,6 @@ exports[`Field for image setting should render as read only if saving is disable
   >
     <EuiFilePicker
       accept=".jpg,.jpeg,.png"
-      aria-label="image:test:setting"
       compressed={false}
       data-test-subj="advancedSetting-editField-image:test:setting"
       disabled={true}
@@ -1038,7 +1037,6 @@ exports[`Field for image setting should render custom setting icon if it is cust
   >
     <EuiFilePicker
       accept=".jpg,.jpeg,.png"
-      aria-label="image:test:setting"
       compressed={false}
       data-test-subj="advancedSetting-editField-image:test:setting"
       disabled={false}
@@ -1091,7 +1089,6 @@ exports[`Field for image setting should render default value if there is no user
   >
     <EuiFilePicker
       accept=".jpg,.jpeg,.png"
-      aria-label="image:test:setting"
       compressed={false}
       data-test-subj="advancedSetting-editField-image:test:setting"
       disabled={false}
@@ -1161,7 +1158,6 @@ exports[`Field for image setting should render unsaved value if there are unsave
   >
     <EuiFilePicker
       accept=".jpg,.jpeg,.png"
-      aria-label="image:test:setting"
       compressed={false}
       data-test-subj="advancedSetting-editField-image:test:setting"
       disabled={false}
