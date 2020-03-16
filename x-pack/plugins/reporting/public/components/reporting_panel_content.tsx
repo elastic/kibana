@@ -40,7 +40,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
 
     this.state = {
       isStale: false,
-      absoluteUrl: '',
+      absoluteUrl: this.getAbsoluteReportGenerationUrl(props),
       layoutId: '',
     };
   }
@@ -53,15 +53,15 @@ class ReportingPanelContentUi extends Component<Props, State> {
     return url.resolve(window.location.href, relativePath);
   };
 
-  public getDerivedStateFromProps = (nextProps: Props, prevState: State) => {
-    if (nextProps.layoutId !== prevState.layoutId) {
-      return {
+  public componentDidUpdate(prevProps: Props, prevState: State) {
+    if (this.props.layoutId !== prevState.layoutId) {
+      this.setState({
         ...prevState,
-        absoluteUrl: this.getAbsoluteReportGenerationUrl(nextProps),
-      };
+        absoluteUrl: this.getAbsoluteReportGenerationUrl(this.props),
+        layoutId: this.props.layoutId,
+      });
     }
-    return prevState;
-  };
+  }
 
   public componentWillUnmount() {
     window.removeEventListener('hashchange', this.markAsStale);
