@@ -81,17 +81,10 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     }
   }, [form]);
 
-  // useEffect(() => {
-  //   if (!form) return;
-
-  //   const subscription = form.subscribe(updatedData => {
-  //     setMyStepData({ ...updatedData.data.raw, ...stepActionsDefaultValue });
-  //   });
-
-  //   return subscription.unsubscribe;
-  // }, [form]);
-
-  // console.error('ss', myStepData, form.getFormData());
+  const updateThrottle = useCallback(throttle => setMyStepData({ ...myStepData, throttle }), [
+    myStepData,
+    setMyStepData,
+  ]);
 
   return isReadOnlyView && myStepData != null ? (
     <StepContentWrapper addPadding={addPadding}>
@@ -109,6 +102,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
               isDisabled: isLoading,
               dataTestSubj: 'detectionEngineStepRuleActionsThrottle',
               hasNoInitialSelection: false,
+              handleChange: updateThrottle,
               euiFieldProps: {
                 options: THROTTLE_OPTIONS,
               },

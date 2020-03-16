@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable complexity */
-
 import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
 import moment from 'moment';
@@ -25,6 +23,7 @@ import { SignalRuleAlertTypeDefinition } from './types';
 import { getGapBetweenRuns } from './utils';
 import { ruleStatusSavedObjectType } from '../rules/saved_object_mappings';
 import { IRuleSavedAttributesSavedObjectAttributes } from '../rules/types';
+import { buildSignalsSearchQuery } from './build_signals_query';
 interface AlertAttributes {
   enabled: boolean;
   name: string;
@@ -92,6 +91,7 @@ export const signalRulesAlertType = ({
         index,
         filters,
         language,
+        meta,
         outputIndex,
         savedId,
         query,
@@ -249,6 +249,35 @@ export const signalRulesAlertType = ({
           });
 
           if (bulkIndexResult) {
+            if (meta?.throttle !== 'no_actions' && actions.length) {
+              const actionsInterval = throttle ?? savedObject.attributes.schedule.interval;
+
+              const singalsQuery = buildSignalsSearchQuery({
+                ruleIds: [ruleId!],
+                index: [outputIndex],
+                from: `now-${actionsInterval}`,
+                to: 'now',
+              });
+
+              const newSignalsResult = await services.callCluster('search', singalsQuery);
+              const newSignalsCount = newSignalsResult.hits.total.value;
+              logger.warn(`newSignalsCount ${newSignalsCount}`);
+
+              // if (newSignalsCount) {
+              const alertInstance = services.alertInstanceFactory(alertId);
+              alertInstance
+                .replaceState({
+                  signalsCount: newSignalsCount,
+                })
+                .scheduleActions('default', {
+                  outputIndex,
+                  name,
+                  alertId,
+                  ruleId,
+                });
+              // }
+            }
+
             logger.debug(
               `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
             );

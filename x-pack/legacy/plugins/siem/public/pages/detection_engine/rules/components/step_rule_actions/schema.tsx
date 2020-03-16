@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormSchema } from '../../../../../shared_imports';
 
 export const schema: FormSchema = {
+  actions: {},
   throttle: {
     label: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepRuleActions.fieldThrottleLabel',

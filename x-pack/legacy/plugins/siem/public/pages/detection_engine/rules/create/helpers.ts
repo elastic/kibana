@@ -6,6 +6,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
+import deepmerge from 'deepmerge';
 
 import { NewRule } from '../../../../containers/detection_engine/rules';
 
@@ -99,13 +100,19 @@ const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson =>
   };
 };
 
+const getAlertThrottle = (throttle: string | null) =>
+  throttle && !['no_actions', 'rule'].includes(throttle) ? throttle : null;
+
 const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {
   const { actions = [], enabled, throttle = null } = actionsStepData;
 
   return {
     actions,
     enabled,
-    throttle,
+    throttle: getAlertThrottle(throttle),
+    meta: {
+      throttle,
+    },
   };
 };
 
@@ -117,13 +124,13 @@ export const formatRule = (
   ruleId?: string
 ): NewRule => {
   const type: FormatRuleType = !isEmpty(defineStepData.queryBar.saved_id) ? 'saved_query' : 'query';
-  const persistData = {
-    type,
-    ...formatDefineStepData(defineStepData),
-    ...formatAboutStepData(aboutStepData),
-    ...formatScheduleStepData(scheduleData),
-    ...formatActionsStepData(actionsData),
-  };
+  const persistData = deepmerge.all([
+    { type },
+    formatDefineStepData(defineStepData),
+    formatAboutStepData(aboutStepData),
+    formatScheduleStepData(scheduleData),
+    formatActionsStepData(actionsData),
+  ]);
 
   return ruleId != null ? { id: ruleId, ...persistData } : persistData;
 };

@@ -112,6 +112,7 @@ export interface ActionsStepRuleJson {
   actions: AlertAction[];
   enabled: boolean;
   throttle?: string | null;
+  meta?: unknown;
 }
 
 export type MyRule = Omit<DefineStepRule & ScheduleStepRule & AboutStepRule, 'isNew'> & {

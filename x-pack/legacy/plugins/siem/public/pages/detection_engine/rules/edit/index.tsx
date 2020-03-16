@@ -217,8 +217,6 @@ const EditRulePageComponent: FC = () => {
     const activeFormId = selectedTab?.id as RuleStep;
     const activeForm = await stepsForm.current[activeFormId]?.submit();
 
-    // console.error('submit', myActionsRuleForm, activeForm);
-
     const invalidForms = [
       RuleStep.aboutRule,
       RuleStep.defineRule,

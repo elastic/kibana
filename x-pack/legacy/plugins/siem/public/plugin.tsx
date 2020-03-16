@@ -27,12 +27,9 @@ import { KibanaServices } from './lib/kibana';
 
 import { serviceNowActionType } from './lib/connectors';
 
-import {
-  TriggersAndActionsUIPublicPluginSetup,
-  TriggersAndActionsUIPublicPluginStart,
-} from '../../../../plugins/triggers_actions_ui/public';
-
 export { AppMountParameters, CoreSetup, CoreStart, PluginInitializerContext };
+
+import { getRulesNotificationAlertType } from './lib/rules_notification_alert_type';
 
 export interface SetupPlugins {
   home: HomePublicPluginSetup;
@@ -73,6 +70,7 @@ export class Plugin implements IPlugin<Setup, Start> {
         const { renderApp } = await import('./app');
 
         plugins.triggers_actions_ui.actionTypeRegistry.register(serviceNowActionType());
+        plugins.triggers_actions_ui.alertTypeRegistry.register(getRulesNotificationAlertType());
 
         return renderApp(coreStart, startPlugins as StartPlugins, params);
       },

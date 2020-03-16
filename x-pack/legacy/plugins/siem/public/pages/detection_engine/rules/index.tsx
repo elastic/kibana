@@ -8,6 +8,11 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useRef, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 
+import {
+  AlertsContextProvider,
+  AlertAdd,
+} from '../../../../../../../plugins/triggers_actions_ui/public';
+import { useKibana } from '../../../lib/kibana';
 import { usePrePackagedRules } from '../../../containers/detection_engine/rules';
 import {
   DETECTION_ENGINE_PAGE_NAME,
@@ -29,6 +34,17 @@ import * as i18n from './translations';
 type Func = (refreshPrePackagedRule?: boolean) => void;
 
 const RulesPageComponent: React.FC = () => {
+  const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
+  const kibana = useKibana();
+  const http = kibana.services.http;
+  const actionTypeRegistry = kibana.services.triggers_actions_ui.actionTypeRegistry;
+  const alertTypeRegistry = kibana.services.triggers_actions_ui.alertTypeRegistry;
+  const toastNotifications = kibana.services.notifications.toasts;
+  const uiSettings = kibana.services.uiSettings;
+  const charts = kibana.services.charts;
+  const dataFieldsFormats = kibana.services.data.fieldFormats;
+  const metadata = { test: 'some value', fields: ['test'] };
+  console.error('kibana', kibana);
   const [showImportModal, setShowImportModal] = useState(false);
   const refreshRulesData = useRef<null | Func>(null);
   const {
@@ -95,6 +111,34 @@ const RulesPageComponent: React.FC = () => {
 
   return (
     <>
+      <EuiButton
+        fill
+        iconType="plusInCircle"
+        iconSide="left"
+        onClick={() => setAlertFlyoutVisibility(true)}
+      >
+        {'Show add alert'}
+      </EuiButton>
+      <AlertsContextProvider
+        value={{
+          http,
+          actionTypeRegistry,
+          alertTypeRegistry,
+          toastNotifications,
+          uiSettings,
+          charts,
+          dataFieldsFormats,
+          metadata,
+        }}
+      >
+        <AlertAdd
+          consumer="siem"
+          alertTypeId="siem.notifications"
+          canChangeTrigger={false}
+          addFlyoutVisible={alertFlyoutVisible}
+          setAddFlyoutVisibility={setAlertFlyoutVisibility}
+        />
+      </AlertsContextProvider>
       {userHasNoPermissions && <ReadOnlyCallOut />}
       <ImportRuleModal
         showModal={showImportModal}

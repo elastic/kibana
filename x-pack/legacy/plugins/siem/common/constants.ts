@@ -53,6 +53,11 @@ export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
 export const SIGNALS_ID = `${APP_ID}.signals`;
 
 /**
+ * Id for the notifications alerting type
+ */
+export const NOTIFICATIONS_ID = `${APP_ID}.notifications`;
+
+/**
  * Special internal structure for tags for signals. This is used
  * to filter out tags that have internal structures within them.
  */

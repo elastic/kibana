@@ -28,14 +28,7 @@ const DEFAULT_ACTION_GROUP_ID = 'default';
 const DEFAULT_ACTION_MESSAGE = 'Rule generated {{state.signalsCount}} singals';
 
 const MESSAGE_STATE_VARIABLES = ['signalsCount'];
-const MESSAGE_CONTEXT_VARIABLES = [
-  'inputIndexes',
-  'outputIndex',
-  'name',
-  'alertId',
-  'ruleId',
-  'ruleLink',
-];
+const MESSAGE_CONTEXT_VARIABLES = ['inputIndexes', 'outputIndex', 'name', 'alertId', 'ruleId'];
 
 const getMessageVariables = memoizeOne(() => {
   const stateVariables = MESSAGE_STATE_VARIABLES.map(variableName => `state.${variableName}`);
