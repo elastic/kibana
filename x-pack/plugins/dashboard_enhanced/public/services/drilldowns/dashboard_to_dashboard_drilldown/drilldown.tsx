@@ -13,11 +13,6 @@ import { DASHBOARD_TO_DASHBOARD_DRILLDOWN } from './constants';
 import { DrilldownsDrilldown as Drilldown } from '../../../../../drilldowns/public';
 import { txtGoToDashboard } from './i18n';
 
-export const dashboards = [
-  { id: 'dashboard1', title: 'Dashboard 1' },
-  { id: 'dashboard2', title: 'Dashboard 2' },
-];
-
 export interface Params {
   savedObjects: () => Promise<CoreStart['savedObjects']['client']>;
 }

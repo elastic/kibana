@@ -273,14 +273,20 @@ export class UiActionsService {
    * Register an action factory. Action factories are used to configure and
    * serialize/deserialize dynamic actions.
    */
-  public readonly registerActionFactory = (definition: ActionFactoryDefinition) => {
+  public readonly registerActionFactory = <
+    Config extends object = object,
+    FactoryContext extends object = object,
+    ActionContext extends object = object
+  >(
+    definition: ActionFactoryDefinition<Config, FactoryContext, ActionContext>
+  ) => {
     if (this.actionFactories.has(definition.id)) {
       throw new Error(`ActionFactory [actionFactory.id = ${definition.id}] already registered.`);
     }
 
-    const actionFactory = new ActionFactory(definition);
+    const actionFactory = new ActionFactory<Config, FactoryContext, ActionContext>(definition);
 
-    this.actionFactories.set(actionFactory.id, actionFactory);
+    this.actionFactories.set(actionFactory.id, actionFactory as ActionFactory<any, any, any>);
   };
 
   public readonly getActionFactory = (actionFactoryId: string): ActionFactory => {
