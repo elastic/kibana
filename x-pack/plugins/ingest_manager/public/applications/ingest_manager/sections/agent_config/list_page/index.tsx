@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { CSSProperties, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { CSSProperties, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiSpacer,
   EuiText,
@@ -16,14 +16,10 @@ import {
   EuiTableActionsColumnType,
   EuiTableFieldDataColumnType,
   EuiTextColor,
-  EuiPopover,
-  EuiContextMenuPanel,
   EuiContextMenuItem,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
-import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
 import { AgentConfig } from '../../../types';
 import {
@@ -44,6 +40,9 @@ import { AgentConfigDeleteProvider } from '../components';
 import { CreateAgentConfigFlyout } from './components';
 import { SearchBar } from '../../../components/search_bar';
 import { LinkedAgentCount } from '../components';
+import { useAgentConfigLink } from '../details_page/hooks/use_details_uri';
+import { TableRowActions } from '../components/table_row_actions';
+import { DangerEuiContextMenuItem } from '../components/danger_eui_context_menu_item';
 
 const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
   overflow: 'hidden',
@@ -82,83 +81,59 @@ const AgentConfigListPageLayout: React.FunctionComponent = ({ children }) => (
   </WithHeaderLayout>
 );
 
-const DangerEuiContextMenuItem = styled(EuiContextMenuItem)`
-  color: ${props => props.theme.eui.textColors.danger};
-`;
-
-const RowActions = React.memo<{ config: AgentConfig; onDelete: () => void }>(
+const ConfigRowActions = memo<{ config: AgentConfig; onDelete: () => void }>(
   ({ config, onDelete }) => {
-    const hasWriteCapabilites = useCapabilities().write;
-    const DETAILS_URI = useLink(`${AGENT_CONFIG_DETAILS_PATH}${config.id}`);
-    const ADD_DATASOURCE_URI = `${DETAILS_URI}/add-datasource`;
-
-    const [isOpen, setIsOpen] = useState(false);
-    const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
-    const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
+    const hasWriteCapabilities = useCapabilities().write;
+    const detailsLink = useAgentConfigLink('details', { configId: config.id });
+    const addDatasourceLink = useAgentConfigLink('add-datasource', { configId: config.id });
 
     return (
-      <EuiPopover
-        anchorPosition="downRight"
-        panelPaddingSize="none"
-        button={
-          <EuiButtonIcon
-            iconType="boxesHorizontal"
-            onClick={handleToggleMenu}
-            aria-label={i18n.translate('xpack.ingestManager.agentConfigList.actionsMenuText', {
-              defaultMessage: 'Open',
-            })}
-          />
-        }
-        isOpen={isOpen}
-        closePopover={handleCloseMenu}
-      >
-        <EuiContextMenuPanel
-          items={[
-            <EuiContextMenuItem icon="inspect" href={DETAILS_URI} key="viewConfig">
-              <FormattedMessage
-                id="xpack.ingestManager.agentConfigList.viewConfigActionText"
-                defaultMessage="View configuration"
-              />
-            </EuiContextMenuItem>,
+      <TableRowActions
+        items={[
+          <EuiContextMenuItem icon="inspect" href={detailsLink} key="viewConfig">
+            <FormattedMessage
+              id="xpack.ingestManager.agentConfigList.viewConfigActionText"
+              defaultMessage="View configuration"
+            />
+          </EuiContextMenuItem>,
 
-            <EuiContextMenuItem
-              disabled={!hasWriteCapabilites}
-              icon="plusInCircle"
-              href={ADD_DATASOURCE_URI}
-              key="createDataSource"
-            >
-              <FormattedMessage
-                id="xpack.ingestManager.agentConfigList.createDatasourceActionText"
-                defaultMessage="Create data source"
-              />
-            </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            disabled={!hasWriteCapabilities}
+            icon="plusInCircle"
+            href={addDatasourceLink}
+            key="createDataSource"
+          >
+            <FormattedMessage
+              id="xpack.ingestManager.agentConfigList.createDatasourceActionText"
+              defaultMessage="Create data source"
+            />
+          </EuiContextMenuItem>,
 
-            <EuiContextMenuItem disabled={true} icon="copy" key="copyConfig">
-              <FormattedMessage
-                id="xpack.ingestManager.agentConfigList.copyConfigActionText"
-                defaultMessage="Copy configuration"
-              />
-            </EuiContextMenuItem>,
+          <EuiContextMenuItem disabled={true} icon="copy" key="copyConfig">
+            <FormattedMessage
+              id="xpack.ingestManager.agentConfigList.copyConfigActionText"
+              defaultMessage="Copy configuration"
+            />
+          </EuiContextMenuItem>,
 
-            <AgentConfigDeleteProvider key="deleteConfig">
-              {deleteAgentConfigsPrompt => {
-                return (
-                  <DangerEuiContextMenuItem
-                    icon="trash"
-                    disabled={Boolean(config.is_default)}
-                    onClick={() => deleteAgentConfigsPrompt([config.id], onDelete)}
-                  >
-                    <FormattedMessage
-                      id="xpack.ingestManager.agentConfigList.deleteConfigActionText"
-                      defaultMessage="Delete Configuration"
-                    />
-                  </DangerEuiContextMenuItem>
-                );
-              }}
-            </AgentConfigDeleteProvider>,
-          ]}
-        />
-      </EuiPopover>
+          <AgentConfigDeleteProvider key="deleteConfig">
+            {deleteAgentConfigsPrompt => {
+              return (
+                <DangerEuiContextMenuItem
+                  icon="trash"
+                  disabled={Boolean(config.is_default)}
+                  onClick={() => deleteAgentConfigsPrompt([config.id], onDelete)}
+                >
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentConfigList.deleteConfigActionText"
+                    defaultMessage="Delete Configuration"
+                  />
+                </DangerEuiContextMenuItem>
+              );
+            }}
+          </AgentConfigDeleteProvider>,
+        ]}
+      />
     );
   }
 );
@@ -293,7 +268,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         actions: [
           {
             render: (config: AgentConfig) => (
-              <RowActions config={config} onDelete={() => sendRequest()} />
+              <ConfigRowActions config={config} onDelete={() => sendRequest()} />
             ),
           },
         ],
