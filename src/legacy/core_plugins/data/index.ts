@@ -33,7 +33,6 @@ export default function DataPlugin(kibana: any) {
     },
     init: (server: Legacy.Server) => ({}),
     uiExports: {
-      interpreter: ['plugins/data/search/expressions/boot'],
       injectDefaultVars: () => ({}),
     },
   };

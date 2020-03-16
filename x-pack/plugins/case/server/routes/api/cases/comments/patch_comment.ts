@@ -65,6 +65,7 @@ export function initPatchCommentApi({ caseService, router }: RouteDeps) {
             updated_at: new Date().toISOString(),
             updated_by: { full_name, username },
           },
+          version: query.version,
         });
 
         return response.ok({

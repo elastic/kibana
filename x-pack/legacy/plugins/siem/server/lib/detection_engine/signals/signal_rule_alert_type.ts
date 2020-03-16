@@ -55,6 +55,7 @@ export const signalRulesAlertType = ({
     validate: {
       params: schema.object({
         description: schema.string(),
+        note: schema.nullable(schema.string()),
         falsePositives: schema.arrayOf(schema.string(), { defaultValue: [] }),
         from: schema.string(),
         ruleId: schema.string(),

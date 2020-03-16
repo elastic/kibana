@@ -99,7 +99,7 @@ export class SearchService implements Plugin<ISearchSetup, void> {
 
     core.http.registerRouteHandlerContext<'search'>('search', context => {
       return createApi({
-        caller: context.core!.elasticsearch.dataClient.callAsCurrentUser,
+        caller: context.core.elasticsearch.dataClient.callAsCurrentUser,
         searchStrategies: this.searchStrategies,
       });
     });

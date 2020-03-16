@@ -6,6 +6,9 @@
 export * from './plugin';
 export * from './routes';
 
+export * from './agent';
 export * from './agent_config';
 export * from './datasource';
+export * from './epm';
 export * from './output';
+export * from './enrollment_api_key';
