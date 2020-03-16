@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PathReporter } from 'io-ts/lib/PathReporter';
+import { isRight } from 'fp-ts/lib/Either';
 import { HttpFetchQuery, HttpSetup } from '../../../../../../../target/types/core/public';
 
 class ApiService {
@@ -28,21 +30,40 @@ class ApiService {
     return ApiService.instance;
   }
 
-  public async get(apiUrl: string, params?: HttpFetchQuery) {
+  public async get(apiUrl: string, params?: HttpFetchQuery, decodeType?: any) {
     const response = await this._http!.get(apiUrl, { query: params });
-    if (response instanceof Error) {
-      throw response;
+
+    if (decodeType) {
+      const decoded = decodeType.decode(response);
+      if (isRight(decoded)) {
+        return decoded.right;
+      } else {
+        // eslint-disable-next-line no-console
+        console.error(
+          `API ${apiUrl} is not returning expected response, ${PathReporter.report(decoded)}`
+        );
+      }
     }
+
     return response;
   }
 
-  public async post(apiUrl: string, data: any) {
+  public async post(apiUrl: string, data?: any, decodeType?: any) {
     const response = await this._http!.post(apiUrl, {
       method: 'POST',
       body: JSON.stringify(data),
     });
-    if (response instanceof Error) {
-      throw response;
+
+    if (decodeType) {
+      const decoded = decodeType.decode(response);
+      if (isRight(decoded)) {
+        return decoded.right;
+      } else {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `API ${apiUrl} is not returning expected response, ${PathReporter.report(decoded)}`
+        );
+      }
     }
     return response;
   }

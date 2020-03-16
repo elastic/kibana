@@ -27,7 +27,6 @@ describe('snapshot API', () => {
   it('calls url with expected params and returns response body on 200', async () => {
     fetchMock.mockReturnValue(new Promise(r => r(mockResponse)));
     const resp = await fetchSnapshotCount({
-      basePath: '',
       dateRangeStart: 'now-15m',
       dateRangeEnd: 'now',
       filters: 'monitor.id:"auto-http-0X21EE76EAC459873F"',
@@ -47,34 +46,24 @@ describe('snapshot API', () => {
   it(`throws when server response doesn't correspond to expected type`, async () => {
     mockResponse = { foo: 'bar' };
     fetchMock.mockReturnValue(new Promise(r => r(mockResponse)));
-    let error: Error | undefined;
-    try {
-      await fetchSnapshotCount({
-        basePath: '',
-        dateRangeStart: 'now-15m',
-        dateRangeEnd: 'now',
-        filters: 'monitor.id: baz',
-        statusFilter: 'up',
-      });
-    } catch (e) {
-      error = e;
-    }
-    expect(error).toMatchSnapshot();
+    const result = await fetchSnapshotCount({
+      dateRangeStart: 'now-15m',
+      dateRangeEnd: 'now',
+      filters: 'monitor.id: baz',
+      statusFilter: 'up',
+    });
+
+    expect(result).toMatchSnapshot();
   });
 
   it('throws an error when response is not ok', async () => {
     mockResponse = new HttpFetchError('There was an error fetching your data.', 'error', {} as any);
     fetchMock.mockReturnValue(mockResponse);
-    let error: Error | undefined;
-    try {
-      await fetchSnapshotCount({
-        basePath: '',
-        dateRangeStart: 'now-15m',
-        dateRangeEnd: 'now',
-      });
-    } catch (e) {
-      error = e;
-    }
-    expect(error).toEqual(new Error('There was an error fetching your data.'));
+    const result = await fetchSnapshotCount({
+      dateRangeStart: 'now-15m',
+      dateRangeEnd: 'now',
+    });
+
+    expect(result).toEqual(new Error('There was an error fetching your data.'));
   });
 });

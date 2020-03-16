@@ -4,14 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isRight } from 'fp-ts/lib/Either';
-import { PathReporter } from 'io-ts/lib/PathReporter';
 import { SnapshotType, Snapshot } from '../../../common/runtime_types';
 import { apiService } from './utils';
 import { API_URLS } from '../../../common/constants/rest_api';
 
-interface ApiRequest {
-  basePath: string;
+export interface SnapShotQueryParams {
   dateRangeStart: string;
   dateRangeEnd: string;
   filters?: string;
@@ -23,7 +20,7 @@ export const fetchSnapshotCount = async ({
   dateRangeEnd,
   filters,
   statusFilter,
-}: ApiRequest): Promise<Snapshot> => {
+}: SnapShotQueryParams): Promise<Snapshot> => {
   const queryParams = {
     dateRangeStart,
     dateRangeEnd,
@@ -31,12 +28,5 @@ export const fetchSnapshotCount = async ({
     ...(statusFilter && { statusFilter }),
   };
 
-  const responseData = await apiService.get(API_URLS.SNAPSHOT_COUNT, queryParams);
-
-  const decoded = SnapshotType.decode(responseData);
-  PathReporter.report(decoded);
-  if (isRight(decoded)) {
-    return decoded.right;
-  }
-  throw new Error('`getSnapshotCount` response did not correspond to expected type');
+  return await apiService.get(API_URLS.SNAPSHOT_COUNT, queryParams, SnapshotType);
 };

@@ -4,44 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { call, put, takeLatest } from 'redux-saga/effects';
-import { Action } from 'redux-actions';
+import { takeLatest } from 'redux-saga/effects';
 import {
-  FETCH_MONITOR_DETAILS,
-  FETCH_MONITOR_DETAILS_SUCCESS,
-  FETCH_MONITOR_DETAILS_FAIL,
-  FETCH_MONITOR_LOCATIONS,
-  FETCH_MONITOR_LOCATIONS_SUCCESS,
-  FETCH_MONITOR_LOCATIONS_FAIL,
+  getMonitorDetailsAction,
+  getMonitorDetailsActionSuccess,
+  getMonitorDetailsActionFail,
+  getMonitorLocationsAction,
+  getMonitorLocationsActionSuccess,
+  getMonitorLocationsActionFail,
 } from '../actions/monitor';
 import { fetchMonitorDetails, fetchMonitorLocations } from '../api';
-import { MonitorDetailsActionPayload } from '../actions/types';
-
-function* monitorDetailsEffect(action: Action<any>) {
-  const { monitorId, dateStart, dateEnd }: MonitorDetailsActionPayload = action.payload;
-  try {
-    const response = yield call(fetchMonitorDetails, {
-      monitorId,
-      dateStart,
-      dateEnd,
-    });
-    yield put({ type: FETCH_MONITOR_DETAILS_SUCCESS, payload: response });
-  } catch (error) {
-    yield put({ type: FETCH_MONITOR_DETAILS_FAIL, payload: error.message });
-  }
-}
-
-function* monitorLocationsEffect(action: Action<any>) {
-  const payload = action.payload;
-  try {
-    const response = yield call(fetchMonitorLocations, payload);
-    yield put({ type: FETCH_MONITOR_LOCATIONS_SUCCESS, payload: response });
-  } catch (error) {
-    yield put({ type: FETCH_MONITOR_LOCATIONS_FAIL, payload: error.message });
-  }
-}
+import { fetchEffectFactory } from './fetch_effect';
 
 export function* fetchMonitorDetailsEffect() {
-  yield takeLatest(FETCH_MONITOR_DETAILS, monitorDetailsEffect);
-  yield takeLatest(FETCH_MONITOR_LOCATIONS, monitorLocationsEffect);
+  yield takeLatest(
+    getMonitorDetailsAction,
+    fetchEffectFactory(
+      fetchMonitorDetails,
+      getMonitorDetailsActionSuccess,
+      getMonitorDetailsActionFail
+    )
+  );
+
+  yield takeLatest(
+    getMonitorLocationsAction,
+    fetchEffectFactory(
+      fetchMonitorLocations,
+      getMonitorLocationsActionSuccess,
+      getMonitorLocationsActionFail
+    )
+  );
 }

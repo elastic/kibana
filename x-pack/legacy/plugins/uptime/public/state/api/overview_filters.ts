@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PathReporter } from 'io-ts/lib/PathReporter';
-import { isRight } from 'fp-ts/lib/Either';
 import { GetOverviewFiltersPayload } from '../actions/overview_filters';
 import { OverviewFiltersType } from '../../../common/runtime_types';
 import { apiService } from './utils';
@@ -30,13 +28,5 @@ export const fetchOverviewFilters = async ({
     search,
   };
 
-  const responseData = await apiService.get(API_URLS.FILTERS, queryParams);
-
-  const decoded = OverviewFiltersType.decode(responseData);
-
-  PathReporter.report(decoded);
-  if (isRight(decoded)) {
-    return decoded.right;
-  }
-  throw new Error('`getOverviewFilters` response did not correspond to expected type');
+  return await apiService.get(API_URLS.FILTERS, queryParams, OverviewFiltersType);
 };

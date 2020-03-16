@@ -13,4 +13,4 @@ export interface BaseParams {
   monitorId?: string;
 }
 
-export type APIFn<P, R = any> = (params: { basePath: string } & P) => Promise<R>;
+export type APIFn<P, R = any> = (params: P) => Promise<R>;

@@ -23,7 +23,7 @@ import { CommonlyUsedRange } from './components/functional/uptime_date_picker';
 import { store } from './state';
 import { setBasePath } from './state/actions';
 import { PageRouter } from './routes';
-import { apiService } from './state/api/utils';
+import { kibanaService } from './state/kibana_service';
 
 export interface UptimeAppColors {
   danger: string;
@@ -84,7 +84,7 @@ const Application = (props: UptimeAppProps) => {
     );
   }, [canSave, renderGlobalHelpControls, setBadge]);
 
-  apiService.http = core.http;
+  kibanaService.core = core;
 
   // @ts-ignore
   store.dispatch(setBasePath(basePath));

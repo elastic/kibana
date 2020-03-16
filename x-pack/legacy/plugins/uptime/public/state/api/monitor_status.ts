@@ -10,7 +10,6 @@ import { apiService } from './utils';
 import { API_URLS } from '../../../common/constants/rest_api';
 
 export interface APIParams {
-  basePath: string;
   monitorId: string;
 }
 
@@ -26,7 +25,7 @@ export const fetchMonitorStatus = async ({
   monitorId,
   dateStart,
   dateEnd,
-}: QueryParams & APIParams): Promise<Ping> => {
+}: QueryParams): Promise<Ping> => {
   const queryParams = {
     monitorId,
     dateStart,
