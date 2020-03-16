@@ -61,18 +61,18 @@ export abstract class Embeddable<
   // TODO: Rename to destroyed.
   private destoyed: boolean = false;
 
-  private __dynamicActions?: UiActionsDynamicActionManager;
+  private cachedDynamicActions?: UiActionsDynamicActionManager;
   public get dynamicActions(): UiActionsDynamicActionManager | undefined {
     if (!this.params.uiActions) return undefined;
-    if (!this.__dynamicActions) {
-      this.__dynamicActions = new UiActionsDynamicActionManager({
+    if (!this.cachedDynamicActions) {
+      this.cachedDynamicActions = new UiActionsDynamicActionManager({
         isCompatible: async ({ embeddable }: any) => embeddable.runtimeId === this.runtimeId,
         storage: new EmbeddableActionStorage(this),
         uiActions: this.params.uiActions,
       });
     }
 
-    return this.__dynamicActions;
+    return this.cachedDynamicActions;
   }
 
   constructor(
