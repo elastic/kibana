@@ -23,22 +23,8 @@ function computeRelativeLuminosity(rgb: string) {
   return colorJS(rgb).luminosity();
 }
 
-function getBrightestRelativeLum(rgb1: string, rgb2: string) {
-  const relLum1 = computeRelativeLuminosity(rgb1);
-  const relLum2 = computeRelativeLuminosity(rgb2);
-  return Math.max(relLum1, relLum2);
-}
-
-function getDarkestRelativeLum(rgb1: string, rgb2: string) {
-  const relLum1 = computeRelativeLuminosity(rgb1);
-  const relLum2 = computeRelativeLuminosity(rgb2);
-  return Math.min(relLum1, relLum2);
-}
-
 function computeContrast(rgb1: string, rgb2: string) {
-  const brightest = getBrightestRelativeLum(rgb1, rgb2);
-  const darkest = getDarkestRelativeLum(rgb1, rgb2);
-  return (brightest + 0.05) / (darkest + 0.05);
+  return colorJS(rgb1).contrast(colorJS(rgb2));
 }
 
 function getAAARelativeLum(bgColor: string, fgColor: string, ratio = 7) {
