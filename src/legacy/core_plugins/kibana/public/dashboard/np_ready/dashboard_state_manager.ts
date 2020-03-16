@@ -23,7 +23,7 @@ import { Observable, Subscription } from 'rxjs';
 import { Moment } from 'moment';
 import { History } from 'history';
 
-import { DashboardContainer } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
+import { DashboardContainer } from 'src/plugins/dashboard/public';
 import { ViewMode } from '../../../../../../plugins/embeddable/public';
 import { migrateLegacyQuery } from '../legacy_imports';
 import {

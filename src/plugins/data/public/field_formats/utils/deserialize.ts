@@ -19,14 +19,8 @@
 
 import { identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  convertDateRangeToString,
-  DateRangeKey,
-} from '../../../../../legacy/core_plugins/data/public/search/aggs/buckets/lib/date_range';
-import {
-  convertIPRangeToString,
-  IpRangeKey,
-} from '../../../../../legacy/core_plugins/data/public/search/aggs/buckets/lib/ip_range';
+import { convertDateRangeToString, DateRangeKey } from '../../search/aggs/buckets/lib/date_range';
+import { convertIPRangeToString, IpRangeKey } from '../../search/aggs/buckets/lib/ip_range';
 import { SerializedFieldFormat } from '../../../../expressions/common/types';
 import { FieldFormatId, FieldFormatsContentType, IFieldFormat } from '../..';
 import { FieldFormat } from '../../../common';
