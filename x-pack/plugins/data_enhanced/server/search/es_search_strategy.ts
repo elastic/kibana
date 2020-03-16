@@ -30,7 +30,7 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
     const defaultParams = getDefaultSearchParams(config);
     const params = { ...defaultParams, ...request.params };
 
-    const rawResponse = (await (request.isRollup
+    const rawResponse = (await (request.indexType === 'rollup'
       ? rollupSearch(caller, { ...request, params }, options)
       : caller('search', params, options))) as SearchResponse<any>;
 

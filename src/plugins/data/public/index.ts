@@ -26,27 +26,27 @@ import { PluginInitializerContext } from '../../../core/public';
  */
 
 import {
-  FILTERS,
   buildEmptyFilter,
-  buildPhrasesFilter,
   buildExistsFilter,
   buildPhraseFilter,
+  buildPhrasesFilter,
   buildQueryFilter,
   buildRangeFilter,
-  toggleFilterNegated,
   disableFilter,
+  FILTERS,
   FilterStateStore,
+  getDisplayValueFromFilter,
   getPhraseFilterField,
   getPhraseFilterValue,
-  isPhraseFilter,
   isExistsFilter,
-  isPhrasesFilter,
-  isRangeFilter,
+  isFilterPinned,
   isMatchAllFilter,
   isMissingFilter,
+  isPhraseFilter,
+  isPhrasesFilter,
   isQueryStringFilter,
-  getDisplayValueFromFilter,
-  isFilterPinned,
+  isRangeFilter,
+  toggleFilterNegated,
 } from '../common';
 
 import { FilterLabel } from './ui/filter_bar';
@@ -283,14 +283,68 @@ export {
  * Search:
  */
 
+import {
+  // aggs
+  AggConfigs,
+  aggTypeFilters,
+  aggGroupNamesMap,
+  CidrMask,
+  convertDateRangeToString,
+  convertIPRangeToString,
+  intervalOptions, // only used in Discover
+  isDateHistogramBucketAggConfig,
+  isStringType,
+  isType,
+  parentPipelineType,
+  propFilter,
+  siblingPipelineType,
+  termsAggFilter,
+  // expressions utils
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  // tabify
+  tabifyAggResponse,
+  tabifyGetColumns,
+} from './search';
+
+import {
+  dateHistogramInterval,
+  InvalidEsCalendarIntervalError,
+  InvalidEsIntervalFormatError,
+  isValidEsInterval,
+  isValidInterval,
+  parseEsInterval,
+  parseInterval,
+  toAbsoluteDates,
+} from '../common';
+
+export { ParsedInterval } from '../common';
+
 export {
+  // aggs
+  AggGroupNames,
+  AggParam, // only the type is used externally, only in vis editor
+  AggParamOption, // only the type is used externally
+  AggParamType,
+  AggTypeFieldFilters, // TODO convert to interface
+  AggTypeFilters, // TODO convert to interface
+  BUCKET_TYPES,
+  DateRangeKey, // only used in field formatter deserialization, which will live in data
+  IAggConfig,
+  IAggConfigs,
+  IAggGroupNames,
+  IAggType,
+  IFieldParamType,
+  IMetricAggType,
+  IpRangeKey, // only used in field formatter deserialization, which will live in data
+  METRIC_TYPES,
+  OptionedParamEditorProps, // only type is used externally
+  OptionedParamType,
+  OptionedValueProp, // only type is used externally
+  // search
   ES_SEARCH_STRATEGY,
   SYNC_SEARCH_STRATEGY,
-  defaultSearchStrategy,
-  esSearchStrategyProvider,
   getEsPreference,
-  addSearchStrategy,
-  hasSearchStategyForIndexPattern,
   getSearchErrorType,
   ISearchContext,
   TSearchStrategyProvider,
@@ -315,7 +369,43 @@ export {
   EsQuerySortValue,
   SortDirection,
   FetchOptions,
+  // tabify
+  TabbedAggColumn,
+  TabbedAggRow,
+  TabbedTable,
 } from './search';
+
+// Search namespace
+export const search = {
+  aggs: {
+    AggConfigs,
+    aggGroupNamesMap,
+    aggTypeFilters,
+    CidrMask,
+    convertDateRangeToString,
+    convertIPRangeToString,
+    dateHistogramInterval,
+    intervalOptions, // only used in Discover
+    InvalidEsCalendarIntervalError,
+    InvalidEsIntervalFormatError,
+    isDateHistogramBucketAggConfig,
+    isStringType,
+    isType,
+    isValidEsInterval,
+    isValidInterval,
+    parentPipelineType,
+    parseEsInterval,
+    parseInterval,
+    propFilter,
+    siblingPipelineType,
+    termsAggFilter,
+    toAbsoluteDates,
+  },
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  tabifyAggResponse,
+  tabifyGetColumns,
+};
 
 /*
  * UI components
@@ -348,9 +438,7 @@ export {
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,
-  SavedQueryAttributes,
   InputTimeRange,
-  TimefilterSetup,
   TimeHistory,
   TimefilterContract,
   TimeHistoryContract,
@@ -360,8 +448,6 @@ export {
   // kbn field types
   castEsToKbnFieldTypeName,
   getKbnTypeNames,
-  // utils
-  parseInterval,
 } from '../common';
 
 /*
