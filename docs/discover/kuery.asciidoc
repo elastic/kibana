@@ -7,8 +7,8 @@ simplified, easier to use syntax. If you have a Basic license or above, autocomp
 
 ==== Language Syntax
 
-If you're familiar with Kibana's old lucene query syntax, you should feel right at home with the new syntax. The basics
-stay the same, we've simply refined things to make the query language easier to use. Read about the changes below.
+If you're familiar with Kibana's old Lucene query syntax, you should feel right at home with the new syntax. The basics
+stay the same, we've simply refined things to make the query language easier to use.
 
 `response:200` will match documents where the response field matches the value 200.
 
