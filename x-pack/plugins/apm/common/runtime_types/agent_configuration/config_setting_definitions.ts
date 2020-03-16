@@ -57,18 +57,9 @@ export type SettingDefinition =
 
 /*
  * Settings added here will automatically be added to  `agent_configuration/agent_configuration_intake_rt.ts`
- * and validated bothj client and server-side
+ * and validated both client and server-side
  */
 export const settingDefinitions: SettingDefinition[] = [
-  // my_custom_setting
-  {
-    key: 'my_custom_setting',
-    label: 'My very custom option',
-    type: 'boolean',
-    validation: booleanRt,
-    helpText: 'You should choose something'
-  },
-
   // Active
   {
     key: 'active',
