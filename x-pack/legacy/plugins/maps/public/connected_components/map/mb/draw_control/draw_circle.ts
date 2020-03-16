@@ -4,12 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
+
+// @ts-ignore
 import turf from 'turf';
+// @ts-ignore
 import turfCircle from '@turf/circle';
 
+type DrawCircleState = {
+  circle: {
+    properties: {
+      center: {} | null;
+      radiusKm: number;
+    };
+    id: string | number;
+    incomingCoords: (coords: unknown[]) => void;
+    toGeoJSON: () => unknown;
+  };
+};
+
+type MouseEvent = {
+  lngLat: {
+    lng: number;
+    lat: number;
+  };
+};
+
 export const DrawCircle = {
-  onSetup: function() {
-    const circle = this.newFeature({
+  onSetup() {
+    // @ts-ignore
+    const circle: unknown = this.newFeature({
       type: 'Feature',
       properties: {
         center: null,
@@ -20,9 +44,14 @@ export const DrawCircle = {
         coordinates: [[]],
       },
     });
+
+    // @ts-ignore
     this.addFeature(circle);
+    // @ts-ignore
     this.clearSelectedFeatures();
+    // @ts-ignore
     this.updateUIClasses({ mouse: 'add' });
+    // @ts-ignore
     this.setActionableState({
       trash: true,
     });
@@ -30,7 +59,7 @@ export const DrawCircle = {
       circle,
     };
   },
-  onKeyUp: function(state, e) {
+  onKeyUp(state: DrawCircleState, e: { keyCode: number }) {
     if (e.keyCode === 27) {
       // clear point when user hits escape
       state.circle.properties.center = null;
@@ -38,21 +67,23 @@ export const DrawCircle = {
       state.circle.incomingCoords([[]]);
     }
   },
-  onClick: function(state, e) {
+  onClick(state: DrawCircleState, e: MouseEvent) {
     if (!state.circle.properties.center) {
       // first click, start circle
       state.circle.properties.center = [e.lngLat.lng, e.lngLat.lat];
     } else {
       // second click, finish draw
+      // @ts-ignore
       this.updateUIClasses({ mouse: 'pointer' });
       state.circle.properties.radiusKm = turf.distance(state.circle.properties.center, [
         e.lngLat.lng,
         e.lngLat.lat,
       ]);
+      // @ts-ignore
       this.changeMode('simple_select', { featuresId: state.circle.id });
     }
   },
-  onMouseMove: function(state, e) {
+  onMouseMove(state: DrawCircleState, e: MouseEvent) {
     if (!state.circle.properties.center) {
       // circle not started, nothing to update
       return;
@@ -66,29 +97,41 @@ export const DrawCircle = {
     );
     state.circle.incomingCoords(newCircleFeature.geometry.coordinates);
   },
-  onStop: function(state) {
+  onStop(state: DrawCircleState) {
+    // @ts-ignore
     this.updateUIClasses({ mouse: 'none' });
+    // @ts-ignore
     this.activateUIButton();
 
+    // @ts-ignore
     if (this.getFeature(state.circle.id) === undefined) return;
 
     if (state.circle.properties.center && state.circle.properties.radiusKm > 0) {
+      // @ts-ignore
       this.map.fire('draw.create', {
         features: [state.circle.toGeoJSON()],
       });
     } else {
+      // @ts-ignore
       this.deleteFeature([state.circle.id], { silent: true });
+      // @ts-ignore
       this.changeMode('simple_select', {}, { silent: true });
     }
   },
-  toDisplayFeatures: function(state, geojson, display) {
+  toDisplayFeatures(
+    state: DrawCircleState,
+    geojson: { properties: { active: string } },
+    display: (geojson: unknown) => unknown
+  ) {
     if (state.circle.properties.center) {
       geojson.properties.active = 'true';
       return display(geojson);
     }
   },
-  onTrash: function(state) {
+  onTrash(state: DrawCircleState) {
+    // @ts-ignore
     this.deleteFeature([state.circle.id], { silent: true });
+    // @ts-ignore
     this.changeMode('simple_select');
   },
 };
