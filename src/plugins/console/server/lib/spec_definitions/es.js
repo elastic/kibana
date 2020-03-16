@@ -18,26 +18,27 @@
  */
 
 import Api from './api';
-import { getSpec } from './spec';
-import { register } from './es_6_0/ingest';
-const ES_6_0 = new Api('es_6_0');
+import { getSpec } from './json';
+import { register } from './js/ingest';
+const ES = new Api('es');
 const spec = getSpec();
 
 // adding generated specs
 Object.keys(spec).forEach(endpoint => {
-  ES_6_0.addEndpointDescription(endpoint, spec[endpoint]);
+  ES.addEndpointDescription(endpoint, spec[endpoint]);
 });
 
 //adding globals and custom API definitions
-require('./es_6_0/aliases')(ES_6_0);
-require('./es_6_0/aggregations')(ES_6_0);
-require('./es_6_0/document')(ES_6_0);
-require('./es_6_0/filter')(ES_6_0);
-require('./es_6_0/globals')(ES_6_0);
-register(ES_6_0);
-require('./es_6_0/mappings')(ES_6_0);
-require('./es_6_0/query')(ES_6_0);
-require('./es_6_0/reindex')(ES_6_0);
-require('./es_6_0/search')(ES_6_0);
+require('./js/aliases')(ES);
+require('./js/aggregations')(ES);
+require('./js/document')(ES);
+require('./js/filter')(ES);
+require('./js/globals')(ES);
+register(ES);
+require('./js/mappings')(ES);
+require('./js/settings')(ES);
+require('./js/query')(ES);
+require('./js/reindex')(ES);
+require('./js/search')(ES);
 
-export default ES_6_0;
+export default ES;

@@ -19,6 +19,6 @@
 
 export declare function addProcessorDefinition(...args: any[]): any;
 
-export declare function resolveApi(senseVersion: string, apis: string[]): object;
+export declare function resolveApi(): object;
 
 export declare function addExtensionSpecFilePath(...args: any[]): any;

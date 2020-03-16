@@ -17,11 +17,9 @@
  * under the License.
  */
 
-const _ = require('lodash');
+import { BOOLEAN } from './shared';
 
-const BOOLEAN = {
-  __one_of: [true, false],
-};
+const _ = require('lodash');
 
 export default function(api) {
   api.addEndpointDescription('put_mapping', {
