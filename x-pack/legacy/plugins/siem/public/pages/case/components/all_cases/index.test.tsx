@@ -113,7 +113,7 @@ describe('AllCases', () => {
     const firstCase = useGetCasesMockState.data.cases[0];
     expect(dispatchUpdateCaseProperty).toBeCalledWith({
       caseId: firstCase.id,
-      updateKey: 'state',
+      updateKey: 'status',
       updateValue: 'closed',
       version: firstCase.version,
     });
