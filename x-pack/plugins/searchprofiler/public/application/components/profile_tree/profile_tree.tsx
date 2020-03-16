@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo } from 'react';
+import React, { memo, Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { IndexDetails } from './index_details';
@@ -54,15 +54,10 @@ export const ProfileTree = memo(({ data, target, onHighlight }: Props) => {
               <EuiSpacer size="s" />
               <EuiFlexItem grow={false}>
                 {index.shards.map((shard, idx) => (
-                  <>
-                    <ShardDetails
-                      key={shard.id[1] + `_${idx}`}
-                      index={index}
-                      shard={shard}
-                      operations={shard[target]!}
-                    />
+                  <Fragment key={shard.id[1] + `_${idx}`}>
+                    <ShardDetails index={index} shard={shard} operations={shard[target]!} />
                     {idx < index.shards.length - 1 ? <EuiSpacer size="s" /> : undefined}
-                  </>
+                  </Fragment>
                 ))}
               </EuiFlexItem>
             </EuiFlexGroup>
