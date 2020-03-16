@@ -13,9 +13,12 @@ import { EndpointDocGenerator } from '../../../../../common/generate_data';
 import { ManagementListState } from '../../types';
 import { AppAction } from '../action';
 import { listData } from './selectors';
+import { DepsStartMock, depsStartMock } from '../../mocks';
+
 describe('endpoint list saga', () => {
   const sleep = (ms = 100) => new Promise(wakeup => setTimeout(wakeup, ms));
   let fakeCoreStart: jest.Mocked<CoreStart>;
+  let depsStart: DepsStartMock;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
   let store: Store<ManagementListState>;
   let getState: typeof store['getState'];
@@ -38,10 +41,11 @@ describe('endpoint list saga', () => {
   };
   beforeEach(() => {
     fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
+    depsStart = depsStartMock();
     fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
     store = createStore(
       managementListReducer,
-      applyMiddleware(managementMiddlewareFactory(fakeCoreStart))
+      applyMiddleware(managementMiddlewareFactory(fakeCoreStart, depsStart))
     );
     getState = store.getState;
     dispatch = store.dispatch;
