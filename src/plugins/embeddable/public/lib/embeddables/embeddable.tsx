@@ -18,7 +18,6 @@
  */
 import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
 import { Adapters, ViewMode } from '../types';
 import { IContainer } from '../containers';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
@@ -117,20 +116,9 @@ export abstract class Embeddable<
         console.error(error);
         /* eslint-enable */
       });
-      this.storageSubscription = this.input$
-        .pipe(
-          distinctUntilChanged((a: TEmbeddableInput, b: TEmbeddableInput) => {
-            if (!!a.events !== !!b.events) return false;
-            if (!a.events || !b.events) return true;
-            if (a.events.length !== b.events.length) return false;
-            for (let i = 0; i < a.events.length; i++)
-              if (a.events[i].eventId !== b.events[i].eventId) return false;
-            return true;
-          })
-        )
-        .subscribe(() => {
-          this.storage.reload$.next();
-        });
+      this.storageSubscription = this.input$.subscribe(() => {
+        this.storage.reload$.next();
+      });
     }
   }
 
