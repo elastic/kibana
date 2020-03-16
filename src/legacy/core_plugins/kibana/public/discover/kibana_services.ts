@@ -50,13 +50,15 @@ export function setServices(newServices: any) {
 // EXPORT legacy static dependencies, should be migrated when available in a new version;
 export { angular };
 export { wrapInI18nContext } from 'ui/i18n';
-export { getRequestInspectorStats, getResponseInspectorStats } from '../../../data/public';
+import { search } from '../../../../../plugins/data/public';
+export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
+// @ts-ignore
+export { shortenDottedString } from '../../common/utils/shorten_dotted_string';
 // @ts-ignore
 export { intervalOptions } from 'ui/agg_types';
-export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
+export { subscribeWithScope } from '../../../../../plugins/kibana_legacy/public';
 // @ts-ignore
 export { timezoneProvider } from 'ui/vis/lib/timezone';
-export { tabifyAggResponse } from '../../../data/public';
 export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 export {
   ensureDefaultIndexPattern,
@@ -70,7 +72,6 @@ export {
   IIndexPattern,
   IndexPattern,
   indexPatterns,
-  hasSearchStategyForIndexPattern,
   IFieldType,
   SearchSource,
   ISearchSource,
