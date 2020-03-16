@@ -39,11 +39,15 @@ export const sendGetOneAgentConfig = (agentConfigId: string) => {
   });
 };
 
-export const sendCreateAgentConfig = (body: CreateAgentConfigRequest['body']) => {
+export const sendCreateAgentConfig = (
+  body: CreateAgentConfigRequest['body'],
+  { withSysMonitoring }: { withSysMonitoring: boolean } = { withSysMonitoring: false }
+) => {
   return sendRequest<CreateAgentConfigResponse>({
     path: agentConfigRouteService.getCreatePath(),
     method: 'post',
     body: JSON.stringify(body),
+    query: withSysMonitoring ? { sys_monitoring: true } : {},
   });
 };
 
