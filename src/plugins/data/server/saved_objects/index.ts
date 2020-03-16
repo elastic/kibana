@@ -17,25 +17,6 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { Legacy } from '../../../../kibana';
-
-// eslint-disable-next-line import/no-default-export
-export default function DataPlugin(kibana: any) {
-  const config: Legacy.PluginSpecOptions = {
-    id: 'data',
-    require: ['elasticsearch'],
-    publicDir: resolve(__dirname, 'public'),
-    config: (Joi: any) => {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-      }).default();
-    },
-    init: (server: Legacy.Server) => ({}),
-    uiExports: {
-      injectDefaultVars: () => ({}),
-    },
-  };
-
-  return new kibana.Plugin(config);
-}
+export { searchSavedObjectType } from './search';
+export { querySavedObjectType } from './query';
+export { indexPatternSavedObjectType } from './index_patterns';
