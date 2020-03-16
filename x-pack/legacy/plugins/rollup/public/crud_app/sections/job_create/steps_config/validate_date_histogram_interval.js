@@ -6,11 +6,12 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
+import { search } from '../../../../../../../../../src/plugins/data/public';
+const {
   InvalidEsIntervalFormatError,
   InvalidEsCalendarIntervalError,
   parseEsInterval,
-} from '../../../../../../../../../src/legacy/core_plugins/data/public';
+} = search.aggs;
 
 export function validateDateHistogramInterval(dateHistogramInterval) {
   if (!dateHistogramInterval || !dateHistogramInterval.trim()) {
