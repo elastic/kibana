@@ -159,13 +159,14 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
       defaultMessage: 'State',
     }),
     items: Object.entries(stateValues).map(([stateKey, stateValue]) => {
-      if (stateKey.toString() === 'state') {
+      const title = stateKey.toString();
+      if (title === 'state') {
         return {
-          title: stateKey.toString(),
+          title,
           description: getTaskStateBadge(getItemDescription(stateValue)),
         };
       }
-      return { title: stateKey.toString(), description: getItemDescription(stateValue) };
+      return { title, description: getItemDescription(stateValue) };
     }),
     position: 'left',
   };

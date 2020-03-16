@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { Fragment, FC } from 'react';
 
 import { EuiCallOut, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 
@@ -18,7 +18,7 @@ export const Messages: FC<Props> = ({ messages }) => {
   return (
     <>
       {messages.map((requestMessage, i) => (
-        <>
+        <Fragment key={i}>
           <EuiCallOut
             title={requestMessage.message}
             color={requestMessage.error !== undefined ? 'danger' : 'primary'}
@@ -32,7 +32,7 @@ export const Messages: FC<Props> = ({ messages }) => {
             )}
           </EuiCallOut>
           <EuiSpacer size="s" />
-        </>
+        </Fragment>
       ))}
     </>
   );
