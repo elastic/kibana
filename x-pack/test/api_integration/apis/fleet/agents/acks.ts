@@ -101,13 +101,13 @@ export default function(providerContext: FtrProviderContext) {
         )
         .expect(200);
       const expectedEvents = eventResponse.list.filter(
-        item =>
+        (item: Record<string, string>) =>
           item.action_id === '48cebde1-c906-4893-b89f-595d943b72a1' ||
           item.action_id === '48cebde1-c906-4893-b89f-595d943b72a2'
       );
       expect(expectedEvents.length).to.eql(2);
-      const expectedEvent = eventResponse.list.find(
-        item => item.action_id === '48cebde1-c906-4893-b89f-595d943b72a1'
+      const expectedEvent = expectedEvents.find(
+        (item: Record<string, string>) => item.action_id === '48cebde1-c906-4893-b89f-595d943b72a1'
       );
       expect(expectedEvent).to.eql({
         type: 'ACTION_RESULT',
