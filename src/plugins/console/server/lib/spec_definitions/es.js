@@ -21,24 +21,27 @@ import Api from './api';
 import { getSpec } from './json';
 import { register } from './js/ingest';
 const ES = new Api('es');
-const spec = getSpec();
 
-// adding generated specs
-Object.keys(spec).forEach(endpoint => {
-  ES.addEndpointDescription(endpoint, spec[endpoint]);
-});
+export const loadSpec = () => {
+  const spec = getSpec();
 
-//adding globals and custom API definitions
-require('./js/aliases')(ES);
-require('./js/aggregations')(ES);
-require('./js/document')(ES);
-require('./js/filter')(ES);
-require('./js/globals')(ES);
-register(ES);
-require('./js/mappings')(ES);
-require('./js/settings')(ES);
-require('./js/query')(ES);
-require('./js/reindex')(ES);
-require('./js/search')(ES);
+  // adding generated specs
+  Object.keys(spec).forEach(endpoint => {
+    ES.addEndpointDescription(endpoint, spec[endpoint]);
+  });
+
+  // adding globals and custom API definitions
+  require('./js/aliases')(ES);
+  require('./js/aggregations')(ES);
+  require('./js/document')(ES);
+  require('./js/filter')(ES);
+  require('./js/globals')(ES);
+  register(ES);
+  require('./js/mappings')(ES);
+  require('./js/settings')(ES);
+  require('./js/query')(ES);
+  require('./js/reindex')(ES);
+  require('./js/search')(ES);
+};
 
 export default ES;

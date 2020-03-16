@@ -21,4 +21,6 @@ export { addProcessorDefinition } from './js/ingest';
 
 export { addExtensionSpecFilePath } from './json';
 
+export { loadSpec } from './es';
+
 export { resolveApi } from './server';
