@@ -34,5 +34,12 @@ export const policyDetailsReducer: Reducer<PolicyDetailsState, AppAction> = (
     };
   }
 
+  if (action.type === 'userChangedPolicyConfig') {
+    return {
+      ...state,
+      policyConfig: action.payload.policyConfig,
+    };
+  }
+
   return state;
 };

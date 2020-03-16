@@ -27,3 +27,9 @@ export const selectPolicyIdFromParams: (state: PolicyDetailsState) => string = c
     return '';
   }
 );
+
+export const selectPolicyConfig = (state: PolicyDetailsState) => state.policyConfig;
+
+export const selectWindowsEventing = (state: PolicyDetailsState) => {
+  return selectPolicyConfig(state).windows.eventing;
+};
