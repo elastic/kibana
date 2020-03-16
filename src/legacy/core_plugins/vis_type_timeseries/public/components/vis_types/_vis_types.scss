@@ -7,4 +7,15 @@
   .tvbVisTimeSeries {
     overflow: hidden;
   }
+  .tvbVisTimeSeriesDark {
+    .echLegendItem  {
+      color: #DFE5EF !important;
+    }
+  }
+  .tvbVisTimeSeriesLight {
+    .echLegendItem  {
+      color: #343741 !important;
+    }
+  }
 }
+
