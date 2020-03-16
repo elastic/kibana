@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// TODO: Delete this file once the lists features are within the product and in a particular version
+// TODO: (LIST-FEATURE) Delete this file once the lists features are within the product and in a particular version
 
 // Very temporary file where we put our feature flags for detection lists.
 // We need to use an environment variable and CANNOT use a kibana.dev.yml setting because some definitions

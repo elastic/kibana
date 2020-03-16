@@ -94,7 +94,7 @@ export const importRulesSchema = Joi.object({
   created_by,
   updated_by,
 
-  // TODO: Remove the hasListsFeatures once this is ready for release
+  // TODO: (LIST-FEATURE) Remove the hasListsFeatures once this is ready for release
   lists: hasListsFeature() ? lists.default([]) : lists.forbidden().default([]),
 });
 

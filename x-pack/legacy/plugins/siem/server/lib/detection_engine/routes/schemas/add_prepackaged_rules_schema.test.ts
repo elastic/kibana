@@ -1342,7 +1342,7 @@ describe('add prepackaged rules schema', () => {
     });
   });
 
-  // TODO: We can enable this once we change the schema's to not be global per module but rather functions that can create the schema
+  // TODO: (LIST-FEATURE) We can enable this once we change the schema's to not be global per module but rather functions that can create the schema
   // on demand. Since they are per module, we have a an issue where the ENV variables do not take effect. It is better we change all the
   // schema's to be function calls to avoid global side effects or just wait until the feature is available. If you want to test this early,
   // you can remove the .skip and set your env variable of export ELASTIC_XPACK_SIEM_LISTS_FEATURE=true locally

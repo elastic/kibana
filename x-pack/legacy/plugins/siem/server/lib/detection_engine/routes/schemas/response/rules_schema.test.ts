@@ -206,7 +206,7 @@ describe('rules_schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  // TODO: Remove this test once the feature flag is deployed
+  // TODO: (LIST-FEATURE) Remove this test once the feature flag is deployed
   test('it should remove lists when we need it to be removed because the feature is off but there exists a list in the data', () => {
     const payload = getBaseResponsePayload();
     const decoded = rulesSchema.decode(payload);

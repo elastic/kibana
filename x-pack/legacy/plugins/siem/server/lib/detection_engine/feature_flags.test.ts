@@ -86,7 +86,7 @@ describe('feature_flags', () => {
       );
     });
 
-    test('it can be called twice as long as unSetFeatureFlagsForTestsOnly is called in-between', () => {
+    test('it can be called twice as long as setFeatureFlagsForTestsOnly is called in-between', () => {
       setFeatureFlagsForTestsOnly();
       unSetFeatureFlagsForTestsOnly();
       setFeatureFlagsForTestsOnly();

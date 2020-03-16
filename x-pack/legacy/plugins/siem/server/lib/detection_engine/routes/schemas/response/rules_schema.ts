@@ -145,7 +145,7 @@ export const rulesSchema = new t.Type<
   (input): Either<t.Errors, RulesWithoutTypeDependentsSchema> => {
     const output = checkTypeDependents(input);
     if (!hasListsFeature()) {
-      // TODO: Remove this after the lists feature is an accepted feature for a particular release
+      // TODO: (LIST-FEATURE) Remove this after the lists feature is an accepted feature for a particular release
       return removeList(output);
     } else {
       return output;
@@ -154,7 +154,7 @@ export const rulesSchema = new t.Type<
   t.identity
 );
 
-// TODO: Remove this after the lists feature is an accepted feature for a particular release
+// TODO: (LIST-FEATURE) Remove this after the lists feature is an accepted feature for a particular release
 export const removeList = (
   decoded: Either<t.Errors, RequiredRulesSchema>
 ): Either<t.Errors, RequiredRulesSchema> => {
