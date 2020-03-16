@@ -67,7 +67,7 @@ describe('action_form', () => {
     },
     actionConnectorFields: null,
     actionParamsFields: null,
-  }
+  };
 
   describe('action_form in alert', () => {
     let wrapper: ReactWrapper<any>;
