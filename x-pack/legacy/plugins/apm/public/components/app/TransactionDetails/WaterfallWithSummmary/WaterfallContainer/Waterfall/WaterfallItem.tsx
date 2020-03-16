@@ -18,12 +18,13 @@ import { IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 import { ErrorOverviewLink } from '../../../../../shared/Links/apm/ErrorOverviewLink';
 import { TRACE_ID } from '../../../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import { SyncBadge } from './SyncBadge';
+import { Margins } from '../../../../../shared/charts/Timeline';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
 interface IContainerStyleProps {
   type: ItemType;
-  timelineMargins: ITimelineMargins;
+  timelineMargins: Margins;
   isSelected: boolean;
 }
 
@@ -72,15 +73,8 @@ const ItemText = styled.span`
   }
 `;
 
-interface ITimelineMargins {
-  right: number;
-  left: number;
-  top: number;
-  bottom: number;
-}
-
 interface IWaterfallItemProps {
-  timelineMargins: ITimelineMargins;
+  timelineMargins: Margins;
   totalDuration?: number;
   item: IWaterfallItem;
   color: string;
