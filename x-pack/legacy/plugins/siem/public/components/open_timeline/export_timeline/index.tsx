@@ -6,17 +6,16 @@
 
 import React, { useState, useCallback, Dispatch, SetStateAction } from 'react';
 import { OpenTimelineResult, DeleteTimelines } from '../types';
-import { KibanaServices } from '../../../lib/kibana';
 import { ExportSelectedData } from '../../generic_downloader';
-import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
+
 import { TimelineDownloader } from './export_timeline';
 import { DeleteTimelineModalOverlay } from '../delete_timeline_modal';
+import { exportSelectedTimeline } from '../../../containers/timeline/all/api';
 
 export interface ExportTimeline {
   disableExportTimelineDownloader: () => void;
   enableExportTimelineDownloader: () => void;
   exportedIds: string[] | undefined;
-  getExportedData: ExportSelectedData;
   isEnableDownloader: boolean;
   setIsEnableDownloader: Dispatch<SetStateAction<boolean>>;
 }
@@ -29,29 +28,6 @@ export const useExportTimeline = ({
   setActionTimeline: Dispatch<SetStateAction<undefined | OpenTimelineResult>>;
 }): ExportTimeline => {
   const [isEnableDownloader, setIsEnableDownloader] = useState(false);
-  const exportSelectedTimeline: ExportSelectedData = useCallback(
-    async ({
-      excludeExportDetails = false,
-      filename = `timelines_export.ndjson`,
-      ids = [],
-      signal,
-    }): Promise<Blob> => {
-      const body = ids.length > 0 ? JSON.stringify({ objects: ids }) : undefined;
-      const response = await KibanaServices.get().http.fetch<Blob>(`${TIMELINE_EXPORT_URL}`, {
-        method: 'POST',
-        body,
-        query: {
-          exclude_export_details: excludeExportDetails,
-          file_name: filename,
-        },
-        signal,
-        asResponse: true,
-      });
-
-      return response.body!;
-    },
-    [selectedItems]
-  );
 
   const getExportedIds = useCallback(
     (selectedTimelines: OpenTimelineResult | OpenTimelineResult[]) => {
@@ -80,7 +56,6 @@ export const useExportTimeline = ({
     disableExportTimelineDownloader,
     enableExportTimelineDownloader,
     exportedIds: selectedItems != null ? getExportedIds(selectedItems) : undefined,
-    getExportedData: exportSelectedTimeline,
     isEnableDownloader,
     setIsEnableDownloader,
   };
@@ -107,7 +82,7 @@ const EditTimelineActionsComponent: React.FC<{
     <>
       <TimelineDownloader
         exportedIds={exportedIds}
-        getExportedData={getExportedData}
+        getExportedData={exportSelectedTimeline}
         isEnableDownloader={isEnableDownloader}
         onComplete={onComplete}
       />

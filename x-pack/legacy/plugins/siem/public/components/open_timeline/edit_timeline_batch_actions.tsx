@@ -13,6 +13,7 @@ import { DeleteTimeline, DeleteTimelines, OpenTimelineResult } from './types';
 import { ExportTimeline } from './export_timeline';
 import { useEditTimelineActions } from './edit_timeline_actions';
 import { ActionToaster } from '../toasters';
+import { exportSelectedTimeline } from '../../containers/timeline/all/api';
 
 export const useEditTimelinBatchActions = ({
   deleteTimelines,
@@ -29,7 +30,6 @@ export const useEditTimelinBatchActions = ({
     enableExportTimelineDownloader,
     disableExportTimelineDownloader,
     exportedIds,
-    getExportedData,
     isEnableDownloader,
     isDeleteTimelineModalOpen,
     onOpenDeleteTimelineModal,
@@ -53,7 +53,7 @@ export const useEditTimelinBatchActions = ({
         <>
           <TimelineDownloader
             exportedIds={exportedIds}
-            getExportedData={getExportedData}
+            getExportedData={exportSelectedTimeline}
             isEnableDownloader={isEnableDownloader}
             onComplete={onCompleteBatchActions.bind(null, closePopover)}
           />
@@ -105,7 +105,6 @@ export const useEditTimelinBatchActions = ({
       dispatchToaster,
       disableExportTimelineDownloader,
       exportedIds,
-      getExportedData,
       isEnableDownloader,
       isDeleteTimelineModalOpen,
       selectedItems,

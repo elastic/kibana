@@ -25,6 +25,7 @@ import {
 } from '../utility_bar';
 import { useEditTimelinBatchActions } from './edit_timeline_batch_actions';
 import { useEditTimelineActions } from './edit_timeline_actions';
+import { exportSelectedTimeline } from '../../containers/timeline/all/api';
 export const OpenTimeline = React.memo<OpenTimelineProps>(
   ({
     deleteTimelines,
@@ -58,7 +59,6 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       actionItem,
       enableExportTimelineDownloader,
       exportedIds,
-      getExportedData,
       isEnableDownloader,
       isDeleteTimelineModalOpen,
       onOpenDeleteTimelineModal,
@@ -96,7 +96,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           actionItem={actionItem}
           deleteTimelines={deleteTimelines}
           exportedIds={exportedIds}
-          getExportedData={getExportedData}
+          getExportedData={exportSelectedTimeline}
           isDeleteTimelineModalOpen={isDeleteTimelineModalOpen}
           isEnableDownloader={isEnableDownloader}
           onComplete={onCompleteEditTimelineAction}

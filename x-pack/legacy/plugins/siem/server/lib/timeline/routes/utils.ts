@@ -27,17 +27,6 @@ import { transformDataToNdjson } from '../../detection_engine/routes/rules/utils
 import { NoteSavedObject } from '../../note/types';
 import { PinnedEventSavedObject } from '../../pinned_event/types';
 
-export const getExportTimelineByObjectIds = async ({
-  client,
-  request,
-}: {
-  client: ExportTimelineSavedObjectsClient;
-  request: ExportTimelineRequest;
-}) => {
-  const timeline = await getTimelinesFromObjects(client, request);
-  return transformDataToNdjson(timeline);
-};
-
 const getAllSavedNote = async (
   savedObjectsClient: ExportTimelineSavedObjectsClient,
   options: SavedObjectsFindOptions
@@ -111,29 +100,6 @@ const getExportedNotedandPinnedEvents = (
   };
 };
 
-const getTimelines = async (
-  savedObjectsClient: ExportTimelineSavedObjectsClient,
-  timelineIds: string[]
-) => {
-  const savedObjects = await Promise.resolve(
-    savedObjectsClient.bulkGet(
-      timelineIds.reduce(
-        (acc, timelineId) => [...acc, { id: timelineId, type: timelineSavedObjectType }],
-        [] as Array<{ id: string; type: string }>
-      )
-    )
-  );
-
-  const timelineObjects: TimelineSavedObject[] | undefined =
-    savedObjects != null
-      ? savedObjects.saved_objects.map((savedObject: unknown) => {
-          return convertSavedObjectToSavedTimeline(savedObject);
-        })
-      : [];
-
-  return timelineObjects;
-};
-
 const getAllSavedPinnedEvents = async (
   savedObjectsClient: ExportTimelineSavedObjectsClient,
   options: SavedObjectsFindOptions
@@ -165,6 +131,29 @@ const getPinnedEventsIdsByTimelineId = (
   return currentPinnedEvents.map(event => event.eventId) ?? [];
 };
 
+const getTimelines = async (
+  savedObjectsClient: ExportTimelineSavedObjectsClient,
+  timelineIds: string[]
+) => {
+  const savedObjects = await Promise.resolve(
+    savedObjectsClient.bulkGet(
+      timelineIds.reduce(
+        (acc, timelineId) => [...acc, { id: timelineId, type: timelineSavedObjectType }],
+        [] as Array<{ id: string; type: string }>
+      )
+    )
+  );
+
+  const timelineObjects: TimelineSavedObject[] | undefined =
+    savedObjects != null
+      ? savedObjects.saved_objects.map((savedObject: unknown) => {
+          return convertSavedObjectToSavedTimeline(savedObject);
+        })
+      : [];
+
+  return timelineObjects;
+};
+
 const getTimelinesFromObjects = async (
   savedObjectsClient: ExportTimelineSavedObjectsClient,
   request: ExportTimelineRequest
@@ -192,4 +181,15 @@ const getTimelinesFromObjects = async (
       };
     }) ?? []
   );
+};
+
+export const getExportTimelineByObjectIds = async ({
+  client,
+  request,
+}: {
+  client: ExportTimelineSavedObjectsClient;
+  request: ExportTimelineRequest;
+}) => {
+  const timeline = await getTimelinesFromObjects(client, request);
+  return transformDataToNdjson(timeline);
 };
