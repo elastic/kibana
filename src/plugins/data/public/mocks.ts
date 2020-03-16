@@ -44,6 +44,9 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   const queryStartMock = queryServiceMock.createStartContract();
   return {
+    actions: {
+      createFiltersFromEvent: jest.fn(),
+    },
     autocomplete: autocompleteMock,
     search: searchStartMock,
     fieldFormats: fieldFormatsMock as DataPublicPluginStart['fieldFormats'],
@@ -64,7 +67,7 @@ const createStartContract = (): Start => {
 };
 
 export { searchSourceMock } from './search/mocks';
-export { getCalculateAutoTimeExpression } from './search/aggs/buckets/lib/date_utils';
+export { getCalculateAutoTimeExpression } from './search/aggs';
 
 export const dataPluginMock = {
   createSetupContract,

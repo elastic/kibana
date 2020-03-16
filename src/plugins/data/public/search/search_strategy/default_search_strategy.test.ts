@@ -59,12 +59,8 @@ describe('defaultSearchStrategy', function() {
       const searchService = searchStartMock;
       searchService.aggs.calculateAutoTimeExpression = jest.fn().mockReturnValue('1d');
       searchService.search = newSearchMock;
-      searchService.__LEGACY = {
-        esClient: {
-          search: searchMock,
-          msearch: msearchMock,
-        },
-      };
+      searchService.__LEGACY.esClient.search = searchMock;
+      searchService.__LEGACY.esClient.msearch = msearchMock;
 
       searchArgs = {
         searchRequests: [
