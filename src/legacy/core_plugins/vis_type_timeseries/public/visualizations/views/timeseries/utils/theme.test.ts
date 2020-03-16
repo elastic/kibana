@@ -33,7 +33,7 @@ describe('TSVB theme', () => {
   });
   it('should return a highcontrast color theme for a different background', () => {
     // red use a near full-black color
-    expect(getTheme(false, 'red').axes.axisTitleStyle.fill).toEqual('rgb(25,25,25)');
+    expect(getTheme(false, 'red').axes.axisTitleStyle.fill).toEqual('rgb(23,23,23)');
 
     // violet increased the text color to full white for higer contrast
     expect(getTheme(false, '#ba26ff').axes.axisTitleStyle.fill).toEqual('rgb(255,255,255)');

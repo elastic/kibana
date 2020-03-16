@@ -82,6 +82,9 @@ function isValidColor(color: string | null | undefined): color is string {
   if (typeof color !== 'string') {
     return false;
   }
+  if (color.length === 0) {
+    return false;
+  }
   try {
     colorJS(color);
     return true;
