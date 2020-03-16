@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiFormRow, EuiSuperSelect, EuiTextColor, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { GeoFieldWithIndex } from '../types/geo_field_with_index';
+import { GeoFieldWithIndex } from './geo_field_with_index';
 
 const OPTION_ID_DELIMITER = '/';
 

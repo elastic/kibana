@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MultiIndexGeoFieldSelect } from './multi_index_geo_field_select';
-import { GeoFieldWithIndex } from '../types/geo_field_with_index';
+import { GeoFieldWithIndex } from './geo_field_with_index';
 
 interface Props {
   className?: string;
