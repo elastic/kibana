@@ -18,4 +18,3 @@
  */
 
 export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
-export { AggGroupNames, Schemas } from '../../data/public';

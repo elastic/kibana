@@ -17,6 +17,5 @@
  * under the License.
  */
 
-export { Schemas } from '../../data/public';
 export { ValidatedDualRange } from 'ui/validated_range';
 export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';

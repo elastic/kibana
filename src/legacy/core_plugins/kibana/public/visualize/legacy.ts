@@ -21,7 +21,6 @@ import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
 import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
 import { plugin } from './index';
-import { start as dataShim } from '../../../data/public/legacy';
 
 const instance = plugin({
   env: npSetup.plugins.kibanaLegacy.env,
@@ -29,6 +28,5 @@ const instance = plugin({
 instance.setup(npSetup.core, npSetup.plugins);
 instance.start(npStart.core, {
   ...npStart.plugins,
-  dataShim,
   visualizations,
 });

@@ -76,7 +76,7 @@ class DefaultEditorController {
     };
   }
 
-  render({ data, dataShim, core, ...props }: EditorRenderProps) {
+  render({ data, core, ...props }: EditorRenderProps) {
     render(
       <I18nProvider>
         <KibanaContextProvider
@@ -84,7 +84,6 @@ class DefaultEditorController {
             appName: 'vis_default_editor',
             storage: localStorage,
             data,
-            dataShim,
             ...core,
           }}
         >
