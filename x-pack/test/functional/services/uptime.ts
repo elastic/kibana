@@ -91,10 +91,6 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
           'xpack.uptime.alerts.monitorStatus.locationsSelectionSelectable',
           5000
         );
-        await testSubjects.click(
-          'xpack.uptime.alerts.monitorStatus.locationSelection.mplsLocationOption',
-          5000
-        );
         return browser.pressKeys(browser.keys.ESCAPE);
       },
       async clickSaveAlertButtion() {
