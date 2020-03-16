@@ -3,21 +3,23 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { deserializeFollowerIndex } from '../../../../common/services/follower_index_serialization';
+import { deserializeFollowerIndex } from '../../../../../common/services/follower_index_serialization';
 import {
   getFollowerIndexStatsMock,
   getFollowerIndexListStatsMock,
   getFollowerIndexInfoMock,
   getFollowerIndexListInfoMock,
-} from '../../../../fixtures';
-import { callWithRequestFactory } from '../../lib/call_with_request_factory';
-import { isEsErrorFactory } from '../../lib/is_es_error_factory';
-import { registerFollowerIndexRoutes } from './follower_index';
+} from '../../../../../fixtures';
+import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
+import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
+import { registerFollowerIndexRoutes } from '../follower_index';
+import { createRouter, callRoute } from './helpers';
 
-jest.mock('../../lib/call_with_request_factory');
-jest.mock('../../lib/is_es_error_factory');
-jest.mock('../../lib/license_pre_routing_factory');
+jest.mock('../../../lib/call_with_request_factory');
+jest.mock('../../../lib/is_es_error_factory');
+jest.mock('../../../lib/license_pre_routing_factory', () => ({
+  licensePreRoutingFactory: ({ requestHandler }) => requestHandler,
+}));
 
 const DESERIALIZED_KEYS = Object.keys(
   deserializeFollowerIndex({
@@ -26,10 +28,7 @@ const DESERIALIZED_KEYS = Object.keys(
   })
 );
 
-/**
- * Hashtable to save the route handlers
- */
-const routeHandlers = {};
+let routeRegistry;
 
 /**
  * Helper to extract all the different server route handler so we can easily call them in our tests.
@@ -38,8 +37,6 @@ const routeHandlers = {};
  * if a 'server.route()' call is moved or deleted, then the HANDLER_INDEX_TO_ACTION must be updated here.
  */
 const registerHandlers = () => {
-  let index = 0;
-
   const HANDLER_INDEX_TO_ACTION = {
     0: 'list',
     1: 'get',
@@ -50,15 +47,11 @@ const registerHandlers = () => {
     6: 'unfollow',
   };
 
-  const server = {
-    route({ handler }) {
-      // Save handler and increment index
-      routeHandlers[HANDLER_INDEX_TO_ACTION[index]] = handler;
-      index++;
-    },
-  };
-
-  registerFollowerIndexRoutes(server);
+  routeRegistry = createRouter(HANDLER_INDEX_TO_ACTION);
+  registerFollowerIndexRoutes({
+    __LEGACY: {},
+    router: routeRegistry.router,
+  });
 };
 
 /**
@@ -104,7 +97,7 @@ describe('[CCR API Routes] Follower Index', () => {
 
   describe('list()', () => {
     beforeEach(() => {
-      routeHandler = routeHandlers.list;
+      routeHandler = routeRegistry.getRoutes().list;
     });
 
     it('deserializes the response from Elasticsearch', async () => {
@@ -117,7 +110,9 @@ describe('[CCR API Routes] Follower Index', () => {
       setHttpRequestResponse(null, infoResult);
       setHttpRequestResponse(null, statsResult);
 
-      const response = await routeHandler();
+      const {
+        options: { body: response },
+      } = await callRoute(routeHandler);
       const followerIndex = response.indices[0];
 
       expect(response.indices.length).toEqual(totalResult);
@@ -127,7 +122,7 @@ describe('[CCR API Routes] Follower Index', () => {
 
   describe('get()', () => {
     beforeEach(() => {
-      routeHandler = routeHandlers.get;
+      routeHandler = routeRegistry.getRoutes().get;
     });
 
     it('should return a single resource even though ES return an array with 1 item', async () => {
@@ -138,7 +133,9 @@ describe('[CCR API Routes] Follower Index', () => {
       setHttpRequestResponse(null, { follower_indices: [followerIndexInfo] });
       setHttpRequestResponse(null, { indices: [followerIndexStats] });
 
-      const response = await routeHandler({ params: { id: mockId } });
+      const {
+        options: { body: response },
+      } = await callRoute(routeHandler, {}, { params: { id: mockId } });
       expect(Object.keys(response)).toEqual(DESERIALIZED_KEYS);
     });
   });
@@ -146,34 +143,40 @@ describe('[CCR API Routes] Follower Index', () => {
   describe('create()', () => {
     beforeEach(() => {
       resetHttpRequestResponses();
-      routeHandler = routeHandlers.create;
+      routeHandler = routeRegistry.getRoutes().create;
     });
 
     it('should return 200 status when follower index is created', async () => {
       setHttpRequestResponse(null, { acknowledge: true });
 
-      const response = await routeHandler({
-        payload: {
-          name: 'follower_index',
-          remoteCluster: 'remote_cluster',
-          leaderIndex: 'leader_index',
-        },
-      });
+      const response = await callRoute(
+        routeHandler,
+        {},
+        {
+          body: {
+            name: 'follower_index',
+            remoteCluster: 'remote_cluster',
+            leaderIndex: 'leader_index',
+          },
+        }
+      );
 
-      expect(response).toEqual({ acknowledge: true });
+      expect(response.options.body).toEqual({ acknowledge: true });
     });
   });
 
   describe('pause()', () => {
     beforeEach(() => {
       resetHttpRequestResponses();
-      routeHandler = routeHandlers.pause;
+      routeHandler = routeRegistry.getRoutes().pause;
     });
 
     it('should pause a single item', async () => {
       setHttpRequestResponse(null, { acknowledge: true });
 
-      const response = await routeHandler({ params: { id: '1' } });
+      const {
+        options: { body: response },
+      } = await callRoute(routeHandler, {}, { params: { id: '1' } });
 
       expect(response.itemsPaused).toEqual(['1']);
       expect(response.errors).toEqual([]);
@@ -184,9 +187,9 @@ describe('[CCR API Routes] Follower Index', () => {
       setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(null, { acknowledge: true });
 
-      const response = await routeHandler({ params: { id: '1,2,3' } });
+      const response = await callRoute(routeHandler, {}, { params: { id: '1,2,3' } });
 
-      expect(response.itemsPaused).toEqual(['1', '2', '3']);
+      expect(response.options.body.itemsPaused).toEqual(['1', '2', '3']);
     });
 
     it('should catch error and return them in array', async () => {
@@ -196,7 +199,9 @@ describe('[CCR API Routes] Follower Index', () => {
       setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(error);
 
-      const response = await routeHandler({ params: { id: '1,2' } });
+      const {
+        options: { body: response },
+      } = await callRoute(routeHandler, {}, { params: { id: '1,2' } });
 
       expect(response.itemsPaused).toEqual(['1']);
       expect(response.errors[0].id).toEqual('2');
@@ -206,13 +211,15 @@ describe('[CCR API Routes] Follower Index', () => {
   describe('resume()', () => {
     beforeEach(() => {
       resetHttpRequestResponses();
-      routeHandler = routeHandlers.resume;
+      routeHandler = routeRegistry.getRoutes().resume;
     });
 
     it('should resume a single item', async () => {
       setHttpRequestResponse(null, { acknowledge: true });
 
-      const response = await routeHandler({ params: { id: '1' } });
+      const {
+        options: { body: response },
+      } = await callRoute(routeHandler, {}, { params: { id: '1' } });
 
       expect(response.itemsResumed).toEqual(['1']);
       expect(response.errors).toEqual([]);
@@ -223,9 +230,9 @@ describe('[CCR API Routes] Follower Index', () => {
       setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(null, { acknowledge: true });
 
-      const response = await routeHandler({ params: { id: '1,2,3' } });
+      const response = await callRoute(routeHandler, {}, { params: { id: '1,2,3' } });
 
-      expect(response.itemsResumed).toEqual(['1', '2', '3']);
+      expect(response.options.body.itemsResumed).toEqual(['1', '2', '3']);
     });
 
     it('should catch error and return them in array', async () => {
@@ -235,7 +242,9 @@ describe('[CCR API Routes] Follower Index', () => {
       setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(error);
 
-      const response = await routeHandler({ params: { id: '1,2' } });
+      const {
+        options: { body: response },
+      } = await callRoute(routeHandler, {}, { params: { id: '1,2' } });
 
       expect(response.itemsResumed).toEqual(['1']);
       expect(response.errors[0].id).toEqual('2');
@@ -245,7 +254,7 @@ describe('[CCR API Routes] Follower Index', () => {
   describe('unfollow()', () => {
     beforeEach(() => {
       resetHttpRequestResponses();
-      routeHandler = routeHandlers.unfollow;
+      routeHandler = routeRegistry.getRoutes().unfollow;
     });
 
     it('should unfollow await single item', async () => {
@@ -254,7 +263,9 @@ describe('[CCR API Routes] Follower Index', () => {
       setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(null, { acknowledge: true });
 
-      const response = await routeHandler({ params: { id: '1' } });
+      const {
+        options: { body: response },
+      } = await callRoute(routeHandler, {}, { params: { id: '1' } });
 
       expect(response.itemsUnfollowed).toEqual(['1']);
       expect(response.errors).toEqual([]);
@@ -274,9 +285,9 @@ describe('[CCR API Routes] Follower Index', () => {
       setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(null, { acknowledge: true });
 
-      const response = await routeHandler({ params: { id: '1,2,3' } });
+      const response = await callRoute(routeHandler, {}, { params: { id: '1,2,3' } });
 
-      expect(response.itemsUnfollowed).toEqual(['1', '2', '3']);
+      expect(response.options.body.itemsUnfollowed).toEqual(['1', '2', '3']);
     });
 
     it('should catch error and return them in array', async () => {
@@ -290,7 +301,9 @@ describe('[CCR API Routes] Follower Index', () => {
       setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(error);
 
-      const response = await routeHandler({ params: { id: '1,2' } });
+      const {
+        options: { body: response },
+      } = await callRoute(routeHandler, {}, { params: { id: '1,2' } });
 
       expect(response.itemsUnfollowed).toEqual(['1']);
       expect(response.errors[0].id).toEqual('2');

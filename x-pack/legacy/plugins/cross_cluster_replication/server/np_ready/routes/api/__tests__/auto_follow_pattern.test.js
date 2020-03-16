@@ -3,23 +3,23 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { deserializeAutoFollowPattern } from '../../../../../common/services/auto_follow_pattern_serialization';
+import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
+import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
+import { getAutoFollowPatternMock, getAutoFollowPatternListMock } from '../../../../../fixtures';
+import { registerAutoFollowPatternRoutes } from '../auto_follow_pattern';
 
-import { deserializeAutoFollowPattern } from '../../../../common/services/auto_follow_pattern_serialization';
-import { callWithRequestFactory } from '../../lib/call_with_request_factory';
-import { isEsErrorFactory } from '../../lib/is_es_error_factory';
-import { getAutoFollowPatternMock, getAutoFollowPatternListMock } from '../../../../fixtures';
-import { registerAutoFollowPatternRoutes } from './auto_follow_pattern';
+import { createRouter, callRoute } from './helpers';
 
-jest.mock('../../lib/call_with_request_factory');
-jest.mock('../../lib/is_es_error_factory');
-jest.mock('../../lib/license_pre_routing_factory');
+jest.mock('../../../lib/call_with_request_factory');
+jest.mock('../../../lib/is_es_error_factory');
+jest.mock('../../../lib/license_pre_routing_factory', () => ({
+  licensePreRoutingFactory: ({ requestHandler }) => requestHandler,
+}));
 
 const DESERIALIZED_KEYS = Object.keys(deserializeAutoFollowPattern(getAutoFollowPatternMock()));
 
-/**
- * Hashtable to save the route handlers
- */
-const routeHandlers = {};
+let routeRegistry;
 
 /**
  * Helper to extract all the different server route handler so we can easily call them in our tests.
@@ -28,8 +28,6 @@ const routeHandlers = {};
  * if a "server.route()" call is moved or deleted, then the HANDLER_INDEX_TO_ACTION must be updated here.
  */
 const registerHandlers = () => {
-  let index = 0;
-
   const HANDLER_INDEX_TO_ACTION = {
     0: 'list',
     1: 'create',
@@ -40,15 +38,12 @@ const registerHandlers = () => {
     6: 'resume',
   };
 
-  const server = {
-    route({ handler }) {
-      // Save handler and increment index
-      routeHandlers[HANDLER_INDEX_TO_ACTION[index]] = handler;
-      index++;
-    },
-  };
+  routeRegistry = createRouter(HANDLER_INDEX_TO_ACTION);
 
-  registerAutoFollowPatternRoutes(server);
+  registerAutoFollowPatternRoutes({
+    __LEGACY: {},
+    router: routeRegistry.router,
+  });
 };
 
 /**
@@ -94,14 +89,16 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
 
   describe('list()', () => {
     beforeEach(() => {
-      routeHandler = routeHandlers.list;
+      routeHandler = routeRegistry.getRoutes().list;
     });
 
     it('should deserialize the response from Elasticsearch', async () => {
       const totalResult = 2;
       setHttpRequestResponse(null, getAutoFollowPatternListMock(totalResult));
 
-      const response = await routeHandler();
+      const {
+        options: { body: response },
+      } = await callRoute(routeHandler);
       const autoFollowPattern = response.patterns[0];
 
       expect(response.patterns.length).toEqual(totalResult);
@@ -112,21 +109,25 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
   describe('create()', () => {
     beforeEach(() => {
       resetHttpRequestResponses();
-      routeHandler = routeHandlers.create;
+      routeHandler = routeRegistry.getRoutes().create;
     });
 
     it('should throw a 409 conflict error if id already exists', async () => {
       setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(null, { acknowledge: true });
 
-      const response = await routeHandler({
-        payload: {
-          id: 'some-id',
-          foo: 'bar',
-        },
-      }).catch(err => err); // return the error
+      const response = await callRoute(
+        routeHandler,
+        {},
+        {
+          body: {
+            id: 'some-id',
+            foo: 'bar',
+          },
+        }
+      );
 
-      expect(response.output.statusCode).toEqual(409);
+      expect(response.status).toEqual(409);
     });
 
     it('should return 200 status when the id does not exist', async () => {
@@ -135,12 +136,18 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
       setHttpRequestResponse(error);
       setHttpRequestResponse(null, { acknowledge: true });
 
-      const response = await routeHandler({
-        payload: {
-          id: 'some-id',
-          foo: 'bar',
-        },
-      });
+      const {
+        options: { body: response },
+      } = await callRoute(
+        routeHandler,
+        {},
+        {
+          body: {
+            id: 'some-id',
+            foo: 'bar',
+          },
+        }
+      );
 
       expect(response).toEqual({ acknowledge: true });
     });
@@ -148,7 +155,7 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
 
   describe('update()', () => {
     beforeEach(() => {
-      routeHandler = routeHandlers.update;
+      routeHandler = routeRegistry.getRoutes().update;
     });
 
     it('should serialize the payload before sending it to Elasticsearch', async () => {
@@ -156,16 +163,16 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
 
       const request = {
         params: { id: 'foo' },
-        payload: {
+        body: {
           remoteCluster: 'bar1',
           leaderIndexPatterns: ['bar2'],
           followIndexPattern: 'bar3',
         },
       };
 
-      const response = await routeHandler(request);
+      const response = await callRoute(routeHandler, {}, request);
 
-      expect(response).toEqual({
+      expect(response.options.body).toEqual({
         id: 'foo',
         body: {
           remote_cluster: 'bar1',
@@ -178,7 +185,7 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
 
   describe('get()', () => {
     beforeEach(() => {
-      routeHandler = routeHandlers.get;
+      routeHandler = routeRegistry.getRoutes().get;
     });
 
     it('should return a single resource even though ES return an array with 1 item', async () => {
@@ -187,21 +194,23 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
 
       setHttpRequestResponse(null, esResponse);
 
-      const response = await routeHandler({ params: { id: 1 } });
-      expect(Object.keys(response)).toEqual(DESERIALIZED_KEYS);
+      const response = await callRoute(routeHandler, {}, { params: { id: 1 } });
+      expect(Object.keys(response.options.body)).toEqual(DESERIALIZED_KEYS);
     });
   });
 
   describe('delete()', () => {
     beforeEach(() => {
       resetHttpRequestResponses();
-      routeHandler = routeHandlers.delete;
+      routeHandler = routeRegistry.getRoutes().delete;
     });
 
     it('should delete a single item', async () => {
       setHttpRequestResponse(null, { acknowledge: true });
 
-      const response = await routeHandler({ params: { id: 'a' } });
+      const {
+        options: { body: response },
+      } = await callRoute(routeHandler, {}, { params: { id: 'a' } });
 
       expect(response.itemsDeleted).toEqual(['a']);
       expect(response.errors).toEqual([]);
@@ -212,9 +221,9 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
       setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(null, { acknowledge: true });
 
-      const response = await routeHandler({ params: { id: 'a,b,c' } });
+      const response = await callRoute(routeHandler, {}, { params: { id: 'a,b,c' } });
 
-      expect(response.itemsDeleted).toEqual(['a', 'b', 'c']);
+      expect(response.options.body.itemsDeleted).toEqual(['a', 'b', 'c']);
     });
 
     it('should catch error and return them in array', async () => {
@@ -224,7 +233,9 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
       setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(error);
 
-      const response = await routeHandler({ params: { id: 'a,b' } });
+      const {
+        options: { body: response },
+      } = await callRoute(routeHandler, {}, { params: { id: 'a,b' } });
 
       expect(response.itemsDeleted).toEqual(['a']);
       expect(response.errors[0].id).toEqual('b');
@@ -234,13 +245,15 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
   describe('pause()', () => {
     beforeEach(() => {
       resetHttpRequestResponses();
-      routeHandler = routeHandlers.pause;
+      routeHandler = routeRegistry.getRoutes().pause;
     });
 
     it('accept a single item', async () => {
       setHttpRequestResponse(null, { acknowledge: true });
 
-      const response = await routeHandler({ params: { id: 'a' } });
+      const {
+        options: { body: response },
+      } = await callRoute(routeHandler, {}, { params: { id: 'a' } });
 
       expect(response.itemsPaused).toEqual(['a']);
       expect(response.errors).toEqual([]);
@@ -251,9 +264,9 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
       setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(null, { acknowledge: true });
 
-      const response = await routeHandler({ params: { id: 'a,b,c' } });
+      const response = await callRoute(routeHandler, {}, { params: { id: 'a,b,c' } });
 
-      expect(response.itemsPaused).toEqual(['a', 'b', 'c']);
+      expect(response.options.body.itemsPaused).toEqual(['a', 'b', 'c']);
     });
 
     it('should catch error and return them in array', async () => {
@@ -263,7 +276,9 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
       setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(error);
 
-      const response = await routeHandler({ params: { id: 'a,b' } });
+      const {
+        options: { body: response },
+      } = await callRoute(routeHandler, {}, { params: { id: 'a,b' } });
 
       expect(response.itemsPaused).toEqual(['a']);
       expect(response.errors[0].id).toEqual('b');
@@ -273,13 +288,15 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
   describe('resume()', () => {
     beforeEach(() => {
       resetHttpRequestResponses();
-      routeHandler = routeHandlers.resume;
+      routeHandler = routeRegistry.getRoutes().resume;
     });
 
     it('accept a single item', async () => {
       setHttpRequestResponse(null, { acknowledge: true });
 
-      const response = await routeHandler({ params: { id: 'a' } });
+      const {
+        options: { body: response },
+      } = await callRoute(routeHandler, {}, { params: { id: 'a' } });
 
       expect(response.itemsResumed).toEqual(['a']);
       expect(response.errors).toEqual([]);
@@ -290,9 +307,9 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
       setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(null, { acknowledge: true });
 
-      const response = await routeHandler({ params: { id: 'a,b,c' } });
+      const response = await callRoute(routeHandler, {}, { params: { id: 'a,b,c' } });
 
-      expect(response.itemsResumed).toEqual(['a', 'b', 'c']);
+      expect(response.options.body.itemsResumed).toEqual(['a', 'b', 'c']);
     });
 
     it('should catch error and return them in array', async () => {
@@ -302,7 +319,9 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
       setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(error);
 
-      const response = await routeHandler({ params: { id: 'a,b' } });
+      const {
+        options: { body: response },
+      } = await callRoute(routeHandler, {}, { params: { id: 'a,b' } });
 
       expect(response.itemsResumed).toEqual(['a']);
       expect(response.errors[0].id).toEqual('b');
