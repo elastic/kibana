@@ -31,10 +31,12 @@ import {
   getAgentEventsHandler,
   postAgentCheckinHandler,
   postAgentEnrollHandler,
-  postAgentAcksHandler,
   postAgentsUnenrollHandler,
   getAgentStatusForConfigHandler,
+  getInternalUserSOClient,
 } from './handlers';
+import { postAgentAcksHandlerBuilder } from './acks_handlers';
+import * as AgentService from '../../services/agents';
 
 export const registerRoutes = (router: IRouter) => {
   // Get one
@@ -101,7 +103,12 @@ export const registerRoutes = (router: IRouter) => {
       validate: PostAgentAcksRequestSchema,
       options: { tags: [] },
     },
-    postAgentAcksHandler
+    postAgentAcksHandlerBuilder({
+      acknowledgeAgentActions: AgentService.acknowledgeAgentActions,
+      getAgentByAccessAPIKeyId: AgentService.getAgentByAccessAPIKeyId,
+      getSavedObjectsClientContract: getInternalUserSOClient,
+      saveAgentEvents: AgentService.saveAgentEvents,
+    })
   );
 
   router.post(
