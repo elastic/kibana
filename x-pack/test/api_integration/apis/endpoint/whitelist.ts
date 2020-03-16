@@ -119,6 +119,22 @@ export default function({ getService }: FtrProviderContext) {
           });
       });
 
+      it('should insert a whilelist rule with unicode into elasticsearch properly', async () => {
+        await supertest
+          .post('/api/endpoint/whitelist')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            event_types: ['processEvent', 'mȀlware'],
+            file_path: 'C://ɚɚɚ/ȄȄȄȄ',
+            comment: 'LGTM 👍',
+          })
+          .then(function(res: { statusCode: any; text: string }) {
+            expect(res.statusCode).to.equal(200);
+            const responseBody = JSON.parse(res.text);
+            expect(responseBody.length).to.equal(1);
+          });
+      });
+
       it('should delete a whitelist rule properly', async () => {
         let createdID: string = '';
         await supertest

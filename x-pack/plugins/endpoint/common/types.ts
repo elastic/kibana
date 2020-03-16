@@ -338,12 +338,12 @@ export interface EndpointEvent {
 export interface WhitelistRule {
   id?: string; // WhitelistRules are given an id from ES
   comment: string;
-  eventTypes: string[];
-  whitelistRuleType: 'simple';
-  whitelistRule: {
-    type: string;
+  event_types: string[];
+  entry_type: 'simple';
+  entry: {
+    comparison: 'equality';
     value: string;
-    applyTo: string;
+    apply_to: string;
   };
 }
 

@@ -53,7 +53,7 @@ export function registerWhitelistRoutes(
       },
       options: { authRequired: true },
     },
-    handleWhitelistDownload // TODO
+    handleWhitelistDownload
   );
 
   router.post(
@@ -62,7 +62,7 @@ export function registerWhitelistRoutes(
       validate: {
         body: schema.object({
           comment: schema.maybe(schema.string()), // Optional comment explaining reason for whitelist
-          event_types: schema.maybe(schema.arrayOf(schema.string())), // TODO
+          event_types: schema.arrayOf(schema.string()),
           file_path: schema.maybe(schema.string()),
           signer: schema.maybe(schema.string()),
           sha256: schema.maybe(schema.string()),
@@ -105,12 +105,12 @@ async function handleWhitelistPost(context: RequestHandlerContext, req, res) {
       if (req.body[k]) {
         newRules.push({
           comment: req.body.comment || '',
-          eventTypes,
-          whitelistRuleType: 'simple',
-          whitelistRule: {
-            type: 'equality',
+          event_types: eventTypes,
+          entry_type: 'simple',
+          entry: {
+            comparison: 'equality',
             value: req.body[k],
-            applyTo: whitelistAttributeMap[k],
+            apply_to: whitelistAttributeMap[k],
           },
         });
       }
