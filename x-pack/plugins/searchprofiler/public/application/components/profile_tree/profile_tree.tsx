@@ -53,13 +53,16 @@ export const ProfileTree = memo(({ data, target, onHighlight }: Props) => {
               </EuiFlexItem>
               <EuiSpacer size="s" />
               <EuiFlexItem grow={false}>
-                {index.shards.map(shard => (
-                  <ShardDetails
-                    key={shard.id[1]}
-                    index={index}
-                    shard={shard}
-                    operations={shard[target]!}
-                  />
+                {index.shards.map((shard, idx) => (
+                  <>
+                    <ShardDetails
+                      key={shard.id[1] + `_${idx}`}
+                      index={index}
+                      shard={shard}
+                      operations={shard[target]!}
+                    />
+                    {idx < index.shards.length - 1 ? <EuiSpacer size="s" /> : undefined}
+                  </>
                 ))}
               </EuiFlexItem>
             </EuiFlexGroup>
