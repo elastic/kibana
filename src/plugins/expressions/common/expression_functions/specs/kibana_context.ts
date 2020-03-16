@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { uniq, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../../expression_functions';
 import { KibanaContext } from '../../expression_types';
+import { Query, Filter } from '../../../../data/common';
 
 interface Arguments {
   q?: string | null;
@@ -34,6 +35,17 @@ export type ExpressionFunctionKibanaContext = ExpressionFunctionDefinition<
   Arguments,
   Promise<KibanaContext>
 >;
+
+export const mergeInput = <T = any>(input: T | T[] = [], argsValue: string): T[] => {
+  const parsedArgValue: T | T[] = JSON.parse(argsValue || '[]');
+  return uniq<T>(
+    [
+      ...(Array.isArray(parsedArgValue) ? parsedArgValue : [parsedArgValue]),
+      ...(Array.isArray(input) ? input : [input]),
+    ],
+    isEqual
+  );
+};
 
 export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
   name: 'kibana_context',
@@ -75,10 +87,9 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
   },
 
   async fn(input, args, { getSavedObject }) {
-    const queryArg = args.q ? JSON.parse(args.q) : input?.query || [];
     const timeRange = args.timeRange ? JSON.parse(args.timeRange) : input?.timeRange;
-    const filters = args.filters ? JSON.parse(args.filters) : input?.filters || [];
-    const queries = Array.isArray(queryArg) ? queryArg : [queryArg];
+    let queries = mergeInput<Query>(input?.query, args?.q || '[]');
+    let filters = mergeInput<Filter>(input?.filters, args?.filters || '[]');
 
     if (args.savedSearchId) {
       if (typeof getSavedObject !== 'function') {
@@ -90,10 +101,10 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
       }
       const obj = await getSavedObject('search', args.savedSearchId);
       const search = obj.attributes.kibanaSavedObjectMeta as { searchSourceJSON: string };
-      const data = JSON.parse(search.searchSourceJSON) as { query: string; filter: any[] };
+      const data = JSON.parse(search.searchSourceJSON) as { query: Query[]; filter: Filter[] };
 
-      queries.push(...data.query);
-      filters.push(...data.filter);
+      queries = queries.concat(data.query);
+      filters = filters.concat(data.filter);
     }
 
     return {
