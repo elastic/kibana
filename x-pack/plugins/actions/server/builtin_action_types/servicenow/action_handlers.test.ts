@@ -185,7 +185,7 @@ describe('handleCreateIncident', () => {
       '123',
       [
         {
-          comment: 'first comment (created at 2020-03-13T08:34:53.450Z by Elastic User)',
+          comment: 'first comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
           commentId: '456',
           createdAt: '2020-03-13T08:34:53.450Z',
           createdBy: {
@@ -293,7 +293,7 @@ describe('handleUpdateIncident', () => {
       '123',
       [
         {
-          comment: 'first comment (created at 2020-03-13T08:34:53.450Z by Elastic User)',
+          comment: 'first comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
           commentId: '456',
           createdAt: '2020-03-13T08:34:53.450Z',
           createdBy: {
@@ -305,7 +305,7 @@ describe('handleUpdateIncident', () => {
           version: 'WzU3LDFd',
         },
         {
-          comment: 'second comment (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+          comment: 'second comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
           commentId: '789',
           createdAt: '2020-03-13T08:34:53.450Z',
           createdBy: {
@@ -375,7 +375,7 @@ describe('handleUpdateIncident: different action types', () => {
     expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', {
       short_description: 'a title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
       description:
-        'a description (updated at 2020-03-13T08:34:53.450Z by Elastic User) servicenow desc',
+        'servicenow desc \r\na description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
     });
     expect(serviceNow.updateIncident).toHaveReturned();
     expect(serviceNow.batchCreateComments).not.toHaveBeenCalled();
@@ -418,7 +418,7 @@ describe('handleUpdateIncident: different action types', () => {
     expect(serviceNow.updateIncident).toHaveBeenCalled();
     expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', {
       description:
-        'a description (updated at 2020-03-13T08:34:53.450Z by Elastic User) servicenow desc',
+        'servicenow desc \r\na description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
     });
     expect(serviceNow.updateIncident).toHaveReturned();
     expect(serviceNow.batchCreateComments).not.toHaveBeenCalled();
@@ -461,9 +461,9 @@ describe('handleUpdateIncident: different action types', () => {
     expect(serviceNow.updateIncident).toHaveBeenCalled();
     expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', {
       short_description:
-        'a title (updated at 2020-03-13T08:34:53.450Z by Elastic User) servicenow title',
+        'servicenow title \r\na title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
       description:
-        'a description (updated at 2020-03-13T08:34:53.450Z by Elastic User) servicenow desc',
+        'servicenow desc \r\na description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
     });
     expect(serviceNow.updateIncident).toHaveReturned();
     expect(serviceNow.batchCreateComments).not.toHaveBeenCalled();
@@ -673,7 +673,7 @@ describe('handleUpdateIncident: different action types', () => {
     expect(serviceNow.updateIncident).toHaveBeenCalled();
     expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', {
       short_description:
-        'a title (updated at 2020-03-13T08:34:53.450Z by Elastic User) servicenow title',
+        'servicenow title \r\na title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
       description: 'a description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
     });
     expect(serviceNow.updateIncident).toHaveReturned();
@@ -717,7 +717,7 @@ describe('handleUpdateIncident: different action types', () => {
     expect(serviceNow.updateIncident).toHaveBeenCalled();
     expect(serviceNow.updateIncident).toHaveBeenCalledWith('123', {
       short_description:
-        'a title (updated at 2020-03-13T08:34:53.450Z by Elastic User) servicenow title',
+        'servicenow title \r\na title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
     });
     expect(serviceNow.updateIncident).toHaveReturned();
     expect(serviceNow.batchCreateComments).not.toHaveBeenCalled();

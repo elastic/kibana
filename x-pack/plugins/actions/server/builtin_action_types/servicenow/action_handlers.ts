@@ -53,12 +53,13 @@ export const handleCreateIncident = async ({
 
   const res: HandlerResponse = { incidentId, number, pushedDate };
 
-  if (comments && Array.isArray(comments) && comments.length > 0) {
-    comments = transformComments(
-      comments.filter(c => !c.updatedAt),
-      params,
-      ['informationCreated']
-    );
+  if (
+    comments &&
+    Array.isArray(comments) &&
+    comments.length > 0 &&
+    mapping.get('comments').actionType !== 'nothing'
+  ) {
+    comments = transformComments(comments, params, ['informationAdded']);
     res.comments = [
       ...(await createComments(serviceNow, incidentId, mapping.get('comments').target, comments)),
     ];
@@ -78,7 +79,6 @@ export const handleUpdateIncident = async ({
   const fields = prepareFieldsForTransformation({
     params,
     mapping,
-    append: true,
     defaultPipes: ['informationUpdated'],
   });
 
@@ -100,23 +100,9 @@ export const handleUpdateIncident = async ({
     comments.length > 0 &&
     mapping.get('comments').actionType !== 'nothing'
   ) {
-    const commentsToCreate = transformComments(
-      comments.filter(c => !c.updatedAt),
-      params,
-      ['informationCreated']
-    );
-
-    const commentsToUpdate = transformComments(
-      comments.filter(c => c.updatedAt),
-      params,
-      ['informationUpdated']
-    );
-
+    comments = transformComments(comments, params, ['informationAdded']);
     res.comments = [
-      ...(await createComments(serviceNow, incidentId, mapping.get('comments').target, [
-        ...commentsToCreate,
-        ...commentsToUpdate,
-      ])),
+      ...(await createComments(serviceNow, incidentId, mapping.get('comments').target, comments)),
     ];
   }
 

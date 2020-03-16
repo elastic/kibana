@@ -89,7 +89,6 @@ export interface TransformerArgs {
 export interface PrepareFieldsForTransformArgs {
   params: Params;
   mapping: Mapping;
-  append?: boolean;
   defaultPipes?: string[];
 }
 

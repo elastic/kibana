@@ -250,7 +250,7 @@ describe('ServiceNow lib', () => {
       throw new Error('Bad request.');
     });
     try {
-      await serviceNow.getUserID('123');
+      await serviceNow.getUserID();
     } catch (error) {
       expect(error.message).toEqual(
         '[Action][ServiceNow]: Unable to get user id. Error: Bad request.'

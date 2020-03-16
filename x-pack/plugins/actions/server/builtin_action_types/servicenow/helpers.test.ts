@@ -143,28 +143,6 @@ describe('prepareFieldsForTransformation', () => {
         key: 'description',
         value: 'a description',
         actionType: 'append',
-        pipes: ['informationCreated'],
-      },
-    ]);
-  });
-
-  test('prepare fields with append', () => {
-    const res = prepareFieldsForTransformation({
-      params: fullParams,
-      mapping: finalMapping,
-      append: true,
-    });
-    expect(res).toEqual([
-      {
-        key: 'short_description',
-        value: 'a title',
-        actionType: 'overwrite',
-        pipes: ['informationCreated'],
-      },
-      {
-        key: 'description',
-        value: 'a description',
-        actionType: 'append',
         pipes: ['informationCreated', 'append'],
       },
     ]);
@@ -174,7 +152,6 @@ describe('prepareFieldsForTransformation', () => {
     const res = prepareFieldsForTransformation({
       params: fullParams,
       mapping: finalMapping,
-      append: true,
       defaultPipes: ['myTestPipe'],
     });
     expect(res).toEqual([
@@ -205,6 +182,7 @@ describe('transformFields', () => {
       params: fullParams,
       fields,
     });
+
     expect(res).toEqual({
       short_description: 'a title (created at 2020-03-13T08:34:53.450Z by Elastic User)',
       description: 'a description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
@@ -215,7 +193,28 @@ describe('transformFields', () => {
     const fields = prepareFieldsForTransformation({
       params: fullParams,
       mapping: finalMapping,
-      append: true,
+      defaultPipes: ['informationUpdated'],
+    });
+
+    const res = transformFields({
+      params: fullParams,
+      fields,
+      currentIncident: {
+        short_description: 'first title (created at 2020-03-13T08:34:53.450Z by Elastic User)',
+        description: 'first description (created at 2020-03-13T08:34:53.450Z by Elastic User)',
+      },
+    });
+    expect(res).toEqual({
+      short_description: 'a title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+      description:
+        'first description (created at 2020-03-13T08:34:53.450Z by Elastic User) \r\na description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+    });
+  });
+
+  test('add newline character to descripton', () => {
+    const fields = prepareFieldsForTransformation({
+      params: fullParams,
+      mapping: finalMapping,
       defaultPipes: ['informationUpdated'],
     });
 
@@ -227,13 +226,10 @@ describe('transformFields', () => {
         description: 'first description',
       },
     });
-    expect(res).toEqual({
-      short_description: 'a title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
-      description:
-        'a description (updated at 2020-03-13T08:34:53.450Z by Elastic User) first description',
-    });
+    expect(res.description?.includes('\r\n')).toBe(true);
   });
 });
+
 describe('appendField', () => {
   test('prefix correctly', () => {
     expect('my_prefixmy_value ').toEqual(appendField({ value: 'my_value', prefix: 'my_prefix' }));
@@ -317,6 +313,31 @@ describe('transformComments', () => {
         commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
         version: 'WzU3LDFd',
         comment: 'first comment (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+        createdAt: '2020-03-13T08:34:53.450Z',
+        createdBy: { fullName: 'Elastic User', username: null },
+        updatedAt: null,
+        updatedBy: null,
+      },
+    ]);
+  });
+  test('transform added comments', () => {
+    const comments: Comment[] = [
+      {
+        commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
+        version: 'WzU3LDFd',
+        comment: 'first comment',
+        createdAt: '2020-03-13T08:34:53.450Z',
+        createdBy: { fullName: 'Elastic User', username: null },
+        updatedAt: null,
+        updatedBy: null,
+      },
+    ];
+    const res = transformComments(comments, fullParams, ['informationAdded']);
+    expect(res).toEqual([
+      {
+        commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
+        version: 'WzU3LDFd',
+        comment: 'first comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: { fullName: 'Elastic User', username: null },
         updatedAt: null,

@@ -26,7 +26,17 @@ export const informationUpdated = ({
   ...rest,
 });
 
+export const informationAdded = ({
+  value,
+  date,
+  user,
+  ...rest
+}: TransformerArgs): TransformerArgs => ({
+  value: `${value} (added at ${date} by ${user})`,
+  ...rest,
+});
+
 export const append = ({ value, previousValue, ...rest }: TransformerArgs): TransformerArgs => ({
-  value: `${value} ${previousValue}`,
+  value: previousValue ? `${previousValue} \r\n${value}` : `${value}`,
   ...rest,
 });

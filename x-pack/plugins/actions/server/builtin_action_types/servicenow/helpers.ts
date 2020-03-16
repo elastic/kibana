@@ -57,26 +57,20 @@ const t = { ...transformers } as { [index: string]: Function }; // TODO: Find a 
 export const prepareFieldsForTransformation = ({
   params,
   mapping,
-  append = false,
   defaultPipes = ['informationCreated'],
 }: PrepareFieldsForTransformArgs): PipedField[] => {
-  let fields = Object.keys(params.incident)
+  return Object.keys(params.incident)
     .filter(p => mapping.get(p).actionType !== 'nothing')
     .map(p => ({
       key: p,
       value: params.incident[p],
       actionType: mapping.get(p).actionType,
       pipes: [...defaultPipes],
-    }));
-
-  if (append) {
-    fields = fields.map(p => ({
+    }))
+    .map(p => ({
       ...p,
       pipes: p.actionType === 'append' ? [...p.pipes, 'append'] : p.pipes,
     }));
-  }
-
-  return fields;
 };
 
 export const transformFields = ({
