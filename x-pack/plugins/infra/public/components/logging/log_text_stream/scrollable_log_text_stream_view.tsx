@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Fragment, useMemo } from 'react';
+import React, { Fragment } from 'react';
 import moment from 'moment';
 
 import { euiStyled } from '../../../../../observability/public';
@@ -16,7 +16,6 @@ import { callWithoutRepeats } from '../../../utils/handlers';
 import { LogColumnConfiguration } from '../../../utils/source_configuration';
 import { AutoSizer } from '../../auto_sizer';
 import { NoData } from '../../empty_states';
-import { useFormattedTime } from '../../formatted_time';
 import { InfraLoadingPanel } from '../../loading';
 import { getStreamItemBeforeTimeKey, getStreamItemId, parseStreamItemId, StreamItem } from './item';
 import { LogColumnHeaders } from './column_headers';
@@ -25,8 +24,7 @@ import { LogTextStreamJumpToTail } from './jump_to_tail';
 import { LogEntryRow } from './log_entry_row';
 import { MeasurableItemView } from './measurable_item_view';
 import { VerticalScrollPanel } from './vertical_scroll_panel';
-import { getColumnWidths, LogEntryColumnWidths } from './log_entry_column';
-import { useMeasuredCharacterDimensions } from './text_styles';
+import { useColumnWidths, LogEntryColumnWidths } from './log_entry_column';
 import { LogDateRow } from './log_date_row';
 
 interface ScrollableLogTextStreamViewProps {
@@ -330,12 +328,8 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
 }
 
 /**
- * This function-as-child component calculates the column widths based on the
- * given configuration. It depends on the `CharacterDimensionsProbe` it returns
- * being rendered so it can measure the monospace character size.
- *
- * If the above component wasn't a class component, this would have been
- * written as a hook.
+ * If the above component wasn't a class component, this wouldn't be necessary
+ * since the `useColumnWidths` hook could have been used directly.
  */
 const WithColumnWidths: React.FunctionComponent<{
   children: (params: {
@@ -345,20 +339,7 @@ const WithColumnWidths: React.FunctionComponent<{
   columnConfigurations: LogColumnConfiguration[];
   scale: TextScale;
 }> = ({ children, columnConfigurations, scale }) => {
-  const { CharacterDimensionsProbe, dimensions } = useMeasuredCharacterDimensions(scale);
-  const referenceTime = useMemo(() => Date.now(), []);
-  const formattedCurrentDate = useFormattedTime(referenceTime, { format: 'time' });
-  const columnWidths = useMemo(
-    () => getColumnWidths(columnConfigurations, dimensions.width, formattedCurrentDate.length),
-    [columnConfigurations, dimensions.width, formattedCurrentDate]
-  );
-  const childParams = useMemo(
-    () => ({
-      columnWidths,
-      CharacterDimensionsProbe,
-    }),
-    [columnWidths, CharacterDimensionsProbe]
-  );
+  const childParams = useColumnWidths({ columnConfigurations, scale });
 
   return children(childParams);
 };

@@ -17,9 +17,7 @@ query MonitorStates($dateRangeStart: String!, $dateRangeEnd: String!, $paginatio
   ) {
     prevPagePagination
     nextPagePagination
-    totalSummaryCount {
-      count
-    }
+    totalSummaryCount
     summaries {
       monitor_id
       histogram {
