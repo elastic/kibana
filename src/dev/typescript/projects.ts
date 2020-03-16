@@ -47,6 +47,9 @@ export const PROJECTS = [
   ...glob
     .sync('test/plugin_functional/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
     .map(path => new Project(resolve(REPO_ROOT, path))),
+  ...glob
+    .sync('x-pack/test/functional_with_es_ssl/fixtures/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
+    .map(path => new Project(resolve(REPO_ROOT, path))),
 ];
 
 export function filterProjectsByFlag(projectFlag?: string) {
