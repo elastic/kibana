@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PluginInitializerContext } from 'src/core/public';
+
 import { LicenseManagementUIPlugin } from './plugin';
 import './application/index.scss';
 

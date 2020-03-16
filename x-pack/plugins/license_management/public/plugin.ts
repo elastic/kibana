@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { first } from 'rxjs/operators';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
 
 import { TelemetryPluginSetup } from '../../../../src/plugins/telemetry/public';
@@ -15,9 +15,9 @@ import { AppDependencies } from './application';
 import { BreadcrumbService } from './application/breadcrumbs';
 
 interface PluginsDependencies {
-  telemetry: TelemetryPluginSetup;
   management: ManagementSetup;
   licensing: LicensingPluginSetup;
+  telemetry?: TelemetryPluginSetup;
 }
 
 export class LicenseManagementUIPlugin implements Plugin<void, void, any, any> {
@@ -34,7 +34,7 @@ export class LicenseManagementUIPlugin implements Plugin<void, void, any, any> {
     }
 
     const { getStartServices } = coreSetup;
-    const { management } = plugins;
+    const { management, telemetry, licensing } = plugins;
 
     management.sections.getSection('elasticsearch')!.registerApp({
       id: PLUGIN.id,
@@ -42,12 +42,15 @@ export class LicenseManagementUIPlugin implements Plugin<void, void, any, any> {
       order: 99,
       mount: async ({ element, setBreadcrumbs }) => {
         const [core] = await getStartServices();
-        const initialLicense = await plugins.licensing.license$.toPromise();
+        const initialLicense = await plugins.licensing.license$.pipe(first()).toPromise();
 
         // Setup documentation links
         const { docLinks } = core;
         const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
         const esBase = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
+        const appDocLinks = {
+          security: `${esBase}/security-settings.html`,
+        };
 
         // Setup services
         this.breadcrumbService.setup(setBreadcrumbs);
@@ -55,19 +58,21 @@ export class LicenseManagementUIPlugin implements Plugin<void, void, any, any> {
         const appDependencies: AppDependencies = {
           core,
           config,
-          plugins,
+          plugins: {
+            licensing,
+            telemetry,
+          },
           services: {
             breadcrumbService: this.breadcrumbService,
           },
           store: {
             initialLicense,
           },
-          docLinks: {
-            security: `${esBase}/security-settings.html`,
-          },
+          docLinks: appDocLinks,
         };
 
         const { renderApp } = await import('./application');
+
         return renderApp(element, appDependencies);
       },
     });

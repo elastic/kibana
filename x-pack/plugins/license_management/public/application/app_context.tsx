@@ -20,8 +20,8 @@ export interface AppDependencies {
     breadcrumbService: BreadcrumbService;
   };
   plugins: {
-    telemetry: TelemetryPluginSetup;
     licensing: LicensingPluginSetup;
+    telemetry?: TelemetryPluginSetup;
   };
   docLinks: {
     security: string;
