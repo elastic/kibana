@@ -294,7 +294,8 @@ class Authenticator {
    * @private
    */
   _isSAMLResponse(request) {
-    return !!(request.payload && request.payload.SAMLResponse);
+    return !!(request.payload && request.payload.SAMLResponse)
+      && request.path === '/api/security/v1/saml';
   }
 }
 
