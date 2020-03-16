@@ -36,6 +36,10 @@ import {
   Container,
   EmbeddableVisTriggerContext,
 } from '../../../../../../../plugins/embeddable/public';
+import {
+  selectRangeTrigger,
+  valueClickTrigger,
+} from '../../../../../../../plugins/ui_actions/public';
 import { dispatchRenderComplete } from '../../../../../../../plugins/kibana_utils/public';
 import {
   IExpressionLoaderParams,
