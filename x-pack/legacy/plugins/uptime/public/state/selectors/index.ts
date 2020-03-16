@@ -26,7 +26,9 @@ export const selectSelectedMonitor = (state: AppState) => state.monitorStatus.mo
 
 export const selectMonitorStatus = (state: AppState) => state.monitorStatus.status;
 
-export const selectIndexPattern = ({ indexPattern }: AppState) => indexPattern.index_pattern;
+export const selectIndexPattern = ({ indexPattern }: AppState) => {
+  return { indexPattern: indexPattern.index_pattern, loading: indexPattern.loading };
+};
 
 export const selectPingHistogram = ({ ping, ui }: AppState) => {
   return {
@@ -45,4 +47,8 @@ export const anomaliesSelector = createSelector(mlSelector, ml => ml.anomalies);
 
 export const selectDurationLines = ({ monitorDuration }: AppState) => {
   return monitorDuration;
+};
+
+export const indexStatusSelector = ({ indexStatus }: AppState) => {
+  return indexStatus;
 };

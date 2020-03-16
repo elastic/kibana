@@ -8,7 +8,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
-  EuiButtonIcon,
   EuiContextMenuPanel,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -23,13 +22,11 @@ import * as i18n from './translations';
 
 import { getCasesColumns } from './columns';
 import { Case, FilterOptions, SortFieldCase } from '../../../../containers/case/types';
-
-import { useGetCases } from '../../../../containers/case/use_get_cases';
+import { useGetCases, UpdateCase } from '../../../../containers/case/use_get_cases';
+import { useGetCasesStatus } from '../../../../containers/case/use_get_cases_status';
 import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
 import { EuiBasicTableOnChange } from '../../../detection_engine/rules/types';
 import { Panel } from '../../../../components/panel';
-import { CasesTableFilters } from './table_filters';
-
 import {
   UtilityBar,
   UtilityBarAction,
@@ -38,11 +35,17 @@ import {
   UtilityBarText,
 } from '../../../../components/utility_bar';
 import { getConfigureCasesUrl, getCreateCaseUrl } from '../../../../components/link_to';
+
 import { getBulkItems } from '../bulk_actions';
 import { CaseHeaderPage } from '../case_header_page';
-import { OpenClosedStats } from '../open_closed_stats';
-import { getActions } from './actions';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
+import { OpenClosedStats } from '../open_closed_stats';
+
+import { getActions } from './actions';
+import { CasesTableFilters } from './table_filters';
+
+const CONFIGURE_CASES_URL = getConfigureCasesUrl();
+const CREATE_CASE_URL = getCreateCaseUrl();
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -75,11 +78,15 @@ const getSortField = (field: string): SortFieldCase => {
 };
 export const AllCases = React.memo(() => {
   const {
-    caseCount,
+    countClosedCases,
+    countOpenCases,
+    isLoading: isCasesStatusLoading,
+    fetchCasesStatus,
+  } = useGetCasesStatus();
+  const {
     data,
     dispatchUpdateCaseProperty,
     filterOptions,
-    getCaseCount,
     loading,
     queryParams,
     selectedCases,
@@ -102,6 +109,7 @@ export const AllCases = React.memo(() => {
   useEffect(() => {
     if (isDeleted) {
       refetchCases(filterOptions, queryParams);
+      fetchCasesStatus();
       dispatchResetIsDeleted();
     }
   }, [isDeleted, filterOptions, queryParams]);
@@ -156,20 +164,27 @@ export const AllCases = React.memo(() => {
           closePopover,
           deleteCasesAction: toggleBulkDeleteModal,
           selectedCaseIds,
-          caseStatus: filterOptions.state,
+          caseStatus: filterOptions.status,
         })}
       />
     ),
-    [selectedCaseIds, filterOptions.state]
+    [selectedCaseIds, filterOptions.status, toggleBulkDeleteModal]
   );
+  const handleDispatchUpdate = useCallback(
+    (args: Omit<UpdateCase, 'refetchCasesStatus'>) => {
+      dispatchUpdateCaseProperty({ ...args, refetchCasesStatus: fetchCasesStatus });
+    },
+    [dispatchUpdateCaseProperty, fetchCasesStatus]
+  );
+
   const actions = useMemo(
     () =>
       getActions({
-        caseStatus: filterOptions.state,
+        caseStatus: filterOptions.status,
         deleteCaseOnClick: toggleDeleteModal,
-        dispatchUpdate: dispatchUpdateCaseProperty,
+        dispatchUpdate: handleDispatchUpdate,
       }),
-    [filterOptions.state]
+    [filterOptions.status, toggleDeleteModal, handleDispatchUpdate]
   );
 
   const tableOnChangeCallback = useCallback(
@@ -201,13 +216,13 @@ export const AllCases = React.memo(() => {
     [filterOptions, setFilters]
   );
 
-  const memoizedGetCasesColumns = useMemo(() => getCasesColumns(actions), [filterOptions.state]);
+  const memoizedGetCasesColumns = useMemo(() => getCasesColumns(actions), [actions]);
   const memoizedPagination = useMemo(
     () => ({
       pageIndex: queryParams.page - 1,
       pageSize: queryParams.perPage,
       totalItemCount: data.total,
-      pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
+      pageSizeOptions: [5, 10, 15, 20, 25],
     }),
     [data, queryParams]
   );
@@ -233,31 +248,27 @@ export const AllCases = React.memo(() => {
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap={true}>
           <EuiFlexItem grow={false}>
             <OpenClosedStats
-              caseCount={caseCount}
-              caseState={'open'}
-              getCaseCount={getCaseCount}
-              isLoading={loading.indexOf('caseCount') > -1}
+              caseCount={countOpenCases}
+              caseStatus={'open'}
+              isLoading={isCasesStatusLoading}
             />
           </EuiFlexItem>
           <FlexItemDivider grow={false}>
             <OpenClosedStats
-              caseCount={caseCount}
-              caseState={'closed'}
-              getCaseCount={getCaseCount}
-              isLoading={loading.indexOf('caseCount') > -1}
+              caseCount={countClosedCases}
+              caseStatus={'closed'}
+              isLoading={isCasesStatusLoading}
             />
           </FlexItemDivider>
           <EuiFlexItem grow={false}>
-            <EuiButton fill href={getCreateCaseUrl()} iconType="plusInCircle">
-              {i18n.CREATE_TITLE}
+            <EuiButton href={CONFIGURE_CASES_URL} iconType="controlsHorizontal">
+              {i18n.CONFIGURE_CASES_BUTTON}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              aria-label={i18n.CONFIGURE_CASES_BUTTON}
-              href={getConfigureCasesUrl()}
-              iconType="gear"
-            />
+            <EuiButton fill href={CREATE_CASE_URL} iconType="plusInCircle">
+              {i18n.CREATE_TITLE}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </CaseHeaderPage>
@@ -266,11 +277,14 @@ export const AllCases = React.memo(() => {
       )}
       <Panel loading={isCasesLoading}>
         <CasesTableFilters
+          countClosedCases={data.countClosedCases}
+          countOpenCases={data.countOpenCases}
           onFilterChanged={onFilterChangedCallback}
           initial={{
             search: filterOptions.search,
+            reporters: filterOptions.reporters,
             tags: filterOptions.tags,
-            state: filterOptions.state,
+            status: filterOptions.status,
           }}
         />
         {isCasesLoading && isDataEmpty ? (
@@ -311,7 +325,7 @@ export const AllCases = React.memo(() => {
                   titleSize="xs"
                   body={i18n.NO_CASES_BODY}
                   actions={
-                    <EuiButton fill size="s" href={getCreateCaseUrl()} iconType="plusInCircle">
+                    <EuiButton fill size="s" href={CREATE_CASE_URL} iconType="plusInCircle">
                       {i18n.ADD_NEW_CASE}
                     </EuiButton>
                   }

@@ -53,7 +53,7 @@ export default function({ getService, getPageObjects }) {
   ]);
 
   describe('scripted fields', function() {
-    this.tags(['skipFirefox', 'skipCoverage']);
+    this.tags(['skipFirefox']);
 
     before(async function() {
       await browser.setWindowSize(1200, 800);
