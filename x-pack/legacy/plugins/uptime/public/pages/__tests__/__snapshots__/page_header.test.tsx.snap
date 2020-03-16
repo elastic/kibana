@@ -39,7 +39,7 @@ Array [
               <span
                 class="euiButtonEmpty__text"
               >
-                Manage alerts
+                Alerting
               </span>
             </span>
           </button>
@@ -187,7 +187,7 @@ Array [
               <span
                 class="euiButtonEmpty__text"
               >
-                Manage alerts
+                Alerting
               </span>
             </span>
           </button>
