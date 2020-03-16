@@ -18,22 +18,11 @@
  */
 
 import * as React from 'react';
-import {
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { uiToReactComponent, reactToUiComponent } from '../../../kibana_react/public';
-import { Action, ActionInternal } from '../actions';
-
-export const contextMenuSeparatorAction = new ActionInternal({
-  id: 'CONTEXT_MENU_SEPARATOR',
-  getDisplayName: () => 'separator',
-  MenuItem: reactToUiComponent(() => <EuiHorizontalRule margin={'none'} />),
-  execute: () => Promise.resolve(),
-});
+import { uiToReactComponent } from '../../../kibana_react/public';
+import { Action } from '../actions';
 
 /**
  * Transforms an array of Actions to the shape EuiContextMenuPanel expects.
@@ -113,12 +102,10 @@ function convertPanelActionToContextMenuItem<Context extends object>({
     'data-test-subj': `embeddablePanelAction-${action.id}`,
   };
 
-  if (action.id !== 'CONTEXT_MENU_SEPARATOR') {
-    menuPanelItem.onClick = () => {
-      action.execute(actionContext);
-      closeMenu();
-    };
-  }
+  menuPanelItem.onClick = () => {
+    action.execute(actionContext);
+    closeMenu();
+  };
 
   if (action.getHref) {
     const href = action.getHref(actionContext);

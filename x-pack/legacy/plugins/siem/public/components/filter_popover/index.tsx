@@ -29,19 +29,15 @@ const ScrollableDiv = styled.div`
   overflow: auto;
 `;
 
-export const toggleSelectedGroup = (
-  group: string,
-  selectedGroups: string[],
-  setSelectedGroups: Dispatch<SetStateAction<string[]>>
-): void => {
+const toggleSelectedGroup = (group: string, selectedGroups: string[]): string[] => {
   const selectedGroupIndex = selectedGroups.indexOf(group);
-  const updatedSelectedGroups = [...selectedGroups];
   if (selectedGroupIndex >= 0) {
-    updatedSelectedGroups.splice(selectedGroupIndex, 1);
-  } else {
-    updatedSelectedGroups.push(group);
+    return [
+      ...selectedGroups.slice(0, selectedGroupIndex),
+      ...selectedGroups.slice(selectedGroupIndex + 1),
+    ];
   }
-  return setSelectedGroups(updatedSelectedGroups);
+  return [...selectedGroups, group];
 };
 
 /**
@@ -64,7 +60,7 @@ export const FilterPopoverComponent = ({
 
   const setIsPopoverOpenCb = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
   const toggleSelectedGroupCb = useCallback(
-    option => toggleSelectedGroup(option, selectedOptions, onSelectedOptionsChanged),
+    option => onSelectedOptionsChanged(toggleSelectedGroup(option, selectedOptions)),
     [selectedOptions, onSelectedOptionsChanged]
   );
 

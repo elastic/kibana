@@ -6,14 +6,8 @@
 
 import { CoreSetup } from 'src/core/public';
 import { AdvancedUiActionsSetup } from '../../../advanced_ui_actions/public';
-import { AnyDrilldown } from '../types';
-
-// TODO: MOCK DATA
-import {
-  // dashboardDrilldownActionFactory,
-  urlDrilldownActionFactory,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../advanced_ui_actions/public/components/action_wizard/test_data';
+import { Drilldown, DrilldownFactoryContext } from '../types';
+import { UiActionsActionFactoryDefinition as ActionFactoryDefinition } from '../../../../../src/plugins/ui_actions/public';
 
 export interface DrilldownServiceSetupDeps {
   advancedUiActions: AdvancedUiActionsSetup;
@@ -23,7 +17,13 @@ export interface DrilldownServiceSetupContract {
   /**
    * Convenience method to register a drilldown.
    */
-  registerDrilldown: (drilldown: AnyDrilldown) => void;
+  registerDrilldown: <
+    Config extends object = object,
+    CreationContext extends object = object,
+    ExecutionContext extends object = object
+  >(
+    drilldown: Drilldown<Config, CreationContext, ExecutionContext>
+  ) => void;
 }
 
 export class DrilldownService {
@@ -31,8 +31,12 @@ export class DrilldownService {
     core: CoreSetup,
     { advancedUiActions }: DrilldownServiceSetupDeps
   ): DrilldownServiceSetupContract {
-    const registerDrilldown: DrilldownServiceSetupContract['registerDrilldown'] = ({
-      id,
+    const registerDrilldown = <
+      Config extends object = object,
+      CreationContext extends object = object,
+      ExecutionContext extends object = object
+    >({
+      id: factoryId,
       places,
       CollectConfig,
       createConfig,
@@ -40,35 +44,33 @@ export class DrilldownService {
       getDisplayName,
       euiIcon,
       execute,
-    }) => {
-      advancedUiActions.registerActionFactory({
-        id,
+    }: Drilldown<Config, CreationContext, ExecutionContext>) => {
+      const actionFactory: ActionFactoryDefinition<
+        Config,
+        DrilldownFactoryContext<CreationContext>,
+        ExecutionContext
+      > = {
+        id: factoryId,
         CollectConfig,
         createConfig,
         isConfigValid,
         getDisplayName,
         getIconType: () => euiIcon,
         isCompatible: async ({ place }: any) => (!places ? true : places.indexOf(place) > -1),
-        create: config => ({
+        create: serializedAction => ({
           id: '',
-          type: id as any,
+          type: factoryId,
           getIconType: () => euiIcon,
-          execute: async context => await execute(config, context),
+          execute: async context => await execute(serializedAction.config, context),
         }),
-      });
-    };
+      } as ActionFactoryDefinition<
+        Config,
+        DrilldownFactoryContext<CreationContext>,
+        ExecutionContext
+      >;
 
-    /*
-    registerDrilldown({
-      ...dashboardDrilldownActionFactory,
-      execute: () => alert('Dashboard drilldown!'),
-    } as any);
-    */
-    registerDrilldown({
-      ...urlDrilldownActionFactory,
-      euiIcon: 'link',
-      execute: () => alert('URL drilldown!'),
-    } as any);
+      advancedUiActions.registerActionFactory(actionFactory);
+    };
 
     return {
       registerDrilldown,

@@ -26,7 +26,7 @@ export interface FlyoutEditDrilldownParams {
 export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_EDIT_DRILLDOWN> {
   public readonly type = OPEN_FLYOUT_EDIT_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_EDIT_DRILLDOWN;
-  public order = 1;
+  public order = 10;
 
   constructor(protected readonly params: FlyoutEditDrilldownParams) {}
 
@@ -63,7 +63,10 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
           viewMode={'manage'}
           dynamicActionManager={dynamicActionManager}
         />
-      )
+      ),
+      {
+        ownFocus: true,
+      }
     );
   }
 }

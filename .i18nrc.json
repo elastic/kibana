@@ -3,7 +3,7 @@
     "common.ui": "src/legacy/ui",
     "console": "src/plugins/console",
     "core": "src/core",
-    "dashboardEmbeddableContainer": "src/plugins/dashboard_embeddable_container",
+    "dashboard": "src/plugins/dashboard",
     "data": [
       "src/legacy/core_plugins/data",
       "src/plugins/data"

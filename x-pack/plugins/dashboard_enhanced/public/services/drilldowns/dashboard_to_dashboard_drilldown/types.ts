@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EmbeddableVisTriggerContext } from '../../../../../../../src/plugins/embeddable/public';
+import {
+  EmbeddableVisTriggerContext,
+  EmbeddableContext,
+} from '../../../../../../../src/plugins/embeddable/public';
 import { UiActionsCollectConfigProps } from '../../../../../../../src/plugins/ui_actions/public';
 
-export type FactoryContext = any;
+export type FactoryContext = EmbeddableContext;
 export type ActionContext = EmbeddableVisTriggerContext;
 
 export interface Config {
