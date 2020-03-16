@@ -8,7 +8,7 @@ import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { EmptyStateComponent } from '../empty_state';
 import { GraphQLError } from 'graphql';
-import { StatesIndexStatus } from '../../../../../common/graphql/types';
+import { StatesIndexStatus } from '../../../../../common/runtime_types';
 
 describe('EmptyState component', () => {
   let statesIndexStatus: StatesIndexStatus;
@@ -16,15 +16,13 @@ describe('EmptyState component', () => {
   beforeEach(() => {
     statesIndexStatus = {
       indexExists: true,
-      docCount: {
-        count: 1,
-      },
+      docCount: 1,
     };
   });
 
   it('renders child components when count is truthy', () => {
     const component = shallowWithIntl(
-      <EmptyStateComponent data={{ statesIndexStatus }} loading={false}>
+      <EmptyStateComponent statesIndexStatus={statesIndexStatus} loading={false}>
         <div>Foo</div>
         <div>Bar</div>
         <div>Baz</div>
@@ -33,9 +31,9 @@ describe('EmptyState component', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it(`doesn't render child components when count is falsey`, () => {
+  it(`doesn't render child components when count is falsy`, () => {
     const component = mountWithIntl(
-      <EmptyStateComponent data={undefined} loading={false}>
+      <EmptyStateComponent statesIndexStatus={null} loading={false}>
         <div>Shouldn&apos;t be rendered</div>
       </EmptyStateComponent>
     );
@@ -57,7 +55,7 @@ describe('EmptyState component', () => {
       },
     ];
     const component = mountWithIntl(
-      <EmptyStateComponent data={undefined} errors={errors} loading={false}>
+      <EmptyStateComponent statesIndexStatus={null} errors={errors} loading={false}>
         <div>Shouldn&apos;t appear...</div>
       </EmptyStateComponent>
     );
@@ -66,7 +64,7 @@ describe('EmptyState component', () => {
 
   it('renders loading state if no errors or doc count', () => {
     const component = mountWithIntl(
-      <EmptyStateComponent loading={true}>
+      <EmptyStateComponent loading={true} statesIndexStatus={null}>
         <div>Should appear even while loading...</div>
       </EmptyStateComponent>
     );
@@ -75,13 +73,11 @@ describe('EmptyState component', () => {
 
   it('does not render empty state with appropriate base path and no docs', () => {
     statesIndexStatus = {
-      docCount: {
-        count: 0,
-      },
+      docCount: 0,
       indexExists: true,
     };
     const component = mountWithIntl(
-      <EmptyStateComponent data={{ statesIndexStatus }} loading={false}>
+      <EmptyStateComponent statesIndexStatus={statesIndexStatus} loading={false}>
         <div>If this is in the snapshot the test should fail</div>
       </EmptyStateComponent>
     );
@@ -91,7 +87,7 @@ describe('EmptyState component', () => {
   it('notifies when index does not exist', () => {
     statesIndexStatus.indexExists = false;
     const component = mountWithIntl(
-      <EmptyStateComponent data={{ statesIndexStatus }} loading={false}>
+      <EmptyStateComponent statesIndexStatus={statesIndexStatus} loading={false}>
         <div>This text should not render</div>
       </EmptyStateComponent>
     );

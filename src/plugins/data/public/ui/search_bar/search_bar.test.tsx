@@ -35,7 +35,7 @@ const mockTimeHistory = {
   },
 };
 
-jest.mock('../..', () => {
+jest.mock('..', () => {
   return {
     FilterBar: () => <div className="filterBar" />,
   };
