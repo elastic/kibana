@@ -147,6 +147,17 @@ describe('when on the alerting page', () => {
           search: '?page_size=1&page_index=1',
         });
       });
+
+      // the test interacts with the pagination elements, which require data to be loaded
+      reactTestingLibrary.act(() => {
+        const action: AppAction = {
+          type: 'serverReturnedAlertsData',
+          payload: mockAlertResultList({
+            total: 20,
+          }),
+        };
+        store.dispatch(action);
+      });
     });
     describe('when the user changes page size to 10', () => {
       beforeEach(async () => {

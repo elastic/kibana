@@ -379,7 +379,7 @@ describe('#getCommonColumns', () => {
       expect(
         wrapper
           .find('thead tr th')
-          .at(2)
+          .at(1)
           .text()
       ).toContain(i18n.TIMELINE_NAME);
     });
@@ -716,7 +716,7 @@ describe('#getCommonColumns', () => {
       expect(
         wrapper
           .find('thead tr th')
-          .at(3)
+          .at(2)
           .text()
       ).toContain(i18n.DESCRIPTION);
     });
@@ -850,7 +850,7 @@ describe('#getCommonColumns', () => {
       expect(
         wrapper
           .find('thead tr th')
-          .at(4)
+          .at(3)
           .text()
       ).toContain(i18n.LAST_MODIFIED);
     });
