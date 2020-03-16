@@ -151,7 +151,7 @@ describe('data generator', () => {
     const timestamp = new Date().getTime();
     const root = generator.generateEvent({ timestamp });
     const generations = 2;
-    const events = generator.generateDescendantsTree(root, generations);
+    const events = [root, ...generator.generateDescendantsTree(root, generations)];
     const rootNode = buildResolverTree(events);
     const visitedEvents = countResolverEvents(rootNode, generations);
     expect(visitedEvents).toEqual(events.length);
