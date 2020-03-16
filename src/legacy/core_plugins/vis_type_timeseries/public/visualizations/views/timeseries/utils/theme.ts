@@ -62,7 +62,7 @@ function findBestContrastColor(
   bgColor: string,
   lightFgColor: string,
   darkFgColor: string,
-  ratio = 4.4
+  ratio = 4.5
 ) {
   const lc = computeContrast(bgColor, lightFgColor);
   const dc = computeContrast(bgColor, darkFgColor);
