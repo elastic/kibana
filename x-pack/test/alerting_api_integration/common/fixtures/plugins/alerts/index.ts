@@ -207,6 +207,10 @@ export default function(kibana: any) {
           { id: 'other', name: 'Other' },
         ],
         defaultActionGroupId: 'default',
+        actionVariables: {
+          state: [{ name: 'instanceStateValue', description: 'the instance state value' }],
+          context: [{ name: 'instanceContextValue', description: 'the instance context value' }],
+        },
         async executor(alertExecutorOptions: AlertExecutorOptions) {
           const {
             services,
@@ -419,6 +423,26 @@ export default function(kibana: any) {
         defaultActionGroupId: 'default',
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
+      const onlyContextVariablesAlertType: AlertType = {
+        id: 'test.onlyContextVariables',
+        name: 'Test: Only Context Variables',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
+        actionVariables: {
+          context: [{ name: 'aContextVariable', description: 'this is a context variable' }],
+        },
+        async executor(opts: AlertExecutorOptions) {},
+      };
+      const onlyStateVariablesAlertType: AlertType = {
+        id: 'test.onlyStateVariables',
+        name: 'Test: Only State Variables',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
+        actionVariables: {
+          state: [{ name: 'aStateVariable', description: 'this is a state variable' }],
+        },
+        async executor(opts: AlertExecutorOptions) {},
+      };
       server.newPlatform.setup.plugins.alerting.registerType(alwaysFiringAlertType);
       server.newPlatform.setup.plugins.alerting.registerType(cumulativeFiringAlertType);
       server.newPlatform.setup.plugins.alerting.registerType(neverFiringAlertType);
@@ -426,6 +450,8 @@ export default function(kibana: any) {
       server.newPlatform.setup.plugins.alerting.registerType(validationAlertType);
       server.newPlatform.setup.plugins.alerting.registerType(authorizationAlertType);
       server.newPlatform.setup.plugins.alerting.registerType(noopAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(onlyContextVariablesAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(onlyStateVariablesAlertType);
     },
   });
 }
