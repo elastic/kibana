@@ -51,7 +51,7 @@ export function eventType(passedEvent: ResolverEvent): ResolverProcessType {
       event: { type, category, kind },
     } = passedEvent;
     if (isValue(category, 'process')) {
-      if (isValue(type, 'start') || isValue(type, 'change')) {
+      if (isValue(type, 'start') || isValue(type, 'change') || isValue(type, 'creation')) {
         return 'processCreated';
       } else if (isValue(type, 'info')) {
         return 'processRan';
@@ -74,7 +74,7 @@ export function uniquePidForProcess(event: ResolverEvent): string {
   if (isLegacyEvent(event)) {
     return String(event.endgame.unique_pid);
   } else {
-    return event.endpoint.process.entity_id;
+    return event.process.entity_id;
   }
 }
 
@@ -85,6 +85,6 @@ export function uniqueParentPidForProcess(event: ResolverEvent): string | undefi
   if (isLegacyEvent(event)) {
     return String(event.endgame.unique_ppid);
   } else {
-    return event.endpoint.process.parent?.entity_id;
+    return event.process.parent?.entity_id;
   }
 }

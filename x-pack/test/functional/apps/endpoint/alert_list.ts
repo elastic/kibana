@@ -12,14 +12,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('Endpoint Alert List page', function() {
+  describe('Endpoint Alert Page: when es has data and user has navigated to the page', function() {
     this.tags(['ciGroup7']);
     before(async () => {
       await esArchiver.load('endpoint/alerts/api_feature');
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/alerts');
     });
-
-    it('loads in the browser', async () => {
+    it('loads the Alert List Page', async () => {
       await testSubjects.existOrFail('alertListPage');
     });
     it('contains the Alert List Page title', async () => {

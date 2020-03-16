@@ -46,14 +46,14 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
           ]);
           childEvents = children.length > 0 ? children.map((child: any) => child.lifecycle) : [];
         } else {
-          const uniquePid = action.payload.selectedEvent.endpoint.process.entity_id;
-          const ppid = action.payload.selectedEvent.endpoint.process.parent?.entity_id;
+          const uniquePid = action.payload.selectedEvent.process.entity_id;
+          const ppid = action.payload.selectedEvent.process.parent?.entity_id;
           async function getAncestors(pid: string | undefined) {
             if (ancestors.length < maxAncestors && pid !== undefined) {
               const parent = await context?.services.http.get(`/api/endpoint/resolver/${pid}`);
               ancestors.push(parent.lifecycle[0]);
-              if (parent.lifecycle[0].endpoint?.process?.parent?.entity_id) {
-                await getAncestors(parent.lifecycle[0].endpoint.process.parent.entity_id);
+              if (parent.lifecycle[0].process?.parent?.entity_id) {
+                await getAncestors(parent.lifecycle[0].process.parent.entity_id);
               }
             }
           }
