@@ -29,19 +29,22 @@ export const TakeActionDropdown = memo(() => {
     setIsDropdownOpen(!isDropdownOpen);
   }, [isDropdownOpen]);
 
+  const closePopover = useCallback(() => {
+    setIsDropdownOpen(false);
+  }, []);
+
   return (
     <EuiPopover
       button={<TakeActionButton onClick={onClick} />}
       isOpen={isDropdownOpen}
       anchorPosition="downRight"
-      closePopover={() => setIsDropdownOpen(false)}
+      closePopover={closePopover}
       data-test-subj="alertListTakeActionDropdownContent"
     >
       <EuiFormRow>
         <EuiButtonEmpty
           data-test-subj="alertDetailTakeActionCloseAlertButton"
           color="text"
-          onClick={() => {}}
           iconType="folderCheck"
         >
           <FormattedMessage
@@ -55,7 +58,6 @@ export const TakeActionDropdown = memo(() => {
         <EuiButtonEmpty
           data-test-subj="alertDetailTakeActionWhitelistButton"
           color="text"
-          onClick={() => {}}
           iconType="listAdd"
         >
           <FormattedMessage

@@ -4,70 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
-import { Provider } from 'react-redux';
-import { I18nProvider } from '@kbn/i18n/react';
-import { AlertIndex } from './index';
 import { appStoreFactory } from '../../store';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { fireEvent } from '@testing-library/react';
-import { RouteCapture } from '../route_capture';
-import { createMemoryHistory, MemoryHistory } from 'history';
-import { Router } from 'react-router-dom';
+import { MemoryHistory } from 'history';
 import { AppAction } from '../../types';
 import { mockAlertResultList } from '../../store/alerts/mock_alert_result_list';
-import { DepsStartMock, depsStartMock } from '../../mocks';
+import { alertPageTestRender } from './test_helpers/render_alert_page';
 
 describe('when the alert details flyout is open', () => {
   let render: () => reactTestingLibrary.RenderResult;
   let history: MemoryHistory<never>;
   let store: ReturnType<typeof appStoreFactory>;
-  let depsStart: DepsStartMock;
 
   beforeEach(async () => {
-    /**
-     * Create a 'history' instance that is only in-memory and causes no side effects to the testing environment.
-     */
-    history = createMemoryHistory<never>();
-    /**
-     * Create a store, with the middleware disabled. We don't want side effects being created by our code in this test.
-     */
-    store = appStoreFactory();
-
-    depsStart = depsStartMock();
-    depsStart.data.ui.SearchBar.mockImplementation(() => <div />);
-
-    /**
-     * Render the test component, use this after setting up anything in `beforeEach`.
-     */
-    render = () => {
-      /**
-       * Provide the store via `Provider`, and i18n APIs via `I18nProvider`.
-       * Use react-router via `Router`, passing our in-memory `history` instance.
-       * Use `RouteCapture` to emit url-change actions when the URL is changed.
-       * Finally, render the `AlertIndex` component which we are testing.
-       */
-      return reactTestingLibrary.render(
-        <Provider store={store}>
-          <KibanaContextProvider services={{ data: depsStart.data }}>
-            <I18nProvider>
-              <Router history={history}>
-                <RouteCapture>
-                  <AlertIndex />
-                </RouteCapture>
-              </Router>
-            </I18nProvider>
-          </KibanaContextProvider>
-        </Provider>
-      );
-    };
+    // Creates the render elements for the tests to use
+    ({ render, history, store } = alertPageTestRender);
   });
   describe('when the alerts details flyout is open', () => {
     beforeEach(() => {
       reactTestingLibrary.act(() => {
         history.push({
-          ...history.location,
           search: '?selected_alert=1',
         });
       });
