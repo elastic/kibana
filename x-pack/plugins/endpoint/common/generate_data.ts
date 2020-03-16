@@ -6,7 +6,7 @@
 
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
-import { AlertEvent, EndpointEvent, EndpointMetadata, OSFields } from './types';
+import { AlertEvent, EndpointEvent, EndpointMetadata, OSFields, HostFields } from './types';
 
 export type Event = AlertEvent | EndpointEvent;
 
@@ -67,31 +67,51 @@ const FILE_OPERATIONS: string[] = ['creation', 'open', 'rename', 'execution', 'd
 // These are from the v1 schemas and aren't all valid ECS event categories, still in flux
 const OTHER_EVENT_CATEGORIES: string[] = ['driver', 'file', 'library', 'network', 'registry'];
 
+interface HostInfo {
+  agent: {
+    version: string;
+    id: string;
+  };
+  host: HostFields;
+  endpoint: {
+    policy: {
+      id: string;
+    };
+  };
+}
+
 export class EndpointDocGenerator {
-  agentId: string;
-  hostId: string;
-  hostname: string;
-  macAddress: string[];
-  ip: string[];
-  agentVersion: string;
-  os: OSFields;
-  policy: { name: string; id: string };
+  commonInfo: HostInfo;
   random: seedrandom.prng;
 
   constructor(seed = Math.random().toString()) {
     this.random = seedrandom(seed);
-    this.hostId = this.seededUUIDv4();
-    this.agentId = this.seededUUIDv4();
-    this.hostname = this.randomHostname();
-    this.ip = this.randomArray(3, () => this.randomIP());
-    this.macAddress = this.randomArray(3, () => this.randomMac());
-    this.agentVersion = this.randomVersion();
-    this.os = this.randomChoice(OS);
-    this.policy = this.randomChoice(POLICIES);
+    this.commonInfo = this.createHostData();
   }
 
-  public randomizeIPs() {
-    this.ip = this.randomArray(3, () => this.randomIP());
+  // This function will create new values for all the host fields, so documents from a different endpoint can be created
+  // This provides a convenient way to make documents from multiple endpoints that are all tied to a single seed value
+  public randomizeHostData() {
+    this.commonInfo = this.createHostData();
+  }
+
+  private createHostData(): HostInfo {
+    return {
+      agent: {
+        version: this.randomVersion(),
+        id: this.seededUUIDv4(),
+      },
+      host: {
+        id: this.seededUUIDv4(),
+        hostname: this.randomHostname(),
+        ip: this.randomArray(3, () => this.randomIP()),
+        mac: this.randomArray(3, () => this.randomMac()),
+        os: this.randomChoice(OS),
+      },
+      endpoint: {
+        policy: this.randomChoice(POLICIES),
+      },
+    };
   }
 
   public generateEndpointMetadata(ts = new Date().getTime()): EndpointMetadata {
@@ -100,22 +120,7 @@ export class EndpointDocGenerator {
       event: {
         created: ts,
       },
-      endpoint: {
-        policy: {
-          id: this.policy.id,
-        },
-      },
-      agent: {
-        version: this.agentVersion,
-        id: this.agentId,
-      },
-      host: {
-        id: this.hostId,
-        hostname: this.hostname,
-        ip: this.ip,
-        mac: this.macAddress,
-        os: this.os,
-      },
+      ...this.commonInfo,
     };
   }
 
@@ -125,11 +130,8 @@ export class EndpointDocGenerator {
     parentEntityID?: string
   ): AlertEvent {
     return {
+      ...this.commonInfo,
       '@timestamp': ts,
-      agent: {
-        id: this.agentId,
-        version: this.agentVersion,
-      },
       event: {
         action: this.randomChoice(FILE_OPERATIONS),
         kind: 'alert',
@@ -138,11 +140,6 @@ export class EndpointDocGenerator {
         dataset: 'endpoint',
         module: 'endpoint',
         type: 'creation',
-      },
-      endpoint: {
-        policy: {
-          id: this.policy.id,
-        },
       },
       file: {
         owner: 'SYSTEM',
@@ -168,13 +165,6 @@ export class EndpointDocGenerator {
           version: '3.0.33',
         },
         temp_file_path: 'C:/temp/fake_malware.exe',
-      },
-      host: {
-        id: this.hostId,
-        hostname: this.hostname,
-        ip: this.ip,
-        mac: this.macAddress,
-        os: this.os,
       },
       process: {
         pid: 2,
@@ -243,11 +233,7 @@ export class EndpointDocGenerator {
   public generateEvent(options: EventOptions = {}): EndpointEvent {
     return {
       '@timestamp': options.timestamp ? options.timestamp : new Date().getTime(),
-      agent: {
-        id: this.agentId,
-        version: this.agentVersion,
-        type: 'endpoint',
-      },
+      agent: { ...this.commonInfo.agent, type: 'endgame' },
       ecs: {
         version: '1.4.0',
       },
@@ -257,13 +243,7 @@ export class EndpointDocGenerator {
         type: options.eventType ? options.eventType : 'creation',
         id: this.seededUUIDv4(),
       },
-      host: {
-        id: this.hostId,
-        hostname: this.hostname,
-        ip: this.ip,
-        mac: this.macAddress,
-        os: this.os,
-      },
+      host: this.commonInfo.host,
       process: {
         entity_id: options.entityID ? options.entityID : this.randomString(10),
         parent: options.parentEntityID ? { entity_id: options.parentEntityID } : undefined,
@@ -323,14 +303,13 @@ export class EndpointDocGenerator {
     percentNodesWithRelated = 100,
     percentChildrenTerminated = 100
   ): Event[] {
-    let events: Event[] = [root];
+    let events: Event[] = [];
     let parents = [root];
     let timestamp = root['@timestamp'];
     for (let i = 0; i < generations; i++) {
       const newParents: EndpointEvent[] = [];
       parents.forEach(element => {
-        // const numChildren = randomN(maxChildrenPerNode);
-        const numChildren = maxChildrenPerNode;
+        const numChildren = this.randomN(maxChildrenPerNode);
         for (let j = 0; j < numChildren; j++) {
           timestamp = timestamp + 1000;
           const child = this.generateEvent({
