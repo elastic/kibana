@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 
@@ -26,13 +26,12 @@ const JobDisplay = ({ title, description }: { title: string; description: string
 );
 
 export const MlJobSelect = ({ field }: MlJobSelectProps) => {
+  const jobId = field.value as string;
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-  const [localJobId, setLocalJobId] = useState<string>(field.value as string);
   const [isLoading, siemJobs] = useSiemJobs(false);
   const handleJobChange = useCallback(
-    (jobId: string) => {
-      setLocalJobId(jobId);
-      field.setValue(jobId);
+    (mlJobId: string) => {
+      field.setValue(mlJobId);
     },
     [field]
   );
@@ -52,7 +51,7 @@ export const MlJobSelect = ({ field }: MlJobSelectProps) => {
             isLoading={isLoading}
             onChange={handleJobChange}
             options={options}
-            valueOfSelected={localJobId}
+            valueOfSelected={jobId}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

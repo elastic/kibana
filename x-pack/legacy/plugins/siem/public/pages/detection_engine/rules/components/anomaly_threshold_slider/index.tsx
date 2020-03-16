@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { EuiFlexGrid, EuiFlexItem, EuiRange, EuiFormRow } from '@elastic/eui';
 
@@ -19,12 +19,11 @@ type EventArg = Event | React.MouseEvent<HTMLButtonElement>;
 const Wrapper = styled(EuiFormRow)``;
 
 export const AnomalyThresholdSlider = ({ field }: AnomalyThresholdSliderProps) => {
-  const [localThreshold, setLocalThreshold] = useState<number>(field.value as number);
+  const threshold = field.value as number;
   const onThresholdChange = useCallback(
     (event: EventArg) => {
-      const threshold = Number((event as Event).target.value);
-      setLocalThreshold(threshold);
-      field.setValue(threshold);
+      const thresholdValue = Number((event as Event).target.value);
+      field.setValue(thresholdValue);
     },
     [field]
   );
@@ -34,7 +33,7 @@ export const AnomalyThresholdSlider = ({ field }: AnomalyThresholdSliderProps) =
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>
           <EuiRange
-            value={localThreshold}
+            value={threshold}
             onChange={onThresholdChange}
             fullWidth
             showInput

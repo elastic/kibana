@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiIcon, EuiFormRow } from '@elastic/eui';
 
@@ -20,10 +20,9 @@ interface SelectRuleTypeProps {
 const Wrapper = styled(EuiFormRow)``;
 
 export const SelectRuleType = ({ field }: SelectRuleTypeProps) => {
-  const [ruleType, setRuleType] = useState<RuleType>(field.value as RuleType);
+  const ruleType = field.value as RuleType;
   const setType = useCallback(
     (type: RuleType) => {
-      setRuleType(type);
       field.setValue(type);
     },
     [field]
