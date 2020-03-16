@@ -70,37 +70,27 @@ export const ActionTypeMenu = ({ onActionTypeChange, actionTypes }: Props) => {
           description={item.selectMessage}
           isDisabled={!checkEnabledResult.isEnabled}
           onClick={() => onActionTypeChange(item.actionType)}
+          betaBadgeLabel={
+            checkEnabledResult.isEnabled
+              ? undefined
+              : i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionsConnectorsList.upgradeBadge',
+                  { defaultMessage: 'Upgrade' }
+                )
+          }
+          betaBadgeTooltipContent={
+            checkEnabledResult.isEnabled ? undefined : checkEnabledResult.message
+          }
         />
       );
 
-      const cardT = (
-        <EuiCard
-          data-test-subj={`${item.actionType.id}-card`}
-          icon={<EuiIcon size="xl" type={item.iconClass} />}
-          title={item.name}
-          description={item.selectMessage}
-          betaBadgeLabel={i18n.translate(
-            'xpack.triggersActionsUI.sections.actionsConnectorsList.upgradeBadge',
-            { defaultMessage: 'Upgrade' }
-          )}
-          betaBadgeTooltipContent={checkEnabledResult.message}
-          isDisabled={!checkEnabledResult.isEnabled}
-          onClick={() => onActionTypeChange(item.actionType)}
-        />
-      );
-
-      return (
-        <EuiFlexItem key={index}>
-          {checkEnabledResult.isEnabled && card}
-          {checkEnabledResult.isEnabled === false && cardT}
-        </EuiFlexItem>
-      );
+      return <EuiFlexItem key={index}>{card}</EuiFlexItem>;
     });
 
   return (
     <div className="actConnectorsListGrid">
       <EuiSpacer size="s" />
-      <EuiFlexGrid gutter="xl" columns={2}>
+      <EuiFlexGrid gutterSize="xl" columns={2}>
         {cardNodes}
       </EuiFlexGrid>
     </div>
