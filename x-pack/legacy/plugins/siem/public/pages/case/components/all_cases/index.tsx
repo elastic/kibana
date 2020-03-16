@@ -44,6 +44,9 @@ import { OpenClosedStats } from '../open_closed_stats';
 import { getActions } from './actions';
 import { CasesTableFilters } from './table_filters';
 
+const CONFIGURE_CASES_URL = getConfigureCasesUrl();
+const CREATE_CASE_URL = getCreateCaseUrl();
+
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
 `;
@@ -258,12 +261,12 @@ export const AllCases = React.memo(() => {
             />
           </FlexItemDivider>
           <EuiFlexItem grow={false}>
-            <EuiButton href={getConfigureCasesUrl()} iconType="controlsHorizontal">
+            <EuiButton href={CONFIGURE_CASES_URL} iconType="controlsHorizontal">
               {i18n.CONFIGURE_CASES_BUTTON}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill href={getCreateCaseUrl()} iconType="plusInCircle">
+            <EuiButton fill href={CREATE_CASE_URL} iconType="plusInCircle">
               {i18n.CREATE_TITLE}
             </EuiButton>
           </EuiFlexItem>
@@ -322,7 +325,7 @@ export const AllCases = React.memo(() => {
                   titleSize="xs"
                   body={i18n.NO_CASES_BODY}
                   actions={
-                    <EuiButton fill size="s" href={getCreateCaseUrl()} iconType="plusInCircle">
+                    <EuiButton fill size="s" href={CREATE_CASE_URL} iconType="plusInCircle">
                       {i18n.ADD_NEW_CASE}
                     </EuiButton>
                   }
