@@ -30,6 +30,8 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await testSubjects.click('dashboardAddPanelButton');
       // Give some time for the animation to complete
       await PageObjects.common.sleep(500);
+      await testSubjects.click('dashboardAddPopoverExisting');
+      await PageObjects.common.sleep(500);
     }
 
     async clickAddNewEmbeddableLink(type) {

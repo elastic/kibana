@@ -67,6 +67,7 @@ export function AddPanelPopover({
           }),
           icon: <EuiIcon type="folderOpen" size="m" />,
           onClick: addExisting,
+          'data-test-subj': 'dashboardAddPopoverExisting',
         },
         {
           name: i18n.translate('kbn.dashboard.topNav.addPopover.addNew', {
@@ -74,6 +75,7 @@ export function AddPanelPopover({
           }),
           icon: <EuiIcon type="plusInCircle" size="m" />,
           onClick: addNew,
+          'data-test-subj': 'dashboardAddPopoverNew',
         },
       ],
     },
