@@ -6,7 +6,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiSpacer, EuiText } from '@elastic/eui';
-import { IFieldType, IIndexPattern } from 'src/plugins/data/public';
+import { IFieldType } from 'src/plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -23,9 +23,9 @@ import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/ap
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AGGREGATION_TYPES } from '../../../../../triggers_actions_ui/public/common/constants';
 import { MetricsExplorerOptions } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
-import { SourceConfiguration } from '../../../utils/source_configuration';
 import { MetricsExplorerKueryBar } from '../../metrics_explorer/kuery_bar';
 import { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explorer';
+import { useSource } from '../../../containers/source';
 
 export interface MetricExpression {
   aggType?: string;
@@ -39,8 +39,6 @@ export interface MetricExpression {
 
 interface AlertContextMeta {
   currentOptions: MetricsExplorerOptions;
-  derivedIndexPattern: IIndexPattern;
-  source: SourceConfiguration;
   series: MetricsExplorerSeries;
 }
 
@@ -57,6 +55,11 @@ type TimeUnit = 's' | 'm' | 'h' | 'd';
 
 export const Expressions: React.FC<Props> = props => {
   const { setAlertParams, alertParams, errors, alertsContext } = props;
+  const { source, createDerivedIndexPattern } = useSource({ sourceId: 'default' });
+
+  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
+    createDerivedIndexPattern,
+  ]);
 
   const defaultExpression = useMemo<MetricExpression>(
     () => ({
@@ -65,9 +68,9 @@ export const Expressions: React.FC<Props> = props => {
       threshold: [],
       timeSize: 1,
       timeUnit: 's',
-      indexPattern: alertsContext.metadata?.source.metricAlias,
+      indexPattern: source?.configuration.metricAlias,
     }),
-    [alertsContext.metadata]
+    [source]
   );
 
   const expressions = useMemo<MetricExpression[]>(() => {
@@ -80,13 +83,13 @@ export const Expressions: React.FC<Props> = props => {
         threshold: [],
         timeSize: 1,
         timeUnit: 's',
-        indexPattern: alertsContext.metadata?.source.metricAlias,
+        indexPattern: source?.configuration.metricAlias,
         aggType: metric.aggregation,
       }));
     } else {
       return [defaultExpression];
     }
-  }, [alertParams.criteria, alertsContext.metadata, defaultExpression]);
+  }, [alertParams.criteria, source, alertsContext.metadata, defaultExpression]);
 
   const updateParams = useCallback(
     (id, e: MetricExpression) => {
@@ -158,7 +161,7 @@ export const Expressions: React.FC<Props> = props => {
       {expressions.map((e, idx) => {
         return (
           <ExpressionRow
-            fields={(alertsContext.metadata!.derivedIndexPattern as IIndexPattern).fields}
+            fields={derivedIndexPattern.fields}
             remove={removeExpression}
             addExpression={addExpression}
             key={idx} // idx's don't usually make good key's but here the index has semantic meaning
@@ -177,7 +180,7 @@ export const Expressions: React.FC<Props> = props => {
       </EuiText>
       <EuiSpacer size={'xs'} />
       <MetricsExplorerKueryBar
-        derivedIndexPattern={alertsContext.metadata!.derivedIndexPattern}
+        derivedIndexPattern={derivedIndexPattern}
         onSubmit={onFilterQuerySubmit}
         value={filterValue}
       />

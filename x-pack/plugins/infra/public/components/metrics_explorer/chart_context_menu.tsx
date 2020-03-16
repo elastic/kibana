@@ -207,8 +207,6 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
         <AlertFlyout
           series={series}
           options={options}
-          derivedIndexPattern={derivedIndexPattern}
-          source={source}
           setVisible={setFlyoutVisible}
           visible={flyoutVisible}
         />
