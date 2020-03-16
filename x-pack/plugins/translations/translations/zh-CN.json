@@ -832,7 +832,6 @@
     "kbn.advancedSettings.defaultIndexTitle": "默认索引",
     "kbn.advancedSettings.defaultRoute.defaultRouteText": "此设置指定打开 Kibana 时的默认路由。您可以使用此设置修改打开 Kibana 时的登陆页面。路由必须以正斜杠（“/”）开头。",
     "kbn.advancedSettings.defaultRoute.defaultRouteTitle": "默认路由",
-    "kbn.advancedSettings.defaultRoute.defaultRouteValidationMessage": "路由必须以正斜杠（“/”）开头",
     "kbn.advancedSettings.disableAnimationsText": "在 Kibana UI 中关闭所有没有必要的动画。刷新页面以应用更改。",
     "kbn.advancedSettings.disableAnimationsTitle": "禁用动画",
     "kbn.advancedSettings.discover.aggsTermsSizeText": "确定在单击“可视化”按钮时将在发现侧边栏的字段下拉列表中可视化多少个词。",

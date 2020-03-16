@@ -832,7 +832,6 @@
     "kbn.advancedSettings.defaultIndexTitle": "デフォルトのインデックス",
     "kbn.advancedSettings.defaultRoute.defaultRouteText": "この設定は、Kibana 起動時のデフォルトのルートを設定します。この設定で、Kibana 起動時のランディングページを変更できます。ルートはスラッシュ (\"/\") で始まる必要があります。",
     "kbn.advancedSettings.defaultRoute.defaultRouteTitle": "デフォルトのルート",
-    "kbn.advancedSettings.defaultRoute.defaultRouteValidationMessage": "ルートはスラッシュ (\"/\") で始まる必要があります。",
     "kbn.advancedSettings.disableAnimationsText": "Kibana UI の不要なアニメーションをオフにします。変更を適用するにはページを更新してください。",
     "kbn.advancedSettings.disableAnimationsTitle": "アニメーションを無効にする",
     "kbn.advancedSettings.discover.aggsTermsSizeText": "「可視化」ボタンをクリックした際に、フィールドドロップダウンやディスカバリサイドバーに可視化される用語の数を設定します。",
