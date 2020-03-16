@@ -468,7 +468,7 @@ export default function({ getService, getPageObjects }) {
             '[data-test-subj="visEditorAggAccordion2"] .visEditorSidebar__aggGroupAccordionButtonContent'
           )
         ).getVisibleText();
-        expect(accordionLabel).to.include.string('per 3 hours');
+        expect(accordionLabel).to.include.string('per month');
       });
 
       it('should update label inside when scaled to milliseconds', async () => {
@@ -476,7 +476,7 @@ export default function({ getService, getPageObjects }) {
         const accordionLabel = await (
           await find.byCssSelector('[data-test-subj="currentlyScaledText"]')
         ).getVisibleText();
-        expect(accordionLabel).to.include.string('to hour');
+        expect(accordionLabel).to.include.string('to week');
       });
 
       it('should scale to 10 minutes and display the correct label when time range is changed and custom interval is set to 10s', async () => {
