@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function isSeedNodeValid(seedNode) {
+export function isAddressValid(seedNode) {
   if (!seedNode) {
     return false;
   }
@@ -23,7 +23,7 @@ export function isSeedNodeValid(seedNode) {
   return !containsInvalidCharacters;
 }
 
-export function isSeedNodePortValid(seedNode) {
+export function isPortValid(seedNode) {
   if (!seedNode) {
     return false;
   }

@@ -16,10 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { coreMock } from '../../../core/public/mocks';
+import { testPlugin } from './tests/test_plugin';
 
-import React from 'react';
-import { EuiRangeProps } from '@elastic/eui';
+test('cannot register embeddable factory with the same ID', async () => {
+  const coreSetup = coreMock.createSetup();
+  const coreStart = coreMock.createStart();
+  const { setup } = testPlugin(coreSetup, coreStart);
+  const embeddableFactoryId = 'ID';
+  const embeddableFactory = {} as any;
 
-export class ValidatedDualRange<EuiRangeProps> extends React.Component<EuiRangeProps> {
-  allowEmptyRange?: boolean;
-}
+  setup.registerEmbeddableFactory(embeddableFactoryId, embeddableFactory);
+  expect(() =>
+    setup.registerEmbeddableFactory(embeddableFactoryId, embeddableFactory)
+  ).toThrowError(
+    'Embeddable factory [embeddableFactoryId = ID] already registered in Embeddables API.'
+  );
+});

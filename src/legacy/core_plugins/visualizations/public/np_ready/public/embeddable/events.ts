@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import { createApi } from '..';
-import { createDeps } from './helpers';
+import {
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+} from '../../../../../../../plugins/ui_actions/public';
 
-test('cannot register embeddable factory with the same ID', async () => {
-  const deps = createDeps();
-  const { api } = createApi(deps);
-  const embeddableFactoryId = 'ID';
-  const embeddableFactory = {} as any;
+export interface VisEventToTrigger {
+  ['brush']: typeof SELECT_RANGE_TRIGGER;
+  ['filter']: typeof VALUE_CLICK_TRIGGER;
+}
 
-  api.registerEmbeddableFactory(embeddableFactoryId, embeddableFactory);
-  expect(() => api.registerEmbeddableFactory(embeddableFactoryId, embeddableFactory)).toThrowError(
-    'Embeddable factory [embeddableFactoryId = ID] already registered in Embeddables API.'
-  );
-});
+export const VIS_EVENT_TO_TRIGGER: VisEventToTrigger = {
+  brush: SELECT_RANGE_TRIGGER,
+  filter: VALUE_CLICK_TRIGGER,
+};
