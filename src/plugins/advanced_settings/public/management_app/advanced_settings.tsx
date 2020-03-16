@@ -31,7 +31,7 @@ import { ComponentRegistry } from '../';
 
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
-import { FieldSetting, IQuery, SettingsChanges } from './types';
+import { FieldSetting, SettingsChanges } from './types';
 
 interface AdvancedSettingsProps {
   enableSaving: boolean;
@@ -47,7 +47,7 @@ interface AdvancedSettingsComponentProps extends AdvancedSettingsProps {
 
 interface AdvancedSettingsState {
   footerQueryMatched: boolean;
-  query: IQuery;
+  query: Query;
   filteredSettings: Record<string, FieldSetting[]>;
 }
 
@@ -149,7 +149,7 @@ export class AdvancedSettingsComponent extends Component<
     }, {});
   }
 
-  onQueryChange = ({ query }: { query: IQuery }) => {
+  onQueryChange = ({ query }: { query: Query }) => {
     this.setState({
       query,
       filteredSettings: this.mapSettings(Query.execute(query, this.settings)),
