@@ -9,8 +9,7 @@ kibanaPipeline(timeoutMinutes: 180) {
       'CODE_COVERAGE=1', // Needed for multiple ci scripts, such as remote.ts, test/scripts/*.sh, schema.js, etc.
     ]) {
       parallel([
-        'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh')
-//        ,
+        'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
 //        'x-pack-intake-agent': {
 //          withEnv([
 //            'NODE_ENV=test' // Needed for jest tests only
@@ -18,19 +17,19 @@ kibanaPipeline(timeoutMinutes: 180) {
 //            workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh')()
 //          }
 //        }
-        ,
         'kibana-oss-agent'   : workers.functional(
           'kibana-oss-tests',
           { kibanaPipeline.buildOss() },
           ossProks()
         )
-//        ,
 //        'kibana-xpack-agent' : workers.functional(
 //          'kibana-xpack-tests',
 //          { kibanaPipeline.buildXpack() },
 //          xpackProks()
 //        ),
       ])
+
+
       workers.base(name: 'coverage-worker', label: 'tests-l', ramDisk: false, bootstrapped: false) {
         kibanaPipeline.downloadCoverageArtifacts()
 
@@ -80,18 +79,17 @@ kibanaPipeline(timeoutMinutes: 180) {
           "### About to Upload Code Coverage Static Site"
         )
         kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP)
-      }
+        sh 'tar -czf kibana-jest-coverage.tar.gz target/kibana-coverage/jest-combined/*'
+        kibanaPipeline.uploadCoverageArtifacts("coverage/jest-combined", 'kibana-jest-coverage.tar.gz')
+        sh 'tar -czf kibana-functional-coverage.tar.gz target/kibana-coverage/functional-combined/*'
+        kibanaPipeline.uploadCoverageArtifacts("coverage/functional-combined", 'kibana-functional-coverage.tar.gz')
+        sh 'tar -czf kibana-mocha-coverage.tar.gz target/kibana-coverage/mocha-combined/*'
+        kibanaPipeline.uploadCoverageArtifacts("coverage/mocha-combined", 'kibana-mocha-coverage.tar.gz')
 
-      sh 'tar -czf kibana-jest-coverage.tar.gz target/kibana-coverage/jest-combined/*'
-      kibanaPipeline.uploadCoverageArtifacts("coverage/jest-combined", 'kibana-jest-coverage.tar.gz')
-      sh 'tar -czf kibana-functional-coverage.tar.gz target/kibana-coverage/functional-combined/*'
-      kibanaPipeline.uploadCoverageArtifacts("coverage/functional-combined", 'kibana-functional-coverage.tar.gz')
-      sh 'tar -czf kibana-mocha-coverage.tar.gz target/kibana-coverage/mocha-combined/*'
-      kibanaPipeline.uploadCoverageArtifacts("coverage/mocha-combined", 'kibana-mocha-coverage.tar.gz')
+      }
     }
   }
-}
-kibanaPipeline.sendMail()
+  kibanaPipeline.sendMail()
 }
 
 def ossProks() {
