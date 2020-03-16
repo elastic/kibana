@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { useRouteMatch } from 'react-router-dom';
+import { useRouteMatch, Switch, Route } from 'react-router-dom';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { i18n } from '@kbn/i18n';
 import {
@@ -39,7 +39,7 @@ export function EPMHomePage() {
               defaultMessage: 'All packages',
             }),
             href: ALL_PACKAGES_URI,
-            isSelected: !tabId,
+            isSelected: tabId !== 'installed',
           },
           {
             id: 'installed_packages',
@@ -52,7 +52,14 @@ export function EPMHomePage() {
         ] as unknown) as EuiTabProps[]
       }
     >
-      {tabId === 'installed' ? <InstalledPackages /> : <AvailablePackages />}
+      <Switch>
+        <Route path={EPM_LIST_INSTALLED_PACKAGES_PATH}>
+          <InstalledPackages />
+        </Route>
+        <Route path={EPM_LIST_ALL_PACKAGES_PATH}>
+          <AvailablePackages />
+        </Route>
+      </Switch>
     </WithHeaderLayout>
   );
 }
