@@ -74,17 +74,6 @@ export async function setupMocha(lifecycle, log, config, providers) {
   filterSuitesByTags({
     log,
     mocha,
-    include: config
-      .get('suiteFiles.include')
-      .map(f => realpathSync(f).replace(REPO_ROOT + sep, '')),
-    exclude: config
-      .get('suiteFiles.exclude')
-      .map(f => realpathSync(f).replace(REPO_ROOT + sep, '')),
-  });
-
-  filterSuitesByTags({
-    log,
-    mocha,
     include: config.get('suiteTags.include').map(tag => tag.replace(/-\d+$/, '')),
     exclude: config.get('suiteTags.exclude').map(tag => tag.replace(/-\d+$/, '')),
   });
