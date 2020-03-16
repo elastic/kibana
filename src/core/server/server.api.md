@@ -2297,7 +2297,7 @@ export interface UiSettingsParams<T = unknown> {
     readonly?: boolean;
     requiresPageReload?: boolean;
     // (undocumented)
-    schema?: Type<T>;
+    schema: Type<T>;
     type?: UiSettingsType;
     // (undocumented)
     validation?: ImageValidation | StringValidation;

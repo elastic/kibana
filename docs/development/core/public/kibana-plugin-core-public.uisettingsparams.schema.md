@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-schema?: Type<T>;
+schema: Type<T>;
 ```
