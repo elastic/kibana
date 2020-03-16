@@ -17,16 +17,38 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
-import { registerRoutes } from './routes';
-import { indexPatternSavedObjectType } from '../saved_objects';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+} from '../../../core/server';
 
-export class IndexPatternsService implements Plugin<void> {
-  public setup(core: CoreSetup) {
-    core.savedObjects.registerType(indexPatternSavedObjectType);
+import { visualizationSavedObjectType } from './saved_objects';
 
-    registerRoutes(core.http);
+import { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
+
+export class VisualizationsPlugin
+  implements Plugin<VisualizationsPluginSetup, VisualizationsPluginStart> {
+  private readonly logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
   }
 
-  public start() {}
+  public setup(core: CoreSetup) {
+    this.logger.debug('visualizations: Setup');
+
+    core.savedObjects.registerType(visualizationSavedObjectType);
+
+    return {};
+  }
+
+  public start(core: CoreStart) {
+    this.logger.debug('visualizations: Started');
+    return {};
+  }
+
+  public stop() {}
 }
