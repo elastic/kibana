@@ -5,7 +5,6 @@
  */
 
 import React, { useContext } from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
 import { AlertsContextProvider, AlertAdd } from '../../../../../triggers_actions_ui/public';
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
