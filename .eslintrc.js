@@ -142,7 +142,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/ml/**/*.{js,ts,tsx}'],
+      files: ['x-pack/plugins/ml/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
       },
