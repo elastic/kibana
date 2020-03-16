@@ -22,7 +22,7 @@ import { asPrettyString } from '../utils';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
-import { shortenDottedString } from '../../utils';
+import { shortenDottedString } from '../../../../kibana_utils/common';
 
 const TRANSFORM_OPTIONS = [
   {
