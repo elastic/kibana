@@ -9,5 +9,5 @@ import { StatesIndexStatus, StatesIndexStatusType } from '../../../common/runtim
 import { apiService } from './utils';
 
 export const fetchIndexStatus = async (): Promise<StatesIndexStatus> => {
-  return await apiService.get(API_URLS.INDEX_STATUS, null, StatesIndexStatusType);
+  return await apiService.get(API_URLS.INDEX_STATUS, undefined, StatesIndexStatusType);
 };
