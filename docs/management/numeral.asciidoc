@@ -19,7 +19,7 @@ The numeral pattern syntax expresses:
 Number of decimal places:: The `.` character turns on the option to show decimal
 places using a locale-specific decimal separator, most often `.` or `,`.
 To add trailing zeroes such as `5.00`, use a pattern like `0.00`.
-To have optional zeroes, use the `[]` characters. Examples below.
+To have optional zeroes, use the `[]` characters.
 Thousands separator:: The thousands separator `,` turns on the option to group
 thousands using a locale-specific separator. The separator is most often `,` or `.`,
 and sometimes ` `.
