@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { EuiButtonIcon, EuiToolTip, EuiText } from '@elastic/eui';
+import { EuiButton, EuiToolTip, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverFieldDetails, Field } from './discover_field_details';
 import { FieldIcon } from '../../../../../../../../plugins/kibana_react/public';
@@ -42,10 +42,10 @@ export function DiscoverField({
   getDetails,
 }: Props) {
   const addLabel = i18n.translate('kbn.discover.fieldChooser.discoverField.addButtonLabel', {
-    defaultMessage: 'Add to selected fields',
+    defaultMessage: 'Add',
   });
   const removeLabel = i18n.translate('kbn.discover.fieldChooser.discoverField.removeButtonLabel', {
-    defaultMessage: 'Remove from selected fields',
+    defaultMessage: 'Remove',
   });
 
   const toggleDisplay = (f: Field) => {
@@ -60,7 +60,9 @@ export function DiscoverField({
   return (
     <div className={`${showDetails ? 'dscSidebarItemExpanded' : ''}`}>
       <div
-        className="dscSidebarField sidebar-item-title dscSidebarItem"
+        className={`dscSidebarField sidebar-item-title dscSidebarItem ${
+          showDetails ? 'dscSidebarItem--active' : ''
+        }`}
         tabIndex={0}
         onClick={() => onShowDetails(!showDetails, field, true)}
         onKeyPress={() => onShowDetails(!showDetails, field, true)}
@@ -82,34 +84,33 @@ export function DiscoverField({
         </span>
         <span>
           {field.name !== '_source' && !field.display && (
-            <EuiToolTip position="top" content={addLabel}>
-              <EuiButtonIcon
-                className="dscSidebarItem__action"
-                iconType="plusInCircleFilled"
-                onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-                  ev.preventDefault();
-                  ev.stopPropagation();
-                  toggleDisplay(field);
-                }}
-                data-test-subj={`fieldToggle-${field.name}`}
-                aria-label={addLabel}
-              />
-            </EuiToolTip>
+            <EuiButton
+              fill
+              size="s"
+              className="dscSidebarItem__action"
+              onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                toggleDisplay(field);
+              }}
+              data-test-subj={`fieldToggle-${field.name}`}
+            >
+              {addLabel}
+            </EuiButton>
           )}
           {field.name !== '_source' && field.display && (
-            <EuiToolTip position="top" content={removeLabel}>
-              <EuiButtonIcon
-                className="dscSidebarItem__action"
-                iconType="minusInCircleFilled"
-                onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-                  ev.preventDefault();
-                  ev.stopPropagation();
-                  toggleDisplay(field);
-                }}
-                data-test-subj={`fieldToggle-${field.name}`}
-                aria-label={removeLabel}
-              />
-            </EuiToolTip>
+            <EuiButton
+              color="danger"
+              className="dscSidebarItem__action"
+              onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                toggleDisplay(field);
+              }}
+              data-test-subj={`fieldToggle-${field.name}`}
+            >
+              {removeLabel}
+            </EuiButton>
           )}
         </span>
       </div>

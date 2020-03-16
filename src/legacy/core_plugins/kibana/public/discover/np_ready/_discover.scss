@@ -109,32 +109,6 @@ discover-app {
   text-align: center;
 }
 
-/**
- * 1. Override sidebar-item-title styles.
- */
-.dscSidebarItem {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 0 !important; /* 1 */
-  padding-bottom: 0 !important; /* 1 */
-
-  &:hover,
-  &:focus {
-    .dscSidebarItem__action {
-      opacity: 1;
-    }
-  }
-}
-
-.dscSidebarItem--active {
-  background: shade($euiColorLightestShade, 5%);
-  color: $euiColorFullShade;
-  font-weight: bold;
-}
-
-
 .dscFieldSearch {
   padding: $euiSizeS;
 }
