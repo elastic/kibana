@@ -34,7 +34,7 @@ export interface EmbeddableInput {
   /**
    * Reserved key for `ui_actions` events.
    */
-  events?: unknown;
+  events?: Array<{ eventId: string }>;
 
   /**
    * List of action IDs that this embeddable should not render.

@@ -18,6 +18,7 @@
  */
 import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 import { Adapters, ViewMode } from '../types';
 import { IContainer } from '../containers';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
@@ -58,8 +59,12 @@ export abstract class Embeddable<
   // to update input when the parent changes.
   private parentSubscription?: Rx.Subscription;
 
+  private storageSubscription?: Rx.Subscription;
+
   // TODO: Rename to destroyed.
   private destoyed: boolean = false;
+
+  private storage = new EmbeddableActionStorage(this);
 
   private cachedDynamicActions?: UiActionsDynamicActionManager;
   public get dynamicActions(): UiActionsDynamicActionManager | undefined {
@@ -67,7 +72,7 @@ export abstract class Embeddable<
     if (!this.cachedDynamicActions) {
       this.cachedDynamicActions = new UiActionsDynamicActionManager({
         isCompatible: async ({ embeddable }: any) => embeddable.runtimeId === this.runtimeId,
-        storage: new EmbeddableActionStorage(this),
+        storage: this.storage,
         uiActions: this.params.uiActions,
       });
     }
@@ -112,6 +117,20 @@ export abstract class Embeddable<
         console.error(error);
         /* eslint-enable */
       });
+      this.storageSubscription = this.input$
+        .pipe(
+          distinctUntilChanged((a: TEmbeddableInput, b: TEmbeddableInput) => {
+            if (!!a.events !== !!b.events) return false;
+            if (!a.events || !b.events) return true;
+            if (a.events.length !== b.events.length) return false;
+            for (let i = 0; i < a.events.length; i++)
+              if (a.events[i].eventId !== b.events[i].eventId) return false;
+            return true;
+          })
+        )
+        .subscribe(() => {
+          this.storage.reload$.next();
+        });
     }
   }
 
@@ -199,6 +218,10 @@ export abstract class Embeddable<
         console.error(error);
         /* eslint-enable */
       });
+    }
+
+    if (this.storageSubscription) {
+      this.storageSubscription.unsubscribe();
     }
 
     if (this.parentSubscription) {

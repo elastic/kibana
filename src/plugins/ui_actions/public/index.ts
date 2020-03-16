@@ -32,6 +32,7 @@ export {
   ActionFactoryDefinition as UiActionsActionFactoryDefinition,
   ActionInternal as UiActionsActionInternal,
   ActionStorage as UiActionsActionStorage,
+  AbstractActionStorage as UiActionsAbstractActionStorage,
   createAction,
   DynamicActionManager,
   IncompatibleActionError,

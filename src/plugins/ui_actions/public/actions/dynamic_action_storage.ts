@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { SerializedAction } from './types';
 
 /**
@@ -47,4 +47,18 @@ export interface ActionStorage {
    * Triggered every time events changed in storage and should be re-loaded.
    */
   readonly reload$?: Observable<void>;
+}
+
+export abstract class AbstractActionStorage implements ActionStorage {
+  public readonly reload$: Observable<void> & Pick<Subject<void>, 'next'> = new Subject<void>();
+
+  public async count(): Promise<number> {
+    return (await this.list()).length;
+  }
+
+  abstract create(event: SerializedEvent): Promise<void>;
+  abstract update(event: SerializedEvent): Promise<void>;
+  abstract remove(eventId: string): Promise<void>;
+  abstract read(eventId: string): Promise<SerializedEvent>;
+  abstract list(): Promise<SerializedEvent[]>;
 }
