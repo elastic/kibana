@@ -6,7 +6,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { getNextTimeKey, getPreviousTimeKey, TimeKey } from '../../../../common/time';
+import { TimeKey } from '../../../../common/time';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { fetchLogEntriesHighlights } from './api/fetch_log_entries_highlights';
 import { LogEntry, LogEntriesHighlightsResponse } from '../../../../common/http_api';
