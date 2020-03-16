@@ -6,13 +6,13 @@
 
 import { chunk } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
-import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../../../../../../../legacy/plugins/ml/common/constants/new_job';
+import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../../../../../common/constants/new_job';
 import {
   Token,
   CategorizationAnalyzer,
   CategoryFieldExample,
-} from '../../../../../../../legacy/plugins/ml/common/types/categories';
-import { callWithRequestType } from '../../../../../../../legacy/plugins/ml/common/types/kibana';
+} from '../../../../../common/types/categories';
+import { callWithRequestType } from '../../../../../common/types/kibana';
 import { ValidationResults } from './validation_results';
 
 const CHUNK_SIZE = 100;

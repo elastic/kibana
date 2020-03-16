@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IndexPattern } from '../../../../../kibana_services';
-import { shortenDottedString } from '../../../../../../../../../../plugins/data/common/utils';
+import { IndexPattern, shortenDottedString } from '../../../../../kibana_services';
 
 export type SortOrder = [string, string];
 export interface ColumnProps {

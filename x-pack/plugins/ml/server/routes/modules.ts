@@ -5,20 +5,27 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { RequestHandlerContext } from 'kibana/server';
-import { DatafeedOverride, JobOverride } from '../../../../legacy/plugins/ml/common/types/modules';
+import { DatafeedOverride, JobOverride } from '../../common/types/modules';
 import { wrapError } from '../client/error_wrapper';
 import { DataRecognizer } from '../models/data_recognizer';
 import { getModuleIdParamSchema, setupModuleBodySchema } from './schemas/modules';
 import { RouteInitialization } from '../types';
 
 function recognize(context: RequestHandlerContext, indexPatternTitle: string) {
-  const dr = new DataRecognizer(context);
+  const dr = new DataRecognizer(
+    context.ml!.mlClient.callAsCurrentUser,
+    context.core.savedObjects.client
+  );
   return dr.findMatches(indexPatternTitle);
 }
 
 function getModule(context: RequestHandlerContext, moduleId: string) {
-  const dr = new DataRecognizer(context);
+  const dr = new DataRecognizer(
+    context.ml!.mlClient.callAsCurrentUser,
+    context.core.savedObjects.client
+  );
   if (moduleId === undefined) {
     return dr.listModules();
   } else {
@@ -40,7 +47,10 @@ function saveModuleItems(
   jobOverrides: JobOverride[],
   datafeedOverrides: DatafeedOverride[]
 ) {
-  const dr = new DataRecognizer(context);
+  const dr = new DataRecognizer(
+    context.ml!.mlClient.callAsCurrentUser,
+    context.core.savedObjects.client
+  );
   return dr.setupModuleItems(
     moduleId,
     prefix,
@@ -57,7 +67,10 @@ function saveModuleItems(
 }
 
 function dataRecognizerJobsExist(context: RequestHandlerContext, moduleId: string) {
-  const dr = new DataRecognizer(context);
+  const dr = new DataRecognizer(
+    context.ml!.mlClient.callAsCurrentUser,
+    context.core.savedObjects.client
+  );
   return dr.dataRecognizerJobsExist(moduleId);
 }
 

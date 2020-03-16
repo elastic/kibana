@@ -16,6 +16,9 @@ const initialState = (): AlertListState => {
     pageIndex: 0,
     total: 0,
     location: undefined,
+    searchBar: {
+      patterns: [],
+    },
   };
 };
 
@@ -48,6 +51,14 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
     return {
       ...state,
       alertDetails: action.payload,
+    };
+  } else if (action.type === 'serverReturnedSearchBarIndexPatterns') {
+    return {
+      ...state,
+      searchBar: {
+        ...state.searchBar,
+        patterns: action.payload,
+      },
     };
   }
 
