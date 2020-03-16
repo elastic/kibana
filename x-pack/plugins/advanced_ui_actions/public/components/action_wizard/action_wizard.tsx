@@ -172,14 +172,13 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
   }
 
   return (
-    <EuiFlexGroup gutterSize="m">
+    <EuiFlexGroup gutterSize="m" wrap={true}>
       {[...actionFactories]
         .sort((f1, f2) => f1.order - f2.order)
         .map(actionFactory => (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} key={actionFactory.id}>
             <EuiKeyPadMenuItemButton
               className="auaActionWizard__actionFactoryItem"
-              key={actionFactory.id}
               label={actionFactory.getDisplayName(context)}
               data-test-subj={TEST_SUBJ_ACTION_FACTORY_ITEM}
               onClick={() => onActionFactorySelected(actionFactory)}
