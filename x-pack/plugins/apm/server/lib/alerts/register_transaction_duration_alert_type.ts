@@ -36,17 +36,17 @@ const paramsSchema = schema.object({
   ])
 });
 
+const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionDuration];
+
 export function registerTransactionDurationAlertType({
   alerting,
   config$
 }: RegisterAlertParams) {
   alerting.registerType({
     id: AlertType.TransactionDuration,
-    name: ALERT_TYPES_CONFIG['apm.error_rate'].name,
-    actionGroups:
-      ALERT_TYPES_CONFIG[AlertType.TransactionDuration].actionGroups,
-    defaultActionGroupId:
-      ALERT_TYPES_CONFIG[AlertType.TransactionDuration].defaultActionGroupId,
+    name: alertTypeConfig.name,
+    actionGroups: alertTypeConfig.actionGroups,
+    defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
     validate: {
       params: paramsSchema
     },
@@ -130,9 +130,7 @@ export function registerTransactionDurationAlertType({
         const alertInstance = services.alertInstanceFactory(
           AlertType.TransactionDuration
         );
-        alertInstance.scheduleActions(
-          ALERT_TYPES_CONFIG['apm.transaction_duration'].defaultActionGroupId
-        );
+        alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId);
       }
 
       return {};

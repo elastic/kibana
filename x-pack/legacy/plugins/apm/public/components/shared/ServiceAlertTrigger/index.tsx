@@ -58,20 +58,13 @@ export function ServiceAlertTrigger(props: Props) {
 
   const params: Record<string, any> = {
     ...defaults,
-    serviceName: urlParams.serviceName!,
-    transactionType: urlParams.transactionType!
+    serviceName: urlParams.serviceName!
   };
 
   useEffect(() => {
-    setAlertProperty(
-      'name',
-      `${alertTypeName} | ${params.serviceName} | ${params.transactionType}`
-    );
-    setAlertProperty('tags', [
-      'apm',
-      `service.name:${params.serviceName}`,
-      `transaction.type:${params.transactionType}`
-    ]);
+    // we only want to run this on mount to set default values
+    setAlertProperty('name', `${alertTypeName} | ${params.serviceName}`);
+    setAlertProperty('tags', ['apm']);
     Object.keys(params).forEach(key => {
       setAlertParams(key, params[key]);
     });
@@ -86,6 +79,7 @@ export function ServiceAlertTrigger(props: Props) {
           <Field key={field.name} {...field} />
         ))}
       </EuiFlexGrid>
+      <EuiSpacer size="m" />
     </>
   );
 }

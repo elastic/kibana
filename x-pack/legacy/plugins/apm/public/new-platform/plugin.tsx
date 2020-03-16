@@ -41,7 +41,10 @@ import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { setReadonlyBadge } from './updateBadge';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { APMIndicesPermission } from '../components/app/APMIndicesPermission';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../../../../plugins/triggers_actions_ui/public';
+import {
+  TriggersAndActionsUIPublicPluginSetup,
+  AlertsContextProvider
+} from '../../../../../plugins/triggers_actions_ui/public';
 import { ErrorRateAlertTrigger } from '../components/shared/ErrorRateAlertTrigger';
 import { TransactionDurationAlertTrigger } from '../components/shared/TransactionDurationAlertTrigger';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
@@ -167,23 +170,32 @@ export class ApmPlugin
 
     ReactDOM.render(
       <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <KibanaContextProvider services={{ ...core, ...plugins }}>
-          <i18nCore.Context>
-            <Router history={history}>
-              <LocationProvider>
-                <MatchedRouteProvider routes={routes}>
-                  <UrlParamsProvider>
-                    <LoadingIndicatorProvider>
-                      <LicenseProvider>
-                        <App />
-                      </LicenseProvider>
-                    </LoadingIndicatorProvider>
-                  </UrlParamsProvider>
-                </MatchedRouteProvider>
-              </LocationProvider>
-            </Router>
-          </i18nCore.Context>
-        </KibanaContextProvider>
+        <AlertsContextProvider
+          value={{
+            http: core.http,
+            toastNotifications: core.notifications.toasts,
+            actionTypeRegistry: plugins.triggers_actions_ui.actionTypeRegistry,
+            alertTypeRegistry: plugins.triggers_actions_ui.alertTypeRegistry
+          }}
+        >
+          <KibanaContextProvider services={{ ...core, ...plugins }}>
+            <i18nCore.Context>
+              <Router history={history}>
+                <LocationProvider>
+                  <MatchedRouteProvider routes={routes}>
+                    <UrlParamsProvider>
+                      <LoadingIndicatorProvider>
+                        <LicenseProvider>
+                          <App />
+                        </LicenseProvider>
+                      </LoadingIndicatorProvider>
+                    </UrlParamsProvider>
+                  </MatchedRouteProvider>
+                </LocationProvider>
+              </Router>
+            </i18nCore.Context>
+          </KibanaContextProvider>
+        </AlertsContextProvider>
       </ApmPluginContext.Provider>,
       document.getElementById(REACT_APP_ROOT_ID)
     );

@@ -14,8 +14,7 @@ import {
 } from '../../../typings/elasticsearch';
 import {
   PROCESSOR_EVENT,
-  SERVICE_NAME,
-  TRANSACTION_TYPE
+  SERVICE_NAME
 } from '../../../common/elasticsearch_fieldnames';
 import { AlertingPlugin } from '../../../../alerting/server';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
@@ -28,10 +27,11 @@ interface RegisterAlertParams {
 
 const paramsSchema = schema.object({
   serviceName: schema.string(),
-  transactionType: schema.string(),
   window: schema.string(),
   threshold: schema.number()
 });
+
+const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.ErrorRate];
 
 export function registerErrorRateAlertType({
   alerting,
@@ -39,11 +39,9 @@ export function registerErrorRateAlertType({
 }: RegisterAlertParams) {
   alerting.registerType({
     id: AlertType.ErrorRate,
-    name: ALERT_TYPES_CONFIG['apm.error_rate'].name,
-    actionGroups:
-      ALERT_TYPES_CONFIG[AlertType.TransactionDuration].actionGroups,
-    defaultActionGroupId:
-      ALERT_TYPES_CONFIG[AlertType.TransactionDuration].defaultActionGroupId,
+    name: alertTypeConfig.name,
+    actionGroups: alertTypeConfig.actionGroups,
+    defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
     validate: {
       params: paramsSchema
     },
@@ -81,11 +79,6 @@ export function registerErrorRateAlertType({
                   term: {
                     [SERVICE_NAME]: alertParams.serviceName
                   }
-                },
-                {
-                  term: {
-                    [TRANSACTION_TYPE]: alertParams.transactionType
-                  }
                 }
               ]
             }
@@ -105,9 +98,7 @@ export function registerErrorRateAlertType({
         const alertInstance = services.alertInstanceFactory(
           AlertType.ErrorRate
         );
-        alertInstance.scheduleActions(
-          ALERT_TYPES_CONFIG['apm.error_rate'].defaultActionGroupId
-        );
+        alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId);
       }
 
       return {};

@@ -13,6 +13,8 @@ import {
 } from '../../../../../../../plugins/apm/common/alert_types';
 import { DurationField } from '../ServiceAlertTrigger/DurationField';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 
 interface Params {
   window: string;
@@ -31,7 +33,38 @@ interface Props {
 export function TransactionDurationAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
 
+  const { urlParams } = useUrlParams();
+
+  const transactionTypes = useServiceTransactionTypes(urlParams);
+
   const fields = [
+    {
+      name: 'transactionType',
+      title: i18n.translate(
+        'xpack.apm.transactionDurationAlertTrigger.setTransactionType',
+        {
+          defaultMessage: 'Set transaction type'
+        }
+      ),
+      field: (
+        <EuiSelect
+          value={alertParams.transactionType}
+          options={transactionTypes.map(key => {
+            return {
+              text: key,
+              value: key
+            };
+          })}
+          onChange={e =>
+            setAlertParams(
+              'transactionType',
+              e.target.value as Params['transactionType']
+            )
+          }
+          compressed
+        />
+      )
+    },
     {
       name: 'type',
       title: i18n.translate(
@@ -98,6 +131,10 @@ export function TransactionDurationAlertTrigger(props: Props) {
     }
   ];
 
+  if (!transactionTypes.length) {
+    return null;
+  }
+
   return (
     <ServiceAlertTrigger
       alertTypeName={ALERT_TYPES_CONFIG['apm.transaction_duration'].name}
@@ -105,7 +142,8 @@ export function TransactionDurationAlertTrigger(props: Props) {
       defaults={{
         threshold: 1500,
         aggregationType: 'avg',
-        window: '5m'
+        window: '5m',
+        transactionType: transactionTypes[0]
       }}
       setAlertParams={setAlertParams}
       setAlertProperty={setAlertProperty}

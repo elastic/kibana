@@ -86,6 +86,7 @@ export const apm: LegacyPluginInitializer = kibana => {
         navLinkId: 'apm',
         app: ['apm', 'kibana'],
         catalogue: ['apm'],
+        // see x-pack/plugins/features/common/feature_kibana_privileges.ts
         privileges: {
           all: {
             api: ['apm', 'apm_write', 'actions-read', 'alerting-read'],

@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import {
   parseEsInterval,
   ParsedInterval
-} from '../../../../../../../../../src/legacy/core_plugins/data/common';
+} from '../../../../../../../../../src/plugins/data/common';
 import { getTimeUnitLabel } from '../../../../../../../../plugins/triggers_actions_ui/public';
 import { TIME_UNITS } from '../../../../../../../../plugins/triggers_actions_ui/public';
 
@@ -31,10 +31,14 @@ export function DurationField(props: Props) {
   try {
     parsedInterval = parseEsInterval(duration);
   } catch (err) {
-    //
+    // this will cause an error when the user clears the number input
   }
 
   const displayedUnit = useRef(parsedInterval?.unit);
+  // we use a ref that we only update when we've succesfully parsed
+  // the interval. this allows the user to clear the number input
+  // without us having to fill it with a 0 in order for it to be
+  // succesfully parsed.
 
   if (parsedInterval?.unit) {
     displayedUnit.current = parsedInterval?.unit;
@@ -48,13 +52,13 @@ export function DurationField(props: Props) {
   ];
 
   return (
-    <EuiFlexGroup gutterSize="none">
+    <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
         <EuiFieldNumber
           value={parsedInterval?.value ?? ''}
           onChange={e => onChange(`${e.target.value}${displayedUnit.current}`)}
           prepend={i18n.translate(
-            'xpack.apm.serviceAlertTrigger.durationField..last',
+            'xpack.apm.serviceAlertTrigger.durationField.last',
             {
               defaultMessage: 'Last'
             }

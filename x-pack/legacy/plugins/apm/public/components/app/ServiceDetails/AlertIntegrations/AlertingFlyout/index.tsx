@@ -5,11 +5,7 @@
  */
 import React from 'react';
 import { AlertType } from '../../../../../../../../../plugins/apm/common/alert_types';
-import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
-import {
-  AlertsContextProvider,
-  AlertAdd
-} from '../../../../../../../../../plugins/triggers_actions_ui/public';
+import { AlertAdd } from '../../../../../../../../../plugins/triggers_actions_ui/public';
 
 type AlertAddProps = React.ComponentProps<typeof AlertAdd>;
 
@@ -22,27 +18,13 @@ interface Props {
 export function AlertingFlyout(props: Props) {
   const { addFlyoutVisible, setAddFlyoutVisibility, alertType } = props;
 
-  const plugin = useApmPluginContext();
-
-  return (
-    <AlertsContextProvider
-      value={{
-        http: plugin.core.http,
-        toastNotifications: plugin.core.notifications.toasts,
-        actionTypeRegistry:
-          plugin.plugins.triggers_actions_ui.actionTypeRegistry,
-        alertTypeRegistry: plugin.plugins.triggers_actions_ui.alertTypeRegistry
-      }}
-    >
-      {alertType ? (
-        <AlertAdd
-          addFlyoutVisible={addFlyoutVisible}
-          setAddFlyoutVisibility={setAddFlyoutVisibility}
-          consumer="apm"
-          alertTypeId={alertType}
-          canChangeTrigger={false}
-        />
-      ) : null}
-    </AlertsContextProvider>
-  );
+  return alertType ? (
+    <AlertAdd
+      addFlyoutVisible={addFlyoutVisible}
+      setAddFlyoutVisibility={setAddFlyoutVisibility}
+      consumer="apm"
+      alertTypeId={alertType}
+      canChangeTrigger={false}
+    />
+  ) : null;
 }
