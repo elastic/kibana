@@ -27,8 +27,6 @@ export {
   ACTION_ADD_PANEL,
   AddPanelAction,
   ACTION_APPLY_FILTER,
-  APPLY_FILTER_TRIGGER,
-  applyFilterTrigger,
   Container,
   ContainerInput,
   ContainerOutput,
@@ -62,8 +60,6 @@ export {
   PanelNotFoundError,
   PanelState,
   PropertySpec,
-  VALUE_CLICK_TRIGGER,
-  valueClickTrigger,
   ViewMode,
   withEmbeddableSubscription,
 } from './lib';
