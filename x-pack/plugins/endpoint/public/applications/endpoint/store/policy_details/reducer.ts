@@ -28,10 +28,24 @@ const initialPolicyDetailsState = (): PolicyDetailsState => {
         },
         eventing: {
           process: true,
+          network: true,
         },
       },
-      mac: {},
-      linux: {},
+      mac: {
+        malware: {
+          mode: 'detect',
+        },
+        eventing: {
+          process: true,
+          network: true,
+        },
+      },
+      linux: {
+        eventing: {
+          process: true,
+          network: true,
+        },
+      },
     },
     isLoading: false,
   };

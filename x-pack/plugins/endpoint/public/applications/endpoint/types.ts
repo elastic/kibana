@@ -94,15 +94,38 @@ export interface PolicyDetailsState {
 
 export interface PolicyDetailsConfig {
   windows: WindowsPolicyConfig;
-  mac: {};
-  linux: {};
+  mac: MacPolicyConfig;
+  linux: LinuxPolicyConfig;
 }
-
-// export type PolicyConfig = Record<'windows' | 'mac' | 'linux', WindowsPolicyConfig | {}>
 
 export interface WindowsPolicyConfig {
   malware: MalwareConfig;
   eventing: WindowsEventingConfig;
+}
+
+export interface MacPolicyConfig {
+  malware: MalwareConfig;
+  eventing: MacEventingConfig;
+}
+
+export interface LinuxPolicyConfig {
+  eventing: LinuxEventingConfig;
+}
+
+export enum OS {
+  windows = 'windows',
+  mac = 'mac',
+  linux = 'linux',
+}
+
+export enum Protections {
+  malware = 'malware',
+  eventing = 'eventing',
+}
+
+export enum EventingFields {
+  process = 'process',
+  network = 'network',
 }
 
 export interface MalwareConfig {
@@ -111,6 +134,17 @@ export interface MalwareConfig {
 
 export interface WindowsEventingConfig {
   process: boolean;
+  network: boolean;
+}
+
+export interface MacEventingConfig {
+  process: boolean;
+  network: boolean;
+}
+
+export interface LinuxEventingConfig {
+  process: boolean;
+  network: boolean;
 }
 
 export interface GlobalState {
