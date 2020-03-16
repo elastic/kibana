@@ -20,7 +20,7 @@
 import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
-} from '../../../../../../../plugins/embeddable/public';
+} from '../../../../../../../plugins/ui_actions/public';
 
 export interface VisEventToTrigger {
   ['brush']: typeof SELECT_RANGE_TRIGGER;
