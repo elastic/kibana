@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-let esBase: () => string;
+let esBase: string;
 
 export const setDocLinks = ({
   DOC_LINK_VERSION,

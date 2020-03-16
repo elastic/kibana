@@ -12,18 +12,18 @@ export function SectionError(props) {
   const data = error.body ? error.body : error;
   const {
     error: errorString,
-    cause, // wrapEsError() on the server add a "cause" array
+    attributes, // wrapEsError() on the server add a "cause" array
     message,
   } = data;
 
   return (
     <EuiCallOut title={title} color="danger" iconType="alert" {...rest}>
       <div>{message || errorString}</div>
-      {cause && (
+      {attributes && attributes.cause && (
         <Fragment>
           <EuiSpacer size="m" />
           <ul>
-            {cause.map((message, i) => (
+            {attributes.cause.map((message, i) => (
               <li key={i}>{message}</li>
             ))}
           </ul>

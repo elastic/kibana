@@ -16,24 +16,18 @@ describe('wrap_es_error', () => {
       originalError.response = '{}';
     });
 
-    it('should return a Boom object', () => {
+    it('should return the correct object', () => {
       const wrappedError = wrapEsError(originalError);
 
-      expect(wrappedError.isBoom).to.be(true);
+      expect(wrappedError.statusCode).to.be(originalError.statusCode);
+      expect(wrappedError.message).to.be(originalError.message);
     });
 
-    it('should return the correct Boom object', () => {
-      const wrappedError = wrapEsError(originalError);
-
-      expect(wrappedError.output.statusCode).to.be(originalError.statusCode);
-      expect(wrappedError.output.payload.message).to.be(originalError.message);
-    });
-
-    it('should return the correct Boom object with custom message', () => {
+    it('should return the correct object with custom message', () => {
       const wrappedError = wrapEsError(originalError, { 404: 'No encontrado!' });
 
-      expect(wrappedError.output.statusCode).to.be(originalError.statusCode);
-      expect(wrappedError.output.payload.message).to.be('No encontrado!');
+      expect(wrappedError.statusCode).to.be(originalError.statusCode);
+      expect(wrappedError.message).to.be('No encontrado!');
     });
   });
 });

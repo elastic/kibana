@@ -11,10 +11,15 @@ import { isEsError } from '../lib/is_es_error';
 
 export const mapErrorToKibanaHttpResponse = (err: any) => {
   if (isEsError(err)) {
-    const { statusCode, message } = wrapEsError(err);
+    const { statusCode, message, body } = wrapEsError(err);
     return kibanaResponseFactory.customError({
       statusCode,
-      body: message,
+      body: {
+        message,
+        attributes: {
+          cause: body?.cause,
+        },
+      },
     });
   }
   return kibanaResponseFactory.internalError(err);

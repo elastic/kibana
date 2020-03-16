@@ -20,9 +20,10 @@ export const setBreadcrumbSetter = ({
     chrome: any;
     MANAGEMENT_BREADCRUMB: ChromeBreadcrumb;
   };
-}): ManagementAppMountParams['setBreadcrumbs'] => {
-  setBreadcrumbs = (crumbs: ChromeBreadcrumb) =>
+}): void => {
+  setBreadcrumbs = (crumbs: ChromeBreadcrumb[]) => {
     __LEGACY.chrome.breadcrumbs.set([__LEGACY.MANAGEMENT_BREADCRUMB, ...crumbs]);
+  };
 };
 
 export const listBreadcrumb = {

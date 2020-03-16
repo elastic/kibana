@@ -26,6 +26,7 @@ interface PluginDependencies {
 }
 
 export class CrossClusterReplicationUIPlugin implements Plugin {
+  // @ts-ignore
   constructor(private readonly ctx: PluginInitializerContext) {}
   setup({ http, notifications, fatalErrors }: CoreSetup, deps: PluginDependencies) {
     setHttpClient(http);

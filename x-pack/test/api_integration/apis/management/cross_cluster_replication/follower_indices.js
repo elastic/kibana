@@ -47,13 +47,13 @@ export default function({ getService }) {
         payload.remoteCluster = 'unknown-cluster';
 
         const { body } = await createFollowerIndex(undefined, payload).expect(404);
-        expect(body.cause[0]).to.contain('no such remote cluster');
+        expect(body.attributes.cause[0]).to.contain('no such remote cluster');
       });
 
       it('should throw a 404 error trying to follow an unknown index', async () => {
         const payload = getFollowerIndexPayload();
         const { body } = await createFollowerIndex(undefined, payload).expect(404);
-        expect(body.cause[0]).to.contain('no such index');
+        expect(body.attributes.cause[0]).to.contain('no such index');
       });
 
       it('should create a follower index that follows an existing remote index', async () => {
@@ -75,7 +75,7 @@ export default function({ getService }) {
         const name = getRandomString();
         const { body } = await getFollowerIndex(name).expect(404);
 
-        expect(body.cause[0]).to.contain('no such index');
+        expect(body.attributes.cause[0]).to.contain('no such index');
       });
 
       it('should return a follower index that was created', async () => {

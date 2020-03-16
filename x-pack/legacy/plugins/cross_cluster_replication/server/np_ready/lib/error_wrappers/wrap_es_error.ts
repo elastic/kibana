@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-
-function extractCausedByChain(causedBy = {}, accumulator = []) {
-  const { reason, caused_by } = causedBy; // eslint-disable-line camelcase
+function extractCausedByChain(
+  causedBy: Record<string, any> = {},
+  accumulator: string[] = []
+): string[] {
+  const { reason, caused_by } = causedBy; // eslint-disable-line @typescript-eslint/camelcase
 
   if (reason) {
     accumulator.push(reason);
   }
 
-  // eslint-disable-next-line camelcase
+  // eslint-disable-next-line @typescript-eslint/camelcase
   if (caused_by) {
     return extractCausedByChain(caused_by, accumulator);
   }
@@ -26,34 +27,39 @@ function extractCausedByChain(causedBy = {}, accumulator = []) {
  *
  * @param err Object Error thrown by ES JS client
  * @param statusCodeToMessageMap Object Optional map of HTTP status codes => error messages
- * @return Object Boom error response
  */
-export function wrapEsError(err, statusCodeToMessageMap = {}) {
+export function wrapEsError(
+  err: any,
+  statusCodeToMessageMap: Record<string, string> = {}
+): { message: string; body?: { cause?: string[] }; statusCode: number } {
   const { statusCode, response } = err;
 
   const {
     error: {
-      root_cause = [], // eslint-disable-line camelcase
-      caused_by, // eslint-disable-line camelcase
+      root_cause = [], // eslint-disable-line @typescript-eslint/camelcase
+      caused_by = undefined, // eslint-disable-line @typescript-eslint/camelcase
     } = {},
   } = JSON.parse(response);
 
   // If no custom message if specified for the error's status code, just
   // wrap the error as a Boom error response and return it
   if (!statusCodeToMessageMap[statusCode]) {
-    const boomError = Boom.boomify(err, { statusCode });
-
     // The caused_by chain has the most information so use that if it's available. If not then
     // settle for the root_cause.
     const causedByChain = extractCausedByChain(caused_by);
     const defaultCause = root_cause.length ? extractCausedByChain(root_cause[0]) : undefined;
 
-    boomError.output.payload.cause = causedByChain.length ? causedByChain : defaultCause;
-    return boomError;
+    return {
+      message: err.message,
+      statusCode,
+      body: {
+        cause: causedByChain.length ? causedByChain : defaultCause,
+      },
+    };
   }
 
   // Otherwise, use the custom message to create a Boom error response and
   // return it
   const message = statusCodeToMessageMap[statusCode];
-  return new Boom(message, { statusCode });
+  return { message, statusCode };
 }
