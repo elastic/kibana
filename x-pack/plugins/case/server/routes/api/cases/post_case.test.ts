@@ -27,7 +27,7 @@ describe('POST cases', () => {
       body: {
         description: 'This is a brand new case of a bad meanie defacing data',
         title: 'Super Bad Security Issue',
-        state: 'open',
+        status: 'open',
         tags: ['defacement'],
       },
     });
@@ -50,7 +50,7 @@ describe('POST cases', () => {
       body: {
         description: 'Throw an error',
         title: 'Super Bad Security Issue',
-        state: 'open',
+        status: 'open',
         tags: ['error'],
       },
     });
@@ -74,7 +74,7 @@ describe('POST cases', () => {
       body: {
         description: 'This is a brand new case of a bad meanie defacing data',
         title: 'Super Bad Security Issue',
-        state: 'open',
+        status: 'open',
         tags: ['defacement'],
       },
     });
