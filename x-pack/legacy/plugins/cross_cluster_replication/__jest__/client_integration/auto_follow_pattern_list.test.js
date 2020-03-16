@@ -4,20 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import '../../public/np_ready/app/services/breadcrumbs.mock';
 import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
 
 import { getAutoFollowPatternClientMock } from '../../fixtures/auto_follow_pattern';
 
 jest.mock('ui/new_platform');
-
-jest.mock('ui/chrome', () => ({
-  addBasePath: () => 'api/cross_cluster_replication',
-  breadcrumbs: { set: () => {} },
-  getUiSettingsClient: () => ({
-    get: x => x,
-    getUpdate$: () => ({ subscribe: jest.fn() }),
-  }),
-}));
 
 const { setup } = pageHelpers.autoFollowPatternList;
 

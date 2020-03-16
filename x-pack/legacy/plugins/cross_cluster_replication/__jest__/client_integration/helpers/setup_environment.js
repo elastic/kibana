@@ -11,10 +11,11 @@ import { setHttpClient } from '../../../public/np_ready/app/services/api';
 import { init as initHttpRequests } from './http_requests';
 
 export const setupEnvironment = () => {
-  // Mock Angular $q
-  const $q = { defer: () => ({ resolve() {} }) };
-  // axios has a $http like interface so using it to simulate $http
-  setHttpClient(axios.create({ adapter: axiosXhrAdapter }), $q);
+  // axios has a similar interface to HttpSetup, but we
+  // flatten out the response.
+  const client = axios.create({ adapter: axiosXhrAdapter });
+  client.interceptors.response.use(({ data }) => data);
+  setHttpClient(client);
 
   const { server, httpRequestsMockHelpers } = initHttpRequests();
 

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import '../../public/np_ready/app/services/breadcrumbs.mock';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { RemoteClustersFormField } from '../../public/np_ready/app/components';
 
