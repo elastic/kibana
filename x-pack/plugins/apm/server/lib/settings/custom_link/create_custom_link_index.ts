@@ -31,7 +31,12 @@ const mappings: Mappings = {
       type: 'date'
     },
     label: {
-      type: 'text'
+      type: 'text',
+      fields: {
+        keyword: {
+          type: 'keyword'
+        }
+      }
     },
     url: {
       type: 'keyword'

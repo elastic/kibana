@@ -1,0 +1,72 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+import React from 'react';
+import {
+  EuiPopoverTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
+import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
+import { CustomLink } from '../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
+import { CustomLinkSection } from './CustomLinkSection';
+import { ManageCustomLink } from './ManageCustomLink';
+import { px } from '../../../../style/variables';
+
+const ScrollableContainer = styled.div`
+  max-height: ${px(535)};
+  overflow: scroll;
+`;
+
+export const CustomLinkPopover = ({
+  customLinks,
+  onCreateCustomLinkClick,
+  onClose,
+  transaction
+}: {
+  customLinks: CustomLink[];
+  onCreateCustomLinkClick: () => void;
+  onClose: () => void;
+  transaction: Transaction;
+}) => {
+  return (
+    <>
+      <EuiPopoverTitle>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiButtonEmpty
+              color="text"
+              size="xs"
+              onClick={onClose}
+              iconType="arrowLeft"
+              style={{ fontWeight: 'bold' }}
+            >
+              {i18n.translate(
+                'xpack.apm.transactionActionMenu.customLink.popover.title',
+                {
+                  defaultMessage: 'Custom links'
+                }
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ManageCustomLink
+              onCreateCustomLinkClick={onCreateCustomLinkClick}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPopoverTitle>
+      <ScrollableContainer>
+        <CustomLinkSection
+          customLinks={customLinks}
+          transaction={transaction}
+        />
+      </ScrollableContainer>
+    </>
+  );
+};

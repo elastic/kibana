@@ -37,7 +37,14 @@ export async function listCustomLinks({
         bool: {
           filter: esFilters
         }
-      }
+      },
+      sort: [
+        {
+          'label.keyword': {
+            order: 'asc'
+          }
+        }
+      ]
     }
   };
   const resp = await internalClient.search<CustomLink>(params);

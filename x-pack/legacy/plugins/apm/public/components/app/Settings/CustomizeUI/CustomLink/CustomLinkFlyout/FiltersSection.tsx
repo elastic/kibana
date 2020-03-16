@@ -89,7 +89,7 @@ export const FiltersSection = ({
           <EuiFlexGroup key={filterId} gutterSize="s" alignItems="center">
             <EuiFlexItem>
               <EuiSelect
-                data-testid={filterId}
+                data-test-subj={filterId}
                 id={filterId}
                 fullWidth
                 options={selectOptions}
@@ -114,7 +114,7 @@ export const FiltersSection = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFieldText
-                data-testid={`value-${idx}`}
+                data-test-subj={`value-${idx}`}
                 fullWidth
                 placeholder={i18n.translate(
                   'xpack.apm.settings.customizeUI.customLink.flyOut.filters.defaultOption.value',

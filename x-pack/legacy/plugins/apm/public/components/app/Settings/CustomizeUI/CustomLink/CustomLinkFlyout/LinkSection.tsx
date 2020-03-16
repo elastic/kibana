@@ -125,7 +125,7 @@ export const LinkSection = ({
               fullWidth
               value={field.value}
               onChange={e => field.onChange(e.target.value)}
-              data-testid={field.name}
+              data-test-subj={field.name}
             />
           </EuiFormRow>
         );

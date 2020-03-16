@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import { Transaction } from '../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
+import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 
 /*
  * Matches any string between {{}}.
@@ -30,7 +30,7 @@ const REGEX = /\{{(.*?)\}}/;
  * @param url
  * @param transaction
  */
-export function replaceVariableInUrl(url: string, transaction?: Transaction) {
+export function replaceVariablesInUrl(url: string, transaction?: Transaction) {
   while (REGEX.test(url)) {
     const matched = REGEX.exec(url);
     if (matched) {

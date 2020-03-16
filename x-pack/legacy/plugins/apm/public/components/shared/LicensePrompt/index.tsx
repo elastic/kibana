@@ -21,7 +21,7 @@ export const LicensePrompt = ({ text }: Props) => {
   return (
     <EuiEmptyPrompt
       iconType="iInCircle"
-      iconColor=""
+      iconColor="subdued"
       title={
         <h2>
           {i18n.translate('xpack.apm.license.title', {
