@@ -5,4 +5,3 @@
  */
 
 import './register_routes';
-import './extend_index_management';
