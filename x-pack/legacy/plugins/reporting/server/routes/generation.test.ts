@@ -77,7 +77,7 @@ test(`returns 400 if there are no job params`, async () => {
   `);
 });
 
-test(`returns 400 if job params is empty`, async () => {
+test(`returns 400 if job params is invalid`, async () => {
   registerJobGenerationRoutes(
     mockReportingPlugin,
     (mockServer as unknown) as ServerFacade,
