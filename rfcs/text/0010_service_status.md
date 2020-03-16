@@ -113,10 +113,6 @@ interface CoreStatus {
   uiSettings: ServiceStatus;
   metrics: ServiceStatus;
 }
-
-// Types that specify valid JSON values.
-type JSONValue = string | number | boolean | null | JSONValue[] | JSONObject;
-type JSONObject = Record<string, JSONValue>;
 ```
 
 ### Plugin API
