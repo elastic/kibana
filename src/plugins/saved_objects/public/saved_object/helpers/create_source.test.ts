@@ -17,12 +17,10 @@
  * under the License.
  */
 
-jest.mock('./confirm_modal_promise');
-
 import { SavedObjectAttributes, SavedObjectsCreateOptions, OverlayStart } from 'kibana/public';
 import { SavedObjectsClientContract } from '../../../../../core/public';
 import { saveWithConfirmation } from './create_source';
-import { confirmModalPromise } from './confirm_modal_promise';
+import * as deps from './confirm_modal_promise';
 import { OVERWRITE_REJECTED } from '../../constants';
 
 describe('saveWithConfirmation', () => {
@@ -38,6 +36,7 @@ describe('saveWithConfirmation', () => {
 
   beforeEach(() => {
     savedObjectsClient.create = jest.fn();
+    jest.spyOn(deps, 'confirmModalPromise').mockReturnValue(Promise.resolve({} as any));
   });
 
   test('should call create of savedObjectsClient', async () => {
@@ -50,13 +49,14 @@ describe('saveWithConfirmation', () => {
   });
 
   test('should call confirmModalPromise when such record exists', async () => {
-    savedObjectsClient.create.mockImplementation((type, src, { overwrite }) =>
-      overwrite ? Promise.resolve() : Promise.reject({ res: { status: 409 } })
-    );
-    confirmModalPromise.mockReturnValue(Promise.resolve());
+    savedObjectsClient.create = jest
+      .fn()
+      .mockImplementation((type, src, opt) =>
+        opt && opt.overwrite ? Promise.resolve({} as any) : Promise.reject({ res: { status: 409 } })
+      );
 
     await saveWithConfirmation(source, savedObject, options, { savedObjectsClient, overlays });
-    expect(confirmModalPromise).toHaveBeenCalledWith(
+    expect(deps.confirmModalPromise).toHaveBeenCalledWith(
       expect.any(String),
       expect.any(String),
       expect.any(String),
@@ -65,13 +65,11 @@ describe('saveWithConfirmation', () => {
   });
 
   test('should call create of savedObjectsClient when overwriting confirmed', async () => {
-    savedObjectsClient.create.mockImplementation((type, src, { overwrite }) => {
-      if (overwrite) {
-        return Promise.resolve();
-      }
-      return Promise.reject({ res: { status: 409 } });
-    });
-    confirmModalPromise.mockReturnValue(Promise.resolve());
+    savedObjectsClient.create = jest
+      .fn()
+      .mockImplementation((type, src, opt) =>
+        opt && opt.overwrite ? Promise.resolve({} as any) : Promise.reject({ res: { status: 409 } })
+      );
 
     await saveWithConfirmation(source, savedObject, options, { savedObjectsClient, overlays });
     expect(savedObjectsClient.create).toHaveBeenLastCalledWith(savedObject.getEsType(), source, {
@@ -81,8 +79,8 @@ describe('saveWithConfirmation', () => {
   });
 
   test('should reject when overwriting denied', async () => {
-    savedObjectsClient.create.mockReturnValue(Promise.reject({ res: { status: 409 } }));
-    confirmModalPromise.mockReturnValue(Promise.reject());
+    savedObjectsClient.create = jest.fn().mockReturnValue(Promise.reject({ res: { status: 409 } }));
+    jest.spyOn(deps, 'confirmModalPromise').mockReturnValue(Promise.reject());
 
     expect.assertions(1);
     await expect(

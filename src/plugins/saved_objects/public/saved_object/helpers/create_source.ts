@@ -18,7 +18,12 @@
  */
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectAttributes, SavedObjectsCreateOptions } from 'kibana/public';
+import {
+  SavedObjectAttributes,
+  SavedObjectsCreateOptions,
+  OverlayStart,
+  SavedObjectsClientContract,
+} from 'kibana/public';
 import { SavedObject, SavedObjectKibanaServices } from '../../types';
 import { OVERWRITE_REJECTED } from '../../constants';
 import { confirmModalPromise } from './confirm_modal_promise';
@@ -89,7 +94,7 @@ export async function saveWithConfirmation(
     displayName: string;
   },
   options: SavedObjectsCreateOptions,
-  services: SavedObjectKibanaServices
+  services: { savedObjectsClient: SavedObjectsClientContract; overlays: OverlayStart }
 ) {
   const { savedObjectsClient, overlays } = services;
   try {

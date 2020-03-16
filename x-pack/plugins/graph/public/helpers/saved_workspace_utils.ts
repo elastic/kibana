@@ -186,12 +186,7 @@ export async function saveSavedWorkspace(
       references,
     };
     const resp = confirmOverwrite
-      ? await saveWithConfirmation(
-          attributes,
-          savedObject,
-          createOpt,
-          services as SavedObjectKibanaServices
-        )
+      ? await saveWithConfirmation(attributes, savedObject, createOpt, services)
       : await services.savedObjectsClient.create(savedObject.getEsType(), attributes, {
           ...createOpt,
           overwrite: true,
