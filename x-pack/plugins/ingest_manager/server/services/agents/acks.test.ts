@@ -81,4 +81,38 @@ describe('test agent acks services', () => {
       expect(isBoom(e)).toBeTruthy();
     }
   });
+
+  it('should fail for events that have types not in the allowed acknowledgement type list', async () => {
+    const mockSavedObjectsClient = savedObjectsClientMock.create();
+    try {
+      await acknowledgeAgentActions(
+        mockSavedObjectsClient,
+        ({
+          id: 'id',
+          type: AGENT_TYPE_PERMANENT,
+          actions: [
+            {
+              type: 'CONFIG_CHANGE',
+              id: 'action1',
+              sent_at: '2020-03-14T19:45:02.620Z',
+              timestamp: '2019-01-04T14:32:03.36764-05:00',
+              created_at: '2020-03-14T19:45:02.620Z',
+            },
+          ],
+        } as unknown) as Agent,
+        [
+          ({
+            type: 'ACTION',
+            subtype: 'FAILED',
+            timestamp: '2019-01-04T14:32:03.36764-05:00',
+            action_id: 'action1',
+            agent_id: 'id',
+          } as unknown) as AgentEvent,
+        ]
+      );
+      expect(true).toBeFalsy();
+    } catch (e) {
+      expect(isBoom(e)).toBeTruthy();
+    }
+  });
 });

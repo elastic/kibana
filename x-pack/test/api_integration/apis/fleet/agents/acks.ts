@@ -180,5 +180,32 @@ export default function(providerContext: FtrProviderContext) {
         .expect(400);
       expect(apiResponse.message).to.eql('all actions should belong to current agent');
     });
+
+    it('should return a 400 when request event list contains action types that are not allowed for acknowledgement', async () => {
+      const { body: apiResponse } = await supertest
+        .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
+        .set('kbn-xsrf', 'xx')
+        .set(
+          'Authorization',
+          `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
+        )
+        .send({
+          events: [
+            {
+              type: 'ACTION',
+              subtype: 'FAILED',
+              timestamp: '2019-01-04T14:32:03.36764-05:00',
+              action_id: '48cebde1-c906-4893-b89f-595d943b72a1',
+              agent_id: 'agent1',
+              message: 'hello',
+              payload: 'payload',
+            },
+          ],
+        })
+        .expect(400);
+      expect(apiResponse.message).to.eql(
+        'ACTION not allowed for acknowledgment only ACTION_RESULT'
+      );
+    });
   });
 }

@@ -20,6 +20,8 @@ import {
 } from '../../types';
 import { AGENT_EVENT_SAVED_OBJECT_TYPE, AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 
+const ALLOWED_ACKNOWLEDGEMENT_TYPE: string[] = ['ACTION_RESULT'];
+
 export async function acknowledgeAgentActions(
   soClient: SavedObjectsClientContract,
   agent: Agent,
@@ -34,6 +36,9 @@ export async function acknowledgeAgentActions(
   const matchedUpdatedActions: AgentAction[] = [];
 
   agentEvents.forEach(agentEvent => {
+    if (ALLOWED_ACKNOWLEDGEMENT_TYPE.indexOf(agentEvent.type) < 0) {
+      throw Boom.badRequest(`${agentEvent.type} not allowed for acknowledgment only ACTION_RESULT`);
+    }
     if (agentActionMap.has(agentEvent.action_id!)) {
       const action = agentActionMap.get(agentEvent.action_id!) as AgentAction;
       if (!action.sent_at) {
