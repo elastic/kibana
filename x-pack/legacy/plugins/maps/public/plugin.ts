@@ -10,6 +10,8 @@ import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { MapListing } from './components/map_listing';
 // @ts-ignore
+import { setInjectedVarFunc } from '../../../../plugins/maps/public/kibana_services'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+// @ts-ignore
 import { setLicenseId, setInspector, setFileUpload } from './kibana_services';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
@@ -33,9 +35,11 @@ interface MapsPluginSetupDependencies {
 
 export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
   const { licensing } = plugins;
+  const { injectedMetadata } = core;
   if (licensing) {
     licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
   }
+  setInjectedVarFunc(injectedMetadata.getInjectedVar);
 };
 
 /** @internal */
@@ -53,7 +57,8 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
   }
 
   public start(core: CoreStart, plugins: any) {
-    setInspector(plugins.np.inspector);
-    setFileUpload(plugins.np.file_upload);
+    const { inspector, file_upload } = plugins.np;
+    setInspector(inspector);
+    setFileUpload(file_upload);
   }
 }

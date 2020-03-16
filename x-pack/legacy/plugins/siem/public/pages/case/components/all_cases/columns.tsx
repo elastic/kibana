@@ -45,7 +45,7 @@ export const getCasesColumns = (
         const caseDetailsLinkComponent = (
           <CaseDetailsLink detailName={theCase.id}>{theCase.title}</CaseDetailsLink>
         );
-        return theCase.state === 'open' ? (
+        return theCase.status === 'open' ? (
           caseDetailsLinkComponent
         ) : (
           <>
@@ -72,7 +72,9 @@ export const getCasesColumns = (
               name={createdBy.fullName ? createdBy.fullName : createdBy.username}
               size="s"
             />
-            <Spacer data-test-subj="case-table-column-createdBy">{createdBy.username}</Spacer>
+            <Spacer data-test-subj="case-table-column-createdBy">
+              {createdBy.fullName ?? createdBy.username ?? 'N/A'}
+            </Spacer>
           </>
         );
       }
