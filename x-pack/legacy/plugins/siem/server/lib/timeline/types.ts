@@ -250,5 +250,7 @@ export interface BulkGetInput {
   id: string;
 }
 
-export type PinnedEventsByTimelineId = Record<string, PinnedEventSavedObject[]>;
-export type NotesByTimelineId = Record<string, NoteSavedObject[]>;
+export type NotesAndPinnedEventsByTimelineId = Record<
+  string,
+  { notes: NoteSavedObject[]; pinnedEvents: PinnedEventSavedObject[] }
+>;

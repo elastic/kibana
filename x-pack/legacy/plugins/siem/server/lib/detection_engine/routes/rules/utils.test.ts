@@ -12,7 +12,7 @@ import {
   transformTags,
   getIdBulkError,
   transformOrBulkError,
-  transformRulesToNdjson,
+  transformDataToNdjson,
   transformAlertsToRules,
   transformOrImportError,
   getDuplicates,
@@ -968,15 +968,15 @@ describe('utils', () => {
     });
   });
 
-  describe('transformRulesToNdjson', () => {
+  describe('transformDataToNdjson', () => {
     test('if rules are empty it returns an empty string', () => {
-      const ruleNdjson = transformRulesToNdjson([]);
+      const ruleNdjson = transformDataToNdjson([]);
       expect(ruleNdjson).toEqual('');
     });
 
     test('single rule will transform with new line ending character for ndjson', () => {
       const rule = sampleRule();
-      const ruleNdjson = transformRulesToNdjson([rule]);
+      const ruleNdjson = transformDataToNdjson([rule]);
       expect(ruleNdjson.endsWith('\n')).toBe(true);
     });
 
@@ -987,7 +987,7 @@ describe('utils', () => {
       result2.rule_id = 'some other id';
       result2.name = 'Some other rule';
 
-      const ruleNdjson = transformRulesToNdjson([result1, result2]);
+      const ruleNdjson = transformDataToNdjson([result1, result2]);
       // this is how we count characters in JavaScript :-)
       const count = ruleNdjson.split('\n').length - 1;
       expect(count).toBe(2);
@@ -1000,7 +1000,7 @@ describe('utils', () => {
       result2.rule_id = 'some other id';
       result2.name = 'Some other rule';
 
-      const ruleNdjson = transformRulesToNdjson([result1, result2]);
+      const ruleNdjson = transformDataToNdjson([result1, result2]);
       const ruleStrings = ruleNdjson.split('\n');
       const reParsed1 = JSON.parse(ruleStrings[0]);
       const reParsed2 = JSON.parse(ruleStrings[1]);

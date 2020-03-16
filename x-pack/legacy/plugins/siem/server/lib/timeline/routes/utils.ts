@@ -12,8 +12,7 @@ import {
   ExportedNotes,
   TimelineSavedObject,
   ExportedTimelines,
-  PinnedEventsByTimelineId,
-  NotesByTimelineId,
+  NotesAndPinnedEventsByTimelineId,
 } from '../types';
 import {
   timelineSavedObjectType,
@@ -22,7 +21,7 @@ import {
 } from '../../../saved_objects';
 
 import { convertSavedObjectToSavedTimeline } from '../convert_saved_object_to_savedtimeline';
-import { transformRulesToNdjson } from '../../detection_engine/routes/rules/utils';
+import { transformDataToNdjson } from '../../detection_engine/routes/rules/utils';
 import { convertSavedObjectToSavedNote } from '../../note/saved_object';
 
 import { NoteSavedObject } from '../../note/types';
@@ -37,7 +36,7 @@ export const getExportTimelineByObjectIds = async ({
   request: ExportTimelineRequest;
 }) => {
   const timeline = await getTimelinesFromObjects(client, request);
-  return transformRulesToNdjson(timeline);
+  return transformDataToNdjson(timeline);
 };
 
 const getAllSavedNote = async (
@@ -48,32 +47,41 @@ const getAllSavedNote = async (
   return savedObjects.saved_objects.map(savedObject => convertSavedObjectToSavedNote(savedObject));
 };
 
-const getNotesByTimelineId = async (
+const getNotesByTimelineId = (
   savedObjectsClient: ExportTimelineSavedObjectsClient,
   timelineId: string
-): Promise<NotesByTimelineId> => {
+): Promise<NoteSavedObject[]> => {
   const options: SavedObjectsFindOptions = {
     type: noteSavedObjectType,
     search: timelineId,
     searchFields: ['timelineId'],
   };
 
-  return { [timelineId]: await Promise.resolve(getAllSavedNote(savedObjectsClient, options)) };
+  return getAllSavedNote(savedObjectsClient, options);
 };
 
-const getGlobalEventNotesByTimelineId = (
-  notes: NotesByTimelineId[],
+const getNotesAndPinnedEventsByTimelineId = async (
+  savedObjectsClient: ExportTimelineSavedObjectsClient,
   timelineId: string
-): ExportedNotes => {
+): Promise<NotesAndPinnedEventsByTimelineId> => {
+  return {
+    [timelineId]: {
+      notes: await Promise.resolve(getNotesByTimelineId(savedObjectsClient, timelineId)),
+      pinnedEvents: await Promise.resolve(
+        getPinnedEventsByTimelineId(savedObjectsClient, timelineId)
+      ),
+    },
+  };
+};
+
+const getGlobalEventNotesByTimelineId = (currentNotes: NoteSavedObject[]): ExportedNotes => {
   const initialNotes: ExportedNotes = {
     eventNotes: [],
     globalNotes: [],
   };
-  const currentNotesRecord = notes.find(note => Object.keys(note)[0] === timelineId) ?? {};
-  const currentNotes = currentNotesRecord[timelineId] ?? [];
 
   return (
-    currentNotes?.reduce((acc, note) => {
+    currentNotes.reduce((acc, note) => {
       if (note.eventId == null)
         return {
           ...acc,
@@ -88,7 +96,21 @@ const getGlobalEventNotesByTimelineId = (
   );
 };
 
-const getTimeline = async (
+const getExportedNotedandPinnedEvents = (
+  data: NotesAndPinnedEventsByTimelineId[],
+  timelineId: string
+) => {
+  const currentRecord = data.find(note => Object.keys(note)[0] === timelineId) ?? {};
+  const currentNote = currentRecord[timelineId].notes ?? [];
+  const currentPinnedEvents = currentRecord[timelineId].pinnedEvents ?? [];
+
+  return {
+    ...getGlobalEventNotesByTimelineId(currentNote),
+    pinnedEventIds: getPinnedEventsIdsByTimelineId(currentPinnedEvents),
+  };
+};
+
+const getTimelines = async (
   savedObjectsClient: ExportTimelineSavedObjectsClient,
   timelineIds: string[]
 ) => {
@@ -122,25 +144,21 @@ const getAllSavedPinnedEvents = async (
   );
 };
 
-const getPinnedEventsByTimelineId = async (
+const getPinnedEventsByTimelineId = (
   savedObjectsClient: ExportTimelineSavedObjectsClient,
   timelineId: string
-): Promise<PinnedEventsByTimelineId> => {
+): Promise<PinnedEventSavedObject[]> => {
   const options: SavedObjectsFindOptions = {
     type: pinnedEventSavedObjectType,
     search: timelineId,
     searchFields: ['timelineId'],
   };
-  return { [timelineId]: await getAllSavedPinnedEvents(savedObjectsClient, options) };
+  return getAllSavedPinnedEvents(savedObjectsClient, options);
 };
 
 const getPinnedEventsIdsByTimelineId = (
-  pinnedEvents: PinnedEventsByTimelineId[],
-  timelineId: string
+  currentPinnedEvents: PinnedEventSavedObject[]
 ): string[] => {
-  const currentPinnedEventsRecord =
-    pinnedEvents.find(pinnedEvent => Object.keys(pinnedEvent)[0] === timelineId) ?? {};
-  const currentPinnedEvents = currentPinnedEventsRecord[timelineId] ?? [];
   return currentPinnedEvents.map(event => event.eventId) ?? [];
 };
 
@@ -148,28 +166,18 @@ const getTimelinesFromObjects = async (
   savedObjectsClient: ExportTimelineSavedObjectsClient,
   request: ExportTimelineRequest
 ): Promise<ExportedTimelines[]> => {
-  const timelines: TimelineSavedObject[] = await getTimeline(
+  const timelines: TimelineSavedObject[] = await getTimelines(
     savedObjectsClient,
     request.body.objects
   );
 
-  const notes: NotesByTimelineId[] = await Promise.all(
+  const notesAndPinnedEvents: NotesAndPinnedEventsByTimelineId[] = await Promise.all(
     request.body.objects.reduce(
       (acc, timelineId) =>
         timelineId != null
-          ? [...acc, getNotesByTimelineId(savedObjectsClient, timelineId)]
+          ? [...acc, getNotesAndPinnedEventsByTimelineId(savedObjectsClient, timelineId)]
           : [...acc],
-      [] as Array<Promise<NotesByTimelineId>>
-    )
-  );
-
-  const pinnedEvents: PinnedEventsByTimelineId[] = await Promise.all(
-    request.body.objects.reduce(
-      (acc, timelineId) =>
-        timelineId != null
-          ? [...acc, getPinnedEventsByTimelineId(savedObjectsClient, timelineId)]
-          : [...acc],
-      [] as Array<Promise<PinnedEventsByTimelineId>>
+      [] as Array<Promise<NotesAndPinnedEventsByTimelineId>>
     )
   );
 
@@ -177,8 +185,7 @@ const getTimelinesFromObjects = async (
     timelines?.map(timeline => {
       return {
         ...timeline,
-        ...getGlobalEventNotesByTimelineId(notes, timeline.savedObjectId),
-        pinnedEventIds: getPinnedEventsIdsByTimelineId(pinnedEvents, timeline.savedObjectId),
+        ...getExportedNotedandPinnedEvents(notesAndPinnedEvents, timeline.savedObjectId),
       };
     }) ?? []
   );
