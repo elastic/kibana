@@ -12,12 +12,12 @@ This makes it useful for visualizing where the selected transaction spent most o
 image::apm/images/apm-distributed-tracing.png[Example view of the distributed tracing in APM app in Kibana]
 
 View a span in detail by clicking on it in the timeline waterfall.
-For example, in the below screenshot we've clicked on an SQL Select database query.
-The information displayed includes the actual SQL that was executed, how long it took,
+When you click on an SQL Select database query,
+the information displayed includes the actual SQL that was executed, how long it took,
 and the percentage of the trace's total time.
 You also get a stack trace, which shows the SQL query in your code.
 Finally, APM knows which files are your code and which are just modules or libraries that you've installed.
-These library frames will be minimized by default in order to show you the most relevant stack trace. 
+These library frames will be minimized by default in order to show you the most relevant stack trace.
 
 [role="screenshot"]
 image::apm/images/apm-span-detail.png[Example view of a span detail in the APM app in Kibana]
