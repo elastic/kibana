@@ -27,15 +27,23 @@ import { DeauthenticationResult } from '../deauthentication_result';
  */
 
 /**
- * Checks the error returned by Elasticsearch as the result of `authenticate` call and returns `true` if request
- * has been rejected because of expired token, otherwise returns `false`.
+ * If request with access token fails with `401 Unauthorized` then this token is no
+ * longer valid and we should try to refresh it. Another use case that we should
+ * temporarily support (until elastic/elasticsearch#38866 is fixed) is when token
+ * document has been removed and ES responds with `500 Internal Server Error`.
  * @param {Object} err Error returned from Elasticsearch.
  * @returns {boolean}
  */
 function isAccessTokenExpiredError(err) {
-  return err.body
-    && err.body.error
-    && err.body.error.reason === 'token expired';
+  const errorStatusCode = getErrorStatusCode(err);
+  return (
+    errorStatusCode === 401 ||
+    (errorStatusCode === 500 &&
+      err &&
+      err.body &&
+      err.body.error &&
+      err.body.error.reason === 'token document is missing and must be present')
+  );
 }
 
 /**
