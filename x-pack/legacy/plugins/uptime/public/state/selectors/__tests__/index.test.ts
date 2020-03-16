@@ -60,6 +60,11 @@ describe('state selectors', () => {
       loading: false,
       errors: [],
     },
+    indexStatus: {
+      loading: false,
+      data: null,
+      errors: [],
+    },
   };
 
   it('selects base path from state', () => {
