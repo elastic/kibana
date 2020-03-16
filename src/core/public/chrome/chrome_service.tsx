@@ -41,7 +41,6 @@ import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 import { IUiSettingsClient } from '../ui_settings';
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
-const IS_COLLAPSED_KEY = 'core.chrome.isCollapsed';
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
 
 /** @public */
@@ -147,7 +146,6 @@ export class ChromeService {
 
     const appTitle$ = new BehaviorSubject<string>('Kibana');
     const brand$ = new BehaviorSubject<ChromeBrand>({});
-    const isCollapsed$ = new BehaviorSubject(!!localStorage.getItem(IS_COLLAPSED_KEY));
     const applicationClasses$ = new BehaviorSubject<Set<string>>(new Set());
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
@@ -224,17 +222,6 @@ export class ChromeService {
       getIsVisible$: () => this.isVisible$,
 
       setIsVisible: (isVisible: boolean) => this.toggleHidden$.next(!isVisible),
-
-      getIsCollapsed$: () => isCollapsed$.pipe(takeUntil(this.stop$)),
-
-      setIsCollapsed: (isCollapsed: boolean) => {
-        isCollapsed$.next(isCollapsed);
-        if (isCollapsed) {
-          localStorage.setItem(IS_COLLAPSED_KEY, 'true');
-        } else {
-          localStorage.removeItem(IS_COLLAPSED_KEY);
-        }
-      },
 
       getApplicationClasses$: () =>
         applicationClasses$.pipe(
@@ -365,16 +352,6 @@ export interface ChromeStart {
    * with an exit button.
    */
   setIsVisible(isVisible: boolean): void;
-
-  /**
-   * Get an observable of the current collapsed state of the chrome.
-   */
-  getIsCollapsed$(): Observable<boolean>;
-
-  /**
-   * Set the collapsed state of the chrome navigation.
-   */
-  setIsCollapsed(isCollapsed: boolean): void;
 
   /**
    * Get the current set of classNames that will be set on the application container.
