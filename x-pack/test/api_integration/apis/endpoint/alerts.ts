@@ -17,15 +17,7 @@ export default function({ getService }: FtrProviderContext) {
   const nextPrevPrefixPageSize = 'page_size=10';
   const nextPrevPrefix = `${nextPrevPrefixQuery}&${nextPrevPrefixDateRange}&${nextPrevPrefixSort}&${nextPrevPrefixOrder}&${nextPrevPrefixPageSize}`;
 
-  function wait(ms){
-    var start = new Date().getTime();
-    var end = start;
-    while(end < start + ms) {
-      end = new Date().getTime();
-    }
-  }
-
-  describe.only('test alerts api', () => {
+  describe('test alerts api', () => {
     describe('Tests for alerts API', () => {
       before(() => esArchiver.load('endpoint/alerts/api_feature'));
       after(() => esArchiver.unload('endpoint/alerts/api_feature'));
