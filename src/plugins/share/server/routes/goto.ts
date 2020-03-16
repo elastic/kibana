@@ -41,6 +41,7 @@ export const createGotoRoute = ({
       },
     },
     router.handleLegacyErrors(async function(context, request, response) {
+      const basePath = http.basePath.get(request);
       const url = await shortUrlLookup.getUrl(request.params.urlId, {
         savedObjects: context.core.savedObjects.client,
       });
@@ -49,8 +50,6 @@ export const createGotoRoute = ({
       const uiSettings = context.core.uiSettings.client;
       const stateStoreInSessionStorage = await uiSettings.get('state:storeInSessionStorage');
       if (!stateStoreInSessionStorage) {
-        const basePath = http.basePath.get(request);
-
         const prependedUrl = modifyUrl(url, parts => {
           if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
             parts.pathname = `${basePath}${parts.pathname}`;
@@ -62,9 +61,16 @@ export const createGotoRoute = ({
           },
         });
       }
+
+      const prependedLegacyRedirectUrl = modifyUrl('/goto_LP/' + request.params.urlId, parts => {
+        if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
+          parts.pathname = `${basePath}${parts.pathname}`;
+        }
+      });
+
       return response.redirected({
         headers: {
-          location: http.basePath.prepend('/goto_LP/' + request.params.urlId),
+          location: prependedLegacyRedirectUrl,
         },
       });
     })

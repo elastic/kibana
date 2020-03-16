@@ -97,9 +97,11 @@ export function generateFilters(
 
       const filterType =
         fieldName === '_exists_' ? esFilters.FILTERS.EXISTS : esFilters.FILTERS.PHRASE;
+      const actualFieldObj = fieldName === '_exists_' ? ({ name: value } as IFieldType) : fieldObj;
+
       filter = esFilters.buildFilter(
         tmpIndexPattern,
-        fieldObj,
+        actualFieldObj,
         filterType,
         negate,
         false,

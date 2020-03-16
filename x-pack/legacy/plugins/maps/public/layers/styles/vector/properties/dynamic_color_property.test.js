@@ -221,3 +221,223 @@ test('Should pluck the categorical style-meta from fieldmeta', async () => {
     ],
   });
 });
+
+describe('get mapbox color expression', () => {
+  describe('ordinal color ramp', () => {
+    test('should return null when field is not provided', async () => {
+      const dynamicStyleOptions = {
+        type: COLOR_MAP_TYPE.ORDINAL,
+      };
+      const colorProperty = makeProperty(dynamicStyleOptions);
+      expect(colorProperty._getMbColor()).toBeNull();
+    });
+
+    test('should return null when field name is not provided', async () => {
+      const dynamicStyleOptions = {
+        type: COLOR_MAP_TYPE.ORDINAL,
+        field: {},
+      };
+      const colorProperty = makeProperty(dynamicStyleOptions);
+      expect(colorProperty._getMbColor()).toBeNull();
+    });
+
+    describe('pre-defined color ramp', () => {
+      test('should return null when color ramp is not provided', async () => {
+        const dynamicStyleOptions = {
+          type: COLOR_MAP_TYPE.ORDINAL,
+          field: {
+            name: 'myField',
+          },
+        };
+        const colorProperty = makeProperty(dynamicStyleOptions);
+        expect(colorProperty._getMbColor()).toBeNull();
+      });
+
+      test('should return mapbox expression for color ramp', async () => {
+        const dynamicStyleOptions = {
+          type: COLOR_MAP_TYPE.ORDINAL,
+          field: {
+            name: 'myField',
+          },
+          color: 'Blues',
+        };
+        const colorProperty = makeProperty(dynamicStyleOptions);
+        expect(colorProperty._getMbColor()).toEqual([
+          'interpolate',
+          ['linear'],
+          ['coalesce', ['feature-state', '__kbn__dynamic__myField__lineColor'], -1],
+          -1,
+          'rgba(0,0,0,0)',
+          0,
+          '#f7faff',
+          0.125,
+          '#ddeaf7',
+          0.25,
+          '#c5daee',
+          0.375,
+          '#9dc9e0',
+          0.5,
+          '#6aadd5',
+          0.625,
+          '#4191c5',
+          0.75,
+          '#2070b4',
+          0.875,
+          '#072f6b',
+        ]);
+      });
+    });
+
+    describe('custom color ramp', () => {
+      test('should return null when customColorRamp is not provided', async () => {
+        const dynamicStyleOptions = {
+          type: COLOR_MAP_TYPE.ORDINAL,
+          field: {
+            name: 'myField',
+          },
+          useCustomColorRamp: true,
+        };
+        const colorProperty = makeProperty(dynamicStyleOptions);
+        expect(colorProperty._getMbColor()).toBeNull();
+      });
+
+      test('should return null when customColorRamp is empty', async () => {
+        const dynamicStyleOptions = {
+          type: COLOR_MAP_TYPE.ORDINAL,
+          field: {
+            name: 'myField',
+          },
+          useCustomColorRamp: true,
+          customColorRamp: [],
+        };
+        const colorProperty = makeProperty(dynamicStyleOptions);
+        expect(colorProperty._getMbColor()).toBeNull();
+      });
+
+      test('should return mapbox expression for custom color ramp', async () => {
+        const dynamicStyleOptions = {
+          type: COLOR_MAP_TYPE.ORDINAL,
+          field: {
+            name: 'myField',
+          },
+          useCustomColorRamp: true,
+          customColorRamp: [
+            { stop: 10, color: '#f7faff' },
+            { stop: 100, color: '#072f6b' },
+          ],
+        };
+        const colorProperty = makeProperty(dynamicStyleOptions);
+        expect(colorProperty._getMbColor()).toEqual([
+          'step',
+          ['coalesce', ['feature-state', '__kbn__dynamic__myField__lineColor'], 9],
+          'rgba(0,0,0,0)',
+          10,
+          '#f7faff',
+          100,
+          '#072f6b',
+        ]);
+      });
+    });
+  });
+
+  describe('categorical color palette', () => {
+    test('should return null when field is not provided', async () => {
+      const dynamicStyleOptions = {
+        type: COLOR_MAP_TYPE.CATEGORICAL,
+      };
+      const colorProperty = makeProperty(dynamicStyleOptions, getCategoricalFieldMeta);
+      expect(colorProperty._getMbColor()).toBeNull();
+    });
+
+    test('should return null when field name is not provided', async () => {
+      const dynamicStyleOptions = {
+        type: COLOR_MAP_TYPE.CATEGORICAL,
+        field: {},
+      };
+      const colorProperty = makeProperty(dynamicStyleOptions, getCategoricalFieldMeta);
+      expect(colorProperty._getMbColor()).toBeNull();
+    });
+
+    describe('pre-defined color palette', () => {
+      test('should return null when color palette is not provided', async () => {
+        const dynamicStyleOptions = {
+          type: COLOR_MAP_TYPE.CATEGORICAL,
+          field: {
+            name: 'myField',
+          },
+        };
+        const colorProperty = makeProperty(dynamicStyleOptions, getCategoricalFieldMeta);
+        expect(colorProperty._getMbColor()).toBeNull();
+      });
+
+      test('should return mapbox expression for color palette', async () => {
+        const dynamicStyleOptions = {
+          type: COLOR_MAP_TYPE.CATEGORICAL,
+          field: {
+            name: 'myField',
+          },
+          colorCategory: 'palette_0',
+        };
+        const colorProperty = makeProperty(dynamicStyleOptions, getCategoricalFieldMeta);
+        expect(colorProperty._getMbColor()).toEqual([
+          'match',
+          ['to-string', ['get', 'myField']],
+          'US',
+          '#54B399',
+          'CN',
+          '#6092C0',
+          '#D36086',
+        ]);
+      });
+    });
+
+    describe('custom color palette', () => {
+      test('should return null when customColorPalette is not provided', async () => {
+        const dynamicStyleOptions = {
+          type: COLOR_MAP_TYPE.CATEGORICAL,
+          field: {
+            name: 'myField',
+          },
+          useCustomColorPalette: true,
+        };
+        const colorProperty = makeProperty(dynamicStyleOptions, getCategoricalFieldMeta);
+        expect(colorProperty._getMbColor()).toBeNull();
+      });
+
+      test('should return null when customColorPalette is empty', async () => {
+        const dynamicStyleOptions = {
+          type: COLOR_MAP_TYPE.CATEGORICAL,
+          field: {
+            name: 'myField',
+          },
+          useCustomColorPalette: true,
+          customColorPalette: [],
+        };
+        const colorProperty = makeProperty(dynamicStyleOptions, getCategoricalFieldMeta);
+        expect(colorProperty._getMbColor()).toBeNull();
+      });
+
+      test('should return mapbox expression for custom color palette', async () => {
+        const dynamicStyleOptions = {
+          type: COLOR_MAP_TYPE.CATEGORICAL,
+          field: {
+            name: 'myField',
+          },
+          useCustomColorPalette: true,
+          customColorPalette: [
+            { stop: null, color: '#f7faff' },
+            { stop: 'MX', color: '#072f6b' },
+          ],
+        };
+        const colorProperty = makeProperty(dynamicStyleOptions, getCategoricalFieldMeta);
+        expect(colorProperty._getMbColor()).toEqual([
+          'match',
+          ['to-string', ['get', 'myField']],
+          'MX',
+          '#072f6b',
+          '#f7faff',
+        ]);
+      });
+    });
+  });
+});

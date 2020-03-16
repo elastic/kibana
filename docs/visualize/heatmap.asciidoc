@@ -8,7 +8,7 @@ image::images/visualize_heat_map_example.png[]
 
 [float]
 [[build-heat-map]]
-=== Build a heat map
+==== Build a heat map
 
 To display your data on the heat map, use the supported aggregations.
 
@@ -21,7 +21,7 @@ Heat maps support the following aggregations:
 
 [float]
 [[navigate-heatmap]]
-=== Change the color ranges
+==== Change the color ranges
 
 When only one color displays on the heat map, you might need to change the color ranges.
 
