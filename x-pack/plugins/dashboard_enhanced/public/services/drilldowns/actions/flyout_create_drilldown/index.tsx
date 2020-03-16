@@ -38,7 +38,7 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
 
   private isEmbeddableCompatible(context: EmbeddableContext) {
     if (!context.embeddable.dynamicActions) return false;
-    const supportedTriggers = ['VALUE_CLICK_TRIGGER']; // context.embeddable.supportedTriggers();
+    const supportedTriggers = context.embeddable.supportedTriggers();
     if (!supportedTriggers || !supportedTriggers.length) return false;
     return supportedTriggers.indexOf('VALUE_CLICK_TRIGGER') > -1;
   }

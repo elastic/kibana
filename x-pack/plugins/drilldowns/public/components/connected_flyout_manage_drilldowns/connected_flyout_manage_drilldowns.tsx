@@ -28,6 +28,7 @@ import {
   toastDrilldownsCRUDError,
   toastDrilldownsDeleted,
 } from './i18n';
+import { DrilldownFactoryContext } from '../../types';
 
 interface ConnectedFlyoutManageDrilldownsProps<Context extends object = object> {
   context: Context;
@@ -65,9 +66,15 @@ export function createFlyoutManageDrilldowns({
   return (props: ConnectedFlyoutManageDrilldownsProps) => {
     const isCreateOnly = props.viewMode === 'create';
 
+    const factoryContext: DrilldownFactoryContext<unknown> = {
+      place: '',
+      placeContext: props.context,
+      triggers: [],
+    };
+
     const actionFactories = useCompatibleActionFactoriesForCurrentContext(
       allActionFactories,
-      props.context
+      factoryContext
     );
 
     const [route, setRoute] = useState<Routes>(
@@ -121,8 +128,8 @@ export function createFlyoutManageDrilldowns({
       return {
         id: drilldown.eventId,
         drilldownName: drilldown.action.name,
-        actionName: actionFactory?.getDisplayName(props.context) ?? drilldown.action.factoryId,
-        icon: actionFactory?.getIconType(props.context),
+        actionName: actionFactory?.getDisplayName(factoryContext) ?? drilldown.action.factoryId,
+        icon: actionFactory?.getIconType(factoryContext),
       };
     }
 
@@ -168,7 +175,7 @@ export function createFlyoutManageDrilldowns({
               setRoute(Routes.Manage);
               setCurrentEditId(null);
             }}
-            actionFactoryContext={props.context}
+            actionFactoryContext={factoryContext}
             initialDrilldownWizardConfig={resolveInitialDrilldownWizardConfig()}
           />
         );
