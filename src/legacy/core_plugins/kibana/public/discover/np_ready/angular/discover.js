@@ -24,7 +24,6 @@ import { debounceTime } from 'rxjs/operators';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
-import { createHashHistory } from 'history';
 import { getState, splitState } from './discover_state';
 
 import { RequestAdapter } from '../../../../../../../plugins/inspector/public';
@@ -59,6 +58,7 @@ const {
   chrome,
   data,
   docTitle,
+  history,
   indexPatterns,
   filterManager,
   share,
@@ -88,8 +88,6 @@ const fetchStatuses = {
 
 const app = getAngularModule();
 
-app.factory('history', () => createHashHistory());
-
 app.config($routeProvider => {
   const defaults = {
     requireDefaultIndex: true,
@@ -117,7 +115,7 @@ app.config($routeProvider => {
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      savedObjects: function($route, kbnUrl, Promise, $rootScope, history) {
+      savedObjects: function($route, kbnUrl, Promise, $rootScope) {
         const savedSearchId = $route.current.params.id;
         return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl).then(() => {
           const { appStateContainer } = getState({ history });
@@ -189,8 +187,7 @@ function discoverController(
   config,
   kbnUrl,
   localStorage,
-  uiCapabilities,
-  history
+  uiCapabilities
 ) {
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
