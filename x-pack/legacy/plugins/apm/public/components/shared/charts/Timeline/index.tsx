@@ -24,7 +24,8 @@ export interface Margins {
 
 interface TimelineProps {
   marks?: Mark[];
-  duration?: number;
+  xMin?: number;
+  xMax?: number;
   height: number;
   header?: ReactNode;
   margins: Margins;
@@ -36,7 +37,8 @@ class TL extends PureComponent<TimelineProps> {
   // `makeWidthFlexible` HOC from react-vis depends on them.
   static propTypes = {
     marks: PropTypes.array,
-    duration: PropTypes.number,
+    xMin: PropTypes.number,
+    xMax: PropTypes.number,
     height: PropTypes.number.isRequired,
     header: PropTypes.node,
     margins: PropTypes.object.isRequired,
@@ -44,23 +46,24 @@ class TL extends PureComponent<TimelineProps> {
   };
 
   render() {
-    const { width, duration, marks, height, margins } = this.props;
-    if (duration == null || !width) {
+    const { width, xMin, xMax, marks, height, margins } = this.props;
+    if (xMax == null || !width) {
       return null;
     }
-    const plotValues = getPlotValues({ width, duration, height, margins });
+    const plotValues = getPlotValues({ width, xMin, xMax, height, margins });
+    const topTraceDuration = xMax - (xMin ?? 0);
 
     return (
       <div>
         <TimelineAxis
           plotValues={plotValues}
           marks={marks}
-          topTraceDuration={duration}
+          topTraceDuration={topTraceDuration}
         />
         <VerticalLines
           plotValues={plotValues}
           marks={marks}
-          topTraceDuration={duration}
+          topTraceDuration={topTraceDuration}
         />
       </div>
     );
