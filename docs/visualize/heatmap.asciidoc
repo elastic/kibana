@@ -1,0 +1,40 @@
+[[heat-map]]
+== Heat map
+
+Display graphical representations of data where the individual values are represented by colors. Use heat maps when your data set includes categorical data. For example, use a heat map to see the flights of origin countries compared to destination countries using the sample flight data.
+
+[role="screenshot"]
+image::images/visualize_heat_map_example.png[]
+
+[float]
+[[build-heat-map]]
+==== Build a heat map
+
+To display your data on the heat map, use the supported aggregations.
+
+Heat maps support the following aggregations:
+
+* <<visualize-metric-aggregations,Metric>>
+* <<visualize-parent-pipeline-aggregations,Parent pipeline>>
+* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
+* <<visualize-bucket-aggregations,Bucket>>
+
+[float]
+[[navigate-heatmap]]
+==== Change the color ranges
+
+When only one color displays on the heat map, you might need to change the color ranges.
+
+To specify the number of color ranges:
+
+. Click *Options*.
+
+. Enter the *Number of colors* to display.
+
+To specify custom ranges:
+
+. Click *Options*.
+
+. Select *Use custom ranges*.
+
+. Enter the ranges to display.

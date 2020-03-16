@@ -21,7 +21,6 @@ const mockReindexService = {
   resumeReindexOperation: jest.fn(),
   cancelReindexing: jest.fn(),
 };
-jest.mock('../../lib/es_indices_state_check', () => ({ esIndicesStateCheck: jest.fn() }));
 jest.mock('../../lib/es_version_precheck', () => ({
   versionCheckHandlerWrapper: (a: any) => a,
 }));
@@ -40,7 +39,6 @@ import {
 } from '../../../common/types';
 import { credentialStoreFactory } from '../../lib/reindexing/credential_store';
 import { registerReindexIndicesRoutes } from './reindex_indices';
-import { esIndicesStateCheck } from '../../lib/es_indices_state_check';
 
 /**
  * Since these route callbacks are so thin, these serve simply as integration tests
@@ -58,7 +56,6 @@ describe('reindex API', () => {
   } as any;
 
   beforeEach(() => {
-    (esIndicesStateCheck as jest.Mock).mockResolvedValue({});
     mockRouter = createMockRouter();
     routeDependencies = {
       credentialStore,
@@ -170,9 +167,7 @@ describe('reindex API', () => {
       );
 
       // It called create correctly
-      expect(mockReindexService.createReindexOperation).toHaveBeenCalledWith('theIndex', {
-        openAndClose: false,
-      });
+      expect(mockReindexService.createReindexOperation).toHaveBeenCalledWith('theIndex', undefined);
 
       // It returned the right results
       expect(resp.status).toEqual(200);
@@ -239,10 +234,7 @@ describe('reindex API', () => {
         kibanaResponseFactory
       );
       // It called resume correctly
-      expect(mockReindexService.resumeReindexOperation).toHaveBeenCalledWith('theIndex', {
-        openAndClose: false,
-        queueSettings: undefined,
-      });
+      expect(mockReindexService.resumeReindexOperation).toHaveBeenCalledWith('theIndex', undefined);
       expect(mockReindexService.createReindexOperation).not.toHaveBeenCalled();
 
       // It returned the right results
@@ -271,7 +263,6 @@ describe('reindex API', () => {
 
   describe('POST /api/upgrade_assistant/reindex/batch', () => {
     const queueSettingsArg = {
-      openAndClose: false,
       queueSettings: { queuedAt: expect.any(Number) },
     };
     it('creates a collection of index operations', async () => {
