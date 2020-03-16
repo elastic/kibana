@@ -55,13 +55,13 @@ describe('filter manager utilities', () => {
         ''
       );
       const f2 = null;
-      expect(compareFilters(f1, f2)).toBeFalsy();
+      expect(compareFilters(f1, f2 as any)).toBeFalsy();
     });
 
     test('should compare a null filter with an empty filter', () => {
       const f1 = null;
       const f2 = buildEmptyFilter(true);
-      expect(compareFilters(f1, f2)).toBeFalsy();
+      expect(compareFilters(f1 as any, f2)).toBeFalsy();
     });
 
     test('should compare duplicates, ignoring meta attributes', () => {
