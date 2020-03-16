@@ -12,13 +12,17 @@ import {
   EuiBadge,
   EuiTextColor,
   EuiContextMenuItem,
+  EuiButton,
 } from '@elastic/eui';
-import { Datasource } from '../../../../../types';
+import { AgentConfig, Datasource } from '../../../../../types';
 import { TableRowActions } from '../../../components/table_row_actions';
 import { DangerEuiContextMenuItem } from '../../../components/danger_eui_context_menu_item';
+import { useCapabilities } from '../../../../../hooks';
+import { useAgentConfigLink } from '../../hooks/use_details_uri';
 
 interface InMemoryDatasource extends Datasource {
   streams: { total: number; enabled: number };
+  inputTypes: string[];
   packageName?: string;
   packageTitle?: string;
   packageVersion?: string;
@@ -26,40 +30,84 @@ interface InMemoryDatasource extends Datasource {
 
 interface Props {
   datasources: Datasource[];
+  config: AgentConfig;
   // Pass through props to InMemoryTable
   loading?: EuiInMemoryTableProps<InMemoryDatasource>['loading'];
   message?: EuiInMemoryTableProps<InMemoryDatasource>['message'];
-  search?: EuiInMemoryTableProps<InMemoryDatasource>['search'];
-  selection?: EuiInMemoryTableProps<InMemoryDatasource>['selection'];
-  isSelectable?: EuiInMemoryTableProps<InMemoryDatasource>['isSelectable'];
 }
+
+interface FilterOption {
+  name: string;
+  value: string;
+}
+
+const stringSortAscending = (a: string, b: string): number => a.localeCompare(b);
+const toFilterOption = (value: string): FilterOption => ({ name: value, value });
 
 export const DatasourcesTable: React.FunctionComponent<Props> = ({
   datasources: originalDatasources,
+  config,
   ...rest
 }) => {
-  // Flatten some values so that they can be searched via in-memory table search
-  const datasources = useMemo(
-    () =>
-      originalDatasources.map<InMemoryDatasource>(datasource => ({
-        ...datasource,
-        streams: datasource.inputs.reduce(
-          (streams, input) => {
-            streams.total += input.streams.length;
-            streams.enabled += input.enabled
-              ? input.streams.filter(stream => stream.enabled).length
-              : 0;
+  const hasWriteCapabilities = useCapabilities().write;
+  const addDatasourceLink = useAgentConfigLink('add-datasource', { configId: config.id });
 
-            return streams;
-          },
-          { total: 0, enabled: 0 }
-        ),
+  // With the datasources provided on input, generate the list of datasources
+  // used in the InMemoryTable (flattens some values for search) as well as
+  // the list of options that will be used in the filters dropdowns
+  const [datasources, namespaces, inputTypes] = useMemo((): [
+    InMemoryDatasource[],
+    FilterOption[],
+    FilterOption[]
+  ] => {
+    const namespacesValues: string[] = [];
+    const inputTypesValues: string[] = [];
+    const mappedDatasources = originalDatasources.map<InMemoryDatasource>(datasource => {
+      if (datasource.namespace && !namespacesValues.includes(datasource.namespace)) {
+        namespacesValues.push(datasource.namespace);
+      }
+
+      const dsInputTypes: string[] = [];
+      const streams = datasource.inputs.reduce(
+        (streamSummary, input) => {
+          if (!inputTypesValues.includes(input.type)) {
+            inputTypesValues.push(input.type);
+          }
+          if (!dsInputTypes.includes(input.type)) {
+            dsInputTypes.push(input.type);
+          }
+
+          streamSummary.total += input.streams.length;
+          streamSummary.enabled += input.enabled
+            ? input.streams.filter(stream => stream.enabled).length
+            : 0;
+
+          return streamSummary;
+        },
+        { total: 0, enabled: 0 }
+      );
+
+      dsInputTypes.sort(stringSortAscending);
+
+      return {
+        ...datasource,
+        streams,
+        inputTypes: dsInputTypes,
         packageName: datasource.package?.name ?? '',
         packageTitle: datasource.package?.title ?? '',
         packageVersion: datasource.package?.version ?? '',
-      })) || [],
-    [originalDatasources]
-  );
+      };
+    });
+
+    namespacesValues.sort(stringSortAscending);
+    inputTypesValues.sort(stringSortAscending);
+
+    return [
+      mappedDatasources,
+      namespacesValues.map(toFilterOption),
+      inputTypesValues.map(toFilterOption),
+    ];
+  }, [originalDatasources]);
 
   const columns = useMemo(
     (): EuiInMemoryTableProps<InMemoryDatasource>['columns'] => [
@@ -97,23 +145,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
           }
         ),
         render: (namespace: InMemoryDatasource['namespace']) => {
-          if (namespace) {
-            return <EuiBadge>{namespace}</EuiBadge>;
-          }
-          return '';
-        },
-      },
-      {
-        field: 'platform',
-        name: i18n.translate(
-          'xpack.ingestManager.configDetails.datasourcesTable.platformColumnTitle',
-          {
-            defaultMessage: 'Platform',
-          }
-        ),
-        render(platform: unknown) {
-          // FIXME: where do we get this from?
-          return '???? FIXME';
+          return namespace ? <EuiBadge color="hollow">{namespace}</EuiBadge> : '';
         },
       },
       {
@@ -167,7 +199,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
                     />
                   </EuiContextMenuItem>,
                   // FIXME: implement Copy datasource action
-                  <DangerEuiContextMenuItem icon="trash" onClick={() => {}}>
+                  <DangerEuiContextMenuItem disabled icon="trash" onClick={() => {}}>
                     <FormattedMessage
                       id="xpack.ingestManager.configDetails.datasourcesTable.deleteActionTitle"
                       defaultMessage="Delete data source"
@@ -195,6 +227,41 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
         },
       }}
       {...rest}
+      search={{
+        toolsRight: [
+          <EuiButton
+            isDisabled={!hasWriteCapabilities}
+            iconType="plusInCircle"
+            href={addDatasourceLink}
+          >
+            <FormattedMessage
+              id="xpack.ingestManager.configDetails.addDatasourceButtonText"
+              defaultMessage="Create data source"
+            />
+          </EuiButton>,
+        ],
+        box: {
+          incremental: true,
+          schema: true,
+        },
+        filters: [
+          {
+            type: 'field_value_selection',
+            field: 'namespace',
+            name: 'Namespace',
+            options: namespaces,
+            multiSelect: 'or',
+          },
+          {
+            type: 'field_value_selection',
+            field: 'inputTypes',
+            name: 'Input types',
+            options: inputTypes,
+            multiSelect: 'or',
+          },
+        ],
+      }}
+      isSelectable={false}
     />
   );
 };
