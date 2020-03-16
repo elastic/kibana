@@ -21,6 +21,8 @@ import {
   throwErrors,
   CommentResponse,
   CommentResponseRt,
+  CasesConfigureResponse,
+  CaseConfigureResponseRt,
 } from '../../../../../../plugins/case/common/api';
 import { ToasterError } from '../../components/toasters';
 import { AllCases, Case } from './types';
@@ -78,3 +80,9 @@ export const decodeCasesFindResponse = (respCases?: CasesFindResponse) =>
 
 export const decodeCommentResponse = (respComment?: CommentResponse) =>
   pipe(CommentResponseRt.decode(respComment), fold(throwErrors(createToasterPlainError), identity));
+
+export const decodeCaseConfigureResponse = (respCase?: CasesConfigureResponse) =>
+  pipe(
+    CaseConfigureResponseRt.decode(respCase),
+    fold(throwErrors(createToasterPlainError), identity)
+  );

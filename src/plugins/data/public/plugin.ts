@@ -50,10 +50,10 @@ import {
 import { createSearchBar } from './ui/search_bar/create_search_bar';
 import { esaggs } from './search/expressions';
 import {
-  APPLY_FILTER_TRIGGER,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
-} from '../../embeddable/public';
+  APPLY_FILTER_TRIGGER,
+} from '../../ui_actions/public';
 import { ACTION_GLOBAL_APPLY_FILTER, createFilterAction, createFiltersFromEvent } from './actions';
 import { ApplyGlobalFilterActionContext } from './actions/apply_filter_action';
 import {

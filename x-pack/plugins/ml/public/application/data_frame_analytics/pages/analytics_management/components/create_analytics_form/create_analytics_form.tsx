@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useEffect, useMemo } from 'react';
+import React, { Fragment, FC, useEffect, useMemo, useRef } from 'react';
 
 import {
   EuiComboBox,
@@ -23,14 +23,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
-import { Field } from '../../../../../../../common/types/fields';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { useMlContext } from '../../../../../contexts/ml';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import {
-  JOB_TYPES,
   DEFAULT_MODEL_MEMORY_LIMIT,
   getJobConfigFromFormState,
+  State,
 } from '../../hooks/use_create_analytics_form/state';
 import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validation';
 import { Messages } from './messages';
@@ -38,7 +37,11 @@ import { JobType } from './job_type';
 import { JobDescriptionInput } from './job_description';
 import { getModelMemoryLimitErrors } from '../../hooks/use_create_analytics_form/reducer';
 import { IndexPattern, indexPatterns } from '../../../../../../../../../../src/plugins/data/public';
-import { DfAnalyticsExplainResponse, FieldSelectionItem } from '../../../../common/analytics';
+import {
+  ANALYSIS_CONFIG_TYPE,
+  DfAnalyticsExplainResponse,
+  FieldSelectionItem,
+} from '../../../../common/analytics';
 import { shouldAddAsDepVarOption, OMIT_FIELDS } from './form_options_validation';
 
 export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
@@ -49,6 +52,9 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   const { setFormState, setEstimatedModelMemoryLimit } = actions;
   const mlContext = useMlContext();
   const { form, indexPatternsMap, isAdvancedEditorEnabled, isJobCreated, requestMessages } = state;
+
+  const forceInput = useRef<HTMLInputElement | null>(null);
+  const firstUpdate = useRef<boolean>(true);
 
   const {
     createIndexPattern,
@@ -91,7 +97,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   ]);
 
   const isJobTypeWithDepVar =
-    jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION;
+    jobType === ANALYSIS_CONFIG_TYPE.REGRESSION || jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
 
   // Find out if index pattern contain numeric fields. Provides a hint in the form
   // that an analytics jobs is not able to identify outliers if there are no numeric fields present.
@@ -139,6 +145,10 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   };
 
   const debouncedGetExplainData = debounce(async () => {
+    const shouldUpdateModelMemoryLimit = !firstUpdate.current || !modelMemoryLimit;
+    if (firstUpdate.current) {
+      firstUpdate.current = false;
+    }
     // Reset if sourceIndex or jobType changes (jobType requires dependent_variable to be set -
     // which won't be the case if switching from outlier detection)
     if (previousSourceIndex !== sourceIndex || previousJobType !== jobType) {
@@ -157,7 +167,9 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       );
       const expectedMemoryWithoutDisk = resp.memory_estimation?.expected_memory_without_disk;
 
-      setEstimatedModelMemoryLimit(expectedMemoryWithoutDisk);
+      if (shouldUpdateModelMemoryLimit) {
+        setEstimatedModelMemoryLimit(expectedMemoryWithoutDisk);
+      }
 
       // If sourceIndex has changed load analysis field options again
       if (previousSourceIndex !== sourceIndex || previousJobType !== jobType) {
@@ -172,7 +184,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
         }
 
         setFormState({
-          ...(!modelMemoryLimit ? { modelMemoryLimit: expectedMemoryWithoutDisk } : {}),
+          ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemoryWithoutDisk } : {}),
           excludesOptions: analyzedFieldsOptions,
           loadingFieldOptions: false,
           fieldOptionsFetchFail: false,
@@ -180,13 +192,13 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
         });
       } else {
         setFormState({
-          ...(!modelMemoryLimit ? { modelMemoryLimit: expectedMemoryWithoutDisk } : {}),
+          ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemoryWithoutDisk } : {}),
         });
       }
     } catch (e) {
       let errorMessage;
       if (
-        jobType === JOB_TYPES.CLASSIFICATION &&
+        jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
         e.message !== undefined &&
         e.message.includes('status_exception') &&
         e.message.includes('must have at most')
@@ -202,16 +214,15 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
         fieldOptionsFetchFail: true,
         maxDistinctValuesError: errorMessage,
         loadingFieldOptions: false,
-        modelMemoryLimit: fallbackModelMemoryLimit,
+        ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: fallbackModelMemoryLimit } : {}),
       });
     }
   }, 400);
 
-  const loadDepVarOptions = async () => {
+  const loadDepVarOptions = async (formState: State['form']) => {
     setFormState({
       loadingDepVarOptions: true,
       // clear when the source index changes
-      dependentVariable: '',
       maxDistinctValuesError: undefined,
       sourceIndexFieldsCheckFailed: false,
       sourceIndexContainsNumericalFields: true,
@@ -222,23 +233,39 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       );
 
       if (indexPattern !== undefined) {
+        const formStateUpdate: {
+          loadingDepVarOptions: boolean;
+          dependentVariableFetchFail: boolean;
+          dependentVariableOptions: State['form']['dependentVariableOptions'];
+          dependentVariable?: State['form']['dependentVariable'];
+        } = {
+          loadingDepVarOptions: false,
+          dependentVariableFetchFail: false,
+          dependentVariableOptions: [] as State['form']['dependentVariableOptions'],
+        };
+
         await newJobCapsService.initializeFromIndexPattern(indexPattern);
         // Get fields and filter for supported types for job type
         const { fields } = newJobCapsService;
 
-        const depVarOptions: EuiComboBoxOptionOption[] = [];
-
-        fields.forEach((field: Field) => {
+        let resetDependentVariable = true;
+        for (const field of fields) {
           if (shouldAddAsDepVarOption(field, jobType)) {
-            depVarOptions.push({ label: field.id });
-          }
-        });
+            formStateUpdate.dependentVariableOptions.push({
+              label: field.id,
+            });
 
-        setFormState({
-          dependentVariableOptions: depVarOptions,
-          loadingDepVarOptions: false,
-          dependentVariableFetchFail: false,
-        });
+            if (formState.dependentVariable === field.id) {
+              resetDependentVariable = false;
+            }
+          }
+        }
+
+        if (resetDependentVariable) {
+          formStateUpdate.dependentVariable = '';
+        }
+
+        setFormState(formStateUpdate);
       }
     } catch (e) {
       setFormState({ loadingDepVarOptions: false, dependentVariableFetchFail: true });
@@ -284,10 +311,10 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
 
   useEffect(() => {
     if (isJobTypeWithDepVar && sourceIndexNameEmpty === false) {
-      loadDepVarOptions();
+      loadDepVarOptions(form);
     }
 
-    if (jobType === JOB_TYPES.OUTLIER_DETECTION && sourceIndexNameEmpty === false) {
+    if (jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && sourceIndexNameEmpty === false) {
       validateSourceIndexFields();
     }
   }, [sourceIndex, jobType, sourceIndexNameEmpty]);
@@ -297,7 +324,8 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       jobType !== undefined && sourceIndex !== '' && sourceIndexNameValid === true;
 
     const hasRequiredAnalysisFields =
-      (isJobTypeWithDepVar && dependentVariable !== '') || jobType === JOB_TYPES.OUTLIER_DETECTION;
+      (isJobTypeWithDepVar && dependentVariable !== '') ||
+      jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION;
 
     if (hasBasicRequiredFields && hasRequiredAnalysisFields) {
       debouncedGetExplainData();
@@ -307,6 +335,16 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       debouncedGetExplainData.cancel();
     };
   }, [jobType, sourceIndex, sourceIndexNameEmpty, dependentVariable, trainingPercent]);
+
+  // Temp effect to close the context menu popover on Clone button click
+  useEffect(() => {
+    if (forceInput.current === null) {
+      return;
+    }
+    const evt = document.createEvent('MouseEvents');
+    evt.initEvent('mouseup', true, true);
+    forceInput.current.dispatchEvent(evt);
+  }, []);
 
   return (
     <EuiForm className="mlDataFrameAnalyticsCreateForm">
@@ -375,6 +413,11 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
             ]}
           >
             <EuiFieldText
+              inputRef={input => {
+                if (input) {
+                  forceInput.current = input;
+                }
+              }}
               disabled={isJobCreated}
               placeholder={i18n.translate('xpack.ml.dataframe.analytics.create.jobIdPlaceholder', {
                 defaultMessage: 'Job ID',
@@ -495,7 +538,8 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               data-test-subj="mlAnalyticsCreateJobFlyoutDestinationIndexInput"
             />
           </EuiFormRow>
-          {(jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION) && (
+          {(jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
+            jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION) && (
             <Fragment>
               <EuiFormRow
                 fullWidth
