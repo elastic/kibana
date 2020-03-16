@@ -145,12 +145,9 @@ export const updateFollowerIndex = (id, followerIndex) => {
   if (isUsingAdvancedSettings) {
     uiMetrics.push(UIM_FOLLOWER_INDEX_USE_ADVANCED_OPTIONS);
   }
-  const request = httpClient.put(
-    `${API_BASE_PATH}/follower_indices/${encodeURIComponent(id)}`,
-    JSON.stringify({
-      body: followerIndex,
-    })
-  );
+  const request = httpClient.put(`${API_BASE_PATH}/follower_indices/${encodeURIComponent(id)}`, {
+    body: JSON.stringify(followerIndex),
+  });
   return trackUserRequest(request, uiMetrics);
 };
 

@@ -176,7 +176,7 @@ export const registerFollowerIndexRoutes = ({ router, __LEGACY }: RouteDependenc
         try {
           const { follower_indices: followerIndices } = await callWithRequest('ccr.info', { id });
           const followerIndexInfo = followerIndices && followerIndices[0];
-          if (followerIndexInfo) {
+          if (!followerIndexInfo) {
             return response.notFound({ body: `The follower index "${id}" does not exist.` });
           }
 
