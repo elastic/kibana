@@ -24,7 +24,7 @@ const getKueryString = (urlFilters: string): string => {
 };
 
 export const useUpdateKueryString = (
-  indexPattern: IIndexPattern,
+  indexPattern: IIndexPattern | null,
   filterQueryString = '',
   urlFilters: string
 ): [string?, Error?] => {
