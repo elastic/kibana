@@ -6,7 +6,7 @@
 
 import createContainer from 'constate';
 import React, { useCallback, useState } from 'react';
-import { NotificationsStart } from 'kibana/public';
+import { NotificationsStart } from 'src/core/public';
 import { useLinks } from '.';
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { PackageInfo } from '../../../types';
