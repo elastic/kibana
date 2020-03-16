@@ -9,7 +9,7 @@ import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AgentConfig, Datasource } from '../../../../../../../../common/types/models';
 import { NoDatasources } from './no_datasources';
-import { DatasourcesTable } from '../datasources_table';
+import { DatasourcesTable } from './datasources_table';
 import { useCapabilities } from '../../../../../hooks';
 import { useAgentConfigLink } from '../../hooks/use_details_uri';
 
@@ -23,7 +23,7 @@ export const ConfigDatasourcesView = memo<{ config: AgentConfig }>(({ config }) 
 
   return (
     <DatasourcesTable
-      datasources={config.datasources as Datasource[]}
+      datasources={(config.datasources || []) as Datasource[]}
       search={{
         toolsRight: [
           <EuiButton
