@@ -10,10 +10,8 @@ import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-import {
-  Embeddable,
-  APPLY_FILTER_TRIGGER,
-} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { Embeddable } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { APPLY_FILTER_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
 import { esFilters } from '../../../../../../src/plugins/data/public';
 
 import { I18nContext } from 'ui/i18n';

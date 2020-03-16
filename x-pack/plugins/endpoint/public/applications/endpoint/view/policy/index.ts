@@ -5,3 +5,4 @@
  */
 
 export * from './policy_list';
+export * from './policy_details';
