@@ -36,6 +36,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
     is_default: undefined,
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
   const validation = agentConfigFormValidation(agentConfig);
 
   const updateAgentConfig = (updatedFields: Partial<NewAgentConfig>) => {
@@ -46,7 +47,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
   };
 
   const createAgentConfig = async () => {
-    return await sendCreateAgentConfig(agentConfig);
+    return await sendCreateAgentConfig(agentConfig, { withSysMonitoring });
   };
 
   const header = (
@@ -73,6 +74,8 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
       <AgentConfigForm
         agentConfig={agentConfig}
         updateAgentConfig={updateAgentConfig}
+        withSysMonitoring={withSysMonitoring}
+        updateSysMonitoring={newValue => setWithSysMonitoring(newValue)}
         validation={validation}
       />
     </EuiFlyoutBody>

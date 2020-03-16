@@ -81,6 +81,7 @@ exports[`Table should render normally 1`] = `
       Object {
         "actions": Array [
           Object {
+            "data-test-subj": "editFieldFormat",
             "description": "Edit",
             "icon": "pencil",
             "name": "Edit",
