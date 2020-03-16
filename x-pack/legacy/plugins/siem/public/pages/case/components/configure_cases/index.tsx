@@ -170,17 +170,7 @@ const ConfigureCasesComponent: React.FC = () => {
         />
       </SectionWrapper>
       <SectionWrapper>
-        <Mapping
-          disabled={
-            isEmpty(connectors) ||
-            connectorId === 'none' ||
-            loadingCaseConfigure ||
-            persistLoading ||
-            isLoadingConnectors
-          }
-          mapping={mapping}
-          onChangeMapping={setMapping}
-        />
+        <Mapping disabled mapping={mapping} onChangeMapping={setMapping} />
       </SectionWrapper>
       <SectionWrapper>
         <EuiSpacer />
