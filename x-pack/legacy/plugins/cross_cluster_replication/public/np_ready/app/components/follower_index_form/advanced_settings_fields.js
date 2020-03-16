@@ -7,7 +7,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { byteUnitsUrl, timeUnitsUrl } from '../../services/documentation_links';
+import { getByteUnitsUrl, getTimeUnitsUrl } from '../../services/documentation_links';
 import { getSettingDefault } from '../../services/follower_index_default_settings';
 
 const byteUnitsHelpText = (
@@ -16,7 +16,7 @@ const byteUnitsHelpText = (
     defaultMessage="Example values: 10b, 1024kb, 1mb, 5gb, 2tb, 1pb. {link}"
     values={{
       link: (
-        <a href={byteUnitsUrl()} target="_blank">
+        <a href={getByteUnitsUrl()} target="_blank">
           <FormattedMessage
             id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.byteUnitsHelpTextLinkMessage"
             defaultMessage="Learn more"
@@ -33,7 +33,7 @@ const timeUnitsHelpText = (
     defaultMessage="Example values: 2d, 24h, 20m, 30s, 500ms, 10000micros, 80000nanos. {link}"
     values={{
       link: (
-        <a href={timeUnitsUrl()} target="_blank">
+        <a href={getTimeUnitsUrl()} target="_blank">
           <FormattedMessage
             id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.timeUnitsHelpTextLinkMessage"
             defaultMessage="Learn more"

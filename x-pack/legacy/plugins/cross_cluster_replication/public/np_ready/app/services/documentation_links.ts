@@ -16,7 +16,7 @@ export const setDocLinks = ({
   esBase = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
 };
 
-export const autoFollowPatternUrl = () => `${esBase}/ccr-put-auto-follow-pattern.html`;
-export const followerIndexUrl = () => `${esBase}/ccr-put-follow.html`;
-export const byteUnitsUrl = () => `${esBase}/common-options.html#byte-units`;
-export const timeUnitsUrl = () => `${esBase}/common-options.html#time-units`;
+export const getAutoFollowPatternUrl = () => `${esBase}/ccr-put-auto-follow-pattern.html`;
+export const getFollowerIndexUrl = () => `${esBase}/ccr-put-follow.html`;
+export const getByteUnitsUrl = () => `${esBase}/common-options.html#byte-units`;
+export const getTimeUnitsUrl = () => `${esBase}/common-options.html#time-units`;

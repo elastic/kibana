@@ -8,7 +8,6 @@ import { ChromeBreadcrumb } from 'src/core/public';
 
 import { ManagementAppMountParams } from '../../../../../../../../src/plugins/management/public';
 
-// @ts-ignore
 import { BASE_PATH } from '../../../../common/constants';
 
 let setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];

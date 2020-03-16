@@ -10,7 +10,7 @@ import {
 } from './auto_follow_pattern_action_menu';
 
 // @ts-ignore
-import { pauseAutoFollowPattern, resumeAutoFollowPattern } from '../../store/actions/index';
+import { pauseAutoFollowPattern, resumeAutoFollowPattern } from '../../store/actions';
 
 const mapDispatchToProps = (dispatch: (action: any) => void) => {
   return {
