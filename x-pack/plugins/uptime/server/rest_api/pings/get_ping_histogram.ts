@@ -21,7 +21,7 @@ export const createGetPingHistogramRoute: UMRestApiRouteFactory = (libs: UMServe
     }),
   },
   options: {
-    tags: ['access:uptime'],
+    tags: ['access:uptime-read'],
   },
   handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
     const { dateStart, dateEnd, statusFilter, monitorId, filters } = request.query;

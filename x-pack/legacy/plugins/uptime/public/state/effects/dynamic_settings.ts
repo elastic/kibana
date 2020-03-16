@@ -6,6 +6,7 @@
 
 import { takeLatest, put, call, select } from 'redux-saga/effects';
 import { Action } from 'redux-actions';
+import { i18n } from '@kbn/i18n';
 import { fetchEffectFactory } from './fetch_effect';
 import {
   getDynamicSettings,
@@ -31,13 +32,16 @@ export function* fetchDynamicSettingsEffect() {
 }
 
 export function* setDynamicSettingsEffect() {
+  const couldNotSaveSettingsText = i18n.translate('xpack.uptime.settings.error.couldNotSave', {
+    defaultMessage: 'Could not save settings!',
+  });
   yield takeLatest(String(setDynamicSettings), function*(action: Action<DynamicSettings>) {
     try {
       if (!action.payload) {
         const err = new Error('Cannot fetch effect without a payload');
         yield put(setDynamicSettingsFail(err));
         yield uptimeKibanaCore?.notifications.toasts.addError(err, {
-          title: 'Could not save settings!',
+          title: couldNotSaveSettingsText,
         });
         return;
       }
@@ -45,11 +49,11 @@ export function* setDynamicSettingsEffect() {
       yield call(setDynamicSettingsAPI, { settings: action.payload, basePath });
       yield put(setDynamicSettingsSuccess(action.payload));
       yield uptimeKibanaCore?.notifications.toasts.addSuccess('Settings saved!');
-    } catch (error) {
-      yield uptimeKibanaCore?.notifications.toasts.addError(error, {
-        title: 'Could not save settings!',
+    } catch (err) {
+      yield uptimeKibanaCore?.notifications.toasts.addError(err, {
+        title: couldNotSaveSettingsText,
       });
-      yield put(setDynamicSettingsFail(error));
+      yield put(setDynamicSettingsFail(err));
     }
   });
 }

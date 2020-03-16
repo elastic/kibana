@@ -20,7 +20,7 @@ export const createGetDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMSer
   path: '/api/uptime/dynamic_settings',
   validate: false,
   options: {
-    tags: ['access:uptime'],
+    tags: ['access:uptime-read'],
   },
   handler: async ({ dynamicSettings }, _context, _request, response): Promise<any> => {
     return response.ok({
@@ -36,7 +36,7 @@ export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMSe
     body: schema.object({}, { allowUnknowns: true }),
   },
   options: {
-    tags: ['access:uptime'],
+    tags: ['access:uptime-write'],
   },
   handler: async ({ savedObjectsClient }, _context, request, response): Promise<any> => {
     const decoded = DynamicSettingsType.decode(request.body);

@@ -13,6 +13,7 @@ import {
   DynamicSettingsSaveResponse,
   DynamicSettingsSaveType,
 } from '../../../common/runtime_types';
+import { uptimeKibanaCore } from '../../uptime_app';
 
 interface BaseApiRequest {
   basePath: string;
@@ -28,12 +29,9 @@ export const getDynamicSettings = async ({
   basePath,
 }: BaseApiRequest): Promise<DynamicSettings> => {
   const url = getApiPath(plainApiPath, basePath);
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-  const responseData = await response.json();
-  const decoded = DynamicSettingsType.decode(responseData);
+  const response = await uptimeKibanaCore?.http.fetch(url);
+
+  const decoded = DynamicSettingsType.decode(response);
   ThrowReporter.report(decoded);
   if (isRight(decoded)) {
     return decoded.right;
@@ -46,19 +44,13 @@ export const setDynamicSettings = async ({
   settings,
 }: SaveApiRequest): Promise<DynamicSettingsSaveResponse> => {
   const url = getApiPath(plainApiPath, basePath);
-  const response = await fetch(url, {
+
+  const response = await uptimeKibanaCore?.http.fetch(url, {
     method: 'POST',
-    headers: {
-      'kbn-xsrf': 'kibana',
-      'content-type': 'application/json',
-    },
     body: JSON.stringify(settings),
   });
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-  const responseData = await response.json();
-  const decoded = DynamicSettingsSaveType.decode(responseData);
+
+  const decoded = DynamicSettingsSaveType.decode(response);
   ThrowReporter.report(decoded);
   if (isRight(decoded)) {
     return decoded.right;

@@ -23,7 +23,7 @@ export const createGetPingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =
     }),
   },
   options: {
-    tags: ['access:uptime'],
+    tags: ['access:uptime-read'],
   },
   handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
     const { dateRangeStart, dateRangeEnd, location, monitorId, size, sort, status } = request.query;

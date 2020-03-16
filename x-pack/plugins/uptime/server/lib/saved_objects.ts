@@ -43,26 +43,15 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
       return obj.attributes;
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
-        try {
-          return (
-            await client.create(umDynamicSettings.name, defaultDynamicSettings, {
-              id: settingsObjectId,
-              overwrite: false,
-            })
-          ).attributes;
-        } catch (createErr) {
-          if (
-            SavedObjectsErrorHelpers.isNotAuthorizedError(createErr) ||
-            SavedObjectsErrorHelpers.isForbiddenError(createErr)
-          ) {
-            return defaultDynamicSettings;
-          }
-        }
+        return defaultDynamicSettings;
       }
       throw getErr;
     }
   },
-  setUptimeDynamicSettings: async (client, settings) => {
-    client.update(umDynamicSettings.name, settingsObjectId, settings);
+  setUptimeDynamicSettings: async (client, settings): Promise<void> => {
+    await client.create(umDynamicSettings.name, settings, {
+      id: settingsObjectId,
+      overwrite: true,
+    });
   },
 };

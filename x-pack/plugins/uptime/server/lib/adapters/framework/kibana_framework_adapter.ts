@@ -46,7 +46,7 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
           }),
         },
         options: {
-          tags: ['access:uptime'],
+          tags: ['access:uptime-read'],
         },
       },
       async (context, request, resp): Promise<any> => {
@@ -70,7 +70,7 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
           },
           path: routePath,
           route: {
-            tags: ['access:uptime'],
+            tags: ['access:uptime-read'],
           },
         };
         try {

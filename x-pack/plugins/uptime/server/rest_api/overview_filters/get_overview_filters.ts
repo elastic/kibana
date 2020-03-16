@@ -29,7 +29,7 @@ export const createGetOverviewFilters: UMRestApiRouteFactory = (libs: UMServerLi
   },
 
   options: {
-    tags: ['access:uptime'],
+    tags: ['access:uptime-read'],
   },
   handler: async ({ callES, dynamicSettings }, _context, request, response) => {
     const { dateRangeStart, dateRangeEnd, locations, schemes, search, ports, tags } = request.query;

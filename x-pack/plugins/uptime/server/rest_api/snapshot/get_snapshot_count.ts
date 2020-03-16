@@ -20,7 +20,7 @@ export const createGetSnapshotCount: UMRestApiRouteFactory = (libs: UMServerLibs
     }),
   },
   options: {
-    tags: ['access:uptime'],
+    tags: ['access:uptime-read'],
   },
   handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
     const { dateRangeStart, dateRangeEnd, filters, statusFilter } = request.query;

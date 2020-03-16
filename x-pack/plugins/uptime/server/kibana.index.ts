@@ -38,7 +38,7 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
     catalogue: ['uptime'],
     privileges: {
       all: {
-        api: ['uptime'],
+        api: ['uptime-read', 'uptime-write'],
         savedObject: {
           all: [umDynamicSettings.name],
           read: [],
@@ -46,7 +46,7 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
         ui: ['save', 'configureSettings', 'show'],
       },
       read: {
-        api: ['uptime'],
+        api: ['uptime-read'],
         savedObject: {
           all: [],
           read: [umDynamicSettings.name],
