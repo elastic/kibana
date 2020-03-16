@@ -10,7 +10,6 @@ import { monitoring } from './legacy/plugins/monitoring';
 import { reporting } from './legacy/plugins/reporting';
 import { security } from './legacy/plugins/security';
 import { tilemap } from './legacy/plugins/tilemap';
-import { grokdebugger } from './legacy/plugins/grokdebugger';
 import { dashboardMode } from './legacy/plugins/dashboard_mode';
 import { logstash } from './legacy/plugins/logstash';
 import { beats } from './legacy/plugins/beats_management';
@@ -45,7 +44,6 @@ module.exports = function(kibana) {
     spaces(kibana),
     security(kibana),
     tilemap(kibana),
-    grokdebugger(kibana),
     dashboardMode(kibana),
     logstash(kibana),
     beats(kibana),

@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { callWithRequestFactory } from './call_with_request_factory';
+import { Plugin } from './plugin';
+
+export function plugin(initializerContext) {
+  return new Plugin(initializerContext);
+}

@@ -2,12 +2,7 @@
   "id": "grokdebugger",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "requiredPlugins": [
-    "kibana",
-    "elasticsearch",
-    "xpack_main"
-  ],
   "server": true,
-  "ui": true,
+  "ui": false,
   "configPath": ["xpack", "grokdebugger"]
 }

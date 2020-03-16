@@ -4,38 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { wrapEsError } from '../../../lib/error_wrappers';
-import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
+import { schema } from '@kbn/config-schema';
 import { GrokdebuggerRequest } from '../../../models/grokdebugger_request';
 import { GrokdebuggerResponse } from '../../../models/grokdebugger_response';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
-function simulateGrok(callWithRequest, ingestJson) {
-  return callWithRequest('ingest.simulate', {
-    body: ingestJson,
-  });
-}
+const escapeHatch = schema.object({}, { allowUnknowns: true });
 
-export function registerGrokSimulateRoute(server) {
-  const licensePreRouting = licensePreRoutingFactory(server);
-
-  server.route({
-    path: '/api/grokdebugger/simulate',
-    method: 'POST',
-    handler: request => {
-      const callWithRequest = callWithRequestFactory(server, request);
-      const grokdebuggerRequest = GrokdebuggerRequest.fromDownstreamJSON(request.payload);
-      return simulateGrok(callWithRequest, grokdebuggerRequest.upstreamJSON)
-        .then(simulateResponseFromES => {
-          const grokdebuggerResponse = GrokdebuggerResponse.fromUpstreamJSON(
-            simulateResponseFromES
-          );
-          return { grokdebuggerResponse };
-        })
-        .catch(e => wrapEsError(e));
+export function registerGrokSimulateRoute(framework) {
+  // TODO: Handle license check here
+  //const licensePreRouting = licensePreRoutingFactory(server);
+  framework.registerRoute(
+    {
+      method: 'POST',
+      path: '/api/grokdebugger/simulate',
+      validate: {
+        // TODO: Add real validation here
+        body: escapeHatch,
+      },
     },
-    config: {
-      pre: [licensePreRouting],
-    },
-  });
+    async (requestContext, request, response) => {
+      try {
+        const grokdebuggerRequest = GrokdebuggerRequest.fromDownstreamJSON(request.body);
+        const simulateResponseFromES = await framework.callWithRequest(
+          requestContext,
+          'ingest.simulate',
+          { body: grokdebuggerRequest.upstreamJSON }
+        );
+        const grokdebuggerResponse = GrokdebuggerResponse.fromUpstreamJSON(simulateResponseFromES);
+        return response.ok({
+          body: grokdebuggerResponse,
+        });
+      } catch (error) {
+        return response.internalError({
+          body: error.message,
+        });
+      }
+    }
+  );
 }
