@@ -39,7 +39,7 @@ export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> =
 
   return (
     <>
-      <EuiFormRow label={txtChooseDestinationDashboard}>
+      <EuiFormRow label={txtChooseDestinationDashboard} fullWidth>
         <EuiComboBox<string>
           async
           selectedOptions={
@@ -50,6 +50,7 @@ export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> =
           onSearchChange={onSearchChange}
           isLoading={isLoading}
           singleSelection={{ asPlainText: true }}
+          fullWidth
         />
       </EuiFormRow>
       {!!onCurrentFiltersToggle && (
