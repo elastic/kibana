@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { first } from 'rxjs/operators';
 
 import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
 import { loggingServiceMock } from '../../../logging/logging_service.mock';
@@ -78,6 +79,32 @@ describe('KibanaMigrator', () => {
         .map(([callClusterPath]) => callClusterPath)
         .filter(callClusterPath => callClusterPath === 'cat.templates');
       expect(callClusterCommands.length).toBe(1);
+    });
+
+    it('emits results on getMigratorResult$()', async () => {
+      const options = mockOptions();
+      const clusterStub = jest.fn<any, any>(() => ({ status: 404 }));
+
+      options.callCluster = clusterStub;
+      const migrator = new KibanaMigrator(options);
+      const result = migrator
+        .getMigrationResult$()
+        .pipe(first())
+        .toPromise();
+      await migrator.runMigrations();
+      const [index1, index2] = await result;
+      expect(index1).toMatchObject({
+        destIndex: '.my-index_1',
+        elapsedMs: expect.any(Number),
+        sourceIndex: '.my-index',
+        status: 'migrated',
+      });
+      expect(index2).toMatchObject({
+        destIndex: 'other-index_1',
+        elapsedMs: expect.any(Number),
+        sourceIndex: 'other-index',
+        status: 'migrated',
+      });
     });
   });
 });

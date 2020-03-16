@@ -36,6 +36,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  --- | --- |
 |  [AuthResultType](./kibana-plugin-core-server.authresulttype.md) |  |
 |  [AuthStatus](./kibana-plugin-core-server.authstatus.md) | Status indicating an outcome of the authentication. |
+|  [ServiceStatusLevel](./kibana-plugin-core-server.servicestatuslevel.md) | The current "level" of availability of a service. |
 
 ## Functions
 
@@ -66,6 +67,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ContextSetup](./kibana-plugin-core-server.contextsetup.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [CoreSetup](./kibana-plugin-core-server.coresetup.md) | Context passed to the plugins <code>setup</code> method. |
 |  [CoreStart](./kibana-plugin-core-server.corestart.md) | Context passed to the plugins <code>start</code> method. |
+|  [CoreStatus](./kibana-plugin-core-server.corestatus.md) | Status of core services. Only contains entries for backend services that could have a non-available <code>status</code>. For example, <code>context</code> cannot possibly be broken, so it is not included. |
 |  [CustomHttpResponseOptions](./kibana-plugin-core-server.customhttpresponseoptions.md) | HTTP response parameters for a response with adjustable status code. |
 |  [DeprecationAPIClientParams](./kibana-plugin-core-server.deprecationapiclientparams.md) |  |
 |  [DeprecationAPIResponse](./kibana-plugin-core-server.deprecationapiresponse.md) |  |
@@ -75,6 +77,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ElasticsearchError](./kibana-plugin-core-server.elasticsearcherror.md) |  |
 |  [ElasticsearchServiceSetup](./kibana-plugin-core-server.elasticsearchservicesetup.md) |  |
 |  [ElasticsearchServiceStart](./kibana-plugin-core-server.elasticsearchservicestart.md) |  |
+|  [ElasticsearchStatusMeta](./kibana-plugin-core-server.elasticsearchstatusmeta.md) |  |
 |  [EnvironmentMode](./kibana-plugin-core-server.environmentmode.md) |  |
 |  [ErrorHttpResponseOptions](./kibana-plugin-core-server.errorhttpresponseoptions.md) | HTTP response parameters |
 |  [FakeRequest](./kibana-plugin-core-server.fakerequest.md) | Fake request object created manually by Kibana plugins. |
@@ -101,6 +104,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [LoggerFactory](./kibana-plugin-core-server.loggerfactory.md) | The single purpose of <code>LoggerFactory</code> interface is to define a way to retrieve a context-based logger instance. |
 |  [LogMeta](./kibana-plugin-core-server.logmeta.md) | Contextual metadata |
 |  [MetricsServiceSetup](./kibana-plugin-core-server.metricsservicesetup.md) | APIs to retrieves metrics gathered and exposed by the core platform. |
+|  [NodesVersionCompatibility](./kibana-plugin-core-server.nodesversioncompatibility.md) |  |
 |  [OnPostAuthToolkit](./kibana-plugin-core-server.onpostauthtoolkit.md) | A tool set defining an outcome of OnPostAuth interceptor for incoming request. |
 |  [OnPreAuthToolkit](./kibana-plugin-core-server.onpreauthtoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |
 |  [OnPreResponseExtensions](./kibana-plugin-core-server.onpreresponseextensions.md) | Additional data to extend a response. |
@@ -164,6 +168,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsResolveImportErrorsOptions](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.md) | Options to control the "resolve import" operation. |
 |  [SavedObjectsServiceSetup](./kibana-plugin-core-server.savedobjectsservicesetup.md) | Saved Objects is Kibana's data persistence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods for registering Saved Object types, creating and registering Saved Object client wrappers and factories. |
 |  [SavedObjectsServiceStart](./kibana-plugin-core-server.savedobjectsservicestart.md) | Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceStart API provides a scoped Saved Objects client for interacting with Saved Objects. |
+|  [SavedObjectStatusMeta](./kibana-plugin-core-server.savedobjectstatusmeta.md) | Meta information about the SavedObjectService's status. Available to plugins via [CoreSetup.status](./kibana-plugin-core-server.coresetup.status.md)<!-- -->. |
 |  [SavedObjectsType](./kibana-plugin-core-server.savedobjectstype.md) |  |
 |  [SavedObjectsTypeManagementDefinition](./kibana-plugin-core-server.savedobjectstypemanagementdefinition.md) | Configuration options for the [type](./kibana-plugin-core-server.savedobjectstype.md)<!-- -->'s management section. |
 |  [SavedObjectsTypeMappingDefinition](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) | Describe a saved object type mapping. |
@@ -173,6 +178,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SessionStorage](./kibana-plugin-core-server.sessionstorage.md) | Provides an interface to store and retrieve data across requests. |
 |  [SessionStorageCookieOptions](./kibana-plugin-core-server.sessionstoragecookieoptions.md) | Configuration used to create HTTP session storage based on top of cookie mechanism. |
 |  [SessionStorageFactory](./kibana-plugin-core-server.sessionstoragefactory.md) | SessionStorage factory to bind one to an incoming request |
+|  [StatusServiceSetup](./kibana-plugin-core-server.statusservicesetup.md) | API for accessing status of Core and this plugin's dependencies as well as for customizing this plugin's status. |
 |  [StringValidationRegex](./kibana-plugin-core-server.stringvalidationregex.md) | StringValidation with regex object |
 |  [StringValidationRegexString](./kibana-plugin-core-server.stringvalidationregexstring.md) | StringValidation as regex string |
 |  [UiSettingsParams](./kibana-plugin-core-server.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
@@ -258,6 +264,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsClientWrapperFactory](./kibana-plugin-core-server.savedobjectsclientwrapperfactory.md) | Describes the factory used to create instances of Saved Objects Client Wrappers. |
 |  [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) | Describe a [saved object type mapping](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) field.<!-- -->Please refer to [elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html) For the mapping documentation |
 |  [ScopeableRequest](./kibana-plugin-core-server.scopeablerequest.md) | A user credentials container. It accommodates the necessary auth credentials to impersonate the current user.<!-- -->See [KibanaRequest](./kibana-plugin-core-server.kibanarequest.md)<!-- -->. |
+|  [ServiceStatus](./kibana-plugin-core-server.servicestatus.md) | The current status of a service at a point in time. |
 |  [SharedGlobalConfig](./kibana-plugin-core-server.sharedglobalconfig.md) |  |
 |  [StringValidation](./kibana-plugin-core-server.stringvalidation.md) | Allows regex objects or a regex string |
 |  [UiSettingsType](./kibana-plugin-core-server.uisettingstype.md) | UI element type to represent the settings. |

@@ -47,6 +47,19 @@ export {
 } from '../../types';
 
 /**
+ * Meta information about the SavedObjectService's status. Available to plugins via {@link CoreSetup.status}.
+ *
+ * @public
+ */
+export interface SavedObjectStatusMeta {
+  migratedIndices: {
+    skipped: number;
+    patched: number;
+    migrated: number;
+  };
+}
+
+/**
  *
  * @public
  */

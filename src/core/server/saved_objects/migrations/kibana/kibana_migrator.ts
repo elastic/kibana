@@ -24,10 +24,11 @@
 
 import { Logger } from 'src/core/server/logging';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
+import { Subject } from 'rxjs';
 import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings';
 import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator, PropertyValidators } from '../../validation';
-import { buildActiveMappings, CallCluster, IndexMigrator } from '../core';
+import { buildActiveMappings, CallCluster, IndexMigrator, MigrationResult } from '../core';
 import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
 import { createIndexMap } from '../core/build_index_map';
 import { SavedObjectsMigrationConfigType } from '../../saved_objects_config';
@@ -58,7 +59,8 @@ export class KibanaMigrator {
   private readonly mappingProperties: SavedObjectsTypeMappingDefinitions;
   private readonly typeRegistry: ISavedObjectTypeRegistry;
   private readonly serializer: SavedObjectsSerializer;
-  private migrationResult?: Promise<Array<{ status: string }>>;
+  private migrationResult?: Promise<MigrationResult[]>;
+  private readonly migrationResult$ = new Subject<MigrationResult[]>();
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -112,7 +114,13 @@ export class KibanaMigrator {
       this.migrationResult = this.runMigrationsInternal();
     }
 
+    this.migrationResult.then(result => this.migrationResult$.next(result));
+
     return this.migrationResult;
+  }
+
+  public getMigrationResult$() {
+    return this.migrationResult$.asObservable();
   }
 
   private runMigrationsInternal() {

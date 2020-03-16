@@ -60,6 +60,7 @@ import {
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { UuidServiceSetup } from './uuid';
 import { MetricsServiceSetup } from './metrics';
+import { StatusServiceSetup } from './status';
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
@@ -95,6 +96,8 @@ export {
   ElasticsearchErrorHelpers,
   ElasticsearchServiceSetup,
   ElasticsearchServiceStart,
+  ElasticsearchStatusMeta,
+  NodesVersionCompatibility,
   APICaller,
   FakeRequest,
   ScopeableRequest,
@@ -226,6 +229,7 @@ export {
   SavedObjectsUpdateResponse,
   SavedObjectsServiceStart,
   SavedObjectsServiceSetup,
+  SavedObjectStatusMeta,
   SavedObjectsDeleteOptions,
   ISavedObjectsRepository,
   SavedObjectsRepository,
@@ -294,6 +298,8 @@ export {
   LegacyInternals,
 } from './legacy';
 
+export { CoreStatus, ServiceStatus, ServiceStatusLevel, StatusServiceSetup } from './status';
+
 /**
  * Plugin specific context passed to a route handler.
  *
@@ -344,14 +350,16 @@ export interface CoreSetup<TPluginsStart extends object = object> {
   elasticsearch: ElasticsearchServiceSetup;
   /** {@link HttpServiceSetup} */
   http: HttpServiceSetup;
+  /** {@link MetricsServiceSetup} */
+  metrics: MetricsServiceSetup;
   /** {@link SavedObjectsServiceSetup} */
   savedObjects: SavedObjectsServiceSetup;
+  /** {@link StatusServiceSetup} */
+  status: StatusServiceSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
   /** {@link UuidServiceSetup} */
   uuid: UuidServiceSetup;
-  /** {@link MetricsServiceSetup} */
-  metrics: MetricsServiceSetup;
   /**
    * Allows plugins to get access to APIs available in start inside async handlers.
    * Promise will not resolve until Core and plugin dependencies have completed `start`.

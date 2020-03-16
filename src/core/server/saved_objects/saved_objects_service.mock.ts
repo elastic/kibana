@@ -29,6 +29,8 @@ import { savedObjectsClientProviderMock } from './service/lib/scoped_client_prov
 import { savedObjectsRepositoryMock } from './service/lib/repository.mock';
 import { savedObjectsClientMock } from './service/saved_objects_client.mock';
 import { typeRegistryMock } from './saved_objects_type_registry.mock';
+import { of } from 'rxjs';
+import { ServiceStatusLevel } from '../status';
 
 type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 
@@ -75,6 +77,7 @@ const createSetupContractMock = () => {
 const createInternalSetupContractMock = () => {
   const internalSetupContract: jest.Mocked<InternalSavedObjectsServiceSetup> = {
     ...createSetupContractMock(),
+    status$: of({ level: ServiceStatusLevel.available }),
   };
   return internalSetupContract;
 };
