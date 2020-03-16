@@ -282,7 +282,7 @@ export class RemoteClusterForm extends Component {
           helpText={
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.fieldSeedsHelpText"
-              defaultMessage="An IP address or host name, followed by the {transportPort} of the remote cluster."
+              defaultMessage="An IP address or host name, followed by the {transportPort} of the remote cluster. Specify multiple seed nodes so discovery doesn't fail if a node is unavailable."
               values={{
                 transportPort: (
                   <EuiLink href={transportPortUrl} target="_blank">
@@ -447,7 +447,7 @@ export class RemoteClusterForm extends Component {
             <h2>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionModeTitle"
-                defaultMessage="Connection mode settings"
+                defaultMessage="Connection mode"
               />
             </h2>
           </EuiTitle>
