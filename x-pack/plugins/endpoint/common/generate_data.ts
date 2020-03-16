@@ -6,7 +6,7 @@
 
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
-import { AlertEvent, EndpointEvent, HostMetadata, OSFields } from './types';
+import { AlertEvent, EndpointEvent, HostMetadata, OSFields, HostFields } from './types';
 
 export type Event = AlertEvent | EndpointEvent;
 

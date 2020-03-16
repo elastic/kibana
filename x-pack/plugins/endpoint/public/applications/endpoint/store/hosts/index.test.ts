@@ -18,12 +18,6 @@ describe('HostList store concerns', () => {
     dispatch = store.dispatch;
   };
 
-  const generator = new EndpointDocGenerator();
-  // https://github.com/elastic/endpoint-app-team/issues/131
-  const generateEndpoint = (): HostMetadata => {
-    return generator.generateEndpointMetadata();
-  };
-
   const loadDataToStore = () => {
     dispatch({
       type: 'serverReturnedHostList',

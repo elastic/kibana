@@ -24,12 +24,6 @@ describe('host list middleware', () => {
   let getState: typeof store['getState'];
   let dispatch: Dispatch<AppAction>;
 
-  const generator = new EndpointDocGenerator();
-  // https://github.com/elastic/endpoint-app-team/issues/131
-  const generateEndpoint = (): HostMetadata => {
-    return generator.generateEndpointMetadata();
-  };
-
   let history: History<never>;
   const getEndpointListApiResponse = (): HostResultList => {
     return mockHostResultList({ request_page_size: 1, request_page_index: 1, total: 10 });
