@@ -24,7 +24,10 @@ export const AppProviders = ({ appDependencies, children }: Props) => {
     services,
     store: { initialLicense },
   } = appDependencies;
+
   const {
+    http,
+    notifications: { toasts },
     i18n: { Context: I18nContext },
   } = core;
 
@@ -32,8 +35,8 @@ export const AppProviders = ({ appDependencies, children }: Props) => {
   const thunkServices = {
     // So we can imperatively control the hash route
     history: history.createHashHistory({ basename: BASE_PATH }),
-    toasts: core.notifications.toasts,
-    http: core.http,
+    toasts,
+    http,
     telemetry: plugins.telemetry,
     licensing: plugins.licensing,
     breadcrumbService: services.breadcrumbService,

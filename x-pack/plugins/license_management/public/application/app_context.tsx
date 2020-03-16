@@ -51,19 +51,3 @@ export const useAppContext = () => {
   }
   return ctx;
 };
-
-export const useCore = () => useAppContext().core;
-
-export const useServices = () => useAppContext().services;
-
-export const useConfig = () => useAppContext().config;
-
-export const useDocLinks = () => useAppContext().docLinks;
-
-export const useToastNotifications = () => {
-  const {
-    notifications: { toasts: toastNotifications },
-  } = useCore();
-
-  return toastNotifications;
-};
