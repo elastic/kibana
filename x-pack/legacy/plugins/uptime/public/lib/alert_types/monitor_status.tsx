@@ -28,7 +28,7 @@ export const validate = (alertParams: any): ValidationResult => {
    */
   if (!isRight(decoded)) {
     errors.typeCheckFailure = 'Provided parameters do not conform to the expected type.';
-    PathReporter.report(decoded);
+    errors.typeCheckParsingMessage = PathReporter.report(decoded);
   }
 
   if (isRight(decoded)) {
