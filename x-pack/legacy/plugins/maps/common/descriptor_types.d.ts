@@ -6,6 +6,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS, SORT_ORDER } from './constants';
+import { VectorStyleDescriptor } from './style_property_descriptor_types';
 
 export type AbstractSourceDescriptor = {
   id?: string;
@@ -117,7 +118,7 @@ export type LayerDescriptor = {
 
 export type VectorLayerDescriptor = LayerDescriptor & {
   joins?: JoinDescriptor[];
-  style?: unknown;
+  style?: VectorStyleDescriptor;
 };
 
 export type RangeFieldMeta = {

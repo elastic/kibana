@@ -7,7 +7,7 @@
 import { VectorStyle } from './vector_style';
 import { DataRequest } from '../../util/data_request';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
-import { FIELD_ORIGIN } from '../../../../common/constants';
+import { FIELD_ORIGIN, STYLE_TYPE } from '../../../../common/constants';
 
 jest.mock('ui/new_platform');
 
@@ -44,11 +44,11 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
   const fieldName = 'doIStillExist';
   const properties = {
     fillColor: {
-      type: VectorStyle.STYLE_TYPE.STATIC,
+      type: STYLE_TYPE.STATIC,
       options: {},
     },
     lineColor: {
-      type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      type: STYLE_TYPE.DYNAMIC,
       options: {
         field: {
           name: fieldName,
@@ -57,7 +57,7 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
       },
     },
     iconSize: {
-      type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      type: STYLE_TYPE.DYNAMIC,
       options: {
         color: 'a color',
         field: { name: fieldName, origin: FIELD_ORIGIN.SOURCE },
@@ -242,7 +242,7 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
         {
           properties: {
             fillColor: {
-              type: VectorStyle.STYLE_TYPE.DYNAMIC,
+              type: STYLE_TYPE.DYNAMIC,
               options: {
                 field: {
                   origin: FIELD_ORIGIN.SOURCE,
@@ -266,7 +266,7 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
         {
           properties: {
             fillColor: {
-              type: VectorStyle.STYLE_TYPE.DYNAMIC,
+              type: STYLE_TYPE.DYNAMIC,
               options: {
                 field: {
                   origin: FIELD_ORIGIN.SOURCE,

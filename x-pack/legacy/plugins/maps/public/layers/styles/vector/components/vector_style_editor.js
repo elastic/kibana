@@ -13,12 +13,10 @@ import { VectorStyleSymbolizeAsEditor } from './symbol/vector_style_symbolize_as
 import { VectorStyleIconEditor } from './symbol/vector_style_icon_editor';
 import { VectorStyleLabelEditor } from './label/vector_style_label_editor';
 import { VectorStyleLabelBorderSizeEditor } from './label/vector_style_label_border_size_editor';
-import { VectorStyle } from '../vector_style';
 import { OrientationEditor } from './orientation/orientation_editor';
 import {
   getDefaultDynamicProperties,
   getDefaultStaticProperties,
-  VECTOR_STYLES,
 } from '../vector_style_defaults';
 import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_utils';
 import { VECTOR_SHAPE_TYPES } from '../../../sources/vector_feature_types';
@@ -29,6 +27,8 @@ import {
   CATEGORICAL_DATA_TYPES,
   ORDINAL_DATA_TYPES,
   LABEL_BORDER_SIZES,
+  VECTOR_STYLES,
+  STYLE_TYPE,
 } from '../../../../../common/constants';
 
 export class VectorStyleEditor extends Component {
@@ -123,7 +123,7 @@ export class VectorStyleEditor extends Component {
 
   _onStaticStyleChange = (propertyName, options) => {
     const styleDescriptor = {
-      type: VectorStyle.STYLE_TYPE.STATIC,
+      type: STYLE_TYPE.STATIC,
       options,
     };
     this.props.handlePropertyChange(propertyName, styleDescriptor);
@@ -131,7 +131,7 @@ export class VectorStyleEditor extends Component {
 
   _onDynamicStyleChange = (propertyName, options) => {
     const styleDescriptor = {
-      type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      type: STYLE_TYPE.DYNAMIC,
       options,
     };
     this.props.handlePropertyChange(propertyName, styleDescriptor);

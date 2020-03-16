@@ -153,14 +153,14 @@ export const COUNT_PROP_LABEL = i18n.translate('xpack.maps.aggs.defaultCountLabe
 
 export const COUNT_PROP_NAME = 'doc_count';
 
-export const STYLE_TYPE = {
-  STATIC: 'STATIC',
-  DYNAMIC: 'DYNAMIC',
-};
+export enum STYLE_TYPE {
+  STATIC = 'STATIC',
+  DYNAMIC = 'DYNAMIC',
+}
 
-export const LAYER_STYLE_TYPE = {
-  VECTOR: 'VECTOR',
-  HEATMAP: 'HEATMAP',
+export enum LAYER_STYLE_TYPE {
+  VECTOR = 'VECTOR',
+  HEATMAP = 'HEATMAP',
 };
 
 export const COLOR_MAP_TYPE = {
@@ -186,3 +186,18 @@ export enum LABEL_BORDER_SIZES {
 }
 
 export const DEFAULT_ICON = 'airfield';
+
+export enum VECTOR_STYLES {
+  SYMBOLIZE_AS = 'symbolizeAs',
+  FILL_COLOR = 'fillColor',
+  LINE_COLOR = 'lineColor',
+  LINE_WIDTH = 'lineWidth',
+  ICON = 'icon',
+  ICON_SIZE = 'iconSize',
+  ICON_ORIENTATION = 'iconOrientation',
+  LABEL_TEXT = 'labelText',
+  LABEL_COLOR = 'labelColor',
+  LABEL_SIZE = 'labelSize',
+  LABEL_BORDER_COLOR = 'labelBorderColor',
+  LABEL_BORDER_SIZE = 'labelBorderSize',
+}

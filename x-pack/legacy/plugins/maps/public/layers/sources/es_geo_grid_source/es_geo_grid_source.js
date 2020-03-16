@@ -12,10 +12,7 @@ import { HeatmapLayer } from '../../heatmap_layer';
 import { VectorLayer } from '../../vector_layer';
 import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
 import { VectorStyle } from '../../styles/vector/vector_style';
-import {
-  getDefaultDynamicProperties,
-  VECTOR_STYLES,
-} from '../../styles/vector/vector_style_defaults';
+import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
 import { COLOR_GRADIENTS } from '../../styles/color_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -27,6 +24,7 @@ import {
   COLOR_MAP_TYPE,
   RENDER_AS,
   GRID_RESOLUTION,
+  VECTOR_STYLES,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';

@@ -30,7 +30,7 @@ export const DEFAULT_LINE_COLORS = [
   '#FFF',
 ];
 
-function getColorRamp(colorRampName) {
+function getColorRamp(colorRampName: string): string[] {
   const colorRamp = vislibColorMaps[colorRampName];
   if (!colorRamp) {
     throw new Error(
@@ -42,18 +42,18 @@ function getColorRamp(colorRampName) {
   return colorRamp;
 }
 
-export function getRGBColorRangeStrings(colorRampName, numberColors = GRADIENT_INTERVALS) {
+export function getRGBColorRangeStrings(colorRampName: string, numberColors: number = GRADIENT_INTERVALS): string[] {
   const colorRamp = getColorRamp(colorRampName);
   return getLegendColors(colorRamp.value, numberColors);
 }
 
-export function getHexColorRangeStrings(colorRampName, numberColors = GRADIENT_INTERVALS) {
+export function getHexColorRangeStrings(colorRampName: string, numberColors: number = GRADIENT_INTERVALS): string[] {
   return getRGBColorRangeStrings(colorRampName, numberColors).map(rgbColor =>
     chroma(rgbColor).hex()
   );
 }
 
-export function getColorRampCenterColor(colorRampName) {
+export function getColorRampCenterColor(colorRampName: string): string {
   if (!colorRampName) {
     return null;
   }
@@ -64,7 +64,7 @@ export function getColorRampCenterColor(colorRampName) {
 
 // Returns an array of color stops
 // [ stop_input_1: number, stop_output_1: color, stop_input_n: number, stop_output_n: color ]
-export function getOrdinalColorRampStops(colorRampName, numberColors = GRADIENT_INTERVALS) {
+export function getOrdinalColorRampStops(colorRampName: string, numberColors: number = GRADIENT_INTERVALS): string[] {
   if (!colorRampName) {
     return null;
   }
@@ -84,7 +84,7 @@ export const COLOR_GRADIENTS = Object.keys(vislibColorMaps).map(colorRampName =>
 
 export const COLOR_RAMP_NAMES = Object.keys(vislibColorMaps);
 
-export function getLinearGradient(colorStrings) {
+export function getLinearGradient(colorStrings: string[]): string {
   const intervals = colorStrings.length;
   let linearGradient = `linear-gradient(to right, ${colorStrings[0]} 0%,`;
   for (let i = 1; i < intervals - 1; i++) {
@@ -101,9 +101,9 @@ const COLOR_PALETTES_CONFIGS = [
   },
 ];
 
-export function getColorPalette(paletteId) {
+export function getColorPalette(paletteId: string): string[] | undefined {
   const palette = COLOR_PALETTES_CONFIGS.find(palette => palette.id === paletteId);
-  return palette ? palette.colors : null;
+  return palette ? palette.colors : undefined;
 }
 
 export const COLOR_PALETTES = COLOR_PALETTES_CONFIGS.map(palette => {

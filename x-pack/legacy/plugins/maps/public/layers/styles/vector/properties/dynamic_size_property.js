@@ -11,7 +11,7 @@ import {
   LARGE_MAKI_ICON_SIZE,
   SMALL_MAKI_ICON_SIZE,
 } from '../symbol_utils';
-import { VECTOR_STYLES } from '../vector_style_defaults';
+import { VECTOR_STYLES } from '../../../../../common/constants';
 import _ from 'lodash';
 import { CircleIcon } from '../components/legend/circle_icon';
 import React, { Fragment } from 'react';

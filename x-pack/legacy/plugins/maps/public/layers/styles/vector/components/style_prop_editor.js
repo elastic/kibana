@@ -14,7 +14,7 @@ import {
   EuiFieldText,
   EuiToolTip,
 } from '@elastic/eui';
-import { VectorStyle } from '../vector_style';
+import { STYLE_TYPE } from '../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 
 export class StylePropEditor extends Component {
@@ -52,7 +52,7 @@ export class StylePropEditor extends Component {
   renderStaticDynamicSelect() {
     const options = [
       {
-        value: VectorStyle.STYLE_TYPE.STATIC,
+        value: STYLE_TYPE.STATIC,
         text: this.props.customStaticOptionLabel
           ? this.props.customStaticOptionLabel
           : i18n.translate('xpack.maps.styles.staticDynamicSelect.staticLabel', {
@@ -60,7 +60,7 @@ export class StylePropEditor extends Component {
             }),
       },
       {
-        value: VectorStyle.STYLE_TYPE.DYNAMIC,
+        value: STYLE_TYPE.DYNAMIC,
         text: i18n.translate('xpack.maps.styles.staticDynamicSelect.dynamicLabel', {
           defaultMessage: 'By value',
         }),
@@ -72,8 +72,8 @@ export class StylePropEditor extends Component {
         options={options}
         value={
           this.props.styleProperty.isDynamic()
-            ? VectorStyle.STYLE_TYPE.DYNAMIC
-            : VectorStyle.STYLE_TYPE.STATIC
+            ? STYLE_TYPE.DYNAMIC
+            : STYLE_TYPE.STATIC
         }
         onChange={this._onTypeToggle}
         disabled={this.props.disabled || this.props.fields.length === 0}

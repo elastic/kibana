@@ -9,11 +9,11 @@ import _ from 'lodash';
 import React, { ChangeEvent, Fragment, MouseEvent } from 'react';
 import { EuiFormRow, EuiRange, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { DEFAULT_SIGMA, VECTOR_STYLES } from '../../vector_style_defaults';
+import { DEFAULT_SIGMA } from '../../vector_style_defaults';
 import { FieldMetaPopover } from './field_meta_popover';
 import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
 import { FieldMetaOptions } from '../../../../../../common/style_property_descriptor_types';
+import { VECTOR_STYLES } from '../../../../../../common/constants';
 
 function getIsEnableToggleLabel(styleName: string) {
   switch (styleName) {

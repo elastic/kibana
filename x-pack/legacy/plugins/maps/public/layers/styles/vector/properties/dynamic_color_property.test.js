@@ -14,10 +14,9 @@ jest.mock('../components/vector_style_editor', () => ({
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { VECTOR_STYLES } from '../vector_style_defaults';
 import { DynamicColorProperty } from './dynamic_color_property';
 import { StyleMeta } from '../style_meta';
-import { COLOR_MAP_TYPE, FIELD_ORIGIN } from '../../../../../common/constants';
+import { COLOR_MAP_TYPE, FIELD_ORIGIN, VECTOR_STYLES } from '../../../../../common/constants';
 
 const mockField = {
   async getLabel() {

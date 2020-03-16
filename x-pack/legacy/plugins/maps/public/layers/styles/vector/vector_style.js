@@ -11,7 +11,6 @@ import {
   getDefaultProperties,
   LINE_STYLES,
   POLYGON_STYLES,
-  VECTOR_STYLES,
 } from './vector_style_defaults';
 import { AbstractStyle } from '../abstract_style';
 import {
@@ -21,6 +20,7 @@ import {
   SOURCE_FORMATTERS_ID_ORIGIN,
   LAYER_STYLE_TYPE,
   DEFAULT_ICON,
+  VECTOR_STYLES,
 } from '../../../../common/constants';
 import { StyleMeta } from './style_meta';
 import { VectorIcon } from './components/legend/vector_icon';
@@ -49,7 +49,7 @@ const POLYGONS = [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON];
 
 export class VectorStyle extends AbstractStyle {
   static type = LAYER_STYLE_TYPE.VECTOR;
-  static STYLE_TYPE = STYLE_TYPE;
+
   static createDescriptor(properties = {}, isTimeAware = true) {
     return {
       type: VectorStyle.type,
