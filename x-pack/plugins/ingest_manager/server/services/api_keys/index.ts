@@ -22,8 +22,8 @@ export async function generateOutputApiKey(
       cluster: ['monitor'],
       index: [
         {
-          names: ['logs-*', 'metrics-*'],
-          privileges: ['write'],
+          names: ['logs-*', 'metrics-*', 'events-*', 'metricbeat*'],
+          privileges: ['write', 'create_index'],
         },
       ],
     },

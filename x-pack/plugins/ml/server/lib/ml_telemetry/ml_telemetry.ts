@@ -39,6 +39,7 @@ export function storeMlTelemetry(
 export async function incrementFileDataVisualizerIndexCreationCount(
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> {
+  return;
   try {
     const { attributes } = await savedObjectsClient.get<{ enabled: boolean }>(
       'telemetry',

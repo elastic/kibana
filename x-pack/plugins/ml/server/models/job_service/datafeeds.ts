@@ -6,15 +6,9 @@
 
 import { APICaller } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
-import {
-  JOB_STATE,
-  DATAFEED_STATE,
-} from '../../../../../legacy/plugins/ml/common/constants/states';
+import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
-import {
-  Datafeed,
-  DatafeedStats,
-} from '../../../../../legacy/plugins/ml/common/types/anomaly_detection_jobs';
+import { Datafeed, DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
 
 export interface MlDatafeedsResponse {
   datafeeds: Datafeed[];
