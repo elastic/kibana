@@ -38,7 +38,7 @@ export {
   SerializedAction as UiActionsSerializedAction,
   SerializedEvent as UiActionsSerializedEvent,
 } from './actions';
-export { buildContextMenuForActions, contextMenuSeparatorAction } from './context_menu';
+export { buildContextMenuForActions } from './context_menu';
 export {
   Presentable as UiActionsPresentable,
   Configurable as UiActionsConfigurable,

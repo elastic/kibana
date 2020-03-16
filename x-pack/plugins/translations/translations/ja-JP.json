@@ -631,7 +631,6 @@
     "embeddableApi.addPanel.noMatchingObjectsMessage": "一致するオブジェクトが見つかりませんでした。",
     "embeddableApi.addPanel.savedObjectAddedToContainerSuccessMessageTitle": "{savedObjectName} が追加されました",
     "embeddableApi.addPanel.Title": "パネルの追加",
-    "embeddableApi.customizePanel.action.displayName": "パネルをカスタマイズ",
     "embeddableApi.customizePanel.modal.cancel": "キャンセル",
     "embeddableApi.customizePanel.modal.optionsMenuForm.panelTitleFormRowLabel": "パネルタイトル",
     "embeddableApi.customizePanel.modal.optionsMenuForm.panelTitleInputAriaLabel": "パネルのカスタムタイトルを入力してください",

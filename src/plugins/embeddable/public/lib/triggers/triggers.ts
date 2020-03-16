@@ -40,13 +40,6 @@ export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'> = {
   description: 'Triggered on top-right corner context-menu select.',
 };
 
-export const CONTEXT_MENU_DRILLDOWNS_TRIGGER = 'CONTEXT_MENU_DRILLDOWNS_TRIGGER';
-export const contextMenuDrilldownsTrigger: Trigger<'CONTEXT_MENU_DRILLDOWNS_TRIGGER'> = {
-  id: CONTEXT_MENU_DRILLDOWNS_TRIGGER,
-  title: 'Drilldown context menu',
-  description: 'Triggered on top-right corner context-menu select.',
-};
-
 export const PANEL_BADGE_TRIGGER = 'PANEL_BADGE_TRIGGER';
 export const panelBadgeTrigger: Trigger<'PANEL_BADGE_TRIGGER'> = {
   id: PANEL_BADGE_TRIGGER,

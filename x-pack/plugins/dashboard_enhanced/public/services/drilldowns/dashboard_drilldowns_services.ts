@@ -7,7 +7,7 @@
 import { CoreSetup } from 'src/core/public';
 import { SetupDependencies } from '../../plugin';
 import {
-  CONTEXT_MENU_DRILLDOWNS_TRIGGER,
+  CONTEXT_MENU_TRIGGER,
   EmbeddableContext,
 } from '../../../../../../src/plugins/embeddable/public';
 import {
@@ -37,11 +37,11 @@ export class DashboardDrilldownsService {
 
     const actionFlyoutCreateDrilldown = new FlyoutCreateDrilldownAction({ overlays, drilldowns });
     plugins.uiActions.registerAction(actionFlyoutCreateDrilldown);
-    plugins.uiActions.attachAction(CONTEXT_MENU_DRILLDOWNS_TRIGGER, actionFlyoutCreateDrilldown);
+    plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, actionFlyoutCreateDrilldown);
 
     const actionFlyoutEditDrilldown = new FlyoutEditDrilldownAction({ overlays, drilldowns });
     plugins.uiActions.registerAction(actionFlyoutEditDrilldown);
-    plugins.uiActions.attachAction(CONTEXT_MENU_DRILLDOWNS_TRIGGER, actionFlyoutEditDrilldown);
+    plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, actionFlyoutEditDrilldown);
 
     const dashboardToDashboardDrilldown = new DashboardToDashboardDrilldown({
       savedObjects,

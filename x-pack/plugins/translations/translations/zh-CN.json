@@ -631,7 +631,6 @@
     "embeddableApi.addPanel.noMatchingObjectsMessage": "未找到任何匹配对象。",
     "embeddableApi.addPanel.savedObjectAddedToContainerSuccessMessageTitle": "{savedObjectName} 已添加",
     "embeddableApi.addPanel.Title": "添加面板",
-    "embeddableApi.customizePanel.action.displayName": "定制面板",
     "embeddableApi.customizePanel.modal.cancel": "取消",
     "embeddableApi.customizePanel.modal.optionsMenuForm.panelTitleFormRowLabel": "面板标题",
     "embeddableApi.customizePanel.modal.optionsMenuForm.panelTitleInputAriaLabel": "为面板输入定制标题",

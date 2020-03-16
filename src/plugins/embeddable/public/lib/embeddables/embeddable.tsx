@@ -16,16 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isEqual, cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
-import { Adapters } from '../types';
+import { Adapters, ViewMode } from '../types';
 import { IContainer } from '../containers';
-import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from './i_embeddable';
-import { ViewMode } from '../types';
+import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { EmbeddableActionStorage } from './embeddable_action_storage';
 import {
-  UiActionsStart,
   UiActionsDynamicActionManager,
+  UiActionsStart,
 } from '../../../../../plugins/ui_actions/public';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {

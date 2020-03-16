@@ -20,22 +20,12 @@ import { EuiContextMenuPanelDescriptor, EuiPanel, htmlIdGenerator } from '@elast
 import classNames from 'classnames';
 import React from 'react';
 import { Subscription } from 'rxjs';
-import {
-  buildContextMenuForActions,
-  UiActionsService,
-  Action,
-  contextMenuSeparatorAction,
-} from '../ui_actions';
+import { buildContextMenuForActions, UiActionsService, Action } from '../ui_actions';
 import { CoreStart, OverlayStart } from '../../../../../core/public';
 import { toMountPoint } from '../../../../kibana_react/public';
 
 import { Start as InspectorStartContract } from '../inspector';
-import {
-  CONTEXT_MENU_TRIGGER,
-  CONTEXT_MENU_DRILLDOWNS_TRIGGER,
-  PANEL_BADGE_TRIGGER,
-  EmbeddableContext,
-} from '../triggers';
+import { CONTEXT_MENU_TRIGGER, PANEL_BADGE_TRIGGER, EmbeddableContext } from '../triggers';
 import { IEmbeddable } from '../embeddables/i_embeddable';
 import { ViewMode, GetEmbeddableFactory, GetEmbeddableFactories } from '../types';
 
@@ -236,15 +226,11 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     let regularActions = await this.props.getActions(CONTEXT_MENU_TRIGGER, {
       embeddable: this.props.embeddable,
     });
-    let drilldownActions = await this.props.getActions(CONTEXT_MENU_DRILLDOWNS_TRIGGER, {
-      embeddable: this.props.embeddable,
-    });
 
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {
       const removeDisabledActions = removeById(disabledActions);
       regularActions = regularActions.filter(removeDisabledActions);
-      drilldownActions = drilldownActions.filter(removeDisabledActions);
     }
 
     const createGetUserData = (overlays: OverlayStart) =>
@@ -283,16 +269,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       new EditPanelAction(this.props.getEmbeddableFactory),
     ];
 
-    const sortedRegularActions = [...regularActions, ...extraActions].sort(sortByOrderField);
-    const sortedDrilldownActions = [...drilldownActions].sort(sortByOrderField);
-    const actions = [
-      ...sortedDrilldownActions,
-      ...(sortedDrilldownActions.length ? [contextMenuSeparatorAction] : []),
-      ...sortedRegularActions,
-    ];
+    const sortedActions = [...regularActions, ...extraActions].sort(sortByOrderField);
 
     return await buildContextMenuForActions({
-      actions,
+      actions: sortedActions,
       actionContext: { embeddable: this.props.embeddable },
       closeMenu: this.closeMyContextMenuPanel,
     });

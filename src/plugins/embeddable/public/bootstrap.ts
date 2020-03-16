@@ -19,12 +19,10 @@
 import { UiActionsSetup } from '../../ui_actions/public';
 import {
   contextMenuTrigger,
-  contextMenuDrilldownsTrigger,
   createFilterAction,
   panelBadgeTrigger,
   EmbeddableContext,
   CONTEXT_MENU_TRIGGER,
-  CONTEXT_MENU_DRILLDOWNS_TRIGGER,
   PANEL_BADGE_TRIGGER,
   ACTION_ADD_PANEL,
   ACTION_CUSTOMIZE_PANEL,
@@ -38,7 +36,6 @@ import {
 declare module '../../ui_actions/public' {
   export interface TriggerContextMapping {
     [CONTEXT_MENU_TRIGGER]: EmbeddableContext;
-    [CONTEXT_MENU_DRILLDOWNS_TRIGGER]: EmbeddableContext;
     [PANEL_BADGE_TRIGGER]: EmbeddableContext;
   }
 
@@ -58,7 +55,6 @@ declare module '../../ui_actions/public' {
  */
 export const bootstrap = (uiActions: UiActionsSetup) => {
   uiActions.registerTrigger(contextMenuTrigger);
-  uiActions.registerTrigger(contextMenuDrilldownsTrigger);
   uiActions.registerTrigger(panelBadgeTrigger);
 
   const actionApplyFilter = createFilterAction();
