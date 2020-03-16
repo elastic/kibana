@@ -20,12 +20,11 @@ import {
   pinnedEventSavedObjectType,
 } from '../../../saved_objects';
 
+import { convertSavedObjectToSavedNote } from '../../note/saved_object';
+import { convertSavedObjectToSavedPinnedEvent } from '../../pinned_event/saved_object';
 import { convertSavedObjectToSavedTimeline } from '../convert_saved_object_to_savedtimeline';
 import { transformDataToNdjson } from '../../detection_engine/routes/rules/utils';
-import { convertSavedObjectToSavedNote } from '../../note/saved_object';
-
 import { NoteSavedObject } from '../../note/types';
-import { convertSavedObjectToSavedPinnedEvent } from '../../pinned_event/saved_object';
 import { PinnedEventSavedObject } from '../../pinned_event/types';
 
 export const getExportTimelineByObjectIds = async ({
@@ -44,7 +43,9 @@ const getAllSavedNote = async (
   options: SavedObjectsFindOptions
 ): Promise<NoteSavedObject[]> => {
   const savedObjects = await savedObjectsClient.find(options);
-  return savedObjects.saved_objects.map(savedObject => convertSavedObjectToSavedNote(savedObject));
+  return savedObjects != null
+    ? savedObjects.saved_objects.map(savedObject => convertSavedObjectToSavedNote(savedObject))
+    : [];
 };
 
 const getNotesByTimelineId = (
@@ -101,8 +102,8 @@ const getExportedNotedandPinnedEvents = (
   timelineId: string
 ) => {
   const currentRecord = data.find(note => Object.keys(note)[0] === timelineId) ?? {};
-  const currentNote = currentRecord[timelineId].notes ?? [];
-  const currentPinnedEvents = currentRecord[timelineId].pinnedEvents ?? [];
+  const currentNote = currentRecord[timelineId]?.notes ?? [];
+  const currentPinnedEvents = currentRecord[timelineId]?.pinnedEvents ?? [];
 
   return {
     ...getGlobalEventNotesByTimelineId(currentNote),
@@ -139,9 +140,11 @@ const getAllSavedPinnedEvents = async (
 ): Promise<PinnedEventSavedObject[]> => {
   const savedObjects = await savedObjectsClient.find(options);
 
-  return savedObjects.saved_objects.map(savedObject =>
-    convertSavedObjectToSavedPinnedEvent(savedObject)
-  );
+  return savedObjects != null
+    ? savedObjects.saved_objects.map(savedObject =>
+        convertSavedObjectToSavedPinnedEvent(savedObject)
+      )
+    : [];
 };
 
 const getPinnedEventsByTimelineId = (

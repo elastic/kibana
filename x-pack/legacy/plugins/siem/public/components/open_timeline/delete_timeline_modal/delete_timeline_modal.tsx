@@ -25,7 +25,7 @@ const getDeletedTitles = (title: string | JSX.Element | null | undefined) => {
   } else if (title != null && typeof title === 'string' && title.trim().length > 0) {
     return title.trim();
   }
-  return i18n.UNTITLED_TIMELINE;
+  return `"${i18n.UNTITLED_TIMELINE}"`;
 };
 
 /**

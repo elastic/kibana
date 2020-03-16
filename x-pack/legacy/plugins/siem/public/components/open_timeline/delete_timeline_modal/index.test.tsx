@@ -7,7 +7,7 @@
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
-import { DeleteTimelineModalButton } from '.';
+import { DeleteTimelineModalOverlay } from '.';
 
 describe('DeleteTimelineModal', () => {
   const savedObjectId = 'abcd';
@@ -25,7 +25,7 @@ describe('DeleteTimelineModal', () => {
         ...defaultProps,
         isModalOpen: false,
       };
-      const wrapper = mountWithIntl(<DeleteTimelineModalButton {...testProps} />);
+      const wrapper = mountWithIntl(<DeleteTimelineModalOverlay {...testProps} />);
 
       expect(
         wrapper
@@ -36,7 +36,7 @@ describe('DeleteTimelineModal', () => {
     });
 
     test('it renders the modal when isModalOpen is true', () => {
-      const wrapper = mountWithIntl(<DeleteTimelineModalButton {...defaultProps} />);
+      const wrapper = mountWithIntl(<DeleteTimelineModalOverlay {...defaultProps} />);
 
       expect(
         wrapper
@@ -47,7 +47,7 @@ describe('DeleteTimelineModal', () => {
     });
 
     test('it hides popover when isModalOpen is true', () => {
-      const wrapper = mountWithIntl(<DeleteTimelineModalButton {...defaultProps} />);
+      const wrapper = mountWithIntl(<DeleteTimelineModalOverlay {...defaultProps} />);
 
       expect(
         wrapper

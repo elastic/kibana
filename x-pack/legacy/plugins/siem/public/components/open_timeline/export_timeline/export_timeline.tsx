@@ -11,10 +11,10 @@ import * as i18n from '../translations';
 import { useStateToaster } from '../../toasters';
 
 const ExportTimeline: React.FC<{
-  isEnableDownloader: boolean;
-  onComplete?: () => void;
   exportedIds: string[] | undefined;
   getExportedData: ExportSelectedData;
+  isEnableDownloader: boolean;
+  onComplete?: () => void;
 }> = ({ onComplete, isEnableDownloader, exportedIds, getExportedData }) => {
   const [, dispatchToaster] = useStateToaster();
   return (

@@ -26,11 +26,10 @@ jest.mock('.', () => {
 describe('TimelineDownloader', () => {
   let wrapper: ReactWrapper;
   const defaultTestProps = {
-    disableExportTimelineDownloader: jest.fn(),
-    exportedIds: [{ timelineId: 'baa20980-6301-11ea-9223-95b6d4dd806c' }],
+    exportedIds: ['baa20980-6301-11ea-9223-95b6d4dd806c'],
     getExportedData: jest.fn(),
     isEnableDownloader: true,
-    selectedItems: undefined,
+    onComplete: jest.fn(),
   };
   describe('should not render a downloader', () => {
     beforeAll(() => {
@@ -44,14 +43,6 @@ describe('TimelineDownloader', () => {
 
     afterAll(() => {
       ((useExportTimeline as unknown) as jest.Mock).mockReset();
-    });
-
-    test('Without selectedItems', () => {
-      const testProps = {
-        ...defaultTestProps,
-      };
-      wrapper = mount(<TimelineDownloader {...testProps} />);
-      expect(wrapper.find('[data-test-subj="export-timeline-downloader"]').exists()).toBeFalsy();
     });
 
     test('Without exportedIds', () => {
