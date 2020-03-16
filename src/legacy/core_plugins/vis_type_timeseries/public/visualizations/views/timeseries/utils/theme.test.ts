@@ -20,7 +20,7 @@
 import { getTheme } from './theme';
 import { LIGHT_THEME, DARK_THEME } from '@elastic/charts';
 
-describe('src/legacy/core_plugins/vis_type_timeseries/public/visualizations/views/timeseries/utils/theme.ts', () => {
+describe('TSVB theme', () => {
   it('should return the basic themes if no bg color is specified', () => {
     // use original dark/light theme
     expect(getTheme(false)).toEqual(LIGHT_THEME);
