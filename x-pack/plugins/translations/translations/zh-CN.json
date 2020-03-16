@@ -5749,8 +5749,6 @@
     "xpack.graph.outlinkEncoders.textPlainTitle": "纯文本",
     "xpack.graph.pluginDescription": "显示并分析 Elasticsearch 数据中的相关关系。",
     "xpack.graph.savedWorkspace.workspaceNameTitle": "新建 Graph 工作空间",
-    "xpack.graph.savedWorkspaces.graphWorkspaceLabel": "Graph 工作空间",
-    "xpack.graph.savedWorkspaces.graphWorkspacesLabel": "Graph 工作空间",
     "xpack.graph.saveWorkspace.savingErrorMessage": "无法保存工作空间：{message}",
     "xpack.graph.saveWorkspace.successNotification.noDataSavedText": "配置会被保存，但不保存数据",
     "xpack.graph.saveWorkspace.successNotificationTitle": "已保存“{workspaceTitle}”",

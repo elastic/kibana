@@ -26,7 +26,6 @@ import {
 // @ts-ignore
 import { initGraphApp } from './app';
 import { Plugin as DataPlugin, IndexPatternsContract } from '../../../../src/plugins/data/public';
-import { Plugin as DataPlugin, IndexPatternsContract } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { checkLicense } from '../common/check_license';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';

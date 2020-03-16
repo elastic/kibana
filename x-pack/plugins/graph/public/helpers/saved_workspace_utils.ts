@@ -19,12 +19,12 @@ import {
   saveWithConfirmation,
   isErrorNonFatal,
   SavedObjectKibanaServices,
-} from '../../../../../../src/plugins/saved_objects/public';
+} from '../../../../../src/plugins/saved_objects/public';
 import {
   injectReferences,
   extractReferences,
 } from '../services/persistence/saved_workspace_references';
-import { SavedObjectNotFound } from '../../../../../../src/plugins/kibana_utils/public';
+import { SavedObjectNotFound } from '../../../../../src/plugins/kibana_utils/public';
 import { GraphWorkspaceSavedObject } from '../types';
 
 const savedWorkspaceType = 'graph-workspace';

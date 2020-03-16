@@ -5749,8 +5749,6 @@
     "xpack.graph.outlinkEncoders.textPlainTitle": "プレインテキスト",
     "xpack.graph.pluginDescription": "Elasticsearch データの関連性のある関係を浮上させ分析します。",
     "xpack.graph.savedWorkspace.workspaceNameTitle": "新規グラフワークスペース",
-    "xpack.graph.savedWorkspaces.graphWorkspaceLabel": "グラフワークスペース",
-    "xpack.graph.savedWorkspaces.graphWorkspacesLabel": "グラフワークスペース",
     "xpack.graph.saveWorkspace.savingErrorMessage": "ワークスペースの保存に失敗しました: {message}",
     "xpack.graph.saveWorkspace.successNotification.noDataSavedText": "構成が保存されましたが、データは保存されませんでした",
     "xpack.graph.saveWorkspace.successNotificationTitle": "「{workspaceTitle}」が保存されました",

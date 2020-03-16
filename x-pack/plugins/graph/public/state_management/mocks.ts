@@ -15,7 +15,7 @@ import { createStore, applyMiddleware, AnyAction } from 'redux';
 import { ChromeStart } from 'kibana/public';
 import { GraphStoreDependencies, createRootReducer, GraphStore, GraphState } from './store';
 import { Workspace, GraphWorkspaceSavedObject, IndexPatternSavedObject } from '../types';
-import { IndexPattern } from '../../../../../../src/plugins/data/public';
+import { IndexPattern } from '../../../../../src/plugins/data/public';
 
 jest.mock('ui/new_platform');
 
@@ -54,7 +54,7 @@ export function createMockGraphStore({
   } as unknown) as GraphWorkspaceSavedObject;
 
   const mockedDeps: jest.Mocked<GraphStoreDependencies> = {
-    basePath: 'basepath',
+    addBasePath: jest.fn((url: string) => url),
     changeUrl: jest.fn(),
     chrome: ({
       setBreadcrumbs: jest.fn(),
@@ -95,7 +95,7 @@ export function createMockGraphStore({
   };
   const sagaMiddleware = createSagaMiddleware();
 
-  const rootReducer = createRootReducer(mockedDeps.basePath);
+  const rootReducer = createRootReducer(mockedDeps.addBasePath);
   const initializedRootReducer = (state: GraphState | undefined, action: AnyAction) =>
     rootReducer(state || (initialStateOverwrites as GraphState), action);
 
