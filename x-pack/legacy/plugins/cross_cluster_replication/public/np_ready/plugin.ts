@@ -11,13 +11,17 @@ import {
   DocLinksStart,
 } from 'src/core/public';
 
+import { IndexMgmtSetup } from '../../../../../plugins/index_management/public';
+
 // @ts-ignore;
 import { setHttpClient } from './app/services/api';
 import { setBreadcrumbSetter } from './app/services/breadcrumbs';
 import { setDocLinks } from './app/services/documentation_links';
 import { setNotifications } from './app/services/notifications';
+import { extendIndexManagement } from './extend_index_management';
 
 interface PluginDependencies {
+  indexManagement: IndexMgmtSetup;
   __LEGACY: {
     chrome: any;
     MANAGEMENT_BREADCRUMB: ChromeBreadcrumb;
@@ -33,6 +37,7 @@ export class CrossClusterReplicationUIPlugin implements Plugin {
     setBreadcrumbSetter(deps);
     setDocLinks(deps.__LEGACY.docLinks);
     setNotifications(notifications, fatalErrors);
+    extendIndexManagement(deps.indexManagement);
   }
 
   start() {}

@@ -3,14 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { i18n } from '@kbn/i18n';
-import { npSetup } from 'ui/new_platform';
 import { get } from 'lodash';
+import { IndexMgmtSetup } from '../../../../../plugins/index_management/public';
 
 const propertyPath = 'isFollowerIndex';
 
 const followerBadgeExtension = {
-  matchIndex: index => {
+  matchIndex: (index: any) => {
     return get(index, propertyPath);
   },
   label: i18n.translate('xpack.crossClusterReplication.indexMgmtBadge.followerLabel', {
@@ -20,6 +21,8 @@ const followerBadgeExtension = {
   filterExpression: 'isFollowerIndex:true',
 };
 
-if (npSetup.plugins.indexManagement) {
-  npSetup.plugins.indexManagement.extensionsService.addBadge(followerBadgeExtension);
-}
+export const extendIndexManagement = (indexManagement?: IndexMgmtSetup) => {
+  if (indexManagement) {
+    indexManagement.extensionsService.addBadge(followerBadgeExtension);
+  }
+};

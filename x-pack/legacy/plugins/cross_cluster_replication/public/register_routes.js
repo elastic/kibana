@@ -44,6 +44,7 @@ if (isLicenseOK && isCcrUiEnabled) {
   const CCR_REACT_ROOT = 'ccrReactRoot';
 
   plugin({}).setup(npSetup.core, {
+    ...npSetup.plugins,
     __LEGACY: {
       chrome,
       docLinks: npStart.core.docLinks,

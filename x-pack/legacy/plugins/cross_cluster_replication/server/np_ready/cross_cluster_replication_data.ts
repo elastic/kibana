@@ -7,7 +7,7 @@ import { APICaller } from 'src/core/server';
 import { Index } from '../../../../../plugins/index_management/server';
 
 export const ccrDataEnricher = async (indicesList: Index[], callWithRequest: APICaller) => {
-  if (indicesList?.length) {
+  if (!indicesList?.length) {
     return indicesList;
   }
   const params = {
