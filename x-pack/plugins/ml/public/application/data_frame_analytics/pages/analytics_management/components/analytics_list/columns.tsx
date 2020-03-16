@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
+import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import {
   getDataFrameAnalyticsProgress,
   isDataFrameAnalyticsFailed,
@@ -125,9 +126,11 @@ export const getColumns = (
   expandedRowItemIds: DataFrameAnalyticsId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>,
   isManagementTable: boolean = false,
-  isMlEnabledInSpace: boolean = true
+  isMlEnabledInSpace: boolean = true,
+  createAnalyticsForm?: CreateAnalyticsFormProps
 ) => {
-  const actions = isManagementTable === true ? [AnalyticsViewAction] : getActions();
+  const actions =
+    isManagementTable === true ? [AnalyticsViewAction] : getActions(createAnalyticsForm!);
 
   function toggleDetails(item: DataFrameAnalyticsListRow) {
     const index = expandedRowItemIds.indexOf(item.config.id);

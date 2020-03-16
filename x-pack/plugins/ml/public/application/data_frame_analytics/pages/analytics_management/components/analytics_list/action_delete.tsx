@@ -54,6 +54,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
       iconType="trash"
       onClick={openModal}
       aria-label={buttonDeleteText}
+      style={{ padding: 0 }}
     >
       {buttonDeleteText}
     </EuiButtonEmpty>
