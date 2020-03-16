@@ -39,10 +39,10 @@ describe('CaseView ', () => {
     ).toEqual(data.title);
     expect(
       wrapper
-        .find(`[data-test-subj="case-view-state"]`)
+        .find(`[data-test-subj="case-view-status"]`)
         .first()
         .text()
-    ).toEqual(data.state);
+    ).toEqual(data.status);
     expect(
       wrapper
         .find(`[data-test-subj="case-view-tag-list"] .euiBadge__text`)
@@ -77,11 +77,11 @@ describe('CaseView ', () => {
     );
 
     wrapper
-      .find('input[data-test-subj="toggle-case-state"]')
+      .find('input[data-test-subj="toggle-case-status"]')
       .simulate('change', { target: { value: false } });
 
     expect(updateCaseProperty).toBeCalledWith({
-      updateKey: 'state',
+      updateKey: 'status',
       updateValue: 'closed',
     });
   });
