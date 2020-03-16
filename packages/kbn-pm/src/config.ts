@@ -48,7 +48,6 @@ export function getProjectPaths({ rootPath, ossOnly, skipKibanaPlugins }: Option
     projectPaths.push(resolve(rootPath, 'x-pack'));
     projectPaths.push(resolve(rootPath, 'x-pack/plugins/*'));
     projectPaths.push(resolve(rootPath, 'x-pack/legacy/plugins/*'));
-    projectPaths.push(resolve(rootPath, 'x-pack/test/functional_with_es_ssl/fixtures/plugins/*'));
   }
 
   if (!skipKibanaPlugins) {
