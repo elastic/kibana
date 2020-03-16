@@ -8,7 +8,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('InfraOps app', function() {
-    this.tags('ciGroup7');
+    // Firefox OOM https://github.com/elastic/kibana/issues/59454
+    this.tags(['ciGroup7', 'skipFirefox']);
 
     loadTestFile(require.resolve('./home_page'));
     loadTestFile(require.resolve('./feature_controls'));

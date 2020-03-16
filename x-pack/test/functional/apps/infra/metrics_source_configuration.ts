@@ -15,8 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'infraHome']);
 
   describe('Infrastructure Source Configuration', function() {
-    // Firefox OOM https://github.com/elastic/kibana/issues/59454
-    // this.tags('smoke');
+    this.tags('smoke');
     before(async () => {
       await esArchiver.load('empty_kibana');
     });

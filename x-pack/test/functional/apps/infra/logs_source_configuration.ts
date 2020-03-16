@@ -16,8 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
 
   describe('Logs Source Configuration', function() {
-    // Firefox OOM https://github.com/elastic/kibana/issues/59454
-    // this.tags('smoke');
+    this.tags('smoke');
 
     before(async () => {
       await esArchiver.load('empty_kibana');
