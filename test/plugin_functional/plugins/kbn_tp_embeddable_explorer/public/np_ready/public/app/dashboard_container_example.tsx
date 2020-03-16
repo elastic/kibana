@@ -30,7 +30,7 @@ import {
   DASHBOARD_CONTAINER_TYPE,
   DashboardContainer,
   DashboardContainerFactory,
-} from '../../../../../../../../src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
+} from '../../../../../../../../src/plugins/dashboard/public';
 
 import { CoreStart } from '../../../../../../../../src/core/public';
 import { dashboardInput } from './dashboard_input';

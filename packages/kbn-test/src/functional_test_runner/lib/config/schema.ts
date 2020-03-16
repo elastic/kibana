@@ -64,10 +64,6 @@ export const schema = Joi.object()
     testFiles: Joi.array().items(Joi.string()),
     testRunner: Joi.func(),
 
-    excludeTestFiles: Joi.array()
-      .items(Joi.string())
-      .default([]),
-
     suiteFiles: Joi.object()
       .keys({
         include: Joi.array()
