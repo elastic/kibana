@@ -9,7 +9,7 @@ kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
     def finishedSuites = [oss: [], xpack: [], ossFirefox: [], xpackFirefox: []]
 
     catchError {
-      // retryable.enable()
+      retryable.enable()
       parallel([
         // 'kibana-intake-agent': kibanaPipeline.intakeWorker('kibana-intake', './test/scripts/jenkins_unit.sh'),
         // 'x-pack-intake-agent': kibanaPipeline.intakeWorker('x-pack-intake', './test/scripts/jenkins_xpack.sh'),
@@ -34,7 +34,7 @@ kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
           parallelExtra: {
             try {
               // kibanaPipeline.buildXpack()
-              kibanaPipeline.prepareXpackTestQueue(queue)
+              // kibanaPipeline.prepareXpackTestQueue(queue)
             } finally {
               if (!queue.containsKey('xpack')) {
                 queue.xpack = []
