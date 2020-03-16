@@ -14,8 +14,10 @@ import { LogEntry, LogEntriesHighlightsResponse } from '../../../../common/http_
 export const useLogEntryHighlights = (
   sourceId: string,
   sourceVersion: string | undefined,
-  startKey: TimeKey | null,
-  endKey: TimeKey | null,
+  startTimestamp: number | null,
+  endTimestamp: number | null,
+  centerPoint: TimeKey | null,
+  size: number,
   filterQuery: string | null,
   highlightTerms: string[]
 ) => {
@@ -26,14 +28,16 @@ export const useLogEntryHighlights = (
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        if (!startKey || !endKey || !highlightTerms.length) {
+        if (!startTimestamp || !endTimestamp || !centerPoint || !highlightTerms.length) {
           throw new Error('Skipping request: Insufficient parameters');
         }
 
         return await fetchLogEntriesHighlights({
           sourceId,
-          startTimestamp: getPreviousTimeKey(startKey).time, // interval boundaries are exclusive
-          endTimestamp: getNextTimeKey(endKey).time, // interval boundaries are exclusive
+          startTimestamp,
+          endTimestamp,
+          center: centerPoint,
+          size,
           query: filterQuery || undefined,
           highlightTerms,
         });
@@ -42,7 +46,7 @@ export const useLogEntryHighlights = (
         setLogEntryHighlights(response.data);
       },
     },
-    [sourceId, startKey, endKey, filterQuery, highlightTerms]
+    [sourceId, startTimestamp, endTimestamp, centerPoint, size, filterQuery, highlightTerms]
   );
 
   useEffect(() => {
@@ -52,14 +56,21 @@ export const useLogEntryHighlights = (
   useEffect(() => {
     if (
       highlightTerms.filter(highlightTerm => highlightTerm.length > 0).length &&
-      startKey &&
-      endKey
+      startTimestamp &&
+      endTimestamp
     ) {
       loadLogEntryHighlights();
     } else {
       setLogEntryHighlights([]);
     }
-  }, [endKey, filterQuery, highlightTerms, loadLogEntryHighlights, sourceVersion, startKey]);
+  }, [
+    endTimestamp,
+    filterQuery,
+    highlightTerms,
+    loadLogEntryHighlights,
+    sourceVersion,
+    startTimestamp,
+  ]);
 
   const logEntryHighlightsById = useMemo(
     () =>

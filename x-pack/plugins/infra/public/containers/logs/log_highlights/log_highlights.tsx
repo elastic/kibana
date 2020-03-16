@@ -15,19 +15,21 @@ import { TimeKey } from '../../../../common/time';
 
 const FETCH_THROTTLE_INTERVAL = 3000;
 
+interface UseLogHighlightsStateProps {
+  sourceId: string;
+  sourceVersion: string | undefined;
+  centerPoint: TimeKey | null;
+  size: number;
+  filterQuery: string | null;
+}
+
 export const useLogHighlightsState = ({
   sourceId,
   sourceVersion,
-  entriesStart,
-  entriesEnd,
+  centerPoint,
+  size,
   filterQuery,
-}: {
-  sourceId: string;
-  sourceVersion: string | undefined;
-  entriesStart: TimeKey | null;
-  entriesEnd: TimeKey | null;
-  filterQuery: string | null;
-}) => {
+}: UseLogHighlightsStateProps) => {
   const [highlightTerms, setHighlightTerms] = useState<string[]>([]);
   const { visibleMidpoint, jumpToTargetPosition, startTimestamp, endTimestamp } = useContext(
     LogPositionState.Context
@@ -43,8 +45,10 @@ export const useLogHighlightsState = ({
   } = useLogEntryHighlights(
     sourceId,
     sourceVersion,
-    entriesStart,
-    entriesEnd,
+    throttledStartTimestamp,
+    throttledEndTimestamp,
+    centerPoint,
+    size,
     filterQuery,
     highlightTerms
   );
