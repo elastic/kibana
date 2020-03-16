@@ -22,7 +22,7 @@ This could be a sign that the agent does not have auto-instrumentation for whate
 
 It's important to note that if you have asynchronous spans, the sum of all span times may exceed the duration of the transaction.
 
-TIP: If the *Time spent by span type* chart is missing in the APM UI, it means your agent does not support this feature yet. 
+TIP: If the *Time spent by span type* chart is missing in the APM UI, it means your agent does not support this feature yet.
 
 *Transaction duration* shows the response times for this service and is broken down into average, 95th, and 99th percentile.
 If there's a weird spike that you'd like to investigate,
@@ -46,7 +46,7 @@ The transaction overview will only display helpful information when the transact
 
 Elastic APM Agents come with built-in support for popular frameworks out-of-the-box.
 However, if you only see one route in the Transaction overview page, or if you have transactions named "unknown route",
-it could be a symptom that the agent either wasn't installed correctly or doesn't support your framework. 
+it could be a symptom that the agent either wasn't installed correctly or doesn't support your framework.
 
 For further details, including troubleshooting and custom implementation instructions,
 refer to the documentation for each {apm-agents-ref}[APM Agent] you've implemented.
@@ -85,9 +85,7 @@ The number of requests per bucket is displayed when hovering over the graph, and
 [role="screenshot"]
 image::apm/images/apm-transaction-duration-dist.png[Example view of transactions duration distribution graph]
 
-Let's look at an example.
-In the screenshot below,
-you'll notice most of our requests fall into buckets on the left side of the graph,
+Most of the requests fall into buckets on the left side of the graph,
 with a long tail of smaller buckets to the right.
 This is a typical distribution, and indicates most of our requests were served quickly - awesome!
 It's the requests on the right, the ones taking longer than average, that we probably want to focus on.
