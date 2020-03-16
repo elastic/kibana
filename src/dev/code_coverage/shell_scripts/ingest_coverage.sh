@@ -18,6 +18,8 @@ USER_FROM_VAULT=$(vault read -field=username ${PATH_TO_SECRET})
 PASS_FROM_VAULT=$(vault read -field=password ${PATH_TO_SECRET})
 ES_HOST="https://${USER_FROM_VAULT}:${PASS_FROM_VAULT}/${HOST_FROM_VAULT}"
 export ES_HOST
+echo "### ES_HOST: ..."
+echo $ES_HOST
 
 STATIC_SITE_URL_BASE='https://kibana-coverage.elastic.dev'
 export STATIC_SITE_URL_BASE
