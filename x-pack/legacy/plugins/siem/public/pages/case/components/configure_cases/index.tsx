@@ -15,7 +15,11 @@ import { useCaseConfigure } from '../../../../containers/case/configure/use_conf
 import {
   ActionsConnectorsContextProvider,
   ConnectorAddFlyout,
+  ConnectorEditFlyout,
 } from '../../../../../../../../plugins/triggers_actions_ui/public';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ActionConnectorTableItem } from '../../../../../../../../plugins/triggers_actions_ui/public/types';
 
 import {
   ClosureType,
@@ -55,9 +59,14 @@ const actionTypes = [
 ];
 
 const ConfigureCasesComponent: React.FC = () => {
-  const [connectorIsValid, setConnectorIsValid] = useState(true);
   const { http, triggers_actions_ui, notifications, application } = useKibana().services;
+
+  const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
+  const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
+  const [editedConnectorItem, setEditedConnectorItem] = useState<
+    ActionConnectorTableItem | undefined
+  >(undefined);
 
   const handleShowAddFlyout = useCallback(() => setAddFlyoutVisibility(true), []);
 
@@ -143,6 +152,14 @@ const ConfigureCasesComponent: React.FC = () => {
     }
   }, [connectors, connectorId]);
 
+  useEffect(() => {
+    if (!isLoadingConnectors && connectorId !== 'none') {
+      setEditedConnectorItem(
+        connectors.find(c => c.id === connectorId) as ActionConnectorTableItem
+      );
+    }
+  }, [connectors, connectorId]);
+
   return (
     <FormWrapper>
       {!connectorIsValid && (
@@ -158,7 +175,7 @@ const ConfigureCasesComponent: React.FC = () => {
           disabled={persistLoading || isLoadingConnectors}
           isLoading={isLoadingConnectors}
           onChangeConnector={setConnectorId}
-          handleShowFlyout={handleShowAddFlyout}
+          handleShowAddFlyout={handleShowAddFlyout}
           selectedConnector={connectorId}
         />
       </SectionWrapper>
@@ -170,7 +187,12 @@ const ConfigureCasesComponent: React.FC = () => {
         />
       </SectionWrapper>
       <SectionWrapper>
-        <Mapping disabled mapping={mapping} onChangeMapping={setMapping} />
+        <Mapping
+          disabled
+          mapping={mapping}
+          onChangeMapping={setMapping}
+          setEditFlyoutVisibility={setEditFlyoutVisibility}
+        />
       </SectionWrapper>
       <SectionWrapper>
         <EuiSpacer />
@@ -217,6 +239,14 @@ const ConfigureCasesComponent: React.FC = () => {
           setAddFlyoutVisibility={setAddFlyoutVisibility}
           actionTypes={actionTypes}
         />
+        {editedConnectorItem && (
+          <ConnectorEditFlyout
+            key={editedConnectorItem.id}
+            initialConnector={editedConnectorItem}
+            editFlyoutVisible={editFlyoutVisible}
+            setEditFlyoutVisibility={setEditFlyoutVisibility}
+          />
+        )}
       </ActionsConnectorsContextProvider>
     </FormWrapper>
   );

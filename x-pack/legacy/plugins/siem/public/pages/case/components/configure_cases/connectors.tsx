@@ -34,7 +34,7 @@ interface Props {
   isLoading: boolean;
   onChangeConnector: (id: string) => void;
   selectedConnector: string;
-  handleShowFlyout: () => void;
+  handleShowAddFlyout: () => void;
 }
 const ConnectorsComponent: React.FC<Props> = ({
   connectors,
@@ -42,13 +42,13 @@ const ConnectorsComponent: React.FC<Props> = ({
   isLoading,
   onChangeConnector,
   selectedConnector,
-  handleShowFlyout,
+  handleShowAddFlyout,
 }) => {
   const dropDownLabel = (
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>{i18n.INCIDENT_MANAGEMENT_SYSTEM_LABEL}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiLink onClick={handleShowFlyout}>{i18n.ADD_NEW_CONNECTOR}</EuiLink>
+        <EuiLink onClick={handleShowAddFlyout}>{i18n.ADD_NEW_CONNECTOR}</EuiLink>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
