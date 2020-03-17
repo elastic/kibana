@@ -30,7 +30,7 @@ const fullParams: Params = {
   title: 'a title',
   description: 'a description',
   createdAt: '2020-03-13T08:34:53.450Z',
-  createdBy: { fullName: 'Elastic User', username: null },
+  createdBy: { fullName: 'Elastic User', username: 'elastic' },
   updatedAt: null,
   updatedBy: null,
   incidentId: null,
@@ -44,7 +44,7 @@ const fullParams: Params = {
       version: 'WzU3LDFd',
       comment: 'first comment',
       createdAt: '2020-03-13T08:34:53.450Z',
-      createdBy: { fullName: 'Elastic User', username: null },
+      createdBy: { fullName: 'Elastic User', username: 'elastic' },
       updatedAt: null,
       updatedBy: null,
     },
@@ -53,7 +53,7 @@ const fullParams: Params = {
       version: 'WzU3LDFd',
       comment: 'second comment',
       createdAt: '2020-03-13T08:34:53.450Z',
-      createdBy: { fullName: 'Elastic User', username: null },
+      createdBy: { fullName: 'Elastic User', username: 'elastic' },
       updatedAt: null,
       updatedBy: null,
     },
@@ -228,6 +228,23 @@ describe('transformFields', () => {
     });
     expect(res.description?.includes('\r\n')).toBe(true);
   });
+
+  test('append username if fullname is undefined', () => {
+    const fields = prepareFieldsForTransformation({
+      params: fullParams,
+      mapping: finalMapping,
+    });
+
+    const res = transformFields({
+      params: { ...fullParams, createdBy: { fullName: null, username: 'elastic' } },
+      fields,
+    });
+
+    expect(res).toEqual({
+      short_description: 'a title (created at 2020-03-13T08:34:53.450Z by elastic)',
+      description: 'a description (created at 2020-03-13T08:34:53.450Z by elastic)',
+    });
+  });
 });
 
 describe('appendField', () => {
@@ -276,7 +293,7 @@ describe('transformComments', () => {
         version: 'WzU3LDFd',
         comment: 'first comment',
         createdAt: '2020-03-13T08:34:53.450Z',
-        createdBy: { fullName: 'Elastic User', username: null },
+        createdBy: { fullName: 'Elastic User', username: 'elastic' },
         updatedAt: null,
         updatedBy: null,
       },
@@ -288,7 +305,7 @@ describe('transformComments', () => {
         version: 'WzU3LDFd',
         comment: 'first comment (created at 2020-03-13T08:34:53.450Z by Elastic User)',
         createdAt: '2020-03-13T08:34:53.450Z',
-        createdBy: { fullName: 'Elastic User', username: null },
+        createdBy: { fullName: 'Elastic User', username: 'elastic' },
         updatedAt: null,
         updatedBy: null,
       },
@@ -302,7 +319,7 @@ describe('transformComments', () => {
         version: 'WzU3LDFd',
         comment: 'first comment',
         createdAt: '2020-03-13T08:34:53.450Z',
-        createdBy: { fullName: 'Elastic User', username: null },
+        createdBy: { fullName: 'Elastic User', username: 'elastic' },
         updatedAt: null,
         updatedBy: null,
       },
@@ -314,7 +331,7 @@ describe('transformComments', () => {
         version: 'WzU3LDFd',
         comment: 'first comment (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
         createdAt: '2020-03-13T08:34:53.450Z',
-        createdBy: { fullName: 'Elastic User', username: null },
+        createdBy: { fullName: 'Elastic User', username: 'elastic' },
         updatedAt: null,
         updatedBy: null,
       },
@@ -327,7 +344,7 @@ describe('transformComments', () => {
         version: 'WzU3LDFd',
         comment: 'first comment',
         createdAt: '2020-03-13T08:34:53.450Z',
-        createdBy: { fullName: 'Elastic User', username: null },
+        createdBy: { fullName: 'Elastic User', username: 'elastic' },
         updatedAt: null,
         updatedBy: null,
       },
@@ -339,7 +356,7 @@ describe('transformComments', () => {
         version: 'WzU3LDFd',
         comment: 'first comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
         createdAt: '2020-03-13T08:34:53.450Z',
-        createdBy: { fullName: 'Elastic User', username: null },
+        createdBy: { fullName: 'Elastic User', username: 'elastic' },
         updatedAt: null,
         updatedBy: null,
       },

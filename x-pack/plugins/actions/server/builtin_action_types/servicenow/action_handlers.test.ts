@@ -44,7 +44,7 @@ const params = {
   title: 'a title',
   description: 'a description',
   createdAt: '2020-03-13T08:34:53.450Z',
-  createdBy: { fullName: 'Elastic User', username: null },
+  createdBy: { fullName: 'Elastic User', username: 'elastic' },
   updatedAt: null,
   updatedBy: null,
   incidentId: null,
@@ -58,7 +58,7 @@ const params = {
       version: 'WzU3LDFd',
       comment: 'first comment',
       createdAt: '2020-03-13T08:34:53.450Z',
-      createdBy: { fullName: 'Elastic User', username: null },
+      createdBy: { fullName: 'Elastic User', username: 'elastic' },
       updatedAt: null,
       updatedBy: null,
     },
@@ -190,7 +190,7 @@ describe('handleCreateIncident', () => {
           createdAt: '2020-03-13T08:34:53.450Z',
           createdBy: {
             fullName: 'Elastic User',
-            username: null,
+            username: 'elastic',
           },
           updatedAt: null,
           updatedBy: null,
@@ -257,7 +257,7 @@ describe('handleUpdateIncident', () => {
           createdAt: '2020-03-13T08:34:53.450Z',
           createdBy: {
             fullName: 'Elastic User',
-            username: null,
+            username: 'elastic',
           },
           updatedAt: null,
           updatedBy: null,
@@ -269,12 +269,12 @@ describe('handleUpdateIncident', () => {
           createdAt: '2020-03-13T08:34:53.450Z',
           createdBy: {
             fullName: 'Elastic User',
-            username: null,
+            username: 'elastic',
           },
           updatedAt: '2020-03-13T08:34:53.450Z',
           updatedBy: {
             fullName: 'Elastic User',
-            username: null,
+            username: 'elastic',
           },
           version: 'WzU3LDFd',
         },
@@ -298,7 +298,7 @@ describe('handleUpdateIncident', () => {
           createdAt: '2020-03-13T08:34:53.450Z',
           createdBy: {
             fullName: 'Elastic User',
-            username: null,
+            username: 'elastic',
           },
           updatedAt: null,
           updatedBy: null,
@@ -310,12 +310,12 @@ describe('handleUpdateIncident', () => {
           createdAt: '2020-03-13T08:34:53.450Z',
           createdBy: {
             fullName: 'Elastic User',
-            username: null,
+            username: 'elastic',
           },
           updatedAt: '2020-03-13T08:34:53.450Z',
           updatedBy: {
             fullName: 'Elastic User',
-            username: null,
+            username: 'elastic',
           },
           version: 'WzU3LDFd',
         },
@@ -744,7 +744,7 @@ describe('createComments', () => {
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: {
           fullName: 'Elastic User',
-          username: null,
+          username: 'elastic',
         },
         updatedAt: null,
         updatedBy: null,
@@ -756,12 +756,12 @@ describe('createComments', () => {
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: {
           fullName: 'Elastic User',
-          username: null,
+          username: 'elastic',
         },
         updatedAt: '2020-03-13T08:34:53.450Z',
         updatedBy: {
           fullName: 'Elastic User',
-          username: null,
+          username: 'elastic',
         },
         version: 'WzU3LDFd',
       },
@@ -779,7 +779,7 @@ describe('createComments', () => {
           createdAt: '2020-03-13T08:34:53.450Z',
           createdBy: {
             fullName: 'Elastic User',
-            username: null,
+            username: 'elastic',
           },
           updatedAt: null,
           updatedBy: null,
@@ -791,12 +791,12 @@ describe('createComments', () => {
           createdAt: '2020-03-13T08:34:53.450Z',
           createdBy: {
             fullName: 'Elastic User',
-            username: null,
+            username: 'elastic',
           },
           updatedAt: '2020-03-13T08:34:53.450Z',
           updatedBy: {
             fullName: 'Elastic User',
-            username: null,
+            username: 'elastic',
           },
           version: 'WzU3LDFd',
         },

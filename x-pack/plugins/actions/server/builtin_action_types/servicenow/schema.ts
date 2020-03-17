@@ -36,7 +36,7 @@ export const SecretsSchema = schema.object(SecretsSchemaProps);
 
 export const UserSchema = schema.object({
   fullName: schema.nullable(schema.string()),
-  username: schema.nullable(schema.string()),
+  username: schema.string(),
 });
 
 export const EntityInformationSchema = schema.object({

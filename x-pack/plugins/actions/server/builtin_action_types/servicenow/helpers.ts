@@ -83,7 +83,7 @@ export const transformFields = ({
     prev[cur.key] = transform({
       value: cur.value,
       date: params.createdAt,
-      user: params.createdBy.fullName ?? '',
+      user: params.createdBy.fullName ?? params.createdBy.username,
       previousValue: currentIncident ? currentIncident[cur.key] : '',
     }).value;
     return prev;

@@ -63,7 +63,7 @@ const mockOptions = {
     title: 'Incident title',
     description: 'Incident description',
     createdAt: '2020-03-13T08:34:53.450Z',
-    createdBy: { fullName: 'Elastic User', username: null },
+    createdBy: { fullName: 'Elastic User', username: 'elastic' },
     updatedAt: null,
     updatedBy: null,
     comments: [
@@ -72,7 +72,7 @@ const mockOptions = {
         version: 'WzU3LDFd',
         comment: 'A comment',
         createdAt: '2020-03-13T08:34:53.450Z',
-        createdBy: { fullName: 'Elastic User', username: null },
+        createdBy: { fullName: 'Elastic User', username: 'elastic' },
         updatedAt: null,
         updatedBy: null,
       },
@@ -175,7 +175,6 @@ describe('validateParams()', () => {
 
 describe('execute()', () => {
   beforeEach(() => {
-    handleIncidentMock.mockReset();
     handleIncidentMock.mockReset();
   });
 
