@@ -69,15 +69,16 @@ kibanaPipeline(timeoutMinutes: 180) {
               }
             }
           }
-        }
-        kibanaPipeline.bash(
-          """
+          kibanaPipeline.bash(
+            """
             echo "### Canonical TIME_STAMP for the build and ingestion: ${TIME_STAMP}"
 
             """,
-          "### About to Upload Code Coverage Static Site"
-        )
-        kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP)
+            "### About to Upload Code Coverage Static Site"
+          )
+          kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP)
+        }
+
         sh 'tar -czf kibana-jest-coverage.tar.gz target/kibana-coverage/jest-combined/*'
         kibanaPipeline.uploadCoverageArtifacts("coverage/jest-combined", 'kibana-jest-coverage.tar.gz')
         sh 'tar -czf kibana-functional-coverage.tar.gz target/kibana-coverage/functional-combined/*'
