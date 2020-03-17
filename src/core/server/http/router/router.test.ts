@@ -59,7 +59,7 @@ describe('Router', () => {
           {
             path: '/',
             options: { body: { output: 'file' } } as any, // We explicitly don't support 'file'
-            validate: { body: schema.object({}, { allowUnknowns: true }) },
+            validate: { body: schema.object({}, { unknowns: 'allow' }) },
           },
           (context, req, res) => res.ok({})
         )

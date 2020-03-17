@@ -16,7 +16,7 @@ export function registerLicenseRoute({ router, plugins: { licensing } }: RouteDe
       validate: {
         query: schema.object({ acknowledge: schema.string() }),
         body: schema.object({
-          license: schema.object({}, { allowUnknowns: true }),
+          license: schema.object({}, { unknowns: 'allow' }),
         }),
       },
     },
