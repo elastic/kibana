@@ -131,7 +131,7 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
             label: i18n.translate('xpack.ingestManager.configDetails.summary.revision', {
               defaultMessage: 'Revision',
             }),
-            content: '999', // FIXME: implement version - see: https://github.com/elastic/kibana/issues/56750
+            content: agentConfig?.revision ?? 0,
           },
           { isDivider: true },
           {
