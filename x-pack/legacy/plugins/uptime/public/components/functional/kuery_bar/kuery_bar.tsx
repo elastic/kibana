@@ -34,8 +34,6 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
 
 interface Props {
   autocomplete: DataPublicPluginSetup['autocomplete'];
-  loadIndexPattern: any;
-  indexPattern: any;
   'data-test-subj': string;
   loadIndexPattern: () => void;
   indexPattern: IIndexPattern | null;
