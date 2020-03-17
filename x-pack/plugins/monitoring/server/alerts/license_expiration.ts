@@ -27,7 +27,7 @@ import { executeActions, getUiMessage } from '../lib/alerts/license_expiration.l
 const EXPIRES_DAYS = [60, 30, 14, 7];
 
 export const getLicenseExpiration = (
-  getUiSettingsService: () => UiSettingsServiceStart | undefined,
+  getUiSettingsService: () => Promise<UiSettingsServiceStart>,
   monitoringCluster: ICustomClusterClient,
   getLogger: (...scopes: string[]) => Logger,
   ccsEnabled: boolean
@@ -83,12 +83,9 @@ export const getLicenseExpiration = (
         return state;
       }
 
-      const uiSettingsService = getUiSettingsService();
-      if (!uiSettingsService) {
-        logger.warn(`No ui settings available ${ALERT_TYPE_LICENSE_EXPIRATION}.`);
-        return state;
-      }
-      const uiSettings = uiSettingsService.asScopedToClient(services.savedObjectsClient);
+      const uiSettings = (await getUiSettingsService()).asScopedToClient(
+        services.savedObjectsClient
+      );
       const dateFormat: string = await uiSettings.get<string>('dateFormat');
       const timezone: string = await uiSettings.get<string>('dateFormat:tz');
       const emailAddress = await fetchDefaultEmailAddress(uiSettings);

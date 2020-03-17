@@ -16,6 +16,7 @@ import { getBeatsForClusters } from '../beats';
 import { alertsClustersAggregation } from '../../cluster_alerts/alerts_clusters_aggregation';
 import { alertsClusterSearch } from '../../cluster_alerts/alerts_cluster_search';
 import { checkLicense as checkLicenseForAlerts } from '../../cluster_alerts/check_license';
+import { fetchStatus } from '../alerts/fetch_status';
 import { getClustersSummary } from './get_clusters_summary';
 import {
   CLUSTER_ALERTS_SEARCH_SIZE,
@@ -27,6 +28,7 @@ import {
   CODE_PATH_LOGSTASH,
   CODE_PATH_BEATS,
   CODE_PATH_APM,
+  KIBANA_ALERTING_ENABLED,
 } from '../../../common/constants';
 import { getApmsForClusters } from '../apm/get_apms_for_clusters';
 import { i18n } from '@kbn/i18n';
@@ -97,15 +99,31 @@ export async function getClustersFromRequest(
     if (mlJobs !== null) {
       cluster.ml = { jobs: mlJobs };
     }
-    const alerts = isInCodePath(codePaths, [CODE_PATH_ALERTS])
-      ? await alertsClusterSearch(req, alertsIndex, cluster, checkLicenseForAlerts, {
+
+    if (isInCodePath(codePaths, [CODE_PATH_ALERTS])) {
+      if (KIBANA_ALERTING_ENABLED) {
+        const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
+        const callCluster = (...args) => callWithRequest(req, ...args);
+        cluster.alerts = await fetchStatus(
+          callCluster,
           start,
           end,
-          size: CLUSTER_ALERTS_SEARCH_SIZE,
-        })
-      : null;
-    if (alerts) {
-      cluster.alerts = alerts;
+          cluster.cluster_uuid,
+          req.server
+        );
+      } else {
+        cluster.alerts = await alertsClusterSearch(
+          req,
+          alertsIndex,
+          cluster,
+          checkLicenseForAlerts,
+          {
+            start,
+            end,
+            size: CLUSTER_ALERTS_SEARCH_SIZE,
+          }
+        );
+      }
     }
 
     cluster.logs = isInCodePath(codePaths, [CODE_PATH_LOGS])

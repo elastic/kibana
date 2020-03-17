@@ -99,12 +99,9 @@ export class Plugin {
   private readonly getLogger: (...scopes: string[]) => Logger;
   private cluster = {} as ICustomClusterClient;
   private licenseService = {} as MonitoringLicenseService;
-  private legacyAPI = {} as LegacyAPI;
-  private uiSettingsService = {} as UiSettingsServiceStart;
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
   private bulkUploader = {} as IBulkUploader;
-  private needToSetupLegacy: boolean = true;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
@@ -150,7 +147,10 @@ export class Plugin {
     if (KIBANA_ALERTING_ENABLED) {
       plugins.alerting.registerType(
         getLicenseExpiration(
-          () => this.uiSettingsService,
+          async () => {
+            const coreStart = (await core.getStartServices())[0];
+            return coreStart.uiSettings;
+          },
           cluster,
           this.getLogger,
           config.ui.ccs.enabled
@@ -212,7 +212,17 @@ export class Plugin {
     // If the UI is enabled, then we want to register it so it shows up
     // and start any other UI-related setup tasks
     if (config.ui.enabled) {
+      // Create our shim which is currently used to power our routing
+      this.monitoringCore = this.getLegacyShim(
+        config,
+        legacyConfig,
+        core.getStartServices as () => Promise<[CoreStart, PluginsStart]>,
+        this.licenseService,
+        this.cluster
+      );
+
       this.registerPluginInUI(plugins);
+      requireUIRoutes(this.monitoringCore);
       initInfraSource(config, plugins.infra);
     }
 
@@ -220,10 +230,7 @@ export class Plugin {
       // The legacy plugin calls this to register certain legacy dependencies
       // that are necessary for the plugin to properly run
       registerLegacyAPI: (legacyAPI: LegacyAPI) => {
-        this.legacyAPI = legacyAPI;
-        if (this.needToSetupLegacy) {
-          this.setupLegacy();
-        }
+        this.setupLegacy(legacyAPI);
       },
       // OSS stats api needs to call this in order to centralize how
       // we fetch kibana specific stats
@@ -231,33 +238,7 @@ export class Plugin {
     };
   }
 
-  async start(core: CoreStart, plugins: PluginsStart) {
-    const [config, legacyConfig] = await combineLatest([
-      this.initializerContext.config.create<MonitoringConfig>(),
-      this.initializerContext.config.legacy.globalConfig$,
-    ])
-      .pipe(first())
-      .toPromise();
-
-    // Create our shim which is currently used to power our routing
-    this.monitoringCore = this.getLegacyShim(
-      config,
-      legacyConfig,
-      plugins,
-      this.licenseService,
-      this.cluster
-    );
-
-    if (config.ui.enabled) {
-      requireUIRoutes(this.monitoringCore);
-    }
-
-    this.uiSettingsService = core.uiSettings;
-    if (this.needToSetupLegacy && !!this.legacyAPI.telemetryCollectionManager) {
-      this.setupLegacy();
-      this.needToSetupLegacy = false;
-    }
-  }
+  start() {}
 
   stop() {
     if (this.cluster) {
@@ -294,18 +275,18 @@ export class Plugin {
     });
   }
 
-  async setupLegacy() {
+  async setupLegacy(legacyAPI: LegacyAPI) {
     // Initialize telemetry
-    registerMonitoringCollection(this.cluster, this.legacyAPI.telemetryCollectionManager);
+    registerMonitoringCollection(this.cluster, legacyAPI.telemetryCollectionManager);
 
     // Set the stats getter
-    this.bulkUploader.setKibanaStatusGetter(() => this.legacyAPI.getServerStatus());
+    this.bulkUploader.setKibanaStatusGetter(() => legacyAPI.getServerStatus());
   }
 
   getLegacyShim(
     config: MonitoringConfig,
     legacyConfig: any,
-    plugins: PluginsStart,
+    getCoreServices: () => Promise<[CoreStart, PluginsStart]>,
     licenseService: MonitoringLicenseService,
     cluster: ICustomClusterClient
   ): MonitoringCore {
@@ -337,6 +318,7 @@ export class Plugin {
           req: KibanaRequest<any, any, any, any>,
           res: KibanaResponseFactory
         ) => {
+          const plugins = (await getCoreServices())[1];
           const legacyRequest = {
             ...req,
             logger: this.log,
