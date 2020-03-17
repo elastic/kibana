@@ -4,25 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse } from 'elasticsearch';
 import { flow, set, omit } from 'lodash/fp';
 
 import { Logger } from '../../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
 import { RuleTypeParams } from '../types';
 import { singleBulkCreate } from './single_bulk_create';
-import { Influencer } from '../../../../public/components/ml/types';
-
-interface Anomaly {
-  job_id: string;
-  record_score: number;
-  timestamp: number;
-  by_field_name: string;
-  by_field_value: string;
-  influencers?: Influencer[];
-}
-
-type AnomalyResults = SearchResponse<Anomaly>;
+import { AnomalyResults, Anomaly } from '../../machine_learning';
 
 interface BulkCreateMlSignalsParams {
   someResult: AnomalyResults;
@@ -41,24 +29,21 @@ interface BulkCreateMlSignalsParams {
   tags: string[];
 }
 
-const convertAnomalyFieldsToECS = (anomaly: Anomaly): Anomaly => {
-  const {
-    by_field_name: entityName,
-    by_field_value: entityValue,
-    influencers: maybeInfluencers,
-  } = anomaly;
-  const influencers = maybeInfluencers ?? [];
+export const convertAnomalyFieldsToECS = (anomaly: Anomaly): Anomaly => {
+  const { by_field_name: entityName, by_field_value: entityValue, influencers } = anomaly;
+  let errantFields = (influencers ?? []).map(influencer => ({
+    name: influencer.influencer_field_name,
+    value: influencer.influencer_field_values,
+  }));
 
-  const setEntityField = set(entityName, entityValue);
-  const setInfluencerFields = influencers.map(influencer =>
-    set(influencer.influencer_field_name, influencer.influencer_field_values)
-  );
-  const omitDottedFields = omit([
-    entityName,
-    ...influencers.map(influencer => influencer.influencer_field_name),
-  ]);
+  if (entityName && entityValue) {
+    errantFields = [...errantFields, { name: entityName, value: [entityValue] }];
+  }
 
-  return flow(omitDottedFields, setEntityField, setInfluencerFields)(anomaly);
+  const omitDottedFields = omit(errantFields.map(field => field.name));
+  const setNestedFields = errantFields.map(field => set(field.name, field.value));
+
+  return flow(omitDottedFields, setNestedFields)(anomaly);
 };
 
 export const bulkCreateMlSignals = async (params: BulkCreateMlSignalsParams) => {

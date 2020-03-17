@@ -7,6 +7,10 @@
 import { SearchResponse } from 'elasticsearch';
 
 import { AlertServices } from '../../../../../../plugins/alerting/server';
+import { AnomalyRecordDoc as Anomaly } from '../../../../../../plugins/ml/common/types/anomalies';
+
+export { Anomaly };
+export type AnomalyResults = SearchResponse<Anomaly>;
 
 export interface AnomaliesSearchParams {
   jobIds: string[];
@@ -16,13 +20,10 @@ export interface AnomaliesSearchParams {
   maxRecords?: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Anomaly = any;
-
 export const getAnomalies = async (
   params: AnomaliesSearchParams,
   callCluster: AlertServices['callCluster']
-): Promise<SearchResponse<Anomaly>> => {
+): Promise<AnomalyResults> => {
   const boolCriteria = buildCriteria(params);
 
   return callCluster('search', {
@@ -51,8 +52,7 @@ export const getAnomalies = async (
   });
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const buildCriteria = (params: AnomaliesSearchParams): any => {
+const buildCriteria = (params: AnomaliesSearchParams): object[] => {
   const { earliestMs, jobIds, latestMs, threshold } = params;
   const jobIdsFilterable =
     jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*');

@@ -39,7 +39,7 @@ const buildMockAnomaly = () => ({
       influencer_field_values: ['rock01'],
     },
   ],
-  'process.name': 'gzip',
+  'process.name': ['gzip'],
   'process.pid': ['123'],
   'user.name': ['root'],
   'host.name': ['rock01'],
@@ -77,6 +77,6 @@ describe('convertAnomalyFieldsToECS', () => {
     const anomaly = buildMockAnomaly();
     const result = convertAnomalyFieldsToECS(anomaly);
 
-    expect(result.process.name).toEqual('gzip');
+    expect(result.process.name).toEqual(['gzip']);
   });
 });
