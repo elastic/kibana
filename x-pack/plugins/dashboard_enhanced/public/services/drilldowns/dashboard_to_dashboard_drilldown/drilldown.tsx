@@ -15,6 +15,7 @@ import { txtGoToDashboard } from './i18n';
 
 export interface Params {
   getSavedObjectsClient: () => Promise<CoreStart['savedObjects']['client']>;
+  getNavigateToApp: () => Promise<CoreStart['application']['navigateToApp']>;
 }
 
 export class DashboardToDashboardDrilldown
@@ -48,12 +49,15 @@ export class DashboardToDashboardDrilldown
     return true;
   };
 
-  // it seems like tthtis fn is being execute with the wrong arguments
+  // it seems like this fn is being execute with the wrong arguments
   // first param should be Config but its { config: Config; name: string; actionFactory: string; } ( I thtink )
 
   // @ts-ignore
   public readonly execute = async ({ config }: Config, context: ActionContext) => {
-    console.log('context', context); // eslint-disable-line
-    window.location.hash = `#/dashboard/${config.dashboardId}`;
+    // todo - need to complete this
+    await this.params.getNavigateToApp().then(navigateToApp => {
+      navigateToApp('kibana', { path: `#/dashboard/${config.dashboardId}` });
+    });
+    // window.location.hash = `#/dashboard/${config.dashboardId}`;
   };
 }
