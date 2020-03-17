@@ -44,6 +44,11 @@ const AgentEventBase = {
   stream_id: schema.maybe(schema.string()),
 };
 
+export const AckEventSchema = schema.object({
+  ...AgentEventBase,
+  ...{ action_id: schema.string() },
+});
+
 export const AgentEventSchema = schema.object({
   ...AgentEventBase,
 });
