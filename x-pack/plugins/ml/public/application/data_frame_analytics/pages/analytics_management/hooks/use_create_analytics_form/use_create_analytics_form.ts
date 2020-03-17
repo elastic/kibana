@@ -9,6 +9,7 @@ import { useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { SimpleSavedObject } from 'kibana/public';
+import { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
 import { useMlContext } from '../../../../../contexts/ml';
 
@@ -308,7 +309,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     dispatch({ type: ACTION.SET_ESTIMATED_MODEL_MEMORY_LIMIT, value });
   };
 
-  const setJobClone = async (cloneJob: DataFrameAnalyticsConfig) => {
+  const setJobClone = async (cloneJob: DeepReadonly<DataFrameAnalyticsConfig>) => {
     resetForm();
     await prepareFormValidation();
 
