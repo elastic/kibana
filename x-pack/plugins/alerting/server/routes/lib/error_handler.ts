@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   RequestHandler,
   KibanaRequest,
@@ -25,7 +26,11 @@ export function handleDisabledApiKeysError<P, Q, B>(
     } catch (e) {
       if (isApiKeyDisabledError(e)) {
         return response.badRequest({
-          body: new Error('Alerting relies upon API keys which appear to be are disabled'),
+          body: new Error(
+            i18n.translate('xpack.alerting.api.error.disabledApiKeys', {
+              defaultMessage: 'Alerting relies upon API keys which appear to be are disabled',
+            })
+          ),
         });
       }
       throw e;
