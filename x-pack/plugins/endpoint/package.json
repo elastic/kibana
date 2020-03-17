@@ -4,10 +4,11 @@
   "version": "0.0.0",
   "private": true,
   "license": "Elastic-License",
-  "scripts": {},
+  "scripts": {
+    "test:generate": "ts-node --project scripts/cli_tsconfig.json scripts/resolver_generator.ts"
+  },
   "dependencies": {
-    "react-redux": "^7.1.0",
-    "seedrandom": "^3.0.5"
+    "react-redux": "^7.1.0"
   },
   "devDependencies": {
     "@types/seedrandom": ">=2.0.0 <4.0.0",

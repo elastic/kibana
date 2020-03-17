@@ -21,11 +21,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { IEmbeddable, EmbeddableInput } from './i_embeddable';
 import { EmbeddableRoot } from './embeddable_root';
-import { GetEmbeddableFactory } from '../types';
+import { EmbeddableStart } from '../../plugin';
 
 interface Props {
   type: string;
-  getEmbeddableFactory: GetEmbeddableFactory;
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
   input: EmbeddableInput;
 }
 

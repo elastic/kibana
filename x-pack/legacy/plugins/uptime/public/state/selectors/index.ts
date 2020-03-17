@@ -34,7 +34,7 @@ export const selectDynamicSettings = (state: AppState) => {
 };
 
 export const selectIndexPattern = ({ indexPattern }: AppState) => {
-  return indexPattern.index_pattern;
+  return { indexPattern: indexPattern.index_pattern, loading: indexPattern.loading };
 };
 
 export const selectPingHistogram = ({ ping, ui }: AppState) => {
@@ -48,4 +48,8 @@ export const selectPingHistogram = ({ ping, ui }: AppState) => {
 
 export const selectDurationLines = ({ monitorDuration }: AppState) => {
   return monitorDuration;
+};
+
+export const indexStatusSelector = ({ indexStatus }: AppState) => {
+  return indexStatus;
 };

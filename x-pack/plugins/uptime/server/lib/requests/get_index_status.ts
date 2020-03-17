@@ -5,7 +5,8 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { StatesIndexStatus } from '../../../../../legacy/plugins/uptime/common/graphql/types';
+import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
+import { StatesIndexStatus } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 
 export const getIndexStatus: UMElasticsearchQueryFn<{}, StatesIndexStatus> = async ({
   callES,
@@ -17,8 +18,6 @@ export const getIndexStatus: UMElasticsearchQueryFn<{}, StatesIndexStatus> = asy
   } = await callES('count', { index: dynamicSettings.heartbeatIndices });
   return {
     indexExists: total > 0,
-    docCount: {
-      count,
-    },
+    docCount: count,
   };
 };
