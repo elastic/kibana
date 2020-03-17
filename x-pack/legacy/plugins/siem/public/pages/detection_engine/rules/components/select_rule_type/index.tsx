@@ -5,7 +5,6 @@
  */
 
 import React, { useCallback } from 'react';
-import styled from 'styled-components';
 import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiIcon, EuiFormRow } from '@elastic/eui';
 
 import { FieldHook } from '../../../../../shared_imports';
@@ -17,9 +16,7 @@ interface SelectRuleTypeProps {
   field: FieldHook;
 }
 
-const Wrapper = styled(EuiFormRow)``;
-
-export const SelectRuleType = ({ field }: SelectRuleTypeProps) => {
+export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({ field }) => {
   const ruleType = field.value as RuleType;
   const setType = useCallback(
     (type: RuleType) => {
@@ -32,7 +29,7 @@ export const SelectRuleType = ({ field }: SelectRuleTypeProps) => {
   const license = true; // TODO
 
   return (
-    <Wrapper label={field.label} fullWidth>
+    <EuiFormRow label={field.label} fullWidth>
       <EuiFlexGrid columns={4}>
         <EuiFlexItem>
           <EuiCard
@@ -58,6 +55,6 @@ export const SelectRuleType = ({ field }: SelectRuleTypeProps) => {
           />
         </EuiFlexItem>
       </EuiFlexGrid>
-    </Wrapper>
+    </EuiFormRow>
   );
 };

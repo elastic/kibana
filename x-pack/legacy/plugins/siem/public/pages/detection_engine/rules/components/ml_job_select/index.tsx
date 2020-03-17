@@ -5,17 +5,11 @@
  */
 
 import React, { useCallback } from 'react';
-import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../../shared_imports';
 import { useSiemJobs } from '../../../../../components/ml_popover/hooks/use_siem_jobs';
 
-interface MlJobSelectProps {
-  field: FieldHook;
-}
-
-const Wrapper = styled(EuiFormRow)``;
 const JobDisplay = ({ title, description }: { title: string; description: string }) => (
   <>
     <strong>{title}</strong>
@@ -25,7 +19,11 @@ const JobDisplay = ({ title, description }: { title: string; description: string
   </>
 );
 
-export const MlJobSelect = ({ field }: MlJobSelectProps) => {
+interface MlJobSelectProps {
+  field: FieldHook;
+}
+
+export const MlJobSelect: React.FC<MlJobSelectProps> = ({ field }) => {
   const jobId = field.value as string;
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const [isLoading, siemJobs] = useSiemJobs(false);
@@ -43,7 +41,7 @@ export const MlJobSelect = ({ field }: MlJobSelectProps) => {
   }));
 
   return (
-    <Wrapper fullWidth label={field.label} isInvalid={isInvalid} error={errorMessage}>
+    <EuiFormRow fullWidth label={field.label} isInvalid={isInvalid} error={errorMessage}>
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiSuperSelect
@@ -55,6 +53,6 @@ export const MlJobSelect = ({ field }: MlJobSelectProps) => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </Wrapper>
+    </EuiFormRow>
   );
 };

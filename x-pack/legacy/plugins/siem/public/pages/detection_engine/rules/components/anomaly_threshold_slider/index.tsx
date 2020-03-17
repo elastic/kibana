@@ -5,7 +5,6 @@
  */
 
 import React, { useCallback } from 'react';
-import styled from 'styled-components';
 import { EuiFlexGrid, EuiFlexItem, EuiRange, EuiFormRow } from '@elastic/eui';
 
 import { FieldHook } from '../../../../../shared_imports';
@@ -16,9 +15,7 @@ interface AnomalyThresholdSliderProps {
 type Event = React.ChangeEvent<HTMLInputElement>;
 type EventArg = Event | React.MouseEvent<HTMLButtonElement>;
 
-const Wrapper = styled(EuiFormRow)``;
-
-export const AnomalyThresholdSlider = ({ field }: AnomalyThresholdSliderProps) => {
+export const AnomalyThresholdSlider: React.FC<AnomalyThresholdSliderProps> = ({ field }) => {
   const threshold = field.value as number;
   const onThresholdChange = useCallback(
     (event: EventArg) => {
@@ -29,7 +26,7 @@ export const AnomalyThresholdSlider = ({ field }: AnomalyThresholdSliderProps) =
   );
 
   return (
-    <Wrapper label={field.label} fullWidth>
+    <EuiFormRow label={field.label} fullWidth>
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>
           <EuiRange
@@ -43,6 +40,6 @@ export const AnomalyThresholdSlider = ({ field }: AnomalyThresholdSliderProps) =
           />
         </EuiFlexItem>
       </EuiFlexGrid>
-    </Wrapper>
+    </EuiFormRow>
   );
 };
