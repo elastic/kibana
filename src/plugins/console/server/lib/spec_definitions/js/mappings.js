@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { BOOLEAN } from './shared';
-
 const _ = require('lodash');
+
+import { BOOLEAN } from './shared';
 
 export default function(api) {
   api.addEndpointDescription('put_mapping', {
