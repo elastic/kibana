@@ -13,11 +13,9 @@ export enum STATUS {
   DOWN = 'down',
 }
 
-export const ML_JOB_ID = 'high_latency';
+export const ML_JOB_ID = 'high_latency_by_geo';
 
 export const ML_MODULE_ID = 'uptime_heartbeat';
-
-export const ML_BY_GEO_JOB_ID = 'uptime_heartbeat';
 
 export const UNNAMED_LOCATION = 'Unnamed-location';
 

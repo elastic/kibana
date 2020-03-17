@@ -8,7 +8,7 @@ import { handleActions } from 'redux-actions';
 import {
   getMLJobAction,
   createMLJobAction,
-  anomalyRecordsAction,
+  getAnomalyRecordsAction,
   deleteMLJobAction,
 } from '../actions';
 import { IReducerState } from './types';
@@ -34,7 +34,7 @@ export const mlJobsReducer = handleActions<MLJobState>(
     ...handleAsyncAction<MLJobState, Payload>('mlJob', getMLJobAction),
     ...handleAsyncAction<MLJobState, Payload>('mlJob', createMLJobAction),
     ...handleAsyncAction<MLJobState, Payload>('mlJob', deleteMLJobAction),
-    ...handleAsyncAction<MLJobState, Payload>('anomalies', anomalyRecordsAction),
+    ...handleAsyncAction<MLJobState, Payload>('anomalies', getAnomalyRecordsAction),
   },
   initialState
 );

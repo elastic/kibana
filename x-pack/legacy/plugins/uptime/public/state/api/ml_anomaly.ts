@@ -5,8 +5,8 @@
  */
 
 import { fetchGet, fetchPost } from './utils';
-import { INDEX_NAMES, ML_BY_GEO_JOB_ID, ML_JOB_ID, ML_MODULE_ID } from '../../../common/constants';
-import { BaseParams } from './types';
+import { INDEX_NAMES, ML_JOB_ID, ML_MODULE_ID } from '../../../common/constants';
+import { AnomalyRecordsParams } from '../actions';
 
 export const fetchMLJob = async ({ jobId }: { jobId: string }) => {
   const url = `/api/ml/anomaly_detectors/${jobId}`;
@@ -45,7 +45,10 @@ export const createMLJob = async ({ monitorId }: { monitorId: string }) => {
   };
 
   const response = await fetchPost(url, data);
-  if (response?.jobs?.[0]?.id === ML_JOB_ID && response?.jobs?.[0]?.success === true) {
+  if (
+    response?.jobs?.[0]?.id === `${monitorId}_${ML_JOB_ID}` &&
+    response?.jobs?.[0]?.success === true
+  ) {
     return {
       count: 1,
     };
@@ -57,7 +60,7 @@ export const createMLJob = async ({ monitorId }: { monitorId: string }) => {
 export const deleteMLJob = async ({ monitorId }: { monitorId: string }) => {
   const url = `/api/ml/jobs/delete_jobs`;
 
-  const data = { jobIds: [`${monitorId}_${ML_JOB_ID}`, `${monitorId}_${ML_BY_GEO_JOB_ID}`] };
+  const data = { jobIds: [`${monitorId}_${ML_JOB_ID}`] };
 
   const response = await fetchPost(url, data);
   if (response?.[ML_JOB_ID]?.deleted) {
@@ -78,31 +81,30 @@ export const getIndexDateRange = async () => {
   return [result.start.epoch, result.end.epoch];
 };
 
-export const fetchAnomalyRecords = async (params: BaseParams) => {
-  const { dateStart, dateEnd, monitorId } = params;
+export const fetchAnomalyRecords = async ({
+  dateStart,
+  dateEnd,
+  listOfMonitorIds,
+  anomalyThreshold,
+}: AnomalyRecordsParams) => {
   const url = `/api/ml/results/anomalies_table_data`;
+
   try {
     const data = {
-      jobIds: [`${monitorId}_${ML_JOB_ID}`, `${monitorId}_${ML_BY_GEO_JOB_ID}`],
+      jobIds: listOfMonitorIds.map((monitorId: string) => `${monitorId}_${ML_JOB_ID}`),
       criteriaFields: [],
       influencers: [],
       aggregationInterval: 'auto',
-      threshold: 0,
+      threshold: anomalyThreshold ?? 25,
       earliestMs: dateStart,
       latestMs: dateEnd,
       dateFormatTz: 'Europe/Berlin',
       maxRecords: 500,
       maxExamples: 10,
-      influencersFilterQuery: {
-        bool: {
-          should: [{ match_phrase: { 'monitor.id': monitorId } }],
-          minimum_should_match: 1,
-        },
-      },
     };
     return fetchPost(url, data);
   } catch (error) {
-    if (error.response.status === 404) {
+    if (error?.response?.status === 404) {
       return null;
     }
     throw error;

@@ -8,7 +8,7 @@ import { takeLatest } from 'redux-saga/effects';
 import {
   getMLJobAction,
   createMLJobAction,
-  anomalyRecordsAction,
+  getAnomalyRecordsAction,
   deleteMLJobAction,
 } from '../actions';
 import { fetchEffectFactory } from './fetch_effect';
@@ -24,8 +24,12 @@ export function* fetchMLJobEffect() {
     fetchEffectFactory(createMLJob, createMLJobAction.success, createMLJobAction.fail)
   );
   yield takeLatest(
-    anomalyRecordsAction.get,
-    fetchEffectFactory(fetchAnomalyRecords, anomalyRecordsAction.success, anomalyRecordsAction.fail)
+    getAnomalyRecordsAction.get,
+    fetchEffectFactory(
+      fetchAnomalyRecords,
+      getAnomalyRecordsAction.success,
+      getAnomalyRecordsAction.fail
+    )
   );
   yield takeLatest(
     deleteMLJobAction.get,

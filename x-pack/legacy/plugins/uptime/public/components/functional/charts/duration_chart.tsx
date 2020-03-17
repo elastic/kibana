@@ -4,21 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Axis, Chart, Position, timeFormatter, Settings } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import { Axis, Chart, Position, timeFormatter, Settings } from '@elastic/charts';
+import { SeriesIdentifier } from '@elastic/charts/dist/chart_types/xy_chart/utils/series';
 import { getChartDateLabel } from '../../../lib/helper';
-import { LocationDurationLine, MonitorDurationAveragePoint } from '../../../../common/types';
+import { LocationDurationLine } from '../../../../common/types';
 import { DurationLineSeriesList } from './duration_line_series_list';
 import { ChartWrapper } from './chart_wrapper';
 import { useUrlParams } from '../../../hooks';
 import { getTickFormat } from './get_tick_format';
 import { ChartEmptyState } from './chart_empty_state';
 import { DurationAnomaliesBar } from './duration_line_bar_list';
-import { MLJobLink } from '../../monitor_details/ml/ml_job_link';
+// import { MLJobLink } from '../../monitor_details/ml/ml_job_link';
 import { MLIntegrationComponent } from '../../monitor_details/ml/ml_integeration';
 
 interface DurationChartProps {
@@ -51,6 +52,8 @@ export const DurationChartComponent = ({
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { absoluteDateRangeStart: min, absoluteDateRangeEnd: max } = getUrlParams();
 
+  const [hiddenLegends, setHiddenLegends] = useState<string[]>([]);
+
   const onBrushEnd = (minX: number, maxX: number) => {
     updateUrlParams({
       dateRangeStart: moment(minX).toISOString(),
@@ -58,19 +61,17 @@ export const DurationChartComponent = ({
     });
   };
 
-  const findMaxInArray = (arr: MonitorDurationAveragePoint[]) => {
-    return Math.max(
-      ...arr.map(item => {
-        return item.y ? item.y : 0;
-      })
-    );
+  const legendToggleVisibility = (legendItem: SeriesIdentifier | null) => {
+    if (legendItem) {
+      setHiddenLegends(prevState => {
+        if (prevState.includes(legendItem.specId)) {
+          return [...prevState.filter(item => item !== legendItem.specId)];
+        } else {
+          return [...prevState, legendItem.specId];
+        }
+      });
+    }
   };
-
-  const maxY = Math.max(
-    ...locationDurationLines.map((data: LocationDurationLine) => {
-      return findMaxInArray(data.line);
-    })
-  );
 
   return (
     <>
@@ -104,6 +105,7 @@ export const DurationChartComponent = ({
                 showLegend={true}
                 legendPosition={Position.Bottom}
                 onBrushEnd={onBrushEnd}
+                onLegendItemClick={legendToggleVisibility}
               />
               <Axis
                 id="bottom"
@@ -124,7 +126,7 @@ export const DurationChartComponent = ({
                 })}
               />
               <DurationLineSeriesList lines={locationDurationLines} />
-              <DurationAnomaliesBar anomalies={anomalies} maxY={maxY} />
+              <DurationAnomaliesBar anomalies={anomalies} hiddenLegends={hiddenLegends} />
             </Chart>
           ) : (
             <ChartEmptyState

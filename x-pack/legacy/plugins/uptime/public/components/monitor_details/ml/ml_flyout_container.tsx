@@ -8,10 +8,9 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { hasMLJobSelector, isMLJobCreatingSelector, mlSelector } from '../../../state/selectors';
-import { createMLJobAction, deleteMLJobAction, getMLJobAction } from '../../../state/actions';
+import { createMLJobAction, deleteMLJobAction } from '../../../state/actions';
 import { MLJobLink } from './ml_job_link';
 import * as labels from './translations';
-import { ML_JOB_ID } from '../../../../common/constants';
 import {
   useKibana,
   KibanaReactNotifications,

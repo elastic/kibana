@@ -56,7 +56,7 @@ describe('state selectors', () => {
       errors: [],
     },
     monitorDuration: {
-      monitor_duration: null,
+      durationLines: null,
       loading: false,
       errors: [],
     },

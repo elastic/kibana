@@ -12,4 +12,13 @@ export const createMLJobAction = createAsyncAction<any>('CREATE_ML_JOB');
 
 export const deleteMLJobAction = createAsyncAction<any>('DELETE_ML_JOB');
 
-export const anomalyRecordsAction = createAsyncAction<any>('GET_ANOMALY_RECORDS');
+export interface AnomalyRecordsParams {
+  dateStart: string;
+  dateEnd: string;
+  listOfMonitorIds: string[];
+  anomalyThreshold?: number;
+}
+
+export const getAnomalyRecordsAction = createAsyncAction<AnomalyRecordsParams>(
+  'GET_ANOMALY_RECORDS'
+);

@@ -7,7 +7,7 @@
 import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useUrlParams } from '../../../hooks';
-import { anomalyRecordsAction, getMonitorDurationAction } from '../../../state/actions';
+import { getAnomalyRecordsAction, getMonitorDurationAction } from '../../../state/actions';
 import { DurationChartComponent } from '../../functional/charts';
 import { anomaliesSelector, selectDurationLines } from '../../../state/selectors';
 import { UptimeRefreshContext } from '../../../contexts';
@@ -25,7 +25,7 @@ export const DurationChart: React.FC<Props> = ({ monitorId }: Props) => {
     absoluteDateRangeEnd,
   } = getUrlParams();
 
-  const { monitor_duration, loading } = useSelector(selectDurationLines);
+  const { durationLines, loading } = useSelector(selectDurationLines);
 
   const anomalies = useSelector(anomaliesSelector);
 
@@ -37,12 +37,12 @@ export const DurationChart: React.FC<Props> = ({ monitorId }: Props) => {
     const params = { monitorId, dateStart: dateRangeStart, dateEnd: dateRangeEnd };
     dispatch(getMonitorDurationAction(params));
     const anomalyParams = {
-      monitorId,
+      listOfMonitorIds: [monitorId],
       dateStart: absoluteDateRangeStart,
       dateEnd: absoluteDateRangeEnd,
     };
 
-    dispatch(anomalyRecordsAction.get(anomalyParams));
+    dispatch(getAnomalyRecordsAction.get(anomalyParams));
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateRangeStart, dateRangeEnd, dispatch, lastRefresh, monitorId]);
@@ -51,7 +51,7 @@ export const DurationChart: React.FC<Props> = ({ monitorId }: Props) => {
     <DurationChartComponent
       anomalies={anomalies}
       loading={loading}
-      locationDurationLines={monitor_duration?.locationDurationLines ?? []}
+      locationDurationLines={durationLines?.locationDurationLines ?? []}
     />
   );
 };

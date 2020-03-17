@@ -8,16 +8,19 @@ import React from 'react';
 import moment from 'moment';
 import { AnnotationTooltipFormatter, RectAnnotation } from '@elastic/charts';
 import { RectAnnotationDatum } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
-import { ANOMALY_SEVERITY } from '../../../../../ml/common/constants/anomalies';
-import { getSeverityColor, getSeverityType } from '../../../../../ml/common/util/anomaly_utils';
 import { AnnotationTooltip } from './annotation_tooltip';
+import { ANOMALY_SEVERITY } from '../../../../../../../plugins/ml/common/constants/anomalies';
+import {
+  getSeverityColor,
+  getSeverityType,
+} from '../../../../../../../plugins/ml/common/util/anomaly_utils';
 
 interface Props {
   anomalies: any;
-  maxY: number;
+  hiddenLegends: string[];
 }
 
-export const DurationAnomaliesBar = ({ anomalies, maxY }: Props) => {
+export const DurationAnomaliesBar = ({ anomalies, hiddenLegends }: Props) => {
   const anomalyAnnotations: Map<string, { rect: RectAnnotationDatum[]; color: string }> = new Map();
 
   Object.keys(ANOMALY_SEVERITY).forEach(severityLevel => {
@@ -27,6 +30,13 @@ export const DurationAnomaliesBar = ({ anomalies, maxY }: Props) => {
   if (anomalies?.anomalies) {
     const records = anomalies.anomalies;
     records.forEach((record: any) => {
+      let recordObsvLoc = record.source['observer.geo.name']?.[0] ?? 'N/A';
+      if (recordObsvLoc === '') {
+        recordObsvLoc = 'N/A';
+      }
+      if (hiddenLegends.length && hiddenLegends.includes(`loc-avg-${recordObsvLoc}`)) {
+        return;
+      }
       const severityLevel = getSeverityType(record.severity);
 
       const tooltipData = {

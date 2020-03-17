@@ -12,7 +12,6 @@ import { UptimeDatePicker } from '../components/functional/uptime_date_picker';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useUrlParams } from '../hooks';
-import { MLIntegrationComponent } from '../components/monitor_details/ml/ml_integeration';
 import { UptimeUrlParams } from '../lib/helper';
 
 interface PageHeaderProps {

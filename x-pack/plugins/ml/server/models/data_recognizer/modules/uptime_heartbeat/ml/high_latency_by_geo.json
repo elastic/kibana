@@ -3,13 +3,14 @@
   "groups": ["uptime"],
   "description": "Uptime Heartbeat: Identify periods of increased latency across geographical regions.",
   "analysis_config": {
-    "bucket_span": "2m",
+    "bucket_span": "15m",
     "detectors": [
       {
         "detector_description": "increased latency",
         "function": "high_mean",
         "field_name": "monitor.duration.us",
-        "partition_field_name": "observer.geo.name"
+        "partition_field_name": "observer.geo.name",
+        "use_null": true
       }
     ],
     "influencers": ["monitor.id", "monitor.name", "observer.geo.name"]
