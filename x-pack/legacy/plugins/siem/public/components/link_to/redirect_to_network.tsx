@@ -33,7 +33,8 @@ export const RedirectToNetworkPage = ({
 );
 
 const baseNetworkUrl = `#/link-to/${SiemPageName.network}`;
-export const getNetworkUrl = () => baseNetworkUrl;
+export const getNetworkUrl = (search?: string) =>
+  `${baseNetworkUrl}${search != null ? `?${search}` : ''}`;
 export const getIPDetailsUrl = (
   detailName: string,
   flowTarget?: FlowTarget | FlowTargetSourceDest

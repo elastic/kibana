@@ -63,9 +63,10 @@ export const RedirectToEditRulePage = ({
 
 const baseDetectionEngineUrl = `#/link-to/${DETECTION_ENGINE_PAGE_NAME}`;
 
-export const getDetectionEngineUrl = () => `${baseDetectionEngineUrl}`;
-export const getDetectionEngineAlertUrl = () =>
-  `${baseDetectionEngineUrl}/${DetectionEngineTab.alerts}`;
+export const getDetectionEngineUrl = (search?: string) =>
+  `${baseDetectionEngineUrl}${search != null ? `?${search}` : ''}`;
+export const getDetectionEngineAlertUrl = (search?: string) =>
+  `${baseDetectionEngineUrl}/${DetectionEngineTab.alerts}${search != null ? `?${search}` : ''}`;
 export const getDetectionEngineTabUrl = (tabPath: string) => `${baseDetectionEngineUrl}/${tabPath}`;
 export const getRulesUrl = () => `${baseDetectionEngineUrl}/rules`;
 export const getCreateRuleUrl = () => `${baseDetectionEngineUrl}/rules/create`;

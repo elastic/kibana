@@ -17,4 +17,5 @@ export const RedirectToTimelinesPage = ({ location: { search } }: TimelineCompon
   <RedirectWrapper to={`/${SiemPageName.timelines}${search}`} />
 );
 
-export const getTimelinesUrl = () => `#/link-to/${SiemPageName.timelines}`;
+export const getTimelinesUrl = (search?: string) =>
+  `#/link-to/${SiemPageName.timelines}${search != null ? `?${search}` : ''}`;

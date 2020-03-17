@@ -44,9 +44,11 @@ export const RedirectToHostDetailsPage = ({
 
 const baseHostsUrl = `#/link-to/${SiemPageName.hosts}`;
 
-export const getHostsUrl = () => baseHostsUrl;
+export const getHostsUrl = (search?: string) =>
+  `${baseHostsUrl}${search != null ? `?${search}` : ''}`;
 
-export const getTabsOnHostsUrl = (tabName: HostsTableType) => `${baseHostsUrl}/${tabName}`;
+export const getTabsOnHostsUrl = (tabName: HostsTableType, search?: string) =>
+  `${baseHostsUrl}/${tabName}${search != null ? `?${search}` : ''}`;
 
 export const getHostDetailsUrl = (detailName: string) => `${baseHostsUrl}/${detailName}`;
 

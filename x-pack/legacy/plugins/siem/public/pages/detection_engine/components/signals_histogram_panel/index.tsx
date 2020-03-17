@@ -11,19 +11,21 @@ import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 
 import { HeaderSection } from '../../../../components/header_section';
-import { SignalsHistogram } from './signals_histogram';
-import { Filter, esQuery, Query } from '../../../../../../../../../src/plugins/data/public';
-import { RegisterQuery, SignalsHistogramOption, SignalsAggregation, SignalsTotal } from './types';
-import { signalsHistogramOptions } from './config';
-import { getDetectionEngineUrl } from '../../../../components/link_to';
-import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
-import { useKibana, useUiSetting$ } from '../../../../lib/kibana';
-import { InspectButtonContainer } from '../../../../components/inspect';
-import { useQuerySignals } from '../../../../containers/detection_engine/signals/use_query';
-import { MatrixLoader } from '../../../../components/matrix_histogram/matrix_loader';
 
+import { Filter, esQuery, Query } from '../../../../../../../../../src/plugins/data/public';
+import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
+import { useQuerySignals } from '../../../../containers/detection_engine/signals/use_query';
+import { getDetectionEngineUrl } from '../../../../components/link_to';
+import { InspectButtonContainer } from '../../../../components/inspect';
+import { useGetUrlSearch } from '../../../../components/navigation/use_get_url_search';
+import { MatrixLoader } from '../../../../components/matrix_histogram/matrix_loader';
+import { useKibana, useUiSetting$ } from '../../../../lib/kibana';
+import { navTabs } from '../../../home/home_navigations';
+import { signalsHistogramOptions } from './config';
 import { formatSignalsData, getSignalsHistogramQuery, showInitialLoadingSpinner } from './helpers';
+import { SignalsHistogram } from './signals_histogram';
 import * as i18n from './translations';
+import { RegisterQuery, SignalsHistogramOption, SignalsAggregation, SignalsTotal } from './types';
 
 const DEFAULT_PANEL_HEIGHT = 300;
 
@@ -101,6 +103,7 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
       signalIndexName
     );
     const kibana = useKibana();
+    const urlSearch = useGetUrlSearch(navTabs.detections);
 
     const totalSignals = useMemo(
       () =>
@@ -212,7 +215,9 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
                   </EuiFlexItem>
                   {showLinkToSignals && (
                     <ViewSignalsFlexItem grow={false}>
-                      <EuiButton href={getDetectionEngineUrl()}>{i18n.VIEW_SIGNALS}</EuiButton>
+                      <EuiButton href={getDetectionEngineUrl(urlSearch)}>
+                        {i18n.VIEW_SIGNALS}
+                      </EuiButton>
                     </ViewSignalsFlexItem>
                   )}
                 </EuiFlexGroup>
