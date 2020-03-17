@@ -25,7 +25,7 @@ export const PackageIcon: React.FunctionComponent<{
 
 const usePackageIcon = (packageName: string, version?: string, icons?: Package['icons']) => {
   const { toImage } = useLinks();
-  const [iconType, setIconType] = useState<string>('empty');
+  const [iconType, setIconType] = useState<string>('');
   const pkgKey = `${packageName}-${version ?? ''}`;
 
   // Generates an icon path or Eui Icon name based on an icon list from the package
