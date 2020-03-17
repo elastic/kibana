@@ -97,7 +97,7 @@ function mapToHostResultList(
   queryParams: Record<string, any>,
   searchResponse: SearchResponse<HostMetadata>
 ): HostResultList {
-  const totalNumberOfEndpoints = searchResponse?.aggregations?.total?.value || 0;
+  const totalNumberOfHosts = searchResponse?.aggregations?.total?.value || 0;
   if (searchResponse.hits.hits.length > 0) {
     return {
       request_page_size: queryParams.size,
@@ -106,13 +106,13 @@ function mapToHostResultList(
         .map(response => response.inner_hits.most_recent.hits.hits)
         .flatMap(data => data as HitSource)
         .map(entry => entry._source),
-      total: totalNumberOfEndpoints,
+      total: totalNumberOfHosts,
     };
   } else {
     return {
       request_page_size: queryParams.size,
       request_page_index: queryParams.from,
-      total: totalNumberOfEndpoints,
+      total: totalNumberOfHosts,
       hosts: [],
     };
   }
