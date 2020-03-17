@@ -5,30 +5,26 @@
  */
 
 import React from 'react';
-import { EuiNotificationBadge } from '@elastic/eui';
-import useMountedState from 'react-use/lib/useMountedState';
+import { EuiNotificationBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EmbeddableContext } from '../../../../../../../../src/plugins/embeddable/public';
 import { txtDisplayName } from './i18n';
+import { useContainerState } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 export const MenuItem: React.FC<{ context: EmbeddableContext }> = ({ context }) => {
-  const isMounted = useMountedState();
-  const [count, setCount] = React.useState(0);
+  if (!context.embeddable.dynamicActions)
+    throw new Error('Flyout edit drillldown context menu item requires `dynamicActions`');
 
-  React.useEffect(() => {
-    if (!context.embeddable.dynamicActions) return;
-    context.embeddable.dynamicActions.count().then(result => {
-      if (!isMounted()) return;
-      setCount(result);
-    });
-  }, [context.embeddable.dynamicActions, isMounted]);
-
-  const badge = !count ? null : (
-    <EuiNotificationBadge style={{ float: 'right', marginTop: 1 }}>{count}</EuiNotificationBadge>
-  );
+  const { events } = useContainerState(context.embeddable.dynamicActions.state);
+  const count = events.length;
 
   return (
-    <>
-      {txtDisplayName} {badge}
-    </>
+    <EuiFlexGroup alignItems={'center'}>
+      <EuiFlexItem grow={true}>{txtDisplayName}</EuiFlexItem>
+      {count > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiNotificationBadge>{count}</EuiNotificationBadge>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 };
