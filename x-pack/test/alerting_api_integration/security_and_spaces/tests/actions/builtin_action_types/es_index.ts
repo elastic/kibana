@@ -31,7 +31,9 @@ export default function indexTest({ getService }: FtrProviderContext) {
         .send({
           name: 'An index action',
           actionTypeId: '.index',
-          config: {},
+          config: {
+            index: ES_TEST_INDEX_NAME,
+          },
           secrets: {},
         })
         .expect(200);
@@ -41,7 +43,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         name: 'An index action',
         actionTypeId: '.index',
         config: {
-          index: null,
+          index: ES_TEST_INDEX_NAME,
         },
       });
       createdActionID = createdAction.id;
@@ -55,10 +57,10 @@ export default function indexTest({ getService }: FtrProviderContext) {
         id: fetchedAction.id,
         name: 'An index action',
         actionTypeId: '.index',
-        config: { index: null },
+        config: { index: ES_TEST_INDEX_NAME },
       });
 
-      // create action with index config
+      // create action with all config props
       const { body: createdActionWithIndex } = await supertest
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
@@ -67,6 +69,8 @@ export default function indexTest({ getService }: FtrProviderContext) {
           actionTypeId: '.index',
           config: {
             index: ES_TEST_INDEX_NAME,
+            refresh: true,
+            executionTimeField: 'test',
           },
         })
         .expect(200);
@@ -77,6 +81,8 @@ export default function indexTest({ getService }: FtrProviderContext) {
         actionTypeId: '.index',
         config: {
           index: ES_TEST_INDEX_NAME,
+          refresh: true,
+          executionTimeField: 'test',
         },
       });
       createdActionIDWithIndex = createdActionWithIndex.id;
@@ -92,6 +98,8 @@ export default function indexTest({ getService }: FtrProviderContext) {
         actionTypeId: '.index',
         config: {
           index: ES_TEST_INDEX_NAME,
+          refresh: true,
+          executionTimeField: 'test',
         },
       });
     });
@@ -122,9 +130,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            index: ES_TEST_INDEX_NAME,
             documents: [{ testing: [1, 2, 3] }],
-            refresh: true,
           },
         })
         .expect(200);
@@ -141,9 +147,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            index: ES_TEST_INDEX_NAME,
             documents: [{ testing: [1, 2, 3] }, { Testing: [4, 5, 6] }],
-            refresh: true,
           },
         })
         .expect(200);
@@ -174,7 +178,6 @@ export default function indexTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            index: ES_TEST_INDEX_NAME,
             documents: [{ refresh: 'not set' }],
           },
         })
@@ -190,9 +193,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            index: ES_TEST_INDEX_NAME,
             documents: [{ refresh: 'true' }],
-            refresh: true,
           },
         })
         .expect(200);
@@ -211,7 +212,6 @@ export default function indexTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            indeX: ES_TEST_INDEX_NAME,
             documents: [{ testing: [1, 2, 3] }],
           },
         })
