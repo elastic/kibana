@@ -4,18 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { listAgents } from './crud';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { unenrollAgents } from './unenroll';
+import { agentConfigService } from '../agent_config';
 
 export async function updateAgentsForConfigId(
   soClient: SavedObjectsClientContract,
   configId: string
 ) {
+  const config = await agentConfigService.get(soClient, configId);
+  if (!config) {
+    throw new Error('Config not found');
+  }
   let hasMore = true;
   let page = 1;
-  const now = new Date().toISOString();
   while (hasMore) {
     const { agents } = await listAgents(soClient, {
       kuery: `agents.config_id:"${configId}"`,
@@ -30,7 +34,7 @@ export async function updateAgentsForConfigId(
     const agentUpdate = agents.map(agent => ({
       id: agent.id,
       type: AGENT_SAVED_OBJECT_TYPE,
-      attributes: { config_updated_at: now },
+      attributes: { config_newest_revision: config.revision },
     }));
 
     await soClient.bulkUpdate(agentUpdate);

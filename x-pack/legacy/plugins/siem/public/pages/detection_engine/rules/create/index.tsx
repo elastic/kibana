@@ -283,7 +283,7 @@ const CreateRulePageComponent: React.FC = () => {
               isLoading={isLoading || loading}
               setForm={setStepsForm}
               setStepData={setStepData}
-              descriptionDirection="row"
+              descriptionColumns="singleSplit"
             />
           </StepDefineRuleAccordion>
         </MyEuiPanel>
@@ -312,7 +312,7 @@ const CreateRulePageComponent: React.FC = () => {
             <StepAboutRule
               addPadding={true}
               defaultValues={(stepsData.current[RuleStep.aboutRule].data as AboutStepRule) ?? null}
-              descriptionDirection="row"
+              descriptionColumns="singleSplit"
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.aboutRule]}
               isLoading={isLoading || loading}
               setForm={setStepsForm}
@@ -347,7 +347,7 @@ const CreateRulePageComponent: React.FC = () => {
               defaultValues={
                 (stepsData.current[RuleStep.scheduleRule].data as ScheduleStepRule) ?? null
               }
-              descriptionDirection="row"
+              descriptionColumns="singleSplit"
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.scheduleRule]}
               isLoading={isLoading || loading}
               setForm={setStepsForm}
