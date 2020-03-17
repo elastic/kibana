@@ -51,8 +51,22 @@ export async function acknowledgeAgentActions(
   });
 
   if (matchedUpdatedActions.length > 0) {
+    const configRevision = matchedUpdatedActions.reduce((acc, action) => {
+      if (action.type !== 'CONFIG_CHANGE') {
+        return acc;
+      }
+      const data = action.data ? JSON.parse(action.data as string) : {};
+
+      if (data?.config?.id !== agent.config_id) {
+        return acc;
+      }
+
+      return data?.config?.revision > acc ? data?.config?.revision : acc;
+    }, agent.config_revision || 0);
+
     await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id, {
       actions: matchedUpdatedActions,
+      config_revision: configRevision,
     });
   }
 
