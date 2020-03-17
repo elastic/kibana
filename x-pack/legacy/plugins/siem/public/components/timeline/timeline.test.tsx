@@ -14,19 +14,16 @@ import { mockBrowserFields } from '../../containers/source/mock';
 import { Direction } from '../../graphql/types';
 import { defaultHeaders, mockTimelineData, mockIndexPattern } from '../../mock';
 import { TestProviders } from '../../mock/test_providers';
-import { flyoutHeaderHeight } from '../flyout';
 
 import {
   DELETE_CLASS_NAME,
   ENABLE_CLASS_NAME,
   EXCLUDE_CLASS_NAME,
 } from './data_providers/provider_item_actions';
-import { TimelineComponent } from './timeline';
+import { TimelineComponent, Props as TimelineComponentProps } from './timeline';
 import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../utils/use_mount_appended';
-
-const testFlyoutHeight = 980;
 
 jest.mock('../../lib/kibana');
 
@@ -35,6 +32,7 @@ jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 describe('Timeline', () => {
+  let props = {} as TimelineComponentProps;
   const sort: Sort = {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
@@ -50,41 +48,44 @@ describe('Timeline', () => {
 
   const mount = useMountAppended();
 
+  beforeEach(() => {
+    props = {
+      browserFields: mockBrowserFields,
+      columns: defaultHeaders,
+      id: 'foo',
+      dataProviders: mockDataProviders,
+      end: endDate,
+      eventType: 'raw' as TimelineComponentProps['eventType'],
+      filters: [],
+      indexPattern,
+      indexToAdd: [],
+      isLive: false,
+      itemsPerPage: 5,
+      itemsPerPageOptions: [5, 10, 20],
+      kqlMode: 'search' as TimelineComponentProps['kqlMode'],
+      kqlQueryExpression: '',
+      loadingIndexName: false,
+      onChangeDataProviderKqlQuery: jest.fn(),
+      onChangeDroppableAndProvider: jest.fn(),
+      onChangeItemsPerPage: jest.fn(),
+      onClose: jest.fn(),
+      onDataProviderEdited: jest.fn(),
+      onDataProviderRemoved: jest.fn(),
+      onToggleDataProviderEnabled: jest.fn(),
+      onToggleDataProviderExcluded: jest.fn(),
+      show: true,
+      showCallOutUnauthorizedMsg: false,
+      start: startDate,
+      sort,
+      toggleColumn: jest.fn(),
+      usersViewing: ['elastic'],
+    };
+  });
+
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
-      const wrapper = shallow(
-        <TimelineComponent
-          browserFields={mockBrowserFields}
-          columns={defaultHeaders}
-          id="foo"
-          dataProviders={mockDataProviders}
-          end={endDate}
-          eventType="raw"
-          filters={[]}
-          flyoutHeight={testFlyoutHeight}
-          flyoutHeaderHeight={flyoutHeaderHeight}
-          indexPattern={indexPattern}
-          indexToAdd={[]}
-          isLive={false}
-          itemsPerPage={5}
-          itemsPerPageOptions={[5, 10, 20]}
-          kqlMode="search"
-          kqlQueryExpression=""
-          loadingIndexName={false}
-          onChangeDataProviderKqlQuery={jest.fn()}
-          onChangeDroppableAndProvider={jest.fn()}
-          onChangeItemsPerPage={jest.fn()}
-          onDataProviderEdited={jest.fn()}
-          onDataProviderRemoved={jest.fn()}
-          onToggleDataProviderEnabled={jest.fn()}
-          onToggleDataProviderExcluded={jest.fn()}
-          show={true}
-          showCallOutUnauthorizedMsg={false}
-          start={startDate}
-          sort={sort}
-          toggleColumn={jest.fn()}
-        />
-      );
+      const wrapper = shallow(<TimelineComponent {...props} />);
+
       expect(wrapper).toMatchSnapshot();
     });
 
@@ -92,37 +93,7 @@ describe('Timeline', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocks}>
-            <TimelineComponent
-              browserFields={mockBrowserFields}
-              columns={defaultHeaders}
-              id="foo"
-              dataProviders={mockDataProviders}
-              end={endDate}
-              eventType="raw"
-              filters={[]}
-              flyoutHeight={testFlyoutHeight}
-              flyoutHeaderHeight={flyoutHeaderHeight}
-              indexPattern={indexPattern}
-              indexToAdd={[]}
-              isLive={false}
-              itemsPerPage={5}
-              itemsPerPageOptions={[5, 10, 20]}
-              kqlMode="search"
-              kqlQueryExpression=""
-              loadingIndexName={false}
-              onChangeDataProviderKqlQuery={jest.fn()}
-              onChangeDroppableAndProvider={jest.fn()}
-              onChangeItemsPerPage={jest.fn()}
-              onDataProviderEdited={jest.fn()}
-              onDataProviderRemoved={jest.fn()}
-              onToggleDataProviderEnabled={jest.fn()}
-              onToggleDataProviderExcluded={jest.fn()}
-              show={true}
-              showCallOutUnauthorizedMsg={false}
-              start={startDate}
-              sort={sort}
-              toggleColumn={jest.fn()}
-            />
+            <TimelineComponent {...props} />
           </MockedProvider>
         </TestProviders>
       );
@@ -130,41 +101,28 @@ describe('Timeline', () => {
       expect(wrapper.find('[data-test-subj="timelineHeader"]').exists()).toEqual(true);
     });
 
+    test('it renders the title field', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mocks}>
+            <TimelineComponent {...props} />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      expect(
+        wrapper
+          .find('[data-test-subj="timeline-title"]')
+          .first()
+          .props().placeholder
+      ).toContain('Untitled Timeline');
+    });
+
     test('it renders the timeline table', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocks}>
-            <TimelineComponent
-              browserFields={mockBrowserFields}
-              columns={defaultHeaders}
-              id="foo"
-              dataProviders={mockDataProviders}
-              end={endDate}
-              eventType="raw"
-              filters={[]}
-              flyoutHeight={testFlyoutHeight}
-              flyoutHeaderHeight={flyoutHeaderHeight}
-              indexPattern={indexPattern}
-              indexToAdd={[]}
-              isLive={false}
-              itemsPerPage={5}
-              itemsPerPageOptions={[5, 10, 20]}
-              kqlMode="search"
-              kqlQueryExpression=""
-              loadingIndexName={false}
-              onChangeDataProviderKqlQuery={jest.fn()}
-              onChangeDroppableAndProvider={jest.fn()}
-              onChangeItemsPerPage={jest.fn()}
-              onDataProviderEdited={jest.fn()}
-              onDataProviderRemoved={jest.fn()}
-              onToggleDataProviderEnabled={jest.fn()}
-              onToggleDataProviderExcluded={jest.fn()}
-              show={true}
-              showCallOutUnauthorizedMsg={false}
-              start={startDate}
-              sort={sort}
-              toggleColumn={jest.fn()}
-            />
+            <TimelineComponent {...props} />
           </MockedProvider>
         </TestProviders>
       );
@@ -176,37 +134,7 @@ describe('Timeline', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocks}>
-            <TimelineComponent
-              browserFields={mockBrowserFields}
-              columns={defaultHeaders}
-              id="foo"
-              dataProviders={mockDataProviders}
-              end={endDate}
-              eventType="raw"
-              filters={[]}
-              flyoutHeight={testFlyoutHeight}
-              flyoutHeaderHeight={flyoutHeaderHeight}
-              indexPattern={indexPattern}
-              indexToAdd={[]}
-              isLive={false}
-              itemsPerPage={5}
-              itemsPerPageOptions={[5, 10, 20]}
-              kqlMode="search"
-              kqlQueryExpression=""
-              loadingIndexName={false}
-              onChangeDataProviderKqlQuery={jest.fn()}
-              onChangeDroppableAndProvider={jest.fn()}
-              onChangeItemsPerPage={jest.fn()}
-              onDataProviderEdited={jest.fn()}
-              onDataProviderRemoved={jest.fn()}
-              onToggleDataProviderEnabled={jest.fn()}
-              onToggleDataProviderExcluded={jest.fn()}
-              show={true}
-              showCallOutUnauthorizedMsg={false}
-              start={startDate}
-              sort={sort}
-              toggleColumn={jest.fn()}
-            />
+            <TimelineComponent {...props} />
           </MockedProvider>
         </TestProviders>
       );
@@ -218,36 +146,7 @@ describe('Timeline', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocks}>
-            <TimelineComponent
-              browserFields={mockBrowserFields}
-              columns={defaultHeaders}
-              id="foo"
-              dataProviders={mockDataProviders}
-              end={endDate}
-              filters={[]}
-              flyoutHeight={testFlyoutHeight}
-              flyoutHeaderHeight={flyoutHeaderHeight}
-              indexPattern={indexPattern}
-              indexToAdd={[]}
-              isLive={false}
-              itemsPerPage={5}
-              itemsPerPageOptions={[5, 10, 20]}
-              kqlMode="search"
-              kqlQueryExpression=""
-              loadingIndexName={false}
-              onChangeDataProviderKqlQuery={jest.fn()}
-              onChangeDroppableAndProvider={jest.fn()}
-              onChangeItemsPerPage={jest.fn()}
-              onDataProviderEdited={jest.fn()}
-              onDataProviderRemoved={jest.fn()}
-              onToggleDataProviderEnabled={jest.fn()}
-              onToggleDataProviderExcluded={jest.fn()}
-              show={true}
-              showCallOutUnauthorizedMsg={false}
-              start={startDate}
-              sort={sort}
-              toggleColumn={jest.fn()}
-            />
+            <TimelineComponent {...props} />
           </MockedProvider>
         </TestProviders>
       );
@@ -261,42 +160,10 @@ describe('Timeline', () => {
   describe('event wire up', () => {
     describe('onDataProviderRemoved', () => {
       test('it invokes the onDataProviderRemoved callback when the delete button on a provider is clicked', () => {
-        const mockOnDataProviderRemoved = jest.fn();
-
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <TimelineComponent
-                browserFields={mockBrowserFields}
-                columns={defaultHeaders}
-                id="foo"
-                dataProviders={mockDataProviders}
-                end={endDate}
-                eventType="raw"
-                filters={[]}
-                flyoutHeight={testFlyoutHeight}
-                flyoutHeaderHeight={flyoutHeaderHeight}
-                indexPattern={indexPattern}
-                indexToAdd={[]}
-                isLive={false}
-                itemsPerPage={5}
-                itemsPerPageOptions={[5, 10, 20]}
-                kqlMode="search"
-                kqlQueryExpression=""
-                loadingIndexName={false}
-                onChangeDataProviderKqlQuery={jest.fn()}
-                onChangeDroppableAndProvider={jest.fn()}
-                onChangeItemsPerPage={jest.fn()}
-                onDataProviderEdited={jest.fn()}
-                onDataProviderRemoved={mockOnDataProviderRemoved}
-                onToggleDataProviderEnabled={jest.fn()}
-                onToggleDataProviderExcluded={jest.fn()}
-                show={true}
-                showCallOutUnauthorizedMsg={false}
-                start={startDate}
-                sort={sort}
-                toggleColumn={jest.fn()}
-              />
+              <TimelineComponent {...props} />
             </MockedProvider>
           </TestProviders>
         );
@@ -306,46 +173,16 @@ describe('Timeline', () => {
           .first()
           .simulate('click');
 
-        expect(mockOnDataProviderRemoved.mock.calls[0][0]).toEqual('id-Provider 1');
+        expect((props.onDataProviderRemoved as jest.Mock).mock.calls[0][0]).toEqual(
+          'id-Provider 1'
+        );
       });
 
       test('it invokes the onDataProviderRemoved callback when you click on the option "Delete" in the provider menu', () => {
-        const mockOnDataProviderRemoved = jest.fn();
-
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <TimelineComponent
-                browserFields={mockBrowserFields}
-                columns={defaultHeaders}
-                id="foo"
-                dataProviders={mockDataProviders}
-                end={endDate}
-                eventType="raw"
-                filters={[]}
-                flyoutHeight={testFlyoutHeight}
-                flyoutHeaderHeight={flyoutHeaderHeight}
-                indexPattern={indexPattern}
-                indexToAdd={[]}
-                isLive={false}
-                itemsPerPage={5}
-                itemsPerPageOptions={[5, 10, 20]}
-                kqlMode="search"
-                kqlQueryExpression=""
-                loadingIndexName={false}
-                onChangeDataProviderKqlQuery={jest.fn()}
-                onChangeDroppableAndProvider={jest.fn()}
-                onChangeItemsPerPage={jest.fn()}
-                onDataProviderEdited={jest.fn()}
-                onDataProviderRemoved={mockOnDataProviderRemoved}
-                onToggleDataProviderEnabled={jest.fn()}
-                onToggleDataProviderExcluded={jest.fn()}
-                show={true}
-                showCallOutUnauthorizedMsg={false}
-                start={startDate}
-                sort={sort}
-                toggleColumn={jest.fn()}
-              />
+              <TimelineComponent {...props} />
             </MockedProvider>
           </TestProviders>
         );
@@ -361,48 +198,18 @@ describe('Timeline', () => {
           .first()
           .simulate('click');
 
-        expect(mockOnDataProviderRemoved.mock.calls[0][0]).toEqual('id-Provider 1');
+        expect((props.onDataProviderRemoved as jest.Mock).mock.calls[0][0]).toEqual(
+          'id-Provider 1'
+        );
       });
     });
 
     describe('onToggleDataProviderEnabled', () => {
       test('it invokes the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the provider menu', () => {
-        const mockOnToggleDataProviderEnabled = jest.fn();
-
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <TimelineComponent
-                browserFields={mockBrowserFields}
-                columns={defaultHeaders}
-                id="foo"
-                dataProviders={mockDataProviders}
-                end={endDate}
-                eventType="raw"
-                filters={[]}
-                flyoutHeight={testFlyoutHeight}
-                flyoutHeaderHeight={flyoutHeaderHeight}
-                indexPattern={indexPattern}
-                indexToAdd={[]}
-                isLive={false}
-                itemsPerPage={5}
-                itemsPerPageOptions={[5, 10, 20]}
-                kqlMode="search"
-                kqlQueryExpression=""
-                loadingIndexName={false}
-                onChangeDataProviderKqlQuery={jest.fn()}
-                onChangeDroppableAndProvider={jest.fn()}
-                onChangeItemsPerPage={jest.fn()}
-                onDataProviderEdited={jest.fn()}
-                onDataProviderRemoved={jest.fn()}
-                onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
-                onToggleDataProviderExcluded={jest.fn()}
-                show={true}
-                showCallOutUnauthorizedMsg={false}
-                start={startDate}
-                sort={sort}
-                toggleColumn={jest.fn()}
-              />
+              <TimelineComponent {...props} />
             </MockedProvider>
           </TestProviders>
         );
@@ -419,7 +226,7 @@ describe('Timeline', () => {
           .first()
           .simulate('click');
 
-        expect(mockOnToggleDataProviderEnabled.mock.calls[0][0]).toEqual({
+        expect((props.onToggleDataProviderEnabled as jest.Mock).mock.calls[0][0]).toEqual({
           providerId: 'id-Provider 1',
           enabled: false,
         });
@@ -428,42 +235,10 @@ describe('Timeline', () => {
 
     describe('onToggleDataProviderExcluded', () => {
       test('it invokes the onToggleDataProviderExcluded callback when you click on the option "Exclude results" in the provider menu', () => {
-        const mockOnToggleDataProviderExcluded = jest.fn();
-
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <TimelineComponent
-                browserFields={mockBrowserFields}
-                columns={defaultHeaders}
-                id="foo"
-                dataProviders={mockDataProviders}
-                end={endDate}
-                eventType="raw"
-                filters={[]}
-                flyoutHeight={testFlyoutHeight}
-                flyoutHeaderHeight={flyoutHeaderHeight}
-                indexPattern={indexPattern}
-                indexToAdd={[]}
-                isLive={false}
-                itemsPerPage={5}
-                itemsPerPageOptions={[5, 10, 20]}
-                kqlMode="search"
-                kqlQueryExpression=""
-                loadingIndexName={false}
-                onChangeDataProviderKqlQuery={jest.fn()}
-                onChangeDroppableAndProvider={jest.fn()}
-                onChangeItemsPerPage={jest.fn()}
-                onDataProviderEdited={jest.fn()}
-                onDataProviderRemoved={jest.fn()}
-                onToggleDataProviderEnabled={jest.fn()}
-                onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
-                show={true}
-                showCallOutUnauthorizedMsg={false}
-                start={startDate}
-                sort={sort}
-                toggleColumn={jest.fn()}
-              />
+              <TimelineComponent {...props} />
             </MockedProvider>
           </TestProviders>
         );
@@ -482,7 +257,7 @@ describe('Timeline', () => {
           .first()
           .simulate('click');
 
-        expect(mockOnToggleDataProviderExcluded.mock.calls[0][0]).toEqual({
+        expect((props.onToggleDataProviderExcluded as jest.Mock).mock.calls[0][0]).toEqual({
           providerId: 'id-Provider 1',
           excluded: true,
         });
@@ -490,44 +265,14 @@ describe('Timeline', () => {
     });
 
     describe('#ProviderWithAndProvider', () => {
-      test('Rendering And Provider', () => {
-        const dataProviders = mockDataProviders.slice(0, 1);
-        dataProviders[0].and = mockDataProviders.slice(1, 3);
+      const dataProviders = mockDataProviders.slice(0, 1);
+      dataProviders[0].and = mockDataProviders.slice(1, 3);
 
+      test('Rendering And Provider', () => {
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <TimelineComponent
-                browserFields={mockBrowserFields}
-                columns={defaultHeaders}
-                id="foo"
-                dataProviders={dataProviders}
-                end={endDate}
-                eventType="raw"
-                filters={[]}
-                flyoutHeight={testFlyoutHeight}
-                flyoutHeaderHeight={flyoutHeaderHeight}
-                indexPattern={indexPattern}
-                indexToAdd={[]}
-                isLive={false}
-                itemsPerPage={5}
-                itemsPerPageOptions={[5, 10, 20]}
-                kqlMode="search"
-                kqlQueryExpression=""
-                loadingIndexName={false}
-                onChangeDataProviderKqlQuery={jest.fn()}
-                onChangeDroppableAndProvider={jest.fn()}
-                onChangeItemsPerPage={jest.fn()}
-                onDataProviderEdited={jest.fn()}
-                onDataProviderRemoved={jest.fn()}
-                onToggleDataProviderEnabled={jest.fn()}
-                onToggleDataProviderExcluded={jest.fn()}
-                show={true}
-                showCallOutUnauthorizedMsg={false}
-                start={startDate}
-                sort={sort}
-                toggleColumn={jest.fn()}
-              />
+              <TimelineComponent {...props} dataProviders={dataProviders} />
             </MockedProvider>
           </TestProviders>
         );
@@ -544,44 +289,10 @@ describe('Timeline', () => {
       });
 
       test('it invokes the onDataProviderRemoved callback when you click on the option "Delete" in the accordion menu', () => {
-        const dataProviders = mockDataProviders.slice(0, 1);
-        dataProviders[0].and = mockDataProviders.slice(1, 3);
-        const mockOnDataProviderRemoved = jest.fn();
-
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <TimelineComponent
-                browserFields={mockBrowserFields}
-                columns={defaultHeaders}
-                id="foo"
-                dataProviders={dataProviders}
-                end={endDate}
-                eventType="raw"
-                filters={[]}
-                flyoutHeight={testFlyoutHeight}
-                flyoutHeaderHeight={flyoutHeaderHeight}
-                indexPattern={indexPattern}
-                indexToAdd={[]}
-                isLive={false}
-                itemsPerPage={5}
-                itemsPerPageOptions={[5, 10, 20]}
-                kqlMode="search"
-                kqlQueryExpression=""
-                loadingIndexName={false}
-                onChangeDataProviderKqlQuery={jest.fn()}
-                onChangeDroppableAndProvider={jest.fn()}
-                onChangeItemsPerPage={jest.fn()}
-                onDataProviderEdited={jest.fn()}
-                onDataProviderRemoved={mockOnDataProviderRemoved}
-                onToggleDataProviderEnabled={jest.fn()}
-                onToggleDataProviderExcluded={jest.fn()}
-                show={true}
-                showCallOutUnauthorizedMsg={false}
-                start={startDate}
-                sort={sort}
-                toggleColumn={jest.fn()}
-              />
+              <TimelineComponent {...props} dataProviders={dataProviders} />
             </MockedProvider>
           </TestProviders>
         );
@@ -600,48 +311,17 @@ describe('Timeline', () => {
           .first()
           .simulate('click');
 
-        expect(mockOnDataProviderRemoved.mock.calls[0]).toEqual(['id-Provider 1', 'id-Provider 2']);
+        expect((props.onDataProviderRemoved as jest.Mock).mock.calls[0]).toEqual([
+          'id-Provider 1',
+          'id-Provider 2',
+        ]);
       });
 
       test('it invokes the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the accordion menu', () => {
-        const dataProviders = mockDataProviders.slice(0, 1);
-        dataProviders[0].and = mockDataProviders.slice(1, 3);
-        const mockOnToggleDataProviderEnabled = jest.fn();
-
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <TimelineComponent
-                browserFields={mockBrowserFields}
-                columns={defaultHeaders}
-                id="foo"
-                dataProviders={dataProviders}
-                end={endDate}
-                eventType="raw"
-                filters={[]}
-                flyoutHeight={testFlyoutHeight}
-                flyoutHeaderHeight={flyoutHeaderHeight}
-                indexPattern={indexPattern}
-                indexToAdd={[]}
-                isLive={false}
-                itemsPerPage={5}
-                itemsPerPageOptions={[5, 10, 20]}
-                kqlMode="search"
-                kqlQueryExpression=""
-                loadingIndexName={false}
-                onChangeDataProviderKqlQuery={jest.fn()}
-                onChangeDroppableAndProvider={jest.fn()}
-                onChangeItemsPerPage={jest.fn()}
-                onDataProviderEdited={jest.fn()}
-                onDataProviderRemoved={jest.fn()}
-                onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
-                onToggleDataProviderExcluded={jest.fn()}
-                show={true}
-                showCallOutUnauthorizedMsg={false}
-                start={startDate}
-                sort={sort}
-                toggleColumn={jest.fn()}
-              />
+              <TimelineComponent {...props} dataProviders={dataProviders} />
             </MockedProvider>
           </TestProviders>
         );
@@ -660,7 +340,7 @@ describe('Timeline', () => {
           .first()
           .simulate('click');
 
-        expect(mockOnToggleDataProviderEnabled.mock.calls[0][0]).toEqual({
+        expect((props.onToggleDataProviderEnabled as jest.Mock).mock.calls[0][0]).toEqual({
           andProviderId: 'id-Provider 2',
           enabled: false,
           providerId: 'id-Provider 1',
@@ -668,44 +348,10 @@ describe('Timeline', () => {
       });
 
       test('it invokes the onToggleDataProviderExcluded callback when you click on the option "Exclude results" in the accordion menu', () => {
-        const dataProviders = mockDataProviders.slice(0, 1);
-        dataProviders[0].and = mockDataProviders.slice(1, 3);
-        const mockOnToggleDataProviderExcluded = jest.fn();
-
         const wrapper = mount(
           <TestProviders>
             <MockedProvider mocks={mocks}>
-              <TimelineComponent
-                browserFields={mockBrowserFields}
-                columns={defaultHeaders}
-                id="foo"
-                dataProviders={dataProviders}
-                end={endDate}
-                eventType="raw"
-                filters={[]}
-                flyoutHeight={testFlyoutHeight}
-                flyoutHeaderHeight={flyoutHeaderHeight}
-                indexPattern={indexPattern}
-                indexToAdd={[]}
-                isLive={false}
-                itemsPerPage={5}
-                itemsPerPageOptions={[5, 10, 20]}
-                kqlMode="search"
-                kqlQueryExpression=""
-                loadingIndexName={false}
-                onChangeDataProviderKqlQuery={jest.fn()}
-                onChangeDroppableAndProvider={jest.fn()}
-                onChangeItemsPerPage={jest.fn()}
-                onDataProviderEdited={jest.fn()}
-                onDataProviderRemoved={jest.fn()}
-                onToggleDataProviderEnabled={jest.fn()}
-                onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
-                show={true}
-                showCallOutUnauthorizedMsg={false}
-                start={startDate}
-                sort={sort}
-                toggleColumn={jest.fn()}
-              />
+              <TimelineComponent {...props} dataProviders={dataProviders} />
             </MockedProvider>
           </TestProviders>
         );
@@ -724,7 +370,7 @@ describe('Timeline', () => {
           .first()
           .simulate('click');
 
-        expect(mockOnToggleDataProviderExcluded.mock.calls[0][0]).toEqual({
+        expect((props.onToggleDataProviderExcluded as jest.Mock).mock.calls[0][0]).toEqual({
           andProviderId: 'id-Provider 2',
           excluded: true,
           providerId: 'id-Provider 1',

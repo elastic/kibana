@@ -9,7 +9,7 @@ import {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkResponse,
   SavedObjectsClientContract,
-} from 'kibana/server';
+} from 'src/core/server';
 import Boom from 'boom';
 import {
   Agent,

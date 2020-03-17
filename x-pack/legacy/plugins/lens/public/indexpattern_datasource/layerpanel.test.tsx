@@ -178,6 +178,7 @@ describe('Layer Data Panel', () => {
     defaultProps = {
       layerId: 'first',
       state: initialState,
+      setState: jest.fn(),
       onChangeIndexPattern: jest.fn(async () => {}),
     };
   });
