@@ -270,7 +270,7 @@ server.newPlatform.setup.plugins.alerting.registerType({
 ```
 
 ## Alert Navigation
-When registering an Alert Type, you'll likely want to provide a way of viewing alerts of that type within your own plugin, or perhaps you want to provide a view for all alerts created fro mwithin your solution within your own UI.
+When registering an Alert Type, you'll likely want to provide a way of viewing alerts of that type within your own plugin, or perhaps you want to provide a view for all alerts created from within your solution within your own UI.
 
 In order for the Alerting framework to know that your plugin has its own interna; view for displaying an alert, you must resigter a navigation handler within the framework.
 
@@ -536,4 +536,3 @@ The templating system will take the alert and alert type as described above and 
 ```
 
 There are limitations that we are aware of using only templates, and we are gathering feedback and use cases for these. (for example passing an array of strings to an action).
-
