@@ -92,9 +92,7 @@ export const signalRulesAlertType = ({
       });
 
       const searchAfterSize = Math.min(params.maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let bulkIndexResult: any;
+      let creationSucceeded = false;
 
       try {
         if (type === 'machine_learning') {
@@ -117,7 +115,7 @@ export const signalRulesAlertType = ({
             );
           }
 
-          bulkIndexResult = await bulkCreateMlSignals({
+          creationSucceeded = await bulkCreateMlSignals({
             someResult: anomalyResults,
             ruleParams: params,
             services,
@@ -175,7 +173,7 @@ export const signalRulesAlertType = ({
             );
           }
 
-          bulkIndexResult = await searchAfterAndBulkCreate({
+          creationSucceeded = await searchAfterAndBulkCreate({
             someResult: noReIndexResult,
             ruleParams: params,
             services,
@@ -195,7 +193,7 @@ export const signalRulesAlertType = ({
           });
         }
 
-        if (bulkIndexResult) {
+        if (creationSucceeded) {
           logger.debug(
             `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
           );
