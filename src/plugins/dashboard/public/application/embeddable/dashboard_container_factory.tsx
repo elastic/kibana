@@ -65,7 +65,7 @@ export class DashboardContainerFactory
   public getDefaultInput(): Partial<DashboardContainerInput> {
     return {
       panels: {},
-      isEmbedded: false,
+      isEmbeddedExternally: false,
       isFullScreenMode: false,
       useMargins: true,
     };

@@ -27,7 +27,7 @@ export function getSampleDashboardInput(
     id: '123',
     filters: [],
     useMargins: false,
-    isEmbedded: false,
+    isEmbeddedExternally: false,
     isFullScreenMode: false,
     title: 'My Dashboard',
     query: {
