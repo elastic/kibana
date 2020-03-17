@@ -50,7 +50,7 @@ export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
   tooltipProperties?: string[];
   sortField?: string;
   sortOrder?: SORT_ORDER;
-  scalingType?: SCALING_TYPES;
+  scalingType: SCALING_TYPES;
   topHitsSplitField?: string;
   topHitsSize?: number;
 };

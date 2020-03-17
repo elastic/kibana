@@ -53,4 +53,22 @@ describe('migrateUseTopHitsToScalingType', () => {
       layerListJSON: '[{"sourceDescriptor":{"type":"ES_SEARCH","scalingType":"LIMIT"}}]',
     });
   });
+
+  test('Should set scalingType to LIMIT when useTopHits is not set', () => {
+    const layerListJSON = JSON.stringify([
+      {
+        sourceDescriptor: {
+          type: 'ES_SEARCH',
+        },
+      },
+    ]);
+    const attributes = {
+      title: 'my map',
+      layerListJSON,
+    };
+    expect(migrateUseTopHitsToScalingType({ attributes })).toEqual({
+      title: 'my map',
+      layerListJSON: '[{"sourceDescriptor":{"type":"ES_SEARCH","scalingType":"LIMIT"}}]',
+    });
+  });
 });

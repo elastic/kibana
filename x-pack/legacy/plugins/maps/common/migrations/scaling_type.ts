@@ -26,15 +26,13 @@ export function migrateUseTopHitsToScalingType({
   const layerList: LayerDescriptor[] = JSON.parse(attributes.layerListJSON);
   layerList.forEach((layerDescriptor: LayerDescriptor) => {
     if (isEsDocumentSource(layerDescriptor)) {
-      if (_.has(layerDescriptor, 'sourceDescriptor.useTopHits')) {
-        const sourceDescriptor = layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor;
-        sourceDescriptor.scalingType = _.get(layerDescriptor, 'sourceDescriptor.useTopHits', false)
-          ? SCALING_TYPES.TOP_HITS
-          : SCALING_TYPES.LIMIT;
-        // @ts-ignore useTopHits no longer in type definition but that does not mean its not in live data
-        // hence the entire point of this method
-        delete sourceDescriptor.useTopHits;
-      }
+      const sourceDescriptor = layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor;
+      sourceDescriptor.scalingType = _.get(layerDescriptor, 'sourceDescriptor.useTopHits', false)
+        ? SCALING_TYPES.TOP_HITS
+        : SCALING_TYPES.LIMIT;
+      // @ts-ignore useTopHits no longer in type definition but that does not mean its not in live data
+      // hence the entire point of this method
+      delete sourceDescriptor.useTopHits;
     }
   });
 
