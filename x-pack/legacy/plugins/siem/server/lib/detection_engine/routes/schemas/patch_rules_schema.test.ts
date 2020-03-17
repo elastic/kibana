@@ -1013,42 +1013,6 @@ describe('patch rules schema', () => {
     );
   });
 
-  test('The default for "actions" will be an empty array', () => {
-    expect(
-      patchRulesSchema.validate<Partial<PatchRuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        version: 1,
-      }).value.actions
-    ).toEqual([]);
-  });
-
-  test('The default for "throttle" will be null', () => {
-    expect(
-      patchRulesSchema.validate<Partial<PatchRuleAlertParamsRest>>({
-        rule_id: 'rule-1',
-        risk_score: 50,
-        description: 'some description',
-        name: 'some-name',
-        severity: 'low',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        version: 1,
-      }).value.throttle
-    ).toEqual(null);
-  });
-
   describe('note', () => {
     test('[rule_id, description, from, to, index, name, severity, interval, type, note] does validate', () => {
       expect(
