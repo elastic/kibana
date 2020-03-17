@@ -19,7 +19,7 @@ import { TimelineUrl } from '../../store/timeline/model';
 import { formatDate } from '../super_date_picker';
 import { NavTab } from '../navigation/types';
 import { CONSTANTS, UrlStateType } from './constants';
-import { UrlStateContainerPropTypes, ReplaceStateInLocation, UpdateUrlStateString } from './types';
+import { ReplaceStateInLocation, UpdateUrlStateString } from './types';
 
 export const decodeRisonUrlState = <T>(value: string | undefined): T | null => {
   try {
@@ -114,7 +114,7 @@ export const makeMapStateToProps = () => {
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getGlobalSavedQuerySelector = inputsSelectors.globalSavedQuerySelector();
   const getTimelines = timelineSelectors.getTimelines();
-  const mapStateToProps = (state: State, { pageName, detailName }: UrlStateContainerPropTypes) => {
+  const mapStateToProps = (state: State) => {
     const inputState = getInputsSelector(state);
     const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
     const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
