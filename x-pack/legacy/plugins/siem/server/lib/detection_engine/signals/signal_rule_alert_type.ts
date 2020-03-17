@@ -113,7 +113,7 @@ export const signalRulesAlertType = ({
           const anomalyCount = anomalyResults.hits.hits.length;
           if (anomalyCount) {
             logger.info(
-              `Found ${anomalyCount} anomalies in interval [${from}, ${to}]; generating signals`
+              `Found ${anomalyCount} signals from ML anomalies for signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
             );
           }
 
