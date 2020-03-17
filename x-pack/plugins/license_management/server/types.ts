@@ -16,7 +16,7 @@ export interface Dependencies {
 
 export interface RouteDependencies {
   router: IRouter;
-  pluggins: {
+  plugins: {
     licensing: LicensingPluginSetup;
   };
   lib: {
