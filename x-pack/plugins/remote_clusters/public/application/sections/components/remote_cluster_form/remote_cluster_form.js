@@ -34,11 +34,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 
-import {
-  skippingDisconnectedClustersUrl,
-  transportPortUrl,
-  proxyModeUrl,
-} from '../../../services/documentation';
+import { skippingDisconnectedClustersUrl, transportPortUrl } from '../../../services/documentation';
 
 import { RequestFlyout } from './request_flyout';
 
@@ -456,33 +452,14 @@ export class RemoteClusterForm extends Component {
           <>
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.sectionModeDescription"
-              defaultMessage="Remote cluster connections work by configuring a remote cluster and connecting only to a limited number of nodes in that remote cluster."
+              defaultMessage="Use seed nodes by default, or switch to a single proxy address."
             />
-            <EuiFormRow
-              hasEmptyLabelSpace
-              fullWidth
-              helpText={
-                <FormattedMessage
-                  id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription"
-                  defaultMessage="Configure a remote cluster with a single proxy address. {learnMoreLink}"
-                  values={{
-                    learnMoreLink: (
-                      <EuiLink href={proxyModeUrl} target="_blank">
-                        <FormattedMessage
-                          id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription.learnMoreLinkLabel"
-                          defaultMessage="Learn more."
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              }
-            >
+            <EuiFormRow hasEmptyLabelSpace fullWidth>
               <EuiSwitch
                 label={
                   <FormattedMessage
                     id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
-                    defaultMessage="Use proxy mode"
+                    defaultMessage="Use a single proxy address"
                   />
                 }
                 checked={mode === PROXY_MODE}
@@ -523,9 +500,7 @@ export class RemoteClusterForm extends Component {
             <p>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription"
-                defaultMessage="By default, a request fails if any of the queried remote clusters
-                  are unavailable. To continue sending a request to other remote clusters if this
-                  cluster is unavailable, enable {optionName}. {learnMoreLink}"
+                defaultMessage="A request fails if any of the queried remote clusters are unavailable. To send requests to other remote clusters if this cluster is unavailable, enable {optionName}. {learnMoreLink}"
                 values={{
                   optionName: (
                     <strong>
@@ -839,7 +814,7 @@ export class RemoteClusterForm extends Component {
             description={
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionNameDescription"
-                defaultMessage="A unique name for the remote cluster."
+                defaultMessage="A unique name for the cluster."
               />
             }
             fullWidth

@@ -141,7 +141,7 @@ export class RemoteClusterTable extends Component {
                     content={
                       <FormattedMessage
                         id="xpack.remoteClusters.remoteClusterList.table.hasDeprecatedSettingMessage"
-                        defaultMessage="This remote cluster contains deprecated settings. Edit the remote cluster to resolve."
+                        defaultMessage="Edit this cluster to update deprecated settings."
                       />
                     }
                   />
