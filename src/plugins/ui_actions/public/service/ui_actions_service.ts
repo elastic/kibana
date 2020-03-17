@@ -114,6 +114,14 @@ export class UiActionsService {
     triggerId: TriggerId,
     actionId: string
   ): void => {
+    const trigger = this.triggers.get(triggerId);
+
+    if (!trigger) {
+      throw new Error(
+        `No trigger [triggerId = ${triggerId}] exists, for attaching action [actionId = ${actionId}].`
+      );
+    }
+
     const actionIds = this.triggerToActions.get(triggerId);
 
     if (!actionIds!.find(id => id === actionId)) {
