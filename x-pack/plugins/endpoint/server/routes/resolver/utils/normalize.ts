@@ -7,7 +7,7 @@
 import { ResolverEvent, LegacyEndpointEvent } from '../../../../common/types';
 
 function isLegacyData(data: ResolverEvent): data is LegacyEndpointEvent {
-  return data.agent.type === 'endgame';
+  return data.agent?.type === 'endgame';
 }
 
 export function extractEventID(event: ResolverEvent) {
@@ -21,7 +21,7 @@ export function extractEntityID(event: ResolverEvent) {
   if (isLegacyData(event)) {
     return String(event.endgame.unique_pid);
   }
-  return event.endpoint.process.entity_id;
+  return event.process.entity_id;
 }
 
 export function extractParentEntityID(event: ResolverEvent) {
@@ -29,5 +29,5 @@ export function extractParentEntityID(event: ResolverEvent) {
     const ppid = event.endgame.unique_ppid;
     return ppid && String(ppid); // if unique_ppid is undefined return undefined
   }
-  return event.endpoint.process.parent?.entity_id;
+  return event.process.parent?.entity_id;
 }

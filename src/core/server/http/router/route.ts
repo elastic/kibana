@@ -116,13 +116,15 @@ export interface RouteConfigOptionsBody {
  */
 export interface RouteConfigOptions<Method extends RouteMethod> {
   /**
-   * A flag shows that authentication for a route:
-   * `enabled`  when true
-   * `disabled` when false
+   * Defines authentication mode for a route:
+   * - true. A user has to have valid credentials to access a resource
+   * - false. A user can access a resource without any credentials.
+   * - 'optional'. A user can access a resource if has valid credentials or no credentials at all.
+   * Can be useful when we grant access to a resource but want to identify a user if possible.
    *
-   * Enabled by default.
+   * Defaults to `true` if an auth mechanism is registered.
    */
-  authRequired?: boolean;
+  authRequired?: boolean | 'optional';
 
   /**
    * Defines xsrf protection requirements for a route:

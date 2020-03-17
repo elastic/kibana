@@ -49,7 +49,7 @@ test('fails if string input cannot be parsed', () => {
     name: schema.string(),
   });
   expect(() => type.validate(`invalidjson`)).toThrowErrorMatchingInlineSnapshot(
-    `"could not parse object value from [invalidjson]"`
+    `"could not parse object value from json input"`
   );
 });
 
@@ -181,7 +181,7 @@ test('called with wrong type', () => {
   const type = schema.object({});
 
   expect(() => type.validate('foo')).toThrowErrorMatchingInlineSnapshot(
-    `"could not parse object value from [foo]"`
+    `"could not parse object value from json input"`
   );
   expect(() => type.validate(123)).toThrowErrorMatchingInlineSnapshot(
     `"expected a plain object value, but found [number] instead."`

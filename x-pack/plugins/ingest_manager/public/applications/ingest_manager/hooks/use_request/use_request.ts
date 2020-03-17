@@ -3,16 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from 'src/core/public';
 import {
   SendRequestConfig,
   SendRequestResponse,
-  UseRequestConfig,
+  UseRequestConfig as _UseRequestConfig,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
 } from '../../../../../../../../src/plugins/es_ui_shared/public';
 
 let httpClient: HttpSetup;
+
+export type UseRequestConfig = _UseRequestConfig;
 
 export const setHttpClient = (client: HttpSetup) => {
   httpClient = client;

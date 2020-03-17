@@ -7,10 +7,10 @@
 import fs from 'fs';
 import Boom from 'boom';
 import numeral from '@elastic/numeral';
-import { CallAPIOptions, RequestHandlerContext, SavedObjectsClientContract } from 'kibana/server';
+import { CallAPIOptions, APICaller, SavedObjectsClientContract } from 'kibana/server';
 import { IndexPatternAttributes } from 'src/plugins/data/server';
 import { merge } from 'lodash';
-import { MlJob } from '../../../../../legacy/plugins/ml/common/types/jobs';
+import { CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
 import {
   KibanaObjects,
   ModuleDataFeed,
@@ -23,13 +23,9 @@ import {
   JobResponse,
   KibanaObjectResponse,
   DataRecognizerConfigResponse,
-} from '../../../../../legacy/plugins/ml/common/types/modules';
-import {
-  getLatestDataOrBucketTimestamp,
-  prefixDatafeedId,
-} from '../../../../../legacy/plugins/ml/common/util/job_utils';
+} from '../../../common/types/modules';
+import { getLatestDataOrBucketTimestamp, prefixDatafeedId } from '../../../common/util/job_utils';
 import { mlLog } from '../../client/log';
-// @ts-ignore
 import { jobServiceProvider } from '../job_service';
 import { resultsServiceProvider } from '../results_service';
 
@@ -61,7 +57,7 @@ interface RawModuleConfig {
 }
 
 interface MlJobStats {
-  jobs: MlJob[];
+  jobs: CombinedJobWithStats[];
 }
 
 interface Config {
@@ -69,7 +65,7 @@ interface Config {
   json: RawModuleConfig;
 }
 
-interface Result {
+export interface RecognizeResult {
   id: string;
   title: string;
   query: any;
@@ -119,9 +115,9 @@ export class DataRecognizer {
     options?: CallAPIOptions
   ) => Promise<any>;
 
-  constructor(context: RequestHandlerContext) {
-    this.callAsCurrentUser = context.ml!.mlClient.callAsCurrentUser;
-    this.savedObjectsClient = context.core.savedObjects.client;
+  constructor(callAsCurrentUser: APICaller, savedObjectsClient: SavedObjectsClientContract) {
+    this.callAsCurrentUser = callAsCurrentUser;
+    this.savedObjectsClient = savedObjectsClient;
   }
 
   // list all directories under the given directory
@@ -190,9 +186,9 @@ export class DataRecognizer {
   }
 
   // called externally by an endpoint
-  async findMatches(indexPattern: string): Promise<Result[]> {
+  async findMatches(indexPattern: string): Promise<RecognizeResult[]> {
     const manifestFiles = await this.loadManifestFiles();
-    const results: Result[] = [];
+    const results: RecognizeResult[] = [];
 
     await Promise.all(
       manifestFiles.map(async i => {

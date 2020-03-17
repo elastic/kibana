@@ -6,6 +6,8 @@
 import { APICaller, Logger } from 'src/core/server';
 import { first } from 'rxjs/operators';
 
+import { LicensingPluginSetup } from '../../../../licensing/server';
+
 import {
   IndexGroup,
   ReindexOptions,
@@ -14,14 +16,17 @@ import {
   ReindexStep,
   ReindexWarning,
 } from '../../../common/types';
+
+import { esIndicesStateCheck } from '../es_indices_state_check';
+
 import {
   generateNewIndexName,
   getReindexWarnings,
   sourceNameForIndex,
   transformFlatSettings,
 } from './index_settings';
+
 import { ReindexActions } from './reindex_actions';
-import { LicensingPluginSetup } from '../../../../licensing/server';
 
 import { error } from './error';
 
@@ -52,7 +57,7 @@ export interface ReindexService {
   /**
    * Creates a new reindex operation for a given index.
    * @param indexName
-   * @param opts
+   * @param opts Additional options when creating a new reindex operation
    */
   createReindexOperation(indexName: string, opts?: ReindexOptions): Promise<ReindexSavedObject>;
 
@@ -314,7 +319,16 @@ export const reindexServiceFactory = (
    * @param reindexOp
    */
   const startReindexing = async (reindexOp: ReindexSavedObject) => {
-    const { indexName } = reindexOp.attributes;
+    const { indexName, reindexOptions } = reindexOp.attributes;
+
+    // Where possible, derive reindex options at the last moment before reindexing
+    // to prevent them from becoming stale as they wait in the queue.
+    const indicesState = await esIndicesStateCheck(callAsUser, [indexName]);
+    const openAndClose = indicesState[indexName] === 'close';
+    if (indicesState[indexName] === 'close') {
+      log.debug(`Detected closed index ${indexName}, opening...`);
+      await callAsUser('indices.open', { index: indexName });
+    }
 
     const startReindex = (await callAsUser('reindex', {
       refresh: true,
@@ -329,6 +343,12 @@ export const reindexServiceFactory = (
       lastCompletedStep: ReindexStep.reindexStarted,
       reindexTaskId: startReindex.task,
       reindexTaskPercComplete: 0,
+      reindexOptions: {
+        ...(reindexOptions ?? {}),
+        // Indicate to downstream states whether we opened a closed index that should be
+        // closed again.
+        openAndClose,
+      },
     });
   };
 
@@ -394,7 +414,7 @@ export const reindexServiceFactory = (
    * @param reindexOp
    */
   const switchAlias = async (reindexOp: ReindexSavedObject) => {
-    const { indexName, newIndexName } = reindexOp.attributes;
+    const { indexName, newIndexName, reindexOptions } = reindexOp.attributes;
 
     const existingAliases = (
       await callAsUser('indices.getAlias', {
@@ -418,6 +438,10 @@ export const reindexServiceFactory = (
 
     if (!aliasResponse.acknowledged) {
       throw error.cannotCreateIndex(`Index aliases could not be created.`);
+    }
+
+    if (reindexOptions?.openAndClose === true) {
+      await callAsUser('indices.close', { index: indexName });
     }
 
     return actions.updateReindexOp(reindexOp, {
@@ -645,9 +669,16 @@ export const reindexServiceFactory = (
           throw new Error(`Reindex operation must be paused in order to be resumed.`);
         }
 
+        const reindexOptions: ReindexOptions | undefined = opts
+          ? {
+              ...(op.attributes.reindexOptions ?? {}),
+              ...opts,
+            }
+          : undefined;
+
         return actions.updateReindexOp(op, {
           status: ReindexStatus.inProgress,
-          reindexOptions: opts,
+          reindexOptions,
         });
       });
     },

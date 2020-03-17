@@ -7,7 +7,7 @@
 import { IESAggField } from './es_agg_field';
 import { IVectorSource } from '../sources/vector_source';
 // @ts-ignore
-import { TooltipProperty } from '../tooltips/tooltip_property';
+import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
 import { TOP_TERM_PERCENTAGE_SUFFIX } from '../../../common/constants';
 import { FIELD_ORIGIN } from '../../../common/constants';
 
@@ -48,7 +48,7 @@ export class TopTermPercentageField implements IESAggField {
     return 'number';
   }
 
-  async createTooltipProperty(value: unknown): Promise<unknown> {
+  async createTooltipProperty(value: string | undefined): Promise<ITooltipProperty> {
     return new TooltipProperty(this.getName(), await this.getLabel(), value);
   }
 
@@ -62,6 +62,14 @@ export class TopTermPercentageField implements IESAggField {
 
   supportsFieldMeta(): boolean {
     return false;
+  }
+
+  async getOrdinalFieldMetaRequest(): Promise<unknown> {
+    return null;
+  }
+
+  async getCategoricalFieldMetaRequest(): Promise<unknown> {
+    return null;
   }
 
   canValueBeFormatted(): boolean {

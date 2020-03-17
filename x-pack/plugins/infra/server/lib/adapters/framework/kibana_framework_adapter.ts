@@ -179,6 +179,11 @@ export class KibanaFramework {
   ): Promise<InfraDatabaseGetIndicesResponse>;
   callWithRequest(
     requestContext: RequestHandlerContext,
+    method: 'transport.request',
+    options?: CallWithRequestParams
+  ): Promise<unknown>;
+  callWithRequest(
+    requestContext: RequestHandlerContext,
     endpoint: string,
     options?: CallWithRequestParams
   ): Promise<InfraDatabaseSearchResponse>;
