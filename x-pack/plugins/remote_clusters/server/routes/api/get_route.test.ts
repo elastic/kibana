@@ -89,6 +89,7 @@ describe('GET remote clusters', () => {
                 test: {
                   seeds: ['127.0.0.1:9300'],
                   skip_unavailable: false,
+                  mode: 'sniff',
                 },
               },
             },
@@ -120,6 +121,7 @@ describe('GET remote clusters', () => {
             initialConnectTimeout: '30s',
             skipUnavailable: false,
             isConfiguredByNode: false,
+            mode: 'sniff',
           },
         ],
       },
@@ -170,6 +172,7 @@ describe('GET remote clusters', () => {
                 test: {
                   seeds: ['127.0.0.1:9300'],
                   skip_unavailable: false,
+                  mode: 'sniff',
                 },
               },
             },
