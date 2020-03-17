@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { AgentType, Agent, AgentSOAttributes } from '../../types';
 import { savedObjectToAgent } from './saved_objects';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
