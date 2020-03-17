@@ -29,7 +29,8 @@ describe('timeline flyout button', () => {
     cy.get(TIMELINE_FLYOUT_BODY).should('have.css', 'visibility', 'visible');
   });
 
-  it('sets the flyout button background to euiColorSuccess with a 10% alpha channel when the user starts dragging a host, but is not hovering over the flyout button', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/60369
+  it.skip('sets the flyout button background to euiColorSuccess with a 10% alpha channel when the user starts dragging a host, but is not hovering over the flyout button', () => {
     dragFirstHostToTimeline();
 
     cy.get(TIMELINE_NOT_READY_TO_DROP_BUTTON).should(
