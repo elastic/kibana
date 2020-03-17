@@ -39,21 +39,20 @@ export const UserSchema = schema.object({
   username: schema.string(),
 });
 
-export const EntityInformationSchema = schema.object({
+const EntityInformationSchemaProps = {
   createdAt: schema.string(),
   createdBy: UserSchema,
   updatedAt: schema.nullable(schema.string()),
   updatedBy: schema.nullable(UserSchema),
-});
+};
+
+export const EntityInformationSchema = schema.object(EntityInformationSchemaProps);
 
 export const CommentSchema = schema.object({
   commentId: schema.string(),
   comment: schema.string(),
   version: schema.maybe(schema.string()),
-  createdAt: schema.string(),
-  createdBy: UserSchema,
-  updatedAt: schema.nullable(schema.string()),
-  updatedBy: schema.nullable(UserSchema),
+  ...EntityInformationSchemaProps,
 });
 
 export const ExecutorAction = schema.oneOf([
@@ -67,8 +66,5 @@ export const ParamsSchema = schema.object({
   comments: schema.maybe(schema.arrayOf(CommentSchema)),
   description: schema.maybe(schema.string()),
   incidentId: schema.nullable(schema.string()),
-  createdAt: schema.string(),
-  createdBy: UserSchema,
-  updatedAt: schema.nullable(schema.string()),
-  updatedBy: schema.nullable(UserSchema),
+  ...EntityInformationSchemaProps,
 });
