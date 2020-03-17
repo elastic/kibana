@@ -18,6 +18,6 @@ const mapDispatchToProps = (dispatch: any): DispatchProps => ({
   setEsKueryFilters: (esFilters: string) => dispatch(setEsKueryString(esFilters)),
 });
 
-const mapStateToProps = (state: AppState) => ({ indexPattern: selectIndexPattern(state) });
+const mapStateToProps = (state: AppState) => ({ ...selectIndexPattern(state) });
 
 export const OverviewPage = connect(mapStateToProps, mapDispatchToProps)(OverviewPageComponent);
