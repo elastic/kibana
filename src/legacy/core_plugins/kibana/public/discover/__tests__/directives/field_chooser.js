@@ -73,22 +73,7 @@ describe('discover field chooser directives', function() {
   beforeEach(() => pluginInstance.initializeServices());
   beforeEach(() => pluginInstance.initializeInnerAngular());
 
-  beforeEach(
-    ngMock.module('app/discover', $provide => {
-      $provide.decorator('config', $delegate => {
-        // disable shortDots for these tests
-        $delegate.get = _.wrap($delegate.get, function(origGet, name) {
-          if (name === 'shortDots:enable') {
-            return false;
-          } else {
-            return origGet.call(this, name);
-          }
-        });
-
-        return $delegate;
-      });
-    })
-  );
+  beforeEach(ngMock.module('app/discover'));
 
   beforeEach(
     ngMock.inject(function(Private) {

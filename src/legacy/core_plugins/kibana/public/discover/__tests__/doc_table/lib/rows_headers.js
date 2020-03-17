@@ -30,7 +30,6 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 describe('Doc Table', function() {
   let $parentScope;
   let $scope;
-  let config;
 
   // Stub out a minimal mapping of 4 fields
   let mapping;
@@ -41,8 +40,7 @@ describe('Doc Table', function() {
   beforeEach(() => pluginInstance.initializeInnerAngular());
   beforeEach(ngMock.module('app/discover'));
   beforeEach(
-    ngMock.inject(function(_config_, $rootScope, Private) {
-      config = _config_;
+    ngMock.inject(function($rootScope, Private) {
       $parentScope = $rootScope;
       $parentScope.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       mapping = $parentScope.indexPattern.fields;
@@ -144,12 +142,6 @@ describe('Doc Table', function() {
         filter: sinon.spy(),
         maxLength: 50,
       });
-
-      // Ignore the metaFields (_id, _type, etc) since we don't have a mapping for them
-      sinon
-        .stub(config, 'get')
-        .withArgs('metaFields')
-        .returns([]);
     });
     afterEach(function() {
       destroy();
@@ -215,10 +207,11 @@ describe('Doc Table', function() {
         maxLength: 50,
       });
 
+      /**
       sinon
         .stub(config, 'get')
         .withArgs('metaFields')
-        .returns(['_id']);
+        .returns(['_id']); **/
 
       // Open the row
       $scope.toggleRow();
