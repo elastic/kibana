@@ -5,6 +5,7 @@
  */
 
 import { TransformerArgs } from './types';
+import * as i18n from './translations';
 
 export const informationCreated = ({
   value,
@@ -12,7 +13,7 @@ export const informationCreated = ({
   user,
   ...rest
 }: TransformerArgs): TransformerArgs => ({
-  value: `${value} (created at ${date} by ${user})`,
+  value: i18n.FIELD_INFORMATION('create', value, date, user),
   ...rest,
 });
 
@@ -22,7 +23,7 @@ export const informationUpdated = ({
   user,
   ...rest
 }: TransformerArgs): TransformerArgs => ({
-  value: `${value} (updated at ${date} by ${user})`,
+  value: i18n.FIELD_INFORMATION('update', value, date, user),
   ...rest,
 });
 
@@ -32,7 +33,7 @@ export const informationAdded = ({
   user,
   ...rest
 }: TransformerArgs): TransformerArgs => ({
-  value: `${value} (added at ${date} by ${user})`,
+  value: i18n.FIELD_INFORMATION('add', value, date, user),
   ...rest,
 });
 
