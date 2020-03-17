@@ -49,7 +49,7 @@ router.get({
   path: 'path/{id}',
   validate: {
     // handler has access to raw non-validated params in runtime
-    params: schema.object({}, { allowUnknowns: true })
+    params: schema.object({}, { unknowns: 'allow' })
   },
 },
 (context, req, res,) {
