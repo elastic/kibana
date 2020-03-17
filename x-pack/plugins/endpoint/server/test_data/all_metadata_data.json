@@ -15,7 +15,7 @@
     "max_score" : null,
     "hits" : [
       {
-        "_index" : "endpoint-agent",
+        "_index" : "metadata-endpoint-default-1",
         "_id" : "WqVo1G8BYQH1gtPUgYkC",
         "_score" : null,
         "_source" : {
@@ -65,7 +65,7 @@
               "max_score" : null,
               "hits" : [
                 {
-                  "_index" : "endpoint-agent",
+                  "_index" : "metadata-endpoint-default-1",
                   "_id" : "WqVo1G8BYQH1gtPUgYkC",
                   "_score" : null,
                   "_source" : {
@@ -107,7 +107,7 @@
         }
       },
       {
-        "_index" : "endpoint-agent",
+        "_index" : "metadata-endpoint-default-1",
         "_id" : "W6Vo1G8BYQH1gtPUgYkC",
         "_score" : null,
         "_source" : {
@@ -157,7 +157,7 @@
               "max_score" : null,
               "hits" : [
                 {
-                  "_index" : "endpoint-agent",
+                  "_index" : "metadata-endpoint-default-1",
                   "_id" : "W6Vo1G8BYQH1gtPUgYkC",
                   "_score" : null,
                   "_source" : {

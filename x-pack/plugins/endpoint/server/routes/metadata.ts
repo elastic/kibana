@@ -21,6 +21,8 @@ interface HitSource {
 }
 
 export function registerEndpointRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
+  const log = endpointAppContext.logFactory.get('metadata');
+
   router.post(
     {
       path: '/api/endpoint/metadata',
@@ -60,7 +62,8 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
           await getIndexPattern(
             endpointAppContext.ingestManager.indexPatternService,
             context.core.savedObjects.client,
-            EndpointAppConstants.METADATA_DATASET
+            EndpointAppConstants.METADATA_DATASET,
+            log
           )
         );
         const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
@@ -90,7 +93,8 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
           await getIndexPattern(
             endpointAppContext.ingestManager.indexPatternService,
             context.core.savedObjects.client,
-            EndpointAppConstants.METADATA_DATASET
+            EndpointAppConstants.METADATA_DATASET,
+            log
           )
         );
         const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(

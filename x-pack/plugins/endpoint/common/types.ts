@@ -30,7 +30,6 @@ export type Direction = 'asc' | 'desc';
 
 export class EndpointAppConstants {
   static BASE_API_URL = '/api/endpoint';
-  static ENDPOINT_INDEX_NAME = 'endpoint-agent*';
   static ALERT_INDEX_NAME = 'events-endpoint-1';
   static ENDPOINT_PACKAGE_NAME = 'endpoint';
   static EVENT_DATASET = 'events';

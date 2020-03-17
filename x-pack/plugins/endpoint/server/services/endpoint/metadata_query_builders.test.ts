@@ -11,8 +11,20 @@ import {
 } from './metadata_query_builders';
 import { IndexPatternService } from '../../../../ingest_manager/server';
 import { EndpointAppConstants } from '../../../common/types';
+import { SavedObjectsClientContract } from 'kibana/server';
 
-const indexPattern = 'metadata-endpoint-*';
+export const MetadataIndexPattern = 'metadata-endpoint-*';
+
+export class FakeIndexPatternService implements IndexPatternService {
+  async get(
+    savedObjectsClient: SavedObjectsClientContract,
+    pkgName: string,
+    datasetPath: string,
+    version?: string
+  ): Promise<string | undefined> {
+    return MetadataIndexPattern;
+  }
+}
 
 describe('query builder', () => {
   describe('MetadataListESQuery', () => {
@@ -23,11 +35,11 @@ describe('query builder', () => {
       const query = await kibanaRequestToMetadataListESQuery(
         mockRequest,
         {
-          ingestManager: { indexPatternService: new IndexPatternService() },
+          ingestManager: { indexPatternService: new FakeIndexPatternService() },
           logFactory: loggingServiceMock.create(),
           config: () => Promise.resolve(EndpointConfigSchema.validate({})),
         },
-        indexPattern
+        MetadataIndexPattern
       );
       expect(query).toEqual({
         body: {
@@ -59,7 +71,7 @@ describe('query builder', () => {
         },
         from: 0,
         size: 10,
-        index: indexPattern,
+        index: MetadataIndexPattern,
       } as Record<string, any>);
     });
   });
@@ -74,11 +86,11 @@ describe('query builder', () => {
       const query = await kibanaRequestToMetadataListESQuery(
         mockRequest,
         {
-          ingestManager: { indexPatternService: new IndexPatternService() },
+          ingestManager: { indexPatternService: new FakeIndexPatternService() },
           logFactory: loggingServiceMock.create(),
           config: () => Promise.resolve(EndpointConfigSchema.validate({})),
         },
-        indexPattern
+        MetadataIndexPattern
       );
       expect(query).toEqual({
         body: {
@@ -123,7 +135,7 @@ describe('query builder', () => {
         },
         from: 0,
         size: 10,
-        index: EndpointAppConstants.ENDPOINT_INDEX_NAME,
+        index: MetadataIndexPattern,
       } as Record<string, any>);
     });
   });
@@ -139,11 +151,11 @@ describe('query builder', () => {
       const query = kibanaRequestToMetadataGetESQuery(
         mockRequest,
         {
-          ingestManager: { indexPatternService: new IndexPatternService() },
+          ingestManager: { indexPatternService: new FakeIndexPatternService() },
           logFactory: loggingServiceMock.create(),
           config: () => Promise.resolve(EndpointConfigSchema.validate({})),
         },
-        indexPattern
+        MetadataIndexPattern
       );
       expect(query).toEqual({
         body: {
@@ -151,7 +163,7 @@ describe('query builder', () => {
           sort: [{ 'event.created': { order: 'desc' } }],
           size: 1,
         },
-        index: EndpointAppConstants.ENDPOINT_INDEX_NAME,
+        index: MetadataIndexPattern,
       });
     });
   });
