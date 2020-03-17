@@ -5,6 +5,7 @@
  */
 
 import { AlertAction } from '../../../../../../plugins/alerting/common';
+export { AlertAction } from '../../../../../../plugins/alerting/common';
 import { CallAPIOptions } from '../../../../../../../src/core/server';
 import { Filter } from '../../../../../../../src/plugins/data/server';
 import { IRuleStatusAttributes } from './rules/types';
@@ -24,7 +25,7 @@ export interface ThreatParams {
 }
 
 export interface RuleAlertParams {
-  actions: AlertAction[];
+  actions: AlertAction[] | undefined;
   description: string;
   note: string | undefined | null;
   enabled: boolean;

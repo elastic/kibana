@@ -6,7 +6,7 @@
 
 import { patchRulesSchema } from './patch_rules_schema';
 import { PatchRuleAlertParamsRest } from '../../rules/types';
-import { ThreatParams } from '../../types';
+import { ThreatParams, AlertAction } from '../../types';
 
 describe('patch rules schema', () => {
   test('empty objects do not validate as they require at least id or rule_id', () => {
@@ -1052,5 +1052,147 @@ describe('patch rules schema', () => {
         }).error.message
       ).toEqual('child "note" fails because ["note" must be a string]');
     });
+  });
+
+  test('You cannot send in an array of actions that are missing "group"', () => {
+    expect(
+      patchRulesSchema.validate<
+        Partial<
+          Omit<PatchRuleAlertParamsRest, 'actions'> & {
+            actions: Array<Omit<AlertAction, 'group'>>;
+          }
+        >
+      >({
+        actions: [{ id: 'id', actionTypeId: 'actionTypeId', params: {} }],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'junk',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "group" fails because ["group" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are missing "id"', () => {
+    expect(
+      patchRulesSchema.validate<
+        Partial<
+          Omit<PatchRuleAlertParamsRest, 'actions'> & {
+            actions: Array<Omit<AlertAction, 'id'>>;
+          }
+        >
+      >({
+        actions: [{ group: 'group', actionTypeId: 'actionTypeId', params: {} }],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'junk',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "id" fails because ["id" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are missing "actionTypeId"', () => {
+    expect(
+      patchRulesSchema.validate<
+        Partial<
+          Omit<PatchRuleAlertParamsRest, 'actions'> & {
+            actions: Array<Omit<AlertAction, 'actionTypeId'>>;
+          }
+        >
+      >({
+        actions: [{ group: 'group', id: 'id', params: {} }],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'junk',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "actionTypeId" fails because ["actionTypeId" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are missing "params"', () => {
+    expect(
+      patchRulesSchema.validate<
+        Partial<
+          Omit<PatchRuleAlertParamsRest, 'actions'> & {
+            actions: Array<Omit<AlertAction, 'params'>>;
+          }
+        >
+      >({
+        actions: [{ group: 'group', id: 'id', actionTypeId: 'actionTypeId' }],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'junk',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "params" fails because ["params" is required]]]'
+    );
+  });
+
+  test('You cannot send in an array of actions that are including "action_type_id', () => {
+    expect(
+      patchRulesSchema.validate<
+        Partial<
+          Omit<PatchRuleAlertParamsRest, 'actions'> & {
+            actions: Array<Omit<AlertAction, 'actionTypeId'> & { action_type_id: string }>;
+          }
+        >
+      >({
+        actions: [
+          {
+            group: 'group',
+            id: 'id',
+            action_type_id: 'action_type_id',
+            params: {},
+          },
+        ],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'junk',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "actions" fails because ["actions" at position 0 fails because [child "actionTypeId" fails because ["actionTypeId" is required]]]'
+    );
   });
 });
