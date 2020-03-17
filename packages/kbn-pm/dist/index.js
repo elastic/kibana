@@ -39806,6 +39806,7 @@ exports.isFailError = fail_1.isFailError;
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = __webpack_require__(36);
+const util_1 = __webpack_require__(29);
 // @ts-ignore @types are outdated and module is super simple
 const exit_hook_1 = tslib_1.__importDefault(__webpack_require__(348));
 const tooling_log_1 = __webpack_require__(415);
@@ -39825,10 +39826,9 @@ async function run(fn, options = {}) {
     });
     process.on('unhandledRejection', error => {
         log.error('UNHANDLED PROMISE REJECTION');
-        if (error instanceof Error || typeof error === 'string')
-            log.error(error);
-        else
-            log.error(String(error));
+        log.error(error instanceof Error
+            ? error
+            : new Error(`non-Error type rejection value: ${util_1.inspect(error)}`));
         process.exit(1);
     });
     const handleErrorWithoutExit = (error) => {
