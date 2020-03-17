@@ -316,7 +316,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             </EuiFlexItem>
             {agent.config_revision && (
               <EuiFlexItem grow={false}>
-                <EuiText color="default" size="xs" style={{ whiteSpace: 'nowrap' }}>
+                <EuiText color="default" size="xs" className="eui-textNoWrap">
                   <FormattedMessage
                     id="xpack.ingestManager.agentList.revisionNumber"
                     defaultMessage="rev. {revNumber}"
@@ -329,8 +329,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               agent.config_newest_revision &&
               agent.config_newest_revision > agent.config_revision && (
                 <EuiFlexItem grow={false}>
-                  <EuiText color="subdued" size="xs" style={{ whiteSpace: 'nowrap' }}>
-                    <EuiIcon size={'m'} type={'alert'} color="warning" />
+                  <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+                    <EuiIcon size="m" type="alert" color="warning" />
                     &nbsp;
                     {true && (
                       <>
