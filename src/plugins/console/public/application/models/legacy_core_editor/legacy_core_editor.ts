@@ -18,9 +18,17 @@
  */
 
 import ace from 'brace';
-import { Editor as IAceEditor } from 'brace';
+import { Editor as IAceEditor, IEditSession as IAceEditSession } from 'brace';
 import $ from 'jquery';
-import { CoreEditor, Position, Range, Token, TokensProvider, EditorEvent } from '../../../types';
+import {
+  CoreEditor,
+  Position,
+  Range,
+  Token,
+  TokensProvider,
+  EditorEvent,
+  AutoCompleterFunction,
+} from '../../../types';
 import { AceTokensProvider } from '../../../lib/ace_token_provider';
 import * as curl from '../sense_editor/curl';
 import smartResize from './smart_resize';
@@ -353,5 +361,49 @@ export class LegacyCoreEditor implements CoreEditor {
         return;
       }
     }
+  }
+
+  registerAutocompleter(getCompletions: AutoCompleterFunction): void {
+    // Hook into Ace
+
+    // disable standard context based autocompletion.
+    // @ts-ignore
+    ace.define('ace/autocomplete/text_completer', ['require', 'exports', 'module'], function(
+      require: any,
+      exports: any
+    ) {
+      exports.getCompletions = function(
+        innerEditor: any,
+        session: any,
+        pos: any,
+        prefix: any,
+        callback: any
+      ) {
+        callback(null, []);
+      };
+    });
+
+    const langTools = ace.acequire('ace/ext/language_tools');
+
+    langTools.setCompleters([
+      {
+        identifierRegexps: [
+          /[a-zA-Z_0-9\.\$\-\u00A2-\uFFFF]/, // adds support for dot character
+        ],
+        getCompletions: (
+          DO_NOT_USE_1: IAceEditor,
+          DO_NOT_USE_2: IAceEditSession,
+          pos: { row: number; column: number },
+          prefix: string,
+          callback: (...args: any[]) => void
+        ) => {
+          const position: Position = {
+            lineNumber: pos.row + 1,
+            column: pos.column + 1,
+          };
+          getCompletions(position, prefix, callback);
+        },
+      },
+    ]);
   }
 }
