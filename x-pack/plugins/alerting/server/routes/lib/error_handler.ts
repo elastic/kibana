@@ -25,7 +25,7 @@ export function handleDisabledApiKeysError<P, Q, B>(
     } catch (e) {
       if (isApiKeyDisabledError(e)) {
         return response.badRequest({
-          body: e,
+          body: new Error('Alerting relies upon API keys which appear to be are disabled'),
         });
       }
       throw e;
