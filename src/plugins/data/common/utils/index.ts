@@ -17,4 +17,5 @@
  * under the License.
  */
 
+/** @internal */
 export { shortenDottedString } from './shorten_dotted_string';
