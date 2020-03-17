@@ -16,6 +16,8 @@ import DragSelect from 'dragselect/dist/ds.min.js';
 import { Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
+import { esKuery, esQuery, QueryStringInput } from '../../../../../../src/plugins/data/public';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -38,7 +40,6 @@ import {
 } from './components';
 import { ChartTooltip } from '../components/chart_tooltip';
 import { ExplorerSwimlane } from './explorer_swimlane';
-import { KqlFilterBar } from '../components/kql_filter_bar';
 import { TimeBuckets } from '../util/time_buckets';
 import { InfluencersList } from '../components/influencers_list';
 import {
@@ -54,7 +55,6 @@ import { SelectInterval } from '../components/controls/select_interval/select_in
 import { SelectLimit, limit$ } from './select_limit/select_limit';
 import { SelectSeverity } from '../components/controls/select_severity/select_severity';
 import {
-  getKqlQueryValues,
   removeFilterFromQueryString,
   getQueryPattern,
   escapeParens,
@@ -67,6 +67,8 @@ import { getSwimlaneContainerWidth } from './legacy_utils';
 import {
   DRAG_SELECT_ACTION,
   FILTER_ACTION,
+  QUERY_LANGUAGE_KUERY,
+  QUERY_LANGUAGE_LUCENE,
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
@@ -85,6 +87,50 @@ function mapSwimlaneOptionsToEuiOptions(options) {
     value: option,
     text: option,
   }));
+}
+
+function getKqlQueryValues({ inputString, queryLanguage, indexPattern }) {
+  let influencersFilterQuery;
+  const ast = esKuery.fromKueryExpression(inputString);
+  const isAndOperator = ast.function === 'and';
+  const filteredFields = [];
+  // if ast.type == 'function' then layout of ast.arguments:
+  // [{ arguments: [ { type: 'literal', value: 'AAL' } ] },{ arguments: [ { type: 'literal', value: 'AAL' } ] }]
+  if (ast && Array.isArray(ast.arguments)) {
+    ast.arguments.forEach(arg => {
+      if (arg.arguments !== undefined) {
+        arg.arguments.forEach(nestedArg => {
+          if (typeof nestedArg.value === 'string') {
+            filteredFields.push(nestedArg.value);
+          }
+        });
+      } else if (typeof arg.value === 'string') {
+        filteredFields.push(arg.value);
+      }
+    });
+  }
+  if (queryLanguage === QUERY_LANGUAGE_KUERY) {
+    influencersFilterQuery = esKuery.toElasticsearchQuery(
+      esKuery.fromKueryExpression(inputString),
+      indexPattern
+    );
+  } else if (queryLanguage === QUERY_LANGUAGE_LUCENE) {
+    influencersFilterQuery = esQuery.luceneStringToDsl(inputString);
+  }
+
+  const clearSettings =
+    influencersFilterQuery.match_all && Object.keys(influencersFilterQuery.match_all).length === 0;
+
+  return {
+    clearSettings,
+    settings: {
+      filterQuery: influencersFilterQuery,
+      queryString: inputString,
+      tableQueryString: inputString,
+      isAndOperator,
+      filteredFields,
+    },
+  };
 }
 
 const ExplorerPage = ({ children, jobSelectorProps, resizeRef }) => (
@@ -110,6 +156,13 @@ export class Explorer extends React.Component {
     setSelectedCells: PropTypes.func.isRequired,
     severity: PropTypes.number.isRequired,
     showCharts: PropTypes.bool.isRequired,
+  };
+
+  state = {
+    searchInput: {
+      query: '',
+      language: QUERY_LANGUAGE_KUERY,
+    },
   };
 
   _unsubscribeAll = new Subject();
@@ -217,11 +270,10 @@ export class Explorer extends React.Component {
       this.props.setSelectedCells(selectedCells);
     }
   };
-  // Escape regular parens from fieldName as that portion of the query is not wrapped in double quotes
+  // Update to kuery. Escape regular parens from fieldName as that portion of the query is not wrapped in double quotes
   // and will cause a syntax error when called with getKqlQueryValues
   applyFilter = (fieldName, fieldValue, action) => {
     const { filterActive, indexPattern, queryString } = this.props.explorerState;
-
     let newQueryString = '';
     const operator = 'and ';
     const sanitizedFieldName = escapeParens(fieldName);
@@ -248,9 +300,29 @@ export class Explorer extends React.Component {
       }
     }
 
+    // explorerService.setSearchInput({
+    //   language: this.props.explorerState.searchInput.language,
+    //   query: `${newQueryString}`,
+    // });
+    this.setState({
+      searchInput: {
+        language: this.props.explorerState.searchInput.language,
+        query: `${newQueryString}`,
+      },
+    });
+
     try {
-      const queryValues = getKqlQueryValues(`${newQueryString}`, indexPattern);
-      this.applyInfluencersFilterQuery(queryValues);
+      const { clearSettings, settings } = getKqlQueryValues({
+        inputString: `${newQueryString}`,
+        queryLanguage: QUERY_LANGUAGE_KUERY,
+        indexPattern,
+      });
+
+      if (clearSettings === true) {
+        explorerService.clearInfluencerFilterSettings();
+      } else {
+        explorerService.setInfluencerFilterSettings(settings);
+      }
     } catch (e) {
       console.log('Invalid kuery syntax', e); // eslint-disable-line no-console
 
@@ -264,16 +336,22 @@ export class Explorer extends React.Component {
     }
   };
 
-  applyInfluencersFilterQuery = payload => {
-    const { filterQuery: influencersFilterQuery } = payload;
+  searchChangeHandler = query => {
+    // explorerService.setSearchInput(query);
+    this.setState({ searchInput: query });
+  };
 
-    if (
-      influencersFilterQuery.match_all &&
-      Object.keys(influencersFilterQuery.match_all).length === 0
-    ) {
+  applyInfluencersFilterQuery = query => {
+    const { clearSettings, settings } = getKqlQueryValues({
+      inputString: query.query,
+      queryLanguage: query.language,
+      indexPattern: this.props.explorerState.indexPattern,
+    });
+
+    if (clearSettings === true) {
       explorerService.clearInfluencerFilterSettings();
     } else {
-      explorerService.setInfluencerFilterSettings(payload);
+      explorerService.setInfluencerFilterSettings(settings);
     }
   };
 
@@ -291,18 +369,21 @@ export class Explorer extends React.Component {
       maskAll,
       noInfluencersConfigured,
       overallSwimlaneData,
-      queryString,
+      // queryString,
+      // searchInput,
       selectedCells,
       selectedJobs,
       swimlaneContainerWidth,
       tableData,
-      tableQueryString,
+      // tableQueryString,
       viewByLoadedForTimeFormatted,
       viewBySwimlaneData,
       viewBySwimlaneDataLoading,
       viewBySwimlaneFieldName,
       viewBySwimlaneOptions,
     } = this.props.explorerState;
+
+    const { searchInput } = this.state;
 
     const jobSelectorProps = {
       dateFormatTz: getDateFormatTz(),
@@ -362,12 +443,16 @@ export class Explorer extends React.Component {
 
           {noInfluencersConfigured === false && influencers !== undefined && (
             <div className="mlAnomalyExplorer__filterBar">
-              <KqlFilterBar
-                indexPattern={indexPattern}
+              <QueryStringInput
+                bubbleSubmitEvent
+                query={searchInput}
+                indexPatterns={[indexPattern]}
+                onChange={this.searchChangeHandler}
                 onSubmit={this.applyInfluencersFilterQuery}
-                initialValue={queryString}
                 placeholder={filterPlaceHolder}
-                valueExternal={tableQueryString}
+                disableAutoFocus
+                dataTestSubj="transformQueryInput"
+                languageSwitcherPopoverAnchorPosition="rightDown"
               />
             </div>
           )}
