@@ -38,10 +38,7 @@ setupMock.uiSettings.get.mockImplementation(uiSettingsMock(true));
 const mockFilterManager = new FilterManager(setupMock.uiSettings);
 
 const mockQueryBar = {
-  query: {
-    query: 'test query',
-    language: 'kuery',
-  },
+  query: 'test query',
   filters: [
     {
       $state: {
@@ -93,10 +90,7 @@ describe('helpers', () => {
   describe('buildQueryBarDescription', () => {
     test('returns empty array if no filters, query or savedId exist', () => {
       const emptyMockQueryBar = {
-        query: {
-          query: '',
-          language: 'kuery',
-        },
+        query: '',
         filters: [],
         saved_id: '',
       };
@@ -113,10 +107,7 @@ describe('helpers', () => {
     test('returns expected array of ListItems when filters exists, but no indexPatterns passed in', () => {
       const mockQueryBarWithFilters = {
         ...mockQueryBar,
-        query: {
-          query: '',
-          language: 'kuery',
-        },
+        query: '',
         saved_id: '',
       };
       const result: ListItems[] = buildQueryBarDescription({
@@ -135,10 +126,7 @@ describe('helpers', () => {
     test('returns expected array of ListItems when filters AND indexPatterns exist', () => {
       const mockQueryBarWithFilters = {
         ...mockQueryBar,
-        query: {
-          query: '',
-          language: 'kuery',
-        },
+        query: '',
         saved_id: '',
       };
       const result: ListItems[] = buildQueryBarDescription({
@@ -177,10 +165,7 @@ describe('helpers', () => {
     test('returns expected array of ListItems when "savedId" exists', () => {
       const mockQueryBarWithSavedId = {
         ...mockQueryBar,
-        query: {
-          query: '',
-          language: 'kuery',
-        },
+        query: '',
         filters: [],
       };
       const result: ListItems[] = buildQueryBarDescription({
