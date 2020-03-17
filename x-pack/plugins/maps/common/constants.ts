@@ -120,6 +120,7 @@ export const EMPTY_FEATURE_COLLECTION = {
 
 export const DRAW_TYPE = {
   BOUNDS: 'BOUNDS',
+  DISTANCE: 'DISTANCE',
   POLYGON: 'POLYGON',
 };
 

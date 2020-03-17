@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ValidatedDualRange } from 'ui/validated_range';
+import { ValidatedDualRange } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { MIN_SIZE, MAX_SIZE } from '../../vector_style_defaults';
 import { i18n } from '@kbn/i18n';
 
