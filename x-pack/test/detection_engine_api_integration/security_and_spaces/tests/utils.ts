@@ -49,8 +49,10 @@ export const getSimpleRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> =
   risk_score: 1,
   rule_id: ruleId,
   severity: 'high',
+  index: ['auditbeat-*'],
   type: 'query',
   query: 'user.name: root or user.name: admin',
+  language: 'kuery',
 });
 
 export const getSignalStatus = () => ({
@@ -118,6 +120,7 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertR
   false_positives: [],
   from: 'now-6m',
   immutable: false,
+  index: ['auditbeat-*'],
   interval: '5m',
   rule_id: ruleId,
   language: 'kuery',
