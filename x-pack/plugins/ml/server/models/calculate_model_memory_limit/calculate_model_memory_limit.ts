@@ -11,11 +11,24 @@ import { analysisConfigSchema } from '../../routes/schemas/anomaly_detectors_sch
 import { fieldsServiceProvider } from '../fields_service';
 
 interface ModelMemoryEstimationResult {
+  /**
+   * Result model memory limit
+   */
   modelMemoryLimit: string;
+  /**
+   * Estimated model memory by elasticsearch ml endpoint
+   */
   estimatedModelMemoryLimit: string;
+  /**
+   * Maximum model memory limit
+   */
+  maxModelMemoryLimit?: string;
 }
 
-interface ModelMemoryEstimate {
+/**
+ * Response of the _estimate_model_memory endpoint.
+ */
+export interface ModelMemoryEstimate {
   model_memory_estimate: string;
 }
 
@@ -36,11 +49,11 @@ export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) 
     latestMs: number,
     allowMMLGreaterThanMax = false
   ): Promise<ModelMemoryEstimationResult> {
-    const limits: { max_model_memory_limit?: string } = {};
+    let maxModelMemoryLimit;
     try {
       const resp = await callAsCurrentUser('ml.info');
       if (resp?.limits?.max_model_memory_limit !== undefined) {
-        limits.max_model_memory_limit = resp.limits.max_model_memory_limit.toUpperCase();
+        maxModelMemoryLimit = resp.limits.max_model_memory_limit.toUpperCase();
       }
     } catch (e) {
       throw new Error('Unable to retrieve max model memory limit');
@@ -116,7 +129,7 @@ export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) 
       let modelMemoryLimit: string = estimatedModelMemoryLimit;
       // if max_model_memory_limit has been set,
       // make sure the estimated value is not greater than it.
-      if (!allowMMLGreaterThanMax && limits.max_model_memory_limit !== undefined) {
+      if (!allowMMLGreaterThanMax && maxModelMemoryLimit !== undefined) {
         // @ts-ignore
         const maxBytes = numeral(limits.max_model_memory_limit).value();
         // @ts-ignore
@@ -130,6 +143,7 @@ export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) 
       return {
         estimatedModelMemoryLimit,
         modelMemoryLimit,
+        ...(maxModelMemoryLimit ? { maxModelMemoryLimit } : {}),
       };
     } catch (e) {
       throw new Error('Unable to retrieve model memory estimation');

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 const customRulesSchema = schema.maybe(
   schema.arrayOf(
@@ -107,3 +107,6 @@ export const anomalyDetectionJobSchema = {
   results_retention_days: schema.maybe(schema.number()),
   state: schema.maybe(schema.string()),
 };
+
+const anomalyDetectionJobSchemaObject = schema.object(anomalyDetectionJobSchema);
+export type AnomalyDetectionJob = TypeOf<typeof anomalyDetectionJobSchemaObject>;
