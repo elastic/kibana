@@ -8,10 +8,11 @@ import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 // @ts-ignore
 import numeral from '@elastic/numeral';
+import { isEmpty } from 'lodash';
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
 import { Action, ACTION } from './actions';
-import { getInitialState, getJobConfigFromFormState, State, JOB_TYPES } from './state';
+import { getInitialState, getJobConfigFromFormState, State } from './state';
 import {
   isJobIdValid,
   validateModelMemoryLimitUnits,
@@ -30,6 +31,7 @@ import {
   getDependentVar,
   isRegressionAnalysis,
   isClassificationAnalysis,
+  ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/analytics';
 import { indexPatterns } from '../../../../../../../../../../src/plugins/data/public';
 
@@ -142,7 +144,7 @@ export const validateAdvancedEditor = (state: State): State => {
 
   if (
     jobConfig.analysis === undefined &&
-    (jobType === JOB_TYPES.CLASSIFICATION || jobType === JOB_TYPES.REGRESSION)
+    (jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION || jobType === ANALYSIS_CONFIG_TYPE.REGRESSION)
   ) {
     dependentVariableEmpty = true;
   }
@@ -315,7 +317,8 @@ const validateForm = (state: State): State => {
 
   const jobTypeEmpty = jobType === undefined;
   const dependentVariableEmpty =
-    (jobType === JOB_TYPES.REGRESSION || jobType === JOB_TYPES.CLASSIFICATION) &&
+    (jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
+      jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION) &&
     dependentVariable === '';
 
   const mmlValidationResult = validateMml(estimatedModelMemoryLimit, modelMemoryLimit);
@@ -437,7 +440,11 @@ export function reducer(state: State, action: Action): State {
     }
 
     case ACTION.SWITCH_TO_ADVANCED_EDITOR:
-      const jobConfig = getJobConfigFromFormState(state.form);
+      let { jobConfig } = state;
+      const isJobConfigEmpty = isEmpty(state.jobConfig);
+      if (isJobConfigEmpty) {
+        jobConfig = getJobConfigFromFormState(state.form);
+      }
       return validateAdvancedEditor({
         ...state,
         advancedEditorRawString: JSON.stringify(jobConfig, null, 2),
@@ -449,6 +456,12 @@ export function reducer(state: State, action: Action): State {
       return {
         ...state,
         estimatedModelMemoryLimit: action.value,
+      };
+
+    case ACTION.SET_JOB_CLONE:
+      return {
+        ...state,
+        cloneJob: action.cloneJob,
       };
   }
 

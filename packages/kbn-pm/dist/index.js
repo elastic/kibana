@@ -43920,7 +43920,7 @@ class KbnClientUiSettings {
      * Replace all uiSettings with the `doc` values, `doc` is merged
      * with some defaults
      */
-    async replace(doc) {
+    async replace(doc, { retries = 5 } = {}) {
         this.log.debug('replacing kibana config doc: %j', doc);
         const changes = {
             ...this.defaults,
@@ -43935,7 +43935,7 @@ class KbnClientUiSettings {
             method: 'POST',
             path: '/api/kibana/settings',
             body: { changes },
-            retries: 5,
+            retries,
         });
     }
     /**
