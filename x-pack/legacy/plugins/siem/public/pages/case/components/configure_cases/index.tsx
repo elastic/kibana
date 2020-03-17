@@ -102,6 +102,8 @@ const ConfigureCasesComponent: React.FC = () => {
   });
   const { loading: isLoadingConnectors, connectors, refetchConnectors } = useConnectors();
 
+  // ActionsConnectorsContextProvider reloadConnectors prop expects a Promise<void>.
+  // TODO: Fix it if reloadConnectors type change.
   const reloadConnectors = useCallback(async () => refetchConnectors(), []);
   const isLoadingAny = isLoadingConnectors || persistLoading || loadingCaseConfigure;
   const updateConnectorDisabled = isLoadingAny || !connectorIsValid || connectorId === 'none';

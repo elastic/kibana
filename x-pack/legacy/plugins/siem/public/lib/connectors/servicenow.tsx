@@ -87,6 +87,10 @@ export function getActionType(): ActionTypeModel {
 const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
   ServiceNowActionConnector
 >> = ({ action, editActionConfig, editActionSecrets, errors }) => {
+  /* We do not provide defaults values to the fields (like empty string for apiUrl) intentionally.
+   * If we do, errors will be shown the first time the flyout is open even though the user did not
+   * interact with the form. Also, we would like to show errors for empty fields provided by the user.
+  /*/
   const { apiUrl, casesConfiguration: { mapping = [] } = {} } = action.config;
   const { username, password } = action.secrets;
 
@@ -153,7 +157,7 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
               fullWidth
               isInvalid={isApiUrlInvalid}
               name="apiUrl"
-              value={apiUrl || ''}
+              value={apiUrl || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="apiUrlFromInput"
               placeholder="https://<instance>.service-now.com"
               onChange={handleOnChangeActionConfig.bind(null, 'apiUrl')}
@@ -175,7 +179,7 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
               fullWidth
               isInvalid={isUsernameInvalid}
               name="username"
-              value={username || ''}
+              value={username || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="usernameFromInput"
               onChange={handleOnChangeSecretConfig.bind(null, 'username')}
               onBlur={handleOnBlurSecretConfig.bind(null, 'username')}
@@ -196,7 +200,7 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
               fullWidth
               isInvalid={isPasswordInvalid}
               name="password"
-              value={password || ''}
+              value={password || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="passwordFromInput"
               onChange={handleOnChangeSecretConfig.bind(null, 'password')}
               onBlur={handleOnBlurSecretConfig.bind(null, 'password')}
