@@ -59,7 +59,7 @@ export { intervalOptions } from 'ui/agg_types';
 export { subscribeWithScope } from '../../../../../plugins/kibana_legacy/public';
 // @ts-ignore
 export { timezoneProvider } from 'ui/vis/lib/timezone';
-export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
+export { unhashUrl, redirectWhenMissing } from '../../../../../plugins/kibana_utils/public';
 export {
   ensureDefaultIndexPattern,
   formatMsg,
