@@ -5,14 +5,16 @@
  */
 
 import ApolloClient from 'apollo-client';
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
+import { EuiButton } from '@elastic/eui';
 import { HeaderPage } from '../../components/header_page';
 import { StatefulOpenTimeline } from '../../components/open_timeline';
 import { WrapperPage } from '../../components/wrapper_page';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import * as i18n from './translations';
+import { ImportRuleModal } from '../detection_engine/rules/components/import_rule_modal';
 
 const TimelinesContainer = styled.div`
   width: 100%;
@@ -26,23 +28,44 @@ type OwnProps = TimelinesProps;
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
-const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => (
-  <>
-    <WrapperPage>
-      <HeaderPage border title={i18n.PAGE_TITLE} />
+const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => {
+  const [showImportModal, setShowImportModal] = useState(false);
+  return (
+    <>
+      <ImportRuleModal
+        showModal={showImportModal}
+        closeModal={() => setShowImportModal(false)}
+        importComplete={() => {
+          /* setImportCompleteToggle(!importCompleteToggle)*/
+        }}
+      />
 
-      <TimelinesContainer>
-        <StatefulOpenTimeline
-          apolloClient={apolloClient}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          isModal={false}
-          title={i18n.ALL_TIMELINES_PANEL_TITLE}
-        />
-      </TimelinesContainer>
-    </WrapperPage>
+      <WrapperPage>
+        <HeaderPage border title={i18n.PAGE_TITLE}>
+          <EuiButton
+            iconType="indexOpen"
+            isDisabled={false}
+            onClick={() => {
+              setShowImportModal(true);
+            }}
+          >
+            {'Import Timeline'}
+          </EuiButton>
+        </HeaderPage>
 
-    <SpyRoute />
-  </>
-);
+        <TimelinesContainer>
+          <StatefulOpenTimeline
+            apolloClient={apolloClient}
+            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+            isModal={false}
+            title={i18n.ALL_TIMELINES_PANEL_TITLE}
+          />
+        </TimelinesContainer>
+      </WrapperPage>
+
+      <SpyRoute />
+    </>
+  );
+};
 
 export const TimelinesPage = React.memo(TimelinesPageComponent);

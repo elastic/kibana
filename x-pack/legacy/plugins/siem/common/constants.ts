@@ -84,3 +84,5 @@ export const DETECTION_ENGINE_QUERY_SIGNALS_URL = `${DETECTION_ENGINE_SIGNALS_UR
  * Common naming convention for an unauthenticated user
  */
 export const UNAUTHENTICATED_USER = 'Unauthenticated';
+
+export const EXPORT_TIMELINES_URL = '/api/timeline/_import';

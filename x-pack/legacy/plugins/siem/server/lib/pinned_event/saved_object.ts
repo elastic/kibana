@@ -180,7 +180,7 @@ export class PinnedEvent {
   }
 }
 
-const convertSavedObjectToSavedPinnedEvent = (
+export const convertSavedObjectToSavedPinnedEvent = (
   savedObject: unknown,
   timelineVersion?: string | undefined | null
 ): PinnedEventSavedObject =>
@@ -204,7 +204,7 @@ const convertSavedObjectToSavedPinnedEvent = (
 // then this interface does not allow types without index signature
 // this is limiting us with our type for now so the easy way was to use any
 
-const pickSavedPinnedEvent = (
+export const pickSavedPinnedEvent = (
   pinnedEventId: string | null,
   savedPinnedEvent: SavedPinnedEvent,
   userInfo: AuthenticatedUser | null

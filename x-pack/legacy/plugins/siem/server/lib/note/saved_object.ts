@@ -194,7 +194,7 @@ export class Note {
   }
 }
 
-const convertSavedObjectToSavedNote = (
+export const convertSavedObjectToSavedNote = (
   savedObject: unknown,
   timelineVersion?: string | undefined | null
 ): NoteSavedObject =>
@@ -218,7 +218,7 @@ const convertSavedObjectToSavedNote = (
 // then this interface does not allow types without index signature
 // this is limiting us with our type for now so the easy way was to use any
 
-const pickSavedNote = (
+export const pickSavedNote = (
   noteId: string | null,
   savedNote: SavedNote,
   userInfo: AuthenticatedUser | null
