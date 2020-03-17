@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { NewOutput, Output } from '../types';
 import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 import { appContextService } from './app_context';
