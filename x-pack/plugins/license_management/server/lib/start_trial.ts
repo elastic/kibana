@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LicensingPluginSetup } from '../../../../../plugins/licensing/server';
+import { LicensingPluginSetup } from '../../../licensing/server';
 import { CallAsCurrentUser } from '../types';
 
 export async function canStartTrial(callAsCurrentUser: CallAsCurrentUser) {

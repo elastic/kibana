@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { LicensingPluginSetup } from '../../../../../plugins/licensing/server';
+import { LicensingPluginSetup } from '../../../licensing/server';
 import { CallAsCurrentUser } from '../types';
 
 const getStartBasicPath = (acknowledge: boolean) =>

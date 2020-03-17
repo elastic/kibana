@@ -5,8 +5,8 @@
  */
 import { ScopedClusterClient, IRouter } from 'kibana/server';
 
-import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
-import { SecurityPluginSetup } from '../../../../plugins/security/server';
+import { LicensingPluginSetup } from '../../licensing/server';
+import { SecurityPluginSetup } from '../../security/server';
 import { isEsError } from './lib/is_es_error';
 
 export interface Dependencies {
