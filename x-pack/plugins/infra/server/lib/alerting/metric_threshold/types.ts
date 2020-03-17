@@ -33,5 +33,4 @@ export interface MetricExpressionParams {
   indexPattern: string;
   threshold: number[];
   comparator: Comparator;
-  filterQuery: string;
 }
