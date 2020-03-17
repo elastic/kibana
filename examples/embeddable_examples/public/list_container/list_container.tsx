@@ -21,7 +21,7 @@ import ReactDOM from 'react-dom';
 import {
   Container,
   ContainerInput,
-  GetEmbeddableFactory,
+  EmbeddableStart,
 } from '../../../../src/plugins/embeddable/public';
 import { ListContainerComponent } from './list_container_component';
 
@@ -31,7 +31,10 @@ export class ListContainer extends Container<{}, ContainerInput> {
   public readonly type = LIST_CONTAINER;
   private node?: HTMLElement;
 
-  constructor(input: ContainerInput, getEmbeddableFactory: GetEmbeddableFactory) {
+  constructor(
+    input: ContainerInput,
+    getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory']
+  ) {
     super(input, { embeddableLoaded: {} }, getEmbeddableFactory);
   }
 
