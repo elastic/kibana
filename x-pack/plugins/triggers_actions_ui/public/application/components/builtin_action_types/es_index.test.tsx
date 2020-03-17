@@ -49,13 +49,6 @@ describe('index connector validation', () => {
         index: [],
       },
     });
-
-    delete actionConnector.config.index;
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        index: ['Index is required.'],
-      },
-    });
   });
 });
 
