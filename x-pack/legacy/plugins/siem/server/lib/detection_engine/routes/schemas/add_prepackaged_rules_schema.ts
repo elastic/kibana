@@ -51,7 +51,7 @@ import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
  *  - index is a required field that must exist
  */
 export const addPrepackagedRulesSchema = Joi.object({
-  actions,
+  actions: actions.default([]),
   description: description.required(),
   enabled: enabled.default(false),
   false_positives: false_positives.default([]),
@@ -82,7 +82,7 @@ export const addPrepackagedRulesSchema = Joi.object({
   to: to.default('now'),
   type: type.required(),
   threat: threat.default([]),
-  throttle,
+  throttle: throttle.default(null),
   references: references.default([]),
   note: note.allow(''),
   version: version.required(),

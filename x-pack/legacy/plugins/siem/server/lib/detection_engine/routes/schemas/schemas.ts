@@ -105,6 +105,6 @@ export const updated_by = Joi.string();
 export const version = Joi.number()
   .integer()
   .min(1);
-export const actions = Joi.array().default([]);
-export const throttle = Joi.string().default(null);
+export const actions = Joi.array();
+export const throttle = Joi.string().allow(null);
 export const note = Joi.string();
