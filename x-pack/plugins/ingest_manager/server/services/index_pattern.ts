@@ -8,7 +8,16 @@ import * as Registry from './epm/registry';
 import { getInstallationObject, findInstalledPackageByName } from './epm/packages/get';
 import { Installation } from '../types';
 
-export class IndexPatternService {
+export interface IndexPatternService {
+  get(
+    savedObjectsClient: SavedObjectsClientContract,
+    pkgName: string,
+    datasetPath: string,
+    version?: string
+  ): Promise<string | undefined>;
+}
+
+export class IndexPatternSavedObjectService implements IndexPatternService {
   public async get(
     savedObjectsClient: SavedObjectsClientContract,
     pkgName: string,

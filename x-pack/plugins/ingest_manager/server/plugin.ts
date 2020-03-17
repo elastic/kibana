@@ -40,7 +40,7 @@ import {
 } from './routes';
 
 import { IngestManagerConfigType } from '../common';
-import { appContextService, IndexPatternService } from './services';
+import { appContextService, IndexPatternService, IndexPatternSavedObjectService } from './services';
 
 /**
  * Describes public IngestManager plugin contract returned at the `setup` stage.
@@ -141,7 +141,7 @@ export class IngestManagerPlugin implements Plugin<IngestManagerSetupContract> {
       });
     }
     return deepFreeze({
-      indexPatternService: new IndexPatternService(),
+      indexPatternService: new IndexPatternSavedObjectService(),
     });
   }
 

@@ -22,6 +22,7 @@ import { EndpointMetadata, EndpointResultList } from '../../common/types';
 import { SearchResponse } from 'elasticsearch';
 import { registerEndpointRoutes } from './metadata';
 import { EndpointConfigSchema } from '../config';
+import { IndexPatternService } from '../../../ingest_manager/server';
 import * as data from '../test_data/all_metadata_data.json';
 
 describe('test endpoint route', () => {
@@ -41,6 +42,7 @@ describe('test endpoint route', () => {
     routerMock = httpServiceMock.createRouter();
     mockResponse = httpServerMock.createResponseFactory();
     registerEndpointRoutes(routerMock, {
+      ingestManager: { indexPatternService: new IndexPatternService() },
       logFactory: loggingServiceMock.create(),
       config: () => Promise.resolve(EndpointConfigSchema.validate({})),
     });
