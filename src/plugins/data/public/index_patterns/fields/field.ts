@@ -23,7 +23,7 @@ import { ObjDefine } from './obj_define';
 import { IndexPattern } from '../index_patterns';
 import { getNotifications, getFieldFormats } from '../../services';
 import { IFieldType, getKbnFieldType, IFieldSubType, FieldFormat } from '../../../common';
-import { shortenDottedString } from '../../../../kibana_utils/common';
+import { shortenDottedString } from '../../../common/utils';
 
 export type FieldSpec = Record<string, any>;
 

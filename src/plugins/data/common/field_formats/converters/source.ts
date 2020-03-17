@@ -18,7 +18,7 @@
  */
 
 import { template, escape, keys } from 'lodash';
-import { shortenDottedString } from '../../../../kibana_utils/common';
+import { shortenDottedString } from '../../utils';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';

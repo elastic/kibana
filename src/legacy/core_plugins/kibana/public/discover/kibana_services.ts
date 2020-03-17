@@ -58,7 +58,6 @@ export { subscribeWithScope } from '../../../../../plugins/kibana_legacy/public'
 // @ts-ignore
 export { timezoneProvider } from 'ui/vis/lib/timezone';
 export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
-export { shortenDottedString } from '../../../../../plugins/kibana_utils/common';
 export {
   ensureDefaultIndexPattern,
   formatMsg,
