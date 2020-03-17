@@ -57,7 +57,8 @@ export class DatafeedPreviewPane extends Component {
   }
 
   componentDidMount() {
-    const canPreviewDatafeed = checkPermission('canPreviewDatafeed');
+    const canPreviewDatafeed =
+      checkPermission('canPreviewDatafeed') && this.props.job.datafeed_config !== undefined;
     this.setState({ canPreviewDatafeed });
 
     updateDatafeedPreview(this.props.job, canPreviewDatafeed)
@@ -87,7 +88,7 @@ function updateDatafeedPreview(job, canPreviewDatafeed) {
   return new Promise((resolve, reject) => {
     if (canPreviewDatafeed) {
       mlJobService
-        .getDatafeedPreview(job.job_id)
+        .getDatafeedPreview(job.datafeed_config.datafeed_id)
         .then(resp => {
           if (Array.isArray(resp)) {
             resolve(JSON.stringify(resp.slice(0, ML_DATA_PREVIEW_COUNT), null, 2));

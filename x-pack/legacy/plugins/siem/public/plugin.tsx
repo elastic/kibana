@@ -17,7 +17,7 @@ import {
 } from '../../../../plugins/triggers_actions_ui/public';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { IEmbeddableStart } from '../../../../../src/plugins/embeddable/public';
+import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import { Start as NewsfeedStart } from '../../../../../src/plugins/newsfeed/public';
 import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
@@ -38,7 +38,7 @@ export interface SetupPlugins {
 }
 export interface StartPlugins {
   data: DataPublicPluginStart;
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   inspector: InspectorStart;
   newsfeed?: NewsfeedStart;
   uiActions: UiActionsStart;
