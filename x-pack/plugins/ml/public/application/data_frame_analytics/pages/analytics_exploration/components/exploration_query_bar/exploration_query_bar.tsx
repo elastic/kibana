@@ -16,15 +16,14 @@ import {
   QueryStringInput,
 } from '../../../../../../../../../../src/plugins/data/public';
 
+import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
+
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
 interface ExplorationQueryBarProps {
   indexPattern: IIndexPattern;
   setSearchQuery: Dispatch<SetStateAction<SavedSearchQuery>>;
 }
-
-const QUERY_LANGUAGE_KUERY = 'kuery';
-const QUERY_LANGUAGE_LUCENE = 'lucene';
 
 export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
   indexPattern,
@@ -33,13 +32,13 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>({
     query: '',
-    language: QUERY_LANGUAGE_KUERY,
+    language: SEARCH_QUERY_LANGUAGE.KUERY,
   });
 
   const searchChangeHandler = (query: Query) => setSearchInput(query);
   const searchSubmitHandler = (query: Query) => {
     switch (query.language) {
-      case QUERY_LANGUAGE_KUERY:
+      case SEARCH_QUERY_LANGUAGE.KUERY:
         setSearchQuery(
           esKuery.toElasticsearchQuery(
             esKuery.fromKueryExpression(query.query as string),
@@ -47,7 +46,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
           )
         );
         return;
-      case QUERY_LANGUAGE_LUCENE:
+      case SEARCH_QUERY_LANGUAGE.LUCENE:
         setSearchQuery(esQuery.luceneStringToDsl(query.query as string));
         return;
     }
@@ -61,7 +60,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
       onChange={searchChangeHandler}
       onSubmit={searchSubmitHandler}
       placeholder={
-        searchInput.language === QUERY_LANGUAGE_KUERY
+        searchInput.language === SEARCH_QUERY_LANGUAGE.KUERY
           ? i18n.translate('xpack.ml.stepDefineForm.queryPlaceholderKql', {
               defaultMessage: 'e.g. {example}',
               values: { example: 'method : "GET" or status : "404"' },
