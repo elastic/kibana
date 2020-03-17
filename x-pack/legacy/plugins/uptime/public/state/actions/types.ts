@@ -4,6 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Action } from 'redux-actions';
+
+export interface AsyncAction {
+  get: (payload?: any) => Action<any>;
+  success: (payload?: any) => Action<any>;
+  fail: (payload?: any) => Action<any>;
+}
+
 export interface QueryParams {
   monitorId: string;
   dateStart: string;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../../constants';
 import * as Registry from '../../registry';
 import { loadFieldsFromYaml, Fields, Field } from '../../fields/field';

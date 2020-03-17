@@ -16,10 +16,11 @@ import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { MaybePromise } from '@kbn/utility-types';
 import { Observable } from 'rxjs';
+import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/server/types';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { ShallowPromise } from '@kbn/utility-types';
-import { UiSettingsParams as UiSettingsParams_2 } from 'src/core/server/types';
+import { Type } from '@kbn/config-schema';
 import { UnregisterCallback } from 'history';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
@@ -783,7 +784,7 @@ export type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' |
 export interface IUiSettingsClient {
     get$: <T = any>(key: string, defaultOverride?: T) => Observable<T>;
     get: <T = any>(key: string, defaultOverride?: T) => T;
-    getAll: () => Readonly<Record<string, UiSettingsParams_2 & UserProvidedValues_2>>;
+    getAll: () => Readonly<Record<string, PublicUiSettingsParams_2 & UserProvidedValues_2>>;
     getSaved$: <T = any>() => Observable<{
         key: string;
         newValue: T;
@@ -932,6 +933,9 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
 // @public (undocumented)
 export type PluginOpaqueId = symbol;
 
+// @public
+export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
+
 // Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
@@ -939,6 +943,8 @@ export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T ext
     [K in keyof T]: RecursiveReadonly<T[K]>;
 }> : T;
 
+// Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
 // @public (undocumented)
 export interface SavedObject<T = unknown> {
     attributes: T;
@@ -1290,7 +1296,7 @@ export type ToastsSetup = IToasts;
 export type ToastsStart = IToasts;
 
 // @public
-export interface UiSettingsParams {
+export interface UiSettingsParams<T = unknown> {
     category?: string[];
     // Warning: (ae-forgotten-export) The symbol "DeprecationSettings" needs to be exported by the entry point index.d.ts
     deprecation?: DeprecationSettings;
@@ -1300,16 +1306,18 @@ export interface UiSettingsParams {
     options?: string[];
     readonly?: boolean;
     requiresPageReload?: boolean;
+    // (undocumented)
+    schema: Type<T>;
     type?: UiSettingsType;
     // (undocumented)
     validation?: ImageValidation | StringValidation;
-    value?: SavedObjectAttribute;
+    value?: T;
 }
 
 // @public (undocumented)
 export interface UiSettingsState {
     // (undocumented)
-    [key: string]: UiSettingsParams_2 & UserProvidedValues_2;
+    [key: string]: PublicUiSettingsParams_2 & UserProvidedValues_2;
 }
 
 // @public
