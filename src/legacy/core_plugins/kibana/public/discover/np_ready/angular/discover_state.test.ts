@@ -30,7 +30,7 @@ describe('Test discover state', () => {
     history.push('/');
     state = getState({
       defaultAppState: { index: 'test' },
-      hashHistory: history,
+      history,
     });
     await state.replaceUrlAppState({});
     await state.startSync();
