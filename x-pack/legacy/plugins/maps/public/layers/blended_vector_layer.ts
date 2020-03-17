@@ -55,6 +55,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
       };
     }),
   ];
+  clusterSourceDescriptor.id = documentSource.getId();
   return new ESGeoGridSource(clusterSourceDescriptor, documentSource.getInspectorAdapters());
 }
 

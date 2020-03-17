@@ -35,6 +35,10 @@ export class AbstractESSource extends AbstractVectorSource {
     );
   }
 
+  getId() {
+    return this._descriptor.id;
+  }
+
   isFieldAware() {
     return true;
   }

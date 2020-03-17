@@ -864,6 +864,62 @@
 {
   "type": "doc",
   "value": {
+    "id": "map:279e1f20-6883-11ea-952a-b102add99cf8",
+    "index": ".kibana",
+    "source": {
+      "map" : {
+        "title" : "blended document example",
+        "description" : "",
+        "mapStateJSON" : "{\"zoom\":10.27,\"center\":{\"lon\":-83.70716,\"lat\":32.73679},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-23T00:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":0},\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filters\":[]}",
+        "layerListJSON" : "[{\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"isAutoSelect\":true},\"id\":\"43a70a86-00fd-43af-9e84-4d9fe2d7513d\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":1,\"visible\":true,\"style\":{},\"type\":\"VECTOR_TILE\"},{\"id\":\"307c8495-89f7-431b-83d8-78724d9a8f72\",\"label\":\"logstash-*\",\"sourceDescriptor\":{\"geoField\":\"geo.coordinates\",\"id\":\"20fc58c3-3c0a-4c7b-9cdc-37552cafdc21\",\"tooltipProperties\":[],\"type\":\"ES_SEARCH\",\"scalingType\":\"CLUSTERS\",\"indexPatternRefName\":\"layer_1_source_index_pattern\"},\"type\":\"BLENDED_VECTOR\",\"visible\":true,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"airfield\"}},\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#54B399\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#41937c\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":6}},\"iconOrientation\":{\"type\":\"STATIC\",\"options\":{\"orientation\":0}},\"labelText\":{\"type\":\"STATIC\",\"options\":{\"value\":\"\"}},\"labelColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#000000\"}},\"labelSize\":{\"type\":\"STATIC\",\"options\":{\"size\":14}},\"labelBorderColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"labelBorderSize\":{\"options\":{\"size\":\"SMALL\"}}},\"isTimeAware\":true}}]",
+        "uiStateJSON" : "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[]}",
+        "bounds" : {
+          "type" : "Polygon",
+          "coordinates" : [
+            [
+              [
+                -84.07816,
+                32.95327
+              ],
+              [
+                -84.07816,
+                32.51978
+              ],
+              [
+                -83.33616,
+                32.51978
+              ],
+              [
+                -83.33616,
+                32.95327
+              ],
+              [
+                -84.07816,
+                32.95327
+              ]
+            ]
+          ]
+        }
+      },
+      "type" : "map",
+      "references" : [
+        {
+          "name" : "layer_1_source_index_pattern",
+          "type" : "index-pattern",
+          "id" : "c698b940-e149-11e8-a35a-370a8516603a"
+        }
+      ],
+      "migrationVersion" : {
+        "map" : "7.7.0"
+      },
+      "updated_at" : "2020-03-17T19:11:50.290Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "dashboard:19906970-2e40-11e9-85cb-6965aae20f13",
     "index": ".kibana",
     "source": {

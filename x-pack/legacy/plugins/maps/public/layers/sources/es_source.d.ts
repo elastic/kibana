@@ -10,6 +10,7 @@ import { IndexPattern, SearchSource } from '../../../../../../../src/plugins/dat
 import { VectorLayerRequestMeta } from '../../../common/data_request_descriptor_types';
 
 export interface IESSource extends IVectorSource {
+  getId(): string;
   getIndexPattern(): Promise<IndexPattern>;
   getIndexPatternId(): string;
   getGeoFieldName(): string;
@@ -22,6 +23,7 @@ export interface IESSource extends IVectorSource {
 }
 
 export class AbstractESSource extends AbstractVectorSource implements IESSource {
+  getId(): string;
   getIndexPattern(): Promise<IndexPattern>;
   getIndexPatternId(): string;
   getGeoFieldName(): string;
