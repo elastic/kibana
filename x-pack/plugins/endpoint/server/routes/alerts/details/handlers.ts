@@ -9,6 +9,7 @@ import { AlertEvent, EndpointAppConstants } from '../../../../common/types';
 import { EndpointAppContext } from '../../../types';
 import { AlertDetailsRequestParams } from '../types';
 import { AlertDetailsPagination } from './lib';
+import { IngestIndexPatternRetriever } from '../../../index_pattern';
 
 export const alertDetailsHandlerWrapper = function(
   endpointAppContext: EndpointAppContext
@@ -21,20 +22,30 @@ export const alertDetailsHandlerWrapper = function(
     try {
       const alertId = req.params.id;
       const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser('get', {
+        // TODO remove the reference here and decode the passed in id
         index: EndpointAppConstants.ALERT_INDEX_NAME,
         id: alertId,
       })) as GetResponse<AlertEvent>;
+
+      const indexPattern = new IngestIndexPatternRetriever(
+        endpointAppContext.ingestManager.indexPatternService,
+        ctx.core.savedObjects.client,
+        EndpointAppConstants.EVENT_DATASET,
+        endpointAppContext.logFactory.get('alerts')
+      );
 
       const config = await endpointAppContext.config();
       const pagination: AlertDetailsPagination = new AlertDetailsPagination(
         config,
         ctx,
         req.params,
-        response
+        response,
+        await indexPattern.get()
       );
 
       return res.ok({
         body: {
+          // TODO base64 encode the index in the response
           id: response._id,
           ...response._source,
           next: await pagination.getNextUrl(),

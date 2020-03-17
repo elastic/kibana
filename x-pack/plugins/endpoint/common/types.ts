@@ -7,6 +7,10 @@
 import { SearchResponse } from 'elasticsearch';
 import { TypeOf } from '@kbn/config-schema';
 import { alertingIndexGetQuerySchema } from './schema/alert_index';
+import {
+  indexPatternGetParamsSchema,
+  indexPatternGetQueryParamsSchema,
+} from './schema/index_pattern';
 
 /**
  * A deep readonly type that will make all children of a given object readonly recursively
@@ -407,3 +411,20 @@ export type AlertingIndexGetQueryInput = KbnConfigSchemaInputTypeOf<
  * Result of the validated query params when handling alert index requests.
  */
 export type AlertingIndexGetQueryResult = TypeOf<typeof alertingIndexGetQuerySchema>;
+
+/**
+ * Result of the validated params when handling an index pattern request.
+ */
+export type IndexPatternGetParamsResult = TypeOf<typeof indexPatternGetParamsSchema>;
+
+/**
+ * Query params to pass to the index pattern API when fetching an index pattern.
+ */
+export type IndexPatternGetQueryParamsInput = KbnConfigSchemaInputTypeOf<
+  TypeOf<typeof indexPatternGetQueryParamsSchema>
+>;
+
+/**
+ * Result of the validated query params when handling an index pattern request.
+ */
+export type IndexPatternGetQueryParamsResult = TypeOf<typeof indexPatternGetQueryParamsSchema>;

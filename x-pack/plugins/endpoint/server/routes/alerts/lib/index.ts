@@ -92,7 +92,8 @@ function buildSort(query: AlertSearchQuery): AlertSort {
  * Builds a request body for Elasticsearch, given a set of query params.
  **/
 const buildAlertSearchQuery = async (
-  query: AlertSearchQuery
+  query: AlertSearchQuery,
+  indexPattern: string
 ): Promise<AlertSearchRequestWrapper> => {
   let totalHitsMin: number = EndpointAppConstants.DEFAULT_TOTAL_HITS;
 
@@ -120,7 +121,7 @@ const buildAlertSearchQuery = async (
 
   const reqWrapper: AlertSearchRequestWrapper = {
     size: query.pageSize,
-    index: EndpointAppConstants.ALERT_INDEX_NAME,
+    index: indexPattern,
     body: reqBody,
   };
 
@@ -136,9 +137,10 @@ const buildAlertSearchQuery = async (
  **/
 export const searchESForAlerts = async (
   dataClient: IScopedClusterClient,
-  query: AlertSearchQuery
+  query: AlertSearchQuery,
+  indexPattern: string
 ): Promise<SearchResponse<AlertEvent>> => {
-  const reqWrapper = await buildAlertSearchQuery(query);
+  const reqWrapper = await buildAlertSearchQuery(query, indexPattern);
   const response = (await dataClient.callAsCurrentUser('search', reqWrapper)) as SearchResponse<
     AlertEvent
   >;
