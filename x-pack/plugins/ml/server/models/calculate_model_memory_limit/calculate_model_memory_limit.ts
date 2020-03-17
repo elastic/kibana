@@ -10,6 +10,8 @@ import { APICaller } from 'kibana/server';
 import { analysisConfigSchema } from '../../routes/schemas/anomaly_detectors_schema';
 import { fieldsServiceProvider } from '../fields_service';
 
+type AnalysisConfig = TypeOf<typeof analysisConfigSchema>;
+
 interface ModelMemoryEstimationResult {
   /**
    * Result model memory limit
@@ -32,7 +34,22 @@ export interface ModelMemoryEstimate {
   model_memory_estimate: string;
 }
 
-export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) {
+/**
+ * Retrieves overall and max bucket cardinalities.
+ */
+async function getCardinalities(
+  callAsCurrentUser: APICaller,
+  influencers: AnalysisConfig['influencers'],
+  detectors: AnalysisConfig['detectors'],
+  indexPattern: string,
+  query: any,
+  timeFieldName: string,
+  earliestMs: number,
+  latestMs: number
+): Promise<{
+  overallCardinality: { [key: string]: number };
+  maxBucketCardinality: { [key: string]: number };
+}> {
   /**
    * Fields not involved in cardinality check
    */
@@ -46,6 +63,68 @@ export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) 
 
   const fieldsService = fieldsServiceProvider(callAsCurrentUser);
 
+  let overallCardinality = {};
+  let maxBucketCardinality = {};
+  try {
+    const overallCardinalityFields: Set<string> = detectors.reduce(
+      (
+        acc,
+        {
+          by_field_name: byFieldName,
+          partition_field_name: partitionFieldName,
+          over_field_name: overFieldName,
+        }
+      ) => {
+        [byFieldName, partitionFieldName, overFieldName]
+          .filter(field => field !== undefined && field !== '' && !excludedKeywords.has(field))
+          .forEach(key => {
+            acc.add(key as string);
+          });
+        return acc;
+      },
+      new Set<string>()
+    );
+
+    const maxBucketFieldCardinalities: string[] = influencers.filter(
+      influencerField =>
+        typeof influencerField === 'string' &&
+        !excludedKeywords.has(influencerField) &&
+        !!influencerField &&
+        !overallCardinalityFields.has(influencerField)
+    ) as string[];
+
+    if (overallCardinalityFields.size > 0) {
+      overallCardinality = await fieldsService.getCardinalityOfFields(
+        indexPattern,
+        [...overallCardinalityFields],
+        query,
+        timeFieldName,
+        earliestMs,
+        latestMs
+      );
+    }
+
+    if (maxBucketFieldCardinalities.length > 0) {
+      maxBucketCardinality = await fieldsService.getCardinalityOfFields(
+        indexPattern,
+        maxBucketFieldCardinalities,
+        query,
+        timeFieldName,
+        earliestMs,
+        latestMs
+      );
+    }
+
+    return {
+      overallCardinality,
+      maxBucketCardinality,
+    };
+  } catch (e) {
+    throw new Error('Unable to retrieve cardinality of the partition fields or the influencers');
+  }
+}
+
+export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) {
   /**
    * Retrieves an estimated size of the model memory limit used in the job config
    * based on the cardinality of the fields being used to split the data
@@ -70,62 +149,16 @@ export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) 
       throw new Error('Unable to retrieve max model memory limit');
     }
 
-    let overallCardinality = {};
-    let maxBucketCardinality = {};
-    try {
-      const { influencers, detectors } = analysisConfig;
-
-      const overallCardinalityFields: Set<string> = detectors.reduce(
-        (
-          acc,
-          {
-            by_field_name: byFieldName,
-            partition_field_name: partitionFieldName,
-            over_field_name: overFieldName,
-          }
-        ) => {
-          [byFieldName, partitionFieldName, overFieldName]
-            .filter(field => field !== undefined && field !== '' && !excludedKeywords.has(field))
-            .forEach(key => {
-              acc.add(key as string);
-            });
-          return acc;
-        },
-        new Set<string>()
-      );
-
-      const maxBucketFieldCardinalities: string[] = influencers.filter(
-        influencerField =>
-          typeof influencerField === 'string' &&
-          !excludedKeywords.has(influencerField) &&
-          !!influencerField &&
-          !overallCardinalityFields.has(influencerField)
-      ) as string[];
-
-      if (overallCardinalityFields.size > 0) {
-        overallCardinality = await fieldsService.getCardinalityOfFields(
-          indexPattern,
-          [...overallCardinalityFields],
-          query,
-          timeFieldName,
-          earliestMs,
-          latestMs
-        );
-      }
-
-      if (maxBucketFieldCardinalities.length > 0) {
-        maxBucketCardinality = await fieldsService.getCardinalityOfFields(
-          indexPattern,
-          maxBucketFieldCardinalities,
-          query,
-          timeFieldName,
-          earliestMs,
-          latestMs
-        );
-      }
-    } catch (e) {
-      throw new Error('Unable to retrieve cardinality of the partition fields or the influencers');
-    }
+    const { overallCardinality, maxBucketCardinality } = await getCardinalities(
+      callAsCurrentUser,
+      analysisConfig.influencers,
+      analysisConfig.detectors,
+      indexPattern,
+      query,
+      timeFieldName,
+      earliestMs,
+      latestMs
+    );
 
     try {
       const estimatedModelMemoryLimit = (
