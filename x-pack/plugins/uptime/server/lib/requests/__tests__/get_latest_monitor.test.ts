@@ -61,9 +61,14 @@ describe('getLatestMonitor', () => {
                   hits: [
                     {
                       _source: {
-                        '@timestamp': 123456,
+                        '@timestamp': '123456',
                         monitor: {
+                          duration: {
+                            us: 12345,
+                          },
                           id: 'testMonitor',
+                          status: 'down',
+                          type: 'http',
                         },
                       },
                     },
@@ -85,9 +90,19 @@ describe('getLatestMonitor', () => {
       dateEnd: 'now',
       monitorId: 'testMonitor',
     });
-    expect(result.timestamp).toBe(123456);
-    expect(result.monitor).not.toBeFalsy();
-    expect(result?.monitor?.id).toBe('testMonitor');
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "@timestamp": "123456",
+        "monitor": Object {
+          "duration": Object {
+            "us": 12345,
+          },
+          "id": "testMonitor",
+          "status": "down",
+          "type": "http",
+        },
+      }
+    `);
     expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetLatestSearchParams);
   });
 });

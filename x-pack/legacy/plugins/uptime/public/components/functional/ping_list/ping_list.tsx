@@ -43,14 +43,14 @@ export const toggleDetails = (
   setItemIdToExpandedRowMap: (update: ExpandedRowMap) => any
 ) => {
   // If the user has clicked on the expanded map, close all expanded rows.
-  if (itemIdToExpandedRowMap[ping.monitor.id]) {
+  if (itemIdToExpandedRowMap[ping['@timestamp']]) {
     setItemIdToExpandedRowMap({});
     return;
   }
 
   // Otherwise expand this row
   const newItemIdToExpandedRowMap: ExpandedRowMap = {};
-  newItemIdToExpandedRowMap[ping.monitor.id] = <PingListExpandedRowComponent ping={ping} />;
+  newItemIdToExpandedRowMap[ping['@timestamp']] = <PingListExpandedRowComponent ping={ping} />;
   setItemIdToExpandedRowMap(newItemIdToExpandedRowMap);
 };
 
@@ -316,7 +316,7 @@ export const PingListComponent = (props: Props) => {
         isExpandable={true}
         hasActions={true}
         items={pings}
-        itemId="id"
+        itemId="@timestamp"
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         pagination={pagination}
         onChange={(criteria: any) => onPageCountChange(criteria.page!.size)}

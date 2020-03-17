@@ -26,7 +26,7 @@ describe('PingList component', () => {
           },
           monitor: {
             duration: { us: 1430 },
-            id: 'auto-tcp-0X81440A68E839814C',
+            id: 'auto-tcp-0X81440A68E839814F',
             ip: '127.0.0.1',
             name: '',
             status: 'down',
@@ -41,7 +41,7 @@ describe('PingList component', () => {
           },
           monitor: {
             duration: { us: 1370 },
-            id: 'auto-tcp-0X81440A68E839814C',
+            id: 'auto-tcp-0X81440A68E839814D',
             ip: '127.0.0.1',
             name: '',
             status: 'down',
@@ -52,7 +52,7 @@ describe('PingList component', () => {
           '@timestamp': '2019-01-28T17:47:06.077Z',
           monitor: {
             duration: { us: 1452 },
-            id: 'auto-tcp-0X81440A68E839814C',
+            id: 'auto-tcp-0X81440A68E839814D',
             ip: '127.0.0.1',
             name: '',
             status: 'up',
@@ -67,7 +67,7 @@ describe('PingList component', () => {
           },
           monitor: {
             duration: { us: 1094 },
-            id: 'auto-tcp-0X81440A68E839814C',
+            id: 'auto-tcp-0X81440A68E839814E',
             ip: '127.0.0.1',
             name: '',
             status: 'down',
@@ -83,7 +83,7 @@ describe('PingList component', () => {
           },
           monitor: {
             duration: { us: 1597 },
-            id: 'auto-http-0X3675F89EF0612091',
+            id: 'auto-http-0X3675F89EF061209G',
             ip: '127.0.0.1',
             name: '',
             status: 'down',
@@ -98,7 +98,7 @@ describe('PingList component', () => {
           },
           monitor: {
             duration: { us: 1699 },
-            id: 'auto-tcp-0X81440A68E839814C',
+            id: 'auto-tcp-0X81440A68E839814H',
             ip: '127.0.0.1',
             name: '',
             status: 'down',
@@ -113,7 +113,7 @@ describe('PingList component', () => {
           },
           monitor: {
             duration: { us: 5384 },
-            id: 'auto-tcp-0X81440A68E839814C',
+            id: 'auto-tcp-0X81440A68E839814I',
             ip: '127.0.0.1',
             name: '',
             status: 'down',
@@ -129,7 +129,7 @@ describe('PingList component', () => {
           },
           monitor: {
             duration: { us: 5397 },
-            id: 'auto-http-0X3675F89EF0612091',
+            id: 'auto-http-0X3675F89EF061209J',
             ip: '127.0.0.1',
             name: '',
             status: 'down',
@@ -141,7 +141,7 @@ describe('PingList component', () => {
           http: { response: { status_code: 200 } },
           monitor: {
             duration: { us: 127511 },
-            id: 'auto-http-0X131221E73F825974',
+            id: 'auto-tcp-0X81440A68E839814C',
             ip: '172.217.7.4',
             name: '',
             status: 'up',
@@ -153,7 +153,7 @@ describe('PingList component', () => {
           http: { response: { status_code: 200 } },
           monitor: {
             duration: { us: 287543 },
-            id: 'auto-http-0X9CB71300ABD5A2A8',
+            id: 'auto-http-0X131221E73F825974',
             ip: '192.30.253.112',
             name: '',
             status: 'up',
@@ -201,7 +201,31 @@ describe('PingList component', () => {
     it('should expand an item if empty', () => {
       const ping = pings[0];
       toggleDetails(ping, itemIdToExpandedRowMap, setItemIdToExpandedRowMap);
-      expect(itemIdToExpandedRowMap).toHaveProperty(ping.monitor.id);
+      expect(itemIdToExpandedRowMap).toMatchInlineSnapshot(`
+        Object {
+          "2019-01-28T17:47:08.078Z": <PingListExpandedRowComponent
+            ping={
+              Object {
+                "@timestamp": "2019-01-28T17:47:08.078Z",
+                "error": Object {
+                  "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+                  "type": "io",
+                },
+                "monitor": Object {
+                  "duration": Object {
+                    "us": 1430,
+                  },
+                  "id": "auto-tcp-0X81440A68E839814C",
+                  "ip": "127.0.0.1",
+                  "name": "",
+                  "status": "down",
+                  "type": "tcp",
+                },
+              }
+            }
+          />,
+        }
+      `);
     });
 
     it('should un-expand an item if clicked again', () => {
@@ -216,7 +240,30 @@ describe('PingList component', () => {
       const pingB = pings[1];
       toggleDetails(pingA, itemIdToExpandedRowMap, setItemIdToExpandedRowMap);
       toggleDetails(pingB, itemIdToExpandedRowMap, setItemIdToExpandedRowMap);
-      expect(itemIdToExpandedRowMap).toHaveProperty(pingB.monitor.id);
+      expect(pingA['@timestamp']).not.toEqual(pingB['@timestamp']);
+      expect(itemIdToExpandedRowMap[pingB['@timestamp']]).toMatchInlineSnapshot(`
+        <PingListExpandedRowComponent
+          ping={
+            Object {
+              "@timestamp": "2019-01-28T17:47:09.075Z",
+              "error": Object {
+                "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+                "type": "io",
+              },
+              "monitor": Object {
+                "duration": Object {
+                  "us": 1370,
+                },
+                "id": "auto-tcp-0X81440A68E839814D",
+                "ip": "127.0.0.1",
+                "name": "",
+                "status": "down",
+                "type": "tcp",
+              },
+            }
+          }
+        />
+      `);
     });
   });
 });
