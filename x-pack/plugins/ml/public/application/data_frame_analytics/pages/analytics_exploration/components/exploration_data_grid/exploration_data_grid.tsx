@@ -63,9 +63,10 @@ export const ExplorationDataGrid: FC<ExplorationDataGridProps> = ({
         return null;
       }
 
-      const cellValue = tableItems.hasOwnProperty(adjustedRowIndex)
-        ? tableItems[adjustedRowIndex][columnId]
-        : null;
+      const cellValue =
+        fullItem.hasOwnProperty(columnId) && fullItem[columnId] !== undefined
+          ? fullItem[columnId]
+          : null;
 
       const split = columnId.split('.');
       let backgroundColor;

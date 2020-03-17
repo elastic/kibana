@@ -26,7 +26,6 @@ import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
 
 import { dictionaryToArray } from '../../../../common/types/common';
 import { formatHumanReadableDateTimeSeconds } from '../../../../common/utils/date_utils';
-import { getNestedProperty } from '../../../../common/utils/object_utils';
 
 import {
   euiDataGridStyle,
@@ -223,9 +222,16 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(
       }) => {
         const adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
 
-        const cellValue = pageData.hasOwnProperty(adjustedRowIndex)
-          ? getNestedProperty(pageData[adjustedRowIndex], columnId, null)
-          : null;
+        const fullItem = pageData[adjustedRowIndex];
+
+        if (fullItem === undefined) {
+          return null;
+        }
+
+        const cellValue =
+          fullItem.hasOwnProperty(columnId) && fullItem[columnId] !== undefined
+            ? fullItem[columnId]
+            : null;
 
         if (typeof cellValue === 'object' && cellValue !== null) {
           return JSON.stringify(cellValue);

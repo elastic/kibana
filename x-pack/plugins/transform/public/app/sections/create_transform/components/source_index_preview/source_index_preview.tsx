@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
-import { getNestedProperty } from '../../../../../../common/utils/object_utils';
 
 import {
   euiDataGridStyle,
@@ -164,9 +163,16 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
     }) => {
       const adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
 
-      const cellValue = data.hasOwnProperty(adjustedRowIndex)
-        ? getNestedProperty(data[adjustedRowIndex], columnId, null)
-        : null;
+      const fullItem = data[adjustedRowIndex];
+
+      if (fullItem === undefined) {
+        return null;
+      }
+
+      const cellValue =
+        fullItem.hasOwnProperty(columnId) && fullItem[columnId] !== undefined
+          ? fullItem[columnId]
+          : null;
 
       if (typeof cellValue === 'object' && cellValue !== null) {
         return JSON.stringify(cellValue);
