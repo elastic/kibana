@@ -14,6 +14,7 @@ import {
   EuiComboBoxOptionOption,
   EuiSelect,
   EuiTitle,
+  EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -51,7 +52,7 @@ export function getActionType(): ActionTypeModel {
       if (!action.config.index) {
         errors.index.push(
           i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.error.requiredIndexlText',
+            'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.error.requiredIndexText',
             {
               defaultMessage: 'Index is required.',
             }
@@ -96,7 +97,6 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
 
   return (
     <>
-      <EuiHorizontalRule />
       <EuiTitle size="s">
         <h5>
           <FormattedMessage
@@ -177,10 +177,22 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           editActionConfig('refresh', e.target.checked);
         }}
         label={
-          <FormattedMessage
-            id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.refreshLabel"
-            defaultMessage="Refresh"
-          />
+          <>
+            <FormattedMessage
+              id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.refreshLabel"
+              defaultMessage="Refresh"
+            />{' '}
+            <EuiIconTip
+              position="right"
+              type="questionInCircle"
+              content={i18n.translate(
+                'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.refreshTooltip',
+                {
+                  defaultMessage: 'This checkbox set refresh index value.',
+                }
+              )}
+            />
+          </>
         }
       />
       <EuiSpacer size="m" />
@@ -191,22 +203,35 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           setTimeFieldCheckboxState(!hasTimeFieldCheckbox);
         }}
         label={
-          <FormattedMessage
-            id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.defineTimeFieldLabel"
-            defaultMessage="Define time field"
-          />
+          <>
+            <FormattedMessage
+              id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.defineTimeFieldLabel"
+              defaultMessage="Define time field"
+            />
+            <EuiIconTip
+              position="right"
+              type="questionInCircle"
+              content={i18n.translate(
+                'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.definedateFieldTooltip',
+                {
+                  defaultMessage:
+                    'This is checkbox allows to define execution time field for index.',
+                }
+              )}
+            />
+          </>
         }
       />
       <EuiSpacer size="m" />
       {hasTimeFieldCheckbox ? (
         <>
           <EuiFormRow
-            id="thresholdTimeField"
+            id="executionTimeField"
             fullWidth
             label={
               <FormattedMessage
-                id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.timeFieldLabel"
-                defaultMessage="Timefield"
+                id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.executionTimeFieldLabel"
+                defaultMessage="Time field"
               />
             }
           >

@@ -44,6 +44,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         actionTypeId: '.index',
         config: {
           index: ES_TEST_INDEX_NAME,
+          refresh: false,
         },
       });
       createdActionID = createdAction.id;
@@ -57,7 +58,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
         id: fetchedAction.id,
         name: 'An index action',
         actionTypeId: '.index',
-        config: { index: ES_TEST_INDEX_NAME },
+        config: { index: ES_TEST_INDEX_NAME, refresh: false },
       });
 
       // create action with all config props
@@ -119,7 +120,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type config: [index]: types that failed validation:\n- [index.0]: expected value of type [string] but got [number]\n- [index.1]: expected value to equal [null]',
+              'error validating action type config: [index]: expected value of type [string] but got [number]',
           });
         });
     });
@@ -129,6 +130,10 @@ export default function indexTest({ getService }: FtrProviderContext) {
         .post(`/api/action/${createdActionID}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
+          config: {
+            index: ES_TEST_INDEX_NAME,
+            refresh: false,
+          },
           params: {
             documents: [{ testing: [1, 2, 3] }],
           },
@@ -146,6 +151,9 @@ export default function indexTest({ getService }: FtrProviderContext) {
         .post(`/api/action/${createdActionID}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
+          config: {
+            index: ES_TEST_INDEX_NAME,
+          },
           params: {
             documents: [{ testing: [1, 2, 3] }, { Testing: [4, 5, 6] }],
           },
@@ -177,6 +185,9 @@ export default function indexTest({ getService }: FtrProviderContext) {
         .post(`/api/action/${createdActionID}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
+          config: {
+            index: ES_TEST_INDEX_NAME,
+          },
           params: {
             documents: [{ refresh: 'not set' }],
           },
@@ -192,6 +203,10 @@ export default function indexTest({ getService }: FtrProviderContext) {
         .post(`/api/action/${createdActionID}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
+          config: {
+            index: ES_TEST_INDEX_NAME,
+            refresh: true,
+          },
           params: {
             documents: [{ refresh: 'true' }],
           },
@@ -211,6 +226,9 @@ export default function indexTest({ getService }: FtrProviderContext) {
         .post(`/api/action/${createdActionID}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
+          config: {
+            index: ES_TEST_INDEX_NAME,
+          },
           params: {
             documents: [{ testing: [1, 2, 3] }],
           },
@@ -219,13 +237,16 @@ export default function indexTest({ getService }: FtrProviderContext) {
       result = response.body;
       expect(result.status).to.equal('error');
       expect(result.message).to.eql(
-        'error validating action params: [indeX]: definition for this key is missing'
+        'error validating action params: [index]: definition for this key is missing'
       );
 
       response = await supertest
         .post(`/api/action/${createdActionID}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
+          config: {
+            index: ES_TEST_INDEX_NAME,
+          },
           params: {
             documents: [{ testing: [1, 2, 3] }],
           },

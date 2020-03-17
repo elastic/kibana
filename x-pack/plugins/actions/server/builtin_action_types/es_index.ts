@@ -75,9 +75,7 @@ async function executor(
     body: bulkBody,
   };
 
-  if (config.refresh != null) {
-    bulkParams.refresh = config.refresh;
-  }
+  bulkParams.refresh = config.refresh;
 
   let result;
   try {
@@ -86,7 +84,7 @@ async function executor(
     const message = i18n.translate('xpack.actions.builtin.esIndex.errorIndexingErrorMessage', {
       defaultMessage: 'error indexing documents',
     });
-    logger.warn(`error indexing documents: ${err.message}`);
+    logger.error(`error indexing documents: ${err.message}`);
     return {
       status: 'error',
       actionId,
