@@ -436,7 +436,7 @@ exports[`share url panel content should hide short url section when allowShortUr
 </I18nProvider>
 `;
 
-exports[`should not show embedded option switches when permalink 1`] = `
+exports[`should not show url param checkboxes when permalink 1`] = `
 <I18nProvider>
   <EuiForm
     className="kbnShareContextMenu__finalPanel"
@@ -592,7 +592,7 @@ exports[`should not show embedded option switches when permalink 1`] = `
 </I18nProvider>
 `;
 
-exports[`should show embedded option switches when embedded link 1`] = `
+exports[`should show url param checkboxes when embedded link 1`] = `
 <I18nProvider>
   <EuiForm
     className="kbnShareContextMenu__finalPanel"
@@ -734,178 +734,64 @@ exports[`should show embedded option switches when embedded link 1`] = `
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormRow>
-    <EuiFormRow
-      data-test-subj="showTopNavMenu"
-      describedByIds={Array []}
-      display="row"
-      fullWidth={false}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
-      labelType="label"
-    >
-      <EuiFlexGroup
-        gutterSize="none"
-        responsive={false}
-      >
-        <EuiFlexItem>
-          <EuiSwitch
-            checked={false}
-            data-test-subj="topNavMenuSwitch"
-            label={
-              <FormattedMessage
-                defaultMessage="Show top nav menu"
-                id="share.urlPanel.topNavMenuLabel"
-                values={Object {}}
-              />
-            }
-            onChange={[Function]}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiIconTip
-            content={
-              <FormattedMessage
-                defaultMessage="Display the top nav menu UI"
-                id="share.urlPanel.topNavMenuHelpText"
-                values={Object {}}
-              />
-            }
-            position="bottom"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFormRow>
-    <EuiFormRow
-      data-test-subj="showQueryInput"
-      describedByIds={Array []}
-      display="row"
-      fullWidth={false}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
-      labelType="label"
-    >
-      <EuiFlexGroup
-        gutterSize="none"
-        responsive={false}
-      >
-        <EuiFlexItem>
-          <EuiSwitch
-            checked={false}
-            data-test-subj="queryInputSwitch"
-            label={
-              <FormattedMessage
-                defaultMessage="Show query input"
-                id="share.urlPanel.queryInputLabel"
-                values={Object {}}
-              />
-            }
-            onChange={[Function]}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiIconTip
-            content={
-              <FormattedMessage
-                defaultMessage="Display the query input UI"
-                id="share.urlPanel.queryInputHelpText"
-                values={Object {}}
-              />
-            }
-            position="bottom"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFormRow>
-    <EuiFormRow
-      data-test-subj="showDatePicker"
-      describedByIds={Array []}
-      display="row"
-      fullWidth={false}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
-      labelType="label"
-    >
-      <EuiFlexGroup
-        gutterSize="none"
-        responsive={false}
-      >
-        <EuiFlexItem>
-          <EuiSwitch
-            checked={false}
-            data-test-subj="datePickerSwitch"
-            label={
-              <FormattedMessage
-                defaultMessage="Show date picker"
-                id="share.urlPanel.datePickerLabel"
-                values={Object {}}
-              />
-            }
-            onChange={[Function]}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiIconTip
-            content={
-              <FormattedMessage
-                defaultMessage="Display the date picker UI"
-                id="share.urlPanel.datePickerHelpText"
-                values={Object {}}
-              />
-            }
-            position="bottom"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFormRow>
-    <EuiFormRow
-      data-test-subj="showFilterBar"
-      describedByIds={Array []}
-      display="row"
-      fullWidth={false}
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
-      labelType="label"
-    >
-      <EuiFlexGroup
-        gutterSize="none"
-        responsive={false}
-      >
-        <EuiFlexItem>
-          <EuiSwitch
-            checked={true}
-            data-test-subj="filterBarSwitch"
-            label={
-              <FormattedMessage
-                defaultMessage="Show filter bar"
-                id="share.urlPanel.filterBarLabel"
-                values={Object {}}
-              />
-            }
-            onChange={[Function]}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiIconTip
-            content={
-              <FormattedMessage
-                defaultMessage="Display the filter bar UI"
-                id="share.urlPanel.filterBarHelpText"
-                values={Object {}}
-              />
-            }
-            position="bottom"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFormRow>
+    <EuiHorizontalRule />
+    <EuiCheckboxGroup
+      data-test-subj="urlParamExtensions"
+      idToSelectedMap={
+        Object {
+          "filterBar": true,
+          "query": false,
+          "timeFilter": false,
+          "topMenu": false,
+        }
+      }
+      legend={
+        Object {
+          "children": <FormattedMessage
+            defaultMessage="Include"
+            id="share.urlPanel.include"
+            values={Object {}}
+          />,
+        }
+      }
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "id": "topMenu",
+            "label": <FormattedMessage
+              defaultMessage="Top menu"
+              id="share.urlPanel.topMenu"
+              values={Object {}}
+            />,
+          },
+          Object {
+            "id": "query",
+            "label": <FormattedMessage
+              defaultMessage="Query"
+              id="share.urlPanel.query"
+              values={Object {}}
+            />,
+          },
+          Object {
+            "id": "timeFilter",
+            "label": <FormattedMessage
+              defaultMessage="Time filter"
+              id="share.urlPanel.timeFilter"
+              values={Object {}}
+            />,
+          },
+          Object {
+            "id": "filterBar",
+            "label": <FormattedMessage
+              defaultMessage="Filter bar"
+              id="share.urlPanel.filterBar"
+              values={Object {}}
+            />,
+          },
+        ]
+      }
+    />
     <EuiSpacer
       size="m"
     />

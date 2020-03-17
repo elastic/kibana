@@ -21,12 +21,15 @@ import React, { Component, ReactElement } from 'react';
 
 import {
   EuiButton,
+  EuiCheckboxGroup,
+  EuiCheckboxGroupIdToSelectedMap,
   EuiCopy,
   EuiFlexGroup,
   EuiSpacer,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiIconTip,
   EuiLoadingSpinner,
   EuiRadioGroup,
@@ -57,22 +60,21 @@ export enum ExportUrlAsType {
   EXPORT_URL_AS_SNAPSHOT = 'snapshot',
 }
 
+interface UrlParams {
+  topNavMenu: boolean;
+  query: boolean;
+  datePicker: boolean;
+  filterBar: boolean;
+}
+
 interface State {
   exportUrlAs: ExportUrlAsType;
   useShortUrl: boolean;
-  showTopNavMenu: boolean;
-  showQueryInput: boolean;
-  showDatePicker: boolean;
-  showFilterBar: boolean;
   isCreatingShortUrl: boolean;
   url?: string;
   shortUrlErrorMsg?: string;
+  urlParamsSelectedMap: UrlParams;
 }
-
-type UrlParams = Pick<
-  State,
-  'showTopNavMenu' | 'showQueryInput' | 'showDatePicker' | 'showFilterBar'
->;
 
 export class UrlPanelContent extends Component<Props, State> {
   private mounted?: boolean;
@@ -86,12 +88,14 @@ export class UrlPanelContent extends Component<Props, State> {
     this.state = {
       exportUrlAs: ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
       useShortUrl: false,
-      showTopNavMenu: false,
-      showQueryInput: false,
-      showDatePicker: false,
-      showFilterBar: true,
       isCreatingShortUrl: false,
       url: '',
+      urlParamsSelectedMap: {
+        topNavMenu: false,
+        query: false,
+        datePicker: false,
+        filterBar: true,
+      },
     };
   }
 
@@ -113,12 +117,8 @@ export class UrlPanelContent extends Component<Props, State> {
       <I18nProvider>
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
           {this.renderExportAsRadioGroup()}
-
           {this.renderShortUrlSwitch()}
-          {this.renderTopNavMenuSwitch()}
-          {this.renderQueryInputSwitch()}
-          {this.renderDatePickerSwitch()}
-          {this.renderFilterBarSwitch()}
+          {this.renderUrlParamExtensions()}
 
           <EuiSpacer size="m" />
 
@@ -214,10 +214,10 @@ export class UrlPanelContent extends Component<Props, State> {
 
   private getEmbedQueryParams = (): string => {
     return [
-      ['&show-top-nav-menu=true', this.state.showTopNavMenu],
-      ['&show-query-input=true', this.state.showQueryInput],
-      ['&show-date-picker=true', this.state.showDatePicker],
-      ['&hide-filter-bar=true', !this.state.showFilterBar], // Inverted to keep default behaviour for old links
+      ['&show-top-nav-menu=true', this.state.urlParamsSelectedMap.topNavMenu],
+      ['&show-query-input=true', this.state.urlParamsSelectedMap.query],
+      ['&show-date-picker=true', this.state.urlParamsSelectedMap.datePicker],
+      ['&hide-filter-bar=true', !this.state.urlParamsSelectedMap.filterBar], // Inverted to keep default behaviour for old links
     ].reduce(
       (accumulator, [queryParam, include]) => (include ? accumulator + queryParam : accumulator),
       '?embed=true'
@@ -316,8 +316,14 @@ export class UrlPanelContent extends Component<Props, State> {
     }
   };
 
-  private handleUrlParamChange = (param: keyof UrlParams) => (evt: EuiSwitchEvent): void => {
-    const stateUpdate: Partial<UrlParams> = { [param]: evt.target.checked };
+  private handleUrlParamChange = (optionId: string): void => {
+    const param = optionId as keyof UrlParams;
+    const stateUpdate: Partial<State> = {
+      urlParamsSelectedMap: {
+        ...this.state.urlParamsSelectedMap,
+        [param]: !this.state.urlParamsSelectedMap[param],
+      },
+    };
     this.setState(stateUpdate as State, this.setUrl);
   };
 
@@ -432,119 +438,36 @@ export class UrlPanelContent extends Component<Props, State> {
     );
   };
 
-  private renderTopNavMenuSwitch = (): ReactElement | void => {
+  private renderUrlParamExtensions = (): ReactElement | void => {
     if (!this.props.isEmbedded) {
       return;
     }
-    const switchLabel = (
-      <FormattedMessage id="share.urlPanel.topNavMenuLabel" defaultMessage="Show top nav menu" />
-    );
-    const switchComponent = (
-      <EuiSwitch
-        label={switchLabel}
-        checked={this.state.showTopNavMenu}
-        onChange={this.handleUrlParamChange('showTopNavMenu')}
-        data-test-subj="topNavMenuSwitch"
-      />
-    );
-    const tipContent = (
-      <FormattedMessage
-        id="share.urlPanel.topNavMenuHelpText"
-        defaultMessage="Display the top nav menu UI"
-      />
-    );
+
+    const checkboxes = [
+      ['topNavMenu', 'Top menu'],
+      ['query', 'Query'],
+      ['datePicker', 'Time filter'],
+      ['filterBar', 'Filter bar'],
+    ].map(([id, message]) => ({
+      id,
+      label: <FormattedMessage id={`share.urlPanel.${id}`} defaultMessage={message} />,
+    }));
 
     return (
-      <EuiFormRow data-test-subj="showTopNavMenu">
-        {this.renderWithIconTip(switchComponent, tipContent)}
-      </EuiFormRow>
-    );
-  };
-
-  private renderQueryInputSwitch = (): ReactElement | void => {
-    if (!this.props.isEmbedded) {
-      return;
-    }
-    const switchLabel = (
-      <FormattedMessage id="share.urlPanel.queryInputLabel" defaultMessage="Show query input" />
-    );
-    const switchComponent = (
-      <EuiSwitch
-        label={switchLabel}
-        checked={this.state.showQueryInput}
-        onChange={this.handleUrlParamChange('showQueryInput')}
-        data-test-subj="queryInputSwitch"
-      />
-    );
-    const tipContent = (
-      <FormattedMessage
-        id="share.urlPanel.queryInputHelpText"
-        defaultMessage="Display the query input UI"
-      />
-    );
-
-    return (
-      <EuiFormRow data-test-subj="showQueryInput">
-        {this.renderWithIconTip(switchComponent, tipContent)}
-      </EuiFormRow>
-    );
-  };
-
-  private renderDatePickerSwitch = (): ReactElement | void => {
-    if (!this.props.isEmbedded) {
-      return;
-    }
-    const switchLabel = (
-      <FormattedMessage id="share.urlPanel.datePickerLabel" defaultMessage="Show date picker" />
-    );
-    const switchComponent = (
-      <EuiSwitch
-        label={switchLabel}
-        checked={this.state.showDatePicker}
-        onChange={this.handleUrlParamChange('showDatePicker')}
-        data-test-subj="datePickerSwitch"
-      />
-    );
-    const tipContent = (
-      <FormattedMessage
-        id="share.urlPanel.datePickerHelpText"
-        defaultMessage="Display the date picker UI"
-      />
-    );
-
-    return (
-      <EuiFormRow data-test-subj="showDatePicker">
-        {this.renderWithIconTip(switchComponent, tipContent)}
-      </EuiFormRow>
-    );
-  };
-
-  private renderFilterBarSwitch = (): ReactElement | void => {
-    if (!this.props.isEmbedded) {
-      return;
-    }
-    const switchLabel = (
-      <FormattedMessage id="share.urlPanel.filterBarLabel" defaultMessage="Show filter bar" />
-    );
-    const switchComponent = (
-      <EuiSwitch
-        label={switchLabel}
-        checked={this.state.showFilterBar}
-        onChange={this.handleUrlParamChange('showFilterBar')}
-        data-test-subj="filterBarSwitch"
-      />
-    );
-    const tipContent = (
-      <FormattedMessage
-        id="share.urlPanel.filterBarHelpText"
-        defaultMessage="Display the filter bar UI"
-      />
-    );
-
-    return (
-      <EuiFormRow data-test-subj="showFilterBar">
-        {this.renderWithIconTip(switchComponent, tipContent)}
-      </EuiFormRow>
+      <React.Fragment>
+        <EuiHorizontalRule />
+        <EuiCheckboxGroup
+          options={checkboxes}
+          idToSelectedMap={
+            (this.state.urlParamsSelectedMap as unknown) as EuiCheckboxGroupIdToSelectedMap
+          }
+          onChange={this.handleUrlParamChange}
+          legend={{
+            children: <FormattedMessage id="share.urlPanel.include" defaultMessage="Include" />,
+          }}
+          data-test-subj="urlParamExtensions"
+        />
+      </React.Fragment>
     );
   };
 }
