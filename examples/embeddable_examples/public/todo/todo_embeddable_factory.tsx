@@ -43,6 +43,10 @@ function TaskInput({ onSave }: { onSave: (task: string) => void }) {
   );
 }
 
+interface StartServices {
+  openModal: OverlayStart['openModal'];
+}
+
 export class TodoEmbeddableFactory extends EmbeddableFactory<
   TodoInput,
   TodoOutput,
@@ -50,11 +54,11 @@ export class TodoEmbeddableFactory extends EmbeddableFactory<
 > {
   public readonly type = TODO_EMBEDDABLE;
 
-  constructor(private openModal: OverlayStart['openModal']) {
+  constructor(private getStartServices: () => Promise<StartServices>) {
     super();
   }
 
-  public isEditable() {
+  public async isEditable() {
     return true;
   }
 
@@ -69,9 +73,10 @@ export class TodoEmbeddableFactory extends EmbeddableFactory<
    * in this case, the task string.
    */
   public async getExplicitInput() {
+    const { openModal } = await this.getStartServices();
     return new Promise<{ task: string }>(resolve => {
       const onSave = (task: string) => resolve({ task });
-      const overlay = this.openModal(
+      const overlay = openModal(
         toMountPoint(
           <TaskInput
             onSave={(task: string) => {
