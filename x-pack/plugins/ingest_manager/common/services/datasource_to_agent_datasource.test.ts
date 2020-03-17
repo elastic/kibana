@@ -43,6 +43,10 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
             type: 'yaml',
             value: '',
           },
+          barVar5: {
+            type: 'yaml',
+            value: 'testField: test\n invalidSpacing: foo',
+          },
         },
       },
     ],

@@ -28,8 +28,13 @@ export const storedDatasourceToAgentDatasource = (
                 (acc, [configName, { type: configType, value: configValue }]) => {
                   if (configValue !== undefined) {
                     if (configType === 'yaml') {
-                      if (configValue.trim()) {
-                        acc[configName] = safeLoad(configValue);
+                      try {
+                        const yamlValue = safeLoad(configValue);
+                        if (yamlValue) {
+                          acc[configName] = yamlValue;
+                        }
+                      } catch (e) {
+                        // Silently swallow parsing error
                       }
                     } else {
                       acc[configName] = configValue;
