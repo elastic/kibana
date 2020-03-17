@@ -77,58 +77,54 @@ export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset }
   ];
 
   return (
-    <>
-      <div className="painlessLabBottomBarPlaceholder" />
-
-      <EuiBottomBar paddingSize="s">
-        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
-              <EuiFlexItem grow={false}>
-                <EuiPopover
-                  id="painlessLabHelpContextMenu"
-                  button={
-                    <EuiButtonEmpty
-                      size="s"
-                      iconType="help"
-                      iconSide="left"
-                      color="ghost"
-                      onClick={() => setIsHelpOpen(!isHelpOpen)}
-                    >
-                      {i18n.translate('xpack.painlessLab.helpButtonLabel', {
-                        defaultMessage: 'Help',
-                      })}
-                    </EuiButtonEmpty>
-                  }
-                  isOpen={isHelpOpen}
-                  closePopover={() => setIsHelpOpen(false)}
-                  panelPaddingSize="none"
-                  withTitle
-                  anchorPosition="upRight"
-                >
-                  <EuiContextMenuPanel items={items} />
-                </EuiPopover>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              color="ghost"
-              onClick={toggleRequestFlyout}
-              data-test-subj="btnViewRequest"
-            >
-              {isRequestFlyoutOpen
-                ? i18n.translate('xpack.painlessLab.hideRequestButtonLabel', {
-                    defaultMessage: 'Hide API request',
-                  })
-                : i18n.translate('xpack.painlessLab.showRequestButtonLabel', {
-                    defaultMessage: 'Show API request',
-                  })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiBottomBar>
-    </>
+    <EuiBottomBar paddingSize="s">
+      <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                id="painlessLabHelpContextMenu"
+                button={
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="help"
+                    iconSide="left"
+                    color="ghost"
+                    onClick={() => setIsHelpOpen(!isHelpOpen)}
+                  >
+                    {i18n.translate('xpack.painlessLab.helpButtonLabel', {
+                      defaultMessage: 'Help',
+                    })}
+                  </EuiButtonEmpty>
+                }
+                isOpen={isHelpOpen}
+                closePopover={() => setIsHelpOpen(false)}
+                panelPaddingSize="none"
+                withTitle
+                anchorPosition="upRight"
+              >
+                <EuiContextMenuPanel items={items} />
+              </EuiPopover>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            color="ghost"
+            onClick={toggleRequestFlyout}
+            data-test-subj="btnViewRequest"
+          >
+            {isRequestFlyoutOpen
+              ? i18n.translate('xpack.painlessLab.hideRequestButtonLabel', {
+                  defaultMessage: 'Hide API request',
+                })
+              : i18n.translate('xpack.painlessLab.showRequestButtonLabel', {
+                  defaultMessage: 'Show API request',
+                })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiBottomBar>
   );
 }

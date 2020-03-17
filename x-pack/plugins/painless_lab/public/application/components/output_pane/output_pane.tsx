@@ -27,10 +27,12 @@ interface Props {
   parameters: string;
   index: string;
   document: string;
+  query: string;
   onContextChange: (change: string) => void;
   onParametersChange: (change: string) => void;
   onIndexChange: (change: string) => void;
   onDocumentChange: (change: string) => void;
+  onQueryChange: (change: string) => void;
 }
 
 export function OutputPane({
@@ -40,10 +42,12 @@ export function OutputPane({
   parameters,
   index,
   document,
+  query,
   onContextChange,
   onParametersChange,
   onIndexChange,
   onDocumentChange,
+  onQueryChange,
 }: Props) {
   const outputTabLabel = (
     <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -96,9 +100,11 @@ export function OutputPane({
                 context={context}
                 index={index}
                 document={document}
+                query={query}
                 onContextChange={onContextChange}
                 onIndexChange={onIndexChange}
                 onDocumentChange={onDocumentChange}
+                onQueryChange={onQueryChange}
               />
             ),
           },

@@ -26,18 +26,22 @@ interface Props {
   context: any;
   index: string;
   document: string;
+  query: string;
   onContextChange: (context: string) => void;
   onIndexChange: (index: string) => void;
   onDocumentChange: (document: string) => void;
+  onQueryChange: (query: string) => void;
 }
 
 export const ContextTab = ({
   context,
   index,
   document,
+  query,
   onContextChange,
   onIndexChange,
   onDocumentChange,
+  onQueryChange,
 }: Props) => (
   <>
     <EuiSpacer size="m" />
@@ -98,6 +102,56 @@ export const ContextTab = ({
         fullWidth
       >
         <EuiFieldText fullWidth value={index || ''} onChange={e => onIndexChange(e.target.value)} />
+      </EuiFormRow>
+    )}
+    {/* Query DSL Code Editor */}
+    {'score'.indexOf(context) !== -1 && (
+      <EuiFormRow
+        label={
+          <EuiToolTip
+            content={i18n.translate('xpack.painlessLab.queryFieldLabel', {
+              defaultMessage:
+                'Use query to specify that that _score will be used to calculate score.',
+            })}
+          >
+            <span>
+              <FormattedMessage id="xpack.painlessLab.indexFieldLabel" defaultMessage="Query" />{' '}
+              <EuiIcon type="questionInCircle" color="subdued" />
+            </span>
+          </EuiToolTip>
+        }
+        labelAppend={
+          <EuiText size="xs">
+            <EuiLink
+              href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html"
+              target="_blank"
+            >
+              {i18n.translate('xpack.painlessLab.queryFieldDocLinkText', {
+                defaultMessage: 'Query DSL docs',
+              })}
+            </EuiLink>
+          </EuiText>
+        }
+        fullWidth
+      >
+        <EuiPanel paddingSize="s">
+          <CodeEditor
+            languageId="json"
+            height={150}
+            value={query}
+            onChange={onQueryChange}
+            options={{
+              fontSize: 12,
+              minimap: {
+                enabled: false,
+              },
+              scrollBeyondLastLine: false,
+              wordWrap: 'on',
+              wrappingIndent: 'indent',
+              automaticLayout: true,
+            }}
+          />
+        </EuiPanel>
       </EuiFormRow>
     )}
     {['filter', 'score'].indexOf(context) !== -1 && (

@@ -13,6 +13,7 @@ export interface RequestPayloadConfig {
   parameters?: string;
   index?: string;
   document?: string;
+  query?: string;
 }
 
 export enum PayloadFormat {
