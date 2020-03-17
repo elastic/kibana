@@ -16,13 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { coreMock } from '../../../core/public/mocks';
+import { testPlugin } from './tests/test_plugin';
 
-// eslint-disable-next-line
-import { npSetup } from '../../../../../../../../src/legacy/ui/public/new_platform';
-// eslint-disable-next-line
-import { HelloWorldEmbeddableFactory, HELLO_WORLD_EMBEDDABLE } from '../../../../../../../../examples/embeddable_examples/public';
+test('cannot register embeddable factory with the same ID', async () => {
+  const coreSetup = coreMock.createSetup();
+  const coreStart = coreMock.createStart();
+  const { setup } = testPlugin(coreSetup, coreStart);
+  const embeddableFactoryId = 'ID';
+  const embeddableFactory = {} as any;
 
-npSetup.plugins.embeddable.registerEmbeddableFactory(
-  HELLO_WORLD_EMBEDDABLE,
-  new HelloWorldEmbeddableFactory()
-);
+  setup.registerEmbeddableFactory(embeddableFactoryId, embeddableFactory);
+  expect(() =>
+    setup.registerEmbeddableFactory(embeddableFactoryId, embeddableFactory)
+  ).toThrowError(
+    'Embeddable factory [embeddableFactoryId = ID] already registered in Embeddables API.'
+  );
+});
