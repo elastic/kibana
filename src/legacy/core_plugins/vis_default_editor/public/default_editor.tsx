@@ -62,6 +62,16 @@ function DefaultEditor({
     return () => embeddableHandler.destroy();
   }, [embeddableHandler, setDirty]);
 
+  useEffect(() => {
+    embeddableHandler.updateInput({
+      timeRange,
+      filters,
+      query,
+    });
+
+    return () => {};
+  }, [embeddableHandler, timeRange, filters, query]);
+
   const editorInitialWidth = getInitialWidth(vis.type.editorConfig.defaultSize);
 
   return (

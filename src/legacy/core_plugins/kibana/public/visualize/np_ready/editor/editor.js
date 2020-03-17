@@ -123,8 +123,9 @@ function VisualizeAppController(
 
   $scope.dirty = false;
   $scope.setDirty = value => {
-    $scope.dirty = value;
-    $scope.$apply();
+    $timeout(() => {
+      $scope.dirty = value;
+    });
   };
 
   const updateEditor = new Subject();
