@@ -11,6 +11,8 @@ import { AllCases } from './';
 import { TestProviders } from '../../../../mock';
 import { useGetCasesMockState } from './__mock__';
 import * as apiHook from '../../../../containers/case/use_get_cases';
+import { act } from '@testing-library/react';
+import { wait } from '../../../../lib/helpers';
 
 describe('AllCases', () => {
   const dispatchUpdateCaseProperty = jest.fn();
@@ -18,16 +20,6 @@ describe('AllCases', () => {
   const setFilters = jest.fn();
   const setQueryParams = jest.fn();
   const setSelectedCases = jest.fn();
-  /* eslint-disable no-console */
-  // Silence until enzyme fixed to use ReactTestUtils.act()
-  const originalError = console.error;
-  beforeAll(() => {
-    console.error = jest.fn();
-  });
-  afterAll(() => {
-    console.error = originalError;
-  });
-  /* eslint-enable no-console */
   beforeEach(() => {
     jest.resetAllMocks();
     jest.spyOn(apiHook, 'useGetCases').mockReturnValue({
@@ -40,12 +32,13 @@ describe('AllCases', () => {
     });
     moment.tz.setDefault('UTC');
   });
-  it('should render AllCases', () => {
+  it('should render AllCases', async () => {
     const wrapper = mount(
       <TestProviders>
         <AllCases />
       </TestProviders>
     );
+    await act(() => wait());
     expect(
       wrapper
         .find(`a[data-test-subj="case-details-link"]`)
@@ -83,12 +76,13 @@ describe('AllCases', () => {
         .text()
     ).toEqual('Showing 10 cases');
   });
-  it('should tableHeaderSortButton AllCases', () => {
+  it('should tableHeaderSortButton AllCases', async () => {
     const wrapper = mount(
       <TestProviders>
         <AllCases />
       </TestProviders>
     );
+    await act(() => wait());
     wrapper
       .find('[data-test-subj="tableHeaderSortButton"]')
       .first()
@@ -98,24 +92,6 @@ describe('AllCases', () => {
       perPage: 5,
       sortField: 'createdAt',
       sortOrder: 'asc',
-    });
-  });
-  it('closes case when row action icon clicked', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <AllCases />
-      </TestProviders>
-    );
-    wrapper
-      .find('[data-test-subj="action-close"]')
-      .first()
-      .simulate('click');
-    const firstCase = useGetCasesMockState.data.cases[0];
-    expect(dispatchUpdateCaseProperty).toBeCalledWith({
-      caseId: firstCase.id,
-      updateKey: 'status',
-      updateValue: 'closed',
-      version: firstCase.version,
     });
   });
 });
