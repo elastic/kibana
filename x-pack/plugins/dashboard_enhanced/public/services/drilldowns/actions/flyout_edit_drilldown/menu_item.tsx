@@ -23,7 +23,7 @@ export const MenuItem: React.FC<{ context: EmbeddableContext }> = ({ context }) 
   }, [context.embeddable.dynamicActions, isMounted]);
 
   const badge = !count ? null : (
-    <EuiNotificationBadge style={{ float: 'right' }}>{count}</EuiNotificationBadge>
+    <EuiNotificationBadge style={{ float: 'right', marginTop: 1 }}>{count}</EuiNotificationBadge>
   );
 
   return (
