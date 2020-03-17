@@ -7,10 +7,13 @@
 import React, { useCallback } from 'react';
 import { EuiCheckbox } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
-import { usePolicyDetailsSelector } from '../policy_hooks';
-import { selectPolicyConfig, selectWindowsEventing } from '../../../store/policy_details/selectors';
-import { PolicyDetailsAction } from '../../../store/policy_details';
-import { OS, EventingFields } from '../../../types';
+import { usePolicyDetailsSelector } from '../../policy_hooks';
+import {
+  selectPolicyConfig,
+  selectWindowsEventing,
+} from '../../../../store/policy_details/selectors';
+import { PolicyDetailsAction } from '../../../../store/policy_details';
+import { OS, EventingFields } from '../../../../types';
 
 export const EventingCheckbox: React.FC<{
   id: string;
