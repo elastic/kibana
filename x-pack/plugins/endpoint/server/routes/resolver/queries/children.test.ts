@@ -6,11 +6,33 @@
 import { ChildrenQuery } from './children';
 import { EndpointAppConstants } from '../../../../common/types';
 
+export class FakeIndexPatternRetriever {
+  constructor(private readonly indexPattern: string) {}
+
+  static buildEventIndexPattern() {
+    return new FakeIndexPatternRetriever(fakeEventIndexPattern);
+  }
+
+  static buildLegacyIndexPattern() {
+    return new FakeIndexPatternRetriever(EndpointAppConstants.LEGACY_EVENT_INDEX_NAME);
+  }
+
+  async get() {
+    return this.indexPattern;
+  }
+}
+
+export const fakeEventIndexPattern = 'events-endpoint-*';
+
 describe('children events query', () => {
-  it('generates the correct legacy queries', () => {
+  it('generates the correct legacy queries', async () => {
     const timestamp = new Date().getTime();
     expect(
-      new ChildrenQuery('awesome-id', { size: 1, timestamp, eventID: 'foo' }).build('5')
+      await new ChildrenQuery(FakeIndexPatternRetriever.buildLegacyIndexPattern(), 'awesome-id', {
+        size: 1,
+        timestamp,
+        eventID: 'foo',
+      }).build('5')
     ).toStrictEqual({
       body: {
         query: {
@@ -46,11 +68,15 @@ describe('children events query', () => {
     });
   });
 
-  it('generates the correct non-legacy queries', () => {
+  it('generates the correct non-legacy queries', async () => {
     const timestamp = new Date().getTime();
 
     expect(
-      new ChildrenQuery(undefined, { size: 1, timestamp, eventID: 'bar' }).build('baz')
+      await new ChildrenQuery(FakeIndexPatternRetriever.buildEventIndexPattern(), undefined, {
+        size: 1,
+        timestamp,
+        eventID: 'bar',
+      }).build('baz')
     ).toStrictEqual({
       body: {
         query: {
@@ -88,7 +114,7 @@ describe('children events query', () => {
         size: 1,
         sort: [{ '@timestamp': 'asc' }, { 'event.id': 'asc' }],
       },
-      index: EndpointAppConstants.EVENT_INDEX_NAME,
+      index: fakeEventIndexPattern,
     });
   });
 });

@@ -9,6 +9,7 @@ import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   AssetReference,
   Installation,
+  InstalledReferences,
   KibanaAssetType,
   CallESAsCurrentUser,
   DefaultPackages,
@@ -26,7 +27,7 @@ export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   callCluster: CallESAsCurrentUser;
-}): Promise<AssetReference[]> {
+}): Promise<InstalledReferences> {
   const { savedObjectsClient, pkgName, callCluster } = options;
   try {
     const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
@@ -85,7 +86,7 @@ export async function installPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
   callCluster: CallESAsCurrentUser;
-}): Promise<AssetReference[]> {
+}): Promise<InstalledReferences> {
   const { savedObjectsClient, pkgkey, callCluster } = options;
   const registryPackageInfo = await Registry.fetchInfo(pkgkey);
   const { name: pkgName, version: pkgVersion } = registryPackageInfo;
@@ -113,7 +114,7 @@ export async function installPackage(options: {
   const toSaveRefs: AssetReference[] = res.flat();
   const toSavePatterns = generateIndexPatterns(registryPackageInfo.datasets);
   // Save those references in the package manager's state saved object
-  await saveInstallationReferences({
+  return await saveInstallationReferences({
     savedObjectsClient,
     pkgkey,
     pkgName,
@@ -121,7 +122,6 @@ export async function installPackage(options: {
     toSaveRefs,
     toSavePatterns,
   });
-  return toSaveRefs;
 }
 
 // TODO: make it an exhaustive list
@@ -163,18 +163,18 @@ export async function saveInstallationReferences(options: {
   };
 
   const toInstallRefs = toSaveRefs.reduce(mergeRefsReducer, savedRefs);
+  const installed = { references: toInstallRefs, patterns: toInstallStreams };
   await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
     {
-      installed: { references: toInstallRefs, patterns: toInstallStreams },
+      installed,
       name: pkgName,
       version: pkgVersion,
     },
     { id: pkgkey, overwrite: true }
   );
 
-  // TODO handle returning both types or merge the install refs into a single object
-  return toInstallRefs;
+  return installed;
 }
 
 async function installKibanaSavedObjects({

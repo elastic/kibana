@@ -13,7 +13,7 @@ import { LifecycleQuery } from './queries/lifecycle';
 import { ChildrenQuery } from './queries/children';
 import { EndpointAppConstants } from '../../../common/types';
 import { IndexPatternService } from '../../../../ingest_manager/server';
-import { getIndexPattern } from '../../index_pattern';
+import { IngestIndexPatternRetriever } from '../../index_pattern';
 
 interface ChildrenQueryParams {
   after?: string;
@@ -58,10 +58,11 @@ export function handleChildren(
     } = req;
     try {
       const pagination = getPaginationParams(limit, after);
-      const indexPattern = await getIndexPattern(
+      const indexPattern = new IngestIndexPatternRetriever(
         indexPatternService,
         context.core.savedObjects.client,
-        EndpointAppConstants.EVENT_DATASET
+        EndpointAppConstants.EVENT_DATASET,
+        log
       );
 
       const client = context.core.elasticsearch.dataClient;

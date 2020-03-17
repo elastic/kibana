@@ -10,7 +10,7 @@ import { EndpointAppConstants } from '../../../common/types';
 import { getPaginationParams } from './utils/pagination';
 import { RelatedEventsQuery } from './queries/related_events';
 import { IndexPatternService } from '../../../../ingest_manager/server';
-import { getIndexPattern } from '../../index_pattern';
+import { IngestIndexPatternRetriever } from '../../index_pattern';
 
 interface RelatedEventsQueryParams {
   after?: string;
@@ -57,16 +57,14 @@ export function handleRelatedEvents(
       const pagination = getPaginationParams(limit, after);
 
       const client = context.core.elasticsearch.dataClient;
-      // Retrieve the related non-process events for a given process
-      const relatedEventsQuery = new RelatedEventsQuery(
-        await getIndexPattern(
-          indexPatternService,
-          context.core.savedObjects.client,
-          EndpointAppConstants.EVENT_DATASET
-        ),
-        legacyEndpointID,
-        pagination
+      const indexPattern = new IngestIndexPatternRetriever(
+        indexPatternService,
+        context.core.savedObjects.client,
+        EndpointAppConstants.EVENT_DATASET,
+        log
       );
+      // Retrieve the related non-process events for a given process
+      const relatedEventsQuery = new RelatedEventsQuery(indexPattern, legacyEndpointID, pagination);
       const relatedEvents = await relatedEventsQuery.search(client, id);
 
       const { total, results: events, nextCursor } = relatedEvents;

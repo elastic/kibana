@@ -5,10 +5,16 @@
  */
 import { EndpointAppConstants } from '../../../../common/types';
 import { LifecycleQuery } from './lifecycle';
+import { FakeIndexPatternRetriever, fakeEventIndexPattern } from './children.test';
 
 describe('lifecycle query', () => {
-  it('generates the correct legacy queries', () => {
-    expect(new LifecycleQuery('awesome-id').build('5')).toStrictEqual({
+  it('generates the correct legacy queries', async () => {
+    expect(
+      await new LifecycleQuery(
+        FakeIndexPatternRetriever.buildLegacyIndexPattern(),
+        'awesome-id'
+      ).build('5')
+    ).toStrictEqual({
       body: {
         query: {
           bool: {
@@ -31,8 +37,10 @@ describe('lifecycle query', () => {
     });
   });
 
-  it('generates the correct non-legacy queries', () => {
-    expect(new LifecycleQuery().build('baz')).toStrictEqual({
+  it('generates the correct non-legacy queries', async () => {
+    expect(
+      await new LifecycleQuery(FakeIndexPatternRetriever.buildEventIndexPattern()).build('baz')
+    ).toStrictEqual({
       body: {
         query: {
           bool: {
@@ -57,7 +65,7 @@ describe('lifecycle query', () => {
         },
         sort: [{ '@timestamp': 'asc' }],
       },
-      index: EndpointAppConstants.EVENT_INDEX_NAME,
+      index: fakeEventIndexPattern,
     });
   });
 });

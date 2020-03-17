@@ -14,7 +14,7 @@ import {
 } from '../services/endpoint/metadata_query_builders';
 import { EndpointMetadata, EndpointResultList, EndpointAppConstants } from '../../common/types';
 import { EndpointAppContext } from '../types';
-import { getIndexPattern } from '../index_pattern';
+import { IngestIndexPatternRetriever } from '../index_pattern';
 
 interface HitSource {
   _source: EndpointMetadata;
@@ -56,15 +56,16 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       try {
+        const indexPattern = new IngestIndexPatternRetriever(
+          endpointAppContext.ingestManager.indexPatternService,
+          context.core.savedObjects.client,
+          EndpointAppConstants.METADATA_DATASET,
+          log
+        );
         const queryParams = await kibanaRequestToMetadataListESQuery(
           req,
           endpointAppContext,
-          await getIndexPattern(
-            endpointAppContext.ingestManager.indexPatternService,
-            context.core.savedObjects.client,
-            EndpointAppConstants.METADATA_DATASET,
-            log
-          )
+          await indexPattern.get()
         );
         const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
           'search',
@@ -87,15 +88,16 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       try {
+        const indexPattern = new IngestIndexPatternRetriever(
+          endpointAppContext.ingestManager.indexPatternService,
+          context.core.savedObjects.client,
+          EndpointAppConstants.METADATA_DATASET,
+          log
+        );
         const query = kibanaRequestToMetadataGetESQuery(
           req,
           endpointAppContext,
-          await getIndexPattern(
-            endpointAppContext.ingestManager.indexPatternService,
-            context.core.savedObjects.client,
-            EndpointAppConstants.METADATA_DATASET,
-            log
-          )
+          await indexPattern.get()
         );
         const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
           'search',

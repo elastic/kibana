@@ -27,6 +27,7 @@ export {
   EnrollmentAPIKey,
   EnrollmentAPIKeySOAttributes,
   Installation,
+  InstalledReferences,
   InstallationStatus,
   PackageInfo,
   RegistryVarsEntry,

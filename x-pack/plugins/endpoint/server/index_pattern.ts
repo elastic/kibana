@@ -12,32 +12,40 @@ const fallbackIndexPatterns: Record<string, string> = {
   metadata: 'metadata-endpoint-*',
 };
 
-export async function getIndexPattern(
-  indexPatternService: IndexPatternService,
-  savedObjectsClient: SavedObjectsClientContract,
-  datasetPath: string,
-  log: Logger,
-  version?: string
-): Promise<string> {
-  const pattern = await indexPatternService.get(
-    savedObjectsClient,
-    EndpointAppConstants.ENDPOINT_PACKAGE_NAME,
-    datasetPath,
-    version
-  );
+export interface IndexPatternRetriever {
+  get(): Promise<string>;
+}
 
-  if (!pattern) {
-    log.warn(
-      `Failed to retrieve index pattern from ingest manager dataset: ${datasetPath} version: ${version} finding default`
+export class IngestIndexPatternRetriever implements IndexPatternRetriever {
+  constructor(
+    private readonly service: IndexPatternService,
+    private readonly client: SavedObjectsClientContract,
+    private readonly datasetPath: string,
+    private readonly log: Logger,
+    private readonly version?: string
+  ) {}
+
+  async get() {
+    const pattern = await this.service.get(
+      this.client,
+      EndpointAppConstants.ENDPOINT_PACKAGE_NAME,
+      this.datasetPath,
+      this.version
     );
 
-    const defaultPattern = fallbackIndexPatterns[datasetPath];
-    if (!defaultPattern) {
-      log.warn(`Failed to retrieve default index pattern ${datasetPath}`);
-      throw new Error('Invalid dataset used, unable to find default index pattern');
-    }
-    return defaultPattern;
-  }
+    if (!pattern) {
+      this.log.warn(
+        `Failed to retrieve index pattern from ingest manager dataset: ${this.datasetPath} version: ${this.version} finding default`
+      );
 
-  return pattern;
+      const defaultPattern = fallbackIndexPatterns[this.datasetPath];
+      if (!defaultPattern) {
+        this.log.warn(`Failed to retrieve default index pattern ${this.datasetPath}`);
+        throw new Error('Invalid dataset used, unable to find default index pattern');
+      }
+      return defaultPattern;
+    }
+
+    return pattern;
+  }
 }

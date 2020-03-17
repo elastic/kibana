@@ -5,12 +5,21 @@
  */
 import { RelatedEventsQuery } from './related_events';
 import { EndpointAppConstants } from '../../../../common/types';
+import { FakeIndexPatternRetriever, fakeEventIndexPattern } from './children.test';
 
 describe('related events query', () => {
-  it('generates the correct legacy queries', () => {
+  it('generates the correct legacy queries', async () => {
     const timestamp = new Date().getTime();
     expect(
-      new RelatedEventsQuery('awesome-id', { size: 1, timestamp, eventID: 'foo' }).build('5')
+      await new RelatedEventsQuery(
+        FakeIndexPatternRetriever.buildLegacyIndexPattern(),
+        'awesome-id',
+        {
+          size: 1,
+          timestamp,
+          eventID: 'foo',
+        }
+      ).build('5')
     ).toStrictEqual({
       body: {
         query: {
@@ -47,11 +56,15 @@ describe('related events query', () => {
     });
   });
 
-  it('generates the correct non-legacy queries', () => {
+  it('generates the correct non-legacy queries', async () => {
     const timestamp = new Date().getTime();
 
     expect(
-      new RelatedEventsQuery(undefined, { size: 1, timestamp, eventID: 'bar' }).build('baz')
+      await new RelatedEventsQuery(FakeIndexPatternRetriever.buildEventIndexPattern(), undefined, {
+        size: 1,
+        timestamp,
+        eventID: 'bar',
+      }).build('baz')
     ).toStrictEqual({
       body: {
         query: {
@@ -90,7 +103,7 @@ describe('related events query', () => {
         size: 1,
         sort: [{ '@timestamp': 'asc' }, { 'event.id': 'asc' }],
       },
-      index: EndpointAppConstants.EVENT_INDEX_NAME,
+      index: fakeEventIndexPattern,
     });
   });
 });
