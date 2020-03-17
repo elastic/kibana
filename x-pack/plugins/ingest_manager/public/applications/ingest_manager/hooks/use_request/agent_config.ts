@@ -3,18 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { HttpFetchQuery } from 'kibana/public';
+import { HttpFetchQuery } from 'src/core/public';
 import { useRequest, sendRequest } from './use_request';
 import { agentConfigRouteService } from '../../services';
 import {
   GetAgentConfigsResponse,
   GetOneAgentConfigResponse,
-  CreateAgentConfigRequestSchema,
+  CreateAgentConfigRequest,
   CreateAgentConfigResponse,
-  UpdateAgentConfigRequestSchema,
+  UpdateAgentConfigRequest,
   UpdateAgentConfigResponse,
-  DeleteAgentConfigsRequestSchema,
+  DeleteAgentConfigsRequest,
   DeleteAgentConfigsResponse,
 } from '../../types';
 
@@ -33,17 +32,28 @@ export const useGetOneAgentConfig = (agentConfigId: string) => {
   });
 };
 
-export const sendCreateAgentConfig = (body: CreateAgentConfigRequestSchema['body']) => {
+export const sendGetOneAgentConfig = (agentConfigId: string) => {
+  return sendRequest<GetOneAgentConfigResponse>({
+    path: agentConfigRouteService.getInfoPath(agentConfigId),
+    method: 'get',
+  });
+};
+
+export const sendCreateAgentConfig = (
+  body: CreateAgentConfigRequest['body'],
+  { withSysMonitoring }: { withSysMonitoring: boolean } = { withSysMonitoring: false }
+) => {
   return sendRequest<CreateAgentConfigResponse>({
     path: agentConfigRouteService.getCreatePath(),
     method: 'post',
     body: JSON.stringify(body),
+    query: withSysMonitoring ? { sys_monitoring: true } : {},
   });
 };
 
 export const sendUpdateAgentConfig = (
   agentConfigId: string,
-  body: UpdateAgentConfigRequestSchema['body']
+  body: UpdateAgentConfigRequest['body']
 ) => {
   return sendRequest<UpdateAgentConfigResponse>({
     path: agentConfigRouteService.getUpdatePath(agentConfigId),
@@ -52,7 +62,7 @@ export const sendUpdateAgentConfig = (
   });
 };
 
-export const sendDeleteAgentConfigs = (body: DeleteAgentConfigsRequestSchema['body']) => {
+export const sendDeleteAgentConfigs = (body: DeleteAgentConfigsRequest['body']) => {
   return sendRequest<DeleteAgentConfigsResponse>({
     path: agentConfigRouteService.getDeletePath(),
     method: 'post',

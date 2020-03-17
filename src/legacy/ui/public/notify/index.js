@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export { fatalError, addFatalErrorCallback } from './fatal_error';
+export { fatalError } from './fatal_error';
 export { toastNotifications } from './toasts';
 export { banners } from './banners';

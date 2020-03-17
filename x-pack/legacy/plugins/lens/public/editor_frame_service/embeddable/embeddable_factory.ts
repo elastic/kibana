@@ -27,17 +27,19 @@ import { Embeddable } from './embeddable';
 import { SavedObjectIndexStore, DOC_TYPE } from '../../persistence';
 import { getEditPath } from '../../../../../../plugins/lens/common';
 
+interface StartServices {
+  timefilter: TimefilterContract;
+  coreHttp: HttpSetup;
+  capabilities: RecursiveReadonly<Capabilities>;
+  savedObjectsClient: SavedObjectsClientContract;
+  expressionRenderer: ReactExpressionRendererType;
+  indexPatternService: IndexPatternsContract;
+}
+
 export class EmbeddableFactory extends AbstractEmbeddableFactory {
   type = DOC_TYPE;
 
-  constructor(
-    private timefilter: TimefilterContract,
-    private coreHttp: HttpSetup,
-    private capabilities: RecursiveReadonly<Capabilities>,
-    private savedObjectsClient: SavedObjectsClientContract,
-    private expressionRenderer: ReactExpressionRendererType,
-    private indexPatternService: IndexPatternsContract
-  ) {
+  constructor(private getStartServices: () => Promise<StartServices>) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('xpack.lens.lensSavedObjectLabel', {
@@ -49,8 +51,9 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
     });
   }
 
-  public isEditable() {
-    return this.capabilities.visualize.save as boolean;
+  public async isEditable() {
+    const { capabilities } = await this.getStartServices();
+    return capabilities.visualize.save as boolean;
   }
 
   canCreateNew() {
@@ -68,13 +71,20 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
     input: Partial<EmbeddableInput> & { id: string },
     parent?: IContainer
   ) {
-    const store = new SavedObjectIndexStore(this.savedObjectsClient);
+    const {
+      savedObjectsClient,
+      coreHttp,
+      indexPatternService,
+      timefilter,
+      expressionRenderer,
+    } = await this.getStartServices();
+    const store = new SavedObjectIndexStore(savedObjectsClient);
     const savedVis = await store.load(savedObjectId);
 
     const promises = savedVis.state.datasourceMetaData.filterableIndexPatterns.map(
       async ({ id }) => {
         try {
-          return await this.indexPatternService.get(id);
+          return await indexPatternService.get(id);
         } catch (error) {
           // Unable to load index pattern, ignore error as the index patterns are only used to
           // configure the filter and query bar - there is still a good chance to get the visualization
@@ -90,12 +100,12 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
     );
 
     return new Embeddable(
-      this.timefilter,
-      this.expressionRenderer,
+      timefilter,
+      expressionRenderer,
       {
         savedVis,
-        editUrl: this.coreHttp.basePath.prepend(getEditPath(savedObjectId)),
-        editable: this.isEditable(),
+        editUrl: coreHttp.basePath.prepend(getEditPath(savedObjectId)),
+        editable: await this.isEditable(),
         indexPatterns,
       },
       input,
