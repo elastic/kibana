@@ -187,6 +187,16 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
       );
     }, [selectedStackByOption.value, from, to, query, filters]);
 
+    const linkButton = useMemo(() => {
+      if (showLinkToSignals) {
+        return (
+          <ViewSignalsFlexItem grow={false}>
+            <EuiButton href={getDetectionEngineUrl(urlSearch)}>{i18n.VIEW_SIGNALS}</EuiButton>
+          </ViewSignalsFlexItem>
+        );
+      }
+    }, [showLinkToSignals, urlSearch]);
+
     return (
       <InspectButtonContainer show={!isInitialLoading}>
         <StyledEuiPanel height={panelHeight}>
@@ -213,13 +223,7 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
                       />
                     )}
                   </EuiFlexItem>
-                  {showLinkToSignals && (
-                    <ViewSignalsFlexItem grow={false}>
-                      <EuiButton href={getDetectionEngineUrl(urlSearch)}>
-                        {i18n.VIEW_SIGNALS}
-                      </EuiButton>
-                    </ViewSignalsFlexItem>
-                  )}
+                  {linkButton}
                 </EuiFlexGroup>
               </HeaderSection>
 
