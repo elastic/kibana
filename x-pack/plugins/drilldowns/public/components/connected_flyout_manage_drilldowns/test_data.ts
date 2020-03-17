@@ -9,6 +9,7 @@ import {
   DynamicActionManager,
   DynamicActionManagerState,
   UiActionsSerializedAction,
+  TriggerContextMapping,
 } from '../../../../../../src/plugins/ui_actions/public';
 import { createStateContainer } from '../../../../../../src/plugins/kibana_utils/common';
 
@@ -29,11 +30,11 @@ class MockDynamicActionManager implements PublicMethodsOf<DynamicActionManager> 
 
   async createEvent(
     action: UiActionsSerializedAction<any>,
-    triggerId: string = 'VALUE_CLICK_TRIGGER'
+    triggers: Array<keyof TriggerContextMapping>
   ) {
     const event = {
       action,
-      triggerId,
+      triggers,
       eventId: uuid(),
     };
     const state = this.state.get();
@@ -60,7 +61,7 @@ class MockDynamicActionManager implements PublicMethodsOf<DynamicActionManager> 
   async updateEvent(
     eventId: string,
     action: UiActionsSerializedAction<unknown>,
-    triggerId: string = 'VALUE_CLICK_TRIGGER'
+    triggers: Array<keyof TriggerContextMapping>
   ) {
     const state = this.state.get();
     const events = state.events;
@@ -68,7 +69,7 @@ class MockDynamicActionManager implements PublicMethodsOf<DynamicActionManager> 
     const event = {
       eventId,
       action,
-      triggerId,
+      triggers,
     };
 
     this.state.set({

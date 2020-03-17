@@ -25,7 +25,7 @@ import { SerializedAction } from './types';
  */
 export interface SerializedEvent {
   eventId: string;
-  triggerId: string;
+  triggers: string[];
   action: SerializedAction<unknown>;
 }
 

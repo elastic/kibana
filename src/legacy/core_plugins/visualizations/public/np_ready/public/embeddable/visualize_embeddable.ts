@@ -406,6 +406,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       case 'histogram':
       case 'horizontal_bar':
       case 'line':
+      case 'metrics':
       case 'pie':
       case 'table':
       case 'tagcloud':
@@ -415,7 +416,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       case 'input_control_vis':
       case 'markdown':
       case 'metric':
-      case 'metrics':
       case 'region_map':
       case 'tile_map':
       case 'timelion':

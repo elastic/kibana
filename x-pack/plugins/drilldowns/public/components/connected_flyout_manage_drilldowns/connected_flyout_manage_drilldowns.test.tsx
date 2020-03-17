@@ -170,7 +170,7 @@ test('Create only mode', async () => {
 
   await wait(() => expect(notifications.toasts.addSuccess).toBeCalled());
   expect(onClose).toBeCalled();
-  expect(await mockDynamicActionManager.count()).toBe(1);
+  expect(await mockDynamicActionManager.state.get().events.length).toBe(1);
 });
 
 test.todo("Error when can't fetch drilldown list");

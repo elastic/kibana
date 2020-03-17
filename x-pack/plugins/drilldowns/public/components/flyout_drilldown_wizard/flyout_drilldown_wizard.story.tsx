@@ -48,4 +48,23 @@ storiesOf('components/FlyoutDrilldownWizard', module)
         />
       </EuiFlyout>
     );
+  })
+  .add('open in flyout - edit, just 1 action type', () => {
+    return (
+      <EuiFlyout onClose={() => {}}>
+        <FlyoutDrilldownWizard
+          onClose={() => {}}
+          drilldownActionFactories={[dashboardFactory]}
+          initialDrilldownWizardConfig={{
+            name: 'My fancy drilldown',
+            actionFactory: urlFactory as any,
+            actionConfig: {
+              url: 'https://elastic.co',
+              openInNewTab: true,
+            },
+          }}
+          mode={'edit'}
+        />
+      </EuiFlyout>
+    );
   });

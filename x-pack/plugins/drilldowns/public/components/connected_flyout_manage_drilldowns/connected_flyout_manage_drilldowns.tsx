@@ -18,6 +18,9 @@ import {
   DynamicActionManager,
   UiActionsSerializedEvent,
   UiActionsSerializedAction,
+  VALUE_CLICK_TRIGGER,
+  SELECT_RANGE_TRIGGER,
+  TriggerContextMapping,
 } from '../../../../../../src/plugins/ui_actions/public';
 import { useContainerState } from '../../../../../../src/plugins/kibana_utils/common';
 import { DrilldownListItem } from '../list_manage_drilldowns';
@@ -66,11 +69,19 @@ export function createFlyoutManageDrilldowns({
   return (props: ConnectedFlyoutManageDrilldownsProps) => {
     const isCreateOnly = props.viewMode === 'create';
 
-    const factoryContext: DrilldownFactoryContext<unknown> = {
-      place: '',
-      placeContext: props.context,
-      triggers: [],
-    };
+    const selectedTriggers: Array<keyof TriggerContextMapping> = React.useMemo(
+      () => [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER],
+      []
+    );
+
+    const factoryContext: DrilldownFactoryContext<unknown> = React.useMemo(
+      () => ({
+        place: '',
+        placeContext: props.context,
+        triggers: [],
+      }),
+      [props.context]
+    );
 
     const actionFactories = useCompatibleActionFactoriesForCurrentContext(
       allActionFactories,
@@ -146,18 +157,24 @@ export function createFlyoutManageDrilldowns({
             onBack={isCreateOnly ? undefined : () => setRoute(Routes.Manage)}
             onSubmit={({ actionConfig, actionFactory, name }) => {
               if (route === Routes.Create) {
-                createDrilldown({
-                  name,
-                  config: actionConfig,
-                  factoryId: actionFactory.id,
-                });
+                createDrilldown(
+                  {
+                    name,
+                    config: actionConfig,
+                    factoryId: actionFactory.id,
+                  },
+                  selectedTriggers
+                );
               } else {
-                // edit
-                editDrilldown(currentEditId!, {
-                  name,
-                  config: actionConfig,
-                  factoryId: actionFactory.id,
-                });
+                editDrilldown(
+                  currentEditId!,
+                  {
+                    name,
+                    config: actionConfig,
+                    factoryId: actionFactory.id,
+                  },
+                  selectedTriggers
+                );
               }
 
               if (isCreateOnly) {
@@ -267,9 +284,12 @@ function useDrilldownsStateManager(
     }
   }
 
-  async function createDrilldown(action: UiActionsSerializedAction<any>, triggerId?: string) {
+  async function createDrilldown(
+    action: UiActionsSerializedAction<any>,
+    selectedTriggers: Array<keyof TriggerContextMapping>
+  ) {
     await run(async () => {
-      await actionManager.createEvent(action, triggerId);
+      await actionManager.createEvent(action, selectedTriggers);
       notifications.toasts.addSuccess({
         title: toastDrilldownCreated.title,
         text: toastDrilldownCreated.text(action.name),
@@ -280,10 +300,10 @@ function useDrilldownsStateManager(
   async function editDrilldown(
     drilldownId: string,
     action: UiActionsSerializedAction<any>,
-    triggerId?: string
+    selectedTriggers: Array<keyof TriggerContextMapping>
   ) {
     await run(async () => {
-      await actionManager.updateEvent(drilldownId, action, triggerId);
+      await actionManager.updateEvent(drilldownId, action, selectedTriggers);
       notifications.toasts.addSuccess({
         title: toastDrilldownEdited.title,
         text: toastDrilldownEdited.text(action.name),
