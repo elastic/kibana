@@ -102,7 +102,7 @@ export class UiActionsService {
     return action;
   };
 
-  protected readonly unregisterAction = (actionId: string): void => {
+  public readonly unregisterAction = (actionId: string): void => {
     if (!this.actions.has(actionId)) {
       throw new Error(`Action [action.id = ${actionId}] is not registered.`);
     }
@@ -133,7 +133,7 @@ export class UiActionsService {
 
   // public readonly removeTriggerAction =
 
-  protected readonly __attachAction = <TriggerId extends keyof TriggerContextMapping>(
+  public readonly __attachAction = <TriggerId extends keyof TriggerContextMapping>(
     triggerId: TriggerId,
     actionId: string
   ): void => {
