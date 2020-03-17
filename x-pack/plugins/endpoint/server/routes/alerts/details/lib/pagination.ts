@@ -16,6 +16,7 @@ import { searchESForAlerts, Pagination } from '../../lib';
 import { AlertSearchQuery, SearchCursor, AlertDetailsRequestParams } from '../../types';
 import { BASE_ALERTS_ROUTE } from '../..';
 import { RequestHandlerContext } from '../../../../../../../../src/core/server';
+import { Filter } from '../../../../../../../../src/plugins/data/server';
 
 /**
  * Pagination class for alert details.
@@ -41,6 +42,8 @@ export class AlertDetailsPagination extends Pagination<
       pageSize: 1,
       sort: EndpointAppConstants.ALERT_LIST_DEFAULT_SORT,
       order: 'desc',
+      query: { query: '', language: 'kuery' },
+      filters: [] as Filter[],
     };
 
     if (direction === 'asc') {

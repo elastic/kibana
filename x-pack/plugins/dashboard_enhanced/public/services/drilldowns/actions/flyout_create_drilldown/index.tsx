@@ -9,14 +9,10 @@ import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
 import { ActionByType } from '../../../../../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
-import { IEmbeddable } from '../../../../../../../../src/plugins/embeddable/public';
 import { DrilldownsStartContract } from '../../../../../../drilldowns/public';
+import { EmbeddableContext } from '../../../../../../../../src/plugins/embeddable/public';
 
 export const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
-
-export interface FlyoutCreateDrilldownActionContext {
-  embeddable: IEmbeddable;
-}
 
 export interface OpenFlyoutAddDrilldownParams {
   overlays: () => Promise<CoreStart['overlays']>;
@@ -26,7 +22,7 @@ export interface OpenFlyoutAddDrilldownParams {
 export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_ADD_DRILLDOWN> {
   public readonly type = OPEN_FLYOUT_ADD_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_ADD_DRILLDOWN;
-  public order = 2;
+  public order = 12;
 
   constructor(protected readonly params: OpenFlyoutAddDrilldownParams) {}
 
@@ -40,14 +36,23 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
     return 'plusInCircle';
   }
 
-  public async isCompatible({ embeddable }: FlyoutCreateDrilldownActionContext) {
-    return embeddable.getInput().viewMode === 'edit';
+  private isEmbeddableCompatible(context: EmbeddableContext) {
+    if (!context.embeddable.dynamicActions) return false;
+    const supportedTriggers = context.embeddable.supportedTriggers();
+    if (!supportedTriggers || !supportedTriggers.length) return false;
+    return supportedTriggers.indexOf('VALUE_CLICK_TRIGGER') > -1;
   }
 
-  public async execute(context: FlyoutCreateDrilldownActionContext) {
+  public async isCompatible(context: EmbeddableContext) {
+    const isEditMode = context.embeddable.getInput().viewMode === 'edit';
+    return isEditMode && this.isEmbeddableCompatible(context);
+  }
+
+  public async execute(context: EmbeddableContext) {
     const overlays = await this.params.overlays();
     const drilldowns = await this.params.drilldowns();
     const dynamicActionManager = context.embeddable.dynamicActions;
+
     if (!dynamicActionManager) {
       throw new Error(`Can't execute FlyoutCreateDrilldownAction without dynamicActionsManager`);
     }
@@ -60,7 +65,10 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
           viewMode={'create'}
           dynamicActionManager={dynamicActionManager}
         />
-      )
+      ),
+      {
+        ownFocus: true,
+      }
     );
   }
 }

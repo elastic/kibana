@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
 import { ActionWizard } from './action_wizard';
-import { ActionFactoryDefinition, AnyActionFactory, ActionFactory } from '../../services';
+import { ActionFactoryDefinition, ActionFactory } from '../../services';
 import { CollectConfigProps } from '../../util';
 
 type ActionBaseConfig = object;
@@ -88,7 +88,7 @@ export const dashboardDrilldownActionFactory: ActionFactoryDefinition<
       useCurrentDashboardFilters: true,
     };
   },
-  isConfigValid: config => {
+  isConfigValid: (config: DashboardDrilldownConfig): config is DashboardDrilldownConfig => {
     if (!config.dashboardId) return false;
     return true;
   },
@@ -146,7 +146,7 @@ export const urlDrilldownActionFactory: ActionFactoryDefinition<UrlDrilldownConf
       openInNewTab: false,
     };
   },
-  isConfigValid: config => {
+  isConfigValid: (config: any): config is UrlDrilldownConfig => {
     if (!config.url) return false;
     return true;
   },
@@ -161,13 +161,13 @@ export const urlDrilldownActionFactory: ActionFactoryDefinition<UrlDrilldownConf
 
 export const urlFactory = new ActionFactory(urlDrilldownActionFactory);
 
-export function Demo({ actionFactories }: { actionFactories: AnyActionFactory[] }) {
+export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory<any>> }) {
   const [state, setState] = useState<{
-    currentActionFactory?: AnyActionFactory;
+    currentActionFactory?: ActionFactory;
     config?: ActionBaseConfig;
   }>({});
 
-  function changeActionFactory(newActionFactory: AnyActionFactory | null) {
+  function changeActionFactory(newActionFactory: ActionFactory | null) {
     if (!newActionFactory) {
       // removing action factory
       return setState({});

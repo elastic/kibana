@@ -28,21 +28,33 @@ export { UiActionsSetup, UiActionsStart } from './plugin';
 export { UiActionsServiceParams, UiActionsService } from './service';
 export {
   Action,
-  createAction,
-  IncompatibleActionError,
   ActionDefinition as UiActionsActionDefinition,
+  ActionFactoryDefinition as UiActionsActionFactoryDefinition,
   ActionInternal as UiActionsActionInternal,
   ActionStorage as UiActionsActionStorage,
-  SerializedEvent as UiActionsSerializedEvent,
-  SerializedAction as UiActionsSerializedAction,
+  AbstractActionStorage as UiActionsAbstractActionStorage,
+  createAction,
   DynamicActionManager,
+  DynamicActionManagerState,
+  IncompatibleActionError,
+  SerializedAction as UiActionsSerializedAction,
+  SerializedEvent as UiActionsSerializedEvent,
 } from './actions';
-export { buildContextMenuForActions, contextMenuSeparatorAction } from './context_menu';
+export { buildContextMenuForActions } from './context_menu';
 export {
   Presentable as UiActionsPresentable,
   Configurable as UiActionsConfigurable,
   CollectConfigProps as UiActionsCollectConfigProps,
 } from './util';
-export { Trigger, TriggerContext } from './triggers';
+export {
+  Trigger,
+  TriggerContext,
+  SELECT_RANGE_TRIGGER,
+  selectRangeTrigger,
+  VALUE_CLICK_TRIGGER,
+  valueClickTrigger,
+  APPLY_FILTER_TRIGGER,
+  applyFilterTrigger,
+} from './triggers';
 export { TriggerContextMapping, TriggerId, ActionContextMapping, ActionType } from './types';
 export { ActionByType, DynamicActionManager as UiActionsDynamicActionManager } from './actions';

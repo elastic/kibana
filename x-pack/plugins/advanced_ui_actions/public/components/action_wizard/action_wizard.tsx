@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { txtChangeButton } from './i18n';
 import './action_wizard.scss';
-import { AnyActionFactory } from '../../services';
+import { ActionFactory } from '../../services';
 
 type ActionBaseConfig = object;
 type ActionFactoryBaseContext = object;
@@ -25,19 +25,19 @@ export interface ActionWizardProps {
   /**
    * List of available action factories
    */
-  actionFactories: AnyActionFactory[];
+  actionFactories: ActionFactory[];
 
   /**
    * Currently selected action factory
    * undefined - is allowed and means that non is selected
    */
-  currentActionFactory?: AnyActionFactory;
+  currentActionFactory?: ActionFactory;
 
   /**
    * Action factory selected changed
    * null - means user click "change" and removed action factory selection
    */
-  onActionFactoryChange: (actionFactory: AnyActionFactory | null) => void;
+  onActionFactoryChange: (actionFactory: ActionFactory | null) => void;
 
   /**
    * current config for currently selected action factory
@@ -97,7 +97,7 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
 };
 
 interface SelectedActionFactoryProps {
-  actionFactory: AnyActionFactory;
+  actionFactory: ActionFactory;
   config: ActionBaseConfig;
   context: ActionFactoryBaseContext;
   onConfigChange: (config: ActionBaseConfig) => void;
@@ -143,19 +143,20 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
       </header>
       <EuiSpacer size="m" />
       <div>
-        {actionFactory.ReactCollectConfig({
-          config,
-          onConfig: onConfigChange,
-        })}
+        <actionFactory.ReactCollectConfig
+          config={config}
+          onConfig={onConfigChange}
+          context={context}
+        />
       </div>
     </div>
   );
 };
 
 interface ActionFactorySelectorProps {
-  actionFactories: AnyActionFactory[];
+  actionFactories: ActionFactory[];
   context: ActionFactoryBaseContext;
-  onActionFactorySelected: (actionFactory: AnyActionFactory) => void;
+  onActionFactorySelected: (actionFactory: ActionFactory) => void;
 }
 
 export const TEST_SUBJ_ACTION_FACTORY_ITEM = 'action-factory-item';
@@ -172,21 +173,22 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
   }
 
   return (
-    <EuiFlexGroup wrap>
+    <EuiFlexGroup gutterSize="m" wrap={true}>
       {[...actionFactories]
         .sort((f1, f2) => f1.order - f2.order)
         .map(actionFactory => (
-          <EuiKeyPadMenuItemButton
-            className="auaActionWizard__actionFactoryItem"
-            key={actionFactory.id}
-            label={actionFactory.getDisplayName(context)}
-            data-test-subj={TEST_SUBJ_ACTION_FACTORY_ITEM}
-            onClick={() => onActionFactorySelected(actionFactory)}
-          >
-            {actionFactory.getIconType(context) && (
-              <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
-            )}
-          </EuiKeyPadMenuItemButton>
+          <EuiFlexItem grow={false} key={actionFactory.id}>
+            <EuiKeyPadMenuItemButton
+              className="auaActionWizard__actionFactoryItem"
+              label={actionFactory.getDisplayName(context)}
+              data-test-subj={TEST_SUBJ_ACTION_FACTORY_ITEM}
+              onClick={() => onActionFactorySelected(actionFactory)}
+            >
+              {actionFactory.getIconType(context) && (
+                <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
+              )}
+            </EuiKeyPadMenuItemButton>
+          </EuiFlexItem>
         ))}
     </EuiFlexGroup>
   );

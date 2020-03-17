@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { validateBucketSpan } from '../validate_bucket_span';
-import { SKIP_BUCKET_SPAN_ESTIMATION } from '../../../../../../legacy/plugins/ml/common/constants/validation';
+import { SKIP_BUCKET_SPAN_ESTIMATION } from '../../../../common/constants/validation';
 
 // farequote2017 snapshot snapshot mock search response
 // it returns a mock for the response of PolledDataChecker's search request

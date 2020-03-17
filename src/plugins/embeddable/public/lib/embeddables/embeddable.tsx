@@ -16,16 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isEqual, cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
-import { Adapters } from '../types';
+import { Adapters, ViewMode } from '../types';
 import { IContainer } from '../containers';
-import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from './i_embeddable';
-import { ViewMode } from '../types';
+import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import { TriggerContextMapping } from '../ui_actions';
 import { EmbeddableActionStorage } from './embeddable_action_storage';
 import {
-  UiActionsStart,
   UiActionsDynamicActionManager,
+  UiActionsStart,
 } from '../../../../../plugins/ui_actions/public';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
@@ -59,21 +59,25 @@ export abstract class Embeddable<
   // to update input when the parent changes.
   private parentSubscription?: Rx.Subscription;
 
+  private storageSubscription?: Rx.Subscription;
+
   // TODO: Rename to destroyed.
   private destoyed: boolean = false;
 
-  private __dynamicActions?: UiActionsDynamicActionManager;
+  private storage = new EmbeddableActionStorage(this);
+
+  private cachedDynamicActions?: UiActionsDynamicActionManager;
   public get dynamicActions(): UiActionsDynamicActionManager | undefined {
     if (!this.params.uiActions) return undefined;
-    if (!this.__dynamicActions) {
-      this.__dynamicActions = new UiActionsDynamicActionManager({
+    if (!this.cachedDynamicActions) {
+      this.cachedDynamicActions = new UiActionsDynamicActionManager({
         isCompatible: async ({ embeddable }: any) => embeddable.runtimeId === this.runtimeId,
-        storage: new EmbeddableActionStorage(this),
+        storage: this.storage,
         uiActions: this.params.uiActions,
       });
     }
 
-    return this.__dynamicActions;
+    return this.cachedDynamicActions;
   }
 
   constructor(
@@ -112,6 +116,9 @@ export abstract class Embeddable<
         console.log('Failed to start embeddable dynamic actions', this);
         console.error(error);
         /* eslint-enable */
+      });
+      this.storageSubscription = this.input$.subscribe(() => {
+        this.storage.reload$.next();
       });
     }
   }
@@ -202,6 +209,10 @@ export abstract class Embeddable<
       });
     }
 
+    if (this.storageSubscription) {
+      this.storageSubscription.unsubscribe();
+    }
+
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();
     }
@@ -239,5 +250,9 @@ export abstract class Embeddable<
     });
 
     this.onResetInput(newInput);
+  }
+
+  public supportedTriggers(): Array<keyof TriggerContextMapping> {
+    return [];
   }
 }

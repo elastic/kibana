@@ -28,14 +28,11 @@ import {
 } from '../types';
 import {
   ActionInternal,
-  AnyActionInternal,
   Action,
   ActionByType,
-  AnyActionDefinition,
-  AnyActionFactoryDefinition,
   ActionFactory,
-  AnyActionFactory,
   ActionDefinition,
+  ActionFactoryDefinition,
 } from '../actions';
 import { Trigger, TriggerContext } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
@@ -91,7 +88,7 @@ export class UiActionsService {
     return trigger.contract;
   };
 
-  public readonly registerAction = <A extends AnyActionDefinition>(
+  public readonly registerAction = <A extends ActionDefinition>(
     definition: A
   ): ActionInternal<A> => {
     if (this.actions.has(definition.id)) {
@@ -147,7 +144,7 @@ export class UiActionsService {
     }
   };
 
-  public readonly getAction = <T extends AnyActionDefinition>(id: string): ActionInternal<T> => {
+  public readonly getAction = <T extends ActionDefinition>(id: string): ActionInternal<T> => {
     if (!this.actions.has(id)) {
       throw new Error(`Action [action.id = ${id}] not registered.`);
     }
@@ -212,7 +209,7 @@ export class UiActionsService {
     const actionIds = this.triggerToActions.get(triggerId);
 
     const actions = actionIds!
-      .map(actionId => this.actions.get(actionId) as AnyActionInternal)
+      .map(actionId => this.actions.get(actionId) as ActionInternal)
       .filter(Boolean);
 
     return actions as Array<Action<TriggerContext<T>>>;
@@ -276,17 +273,23 @@ export class UiActionsService {
    * Register an action factory. Action factories are used to configure and
    * serialize/deserialize dynamic actions.
    */
-  public readonly registerActionFactory = (definition: AnyActionFactoryDefinition) => {
+  public readonly registerActionFactory = <
+    Config extends object = object,
+    FactoryContext extends object = object,
+    ActionContext extends object = object
+  >(
+    definition: ActionFactoryDefinition<Config, FactoryContext, ActionContext>
+  ) => {
     if (this.actionFactories.has(definition.id)) {
       throw new Error(`ActionFactory [actionFactory.id = ${definition.id}] already registered.`);
     }
 
-    const actionFactory = new ActionFactory(definition);
+    const actionFactory = new ActionFactory<Config, FactoryContext, ActionContext>(definition);
 
-    this.actionFactories.set(actionFactory.id, actionFactory);
+    this.actionFactories.set(actionFactory.id, actionFactory as ActionFactory<any, any, any>);
   };
 
-  public readonly getActionFactory = (actionFactoryId: string): AnyActionFactory => {
+  public readonly getActionFactory = (actionFactoryId: string): ActionFactory => {
     const actionFactory = this.actionFactories.get(actionFactoryId);
 
     if (!actionFactory) {
@@ -299,7 +302,7 @@ export class UiActionsService {
   /**
    * Returns an array of all action factories.
    */
-  public readonly getActionFactories = (): AnyActionFactory[] => {
+  public readonly getActionFactories = (): ActionFactory[] => {
     return [...this.actionFactories.values()];
   };
 }

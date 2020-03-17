@@ -15,8 +15,8 @@ import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actio
 import {
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
-  IEmbeddableSetup,
-  IEmbeddableStart,
+  EmbeddableSetup,
+  EmbeddableStart,
 } from '../../../../src/plugins/embeddable/public';
 import {
   CustomTimeRangeAction,
@@ -32,12 +32,12 @@ import {
 import { CommonlyUsedRange } from './types';
 
 interface SetupDependencies {
-  embeddable: IEmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
+  embeddable: EmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
   uiActions: UiActionsSetup;
 }
 
 interface StartDependencies {
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
 }
 

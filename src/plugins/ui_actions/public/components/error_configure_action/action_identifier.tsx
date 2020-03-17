@@ -19,10 +19,10 @@
 
 import React from 'react';
 import { EuiCode } from '@elastic/eui';
-import { AnyActionInternal } from '../../actions';
+import { ActionInternal } from '../../actions';
 
 export interface ActionIdentifierProps {
-  action: AnyActionInternal;
+  action: ActionInternal;
 }
 
 export const ActionIdentifier: React.FC<ActionIdentifierProps> = ({ action }) => (

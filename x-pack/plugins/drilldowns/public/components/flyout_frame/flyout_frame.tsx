@@ -38,36 +38,24 @@ export const FlyoutFrame: React.FC<FlyoutFrameProps> = ({
 }) => {
   const headerFragment = (title || onBack) && (
     <EuiFlyoutHeader hasBorder>
-      <EuiTitle size="m">
-        <>
-          {/* just title */}
-          {title && !onBack && <h1>{title}</h1>}
-          {/* just back button */}
-          {!title && onBack && (
-            <EuiButtonIcon
-              color={'subdued'}
-              onClick={onBack}
-              iconType="arrowLeft"
-              aria-label={txtBack}
-            />
+      <EuiTitle size="s">
+        <EuiFlexGroup alignItems="center" gutterSize={'s'} responsive={false}>
+          {onBack && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                color={'subdued'}
+                onClick={onBack}
+                iconType="arrowLeft"
+                aria-label={txtBack}
+              />
+            </EuiFlexItem>
           )}
-          {/* back button && title */}
-          {title && onBack && (
-            <EuiFlexGroup alignItems="center" gutterSize={'s'}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  color={'subdued'}
-                  onClick={onBack}
-                  iconType="arrowLeft"
-                  aria-label={txtBack}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={true}>
-                <h1>{title}</h1>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+          {title && (
+            <EuiFlexItem grow={true}>
+              <h1>{title}</h1>
+            </EuiFlexItem>
           )}
-        </>
+        </EuiFlexGroup>
       </EuiTitle>
     </EuiFlyoutHeader>
   );

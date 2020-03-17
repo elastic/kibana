@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import { Action, ActionContext as Context, AnyActionDefinition } from './action';
+import { Action, ActionContext as Context, ActionDefinition } from './action';
 import { Presentable } from '../util/presentable';
 import { uiToReactComponent } from '../../../kibana_react/public';
 import { ActionType } from '../types';
-import { SerializedAction } from './types';
 
-export class ActionInternal<A extends AnyActionDefinition>
+export class ActionInternal<A extends ActionDefinition = ActionDefinition>
   implements Action<Context<A>>, Presentable<Context<A>> {
   constructor(public readonly definition: A) {}
 
@@ -32,9 +31,6 @@ export class ActionInternal<A extends AnyActionDefinition>
   public readonly order: number = this.definition.order || 0;
   public readonly MenuItem? = this.definition.MenuItem;
   public readonly ReactMenuItem? = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
-
-  public name: string = '';
-  public config?: object;
 
   public execute(context: Context<A>) {
     return this.definition.execute(context);
@@ -59,25 +55,4 @@ export class ActionInternal<A extends AnyActionDefinition>
     if (!this.definition.getHref) return undefined;
     return this.definition.getHref(context);
   }
-
-  public serialize() {
-    if (!this.config) {
-      throw new Error('Action does not have a config.');
-    }
-
-    const serialized: SerializedAction<unknown> = {
-      factoryId: this.type,
-      name: this.name,
-      config: this.config,
-    };
-
-    return serialized;
-  }
-
-  public deserialize({ name, config }: SerializedAction<unknown>) {
-    this.name = name;
-    this.config = config as object;
-  }
 }
-
-export type AnyActionInternal = ActionInternal<any>;

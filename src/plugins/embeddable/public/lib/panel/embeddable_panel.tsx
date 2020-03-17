@@ -20,24 +20,14 @@ import { EuiContextMenuPanelDescriptor, EuiPanel, htmlIdGenerator } from '@elast
 import classNames from 'classnames';
 import React from 'react';
 import { Subscription } from 'rxjs';
-import {
-  buildContextMenuForActions,
-  UiActionsService,
-  Action,
-  contextMenuSeparatorAction,
-} from '../ui_actions';
+import { buildContextMenuForActions, UiActionsService, Action } from '../ui_actions';
 import { CoreStart, OverlayStart } from '../../../../../core/public';
 import { toMountPoint } from '../../../../kibana_react/public';
 
 import { Start as InspectorStartContract } from '../inspector';
-import {
-  CONTEXT_MENU_TRIGGER,
-  CONTEXT_MENU_DRILLDOWNS_TRIGGER,
-  PANEL_BADGE_TRIGGER,
-  EmbeddableContext,
-} from '../triggers';
+import { CONTEXT_MENU_TRIGGER, PANEL_BADGE_TRIGGER, EmbeddableContext } from '../triggers';
 import { IEmbeddable } from '../embeddables/i_embeddable';
-import { ViewMode, GetEmbeddableFactory, GetEmbeddableFactories } from '../types';
+import { ViewMode } from '../types';
 
 import { RemovePanelAction } from './panel_header/panel_actions';
 import { AddPanelAction } from './panel_header/panel_actions/add_panel/add_panel_action';
@@ -46,6 +36,7 @@ import { PanelHeader } from './panel_header/panel_header';
 import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_action';
 import { EditPanelAction } from '../actions';
 import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
+import { EmbeddableStart } from '../../plugin';
 
 const sortByOrderField = (
   { order: orderA }: { order?: number },
@@ -58,8 +49,8 @@ const removeById = (disabledActions: string[]) => ({ id }: { id: string }) =>
 interface Props {
   embeddable: IEmbeddable<any, any>;
   getActions: UiActionsService['getTriggerCompatibleActions'];
-  getEmbeddableFactory: GetEmbeddableFactory;
-  getAllEmbeddableFactories: GetEmbeddableFactories;
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
@@ -81,6 +72,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   private embeddableRoot: React.RefObject<HTMLDivElement>;
   private parentSubscription?: Subscription;
   private subscription?: Subscription;
+  private drilldownCountSubscription?: Subscription;
   private mounted: boolean = false;
   private generateId = htmlIdGenerator();
 
@@ -154,6 +146,9 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+    if (this.drilldownCountSubscription) {
+      this.drilldownCountSubscription.unsubscribe();
+    }
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();
     }
@@ -210,10 +205,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
 
     const dynamicActions = this.props.embeddable.dynamicActions;
     if (dynamicActions) {
-      dynamicActions.count().then(drilldownCount => {
-        if (this.mounted) {
-          this.setState({ drilldownCount });
-        }
+      this.setState({ drilldownCount: dynamicActions.state.get().events.length });
+      this.drilldownCountSubscription = dynamicActions.state.state$.subscribe(({ events }) => {
+        if (!this.mounted) return;
+        this.setState({ drilldownCount: events.length });
       });
     }
   }
@@ -232,15 +227,11 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     let regularActions = await this.props.getActions(CONTEXT_MENU_TRIGGER, {
       embeddable: this.props.embeddable,
     });
-    let drilldownActions = await this.props.getActions(CONTEXT_MENU_DRILLDOWNS_TRIGGER, {
-      embeddable: this.props.embeddable,
-    });
 
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {
       const removeDisabledActions = removeById(disabledActions);
       regularActions = regularActions.filter(removeDisabledActions);
-      drilldownActions = drilldownActions.filter(removeDisabledActions);
     }
 
     const createGetUserData = (overlays: OverlayStart) =>
@@ -279,16 +270,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       new EditPanelAction(this.props.getEmbeddableFactory),
     ];
 
-    const sortedRegularActions = [...regularActions, ...extraActions].sort(sortByOrderField);
-    const sortedDrilldownActions = [...drilldownActions].sort(sortByOrderField);
-    const actions = [
-      ...sortedDrilldownActions,
-      ...(sortedDrilldownActions.length ? [contextMenuSeparatorAction] : []),
-      ...sortedRegularActions,
-    ];
+    const sortedActions = [...regularActions, ...extraActions].sort(sortByOrderField);
 
     return await buildContextMenuForActions({
-      actions,
+      actions: sortedActions,
       actionContext: { embeddable: this.props.embeddable },
       closeMenu: this.closeMyContextMenuPanel,
     });

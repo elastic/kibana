@@ -9,13 +9,17 @@ import {
   EuiBasicTableColumn,
   EuiButton,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiSpacer,
+  EuiTextColor,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import {
-  txtEditDrilldown,
   txtCreateDrilldown,
   txtDeleteDrilldowns,
+  txtEditDrilldown,
   txtSelectDrilldown,
 } from './i18n';
 
@@ -23,6 +27,7 @@ export interface DrilldownListItem {
   id: string;
   actionName: string;
   drilldownName: string;
+  icon?: string;
 }
 
 export interface ListManageDrilldownsProps {
@@ -50,13 +55,25 @@ export function ListManageDrilldowns({
       field: 'drilldownName',
       name: 'Name',
       truncateText: true,
+      width: '50%',
     },
     {
-      field: 'actionName',
       name: 'Action',
-      truncateText: true,
+      render: (drilldown: DrilldownListItem) => (
+        <EuiFlexGroup responsive={false} alignItems="center" gutterSize={'s'}>
+          {drilldown.icon && (
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={drilldown.icon} />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false} className="eui-textTruncate">
+            <EuiTextColor color="subdued">{drilldown.actionName}</EuiTextColor>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
     },
     {
+      align: 'right',
       render: (drilldown: DrilldownListItem) => (
         <EuiButtonEmpty size="xs" onClick={() => onEdit(drilldown.id)}>
           {txtEditDrilldown}
@@ -72,6 +89,7 @@ export function ListManageDrilldowns({
         itemId="id"
         columns={columns}
         isSelectable={true}
+        responsive={false}
         selection={{
           onSelectionChange: selection => {
             setSelectedDrilldowns(selection.map(drilldown => drilldown.id));
