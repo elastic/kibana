@@ -21,8 +21,8 @@ import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
 import { FieldIcon, FieldIconProps } from '../../../../../../../../../plugins/kibana_react/public';
-import { shortenDottedString } from '../../../../kibana_services';
 import { getFieldTypeName } from './field_type_name';
+import { shortenDottedString } from '../../../helpers';
 
 // property field is provided at discover's field chooser
 // properties fieldType and fieldName are provided in kbn_doc_view
