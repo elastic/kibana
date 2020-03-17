@@ -41,7 +41,6 @@ const createStartContract = (): Start => {
   const startContract: Start = {
     __attachAction: jest.fn(),
     unregisterAction: jest.fn(),
-    addTriggerAction: jest.fn(),
     attachAction: jest.fn(),
     clear: jest.fn(),
     detachAction: jest.fn(),
@@ -56,7 +55,6 @@ const createStartContract = (): Start => {
     registerAction: jest.fn(),
     registerActionFactory: jest.fn(),
     registerTrigger: jest.fn(),
-    removeTriggerAction: jest.fn(),
   };
 
   return startContract;

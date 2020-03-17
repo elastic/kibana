@@ -110,29 +110,6 @@ export class UiActionsService {
     this.actions.delete(actionId);
   };
 
-  public readonly addTriggerAction = <TriggerId extends keyof TriggerContextMapping>(
-    triggerId: TriggerId,
-    definition: ActionDefinition<TriggerContextMapping[TriggerId]>
-  ) => {
-    // Check if trigger exists, if not, next line throws.
-    this.getTrigger(triggerId);
-
-    const action = this.registerAction(definition);
-    this.__attachAction(triggerId, action.id);
-
-    return action;
-  };
-
-  public readonly removeTriggerAction = <TriggerId extends keyof TriggerContextMapping>(
-    triggerId: TriggerId,
-    actionId: string
-  ) => {
-    this.detachAction(triggerId, actionId);
-    this.unregisterAction(actionId);
-  };
-
-  // public readonly removeTriggerAction =
-
   public readonly __attachAction = <TriggerId extends keyof TriggerContextMapping>(
     triggerId: TriggerId,
     actionId: string
