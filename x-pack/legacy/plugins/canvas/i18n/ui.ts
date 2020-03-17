@@ -342,7 +342,10 @@ export const DataSourceStrings = {
       }),
     getHelp: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocsLabel', {
-        defaultMessage: 'Pull data directly from Elasticsearch without the use of aggregations',
+        defaultMessage: 'Pull data directly from {elasticsearch} without the use of aggregations',
+        values: {
+          elasticsearch: ELASTICSEARCH,
+        },
       }),
     getWarningTitle: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.warningTitle', {
@@ -352,9 +355,6 @@ export const DataSourceStrings = {
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.warningDescription', {
         defaultMessage: `
         Using this data source with larger data sets can result in slower performance. Use this source only when you need exact values.`,
-        values: {
-          elasticsearch: ELASTICSEARCH,
-        },
       }),
     getIndexTitle: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.indexTitle', {
