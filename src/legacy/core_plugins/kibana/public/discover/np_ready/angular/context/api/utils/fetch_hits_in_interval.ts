@@ -16,7 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { EsQuerySortValue, SortDirection, ISearchSource } from '../../../../../kibana_services';
+import {
+  ISearchSource,
+  EsQuerySortValue,
+  SortDirection,
+} from '../../../../../../../../../../plugins/data/public';
 import { convertTimeValueToIso } from './date_conversion';
 import { EsHitRecordList } from '../context';
 import { IntervalValue } from './generate_intervals';

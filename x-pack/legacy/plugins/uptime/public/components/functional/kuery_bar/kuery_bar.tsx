@@ -34,14 +34,16 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
 
 interface Props {
   autocomplete: DataPublicPluginSetup['autocomplete'];
-  loadIndexPattern: any;
-  indexPattern: any;
+  loadIndexPattern: () => void;
+  indexPattern: IIndexPattern | null;
+  loading: boolean;
 }
 
 export function KueryBarComponent({
   autocomplete: autocompleteService,
   loadIndexPattern,
   indexPattern,
+  loading,
 }: Props) {
   useEffect(() => {
     if (!indexPattern) {
@@ -53,19 +55,13 @@ export function KueryBarComponent({
     suggestions: [],
     isLoadingIndexPattern: true,
   });
-  const [isLoadingIndexPattern, setIsLoadingIndexPattern] = useState<boolean>(true);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState<boolean>(false);
   let currentRequestCheck: string;
 
-  useEffect(() => {
-    if (indexPattern !== undefined) {
-      setIsLoadingIndexPattern(false);
-    }
-  }, [indexPattern]);
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { search: kuery } = getUrlParams();
 
-  const indexPatternMissing = !isLoadingIndexPattern && !indexPattern;
+  const indexPatternMissing = loading && !indexPattern;
 
   async function onChange(inputValue: string, selectionStart: number) {
     if (!indexPattern) {
@@ -124,7 +120,7 @@ export function KueryBarComponent({
     <Container>
       <Typeahead
         disabled={indexPatternMissing}
-        isLoading={isLoadingSuggestions}
+        isLoading={isLoadingSuggestions || loading}
         initialValue={kuery}
         onChange={onChange}
         onSubmit={onSubmit}

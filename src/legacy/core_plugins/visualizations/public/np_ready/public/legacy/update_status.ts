@@ -18,7 +18,7 @@
  */
 
 import { PersistedState } from '../../../../../../../plugins/visualizations/public';
-import { calculateObjectHash } from './calculate_object_hash';
+import { calculateObjectHash } from '../../../../../../../plugins/kibana_utils/common';
 import { Vis } from '../vis';
 
 enum Status {

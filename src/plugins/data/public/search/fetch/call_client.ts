@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { groupBy } from 'lodash';
 import { handleResponse } from './handle_response';
 import { FetchOptions, FetchHandlers } from './types';
-import { getSearchStrategyForSearchRequest, getSearchStrategyById } from '../search_strategy';
+import { defaultSearchStrategy } from '../search_strategy';
 import { SearchRequest } from '..';
 
 export function callClient(
@@ -34,34 +33,18 @@ export function callClient(
     FetchOptions
   ]> = searchRequests.map((request, i) => [request, requestsOptions[i]]);
   const requestOptionsMap = new Map<SearchRequest, FetchOptions>(requestOptionEntries);
+  const requestResponseMap = new Map();
 
-  // Group the requests by the strategy used to search that specific request
-  const searchStrategyMap = groupBy(searchRequests, (request, i) => {
-    const searchStrategy = getSearchStrategyForSearchRequest(request, requestsOptions[i]);
-    return searchStrategy.id;
+  const { searching, abort } = defaultSearchStrategy.search({
+    searchRequests,
+    ...fetchHandlers,
   });
 
-  // Execute each search strategy with the group of requests, but return the responses in the same
-  // order in which they were received. We use a map to correlate the original request with its
-  // response.
-  const requestResponseMap = new Map();
-  Object.keys(searchStrategyMap).forEach(searchStrategyId => {
-    const searchStrategy = getSearchStrategyById(searchStrategyId);
-    const requests = searchStrategyMap[searchStrategyId];
-
-    // There's no way `searchStrategy` could be undefined here because if we didn't get a matching strategy for this ID
-    // then an error would have been thrown above
-    const { searching, abort } = searchStrategy!.search({
-      searchRequests: requests,
-      ...fetchHandlers,
-    });
-
-    requests.forEach((request, i) => {
-      const response = searching.then(results => handleResponse(request, results[i]));
-      const { abortSignal = null } = requestOptionsMap.get(request) || {};
-      if (abortSignal) abortSignal.addEventListener('abort', abort);
-      requestResponseMap.set(request, response);
-    });
-  }, []);
+  searchRequests.forEach((request, i) => {
+    const response = searching.then(results => handleResponse(request, results[i]));
+    const { abortSignal = null } = requestOptionsMap.get(request) || {};
+    if (abortSignal) abortSignal.addEventListener('abort', abort);
+    requestResponseMap.set(request, response);
+  });
   return searchRequests.map(request => requestResponseMap.get(request));
 }

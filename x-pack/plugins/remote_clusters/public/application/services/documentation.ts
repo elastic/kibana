@@ -9,6 +9,7 @@ import { DocLinksStart } from 'kibana/public';
 export let skippingDisconnectedClustersUrl: string;
 export let remoteClustersUrl: string;
 export let transportPortUrl: string;
+export let proxyModeUrl: string;
 
 export function init(docLinks: DocLinksStart): void {
   const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } = docLinks;
@@ -17,4 +18,5 @@ export function init(docLinks: DocLinksStart): void {
   skippingDisconnectedClustersUrl = `${esDocBasePath}/modules-cross-cluster-search.html#_skipping_disconnected_clusters`;
   remoteClustersUrl = `${esDocBasePath}/modules-remote-clusters.html`;
   transportPortUrl = `${esDocBasePath}/modules-transport.html`;
+  proxyModeUrl = `${esDocBasePath}/modules-remote-clusters.html#proxy-mode`;
 }

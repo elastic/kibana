@@ -73,6 +73,7 @@ export const FileAccordion = memo(({ alertData }: { alertData: Immutable<AlertDa
         }
       )}
       paddingSize="l"
+      data-test-subj="alertDetailsFileAccordion"
     >
       <EuiDescriptionList type="column" listItems={columns} />
     </EuiAccordion>

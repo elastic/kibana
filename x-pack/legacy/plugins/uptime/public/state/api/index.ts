@@ -9,5 +9,6 @@ export * from './overview_filters';
 export * from './snapshot';
 export * from './monitor_status';
 export * from './index_pattern';
+export * from './index_status';
 export * from './ping';
 export * from './monitor_duration';

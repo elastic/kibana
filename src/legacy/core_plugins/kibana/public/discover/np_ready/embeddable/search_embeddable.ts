@@ -20,7 +20,10 @@ import _ from 'lodash';
 import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import {
+  UiActionsStart,
+  APPLY_FILTER_TRIGGER,
+} from '../../../../../../..//plugins/ui_actions/public';
 import { RequestAdapter, Adapters } from '../../../../../../../plugins/inspector/public';
 import {
   esFilters,
@@ -31,11 +34,7 @@ import {
   Query,
   IFieldType,
 } from '../../../../../../../plugins/data/public';
-import {
-  APPLY_FILTER_TRIGGER,
-  Container,
-  Embeddable,
-} from '../../../../../embeddable_api/public/np_ready/public';
+import { Container, Embeddable } from '../../../../../embeddable_api/public/np_ready/public';
 import * as columnActions from '../angular/doc_table/actions/columns';
 import searchTemplate from './search_template.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
@@ -214,24 +213,24 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
         return;
       }
       indexPattern.popularizeField(columnName, 1);
-      columnActions.addColumn(searchScope.columns, columnName);
-      this.updateInput({ columns: searchScope.columns });
+      const columns = columnActions.addColumn(searchScope.columns, columnName);
+      this.updateInput({ columns });
     };
 
     searchScope.removeColumn = (columnName: string) => {
       if (!searchScope.columns) {
         return;
       }
-      columnActions.removeColumn(searchScope.columns, columnName);
-      this.updateInput({ columns: searchScope.columns });
+      const columns = columnActions.removeColumn(searchScope.columns, columnName);
+      this.updateInput({ columns });
     };
 
     searchScope.moveColumn = (columnName, newIndex: number) => {
       if (!searchScope.columns) {
         return;
       }
-      columnActions.moveColumn(searchScope.columns, columnName, newIndex);
-      this.updateInput({ columns: searchScope.columns });
+      const columns = columnActions.moveColumn(searchScope.columns, columnName, newIndex);
+      this.updateInput({ columns });
     };
 
     searchScope.filter = async (field, value, operator) => {
