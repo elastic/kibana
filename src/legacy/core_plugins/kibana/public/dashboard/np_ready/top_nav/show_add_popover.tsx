@@ -17,9 +17,6 @@
  * under the License.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiContextMenuPanel } from '@elastic/eui';
-import { EuiContextMenuItem } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';

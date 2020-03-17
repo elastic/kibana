@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { ViewMode } from '../../../../../../../plugins/embeddable/public';
 import { TopNavIds } from './top_nav_ids';
 import { NavAction } from '../types';
-import { AddPanelPopover } from './show_add_popover';
 
 /**
  * @param actions - A mapping of TopNavIds to an action function that should run when the

@@ -18,13 +18,10 @@
  */
 
 import { capitalize, isFunction } from 'lodash';
-import React, { MouseEvent, useState } from 'react';
+import React, { MouseEvent } from 'react';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
 import { EuiButton } from '@elastic/eui';
-import { EuiPopover } from '@elastic/eui';
-import { EuiButtonProps } from '@elastic/eui';
-import { EuiButtonEmptyProps } from '@elastic/eui';
 import { TopNavMenuData } from './top_nav_menu_data';
 
 export function TopNavMenuItem(props: TopNavMenuData) {
