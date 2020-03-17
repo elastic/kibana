@@ -18,7 +18,7 @@ export class LicenseManagementServerPlugin implements Plugin<void, void, any, an
 
     this.apiRoutes.setup({
       router,
-      pluggins: {
+      plugins: {
         licensing,
       },
       lib: {

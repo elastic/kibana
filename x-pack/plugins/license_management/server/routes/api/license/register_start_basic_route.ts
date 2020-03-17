@@ -9,7 +9,7 @@ import { startBasic } from '../../../lib/start_basic';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../helpers';
 
-export function registerStartBasicRoute({ router, pluggins: { licensing } }: RouteDependencies) {
+export function registerStartBasicRoute({ router, plugins: { licensing } }: RouteDependencies) {
   router.post(
     {
       path: addBasePath('/start_basic'),

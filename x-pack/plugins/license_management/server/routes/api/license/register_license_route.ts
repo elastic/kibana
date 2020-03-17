@@ -9,7 +9,7 @@ import { putLicense } from '../../../lib/license';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../helpers';
 
-export function registerLicenseRoute({ router, pluggins: { licensing } }: RouteDependencies) {
+export function registerLicenseRoute({ router, plugins: { licensing } }: RouteDependencies) {
   router.put(
     {
       path: addBasePath('/'),
