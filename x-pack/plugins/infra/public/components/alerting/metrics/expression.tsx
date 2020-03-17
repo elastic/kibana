@@ -155,15 +155,6 @@ export const Expressions: React.FC<Props> = props => {
     }
   }, [alertsContext.metadata, defaultExpression, setAlertParams, source]);
 
-  useEffect(() => {
-    return () => {
-      // When flyout closes, reset alert params
-      setAlertParams('criteria', []);
-      setAlertParams('filterQuery', '');
-      setAlertParams('groupBy', undefined);
-    };
-  }, [setAlertParams]);
-
   return (
     <>
       <EuiSpacer size={'m'} />
