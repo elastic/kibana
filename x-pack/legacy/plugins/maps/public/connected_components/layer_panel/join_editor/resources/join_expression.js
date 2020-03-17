@@ -19,7 +19,10 @@ import { i18n } from '@kbn/i18n';
 import { SingleFieldSelect } from '../../../../components/single_field_select';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getTermsFields } from '../../../../index_pattern_util';
-import { indexPatternService, getIndexPatternSelectComponent } from '../../../../kibana_services';
+import {
+  getIndexPatternService,
+  getIndexPatternSelectComponent,
+} from '../../../../kibana_services';
 
 export class JoinExpression extends Component {
   state = {
@@ -40,7 +43,7 @@ export class JoinExpression extends Component {
 
   _onRightSourceChange = async indexPatternId => {
     try {
-      const indexPattern = await indexPatternService.get(indexPatternId);
+      const indexPattern = await getIndexPatternService().get(indexPatternId);
       this.props.onRightSourceChange({
         indexPatternId,
         indexPatternTitle: indexPattern.title,

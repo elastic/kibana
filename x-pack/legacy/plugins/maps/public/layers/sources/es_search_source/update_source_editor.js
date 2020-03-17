@@ -18,7 +18,7 @@ import {
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { TooltipSelector } from '../../../components/tooltip_selector';
 
-import { indexPatternService } from '../../../kibana_services';
+import { getIndexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { getTermsFields, getSourceFields } from '../../../index_pattern_util';
 import { ValidatedRange } from '../../../components/validated_range';
@@ -60,7 +60,7 @@ export class UpdateSourceEditor extends Component {
 
   async loadIndexSettings() {
     try {
-      const indexPattern = await indexPatternService.get(this.props.indexPatternId);
+      const indexPattern = await getIndexPatternService().get(this.props.indexPatternId);
       const { maxInnerResultWindow } = await loadIndexSettings(indexPattern.title);
       if (this._isMounted) {
         this.setState({ maxInnerResultWindow });
@@ -73,7 +73,7 @@ export class UpdateSourceEditor extends Component {
   async loadFields() {
     let indexPattern;
     try {
-      indexPattern = await indexPatternService.get(this.props.indexPatternId);
+      indexPattern = await getIndexPatternService().get(this.props.indexPatternId);
     } catch (err) {
       if (this._isMounted) {
         this.setState({

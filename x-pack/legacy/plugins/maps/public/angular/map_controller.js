@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { capabilities } from 'ui/capabilities';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
-import { getTimeFilter, indexPatternService, getInspector } from '../kibana_services';
+import { getTimeFilter, getIndexPatternService, getInspector } from '../kibana_services';
 import { Provider } from 'react-redux';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createMapStore } from '../../../../../plugins/maps/public/reducers/store';
@@ -396,7 +396,7 @@ app.controller(
       const indexPatterns = [];
       const getIndexPatternPromises = nextIndexPatternIds.map(async indexPatternId => {
         try {
-          const indexPattern = await indexPatternService.get(indexPatternId);
+          const indexPattern = await getIndexPatternService().get(indexPatternId);
           indexPatterns.push(indexPattern);
         } catch (err) {
           // unable to fetch index pattern

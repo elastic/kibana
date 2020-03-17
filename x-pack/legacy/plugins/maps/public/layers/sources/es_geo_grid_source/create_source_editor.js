@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { RENDER_AS } from '../../../../common/constants';
-import { indexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
+import { getIndexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
 import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
 import { i18n } from '@kbn/i18n';
 
@@ -89,7 +89,7 @@ export class CreateSourceEditor extends Component {
 
     let indexPattern;
     try {
-      indexPattern = await indexPatternService.get(indexPatternId);
+      indexPattern = await getIndexPatternService().get(indexPatternId);
     } catch (err) {
       // index pattern no longer exists
       return;

@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { indexPatternService } from './kibana_services';
+import { getIndexPatternService } from './kibana_services';
 import { indexPatterns } from '../../../../../src/plugins/data/public';
 import { ES_GEO_FIELD_TYPE } from '../common/constants';
 
 export async function getIndexPatternsFromIds(indexPatternIds = []) {
   const promises = [];
   indexPatternIds.forEach(id => {
-    const indexPatternPromise = indexPatternService.get(id);
+    const indexPatternPromise = getIndexPatternService().get(id);
     if (indexPatternPromise) {
       promises.push(indexPatternPromise);
     }

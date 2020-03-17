@@ -22,7 +22,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { indexPatternService } from '../../../kibana_services';
+import { getIndexPatternService } from '../../../kibana_services';
 import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
 
 import { npStart } from 'ui/new_platform';
@@ -49,7 +49,7 @@ export class FilterEditor extends Component {
     const indexPatterns = [];
     const getIndexPatternPromises = indexPatternIds.map(async indexPatternId => {
       try {
-        const indexPattern = await indexPatternService.get(indexPatternId);
+        const indexPattern = await getIndexPatternService().get(indexPatternId);
         indexPatterns.push(indexPattern);
       } catch (err) {
         // unable to fetch index pattern

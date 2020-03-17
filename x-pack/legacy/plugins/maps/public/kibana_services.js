@@ -13,11 +13,11 @@ export { SearchSource } from '../../../../../src/plugins/data/public';
 let indexPatternService;
 export const setIndexPatternService = dataIndexPatterns =>
   (indexPatternService = dataIndexPatterns);
-export const getIndexPatternService = indexPatternService;
+export const getIndexPatternService = () => indexPatternService;
 
 let autocompleteService;
 export const setAutocompleteService = dataAutoComplete => (autocompleteService = dataAutoComplete);
-export const getAutocompleteService = autocompleteService;
+export const getAutocompleteService = () => autocompleteService;
 
 let licenseId;
 export const setLicenseId = latestLicenseId => (licenseId = latestLicenseId);

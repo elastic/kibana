@@ -14,7 +14,7 @@ import {
 } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { setup } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { MapEmbeddable } from './map_embeddable';
-import { indexPatternService } from '../kibana_services';
+import { getIndexPatternService } from '../kibana_services';
 
 import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -78,7 +78,7 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
 
     const promises = queryableIndexPatternIds.map(async indexPatternId => {
       try {
-        return await indexPatternService.get(indexPatternId);
+        return await getIndexPatternService().get(indexPatternId);
       } catch (error) {
         // Unable to load index pattern, better to not throw error so map embeddable can render
         // Error will be surfaced by map embeddable since it too will be unable to locate the index pattern

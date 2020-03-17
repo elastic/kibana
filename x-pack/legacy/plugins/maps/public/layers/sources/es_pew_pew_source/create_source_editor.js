@@ -9,7 +9,7 @@ import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 
 import { SingleFieldSelect } from '../../../components/single_field_select';
-import { indexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
+import { getIndexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -70,7 +70,7 @@ export class CreateSourceEditor extends Component {
 
     let indexPattern;
     try {
-      indexPattern = await indexPatternService.get(indexPatternId);
+      indexPattern = await getIndexPatternService().get(indexPatternId);
     } catch (err) {
       // index pattern no longer exists
       return;

@@ -11,7 +11,7 @@ import { EuiFormRow, EuiSpacer, EuiSwitch, EuiCallOut } from '@elastic/eui';
 
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import {
-  indexPatternService,
+  getIndexPatternService,
   getIndexPatternSelectComponent,
   getHttp,
 } from '../../../kibana_services';
@@ -99,7 +99,7 @@ export class CreateSourceEditor extends Component {
 
     let indexPattern;
     try {
-      indexPattern = await indexPatternService.get(indexPatternId);
+      indexPattern = await getIndexPatternService().get(indexPatternId);
     } catch (err) {
       // index pattern no longer exists
       return;
