@@ -25,6 +25,7 @@ export * from './ui_settings';
 export * from './field_icon';
 export * from './table_list_view';
 export * from './split_panel';
+export { ValidatedDualRange } from './validated_range';
 export * from './notifications';
 export { Markdown, MarkdownSimple } from './markdown';
 export { reactToUiComponent, uiToReactComponent } from './adapters';
