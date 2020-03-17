@@ -201,6 +201,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
 
   return (
     <>
+      <EuiSpacer size="m" />
       <KueryBar
         autocomplete={props.autocomplete}
         data-test-subj="xpack.uptime.alerts.monitorStatus.filterBar"
