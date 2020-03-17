@@ -14,6 +14,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.8.8>>
 * <<release-notes-6.8.7>>
 * <<release-notes-6.8.6>>
 * <<release-notes-6.8.5>>
@@ -93,6 +94,15 @@ This section summarizes the changes in each release.
 //[float]
 //=== Known Issues
 ////
+
+[[release-notes-6.8.8]]
+== {kib} 6.8.8
+
+[float]
+[[enhancement-6.8.8]]
+=== Enhancement
+Security::
+* Allows SAML IdP initiated login when SAML authentication provider is not configured as the first provider. {pull}60240[#60240]
 
 [[release-notes-6.8.7]]
 == {kib} 6.8.7
