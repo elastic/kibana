@@ -77,7 +77,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
     const rangeFieldMeta = this.getRangeFieldMeta();
     if (this._isSizeDynamicConfigComplete(this._options) && rangeFieldMeta) {
       const halfIconPixels = this.getIconPixelSize() / 2;
-      const targetName = this.getComputedFieldName();
+      const targetName = this.getCompletedFieldName();
       // Using property state instead of feature-state because layout properties do not support feature-state
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', [
         'interpolate',
@@ -126,7 +126,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
     }
 
     return this._getMbDataDrivenSize({
-      targetName: this.getComputedFieldName(),
+      targetName: this.getCompletedFieldName(),
       minSize: this._options.minSize,
       maxSize: this._options.maxSize,
       minValue: rangeFieldMeta.min,

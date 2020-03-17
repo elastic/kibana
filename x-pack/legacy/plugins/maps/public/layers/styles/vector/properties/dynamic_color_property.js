@@ -5,11 +5,7 @@
  */
 
 import { DynamicStyleProperty } from './dynamic_style_property';
-import {
-  getComputedFieldName,
-  getOtherCategoryLabel,
-  makeMbClampedNumberExpression,
-} from '../style_util';
+import { getOtherCategoryLabel, makeMbClampedNumberExpression } from '../style_util';
 import { getOrdinalColorRampStops, getColorPalette } from '../../color_utils';
 import { ColorGradient } from '../../components/color_gradient';
 import React from 'react';
@@ -111,7 +107,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
   }
 
   _getOrdinalColorMbExpression() {
-    const targetName = getComputedFieldName(this._styleName, this._field.getName());
+    const targetName = this._field.getName();
     if (this._options.useCustomColorRamp) {
       if (!this._options.customColorRamp || !this._options.customColorRamp.length) {
         // custom color ramp config is not complete

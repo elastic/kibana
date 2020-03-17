@@ -13,7 +13,6 @@ import {
   SOURCE_META_ID_ORIGIN,
   FIELD_ORIGIN,
 } from '../../../../../common/constants';
-import { getComputedFieldName } from '../style_util';
 import React from 'react';
 import { OrdinalLegend } from './components/ordinal_legend';
 import { CategoricalLegend } from './components/categorical_legend';
@@ -109,11 +108,11 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return this._field ? this._field.getName() : '';
   }
 
-  getComputedFieldName() {
+  getCompletedFieldName() {
     if (!this.isComplete()) {
       return null;
     }
-    return getComputedFieldName(this._styleName, this.getField().getName());
+    return this.getField().getName();
   }
 
   isDynamic() {
@@ -292,11 +291,11 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     }
   }
 
-  getMbFeatureStateValue(value) {
-    if (!this.isOrdinal()) {
-      return this.formatField(value);
-    }
+  getFormattedValue(value) {
+    return this.isOrdinal() ? this.getNumericalMbFeatureStateValue(value) : this.formatField(value);
+  }
 
+  getNumericalMbFeatureStateValue(value) {
     const valueAsFloat = parseFloat(value);
     return isNaN(valueAsFloat) ? null : valueAsFloat;
   }

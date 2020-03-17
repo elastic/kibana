@@ -81,7 +81,7 @@ export class DynamicIconProperty extends DynamicStyleProperty {
       mbStops.push(getMakiIconId(style, iconPixelSize));
     });
     mbStops.push(getMakiIconId(fallback, iconPixelSize)); //last item is fallback style for anything that does not match provided stops
-    return ['match', ['to-string', ['get', this._options.field.name]], ...mbStops];
+    return ['match', ['to-string', ['get', this._field.getName()]], ...mbStops];
   }
 
   _getMbIconAnchorExpression() {
@@ -98,7 +98,7 @@ export class DynamicIconProperty extends DynamicStyleProperty {
       mbStops.push(getMakiSymbolAnchor(style));
     });
     mbStops.push(getMakiSymbolAnchor(fallback)); //last item is fallback style for anything that does not match provided stops
-    return ['match', ['to-string', ['get', this._options.field.name]], ...mbStops];
+    return ['match', ['to-string', ['get', this._field.getName()]], ...mbStops];
   }
 
   _isIconDynamicConfigComplete() {
