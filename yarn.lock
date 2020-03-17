@@ -1916,10 +1916,10 @@
     once "^1.4.0"
     pump "^3.0.0"
 
-"@elastic/ems-client@7.6.0":
-  version "7.6.0"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-7.6.0.tgz#ca548aba1a1f5170a1892de129b537b5248c74be"
-  integrity sha512-oBtLH24qIgTaMhlSske49FTd35Y0nv+PlZCZaHkBhOH+ScsTDL3LO2lbIcSmcYQod43Ly34v/xwJvFCTxojVEQ==
+"@elastic/ems-client@7.7.0":
+  version "7.7.0"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-7.7.0.tgz#7d36d716dd941f060b9fcdae94f186a9aecc5cc2"
+  integrity sha512-JatsSyLik/8MTEOEimzEZ3NYjvGL1YzjbGujuSCgaXhPRqzu/wvMLEL8dlVpmYFZ7ALbGNsVdho4Hr8tngsIMw==
   dependencies:
     lodash "^4.17.15"
     node-fetch "^1.7.3"
