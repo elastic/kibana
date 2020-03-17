@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { throttle } from 'lodash/fp';
+import { useMemo, useState } from 'react';
+import useResizeObserver from 'use-resize-observer/polyfilled';
 import { niceTimeFormatByDay, timeFormatter } from '@elastic/charts';
 import moment from 'moment-timezone';
 
@@ -21,4 +24,12 @@ export const histogramDateTimeFormatter = (domain: [number, number] | null, fixe
   const diff = fixedDiff ?? getDaysDiff(moment(domain![0]), moment(domain![1]));
   const format = niceTimeFormatByDay(diff);
   return timeFormatter(format);
+};
+
+export const useThrottledResizeObserver = (wait = 100) => {
+  const [size, setSize] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
+  const onResize = useMemo(() => throttle(wait, setSize), [wait]);
+  const { ref } = useResizeObserver<HTMLDivElement>({ onResize });
+
+  return { ref, ...size };
 };
