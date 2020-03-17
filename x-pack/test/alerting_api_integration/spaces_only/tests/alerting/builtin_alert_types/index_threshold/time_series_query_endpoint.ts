@@ -197,14 +197,6 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
       const expected = {
         results: [
           {
-            group: 'groupA',
-            metrics: [
-              [START_DATE_MINUS_2INTERVALS, 4 / 1],
-              [START_DATE_MINUS_1INTERVALS, (4 + 2) / 2],
-              [START_DATE_MINUS_0INTERVALS, (4 + 2 + 1) / 3],
-            ],
-          },
-          {
             group: 'groupB',
             metrics: [
               [START_DATE_MINUS_2INTERVALS, 5 / 1],
@@ -212,10 +204,48 @@ export default function timeSeriesQueryEndpointTests({ getService }: FtrProvider
               [START_DATE_MINUS_0INTERVALS, (5 + 3 + 2) / 3],
             ],
           },
+          {
+            group: 'groupA',
+            metrics: [
+              [START_DATE_MINUS_2INTERVALS, 4 / 1],
+              [START_DATE_MINUS_1INTERVALS, (4 + 2) / 2],
+              [START_DATE_MINUS_0INTERVALS, (4 + 2 + 1) / 3],
+            ],
+          },
         ],
       };
 
       expect(await runQueryExpect(query, 200)).eql(expected);
+    });
+
+    it('should return correct sorted group for average', async () => {
+      const query = getQueryBody({
+        aggType: 'avg',
+        aggField: 'testedValue',
+        groupBy: 'top',
+        termField: 'group',
+        termSize: 1,
+        dateStart: START_DATE_MINUS_2INTERVALS,
+        dateEnd: START_DATE_MINUS_0INTERVALS,
+      });
+      const result = await runQueryExpect(query, 200);
+      expect(result.results.length).to.be(1);
+      expect(result.results[0].group).to.be('groupB');
+    });
+
+    it('should return correct sorted group for min', async () => {
+      const query = getQueryBody({
+        aggType: 'min',
+        aggField: 'testedValue',
+        groupBy: 'top',
+        termField: 'group',
+        termSize: 1,
+        dateStart: START_DATE_MINUS_2INTERVALS,
+        dateEnd: START_DATE_MINUS_0INTERVALS,
+      });
+      const result = await runQueryExpect(query, 200);
+      expect(result.results.length).to.be(1);
+      expect(result.results[0].group).to.be('groupA');
     });
 
     it('should return an error when passed invalid input', async () => {

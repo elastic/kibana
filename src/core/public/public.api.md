@@ -944,6 +944,8 @@ export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T ext
     [K in keyof T]: RecursiveReadonly<T[K]>;
 }> : T;
 
+// Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
 // @public (undocumented)
 export interface SavedObject<T = unknown> {
     attributes: T;
