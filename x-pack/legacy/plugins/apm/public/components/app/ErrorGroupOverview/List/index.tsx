@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiToolTip, EuiIcon } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -59,9 +59,29 @@ const ErrorGroupList: React.FC<Props> = props => {
   const columns = useMemo(
     () => [
       {
-        name: i18n.translate('xpack.apm.errorsTable.groupIdColumnLabel', {
-          defaultMessage: 'Group ID'
-        }),
+        name: (
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.apm.errorsTable.groupIdColumnDescription',
+              {
+                defaultMessage:
+                  'Hash of the stack trace. Groups similar errors together, even when the error message is different due to dynamic parameters.'
+              }
+            )}
+          >
+            <>
+              {i18n.translate('xpack.apm.errorsTable.groupIdColumnLabel', {
+                defaultMessage: 'Group ID'
+              })}{' '}
+              <EuiIcon
+                size="m"
+                color="subdued"
+                type="iInCircle"
+                className="eui-alignTop"
+              />
+            </>
+          </EuiToolTip>
+        ),
         field: 'groupId',
         sortable: false,
         width: px(unit * 6),

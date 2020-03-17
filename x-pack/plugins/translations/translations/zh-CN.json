@@ -3694,6 +3694,7 @@
     "xpack.apm.errorGroupDetails.unhandledLabel": "未处理",
     "xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel": "在 Discover 查看 {occurrencesCount} 个 {occurrencesCount, plural, one {匹配项} other {匹配项}}。",
     "xpack.apm.errorsTable.errorMessageAndCulpritColumnLabel": "错误消息和原因",
+    "xpack.apm.errorsTable.groupIdColumnDescription": "堆栈跟踪的哈希值。即使由于动态参数而导致错误消息不同，也将相似的错误归为一组。",
     "xpack.apm.errorsTable.groupIdColumnLabel": "组 ID",
     "xpack.apm.errorsTable.latestOccurrenceColumnLabel": "最新一次发生",
     "xpack.apm.errorsTable.noErrorsLabel": "未找到任何错误",
