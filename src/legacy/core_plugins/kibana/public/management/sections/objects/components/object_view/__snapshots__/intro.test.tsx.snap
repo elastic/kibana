@@ -4,7 +4,7 @@ exports[`Intro component renders correctly 1`] = `
 <Intro>
   <EuiCallOut
     color="warning"
-    iconType="bolt"
+    iconType="alert"
     title={
       <FormattedMessage
         defaultMessage="Proceed with caution!"
@@ -23,12 +23,12 @@ exports[`Intro component renders correctly 1`] = `
           aria-hidden="true"
           className="euiCallOutHeader__icon"
           size="m"
-          type="bolt"
+          type="alert"
         >
           <div
             aria-hidden="true"
             className="euiCallOutHeader__icon"
-            data-euiicon-type="bolt"
+            data-euiicon-type="alert"
             size="m"
           />
         </EuiIcon>

@@ -21,7 +21,7 @@ import React, { PureComponent } from 'react';
 import {
   EuiFieldNumber,
   EuiFieldText,
-  EuiFormLabel,
+  EuiFormRow,
   EuiSwitch,
   // @ts-ignore
   EuiCodeEditor,
@@ -43,12 +43,9 @@ export class Field extends PureComponent<FieldProps> {
     const { name } = this.props;
 
     return (
-      <div className="kuiFormSection">
-        <EuiFormLabel htmlFor={this.fieldId} className="kuiFormLabel">
-          {name}
-        </EuiFormLabel>
+      <EuiFormRow fullWidth={true} label={name}>
         {this.renderField()}
-      </div>
+      </EuiFormRow>
     );
   }
 

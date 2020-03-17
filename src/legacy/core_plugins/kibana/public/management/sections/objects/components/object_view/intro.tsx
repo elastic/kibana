@@ -30,7 +30,7 @@ export const Intro = () => {
           defaultMessage="Proceed with caution!"
         />
       }
-      iconType="bolt"
+      iconType="alert"
       color="warning"
     >
       <div>

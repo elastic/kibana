@@ -20,11 +20,11 @@
 import React, { Component } from 'react';
 import {
   EuiForm,
-  EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
+  EuiSpacer,
 } from '@elastic/eui';
 import {
   forOwn,
@@ -93,60 +93,57 @@ export class Form extends Component<FormProps, FormState> {
     const isValid = this.isFormValid();
     return (
       <EuiForm data-test-subj="savedObjectEditForm" role="form">
-        <div className="kuiVerticalRhythm">
-          {fields.map(field => (
-            <Field
-              key={`${field.type}-${field.name}`}
-              type={field.type}
-              name={field.name}
-              value={field.value}
-              state={fieldStates[field.name]}
-              disabled={!editionEnabled}
-              onChange={this.handleFieldChange}
-            />
-          ))}
-        </div>
-        <EuiFormRow fullWidth={true}>
-          <EuiFlexGroup responsive={false}>
-            {editionEnabled && (
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill={true}
-                  aria-label={i18n.translate('kbn.management.objects.view.saveButtonAriaLabel', {
-                    defaultMessage: 'Save { title } object',
-                    values: {
-                      title: service.type,
-                    },
-                  })}
-                  onClick={this.onSubmit}
-                  disabled={!isValid}
-                  data-test-subj="savedObjectEditSave"
-                >
-                  <FormattedMessage
-                    id="kbn.management.objects.view.saveButtonLabel"
-                    defaultMessage="Save { title } object"
-                    values={{ title: service.type }}
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            )}
-
+        {fields.map(field => (
+          <Field
+            key={`${field.type}-${field.name}`}
+            type={field.type}
+            name={field.name}
+            value={field.value}
+            state={fieldStates[field.name]}
+            disabled={!editionEnabled}
+            onChange={this.handleFieldChange}
+          />
+        ))}
+        <EuiSpacer size={'l'} />
+        <EuiFlexGroup responsive={false} gutterSize={'m'}>
+          {editionEnabled && (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                aria-label={i18n.translate('kbn.management.objects.view.cancelButtonAriaLabel', {
-                  defaultMessage: 'Cancel',
+              <EuiButton
+                fill={true}
+                aria-label={i18n.translate('kbn.management.objects.view.saveButtonAriaLabel', {
+                  defaultMessage: 'Save { title } object',
+                  values: {
+                    title: service.type,
+                  },
                 })}
-                onClick={this.onCancel}
-                data-test-subj="savedObjectEditCancel"
+                onClick={this.onSubmit}
+                disabled={!isValid}
+                data-test-subj="savedObjectEditSave"
               >
                 <FormattedMessage
-                  id="kbn.management.objects.view.cancelButtonLabel"
-                  defaultMessage="Cancel"
+                  id="kbn.management.objects.view.saveButtonLabel"
+                  defaultMessage="Save { title } object"
+                  values={{ title: service.type }}
                 />
-              </EuiButtonEmpty>
+              </EuiButton>
             </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFormRow>
+          )}
+
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              aria-label={i18n.translate('kbn.management.objects.view.cancelButtonAriaLabel', {
+                defaultMessage: 'Cancel',
+              })}
+              onClick={this.onCancel}
+              data-test-subj="savedObjectEditCancel"
+            >
+              <FormattedMessage
+                id="kbn.management.objects.view.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiForm>
     );
   }
