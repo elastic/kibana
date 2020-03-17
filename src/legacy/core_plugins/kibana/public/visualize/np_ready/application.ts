@@ -24,7 +24,6 @@ import { AppMountContext } from 'kibana/public';
 import {
   configureAppAngularModule,
   KbnUrlProvider,
-  RedirectWhenMissingProvider,
   IPrivate,
   PrivateProvider,
   PromiseServiceCreator,
@@ -102,8 +101,7 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
 function createLocalKbnUrlModule() {
   angular
     .module('app/visualize/KbnUrl', ['app/visualize/Private', 'ngRoute'])
-    .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider))
-    .service('redirectWhenMissing', (Private: IPrivate) => Private(RedirectWhenMissingProvider));
+    .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider));
 }
 
 function createLocalPromiseModule() {
