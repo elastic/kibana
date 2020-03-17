@@ -68,7 +68,7 @@ export async function getAgent(soClient: SavedObjectsClientContract, agentId: st
 export async function getAgentByAccessAPIKeyId(
   soClient: SavedObjectsClientContract,
   accessAPIKeyId: string
-) {
+): Promise<Agent> {
   const response = await soClient.find<AgentSOAttributes>({
     type: AGENT_SAVED_OBJECT_TYPE,
     searchFields: ['access_api_key_id'],
