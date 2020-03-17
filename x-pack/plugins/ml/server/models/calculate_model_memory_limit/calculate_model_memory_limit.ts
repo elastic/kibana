@@ -33,6 +33,17 @@ export interface ModelMemoryEstimate {
 }
 
 export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) {
+  /**
+   * Fields not involved in cardinality check
+   */
+  const excludedKeywords = new Set<string>(
+    /**
+     * The keyword which is used to mean the output of categorization,
+     * so it will have cardinality zero in the actual input data.
+     */
+    'mlcategory'
+  );
+
   const fieldsService = fieldsServiceProvider(callAsCurrentUser);
 
   /**
@@ -68,13 +79,13 @@ export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) 
         (
           acc,
           {
-            by_field_name: baseFieldName,
+            by_field_name: byFieldName,
             partition_field_name: partitionFieldName,
             over_field_name: overFieldName,
           }
         ) => {
-          [baseFieldName, partitionFieldName, overFieldName]
-            .filter(field => !!field !== undefined && field !== '')
+          [byFieldName, partitionFieldName, overFieldName]
+            .filter(field => field !== undefined && field !== '' && !excludedKeywords.has(field))
             .forEach(key => {
               acc.add(key as string);
             });
@@ -86,6 +97,7 @@ export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) 
       const maxBucketFieldCardinalities: string[] = influencers.filter(
         influencerField =>
           typeof influencerField === 'string' &&
+          !excludedKeywords.has(influencerField) &&
           !!influencerField &&
           !overallCardinalityFields.has(influencerField)
       ) as string[];
