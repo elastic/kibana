@@ -70,7 +70,7 @@ const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJso
       ml_job_id: mlJobId,
     };
   } else {
-    const { index, queryBar, isNew, ruleType, ...rest } = ruleFields;
+    const { queryBar, isNew, ruleType, ...rest } = ruleFields;
     return {
       ...rest,
       type: ruleType,
