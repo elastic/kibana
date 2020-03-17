@@ -36,7 +36,7 @@ const templateFields = [
  *  check for that and not just passing array in the dsl query
  *
  */
-const hasValueInStringArray = (value: unknown) => Array.isArray(value) && !isEmpty(value);
+const hasValueInStringArray = (value: unknown) => Array.isArray(value) && value.length > 0;
 
 export const findValueToChangeInQuery = (
   keuryNode: KueryNode,
