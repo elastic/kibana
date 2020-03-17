@@ -8,7 +8,7 @@ import { HttpSetup } from 'kibana/public';
 import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { buildRequestPayload, formatJson } from '../lib/helpers';
+import { formatRequestPayload, formatJson } from '../lib/format';
 import { painlessContextOptions, exampleScript } from '../common/constants';
 import { PayloadFormat } from '../common/types';
 import { useSubmitCode } from '../hooks';
@@ -108,7 +108,7 @@ export function Main({ http }: Props) {
       {isRequestFlyoutOpen && (
         <RequestFlyout
           onClose={() => setRequestFlyoutOpen(false)}
-          requestBody={buildRequestPayload(
+          requestBody={formatRequestPayload(
             { code, context, document, index, parameters },
             PayloadFormat.PRETTY
           )}

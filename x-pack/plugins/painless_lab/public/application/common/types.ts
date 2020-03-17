@@ -8,11 +8,11 @@
 export type Context = string;
 
 export interface RequestPayloadConfig {
-  code: string;
-  context: string;
-  parameters: string;
-  index: string;
-  document: string;
+  code?: string;
+  context?: string;
+  parameters?: string;
+  index?: string;
+  document?: string;
 }
 
 export enum PayloadFormat {

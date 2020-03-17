@@ -10,7 +10,7 @@ import { debounce } from 'lodash';
 
 import { API_BASE_PATH } from '../../../common/constants';
 import { Response, RequestPayloadConfig, PayloadFormat } from '../common/types';
-import { buildRequestPayload } from '../lib/helpers';
+import { formatRequestPayload } from '../lib/format';
 
 const DEBOUNCE_MS = 800;
 
@@ -32,7 +32,7 @@ export const useSubmitCode = (http: HttpSetup) => {
           const result = await http.post(`${API_BASE_PATH}/execute`, {
             // Stringify the string, because http runs it through JSON.parse, and we want to actually
             // send a JSON string.
-            body: JSON.stringify(buildRequestPayload(config, PayloadFormat.UGLY)),
+            body: JSON.stringify(formatRequestPayload(config, PayloadFormat.UGLY)),
           });
 
           if (currentRequestIdRef.current === requestId) {
