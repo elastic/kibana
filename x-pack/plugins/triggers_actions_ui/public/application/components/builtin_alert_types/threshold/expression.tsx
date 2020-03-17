@@ -28,6 +28,7 @@ import {
   getMatchingIndicesForThresholdAlertType,
   getThresholdAlertTypeFields,
   loadIndexPatterns,
+  getSavedObjectsClient,
 } from './lib/api';
 import { getTimeFieldOptions } from '../../../../common/lib/get_time_options';
 import { ThresholdVisualization } from './visualization';
@@ -125,9 +126,11 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
   );
 
   const getIndexPatterns = async () => {
-    const indexPatternObjects = await loadIndexPatterns();
-    const titles = indexPatternObjects.map((indexPattern: any) => indexPattern.attributes.title);
-    setIndexPatterns(titles);
+    if (getSavedObjectsClient()) {
+      const indexPatternObjects = await loadIndexPatterns();
+      const titles = indexPatternObjects.map((indexPattern: any) => indexPattern.attributes.title);
+      setIndexPatterns(titles);
+    }
   };
 
   const expressionErrorMessage = i18n.translate(
