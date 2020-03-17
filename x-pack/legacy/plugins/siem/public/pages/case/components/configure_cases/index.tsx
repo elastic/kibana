@@ -64,9 +64,9 @@ const ConfigureCasesComponent: React.FC = () => {
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
-  const [editedConnectorItem, setEditedConnectorItem] = useState<
-    ActionConnectorTableItem | undefined
-  >(undefined);
+  const [editedConnectorItem, setEditedConnectorItem] = useState<ActionConnectorTableItem | null>(
+    null
+  );
 
   const handleShowAddFlyout = useCallback(() => setAddFlyoutVisibility(true), []);
 
