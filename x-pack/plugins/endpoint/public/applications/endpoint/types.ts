@@ -99,17 +99,30 @@ export interface PolicyDetailsConfig {
 }
 
 export interface WindowsPolicyConfig {
-  malware: MalwareConfig;
-  eventing: WindowsEventingConfig;
+  malware: {
+    mode: string;
+  };
+  eventing: {
+    process: boolean;
+    network: boolean;
+  };
 }
 
 export interface MacPolicyConfig {
-  malware: MalwareConfig;
-  eventing: MacEventingConfig;
+  malware: {
+    mode: string;
+  };
+  eventing: {
+    process: boolean;
+    network: boolean;
+  };
 }
 
 export interface LinuxPolicyConfig {
-  eventing: LinuxEventingConfig;
+  eventing: {
+    process: boolean;
+    network: boolean;
+  };
 }
 
 export enum OS {
@@ -126,25 +139,6 @@ export enum Protections {
 export enum EventingFields {
   process = 'process',
   network = 'network',
-}
-
-export interface MalwareConfig {
-  mode: string;
-}
-
-export interface WindowsEventingConfig {
-  process: boolean;
-  network: boolean;
-}
-
-export interface MacEventingConfig {
-  process: boolean;
-  network: boolean;
-}
-
-export interface LinuxEventingConfig {
-  process: boolean;
-  network: boolean;
 }
 
 export interface GlobalState {
