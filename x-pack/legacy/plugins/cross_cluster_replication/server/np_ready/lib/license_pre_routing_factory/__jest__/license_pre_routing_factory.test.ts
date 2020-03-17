@@ -8,8 +8,11 @@ import { licensePreRoutingFactory } from '../license_pre_routing_factory';
 
 describe('license_pre_routing_factory', () => {
   describe('#reportingFeaturePreRoutingFactory', () => {
-    let mockDeps;
-    let mockLicenseCheckResults;
+    let mockDeps: any;
+    let mockLicenseCheckResults: any;
+
+    const anyContext: any = {};
+    const anyRequest: any = {};
 
     beforeEach(() => {
       mockDeps = {
@@ -39,7 +42,7 @@ describe('license_pre_routing_factory', () => {
 
       it('replies with 403', async () => {
         const licensePreRouting = licensePreRoutingFactory(mockDeps);
-        const response = await licensePreRouting({}, {}, kibanaResponseFactory);
+        const response = await licensePreRouting(anyContext, anyRequest, kibanaResponseFactory);
         expect(response.status).toBe(403);
       });
     });
@@ -53,7 +56,7 @@ describe('license_pre_routing_factory', () => {
 
       it('it calls the wrapped handler', async () => {
         const licensePreRouting = licensePreRoutingFactory(mockDeps);
-        await licensePreRouting({}, {}, kibanaResponseFactory);
+        await licensePreRouting(anyContext, anyRequest, kibanaResponseFactory);
         expect(mockDeps.requestHandler).toHaveBeenCalledTimes(1);
       });
     });
