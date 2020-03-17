@@ -108,9 +108,9 @@ export interface Drilldown<
  */
 export interface DrilldownFactoryContext<T> {
   /**
-   * List of places as configured in @type {Drilldown} interface.
+   * Place where factory is being rendered.
    */
-  places?: string[];
+  place?: string;
 
   /**
    * Context provided to the drilldown factory by the place where the UI is

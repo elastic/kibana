@@ -18,12 +18,24 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { Subscription } from 'rxjs';
 import { ActionStorage, SerializedEvent } from './dynamic_action_storage';
 import { UiActionsService } from '../service';
 import { SerializedAction } from './types';
 import { ActionDefinition } from './action';
 import { defaultState, transitions, selectors, State } from './dynamic_action_manager_state';
 import { StateContainer, createStateContainer } from '../../../kibana_utils';
+
+const compareEvents = (
+  a: ReadonlyArray<{ eventId: string }>,
+  b: ReadonlyArray<{ eventId: string }>
+) => {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) if (a[i].eventId !== b[i].eventId) return false;
+  return true;
+};
+
+export type DynamicActionManagerState = State;
 
 export interface DynamicActionManagerParams {
   storage: ActionStorage;
@@ -38,8 +50,8 @@ export class DynamicActionManager {
   static idPrefixCounter = 0;
 
   private readonly idPrefix = `D_ACTION_${DynamicActionManager.idPrefixCounter++}_`;
-
   private stopped: boolean = false;
+  private reloadSubscription?: Subscription;
 
   /**
    * UI State of the dynamic action manager.
@@ -85,6 +97,35 @@ export class DynamicActionManager {
     uiActions.removeTriggerAction(triggerId as any, actionId);
   }
 
+  private syncId = 0;
+
+  /**
+   * This function is called every time stored events might have changed not by
+   * us. For example, when in edit mode on dashboard user presses "back" button
+   * in the browser, then contents of storage changes.
+   */
+  private onSync = () => {
+    if (this.stopped) return;
+
+    (async () => {
+      const syncId = ++this.syncId;
+      const events = await this.params.storage.list();
+
+      if (this.stopped) return;
+      if (syncId !== this.syncId) return;
+      if (compareEvents(events, this.ui.get().events)) return;
+
+      for (const event of this.ui.get().events) this.killAction(event);
+      for (const event of events) this.reviveAction(event);
+      this.ui.transitions.finishFetching(events);
+    })().catch(error => {
+      /* eslint-disable */
+      console.log('Dynamic action manager storage reload failed.');
+      console.error(error);
+      /* eslint-enable */
+    });
+  };
+
   // Public API: ---------------------------------------------------------------
 
   /**
@@ -108,6 +149,10 @@ export class DynamicActionManager {
     const events = await this.params.storage.list();
     for (const event of events) this.reviveAction(event);
     this.ui.transitions.finishFetching(events);
+
+    if (this.params.storage.reload$) {
+      this.reloadSubscription = this.params.storage.reload$.subscribe(this.onSync);
+    }
   }
 
   /**
@@ -120,6 +165,10 @@ export class DynamicActionManager {
 
     for (const event of events) {
       this.killAction(event);
+    }
+
+    if (this.reloadSubscription) {
+      this.reloadSubscription.unsubscribe();
     }
   }
 

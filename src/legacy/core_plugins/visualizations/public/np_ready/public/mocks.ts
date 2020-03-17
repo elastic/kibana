@@ -50,7 +50,7 @@ const createInstance = async () => {
   const setup = plugin.setup(coreMock.createSetup() as CoreSetup<VisualizationsStartDeps>, {
     data: dataPluginMock.createSetupContract(),
     expressions: expressionsPluginMock.createSetupContract(),
-    embeddable: embeddablePluginMock.createStartContract(),
+    embeddable: embeddablePluginMock.createSetupContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
   });
   const doStart = () =>

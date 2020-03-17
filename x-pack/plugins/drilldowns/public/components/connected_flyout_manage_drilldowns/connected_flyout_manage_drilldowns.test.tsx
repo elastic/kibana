@@ -19,7 +19,7 @@ import { TEST_SUBJ_DRILLDOWN_ITEM } from '../list_manage_drilldowns';
 import { WELCOME_MESSAGE_TEST_SUBJ } from '../drilldown_hello_bar';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { NotificationsStart } from 'kibana/public';
-import { toastDrilldownsCRUDError, toastDrilldownsFetchError } from './i18n';
+import { toastDrilldownsCRUDError } from './i18n';
 
 const storage = new Storage(new StubBrowserStorage());
 const notifications = coreMock.createStart().notifications;
@@ -173,18 +173,7 @@ test('Create only mode', async () => {
   expect(await mockDynamicActionManager.count()).toBe(1);
 });
 
-test("Error when can't fetch drilldown list", async () => {
-  const error = new Error('Oops');
-  jest.spyOn(mockDynamicActionManager, 'list').mockImplementationOnce(async () => {
-    throw error;
-  });
-  render(<FlyoutManageDrilldowns context={{}} dynamicActionManager={mockDynamicActionManager} />);
-  await wait(() =>
-    expect(notifications.toasts.addError).toBeCalledWith(error, {
-      title: toastDrilldownsFetchError,
-    })
-  );
-});
+test.todo("Error when can't fetch drilldown list");
 
 test("Error when can't save drilldown changes", async () => {
   const error = new Error('Oops');

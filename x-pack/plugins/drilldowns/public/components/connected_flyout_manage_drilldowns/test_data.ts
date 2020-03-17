@@ -7,46 +7,74 @@
 import uuid from 'uuid';
 import {
   DynamicActionManager,
+  DynamicActionManagerState,
   UiActionsSerializedAction,
-  UiActionsSerializedEvent,
 } from '../../../../../../src/plugins/ui_actions/public';
+import { createStateContainer } from '../../../../../../src/plugins/kibana_utils/common';
 
 class MockDynamicActionManager implements PublicMethodsOf<DynamicActionManager> {
-  private readonly events: UiActionsSerializedEvent[] = [];
+  public readonly state = createStateContainer<DynamicActionManagerState>({
+    isFetchingEvents: false,
+    fetchCount: 0,
+    events: [],
+  });
 
   async count() {
-    return this.events.length;
+    return this.state.get().events.length;
   }
+
   async list() {
-    return this.events;
+    return this.state.get().events;
   }
+
   async createEvent(
     action: UiActionsSerializedAction<any>,
     triggerId: string = 'VALUE_CLICK_TRIGGER'
   ) {
-    this.events.push({
+    const event = {
       action,
       triggerId,
       eventId: uuid(),
+    };
+    const state = this.state.get();
+    this.state.set({
+      ...state,
+      events: [...state.events, event],
     });
   }
+
   async deleteEvents(eventIds: string[]) {
+    const state = this.state.get();
+    let events = state.events;
+
     eventIds.forEach(id => {
-      const idx = this.events.findIndex(e => e.eventId === id);
-      this.events.splice(idx, 1);
+      events = events.filter(e => e.eventId !== id);
+    });
+
+    this.state.set({
+      ...state,
+      events,
     });
   }
+
   async updateEvent(
     eventId: string,
     action: UiActionsSerializedAction<unknown>,
     triggerId: string = 'VALUE_CLICK_TRIGGER'
   ) {
-    const idx = this.events.findIndex(e => e.eventId === eventId);
-    this.events[idx] = {
+    const state = this.state.get();
+    const events = state.events;
+    const idx = events.findIndex(e => e.eventId === eventId);
+    const event = {
       eventId,
       action,
       triggerId,
     };
+
+    this.state.set({
+      ...state,
+      events: [...events.slice(0, idx), event, ...events.slice(idx + 1)],
+    });
   }
 
   async deleteEvent() {

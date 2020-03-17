@@ -28,7 +28,7 @@ export class ActionFactory<
   Config extends object = object,
   FactoryContext extends object = object,
   ActionContext extends object = object
-> implements Presentable<FactoryContext>, Configurable<Config> {
+> implements Presentable<FactoryContext>, Configurable<Config, FactoryContext> {
   constructor(
     protected readonly def: ActionFactoryDefinition<Config, FactoryContext, ActionContext>
   ) {}

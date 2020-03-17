@@ -143,10 +143,11 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
       </header>
       <EuiSpacer size="m" />
       <div>
-        {actionFactory.ReactCollectConfig({
-          config,
-          onConfig: onConfigChange,
-        })}
+        <actionFactory.ReactCollectConfig
+          config={config}
+          onConfig={onConfigChange}
+          context={context}
+        />
       </div>
     </div>
   );

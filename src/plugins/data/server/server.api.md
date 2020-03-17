@@ -733,7 +733,7 @@ export type TSearchStrategyProvider<T extends TStrategyTypes> = (context: ISearc
 // src/plugins/data/server/index.ts:184:1 - (ae-forgotten-export) The symbol "isValidEsInterval" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:185:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:188:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/plugin.ts:62:14 - (ae-forgotten-export) The symbol "ISearchSetup" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/plugin.ts:64:14 - (ae-forgotten-export) The symbol "ISearchSetup" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

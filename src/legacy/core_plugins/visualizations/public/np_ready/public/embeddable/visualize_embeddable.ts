@@ -36,10 +36,6 @@ import {
   Container,
   EmbeddableVisTriggerContext,
 } from '../../../../../../../plugins/embeddable/public';
-import {
-  selectRangeTrigger,
-  valueClickTrigger,
-} from '../../../../../../../plugins/ui_actions/public';
 import { dispatchRenderComplete } from '../../../../../../../plugins/kibana_utils/public';
 import {
   IExpressionLoaderParams,
@@ -51,6 +47,7 @@ import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { VisSavedObject } from '../types';
 import { VisualizationsStartDeps } from '../plugin';
+import { VIS_EVENT_TO_TRIGGER } from './events';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -299,8 +296,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         }
 
         if (!this.input.disableTriggers) {
-          const triggerId: 'SELECT_RANGE_TRIGGER' | 'VALUE_CLICK_TRIGGER' =
-            event.name === 'brush' ? selectRangeTrigger.id : valueClickTrigger.id;
+          const triggerId =
+            event.name === 'brush' ? VIS_EVENT_TO_TRIGGER.brush : VIS_EVENT_TO_TRIGGER.filter;
           const context: EmbeddableVisTriggerContext = {
             embeddable: this,
             timeFieldName: this.vis.indexPattern.timeFieldName,
@@ -400,4 +397,31 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       ...this.uiState.toJSON(),
     });
   };
+
+  public supportedTriggers() {
+    // TODO: Report a correct list of triggers for each vis_type.
+    switch (this.vis.type.name) {
+      case 'area':
+      case 'heatmap':
+      case 'histogram':
+      case 'horizontal_bar':
+      case 'line':
+      case 'pie':
+      case 'table':
+      case 'tagcloud':
+        return [VIS_EVENT_TO_TRIGGER.filter];
+      case 'gauge':
+      case 'goal':
+      case 'input_control_vis':
+      case 'markdown':
+      case 'metric':
+      case 'metrics':
+      case 'region_map':
+      case 'tile_map':
+      case 'timelion':
+      case 'vega':
+      default:
+        return [];
+    }
+  }
 }

@@ -22,7 +22,7 @@ import { UiComponent } from 'src/plugins/kibana_utils/common';
 /**
  * Represents something that can be configured by user using UI.
  */
-export interface Configurable<Config extends object = object> {
+export interface Configurable<Config extends object = object, Context = object> {
   /**
    * Create default config for this item, used when item is created for the first time.
    */
@@ -36,13 +36,13 @@ export interface Configurable<Config extends object = object> {
   /**
    * `UiComponent` to be rendered when collecting configuration for this item.
    */
-  readonly CollectConfig: UiComponent<CollectConfigProps<Config>>;
+  readonly CollectConfig: UiComponent<CollectConfigProps<Config, Context>>;
 }
 
 /**
  * Props provided to `CollectConfig` component on every re-render.
  */
-export interface CollectConfigProps<Config extends object = object> {
+export interface CollectConfigProps<Config extends object = object, Context = object> {
   /**
    * Current (latest) config of the item.
    */
@@ -52,4 +52,9 @@ export interface CollectConfigProps<Config extends object = object> {
    * Callback called when user updates the config in UI.
    */
   onConfig: (config: Config) => void;
+
+  /**
+   * Context information about where component is being rendered.
+   */
+  context: Context;
 }

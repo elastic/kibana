@@ -22,6 +22,7 @@ import { UiActionsDynamicActionManager } from '../../../../../plugins/ui_actions
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { ViewMode } from '../types';
+import { TriggerContextMapping } from '../../../../ui_actions/public';
 
 export interface EmbeddableInput {
   viewMode?: ViewMode;
@@ -34,7 +35,7 @@ export interface EmbeddableInput {
   /**
    * Reserved key for `ui_actions` events.
    */
-  events?: unknown;
+  events?: Array<{ eventId: string }>;
 
   /**
    * List of action IDs that this embeddable should not render.
@@ -175,4 +176,9 @@ export interface IEmbeddable<
    * Cleans up subscriptions, destroy nodes mounted from calls to render.
    */
   destroy(): void;
+
+  /**
+   * List of triggers that this embeddable will execute.
+   */
+  supportedTriggers(): Array<keyof TriggerContextMapping>;
 }

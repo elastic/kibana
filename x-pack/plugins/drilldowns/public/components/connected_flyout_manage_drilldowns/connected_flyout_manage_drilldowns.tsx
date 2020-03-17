@@ -5,7 +5,6 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import useMount from 'react-use/lib/useMount';
 import useMountedState from 'react-use/lib/useMountedState';
 import {
   AdvancedUiActionsActionFactory as ActionFactory,
@@ -20,6 +19,7 @@ import {
   UiActionsSerializedEvent,
   UiActionsSerializedAction,
 } from '../../../../../../src/plugins/ui_actions/public';
+import { useContainerState } from '../../../../../../src/plugins/kibana_utils/common';
 import { DrilldownListItem } from '../list_manage_drilldowns';
 import {
   toastDrilldownCreated,
@@ -27,8 +27,8 @@ import {
   toastDrilldownEdited,
   toastDrilldownsCRUDError,
   toastDrilldownsDeleted,
-  toastDrilldownsFetchError,
 } from './i18n';
+import { DrilldownFactoryContext } from '../../types';
 
 interface ConnectedFlyoutManageDrilldownsProps<Context extends object = object> {
   context: Context;
@@ -66,9 +66,18 @@ export function createFlyoutManageDrilldowns({
   return (props: ConnectedFlyoutManageDrilldownsProps) => {
     const isCreateOnly = props.viewMode === 'create';
 
+    const factoryContext: DrilldownFactoryContext<unknown> = React.useMemo(
+      () => ({
+        place: '',
+        placeContext: props.context,
+        triggers: [],
+      }),
+      [props.context]
+    );
+
     const actionFactories = useCompatibleActionFactoriesForCurrentContext(
       allActionFactories,
-      props.context
+      factoryContext
     );
 
     const [route, setRoute] = useState<Routes>(
@@ -122,8 +131,8 @@ export function createFlyoutManageDrilldowns({
       return {
         id: drilldown.eventId,
         drilldownName: drilldown.action.name,
-        actionName: actionFactory?.getDisplayName(props.context) ?? drilldown.action.factoryId,
-        icon: actionFactory?.getIconType(props.context),
+        actionName: actionFactory?.getDisplayName(factoryContext) ?? drilldown.action.factoryId,
+        icon: actionFactory?.getIconType(factoryContext),
       };
     }
 
@@ -169,7 +178,7 @@ export function createFlyoutManageDrilldowns({
               setRoute(Routes.Manage);
               setCurrentEditId(null);
             }}
-            actionFactoryContext={props.context}
+            actionFactoryContext={factoryContext}
             initialDrilldownWizardConfig={resolveInitialDrilldownWizardConfig()}
           />
         );
@@ -243,8 +252,8 @@ function useDrilldownsStateManager(
   actionManager: DynamicActionManager,
   notifications: NotificationsStart
 ) {
+  const { events: drilldowns } = useContainerState(actionManager.state);
   const [isLoading, setIsLoading] = useState(false);
-  const [drilldowns, setDrilldowns] = useState<readonly UiActionsSerializedEvent[]>();
   const isMounted = useMountedState();
 
   async function run(op: () => Promise<void>) {
@@ -259,35 +268,7 @@ function useDrilldownsStateManager(
       setIsLoading(false);
       return;
     }
-
-    await reload();
   }
-
-  async function reload() {
-    if (!isMounted) {
-      // don't do any side effects anymore because component is already unmounted
-      return;
-    }
-    if (!isLoading) {
-      setIsLoading(true);
-    }
-    try {
-      const drilldownsList = await actionManager.list();
-      if (!isMounted) {
-        return;
-      }
-      setDrilldowns(drilldownsList);
-      setIsLoading(false);
-    } catch (e) {
-      notifications.toasts.addError(e, {
-        title: toastDrilldownsFetchError,
-      });
-    }
-  }
-
-  useMount(() => {
-    reload();
-  });
 
   async function createDrilldown(action: UiActionsSerializedAction<any>, triggerId?: string) {
     await run(async () => {
