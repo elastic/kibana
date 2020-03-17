@@ -63,7 +63,9 @@ export function EndpointPageProvider({ getService }: FtrProviderContext) {
     async waitForTableToHaveData(dataTestSubj: string) {
       await retry.waitForWithTimeout('table to have data', 2000, async () => {
         const tableData = await this.getEndpointAppTableData(dataTestSubj);
-        if (tableData[1][0] === 'No items found') return false;
+        if (tableData[1][0] === 'No items found') {
+          return false;
+        }
         return true;
       });
     },
@@ -88,12 +90,15 @@ export function EndpointPageProvider({ getService }: FtrProviderContext) {
       const $ = await detailsData.parseDomContent();
       return $('dd')
         .toArray()
-        .map(value =>
-          $(value)
+        .map((value, index) => {
+          if (index === 1) {
+            return '';
+          }
+          return $(value)
             .text()
             .replace(/&nbsp;/g, '')
-            .trim()
-        );
+            .trim();
+        });
     },
   };
 }

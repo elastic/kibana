@@ -35,7 +35,7 @@ describe('data generator', () => {
     expect(metadata1).not.toEqual(metadata2);
   });
 
-  it('creates endpoint metadata documents', () => {
+  it('creates host metadata documents', () => {
     const timestamp = new Date().getTime();
     const metadata = generator.generateHostMetadata(timestamp);
     expect(metadata['@timestamp']).toEqual(timestamp);
