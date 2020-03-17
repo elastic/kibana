@@ -7,6 +7,7 @@
 import { EuiButtonIcon, EuiCallOut, EuiPopover } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
+import { JobStatuses } from '../../../constants';
 import { JobContent, ReportingAPIClient } from '../../lib/reporting_api_client';
 
 interface Props {
@@ -39,12 +40,18 @@ class ReportErrorButtonUi extends Component<Props, State> {
   }
 
   public render() {
+    const { record, apiClient, intl } = this.props;
+
+    if (record.status !== JobStatuses.FAILED) {
+      return null;
+    }
+
     const button = (
       <EuiButtonIcon
         onClick={this.togglePopover}
         iconType="alert"
         color={'danger'}
-        aria-label={this.props.intl.formatMessage({
+        aria-label={intl.formatMessage({
           id: 'xpack.reporting.errorButton.showReportErrorAriaLabel',
           defaultMessage: 'Show report error',
         })}
