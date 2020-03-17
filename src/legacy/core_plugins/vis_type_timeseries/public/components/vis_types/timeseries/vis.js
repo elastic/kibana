@@ -34,8 +34,8 @@ import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
 import { areFieldsDifferent } from '../../lib/charts';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
-import { isBackgroundDark } from '../../../../common/set_is_reversed';
 import { STACKED_OPTIONS } from '../../../visualizations/constants';
+import { getUISettings } from '../../../services';
 
 export class TimeseriesVisualization extends Component {
   static propTypes = {
@@ -237,6 +237,7 @@ export class TimeseriesVisualization extends Component {
       }
     });
 
+    const darkMode = getUISettings().get('theme:darkMode');
     return (
       <div className="tvbVis" style={styles.tvbVis}>
         <TimeSeries
@@ -244,7 +245,8 @@ export class TimeseriesVisualization extends Component {
           yAxis={yAxis}
           onBrush={onBrush}
           enableHistogramMode={enableHistogramMode}
-          isDarkMode={isBackgroundDark(model.background_color)}
+          backgroundColor={model.background_color}
+          darkMode={darkMode}
           showGrid={Boolean(model.show_grid)}
           legend={Boolean(model.show_legend)}
           legendPosition={model.legend_position}
