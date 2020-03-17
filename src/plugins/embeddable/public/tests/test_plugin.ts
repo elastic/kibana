@@ -22,14 +22,14 @@ import { CoreSetup, CoreStart } from 'src/core/public';
 import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { coreMock } from '../../../../core/public/mocks';
-import { EmbeddablePublicPlugin, IEmbeddableSetup, IEmbeddableStart } from '../plugin';
+import { EmbeddablePublicPlugin, EmbeddableSetup, EmbeddableStart } from '../plugin';
 
 export interface TestPluginReturn {
   plugin: EmbeddablePublicPlugin;
   coreSetup: CoreSetup;
   coreStart: CoreStart;
-  setup: IEmbeddableSetup;
-  doStart: (anotherCoreStart?: CoreStart) => IEmbeddableStart;
+  setup: EmbeddableSetup;
+  doStart: (anotherCoreStart?: CoreStart) => EmbeddableStart;
   uiActions: UiActionsStart;
 }
 

@@ -50,6 +50,7 @@ import {
   tabifyAggResponse,
   getAngularModule,
   ensureDefaultIndexPattern,
+  redirectWhenMissing,
 } from '../../kibana_services';
 
 const {
@@ -57,6 +58,7 @@ const {
   chrome,
   data,
   docTitle,
+  history,
   indexPatterns,
   filterManager,
   share,
@@ -76,6 +78,7 @@ import {
   getDefaultQuery,
 } from '../../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
+import { addFatalError } from '../../../../../../../plugins/kibana_legacy/public';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -112,10 +115,10 @@ app.config($routeProvider => {
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      savedObjects: function(redirectWhenMissing, $route, kbnUrl, Promise, $rootScope) {
+      savedObjects: function($route, kbnUrl, Promise, $rootScope) {
         const savedSearchId = $route.current.params.id;
         return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl).then(() => {
-          const { appStateContainer } = getState({});
+          const { appStateContainer } = getState({ history });
           const { index } = appStateContainer.getState();
           return Promise.props({
             ip: indexPatterns.getCache().then(indexPatternList => {
@@ -150,9 +153,13 @@ app.config($routeProvider => {
               })
               .catch(
                 redirectWhenMissing({
-                  search: '/discover',
-                  'index-pattern':
-                    '/management/kibana/objects/savedSearches/' + $route.current.params.id,
+                  history,
+                  mapping: {
+                    search: '/discover',
+                    'index-pattern':
+                      '/management/kibana/objects/savedSearches/' + $route.current.params.id,
+                  },
+                  toastNotifications,
                 })
               ),
           });
@@ -206,6 +213,7 @@ function discoverController(
   } = getState({
     defaultAppState: getStateDefaults(),
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
+    history,
   });
   if (appStateContainer.getState().index !== $scope.indexPattern.id) {
     //used index pattern is different than the given by url/state which is invalid
@@ -255,11 +263,16 @@ function discoverController(
 
   // update data source when filters update
   subscriptions.add(
-    subscribeWithScope($scope, filterManager.getUpdates$(), {
-      next: () => {
-        $scope.updateDataSource();
+    subscribeWithScope(
+      $scope,
+      filterManager.getUpdates$(),
+      {
+        next: () => {
+          $scope.updateDataSource();
+        },
       },
-    })
+      error => addFatalError(core.fatalErrors, error)
+    )
   );
 
   const inspectorAdapters = {
@@ -621,16 +634,26 @@ function discoverController(
       ).pipe(debounceTime(100));
 
       subscriptions.add(
-        subscribeWithScope($scope, searchBarChanges, {
-          next: $scope.fetch,
-        })
+        subscribeWithScope(
+          $scope,
+          searchBarChanges,
+          {
+            next: $scope.fetch,
+          },
+          error => addFatalError(core.fatalErrors, error)
+        )
       );
       subscriptions.add(
-        subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
-          next: () => {
-            $scope.updateTime();
+        subscribeWithScope(
+          $scope,
+          timefilter.getTimeUpdate$(),
+          {
+            next: () => {
+              $scope.updateTime();
+            },
           },
-        })
+          error => addFatalError(core.fatalErrors, error)
+        )
       );
       //Handling change oft the histogram interval
       $scope.$watch('state.interval', function(newInterval, oldInterval) {

@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from 'src/core/server';
+import {
+  SavedObjectsClientContract,
+  SavedObjectsErrorHelpers,
+  SavedObjectsBulkGetObject,
+  SavedObjectsBulkUpdateObject,
+} from 'src/core/server';
 
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../saved_object_types';
 
@@ -16,6 +21,47 @@ export const createMockSavedObjectsRepository = ({
   caseCommentSavedObject?: any[];
 }) => {
   const mockSavedObjectsClientContract = ({
+    bulkGet: jest.fn((objects: SavedObjectsBulkGetObject[]) => {
+      return {
+        saved_objects: objects.map(({ id, type }) => {
+          if (type === CASE_COMMENT_SAVED_OBJECT) {
+            const result = caseCommentSavedObject.filter(s => s.id === id);
+            if (!result.length) {
+              throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+            }
+            return result[0];
+          }
+          const result = caseSavedObject.filter(s => s.id === id);
+          if (!result.length) {
+            throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+          }
+          return result[0];
+        }),
+      };
+    }),
+    bulkUpdate: jest.fn((objects: Array<SavedObjectsBulkUpdateObject<unknown>>) => {
+      return {
+        saved_objects: objects.map(({ id, type, attributes }) => {
+          if (type === CASE_COMMENT_SAVED_OBJECT) {
+            if (!caseCommentSavedObject.find(s => s.id === id)) {
+              throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+            }
+          } else if (type === CASE_SAVED_OBJECT) {
+            if (!caseSavedObject.find(s => s.id === id)) {
+              throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+            }
+          }
+
+          return {
+            id,
+            type,
+            updated_at: '2019-11-22T22:50:55.191Z',
+            version: 'WzE3LDFd',
+            attributes,
+          };
+        }),
+      };
+    }),
     get: jest.fn((type, id) => {
       if (type === CASE_COMMENT_SAVED_OBJECT) {
         const result = caseCommentSavedObject.filter(s => s.id === id);
