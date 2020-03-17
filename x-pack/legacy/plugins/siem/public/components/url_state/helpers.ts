@@ -19,12 +19,7 @@ import { TimelineUrl } from '../../store/timeline/model';
 import { formatDate } from '../super_date_picker';
 import { NavTab } from '../navigation/types';
 import { CONSTANTS, UrlStateType } from './constants';
-import {
-  LocationTypes,
-  UrlStateContainerPropTypes,
-  ReplaceStateInLocation,
-  UpdateUrlStateString,
-} from './types';
+import { UrlStateContainerPropTypes, ReplaceStateInLocation, UpdateUrlStateString } from './types';
 
 export const decodeRisonUrlState = <T>(value: string | undefined): T | null => {
   try {

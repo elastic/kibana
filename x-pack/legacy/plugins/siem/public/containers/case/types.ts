@@ -75,3 +75,9 @@ export interface FetchCasesProps {
 export interface ApiProps {
   signal: AbortSignal;
 }
+
+export interface BulkUpdateStatus {
+  status: string;
+  id: string;
+  version: string;
+}

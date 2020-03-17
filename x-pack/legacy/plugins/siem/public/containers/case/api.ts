@@ -15,7 +15,15 @@ import {
   User,
 } from '../../../../../../plugins/case/common/api';
 import { KibanaServices } from '../../lib/kibana';
-import { AllCases, Case, CasesStatus, Comment, FetchCasesProps, SortFieldCase } from './types';
+import {
+  AllCases,
+  BulkUpdateStatus,
+  Case,
+  CasesStatus,
+  Comment,
+  FetchCasesProps,
+  SortFieldCase,
+} from './types';
 import { CASES_URL } from './constants';
 import {
   convertToCamelCase,
@@ -107,6 +115,14 @@ export const patchCase = async (
   const response = await KibanaServices.get().http.fetch<CasesResponse>(`${CASES_URL}`, {
     method: 'PATCH',
     body: JSON.stringify({ cases: [{ ...updatedCase, id: caseId, version }] }),
+  });
+  return convertToCamelCase<CasesResponse, Case[]>(decodeCasesResponse(response));
+};
+
+export const patchCasesStatus = async (cases: BulkUpdateStatus[]): Promise<Case[]> => {
+  const response = await KibanaServices.get().http.fetch<CasesResponse>(`${CASES_URL}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ cases }),
   });
   return convertToCamelCase<CasesResponse, Case[]>(decodeCasesResponse(response));
 };

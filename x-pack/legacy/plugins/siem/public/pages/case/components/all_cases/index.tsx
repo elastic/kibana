@@ -43,6 +43,7 @@ import { OpenClosedStats } from '../open_closed_stats';
 
 import { getActions } from './actions';
 import { CasesTableFilters } from './table_filters';
+import { useUpdateCases } from '../../../../containers/case/use_bulk_update_case';
 
 const CONFIGURE_CASES_URL = getConfigureCasesUrl();
 const CREATE_CASE_URL = getCreateCaseUrl();
@@ -106,13 +107,20 @@ export const AllCases = React.memo(() => {
     isDisplayConfirmDeleteModal,
   } = useDeleteCases();
 
+  const { dispatchResetIsUpdated, isUpdated, updateBulkStatus } = useUpdateCases();
+
   useEffect(() => {
     if (isDeleted) {
       refetchCases(filterOptions, queryParams);
       fetchCasesStatus();
       dispatchResetIsDeleted();
     }
-  }, [isDeleted, filterOptions, queryParams]);
+    if (isUpdated) {
+      refetchCases(filterOptions, queryParams);
+      fetchCasesStatus();
+      dispatchResetIsUpdated();
+    }
+  }, [isDeleted, isUpdated, filterOptions, queryParams]);
 
   const [deleteThisCase, setDeleteThisCase] = useState({
     title: '',
@@ -151,6 +159,13 @@ export const AllCases = React.memo(() => {
     [isDisplayConfirmDeleteModal]
   );
 
+  const handleUpdateCaseStatus = useCallback(
+    (status: string) => {
+      updateBulkStatus(selectedCases, status);
+    },
+    [selectedCases]
+  );
+
   const selectedCaseIds = useMemo(
     (): string[] =>
       selectedCases.reduce((arr: string[], caseObj: Case) => [...arr, caseObj.id], []),
@@ -161,10 +176,11 @@ export const AllCases = React.memo(() => {
     (closePopover: () => void) => (
       <EuiContextMenuPanel
         items={getBulkItems({
+          caseStatus: filterOptions.status,
           closePopover,
           deleteCasesAction: toggleBulkDeleteModal,
           selectedCaseIds,
-          caseStatus: filterOptions.status,
+          updateCaseStatus: handleUpdateCaseStatus,
         })}
       />
     ),
