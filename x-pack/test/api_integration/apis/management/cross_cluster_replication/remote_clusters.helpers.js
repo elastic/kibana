@@ -25,7 +25,8 @@ export const registerHelpers = supertest => {
       .post(`${REMOTE_CLUSTERS_API_BASE_PATH}`)
       .set('kbn-xsrf', 'xxx')
       .send({
-        name: name,
+        name,
+        mode: 'sniff',
         seeds: [`localhost:${esTransportPort}`],
         skipUnavailable: true,
       });

@@ -38,7 +38,7 @@ export interface BodyProps {
   columnRenderers: ColumnRenderer[];
   data: TimelineItem[];
   getNotesByIds: (noteIds: string[]) => Note[];
-  height: number;
+  height?: number;
   id: string;
   isEventViewer?: boolean;
   isSelectAllChecked: boolean;
@@ -96,9 +96,10 @@ export const Body = React.memo<BodyProps>(
   }) => {
     const containerElementRef = useRef<HTMLDivElement>(null);
     const timelineTypeContext = useTimelineTypeContext();
-    const additionalActionWidth =
-      timelineTypeContext.timelineActions?.reduce((acc, v) => acc + v.width, 0) ?? 0;
-
+    const additionalActionWidth = useMemo(
+      () => timelineTypeContext.timelineActions?.reduce((acc, v) => acc + v.width, 0) ?? 0,
+      [timelineTypeContext.timelineActions]
+    );
     const actionsColumnWidth = useMemo(
       () => getActionsColumnWidth(isEventViewer, showCheckboxes, additionalActionWidth),
       [isEventViewer, showCheckboxes, additionalActionWidth]
@@ -113,11 +114,7 @@ export const Body = React.memo<BodyProps>(
     return (
       <>
         <TimelineBody data-test-subj="timeline-body" bodyHeight={height} ref={containerElementRef}>
-          <EventsTable
-            data-test-subj="events-table"
-            // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-            style={{ minWidth: `${columnWidths}px` }}
-          >
+          <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
             <ColumnHeaders
               actionsColumnWidth={actionsColumnWidth}
               browserFields={browserFields}
