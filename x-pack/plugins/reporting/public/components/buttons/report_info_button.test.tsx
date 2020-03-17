@@ -7,9 +7,10 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ReportInfoButton } from './report_info_button';
-import { ReportingAPIClient } from '../../lib/reporting_api_client';
 
-jest.mock('../lib/reporting_api_client');
+jest.mock('../../lib/reporting_api_client');
+
+import { ReportingAPIClient } from '../../lib/reporting_api_client';
 
 const httpSetup = {} as any;
 const apiClient = new ReportingAPIClient(httpSetup);

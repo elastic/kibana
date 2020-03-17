@@ -65,11 +65,10 @@ export function getDocumentPayloadFactory(
     const exportType = exportTypesRegistry.get((item: ExportTypeType) => item.jobType === jobType);
     const filename = getTitle(exportType, title);
     const headers = getReportingHeaders(output, exportType);
-    const content = encodeContent(output.content, exportType);
 
     return {
       statusCode: 200,
-      content,
+      content: encodeContent(output.content, exportType),
       contentType: output.content_type,
       headers: {
         ...headers,
