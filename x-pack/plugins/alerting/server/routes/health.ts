@@ -12,6 +12,7 @@ import {
   KibanaResponseFactory,
   ElasticsearchServiceSetup,
 } from 'kibana/server';
+import { isApiKeyDisabledError, isSecurityPluginDisabledError } from './lib/error_handler';
 
 export function healthRoute(router: IRouter, elasticsearch: ElasticsearchServiceSetup) {
   const clusterClient = elasticsearch.createClient('alertingSecurity', {
@@ -40,9 +41,9 @@ export function healthRoute(router: IRouter, elasticsearch: ElasticsearchService
             (result: unknown) => ({ canGenerateApiKeys: !!result }),
             // This is a brittle dependency upon message. Tracked by https://github.com/elastic/elasticsearch/issues/47759.
             (e: Error) =>
-              e.message.includes('api keys are not enabled')
+              isApiKeyDisabledError(e)
                 ? Promise.resolve({ canGenerateApiKeys: false })
-                : e.message.includes('no handler found')
+                : isSecurityPluginDisabledError(e)
                 ? // If no handler is available, this means security is disabled, in which
                   // case generating keys should work fine
                   Promise.resolve({ canGenerateApiKeys: true })

@@ -16,6 +16,7 @@ import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { validateDurationSchema } from '../lib';
 import { Alert } from '../types';
+import { handleDisabledApiKeysError } from './lib/error_handler';
 
 export const bodySchema = schema.object({
   name: schema.string(),
@@ -50,22 +51,24 @@ export const createAlertRoute = (router: IRouter, licenseState: LicenseState) =>
         tags: ['access:alerting-all'],
       },
     },
-    router.handleLegacyErrors(async function(
-      context: RequestHandlerContext,
-      req: KibanaRequest<any, any, TypeOf<typeof bodySchema>, any>,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
-      verifyApiAccess(licenseState);
+    handleDisabledApiKeysError(
+      router.handleLegacyErrors(async function(
+        context: RequestHandlerContext,
+        req: KibanaRequest<any, any, TypeOf<typeof bodySchema>, any>,
+        res: KibanaResponseFactory
+      ): Promise<IKibanaResponse<any>> {
+        verifyApiAccess(licenseState);
 
-      if (!context.alerting) {
-        return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
-      }
-      const alertsClient = context.alerting.getAlertsClient();
-      const alert = req.body;
-      const alertRes: Alert = await alertsClient.create({ data: alert });
-      return res.ok({
-        body: alertRes,
-      });
-    })
+        if (!context.alerting) {
+          return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
+        }
+        const alertsClient = context.alerting.getAlertsClient();
+        const alert = req.body;
+        const alertRes: Alert = await alertsClient.create({ data: alert });
+        return res.ok({
+          body: alertRes,
+        });
+      })
+    )
   );
 };
