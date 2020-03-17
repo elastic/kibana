@@ -13,6 +13,7 @@ import { ILayer } from './layer';
 import { IJoin } from './joins/join';
 import { IVectorStyle } from './styles/vector/vector_style';
 import { IField } from './fields/field';
+import { SyncContext } from '../actions/map_actions';
 
 type VectorLayerArguments = {
   source: IVectorSource;
@@ -45,5 +46,5 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     source: IVectorSource,
     style: IVectorStyle
   ): VectorLayerRequestMeta;
-  _syncData(syncContext: unknown, source: IVectorSource, style: IVectorStyle): Promise<void>;
+  _syncData(syncContext: SyncContext, source: IVectorSource, style: IVectorStyle): Promise<void>;
 }

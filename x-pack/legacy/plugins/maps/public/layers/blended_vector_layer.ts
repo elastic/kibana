@@ -28,6 +28,10 @@ import { IVectorLayer, VectorLayerArguments } from './vector_layer';
 import { IESSource } from './sources/es_source';
 import { IESAggSource } from './sources/es_agg_source';
 import { ISource } from './sources/source';
+import { SyncContext } from '../actions/map_actions';
+import { DataRequestAbortError } from './util/data_request';
+
+const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
 
 function getAggType(dynamicProperty: IDynamicStyleProperty): AGG_TYPE {
   return dynamicProperty.isOrdinal() ? AGG_TYPE.AVG : AGG_TYPE.TERMS;
@@ -209,33 +213,46 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     return this._documentStyle;
   }
 
-  async syncData(syncContext: unknown) {
+  async syncData(syncContext: SyncContext) {
+    const dataRequestId = ACTIVE_COUNT_DATA_ID;
+    const requestToken = Symbol(`layer-active-count:${this.getId()}`);
     const searchFilters = this._getSearchFilters(
-      // @ts-ignore
       syncContext.dataFilters,
       this.getSource(),
       this.getCurrentStyle()
     );
     const canSkipFetch = await canSkipSourceUpdate({
       source: this.getSource(),
-      prevDataRequest: this.getSourceDataRequest(),
+      prevDataRequest: this.getDataRequest(dataRequestId),
       nextMeta: searchFilters,
     });
+    if (canSkipFetch) {
+      return;
+    }
 
-    let activeSource = this.getSource();
-    let activeStyle = this.getCurrentStyle();
-    if (!canSkipFetch) {
+    let isSyncClustered;
+    try {
+      syncContext.startLoading(dataRequestId, requestToken, searchFilters);
       const searchSource = await this._documentSource.makeSearchSource(searchFilters, 0);
       const resp = await searchSource.fetch();
       const maxResultWindow = await this._documentSource.getMaxResultWindow();
-
-      if (resp.hits.total > maxResultWindow) {
-        activeSource = this._clusterSource;
-        activeStyle = this._clusterStyle;
-      } else {
-        activeSource = this._documentSource;
-        activeStyle = this._documentStyle;
+      isSyncClustered = resp.hits.total > maxResultWindow;
+      syncContext.stopLoading(dataRequestId, requestToken, { isSyncClustered }, searchFilters);
+    } catch (error) {
+      if (!(error instanceof DataRequestAbortError)) {
+        syncContext.onLoadError(dataRequestId, requestToken, error.message);
       }
+      return;
+    }
+
+    let activeSource;
+    let activeStyle;
+    if (isSyncClustered) {
+      activeSource = this._clusterSource;
+      activeStyle = this._clusterStyle;
+    } else {
+      activeSource = this._documentSource;
+      activeStyle = this._documentStyle;
     }
 
     super._syncData(syncContext, activeSource, activeStyle);
