@@ -10,10 +10,11 @@ import { EuiPanel } from '@elastic/eui';
 export const ConfigForm: React.FC<{
   type: string;
   supportedOss: string[];
-  children: any;
-}> = React.memo(({ type, supportedOss, children }) => {
+  children: React.ReactNode;
+  id: string;
+}> = React.memo(({ type, supportedOss, children, id }) => {
   return (
-    <EuiPanel>
+    <EuiPanel data-test-subj={id}>
       <span>{`Type: ${type}`}</span>
       <span>{`OS: ${supportedOss.join(',')}`}</span>
       {children}

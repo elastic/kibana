@@ -41,7 +41,7 @@ export const WindowsEventing = React.memo(() => {
     });
   };
   return (
-    <ConfigForm type={`Event Collection`} supportedOss={['Windows']}>
+    <ConfigForm type={`Event Collection`} supportedOss={['Windows']} id="windowsEventingForm">
       {renderCheckboxes()}
     </ConfigForm>
   );

@@ -12,13 +12,20 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Endpoint Policy Details', function() {
     this.tags(['ciGroup7']);
+    before(async () => {
+      await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy/123');
+    });
 
     it('loads the Policy Details Page', async () => {
-      await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy/123');
       await testSubjects.existOrFail('policyDetailsViewTitle');
 
       const policyDetailsNotFoundTitle = await testSubjects.getVisibleText('policyDetailsName');
       expect(policyDetailsNotFoundTitle).to.equal('policy with some protections 123');
+    });
+
+    it('loads the Policy Details Eventing config', async () => {
+      await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy/123');
+      await testSubjects.existOrFail('windowsEventingForm');
     });
   });
 }
