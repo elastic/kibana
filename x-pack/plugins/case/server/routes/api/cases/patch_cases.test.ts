@@ -18,7 +18,7 @@ import { initPatchCasesApi } from './patch_cases';
 
 describe('PATCH cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
-  beforeEach(async () => {
+  beforeAll(async () => {
     routeHandler = await createRoute(initPatchCasesApi, 'patch');
     const spyOnDate = jest.spyOn(global, 'Date') as jest.SpyInstance<{}, []>;
     spyOnDate.mockImplementation(() => ({
