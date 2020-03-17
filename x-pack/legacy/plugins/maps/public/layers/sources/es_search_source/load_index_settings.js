@@ -15,7 +15,6 @@ import { i18n } from '@kbn/i18n';
 
 let toastDisplayed = false;
 const indexSettings = new Map();
-const http = getHttp();
 
 export async function loadIndexSettings(indexPatternTitle) {
   if (indexSettings.has(indexPatternTitle)) {
@@ -28,10 +27,11 @@ export async function loadIndexSettings(indexPatternTitle) {
 }
 
 async function fetchIndexSettings(indexPatternTitle) {
+  const http = getHttp();
   try {
-    const indexSettings = await http({
+    const indexSettings = await http.fetch(`../${INDEX_SETTINGS_API_PATH}`, {
       method: 'GET',
-      pathname: `../${INDEX_SETTINGS_API_PATH}`,
+      credentials: 'same-origin',
       query: {
         indexPatternTitle,
       },

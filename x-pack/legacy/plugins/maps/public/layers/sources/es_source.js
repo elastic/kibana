@@ -22,8 +22,6 @@ import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
 import { DataRequestAbortError } from '../util/data_request';
 import { expandToTileBoundaries } from './es_geo_grid_source/geo_tile_utils';
 
-const timefilter = getTimeFilter();
-
 export class AbstractESSource extends AbstractVectorSource {
   static icon = 'logoElasticsearch';
 
@@ -123,7 +121,7 @@ export class AbstractESSource extends AbstractVectorSource {
       allFilters.push(createExtentFilter(buffer, geoField.name, geoField.type));
     }
     if (isTimeAware) {
-      allFilters.push(timefilter.createFilter(indexPattern, searchFilters.timeFilters));
+      allFilters.push(getTimeFilter().createFilter(indexPattern, searchFilters.timeFilters));
     }
 
     const searchSource = new SearchSource(initialSearchContext);
@@ -295,7 +293,7 @@ export class AbstractESSource extends AbstractVectorSource {
     }
     if (style.isTimeAware() && (await this.isTimeAware())) {
       searchSource.setField('filter', [
-        timefilter.createFilter(indexPattern, searchFilters.timeFilters),
+        getTimeFilter().createFilter(indexPattern, searchFilters.timeFilters),
       ]);
     }
 

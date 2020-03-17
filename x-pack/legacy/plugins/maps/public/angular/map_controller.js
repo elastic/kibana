@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { capabilities } from 'ui/capabilities';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
-import { timefilter } from 'ui/timefilter';
+import { getTimeFilter, indexPatternService, getInspector } from '../kibana_services';
 import { Provider } from 'react-redux';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createMapStore } from '../../../../../plugins/maps/public/reducers/store';
@@ -52,7 +52,7 @@ import {
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInspectorAdapters } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import { docTitle } from 'ui/doc_title';
-import { indexPatternService, getInspector } from '../kibana_services';
+
 import { toastNotifications } from 'ui/notify';
 import { getInitialLayers } from './get_initial_layers';
 import { getInitialQuery } from './get_initial_query';
@@ -519,8 +519,8 @@ app.controller(
     }
 
     // Hide angular timepicer/refresh UI from top nav
-    timefilter.disableTimeRangeSelector();
-    timefilter.disableAutoRefreshSelector();
+    getTimeFilter().disableTimeRangeSelector();
+    getTimeFilter().disableAutoRefreshSelector();
     $scope.showDatePicker = true; // used by query-bar directive to enable timepikcer in query bar
     $scope.topNavMenu = [
       {

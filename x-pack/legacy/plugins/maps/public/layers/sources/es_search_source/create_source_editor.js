@@ -26,9 +26,6 @@ import {
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 
-const IndexPatternSelect = getIndexPatternSelectComponent();
-const http = getHttp();
-
 function getGeoFields(fields) {
   return fields.filter(field => {
     return (
@@ -84,9 +81,10 @@ export class CreateSourceEditor extends Component {
   };
 
   loadIndexDocCount = async indexPatternTitle => {
-    const { count } = await http({
+    const http = getHttp();
+    const { count } = await http.fetch(`../${GIS_API_PATH}/indexCount`, {
       method: 'GET',
-      pathname: `../${GIS_API_PATH}/indexCount`,
+      credentials: 'same-origin',
       query: {
         index: indexPatternTitle,
       },
@@ -253,6 +251,8 @@ export class CreateSourceEditor extends Component {
   }
 
   render() {
+    const IndexPatternSelect = getIndexPatternSelectComponent();
+
     return (
       <Fragment>
         {this._renderNoIndexPatternWarning()}

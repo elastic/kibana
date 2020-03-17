@@ -11,7 +11,7 @@ import { VectorTileLayer } from '../layers/vector_tile_layer';
 import { VectorLayer } from '../layers/vector_layer';
 import { HeatmapLayer } from '../layers/heatmap_layer';
 import { ALL_SOURCES } from '../layers/sources/all_sources';
-import { timefilter } from 'ui/timefilter';
+import { getTimeFilter } from '../kibana_services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInspectorAdapters } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
 import {
@@ -106,7 +106,7 @@ export const getMapCenter = ({ map }) =>
 export const getMouseCoordinates = ({ map }) => map.mapState.mouseCoordinates;
 
 export const getTimeFilters = ({ map }) =>
-  map.mapState.timeFilters ? map.mapState.timeFilters : timefilter.getTime();
+  map.mapState.timeFilters ? map.mapState.timeFilters : getTimeFilter().getTime();
 
 export const getQuery = ({ map }) => map.mapState.query;
 
@@ -129,7 +129,7 @@ export const getRefreshConfig = ({ map }) => {
     return map.mapState.refreshConfig;
   }
 
-  const refreshInterval = timefilter.getRefreshInterval();
+  const refreshInterval = getTimeFilter().getRefreshInterval();
   return {
     isPaused: refreshInterval.pause,
     interval: refreshInterval.value,

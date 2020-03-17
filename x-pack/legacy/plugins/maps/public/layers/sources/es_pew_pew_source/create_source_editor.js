@@ -19,8 +19,6 @@ import {
   getAggregatableGeoFields,
 } from '../../../index_pattern_util';
 
-const IndexPatternSelect = getIndexPatternSelectComponent();
-
 export class CreateSourceEditor extends Component {
   static propTypes = {
     onSourceConfigChange: PropTypes.func.isRequired,
@@ -168,6 +166,8 @@ export class CreateSourceEditor extends Component {
   }
 
   _renderIndexPatternSelect() {
+    const IndexPatternSelect = getIndexPatternSelectComponent();
+
     return (
       <EuiFormRow
         label={i18n.translate('xpack.maps.source.pewPew.indexPatternLabel', {
