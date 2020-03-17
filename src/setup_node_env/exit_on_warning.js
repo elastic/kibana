@@ -35,4 +35,16 @@ if (process.noProcessWarnings !== true) {
 
     process.exit(1);
   });
+
+  // While the above warning listener would also be called on
+  // unhandledRejection warnings, we can give a better error message if we
+  // handle them separately:
+  process.on('unhandledRejection', function(reason) {
+    console.error('Unhandled Promise rejection detected:');
+    console.error();
+    console.error(reason);
+    console.error();
+    console.error('Terminating process...');
+    process.exit(1);
+  });
 }

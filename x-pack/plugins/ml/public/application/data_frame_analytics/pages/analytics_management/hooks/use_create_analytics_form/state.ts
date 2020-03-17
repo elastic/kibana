@@ -5,11 +5,18 @@
  */
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { DeepPartial } from '../../../../../../../common/types/common';
+import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../privilege/check_privilege';
-import { mlNodesAvailable } from '../../../../../ml_nodes_check/check_ml_nodes';
+import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 
-import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
+import {
+  isClassificationAnalysis,
+  isRegressionAnalysis,
+  DataFrameAnalyticsId,
+  DataFrameAnalyticsConfig,
+  ANALYSIS_CONFIG_TYPE,
+} from '../../../../common/analytics';
+import { CloneDataFrameAnalyticsConfig } from '../../components/analytics_list/action_clone';
 
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',
@@ -21,7 +28,7 @@ export enum DEFAULT_MODEL_MEMORY_LIMIT {
 export type EsIndexName = string;
 export type DependentVariable = string;
 export type IndexPatternTitle = string;
-export type AnalyticsJobType = JOB_TYPES | undefined;
+export type AnalyticsJobType = ANALYSIS_CONFIG_TYPE | undefined;
 type IndexPatternId = string;
 export type SourceIndexMap = Record<
   IndexPatternTitle,
@@ -31,12 +38,6 @@ export type SourceIndexMap = Record<
 export interface FormMessage {
   error?: string;
   message: string;
-}
-
-export enum JOB_TYPES {
-  OUTLIER_DETECTION = 'outlier_detection',
-  REGRESSION = 'regression',
-  CLASSIFICATION = 'classification',
 }
 
 export interface State {
@@ -90,6 +91,7 @@ export interface State {
   jobIds: DataFrameAnalyticsId[];
   requestMessages: FormMessage[];
   estimatedModelMemoryLimit: string;
+  cloneJob?: DeepReadonly<DataFrameAnalyticsConfig>;
 }
 
 export const getInitialState = (): State => ({
@@ -174,8 +176,8 @@ export const getJobConfigFromFormState = (
   };
 
   if (
-    formState.jobType === JOB_TYPES.REGRESSION ||
-    formState.jobType === JOB_TYPES.CLASSIFICATION
+    formState.jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
+    formState.jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
   ) {
     jobConfig.analysis = {
       [formState.jobType]: {
@@ -187,3 +189,35 @@ export const getJobConfigFromFormState = (
 
   return jobConfig;
 };
+
+/**
+ * Extracts form state for a job clone from the analytics job configuration.
+ * For cloning we keep job id and destination index empty.
+ */
+export function getCloneFormStateFromJobConfig(
+  analyticsJobConfig: Readonly<CloneDataFrameAnalyticsConfig>
+): Partial<State['form']> {
+  const jobType = Object.keys(analyticsJobConfig.analysis)[0] as ANALYSIS_CONFIG_TYPE;
+
+  const resultState: Partial<State['form']> = {
+    jobType,
+    description: analyticsJobConfig.description ?? '',
+    sourceIndex: Array.isArray(analyticsJobConfig.source.index)
+      ? analyticsJobConfig.source.index.join(',')
+      : analyticsJobConfig.source.index,
+    modelMemoryLimit: analyticsJobConfig.model_memory_limit,
+    excludes: analyticsJobConfig.analyzed_fields.excludes,
+  };
+
+  if (
+    isRegressionAnalysis(analyticsJobConfig.analysis) ||
+    isClassificationAnalysis(analyticsJobConfig.analysis)
+  ) {
+    const analysisConfig = analyticsJobConfig.analysis[jobType];
+
+    resultState.dependentVariable = analysisConfig.dependent_variable;
+    resultState.trainingPercent = analysisConfig.training_percent;
+  }
+
+  return resultState;
+}
