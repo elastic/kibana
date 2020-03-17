@@ -29,7 +29,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../../../src/plugins/es_ui_shared/public';
+import { indices } from '../../../../../../../../src/plugins/es_ui_shared/public';
 import { indexNameValidator, leaderIndexValidator } from '../../services/input_validation';
 import routing from '../../services/routing';
 import { loadIndices } from '../../services/api';
@@ -47,7 +47,7 @@ import { RemoteClustersFormField } from '../remote_clusters_form_field';
 
 import { FollowerIndexRequestFlyout } from './follower_index_request_flyout';
 
-const indexNameIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
+const indexNameIllegalCharacters = indices.INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
 const fieldToValidatorMap = advancedSettingsFields.reduce(
   (map, advancedSetting) => {

@@ -27,3 +27,5 @@ export {
   sendRequest,
   useRequest,
 } from './request/np_ready_request';
+
+export { indices } from './indices';

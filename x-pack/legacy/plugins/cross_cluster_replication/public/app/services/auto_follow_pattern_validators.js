@@ -8,12 +8,14 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
+import { indices } from '../../../../../../../src/plugins/es_ui_shared/public';
+import { indexPatterns } from '../../../../../../../src/plugins/data/public';
+
+const {
   indexNameBeginsWithPeriod,
   findIllegalCharactersInIndexName,
   indexNameContainsSpaces,
-} from '../../../../../../../src/plugins/es_ui_shared/public';
-import { indexPatterns } from '../../../../../../../src/plugins/data/public';
+} = indices;
 
 export const validateName = (name = '') => {
   let errorMsg = null;

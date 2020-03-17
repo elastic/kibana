@@ -17,8 +17,7 @@
  * under the License.
  */
 
-// @ts-ignore
-import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../indices';
+import { indices } from '../../../../public';
 import { ValidationFunc } from '../../hook_form_lib';
 import { startsWith, containsChars } from '../../../validators/string';
 import { ERROR_CODE } from './types';
@@ -49,7 +48,7 @@ export const indexNameField = (i18n: any) => (
     };
   }
 
-  const { charsFound, doesContain } = containsChars(INDEX_ILLEGAL_CHARACTERS_VISIBLE)(
+  const { charsFound, doesContain } = containsChars(indices.INDEX_ILLEGAL_CHARACTERS_VISIBLE)(
     value as string
   );
   if (doesContain) {

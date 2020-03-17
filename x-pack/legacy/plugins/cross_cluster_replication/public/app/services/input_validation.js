@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../../src/plugins/es_ui_shared/public';
+import { indices } from '../../../../../../../src/plugins/es_ui_shared/public';
 
 const isEmpty = value => {
   return !value || !value.trim().length;
@@ -19,7 +19,7 @@ const beginsWithPeriod = value => {
 };
 
 const findIllegalCharacters = value => {
-  return INDEX_ILLEGAL_CHARACTERS_VISIBLE.reduce((chars, char) => {
+  return indices.INDEX_ILLEGAL_CHARACTERS_VISIBLE.reduce((chars, char) => {
     if (value.includes(char)) {
       chars.push(char);
     }

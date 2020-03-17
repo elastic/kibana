@@ -29,7 +29,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../../src/plugins/es_ui_shared/public';
+import { indices } from '../../../../../../../src/plugins/es_ui_shared/public';
 import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 
 import routing from '../services/routing';
@@ -47,7 +47,7 @@ import {
 import { AutoFollowPatternRequestFlyout } from './auto_follow_pattern_request_flyout';
 
 const indexPatternIllegalCharacters = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.join(' ');
-const indexNameIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
+const indexNameIllegalCharacters = indices.INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
 const getEmptyAutoFollowPattern = (remoteClusterName = '') => ({
   name: '',

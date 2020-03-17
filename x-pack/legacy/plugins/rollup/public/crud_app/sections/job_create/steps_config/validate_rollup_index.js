@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { findIllegalCharactersInIndexName } from '../../../../shared_imports';
+import { indices } from '../../../../shared_imports';
 
 export function validateRollupIndex(rollupIndex, indexPattern) {
   if (!rollupIndex || !rollupIndex.trim()) {
@@ -27,7 +27,7 @@ export function validateRollupIndex(rollupIndex, indexPattern) {
     ];
   }
 
-  const illegalCharacters = findIllegalCharactersInIndexName(rollupIndex);
+  const illegalCharacters = indices.findIllegalCharactersInIndexName(rollupIndex);
 
   if (illegalCharacters.length) {
     return [
