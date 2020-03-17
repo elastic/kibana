@@ -60,7 +60,7 @@ export const validate = (alertParams: any): ValidationResult => {
 export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   autocomplete,
 }): AlertTypeModel => ({
-  id: 'xpack.uptime.alerts.downMonitor',
+  id: 'xpack.uptime.alerts.monitorStatus',
   name: 'Uptime Monitor Status',
   iconClass: 'uptimeApp',
   alertParamsExpression: params => {

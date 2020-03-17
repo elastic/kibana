@@ -12,8 +12,8 @@ interface ActionGroupDefinition {
 type ActionGroupDefinitions = Record<string, ActionGroupDefinition>;
 
 export const ACTION_GROUP_DEFINITIONS: ActionGroupDefinitions = {
-  DOWN_MONITOR: {
-    id: 'xpack.uptime.alerts.actionGroups.downMonitor',
+  MONITOR_STATUS: {
+    id: 'xpack.uptime.alerts.actionGroups.monitorStatus',
     name: 'Uptime Down Monitor',
   },
 };

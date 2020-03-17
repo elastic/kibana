@@ -18,7 +18,7 @@ import {
   StatusCheckAlertState,
 } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 
-const { DOWN_MONITOR } = ACTION_GROUP_DEFINITIONS;
+const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
 /**
  * Reduce a composite-key array of status results to a set of unique IDs.
@@ -184,11 +184,11 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
       locations: schema.arrayOf(schema.string()),
     }),
   },
-  defaultActionGroupId: DOWN_MONITOR.id,
+  defaultActionGroupId: MONITOR_STATUS.id,
   actionGroups: [
     {
-      id: DOWN_MONITOR.id,
-      name: DOWN_MONITOR.name,
+      id: MONITOR_STATUS.id,
+      name: MONITOR_STATUS.name,
     },
   ],
   async executor(options: AlertExecutorOptions) {
@@ -215,12 +215,12 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
     // if no monitors are down for our query, we don't need to trigger an alert
     if (monitorsByLocation.length) {
       const uniqueIds = uniqueMonitorIds(monitorsByLocation);
-      const alertInstance = options.services.alertInstanceFactory(DOWN_MONITOR.id);
+      const alertInstance = options.services.alertInstanceFactory(MONITOR_STATUS.id);
       alertInstance.replaceState({
         ...options.state,
         monitors: monitorsByLocation,
       });
-      alertInstance.scheduleActions(DOWN_MONITOR.id, {
+      alertInstance.scheduleActions(MONITOR_STATUS.id, {
         message: contextMessage(Array.from(uniqueIds.keys()), DEFAULT_MAX_MESSAGE_ROWS),
         server,
         completeIdList: fullListByIdAndLocation(monitorsByLocation),

@@ -57,7 +57,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // we're not testing the flyout's ability to associate alerts with action connectors
       expect(actions).to.eql([]);
 
-      expect(alertTypeId).to.eql('xpack.uptime.alerts.downMonitor');
+      expect(alertTypeId).to.eql('xpack.uptime.alerts.monitorStatus');
       expect(consumer).to.eql('uptime');
       expect(interval).to.eql('11m');
       expect(tags).to.eql(['uptime', 'another']);

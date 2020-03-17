@@ -172,7 +172,7 @@ describe('monitor status alert type', () => {
         "defaultActionMessage": "{{context.message}}
       {{context.completeIdList}}",
         "iconClass": "uptimeApp",
-        "id": "xpack.uptime.alerts.downMonitor",
+        "id": "xpack.uptime.alerts.monitorStatus",
         "name": "Uptime Monitor Status",
         "validate": [Function],
       }
