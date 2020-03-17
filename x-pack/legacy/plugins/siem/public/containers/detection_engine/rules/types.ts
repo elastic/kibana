@@ -6,11 +6,11 @@
 
 import * as t from 'io-ts';
 
-export const RuleTypeSchema = t.union([
-  t.literal('query'),
-  t.literal('saved_query'),
-  t.literal('machine_learning'),
-]);
+export const RuleTypeSchema = t.keyof({
+  query: null,
+  saved_query: null,
+  machine_learning: null,
+});
 export type RuleType = t.TypeOf<typeof RuleTypeSchema>;
 
 export const NewRuleSchema = t.intersection([
