@@ -125,7 +125,7 @@ export const checks: DisallowedSyntaxCheck[] = [
     name: '[es2018] for-await-of statements',
     nodeType: 'ForOfStatement',
     test: (n: estree.ForOfStatement) =>
-      // @ts-ignore TODO: ensure this property is added to @types/estree
+      // @ts-ignore removed once https://github.com/DefinitelyTyped/DefinitelyTyped/pull/43103 is merged
       n.await,
   },
   // https://github.com/estree/estree/blob/master/es2018.md#expressions
@@ -135,7 +135,7 @@ export const checks: DisallowedSyntaxCheck[] = [
     test: (n: estree.ObjectExpression) =>
       n.properties.some(
         p =>
-          // @ts-ignore TODO: make sure this is added to @types/estree
+          // @ts-ignore removed once https://github.com/DefinitelyTyped/DefinitelyTyped/pull/43103 is merged
           p.type === 'SpreadElement'
       ),
   },
@@ -152,7 +152,7 @@ export const checks: DisallowedSyntaxCheck[] = [
     test: (n: estree.ObjectPattern) =>
       n.properties.some(
         p =>
-          // @ts-ignore TODO: make sure this is added to @types/estree
+          // @ts-ignore removed once https://github.com/DefinitelyTyped/DefinitelyTyped/pull/43103 is merged
           p.type === 'RestElement'
       ),
   },
@@ -179,7 +179,7 @@ export const checks: DisallowedSyntaxCheck[] = [
   // https://github.com/estree/estree/blob/master/es2020.md#importexpression
   {
     name: '[es2020] import expression',
-    // @ts-ignore TODO: make sure this is added to @types/estree
+    // @ts-ignore removed once https://github.com/DefinitelyTyped/DefinitelyTyped/pull/43103 is merged
     nodeType: 'ImportExpression',
   },
   // https://github.com/estree/estree/blob/master/es2020.md#exportalldeclaration
