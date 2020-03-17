@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import { ISavedObjectsRepository } from 'kibana/server';
 
 import { getInternalRepository } from './internal_repository';
 
@@ -28,12 +29,20 @@ export function initTelemetry(): Telemetry {
   };
 }
 
-export async function getTelemetry(internalRepo?: object): Promise<Telemetry> {
-  const internalRepository = internalRepo || getInternalRepository();
+export async function getTelemetry(
+  internalRepository?: ISavedObjectsRepository
+): Promise<Telemetry | null> {
+  if (internalRepository === undefined) {
+    return null;
+  }
+
   let telemetrySavedObject;
 
   try {
-    telemetrySavedObject = await internalRepository.get(TELEMETRY_DOC_ID, TELEMETRY_DOC_ID);
+    telemetrySavedObject = await internalRepository.get<Telemetry>(
+      TELEMETRY_DOC_ID,
+      TELEMETRY_DOC_ID
+    );
   } catch (e) {
     // Fail silently
   }
@@ -41,11 +50,15 @@ export async function getTelemetry(internalRepo?: object): Promise<Telemetry> {
   return telemetrySavedObject ? telemetrySavedObject.attributes : null;
 }
 
-export async function updateTelemetry(internalRepo?: any) {
+export async function updateTelemetry(internalRepo?: ISavedObjectsRepository) {
   const internalRepository = internalRepo || getInternalRepository();
+  if (internalRepository === null) {
+    return;
+  }
+
   let telemetry = await getTelemetry(internalRepository);
   // Create if doesn't exist
-  if (!telemetry || _.isEmpty(telemetry)) {
+  if (telemetry === null || _.isEmpty(telemetry)) {
     const newTelemetrySavedObject = await internalRepository.create(
       TELEMETRY_DOC_ID,
       initTelemetry(),
@@ -54,7 +67,9 @@ export async function updateTelemetry(internalRepo?: any) {
     telemetry = newTelemetrySavedObject.attributes;
   }
 
-  await internalRepository.update(TELEMETRY_DOC_ID, TELEMETRY_DOC_ID, incrementCounts(telemetry));
+  if (telemetry !== null) {
+    await internalRepository.update(TELEMETRY_DOC_ID, TELEMETRY_DOC_ID, incrementCounts(telemetry));
+  }
 }
 
 function incrementCounts(telemetry: Telemetry) {
