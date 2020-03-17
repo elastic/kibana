@@ -244,7 +244,7 @@ export class AlertingPlugin {
     return async function alertsRouteHandlerContext(context, request) {
       return {
         getAlertsClient: () => {
-          return alertsClientFactory!.create(request, context.core!.savedObjects.client);
+          return alertsClientFactory!.create(request, context.core.savedObjects.client);
         },
         listTypes: alertTypeRegistry!.list.bind(alertTypeRegistry!),
       };
