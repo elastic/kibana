@@ -36,6 +36,7 @@ export interface SavedVisState {
 }
 
 export interface ISavedVis {
+  id: string;
   title: string;
   description?: string;
   visState: SavedVisState;

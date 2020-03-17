@@ -51,6 +51,7 @@ export const convertToSerializedVis = async (savedVis: ISavedVis): Promise<Seria
   const aggs = indexPattern ? visState.aggs || [] : visState.aggs;
 
   return {
+    id: savedVis.id,
     title: savedVis.title,
     type: visState.type,
     description: savedVis.description,
@@ -67,6 +68,7 @@ export const convertToSerializedVis = async (savedVis: ISavedVis): Promise<Seria
 
 export const convertFromSerializedVis = (vis: SerializedVis): ISavedVis => {
   return {
+    id: vis.id,
     title: vis.title,
     description: vis.description,
     visState: {

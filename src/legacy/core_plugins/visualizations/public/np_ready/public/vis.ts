@@ -49,6 +49,7 @@ export interface SerializedVisData {
 }
 
 export interface SerializedVis {
+  id: string;
   title: string;
   description?: string;
   type: string;
@@ -71,6 +72,7 @@ export interface VisParams {
 
 export class Vis {
   public readonly type: VisType;
+  public readonly id: string;
   public title: string = '';
   public description: string = '';
   public params: VisParams = {};
@@ -88,6 +90,7 @@ export class Vis {
     }
 
     this.uiState = new PersistedState(visState.uiState);
+    this.id = visState.id;
 
     this.setState(visState || {});
   }
@@ -131,6 +134,7 @@ export class Vis {
     const aggs = this.data.aggs ? this.data.aggs.aggs.map(agg => agg.toJSON()) : [];
     const indexPattern = this.data.searchSource && this.data.searchSource.getField('index');
     return {
+      id: this.id,
       title: this.title,
       type: this.type.name,
       params: cloneDeep(this.params) as any,

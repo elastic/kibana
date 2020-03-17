@@ -101,7 +101,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     const savedVisualizations = getSavedVisualizationsLoader();
 
     try {
-      const visId = input.id as string;
+      const visId = vis.id as string;
 
       const editUrl = visId
         ? getHttp().basePath.prepend(`/app/kibana${savedVisualizations.urlFor(visId)}`)
