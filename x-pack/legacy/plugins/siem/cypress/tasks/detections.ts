@@ -8,19 +8,12 @@ import {
   CLOSED_SIGNALS_BTN,
   LOADING_SIGNALS_PANEL,
   MANAGE_SIGNAL_DETECTION_RULES_BTN,
-  OPEN_CLOSE_SIGNAL_BTN,
   OPEN_CLOSE_SIGNALS_BTN,
   OPENED_SIGNALS_BTN,
   SIGNALS,
   SIGNAL_CHECKBOX,
 } from '../screens/detections';
 import { REFRESH_BUTTON } from '../screens/siem_header';
-
-export const closeFirstSignal = () => {
-  cy.get(OPEN_CLOSE_SIGNAL_BTN)
-    .first()
-    .click({ force: true });
-};
 
 export const closeSignals = () => {
   cy.get(OPEN_CLOSE_SIGNALS_BTN).click({ force: true });

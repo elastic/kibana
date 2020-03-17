@@ -88,20 +88,8 @@ describe('DraggableWrapper', () => {
 describe('ConditionalPortal', () => {
   const mount = useMountAppended();
   const props = {
-    usePortal: false,
     registerProvider: jest.fn(),
-    isDragging: true,
   };
-
-  it(`doesn't call registerProvider is NOT isDragging`, () => {
-    mount(
-      <ConditionalPortal {...props} isDragging={false}>
-        <div />
-      </ConditionalPortal>
-    );
-
-    expect(props.registerProvider.mock.calls.length).toEqual(0);
-  });
 
   it('calls registerProvider when isDragging', () => {
     mount(
