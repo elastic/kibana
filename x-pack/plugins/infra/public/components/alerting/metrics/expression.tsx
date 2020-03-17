@@ -153,7 +153,7 @@ export const Expressions: React.FC<Props> = props => {
 
       setAlertParams('groupBy', md.currentOptions.groupBy);
     }
-  }, [alertsContext.metadata, defaultExpression, setAlertParams, source]);
+  }, [alertsContext.metadata, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
@@ -208,7 +208,10 @@ export const Expressions: React.FC<Props> = props => {
         <MetricsExplorerGroupBy
           onChange={onGroupByChange}
           fields={derivedIndexPattern.fields}
-          options={alertsContext.metadata.currentOptions}
+          options={{
+            ...alertsContext.metadata.currentOptions,
+            groupBy: alertParams.groupBy || undefined,
+          }}
         />
       )}
     </>
@@ -279,7 +282,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
 
   return (
     <>
-      <EuiFlexGroup gutterSize="s" wrap>
+      <EuiFlexGroup gutterSize="xs" wrap>
         <EuiFlexItem grow={true}>
           <EuiFlexGroup gutterSize="s" wrap>
             <EuiFlexItem grow={false}>
@@ -325,7 +328,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
+          <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem>
               <EuiButtonIcon
                 aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.addCondition', {
