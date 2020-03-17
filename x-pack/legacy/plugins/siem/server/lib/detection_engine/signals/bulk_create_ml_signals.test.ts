@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { convertAnomalyFieldsToECS } from './bulk_create_ml_signals';
+import { transformAnomalyFieldsToEcs } from './bulk_create_ml_signals';
 
 const buildMockAnomaly = () => ({
   job_id: 'rare_process_by_host_linux_ecs',
@@ -45,10 +45,18 @@ const buildMockAnomaly = () => ({
   'host.name': ['rock01'],
 });
 
-describe('convertAnomalyFieldsToECS', () => {
+describe('transformAnomalyFieldsToEcs', () => {
+  it('adds a @timestamp field based on timestamp', () => {
+    const anomaly = buildMockAnomaly();
+    const result = transformAnomalyFieldsToEcs(anomaly);
+    const expectedTime = '2020-03-17T22:00:00.000Z';
+
+    expect(result['@timestamp']).toEqual(expectedTime);
+  });
+
   it('deletes dotted influencer fields', () => {
     const anomaly = buildMockAnomaly();
-    const result = convertAnomalyFieldsToECS(anomaly);
+    const result = transformAnomalyFieldsToEcs(anomaly);
 
     const ecsKeys = Object.keys(result);
     expect(ecsKeys).not.toContain('user.name');
@@ -58,7 +66,7 @@ describe('convertAnomalyFieldsToECS', () => {
 
   it('deletes dotted entity field', () => {
     const anomaly = buildMockAnomaly();
-    const result = convertAnomalyFieldsToECS(anomaly);
+    const result = transformAnomalyFieldsToEcs(anomaly);
 
     const ecsKeys = Object.keys(result);
     expect(ecsKeys).not.toContain('process.name');
@@ -66,7 +74,7 @@ describe('convertAnomalyFieldsToECS', () => {
 
   it('creates nested influencer fields', () => {
     const anomaly = buildMockAnomaly();
-    const result = convertAnomalyFieldsToECS(anomaly);
+    const result = transformAnomalyFieldsToEcs(anomaly);
 
     expect(result.process.pid).toEqual(['123']);
     expect(result.user.name).toEqual(['root']);
@@ -75,7 +83,7 @@ describe('convertAnomalyFieldsToECS', () => {
 
   it('creates nested entity field', () => {
     const anomaly = buildMockAnomaly();
-    const result = convertAnomalyFieldsToECS(anomaly);
+    const result = transformAnomalyFieldsToEcs(anomaly);
 
     expect(result.process.name).toEqual(['gzip']);
   });

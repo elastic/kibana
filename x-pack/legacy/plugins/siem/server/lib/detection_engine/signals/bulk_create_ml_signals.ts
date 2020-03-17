@@ -5,6 +5,7 @@
  */
 
 import { flow, set, omit } from 'lodash/fp';
+import { SearchResponse } from 'elasticsearch';
 
 import { Logger } from '../../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
@@ -29,8 +30,17 @@ interface BulkCreateMlSignalsParams {
   tags: string[];
 }
 
-export const convertAnomalyFieldsToECS = (anomaly: Anomaly): Anomaly => {
-  const { by_field_name: entityName, by_field_value: entityValue, influencers } = anomaly;
+interface EcsAnomaly extends Anomaly {
+  '@timestamp': string;
+}
+
+export const transformAnomalyFieldsToEcs = (anomaly: Anomaly): EcsAnomaly => {
+  const {
+    by_field_name: entityName,
+    by_field_value: entityValue,
+    influencers,
+    timestamp,
+  } = anomaly;
   let errantFields = (influencers ?? []).map(influencer => ({
     name: influencer.influencer_field_name,
     value: influencer.influencer_field_values,
@@ -42,16 +52,29 @@ export const convertAnomalyFieldsToECS = (anomaly: Anomaly): Anomaly => {
 
   const omitDottedFields = omit(errantFields.map(field => field.name));
   const setNestedFields = errantFields.map(field => set(field.name, field.value));
+  const setTimestamp = set('@timestamp', new Date(timestamp).toISOString());
 
-  return flow(omitDottedFields, setNestedFields)(anomaly);
+  return flow(omitDottedFields, setNestedFields, setTimestamp)(anomaly);
+};
+
+const transformAnomalyResultsToEcs = (results: AnomalyResults): SearchResponse<EcsAnomaly> => {
+  const transformedHits = results.hits.hits.map(({ _source, ...rest }) => ({
+    ...rest,
+    _source: transformAnomalyFieldsToEcs(_source),
+  }));
+
+  return {
+    ...results,
+    hits: {
+      ...results.hits,
+      hits: transformedHits,
+    },
+  };
 };
 
 export const bulkCreateMlSignals = async (params: BulkCreateMlSignalsParams) => {
-  const anomalies = params.someResult;
-  anomalies.hits.hits = anomalies.hits.hits.map(({ _source, ...rest }) => ({
-    ...rest,
-    _source: convertAnomalyFieldsToECS(_source),
-  }));
+  const anomalyResults = params.someResult;
+  const ecsResults = transformAnomalyResultsToEcs(anomalyResults);
 
-  return singleBulkCreate({ ...params, someResult: anomalies });
+  return singleBulkCreate({ ...params, someResult: ecsResults });
 };
