@@ -47,7 +47,6 @@ export interface Job {
   max_attempts: number;
   csv_contains_formulas: boolean;
   warnings: string[];
-  is_deleting: boolean;
 }
 
 export interface Props {
@@ -390,7 +389,6 @@ class ReportListingUi extends Component<Props, State> {
     const performDelete = async () => {
       for (const record of selectedJobs) {
         try {
-          this.setState(current => ({ ...current, is_deleting: true }));
           await this.props.apiClient.deleteReport(record.id);
           this.removeRecord(record);
           this.props.toasts.addSuccess(
@@ -488,7 +486,6 @@ class ReportListingUi extends Component<Props, State> {
               max_attempts: source.max_attempts,
               csv_contains_formulas: get(source, 'output.csv_contains_formulas'),
               warnings: source.output ? source.output.warnings : undefined,
-              is_deleting: false,
             };
           }
         ),
