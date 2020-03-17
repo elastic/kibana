@@ -147,6 +147,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
                   packageName={datasource.package.name}
                   version={datasource.package.version}
                   size="m"
+                  style={{ marginRight: '1ch' }}
                 />
               )}
               {packageTitle}
