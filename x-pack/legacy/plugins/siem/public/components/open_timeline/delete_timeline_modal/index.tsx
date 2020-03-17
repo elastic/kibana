@@ -3,9 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiModal, EuiOverlayMask, EuiIcon, EuiLink } from '@elastic/eui';
+
+import { EuiModal, EuiOverlayMask } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import styled, { createGlobalStyle } from 'styled-components';
+import { createGlobalStyle } from 'styled-components';
+
 import { DeleteTimelineModal, DELETE_TIMELINE_MODAL_WIDTH } from './delete_timeline_modal';
 import { DeleteTimelines } from '../types';
 const RemovePopover = createGlobalStyle`
@@ -13,12 +15,7 @@ div.euiPopover__panel-isOpen {
   display: none;
 }
 `;
-export const TimelineCustomAction = styled(EuiLink)`
-  width: 100%;
-`;
-export const ActionListIcon = styled(EuiIcon)`
-  margin-right: 8px;
-`;
+
 interface Props {
   deleteTimelines: DeleteTimelines;
   onComplete?: () => void;

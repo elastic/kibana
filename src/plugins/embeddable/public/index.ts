@@ -48,8 +48,6 @@ export {
   EmbeddableRoot,
   EmbeddableVisTriggerContext,
   ErrorEmbeddable,
-  GetEmbeddableFactories,
-  GetEmbeddableFactory,
   IContainer,
   IEmbeddable,
   isErrorEmbeddable,
@@ -68,4 +66,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
 
-export { IEmbeddableSetup, IEmbeddableStart } from './plugin';
+export { EmbeddableSetup, EmbeddableStart } from './plugin';

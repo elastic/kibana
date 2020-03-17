@@ -23,7 +23,7 @@ import * as React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { SharePluginSetup } from 'src/plugins/share/public';
 import { UiActionsSetup, UiActionsStart } from '../../../plugins/ui_actions/public';
-import { CONTEXT_MENU_TRIGGER, IEmbeddableSetup, IEmbeddableStart } from './embeddable_plugin';
+import { CONTEXT_MENU_TRIGGER, EmbeddableSetup, EmbeddableStart } from './embeddable_plugin';
 import { ExpandPanelAction, ReplacePanelAction } from '.';
 import { DashboardContainerFactory } from './embeddable/dashboard_container_factory';
 import { Start as InspectorStartContract } from '../../../plugins/inspector/public';
@@ -47,13 +47,13 @@ declare module '../../share/public' {
 }
 
 interface SetupDependencies {
-  embeddable: IEmbeddableSetup;
+  embeddable: EmbeddableSetup;
   uiActions: UiActionsSetup;
   share?: SharePluginSetup;
 }
 
 interface StartDependencies {
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   inspector: InspectorStartContract;
   uiActions: UiActionsStart;
 }
@@ -72,7 +72,10 @@ export class DashboardEmbeddableContainerPublicPlugin
   implements Plugin<Setup, Start, SetupDependencies, StartDependencies> {
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { share, uiActions }: SetupDependencies): Setup {
+  public setup(
+    core: CoreSetup<StartDependencies>,
+    { share, uiActions, embeddable }: SetupDependencies
+  ): Setup {
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction);
@@ -86,25 +89,43 @@ export class DashboardEmbeddableContainerPublicPlugin
         }))
       );
     }
+
+    const getStartServices = async () => {
+      const [coreStart, deps] = await core.getStartServices();
+
+      const useHideChrome = () => {
+        React.useEffect(() => {
+          coreStart.chrome.setIsVisible(false);
+          return () => coreStart.chrome.setIsVisible(true);
+        }, []);
+      };
+
+      const ExitFullScreenButton: React.FC<ExitFullScreenButtonProps> = props => {
+        useHideChrome();
+        return <ExitFullScreenButtonUi {...props} />;
+      };
+      return {
+        capabilities: coreStart.application.capabilities,
+        application: coreStart.application,
+        notifications: coreStart.notifications,
+        overlays: coreStart.overlays,
+        embeddable: deps.embeddable,
+        inspector: deps.inspector,
+        SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
+        ExitFullScreenButton,
+        uiActions: deps.uiActions,
+      };
+    };
+
+    const factory = new DashboardContainerFactory(getStartServices);
+    embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 
   public start(core: CoreStart, plugins: StartDependencies): Start {
-    const { application, notifications, overlays } = core;
-    const { embeddable, inspector, uiActions } = plugins;
+    const { notifications } = core;
+    const { uiActions } = plugins;
 
     const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
-
-    const useHideChrome = () => {
-      React.useEffect(() => {
-        core.chrome.setIsVisible(false);
-        return () => core.chrome.setIsVisible(true);
-      }, []);
-    };
-
-    const ExitFullScreenButton: React.FC<ExitFullScreenButtonProps> = props => {
-      useHideChrome();
-      return <ExitFullScreenButtonUi {...props} />;
-    };
 
     const changeViewAction = new ReplacePanelAction(
       core,
@@ -114,19 +135,6 @@ export class DashboardEmbeddableContainerPublicPlugin
     );
     uiActions.registerAction(changeViewAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction);
-
-    const factory = new DashboardContainerFactory({
-      application,
-      notifications,
-      overlays,
-      embeddable,
-      inspector,
-      SavedObjectFinder,
-      ExitFullScreenButton,
-      uiActions,
-    });
-
-    embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 
   public stop() {}

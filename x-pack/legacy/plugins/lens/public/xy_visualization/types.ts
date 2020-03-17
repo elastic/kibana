@@ -191,10 +191,10 @@ export type SeriesType =
 export interface LayerConfig {
   hide?: boolean;
   layerId: string;
-  xAccessor: string;
+  xAccessor?: string;
   accessors: string[];
   seriesType: SeriesType;
-  splitAccessor: string;
+  splitAccessor?: string;
 }
 
 export type LayerArgs = LayerConfig & {

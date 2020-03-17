@@ -77,6 +77,15 @@ export async function timeSeriesQuery(
         },
       },
     };
+
+    // if not count add an order
+    if (!isCountAgg) {
+      const sortOrder = aggType === 'min' ? 'asc' : 'desc';
+      aggParent.aggs.groupAgg.terms.order = {
+        sortValueAgg: sortOrder,
+      };
+    }
+
     aggParent = aggParent.aggs.groupAgg;
   }
 
@@ -89,6 +98,16 @@ export async function timeSeriesQuery(
       },
     },
   };
+
+  // if not count, add a sorted value agg
+  if (!isCountAgg) {
+    aggParent.aggs.sortValueAgg = {
+      [aggType]: {
+        field: aggField,
+      },
+    };
+  }
+
   aggParent = aggParent.aggs.dateAgg;
 
   // finally, the metric aggregation, if requested
@@ -106,13 +125,20 @@ export async function timeSeriesQuery(
   const logPrefix = 'indexThreshold timeSeriesQuery: callCluster';
   logger.debug(`${logPrefix} call: ${JSON.stringify(esQuery)}`);
 
+  // note there are some commented out console.log()'s below, which are left
+  // in, as they are VERY useful when debugging these queries; debug logging
+  // isn't as nice since it's a single long JSON line.
+
+  // console.log('time_series_query.ts request\n', JSON.stringify(esQuery, null, 4));
   try {
     esResult = await callCluster('search', esQuery);
   } catch (err) {
+    // console.log('time_series_query.ts error\n', JSON.stringify(err, null, 4));
     logger.warn(`${logPrefix} error: ${JSON.stringify(err.message)}`);
     throw new Error('error running search');
   }
 
+  // console.log('time_series_query.ts response\n', JSON.stringify(esResult, null, 4));
   logger.debug(`${logPrefix} result: ${JSON.stringify(esResult)}`);
   return getResultFromEs(isCountAgg, isGroupAgg, esResult);
 }
