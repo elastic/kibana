@@ -62,10 +62,11 @@ describe('data generator', () => {
     expect(processEvent['@timestamp']).toEqual(timestamp);
     expect(processEvent.event.category).toEqual('process');
     expect(processEvent.event.kind).toEqual('event');
-    expect(processEvent.event.type).toEqual('creation');
+    expect(processEvent.event.type).toEqual('start');
     expect(processEvent.agent).not.toBeNull();
     expect(processEvent.host).not.toBeNull();
     expect(processEvent.process.entity_id).not.toBeNull();
+    expect(processEvent.process.name).not.toBeNull();
   });
 
   it('creates other event documents', () => {
@@ -74,10 +75,11 @@ describe('data generator', () => {
     expect(processEvent['@timestamp']).toEqual(timestamp);
     expect(processEvent.event.category).toEqual('dns');
     expect(processEvent.event.kind).toEqual('event');
-    expect(processEvent.event.type).toEqual('creation');
+    expect(processEvent.event.type).toEqual('start');
     expect(processEvent.agent).not.toBeNull();
     expect(processEvent.host).not.toBeNull();
     expect(processEvent.process.entity_id).not.toBeNull();
+    expect(processEvent.process.name).not.toBeNull();
   });
 
   describe('creates alert ancestor tree', () => {
@@ -151,7 +153,7 @@ describe('data generator', () => {
     const timestamp = new Date().getTime();
     const root = generator.generateEvent({ timestamp });
     const generations = 2;
-    const events = generator.generateDescendantsTree(root, generations);
+    const events = [root, ...generator.generateDescendantsTree(root, generations)];
     const rootNode = buildResolverTree(events);
     const visitedEvents = countResolverEvents(rootNode, generations);
     expect(visitedEvents).toEqual(events.length);

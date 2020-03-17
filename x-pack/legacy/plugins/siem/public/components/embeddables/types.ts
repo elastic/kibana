@@ -9,7 +9,6 @@ import {
   EmbeddableInput,
   EmbeddableOutput,
   IEmbeddable,
-  EmbeddableFactory,
 } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { inputsModel } from '../../store/inputs';
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
@@ -85,8 +84,3 @@ export interface RenderTooltipContentParams {
 }
 
 export type MapToolTipProps = Partial<RenderTooltipContentParams>;
-
-export interface EmbeddableApi {
-  getEmbeddableFactory: (embeddableFactoryId: string) => EmbeddableFactory;
-  registerEmbeddableFactory: (id: string, factory: EmbeddableFactory) => void;
-}

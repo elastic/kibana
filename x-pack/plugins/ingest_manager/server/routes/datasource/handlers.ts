@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TypeOf } from '@kbn/config-schema';
-import { RequestHandler } from 'kibana/server';
+import { RequestHandler } from 'src/core/server';
 import { appContextService, datasourceService } from '../../services';
 import { ensureInstalledPackage } from '../../services/epm/packages';
 import {
