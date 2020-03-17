@@ -44,16 +44,25 @@ kibanaPipeline(timeoutMinutes: 180) {
             withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
               withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
                 kibanaPipeline.bash(
-                """
-                source src/dev/ci_setup/setup_env.sh
+                  """
+                  source src/dev/ci_setup/setup_env.sh
 
-                touch vault_stuff.js
-                echo $HOST_FROM_VAULT >> vault_stuff.js || echo "### Something wrong trying record the HOST from vault"
-                echo $USER_FROM_VAULT >> vault_stuff.js || echo "### Something wrong trying record the USER from vault"
-                echo $PASS_FROM_VAULT >> vault_stuff.js || echo "### Something wrong trying record the PASS from vault"
+                  # bootstrap from x-pack folder
+                  cd x-pack
+                  yarn kbn bootstrap --prefer-offline
 
-                echo "### Printing contents of vault_stuff.js"
-                cat vault_stuff.js
+                  # Return to project root
+                  cd ..
+
+                  . src/dev/code_coverage/shell_scripts/extract_archives.sh
+
+                  . src/dev/code_coverage/shell_scripts/fix_html_reports_parallel.sh
+
+                  . src/dev/code_coverage/shell_scripts/merge_jest_and_functional.sh
+
+                  . src/dev/code_coverage/shell_scripts/copy_mocha_reports.sh
+
+                  . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${BUILD_NUMBER} ${env.BUILD_URL}
 
                 """, "### Bootstrap shell and kibana env, merge and ingest code coverage"
                 )
@@ -68,18 +77,13 @@ kibanaPipeline(timeoutMinutes: 180) {
             """,
           "### About to Upload Code Coverage Static Site"
         )
-
-        def uploadPrefix = "gs://elastic-bekitzur-kibana-coverage-live/"
-        def uploadPrefixWithTimeStamp = "${uploadPrefix}${timestamp}/"
-        kibanaCoverage.uploadWithVault(uploadPrefixWithTimeStamp, "vault_stuff.js")
-
-//        kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP)
-//        sh 'tar -czf kibana-jest-coverage.tar.gz target/kibana-coverage/jest-combined/*'
-//        kibanaPipeline.uploadCoverageArtifacts("coverage/jest-combined", 'kibana-jest-coverage.tar.gz')
-//        sh 'tar -czf kibana-functional-coverage.tar.gz target/kibana-coverage/functional-combined/*'
-//        kibanaPipeline.uploadCoverageArtifacts("coverage/functional-combined", 'kibana-functional-coverage.tar.gz')
-//        sh 'tar -czf kibana-mocha-coverage.tar.gz target/kibana-coverage/mocha-combined/*'
-//        kibanaPipeline.uploadCoverageArtifacts("coverage/mocha-combined", 'kibana-mocha-coverage.tar.gz')
+        kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP)
+        sh 'tar -czf kibana-jest-coverage.tar.gz target/kibana-coverage/jest-combined/*'
+        kibanaPipeline.uploadCoverageArtifacts("coverage/jest-combined", 'kibana-jest-coverage.tar.gz')
+        sh 'tar -czf kibana-functional-coverage.tar.gz target/kibana-coverage/functional-combined/*'
+        kibanaPipeline.uploadCoverageArtifacts("coverage/functional-combined", 'kibana-functional-coverage.tar.gz')
+        sh 'tar -czf kibana-mocha-coverage.tar.gz target/kibana-coverage/mocha-combined/*'
+        kibanaPipeline.uploadCoverageArtifacts("coverage/mocha-combined", 'kibana-mocha-coverage.tar.gz')
 
       }
     }
