@@ -233,7 +233,7 @@ export const buildUrlsDescription = (label: string, values: string[]): ListItems
             <ul>
               {values
                 .filter(v => !isEmpty(v))
-                .map((val: string, index: number) => (
+                .map((val, index) => (
                   <li data-test-subj="urlsDescriptionReferenceLinkItem" key={`${index}-${val}`}>
                     <EuiLink href={val} external target="_blank">
                       {val}
@@ -250,7 +250,7 @@ export const buildUrlsDescription = (label: string, values: string[]): ListItems
 };
 
 export const buildNoteDescription = (label: string, note: string): ListItems[] => {
-  if (note) {
+  if (note.trim() !== '') {
     return [
       {
         title: label,

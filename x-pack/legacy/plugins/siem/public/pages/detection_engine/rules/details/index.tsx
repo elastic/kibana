@@ -53,7 +53,7 @@ import * as detectionI18n from '../../translations';
 import { ReadOnlyCallOut } from '../components/read_only_callout';
 import { RuleSwitch } from '../components/rule_switch';
 import { StepPanel } from '../components/step_panel';
-import { getStepsDataDetails, redirectToDetections } from '../helpers';
+import { getStepsData, redirectToDetections } from '../helpers';
 import * as ruleI18n from '../translations';
 import * as i18n from './translations';
 import { GlobalTime } from '../../../../containers/global_time';
@@ -105,12 +105,12 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   // This is used to re-trigger api rule status when user de/activate rule
   const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
   const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.signals);
-  const { aboutRuleData, aboutRuleDataDetails, defineRuleData, scheduleRuleData } =
+  const { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData } =
     rule != null
-      ? getStepsDataDetails(rule)
+      ? getStepsData({ rule, detailsView: true })
       : {
           aboutRuleData: null,
-          aboutRuleDataDetails: null,
+          modifiedAboutRuleDetailsData: null,
           defineRuleData: null,
           scheduleRuleData: null,
         };
@@ -299,7 +299,7 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                         <StepAboutRuleToggleDetails
                           loading={isLoading}
                           stepData={aboutRuleData}
-                          stepDataDetails={aboutRuleDataDetails}
+                          stepDataDetails={modifiedAboutRuleDetailsData}
                         />
                       </EuiFlexItem>
 

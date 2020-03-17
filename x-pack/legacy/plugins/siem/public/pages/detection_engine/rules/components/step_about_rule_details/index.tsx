@@ -34,7 +34,7 @@ const FlexGroupFullHeight = styled(EuiFlexGroup)`
 `;
 
 const VerticalOverflowContainer = styled.div((props: { maxHeight: number }) => ({
-  'max-height': `${props.maxHeight ?? '200'}px`,
+  'max-height': `${props.maxHeight}px`,
   'overflow-y': 'hidden',
 }));
 
@@ -69,7 +69,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
   loading,
 }) => {
   const [selectedToggleOption, setToggleOption] = useState('details');
-  const [aboutPanelHeight, setAboutPanelHeight] = useState();
+  const [aboutPanelHeight, setAboutPanelHeight] = useState(0);
 
   const onResize = (e: { height: number; width: number }) => {
     setAboutPanelHeight(e.height);
@@ -87,7 +87,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
         <FlexGroupFullHeight gutterSize="xs" direction="column">
           <EuiFlexItem grow={1}>
             <HeaderSection title={i18n.ABOUT_TEXT}>
-              {!isEmpty(stepDataDetails.note) && (
+              {!isEmpty(stepDataDetails.note) && stepDataDetails.note.trim() !== '' && (
                 <EuiButtonGroup
                   options={toggleOptions}
                   idSelected={selectedToggleOption}

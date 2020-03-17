@@ -382,7 +382,7 @@ describe('helpers', () => {
   });
 
   describe('buildNoteDescription', () => {
-    test('returns ListItem with passed in label and SeverityBadge component', () => {
+    test('returns ListItem with passed in label and note content', () => {
       const noteSample =
         'Cras mattism. [Pellentesque](https://elastic.co). ### Malesuada adipiscing tristique';
       const result: ListItems[] = buildNoteDescription('Test label', noteSample);
@@ -392,6 +392,12 @@ describe('helpers', () => {
       expect(result[0].title).toEqual('Test label');
       expect(noteElement.exists()).toBeTruthy();
       expect(noteElement.text()).toEqual(noteSample);
+    });
+
+    test('returns empty array if passed in note is empty string', () => {
+      const result: ListItems[] = buildNoteDescription('Test label', '');
+
+      expect(result).toHaveLength(0);
     });
   });
 });
