@@ -53,7 +53,12 @@ export class DashboardToDashboardDrilldown
     return true;
   };
 
-  public readonly execute = () => {
-    alert('Go to another dashboard!');
+  // it seems like tthtis fn is being execute with the wrong arguments
+  // first param should be Config but its { config: Config; name: string; actionFactory: string; } ( I thtink )
+
+  // @ts-ignore
+  public readonly execute = async ({ config }: Config, context: ActionContext) => {
+    console.log('context', context); // eslint-disable-line
+    window.location.hash = `#/dashboard/${config.dashboardId}`;
   };
 }
