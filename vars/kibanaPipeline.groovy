@@ -268,38 +268,40 @@ def processFunctionalQueue(queue, finishedSuites, workerNumber, type) {
 
       iteration++
 
-      retryable("kibana-functional-${type}-${workerNumber}-${iteration}") {
-        if (testSuite.files && testSuite.files.size() > 0) {
-          catchErrorClean {
-            def filesString = testSuite.files.collect { "--include '${it.file}'" }.join(' ')
+      catchErrorClean {
+        retryable("kibana-functional-${type}-${workerNumber}-${iteration}") {
+          if (testSuite.files && testSuite.files.size() > 0) {
+            try {
+              def filesString = testSuite.files.collect { "--include '${it.file}'" }.join(' ')
 
-            // TODO runbld
-            bash(
-              """
-                export JOB=${env.JOB}-${iteration}
-                source test/scripts/jenkins_test_setup_${type}.sh
-                node scripts/functional_tests \
-                  --config '${testSuite.config}' \
-                  --debug \
-                  ${filesString}
-              """, "${type} tests: ${testSuite.config}"
-            )
+              // TODO runbld
+              bash(
+                """
+                  export JOB=${env.JOB}-${iteration}
+                  source test/scripts/jenkins_test_setup_${type}.sh
+                  node scripts/functional_tests \
+                    --config '${testSuite.config}' \
+                    --debug \
+                    ${filesString}
+                """, "${type} tests: ${testSuite.config}"
+              )
 
-            // --kibana-install-dir "\$KIBANA_INSTALL_DIR" \
-          }
-
-          catchErrorClean {
-            def suites = toJSON(readFile(file: testMetadataPath))
-            suites.each {
+              // --kibana-install-dir "\$KIBANA_INSTALL_DIR" \
+            } finally {
               catchErrorClean {
-                if (byFile[it.file]) {
-                  it.previousDuration = byFile[it.file].duration
+                def suites = toJSON(readFile(file: testMetadataPath))
+                suites.each {
+                  catchErrorClean {
+                    if (byFile[it.file]) {
+                      it.previousDuration = byFile[it.file].duration
+                    }
+                    finishedSuites << it
+                  }
                 }
-                finishedSuites << it
+                testSuite.files = testSuite.files.findAll { suite -> !suites.find { finishedSuite -> finishedSuite.file == suite.file && finishedSuite.success } }
+                print testSuite.files
               }
             }
-            testSuite.files = testSuite.files.findAll { suite -> !suites.find { finishedSuite -> finishedSuite.file == suite.file && finishedSuite.success } }
-            print testSuite.files
           }
         }
       }
