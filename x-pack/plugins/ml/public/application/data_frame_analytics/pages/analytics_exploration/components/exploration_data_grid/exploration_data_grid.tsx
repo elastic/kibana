@@ -59,6 +59,10 @@ export const ExplorationDataGrid: FC<ExplorationDataGridProps> = ({
 
       const fullItem = tableItems[adjustedRowIndex];
 
+      if (fullItem === undefined) {
+        return null;
+      }
+
       const cellValue = tableItems.hasOwnProperty(adjustedRowIndex)
         ? tableItems[adjustedRowIndex][columnId]
         : null;
@@ -98,20 +102,21 @@ export const ExplorationDataGrid: FC<ExplorationDataGridProps> = ({
     };
   }, [resultsField, rowCount, tableItems, pagination.pageIndex, pagination.pageSize]);
 
-  const onChangeItemsPerPage = useCallback(pageSize => setPagination(p => ({ ...p, pageSize })), [
-    setPagination,
-  ]);
+  const onChangeItemsPerPage = useCallback(
+    pageSize => {
+      setPagination(p => {
+        const pageIndex = Math.floor((p.pageSize * p.pageIndex) / pageSize);
+        return { pageIndex, pageSize };
+      });
+    },
+    [setPagination]
+  );
 
   const onChangePage = useCallback(pageIndex => setPagination(p => ({ ...p, pageIndex })), [
     setPagination,
   ]);
 
-  const onSort = useCallback(
-    sc => {
-      setSortingColumns(sc);
-    },
-    [setSortingColumns]
-  );
+  const onSort = useCallback(sc => setSortingColumns(sc), [setSortingColumns]);
 
   return (
     <EuiDataGrid
