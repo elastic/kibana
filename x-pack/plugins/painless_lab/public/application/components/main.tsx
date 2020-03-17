@@ -24,14 +24,14 @@ interface Props {
 const PAINLESS_LAB_KEY = 'painlessLabState';
 
 export function Main({ http }: Props) {
-  const [state, setState] = useState({
+  const [state, setState] = useState(() => ({
     code: exampleScript,
     context: painlessContextOptions[0].value,
     parameters: '',
     index: '',
     document: '',
     ...JSON.parse(localStorage.getItem(PAINLESS_LAB_KEY) || '{}'),
-  });
+  }));
 
   const [isRequestFlyoutOpen, setRequestFlyoutOpen] = useState(false);
   const { inProgress, response, submit } = useSubmitCode(http);
