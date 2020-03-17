@@ -295,8 +295,8 @@ describe('status check alert', () => {
     });
 
     it('contains the expected static fields like id, name, etc.', () => {
-      expect(alert.id).toBe('xpack.uptime.alerts.downMonitor');
-      expect(alert.name).toBe('X-Pack Alerting');
+      expect(alert.id).toBe('xpack.uptime.alerts.monitorStatus');
+      expect(alert.name).toBe('Uptime Monitor Status');
       expect(alert.defaultActionGroupId).toBe('xpack.uptime.alerts.actionGroups.downMonitor');
       expect(alert.actionGroups).toMatchInlineSnapshot(`
         Array [

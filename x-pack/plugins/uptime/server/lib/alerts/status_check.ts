@@ -169,8 +169,10 @@ export const updateState = (
 const DEFAULT_MAX_MESSAGE_ROWS = 3;
 
 export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) => ({
-  id: 'xpack.uptime.alerts.downMonitor',
-  name: 'X-Pack Alerting',
+  id: 'xpack.uptime.alerts.monitorStatus',
+  name: i18n.translate('xpack.uptime.alerts.monitorStatus', {
+    defaultMessage: 'Uptime Monitor Status',
+  }),
   validate: {
     params: schema.object({
       filters: schema.maybe(schema.string()),
