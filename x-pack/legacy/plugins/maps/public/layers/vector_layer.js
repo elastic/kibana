@@ -483,7 +483,7 @@ export class VectorLayer extends AbstractLayer {
     const requestToken = Symbol(`layer-${this.getId()}-${dataRequestId}`);
     try {
       startLoading(dataRequestId, requestToken, nextMeta);
-      const layerName = await this.getDisplayName();
+      const layerName = await this.getDisplayName(source);
       const styleMeta = await source.loadStylePropsMeta(
         layerName,
         style,
