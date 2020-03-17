@@ -5,7 +5,7 @@
  */
 
 export {
-  FlyoutEditDrilldownAction,
-  FlyoutEditDrilldownParams,
-  OPEN_FLYOUT_EDIT_DRILLDOWN,
-} from './flyout_edit_drilldown';
+  FlyoutCreateDrilldownAction,
+  OpenFlyoutAddDrilldownParams,
+  OPEN_FLYOUT_ADD_DRILLDOWN,
+} from './flyout_create_drilldown';
