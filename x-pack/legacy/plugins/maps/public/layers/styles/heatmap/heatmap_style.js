@@ -14,6 +14,8 @@ import { getOrdinalColorRampStops } from '../color_utils';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 
+//The heatmap range chosen hear runs from 0 to 1. It is arbitrary.
+//Weighting is on the raw count/sum values.
 const MIN_RANGE = 0;
 const MAX_RANGE = 1;
 

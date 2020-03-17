@@ -72,7 +72,7 @@ export class HeatmapLayer extends VectorLayer {
     const propertyKey = this._getPropKeyOfSelectedMetric();
     const dataBoundToMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
     if (featureCollection !== dataBoundToMap) {
-      let max = 0;
+      let max = 1; //max will be at least one, since counts or sums will be at least one.
       for (let i = 0; i < featureCollection.features.length; i++) {
         max = Math.max(featureCollection.features[i].properties[propertyKey], max);
       }
