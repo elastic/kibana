@@ -186,7 +186,7 @@ export class Server {
       uiSettings: uiSettingsStart,
     };
 
-    const pluginsStart = await this.plugins.start(this.coreStart!);
+    const pluginsStart = await this.plugins.start(this.coreStart);
 
     await this.legacy.start({
       core: {
