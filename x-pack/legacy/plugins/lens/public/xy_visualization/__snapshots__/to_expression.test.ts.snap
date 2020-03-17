@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`xy_visualization #toExpression should map to a valid AST 1`] = `
+exports[`#toExpression should map to a valid AST 1`] = `
 Object {
   "chain": Array [
     Object {
