@@ -331,7 +331,7 @@ export interface EndpointEvent {
       parent?: {
         entity_id: string;
       };
-      name: string;
+      name?: string;
     };
   };
 }
