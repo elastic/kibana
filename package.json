@@ -239,7 +239,7 @@
     "react-resize-detector": "^4.2.0",
     "react-router-dom": "^5.1.2",
     "react-sizeme": "^2.3.6",
-    "react-use": "^13.13.0",
+    "react-use": "^13.27.0",
     "reactcss": "1.2.3",
     "redux": "^4.0.5",
     "redux-actions": "^2.6.5",
