@@ -93,7 +93,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToUrlWithBrowserHistory(
           'endpoint',
           '/hosts',
-          'selected_host=1fb3e58f-6ab0-4406-9d2a-91911207a712'
+          'selected_host=cbe80003-6964-4e0f-aba1-f94c32b44e95'
         );
       });
 
@@ -119,14 +119,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('displays details row descriptions', async () => {
         const values = await pageObjects.endpoint.hostFlyoutDescriptionValues('hostDetailsFlyout');
         expect(values).to.eql([
-          'Windows 10',
-          'Jan 24, 2020 @4:06 PM',
+          'Windows Server 2012',
+          'Mar 12, 2020 @4:18 PM',
           '0',
           'C2A9093E-E289-4C0A-AA44-8C32A414FA7A',
           'active',
-          '10.192.213.13010.70.28.129',
-          'cadmann-4.example.com',
-          '6.6.1',
+          '10.48.181.22210.116.62.6210.102.83.30',
+          'Host-cxz5glsoup',
+          '6.6.9',
         ]);
       });
     });
