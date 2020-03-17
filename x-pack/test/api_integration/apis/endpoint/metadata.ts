@@ -188,13 +188,8 @@ export default function({ getService }: FtrProviderContext) {
           (ip: string) => ip === targetEndpointIp
         );
         expect(resultIp).to.eql([targetEndpointIp]);
-<<<<<<< HEAD
         expect(body.hosts[0].event.created).to.eql(1584044335459);
         expect(body.hosts.length).to.eql(1);
-=======
-        expect(body.hosts[0].event.created).to.eql('2020-01-24T16:06:09.541Z');
-        expect(body.hosts.length).to.eql(1);
->>>>>>> fix api_integration test
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
       });
@@ -207,13 +202,8 @@ export default function({ getService }: FtrProviderContext) {
             filter: '',
           })
           .expect(200);
-<<<<<<< HEAD
         expect(body.total).to.eql(numberOfHostsInFixture);
         expect(body.hosts.length).to.eql(numberOfHostsInFixture);
-=======
-        expect(body.total).to.eql(3);
-        expect(body.hosts.length).to.eql(3);
->>>>>>> fix api_integration test
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
       });
