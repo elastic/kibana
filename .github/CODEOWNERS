@@ -46,7 +46,7 @@
 /src/plugins/expressions/ @elastic/kibana-app-arch
 /src/plugins/inspector/ @elastic/kibana-app-arch
 /src/plugins/kibana_react/ @elastic/kibana-app-arch
-/src/plugins/kibana_react/public/code_editor @elastic/canvas
+/src/plugins/kibana_react/public/code_editor @elastic/kibana-canvas
 /src/plugins/kibana_utils/ @elastic/kibana-app-arch
 /src/plugins/management/ @elastic/kibana-app-arch
 /src/plugins/navigation/ @elastic/kibana-app-arch
