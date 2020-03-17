@@ -155,5 +155,5 @@ export function createSavedVisClass(services: SavedObjectKibanaServices) {
     }
   }
 
-  return SavedVis;
+  return SavedVis as new (opts: Record<string, unknown> | string) => SavedObject;
 }

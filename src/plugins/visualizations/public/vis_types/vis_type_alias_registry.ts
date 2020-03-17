@@ -17,7 +17,7 @@
  * under the License.
  */
 
-interface VisualizationListItem {
+export interface VisualizationListItem {
   editUrl: string;
   icon: string;
   id: string;
