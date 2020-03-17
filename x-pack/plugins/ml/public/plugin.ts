@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreStart, CoreSetup, AppMountParameters } from 'kibana/public';
 import { ManagementSetup } from 'src/plugins/management/public';
+import { SharePluginStart } from 'src/plugins/share/public';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { SecurityPluginSetup } from '../../security/public';
@@ -17,6 +18,7 @@ import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
+  share: SharePluginStart;
 }
 export interface MlSetupDependencies {
   security: SecurityPluginSetup;
@@ -41,6 +43,7 @@ export class MlPlugin implements Plugin<Setup, Start> {
           coreStart,
           {
             data: pluginsStart.data,
+            share: pluginsStart.share,
             security: pluginsSetup.security,
             licensing: pluginsSetup.licensing,
             management: pluginsSetup.management,
