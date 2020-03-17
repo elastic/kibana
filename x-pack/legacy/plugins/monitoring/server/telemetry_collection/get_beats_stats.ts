@@ -29,6 +29,10 @@ const getBaseStats = () => ({
     count: 0,
     names: [],
   },
+  queue: {
+    mem: 0,
+    spool: 0,
+  },
   architecture: {
     count: 0,
     architectures: [],
@@ -69,6 +73,9 @@ export interface BeatsStats {
         names: string[];
         count: number;
       };
+      queue?: {
+        name?: string;
+      };
       heartbeat?: HeartbeatBase;
       functionbeat?: {
         functions?: {
@@ -106,6 +113,9 @@ export interface BeatsBaseStats {
   module: {
     count: number;
     names: string[];
+  };
+  queue: {
+    [queueType: string]: number;
   };
   architecture: {
     count: number;
@@ -213,6 +223,11 @@ export function processResults(
         stateModule.names.forEach(name => moduleSet.add(statsType + '.' + name));
         clusters[clusterUuid].module.names = Array.from(moduleSet);
         clusters[clusterUuid].module.count += stateModule.count;
+      }
+
+      const stateQueue = hit._source.beats_state?.state?.queue?.name;
+      if (stateQueue !== undefined) {
+        clusters[clusterUuid].queue[stateQueue] += 1;
       }
 
       const heartbeatState = hit._source.beats_state?.state?.heartbeat;
@@ -323,10 +338,7 @@ async function fetchBeatsByType(
       'hits.hits._source.beats_stats.beat.host',
       'hits.hits._source.beats_stats.metrics.libbeat.pipeline.events.published',
       'hits.hits._source.beats_stats.metrics.libbeat.output.type',
-      'hits.hits._source.beats_state.state.input',
-      'hits.hits._source.beats_state.state.module',
-      'hits.hits._source.beats_state.state.host',
-      'hits.hits._source.beats_state.state.heartbeat',
+      'hits.hits._source.beats_state.state',
       'hits.hits._source.beats_state.beat.type',
     ],
     body: {

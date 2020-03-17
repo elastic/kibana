@@ -29,7 +29,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         search: `time=${timestamp}&filter=trace.id:${traceId}`,
         state: undefined,
       };
-      const expectedSearchString = `sourceId=default&logPosition=(end:'${endDate}',position:(tiebreaker:0,time:${timestamp}),start:'${startDate}',streamLive:!f)&logFilter=(expression:'trace.id:${traceId}',kind:kuery)`;
+      const expectedSearchString = `logFilter=(expression:'trace.id:${traceId}',kind:kuery)&logPosition=(end:'${endDate}',position:(tiebreaker:0,time:${timestamp}),start:'${startDate}',streamLive:!f)&sourceId=default`;
       const expectedRedirectPath = '/logs/stream?';
 
       await pageObjects.common.navigateToUrlWithBrowserHistory(

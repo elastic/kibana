@@ -24,7 +24,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { parseEsInterval } from '../../../../../../../../../src/legacy/core_plugins/data/public';
+import { search } from '../../../../../../../../../src/plugins/data/public';
+const { parseEsInterval } = search.aggs;
 
 import { getDateHistogramDetailsUrl, getDateHistogramAggregationUrl } from '../../../services';
 

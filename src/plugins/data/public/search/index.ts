@@ -17,6 +17,10 @@
  * under the License.
  */
 
+export * from './aggs';
+export * from './expressions';
+export * from './tabify';
+
 export {
   ISearchSetup,
   ISearchStart,

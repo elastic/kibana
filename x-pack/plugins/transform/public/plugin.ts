@@ -9,11 +9,15 @@ import { CoreSetup } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ManagementSetup } from 'src/plugins/management/public';
 
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
+
 import { renderApp } from './app/app';
 import { AppDependencies } from './app/app_dependencies';
 import { breadcrumbService } from './app/services/navigation';
 import { docTitleService } from './app/services/navigation';
 import { textService } from './app/services/text';
+
+const localStorage = new Storage(window.localStorage);
 
 export interface PluginsDependencies {
   data: DataPublicPluginStart;
@@ -56,6 +60,7 @@ export class TransformUiPlugin {
             notifications,
             overlays,
             savedObjects,
+            storage: localStorage,
             uiSettings,
           };
 
