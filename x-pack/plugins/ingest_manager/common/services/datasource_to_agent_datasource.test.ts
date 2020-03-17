@@ -39,6 +39,10 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
             value:
               '- namespace: mockNamespace\n  #disabledProp: ["test"]\n  anotherProp: test\n- namespace: mockNamespace2\n  #disabledProp: ["test2"]\n  anotherProp: test2',
           },
+          barVar4: {
+            type: 'yaml',
+            value: '',
+          },
         },
       },
     ],
