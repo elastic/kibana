@@ -24,7 +24,7 @@ import {
   IEmbeddable,
   EmbeddableInput,
   EmbeddableOutput,
-  IEmbeddableStart,
+  EmbeddableStart,
   IContainer,
 } from '../embeddable_plugin';
 
@@ -34,7 +34,7 @@ export async function openReplacePanelFlyout(options: {
   savedObjectFinder: React.ComponentType<any>;
   notifications: CoreStart['notifications'];
   panelToRemove: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
-  getEmbeddableFactories: IEmbeddableStart['getEmbeddableFactories'];
+  getEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
 }) {
   const {
     embeddable,
