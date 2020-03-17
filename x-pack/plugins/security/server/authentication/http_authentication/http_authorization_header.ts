@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest } from '../../../../../src/core/server';
+import { KibanaRequest } from '../../../../../../src/core/server';
 
 export class HTTPAuthorizationHeader {
   constructor(public scheme: string, public credentials: string) {}
@@ -19,5 +19,9 @@ export class HTTPAuthorizationHeader {
     const credentials = authorizationHeaderValue.substring(scheme.length + 1);
 
     return new HTTPAuthorizationHeader(scheme.toLowerCase(), credentials);
+  }
+
+  toString() {
+    return `${this.scheme} ${this.credentials}`;
   }
 }

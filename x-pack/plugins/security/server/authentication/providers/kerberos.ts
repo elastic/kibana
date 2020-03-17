@@ -175,7 +175,9 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
 
     try {
       // Then attempt to query for the user details using the new token
-      const authHeaders = { authorization: `Bearer ${tokens.access_token}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader('Bearer', tokens.access_token).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('User has been authenticated with new access token');
@@ -205,7 +207,9 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     try {
-      const authHeaders = { authorization: `Bearer ${accessToken}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Request has been authenticated via state.');
@@ -242,7 +246,12 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     try {
-      const authHeaders = { authorization: `Bearer ${refreshedTokenPair.accessToken}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader(
+          'Bearer',
+          refreshedTokenPair.accessToken
+        ).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Request has been authenticated via refreshed token.');

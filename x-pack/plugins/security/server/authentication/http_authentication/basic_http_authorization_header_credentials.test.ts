@@ -8,7 +8,7 @@ import { BasicHTTPAuthorizationHeaderCredentials } from './basic_http_authorizat
 
 const encodeToBase64 = (str: string) => Buffer.from(str).toString('base64');
 
-describe('BasicHTTPAuthorizationHeaderCredentials.parseFromRequest', () => {
+describe('BasicHTTPAuthorizationHeaderCredentials.parseFromRequest()', () => {
   it('parses username from the left-side of the single colon', () => {
     const basicCredentials = BasicHTTPAuthorizationHeaderCredentials.parseFromCredentials(
       encodeToBase64('fOo:bAr')
@@ -43,5 +43,14 @@ describe('BasicHTTPAuthorizationHeaderCredentials.parseFromRequest', () => {
     }).toThrowErrorMatchingInlineSnapshot(
       `"Unable to parse basic authentication credentials without a colon"`
     );
+  });
+});
+
+describe(`toString()`, () => {
+  it('concatenates username and password using a colon and then base64 encodes the string', () => {
+    const basicCredentials = new BasicHTTPAuthorizationHeaderCredentials('elastic', 'changeme');
+
+    expect(basicCredentials.toString()).toEqual(Buffer.from(`elastic:changeme`).toString('base64')); // I don't like that this so closely mirror the actual implementation
+    expect(basicCredentials.toString()).toEqual('ZWxhc3RpYzpjaGFuZ2VtZQ=='); // and I don't like that this is so opaque. Both together seem reasonable...
   });
 });

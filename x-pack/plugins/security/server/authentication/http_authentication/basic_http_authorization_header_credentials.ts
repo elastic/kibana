@@ -19,4 +19,8 @@ export class BasicHTTPAuthorizationHeaderCredentials {
     const password = decoded.substring(username.length + 1);
     return new BasicHTTPAuthorizationHeaderCredentials(username, password);
   }
+
+  toString() {
+    return Buffer.from(`${this.username}:${this.password}`).toString('base64');
+  }
 }

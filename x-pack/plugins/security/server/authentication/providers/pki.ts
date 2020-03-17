@@ -156,7 +156,9 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     try {
-      const authHeaders = { authorization: `Bearer ${accessToken}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Request has been authenticated via state.');
@@ -207,7 +209,9 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
 
     try {
       // Then attempt to query for the user details using the new token
-      const authHeaders = { authorization: `Bearer ${accessToken}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('User has been authenticated with new access token');

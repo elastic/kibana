@@ -289,7 +289,9 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     try {
-      const authHeaders = { authorization: `Bearer ${accessToken}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Request has been authenticated via state.');
@@ -345,7 +347,12 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     try {
-      const authHeaders = { authorization: `Bearer ${refreshedTokenPair.accessToken}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader(
+          'Bearer',
+          refreshedTokenPair.accessToken
+        ).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Request has been authenticated via refreshed token.');

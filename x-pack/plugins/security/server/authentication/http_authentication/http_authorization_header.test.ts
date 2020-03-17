@@ -8,7 +8,7 @@ import { httpServerMock } from '../../../../../../src/core/server/http/http_serv
 
 import { HTTPAuthorizationHeader } from './http_authorization_header';
 
-describe('HTTPAuthorizationHeader.parseFromRequest', () => {
+describe('HTTPAuthorizationHeader.parseFromRequest()', () => {
   it('returns `null` if request does not have authorization header', () => {
     expect(
       HTTPAuthorizationHeader.parseFromRequest(httpServerMock.createKibanaRequest())
@@ -73,5 +73,13 @@ describe('HTTPAuthorizationHeader.parseFromRequest', () => {
       expect(header).not.toBeNull();
       expect(header!.credentials).toBe(credentials);
     }
+  });
+});
+
+describe('toString()', () => {
+  it('concatenates scheme and credentials using a space', () => {
+    const header = new HTTPAuthorizationHeader('Bearer', 'some-access-token');
+
+    expect(header.toString()).toEqual('Bearer some-access-token');
   });
 });

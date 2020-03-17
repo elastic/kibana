@@ -60,7 +60,9 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug('Get token API request to Elasticsearch successful');
 
       // Then attempt to query for the user details using the new token
-      const authHeaders = { authorization: `Bearer ${accessToken}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Login has been successfully performed.');
@@ -152,7 +154,9 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('Trying to authenticate via state.');
 
     try {
-      const authHeaders = { authorization: `Bearer ${accessToken}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Request has been authenticated via state.');
@@ -199,7 +203,12 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     try {
-      const authHeaders = { authorization: `Bearer ${refreshedTokenPair.accessToken}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader(
+          'Bearer',
+          refreshedTokenPair.accessToken
+        ).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Request has been authenticated via refreshed token.');

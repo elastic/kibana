@@ -8,7 +8,10 @@ import { KibanaRequest } from '../../../../../../src/core/server';
 import { canRedirectRequest } from '../can_redirect_request';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { HTTPAuthorizationHeader } from '../http_authentication';
+import {
+  HTTPAuthorizationHeader,
+  BasicHTTPAuthorizationHeaderCredentials,
+} from '../http_authentication';
 import { BaseAuthenticationProvider } from './base';
 
 /**
@@ -54,7 +57,10 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('Trying to perform a login.');
 
     const authHeaders = {
-      authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
+      authorization: new HTTPAuthorizationHeader(
+        'Basic',
+        new BasicHTTPAuthorizationHeaderCredentials(username, password).toString()
+      ).toString(),
     };
 
     try {
