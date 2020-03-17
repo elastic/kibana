@@ -51,9 +51,6 @@ interface Props {
   updateNote: UpdateNote;
 }
 
-// Passing the styles directly to the component because the width is
-// being calculated and is recommended by Styled Components for performance
-// https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
 const EventsComponent: React.FC<Props> = ({
   actionsColumnWidth,
   addNoteToEvent,
@@ -93,7 +90,7 @@ const EventsComponent: React.FC<Props> = ({
         getNotesByIds={getNotesByIds}
         isEventPinned={eventIsPinned({ eventId: event._id, pinnedEventIds })}
         isEventViewer={isEventViewer}
-        key={event._id}
+        key={`${event._id}_${event._index}`}
         loadingEventIds={loadingEventIds}
         maxDelay={maxDelay(i)}
         onColumnResized={onColumnResized}

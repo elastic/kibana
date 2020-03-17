@@ -9,10 +9,6 @@ import { Position } from '@elastic/charts';
 import { Operation } from '../types';
 import { State, SeriesType } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
-import { generateId } from '../id_generator';
-import { Ast } from '@kbn/interpreter/target/common';
-
-jest.mock('../id_generator');
 
 function exampleState(): State {
   return {
@@ -87,31 +83,22 @@ describe('xy_visualization', () => {
 
   describe('#initialize', () => {
     it('loads default state', () => {
-      (generateId as jest.Mock)
-        .mockReturnValueOnce('test-id1')
-        .mockReturnValueOnce('test-id2')
-        .mockReturnValue('test-id3');
       const mockFrame = createMockFramePublicAPI();
       const initialState = xyVisualization.initialize(mockFrame);
 
       expect(initialState.layers).toHaveLength(1);
-      expect(initialState.layers[0].xAccessor).toBeDefined();
-      expect(initialState.layers[0].accessors[0]).toBeDefined();
-      expect(initialState.layers[0].xAccessor).not.toEqual(initialState.layers[0].accessors[0]);
+      expect(initialState.layers[0].xAccessor).not.toBeDefined();
+      expect(initialState.layers[0].accessors).toHaveLength(0);
 
       expect(initialState).toMatchInlineSnapshot(`
         Object {
           "layers": Array [
             Object {
-              "accessors": Array [
-                "test-id1",
-              ],
+              "accessors": Array [],
               "layerId": "",
               "position": "top",
               "seriesType": "bar_stacked",
               "showGridlines": false,
-              "splitAccessor": "test-id2",
-              "xAccessor": "test-id3",
             },
           ],
           "legend": Object {
@@ -167,14 +154,11 @@ describe('xy_visualization', () => {
 
   describe('#clearLayer', () => {
     it('clears the specified layer', () => {
-      (generateId as jest.Mock).mockReturnValue('test_empty_id');
       const layer = xyVisualization.clearLayer(exampleState(), 'first').layers[0];
       expect(layer).toMatchObject({
-        accessors: ['test_empty_id'],
+        accessors: [],
         layerId: 'first',
         seriesType: 'bar',
-        splitAccessor: 'test_empty_id',
-        xAccessor: 'test_empty_id',
       });
     });
   });
@@ -185,13 +169,94 @@ describe('xy_visualization', () => {
     });
   });
 
-  describe('#toExpression', () => {
+  describe('#setDimension', () => {
+    it('sets the x axis', () => {
+      expect(
+        xyVisualization.setDimension({
+          prevState: {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: [],
+              },
+            ],
+          },
+          layerId: 'first',
+          groupId: 'x',
+          columnId: 'newCol',
+        }).layers[0]
+      ).toEqual({
+        layerId: 'first',
+        seriesType: 'area',
+        xAccessor: 'newCol',
+        accessors: [],
+      });
+    });
+
+    it('replaces the x axis', () => {
+      expect(
+        xyVisualization.setDimension({
+          prevState: {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: [],
+              },
+            ],
+          },
+          layerId: 'first',
+          groupId: 'x',
+          columnId: 'newCol',
+        }).layers[0]
+      ).toEqual({
+        layerId: 'first',
+        seriesType: 'area',
+        xAccessor: 'newCol',
+        accessors: [],
+      });
+    });
+  });
+
+  describe('#removeDimension', () => {
+    it('removes the x axis', () => {
+      expect(
+        xyVisualization.removeDimension({
+          prevState: {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: [],
+              },
+            ],
+          },
+          layerId: 'first',
+          columnId: 'a',
+        }).layers[0]
+      ).toEqual({
+        layerId: 'first',
+        seriesType: 'area',
+        xAccessor: undefined,
+        accessors: [],
+      });
+    });
+  });
+
+  describe('#getConfiguration', () => {
     let mockDatasource: ReturnType<typeof createMockDatasource>;
     let frame: ReturnType<typeof createMockFramePublicAPI>;
 
     beforeEach(() => {
       frame = createMockFramePublicAPI();
-      mockDatasource = createMockDatasource();
+      mockDatasource = createMockDatasource('testDatasource');
 
       mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
         { columnId: 'd' },
@@ -200,36 +265,78 @@ describe('xy_visualization', () => {
         { columnId: 'c' },
       ]);
 
-      mockDatasource.publicAPIMock.getOperationForColumnId.mockImplementation(col => {
-        return { label: `col_${col}`, dataType: 'number' } as Operation;
-      });
-
       frame.datasourceLayers = {
         first: mockDatasource.publicAPIMock,
       };
     });
 
-    it('should map to a valid AST', () => {
-      expect(xyVisualization.toExpression(exampleState(), frame)).toMatchSnapshot();
+    it('should return options for 3 dimensions', () => {
+      const options = xyVisualization.getConfiguration({
+        state: exampleState(),
+        frame,
+        layerId: 'first',
+      }).groups;
+      expect(options).toHaveLength(3);
+      expect(options.map(o => o.groupId)).toEqual(['x', 'y', 'breakdown']);
     });
 
-    it('should default to labeling all columns with their column label', () => {
-      const expression = xyVisualization.toExpression(exampleState(), frame)! as Ast;
+    it('should only accept bucketed operations for x', () => {
+      const options = xyVisualization.getConfiguration({
+        state: exampleState(),
+        frame,
+        layerId: 'first',
+      }).groups;
+      const filterOperations = options.find(o => o.groupId === 'x')!.filterOperations;
 
-      expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('b');
-      expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('c');
-      expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('d');
-      expect(expression.chain[0].arguments.xTitle).toEqual(['col_a']);
-      expect(expression.chain[0].arguments.yTitle).toEqual(['col_b']);
-      expect(
-        (expression.chain[0].arguments.layers[0] as Ast).chain[0].arguments.columnToLabel
-      ).toEqual([
-        JSON.stringify({
-          b: 'col_b',
-          c: 'col_c',
-          d: 'col_d',
-        }),
-      ]);
+      const exampleOperation: Operation = {
+        dataType: 'number',
+        isBucketed: false,
+        label: 'bar',
+      };
+      const bucketedOps: Operation[] = [
+        { ...exampleOperation, isBucketed: true, dataType: 'number' },
+        { ...exampleOperation, isBucketed: true, dataType: 'string' },
+        { ...exampleOperation, isBucketed: true, dataType: 'boolean' },
+        { ...exampleOperation, isBucketed: true, dataType: 'date' },
+      ];
+      const ops: Operation[] = [
+        ...bucketedOps,
+        { ...exampleOperation, dataType: 'number' },
+        { ...exampleOperation, dataType: 'string' },
+        { ...exampleOperation, dataType: 'boolean' },
+        { ...exampleOperation, dataType: 'date' },
+      ];
+      expect(ops.filter(filterOperations)).toEqual(bucketedOps);
+    });
+
+    it('should not allow anything to be added to x', () => {
+      const options = xyVisualization.getConfiguration({
+        state: exampleState(),
+        frame,
+        layerId: 'first',
+      }).groups;
+      expect(options.find(o => o.groupId === 'x')?.supportsMoreColumns).toBe(false);
+    });
+
+    it('should allow number operations on y', () => {
+      const options = xyVisualization.getConfiguration({
+        state: exampleState(),
+        frame,
+        layerId: 'first',
+      }).groups;
+      const filterOperations = options.find(o => o.groupId === 'y')!.filterOperations;
+      const exampleOperation: Operation = {
+        dataType: 'number',
+        isBucketed: false,
+        label: 'bar',
+      };
+      const ops: Operation[] = [
+        { ...exampleOperation, dataType: 'number' },
+        { ...exampleOperation, dataType: 'string' },
+        { ...exampleOperation, dataType: 'boolean' },
+        { ...exampleOperation, dataType: 'date' },
+      ];
+      expect(ops.filter(filterOperations).map(x => x.dataType)).toEqual(['number']);
     });
   });
 });

@@ -37,9 +37,9 @@ export const policySchema = schema.object({
   config: schema.maybe(snapshotConfigSchema),
   retention: schema.maybe(snapshotRetentionSchema),
   isManagedPolicy: schema.boolean(),
-  stats: schema.maybe(schema.object({}, { allowUnknowns: true })),
-  lastFailure: schema.maybe(schema.object({}, { allowUnknowns: true })),
-  lastSuccess: schema.maybe(schema.object({}, { allowUnknowns: true })),
+  stats: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  lastFailure: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  lastSuccess: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
 const fsRepositorySettings = schema.object({
@@ -100,7 +100,7 @@ const hdsRepositorySettings = schema.object(
     readonly: schema.maybe(schema.boolean()),
     ['security.principal']: schema.maybe(schema.string()),
   },
-  { allowUnknowns: true }
+  { unknowns: 'allow' }
 );
 
 const hdsfRepository = schema.object({
@@ -158,7 +158,7 @@ const sourceRepository = schema.object({
       {
         delegateType: schema.string(),
       },
-      { allowUnknowns: true }
+      { unknowns: 'allow' }
     ),
   ]),
 });
