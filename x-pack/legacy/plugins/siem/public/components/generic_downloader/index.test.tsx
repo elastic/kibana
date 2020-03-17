@@ -11,7 +11,11 @@ import { GenericDownloaderComponent } from './index';
 describe('GenericDownloader', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <GenericDownloaderComponent filename={'export_rules.ndjson'} onExportSuccess={jest.fn()} />
+      <GenericDownloaderComponent
+        filename={'export_rules.ndjson'}
+        onExportSuccess={jest.fn()}
+        exportSelectedData={jest.fn()}
+      />
     );
     expect(wrapper).toMatchSnapshot();
   });

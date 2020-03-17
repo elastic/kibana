@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { isFunction, isNil } from 'lodash/fp';
 import * as i18n from './translations';
 
-import { exportRules, ExportDocumentsProps } from '../../containers/detection_engine/rules';
+import { ExportDocumentsProps } from '../../containers/detection_engine/rules';
 import { useStateToaster, errorToToaster } from '../toasters';
 
 const InvisibleAnchor = styled.a`
@@ -26,7 +26,7 @@ export type ExportSelectedData = ({
 export interface GenericDownloaderProps {
   filename: string;
   ids?: string[];
-  exportSelectedData?: ExportSelectedData;
+  exportSelectedData: ExportSelectedData;
   onExportSuccess?: (exportCount: number) => void;
   onExportFailure?: () => void;
 }
@@ -61,12 +61,7 @@ export const GenericDownloaderComponent = ({
       ) {
         let exportResponse;
         try {
-          if (isNil(exportSelectedData)) {
-            exportResponse = await exportRules({
-              ids,
-              signal: abortCtrl.signal,
-            });
-          } else {
+          if (!isNil(exportSelectedData)) {
             exportResponse = await exportSelectedData({
               ids,
               signal: abortCtrl.signal,

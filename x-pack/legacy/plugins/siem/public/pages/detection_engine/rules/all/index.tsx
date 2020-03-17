@@ -22,6 +22,7 @@ import {
   FilterOptions,
   Rule,
   PaginationOptions,
+  exportRules,
 } from '../../../../containers/detection_engine/rules';
 import { HeaderSection } from '../../../../components/header_section';
 import {
@@ -259,6 +260,7 @@ export const AllRules = React.memo<AllRulesProps>(
               },
             });
           }}
+          exportSelectedData={exportRules}
         />
         <EuiSpacer />
 

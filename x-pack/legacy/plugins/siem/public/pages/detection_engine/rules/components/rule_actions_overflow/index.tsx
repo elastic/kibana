@@ -16,7 +16,7 @@ import styled from 'styled-components';
 
 import { noop } from 'lodash/fp';
 import { useHistory } from 'react-router-dom';
-import { Rule } from '../../../../../containers/detection_engine/rules';
+import { Rule, exportRules } from '../../../../../containers/detection_engine/rules';
 import * as i18n from './translations';
 import * as i18nActions from '../../../rules/translations';
 import { displaySuccessToast, useStateToaster } from '../../../../../components/toasters';
@@ -132,6 +132,7 @@ const RuleActionsOverflowComponent = ({
       <GenericDownloader
         filename={`${i18nActions.EXPORT_FILENAME}.ndjson`}
         ids={rulesToExport}
+        exportSelectedData={exportRules}
         onExportSuccess={exportCount => {
           displaySuccessToast(
             i18nActions.SUCCESSFULLY_EXPORTED_RULES(exportCount),
