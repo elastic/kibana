@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, SavedObject, KibanaRequest } from 'kibana/server';
+import { SavedObjectsClientContract, SavedObject, KibanaRequest } from 'src/core/server';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { EnrollmentAPIKeySOAttributes, EnrollmentAPIKey } from '../../types';
 import { createAPIKey } from './security';
@@ -22,8 +22,8 @@ export async function generateOutputApiKey(
       cluster: ['monitor'],
       index: [
         {
-          names: ['logs-*', 'metrics-*'],
-          privileges: ['write'],
+          names: ['logs-*', 'metrics-*', 'events-*', 'metricbeat*'],
+          privileges: ['write', 'create_index'],
         },
       ],
     },

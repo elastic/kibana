@@ -87,14 +87,15 @@ describe('editor_frame', () => {
     mockVisualization.getLayerIds.mockReturnValue(['first']);
     mockVisualization2.getLayerIds.mockReturnValue(['second']);
 
-    mockDatasource = createMockDatasource();
-    mockDatasource2 = createMockDatasource();
+    mockDatasource = createMockDatasource('testDatasource');
+    mockDatasource2 = createMockDatasource('testDatasource2');
 
     expressionRendererMock = createExpressionRendererMock();
   });
 
   describe('initialization', () => {
     it('should initialize initial datasource', async () => {
+      mockVisualization.getLayerIds.mockReturnValue([]);
       await act(async () => {
         mount(
           <EditorFrame
@@ -138,7 +139,7 @@ describe('editor_frame', () => {
     });
 
     it('should initialize all datasources with state from doc', async () => {
-      const mockDatasource3 = createMockDatasource();
+      const mockDatasource3 = createMockDatasource('testDatasource3');
       const datasource1State = { datasource1: '' };
       const datasource2State = { datasource2: '' };
 
@@ -198,9 +199,9 @@ describe('editor_frame', () => {
             ExpressionRenderer={expressionRendererMock}
           />
         );
-        expect(mockVisualization.renderLayerConfigPanel).not.toHaveBeenCalled();
         expect(mockDatasource.renderDataPanel).not.toHaveBeenCalled();
       });
+      expect(mockDatasource.renderDataPanel).toHaveBeenCalled();
     });
 
     it('should not initialize visualization before datasource is initialized', async () => {
@@ -289,6 +290,7 @@ describe('editor_frame', () => {
       mockDatasource2.initialize.mockReturnValue(Promise.resolve(initialState));
       mockDatasource2.getLayers.mockReturnValue(['abc', 'def']);
       mockDatasource2.removeLayer.mockReturnValue({ removed: true });
+      mockVisualization.getLayerIds.mockReturnValue(['first', 'abc', 'def']);
       await act(async () => {
         mount(
           <EditorFrame
@@ -374,8 +376,7 @@ describe('editor_frame', () => {
         );
       });
 
-      expect(mockVisualization.renderLayerConfigPanel).toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({ state: initialState })
       );
     });
@@ -614,15 +615,14 @@ describe('editor_frame', () => {
         );
       });
       const updatedState = {};
-      const setVisualizationState = (mockVisualization.renderLayerConfigPanel as jest.Mock).mock
-        .calls[0][1].setState;
+      const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
+        .setState;
       act(() => {
-        setVisualizationState(updatedState);
+        setDatasourceState(updatedState);
       });
 
-      expect(mockVisualization.renderLayerConfigPanel).toHaveBeenCalledTimes(2);
-      expect(mockVisualization.renderLayerConfigPanel).toHaveBeenLastCalledWith(
-        expect.any(Element),
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
+      expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: updatedState,
         })
@@ -688,8 +688,7 @@ describe('editor_frame', () => {
       });
 
       const updatedPublicAPI: DatasourcePublicAPI = {
-        renderLayerPanel: jest.fn(),
-        renderDimensionPanel: jest.fn(),
+        datasourceId: 'testDatasource',
         getOperationForColumnId: jest.fn(),
         getTableSpec: jest.fn(),
       };
@@ -701,9 +700,8 @@ describe('editor_frame', () => {
         setDatasourceState({});
       });
 
-      expect(mockVisualization.renderLayerConfigPanel).toHaveBeenCalledTimes(2);
-      expect(mockVisualization.renderLayerConfigPanel).toHaveBeenLastCalledWith(
-        expect.any(Element),
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
+      expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           frame: expect.objectContaining({
             datasourceLayers: {
@@ -719,6 +717,7 @@ describe('editor_frame', () => {
     it('should pass the datasource api for each layer to the visualization', async () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
       mockDatasource2.getLayers.mockReturnValue(['second', 'third']);
+      mockVisualization.getLayerIds.mockReturnValue(['first', 'second', 'third']);
 
       await act(async () => {
         mount(
@@ -755,10 +754,10 @@ describe('editor_frame', () => {
         );
       });
 
-      expect(mockVisualization.renderLayerConfigPanel).toHaveBeenCalled();
+      expect(mockVisualization.getConfiguration).toHaveBeenCalled();
 
       const datasourceLayers =
-        mockVisualization.renderLayerConfigPanel.mock.calls[0][1].frame.datasourceLayers;
+        mockVisualization.getConfiguration.mock.calls[0][0].frame.datasourceLayers;
       expect(datasourceLayers.first).toBe(mockDatasource.publicAPIMock);
       expect(datasourceLayers.second).toBe(mockDatasource2.publicAPIMock);
       expect(datasourceLayers.third).toBe(mockDatasource2.publicAPIMock);
@@ -811,21 +810,18 @@ describe('editor_frame', () => {
       expect(mockDatasource.getPublicAPI).toHaveBeenCalledWith(
         expect.objectContaining({
           state: datasource1State,
-          setState: expect.anything(),
           layerId: 'first',
         })
       );
       expect(mockDatasource2.getPublicAPI).toHaveBeenCalledWith(
         expect.objectContaining({
           state: datasource2State,
-          setState: expect.anything(),
           layerId: 'second',
         })
       );
       expect(mockDatasource2.getPublicAPI).toHaveBeenCalledWith(
         expect.objectContaining({
           state: datasource2State,
-          setState: expect.anything(),
           layerId: 'third',
         })
       );
@@ -858,44 +854,8 @@ describe('editor_frame', () => {
       expect(mockDatasource.getPublicAPI).toHaveBeenCalledWith({
         dateRange,
         state: datasourceState,
-        setState: expect.any(Function),
         layerId: 'first',
       });
-    });
-
-    it('should re-create the public api after state has been set', async () => {
-      mockDatasource.getLayers.mockReturnValue(['first']);
-
-      await act(async () => {
-        mount(
-          <EditorFrame
-            {...getDefaultProps()}
-            visualizationMap={{
-              testVis: mockVisualization,
-            }}
-            datasourceMap={{
-              testDatasource: mockDatasource,
-            }}
-            initialDatasourceId="testDatasource"
-            initialVisualizationId="testVis"
-            ExpressionRenderer={expressionRendererMock}
-          />
-        );
-      });
-
-      const updatedState = {};
-      const setDatasourceState = mockDatasource.getPublicAPI.mock.calls[0][0].setState;
-      act(() => {
-        setDatasourceState(updatedState);
-      });
-
-      expect(mockDatasource.getPublicAPI).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          state: updatedState,
-          setState: expect.any(Function),
-          layerId: 'first',
-        })
-      );
     });
   });
 
@@ -1021,8 +981,7 @@ describe('editor_frame', () => {
 
       expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
       expect(mockVisualization2.initialize).toHaveBeenCalledWith(expect.anything(), initialState);
-      expect(mockVisualization2.renderLayerConfigPanel).toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(mockVisualization2.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({ state: { initial: true } })
       );
     });
@@ -1039,8 +998,7 @@ describe('editor_frame', () => {
           datasourceLayers: expect.objectContaining({ first: mockDatasource.publicAPIMock }),
         })
       );
-      expect(mockVisualization2.renderLayerConfigPanel).toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(mockVisualization2.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({ state: { initial: true } })
       );
     });
@@ -1239,9 +1197,8 @@ describe('editor_frame', () => {
           .simulate('click');
       });
 
-      expect(mockVisualization.renderLayerConfigPanel).toHaveBeenCalledTimes(1);
-      expect(mockVisualization.renderLayerConfigPanel).toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(1);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           state: suggestionVisState,
         })
@@ -1306,8 +1263,7 @@ describe('editor_frame', () => {
           .simulate('drop');
       });
 
-      expect(mockVisualization.renderLayerConfigPanel).toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           state: suggestionVisState,
         })
@@ -1375,14 +1331,16 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance.find(DragDrop).prop('onDrop')!({
+        instance
+          .find(DragDrop)
+          .filter('[data-test-subj="mockVisA"]')
+          .prop('onDrop')!({
           indexPatternId: '1',
           field: {},
         });
       });
 
-      expect(mockVisualization2.renderLayerConfigPanel).toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(mockVisualization2.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           state: suggestionVisState,
         })
@@ -1472,14 +1430,16 @@ describe('editor_frame', () => {
       instance.update();
 
       act(() => {
-        instance.find(DragDrop).prop('onDrop')!({
+        instance
+          .find(DragDrop)
+          .filter('[data-test-subj="lnsWorkspace"]')
+          .prop('onDrop')!({
           indexPatternId: '1',
           field: {},
         });
       });
 
-      expect(mockVisualization3.renderLayerConfigPanel).toHaveBeenCalledWith(
-        expect.any(Element),
+      expect(mockVisualization3.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           state: suggestionVisState,
         })

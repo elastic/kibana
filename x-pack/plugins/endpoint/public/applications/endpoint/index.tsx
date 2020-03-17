@@ -18,6 +18,7 @@ import { appStoreFactory } from './store';
 import { AlertIndex } from './view/alerts';
 import { ManagementList } from './view/managing';
 import { PolicyList } from './view/policy';
+import { PolicyDetails } from './view/policy';
 import { HeaderNavigation } from './components/header_nav';
 import { setupRouteService } from '../../../../ingest_manager/common';
 
@@ -72,6 +73,7 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
                 <Route path="/management" component={ManagementList} />
                 <Route path="/alerts" component={AlertIndex} />
                 <Route path="/policy" exact component={PolicyList} />
+                <Route path="/policy/:id" exact component={PolicyDetails} />
                 <Route
                   render={() => (
                     <FormattedMessage
