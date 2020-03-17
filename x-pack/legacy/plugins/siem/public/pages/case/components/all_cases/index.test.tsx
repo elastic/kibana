@@ -10,35 +10,86 @@ import moment from 'moment-timezone';
 import { AllCases } from './';
 import { TestProviders } from '../../../../mock';
 import { useGetCasesMockState } from './__mock__';
-import * as apiHook from '../../../../containers/case/use_get_cases';
-import { act } from '@testing-library/react';
-import { wait } from '../../../../lib/helpers';
+import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
+import { useGetCases } from '../../../../containers/case/use_get_cases';
+import { useGetCasesStatus } from '../../../../containers/case/use_get_cases_status';
+import { useUpdateCases } from '../../../../containers/case/use_bulk_update_case';
+jest.mock('../../../../containers/case/use_bulk_update_case');
+jest.mock('../../../../containers/case/use_delete_cases');
+jest.mock('../../../../containers/case/use_get_cases');
+jest.mock('../../../../containers/case/use_get_cases_status');
+const useDeleteCasesMock = useDeleteCases as jest.Mock;
+const useGetCasesMock = useGetCases as jest.Mock;
+const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
+const useUpdateCasesMock = useUpdateCases as jest.Mock;
 
 describe('AllCases', () => {
+  const dispatchResetIsDeleted = jest.fn();
+  const dispatchResetIsUpdated = jest.fn();
   const dispatchUpdateCaseProperty = jest.fn();
+  const handleOnDeleteConfirm = jest.fn();
+  const handleToggleModal = jest.fn();
   const refetchCases = jest.fn();
   const setFilters = jest.fn();
   const setQueryParams = jest.fn();
   const setSelectedCases = jest.fn();
+  const updateBulkStatus = jest.fn();
+  const fetchCasesStatus = jest.fn();
+
+  const defaultGetCases = {
+    ...useGetCasesMockState,
+    dispatchUpdateCaseProperty,
+    refetchCases,
+    setFilters,
+    setQueryParams,
+    setSelectedCases,
+  };
+  const defaultDeleteCases = {
+    dispatchResetIsDeleted,
+    handleOnDeleteConfirm,
+    handleToggleModal,
+    isDeleted: false,
+    isDisplayConfirmDeleteModal: false,
+    isLoading: false,
+  };
+  const defaultCasesStatus = {
+    countClosedCases: 0,
+    countOpenCases: 5,
+    fetchCasesStatus,
+    isError: false,
+    isLoading: true,
+  };
+  const defaultUpdateCases = {
+    isUpdated: false,
+    isLoading: false,
+    isError: false,
+    dispatchResetIsUpdated,
+    updateBulkStatus,
+  };
+  /* eslint-disable no-console */
+  // Silence until enzyme fixed to use ReactTestUtils.act()
+  const originalError = console.error;
+  beforeAll(() => {
+    console.error = jest.fn();
+  });
+  afterAll(() => {
+    console.error = originalError;
+  });
+  /* eslint-enable no-console */
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.spyOn(apiHook, 'useGetCases').mockReturnValue({
-      ...useGetCasesMockState,
-      dispatchUpdateCaseProperty,
-      refetchCases,
-      setFilters,
-      setQueryParams,
-      setSelectedCases,
-    });
+    useUpdateCasesMock.mockImplementation(() => defaultUpdateCases);
+    useGetCasesMock.mockImplementation(() => defaultGetCases);
+    useDeleteCasesMock.mockImplementation(() => defaultDeleteCases);
+    useGetCasesStatusMock.mockImplementation(() => defaultCasesStatus);
     moment.tz.setDefault('UTC');
   });
-  it('should render AllCases', async () => {
+  it('should render AllCases', () => {
     const wrapper = mount(
       <TestProviders>
         <AllCases />
       </TestProviders>
     );
-    await act(() => wait());
     expect(
       wrapper
         .find(`a[data-test-subj="case-details-link"]`)
@@ -76,13 +127,12 @@ describe('AllCases', () => {
         .text()
     ).toEqual('Showing 10 cases');
   });
-  it('should tableHeaderSortButton AllCases', async () => {
+  it('should tableHeaderSortButton AllCases', () => {
     const wrapper = mount(
       <TestProviders>
         <AllCases />
       </TestProviders>
     );
-    await act(() => wait());
     wrapper
       .find('[data-test-subj="tableHeaderSortButton"]')
       .first()
@@ -93,5 +143,140 @@ describe('AllCases', () => {
       sortField: 'createdAt',
       sortOrder: 'asc',
     });
+  });
+  it('closes case when row action icon clicked', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases />
+      </TestProviders>
+    );
+    wrapper
+      .find('[data-test-subj="action-close"]')
+      .first()
+      .simulate('click');
+    const firstCase = useGetCasesMockState.data.cases[0];
+    expect(dispatchUpdateCaseProperty).toBeCalledWith({
+      caseId: firstCase.id,
+      updateKey: 'status',
+      updateValue: 'closed',
+      refetchCasesStatus: fetchCasesStatus,
+      version: firstCase.version,
+    });
+  });
+  it('Bulk delete', () => {
+    useGetCasesMock.mockImplementation(() => ({
+      ...defaultGetCases,
+      selectedCases: useGetCasesMockState.data.cases,
+    }));
+    useDeleteCasesMock
+      .mockReturnValueOnce({
+        ...defaultDeleteCases,
+        isDisplayConfirmDeleteModal: false,
+      })
+      .mockReturnValue({
+        ...defaultDeleteCases,
+        isDisplayConfirmDeleteModal: true,
+      });
+
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases />
+      </TestProviders>
+    );
+    wrapper
+      .find('[data-test-subj="case-table-bulk-actions"] button')
+      .first()
+      .simulate('click');
+    wrapper
+      .find('[data-test-subj="cases-bulk-delete-button"]')
+      .first()
+      .simulate('click');
+    expect(handleToggleModal).toBeCalled();
+
+    wrapper
+      .find(
+        '[data-test-subj="confirm-delete-case-modal"] [data-test-subj="confirmModalConfirmButton"]'
+      )
+      .last()
+      .simulate('click');
+    expect(handleOnDeleteConfirm.mock.calls[0][0]).toStrictEqual(
+      useGetCasesMockState.data.cases.map(theCase => theCase.id)
+    );
+  });
+  it('Bulk close status update', () => {
+    useGetCasesMock.mockImplementation(() => ({
+      ...defaultGetCases,
+      selectedCases: useGetCasesMockState.data.cases,
+    }));
+
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases />
+      </TestProviders>
+    );
+    wrapper
+      .find('[data-test-subj="case-table-bulk-actions"] button')
+      .first()
+      .simulate('click');
+    wrapper
+      .find('[data-test-subj="cases-bulk-close-button"]')
+      .first()
+      .simulate('click');
+    expect(updateBulkStatus).toBeCalledWith(useGetCasesMockState.data.cases, 'closed');
+  });
+  it('Bulk open status update', () => {
+    useGetCasesMock.mockImplementation(() => ({
+      ...defaultGetCases,
+      selectedCases: useGetCasesMockState.data.cases,
+      filterOptions: {
+        ...defaultGetCases.filterOptions,
+        status: 'closed',
+      },
+    }));
+
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases />
+      </TestProviders>
+    );
+    wrapper
+      .find('[data-test-subj="case-table-bulk-actions"] button')
+      .first()
+      .simulate('click');
+    wrapper
+      .find('[data-test-subj="cases-bulk-open-button"]')
+      .first()
+      .simulate('click');
+    expect(updateBulkStatus).toBeCalledWith(useGetCasesMockState.data.cases, 'open');
+  });
+  it('isDeleted is true, refetch', () => {
+    useDeleteCasesMock.mockImplementation(() => ({
+      ...defaultDeleteCases,
+      isDeleted: true,
+    }));
+
+    mount(
+      <TestProviders>
+        <AllCases />
+      </TestProviders>
+    );
+    expect(refetchCases).toBeCalled();
+    expect(fetchCasesStatus).toBeCalled();
+    expect(dispatchResetIsDeleted).toBeCalled();
+  });
+  it('isUpdated is true, refetch', () => {
+    useUpdateCasesMock.mockImplementation(() => ({
+      ...defaultUpdateCases,
+      isUpdated: true,
+    }));
+
+    mount(
+      <TestProviders>
+        <AllCases />
+      </TestProviders>
+    );
+    expect(refetchCases).toBeCalled();
+    expect(fetchCasesStatus).toBeCalled();
+    expect(dispatchResetIsUpdated).toBeCalled();
   });
 });

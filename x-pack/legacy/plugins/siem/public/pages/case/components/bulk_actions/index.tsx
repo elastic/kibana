@@ -9,11 +9,11 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import * as i18n from './translations';
 
 interface GetBulkItems {
+  caseStatus: string;
   closePopover: () => void;
   deleteCasesAction: (cases: string[]) => void;
-  updateCaseStatus: (status: string) => void;
   selectedCaseIds: string[];
-  caseStatus: string;
+  updateCaseStatus: (status: string) => void;
 }
 
 export const getBulkItems = ({
@@ -26,9 +26,10 @@ export const getBulkItems = ({
   return [
     caseStatus === 'open' ? (
       <EuiContextMenuItem
+        data-test-subj="cases-bulk-close-button"
         key={i18n.BULK_ACTION_CLOSE_SELECTED}
         icon="magnet"
-        onClick={async () => {
+        onClick={() => {
           closePopover();
           updateCaseStatus('closed');
         }}
@@ -37,6 +38,7 @@ export const getBulkItems = ({
       </EuiContextMenuItem>
     ) : (
       <EuiContextMenuItem
+        data-test-subj="cases-bulk-open-button"
         key={i18n.BULK_ACTION_OPEN_SELECTED}
         icon="magnet"
         onClick={() => {
@@ -48,9 +50,10 @@ export const getBulkItems = ({
       </EuiContextMenuItem>
     ),
     <EuiContextMenuItem
+      data-test-subj="cases-bulk-delete-button"
       key={i18n.BULK_ACTION_DELETE_SELECTED}
       icon="trash"
-      onClick={async () => {
+      onClick={() => {
         closePopover();
         deleteCasesAction(selectedCaseIds);
       }}

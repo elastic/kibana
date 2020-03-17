@@ -12,8 +12,10 @@ export const NO_CASES = i18n.translate('xpack.siem.case.caseTable.noCases.title'
   defaultMessage: 'No Cases',
 });
 export const NO_CASES_BODY = i18n.translate('xpack.siem.case.caseTable.noCases.body', {
-  defaultMessage: 'Create a new case to see it displayed in the case workflow table.',
+  defaultMessage:
+    'There are no cases to display. Please create a new case or change your filter settings above.',
 });
+
 export const ADD_NEW_CASE = i18n.translate('xpack.siem.case.caseTable.addNewCase', {
   defaultMessage: 'Add New Case',
 });

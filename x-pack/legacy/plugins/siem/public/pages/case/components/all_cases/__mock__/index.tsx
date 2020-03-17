@@ -10,7 +10,7 @@ import { UseGetCasesState } from '../../../../../containers/case/use_get_cases';
 export const useGetCasesMockState: UseGetCasesState = {
   data: {
     countClosedCases: 0,
-    countOpenCases: 0,
+    countOpenCases: 5,
     cases: [
       {
         id: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
