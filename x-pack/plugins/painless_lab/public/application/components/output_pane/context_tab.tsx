@@ -26,9 +26,9 @@ interface Props {
   context: any;
   index: string;
   document: string;
-  onContextChange: (change: any) => void;
-  onIndexChange: (change: string) => void;
-  onDocumentChange: (change: string) => void;
+  onContextChange: (context: string) => void;
+  onIndexChange: (index: string) => void;
+  onDocumentChange: (document: string) => void;
 }
 
 export const ContextTab = ({

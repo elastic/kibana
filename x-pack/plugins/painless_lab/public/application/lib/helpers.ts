@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestPayloadConfig, Response, ExecutionError } from '../common/types';
+import { RequestPayloadConfig, Response, ExecutionError, PayloadFormat } from '../common/types';
 
 export function parseJSON(text: string) {
   try {
@@ -14,34 +14,47 @@ export function parseJSON(text: string) {
   }
 }
 
+function prettifyPayload(payload = '', indentationLevel = 0) {
+  const indentation = new Array(indentationLevel + 1).join(' ');
+  return payload.replace(/\n/g, `\n${indentation}`);
+}
+
 /**
  * Values should be preserved as strings so that floating point precision,
  * e.g. 1.0, is preserved instead of being coerced to an integer, e.g. 1.
  */
-export function buildRequestPayload({
-  code,
-  context,
-  parameters,
-  index,
-  document,
-}: RequestPayloadConfig): string {
+export function buildRequestPayload(
+  { code, context, parameters, index, document }: RequestPayloadConfig,
+  format: PayloadFormat = PayloadFormat.UGLY
+): string {
   const isAdvancedContext = context === 'filter' || context === 'score';
+  const formattedCode =
+    format === PayloadFormat.UGLY ? JSON.stringify(code) : `"""${prettifyPayload(code, 4)}"""`;
+  const formattedParameters =
+    format === PayloadFormat.UGLY ? parameters : prettifyPayload(parameters, 4);
+  const formattedContext = format === PayloadFormat.UGLY ? context : prettifyPayload(context, 6);
+  const formattedIndex = format === PayloadFormat.UGLY ? index : prettifyPayload(index);
+  const formattedDocument = format === PayloadFormat.UGLY ? document : prettifyPayload(document, 4);
+
   const requestPayload = `{
   "script": {
-    "source": "${code}",
-    ${parameters ? `"params": ${parameters}` : ``}
+    "source": ${formattedCode}${
+    parameters
+      ? `,
+    "params": ${formattedParameters}`
+      : ``
+  }
   }${
     isAdvancedContext
       ? `,
-  "context": ${context},
+  "context": "${formattedContext}",
   "context_setup": {
-    "index": ${index},
-    "document": ${document}
+    "index": "${formattedIndex}",
+    "document": ${formattedDocument}
   }`
       : ``
   }
 }`;
-
   return requestPayload;
 }
 

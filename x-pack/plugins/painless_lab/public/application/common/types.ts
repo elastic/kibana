@@ -15,6 +15,11 @@ export interface RequestPayloadConfig {
   document: string;
 }
 
+export enum PayloadFormat {
+  UGLY = 'ugly',
+  PRETTY = 'pretty',
+}
+
 export interface Response {
   error?: ExecutionError | Error;
   result?: string;

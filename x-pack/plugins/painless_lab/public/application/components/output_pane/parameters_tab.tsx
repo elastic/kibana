@@ -14,6 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { monaco } from '@kbn/ui-shared-deps/monaco';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '../../../../../../../src/plugins/kibana_react/public';
 
@@ -74,6 +75,13 @@ export function ParametersTab({ parameters, onParametersChange }: Props) {
               wordWrap: 'on',
               wrappingIndent: 'indent',
               automaticLayout: true,
+            }}
+            editorDidMount={(editor: monaco.editor.IStandaloneCodeEditor) => {
+              // Updating tab size for the editor
+              const model = editor.getModel();
+              if (model) {
+                model.updateOptions({ tabSize: 2 });
+              }
             }}
           />
         </EuiPanel>

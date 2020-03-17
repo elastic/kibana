@@ -9,13 +9,13 @@ import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { buildRequestPayload, formatJson } from '../lib/helpers';
-import { painlessContextOptions } from '../common/constants';
+import { painlessContextOptions, exampleScript } from '../common/constants';
+import { PayloadFormat } from '../common/types';
+import { useSubmitCode } from '../hooks';
 import { OutputPane } from './output_pane';
 import { MainControls } from './main_controls';
 import { Editor } from './editor';
 import { RequestFlyout } from './request_flyout';
-import { useSubmitCode } from '../hooks';
-import { exampleScript } from '../common/constants';
 
 interface Props {
   http: HttpSetup;
@@ -108,7 +108,10 @@ export function Main({ http }: Props) {
       {isRequestFlyoutOpen && (
         <RequestFlyout
           onClose={() => setRequestFlyoutOpen(false)}
-          requestBody={buildRequestPayload({ code, context, document, index, parameters })}
+          requestBody={buildRequestPayload(
+            { code, context, document, index, parameters },
+            PayloadFormat.PRETTY
+          )}
           response={response ? formatJson(response.result || response.error) : ''}
         />
       )}

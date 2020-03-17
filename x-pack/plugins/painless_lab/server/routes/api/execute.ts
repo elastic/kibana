@@ -10,19 +10,6 @@ import { API_BASE_PATH } from '../../../common/constants';
 import { isEsError } from '../../lib';
 
 const bodySchema = schema.string();
-// const bodySchema = schema.object({
-//   script: schema.object({
-//     source: schema.string(),
-//     params: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-//   }),
-//   context: schema.maybe(schema.string()),
-//   context_setup: schema.maybe(
-//     schema.object({
-//       index: schema.string(),
-//       document: schema.string(),
-//     })
-//   ),
-// });
 
 export function registerExecuteRoute({ router, license }: RouteDependencies) {
   router.post(
@@ -37,7 +24,6 @@ export function registerExecuteRoute({ router, license }: RouteDependencies) {
 
       try {
         const callAsCurrentUser = ctx.core.elasticsearch.dataClient.callAsCurrentUser;
-        console.log('body', body);
         const response = await callAsCurrentUser('scriptsPainlessExecute', {
           body,
         });
