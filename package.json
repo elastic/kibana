@@ -116,7 +116,7 @@
     "@babel/register": "^7.7.0",
     "@elastic/charts": "^17.1.1",
     "@elastic/datemath": "5.0.2",
-    "@elastic/ems-client": "7.6.0",
+    "@elastic/ems-client": "7.7.0",
     "@elastic/eui": "20.0.2",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",

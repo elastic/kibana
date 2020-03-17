@@ -179,7 +179,7 @@
     "@babel/register": "^7.7.0",
     "@babel/runtime": "^7.5.5",
     "@elastic/datemath": "5.0.2",
-    "@elastic/ems-client": "7.6.0",
+    "@elastic/ems-client": "7.7.0",
     "@elastic/eui": "20.0.2",
     "@elastic/filesaver": "1.1.2",
     "@elastic/maki": "6.1.0",
