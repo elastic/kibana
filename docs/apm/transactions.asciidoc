@@ -59,13 +59,7 @@ The number of requests per bucket is displayed when hovering over the graph, and
 [role="screenshot"]
 image::apm/images/apm-transaction-duration-dist.png[Example view of transactions duration distribution graph]
 
-<<<<<<< HEAD
-Let's look at an example.
-In the screenshot below,
-you'll notice most of our requests fall into buckets on the left side of the graph,
-=======
 Most of the requests fall into buckets on the left side of the graph,
->>>>>>> 56006534af... [DOCS] Removed below references (#60159)
 with a long tail of smaller buckets to the right.
 This is a typical distribution, and indicates most of our requests were served quickly - awesome!
 It's the requests on the right, the ones taking longer than average, that we probably want to focus on.
