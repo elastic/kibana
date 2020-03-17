@@ -31,7 +31,8 @@ import { getEditBreadcrumbs } from '../breadcrumbs';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 import { unhashUrl } from '../../../../../../../plugins/kibana_utils/public';
-import { kbnBaseUrl } from '../../../../../../../plugins/kibana_legacy/public';
+import { MarkdownSimple, toMountPoint } from '../../../../../../../plugins/kibana_react/public';
+import { addFatalError, kbnBaseUrl } from '../../../../../../../plugins/kibana_legacy/public';
 import {
   SavedObjectSaveModal,
   showSaveModal,
@@ -75,7 +76,6 @@ function VisualizeAppController(
   $injector,
   $timeout,
   kbnUrl,
-  redirectWhenMissing,
   kbnUrlStateStorage,
   history
 ) {
@@ -88,7 +88,7 @@ function VisualizeAppController(
     toastNotifications,
     chrome,
     getBasePath,
-    core: { docLinks },
+    core: { docLinks, fatalErrors },
     savedQueryService,
     uiSettings,
     I18nContext,
@@ -313,16 +313,33 @@ function VisualizeAppController(
     }
   );
 
+  const stopAllSyncing = () => {
+    stopStateSync();
+    stopSyncingQueryServiceStateWithUrl();
+    stopSyncingAppFilters();
+  };
+
   // The savedVis is pulled from elasticsearch, but the appState is pulled from the url, with the
   // defaults applied. If the url was from a previous session which included modifications to the
   // appState then they won't be equal.
   if (!_.isEqual(stateContainer.getState().vis, stateDefaults.vis)) {
     try {
       vis.setState(stateContainer.getState().vis);
-    } catch {
-      redirectWhenMissing({
-        'index-pattern-field': '/visualize',
+    } catch (error) {
+      // stop syncing url updtes with the state to prevent extra syncing
+      stopAllSyncing();
+
+      toastNotifications.addWarning({
+        title: i18n.translate('kbn.visualize.visualizationTypeInvalidNotificationMessage', {
+          defaultMessage: 'Invalid visualization type',
+        }),
+        text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
       });
+
+      history.replace(`${VisualizeConstants.LANDING_PAGE_PATH}?notFound=visualization`);
+
+      // prevent further controller execution
+      return;
     }
   }
 
@@ -455,16 +472,26 @@ function VisualizeAppController(
     const subscriptions = new Subscription();
 
     subscriptions.add(
-      subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
-        next: () => {
-          $scope.refreshInterval = timefilter.getRefreshInterval();
+      subscribeWithScope(
+        $scope,
+        timefilter.getRefreshIntervalUpdate$(),
+        {
+          next: () => {
+            $scope.refreshInterval = timefilter.getRefreshInterval();
+          },
         },
-      })
+        error => addFatalError(fatalErrors, error)
+      )
     );
     subscriptions.add(
-      subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
-        next: updateTimeRange,
-      })
+      subscribeWithScope(
+        $scope,
+        timefilter.getTimeUpdate$(),
+        {
+          next: updateTimeRange,
+        },
+        error => addFatalError(fatalErrors, error)
+      )
     );
 
     subscriptions.add(
@@ -487,16 +514,26 @@ function VisualizeAppController(
 
     // update the searchSource when filters update
     subscriptions.add(
-      subscribeWithScope($scope, filterManager.getUpdates$(), {
-        next: () => {
-          $scope.filters = filterManager.getFilters();
+      subscribeWithScope(
+        $scope,
+        filterManager.getUpdates$(),
+        {
+          next: () => {
+            $scope.filters = filterManager.getFilters();
+          },
         },
-      })
+        error => addFatalError(fatalErrors, error)
+      )
     );
     subscriptions.add(
-      subscribeWithScope($scope, filterManager.getFetches$(), {
-        next: $scope.fetch,
-      })
+      subscribeWithScope(
+        $scope,
+        filterManager.getFetches$(),
+        {
+          next: $scope.fetch,
+        },
+        error => addFatalError(fatalErrors, error)
+      )
     );
 
     $scope.$on('$destroy', () => {
@@ -509,9 +546,8 @@ function VisualizeAppController(
 
       unsubscribePersisted();
       unsubscribeStateUpdates();
-      stopStateSync();
-      stopSyncingQueryServiceStateWithUrl();
-      stopSyncingAppFilters();
+
+      stopAllSyncing();
     });
 
     $timeout(() => {

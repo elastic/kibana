@@ -27,7 +27,7 @@ import { toMountPoint } from '../../../../kibana_react/public';
 import { Start as InspectorStartContract } from '../inspector';
 import { CONTEXT_MENU_TRIGGER, PANEL_BADGE_TRIGGER, EmbeddableContext } from '../triggers';
 import { IEmbeddable } from '../embeddables/i_embeddable';
-import { ViewMode, GetEmbeddableFactory, GetEmbeddableFactories } from '../types';
+import { ViewMode } from '../types';
 
 import { RemovePanelAction } from './panel_header/panel_actions';
 import { AddPanelAction } from './panel_header/panel_actions/add_panel/add_panel_action';
@@ -36,12 +36,13 @@ import { PanelHeader } from './panel_header/panel_header';
 import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_action';
 import { EditPanelAction } from '../actions';
 import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
+import { EmbeddableStart } from '../../plugin';
 
 interface Props {
   embeddable: IEmbeddable<any, any>;
   getActions: UiActionsService['getTriggerCompatibleActions'];
-  getEmbeddableFactory: GetEmbeddableFactory;
-  getAllEmbeddableFactories: GetEmbeddableFactories;
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;

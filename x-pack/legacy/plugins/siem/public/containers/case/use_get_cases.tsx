@@ -13,7 +13,6 @@ import { UpdateByKey } from './use_update_case';
 import { getCases, patchCase } from './api';
 
 export interface UseGetCasesState {
-  caseCount: CaseCount;
   data: AllCases;
   filterOptions: FilterOptions;
   isError: boolean;
@@ -22,20 +21,18 @@ export interface UseGetCasesState {
   selectedCases: Case[];
 }
 
-export interface CaseCount {
-  open: number;
-  closed: number;
-}
-
 export interface UpdateCase extends UpdateByKey {
   caseId: string;
   version: string;
+  refetchCasesStatus: () => void;
 }
 
 export type Action =
   | { type: 'FETCH_INIT'; payload: string }
-  | { type: 'FETCH_CASE_COUNT_SUCCESS'; payload: Partial<CaseCount> }
-  | { type: 'FETCH_CASES_SUCCESS'; payload: AllCases }
+  | {
+      type: 'FETCH_CASES_SUCCESS';
+      payload: AllCases;
+    }
   | { type: 'FETCH_FAILURE'; payload: string }
   | { type: 'FETCH_UPDATE_CASE_SUCCESS' }
   | { type: 'UPDATE_FILTER_OPTIONS'; payload: FilterOptions }
@@ -55,20 +52,11 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
         ...state,
         loading: state.loading.filter(e => e !== 'caseUpdate'),
       };
-    case 'FETCH_CASE_COUNT_SUCCESS':
-      return {
-        ...state,
-        caseCount: {
-          ...state.caseCount,
-          ...action.payload,
-        },
-        loading: state.loading.filter(e => e !== 'caseCount'),
-      };
     case 'FETCH_CASES_SUCCESS':
       return {
         ...state,
-        isError: false,
         data: action.payload,
+        isError: false,
         loading: state.loading.filter(e => e !== 'cases'),
       };
     case 'FETCH_FAILURE':
@@ -102,13 +90,20 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
 
 const initialData: AllCases = {
   cases: [],
+  countClosedCases: null,
+  countOpenCases: null,
   page: 0,
   perPage: 0,
   total: 0,
 };
 interface UseGetCases extends UseGetCasesState {
-  dispatchUpdateCaseProperty: ({ updateKey, updateValue, caseId, version }: UpdateCase) => void;
-  getCaseCount: (caseState: keyof CaseCount) => void;
+  dispatchUpdateCaseProperty: ({
+    updateKey,
+    updateValue,
+    caseId,
+    version,
+    refetchCasesStatus,
+  }: UpdateCase) => void;
   refetchCases: (filters: FilterOptions, queryParams: QueryParams) => void;
   setFilters: (filters: FilterOptions) => void;
   setQueryParams: (queryParams: QueryParams) => void;
@@ -116,14 +111,11 @@ interface UseGetCases extends UseGetCasesState {
 }
 export const useGetCases = (): UseGetCases => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
-    caseCount: {
-      open: 0,
-      closed: 0,
-    },
     data: initialData,
     filterOptions: {
       search: '',
-      state: 'open',
+      reporters: [],
+      status: 'open',
       tags: [],
     },
     isError: false,
@@ -187,35 +179,8 @@ export const useGetCases = (): UseGetCases => {
     state.filterOptions,
   ]);
 
-  const getCaseCount = useCallback((caseState: keyof CaseCount) => {
-    let didCancel = false;
-    const fetchData = async () => {
-      dispatch({ type: 'FETCH_INIT', payload: 'caseCount' });
-      try {
-        const response = await getCases({
-          filterOptions: { search: '', state: caseState, tags: [] },
-        });
-        if (!didCancel) {
-          dispatch({
-            type: 'FETCH_CASE_COUNT_SUCCESS',
-            payload: { [caseState]: response.total },
-          });
-        }
-      } catch (error) {
-        if (!didCancel) {
-          errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
-          dispatch({ type: 'FETCH_FAILURE', payload: 'caseCount' });
-        }
-      }
-    };
-    fetchData();
-    return () => {
-      didCancel = true;
-    };
-  }, []);
-
   const dispatchUpdateCaseProperty = useCallback(
-    ({ updateKey, updateValue, caseId, version }: UpdateCase) => {
+    ({ updateKey, updateValue, caseId, refetchCasesStatus, version }: UpdateCase) => {
       let didCancel = false;
       const fetchData = async () => {
         dispatch({ type: 'FETCH_INIT', payload: 'caseUpdate' });
@@ -228,8 +193,7 @@ export const useGetCases = (): UseGetCases => {
           if (!didCancel) {
             dispatch({ type: 'FETCH_UPDATE_CASE_SUCCESS' });
             fetchCases(state.filterOptions, state.queryParams);
-            getCaseCount('open');
-            getCaseCount('closed');
+            refetchCasesStatus();
           }
         } catch (error) {
           if (!didCancel) {
@@ -248,14 +212,11 @@ export const useGetCases = (): UseGetCases => {
 
   const refetchCases = useCallback(() => {
     fetchCases(state.filterOptions, state.queryParams);
-    getCaseCount('open');
-    getCaseCount('closed');
   }, [state.filterOptions, state.queryParams]);
 
   return {
     ...state,
     dispatchUpdateCaseProperty,
-    getCaseCount,
     refetchCases,
     setFilters,
     setQueryParams,

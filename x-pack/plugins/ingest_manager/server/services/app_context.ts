@@ -5,6 +5,7 @@
  */
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { SavedObjectsServiceStart } from 'src/core/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { IngestManagerConfigType } from '../../common';
@@ -15,10 +16,12 @@ class AppContextService {
   private security: SecurityPluginSetup | undefined;
   private config$?: Observable<IngestManagerConfigType>;
   private configSubject$?: BehaviorSubject<IngestManagerConfigType>;
+  private savedObjects: SavedObjectsServiceStart | undefined;
 
   public async start(appContext: IngestManagerAppContext) {
     this.encryptedSavedObjects = appContext.encryptedSavedObjects;
     this.security = appContext.security;
+    this.savedObjects = appContext.savedObjects;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -44,6 +47,13 @@ class AppContextService {
 
   public getConfig$() {
     return this.config$;
+  }
+
+  public getSavedObjects() {
+    if (!this.savedObjects) {
+      throw new Error('Saved objects start service not set.');
+    }
+    return this.savedObjects;
   }
 }
 
