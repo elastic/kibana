@@ -35,7 +35,7 @@ function handleIndexPattern(
   };
 }
 
-export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
+export function registerIndexPatternRoute(router: IRouter, endpointAppContext: EndpointAppContext) {
   const log = endpointAppContext.logFactory.get('index_pattern');
   const indexPatternService = endpointAppContext.ingestManager.indexPatternService;
 
