@@ -32,6 +32,12 @@ const templateFields = [
   'process.name',
 ];
 
+/* The mistake here was that ECS is returning array of string and we should have
+ *  check for that and not just passing array in the dsl query
+ *
+ */
+const hasValueInStringArray = (value: unknown) => Array.isArray(value) && !isEmpty(value);
+
 export const findValueToChangeInQuery = (
   keuryNode: KueryNode,
   valueToChange: FindValueToChangeInQuery[] = []
@@ -71,7 +77,9 @@ export const replaceTemplateFieldFromQuery = (query: string, ecsData: Ecs) => {
     const valueToChange = findValueToChangeInQuery(esKuery.fromKueryExpression(query));
     return valueToChange.reduce((newQuery, vtc) => {
       const newValue = get(vtc.field, ecsData);
-      if (newValue != null) {
+      if (hasValueInStringArray(newValue)) {
+        return newQuery.replace(vtc.valueToChange, newValue[0]);
+      } else if (newValue != null) {
         return newQuery.replace(vtc.valueToChange, newValue);
       }
       return newQuery;
@@ -90,7 +98,11 @@ export const replaceTemplateFieldFromMatchFilters = (filters: Filter[], ecsData:
       const newValue = get(filter.meta.key, ecsData);
       if (newValue != null) {
         filter.meta.params = { query: newValue };
-        filter.query = { match_phrase: { [filter.meta.key]: newValue } };
+        if (hasValueInStringArray(newValue)) {
+          filter.query = { match_phrase: { [filter.meta.key]: newValue[0] } };
+        } else if (newValue != null) {
+          filter.query = { match_phrase: { [filter.meta.key]: newValue } };
+        }
       }
     }
     return filter;
@@ -102,12 +114,15 @@ export const reformatDataProviderWithNewValue = <T extends DataProvider | DataPr
 ): T => {
   if (templateFields.includes(dataProvider.queryMatch.field)) {
     const newValue = get(dataProvider.queryMatch.field, ecsData);
-    if (newValue != null) {
-      dataProvider.id = dataProvider.id.replace(dataProvider.name, newValue);
+    dataProvider.id = dataProvider.id.replace(dataProvider.name, newValue);
+    dataProvider.queryMatch.displayField = undefined;
+    dataProvider.queryMatch.displayValue = undefined;
+    if (hasValueInStringArray(newValue)) {
+      dataProvider.name = newValue[0];
+      dataProvider.queryMatch.value = newValue[0];
+    } else if (newValue != null) {
       dataProvider.name = newValue;
       dataProvider.queryMatch.value = newValue;
-      dataProvider.queryMatch.displayField = undefined;
-      dataProvider.queryMatch.displayValue = undefined;
     }
   }
   return dataProvider;
