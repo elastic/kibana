@@ -44,7 +44,6 @@ export class SenseEditor {
       coreEditor,
       parser: this.parser,
     });
-    this.coreEditor.registerAutocompleter(this.autocomplete.getCompletions);
     this.coreEditor.on(
       'tokenizerUpdate',
       this.highlightCurrentRequestsAndUpdateActionBar.bind(this)

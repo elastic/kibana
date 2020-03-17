@@ -281,11 +281,9 @@ export function queryDsl(api) {
           __scope_link: '.',
         },
       ],
-      filter: [
-        {
-          __scope_link: 'GLOBAL.filter',
-        },
-      ],
+      filter: {
+        __scope_link: 'GLOBAL.filter',
+      },
       minimum_should_match: 1,
       boost: 1.0,
     },
