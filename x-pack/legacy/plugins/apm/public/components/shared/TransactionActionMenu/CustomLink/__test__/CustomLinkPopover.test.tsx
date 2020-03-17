@@ -31,7 +31,7 @@ describe('CustomLinkPopover', () => {
         onClose={jest.fn()}
       />
     );
-    expectTextsInDocument(component, ['Custom links', 'Create', 'foo', 'bar']);
+    expectTextsInDocument(component, ['CUSTOM LINKS', 'Create', 'foo', 'bar']);
   });
 
   it('closes popover', () => {
@@ -46,7 +46,7 @@ describe('CustomLinkPopover', () => {
     );
     expect(handleCloseMock).not.toHaveBeenCalled();
     act(() => {
-      fireEvent.click(getByText('Custom links'));
+      fireEvent.click(getByText('CUSTOM LINKS'));
     });
     expect(handleCloseMock).toHaveBeenCalled();
   });

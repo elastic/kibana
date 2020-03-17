@@ -8,8 +8,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
-  EuiButtonIcon,
-  EuiButtonEmpty
+  EuiButtonEmpty,
+  EuiIcon
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { APMLink } from '../../Links/apm/APMLink';
@@ -24,7 +24,7 @@ export const ManageCustomLink = ({
   <EuiFlexGroup>
     <EuiFlexItem>
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
           <EuiToolTip
             position="top"
             content={i18n.translate('xpack.apm.customLink.buttom.manage', {
@@ -32,8 +32,8 @@ export const ManageCustomLink = ({
             })}
           >
             <APMLink path={`/settings/customize-ui`}>
-              <EuiButtonIcon
-                iconType="gear"
+              <EuiIcon
+                type="gear"
                 color="text"
                 aria-label="Custom links settings page"
               />

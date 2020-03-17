@@ -38,18 +38,19 @@ export const CustomLinkPopover = ({
     <>
       <EuiPopoverTitle>
         <EuiFlexGroup>
-          <EuiFlexItem>
+          <EuiFlexItem style={{ alignItems: 'flex-start' }}>
             <EuiButtonEmpty
               color="text"
               size="xs"
               onClick={onClose}
               iconType="arrowLeft"
               style={{ fontWeight: 'bold' }}
+              flush="left"
             >
               {i18n.translate(
                 'xpack.apm.transactionActionMenu.customLink.popover.title',
                 {
-                  defaultMessage: 'Custom links'
+                  defaultMessage: 'CUSTOM LINKS'
                 }
               )}
             </EuiButtonEmpty>
