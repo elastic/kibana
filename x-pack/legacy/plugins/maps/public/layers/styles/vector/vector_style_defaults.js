@@ -12,7 +12,7 @@ import {
   DEFAULT_FILL_COLORS,
   DEFAULT_LINE_COLORS,
 } from '../color_utils';
-import chrome from 'ui/chrome';
+import { getUiSettings } from '../../../kibana_services';
 
 export const MIN_SIZE = 1;
 export const MAX_SIZE = 64;
@@ -67,7 +67,7 @@ export function getDefaultStaticProperties(mapColors = []) {
   const nextFillColor = DEFAULT_FILL_COLORS[nextColorIndex];
   const nextLineColor = DEFAULT_LINE_COLORS[nextColorIndex];
 
-  const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode', false);
+  const isDarkMode = getUiSettings().get('theme:darkMode', false);
 
   return {
     [VECTOR_STYLES.ICON]: {

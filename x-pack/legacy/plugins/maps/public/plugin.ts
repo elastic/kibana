@@ -19,6 +19,7 @@ import {
   setTimeFilter,
   setUiSettings,
   setInjectedVarFunc,
+  setToasts,
 } from './kibana_services';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
@@ -61,6 +62,7 @@ export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
   setHttp(http);
   setUiSettings(core.uiSettings);
   setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
+  setToasts(core.notifications.toasts);
 };
 
 export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {

@@ -52,6 +52,10 @@ let dataTimeFilter;
 export const setTimeFilter = timeFilter => (dataTimeFilter = timeFilter);
 export const getTimeFilter = () => dataTimeFilter;
 
+let toast;
+export const setToasts = notificationToast => (toast = notificationToast);
+export const getToasts = () => toast;
+
 export async function fetchSearchSourceAndRecordWithInspector({
   searchSource,
   requestId,

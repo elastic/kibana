@@ -9,8 +9,7 @@ import {
   DEFAULT_MAX_INNER_RESULT_WINDOW,
   INDEX_SETTINGS_API_PATH,
 } from '../../../../common/constants';
-import { getHttp } from '../../../kibana_services';
-import { toastNotifications } from 'ui/notify';
+import { getHttp, getToasts } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 
 let toastDisplayed = false;
@@ -28,6 +27,7 @@ export async function loadIndexSettings(indexPatternTitle) {
 
 async function fetchIndexSettings(indexPatternTitle) {
   const http = getHttp();
+  const toasts = getToasts();
   try {
     const indexSettings = await http.fetch(`../${INDEX_SETTINGS_API_PATH}`, {
       method: 'GET',
@@ -49,7 +49,7 @@ async function fetchIndexSettings(indexPatternTitle) {
     if (!toastDisplayed) {
       // Only show toast for first failure to avoid flooding user with warnings
       toastDisplayed = true;
-      toastNotifications.addWarning(warningMsg);
+      toasts.addWarning(warningMsg);
     }
     console.warn(warningMsg);
     return {

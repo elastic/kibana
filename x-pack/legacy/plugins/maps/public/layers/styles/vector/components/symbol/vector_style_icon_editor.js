@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import chrome from 'ui/chrome';
+import { getUiSettings } from '../../../../../kibana_services';
 import { StylePropEditor } from '../style_prop_editor';
 import { DynamicIconForm } from './dynamic_icon_form';
 import { StaticIconForm } from './static_icon_form';
@@ -16,13 +16,13 @@ export function VectorStyleIconEditor(props) {
   const iconForm = props.styleProperty.isDynamic() ? (
     <DynamicIconForm
       {...props}
-      isDarkMode={chrome.getUiSettingsClient().get('theme:darkMode', false)}
+      isDarkMode={getUiSettings().get('theme:darkMode', false)}
       symbolOptions={SYMBOL_OPTIONS}
     />
   ) : (
     <StaticIconForm
       {...props}
-      isDarkMode={chrome.getUiSettingsClient().get('theme:darkMode', false)}
+      isDarkMode={getUiSettings().get('theme:darkMode', false)}
       symbolOptions={SYMBOL_OPTIONS}
     />
   );
