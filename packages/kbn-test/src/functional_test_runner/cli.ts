@@ -18,6 +18,7 @@
  */
 
 import { resolve } from 'path';
+import { inspect } from 'util';
 import { run, createFlagError, Flags } from '@kbn/dev-utils';
 import { FunctionalTestRunner } from './functional_test_runner';
 
@@ -83,7 +84,11 @@ export function runFtrCli() {
         }
       };
 
-      process.on('unhandledRejection', err => teardown(err));
+      process.on('unhandledRejection', err =>
+        teardown(
+          err instanceof Error ? err : new Error(`non-Error type rejection value: ${inspect(err)}`)
+        )
+      );
       process.on('SIGTERM', () => teardown());
       process.on('SIGINT', () => teardown());
 
