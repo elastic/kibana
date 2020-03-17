@@ -25,7 +25,8 @@ export * from './search_source/mocks';
 
 export const searchSetupMock: jest.Mocked<ISearchSetup> = {
   aggs: searchAggsSetupMock(),
-  registerSearchStrategyProvider: jest.fn(),
+  registerSearchStrategy: jest.fn(),
+  getSearchStrategy: jest.fn(),
 };
 
 export const searchStartMock: jest.Mocked<ISearchStart> = {

@@ -56,15 +56,11 @@ declare module '../../../src/plugins/data/public' {
 }
 
 export class DemoDataPlugin implements Plugin {
-  public setup(core: CoreSetup, deps: DemoDataSearchSetupDependencies) {
-    deps.data.search.registerSearchStrategyProvider(
-      DEMO_SEARCH_STRATEGY,
-      demoClientSearchStrategyProvider
-    );
-    deps.data.search.registerSearchStrategyProvider(
-      ASYNC_DEMO_SEARCH_STRATEGY,
-      asyncDemoClientSearchStrategyProvider
-    );
+  public setup(core: CoreSetup, { data }: DemoDataSearchSetupDependencies) {
+    const demoClientSearchStrategy = demoClientSearchStrategyProvider(data);
+    const asyncDemoClientSearchStrategy = asyncDemoClientSearchStrategyProvider(data);
+    data.search.registerSearchStrategy(DEMO_SEARCH_STRATEGY, demoClientSearchStrategy);
+    data.search.registerSearchStrategy(ASYNC_DEMO_SEARCH_STRATEGY, asyncDemoClientSearchStrategy);
   }
 
   public start() {}

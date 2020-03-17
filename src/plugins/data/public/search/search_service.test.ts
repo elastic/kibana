@@ -36,7 +36,8 @@ describe('Search service', () => {
       const setup = searchService.setup(mockCoreSetup, {
         version: '8',
       } as any);
-      expect(setup).toHaveProperty('registerSearchStrategyProvider');
+      expect(setup).toHaveProperty('registerSearchStrategy');
+      expect(setup).toHaveProperty('getSearchStrategy');
     });
   });
 });

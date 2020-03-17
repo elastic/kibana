@@ -24,11 +24,6 @@ import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
 import { LegacyApiCaller } from './es_client';
 
-export interface ISearchContext {
-  core: CoreStart;
-  getSearchStrategy: <T extends TStrategyTypes>(name: T) => TSearchStrategyProvider<T>;
-}
-
 /**
  * Search strategy interface contains a search method that takes in
  * a request and returns a promise that resolves to a response.
@@ -37,36 +32,23 @@ export interface ISearchStrategy<T extends TStrategyTypes> {
   search: ISearch<T>;
 }
 
-/**
- * Search strategy provider creates an instance of a search strategy with the request
- * handler context bound to it. This way every search strategy can use
- * whatever information they require from the request context.
- */
-export type TSearchStrategyProviderEnhanced<T extends TStrategyTypes> = (
-  search: ISearchGeneric
-) => Promise<ISearchStrategy<T>>;
-
 export type TSearchStrategiesMap = {
-  [K in TStrategyTypes]?: TSearchStrategyProvider<any>;
+  [K in TStrategyTypes]?: ISearchStrategy<K>;
 };
-
-/**
- * Search strategy provider creates an instance of a search strategy with the request
- * handler context bound to it. This way every search strategy can use
- * whatever information they require from the request context.
- */
-export type TSearchStrategyProvider<T extends TStrategyTypes> = (
-  context: ISearchContext
-) => ISearchStrategy<T>;
 
 /**
  * Extension point exposed for other plugins to register their own search
  * strategies.
  */
-export type TRegisterSearchStrategyProvider = <T extends TStrategyTypes>(
+export type TRegisterSearchStrategy = <T extends TStrategyTypes>(
   name: T,
-  searchStrategyProvider: TSearchStrategyProvider<T>
+  searchStrategy: ISearchStrategy<T>
 ) => void;
+
+/**
+ * Used if a plugin needs access to an already registered search strategy.
+ */
+export type TGetSearchStrategy = <T extends TStrategyTypes>(name: T) => ISearchStrategy<T>;
 
 interface ISearchStartLegacy {
   esClient: LegacyApiCaller;
@@ -82,7 +64,12 @@ export interface ISearchSetup {
    * Extension point exposed for other plugins to register their own search
    * strategies.
    */
-  registerSearchStrategyProvider: TRegisterSearchStrategyProvider;
+  registerSearchStrategy: TRegisterSearchStrategy;
+
+  /**
+   * Used if a plugin needs access to an already registered search strategy.
+   */
+  getSearchStrategy: TGetSearchStrategy;
 }
 
 export interface ISearchStart {

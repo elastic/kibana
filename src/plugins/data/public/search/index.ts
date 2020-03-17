@@ -21,13 +21,7 @@ export * from './aggs';
 export * from './expressions';
 export * from './tabify';
 
-export {
-  ISearchSetup,
-  ISearchStart,
-  ISearchContext,
-  TSearchStrategyProvider,
-  ISearchStrategy,
-} from './types';
+export { ISearchSetup, ISearchStart, ISearchStrategy } from './types';
 
 export {
   ISearch,

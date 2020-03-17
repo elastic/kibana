@@ -29,18 +29,15 @@ export type DataEnhancedSetup = ReturnType<DataEnhancedPlugin['setup']>;
 export type DataEnhancedStart = ReturnType<DataEnhancedPlugin['start']>;
 
 export class DataEnhancedPlugin implements Plugin {
-  constructor() {}
-
   public setup(core: CoreSetup, { data }: DataEnhancedSetupDependencies) {
     data.autocomplete.addQuerySuggestionProvider(
       KUERY_LANGUAGE_NAME,
       setupKqlQuerySuggestionProvider(core)
     );
-    data.search.registerSearchStrategyProvider(ASYNC_SEARCH_STRATEGY, asyncSearchStrategyProvider);
-    data.search.registerSearchStrategyProvider(
-      ES_SEARCH_STRATEGY,
-      enhancedEsSearchStrategyProvider
-    );
+    const asyncSearchStrategy = asyncSearchStrategyProvider(core, data);
+    const esSearchStrategy = enhancedEsSearchStrategyProvider(core, asyncSearchStrategy);
+    data.search.registerSearchStrategy(ASYNC_SEARCH_STRATEGY, asyncSearchStrategy);
+    data.search.registerSearchStrategy(ES_SEARCH_STRATEGY, esSearchStrategy);
   }
 
   public start(core: CoreStart, plugins: DataEnhancedStartDependencies) {

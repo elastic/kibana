@@ -346,8 +346,6 @@ export {
   SYNC_SEARCH_STRATEGY,
   getEsPreference,
   getSearchErrorType,
-  ISearchContext,
-  TSearchStrategyProvider,
   ISearchStrategy,
   ISearch,
   ISearchOptions,
