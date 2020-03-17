@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { NewDatasource } from '../types';
+import { NewDatasource, DatasourceInput } from '../types';
 import { storedDatasourceToAgentDatasource } from './datasource_to_agent_datasource';
 
 describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
@@ -17,7 +17,7 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
     inputs: [],
   };
 
-  const mockInput = {
+  const mockInput: DatasourceInput = {
     type: 'test-logs',
     enabled: true,
     streams: [
@@ -25,13 +25,21 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
         id: 'test-logs-foo',
         enabled: true,
         dataset: 'foo',
-        config: { fooVar: 'foo-value', fooVar2: [1, 2] },
+        config: { fooVar: { value: 'foo-value' }, fooVar2: { value: [1, 2] } },
       },
       {
         id: 'test-logs-bar',
         enabled: false,
         dataset: 'bar',
-        config: { barVar: 'bar-value', barVar2: [1, 2] },
+        config: {
+          barVar: { value: 'bar-value' },
+          barVar2: { value: [1, 2] },
+          barVar3: {
+            type: 'yaml',
+            value:
+              '- namespace: mockNamespace\n  #disabledProp: ["test"]\n  anotherProp: test\n- namespace: mockNamespace2\n  #disabledProp: ["test2"]\n  anotherProp: test2',
+          },
+        },
       },
     ],
   };
@@ -91,6 +99,16 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
               dataset: 'bar',
               barVar: 'bar-value',
               barVar2: [1, 2],
+              barVar3: [
+                {
+                  namespace: 'mockNamespace',
+                  anotherProp: 'test',
+                },
+                {
+                  namespace: 'mockNamespace2',
+                  anotherProp: 'test2',
+                },
+              ],
             },
           ],
         },

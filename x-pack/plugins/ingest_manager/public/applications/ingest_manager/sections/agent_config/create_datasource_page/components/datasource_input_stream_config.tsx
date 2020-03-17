@@ -65,8 +65,8 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
       <EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="m">
           {requiredVars.map(varDef => {
-            const varName = varDef.name;
-            const value = datasourceInputStream.config![varName];
+            const { name: varName, type: varType } = varDef;
+            const value = datasourceInputStream.config![varName].value;
             return (
               <EuiFlexItem key={varName}>
                 <DatasourceInputVarField
@@ -76,7 +76,10 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
                     updateDatasourceInputStream({
                       config: {
                         ...datasourceInputStream.config,
-                        [varName]: newValue,
+                        [varName]: {
+                          type: varType,
+                          value: newValue,
+                        },
                       },
                     });
                   }}
@@ -104,8 +107,8 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
               </EuiFlexItem>
               {isShowingAdvanced
                 ? advancedVars.map(varDef => {
-                    const varName = varDef.name;
-                    const value = datasourceInputStream.config![varName];
+                    const { name: varName, type: varType } = varDef;
+                    const value = datasourceInputStream.config![varName].value;
                     return (
                       <EuiFlexItem key={varName}>
                         <DatasourceInputVarField
@@ -115,7 +118,10 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
                             updateDatasourceInputStream({
                               config: {
                                 ...datasourceInputStream.config,
-                                [varName]: newValue,
+                                [varName]: {
+                                  type: varType,
+                                  value: newValue,
+                                },
                               },
                             });
                           }}

@@ -41,9 +41,9 @@ export const packageToConfigDatasourceInputs = (packageInfo: PackageInfo): Datas
               streamVar: RegistryVarsEntry
             ): DatasourceInputStream['config'] => {
               if (!streamVar.default && streamVar.multi) {
-                configObject![streamVar.name] = [];
+                configObject![streamVar.name] = { type: streamVar.type, value: [] };
               } else {
-                configObject![streamVar.name] = streamVar.default;
+                configObject![streamVar.name] = { type: streamVar.type, value: streamVar.default };
               }
               return configObject;
             };

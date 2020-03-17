@@ -108,8 +108,14 @@ describe('Ingest Manager - packageToConfig', () => {
                 {
                   type: 'bar',
                   streams: [
-                    { dataset: 'bar', vars: [{ default: 'bar-var-value', name: 'var-name' }] },
-                    { dataset: 'bar2', vars: [{ default: 'bar2-var-value', name: 'var-name' }] },
+                    {
+                      dataset: 'bar',
+                      vars: [{ default: 'bar-var-value', name: 'var-name', type: 'text' }],
+                    },
+                    {
+                      dataset: 'bar2',
+                      vars: [{ default: 'bar2-var-value', name: 'var-name', type: 'yaml' }],
+                    },
                   ],
                 },
               ],
@@ -125,7 +131,7 @@ describe('Ingest Manager - packageToConfig', () => {
               id: 'foo-foo',
               enabled: true,
               dataset: 'foo',
-              config: { 'var-name': 'foo-var-value' },
+              config: { 'var-name': { value: 'foo-var-value' } },
             },
           ],
         },
@@ -137,13 +143,13 @@ describe('Ingest Manager - packageToConfig', () => {
               id: 'bar-bar',
               enabled: true,
               dataset: 'bar',
-              config: { 'var-name': 'bar-var-value' },
+              config: { 'var-name': { type: 'text', value: 'bar-var-value' } },
             },
             {
               id: 'bar-bar2',
               enabled: true,
               dataset: 'bar2',
-              config: { 'var-name': 'bar2-var-value' },
+              config: { 'var-name': { type: 'yaml', value: 'bar2-var-value' } },
             },
           ],
         },
@@ -204,10 +210,10 @@ describe('Ingest Manager - packageToConfig', () => {
               enabled: true,
               dataset: 'foo',
               config: {
-                'var-name': 'foo-var-value',
-                'foo-input-var-name': 'foo-input-var-value',
-                'foo-input2-var-name': 'foo-input2-var-value',
-                'foo-input3-var-name': undefined,
+                'var-name': { value: 'foo-var-value' },
+                'foo-input-var-name': { value: 'foo-input-var-value' },
+                'foo-input2-var-name': { value: 'foo-input2-var-value' },
+                'foo-input3-var-name': { value: undefined },
               },
             },
           ],
@@ -221,9 +227,9 @@ describe('Ingest Manager - packageToConfig', () => {
               enabled: true,
               dataset: 'bar',
               config: {
-                'var-name': 'bar-var-value',
-                'bar-input-var-name': ['value1', 'value2'],
-                'bar-input2-var-name': 123456,
+                'var-name': { value: 'bar-var-value' },
+                'bar-input-var-name': { value: ['value1', 'value2'] },
+                'bar-input2-var-name': { value: 123456 },
               },
             },
             {
@@ -231,9 +237,9 @@ describe('Ingest Manager - packageToConfig', () => {
               enabled: true,
               dataset: 'bar2',
               config: {
-                'var-name': 'bar2-var-value',
-                'bar-input-var-name': ['value1', 'value2'],
-                'bar-input2-var-name': 123456,
+                'var-name': { value: 'bar2-var-value' },
+                'bar-input-var-name': { value: ['value1', 'value2'] },
+                'bar-input2-var-name': { value: 123456 },
               },
             },
           ],
@@ -247,7 +253,7 @@ describe('Ingest Manager - packageToConfig', () => {
               enabled: false,
               dataset: 'disabled',
               config: {
-                'var-name': [],
+                'var-name': { value: [] },
               },
             },
             {

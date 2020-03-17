@@ -15,7 +15,13 @@ export interface DatasourceInputStream {
   enabled: boolean;
   dataset: string;
   processors?: string[];
-  config?: Record<string, any>;
+  config?: Record<
+    string,
+    {
+      type?: string;
+      value: any;
+    }
+  >;
 }
 
 export interface DatasourceInput {

@@ -6,14 +6,57 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFormRow, EuiFieldText, EuiComboBox, EuiText } from '@elastic/eui';
+import { EuiFormRow, EuiFieldText, EuiComboBox, EuiText, EuiCodeEditor } from '@elastic/eui';
 import { RegistryVarsEntry } from '../../../../types';
+
+import 'brace/mode/yaml';
+import 'brace/theme/textmate';
 
 export const DatasourceInputVarField: React.FunctionComponent<{
   varDef: RegistryVarsEntry;
   value: any;
   onChange: (newValue: any) => void;
 }> = ({ varDef, value, onChange }) => {
+  const renderField = () => {
+    if (varDef.multi) {
+      return (
+        <EuiComboBox
+          noSuggestions
+          selectedOptions={value.map((val: string) => ({ label: val }))}
+          onCreateOption={(newVal: any) => {
+            onChange([...value, newVal]);
+          }}
+          onChange={(newVals: any[]) => {
+            onChange(newVals.map(val => val.label));
+          }}
+        />
+      );
+    }
+    if (varDef.type === 'yaml') {
+      return (
+        <EuiCodeEditor
+          width="100%"
+          mode="yaml"
+          theme="textmate"
+          setOptions={{
+            minLines: 10,
+            maxLines: 30,
+            tabSize: 2,
+            showGutter: false,
+          }}
+          value={value}
+          onChange={newVal => onChange(newVal)}
+        />
+      );
+    }
+    return (
+      <EuiFieldText
+        value={value === undefined ? '' : value}
+        onChange={e => onChange(e.target.value)}
+      />
+    );
+  };
+
   return (
     <EuiFormRow
       label={varDef.title || varDef.name}
@@ -29,20 +72,7 @@ export const DatasourceInputVarField: React.FunctionComponent<{
       }
       helpText={<ReactMarkdown source={varDef.description} />}
     >
-      {varDef.multi ? (
-        <EuiComboBox
-          noSuggestions
-          selectedOptions={value.map((val: string) => ({ label: val }))}
-          onCreateOption={(newVal: any) => {
-            onChange([...value, newVal]);
-          }}
-          onChange={(newVals: any[]) => {
-            onChange(newVals.map(val => val.label));
-          }}
-        />
-      ) : (
-        <EuiFieldText value={value} onChange={e => onChange(e.target.value)} />
-      )}
+      {renderField()}
     </EuiFormRow>
   );
 };
