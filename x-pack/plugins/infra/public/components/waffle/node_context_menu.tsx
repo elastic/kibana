@@ -153,7 +153,6 @@ export const NodeContextMenu: React.FC<Props> = ({
     onClick: () => {
       setFlyoutVisible(true);
     },
-    iconType: 'bell',
   };
 
   return (
