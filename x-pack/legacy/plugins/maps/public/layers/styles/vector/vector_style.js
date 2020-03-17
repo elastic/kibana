@@ -390,7 +390,7 @@ export class VectorStyle extends AbstractStyle {
       return null;
     }
 
-    const formattersDataRequest = this._layer.findDataRequestById(dataRequestId);
+    const formattersDataRequest = this._layer.getDataRequest(dataRequestId);
     if (!formattersDataRequest || !formattersDataRequest.hasData()) {
       return null;
     }

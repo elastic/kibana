@@ -40,5 +40,10 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   getFields(): Promise<IField[]>;
   getStyleEditorFields(): Promise<IField[]>;
   getValidJoins(): IJoin[];
-  _getSearchFilters(dataFilters: MapFilters): VectorLayerRequestMeta;
+  _getSearchFilters(
+    dataFilters: MapFilters,
+    source: IVectorSource,
+    style: IVectorStyle
+  ): VectorLayerRequestMeta;
+  _syncData(syncContext: unknown, source: IVectorSource, style: IVectorStyle): Promise<void>;
 }

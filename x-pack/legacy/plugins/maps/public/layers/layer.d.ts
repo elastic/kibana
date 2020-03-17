@@ -8,7 +8,8 @@ import { ISource } from './sources/source';
 import { DataRequest } from './util/data_request';
 
 export interface ILayer {
-  getDisplayName(): Promise<string>;
+  getDataRequest(id: string): DataRequest | undefined;
+  getDisplayName(source?: ISource): Promise<string>;
   getSourceDataRequest(): DataRequest | undefined;
   getSource(): ISource;
   getSourceForEditing(): ISource;
@@ -22,7 +23,8 @@ export interface ILayerArguments {
 
 export class AbstractLayer implements ILayer {
   constructor(layerArguments: ILayerArguments);
-  getDisplayName(): Promise<string>;
+  getDataRequest(id: string): DataRequest | undefined;
+  getDisplayName(source?: ISource): Promise<string>;
   getSourceDataRequest(): DataRequest | undefined;
   getSource(): ISource;
   getSourceForEditing(): ISource;

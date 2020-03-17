@@ -89,12 +89,15 @@ export class AbstractLayer {
     return await this.getSource().supportsFitToBounds();
   }
 
-  async getDisplayName() {
+  async getDisplayName(source) {
     if (this._descriptor.label) {
       return this._descriptor.label;
     }
 
-    return (await this.getSource().getDisplayName()) || `Layer ${this._descriptor.id}`;
+    const sourceDisplayName = source
+      ? await source.getDisplayName()
+      : await this.getSource().getDisplayName();
+    return sourceDisplayName || `Layer ${this._descriptor.id}`;
   }
 
   async getAttributions() {

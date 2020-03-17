@@ -131,8 +131,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     return layerDescriptor;
   }
 
-  private _activeSource: IESSource;
-  private _activeStyle: IVectorStyle;
+  private readonly _isClustered: boolean;
   private readonly _clusterSource: IESAggSource;
   private readonly _clusterStyle: IVectorStyle;
   private readonly _documentSource: IESSource;
@@ -151,16 +150,15 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     );
     this._clusterStyle = new VectorStyle(clusterStyleDescriptor, this._clusterSource, this);
 
-    this._activeSource = this._documentSource;
-    this._activeStyle = this._documentStyle;
+    let isClustered = false;
     const sourceDataRequest = this.getSourceDataRequest();
     if (sourceDataRequest) {
       const requestMeta = sourceDataRequest.getMeta();
       if (requestMeta && requestMeta.sourceType && requestMeta.sourceType === ES_GEO_GRID) {
-        this._activeSource = this._clusterSource;
-        this._activeStyle = this._clusterStyle;
+        isClustered = true;
       }
     }
+    this._isClustered = isClustered;
   }
 
   destroy() {
@@ -181,7 +179,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   }
 
   getSource() {
-    return this._activeSource;
+    return this._isClustered ? this._clusterSource : this._documentSource;
   }
 
   getSourceForEditing() {
@@ -192,7 +190,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   }
 
   getCurrentStyle() {
-    return this._activeStyle;
+    return this._isClustered ? this._clusterStyle : this._documentStyle;
   }
 
   getStyleForEditing() {
@@ -201,27 +199,33 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
 
   async syncData(syncContext: unknown) {
     // @ts-ignore
-    const searchFilters = this._getSearchFilters(syncContext.dataFilters);
+    const searchFilters = this._getSearchFilters(
+      syncContext.dataFilters,
+      this.getSource(),
+      this.getCurrentStyle()
+    );
     const canSkipFetch = await canSkipSourceUpdate({
       source: this.getSource(),
       prevDataRequest: this.getSourceDataRequest(),
       nextMeta: searchFilters,
     });
+
+    let activeSource = this.getSource();
+    let activeStyle = this.getCurrentStyle();
     if (!canSkipFetch) {
       const searchSource = await this._documentSource.makeSearchSource(searchFilters, 0);
       const resp = await searchSource.fetch();
       const maxResultWindow = await this._documentSource.getMaxResultWindow();
+
       if (resp.hits.total > maxResultWindow) {
-        this._activeSource = this._clusterSource;
-        this._activeStyle = this._clusterStyle;
+        activeSource = this._clusterSource;
+        activeStyle = this._clusterStyle;
       } else {
-        this._activeSource = this._documentSource;
-        this._activeStyle = this._documentStyle;
+        activeSource = this._documentSource;
+        activeStyle = this._documentStyle;
       }
     }
 
-    super.syncData(syncContext);
+    super._syncData(syncContext, activeSource, activeStyle);
   }
-
-  /* syncLayerWithMB(mbMap) {}*/
 }
