@@ -16,7 +16,7 @@ describe('appendSearch', () => {
   test('should return empty string if  parameter is null', () => {
     expect(appendSearch(null)).toEqual('');
   });
-  test('should return "?" + parameter if  parameter is defined', () => {
-    expect(appendSearch('helloWorld')).toEqual('?helloWorld');
+  test('should return parameter if  parameter is defined', () => {
+    expect(appendSearch('helloWorld')).toEqual('helloWorld');
   });
 });
