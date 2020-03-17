@@ -36,7 +36,7 @@ When the minimum and maximum are the same and there is no range:
 * *Fill color* and *Border color* are set to last color in the color ramp.
 * *Border width* and *Symbol size* are set to the maximum size.
 
-The image below shows an example of data driven styling using the <<add-sample-data, Kibana sample web logs>> data set.
+The image shows an example of data driven styling using the <<add-sample-data, Kibana sample web logs>> data set.
 The *kibana_sample_data_logs* layer uses data driven styling for fill color and symbol size style properties.
 
 * The `hour_of_day` property determines the fill color for each feature based on where the value fits on a linear scale.
