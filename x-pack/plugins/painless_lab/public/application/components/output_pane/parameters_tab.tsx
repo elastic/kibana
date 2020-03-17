@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import {
   EuiFormRow,
   EuiPanel,
@@ -18,12 +18,10 @@ import { monaco } from '@kbn/ui-shared-deps/monaco';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '../../../../../../../src/plugins/kibana_react/public';
 
-interface Props {
-  parameters: string;
-  onParametersChange: (change: string) => void;
-}
+import { useAppContext } from '../../context';
 
-export function ParametersTab({ parameters, onParametersChange }: Props) {
+export const ParametersTab: FunctionComponent = () => {
+  const { state, setState } = useAppContext();
   return (
     <>
       <EuiSpacer size="m" />
@@ -64,8 +62,8 @@ export function ParametersTab({ parameters, onParametersChange }: Props) {
           <CodeEditor
             languageId="json"
             height={600}
-            value={parameters}
-            onChange={onParametersChange}
+            value={state.parameters}
+            onChange={nextParams => setState(s => ({ ...s, params: nextParams }))}
             options={{
               fontSize: 12,
               minimap: {
@@ -88,4 +86,4 @@ export function ParametersTab({ parameters, onParametersChange }: Props) {
       </EuiFormRow>
     </>
   );
-}
+};

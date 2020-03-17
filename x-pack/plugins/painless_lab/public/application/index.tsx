@@ -7,8 +7,10 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { CoreSetup, CoreStart } from 'kibana/public';
-import { Main } from './components/main';
 import { createKibanaReactContext } from '../../../../../src/plugins/kibana_react/public';
+
+import { AppContextProvider } from './context';
+import { Main } from './components/main';
 
 interface AppDependencies {
   http: CoreSetup['http'];
@@ -30,7 +32,9 @@ export function renderApp(
   render(
     <I18nContext>
       <KibanaReactContextProvider>
-        <Main http={http} />
+        <AppContextProvider>
+          <Main http={http} />
+        </AppContextProvider>
       </KibanaReactContextProvider>
     </I18nContext>,
     element

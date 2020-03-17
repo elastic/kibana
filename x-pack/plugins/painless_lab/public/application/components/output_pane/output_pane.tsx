@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import {
   EuiIcon,
   EuiFlexGroup,
@@ -23,32 +23,9 @@ import { ContextTab } from './context_tab';
 interface Props {
   isLoading: boolean;
   response?: Response;
-  context: string;
-  parameters: string;
-  index: string;
-  document: string;
-  query: string;
-  onContextChange: (change: string) => void;
-  onParametersChange: (change: string) => void;
-  onIndexChange: (change: string) => void;
-  onDocumentChange: (change: string) => void;
-  onQueryChange: (change: string) => void;
 }
 
-export function OutputPane({
-  isLoading,
-  response,
-  context,
-  parameters,
-  index,
-  document,
-  query,
-  onContextChange,
-  onParametersChange,
-  onIndexChange,
-  onDocumentChange,
-  onQueryChange,
-}: Props) {
+export const OutputPane: FunctionComponent<Props> = ({ isLoading, response }) => {
   const outputTabLabel = (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -86,30 +63,17 @@ export function OutputPane({
             name: i18n.translate('xpack.painlessLab.parametersTabLabel', {
               defaultMessage: 'Parameters',
             }),
-            content: (
-              <ParametersTab parameters={parameters} onParametersChange={onParametersChange} />
-            ),
+            content: <ParametersTab />,
           },
           {
             id: 'context',
             name: i18n.translate('xpack.painlessLab.contextTabLabel', {
               defaultMessage: 'Context',
             }),
-            content: (
-              <ContextTab
-                context={context}
-                index={index}
-                document={document}
-                query={query}
-                onContextChange={onContextChange}
-                onIndexChange={onIndexChange}
-                onDocumentChange={onDocumentChange}
-                onQueryChange={onQueryChange}
-              />
-            ),
+            content: <ContextTab />,
           },
         ]}
       />
     </EuiPanel>
   );
-}
+};

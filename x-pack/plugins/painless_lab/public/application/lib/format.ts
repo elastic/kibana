@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestPayloadConfig, Response, ExecutionError, PayloadFormat } from '../common/types';
+import { Response, ExecutionError, PayloadFormat } from '../common/types';
+import { Store } from '../store';
 
 function prettifyPayload(payload = '', indentationLevel = 0) {
   const indentation = new Array(indentationLevel + 1).join(' ');
@@ -16,7 +17,7 @@ function prettifyPayload(payload = '', indentationLevel = 0) {
  * e.g. 1.0, is preserved instead of being coerced to an integer, e.g. 1.
  */
 export function formatRequestPayload(
-  { code, context, parameters, index, document, query }: RequestPayloadConfig,
+  { code, context, parameters, index, document, query }: Store,
   format: PayloadFormat = PayloadFormat.UGLY
 ): string {
   const isAdvancedContext = context === 'filter' || context === 'score';

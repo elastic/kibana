@@ -7,15 +7,6 @@
 // This should be an enumerated list
 export type Context = string;
 
-export interface RequestPayloadConfig {
-  code?: string;
-  context?: string;
-  parameters?: string;
-  index?: string;
-  document?: string;
-  query?: string;
-}
-
 export enum PayloadFormat {
   UGLY = 'ugly',
   PRETTY = 'pretty',
