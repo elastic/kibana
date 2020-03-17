@@ -53,7 +53,11 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
   );
 
   const actionWizard = (
-    <EuiFormRow fullWidth={true} className="drdFormDrilldownWizard__formRow">
+    <EuiFormRow
+      label={actionFactories?.length > 1 ? txtDrilldownAction : undefined}
+      fullWidth={true}
+      className="drdFormDrilldownWizard__formRow"
+    >
       <ActionWizard
         actionFactories={actionFactories}
         currentActionFactory={currentActionFactory}
