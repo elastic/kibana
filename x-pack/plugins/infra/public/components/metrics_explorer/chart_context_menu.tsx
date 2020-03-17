@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import DateMath from '@elastic/datemath';
 import { Capabilities } from 'src/core/public';
-import { IIndexPattern } from 'src/plugins/data/public';
 import { MetricsExplorerSeries } from '../../../common/http_api/metrics_explorer';
 import {
   MetricsExplorerOptions,
@@ -29,7 +28,6 @@ import { AlertFlyout } from '../alerting/metrics/alert_flyout';
 import { useLinkProps } from '../../hooks/use_link_props';
 
 export interface Props {
-  derivedIndexPattern: IIndexPattern;
   options: MetricsExplorerOptions;
   onFilter?: (query: string) => void;
   series: MetricsExplorerSeries;

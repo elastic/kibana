@@ -10,7 +10,6 @@ import { EuiTitle, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Axis, Chart, niceTimeFormatter, Position, Settings, TooltipValue } from '@elastic/charts';
 import { first, last } from 'lodash';
 import moment from 'moment';
-import { IIndexPattern } from 'src/plugins/data/public';
 import { MetricsExplorerSeries } from '../../../common/http_api/metrics_explorer';
 import {
   MetricsExplorerOptions,
@@ -31,7 +30,6 @@ import { calculateDomain } from './helpers/calculate_domain';
 import { useKibana, useUiSetting } from '../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
-  derivedIndexPattern: IIndexPattern;
   title?: string | null;
   onFilter: (query: string) => void;
   width?: number | string;
@@ -45,7 +43,6 @@ interface Props {
 }
 
 export const MetricsExplorerChart = ({
-  derivedIndexPattern,
   source,
   options,
   chartOptions,
@@ -95,7 +92,6 @@ export const MetricsExplorerChart = ({
             </ChartTitle>
             <EuiFlexItem grow={false}>
               <MetricsExplorerChartContextMenu
-                derivedIndexPattern={derivedIndexPattern}
                 timeRange={timeRange}
                 options={options}
                 chartOptions={chartOptions}
@@ -111,7 +107,6 @@ export const MetricsExplorerChart = ({
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <MetricsExplorerChartContextMenu
-              derivedIndexPattern={derivedIndexPattern}
               options={options}
               chartOptions={chartOptions}
               series={series}

@@ -8,7 +8,6 @@ import { EuiButton, EuiFlexGrid, EuiFlexItem, EuiText, EuiHorizontalRule } from 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { IIndexPattern } from 'src/plugins/data/public';
 import { MetricsExplorerResponse } from '../../../common/http_api/metrics_explorer';
 import {
   MetricsExplorerOptions,
@@ -21,7 +20,6 @@ import { MetricsExplorerChart } from './chart';
 import { SourceQuery } from '../../graphql/types';
 
 interface Props {
-  derivedIndexPattern: IIndexPattern;
   loading: boolean;
   options: MetricsExplorerOptions;
   chartOptions: MetricsExplorerChartOptions;
@@ -34,7 +32,6 @@ interface Props {
   timeRange: MetricsExplorerTimeOptions;
 }
 export const MetricsExplorerCharts = ({
-  derivedIndexPattern,
   loading,
   data,
   onLoadMore,
@@ -90,7 +87,6 @@ export const MetricsExplorerCharts = ({
               title={options.groupBy ? series.id : null}
               height={data.series.length > 1 ? 200 : 400}
               series={series}
-              derivedIndexPattern={derivedIndexPattern}
               source={source}
               timeRange={timeRange}
               onTimeChange={onTimeChange}

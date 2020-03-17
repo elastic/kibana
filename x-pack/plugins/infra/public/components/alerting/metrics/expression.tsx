@@ -278,7 +278,7 @@ export const Expressions: React.FC<Props> = props => {
 
       <EuiSpacer size={'m'} />
 
-      {alertsContext.metadata && options.metrics.length > 0 && (
+      {alertsContext.metadata && (
         <EuiFormRow
           label={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerText', {
             defaultMessage: 'Create alert per',

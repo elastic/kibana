@@ -8,7 +8,6 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { EuiPopover, EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AlertFlyout } from './alert_flyout';
-import { useLinkProps } from '../../../hooks/use_link_props';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export const AlertDropdown = () => {
@@ -28,7 +27,7 @@ export const AlertDropdown = () => {
     return [
       <EuiContextMenuItem icon="bell" key="createLink" onClick={() => setFlyoutVisible(true)}>
         <FormattedMessage
-          id="xpack.infra.metricsExplorer.createAlertButton"
+          id="xpack.infra.alerting.createAlertButton"
           defaultMessage="Create alert"
         />
       </EuiContextMenuItem>,
@@ -39,10 +38,7 @@ export const AlertDropdown = () => {
           'kibana#/management/kibana/triggersActions/alerts'
         )}
       >
-        <FormattedMessage
-          id="xpack.infra.logEntryActionsMenu.manageAlerts"
-          defaultMessage="Manage Alerts"
-        />
+        <FormattedMessage id="xpack.infra.alerting.manageAlerts" defaultMessage="Manage Alerts" />
       </EuiContextMenuItem>,
     ];
   }, [kibana.services]);
