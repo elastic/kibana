@@ -13,13 +13,20 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   // Skipped until we can figure out how to load data for Ingest
   describe.skip('Endpoint Policy Details', function() {
     this.tags(['ciGroup7']);
+    before(async () => {
+      await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy/123');
+    });
 
     it('loads the Policy Details Page', async () => {
-      await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy/123');
       await testSubjects.existOrFail('policyDetailsViewTitle');
 
       const policyDetailsNotFoundTitle = await testSubjects.getVisibleText('policyDetailsName');
       expect(policyDetailsNotFoundTitle).to.equal('policy with some protections 123');
+    });
+
+    it('loads the Policy Details Eventing config', async () => {
+      await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy/123');
+      await testSubjects.existOrFail('windowsEventingForm');
     });
   });
 }

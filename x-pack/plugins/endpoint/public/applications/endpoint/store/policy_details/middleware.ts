@@ -31,6 +31,7 @@ export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsStat
               },
               eventing: {
                 process: true,
+                network: true,
               },
             },
             mac: {},
