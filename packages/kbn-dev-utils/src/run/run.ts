@@ -62,7 +62,8 @@ export async function run(fn: RunFn, options: Options = {}) {
 
   process.on('unhandledRejection', error => {
     log.error('UNHANDLED PROMISE REJECTION');
-    log.error(error);
+    if (error instanceof Error || typeof error === 'string') log.error(error);
+    else log.error(String(error));
     process.exit(1);
   });
 
