@@ -17,9 +17,4 @@
  * under the License.
  */
 
-import React from 'react';
-import { EuiRangeProps } from '@elastic/eui';
-
-export class ValidatedDualRange<EuiRangeProps> extends React.Component<EuiRangeProps> {
-  allowEmptyRange?: boolean;
-}
+export { CoreApp } from './core_app';

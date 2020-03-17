@@ -19,6 +19,9 @@ export const GetOneAgentConfigRequestSchema = {
 
 export const CreateAgentConfigRequestSchema = {
   body: NewAgentConfigSchema,
+  query: schema.object({
+    sys_monitoring: schema.maybe(schema.boolean()),
+  }),
 };
 
 export const UpdateAgentConfigRequestSchema = {

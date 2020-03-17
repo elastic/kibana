@@ -3,12 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/server';
-import { DeleteDatasourcesResponse } from '../../common';
+import { DeleteDatasourcesResponse, packageToConfigDatasource } from '../../common';
 import { DATASOURCE_SAVED_OBJECT_TYPE } from '../constants';
 import { NewDatasource, Datasource, ListWithKuery } from '../types';
 import { agentConfigService } from './agent_config';
+import { findInstalledPackageByName, getPackageInfo } from './epm/packages';
+import { outputService } from './output';
 
 const SAVED_OBJECT_TYPE = DATASOURCE_SAVED_OBJECT_TYPE;
 
@@ -164,6 +166,28 @@ class DatasourceService {
     }
 
     return result;
+  }
+
+  public async buildDatasourceFromPackage(
+    soClient: SavedObjectsClientContract,
+    pkgName: string
+  ): Promise<NewDatasource | undefined> {
+    const pkgInstall = await findInstalledPackageByName({
+      savedObjectsClient: soClient,
+      pkgName,
+    });
+    if (pkgInstall) {
+      const [pkgInfo, defaultOutputId] = await Promise.all([
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgkey: `${pkgInstall.name}-${pkgInstall.version}`,
+        }),
+        outputService.getDefaultOutputId(soClient),
+      ]);
+      if (pkgInfo) {
+        return packageToConfigDatasource(pkgInfo, '', defaultOutputId);
+      }
+    }
   }
 }
 
