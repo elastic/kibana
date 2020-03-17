@@ -10,6 +10,8 @@ import { Case } from '../../../../../containers/case/types';
 export const caseProps: CaseProps = {
   caseId: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
   initialData: {
+    closedAt: null,
+    closedBy: null,
     id: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
     commentIds: ['a357c6a0-5435-11ea-b427-fb51a1fcb7b8'],
     comments: [
@@ -20,6 +22,7 @@ export const caseProps: CaseProps = {
         createdBy: {
           fullName: 'Steph Milovic',
           username: 'smilovic',
+          email: 'notmyrealemailfool@elastic.co',
         },
         updatedAt: '2020-02-20T23:06:33.798Z',
         updatedBy: {
@@ -29,7 +32,7 @@ export const caseProps: CaseProps = {
       },
     ],
     createdAt: '2020-02-13T19:44:23.627Z',
-    createdBy: { fullName: null, username: 'elastic' },
+    createdBy: { fullName: null, email: 'testemail@elastic.co', username: 'elastic' },
     description: 'Security banana Issue',
     status: 'open',
     tags: ['defacement'],
@@ -43,6 +46,8 @@ export const caseProps: CaseProps = {
 };
 
 export const data: Case = {
+  closedAt: null,
+  closedBy: null,
   id: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
   commentIds: ['a357c6a0-5435-11ea-b427-fb51a1fcb7b8'],
   comments: [
@@ -53,6 +58,7 @@ export const data: Case = {
       createdBy: {
         fullName: 'Steph Milovic',
         username: 'smilovic',
+        email: 'notmyrealemailfool@elastic.co',
       },
       updatedAt: '2020-02-20T23:06:33.798Z',
       updatedBy: {
@@ -62,7 +68,7 @@ export const data: Case = {
     },
   ],
   createdAt: '2020-02-13T19:44:23.627Z',
-  createdBy: { username: 'elastic', fullName: null },
+  createdBy: { fullName: null, email: 'testemail@elastic.co', username: 'elastic' },
   description: 'Security banana Issue',
   status: 'open',
   tags: ['defacement'],

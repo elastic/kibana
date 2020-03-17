@@ -60,18 +60,31 @@ export function initPatchCasesApi({ caseService, router }: RouteDeps) {
         });
         if (updateFilterCases.length > 0) {
           const updatedBy = await caseService.getUser({ request, response });
-          const { full_name, username } = updatedBy;
+          const { email, full_name, username } = updatedBy;
           const updatedDt = new Date().toISOString();
           const updatedCases = await caseService.patchCases({
             client: context.core.savedObjects.client,
             cases: updateFilterCases.map(thisCase => {
               const { id: caseId, version, ...updateCaseAttributes } = thisCase;
+              let closedInfo = {};
+              if (updateCaseAttributes.status && updateCaseAttributes.status === 'closed') {
+                closedInfo = {
+                  closed_at: updatedDt,
+                  closed_by: { email, full_name, username },
+                };
+              } else if (updateCaseAttributes.status && updateCaseAttributes.status === 'open') {
+                closedInfo = {
+                  closed_at: null,
+                  closed_by: null,
+                };
+              }
               return {
                 caseId,
                 updatedAttributes: {
                   ...updateCaseAttributes,
+                  ...closedInfo,
                   updated_at: updatedDt,
-                  updated_by: { full_name, username },
+                  updated_by: { email, full_name, username },
                 },
                 version,
               };

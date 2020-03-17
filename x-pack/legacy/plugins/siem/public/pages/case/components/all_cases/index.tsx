@@ -71,8 +71,8 @@ const ProgressLoader = styled(EuiProgress)`
 const getSortField = (field: string): SortFieldCase => {
   if (field === SortFieldCase.createdAt) {
     return SortFieldCase.createdAt;
-  } else if (field === SortFieldCase.updatedAt) {
-    return SortFieldCase.updatedAt;
+  } else if (field === SortFieldCase.closedAt) {
+    return SortFieldCase.closedAt;
   }
   return SortFieldCase.createdAt;
 };

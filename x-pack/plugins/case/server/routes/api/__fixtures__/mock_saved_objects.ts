@@ -12,10 +12,13 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
     type: 'cases',
     id: 'mock-id-1',
     attributes: {
+      closed_at: null,
+      closed_by: null,
       comment_ids: ['mock-comment-1'],
       created_at: '2019-11-25T21:54:48.952Z',
       created_by: {
         full_name: 'elastic',
+        email: 'testemail@elastic.co',
         username: 'elastic',
       },
       description: 'This is a brand new case of a bad meanie defacing data',
@@ -25,6 +28,7 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
       updated_at: '2019-11-25T21:54:48.952Z',
       updated_by: {
         full_name: 'elastic',
+        email: 'testemail@elastic.co',
         username: 'elastic',
       },
     },
@@ -36,10 +40,13 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
     type: 'cases',
     id: 'mock-id-2',
     attributes: {
+      closed_at: null,
+      closed_by: null,
       comment_ids: [],
       created_at: '2019-11-25T22:32:00.900Z',
       created_by: {
         full_name: 'elastic',
+        email: 'testemail@elastic.co',
         username: 'elastic',
       },
       description: 'Oh no, a bad meanie destroying data!',
@@ -49,6 +56,7 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
       updated_at: '2019-11-25T22:32:00.900Z',
       updated_by: {
         full_name: 'elastic',
+        email: 'testemail@elastic.co',
         username: 'elastic',
       },
     },
@@ -60,10 +68,13 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
     type: 'cases',
     id: 'mock-id-3',
     attributes: {
+      closed_at: null,
+      closed_by: null,
       comment_ids: [],
       created_at: '2019-11-25T22:32:17.947Z',
       created_by: {
         full_name: 'elastic',
+        email: 'testemail@elastic.co',
         username: 'elastic',
       },
       description: 'Oh no, a bad meanie going LOLBins all over the place!',
@@ -73,6 +84,39 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
       updated_at: '2019-11-25T22:32:17.947Z',
       updated_by: {
         full_name: 'elastic',
+        email: 'testemail@elastic.co',
+        username: 'elastic',
+      },
+    },
+    references: [],
+    updated_at: '2019-11-25T22:32:17.947Z',
+    version: 'WzUsMV0=',
+  },
+  {
+    type: 'cases',
+    id: 'mock-id-4',
+    attributes: {
+      closed_at: '2019-11-25T22:32:17.947Z',
+      closed_by: {
+        full_name: 'elastic',
+        email: 'testemail@elastic.co',
+        username: 'elastic',
+      },
+      comment_ids: [],
+      created_at: '2019-11-25T22:32:17.947Z',
+      created_by: {
+        full_name: 'elastic',
+        email: 'testemail@elastic.co',
+        username: 'elastic',
+      },
+      description: 'Oh no, a bad meanie going LOLBins all over the place!',
+      title: 'Another bad one',
+      status: 'closed',
+      tags: ['LOLBins'],
+      updated_at: '2019-11-25T22:32:17.947Z',
+      updated_by: {
+        full_name: 'elastic',
+        email: 'testemail@elastic.co',
         username: 'elastic',
       },
     },
@@ -100,11 +144,13 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
       created_at: '2019-11-25T21:55:00.177Z',
       created_by: {
         full_name: 'elastic',
+        email: 'testemail@elastic.co',
         username: 'elastic',
       },
       updated_at: '2019-11-25T21:55:00.177Z',
       updated_by: {
         full_name: 'elastic',
+        email: 'testemail@elastic.co',
         username: 'elastic',
       },
     },
@@ -126,11 +172,13 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
       created_at: '2019-11-25T21:55:14.633Z',
       created_by: {
         full_name: 'elastic',
+        email: 'testemail@elastic.co',
         username: 'elastic',
       },
       updated_at: '2019-11-25T21:55:14.633Z',
       updated_by: {
         full_name: 'elastic',
+        email: 'testemail@elastic.co',
         username: 'elastic',
       },
     },
@@ -153,11 +201,13 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
       created_at: '2019-11-25T22:32:30.608Z',
       created_by: {
         full_name: 'elastic',
+        email: 'testemail@elastic.co',
         username: 'elastic',
       },
       updated_at: '2019-11-25T22:32:30.608Z',
       updated_by: {
         full_name: 'elastic',
+        email: 'testemail@elastic.co',
         username: 'elastic',
       },
     },

@@ -26,18 +26,22 @@ import { SortFieldCase } from './types';
 
 export const transformNewCase = ({
   createdDate,
-  newCase,
+  email,
   full_name,
+  newCase,
   username,
 }: {
   createdDate: string;
-  newCase: CaseRequest;
+  email?: string;
   full_name?: string;
+  newCase: CaseRequest;
   username: string;
 }): CaseAttributes => ({
+  closed_at: null,
+  closed_by: null,
   comment_ids: [],
   created_at: createdDate,
-  created_by: { full_name, username },
+  created_by: { email, full_name, username },
   updated_at: null,
   updated_by: null,
   ...newCase,
@@ -46,18 +50,20 @@ export const transformNewCase = ({
 interface NewCommentArgs {
   comment: string;
   createdDate: string;
+  email?: string;
   full_name?: string;
   username: string;
 }
 export const transformNewComment = ({
   comment,
   createdDate,
+  email,
   full_name,
   username,
 }: NewCommentArgs): CommentAttributes => ({
   comment,
   created_at: createdDate,
-  created_by: { full_name, username },
+  created_by: { email, full_name, username },
   updated_at: null,
   updated_by: null,
 });
@@ -133,9 +139,9 @@ export const sortToSnake = (sortField: string): SortFieldCase => {
     case 'createdAt':
     case 'created_at':
       return SortFieldCase.createdAt;
-    case 'updatedAt':
-    case 'updated_at':
-      return SortFieldCase.updatedAt;
+    case 'closedAt':
+    case 'closed_at':
+      return SortFieldCase.closedAt;
     default:
       return SortFieldCase.createdAt;
   }

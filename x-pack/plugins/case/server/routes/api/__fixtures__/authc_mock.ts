@@ -13,7 +13,11 @@ function createAuthenticationMock({
   authc.getCurrentUser.mockReturnValue(
     currentUser !== undefined
       ? currentUser
-      : ({ username: 'awesome', full_name: 'Awesome D00d' } as AuthenticatedUser)
+      : ({
+          email: 'd00d@awesome.com',
+          username: 'awesome',
+          full_name: 'Awesome D00d',
+        } as AuthenticatedUser)
   );
   return authc;
 }

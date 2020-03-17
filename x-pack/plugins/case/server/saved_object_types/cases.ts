@@ -14,6 +14,22 @@ export const caseSavedObjectType: SavedObjectsType = {
   namespaceAgnostic: false,
   mappings: {
     properties: {
+      closed_at: {
+        type: 'date',
+      },
+      closed_by: {
+        properties: {
+          username: {
+            type: 'keyword',
+          },
+          full_name: {
+            type: 'keyword',
+          },
+          email: {
+            type: 'keyword',
+          },
+        },
+      },
       comment_ids: {
         type: 'keyword',
       },
@@ -26,6 +42,9 @@ export const caseSavedObjectType: SavedObjectsType = {
             type: 'keyword',
           },
           full_name: {
+            type: 'keyword',
+          },
+          email: {
             type: 'keyword',
           },
         },
@@ -51,6 +70,9 @@ export const caseSavedObjectType: SavedObjectsType = {
             type: 'keyword',
           },
           full_name: {
+            type: 'keyword',
+          },
+          email: {
             type: 'keyword',
           },
         },
