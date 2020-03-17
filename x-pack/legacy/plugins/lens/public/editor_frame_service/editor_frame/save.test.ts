@@ -11,7 +11,7 @@ import { esFilters, IIndexPattern, IFieldType } from '../../../../../../../src/p
 describe('save editor frame state', () => {
   const mockVisualization = createMockVisualization();
   mockVisualization.getPersistableState.mockImplementation(x => x);
-  const mockDatasource = createMockDatasource();
+  const mockDatasource = createMockDatasource('a');
   const mockIndexPattern = ({ id: 'indexpattern' } as unknown) as IIndexPattern;
   const mockField = ({ name: '@timestamp' } as unknown) as IFieldType;
 
@@ -45,7 +45,7 @@ describe('save editor frame state', () => {
   };
 
   it('transforms from internal state to persisted doc format', async () => {
-    const datasource = createMockDatasource();
+    const datasource = createMockDatasource('a');
     datasource.getPersistableState.mockImplementation(state => ({
       stuff: `${state}_datasource_persisted`,
     }));
