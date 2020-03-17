@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EventingCheckbox } from './checkbox';
 import { OS, EventingFields } from '../../../../types';
+import { ConfigForm } from '../config_form';
 
 export const WindowsEventing = React.memo(() => {
   const checkboxes = [
@@ -41,11 +41,8 @@ export const WindowsEventing = React.memo(() => {
     });
   };
   return (
-    <>
-      <EuiTitle size="l">
-        <h1 data-test-subj="eventingViewTitle">{'Windows Eventing'}</h1>
-      </EuiTitle>
+    <ConfigForm type={`Event Collection`} supportedOss={['Windows']}>
       {renderCheckboxes()}
-    </>
+    </ConfigForm>
   );
 });

@@ -5,7 +5,14 @@
  */
 
 import React from 'react';
-import { EuiTitle } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContentBody,
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import { selectPolicyDetails } from '../../store/policy_details/selectors';
@@ -30,11 +37,19 @@ export const PolicyDetails = React.memo(() => {
   }
 
   return (
-    <>
-      <EuiTitle size="l">
-        <h1 data-test-subj="policyDetailsViewTitle">{policyName()}</h1>
-      </EuiTitle>
-      <WindowsEventing />
-    </>
+    <EuiPage data-test-subj="policyDetailsPage">
+      <EuiPageBody>
+        <EuiPageContentHeader>
+          <EuiPageContentHeaderSection>
+            <EuiTitle size="l">
+              <h1 data-test-subj="policyDetailsViewTitle">{policyName()}</h1>
+            </EuiTitle>
+          </EuiPageContentHeaderSection>
+        </EuiPageContentHeader>
+        <EuiPageContentBody>
+          <WindowsEventing />
+        </EuiPageContentBody>
+      </EuiPageBody>
+    </EuiPage>
   );
 });
