@@ -44,7 +44,7 @@ export interface DataFrameAnalyticsStats {
     transport_address: string;
   };
   progress: ProgressSection[];
-  reason?: string;
+  failure_reason?: string;
   state: DATA_FRAME_TASK_STATE;
 }
 
