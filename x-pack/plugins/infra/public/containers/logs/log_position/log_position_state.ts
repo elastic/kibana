@@ -17,7 +17,7 @@ interface DateRange {
   endDateExpression: string;
   startTimestamp: number;
   endTimestamp: number;
-  timestampsLastUpdated: number;
+  timestampsLastUpdate: number;
 }
 
 interface VisiblePositions {
@@ -107,7 +107,7 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     ...DEFAULT_DATE_RANGE,
     startTimestamp: datemathToEpochMillis(DEFAULT_DATE_RANGE.startDateExpression)!,
     endTimestamp: datemathToEpochMillis(DEFAULT_DATE_RANGE.endDateExpression, 'up')!,
-    timestampsLastUpdated: Date.now(),
+    timestampsLastUpdate: Date.now(),
   });
 
   const { startKey, middleKey, endKey, pagesBeforeStart, pagesAfterEnd } = visiblePositions;
@@ -151,7 +151,7 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
         ...newDateRange,
         startTimestamp: nextStartTimestamp,
         endTimestamp: nextEndTimestamp,
-        timestampsLastUpdated: Date.now(),
+        timestampsLastUpdate: Date.now(),
       });
     },
     [setDateRange, dateRange, targetPosition]
@@ -168,7 +168,7 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     if (pagesAfterEnd <= DESIRED_BUFFER_PAGES) {
       setDateRange({
         endTimestamp: datemathToEpochMillis(dateRange.endDateExpression, 'up')!,
-        timestampsLastUpdated: Date.now(),
+        timestampsLastUpdate: Date.now(),
       });
     }
   }, [dateRange.endDateExpression, pagesAfterEnd, setDateRange]);
