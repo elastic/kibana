@@ -39825,7 +39825,10 @@ async function run(fn, options = {}) {
     });
     process.on('unhandledRejection', error => {
         log.error('UNHANDLED PROMISE REJECTION');
-        log.error(error);
+        if (error instanceof Error || typeof error === 'string')
+            log.error(error);
+        else
+            log.error(String(error));
         process.exit(1);
     });
     const handleErrorWithoutExit = (error) => {
