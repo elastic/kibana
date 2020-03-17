@@ -176,17 +176,23 @@ export const checks: DisallowedSyntaxCheck[] = [
     nodeType: 'Literal',
     test: (n: estree.Literal) => typeof n.value === 'bigint',
   },
-  // https://github.com/estree/estree/blob/master/es2020.md#importexpression
-  {
-    name: '[es2020] import expression',
-    // @ts-ignore removed once https://github.com/DefinitelyTyped/DefinitelyTyped/pull/43103 is merged
-    nodeType: 'ImportExpression',
-  },
-  // https://github.com/estree/estree/blob/master/es2020.md#exportalldeclaration
-  {
-    name: '[es2020] export all declaration',
-    nodeType: 'ExportAllDeclaration',
-  },
+
+  /**
+   * webpack transforms import/export in order to support tree shaking and async imports
+   *
+   * // https://github.com/estree/estree/blob/master/es2020.md#importexpression
+   * {
+   *   name: '[es2020] import expression',
+   *   // @ts-ignore removed once https://github.com/DefinitelyTyped/DefinitelyTyped/pull/43103 is merged
+   *   nodeType: 'ImportExpression',
+   * },
+   * // https://github.com/estree/estree/blob/master/es2020.md#exportalldeclaration
+   * {
+   *   name: '[es2020] export all declaration',
+   *   nodeType: 'ExportAllDeclaration',
+   * },
+   *
+   */
 ];
 
 export const checksByNodeType = new Map<estree.Node['type'], DisallowedSyntaxCheck[]>();
