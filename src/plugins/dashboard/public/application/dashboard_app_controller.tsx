@@ -145,9 +145,9 @@ export class DashboardAppController {
     const shouldForceDisplay = (param: string): boolean =>
       chrome.isEmbedded && Boolean($routeParams[param]);
 
-    const forceShowTopNavMenu = shouldForceDisplay('show-top-nav-menu');
+    const forceShowTopNavMenu = shouldForceDisplay('show-top-menu');
     const forceShowQueryInput = shouldForceDisplay('show-query-input');
-    const forceShowDatePicker = shouldForceDisplay('show-date-picker');
+    const forceShowDatePicker = shouldForceDisplay('show-time-filter');
     const forceHideFilterBar = shouldForceDisplay('hide-filter-bar');
 
     let lastReloadRequestTime = 0;

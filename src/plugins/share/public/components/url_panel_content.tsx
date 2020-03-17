@@ -61,9 +61,9 @@ export enum ExportUrlAsType {
 }
 
 interface UrlParams {
-  topNavMenu: boolean;
+  topMenu: boolean;
   query: boolean;
-  datePicker: boolean;
+  timeFilter: boolean;
   filterBar: boolean;
 }
 
@@ -91,9 +91,9 @@ export class UrlPanelContent extends Component<Props, State> {
       isCreatingShortUrl: false,
       url: '',
       urlParamsSelectedMap: {
-        topNavMenu: false,
+        topMenu: false,
         query: false,
-        datePicker: false,
+        timeFilter: false,
         filterBar: true,
       },
     };
@@ -214,9 +214,9 @@ export class UrlPanelContent extends Component<Props, State> {
 
   private getEmbedQueryParams = (): string => {
     return [
-      ['&show-top-nav-menu=true', this.state.urlParamsSelectedMap.topNavMenu],
+      ['&show-top-menu=true', this.state.urlParamsSelectedMap.topMenu],
       ['&show-query-input=true', this.state.urlParamsSelectedMap.query],
-      ['&show-date-picker=true', this.state.urlParamsSelectedMap.datePicker],
+      ['&show-time-filter=true', this.state.urlParamsSelectedMap.timeFilter],
       ['&hide-filter-bar=true', !this.state.urlParamsSelectedMap.filterBar], // Inverted to keep default behaviour for old links
     ].reduce(
       (accumulator, [queryParam, include]) => (include ? accumulator + queryParam : accumulator),
@@ -444,9 +444,9 @@ export class UrlPanelContent extends Component<Props, State> {
     }
 
     const checkboxes = [
-      ['topNavMenu', 'Top menu'],
+      ['topMenu', 'Top menu'],
       ['query', 'Query'],
-      ['datePicker', 'Time filter'],
+      ['timeFilter', 'Time filter'],
       ['filterBar', 'Filter bar'],
     ].map(([id, message]) => ({
       id,
