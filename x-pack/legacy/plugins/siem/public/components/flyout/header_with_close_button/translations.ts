@@ -6,9 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TIMELINE_DESCRIPTION = i18n.translate(
-  'xpack.siem.timeline.flyout.pane.timelinePropertiesAriaLabel',
+export const CLOSE_TIMELINE = i18n.translate(
+  'xpack.siem.timeline.flyout.header.closeTimelineButtonLabel',
   {
-    defaultMessage: 'Timeline Properties',
+    defaultMessage: 'Close timeline',
   }
 );
