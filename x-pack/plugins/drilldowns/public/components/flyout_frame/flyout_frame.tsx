@@ -42,12 +42,14 @@ export const FlyoutFrame: React.FC<FlyoutFrameProps> = ({
         <EuiFlexGroup alignItems="center" gutterSize={'s'} responsive={false}>
           {onBack && (
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                color={'subdued'}
-                onClick={onBack}
-                iconType="arrowLeft"
-                aria-label={txtBack}
-              />
+              <div style={{ marginLeft: '-8px' }}>
+                <EuiButtonIcon
+                  color={'subdued'}
+                  onClick={onBack}
+                  iconType="arrowLeft"
+                  aria-label={txtBack}
+                />
+              </div>
             </EuiFlexItem>
           )}
           {title && (

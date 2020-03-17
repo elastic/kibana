@@ -35,7 +35,9 @@ export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({
       title={
         <EuiFlexGroup className="drdHelloBar__content">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="help" />
+            <div style={{ marginLeft: '8px' }}>
+              <EuiIcon type="help" />
+            </div>
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <EuiText size={'s'}>
