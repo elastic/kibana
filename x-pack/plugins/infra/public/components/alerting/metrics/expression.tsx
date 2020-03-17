@@ -219,7 +219,7 @@ export const Expressions: React.FC<Props> = props => {
       <EuiSpacer size={'m'} />
 
       {alertsContext.metadata && (
-        <EuiFormRow label="Send alert per" helpText="Some helpful text" fullWidth compressed>
+        <EuiFormRow label="Create alert per" helpText="Some helpful text" fullWidth compressed>
           <MetricsExplorerGroupBy
             onChange={onGroupByChange}
             fields={derivedIndexPattern.fields}
@@ -274,7 +274,7 @@ interface ExpressionRowProps {
   setAlertParams(id: number, params: MetricExpression): void;
 }
 
-const StyledExpressionRow = euiStyled.div`
+const StyledExpressionRow = euiStyled(EuiFlexGroup)`
   display: flex;
   flex-wrap: wrap;
   margin: 0 -${props => props.theme.eui.euiSizeXS};
