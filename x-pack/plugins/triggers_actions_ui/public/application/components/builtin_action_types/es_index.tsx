@@ -8,7 +8,6 @@ import {
   EuiFormRow,
   EuiSwitch,
   EuiSpacer,
-  EuiHorizontalRule,
   EuiCodeEditor,
   EuiComboBox,
   EuiComboBoxOptionOption,
