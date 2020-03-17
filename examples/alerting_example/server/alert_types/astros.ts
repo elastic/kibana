@@ -21,7 +21,7 @@ import axios from 'axios';
 import { AlertType } from '../../../../x-pack/plugins/alerting/server';
 import { Operator, Craft } from '../../common/constants';
 
-interface PeopleinSpace {
+interface PeopleInSpace {
   people: Array<{
     craft: string;
     name: string;
@@ -56,10 +56,10 @@ export const alertType: AlertType = {
   name: 'People In Space Right Now',
   actionGroups: [{ id: 'default', name: 'default' }],
   defaultActionGroupId: 'default',
-  async executor({ services, params, state }) {
+  async executor({ services, params }) {
     const { outerSpaceCapacity, craft: craftToTriggerBy, op } = params;
 
-    const response = await axios.get<PeopleinSpace>('http://api.open-notify.org/astros.json');
+    const response = await axios.get<PeopleInSpace>('http://api.open-notify.org/astros.json');
     const {
       data: { number: peopleInSpace, people = [] },
     } = response;
