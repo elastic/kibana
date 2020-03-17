@@ -41,6 +41,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     application: coreStart.application,
     http: coreStart.http,
     security: deps.security,
+    urlGenerators: deps.share.urlGenerators,
   });
 
   const mlLicense = setLicenseCache(deps.licensing);
