@@ -7,6 +7,8 @@ export { PLUGIN_ID, EPM_API_ROUTES, AGENT_CONFIG_SAVED_OBJECT_TYPE } from '../..
 
 export const BASE_PATH = '/app/ingestManager';
 export const EPM_PATH = '/epm';
+export const EPM_LIST_ALL_PACKAGES_PATH = EPM_PATH;
+export const EPM_LIST_INSTALLED_PACKAGES_PATH = `${EPM_PATH}/installed`;
 export const EPM_DETAIL_VIEW_PATH = `${EPM_PATH}/detail/:pkgkey/:panel?`;
 export const AGENT_CONFIG_PATH = '/configs';
 export const AGENT_CONFIG_DETAILS_PATH = `${AGENT_CONFIG_PATH}/`;
