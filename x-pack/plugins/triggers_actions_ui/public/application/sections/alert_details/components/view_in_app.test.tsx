@@ -51,7 +51,7 @@ describe('alert_details', () => {
         expect(component!.find('button').prop('disabled')).toBe(true);
         expect(component!.text()).toBe('View in app');
 
-        expect(alerting.getNavigation).toBeCalledWith(alert.id);
+        expect(alerting!.getNavigation).toBeCalledWith(alert.id);
       });
     });
 
