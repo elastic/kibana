@@ -15,6 +15,7 @@ import {
 import { FindOptions } from '../../../alerting/server';
 import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
+import { BASE_ALERT_API_PATH } from '../../common';
 
 // config definition
 const querySchema = schema.object({
@@ -43,7 +44,7 @@ const querySchema = schema.object({
 export const findAlertRoute = (router: IRouter, licenseState: LicenseState) => {
   router.get(
     {
-      path: '/api/alert/_find',
+      path: `${BASE_ALERT_API_PATH}/_find`,
       validate: {
         query: querySchema,
       },
