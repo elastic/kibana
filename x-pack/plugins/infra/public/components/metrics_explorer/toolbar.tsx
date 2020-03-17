@@ -120,15 +120,6 @@ export const MetricsExplorerToolbar = ({
             value={options.filterQuery}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButton onClick={showAlertFlyout}>
-            <FormattedMessage
-              id="xpack.infra.metricsExplorer.createAlertButton"
-              defaultMessage="Create alert"
-            />
-          </EuiButton>
-          <AlertFlyout options={options} setVisible={setFlyoutVisible} visible={flyoutVisible} />
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <MetricsExplorerChartOptionsComponent
             onChange={onChartOptionsChange}

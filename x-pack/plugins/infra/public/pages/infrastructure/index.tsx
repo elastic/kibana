@@ -25,9 +25,11 @@ import { MetricsSettingsPage } from './settings';
 import { AppNavigation } from '../../components/navigation/app_navigation';
 import { SourceLoadingPage } from '../../components/source_loading_page';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { AlertDropdown } from '../../components/alerting/metrics/alert_dropdown';
 
 export const InfrastructurePage = ({ match }: RouteComponentProps) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
+
   return (
     <Source.Provider sourceId="default">
       <ColumnarPage>
@@ -89,7 +91,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <Route path={'/explorer'} render={props => <div>Alerts</div>} />
+              <AlertDropdown />
             </EuiFlexItem>
           </EuiFlexGroup>
         </AppNavigation>

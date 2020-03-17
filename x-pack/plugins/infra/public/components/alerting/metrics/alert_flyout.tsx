@@ -15,7 +15,7 @@ import { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explo
 
 interface Props {
   visible?: boolean;
-  options: MetricsExplorerOptions;
+  options?: Partial<MetricsExplorerOptions>;
   series?: MetricsExplorerSeries;
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }

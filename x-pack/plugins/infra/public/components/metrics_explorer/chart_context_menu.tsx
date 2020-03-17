@@ -75,7 +75,6 @@ export const createNodeDetailLink = (
 };
 
 export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
-  derivedIndexPattern,
   onFilter,
   options,
   series,
@@ -193,7 +192,6 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
     </EuiButtonEmpty>
   );
 
-  // options.
   return (
     <>
       <EuiPopover

@@ -8,7 +8,7 @@ import { EuiPopoverProps, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../pages/link_to';
 import { createUptimeLink } from './lib/create_uptime_link';
@@ -25,6 +25,7 @@ import {
   SectionLink,
 } from '../../../../observability/public';
 import { useLinkProps } from '../../hooks/use_link_props';
+import { AlertFlyout } from '../alerting/metrics/alert_flyout';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -46,6 +47,7 @@ export const NodeContextMenu: React.FC<Props> = ({
   nodeType,
   popoverPosition,
 }) => {
+  const [flyoutVisible, setFlyoutVisible] = useState(false);
   const inventoryModel = findInventoryModel(nodeType);
   const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -143,42 +145,61 @@ export const NodeContextMenu: React.FC<Props> = ({
     isDisabled: !showUptimeLink,
   };
 
+  const alertMenuItem: SectionLinkProps = {
+    label: i18n.translate('xpack.infra.nodeContextMenu.createAlertLink', {
+      defaultMessage: 'Create Alert',
+      values: { inventoryName: inventoryModel.singularDisplayName },
+    }),
+    onClick: () => {
+      setFlyoutVisible(true);
+    },
+    iconType: 'bell',
+  };
+
   return (
-    <ActionMenu
-      closePopover={closePopover}
-      id={`${node.pathId}-popover`}
-      isOpen={isPopoverOpen}
-      button={children!}
-      anchorPosition={popoverPosition}
-    >
-      <div style={{ maxWidth: 300 }} data-test-subj="nodeContextMenu">
-        <Section>
-          <SectionTitle>
-            <FormattedMessage
-              id="xpack.infra.nodeContextMenu.title"
-              defaultMessage="{inventoryName} details"
-              values={{ inventoryName: inventoryModel.singularDisplayName }}
-            />
-          </SectionTitle>
-          {inventoryId.label && (
-            <SectionSubtitle>
-              <div style={{ wordBreak: 'break-all' }}>
-                <FormattedMessage
-                  id="xpack.infra.nodeContextMenu.description"
-                  defaultMessage="View details for {label} {value}"
-                  values={{ label: inventoryId.label, value: inventoryId.value }}
-                />
-              </div>
-            </SectionSubtitle>
-          )}
-          <SectionLinks>
-            <SectionLink data-test-subj="viewLogsContextMenuItem" {...nodeLogsMenuItem} />
-            <SectionLink {...nodeDetailMenuItem} />
-            <SectionLink data-test-subj="viewApmTracesContextMenuItem" {...apmTracesMenuItem} />
-            <SectionLink {...uptimeMenuItem} />
-          </SectionLinks>
-        </Section>
-      </div>
-    </ActionMenu>
+    <>
+      <ActionMenu
+        closePopover={closePopover}
+        id={`${node.pathId}-popover`}
+        isOpen={isPopoverOpen}
+        button={children!}
+        anchorPosition={popoverPosition}
+      >
+        <div style={{ maxWidth: 300 }} data-test-subj="nodeContextMenu">
+          <Section>
+            <SectionTitle>
+              <FormattedMessage
+                id="xpack.infra.nodeContextMenu.title"
+                defaultMessage="{inventoryName} details"
+                values={{ inventoryName: inventoryModel.singularDisplayName }}
+              />
+            </SectionTitle>
+            {inventoryId.label && (
+              <SectionSubtitle>
+                <div style={{ wordBreak: 'break-all' }}>
+                  <FormattedMessage
+                    id="xpack.infra.nodeContextMenu.description"
+                    defaultMessage="View details for {label} {value}"
+                    values={{ label: inventoryId.label, value: inventoryId.value }}
+                  />
+                </div>
+              </SectionSubtitle>
+            )}
+            <SectionLinks>
+              <SectionLink data-test-subj="viewLogsContextMenuItem" {...nodeLogsMenuItem} />
+              <SectionLink {...nodeDetailMenuItem} />
+              <SectionLink data-test-subj="viewApmTracesContextMenuItem" {...apmTracesMenuItem} />
+              <SectionLink {...uptimeMenuItem} />
+              <SectionLink {...alertMenuItem} />
+            </SectionLinks>
+          </Section>
+        </div>
+      </ActionMenu>
+      <AlertFlyout
+        options={{ filterQuery: `${nodeType}: ${node.id}` }}
+        setVisible={setFlyoutVisible}
+        visible={flyoutVisible}
+      />
+    </>
   );
 };

@@ -48,7 +48,7 @@ export interface MetricExpression {
 }
 
 interface AlertContextMeta {
-  currentOptions: MetricsExplorerOptions;
+  currentOptions?: Partial<MetricsExplorerOptions>;
   series?: MetricsExplorerSeries;
 }
 
@@ -76,6 +76,17 @@ export const Expressions: React.FC<Props> = props => {
   const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
     createDerivedIndexPattern,
   ]);
+
+  const options = useMemo<MetricsExplorerOptions>(() => {
+    if (alertsContext.metadata?.currentOptions?.metrics) {
+      return alertsContext.metadata.currentOptions as MetricsExplorerOptions;
+    } else {
+      return {
+        metrics: [],
+        aggregation: 'avg',
+      };
+    }
+  }, [alertsContext.metadata]);
 
   const defaultExpression = useMemo<MetricExpression>(
     () => ({
@@ -164,7 +175,7 @@ export const Expressions: React.FC<Props> = props => {
   useEffect(() => {
     const md = alertsContext.metadata;
     if (md) {
-      if (md.currentOptions) {
+      if (md.currentOptions?.metrics) {
         setAlertParams(
           'criteria',
           md.currentOptions.metrics.map(metric => ({
@@ -181,14 +192,16 @@ export const Expressions: React.FC<Props> = props => {
         setAlertParams('criteria', [defaultExpression]);
       }
 
-      if (md.currentOptions.filterQuery) {
-        setAlertParams('filterQuery', md.currentOptions.filterQuery);
-      } else if (md.currentOptions.groupBy && md.series) {
-        const filter = `${md.currentOptions.groupBy}: "${md.series.id}"`;
-        setAlertParams('filterQuery', filter);
-      }
+      if (md.currentOptions) {
+        if (md.currentOptions.filterQuery) {
+          setAlertParams('filterQuery', md.currentOptions.filterQuery);
+        } else if (md.currentOptions.groupBy && md.series) {
+          const filter = `${md.currentOptions.groupBy}: "${md.series.id}"`;
+          setAlertParams('filterQuery', filter);
+        }
 
-      setAlertParams('groupBy', md.currentOptions.groupBy);
+        setAlertParams('groupBy', md.currentOptions.groupBy);
+      }
     }
   }, [alertsContext.metadata, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -265,13 +278,13 @@ export const Expressions: React.FC<Props> = props => {
 
       <EuiSpacer size={'m'} />
 
-      {alertsContext.metadata && (
+      {alertsContext.metadata && options.metrics.length > 0 && (
         <EuiFormRow
           label={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerText', {
             defaultMessage: 'Create alert per',
           })}
           helpText={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerHelpText', {
-            defaultMessage: 'Filter help text',
+            defaultMessage: 'Create alert help text',
           })}
           fullWidth
           compressed
@@ -279,7 +292,10 @@ export const Expressions: React.FC<Props> = props => {
           <MetricsExplorerGroupBy
             onChange={onGroupByChange}
             fields={derivedIndexPattern.fields}
-            options={alertsContext.metadata.currentOptions}
+            options={{
+              ...options,
+              groupBy: alertParams.groupBy || undefined,
+            }}
           />
         </EuiFormRow>
       )}
