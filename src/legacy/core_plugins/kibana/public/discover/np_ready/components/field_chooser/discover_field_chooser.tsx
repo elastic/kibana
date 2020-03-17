@@ -167,18 +167,18 @@ export function DiscoverFieldChooser({
                   defaultMessage="Available fields"
                 />
               </h3>
-            </div>
-            <div className="euiFlexItem euiFlexItem--flexGrowZero">
-              <button
-                onClick={() => setShowFields(!showFields)}
-                aria-hidden="true"
-                className="kuiButton kuiButton--small visible-xs visible-sm pull-right dscFieldChooser__toggle"
-              >
-                <span
+              <div className="euiFlexItem euiFlexItem--flexGrowZero">
+                <button
+                  onClick={() => setShowFields(!showFields)}
                   aria-hidden="true"
-                  className={`kuiIcon ${showFields ? 'fa-chevron-down' : 'fa-chevron-down'}`}
-                />
-              </button>
+                  className="kuiButton kuiButton--small visible-xs visible-sm pull-right dscFieldChooser__toggle"
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`kuiIcon ${showFields ? 'fa-chevron-down' : 'fa-chevron-right'}`}
+                  />
+                </button>
+              </div>
             </div>
           </>
         )}
