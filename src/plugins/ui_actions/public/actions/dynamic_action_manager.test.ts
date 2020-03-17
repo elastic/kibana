@@ -30,9 +30,11 @@ const setup = () => {
     update: jest.fn(),
   };
   const uiActions: DynamicActionManagerParams['uiActions'] = {
-    addTriggerAction: jest.fn(),
     getActionFactory: jest.fn(),
-    removeTriggerAction: jest.fn(),
+    __attachAction: jest.fn(),
+    detachAction: jest.fn(),
+    registerAction: jest.fn(),
+    unregisterAction: jest.fn(),
   };
   const manager = new DynamicActionManager({
     isCompatible,
