@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { has, omit, isEmpty } from 'lodash/fp';
+import { has, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
 import { NewRule, RuleType } from '../../../../containers/detection_engine/rules';
@@ -53,9 +53,13 @@ const isMlFields = <T>(fields: QueryRuleFields<T> | MlRuleFields<T>): fields is 
   has('anomalyThreshold', fields);
 
 export const filterRuleFieldsForType = <T extends RuleFields>(fields: T, type: RuleType) => {
-  return isMlRule(type)
-    ? omit(['index', 'queryBar'], fields)
-    : omit(['anomalyThreshold', 'mlJobId'], fields);
+  if (isMlRule(type)) {
+    const { index, queryBar, ...mlRuleFields } = fields;
+    return mlRuleFields;
+  } else {
+    const { anomalyThreshold, mlJobId, ...queryRuleFields } = fields;
+    return queryRuleFields;
+  }
 };
 
 export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
