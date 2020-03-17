@@ -325,6 +325,7 @@ export interface EndpointEvent {
   };
   process: {
     entity_id: string;
+    name: string;
     parent?: {
       entity_id: string;
     };
