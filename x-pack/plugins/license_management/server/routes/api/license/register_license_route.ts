@@ -12,7 +12,7 @@ import { addBasePath } from '../../helpers';
 export function registerLicenseRoute({ router, plugins: { licensing } }: RouteDependencies) {
   router.put(
     {
-      path: addBasePath('/'),
+      path: addBasePath(''),
       validate: {
         query: schema.object({ acknowledge: schema.string() }),
         body: schema.object({
