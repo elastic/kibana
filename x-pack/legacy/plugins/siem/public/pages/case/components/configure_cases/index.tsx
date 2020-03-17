@@ -104,6 +104,7 @@ const ConfigureCasesComponent: React.FC = () => {
 
   const reloadConnectors = useCallback(async () => refetchConnectors(), []);
   const isLoadingAny = isLoadingConnectors || persistLoading || loadingCaseConfigure;
+  const updateConnectorDisabled = isLoadingAny || !connectorIsValid || connectorId === 'none';
 
   const handleSubmit = useCallback(
     // TO DO give a warning/error to user when field are not mapped so they have chance to do it
@@ -183,6 +184,7 @@ const ConfigureCasesComponent: React.FC = () => {
       <SectionWrapper>
         <Mapping
           disabled
+          updateConnectorDisabled={updateConnectorDisabled}
           mapping={mapping}
           onChangeMapping={setMapping}
           setEditFlyoutVisibility={setEditFlyoutVisibility}

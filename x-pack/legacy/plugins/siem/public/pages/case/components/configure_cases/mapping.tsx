@@ -5,12 +5,14 @@
  */
 
 import React, { useCallback } from 'react';
+import styled from 'styled-components';
+
 import {
   EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiFormRow,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import * as i18n from './translations';
@@ -20,13 +22,20 @@ import { CasesConfigurationMapping } from '../../../../containers/case/configure
 
 interface MappingProps {
   disabled: boolean;
+  updateConnectorDisabled: boolean;
   mapping: CasesConfigurationMapping[] | null;
   onChangeMapping: (newMapping: CasesConfigurationMapping[]) => void;
   setEditFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+const EuiButtonEmptyExtended = styled(EuiButtonEmpty)`
+  font-size: 12px;
+  height: 24px;
+`;
+
 const MappingComponent: React.FC<MappingProps> = ({
   disabled,
+  updateConnectorDisabled,
   mapping,
   onChangeMapping,
   setEditFlyoutVisibility,
@@ -42,7 +51,9 @@ const MappingComponent: React.FC<MappingProps> = ({
       <EuiFormRow fullWidth>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false} className="euiFormLabel">
-            <EuiLink onClick={onClick}>{i18n.UPDATE_CONNECTOR}</EuiLink>
+            <EuiButtonEmptyExtended onClick={onClick} disabled={updateConnectorDisabled}>
+              {i18n.UPDATE_CONNECTOR}
+            </EuiButtonEmptyExtended>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
