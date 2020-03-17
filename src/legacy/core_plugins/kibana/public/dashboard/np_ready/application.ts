@@ -38,7 +38,7 @@ import {
 } from '../legacy_imports';
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
-import { IEmbeddableStart } from '../../../../../../plugins/embeddable/public';
+import { EmbeddableStart } from '../../../../../../plugins/embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
 import { DataPublicPluginStart } from '../../../../../../plugins/data/public';
 import { SharePluginStart } from '../../../../../../plugins/share/public';
@@ -66,7 +66,7 @@ export interface RenderDeps {
   chrome: ChromeStart;
   addBasePath: (path: string) => string;
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   localStorage: Storage;
   share: SharePluginStart;
   config: KibanaLegacyStart['config'];

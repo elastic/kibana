@@ -24,7 +24,6 @@ import { debounceTime } from 'rxjs/operators';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
-import { createHashHistory } from 'history';
 import { getState, splitState } from './discover_state';
 
 import { RequestAdapter } from '../../../../../../../plugins/inspector/public';
@@ -59,6 +58,7 @@ const {
   chrome,
   data,
   docTitle,
+  history,
   indexPatterns,
   filterManager,
   share,
@@ -78,6 +78,7 @@ import {
   getDefaultQuery,
 } from '../../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
+import { addFatalError } from '../../../../../../../plugins/kibana_legacy/public';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -86,8 +87,6 @@ const fetchStatuses = {
 };
 
 const app = getAngularModule();
-
-app.factory('history', () => createHashHistory());
 
 app.config($routeProvider => {
   const defaults = {
@@ -116,9 +115,9 @@ app.config($routeProvider => {
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      savedObjects: function($route, kbnUrl, Promise, $rootScope, history) {
+      savedObjects: function($route, kbnUrl, Promise, $rootScope) {
         const savedSearchId = $route.current.params.id;
-        return ensureDefaultIndexPattern(core, data, history).then(() => {
+        return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl).then(() => {
           const { appStateContainer } = getState({ history });
           const { index } = appStateContainer.getState();
           return Promise.props({
@@ -188,8 +187,7 @@ function discoverController(
   config,
   kbnUrl,
   localStorage,
-  uiCapabilities,
-  history
+  uiCapabilities
 ) {
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
@@ -247,28 +245,9 @@ function discoverController(
         $scope.state = { ...newState };
 
         // detect changes that should trigger fetching of new data
-        const changes = ['interval', 'sort', 'index', 'query'].filter(
+        const changes = ['interval', 'sort', 'query'].filter(
           prop => !_.isEqual(newStatePartial[prop], oldStatePartial[prop])
         );
-        if (changes.indexOf('index') !== -1) {
-          try {
-            $scope.indexPattern = await indexPatterns.get(newStatePartial.index);
-            $scope.opts.timefield = getTimeField();
-            $scope.enableTimeRangeSelector = !!$scope.opts.timefield;
-            // is needed to rerender the histogram
-            $scope.vis = undefined;
-
-            // Taking care of sort when switching index pattern:
-            // Old indexPattern: sort by A
-            // If A is not available in the new index pattern, sort has to be adapted and propagated to URL
-            const sort = getSortArray(newStatePartial.sort, $scope.indexPattern);
-            if (newStatePartial.sort && !_.isEqual(sort, newStatePartial.sort)) {
-              return await replaceUrlAppState({ sort });
-            }
-          } catch (e) {
-            toastNotifications.addWarning({ text: getIndexPatternWarning(newStatePartial.index) });
-          }
-        }
 
         if (changes.length) {
           $fetchObservable.next();
@@ -277,17 +256,23 @@ function discoverController(
     }
   });
 
-  $scope.setIndexPattern = id => {
-    setAppState({ index: id });
+  $scope.setIndexPattern = async id => {
+    await replaceUrlAppState({ index: id });
+    $route.reload();
   };
 
   // update data source when filters update
   subscriptions.add(
-    subscribeWithScope($scope, filterManager.getUpdates$(), {
-      next: () => {
-        $scope.updateDataSource();
+    subscribeWithScope(
+      $scope,
+      filterManager.getUpdates$(),
+      {
+        next: () => {
+          $scope.updateDataSource();
+        },
       },
-    })
+      error => addFatalError(core.fatalErrors, error)
+    )
   );
 
   const inspectorAdapters = {
@@ -649,16 +634,26 @@ function discoverController(
       ).pipe(debounceTime(100));
 
       subscriptions.add(
-        subscribeWithScope($scope, searchBarChanges, {
-          next: $scope.fetch,
-        })
+        subscribeWithScope(
+          $scope,
+          searchBarChanges,
+          {
+            next: $scope.fetch,
+          },
+          error => addFatalError(core.fatalErrors, error)
+        )
       );
       subscriptions.add(
-        subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
-          next: () => {
-            $scope.updateTime();
+        subscribeWithScope(
+          $scope,
+          timefilter.getTimeUpdate$(),
+          {
+            next: () => {
+              $scope.updateTime();
+            },
           },
-        })
+          error => addFatalError(core.fatalErrors, error)
+        )
       );
       //Handling change oft the histogram interval
       $scope.$watch('state.interval', function(newInterval, oldInterval) {
