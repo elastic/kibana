@@ -326,6 +326,7 @@ function VisualizeAppController(
     try {
       vis.setState(stateContainer.getState().vis);
     } catch (error) {
+      // stop syncing url updtes with the state to prevent extra syncing
       stopAllSyncing();
 
       toastNotifications.addWarning({
@@ -335,7 +336,10 @@ function VisualizeAppController(
         text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
       });
 
-      history.replace('/notFound=visualization');
+      history.replace(`${VisualizeConstants.LANDING_PAGE_PATH}?notFound=visualization`);
+
+      // prevent further controller execution
+      return;
     }
   }
 

@@ -132,9 +132,7 @@ export function initVisualizeApp(app, deps) {
               .catch(
                 redirectWhenMissing({
                   history,
-                  mapping: {
-                    '*': '/visualize',
-                  },
+                  mapping: VisualizeConstants.LANDING_PAGE_PATH,
                   toastNotifications,
                 })
               );
@@ -164,7 +162,7 @@ export function initVisualizeApp(app, deps) {
                 redirectWhenMissing({
                   history,
                   mapping: {
-                    visualization: '/visualize',
+                    visualization: VisualizeConstants.LANDING_PAGE_PATH,
                     search:
                       '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
                     'index-pattern':
