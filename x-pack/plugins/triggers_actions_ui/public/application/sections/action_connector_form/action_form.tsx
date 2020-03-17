@@ -463,7 +463,7 @@ export const ActionForm = ({
     }
   }
 
-  let actionTypeNodes = null;
+  let actionTypeNodes: JSX.Element[] | null = null;
   let hasDisabledByLicenseActionTypes = false;
   if (actionTypesIndex) {
     actionTypeNodes = actionTypeRegistry
