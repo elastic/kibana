@@ -16,7 +16,7 @@ export interface ServiceConnectionNode {
 export interface ExternalConnectionNode {
   'destination.address': string;
   'span.type': string;
-  'span.subtype': string;
+  'span.subtype': string | null;
 }
 
 export type ConnectionNode = ServiceConnectionNode | ExternalConnectionNode;

@@ -28,7 +28,7 @@ describe('getCytoscapeElements', () => {
               },
               destination: {
                 'destination.address': 'opbeans-node',
-                'span.subtype': '',
+                'span.subtype': null,
                 'span.type': 'resource'
               }
             },
@@ -59,7 +59,7 @@ describe('getCytoscapeElements', () => {
         }
       ];
 
-      expect(getCytoscapeElements(responses, '')).toEqual([
+      const returnValue = [
         {
           group: 'nodes',
           data: {
@@ -70,6 +70,15 @@ describe('getCytoscapeElements', () => {
             agentName: 'js-base',
             frameworkName: null,
             type: 'service'
+          }
+        },
+        {
+          group: 'nodes',
+          data: {
+            id: '>opbeans-node',
+            label: 'opbeans-node',
+            type: 'resource',
+            subtype: null
           }
         },
         {
@@ -88,13 +97,25 @@ describe('getCytoscapeElements', () => {
           group: 'edges',
           classes: undefined,
           data: {
+            id: 'client~>opbeans-node',
+            source: 'client',
+            target: '>opbeans-node',
+            bidirectional: undefined
+          }
+        },
+        {
+          group: 'edges',
+          classes: undefined,
+          data: {
             id: 'client~opbeans-node',
             source: 'client',
             target: 'opbeans-node',
             bidirectional: undefined
           }
         }
-      ]);
+      ];
+
+      expect(getCytoscapeElements(responses, '')).toEqual(returnValue);
     });
   });
 });
