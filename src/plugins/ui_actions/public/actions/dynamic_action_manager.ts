@@ -22,6 +22,7 @@ import { Subscription } from 'rxjs';
 import { ActionStorage, SerializedEvent } from './dynamic_action_storage';
 import { UiActionsService } from '../service';
 import { SerializedAction } from './types';
+import { TriggerContextMapping } from '../types';
 import { ActionDefinition } from './action';
 import { defaultState, transitions, selectors, State } from './dynamic_action_manager_state';
 import { StateContainer, createStateContainer } from '../../../kibana_utils';
@@ -41,7 +42,7 @@ export interface DynamicActionManagerParams {
   storage: ActionStorage;
   uiActions: Pick<
     UiActionsService,
-    'addTriggerAction' | 'removeTriggerAction' | 'getActionFactory'
+    'registerAction' | '__attachAction' | 'unregisterAction' | 'detachAction' | 'getActionFactory'
   >;
   isCompatible: <C = unknown>(context: C) => Promise<boolean>;
 }
@@ -75,7 +76,7 @@ export class DynamicActionManager {
   }
 
   protected reviveAction(event: SerializedEvent) {
-    const { eventId, triggerId, action } = event;
+    const { eventId, triggers, action } = event;
     const { uiActions, isCompatible } = this.params;
     const { name } = action;
 
@@ -88,13 +89,16 @@ export class DynamicActionManager {
       getDisplayName: () => name,
     };
 
-    uiActions.addTriggerAction(triggerId as any, actionDefinition);
+    uiActions.registerAction(actionDefinition);
+    for (const trigger of triggers) uiActions.__attachAction(trigger as any, actionId);
   }
 
-  protected killAction({ eventId, triggerId }: SerializedEvent) {
+  protected killAction({ eventId, triggers }: SerializedEvent) {
     const { uiActions } = this.params;
     const actionId = this.generateActionId(eventId);
-    uiActions.removeTriggerAction(triggerId as any, actionId);
+
+    for (const trigger of triggers) uiActions.detachAction(trigger as any, actionId);
+    uiActions.unregisterAction(actionId);
   }
 
   private syncId = 0;
@@ -179,15 +183,16 @@ export class DynamicActionManager {
    * 2. Optimistically adds it to UI state, and rolls back on failure.
    * 3. Adds action to `ui_actions` registry.
    *
-   * @todo `triggerId` should not be optional.
-   *
    * @param action Dynamic action for which to create an event.
-   * @param triggerId Trigger to which to attach the action.
+   * @param triggers List of triggers to which action should react.
    */
-  public async createEvent(action: SerializedAction<unknown>, triggerId = 'VALUE_CLICK_TRIGGER') {
+  public async createEvent(
+    action: SerializedAction<unknown>,
+    triggers: Array<keyof TriggerContextMapping>
+  ) {
     const event: SerializedEvent = {
       eventId: uuidv4(),
-      triggerId,
+      triggers,
       action,
     };
 
@@ -212,16 +217,16 @@ export class DynamicActionManager {
    *
    * @param eventId ID of the event to replace.
    * @param action New action for which to create the event.
-   * @param triggerId New trigger with which to associate the event.
+   * @param triggers List of triggers to which action should react.
    */
   public async updateEvent(
     eventId: string,
     action: SerializedAction<unknown>,
-    triggerId = 'VALUE_CLICK_TRIGGER'
+    triggers: Array<keyof TriggerContextMapping>
   ) {
     const event: SerializedEvent = {
       eventId,
-      triggerId,
+      triggers,
       action,
     };
 
