@@ -90,6 +90,18 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
       .subscribe(this.reload.bind(this));
   }
 
+  public supportedTriggers() {
+    switch (this.savedVis.visualizationType) {
+      case 'lnsXY':
+      case 'lnsDatatable':
+        return ['VALUE_CLICK_TRIGGER'];
+
+      case 'lnsMetric':
+      default:
+        return [];
+    }
+  }
+
   onContainerStateChanged(containerState: LensEmbeddableInput) {
     const cleanedFilters = containerState.filters
       ? containerState.filters.filter(filter => !filter.meta.disabled)
