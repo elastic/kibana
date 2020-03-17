@@ -19,7 +19,7 @@
 
 import { useCallback } from 'react';
 
-import { IAggConfig, AggParamType } from '../../../legacy_imports';
+import { IAggConfig, AggParamType } from 'src/plugins/data/public';
 
 type SetValue = (value?: IAggConfig) => void;
 

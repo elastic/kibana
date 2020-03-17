@@ -23,9 +23,8 @@ import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiLink, EuiText } fr
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { IndexPattern } from 'src/plugins/data/public';
+import { IAggType, IndexPattern } from 'src/plugins/data/public';
 import { useKibana } from '../../../../../plugins/kibana_react/public';
-import { IAggType } from '../legacy_imports';
 import { ComboBoxGroupedOptions } from '../utils';
 import { AGG_TYPE_ACTION_KEYS, AggTypeAction } from './agg_params_state';
 

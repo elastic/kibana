@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { AggParamEditorProps } from '../agg_param_props';
-import { IAggConfig } from '../../legacy_imports';
+import { IAggConfig } from 'src/plugins/data/public';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { mount } from 'enzyme';
 import { PercentilesEditor } from './percentiles';

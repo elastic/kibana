@@ -23,7 +23,7 @@ import { EuiFormRow, EuiIconTip, EuiComboBox, EuiComboBoxOptionOption } from '@e
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { isValidInterval, AggParamOption } from '../../legacy_imports';
+import { search, AggParamOption } from '../../../../../../plugins/data/public';
 import { AggParamEditorProps } from '../agg_param_props';
 
 interface ComboBoxOption extends EuiComboBoxOptionOption {
@@ -59,7 +59,7 @@ function TimeIntervalParamEditor({
   if (value) {
     definedOption = find(options, { key: value });
     selectedOptions = definedOption ? [definedOption] : [{ label: value, key: 'custom' }];
-    isValid = !!(definedOption || isValidInterval(value, timeBase));
+    isValid = !!(definedOption || search.aggs.isValidInterval(value, timeBase));
   }
 
   const interval = get(agg, 'buckets.getInterval') && (agg as any).buckets.getInterval();
@@ -100,7 +100,7 @@ function TimeIntervalParamEditor({
     const normalizedCustomValue = customValue.trim();
     setValue(normalizedCustomValue);
 
-    if (normalizedCustomValue && isValidInterval(normalizedCustomValue, timeBase)) {
+    if (normalizedCustomValue && search.aggs.isValidInterval(normalizedCustomValue, timeBase)) {
       agg.write();
     }
   };

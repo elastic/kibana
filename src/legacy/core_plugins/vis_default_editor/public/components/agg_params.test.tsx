@@ -21,9 +21,8 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { IndexPattern } from 'src/plugins/data/public';
+import { IndexPattern, IAggConfig, AggGroupNames } from 'src/plugins/data/public';
 import { DefaultEditorAggParams, DefaultEditorAggParamsProps } from './agg_params';
-import { IAggConfig, AggGroupNames } from '../legacy_imports';
 
 const mockEditorConfig = {
   useNormalizedEsInterval: { hidden: false, fixedValue: false },
@@ -35,7 +34,6 @@ const mockEditorConfig = {
   },
 };
 
-jest.mock('ui/new_platform');
 jest.mock('./utils', () => ({
   getEditorConfig: jest.fn(() => mockEditorConfig),
 }));
@@ -73,10 +71,14 @@ jest.mock('./agg_param', () => ({
 jest.mock('../../../../../plugins/kibana_react/public', () => ({
   useKibana: () => ({
     services: {
-      dataShim: {
+      data: {
         search: {
           aggs: {
-            types: {},
+            types: {
+              getAll: () => [],
+            },
+          },
+          __LEGACY: {
             aggTypeFieldFilters: {
               filter: () => [],
             },

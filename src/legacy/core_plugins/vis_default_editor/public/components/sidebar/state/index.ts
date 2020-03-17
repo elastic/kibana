@@ -21,7 +21,7 @@ import { useEffect, useReducer, useCallback } from 'react';
 import { isEqual } from 'lodash';
 
 import { Vis, VisState, VisParams } from 'src/legacy/core_plugins/visualizations/public';
-import { editorStateReducer, initEditorState } from './reducers';
+import { createEditorStateReducer, initEditorState } from './reducers';
 import { EditorStateActionTypes } from './constants';
 import { EditorAction, updateStateParams } from './actions';
 import { useKibana } from '../../../../../../../plugins/kibana_react/public';
@@ -32,7 +32,11 @@ export * from './actions';
 
 export function useEditorReducer(vis: Vis): [VisState, React.Dispatch<EditorAction>] {
   const { services } = useKibana<VisDefaultEditorKibanaServices>();
-  const [state, dispatch] = useReducer(editorStateReducer(services.dataShim), vis, initEditorState);
+  const [state, dispatch] = useReducer(
+    createEditorStateReducer(services.data.search),
+    vis,
+    initEditorState
+  );
 
   useEffect(() => {
     const handleVisUpdate = (params: VisParams) => {

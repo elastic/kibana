@@ -22,10 +22,11 @@ import {
   AggGroupNames,
   BUCKET_TYPES,
   METRIC_TYPES,
-  siblingPipelineType,
-  parentPipelineType,
-} from '../legacy_imports';
+  search,
+} from '../../../../../plugins/data/public';
 import { wrapWithInlineComp } from './controls/utils';
+
+const { siblingPipelineType, parentPipelineType } = search.aggs;
 
 const buckets = {
   [BUCKET_TYPES.DATE_HISTOGRAM]: {

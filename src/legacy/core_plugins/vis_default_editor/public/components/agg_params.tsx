@@ -22,8 +22,7 @@ import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
 
-import { IndexPattern } from 'src/plugins/data/public';
-import { IAggConfig, AggGroupNames } from '../legacy_imports';
+import { IAggConfig, IndexPattern, AggGroupNames } from '../../../../../plugins/data/public';
 
 import { DefaultEditorAggSelect } from './agg_select';
 import { DefaultEditorAggParam } from './agg_param';
@@ -41,6 +40,8 @@ import {
 import { DefaultEditorCommonProps } from './agg_common_props';
 import { EditorParamConfig, TimeIntervalParam, FixedParam, getEditorConfig } from './utils';
 import { Schema, getSchemaByName } from '../schemas';
+import { useKibana } from '../../../../../plugins/kibana_react/public';
+import { VisDefaultEditorKibanaServices } from '../types';
 
 const FIXED_VALUE_PROP = 'fixedValue';
 const DEFAULT_PROP = 'default';
@@ -83,18 +84,24 @@ function DefaultEditorAggParams({
   allowedAggs = [],
   hideCustomLabel = false,
 }: DefaultEditorAggParamsProps) {
-  const schema = getSchemaByName(schemas, agg.schema);
-  const { title } = schema;
-  const aggFilter = [...allowedAggs, ...(schema.aggFilter || [])];
+  const schema = useMemo(() => getSchemaByName(schemas, agg.schema), [agg.schema, schemas]);
+  const aggFilter = useMemo(() => [...allowedAggs, ...(schema.aggFilter || [])], [
+    allowedAggs,
+    schema.aggFilter,
+  ]);
+  const { services } = useKibana<VisDefaultEditorKibanaServices>();
+  const aggTypes = useMemo(() => services.data.search.aggs.types.getAll(), [
+    services.data.search.aggs.types,
+  ]);
   const groupedAggTypeOptions = useMemo(
-    () => getAggTypeOptions(agg, indexPattern, groupName, aggFilter),
-    [agg, indexPattern, groupName, aggFilter]
+    () => getAggTypeOptions(aggTypes, agg, indexPattern, groupName, aggFilter),
+    [aggTypes, agg, indexPattern, groupName, aggFilter]
   );
 
   const error = aggIsTooLow
     ? i18n.translate('visDefaultEditor.aggParams.errors.aggWrongRunOrderErrorMessage', {
         defaultMessage: '"{schema}" aggs must run before all other buckets!',
-        values: { schema: title },
+        values: { schema: schema.title },
       })
     : '';
   const aggTypeName = agg.type?.name;
@@ -105,8 +112,20 @@ function DefaultEditorAggParams({
     fieldName,
   ]);
   const params = useMemo(
-    () => getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas, hideCustomLabel }),
-    [agg, editorConfig, metricAggs, state, schemas, hideCustomLabel]
+    () =>
+      getAggParamsToRender(
+        { agg, editorConfig, metricAggs, state, schemas, hideCustomLabel },
+        services.data.search.__LEGACY.aggTypeFieldFilters
+      ),
+    [
+      agg,
+      editorConfig,
+      metricAggs,
+      state,
+      schemas,
+      hideCustomLabel,
+      services.data.search.__LEGACY.aggTypeFieldFilters,
+    ]
   );
   const allParams = [...params.basic, ...params.advanced];
   const [paramsState, onChangeParamsState] = useReducer(

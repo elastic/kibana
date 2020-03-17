@@ -17,18 +17,8 @@
  * under the License.
  */
 
-import { IAggConfigs } from 'src/plugins/data/public';
-import { PersistedState } from '../../../../plugins/visualizations/public';
-import { Vis } from '../../visualizations/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 
-export interface VisOptionsProps<VisParamType = unknown> {
-  aggs: IAggConfigs;
-  hasHistogramAgg: boolean;
-  isTabSelected: boolean;
-  stateParams: VisParamType;
-  vis: Vis;
-  uiState: PersistedState;
-  setValue<T extends keyof VisParamType>(paramName: T, value: VisParamType[T]): void;
-  setValidity(isValid: boolean): void;
-  setTouched(isTouched: boolean): void;
+export interface VisDefaultEditorKibanaServices {
+  data: DataPublicPluginStart;
 }
