@@ -79,7 +79,6 @@ type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private handler?: ExpressionLoader;
-  private appState: { save(): void } | undefined;
   private timefilter: TimefilterContract;
   private timeRange?: TimeRange;
   private query?: Query;
@@ -95,7 +94,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   constructor(
     timefilter: TimefilterContract,
-    { vis, editUrl, indexPatterns, editable, appState }: VisualizeEmbeddableConfiguration,
+    { vis, editUrl, indexPatterns, editable }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
     parent?: Container
   ) {
@@ -111,7 +110,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       parent
     );
     this.timefilter = timefilter;
-    this.appState = appState;
     this.vis = vis;
     this.vis.uiState.on('change', this.uiStateChangeHandler);
 
@@ -164,8 +162,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         });
         this.vis.uiState.on('change', this.uiStateChangeHandler);
       }
-    } else if (!this.appState) {
-      this.vis.uiState.clearAllKeys();
     }
   }
 

@@ -141,21 +141,20 @@ export function createTileMapTypeDefinition(dependencies) {
         },
       ]),
     },
-    setup: async savedVis => {
-      const vis = savedVis.vis;
+    setup: async vis => {
       let tmsLayers;
 
       try {
         tmsLayers = await serviceSettings.getTMSServices();
       } catch (e) {
-        return savedVis;
+        return vis;
       }
 
       vis.type.editorConfig.collections.tmsLayers = tmsLayers;
       if (!vis.params.wms.selectedTmsLayer && tmsLayers.length) {
         vis.params.wms.selectedTmsLayer = tmsLayers[0];
       }
-      return savedVis;
+      return vis;
     },
   };
 }

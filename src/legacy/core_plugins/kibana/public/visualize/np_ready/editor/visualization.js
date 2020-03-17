@@ -31,15 +31,16 @@ export function initVisualizationDirective(app) {
       },
       link: function($scope, element) {
         $scope.renderFunction = async () => {
-          if (!$scope.embeddableHandler) {
+          if (!$scope.rendered) {
             $scope.embeddableHandler.render(element[0]);
-          } else {
-            $scope.embeddableHandler.updateInput({
-              timeRange: $scope.timeRange,
-              filters: $scope.filters || [],
-              query: $scope.query,
-            });
+            $scope.rendered = true;
           }
+
+          $scope.embeddableHandler.updateInput({
+            timeRange: $scope.timeRange,
+            filters: $scope.filters || [],
+            query: $scope.query,
+          });
         };
 
         $scope.$on('render', event => {

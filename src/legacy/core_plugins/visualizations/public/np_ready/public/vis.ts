@@ -96,8 +96,12 @@ export class Vis {
   }
 
   setState(state: SerializedVis) {
-    this.title = state.title || '';
-    this.description = state.description || '';
+    if (state.title !== undefined) {
+      this.title = state.title;
+    }
+    if (state.description !== undefined) {
+      this.description = state.description;
+    }
 
     this.params = defaults(
       {},

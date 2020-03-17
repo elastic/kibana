@@ -93,11 +93,11 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     });
   }
 
-  public createFromObject(
+  public async createFromObject(
     vis: Vis,
     input: Partial<VisualizeInput> & { id: string },
     parent?: Container
-  ): VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable {
+  ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
     const savedVisualizations = getSavedVisualizationsLoader();
 
     try {

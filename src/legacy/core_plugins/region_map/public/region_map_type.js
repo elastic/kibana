@@ -98,9 +98,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
         },
       ]),
     },
-    setup: async savedVis => {
-      const vis = savedVis.vis;
-
+    setup: async vis => {
       const tmsLayers = await serviceSettings.getTMSServices();
       vis.type.editorConfig.collections.tmsLayers = tmsLayers;
       if (!vis.params.wms.selectedTmsLayer && tmsLayers.length) {
@@ -144,7 +142,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
         vis.params.selectedJoinField = selectedJoinField;
       }
 
-      return savedVis;
+      return vis;
     },
   };
 }

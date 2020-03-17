@@ -526,8 +526,7 @@ function VisualizeAppController(
       handleLinkedSearch(linked);
       vis.data.searchSource.setField('query', query);
       vis.data.searchSource.setField('filter', filters);
-      // $scope.$broadcast('render');
-      embeddableHandler.reload();
+      $scope.$broadcast('render');
     };
 
     // update the searchSource when filters update
@@ -630,6 +629,8 @@ function VisualizeAppController(
       title: savedVis.title,
       type: savedVis.type || stateContainer.getState().vis.type,
     });
+    savedVis.searchSource.setField('query', stateContainer.getState().query);
+    savedVis.searchSource.setField('filter', stateContainer.getState().filters);
     savedVis.visState = stateContainer.getState().vis;
     savedVis.uiStateJSON = angular.toJson($scope.uiState.getChanges());
     $appStatus.dirty = false;

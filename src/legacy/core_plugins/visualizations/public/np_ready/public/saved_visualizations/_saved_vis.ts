@@ -26,6 +26,7 @@
  */
 import {
   createSavedObjectClass,
+  SavedObject,
   SavedObjectKibanaServices,
 } from '../../../../../../../plugins/saved_objects/public';
 // @ts-ignore
@@ -41,7 +42,7 @@ import { createSavedSearchesLoader } from '../../../../../../../plugins/discover
 import { getChrome, getOverlays, getIndexPatterns, getSavedObjects } from '../services';
 
 export const convertToSerializedVis = async (savedVis: ISavedVis): Promise<SerializedVis> => {
-  const visState = updateOldState(savedVis.visState);
+  const { visState } = savedVis;
   const searchSource =
     savedVis.searchSource && (await getSearchSource(savedVis.searchSource, savedVis.savedSearchId));
 
@@ -138,6 +139,17 @@ export function createSavedVisClass(services: SavedObjectKibanaServices) {
           description: '',
           savedSearchId: opts.savedSearchId,
           version: 1,
+        },
+        afterESResp: async (savedObject: SavedObject) => {
+          const savedVis = (savedObject as any) as ISavedVis;
+          savedVis.visState = await updateOldState(savedVis.visState);
+          if (savedVis.savedSearchId && savedVis.searchSource) {
+            savedObject.searchSource = await getSearchSource(
+              savedVis.searchSource,
+              savedVis.savedSearchId
+            );
+          }
+          return (savedVis as any) as SavedObject;
         },
       });
       this.showInRecentlyAccessed = true;

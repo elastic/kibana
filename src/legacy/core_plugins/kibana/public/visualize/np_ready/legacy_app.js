@@ -135,6 +135,9 @@ export function initVisualizeApp(app, deps) {
                 if (vis.type.setup) {
                   return vis.type.setup(vis).catch(() => vis);
                 }
+                return vis;
+              })
+              .then(vis => {
                 results.vis = vis;
                 return deps.embeddable
                   .getEmbeddableFactory('visualization')
@@ -176,7 +179,14 @@ export function initVisualizeApp(app, deps) {
         k7Breadcrumbs: getEditBreadcrumbs,
         resolve: {
           resolved: function($route, $rootScope, kbnUrl, history) {
-            const { chrome, core, data, savedVisualizations, visualizations, toastNotifications } = deps;
+            const {
+              chrome,
+              core,
+              data,
+              savedVisualizations,
+              visualizations,
+              toastNotifications,
+            } = deps;
 
             const results = {};
 
@@ -192,6 +202,9 @@ export function initVisualizeApp(app, deps) {
                 if (vis.type.setup) {
                   return vis.type.setup(vis).catch(() => vis);
                 }
+                return vis;
+              })
+              .then(vis => {
                 results.vis = vis;
                 return deps.embeddable
                   .getEmbeddableFactory('visualization')
