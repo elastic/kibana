@@ -71,6 +71,7 @@ export const useSavedQuery = (props: UseSavedQueriesProps): UseSavedQueriesRetur
     };
 
     if (props.savedQueryId) fetchSavedQuery(props.savedQueryId);
+    else setSavedQuery(undefined);
   }, [
     defaultLanguage,
     props.notifications.toasts,

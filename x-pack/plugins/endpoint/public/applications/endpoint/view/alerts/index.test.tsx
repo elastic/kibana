@@ -4,83 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
-import { Provider } from 'react-redux';
-import { I18nProvider } from '@kbn/i18n/react';
-import { AlertIndex } from './index';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { appStoreFactory } from '../../store';
-import { coreMock } from 'src/core/public/mocks';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
-import { fireEvent, waitForElement, act } from '@testing-library/react';
-import { RouteCapture } from '../route_capture';
-import { createMemoryHistory, MemoryHistory } from 'history';
-import { Router } from 'react-router-dom';
+import { fireEvent, act } from '@testing-library/react';
+import { MemoryHistory } from 'history';
 import { AppAction } from '../../types';
 import { mockAlertResultList } from '../../store/alerts/mock_alert_result_list';
+import { DepsStartMock } from '../../mocks';
+import { alertPageTestRender } from './test_helpers/render_alert_page';
 
 describe('when on the alerting page', () => {
   let render: () => reactTestingLibrary.RenderResult;
   let history: MemoryHistory<never>;
   let store: ReturnType<typeof appStoreFactory>;
-
-  /**
-   * @testing-library/react provides `queryByTestId`, but that uses the data attribute
-   * 'data-testid' whereas our FTR and EUI's tests all use 'data-test-subj'. While @testing-library/react
-   * could be configured to use 'data-test-subj', it is not currently configured that way.
-   *
-   * This provides an equivalent function to `queryByTestId` but that uses our 'data-test-subj' attribute.
-   */
-  let queryByTestSubjId: (
-    renderResult: reactTestingLibrary.RenderResult,
-    testSubjId: string
-  ) => Promise<Element | null>;
+  let depsStart: DepsStartMock;
 
   beforeEach(async () => {
-    /**
-     * Create a 'history' instance that is only in-memory and causes no side effects to the testing environment.
-     */
-    history = createMemoryHistory<never>();
-    /**
-     * Create a store, with the middleware disabled. We don't want side effects being created by our code in this test.
-     */
-    store = appStoreFactory(coreMock.createStart(), true);
-
-    /**
-     * Render the test component, use this after setting up anything in `beforeEach`.
-     */
-    render = () => {
-      /**
-       * Provide the store via `Provider`, and i18n APIs via `I18nProvider`.
-       * Use react-router via `Router`, passing our in-memory `history` instance.
-       * Use `RouteCapture` to emit url-change actions when the URL is changed.
-       * Finally, render the `AlertIndex` component which we are testing.
-       */
-      return reactTestingLibrary.render(
-        <Provider store={store}>
-          <KibanaContextProvider services={undefined}>
-            <I18nProvider>
-              <Router history={history}>
-                <RouteCapture>
-                  <AlertIndex />
-                </RouteCapture>
-              </Router>
-            </I18nProvider>
-          </KibanaContextProvider>
-        </Provider>
-      );
-    };
-    queryByTestSubjId = async (renderResult, testSubjId) => {
-      return await waitForElement(
-        /**
-         * Use document.body instead of container because EUI renders things like popover out of the DOM heirarchy.
-         */
-        () => document.body.querySelector(`[data-test-subj="${testSubjId}"]`),
-        {
-          container: renderResult.container,
-        }
-      );
-    };
+    // Creates the render elements for the tests to use
+    ({ render, history, store, depsStart } = alertPageTestRender);
   });
   it('should show a data grid', async () => {
     await render().findByTestId('alertListGrid');
@@ -98,7 +40,7 @@ describe('when on the alerting page', () => {
         reactTestingLibrary.act(() => {
           const action: AppAction = {
             type: 'serverReturnedAlertsData',
-            payload: mockAlertResultList(),
+            payload: mockAlertResultList({ total: 11 }),
           };
           store.dispatch(action);
         });
@@ -111,16 +53,17 @@ describe('when on the alerting page', () => {
          * There should be a 'row' which is the header, and
          * row which is the alert item.
          */
-        expect(rows).toHaveLength(2);
+        expect(rows).toHaveLength(11);
       });
       describe('when the user has clicked the alert type in the grid', () => {
         let renderResult: reactTestingLibrary.RenderResult;
         beforeEach(async () => {
           renderResult = render();
+          const alertLinks = await renderResult.findAllByTestId('alertTypeCellLink');
           /**
            * This is the cell with the alert type, it has a link.
            */
-          fireEvent.click(await renderResult.findByTestId('alertTypeCellLink'));
+          fireEvent.click(alertLinks[0]);
         });
         it('should show the flyout', async () => {
           await renderResult.findByTestId('alertDetailFlyout');
@@ -147,7 +90,7 @@ describe('when on the alerting page', () => {
         /**
          * Use our helper function to find the flyout's close button, as it uses a different test ID attribute.
          */
-        const closeButton = await queryByTestSubjId(renderResult, 'euiFlyoutCloseButton');
+        const closeButton = await renderResult.findByTestId('euiFlyoutCloseButton');
         if (closeButton) {
           fireEvent.click(closeButton);
         }
@@ -169,16 +112,13 @@ describe('when on the alerting page', () => {
     describe('when the user changes page size to 10', () => {
       beforeEach(async () => {
         const renderResult = render();
-        const paginationButton = await queryByTestSubjId(
-          renderResult,
-          'tablePaginationPopoverButton'
-        );
+        const paginationButton = await renderResult.findByTestId('tablePaginationPopoverButton');
         if (paginationButton) {
           act(() => {
             fireEvent.click(paginationButton);
           });
         }
-        const show10RowsButton = await queryByTestSubjId(renderResult, 'tablePagination-10-rows');
+        const show10RowsButton = await renderResult.findByTestId('tablePagination-10-rows');
         if (show10RowsButton) {
           act(() => {
             fireEvent.click(show10RowsButton);
@@ -188,6 +128,67 @@ describe('when on the alerting page', () => {
       it('should have a page_index of 0', () => {
         expect(history.location.search).toBe('?page_size=10');
       });
+    });
+  });
+  describe('when there are filtering params in the url', () => {
+    let indexPatterns: IIndexPattern[];
+    beforeEach(() => {
+      /**
+       * Dispatch the `serverReturnedSearchBarIndexPatterns` action, which is normally dispatched by the middleware
+       * when the page loads. The SearchBar will not render if there are no indexPatterns in the state.
+       */
+      indexPatterns = [
+        { title: 'endpoint-events-1', fields: [{ name: 'host.hostname', type: 'string' }] },
+      ];
+      reactTestingLibrary.act(() => {
+        const action: AppAction = {
+          type: 'serverReturnedSearchBarIndexPatterns',
+          payload: indexPatterns,
+        };
+        store.dispatch(action);
+      });
+
+      const searchBarQueryParam =
+        '(language%3Akuery%2Cquery%3A%27host.hostname%20%3A%20"DESKTOP-QBBSCUT"%27)';
+      const searchBarDateRangeParam = '(from%3Anow-1y%2Cto%3Anow)';
+      reactTestingLibrary.act(() => {
+        history.push({
+          ...history.location,
+          search: `?query=${searchBarQueryParam}&date_range=${searchBarDateRangeParam}`,
+        });
+      });
+    });
+    it("should render the SearchBar component with the correct 'indexPatterns' prop", async () => {
+      render();
+      const callProps = depsStart.data.ui.SearchBar.mock.calls[0][0];
+      expect(callProps.indexPatterns).toEqual(indexPatterns);
+    });
+    it("should render the SearchBar component with the correct 'query' prop", async () => {
+      render();
+      const callProps = depsStart.data.ui.SearchBar.mock.calls[0][0];
+      const expectedProp = { query: 'host.hostname : "DESKTOP-QBBSCUT"', language: 'kuery' };
+      expect(callProps.query).toEqual(expectedProp);
+    });
+    it("should render the SearchBar component with the correct 'dateRangeFrom' prop", async () => {
+      render();
+      const callProps = depsStart.data.ui.SearchBar.mock.calls[0][0];
+      const expectedProp = 'now-1y';
+      expect(callProps.dateRangeFrom).toEqual(expectedProp);
+    });
+    it("should render the SearchBar component with the correct 'dateRangeTo' prop", async () => {
+      render();
+      const callProps = depsStart.data.ui.SearchBar.mock.calls[0][0];
+      const expectedProp = 'now';
+      expect(callProps.dateRangeTo).toEqual(expectedProp);
+    });
+    it('should render the SearchBar component with the correct display props', async () => {
+      render();
+      const callProps = depsStart.data.ui.SearchBar.mock.calls[0][0];
+      expect(callProps.showFilterBar).toBe(true);
+      expect(callProps.showDatePicker).toBe(true);
+      expect(callProps.showQueryBar).toBe(true);
+      expect(callProps.showQueryInput).toBe(true);
+      expect(callProps.showSaveQuery).toBe(false);
     });
   });
 });

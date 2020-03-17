@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { ElementDefinition } from 'cytoscape';
@@ -16,7 +15,6 @@ import React, {
   useRef,
   useState
 } from 'react';
-import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { isValidPlatinumLicense } from '../../../../../../../plugins/apm/common/service_map';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceMapAPIResponse } from '../../../../../../../plugins/apm/server/lib/service_map/get_service_map';
@@ -26,13 +24,14 @@ import { useLicense } from '../../../hooks/useLicense';
 import { useLoadingIndicator } from '../../../hooks/useLoadingIndicator';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
+import { EmptyBanner } from './EmptyBanner';
 import { getCytoscapeElements } from './get_cytoscape_elements';
 import { PlatinumLicensePrompt } from './PlatinumLicensePrompt';
 import { Popover } from './Popover';
 import { useRefDimensions } from './useRefDimensions';
-import { callApmApi } from '../../../services/rest/createCallApmApi';
 
 interface ServiceMapProps {
   serviceName?: string;
@@ -77,7 +76,6 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
   });
 
   const renderedElements = useRef<ElementDefinition[]>([]);
-  const openToast = useRef<string | null>(null);
 
   const [responses, setResponses] = useState<ServiceMapAPIResponse[]>([]);
 
@@ -159,41 +157,11 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
       return !find(renderedElements.current, el => isEqual(el, element));
     });
 
-    const updateMap = () => {
-      renderedElements.current = elements;
-      if (openToast.current) {
-        notifications.toasts.remove(openToast.current);
-      }
-      forceUpdate();
-    };
-
     if (newElements.length > 0 && renderedElements.current.length > 0) {
-      openToast.current = notifications.toasts.add({
-        title: i18n.translate('xpack.apm.newServiceMapData', {
-          defaultMessage: `Newly discovered connections are available.`
-        }),
-        onClose: () => {
-          openToast.current = null;
-        },
-        toastLifeTimeMs: 24 * 60 * 60 * 1000,
-        text: toMountPoint(
-          <EuiButton onClick={updateMap}>
-            {i18n.translate('xpack.apm.updateServiceMap', {
-              defaultMessage: 'Update map'
-            })}
-          </EuiButton>
-        )
-      }).id;
+      renderedElements.current = elements;
+      forceUpdate();
     }
-
-    return () => {
-      if (openToast.current) {
-        notifications.toasts.remove(openToast.current);
-      }
-    };
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [elements]);
+  }, [elements, forceUpdate]);
 
   const { ref: wrapperRef, width, height } = useRefDimensions();
 
@@ -214,6 +182,9 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         style={cytoscapeDivStyle}
       >
         <Controls />
+        {serviceName && renderedElements.current.length === 1 && (
+          <EmptyBanner />
+        )}
         <Popover focusedServiceName={serviceName} />
       </Cytoscape>
     </div>

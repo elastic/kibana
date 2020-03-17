@@ -26,7 +26,7 @@
 /src/plugins/kibana_legacy/ @elastic/kibana-app
 /src/plugins/timelion/ @elastic/kibana-app
 /src/plugins/dev_tools/ @elastic/kibana-app
-/src/plugins/dashboard_embeddable_container/ @elastic/kibana-app
+/src/plugins/dashboard/ @elastic/kibana-app
 
 # App Architecture
 /packages/kbn-interpreter/ @elastic/kibana-app-arch
@@ -88,7 +88,6 @@
 /x-pack/test/functional/services/ml.ts  @elastic/ml-ui
 # ML team owns the transform plugin, ES team added here for visibility
 # because the plugin lives in Kibana's Elasticsearch management section.
-/x-pack/legacy/plugins/transform/  @elastic/ml-ui @elastic/es-ui
 /x-pack/plugins/transform/  @elastic/ml-ui @elastic/es-ui
 /x-pack/test/functional/apps/transform/ @elastic/ml-ui
 /x-pack/test/functional/services/transform_ui/ @elastic/ml-ui
@@ -133,7 +132,7 @@
 /src/legacy/server/saved_objects/  @elastic/kibana-platform
 /src/legacy/server/status/ @elastic/kibana-platform
 /src/plugins/status_page/ @elastic/kibana-platform
-/src/dev/run_check_core_api_changes.ts @elastic/kibana-platform
+/src/dev/run_check_published_api_changes.ts @elastic/kibana-platform
 
 # Security
 /src/core/server/csp/  @elastic/kibana-security @elastic/kibana-platform

@@ -12,9 +12,6 @@ describe('ActionContext', () => {
     const base: BaseActionContext = {
       date: '2020-01-01T00:00:00.000Z',
       group: '[group]',
-      name: '[name]',
-      spaceId: '[spaceId]',
-      namespace: '[spaceId]',
       value: 42,
     };
     const params = ParamsSchema.validate({
@@ -29,12 +26,12 @@ describe('ActionContext', () => {
       thresholdComparator: '>',
       threshold: [4],
     });
-    const context = addMessages(base, params);
-    expect(context.subject).toMatchInlineSnapshot(
-      `"alert [name] group [group] exceeded threshold"`
+    const context = addMessages({ name: '[alert-name]' }, base, params);
+    expect(context.title).toMatchInlineSnapshot(
+      `"alert [alert-name] group [group] exceeded threshold"`
     );
     expect(context.message).toMatchInlineSnapshot(
-      `"alert [name] group [group] value 42 exceeded threshold count > 4 over 5m on 2020-01-01T00:00:00.000Z"`
+      `"alert [alert-name] group [group] value 42 exceeded threshold count > 4 over 5m on 2020-01-01T00:00:00.000Z"`
     );
   });
 
@@ -42,9 +39,6 @@ describe('ActionContext', () => {
     const base: BaseActionContext = {
       date: '2020-01-01T00:00:00.000Z',
       group: '[group]',
-      name: '[name]',
-      spaceId: '[spaceId]',
-      namespace: '[spaceId]',
       value: 42,
     };
     const params = ParamsSchema.validate({
@@ -60,12 +54,12 @@ describe('ActionContext', () => {
       thresholdComparator: '>',
       threshold: [4.2],
     });
-    const context = addMessages(base, params);
-    expect(context.subject).toMatchInlineSnapshot(
-      `"alert [name] group [group] exceeded threshold"`
+    const context = addMessages({ name: '[alert-name]' }, base, params);
+    expect(context.title).toMatchInlineSnapshot(
+      `"alert [alert-name] group [group] exceeded threshold"`
     );
     expect(context.message).toMatchInlineSnapshot(
-      `"alert [name] group [group] value 42 exceeded threshold avg([aggField]) > 4.2 over 5m on 2020-01-01T00:00:00.000Z"`
+      `"alert [alert-name] group [group] value 42 exceeded threshold avg([aggField]) > 4.2 over 5m on 2020-01-01T00:00:00.000Z"`
     );
   });
 
@@ -73,9 +67,6 @@ describe('ActionContext', () => {
     const base: BaseActionContext = {
       date: '2020-01-01T00:00:00.000Z',
       group: '[group]',
-      name: '[name]',
-      spaceId: '[spaceId]',
-      namespace: '[spaceId]',
       value: 4,
     };
     const params = ParamsSchema.validate({
@@ -90,12 +81,12 @@ describe('ActionContext', () => {
       thresholdComparator: 'between',
       threshold: [4, 5],
     });
-    const context = addMessages(base, params);
-    expect(context.subject).toMatchInlineSnapshot(
-      `"alert [name] group [group] exceeded threshold"`
+    const context = addMessages({ name: '[alert-name]' }, base, params);
+    expect(context.title).toMatchInlineSnapshot(
+      `"alert [alert-name] group [group] exceeded threshold"`
     );
     expect(context.message).toMatchInlineSnapshot(
-      `"alert [name] group [group] value 4 exceeded threshold count between 4,5 over 5m on 2020-01-01T00:00:00.000Z"`
+      `"alert [alert-name] group [group] value 4 exceeded threshold count between 4,5 over 5m on 2020-01-01T00:00:00.000Z"`
     );
   });
 });

@@ -19,6 +19,12 @@
 
 import { find } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { createHashHistory } from 'history';
+
+import {
+  createKbnUrlStateStorage,
+  redirectWhenMissing,
+} from '../../../../../../plugins/kibana_utils/public';
 
 import editorTemplate from './editor/editor.html';
 import visualizeListingTemplate from './listing/visualize_listing.html';
@@ -26,11 +32,7 @@ import visualizeListingTemplate from './listing/visualize_listing.html';
 import { initVisualizeAppDirective } from './visualize_app';
 import { VisualizeConstants } from './visualize_constants';
 import { VisualizeListingController } from './listing/visualize_listing';
-import {
-  ensureDefaultIndexPattern,
-  registerTimefilterWithGlobalStateFactory,
-} from '../legacy_imports';
-import { syncOnMount } from './global_state_sync';
+import { ensureDefaultIndexPattern } from '../legacy_imports';
 
 import {
   getLandingBreadcrumbs,
@@ -42,17 +44,13 @@ import {
 export function initVisualizeApp(app, deps) {
   initVisualizeAppDirective(app, deps);
 
-  app.run(globalState => {
-    syncOnMount(globalState, deps.data);
-  });
-
-  app.run((globalState, $rootScope) => {
-    registerTimefilterWithGlobalStateFactory(
-      deps.data.query.timefilter.timefilter,
-      globalState,
-      $rootScope
-    );
-  });
+  app.factory('history', () => createHashHistory());
+  app.factory('kbnUrlStateStorage', history =>
+    createKbnUrlStateStorage({
+      history,
+      useHash: deps.uiSettings.get('state:storeInSessionStorage'),
+    })
+  );
 
   app.config(function($routeProvider) {
     const defaults = {
@@ -105,9 +103,9 @@ export function initVisualizeApp(app, deps) {
         template: editorTemplate,
         k7Breadcrumbs: getCreateBreadcrumbs,
         resolve: {
-          savedVis: function(redirectWhenMissing, $route, $rootScope, kbnUrl) {
-            const { core, data, savedVisualizations, visualizations } = deps;
-            const visTypes = visualizations.types.all();
+          savedVis: function($route, $rootScope, kbnUrl, history) {
+            const { core, data, savedVisualizations, visualizations, toastNotifications } = deps;
+            const visTypes = visualizations.all();
             const visType = find(visTypes, { name: $route.current.params.type });
             const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
             const hasIndex =
@@ -133,7 +131,9 @@ export function initVisualizeApp(app, deps) {
               })
               .catch(
                 redirectWhenMissing({
-                  '*': '/visualize',
+                  history,
+                  mapping: VisualizeConstants.LANDING_PAGE_PATH,
+                  toastNotifications,
                 })
               );
           },
@@ -144,8 +144,8 @@ export function initVisualizeApp(app, deps) {
         template: editorTemplate,
         k7Breadcrumbs: getEditBreadcrumbs,
         resolve: {
-          savedVis: function(redirectWhenMissing, $route, $rootScope, kbnUrl) {
-            const { chrome, core, data, savedVisualizations } = deps;
+          savedVis: function($route, $rootScope, kbnUrl, history) {
+            const { chrome, core, data, savedVisualizations, toastNotifications } = deps;
             return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl)
               .then(() => savedVisualizations.get($route.current.params.id))
               .then(savedVis => {
@@ -160,13 +160,17 @@ export function initVisualizeApp(app, deps) {
               })
               .catch(
                 redirectWhenMissing({
-                  visualization: '/visualize',
-                  search:
-                    '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-                  'index-pattern':
-                    '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-                  'index-pattern-field':
-                    '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+                  history,
+                  mapping: {
+                    visualization: VisualizeConstants.LANDING_PAGE_PATH,
+                    search:
+                      '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+                    'index-pattern':
+                      '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+                    'index-pattern-field':
+                      '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+                  },
+                  toastNotifications,
                 })
               );
           },

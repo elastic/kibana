@@ -206,6 +206,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     capabilities: {
       resolveCapabilities: deps.capabilities.resolveCapabilities,
     },
+    elasticsearch: deps.elasticsearch,
     savedObjects: {
       getScopedClient: deps.savedObjects.getScopedClient,
       createInternalRepository: deps.savedObjects.createInternalRepository,

@@ -14,7 +14,8 @@ import {
   SOURCE_DATA_ID_ORIGIN,
 } from '../../common/constants';
 import uuid from 'uuid/v4';
-import { copyPersistentState } from '../reducers/util';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { copyPersistentState } from '../../../../../plugins/maps/public/reducers/util.js';
 import { i18n } from '@kbn/i18n';
 
 export class AbstractLayer {
@@ -329,18 +330,6 @@ export class AbstractLayer {
   }
 
   getQueryableIndexPatternIds() {
-    return [];
-  }
-
-  async getDateFields() {
-    return [];
-  }
-
-  async getNumberFields() {
-    return [];
-  }
-
-  async getCategoricalFields() {
     return [];
   }
 

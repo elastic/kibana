@@ -63,7 +63,7 @@ function getLayoutOptions(
 ): cytoscape.LayoutOptions {
   return {
     name: 'breadthfirst',
-    roots: selectedRoots,
+    roots: selectedRoots.length ? selectedRoots : undefined,
     fit: true,
     padding: nodeHeight,
     spacingFactor: 0.85,
@@ -78,11 +78,11 @@ function getLayoutOptions(
   };
 }
 
-function selectRoots(elements: cytoscape.ElementDefinition[]): string[] {
-  const nodes = cytoscape({ elements }).nodes();
-  const unconnectedNodes = nodes.roots().intersection(nodes.leaves());
+function selectRoots(cy: cytoscape.Core): string[] {
+  const nodes = cy.nodes();
+  const roots = nodes.roots();
   const rumNodes = nodes.filter(node => isRumAgentName(node.data('agentName')));
-  return rumNodes.union(unconnectedNodes).map(node => node.id());
+  return rumNodes.union(roots).map(node => node.id());
 }
 
 export function Cytoscape({
@@ -111,18 +111,28 @@ export function Cytoscape({
   const dataHandler = useCallback<cytoscape.EventHandler>(
     event => {
       if (cy) {
+        cy.edges().removeClass('highlight');
+
+        if (serviceName) {
+          const focusedNode = cy.getElementById(serviceName);
+          focusedNode.connectedEdges().addClass('highlight');
+        }
+
         // Add the "primary" class to the node if its id matches the serviceName.
         if (cy.nodes().length > 0 && serviceName) {
           cy.nodes().removeClass('primary');
           cy.getElementById(serviceName).addClass('primary');
         }
-
         if (event.cy.elements().length > 0) {
-          const selectedRoots = selectRoots(elements);
+          const selectedRoots = selectRoots(event.cy);
           const layout = cy.layout(
             getLayoutOptions(selectedRoots, height, width)
           );
           layout.one('layoutstop', () => {
+            if (serviceName) {
+              const focusedNode = cy.getElementById(serviceName);
+              cy.center(focusedNode);
+            }
             // show elements after layout is applied
             cy.elements().removeClass('invisible');
           });
@@ -130,7 +140,7 @@ export function Cytoscape({
         }
       }
     },
-    [cy, serviceName, elements, height, width]
+    [cy, serviceName, height, width]
   );
 
   // Trigger a custom "data" event when data changes
