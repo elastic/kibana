@@ -48,6 +48,8 @@ export function checkActionTypeEnabled(
               },
             }
           )}
+          // The "re-enable" terminology is used here because this message is used when an alert
+          // action was previously enabled and needs action to be re-enabled.
           description={i18n.translate(
             'xpack.triggersActionsUI.sections.alertForm.actionTypeDisabledByLicenseMessageDescription',
             { defaultMessage: 'To re-enable this action, please upgrade your license.' }
