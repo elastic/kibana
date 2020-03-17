@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -26,6 +26,7 @@ import { MetricsExplorerOptions } from '../../../containers/metrics_explorer/use
 import { MetricsExplorerKueryBar } from '../../metrics_explorer/kuery_bar';
 import { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explorer';
 import { useSource } from '../../../containers/source';
+import { MetricsExplorerGroupBy } from '../../metrics_explorer/group_by';
 
 export interface MetricExpression {
   aggType?: string;
@@ -39,12 +40,16 @@ export interface MetricExpression {
 
 interface AlertContextMeta {
   currentOptions: MetricsExplorerOptions;
-  series: MetricsExplorerSeries;
+  series?: MetricsExplorerSeries;
 }
 
 interface Props {
   errors: IErrorObject[];
-  alertParams: { criteria: MetricExpression[] };
+  alertParams: {
+    criteria: MetricExpression[];
+    groupBy?: string | null;
+    filterQuery?: string;
+  };
   alertsContext: AlertsContextValue<AlertContextMeta>;
   setAlertParams(key: string, value: any): void;
   setAlertProperty(key: string, value: any): void;
@@ -73,51 +78,40 @@ export const Expressions: React.FC<Props> = props => {
     [source]
   );
 
-  const expressions = useMemo<MetricExpression[]>(() => {
-    if (alertParams.criteria) {
-      return alertParams.criteria;
-    } else if (alertsContext.metadata?.currentOptions) {
-      return alertsContext.metadata.currentOptions.metrics.map(metric => ({
-        metric: metric.field,
-        comparator: '>',
-        threshold: [],
-        timeSize: 1,
-        timeUnit: 's',
-        indexPattern: source?.configuration.metricAlias,
-        aggType: metric.aggregation,
-      }));
-    } else {
-      return [defaultExpression];
-    }
-  }, [alertParams.criteria, source, alertsContext.metadata, defaultExpression]);
-
   const updateParams = useCallback(
     (id, e: MetricExpression) => {
-      const exp = expressions ? expressions.slice() : [];
+      const exp = alertParams.criteria ? alertParams.criteria.slice() : [];
       exp[id] = { ...exp[id], ...e };
       setAlertParams('criteria', exp);
     },
-    [setAlertParams, expressions]
+    [setAlertParams, alertParams.criteria]
   );
 
   const addExpression = useCallback(() => {
-    const exp = expressions.slice();
+    const exp = alertParams.criteria.slice();
     exp.push(defaultExpression);
     setAlertParams('criteria', exp);
-  }, [setAlertParams, expressions, defaultExpression]);
+  }, [setAlertParams, alertParams.criteria, defaultExpression]);
 
   const removeExpression = useCallback(
     (id: number) => {
-      const exp = expressions.slice();
+      const exp = alertParams.criteria.slice();
       exp.splice(id, 1);
       setAlertParams('criteria', exp);
     },
-    [setAlertParams, expressions]
+    [setAlertParams, alertParams.criteria]
   );
 
   const onFilterQuerySubmit = useCallback(
     (filter: any) => {
       setAlertParams('filterQuery', filter);
+    },
+    [setAlertParams]
+  );
+
+  const onGroupByChange = useCallback(
+    (group: string | null) => {
+      setAlertParams('groupBy', group);
     },
     [setAlertParams]
   );
@@ -130,21 +124,45 @@ export const Expressions: React.FC<Props> = props => {
     };
   }, []);
 
-  const filterValue = useMemo(() => {
-    const options = alertsContext.metadata?.currentOptions;
-    const series = alertsContext.metadata?.series;
-    if (!options) {
-      return;
-    }
+  useEffect(() => {
+    const md = alertsContext.metadata;
+    if (md) {
+      if (md.currentOptions) {
+        setAlertParams(
+          'criteria',
+          md.currentOptions.metrics.map(metric => ({
+            metric: metric.field,
+            comparator: '>',
+            threshold: [],
+            timeSize: 1,
+            timeUnit: 'm',
+            indexPattern: source?.configuration.metricAlias,
+            aggType: metric.aggregation,
+          }))
+        );
+      } else {
+        setAlertParams('criteria', [defaultExpression]);
+      }
 
-    if (options.filterQuery) {
-      return options.filterQuery;
-    } else if (options.groupBy && series) {
-      const filter = `${options.groupBy}: "${series.id}"`;
-      onFilterQuerySubmit(filter);
-      return filter;
+      if (md.currentOptions.filterQuery) {
+        setAlertParams('filterQuery', md.currentOptions.filterQuery);
+      } else if (md.currentOptions.groupBy && md.series) {
+        const filter = `${md.currentOptions.groupBy}: "${md.series.id}"`;
+        setAlertParams('filterQuery', filter);
+      }
+
+      setAlertParams('groupBy', md.currentOptions.groupBy);
     }
-  }, [alertsContext.metadata, onFilterQuerySubmit]);
+  }, [alertsContext.metadata, defaultExpression, setAlertParams, source]);
+
+  useEffect(() => {
+    return () => {
+      // When flyout closes, reset alert params
+      setAlertParams('criteria', []);
+      setAlertParams('filterQuery', '');
+      setAlertParams('groupBy', undefined);
+    };
+  }, [setAlertParams]);
 
   return (
     <>
@@ -158,20 +176,21 @@ export const Expressions: React.FC<Props> = props => {
         </h5>
       </EuiText>
       <EuiSpacer size={'xs'} />
-      {expressions.map((e, idx) => {
-        return (
-          <ExpressionRow
-            fields={derivedIndexPattern.fields}
-            remove={removeExpression}
-            addExpression={addExpression}
-            key={idx} // idx's don't usually make good key's but here the index has semantic meaning
-            expressionId={idx}
-            setAlertParams={updateParams}
-            errors={errors[idx] || emptyError}
-            expression={e || {}}
-          />
-        );
-      })}
+      {alertParams.criteria &&
+        alertParams.criteria.map((e, idx) => {
+          return (
+            <ExpressionRow
+              fields={derivedIndexPattern.fields}
+              remove={removeExpression}
+              addExpression={addExpression}
+              key={idx} // idx's don't usually make good key's but here the index has semantic meaning
+              expressionId={idx}
+              setAlertParams={updateParams}
+              errors={errors[idx] || emptyError}
+              expression={e || {}}
+            />
+          );
+        })}
       <EuiSpacer size={'m'} />
       <EuiText>
         <h5>
@@ -182,9 +201,25 @@ export const Expressions: React.FC<Props> = props => {
       <MetricsExplorerKueryBar
         derivedIndexPattern={derivedIndexPattern}
         onSubmit={onFilterQuerySubmit}
-        value={filterValue}
+        value={alertParams.filterQuery}
       />
       <EuiSpacer size={'m'} />
+      <EuiText>
+        <h5>
+          <FormattedMessage
+            id="xpack.infra.metrics.alertFlyout.alertPer"
+            defaultMessage="Alert Per"
+          />
+        </h5>
+      </EuiText>
+      <EuiSpacer size={'xs'} />
+      {alertsContext.metadata && (
+        <MetricsExplorerGroupBy
+          onChange={onGroupByChange}
+          fields={derivedIndexPattern.fields}
+          options={alertsContext.metadata.currentOptions}
+        />
+      )}
     </>
   );
 };

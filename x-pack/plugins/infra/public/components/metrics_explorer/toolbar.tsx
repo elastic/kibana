@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiText, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
 import {
   MetricsExplorerMetric,
@@ -28,6 +28,7 @@ import { MetricExplorerViewState } from '../../pages/infrastructure/metrics_expl
 import { metricsExplorerViewSavedObjectType } from '../../../common/saved_objects/metrics_explorer_view';
 import { useKibanaUiSetting } from '../../utils/use_kibana_ui_setting';
 import { mapKibanaQuickRangesToDatePickerRanges } from '../../utils/map_timepicker_quickranges_to_datepicker_ranges';
+import { AlertFlyout } from '../alerting/metrics/alert_flyout';
 
 interface Props {
   derivedIndexPattern: IIndexPattern;
@@ -63,6 +64,12 @@ export const MetricsExplorerToolbar = ({
   const isDefaultOptions = options.aggregation === 'avg' && options.metrics.length === 0;
   const [timepickerQuickRanges] = useKibanaUiSetting('timepicker:quickRanges');
   const commonlyUsedRanges = mapKibanaQuickRangesToDatePickerRanges(timepickerQuickRanges);
+  const [flyoutVisible, setFlyoutVisible] = useState(false);
+
+  const showAlertFlyout = useCallback(() => {
+    setFlyoutVisible(true);
+  }, [setFlyoutVisible]);
+
   return (
     <Toolbar>
       <EuiFlexGroup alignItems="center">
@@ -112,6 +119,15 @@ export const MetricsExplorerToolbar = ({
             onSubmit={onFilterQuerySubmit}
             value={options.filterQuery}
           />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButton onClick={showAlertFlyout}>
+            <FormattedMessage
+              id="xpack.infra.metricsExplorer.createAlertButton"
+              defaultMessage="Create alert"
+            />
+          </EuiButton>
+          <AlertFlyout options={options} setVisible={setFlyoutVisible} visible={flyoutVisible} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <MetricsExplorerChartOptionsComponent
