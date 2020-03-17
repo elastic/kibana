@@ -20,6 +20,8 @@ import {
   setUiSettings,
   setInjectedVarFunc,
   setToasts,
+  setIndexPatternService,
+  setAutocompleteService,
 } from './kibana_services';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
@@ -71,6 +73,8 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setFileUpload(file_upload);
   setIndexPatternSelect(data.ui.IndexPatternSelect);
   setTimeFilter(data.query.timefilter.timefilter);
+  setIndexPatternService(data.indexPatterns);
+  setAutocompleteService(data.autocompleteService);
 };
 
 /** @internal */
