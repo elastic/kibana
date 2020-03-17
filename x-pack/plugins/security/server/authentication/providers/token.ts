@@ -9,7 +9,7 @@ import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
-import { HTTPAuthorizationHeader } from '../http_authorization_header';
+import { HTTPAuthorizationHeader } from '../http_authentication';
 import { Tokens, TokenPair } from '../tokens';
 import { BaseAuthenticationProvider } from './base';
 

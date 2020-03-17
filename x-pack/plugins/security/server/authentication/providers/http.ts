@@ -7,7 +7,7 @@
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { HTTPAuthorizationHeader } from '../http_authorization_header';
+import { HTTPAuthorizationHeader } from '../http_authentication';
 import { AuthenticationProviderOptions, BaseAuthenticationProvider } from './base';
 
 interface HTTPAuthenticationProviderOptions {

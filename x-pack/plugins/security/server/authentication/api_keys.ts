@@ -6,8 +6,8 @@
 
 import { IClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
 import { SecurityLicense } from '../../common/licensing';
-import { HTTPAuthorizationHeader } from './http_authorization_header';
-import { BasicHTTPAuthorizationHeaderCredentials } from './basic_http_authorization_header_credentials';
+import { HTTPAuthorizationHeader } from './http_authentication';
+import { BasicHTTPAuthorizationHeaderCredentials } from './http_authentication';
 
 /**
  * Represents the options to create an APIKey class instance that will be
