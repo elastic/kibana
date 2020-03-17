@@ -25,7 +25,7 @@ import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy
 const timelionVisPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
     id: 'timelion_vis',
-    require: ['kibana', 'elasticsearch', 'visualizations', 'data'],
+    require: ['kibana', 'elasticsearch', 'visualizations'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),

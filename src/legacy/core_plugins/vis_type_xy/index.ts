@@ -31,7 +31,7 @@ export interface ConfigSchema {
 const visTypeXyPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
     id: 'visTypeXy',
-    require: ['kibana', 'elasticsearch', 'visualizations', 'interpreter', 'data'],
+    require: ['kibana', 'elasticsearch', 'visualizations', 'interpreter'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       hacks: [resolve(__dirname, 'public/legacy')],
