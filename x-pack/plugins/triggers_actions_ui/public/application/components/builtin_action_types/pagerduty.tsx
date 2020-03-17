@@ -219,7 +219,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
       <EuiPopover
         button={
           <EuiButtonIcon
-            data-test-subj={`${buttonName}AddVariableButton`}
+            data-test-subj={`${paramsProperty}AddVariableButton`}
             onClick={() => setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, dedupKey: true })}
             iconType="indexOpen"
             aria-label={buttonName}
