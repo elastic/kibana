@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TIMELINE_FLYOUT_BODY, TIMELINE_NOT_READY_TO_DROP_BUTTON } from '../screens/timeline';
+import { TIMELINE_FLYOUT_HEADER, TIMELINE_NOT_READY_TO_DROP_BUTTON } from '../screens/timeline';
 
 import { dragFirstHostToTimeline, waitForAllHostsToBeLoaded } from '../tasks/hosts/all_hosts';
 import { loginAndWaitForPage } from '../tasks/login';
@@ -26,7 +26,7 @@ describe('timeline flyout button', () => {
 
   it('toggles open the timeline', () => {
     openTimeline();
-    cy.get(TIMELINE_FLYOUT_BODY).should('have.css', 'visibility', 'visible');
+    cy.get(TIMELINE_FLYOUT_HEADER).should('have.css', 'visibility', 'visible');
   });
 
   it('sets the flyout button background to euiColorSuccess with a 10% alpha channel when the user starts dragging a host, but is not hovering over the flyout button', () => {
