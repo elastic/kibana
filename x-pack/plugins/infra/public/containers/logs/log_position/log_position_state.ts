@@ -15,6 +15,9 @@ type TimeKeyOrNull = TimeKey | null;
 interface DateRange {
   startDateExpression: string;
   endDateExpression: string;
+  startTimestamp: number;
+  endTimestamp: number;
+  timestampsLastUpdated: number;
 }
 
 interface VisiblePositions {
@@ -52,7 +55,8 @@ export interface LogPositionCallbacks {
   updateDateRange: (newDateRage: Partial<DateRange>) => void;
 }
 
-const DEFAULT_DATE_RANGE: DateRange = { startDateExpression: 'now-1d', endDateExpression: 'now' };
+const DEFAULT_DATE_RANGE = { startDateExpression: 'now-1d', endDateExpression: 'now' };
+const DESIRED_BUFFER_PAGES = 2;
 
 const useVisibleMidpoint = (middleKey: TimeKeyOrNull, targetPosition: TimeKeyOrNull) => {
   // Of the two dependencies `middleKey` and `targetPosition`, return
@@ -87,11 +91,6 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     setInitialized(true);
   }, [setInitialized]);
 
-  const [timestampsLastUpdate, setTimestampsLastUpdate] = useState<number>(Date.now());
-  const updateTimestamps = useCallback(() => {
-    setTimestampsLastUpdate(Date.now());
-  }, [setTimestampsLastUpdate]);
-
   const [targetPosition, jumpToTargetPosition] = useState<TimeKey | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const [visiblePositions, reportVisiblePositions] = useState<VisiblePositions>({
@@ -104,7 +103,12 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
 
   // We group the `startDate` and `endDate` values in the same object to be able
   // to set both at the same time, saving a re-render
-  const [dateRange, setDateRange] = useSetState<DateRange>(DEFAULT_DATE_RANGE);
+  const [dateRange, setDateRange] = useSetState<DateRange>({
+    ...DEFAULT_DATE_RANGE,
+    startTimestamp: datemathToEpochMillis(DEFAULT_DATE_RANGE.startDateExpression)!,
+    endTimestamp: datemathToEpochMillis(DEFAULT_DATE_RANGE.endDateExpression, 'up')!,
+    timestampsLastUpdated: Date.now(),
+  });
 
   const { startKey, middleKey, endKey, pagesBeforeStart, pagesAfterEnd } = visiblePositions;
 
@@ -143,28 +147,31 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
         jumpToTargetPosition(null);
       }
 
-      setDateRange(newDateRange);
-      updateTimestamps();
+      setDateRange({
+        ...newDateRange,
+        startTimestamp: nextStartTimestamp,
+        endTimestamp: nextEndTimestamp,
+        timestampsLastUpdated: Date.now(),
+      });
     },
-    [setDateRange, dateRange, targetPosition, updateTimestamps]
+    [setDateRange, dateRange, targetPosition]
   );
 
-  // `lastUpdate` needs to be a dependency for the timestamps.
-  // ESLint complains it's unnecessary, but we know better.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const startTimestamp = useMemo(() => datemathToEpochMillis(dateRange.startDateExpression), [
-    dateRange.startDateExpression,
-    timestampsLastUpdate,
-  ]);
+  // `endTimestamp` update conditions
+  useEffect(() => {
+    if (dateRange.endDateExpression !== 'now') {
+      return;
+    }
 
-  // endTimestamp needs to be synced to `now` to allow auto-streaming
-  const endTimestampDep =
-    dateRange.endDateExpression === 'now' ? Date.now() : dateRange.endDateExpression;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const endTimestamp = useMemo(() => datemathToEpochMillis(dateRange.endDateExpression, 'up'), [
-    endTimestampDep,
-    timestampsLastUpdate,
-  ]);
+    // User is close to the bottom edge of the scroll. The value of
+    // `pagesAfterEnd` changes on live stream as well.
+    if (pagesAfterEnd <= DESIRED_BUFFER_PAGES) {
+      setDateRange({
+        endTimestamp: datemathToEpochMillis(dateRange.endDateExpression, 'up')!,
+        timestampsLastUpdated: Date.now(),
+      });
+    }
+  }, [dateRange.endDateExpression, pagesAfterEnd, setDateRange]);
 
   const state = {
     isInitialized,
@@ -177,9 +184,6 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     visibleMidpointTime: visibleMidpoint ? visibleMidpoint.time : null,
     visibleTimeInterval,
     ...dateRange,
-    startTimestamp,
-    endTimestamp,
-    timestampsLastUpdate,
   };
 
   const callbacks = {
