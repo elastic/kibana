@@ -305,7 +305,7 @@ The navigation is handled using the `navigateToApp` api, meaning that the path w
 
 You can look at the `alerting-example` plugin to see an example of using this API, which is enabled using the `--run-examples` flag when you run `yarn start`.
 
-### registerNavigation
+### registerDefaultNavigation
 The _registerDefaultNavigation_ api allows you to register a handler for any alert type within your solution:
 
 ```
