@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FieldName } from '../../../../../../../../plugins/discover/public';
+import { FieldName } from './field_name/field_name';
 import { getServices, wrapInI18nContext } from '../../../kibana_services';
 
 export function FieldNameDirectiveProvider(reactDirective) {
