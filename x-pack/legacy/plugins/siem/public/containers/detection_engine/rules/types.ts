@@ -33,6 +33,7 @@ export const NewRuleSchema = t.intersection([
     threat: t.array(t.unknown),
     to: t.string,
     updated_by: t.string,
+    note: t.string,
   }),
 ]);
 
@@ -86,6 +87,7 @@ export const RuleSchema = t.intersection([
     status_date: t.string,
     timeline_id: t.string,
     timeline_title: t.string,
+    note: t.string,
     version: t.number,
   }),
 ]);

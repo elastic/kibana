@@ -23,7 +23,7 @@ import { getVisData, GetVisDataOptions } from '../lib/get_vis_data';
 import { visPayloadSchema } from './post_vis_schema';
 import { Framework, ValidationTelemetryServiceSetup } from '../index';
 
-const escapeHatch = schema.object({}, { allowUnknowns: true });
+const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const visDataRoutes = (
   router: IRouter,

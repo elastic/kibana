@@ -4,21 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
-import { Provider } from 'react-redux';
-import { I18nProvider } from '@kbn/i18n/react';
-import { AlertIndex } from './index';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { appStoreFactory } from '../../store';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { fireEvent, act } from '@testing-library/react';
-import { RouteCapture } from '../route_capture';
-import { createMemoryHistory, MemoryHistory } from 'history';
-import { Router } from 'react-router-dom';
+import { MemoryHistory } from 'history';
 import { AppAction } from '../../types';
 import { mockAlertResultList } from '../../store/alerts/mock_alert_result_list';
-import { DepsStartMock, depsStartMock } from '../../mocks';
+import { DepsStartMock } from '../../mocks';
+import { alertPageTestRender } from './test_helpers/render_alert_page';
 
 describe('when on the alerting page', () => {
   let render: () => reactTestingLibrary.RenderResult;
@@ -27,42 +21,8 @@ describe('when on the alerting page', () => {
   let depsStart: DepsStartMock;
 
   beforeEach(async () => {
-    /**
-     * Create a 'history' instance that is only in-memory and causes no side effects to the testing environment.
-     */
-    history = createMemoryHistory<never>();
-    /**
-     * Create a store, with the middleware disabled. We don't want side effects being created by our code in this test.
-     */
-    store = appStoreFactory();
-
-    depsStart = depsStartMock();
-    depsStart.data.ui.SearchBar.mockImplementation(() => <div />);
-
-    /**
-     * Render the test component, use this after setting up anything in `beforeEach`.
-     */
-    render = () => {
-      /**
-       * Provide the store via `Provider`, and i18n APIs via `I18nProvider`.
-       * Use react-router via `Router`, passing our in-memory `history` instance.
-       * Use `RouteCapture` to emit url-change actions when the URL is changed.
-       * Finally, render the `AlertIndex` component which we are testing.
-       */
-      return reactTestingLibrary.render(
-        <Provider store={store}>
-          <KibanaContextProvider services={{ data: depsStart.data }}>
-            <I18nProvider>
-              <Router history={history}>
-                <RouteCapture>
-                  <AlertIndex />
-                </RouteCapture>
-              </Router>
-            </I18nProvider>
-          </KibanaContextProvider>
-        </Provider>
-      );
-    };
+    // Creates the render elements for the tests to use
+    ({ render, history, store, depsStart } = alertPageTestRender);
   });
   it('should show a data grid', async () => {
     await render().findByTestId('alertListGrid');
@@ -80,7 +40,7 @@ describe('when on the alerting page', () => {
         reactTestingLibrary.act(() => {
           const action: AppAction = {
             type: 'serverReturnedAlertsData',
-            payload: mockAlertResultList(),
+            payload: mockAlertResultList({ total: 11 }),
           };
           store.dispatch(action);
         });
@@ -93,16 +53,17 @@ describe('when on the alerting page', () => {
          * There should be a 'row' which is the header, and
          * row which is the alert item.
          */
-        expect(rows).toHaveLength(2);
+        expect(rows).toHaveLength(11);
       });
       describe('when the user has clicked the alert type in the grid', () => {
         let renderResult: reactTestingLibrary.RenderResult;
         beforeEach(async () => {
           renderResult = render();
+          const alertLinks = await renderResult.findAllByTestId('alertTypeCellLink');
           /**
            * This is the cell with the alert type, it has a link.
            */
-          fireEvent.click(await renderResult.findByTestId('alertTypeCellLink'));
+          fireEvent.click(alertLinks[0]);
         });
         it('should show the flyout', async () => {
           await renderResult.findByTestId('alertDetailFlyout');
