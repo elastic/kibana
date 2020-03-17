@@ -36,7 +36,7 @@ let component: any = null;
 const appDependencies = {
   plugins: {
     licensing: {
-      refresh: jest.fn().mockResolvedValue({}),
+      refresh: jest.fn(),
     },
   },
   docLinks: {},
@@ -63,6 +63,7 @@ describe('UploadLicense', () => {
         </Provider>
       </AppContextProvider>
     );
+    appDependencies.plugins.licensing.refresh.mockResolvedValue({});
   });
 
   afterEach(() => {
