@@ -27,7 +27,7 @@ export default function({ getService }: FtrProviderContext) {
   const nextPrevPrefixPageSize = 'page_size=10';
   const nextPrevPrefix = `${nextPrevPrefixQuery}&${nextPrevPrefixDateRange}&${nextPrevPrefixSort}&${nextPrevPrefixOrder}&${nextPrevPrefixPageSize}`;
 
-  describe('Endpoint alert API', () => {
+  describe.only('Endpoint alert API', () => {
     describe('when data is in elasticsearch', () => {
       before(() => esArchiver.load('endpoint/alerts/api_feature'));
       after(() => esArchiver.unload('endpoint/alerts/api_feature'));
@@ -231,11 +231,11 @@ export default function({ getService }: FtrProviderContext) {
         const documentID = 'xDUYMHABAJk0XnHd8rrd';
         const nextDocumentID = 'zbNm0HABdD75WLjLYgcB';
         const { body } = await supertest
-          .get('/api/endpoint/alerts/${documentID}')
+          .get(`/api/endpoint/alerts/${documentID}`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
-        expect(body.id).to.eql({documentID});
-        expect(body.next).to.eql('/api/endpoint/alerts/${nextDocumentID}');
+        expect(body.id).to.eql(documentID);
+        expect(body.next).to.eql(`/api/endpoint/alerts/${nextDocumentID}`);
         expect(body.prev).to.eql(null); // first alert, no more before this
       });
 
