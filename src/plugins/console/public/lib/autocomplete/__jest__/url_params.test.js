@@ -16,10 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import '../../../application/models/sense_editor/sense_editor.test.mocks';
-import 'brace';
-import 'brace/mode/javascript';
-import 'brace/mode/json';
 const _ = require('lodash');
 import { UrlParams } from '../../autocomplete/url_params';
 import { populateContext } from '../../autocomplete/engine';
