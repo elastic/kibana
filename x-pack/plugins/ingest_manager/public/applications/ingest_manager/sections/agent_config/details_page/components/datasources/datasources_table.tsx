@@ -21,6 +21,7 @@ import { useCapabilities } from '../../../../../hooks';
 import { useAgentConfigLink } from '../../hooks/use_details_uri';
 import { DatasourceDeleteProvider } from '../../../components/datasource_delete_provider';
 import { useConfigRefresh } from '../../hooks/use_config';
+import { PackageIcon } from '../../../../../components/package_icon';
 
 interface InMemoryDatasource extends Datasource {
   streams: { total: number; enabled: number };
@@ -138,6 +139,20 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
             defaultMessage: 'Package',
           }
         ),
+        render(packageTitle: string, datasource: InMemoryDatasource) {
+          return (
+            <>
+              {datasource.package && (
+                <PackageIcon
+                  packageName={datasource.package.name}
+                  version={datasource.package.version}
+                  size="m"
+                />
+              )}
+              {packageTitle}
+            </>
+          );
+        },
       },
       {
         field: 'namespace',
