@@ -10,7 +10,7 @@ import { getInternalRepository } from './internal_repository';
 
 export const TELEMETRY_DOC_ID = 'ml-telemetry';
 
-export interface Telemetry {
+interface Telemetry {
   file_data_visualizer: {
     index_creation_count: number;
   };
@@ -57,7 +57,7 @@ export async function updateTelemetry(internalRepo?: any) {
   await internalRepository.update(TELEMETRY_DOC_ID, TELEMETRY_DOC_ID, incrementCounts(telemetry));
 }
 
-export function incrementCounts(telemetry: Telemetry) {
+function incrementCounts(telemetry: Telemetry) {
   return {
     file_data_visualizer: {
       index_creation_count: telemetry.file_data_visualizer.index_creation_count + 1,
