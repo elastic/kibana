@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'kibana/server';
+import { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'src/core/server';
 import uuid from 'uuid';
 import {
   Agent,

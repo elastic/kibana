@@ -113,7 +113,17 @@ describe('DELETE remote clusters', () => {
               body: {
                 persistent: {
                   cluster: {
-                    remote: { test: { seeds: null, skip_unavailable: null } },
+                    remote: {
+                      test: {
+                        seeds: null,
+                        skip_unavailable: null,
+                        mode: null,
+                        proxy_address: null,
+                        proxy_socket_connections: null,
+                        server_name: null,
+                        node_connections: null,
+                      },
+                    },
                   },
                 },
               },
@@ -211,7 +221,17 @@ describe('DELETE remote clusters', () => {
                 body: {
                   persistent: {
                     cluster: {
-                      remote: { test: { seeds: null, skip_unavailable: null } },
+                      remote: {
+                        test: {
+                          seeds: null,
+                          skip_unavailable: null,
+                          mode: null,
+                          node_connections: null,
+                          proxy_address: null,
+                          proxy_socket_connections: null,
+                          server_name: null,
+                        },
+                      },
                     },
                   },
                 },
