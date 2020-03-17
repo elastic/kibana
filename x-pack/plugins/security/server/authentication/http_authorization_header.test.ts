@@ -6,16 +6,16 @@
 
 import { httpServerMock } from '../../../../../src/core/server/http/http_server.mocks';
 
-import { getHTTPAuthenticationScheme } from './get_http_authentication_scheme';
+import { getRequestsHTTPAuthenticationScheme } from './http_authorization_header';
 
 describe('getHTTPAuthenticationScheme', () => {
   it('returns `null` if request does not have authorization header', () => {
-    expect(getHTTPAuthenticationScheme(httpServerMock.createKibanaRequest())).toBeNull();
+    expect(getRequestsHTTPAuthenticationScheme(httpServerMock.createKibanaRequest())).toBeNull();
   });
 
   it('returns `null` if authorization header value isn not a string', () => {
     expect(
-      getHTTPAuthenticationScheme(
+      getRequestsHTTPAuthenticationScheme(
         httpServerMock.createKibanaRequest({
           headers: { authorization: ['Basic xxx', 'Bearer xxx'] as any },
         })
@@ -25,7 +25,7 @@ describe('getHTTPAuthenticationScheme', () => {
 
   it('returns `null` if authorization header value is an empty string', () => {
     expect(
-      getHTTPAuthenticationScheme(
+      getRequestsHTTPAuthenticationScheme(
         httpServerMock.createKibanaRequest({ headers: { authorization: '' } })
       )
     ).toBeNull();
@@ -49,7 +49,7 @@ describe('getHTTPAuthenticationScheme', () => {
 
     for (const [authorization, scheme] of headerValueAndSchemeMap) {
       expect(
-        getHTTPAuthenticationScheme(
+        getRequestsHTTPAuthenticationScheme(
           httpServerMock.createKibanaRequest({ headers: { authorization } })
         )
       ).toBe(scheme);

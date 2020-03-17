@@ -6,6 +6,10 @@
 
 import { IClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
 import { SecurityLicense } from '../../common/licensing';
+import {
+  getHTTPAuthorizationHeader,
+  getHTTPAuthenticationScheme,
+} from './http_authorization_header';
 
 /**
  * Represents the options to create an APIKey class instance that will be
@@ -24,6 +28,13 @@ export interface CreateAPIKeyParams {
   name: string;
   role_descriptors: Record<string, any>;
   expiration?: string;
+}
+
+interface GrantAPIKeyParams {
+  grant_type: 'password' | 'access_token';
+  username?: string;
+  password?: string;
+  access_token?: string;
 }
 
 /**
@@ -52,6 +63,21 @@ export interface CreateAPIKeyResult {
    * Optional expiration in milliseconds for this API key
    */
   expiration?: number;
+  /**
+   * Generated API key
+   */
+  api_key: string;
+}
+
+export interface GrantAPIKeyResult {
+  /**
+   * Unique id for this API key
+   */
+  id: string;
+  /**
+   * Name for this API key
+   */
+  name: string;
   /**
    * Generated API key
    */
@@ -132,6 +158,40 @@ export class APIKeys {
   }
 
   /**
+   * Tries to grant an API key for the current user.
+   * @param request Request instance.
+   */
+  async grant(request: KibanaRequest): Promise<GrantAPIKeyResult | null> {
+    if (!this.license.isEnabled()) {
+      return null;
+    }
+
+    this.logger.debug('Trying to grant an API key');
+    const authorizationHeaderValue = getHTTPAuthorizationHeader(request);
+    if (authorizationHeaderValue == null) {
+      throw new Error(
+        `Unable to grant an API Key, request does not contain an authorization header`
+      );
+    }
+    const scheme = getHTTPAuthenticationScheme(authorizationHeaderValue);
+    const params = this.getGrantParams(scheme, authorizationHeaderValue);
+
+    // User needs `manage_api_key` privilege to use this API
+    let result: GrantAPIKeyResult;
+    try {
+      result = (await this.clusterClient
+        .asScoped(request)
+        .callAsCurrentUser('shield.grantAPIKey', { body: params })) as GrantAPIKeyResult;
+      this.logger.debug('API key was granted successfully');
+    } catch (e) {
+      this.logger.error(`Failed to grant API key: ${e.message}`);
+      throw e;
+    }
+
+    return result;
+  }
+
+  /**
    * Tries to invalidate an API key.
    * @param request Request instance.
    * @param params The params to invalidate an API key.
@@ -163,5 +223,30 @@ export class APIKeys {
     }
 
     return result;
+  }
+
+  private getGrantParams(scheme: string, authorizationHeaderValue: string): GrantAPIKeyParams {
+    if (scheme.toLowerCase() === 'bearer') {
+      return {
+        grant_type: 'access_token',
+        access_token: authorizationHeaderValue.substring(scheme.length + 1),
+      };
+    }
+
+    if (scheme.toLowerCase() === 'basic') {
+      const [username, password] = Buffer.from(
+        authorizationHeaderValue.substring(scheme.length + 1),
+        'base64'
+      )
+        .toString()
+        .split(':');
+      return {
+        grant_type: 'password',
+        username,
+        password,
+      };
+    }
+
+    throw new Error(`Unsupported scheme ${scheme} for granting API Key`);
   }
 }

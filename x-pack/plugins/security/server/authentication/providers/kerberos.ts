@@ -12,7 +12,7 @@ import {
 } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { getHTTPAuthenticationScheme } from '../get_http_authentication_scheme';
+import { getRequestsHTTPAuthenticationScheme } from '../http_authorization_header';
 import { Tokens, TokenPair } from '../tokens';
 import { BaseAuthenticationProvider } from './base';
 
@@ -44,7 +44,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
     this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
-    const authenticationScheme = getHTTPAuthenticationScheme(request);
+    const authenticationScheme = getRequestsHTTPAuthenticationScheme(request);
     if (authenticationScheme && authenticationScheme !== 'negotiate') {
       this.logger.debug(`Unsupported authentication scheme: ${authenticationScheme}`);
       return AuthenticationResult.notHandled();

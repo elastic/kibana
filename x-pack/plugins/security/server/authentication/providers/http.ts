@@ -7,7 +7,7 @@
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { getHTTPAuthenticationScheme } from '../get_http_authentication_scheme';
+import { getRequestsHTTPAuthenticationScheme } from '../http_authorization_header';
 import { AuthenticationProviderOptions, BaseAuthenticationProvider } from './base';
 
 interface HTTPAuthenticationProviderOptions {
@@ -56,7 +56,7 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
   public async authenticate(request: KibanaRequest) {
     this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
-    const authenticationScheme = getHTTPAuthenticationScheme(request);
+    const authenticationScheme = getRequestsHTTPAuthenticationScheme(request);
     if (authenticationScheme == null) {
       this.logger.debug('Authorization header is not presented.');
       return AuthenticationResult.notHandled();

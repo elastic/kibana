@@ -169,6 +169,7 @@ export async function setupAuthentication({
     getCurrentUser,
     createAPIKey: (request: KibanaRequest, params: CreateAPIKeyParams) =>
       apiKeys.create(request, params),
+    grantAPIKey: (request: KibanaRequest) => apiKeys.grant(request),
     invalidateAPIKey: (request: KibanaRequest, params: InvalidateAPIKeyParams) =>
       apiKeys.invalidate(request, params),
     isAuthenticated: (request: KibanaRequest) => http.auth.isAuthenticated(request),

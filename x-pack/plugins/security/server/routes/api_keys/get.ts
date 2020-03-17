@@ -10,7 +10,7 @@ import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { RouteDefinitionParams } from '..';
 
-export function defineGetApiKeysRoutes({ router, clusterClient }: RouteDefinitionParams) {
+export function defineGetApiKeysRoutes({ authc, router, clusterClient }: RouteDefinitionParams) {
   router.get(
     {
       path: '/internal/security/api_key',
@@ -35,6 +35,21 @@ export function defineGetApiKeysRoutes({ router, clusterClient }: RouteDefinitio
         const validKeys = apiKeys.filter(({ invalidated }) => !invalidated);
 
         return response.ok({ body: { apiKeys: validKeys } });
+      } catch (error) {
+        return response.customError(wrapIntoCustomErrorResponse(error));
+      }
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/security/api_key/grant',
+      validate: false,
+    },
+    createLicensedRouteHandler(async (context, request, response) => {
+      try {
+        const result = await authc.grantAPIKey(request);
+        return response.ok({ body: { result } });
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));
       }
