@@ -41,9 +41,10 @@ import {
 } from '@elastic/charts';
 
 import { i18n } from '@kbn/i18n';
+import { IUiSettingsClient } from 'kibana/public';
 import { EuiChartThemeType } from '@elastic/eui/dist/eui_charts_theme';
 import { Subscription } from 'rxjs';
-import { getServices, timezoneProvider } from '../../../kibana_services';
+import { getServices } from '../../../kibana_services';
 
 export interface DiscoverHistogramProps {
   chartData: any;
@@ -82,6 +83,16 @@ function getIntervalInMs(
       return 1 * esValue;
     default:
       return findIntervalFromDuration(value, esValue, esUnit, timeZone);
+  }
+}
+
+function getTimezone(uiSettings: IUiSettingsClient) {
+  if (uiSettings.isDefault('dateFormat:tz')) {
+    const detectedTimezone = moment.tz.guess();
+    if (detectedTimezone) return detectedTimezone;
+    else return moment().format('Z');
+  } else {
+    return uiSettings.get('dateFormat:tz', 'Browser');
   }
 }
 
@@ -192,7 +203,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
 
   public render() {
     const uiSettings = getServices().uiSettings;
-    const timeZone = timezoneProvider(uiSettings)();
+    const timeZone = getTimezone(uiSettings);
     const { chartData } = this.props;
     const { chartsTheme } = this.state;
 
