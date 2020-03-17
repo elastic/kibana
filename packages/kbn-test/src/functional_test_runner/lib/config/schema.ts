@@ -255,5 +255,20 @@ export const schema = Joi.object()
         fixedHeaderHeight: Joi.number().default(50),
       })
       .default(),
+
+    // settings for the security service if there is no defaultRole defined, then default to superuser role.
+    security: Joi.object()
+      .keys({
+        roles: Joi.object().default(),
+        defaultRoles: Joi.array()
+          .items(Joi.string())
+          .when('$primary', {
+            is: true,
+            then: Joi.array().min(1),
+          })
+          .default(['superuser']),
+        disableTestUser: Joi.boolean(),
+      })
+      .default(),
   })
   .default();

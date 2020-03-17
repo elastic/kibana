@@ -6,24 +6,21 @@
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
-
-import { npSetup, npStart } from 'ui/new_platform';
-import {
-  ActionByType,
-  IncompatibleActionError,
-} from '../../../../../../src/plugins/ui_actions/public';
+import { CoreSetup } from 'src/core/public';
+import { Action, IncompatibleActionError } from '../../../../../src/plugins/ui_actions/public';
+import { LicensingPluginSetup } from '../../../licensing/public';
+import { checkLicense } from '../lib/license_check';
 
 import {
   ViewMode,
   IEmbeddable,
-  CONTEXT_MENU_TRIGGER,
-} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { SEARCH_EMBEDDABLE_TYPE } from '../../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/embeddable/constants';
-import { ISearchEmbeddable } from '../../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/embeddable/types';
+} from '../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 
-import { API_GENERATE_IMMEDIATE, CSV_REPORTING_ACTION } from '../../common/constants';
+// @TODO: These import paths will need to be updated once discovery moves to non-legacy dir
+import { SEARCH_EMBEDDABLE_TYPE } from '../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/embeddable/constants';
+import { ISearchEmbeddable } from '../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/embeddable/types';
 
-const { core } = npStart;
+import { API_GENERATE_IMMEDIATE, CSV_REPORTING_ACTION } from '../../constants';
 
 function isSavedSearchEmbeddable(
   embeddable: IEmbeddable | ISearchEmbeddable
@@ -31,23 +28,26 @@ function isSavedSearchEmbeddable(
   return embeddable.type === SEARCH_EMBEDDABLE_TYPE;
 }
 
-export interface CSVActionContext {
+interface ActionContext {
   embeddable: ISearchEmbeddable;
 }
 
-declare module '../../../../../../src/plugins/ui_actions/public' {
-  export interface ActionContextMapping {
-    [CSV_REPORTING_ACTION]: CSVActionContext;
-  }
-}
-
-class GetCsvReportPanelAction implements ActionByType<typeof CSV_REPORTING_ACTION> {
+export class GetCsvReportPanelAction implements Action<ActionContext> {
   private isDownloading: boolean;
-  public readonly type = CSV_REPORTING_ACTION;
+  public readonly type = '';
   public readonly id = CSV_REPORTING_ACTION;
+  private canDownloadCSV: boolean = false;
+  private core: CoreSetup;
 
-  constructor() {
+  constructor(core: CoreSetup, license$: LicensingPluginSetup['license$']) {
     this.isDownloading = false;
+    this.core = core;
+
+    license$.subscribe(license => {
+      const results = license.check('reporting', 'basic');
+      const { showLinks } = checkLicense(results);
+      this.canDownloadCSV = showLinks;
+    });
   }
 
   public getIconType() {
@@ -73,13 +73,17 @@ class GetCsvReportPanelAction implements ActionByType<typeof CSV_REPORTING_ACTIO
     return searchEmbeddable.getSavedSearch().searchSource.getSearchRequestBody();
   }
 
-  public isCompatible = async (context: CSVActionContext) => {
+  public isCompatible = async (context: ActionContext) => {
+    if (!this.canDownloadCSV) {
+      return false;
+    }
+
     const { embeddable } = context;
 
     return embeddable.getInput().viewMode !== ViewMode.EDIT && embeddable.type === 'search';
   };
 
-  public execute = async (context: CSVActionContext) => {
+  public execute = async (context: ActionContext) => {
     const { embeddable } = context;
 
     if (!isSavedSearchEmbeddable(embeddable)) {
@@ -97,7 +101,7 @@ class GetCsvReportPanelAction implements ActionByType<typeof CSV_REPORTING_ACTIO
     const searchEmbeddable = embeddable;
     const searchRequestBody = await this.getSearchRequestBody({ searchEmbeddable });
     const state = _.pick(searchRequestBody, ['sort', 'docvalue_fields', 'query']);
-    const kibanaTimezone = core.uiSettings.get('dateFormat:tz');
+    const kibanaTimezone = this.core.uiSettings.get('dateFormat:tz');
 
     const id = `search:${embeddable.getSavedSearch().id}`;
     const filename = embeddable.getTitle();
@@ -122,7 +126,7 @@ class GetCsvReportPanelAction implements ActionByType<typeof CSV_REPORTING_ACTIO
 
     this.isDownloading = true;
 
-    core.notifications.toasts.addSuccess({
+    this.core.notifications.toasts.addSuccess({
       title: i18n.translate('xpack.reporting.dashboard.csvDownloadStartedTitle', {
         defaultMessage: `CSV Download Started`,
       }),
@@ -132,7 +136,7 @@ class GetCsvReportPanelAction implements ActionByType<typeof CSV_REPORTING_ACTIO
       'data-test-subj': 'csvDownloadStarted',
     });
 
-    await core.http
+    await this.core.http
       .post(`${API_GENERATE_IMMEDIATE}/${id}`, { body })
       .then((rawResponse: string) => {
         this.isDownloading = false;
@@ -160,7 +164,7 @@ class GetCsvReportPanelAction implements ActionByType<typeof CSV_REPORTING_ACTIO
 
   private onGenerationFail(error: Error) {
     this.isDownloading = false;
-    core.notifications.toasts.addDanger({
+    this.core.notifications.toasts.addDanger({
       title: i18n.translate('xpack.reporting.dashboard.failedCsvDownloadTitle', {
         defaultMessage: `CSV download failed`,
       }),
@@ -171,8 +175,3 @@ class GetCsvReportPanelAction implements ActionByType<typeof CSV_REPORTING_ACTIO
     });
   }
 }
-
-const action = new GetCsvReportPanelAction();
-
-npSetup.plugins.uiActions.registerAction(action);
-npSetup.plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, action);
