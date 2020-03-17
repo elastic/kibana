@@ -272,7 +272,7 @@ server.newPlatform.setup.plugins.alerting.registerType({
 ## Alert Navigation
 When registering an Alert Type, you'll likely want to provide a way of viewing alerts of that type within your own plugin, or perhaps you want to provide a view for all alerts created from within your solution within your own UI.
 
-In order for the Alerting framework to know that your plugin has its own interna; view for displaying an alert, you must resigter a navigation handler within the framework.
+In order for the Alerting framework to know that your plugin has its own internal view for displaying an alert, you must resigter a navigation handler within the framework.
 
 A navigation handler is nothing more than a function that receives an Alert and its corresponding AlertType, and is expected to then return the path *within your plugin* which knows how to display this alert.
 
