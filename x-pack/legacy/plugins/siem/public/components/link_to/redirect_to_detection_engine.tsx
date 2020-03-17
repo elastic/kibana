@@ -8,6 +8,7 @@ import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { DetectionEngineTab } from '../../pages/detection_engine/types';
+import { appendSearch } from './helpers';
 import { RedirectWrapper } from './redirect_wrapper';
 
 export type DetectionEngineComponentProps = RouteComponentProps<{
@@ -64,9 +65,9 @@ export const RedirectToEditRulePage = ({
 const baseDetectionEngineUrl = `#/link-to/${DETECTION_ENGINE_PAGE_NAME}`;
 
 export const getDetectionEngineUrl = (search?: string) =>
-  `${baseDetectionEngineUrl}${search != null ? `?${search}` : ''}`;
+  `${baseDetectionEngineUrl}${appendSearch(search)}`;
 export const getDetectionEngineAlertUrl = (search?: string) =>
-  `${baseDetectionEngineUrl}/${DetectionEngineTab.alerts}${search != null ? `?${search}` : ''}`;
+  `${baseDetectionEngineUrl}/${DetectionEngineTab.alerts}${appendSearch(search)}`;
 export const getDetectionEngineTabUrl = (tabPath: string) => `${baseDetectionEngineUrl}/${tabPath}`;
 export const getRulesUrl = () => `${baseDetectionEngineUrl}/rules`;
 export const getCreateRuleUrl = () => `${baseDetectionEngineUrl}/rules/create`;

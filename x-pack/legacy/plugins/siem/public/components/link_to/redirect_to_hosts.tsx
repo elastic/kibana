@@ -7,9 +7,11 @@
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { RedirectWrapper } from './redirect_wrapper';
 import { HostsTableType } from '../../store/hosts/model';
 import { SiemPageName } from '../../pages/home/types';
+
+import { appendSearch } from './helpers';
+import { RedirectWrapper } from './redirect_wrapper';
 
 export type HostComponentProps = RouteComponentProps<{
   detailName: string;
@@ -44,11 +46,10 @@ export const RedirectToHostDetailsPage = ({
 
 const baseHostsUrl = `#/link-to/${SiemPageName.hosts}`;
 
-export const getHostsUrl = (search?: string) =>
-  `${baseHostsUrl}${search != null ? `?${search}` : ''}`;
+export const getHostsUrl = (search?: string) => `${baseHostsUrl}${appendSearch(search)}`;
 
 export const getTabsOnHostsUrl = (tabName: HostsTableType, search?: string) =>
-  `${baseHostsUrl}/${tabName}${search != null ? `?${search}` : ''}`;
+  `${baseHostsUrl}/${tabName}${appendSearch(search)}`;
 
 export const getHostDetailsUrl = (detailName: string) => `${baseHostsUrl}/${detailName}`;
 
