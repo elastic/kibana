@@ -96,8 +96,6 @@ kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
                     credentialsId: 'kibana-ci-gcs-plugin',
                     bucket: "gs://kibana-ci-functional-metrics/${kibanaPipeline.getTargetBranch()}",
                     pattern: filename,
-                    sharedPublicly: true,
-                    showInline: true,
                   )
 
                   def status = buildUtils.getBuildStatus()
