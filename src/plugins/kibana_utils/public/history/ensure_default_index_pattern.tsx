@@ -77,7 +77,7 @@ export async function ensureDefaultIndexPattern(
         <EuiCallOut
           color="warning"
           iconType="iInCircle"
-          title={i18n.translate('kibana_legacy.indexPattern.bannerLabel', {
+          title={i18n.translate('kibana_utils.indexPattern.bannerLabel', {
             defaultMessage:
               "In order to visualize and explore data in Kibana, you'll need to create an index pattern to retrieve data from Elasticsearch.",
           })}
