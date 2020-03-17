@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { uniq, isEqual } from 'lodash';
+import { uniq } from 'lodash';
+import { stringify } from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../../expression_functions';
 import { KibanaContext } from '../../expression_types';
@@ -36,14 +37,14 @@ export type ExpressionFunctionKibanaContext = ExpressionFunctionDefinition<
   Promise<KibanaContext>
 >;
 
-export const mergeInput = <T = any>(input: T | T[] = [], argsValue: string): T[] => {
-  const parsedArgValue: T | T[] = JSON.parse(argsValue || '[]');
+export const mergeInput = <T = any>(object: T | T[] = [], other: string | T | T[]): T[] => {
+  const parsed: T | T[] = typeof other === 'string' ? JSON.parse(other || '[]') : other;
   return uniq<T>(
     [
-      ...(Array.isArray(parsedArgValue) ? parsedArgValue : [parsedArgValue]),
-      ...(Array.isArray(input) ? input : [input]),
+      ...(Array.isArray(parsed) ? parsed : [parsed]),
+      ...(Array.isArray(object) ? object : [object]),
     ],
-    isEqual
+    (n: any) => stringify(n)
   );
 };
 
@@ -103,8 +104,8 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
       const search = obj.attributes.kibanaSavedObjectMeta as { searchSourceJSON: string };
       const data = JSON.parse(search.searchSourceJSON) as { query: Query[]; filter: Filter[] };
 
-      queries = queries.concat(data.query);
-      filters = filters.concat(data.filter);
+      queries = mergeInput(queries, data.query);
+      filters = mergeInput(filters, data.filter);
     }
 
     return {
