@@ -5,14 +5,15 @@
  */
 
 import React, { Fragment, useMemo, useRef, useState } from 'react';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiOverlayMask, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useCore, sendRequest, sendDeleteDatasource } from '../../../hooks';
 import { AGENT_API_ROUTES } from '../../../../../../common/constants';
+import { AgentConfig } from '../../../../../../common/types/models';
 
 interface Props {
-  agentConfigId: string;
+  agentConfig: AgentConfig;
   children: (deleteDatasourcePrompt: DeleteAgentConfigDatasourcePrompt) => React.ReactElement;
 }
 
@@ -24,7 +25,7 @@ export type DeleteAgentConfigDatasourcePrompt = (
 type OnSuccessCallback = (datasourcesDeleted: string[]) => void;
 
 export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
-  agentConfigId,
+  agentConfig,
   children,
 }) => {
   const { notifications } = useCore();
@@ -47,13 +48,13 @@ export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
         query: {
           page: 1,
           perPage: 1,
-          kuery: `agents.config_id : ${agentConfigId}`,
+          kuery: `agents.config_id : ${agentConfig.id}`,
         },
       });
       setAgentsCount(data?.total || 0);
       setIsLoadingAgentsCount(false);
     },
-    [agentConfigId, isLoadingAgentsCount]
+    [agentConfig.id, isLoadingAgentsCount]
   );
 
   const deleteDatasourcesPrompt = useMemo(
@@ -154,7 +155,7 @@ export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
           title={
             <FormattedMessage
               id="xpack.ingestManager.deleteDatasource.confirmModal.deleteMultipleTitle"
-              defaultMessage="Delete {count, plural, one {this data source} other {# data sources}}?"
+              defaultMessage="Delete {count, plural, one {data source} other {# data sources}}?"
               values={{ count: datasources.length }}
             />
           }
@@ -172,15 +173,6 @@ export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
                 id="xpack.ingestManager.deleteDatasource.confirmModal.loadingButtonLabel"
                 defaultMessage="Loading…"
               />
-            ) : agentsCount ? ( // FIXME: revise message
-              <FormattedMessage
-                id="xpack.ingestManager.deleteDatasource.confirmModal.confirmAndReassignButtonLabel"
-                defaultMessage="Delete {agentConfigsCount, plural, one {data source} other {data sources}} and unenroll {agentsCount, plural, one {agent} other {agents}}"
-                values={{
-                  agentsCount,
-                  agentConfigsCount: datasources.length,
-                }}
-              />
             ) : (
               <FormattedMessage
                 id="xpack.ingestManager.deleteDatasource.confirmModal.confirmButtonLabel"
@@ -197,25 +189,35 @@ export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
           {isLoadingAgentsCount ? (
             <FormattedMessage
               id="xpack.ingestManager.deleteDatasource.confirmModal.loadingAgentsCountMessage"
-              defaultMessage="Checking amount of affected agents…"
+              defaultMessage="Checking affected agents…"
             />
-          ) : agentsCount ? ( // FIXME: revise message
+          ) : agentsCount ? (
+            <>
+              <EuiCallOut
+                color="danger"
+                title={
+                  <FormattedMessage
+                    id="xpack.ingestManager.deleteDatasource.confirmModal.affectedAgentsTitle"
+                    defaultMessage="This action will affect {agentsCount} {agentsCount, plural, one {agent} other {agents}}."
+                    values={{ agentsCount }}
+                  />
+                }
+              >
+                <FormattedMessage
+                  id="xpack.ingestManager.deleteDatasource.confirmModal.affectedAgentsMessage"
+                  defaultMessage="Fleet has detected that {agentConfigName} is already in use by some of your agents."
+                  values={{
+                    agentConfigName: <strong>{agentConfig.name}</strong>,
+                  }}
+                />
+              </EuiCallOut>
+              <EuiSpacer size="l" />
+            </>
+          ) : null}
+          {!isLoadingAgentsCount && (
             <FormattedMessage
-              id="xpack.ingestManager.deleteDatasource.confirmModal.affectedAgentsMessage"
-              defaultMessage="{agentsCount, plural, one {# agent is} other {# agents are}} assigned {agentConfigsCount, plural, one {to this agent config} other {across these agentConfigs}}. {agentsCount, plural, one {This agent} other {These agents}} will be unenrolled."
-              values={{
-                agentsCount,
-                agentConfigsCount: datasources.length,
-              }}
-            />
-          ) : (
-            // FIXME: revise message
-            <FormattedMessage
-              id="xpack.ingestManager.deleteDatasource.confirmModal.noAffectedAgentsMessage"
-              defaultMessage="There are no agents assigned to {agentConfigsCount, plural, one {this agent config} other {these agentConfigs}}."
-              values={{
-                agentConfigsCount: datasources.length,
-              }}
+              id="xpack.ingestManager.deleteDatasource.confirmModal.generalMessage"
+              defaultMessage="This action can not be undone. Are you sure you wish to continue?"
             />
           )}
         </EuiConfirmModal>

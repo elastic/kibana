@@ -201,7 +201,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
                       defaultMessage="Copy data source"
                     />
                   </EuiContextMenuItem>,
-                  <DatasourceDeleteProvider agentConfigId={datasource.config_id}>
+                  <DatasourceDeleteProvider agentConfig={config}>
                     {deleteDatasourcePrompt => {
                       return (
                         <DangerEuiContextMenuItem
@@ -226,7 +226,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
         ],
       },
     ],
-    [hasWriteCapabilities, refreshConfig]
+    [config, hasWriteCapabilities, refreshConfig]
   );
 
   return (
