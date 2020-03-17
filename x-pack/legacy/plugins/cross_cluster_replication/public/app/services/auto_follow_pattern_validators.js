@@ -12,7 +12,7 @@ import {
   indexNameBeginsWithPeriod,
   findIllegalCharactersInIndexName,
   indexNameContainsSpaces,
-} from '../../../../../../../src/plugins/es_ui_shared/indices';
+} from '../../../../../../../src/plugins/es_ui_shared/public';
 import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 
 export const validateName = (name = '') => {

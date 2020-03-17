@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../../src/plugins/es_ui_shared/indices';
+import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../../src/plugins/es_ui_shared/public';
 
 const isEmpty = value => {
   return !value || !value.trim().length;

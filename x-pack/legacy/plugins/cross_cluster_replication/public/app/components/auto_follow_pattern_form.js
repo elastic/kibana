@@ -29,7 +29,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../../src/plugins/es_ui_shared/indices';
+import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../../src/plugins/es_ui_shared/public';
 import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 
 import routing from '../services/routing';

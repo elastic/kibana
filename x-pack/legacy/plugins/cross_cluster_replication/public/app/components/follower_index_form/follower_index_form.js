@@ -29,7 +29,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../../../src/plugins/es_ui_shared/indices';
+import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../../../src/plugins/es_ui_shared/public';
 import { indexNameValidator, leaderIndexValidator } from '../../services/input_validation';
 import routing from '../../services/routing';
 import { loadIndices } from '../../services/api';
