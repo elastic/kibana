@@ -88,7 +88,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await esArchiver.load('endpoint/metadata/api_feature');
     });
 
-    describe.skip('has a url with a host id', () => {
+    describe('has a url with a host id', () => {
       before(async () => {
         await pageObjects.common.navigateToUrlWithBrowserHistory(
           'endpoint',

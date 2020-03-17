@@ -105,7 +105,7 @@ export class EndpointDocGenerator {
   }
 
   // This function will create new values for all the host fields, so documents from a different host can be created
-  // This provides a convenient way to make documents from multiple endpoints that are all tied to a single seed value
+  // This provides a convenient way to make documents from multiple hosts that are all tied to a single seed value
   public randomizeHostData() {
     this.commonInfo = this.createHostData();
   }
