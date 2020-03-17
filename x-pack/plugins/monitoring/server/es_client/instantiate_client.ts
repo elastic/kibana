@@ -4,14 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ElasticsearchConfig,
-  Logger,
-  ElasticsearchClientConfig,
-  ICustomClusterClient,
-} from 'kibana/server';
+import { Logger, ElasticsearchClientConfig, ICustomClusterClient } from 'kibana/server';
 // @ts-ignore
 import { monitoringBulk } from '../kibana_monitoring/lib/monitoring_bulk';
+import { MonitoringElasticsearchConfig } from '../types';
 
 /* Provide a dedicated Elasticsearch client for Monitoring
  * The connection options can be customized for the Monitoring application
@@ -20,7 +16,7 @@ import { monitoringBulk } from '../kibana_monitoring/lib/monitoring_bulk';
  */
 
 export function instantiateClient(
-  elasticsearchConfig: ElasticsearchConfig,
+  elasticsearchConfig: any,
   log: Logger,
   createClient: (
     type: string,
@@ -39,6 +35,6 @@ export function instantiateClient(
   return cluster;
 }
 
-export function hasMonitoringCluster(config: ElasticsearchConfig) {
+export function hasMonitoringCluster(config: MonitoringElasticsearchConfig) {
   return Boolean(config.hosts && config.hosts[0]);
 }

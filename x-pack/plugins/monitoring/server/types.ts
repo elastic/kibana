@@ -18,4 +18,6 @@ export interface MonitoringLicenseService {
   stop: () => void;
 }
 
-export type ElasticsearchConfigType = TypeOf<typeof config.elasticsearch.schema>;
+export interface MonitoringElasticsearchConfig {
+  hosts: string[];
+}

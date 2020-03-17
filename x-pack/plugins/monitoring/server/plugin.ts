@@ -24,7 +24,6 @@ import {
   KibanaResponseFactory,
   CoreSetup,
   ICustomClusterClient,
-  ElasticsearchConfig,
   UiSettingsServiceStart,
   CoreStart,
   IRouter,
@@ -43,7 +42,7 @@ import { registerMonitoringCollection } from './telemetry_collection';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { LicenseService } from './license_service';
-import { MonitoringLicenseService, ElasticsearchConfigType } from './types';
+import { MonitoringLicenseService } from './types';
 import {
   PluginStartContract as AlertingPluginStartContract,
   PluginSetupContract as AlertingPluginSetupContract,
@@ -132,11 +131,8 @@ export class Plugin {
 
     // Monitoring creates and maintains a connection to a potentially
     // separate ES cluster - create this first
-    const elasticsearchConfig = new ElasticsearchConfig(
-      config.ui.elasticsearch as ElasticsearchConfigType
-    );
     const cluster = (this.cluster = instantiateClient(
-      elasticsearchConfig,
+      config.ui.elasticsearch,
       this.log,
       core.elasticsearch.createClient
     ));
