@@ -122,10 +122,10 @@ export class DynamicColorProperty extends DynamicStyleProperty {
         return [...accumulatedStops, nextStop.stop, nextStop.color];
       }, []);
       const firstStopValue = colorStops[0];
-      const lessThenFirstStopValue = firstStopValue - 1;
+      const lessThanFirstStopValue = firstStopValue - 1;
       return [
         'step',
-        ['coalesce', ['feature-state', targetName], lessThenFirstStopValue],
+        ['coalesce', ['feature-state', targetName], lessThanFirstStopValue],
         RGBA_0000, // MB will assign the base value to any features that is below the first stop value
         ...colorStops,
       ];
@@ -144,7 +144,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
         return null;
       }
 
-      const lessThenFirstStopValue = rangeFieldMeta.min - 1;
+      const lessThanFirstStopValue = rangeFieldMeta.min - 1;
       return [
         'interpolate',
         ['linear'],
@@ -152,10 +152,10 @@ export class DynamicColorProperty extends DynamicStyleProperty {
           minValue: rangeFieldMeta.min,
           maxValue: rangeFieldMeta.max,
           lookupFunction: 'feature-state',
-          fallback: lessThenFirstStopValue,
+          fallback: lessThanFirstStopValue,
           fieldName: targetName,
         }),
-        lessThenFirstStopValue,
+        lessThanFirstStopValue,
         RGBA_0000,
         ...colorStops,
       ];

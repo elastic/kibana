@@ -14,6 +14,9 @@ import { getOrdinalColorRampStops } from '../color_utils';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 
+const MIN_RANGE = 0;
+const MAX_RANGE = 1;
+
 export class HeatmapStyle extends AbstractStyle {
   static type = LAYER_STYLE_TYPE.HEATMAP;
 
@@ -80,7 +83,7 @@ export class HeatmapStyle extends AbstractStyle {
 
     const { colorRampName } = this._descriptor;
     if (colorRampName && colorRampName !== DEFAULT_HEATMAP_COLOR_RAMP_NAME) {
-      const colorStops = getOrdinalColorRampStops(colorRampName, 0, 1);
+      const colorStops = getOrdinalColorRampStops(colorRampName, MIN_RANGE, MAX_RANGE);
       mbMap.setPaintProperty(layerId, 'heatmap-color', [
         'interpolate',
         ['linear'],
