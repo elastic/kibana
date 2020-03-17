@@ -32,7 +32,10 @@ describe('rule helpers', () => {
       });
       const defineRuleStepData = {
         isNew: false,
+        ruleType: 'saved_query',
+        anomalyThreshold: 50,
         index: ['auditbeat-*'],
+        mlJobId: '',
         queryBar: {
           query: {
             query: 'user.name: root or user.name: admin',
@@ -180,6 +183,9 @@ describe('rule helpers', () => {
       const result: DefineStepRule = getDefineStepsData(mockRule('test-id'));
       const expected = {
         isNew: false,
+        ruleType: 'saved_query',
+        anomalyThreshold: 50,
+        mlJobId: '',
         index: ['auditbeat-*'],
         queryBar: {
           query: {
@@ -194,7 +200,7 @@ describe('rule helpers', () => {
       expect(result).toEqual(expected);
     });
 
-    test('returns with saved_id of null if value does not exist on rule', () => {
+    test('returns with saved_id of undefined if value does not exist on rule', () => {
       const mockedRule = {
         ...mockRule('test-id'),
       };
@@ -202,6 +208,9 @@ describe('rule helpers', () => {
       const result: DefineStepRule = getDefineStepsData(mockedRule);
       const expected = {
         isNew: false,
+        ruleType: 'saved_query',
+        anomalyThreshold: 50,
+        mlJobId: '',
         index: ['auditbeat-*'],
         queryBar: {
           query: {
@@ -209,7 +218,7 @@ describe('rule helpers', () => {
             language: 'kuery',
           },
           filters: [],
-          saved_id: null,
+          saved_id: undefined,
         },
       };
 
