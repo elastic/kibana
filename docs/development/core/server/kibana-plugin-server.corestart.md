@@ -17,6 +17,7 @@ export interface CoreStart
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [capabilities](./kibana-plugin-server.corestart.capabilities.md) | <code>CapabilitiesStart</code> | [CapabilitiesStart](./kibana-plugin-server.capabilitiesstart.md) |
+|  [elasticsearch](./kibana-plugin-server.corestart.elasticsearch.md) | <code>ElasticsearchServiceStart</code> | [ElasticsearchServiceStart](./kibana-plugin-server.elasticsearchservicestart.md) |
 |  [savedObjects](./kibana-plugin-server.corestart.savedobjects.md) | <code>SavedObjectsServiceStart</code> | [SavedObjectsServiceStart](./kibana-plugin-server.savedobjectsservicestart.md) |
 |  [uiSettings](./kibana-plugin-server.corestart.uisettings.md) | <code>UiSettingsServiceStart</code> | [UiSettingsServiceStart](./kibana-plugin-server.uisettingsservicestart.md) |
 

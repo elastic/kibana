@@ -9,48 +9,28 @@ import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { History, createBrowserHistory } from 'history';
 import { managementListReducer, managementMiddlewareFactory } from './index';
 import { EndpointMetadata, EndpointResultList } from '../../../../../common/types';
+import { EndpointDocGenerator } from '../../../../../common/generate_data';
 import { ManagementListState } from '../../types';
 import { AppAction } from '../action';
 import { listData } from './selectors';
+import { DepsStartMock, depsStartMock } from '../../mocks';
+
 describe('endpoint list saga', () => {
   const sleep = (ms = 100) => new Promise(wakeup => setTimeout(wakeup, ms));
   let fakeCoreStart: jest.Mocked<CoreStart>;
+  let depsStart: DepsStartMock;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
   let store: Store<ManagementListState>;
   let getState: typeof store['getState'];
   let dispatch: Dispatch<AppAction>;
-  let history: History<never>;
 
+  const generator = new EndpointDocGenerator();
   // https://github.com/elastic/endpoint-app-team/issues/131
   const generateEndpoint = (): EndpointMetadata => {
-    return {
-      '@timestamp': new Date(1582231151055).toString(),
-      event: {
-        created: new Date(0),
-      },
-      endpoint: {
-        policy: {
-          id: '',
-        },
-      },
-      agent: {
-        version: '',
-        id: '',
-      },
-      host: {
-        id: '',
-        hostname: '',
-        ip: [''],
-        mac: [''],
-        os: {
-          name: '',
-          full: '',
-          version: '',
-          variant: '',
-        },
-      },
-    };
+    return generator.generateEndpointMetadata(new Date().getTime());
   };
+
+  let history: History<never>;
   const getEndpointListApiResponse = (): EndpointResultList => {
     return {
       endpoints: [generateEndpoint()],
@@ -61,10 +41,11 @@ describe('endpoint list saga', () => {
   };
   beforeEach(() => {
     fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
+    depsStart = depsStartMock();
     fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
     store = createStore(
       managementListReducer,
-      applyMiddleware(managementMiddlewareFactory(fakeCoreStart))
+      applyMiddleware(managementMiddlewareFactory(fakeCoreStart, depsStart))
     );
     getState = store.getState;
     dispatch = store.dispatch;

@@ -217,6 +217,7 @@ export class Table extends PureComponent {
             icon: 'pencil',
             onClick: editField,
             type: 'icon',
+            'data-test-subj': 'editFieldFormat',
           },
         ],
         width: '40px',
