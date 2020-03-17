@@ -8,6 +8,8 @@ import React, { useState, useEffect } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart } from 'kibana/public';
+import { fromNullable, fold } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { useAppDependencies } from '../../../app_context';
 
 import {
@@ -26,17 +28,28 @@ const NO_NAVIGATION = false;
 type AlertNavigationLoadingState = AlertNavigation | false | null;
 
 export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ alert }) => {
-  const { navigateToApp, alerting } = useAppDependencies();
+  const { navigateToApp, alerting: maybeAlerting } = useAppDependencies();
 
   const [alertNavigation, setAlertNavigation] = useState<AlertNavigationLoadingState>(null);
   useEffect(() => {
-    alerting
-      .getNavigation(alert.id)
-      .then(nav => (nav ? setAlertNavigation(nav) : setAlertNavigation(NO_NAVIGATION)))
-      .catch(() => {
-        setAlertNavigation(NO_NAVIGATION);
-      });
-  }, [alert.id, alerting]);
+    pipe(
+      fromNullable(maybeAlerting),
+      fold(
+        /**
+         * If the alerting plugin is disabled,
+         * navigation isn't supported
+         */
+        () => setAlertNavigation(NO_NAVIGATION),
+        alerting =>
+          alerting
+            .getNavigation(alert.id)
+            .then(nav => (nav ? setAlertNavigation(nav) : setAlertNavigation(NO_NAVIGATION)))
+            .catch(() => {
+              setAlertNavigation(NO_NAVIGATION);
+            })
+      )
+    );
+  }, [alert.id, maybeAlerting]);
 
   return (
     <EuiButtonEmpty

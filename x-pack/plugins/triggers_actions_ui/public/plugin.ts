@@ -32,7 +32,7 @@ interface PluginsStart {
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;
   management: ManagementStart;
-  alerting: AlertingStart;
+  alerting?: AlertingStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
 }
 
