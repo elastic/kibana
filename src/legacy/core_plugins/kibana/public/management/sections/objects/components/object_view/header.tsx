@@ -72,7 +72,12 @@ export const Header = ({
         <EuiFlexGroup responsive={false}>
           {canViewInApp && (
             <EuiFlexItem grow={false}>
-              <EuiButton size="s" href={viewUrl} iconType="eye">
+              <EuiButton
+                size="s"
+                href={viewUrl}
+                iconType="eye"
+                data-test-subj="savedObjectEditViewInApp"
+              >
                 <FormattedMessage
                   id="kbn.management.objects.view.viewItemButtonLabel"
                   defaultMessage="View {title}"
