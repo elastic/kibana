@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import React from 'react';
-import { EuiRangeProps } from '@elastic/eui';
+import { CoreSetup, Plugin } from 'kibana/server';
+import { querySavedObjectType } from '../saved_objects';
 
-export class ValidatedDualRange<EuiRangeProps> extends React.Component<EuiRangeProps> {
-  allowEmptyRange?: boolean;
+export class QueryService implements Plugin<void> {
+  public setup(core: CoreSetup) {
+    core.savedObjects.registerType(querySavedObjectType);
+  }
+
+  public start() {}
 }
