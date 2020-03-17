@@ -14,9 +14,10 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DRAW_TYPE } from '../../../../common/constants';
+import { DRAW_TYPE, ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { GeometryFilterForm } from '../../../components/geometry_filter_form';
+import { DistanceFilterForm } from '../../../components/distance_filter_form';
 
 const DRAW_SHAPE_LABEL = i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabel', {
   defaultMessage: 'Draw shape to filter data',
@@ -26,6 +27,10 @@ const DRAW_BOUNDS_LABEL = i18n.translate('xpack.maps.toolbarOverlay.drawBoundsLa
   defaultMessage: 'Draw bounds to filter data',
 });
 
+const DRAW_DISTANCE_LABEL = i18n.translate('xpack.maps.toolbarOverlay.drawDistanceLabel', {
+  defaultMessage: 'Draw distance to filter data',
+});
+
 const DRAW_SHAPE_LABEL_SHORT = i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabelShort', {
   defaultMessage: 'Draw shape',
 });
@@ -33,6 +38,13 @@ const DRAW_SHAPE_LABEL_SHORT = i18n.translate('xpack.maps.toolbarOverlay.drawSha
 const DRAW_BOUNDS_LABEL_SHORT = i18n.translate('xpack.maps.toolbarOverlay.drawBoundsLabelShort', {
   defaultMessage: 'Draw bounds',
 });
+
+const DRAW_DISTANCE_LABEL_SHORT = i18n.translate(
+  'xpack.maps.toolbarOverlay.drawDistanceLabelShort',
+  {
+    defaultMessage: 'Draw distance',
+  }
+);
 
 export class ToolsControl extends Component {
   state = {
@@ -65,23 +77,43 @@ export class ToolsControl extends Component {
     this._closePopover();
   };
 
+  _initiateDistanceDraw = options => {
+    this.props.initiateDraw({
+      drawType: DRAW_TYPE.DISTANCE,
+      ...options,
+    });
+    this._closePopover();
+  };
+
   _getDrawPanels() {
+    const tools = [
+      {
+        name: DRAW_SHAPE_LABEL,
+        panel: 1,
+      },
+      {
+        name: DRAW_BOUNDS_LABEL,
+        panel: 2,
+      },
+    ];
+
+    const hasGeoPoints = this.props.geoFields.some(({ geoFieldType }) => {
+      return geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT;
+    });
+    if (hasGeoPoints) {
+      tools.push({
+        name: DRAW_DISTANCE_LABEL,
+        panel: 3,
+      });
+    }
+
     return [
       {
         id: 0,
         title: i18n.translate('xpack.maps.toolbarOverlay.tools.toolbarTitle', {
           defaultMessage: 'Tools',
         }),
-        items: [
-          {
-            name: DRAW_SHAPE_LABEL,
-            panel: 1,
-          },
-          {
-            name: DRAW_BOUNDS_LABEL,
-            panel: 2,
-          },
-        ],
+        items: tools,
       },
       {
         id: 1,
@@ -116,6 +148,20 @@ export class ToolsControl extends Component {
               }
             )}
             onSubmit={this._initiateBoundsDraw}
+          />
+        ),
+      },
+      {
+        id: 3,
+        title: DRAW_DISTANCE_LABEL_SHORT,
+        content: (
+          <DistanceFilterForm
+            className="mapDrawControl__geometryFilterForm"
+            buttonLabel={DRAW_DISTANCE_LABEL_SHORT}
+            geoFields={this.props.geoFields.filter(({ geoFieldType }) => {
+              return geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT;
+            })}
+            onSubmit={this._initiateDistanceDraw}
           />
         ),
       },
