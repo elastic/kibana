@@ -151,7 +151,7 @@ describe('status check alert', () => {
       expect(mockScheduleActions).toHaveBeenCalledTimes(1);
       expect(mockScheduleActions.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "xpack.uptime.alerts.actionGroups.downMonitor",
+          "xpack.uptime.alerts.actionGroups.monitorStatus",
           Object {
             "completeIdList": "first from fairbanks; first from harrisburg; ",
             "message": "Down monitor: first",
@@ -297,11 +297,11 @@ describe('status check alert', () => {
     it('contains the expected static fields like id, name, etc.', () => {
       expect(alert.id).toBe('xpack.uptime.alerts.monitorStatus');
       expect(alert.name).toBe('Uptime Monitor Status');
-      expect(alert.defaultActionGroupId).toBe('xpack.uptime.alerts.actionGroups.downMonitor');
+      expect(alert.defaultActionGroupId).toBe('xpack.uptime.alerts.actionGroups.monitorStatus');
       expect(alert.actionGroups).toMatchInlineSnapshot(`
         Array [
           Object {
-            "id": "xpack.uptime.alerts.actionGroups.downMonitor",
+            "id": "xpack.uptime.alerts.actionGroups.monitorStatus",
             "name": "Uptime Down Monitor",
           },
         ]
