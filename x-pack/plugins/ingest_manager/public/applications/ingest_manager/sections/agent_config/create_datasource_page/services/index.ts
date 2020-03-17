@@ -3,11 +3,4 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-export enum JobStatuses {
-  PENDING = 'pending',
-  PROCESSING = 'processing',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled',
-}
+export { isAdvancedVar } from './is_advanced_var';

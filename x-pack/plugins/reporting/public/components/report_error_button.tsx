@@ -7,11 +7,12 @@
 import { EuiButtonIcon, EuiCallOut, EuiPopover } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { JobContent, jobQueueClient } from '../lib/job_queue_client';
+import { JobContent, ReportingAPIClient } from '../lib/reporting_api_client';
 
 interface Props {
   jobId: string;
   intl: InjectedIntl;
+  apiClient: ReportingAPIClient;
 }
 
 interface State {
@@ -90,7 +91,7 @@ class ReportErrorButtonUi extends Component<Props, State> {
   private loadError = async () => {
     this.setState({ isLoading: true });
     try {
-      const reportContent: JobContent = await jobQueueClient.getContent(this.props.jobId);
+      const reportContent: JobContent = await this.props.apiClient.getContent(this.props.jobId);
       if (this.mounted) {
         this.setState({ isLoading: false, error: reportContent.content });
       }

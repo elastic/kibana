@@ -24,6 +24,7 @@ export default function({ getService, getPageObjects }) {
   const inspector = getService('inspector');
   const browser = getService('browser');
   const retry = getService('retry');
+  const security = getService('security');
   const PageObjects = getPageObjects([
     'common',
     'visualize',
@@ -58,7 +59,14 @@ export default function({ getService, getPageObjects }) {
       return PageObjects.visEditor.clickGo();
     };
 
-    before(initAreaChart);
+    before(async function() {
+      await security.testUser.setRoles([
+        'kibana_admin',
+        'long_window_logstash',
+        'test_logstash_reader',
+      ]);
+      await initAreaChart();
+    });
 
     it('should save and load with special characters', async function() {
       const vizNamewithSpecialChars = vizName1 + '/?&=%';
@@ -284,6 +292,7 @@ export default function({ getService, getPageObjects }) {
           .pop()
           .replace('embed=true', '');
         await PageObjects.common.navigateToUrl('visualize', embedUrl);
+        await security.testUser.restoreDefaults();
       });
     });
 
