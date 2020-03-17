@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './multi_column_editor';
+export const appendSearch = (search?: string) => (search != null ? `${search}` : '');
