@@ -8,6 +8,7 @@ import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n/react';
+import { EuiThemeProvider } from '../../../../../../../legacy/common/eui_styled_components';
 import { appStoreFactory } from '../../store';
 import { RouteCapture } from '../route_capture';
 import { createMemoryHistory, MemoryHistory } from 'history';
@@ -28,11 +29,13 @@ describe('when on the hosts page', () => {
       return reactTestingLibrary.render(
         <Provider store={store}>
           <I18nProvider>
-            <Router history={history}>
-              <RouteCapture>
-                <HostList />
-              </RouteCapture>
-            </Router>
+            <EuiThemeProvider>
+              <Router history={history}>
+                <RouteCapture>
+                  <HostList />
+                </RouteCapture>
+              </Router>
+            </EuiThemeProvider>
           </I18nProvider>
         </Provider>
       );
