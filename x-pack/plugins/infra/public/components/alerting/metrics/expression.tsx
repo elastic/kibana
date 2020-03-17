@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, useEffect } from 'react';
+import React, { useCallback, useMemo, useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiSpacer,
   EuiText,
   EuiFormRow,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -70,6 +70,8 @@ type TimeUnit = 's' | 'm' | 'h' | 'd';
 export const Expressions: React.FC<Props> = props => {
   const { setAlertParams, alertParams, errors, alertsContext } = props;
   const { source, createDerivedIndexPattern } = useSource({ sourceId: 'default' });
+  const [timeSize, setTimeSize] = useState<number | undefined>(1);
+  const [timeUnit, setTimeUnit] = useState<TimeUnit>('s');
 
   const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
     createDerivedIndexPattern,
@@ -105,8 +107,10 @@ export const Expressions: React.FC<Props> = props => {
   const removeExpression = useCallback(
     (id: number) => {
       const exp = alertParams.criteria.slice();
-      exp.splice(id, 1);
-      setAlertParams('criteria', exp);
+      if (exp.length > 1) {
+        exp.splice(id, 1);
+        setAlertParams('criteria', exp);
+      }
     },
     [setAlertParams, alertParams.criteria]
   );
@@ -133,6 +137,30 @@ export const Expressions: React.FC<Props> = props => {
     };
   }, []);
 
+  const updateTimeSize = useCallback(
+    (ts: number | '') => {
+      const criteria = alertParams.criteria.map(c => ({
+        ...c,
+        timeSize: ts,
+      }));
+      setTimeSize(ts || undefined);
+      setAlertParams('criteria', criteria);
+    },
+    [alertParams.criteria, setAlertParams]
+  );
+
+  const updateTimeUnit = useCallback(
+    (tu: string) => {
+      const criteria = alertParams.criteria.map(c => ({
+        ...c,
+        timeUnit: tu,
+      }));
+      setTimeUnit(tu as TimeUnit);
+      setAlertParams('criteria', criteria);
+    },
+    [alertParams.criteria, setAlertParams]
+  );
+
   useEffect(() => {
     const md = alertsContext.metadata;
     if (md) {
@@ -143,8 +171,8 @@ export const Expressions: React.FC<Props> = props => {
             metric: metric.field,
             comparator: '>',
             threshold: [],
-            timeSize: 1,
-            timeUnit: 'm',
+            timeSize,
+            timeUnit,
             indexPattern: source?.configuration.metricAlias,
             aggType: metric.aggregation,
           }))
@@ -180,6 +208,7 @@ export const Expressions: React.FC<Props> = props => {
         alertParams.criteria.map((e, idx) => {
           return (
             <ExpressionRow
+              canDelete={alertParams.criteria.length > 1}
               fields={derivedIndexPattern.fields}
               remove={removeExpression}
               addExpression={addExpression}
@@ -192,23 +221,41 @@ export const Expressions: React.FC<Props> = props => {
           );
         })}
 
-      {/* The "for last" expression should appear here, only once. It applies to all the metrics above  */}
-      <EuiText color="warning">For last expression goes last here</EuiText>
-      {/* <ForLastExpression
+      <ForLastExpression
         timeWindowSize={timeSize}
         timeWindowUnit={timeUnit}
-        errors={errors}
+        errors={emptyError}
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
-      /> */}
+      />
 
-      <EuiButtonEmpty iconSide="left" flush="left" color="primary" iconType="plusInCircle">
-        Add condition
-      </EuiButtonEmpty>
+      <div>
+        <EuiButtonEmpty
+          color={'primary'}
+          iconSide={'left'}
+          flush={'left'}
+          iconType={'plusInCircleFilled'}
+          onClick={addExpression}
+        >
+          <FormattedMessage
+            id={'xpack.infra.metrics.alertFlyout.addCondition'}
+            defaultMessage={'Add condition'}
+          />
+        </EuiButtonEmpty>
+      </div>
 
       <EuiSpacer size={'m'} />
 
-      <EuiFormRow label="Filter" helpText="Some helpful text" fullWidth compressed>
+      <EuiFormRow
+        label={i18n.translate('xpack.infra.metrics.alertFlyout.filterLabel', {
+          defaultMessage: 'Filter',
+        })}
+        helpText={i18n.translate('xpack.infra.metrics.alertFlyout.filterHelpText', {
+          defaultMessage: 'Filter help text',
+        })}
+        fullWidth
+        compressed
+      >
         <MetricsExplorerKueryBar
           derivedIndexPattern={derivedIndexPattern}
           onSubmit={onFilterQuerySubmit}
@@ -219,7 +266,16 @@ export const Expressions: React.FC<Props> = props => {
       <EuiSpacer size={'m'} />
 
       {alertsContext.metadata && (
-        <EuiFormRow label="Create alert per" helpText="Some helpful text" fullWidth compressed>
+        <EuiFormRow
+          label={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerText', {
+            defaultMessage: 'Create alert per',
+          })}
+          helpText={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerHelpText', {
+            defaultMessage: 'Filter help text',
+          })}
+          fullWidth
+          compressed
+        >
           <MetricsExplorerGroupBy
             onChange={onGroupByChange}
             fields={derivedIndexPattern.fields}
@@ -227,39 +283,6 @@ export const Expressions: React.FC<Props> = props => {
           />
         </EuiFormRow>
       )}
-
-      {/* 
-      <EuiText>
-        <h5>
-          <FormattedMessage id="xpack.infra.metrics.alertFlyout.filter" defaultMessage="Filter" />
-        </h5>
-      </EuiText>
-      <MetricsExplorerKueryBar
-        derivedIndexPattern={derivedIndexPattern}
-        onSubmit={onFilterQuerySubmit}
-        value={alertParams.filterQuery}
-      />
-
-      <EuiSpacer size={'m'} />
-      <EuiText>
-        <h5>
-          <FormattedMessage
-            id="xpack.infra.metrics.alertFlyout.alertPer"
-            defaultMessage="Alert Per"
-          />
-        </h5>
-      </EuiText>
-      <EuiSpacer size={'xs'} />
-      {alertsContext.metadata && (
-        <MetricsExplorerGroupBy
-          onChange={onGroupByChange}
-          fields={derivedIndexPattern.fields}
-          options={{
-            ...alertsContext.metadata.currentOptions,
-            groupBy: alertParams.groupBy || undefined,
-          }}
-        />
-      )} */}
     </>
   );
 };
@@ -269,6 +292,7 @@ interface ExpressionRowProps {
   expressionId: number;
   expression: MetricExpression;
   errors: IErrorObject;
+  canDelete: boolean;
   addExpression(): void;
   remove(id: number): void;
   setAlertParams(id: number, params: MetricExpression): void;
@@ -285,15 +309,8 @@ const StyledExpression = euiStyled.div`
 `;
 
 export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
-  const { setAlertParams, expression, errors, expressionId, remove, fields } = props;
-  const {
-    aggType = AGGREGATION_TYPES.MAX,
-    metric,
-    comparator = '>',
-    threshold = [],
-    timeSize,
-    timeUnit = 's',
-  } = expression;
+  const { setAlertParams, expression, errors, expressionId, remove, fields, canDelete } = props;
+  const { aggType = AGGREGATION_TYPES.MAX, metric, comparator = '>', threshold = [] } = expression;
 
   const updateAggType = useCallback(
     (at: string) => {
@@ -319,20 +336,6 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
   const updateThreshold = useCallback(
     t => {
       setAlertParams(expressionId, { ...expression, threshold: t });
-    },
-    [expressionId, expression, setAlertParams]
-  );
-
-  const updateTimeSize = useCallback(
-    (ts: number | '') => {
-      setAlertParams(expressionId, { ...expression, timeSize: ts || undefined });
-    },
-    [expressionId, expression, setAlertParams]
-  );
-
-  const updateTimeUnit = useCallback(
-    (tu: string) => {
-      setAlertParams(expressionId, { ...expression, timeUnit: tu as TimeUnit });
     },
     [expressionId, expression, setAlertParams]
   );
@@ -372,88 +375,19 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
             </StyledExpression>
           </StyledExpressionRow>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
-              defaultMessage: 'Remove condition',
-            })}
-            color={'danger'}
-            iconType={'trash'}
-            onClick={() => remove(expressionId)}
-          />
-        </EuiFlexItem>
+        {canDelete && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
+                defaultMessage: 'Remove condition',
+              })}
+              color={'danger'}
+              iconType={'trash'}
+              onClick={() => remove(expressionId)}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
-
-      {/* <EuiFlexGroup gutterSize="xs" wrap>
-        <EuiFlexItem grow={true}>
-          <EuiFlexGroup gutterSize="s" wrap>
-            <EuiFlexItem grow={false}>
-              <WhenExpression
-                customAggTypesOptions={aggregationType}
-                aggType={aggType}
-                onChangeSelectedAggType={updateAggType}
-              />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <OfExpression
-                aggField={metric}
-                fields={fields.map(f => ({
-                  normalizedType: f.type,
-                  name: f.name,
-                }))}
-                aggType={aggType}
-                errors={errors}
-                onChangeSelectedAggField={updateMetric}
-              />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <ThresholdExpression
-                thresholdComparator={comparator || '>'}
-                threshold={threshold}
-                onChangeSelectedThresholdComparator={updateComparator}
-                onChangeSelectedThreshold={updateThreshold}
-                errors={errors}
-              />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <ForLastExpression
-                timeWindowSize={timeSize}
-                timeWindowUnit={timeUnit}
-                errors={errors}
-                onChangeWindowSize={updateTimeSize}
-                onChangeWindowUnit={updateTimeUnit}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs">
-            <EuiFlexItem>
-              <EuiButtonIcon
-                aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.addCondition', {
-                  defaultMessage: 'Add condition',
-                })}
-                color={'primary'}
-                iconType={'plusInCircleFilled'}
-                onClick={props.addExpression}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButtonIcon
-                aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
-                  defaultMessage: 'Remove condition',
-                })}
-                color={'danger'}
-                iconType={'trash'}
-                onClick={() => remove(expressionId)}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup> */}
       <EuiSpacer size={'s'} />
     </>
   );
