@@ -66,11 +66,14 @@ export function createFlyoutManageDrilldowns({
   return (props: ConnectedFlyoutManageDrilldownsProps) => {
     const isCreateOnly = props.viewMode === 'create';
 
-    const factoryContext: DrilldownFactoryContext<unknown> = {
-      place: '',
-      placeContext: props.context,
-      triggers: [],
-    };
+    const factoryContext: DrilldownFactoryContext<unknown> = React.useMemo(
+      () => ({
+        place: '',
+        placeContext: props.context,
+        triggers: [],
+      }),
+      [props.context]
+    );
 
     const actionFactories = useCompatibleActionFactoriesForCurrentContext(
       allActionFactories,
