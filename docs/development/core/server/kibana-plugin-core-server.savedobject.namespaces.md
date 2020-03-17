@@ -4,6 +4,8 @@
 
 ## SavedObject.namespaces property
 
+Namespace(s) that this saved object exists in. This attribute is only used for multi-namespace saved object types.
+
 <b>Signature:</b>
 
 ```typescript

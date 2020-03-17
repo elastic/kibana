@@ -232,40 +232,18 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
-    // This used to be using `method = id && !overwrite ? 'create' : 'index'`;
-    // This meant that when we were generating the IDs ourselves using uuid.v1(), that if
-    // there was a conflict for some reason, we'd be hiding it and not throwing a Conflict.
-    // We can leave it the old way, it just feels wrong because now we could potentially
-    // be overwriting a saved-object which exists in another namespace
-    //
-    // ID      |   overwrite | old operation | new operation
-    // null        true        index           create
-    // null        false       index           create
-    // something   true        index           index
-    // something   false       create          create
-    const method = id && overwrite ? 'index' : 'create';
     const time = this._getCurrentTime();
     let savedObjectNamespace;
-    let savedObjectNamespaces;
+    let savedObjectNamespaces: string[] | undefined;
 
     if (this._registry.isSingleNamespace(type) && namespace) {
       savedObjectNamespace = namespace;
     } else if (this._registry.isMultiNamespace(type)) {
-      if (method === 'index') {
-        const response = await this._callCluster('get', {
-          id: this._serializer.generateRawId(undefined, type, id),
-          index: this.getIndexForType(type),
-          ignore: [404],
-        });
-
-        const docFound = response.found === true;
-        const indexFound = response.status !== 404;
-        if (docFound && indexFound && !this._rawInNamespaces(response, namespace)) {
-          throw SavedObjectsErrorHelpers.createConflictError(type, id!);
-        }
-        savedObjectNamespaces = docFound ? response._source.namespaces : [namespace ?? 'default'];
+      if (id && overwrite) {
+        // we will overwrite a multi-namespace saved object if it exists; if that happens, ensure we preserve its included namespaces
+        savedObjectNamespaces = await this.preflightGetNamespaces(type, id, namespace);
       } else {
-        savedObjectNamespaces = [namespace ?? 'default'];
+        savedObjectNamespaces = getSavedObjectNamespaces(namespace);
       }
     }
 
@@ -283,6 +261,7 @@ export class SavedObjectsRepository {
 
       const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
 
+      const method = id && overwrite ? 'index' : 'create';
       const response = await this._writeToCluster(method, {
         id: raw._id,
         index: this.getIndexForType(type),
@@ -322,7 +301,7 @@ export class SavedObjectsRepository {
 
     let bulkGetRequestIndexCounter = 0;
     const bulkGetDocs: object[] = [];
-    const expectedBulkGetResults: Array<Either<any, any>> = objects.map(object => {
+    const expectedResults: Array<Either<any, any>> = objects.map(object => {
       if (!this._allowedTypes.includes(object.type)) {
         return {
           tag: 'Left' as 'Left',
@@ -334,19 +313,26 @@ export class SavedObjectsRepository {
         };
       }
 
-      // This used to be using `method = object.id && !overwrite ? 'create' : 'index'`;
-      // This meant that when we were generating the IDs ourselves using uuid.v1(), that if
-      // there was a conflict for some reason, we'd be hiding it and not throwing a Conflict.
-      // We can leave it the old way, it just feels wrong because now we could potentially
-      // be overwriting a saved-object which exists in another namespace
-      //
-      // ID      |   overwrite | old operation | new operation
-      // null        true        index           create
-      // null        false       index           create
-      // something   true        index           index
-      // something   false       create          create
       const method = object.id && overwrite ? 'index' : 'create';
-      if (method === 'create' || !this._registry.isMultiNamespace(object.type)) {
+      const requiresNamespacesCheck =
+        method === 'index' && this._registry.isMultiNamespace(object.type);
+
+      if (requiresNamespacesCheck) {
+        bulkGetDocs.push({
+          _id: this._serializer.generateRawId(namespace, object.type, object.id),
+          _index: this.getIndexForType(object.type),
+          _source: ['type', 'namespaces'],
+        });
+
+        return {
+          tag: 'Right' as 'Right',
+          value: {
+            esRequestIndex: bulkGetRequestIndexCounter++,
+            method,
+            object,
+          },
+        };
+      } else {
         return {
           tag: 'Right' as 'Right',
           value: {
@@ -355,21 +341,6 @@ export class SavedObjectsRepository {
           },
         };
       }
-
-      bulkGetDocs.push({
-        _id: this._serializer.generateRawId(namespace, object.type, object.id),
-        _index: this.getIndexForType(object.type),
-        _source: ['type', 'namespaces'],
-      });
-
-      return {
-        tag: 'Right' as 'Right',
-        value: {
-          esRequestIndex: bulkGetRequestIndexCounter++,
-          method,
-          object,
-        },
-      };
     });
 
     const bulkGetResponse = bulkGetDocs.length
@@ -383,7 +354,7 @@ export class SavedObjectsRepository {
 
     let bulkRequestIndexCounter = 0;
     const bulkCreateParams: object[] = [];
-    const expectedBulkResults: Array<Either<any, any>> = expectedBulkGetResults.map(
+    const expectedBulkResults: Array<Either<any, any>> = expectedResults.map(
       expectedBulkGetResult => {
         if (isLeft(expectedBulkGetResult)) {
           return expectedBulkGetResult;
@@ -396,7 +367,7 @@ export class SavedObjectsRepository {
           const indexFound = bulkGetResponse.status !== 404;
           const actualResult = indexFound ? bulkGetResponse.docs[esRequestIndex] : undefined;
           const docFound = indexFound && actualResult.found === true;
-          if (indexFound && docFound && !this._rawInNamespaces(actualResult, namespace)) {
+          if (docFound && !this._rawInNamespaces(actualResult, namespace)) {
             const { id, type } = object;
             return {
               tag: 'Left' as 'Left',
@@ -407,14 +378,12 @@ export class SavedObjectsRepository {
               },
             };
           }
-          savedObjectNamespaces = docFound
-            ? actualResult._source.namespaces
-            : [namespace ?? 'default'];
+          savedObjectNamespaces = getSavedObjectNamespaces(namespace, docFound && actualResult);
         } else {
           if (this._registry.isSingleNamespace(object.type)) {
             savedObjectNamespace = namespace;
           } else if (this._registry.isMultiNamespace(object.type)) {
-            savedObjectNamespaces = [namespace ?? 'default'];
+            savedObjectNamespaces = getSavedObjectNamespaces(namespace);
           }
         }
 
@@ -512,25 +481,17 @@ export class SavedObjectsRepository {
 
     const { namespace, refresh = DEFAULT_REFRESH_SETTING } = options;
 
-    // Instead of the get, we could always do a _delete_by_query
     const rawId = this._serializer.generateRawId(namespace, type, id);
-    const getResponse = await this._callCluster('get', {
-      id: rawId,
-      index: this.getIndexForType(type),
-      ignore: [404],
-    });
-
-    const getDocNotFound = getResponse.found === false;
-    const getIndexNotFound = getResponse.status === 404;
-    if (getDocNotFound || getIndexNotFound || !this._rawInNamespaces(getResponse, namespace)) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-    }
+    let preflightResult: SavedObjectsRawDoc | undefined;
 
     if (this._registry.isMultiNamespace(type)) {
-      const existingNamespaces = getResponse._source.namespaces as string[];
-      const remainingNamespaces = existingNamespaces.filter(x => x !== (namespace ?? 'default'));
+      preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
+      const existingNamespaces = getSavedObjectNamespaces(undefined, preflightResult);
+      const remainingNamespaces = existingNamespaces?.filter(
+        x => x !== getNamespaceString(namespace)
+      );
 
-      if (remainingNamespaces.length) {
+      if (remainingNamespaces?.length) {
         // if there is 1 or more namespace remaining, update the saved object
         const time = this._getCurrentTime();
 
@@ -542,6 +503,7 @@ export class SavedObjectsRepository {
         const updateResponse = await this._writeToCluster('update', {
           id: rawId,
           index: this.getIndexForType(type),
+          ...getExpectedVersionProperties(undefined, preflightResult),
           refresh,
           ignore: [404],
           body: {
@@ -560,6 +522,7 @@ export class SavedObjectsRepository {
     const deleteResponse = await this._writeToCluster('delete', {
       id: rawId,
       index: this.getIndexForType(type),
+      ...getExpectedVersionProperties(undefined, preflightResult),
       refresh,
       ignore: [404],
     });
@@ -621,10 +584,7 @@ export class SavedObjectsRepository {
               }
             `,
           lang: 'painless',
-          params: {
-            // this nullish coalescing isn't required, as the default namespace can't be deleted; it's just here as a fail-safe
-            namespace: namespace ?? 'default',
-          },
+          params: { namespace: getNamespaceString(namespace) },
         },
         conflicts: 'proceed',
         ...getSearchDsl(this._mappings, this._registry, {
@@ -919,17 +879,9 @@ export class SavedObjectsRepository {
 
     const { version, namespace, references, refresh = DEFAULT_REFRESH_SETTING } = options;
 
-    // Instead of the get, we could always do an _update_by_query
-    const getResponse = await this._callCluster('get', {
-      id: this._serializer.generateRawId(namespace, type, id),
-      index: this.getIndexForType(type),
-      ignore: [404],
-    });
-
-    const getDocNotFound = getResponse.found === false;
-    const getIndexNotFound = getResponse.status === 404;
-    if (getDocNotFound || getIndexNotFound || !this._rawInNamespaces(getResponse, namespace)) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    let preflightResult: SavedObjectsRawDoc | undefined;
+    if (this._registry.isMultiNamespace(type)) {
+      preflightResult = await this.preflightCheckIncludesNamespace(type, id, namespace);
     }
 
     const time = this._getCurrentTime();
@@ -943,7 +895,7 @@ export class SavedObjectsRepository {
     const updateResponse = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
       index: this.getIndexForType(type),
-      ...(version && decodeRequestVersion(version)),
+      ...getExpectedVersionProperties(version, preflightResult),
       refresh,
       ignore: [404],
       body: {
@@ -1030,7 +982,7 @@ export class SavedObjectsRepository {
     const updateResponse = await this._writeToCluster('update', {
       id: rawId,
       index: this.getIndexForType(type),
-      ...(version && decodeRequestVersion(version)),
+      ...getExpectedVersionProperties(version, getResponse),
       refresh,
       ignore: [404],
       body: {
@@ -1108,6 +1060,7 @@ export class SavedObjectsRepository {
       const updateResponse = await this._writeToCluster('update', {
         id: rawId,
         index: this.getIndexForType(type),
+        ...getExpectedVersionProperties(undefined, getResponse),
         refresh,
         ignore: [404],
         body: {
@@ -1125,6 +1078,7 @@ export class SavedObjectsRepository {
       const deleteResponse = await this._writeToCluster('delete', {
         id: this._serializer.generateRawId(undefined, type, id),
         index: this.getIndexForType(type),
+        ...getExpectedVersionProperties(undefined, getResponse),
         refresh,
         ignore: [404],
       });
@@ -1240,11 +1194,12 @@ export class SavedObjectsRepository {
 
         const { esRequestIndex, id, type, version, documentToSave } = expectedBulkGetResult.value;
         let namespaces;
+        let versionProperties;
         if (esRequestIndex !== undefined) {
           const indexFound = bulkGetResponse.status !== 404;
           const actualResult = indexFound ? bulkGetResponse.docs[esRequestIndex] : undefined;
           const docFound = indexFound && actualResult.found === true;
-          if (!indexFound || !docFound || !this._rawInNamespaces(actualResult, namespace)) {
+          if (!docFound || !this._rawInNamespaces(actualResult, namespace)) {
             return {
               tag: 'Left' as 'Left',
               error: {
@@ -1255,6 +1210,9 @@ export class SavedObjectsRepository {
             };
           }
           namespaces = actualResult._source.namespaces;
+          versionProperties = getExpectedVersionProperties(version, actualResult);
+        } else {
+          versionProperties = getExpectedVersionProperties(version);
         }
 
         const expectedResult = {
@@ -1270,7 +1228,7 @@ export class SavedObjectsRepository {
             update: {
               _id: this._serializer.generateRawId(namespace, type, id),
               _index: this.getIndexForType(type),
-              ...(version && decodeRequestVersion(version)),
+              ...versionProperties,
             },
           },
           { doc: documentToSave }
@@ -1351,23 +1309,12 @@ export class SavedObjectsRepository {
 
     const time = this._getCurrentTime();
     let savedObjectNamespace;
-    let savedObjectNamespaces;
+    let savedObjectNamespaces: string[] | undefined;
 
     if (this._registry.isSingleNamespace(type) && namespace) {
       savedObjectNamespace = namespace;
     } else if (this._registry.isMultiNamespace(type)) {
-      const response = await this._callCluster('get', {
-        id: this._serializer.generateRawId(undefined, type, id),
-        index: this.getIndexForType(type),
-        ignore: [404],
-      });
-
-      const docFound = response.found === true;
-      const indexFound = response.status !== 404;
-      if (docFound && indexFound && !this._rawInNamespaces(response, namespace)) {
-        throw SavedObjectsErrorHelpers.createConflictError(type, id);
-      }
-      savedObjectNamespaces = docFound ? response._source.namespaces : [namespace ?? 'default'];
+      savedObjectNamespaces = await this.preflightGetNamespaces(type, id, namespace);
     }
 
     const migrated = this._migrator.migrateDocument({
@@ -1480,7 +1427,62 @@ export class SavedObjectsRepository {
     }
 
     const namespaces = raw._source.namespaces as string[] | undefined;
-    return namespaces?.includes(namespace ?? 'default');
+    return namespaces?.includes(getNamespaceString(namespace)) ?? false;
+  }
+
+  /**
+   * Pre-flight check to get a multi-namespace saved object's included namespaces. This ensures that, if the saved object exists, it
+   * includes the target namespace.
+   *
+   * @param type The type of the saved object.
+   * @param id The ID of the saved object.
+   * @param namespace The target namespace.
+   * @returns Array of namespaces that this saved object currently includes, or (if the object does not exist yet) the namespaces that a
+   * newly-created object will include.
+   * @throws Will throw an error if the saved object exists and it does not include the target namespace.
+   */
+  private async preflightGetNamespaces(type: string, id: string, namespace?: string) {
+    const response = await this._callCluster('get', {
+      id: this._serializer.generateRawId(undefined, type, id),
+      index: this.getIndexForType(type),
+      ignore: [404],
+    });
+
+    const indexFound = response.status !== 404;
+    const docFound = indexFound && response.found === true;
+    if (docFound) {
+      if (!this._rawInNamespaces(response, namespace)) {
+        throw SavedObjectsErrorHelpers.createConflictError(type, id);
+      }
+      return getSavedObjectNamespaces(namespace, response);
+    }
+    return getSavedObjectNamespaces(namespace);
+  }
+
+  /**
+   * Pre-flight check for a multi-namespace saved object's namespaces. This ensures that, if the saved object exists, it includes the target
+   * namespace.
+   *
+   * @param type The type of the saved object.
+   * @param id The ID of the saved object.
+   * @param namespace The target namespace.
+   * @returns Raw document from Elasticsearch.
+   * @throws Will throw an error if the saved object is not found, or if it doesn't include the target namespace.
+   */
+  private async preflightCheckIncludesNamespace(type: string, id: string, namespace?: string) {
+    const rawId = this._serializer.generateRawId(undefined, type, id);
+    const response = await this._callCluster('get', {
+      id: rawId,
+      index: this.getIndexForType(type),
+      ignore: [404],
+    });
+
+    const indexFound = response.status !== 404;
+    const docFound = indexFound && response.found === true;
+    if (!docFound || !this._rawInNamespaces(response, namespace)) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+    return response as SavedObjectsRawDoc;
   }
 }
 
@@ -1495,4 +1497,46 @@ function getBulkOperationError(error: { type: string; reason?: string }, type: s
         message: error.reason || JSON.stringify(error),
       };
   }
+}
+
+/**
+ * Returns an object with the expected version properties. This facilitates Elasticsearch's Optimistic Concurrency Control.
+ *
+ * @param version Optional version specified by the consumer.
+ * @param document Optional existing document that was obtained in a preflight operation.
+ */
+function getExpectedVersionProperties(version?: string, document?: SavedObjectsRawDoc) {
+  if (version) {
+    return decodeRequestVersion(version);
+  } else if (document) {
+    return {
+      if_seq_no: document._seq_no,
+      if_primary_term: document._primary_term,
+    };
+  }
+  return {};
+}
+
+/**
+ * Returns the string representation of a namespace.
+ */
+function getNamespaceString(namespace?: string) {
+  return namespace ?? 'default';
+}
+
+/**
+ * Returns a string array of namespaces for a given saved object.
+ * If the saved object is undefined, the result is an array that contains the current namespace.
+ *
+ * @param namespace The current namespace.
+ * @param document Optional existing saved object that was obtained in a preflight operation.
+ */
+function getSavedObjectNamespaces(
+  namespace?: string,
+  document?: SavedObjectsRawDoc
+): string[] | undefined {
+  if (document) {
+    return document._source.namespaces;
+  }
+  return [getNamespaceString(namespace)];
 }

@@ -105,10 +105,8 @@ export function disableUICapabilitiesFactory(
       }
 
       const action = authz.actions.ui.get(featureId, ...uiCapabilityParts);
-      return (
-        checkPrivilegesResponse.privileges.find(
-          x => x.privilege === action && x.authorized === true
-        ) !== undefined
+      return checkPrivilegesResponse.privileges.some(
+        x => x.privilege === action && x.authorized === true
       );
     };
 

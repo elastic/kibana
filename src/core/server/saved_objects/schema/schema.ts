@@ -73,7 +73,7 @@ export class SavedObjectsSchema {
   }
 
   public isNamespaceAgnostic(type: string) {
-    // if no plugins have registered a uiExports.savedObjectSchemas,
+    // if no plugins have registered a Saved Objects Schema,
     // this.schema will be undefined, and no types are namespace agnostic
     if (!this.definition) {
       return false;
@@ -87,7 +87,7 @@ export class SavedObjectsSchema {
   }
 
   public isSingleNamespace(type: string) {
-    // if no plugins have registered a uiExports.savedObjectSchemas,
+    // if no plugins have registered a Saved Objects Schema,
     // this.schema will be undefined, and all types are namespace isolated
     if (!this.definition) {
       return true;
@@ -101,8 +101,8 @@ export class SavedObjectsSchema {
   }
 
   public isMultiNamespace(type: string) {
-    // if no plugins have registered a uiExports.savedObjectSchemas,
-    // this.schema will be undefined, and all types are namespace isolated
+    // if no plugins have registered a Saved Objects Schema,
+    // this.schema will be undefined, and no types are multi-namespace
     if (!this.definition) {
       return false;
     }

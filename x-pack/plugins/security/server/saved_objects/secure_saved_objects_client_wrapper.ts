@@ -74,7 +74,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     await this.ensureAuthorized(type, 'create', options.namespace, { type, attributes, options });
 
     const savedObject = await this.baseClient.create(type, attributes, options);
-    return await this.filterSavedObjectNamespaces(savedObject);
+    return await this.redactSavedObjectNamespaces(savedObject);
   }
 
   public async bulkCreate<T = unknown>(
@@ -89,7 +89,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     );
 
     const response = await this.baseClient.bulkCreate(objects, options);
-    return await this.filterSavedObjectsNamespaces(response);
+    return await this.redactSavedObjectsNamespaces(response);
   }
 
   public async delete(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
@@ -102,7 +102,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     await this.ensureAuthorized(options.type, 'find', options.namespace, { options });
 
     const response = await this.baseClient.find<T>(options);
-    return await this.filterSavedObjectsNamespaces(response);
+    return await this.redactSavedObjectsNamespaces(response);
   }
 
   public async bulkGet<T = unknown>(
@@ -115,14 +115,14 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     });
 
     const response = await this.baseClient.bulkGet<T>(objects, options);
-    return await this.filterSavedObjectsNamespaces(response);
+    return await this.redactSavedObjectsNamespaces(response);
   }
 
   public async get<T = unknown>(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
     await this.ensureAuthorized(type, 'get', options.namespace, { type, id, options });
 
     const savedObject = await this.baseClient.get<T>(type, id, options);
-    return await this.filterSavedObjectNamespaces(savedObject);
+    return await this.redactSavedObjectNamespaces(savedObject);
   }
 
   public async update<T = unknown>(
@@ -135,7 +135,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     await this.ensureAuthorized(type, 'update', options.namespace, args);
 
     const savedObject = await this.baseClient.update(type, id, attributes, options);
-    return await this.filterSavedObjectNamespaces(savedObject);
+    return await this.redactSavedObjectNamespaces(savedObject);
   }
 
   public async addNamespaces(
@@ -182,7 +182,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     );
 
     const response = await this.baseClient.bulkUpdate<T>(objects, options);
-    return await this.filterSavedObjectsNamespaces(response);
+    return await this.redactSavedObjectsNamespaces(response);
   }
 
   private async checkPrivileges(
@@ -273,7 +273,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     return map;
   }
 
-  private filterAndSortNamespaces(spaceIds: string[], privilegeMap: Record<string, boolean>) {
+  private redactAndSortNamespaces(spaceIds: string[], privilegeMap: Record<string, boolean>) {
     const comparator = (a: string, b: string) => {
       const _a = a.toLowerCase();
       const _b = b.toLowerCase();
@@ -289,7 +289,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     return spaceIds.map(spaceId => (privilegeMap[spaceId] ? spaceId : '?')).sort(comparator);
   }
 
-  private async filterSavedObjectNamespaces<T extends SavedObjectNamespaces>(
+  private async redactSavedObjectNamespaces<T extends SavedObjectNamespaces>(
     savedObject: T
   ): Promise<T> {
     if (this.getSpacesService() === undefined || savedObject.namespaces == null) {
@@ -297,15 +297,14 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     }
 
     const privilegeMap = await this.getNamespacesPrivilegeMap(savedObject.namespaces);
-    const filteredNamespaces = this.filterAndSortNamespaces(savedObject.namespaces, privilegeMap);
 
     return {
       ...savedObject,
-      namespaces: filteredNamespaces,
+      namespaces: this.redactAndSortNamespaces(savedObject.namespaces, privilegeMap),
     };
   }
 
-  private async filterSavedObjectsNamespaces<T extends SavedObjectsNamespaces>(
+  private async redactSavedObjectsNamespaces<T extends SavedObjectsNamespaces>(
     response: T
   ): Promise<T> {
     if (this.getSpacesService() === undefined) {
@@ -325,7 +324,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
         ...savedObject,
         namespaces:
           savedObject.namespaces &&
-          this.filterAndSortNamespaces(savedObject.namespaces, privilegeMap),
+          this.redactAndSortNamespaces(savedObject.namespaces, privilegeMap),
       })),
     };
   }
