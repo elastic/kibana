@@ -174,5 +174,4 @@ class GetCsvReportPanelAction implements ActionByType<typeof CSV_REPORTING_ACTIO
 
 const action = new GetCsvReportPanelAction();
 
-npSetup.plugins.uiActions.registerAction(action);
-npSetup.plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, action);
+npSetup.plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, action);

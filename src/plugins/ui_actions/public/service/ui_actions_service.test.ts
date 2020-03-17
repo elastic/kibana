@@ -141,14 +141,14 @@ describe('UiActionsService', () => {
 
       expect(list0).toHaveLength(0);
 
-      service.attachAction(FOO_TRIGGER, action1);
+      service.addTriggerAction(FOO_TRIGGER, action1);
       const list1 = service.getTriggerActions(FOO_TRIGGER);
 
       expect(list1).toHaveLength(1);
       expect(list1[0]).toBeInstanceOf(ActionInternal);
       expect(list1[0].id).toBe(action1.id);
 
-      service.attachAction(FOO_TRIGGER, action2);
+      service.addTriggerAction(FOO_TRIGGER, action2);
       const list2 = service.getTriggerActions(FOO_TRIGGER);
 
       expect(list2).toHaveLength(2);
@@ -181,7 +181,7 @@ describe('UiActionsService', () => {
         title: 'My trigger',
       };
       service.registerTrigger(testTrigger);
-      service.attachAction(MY_TRIGGER, helloWorldAction);
+      service.addTriggerAction(MY_TRIGGER, helloWorldAction);
 
       const compatibleActions = await service.getTriggerCompatibleActions(MY_TRIGGER, {
         hi: 'there',
@@ -207,7 +207,7 @@ describe('UiActionsService', () => {
       };
 
       service.registerTrigger(testTrigger);
-      service.attachAction(testTrigger.id, action);
+      service.addTriggerAction(testTrigger.id, action);
 
       const compatibleActions1 = await service.getTriggerCompatibleActions(testTrigger.id, {
         accept: true,
@@ -291,7 +291,7 @@ describe('UiActionsService', () => {
         id: FOO_TRIGGER,
       });
       service1.registerAction(testAction1);
-      service1.attachAction(FOO_TRIGGER, testAction1);
+      service1.addTriggerAction(FOO_TRIGGER, testAction1);
 
       const service2 = service1.fork();
 
@@ -312,14 +312,14 @@ describe('UiActionsService', () => {
       });
       service1.registerAction(testAction1);
       service1.registerAction(testAction2);
-      service1.attachAction(FOO_TRIGGER, testAction1);
+      service1.addTriggerAction(FOO_TRIGGER, testAction1);
 
       const service2 = service1.fork();
 
       expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
       expect(service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
 
-      service2.attachAction(FOO_TRIGGER, testAction2);
+      service2.addTriggerAction(FOO_TRIGGER, testAction2);
 
       expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
       expect(service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(2);
@@ -333,14 +333,14 @@ describe('UiActionsService', () => {
       });
       service1.registerAction(testAction1);
       service1.registerAction(testAction2);
-      service1.attachAction(FOO_TRIGGER, testAction1);
+      service1.addTriggerAction(FOO_TRIGGER, testAction1);
 
       const service2 = service1.fork();
 
       expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
       expect(service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
 
-      service1.attachAction(FOO_TRIGGER, testAction2);
+      service1.addTriggerAction(FOO_TRIGGER, testAction2);
 
       expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(2);
       expect(service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
@@ -395,7 +395,7 @@ describe('UiActionsService', () => {
       } as any;
 
       service.registerTrigger(trigger);
-      service.attachAction(MY_TRIGGER, action);
+      service.addTriggerAction(MY_TRIGGER, action);
 
       const actions = service.getTriggerActions(trigger.id);
 
@@ -416,7 +416,7 @@ describe('UiActionsService', () => {
 
       service.registerTrigger(trigger);
       service.registerAction(action);
-      service.attachAction(trigger.id, action);
+      service.addTriggerAction(trigger.id, action);
       service.detachAction(trigger.id, action.id);
 
       const actions2 = service.getTriggerActions(trigger.id);
@@ -448,7 +448,7 @@ describe('UiActionsService', () => {
       } as any;
 
       service.registerAction(action);
-      expect(() => service.attachAction('i do not exist' as TriggerId, action)).toThrowError(
+      expect(() => service.addTriggerAction('i do not exist' as TriggerId, action)).toThrowError(
         'No trigger [triggerId = i do not exist] exists, for attaching action [actionId = ACTION_HELLO_WORLD].'
       );
     });

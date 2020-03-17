@@ -42,7 +42,7 @@ export interface DynamicActionManagerParams {
   storage: ActionStorage;
   uiActions: Pick<
     UiActionsService,
-    'registerAction' | '__attachAction' | 'unregisterAction' | 'detachAction' | 'getActionFactory'
+    'registerAction' | 'attachAction' | 'unregisterAction' | 'detachAction' | 'getActionFactory'
   >;
   isCompatible: <C = unknown>(context: C) => Promise<boolean>;
 }
@@ -90,7 +90,7 @@ export class DynamicActionManager {
     };
 
     uiActions.registerAction(actionDefinition);
-    for (const trigger of triggers) uiActions.__attachAction(trigger as any, actionId);
+    for (const trigger of triggers) uiActions.attachAction(trigger as any, actionId);
   }
 
   protected killAction({ eventId, triggers }: SerializedEvent) {

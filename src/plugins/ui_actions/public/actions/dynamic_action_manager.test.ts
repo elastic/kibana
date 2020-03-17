@@ -31,7 +31,7 @@ const setup = () => {
   };
   const uiActions: DynamicActionManagerParams['uiActions'] = {
     getActionFactory: jest.fn(),
-    __attachAction: jest.fn(),
+    attachAction: jest.fn(),
     detachAction: jest.fn(),
     registerAction: jest.fn(),
     unregisterAction: jest.fn(),
