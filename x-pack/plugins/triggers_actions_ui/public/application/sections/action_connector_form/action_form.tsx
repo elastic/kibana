@@ -273,28 +273,26 @@ export const ActionForm = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="s">
-                <Fragment>
-                  <h5>
-                    <FormattedMessage
-                      defaultMessage="Action: {actionConnectorName}"
-                      id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeEditTitle"
-                      values={{
-                        actionConnectorName: actionConnector.name,
-                      }}
-                    />
-                    {checkEnabledResult.isEnabled === false && (
-                      <Fragment>
-                        <span className="actActionForm__disabledActionWarningTitle">
-                          <EuiIcon type="alert" />
-                          <FormattedMessage
-                            defaultMessage="This action is disabled"
-                            id="xpack.triggersActionsUI.sections.alertForm.actionDisabledTitle"
-                          />
-                        </span>
-                      </Fragment>
-                    )}
-                  </h5>
-                </Fragment>
+                <h5>
+                  <FormattedMessage
+                    defaultMessage="Action: {actionConnectorName}"
+                    id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeEditTitle"
+                    values={{
+                      actionConnectorName: actionConnector.name,
+                    }}
+                  />
+                  {checkEnabledResult.isEnabled === false && (
+                    <Fragment>
+                      <span className="actActionForm__disabledActionWarningTitle">
+                        <EuiIcon type="alert" />
+                        <FormattedMessage
+                          defaultMessage="This action is disabled"
+                          id="xpack.triggersActionsUI.sections.alertForm.actionDisabledTitle"
+                        />
+                      </span>
+                    </Fragment>
+                  )}
+                </h5>
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
