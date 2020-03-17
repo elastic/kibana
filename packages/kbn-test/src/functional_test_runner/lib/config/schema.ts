@@ -69,9 +69,16 @@ export const schema = Joi.object()
         otherwise: Joi.any().default([]),
       }),
 
-    excludeTestFiles: Joi.array()
-      .items(Joi.string())
-      .default([]),
+    suiteFiles: Joi.object()
+      .keys({
+        include: Joi.array()
+          .items(Joi.string())
+          .default([]),
+        exclude: Joi.array()
+          .items(Joi.string())
+          .default([]),
+      })
+      .default(),
 
     suiteTags: Joi.object()
       .keys({
