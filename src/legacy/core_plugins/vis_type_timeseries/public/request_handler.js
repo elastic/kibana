@@ -18,7 +18,7 @@
  */
 
 import { validateInterval } from './lib/validate_interval';
-import { timezoneProvider } from './legacy_imports';
+import { getTimezone } from './lib/get_timezone';
 import { getUISettings, getDataStart, getCoreStart } from './services';
 
 export const metricsRequestHandler = async ({
@@ -30,7 +30,7 @@ export const metricsRequestHandler = async ({
   savedObjectId,
 }) => {
   const config = getUISettings();
-  const timezone = timezoneProvider(config)();
+  const timezone = getTimezone(config);
   const uiStateObj = uiState.get(visParams.type, {});
   const parsedTimeRange = getDataStart().query.timefilter.timefilter.calculateBounds(timeRange);
   const scaledDataFormat = config.get('dateFormat:scaled');

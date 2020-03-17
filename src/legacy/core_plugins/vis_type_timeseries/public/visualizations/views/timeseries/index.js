@@ -32,8 +32,7 @@ import {
   TooltipType,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
-
-import { timezoneProvider } from '../../../legacy_imports';
+import { getTimezone } from '../../../lib/get_timezone';
 import { eventBus, ACTIVE_CURSOR } from '../../lib/active_cursor';
 import { getUISettings } from '../../../services';
 import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constants';
@@ -86,7 +85,7 @@ export const TimeSeries = ({
 
   const tooltipFormatter = decorateFormatter(xAxisFormatter);
   const uiSettings = getUISettings();
-  const timeZone = timezoneProvider(uiSettings)();
+  const timeZone = getTimezone(uiSettings);
   const hasBarChart = series.some(({ bars }) => bars.show);
 
   return (
