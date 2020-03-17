@@ -183,7 +183,10 @@ export const StepConfigureDatasource: React.FunctionComponent<{
   // Step B, configure inputs (and their streams)
   // Assume packages only export one datasource for now
   const ConfigureInputs =
-    packageInfo.datasources && packageInfo.datasources[0] ? (
+    packageInfo.datasources &&
+    packageInfo.datasources[0] &&
+    packageInfo.datasources[0].inputs &&
+    packageInfo.datasources[0].inputs.length ? (
       <EuiFlexGroup direction="column">
         {packageInfo.datasources[0].inputs.map(packageInput => {
           const datasourceInput = datasource.inputs.find(input => input.type === packageInput.type);
