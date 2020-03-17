@@ -232,6 +232,7 @@ export class Table extends PureComponent {
             icon: 'inspect',
             onClick: object => goInspectObject(object),
             available: object => !!object.meta.editUrl,
+            'data-test-subj': 'savedObjectsTableAction-inspect',
           },
           {
             name: i18n.translate(
@@ -248,10 +249,12 @@ export class Table extends PureComponent {
             type: 'icon',
             icon: 'kqlSelector',
             onClick: object => onShowRelationships(object),
+            'data-test-subj': 'savedObjectsTableAction-relationships',
           },
           ...this.extraActions.map(action => {
             return {
               ...action.euiAction,
+              'data-test-subj': `savedObjectsTableAction-${action.id}`,
               onClick: object => {
                 this.setState({
                   activeAction: action,
