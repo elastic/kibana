@@ -6,10 +6,8 @@
 
 import { IClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
 import { SecurityLicense } from '../../common/licensing';
-import {
-  getHTTPAuthorizationHeader,
-  getHTTPAuthenticationScheme,
-} from './http_authorization_header';
+import { HTTPAuthorizationHeader } from './http_authorization_header';
+import { BasicHTTPAuthorizationHeaderCredentials } from './basic_http_authorization_header_credentials';
 
 /**
  * Represents the options to create an APIKey class instance that will be
@@ -167,14 +165,13 @@ export class APIKeys {
     }
 
     this.logger.debug('Trying to grant an API key');
-    const authorizationHeaderValue = getHTTPAuthorizationHeader(request);
-    if (authorizationHeaderValue == null) {
+    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+    if (authorizationHeader == null) {
       throw new Error(
         `Unable to grant an API Key, request does not contain an authorization header`
       );
     }
-    const scheme = getHTTPAuthenticationScheme(authorizationHeaderValue);
-    const params = this.getGrantParams(scheme, authorizationHeaderValue);
+    const params = this.getGrantParams(authorizationHeader);
 
     // User needs `manage_api_key` privilege to use this API
     let result: GrantAPIKeyResult;
@@ -225,28 +222,25 @@ export class APIKeys {
     return result;
   }
 
-  private getGrantParams(scheme: string, authorizationHeaderValue: string): GrantAPIKeyParams {
-    if (scheme.toLowerCase() === 'bearer') {
+  private getGrantParams(authorizationHeader: HTTPAuthorizationHeader): GrantAPIKeyParams {
+    if (authorizationHeader.scheme === 'bearer') {
       return {
         grant_type: 'access_token',
-        access_token: authorizationHeaderValue.substring(scheme.length + 1),
+        access_token: authorizationHeader.credentials,
       };
     }
 
-    if (scheme.toLowerCase() === 'basic') {
-      const [username, password] = Buffer.from(
-        authorizationHeaderValue.substring(scheme.length + 1),
-        'base64'
-      )
-        .toString()
-        .split(':');
+    if (authorizationHeader.scheme === 'basic') {
+      const basicCredentials = BasicHTTPAuthorizationHeaderCredentials.parseFromCredentials(
+        authorizationHeader.credentials
+      );
       return {
         grant_type: 'password',
-        username,
-        password,
+        username: basicCredentials.username,
+        password: basicCredentials.password,
       };
     }
 
-    throw new Error(`Unsupported scheme ${scheme} for granting API Key`);
+    throw new Error(`Unsupported scheme ${authorizationHeader.scheme} for granting API Key`);
   }
 }

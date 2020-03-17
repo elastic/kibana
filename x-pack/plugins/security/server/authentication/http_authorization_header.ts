@@ -6,39 +6,18 @@
 
 import { KibanaRequest } from '../../../../../src/core/server';
 
-/**
- * Parses request's `Authorization` HTTP header if present and extracts authentication scheme.
- * https://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml#authschemes
- * @param request Request instance to extract authentication scheme for.
- */
-export function getRequestsHTTPAuthenticationScheme(request: KibanaRequest) {
-  const authorizationHeaderValue = request.headers.authorization;
-  if (!authorizationHeaderValue || typeof authorizationHeaderValue !== 'string') {
-    return null;
+export class HTTPAuthorizationHeader {
+  constructor(public scheme: string, public credentials: string) {}
+
+  static parseFromRequest(request: KibanaRequest) {
+    const authorizationHeaderValue = request.headers.authorization;
+    if (!authorizationHeaderValue || typeof authorizationHeaderValue !== 'string') {
+      return null;
+    }
+
+    const [scheme] = authorizationHeaderValue.split(/\s+/);
+    const credentials = authorizationHeaderValue.substring(scheme.length + 1);
+
+    return new HTTPAuthorizationHeader(scheme.toLowerCase(), credentials);
   }
-
-  return getHTTPAuthenticationScheme(authorizationHeaderValue);
-}
-
-/**
- * Extracts authentication scheme from the value of a `Authorization` HTTP header.
- * https://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml#authschemes
- * @param authorizationHeaderValue Authorization header value to extract authentication scheme for.
- */
-export function getHTTPAuthenticationScheme(authorizationHeaderValue: string) {
-  return authorizationHeaderValue.split(/\s+/)[0].toLowerCase();
-}
-
-/**
- * Returns the `Authorization` HTTP header from a `KibanaRequest`
- * https://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml#authschemes
- * @param request Request instance to return authorization header.
- */
-export function getHTTPAuthorizationHeader(request: KibanaRequest) {
-  const authorizationHeaderValue = request.headers.authorization;
-  if (!authorizationHeaderValue || typeof authorizationHeaderValue !== 'string') {
-    return null;
-  }
-
-  return authorizationHeaderValue;
 }

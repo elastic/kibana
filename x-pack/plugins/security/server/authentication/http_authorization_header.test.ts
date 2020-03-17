@@ -6,16 +6,18 @@
 
 import { httpServerMock } from '../../../../../src/core/server/http/http_server.mocks';
 
-import { getRequestsHTTPAuthenticationScheme } from './http_authorization_header';
+import { HTTPAuthorizationHeader } from './http_authorization_header';
 
-describe('getHTTPAuthenticationScheme', () => {
+describe('HTTPAuthorizationHeader.parseFromRequest', () => {
   it('returns `null` if request does not have authorization header', () => {
-    expect(getRequestsHTTPAuthenticationScheme(httpServerMock.createKibanaRequest())).toBeNull();
+    expect(
+      HTTPAuthorizationHeader.parseFromRequest(httpServerMock.createKibanaRequest())
+    ).toBeNull();
   });
 
-  it('returns `null` if authorization header value isn not a string', () => {
+  it('returns `null` if authorization header value is not a string', () => {
     expect(
-      getRequestsHTTPAuthenticationScheme(
+      HTTPAuthorizationHeader.parseFromRequest(
         httpServerMock.createKibanaRequest({
           headers: { authorization: ['Basic xxx', 'Bearer xxx'] as any },
         })
@@ -25,13 +27,13 @@ describe('getHTTPAuthenticationScheme', () => {
 
   it('returns `null` if authorization header value is an empty string', () => {
     expect(
-      getRequestsHTTPAuthenticationScheme(
+      HTTPAuthorizationHeader.parseFromRequest(
         httpServerMock.createKibanaRequest({ headers: { authorization: '' } })
       )
     ).toBeNull();
   });
 
-  it('returns only scheme portion of the authorization header value in lower case', () => {
+  it('parses scheme portion of the authorization header value in lower case', () => {
     const headerValueAndSchemeMap = [
       ['Basic xxx', 'basic'],
       ['Basic xxx yyy', 'basic'],
@@ -48,11 +50,28 @@ describe('getHTTPAuthenticationScheme', () => {
     ];
 
     for (const [authorization, scheme] of headerValueAndSchemeMap) {
-      expect(
-        getRequestsHTTPAuthenticationScheme(
-          httpServerMock.createKibanaRequest({ headers: { authorization } })
-        )
-      ).toBe(scheme);
+      const header = HTTPAuthorizationHeader.parseFromRequest(
+        httpServerMock.createKibanaRequest({ headers: { authorization } })
+      );
+      expect(header).not.toBeNull();
+      expect(header!.scheme).toBe(scheme);
+    }
+  });
+
+  it('parses credentials portion of the authorization header value', () => {
+    const headerValueAndCredentialsMap = [
+      ['xxx fOo', 'fOo'],
+      ['xxx fOo bAr', 'fOo bAr'],
+      // We don't trim leading whitespaces in scheme.
+      [' xxx fOo', 'xxx fOo'],
+    ];
+
+    for (const [authorization, credentials] of headerValueAndCredentialsMap) {
+      const header = HTTPAuthorizationHeader.parseFromRequest(
+        httpServerMock.createKibanaRequest({ headers: { authorization } })
+      );
+      expect(header).not.toBeNull();
+      expect(header!.credentials).toBe(credentials);
     }
   });
 });

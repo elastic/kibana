@@ -9,7 +9,7 @@ import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
-import { getRequestsHTTPAuthenticationScheme } from '../http_authorization_header';
+import { HTTPAuthorizationHeader } from '../http_authorization_header';
 import { Tokens, TokenPair } from '../tokens';
 import { BaseAuthenticationProvider } from './base';
 
@@ -82,7 +82,7 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
     this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
-    if (getRequestsHTTPAuthenticationScheme(request) != null) {
+    if (HTTPAuthorizationHeader.parseFromRequest(request) != null) {
       this.logger.debug('Cannot authenticate requests with `Authorization` header.');
       return AuthenticationResult.notHandled();
     }
