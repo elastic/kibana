@@ -16,11 +16,11 @@ import {
   EuiLink,
   EuiText,
 } from '@elastic/eui';
-import { getSimpleArg, setSimpleArg } from '../../lib/arg_helpers';
-import { ESFieldsSelect } from '../../components/es_fields_select';
-import { ESFieldSelect } from '../../components/es_field_select';
-import { ESIndexSelect } from '../../components/es_index_select';
-import { templateFromReactComponent } from '../../lib/template_from_react_component';
+import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
+import { ESFieldsSelect } from '../../../public/components/es_fields_select';
+import { ESFieldSelect } from '../../../public/components/es_field_select';
+import { ESIndexSelect } from '../../../public/components/es_index_select';
+import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { DataSourceStrings, LUCENE_QUERY_URL } from '../../../i18n';
 
 const { ESDocs: strings } = DataSourceStrings;

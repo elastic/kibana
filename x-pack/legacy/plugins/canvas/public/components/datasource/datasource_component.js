@@ -114,7 +114,7 @@ export class DatasourceComponent extends PureComponent {
     } = this.props;
 
     const { defaultIndex } = this.state;
-
+    console.log({ datasources });
     if (selecting) {
       return (
         <DatasourceSelector
