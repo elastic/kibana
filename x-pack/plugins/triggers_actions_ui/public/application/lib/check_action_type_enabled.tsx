@@ -50,7 +50,7 @@ export function checkActionTypeEnabled(
           )}
           description={i18n.translate(
             'xpack.triggersActionsUI.sections.alertForm.actionTypeDisabledByLicenseMessageDescription',
-            { defaultMessage: 'To enable this action, please upgrade your license.' }
+            { defaultMessage: 'To re-enable this action, please upgrade your license.' }
           )}
           className="actCheckActionTypeEnabled__disabledActionWarningCard"
           children={
