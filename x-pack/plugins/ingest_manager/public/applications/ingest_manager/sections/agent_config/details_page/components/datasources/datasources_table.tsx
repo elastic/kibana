@@ -181,27 +181,37 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
               <TableRowActions
                 items={[
                   // FIXME: implement View datasource action
-                  <EuiContextMenuItem disabled icon="inspect" onClick={() => {}}>
+                  <EuiContextMenuItem
+                    disabled
+                    icon="inspect"
+                    onClick={() => {}}
+                    key="datasourceView"
+                  >
                     <FormattedMessage
                       id="xpack.ingestManager.configDetails.datasourcesTable.viewActionTitle"
                       defaultMessage="View data source"
                     />
                   </EuiContextMenuItem>,
                   // FIXME: implement Edit datasource action
-                  <EuiContextMenuItem disabled icon="pencil" onClick={() => {}}>
+                  <EuiContextMenuItem
+                    disabled
+                    icon="pencil"
+                    onClick={() => {}}
+                    key="datasourceEdit"
+                  >
                     <FormattedMessage
                       id="xpack.ingestManager.configDetails.datasourcesTable.editActionTitle"
                       defaultMessage="Edit data source"
                     />
                   </EuiContextMenuItem>,
                   // FIXME: implement Copy datasource action
-                  <EuiContextMenuItem disabled icon="copy" onClick={() => {}}>
+                  <EuiContextMenuItem disabled icon="copy" onClick={() => {}} key="datasourceCopy">
                     <FormattedMessage
                       id="xpack.ingestManager.configDetails.datasourcesTable.copyActionTitle"
                       defaultMessage="Copy data source"
                     />
                   </EuiContextMenuItem>,
-                  <DatasourceDeleteProvider agentConfig={config}>
+                  <DatasourceDeleteProvider agentConfig={config} key="datasourceDelete">
                     {deleteDatasourcePrompt => {
                       return (
                         <DangerEuiContextMenuItem

@@ -305,10 +305,10 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
             />
           </h2>
         }
-        actions={hasWriteCapabilites ?? createAgentConfigButton}
+        actions={createAgentConfigButton}
       />
     ),
-    [hasWriteCapabilites, createAgentConfigButton]
+    [createAgentConfigButton]
   );
 
   return (
