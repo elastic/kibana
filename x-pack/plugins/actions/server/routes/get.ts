@@ -14,6 +14,7 @@ import {
 } from 'kibana/server';
 import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
+import { BASE_ACTION_API_PATH } from '../../common';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -22,7 +23,7 @@ const paramSchema = schema.object({
 export const getActionRoute = (router: IRouter, licenseState: LicenseState) => {
   router.get(
     {
-      path: `/api/action/{id}`,
+      path: `${BASE_ACTION_API_PATH}/{id}`,
       validate: {
         params: paramSchema,
       },

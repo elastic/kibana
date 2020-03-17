@@ -15,6 +15,7 @@ import {
 import { ActionResult } from '../types';
 import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
+import { BASE_ACTION_API_PATH } from '../../common';
 
 export const bodySchema = schema.object({
   name: schema.string(),
@@ -26,7 +27,7 @@ export const bodySchema = schema.object({
 export const createActionRoute = (router: IRouter, licenseState: LicenseState) => {
   router.post(
     {
-      path: `/api/action`,
+      path: BASE_ACTION_API_PATH,
       validate: {
         body: bodySchema,
       },

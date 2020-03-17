@@ -19,7 +19,7 @@ import {
 import { kfetch } from 'ui/kfetch';
 import { omit, pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ActionResult } from '../../../../../../../plugins/actions/common';
+import { ActionResult, BASE_ACTION_API_PATH } from '../../../../../../../plugins/actions/common';
 import { ManageEmailAction, EmailActionData } from '../manage_email_action';
 import { ALERT_ACTION_TYPE_EMAIL } from '../../../../common/constants';
 import { NEW_ACTION_ID } from './configuration';
@@ -44,7 +44,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
     if (props.editAction) {
       await kfetch({
         method: 'PUT',
-        pathname: `/api/action/${props.editAction.id}`,
+        pathname: `${BASE_ACTION_API_PATH}/${props.editAction.id}`,
         body: JSON.stringify({
           name: props.editAction.name,
           config: omit(data, ['user', 'password']),
@@ -55,7 +55,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
     } else {
       await kfetch({
         method: 'POST',
-        pathname: '/api/action',
+        pathname: BASE_ACTION_API_PATH,
         body: JSON.stringify({
           name: i18n.translate('xpack.monitoring.alerts.configuration.emailAction.name', {
             defaultMessage: 'Email action for Stack Monitoring alerts',
@@ -75,7 +75,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
 
     await kfetch({
       method: 'DELETE',
-      pathname: `/api/action/${id}`,
+      pathname: `${BASE_ACTION_API_PATH}/${id}`,
     });
 
     if (props.editAction && props.editAction.id === id) {
@@ -101,7 +101,7 @@ export const Step1: React.FC<GetStep1Props> = (props: GetStep1Props) => {
 
     const result = await kfetch({
       method: 'POST',
-      pathname: `/api/action/${props.selectedEmailActionId}/_execute`,
+      pathname: `${BASE_ACTION_API_PATH}/${props.selectedEmailActionId}/_execute`,
       body: JSON.stringify({ params }),
     });
     if (result.status === 'ok') {
