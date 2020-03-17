@@ -747,8 +747,7 @@ class JobService {
     return datafeedId;
   }
 
-  getDatafeedPreview(jobId) {
-    const datafeedId = this.getDatafeedId(jobId);
+  getDatafeedPreview(datafeedId) {
     return ml.datafeedPreview({ datafeedId });
   }
 

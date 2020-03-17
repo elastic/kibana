@@ -16,18 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { createApi } from '..';
-import { createDeps } from './helpers';
+import { coreMock } from '../../../core/public/mocks';
+import { testPlugin } from './tests/test_plugin';
 
 test('cannot register embeddable factory with the same ID', async () => {
-  const deps = createDeps();
-  const { api } = createApi(deps);
+  const coreSetup = coreMock.createSetup();
+  const coreStart = coreMock.createStart();
+  const { setup } = testPlugin(coreSetup, coreStart);
   const embeddableFactoryId = 'ID';
   const embeddableFactory = {} as any;
 
-  api.registerEmbeddableFactory(embeddableFactoryId, embeddableFactory);
-  expect(() => api.registerEmbeddableFactory(embeddableFactoryId, embeddableFactory)).toThrowError(
+  setup.registerEmbeddableFactory(embeddableFactoryId, embeddableFactory);
+  expect(() =>
+    setup.registerEmbeddableFactory(embeddableFactoryId, embeddableFactory)
+  ).toThrowError(
     'Embeddable factory [embeddableFactoryId = ID] already registered in Embeddables API.'
   );
 });
