@@ -55,6 +55,7 @@ describe('Detections', () => {
         waitForSignals();
         cy.reload();
         waitForSignals();
+        waitForSignalsToBeLoaded();
 
         const expectedNumberOfSignalsAfterClosing = +numberOfSignals - numberOfSignalsToBeClosed;
         cy.get(NUMBER_OF_SIGNALS)

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TypeOf } from '@kbn/config-schema';
-import { RequestHandler } from 'kibana/server';
+import { RequestHandler } from 'src/core/server';
 import { outputService, agentConfigService } from '../../services';
 import { CreateFleetSetupRequestSchema, CreateFleetSetupResponse } from '../../types';
 import { setup } from '../../services/setup';
