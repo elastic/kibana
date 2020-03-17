@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { telemetryCollectionManager } from '../../../../../../src/legacy/core_plugins/telemetry/server';
-import { getAllStats } from './get_all_stats';
+import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
+import { getAllStats, CustomContext } from './get_all_stats';
 import { getClusterUuids } from './get_cluster_uuids';
 import { getLicenses } from './get_licenses';
 
-export function registerMonitoringCollection() {
+export function registerMonitoringCollection(
+  telemetryCollectionManager: TelemetryCollectionManagerPluginSetup,
+  customContext: CustomContext
+) {
   telemetryCollectionManager.setCollection({
     esCluster: 'monitoring',
     title: 'monitoring',
@@ -17,5 +20,6 @@ export function registerMonitoringCollection() {
     statsGetter: getAllStats,
     clusterDetailsGetter: getClusterUuids,
     licenseGetter: getLicenses,
+    customContext,
   });
 }

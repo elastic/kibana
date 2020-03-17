@@ -5,8 +5,8 @@
  */
 
 import { get } from 'lodash';
-import { StatsCollectionConfig } from 'src/legacy/core_plugins/telemetry/server/collection_manager';
 import { SearchResponse } from 'elasticsearch';
+import { StatsCollectionConfig } from 'src/plugins/telemetry_collection_manager/server';
 import { createQuery } from './create_query';
 import { INDEX_PATTERN_BEATS } from '../../common/constants';
 
@@ -308,7 +308,6 @@ export function processResults(
 
 /*
  * Create a set of result objects where each is the result of searching hits from Elasticsearch with a size of HITS_SIZE each time.
- * @param {Object} server - The server instance
  * @param {function} callCluster - The callWithRequest or callWithInternalUser handler
  * @param {Array} clusterUuids - The string Cluster UUIDs to fetch details for
  * @param {Date} start - Start time to limit the stats
@@ -319,7 +318,6 @@ export function processResults(
  * @return {Promise}
  */
 async function fetchBeatsByType(
-  server: StatsCollectionConfig['server'],
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[],
   start: StatsCollectionConfig['start'],
@@ -376,7 +374,7 @@ async function fetchBeatsByType(
       };
 
       // returns a promise and keeps the caller blocked from returning until the entire clusters object is built
-      return fetchBeatsByType(server, callCluster, clusterUuids, start, end, nextOptions, type);
+      return fetchBeatsByType(callCluster, clusterUuids, start, end, nextOptions, type);
     }
   }
 
@@ -384,25 +382,23 @@ async function fetchBeatsByType(
 }
 
 export async function fetchBeatsStats(
-  server: StatsCollectionConfig['server'],
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[],
   start: StatsCollectionConfig['start'],
   end: StatsCollectionConfig['end'],
   options: { page?: number } & BeatsProcessOptions
 ) {
-  return fetchBeatsByType(server, callCluster, clusterUuids, start, end, options, 'beats_stats');
+  return fetchBeatsByType(callCluster, clusterUuids, start, end, options, 'beats_stats');
 }
 
 export async function fetchBeatsStates(
-  server: StatsCollectionConfig['server'],
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[],
   start: StatsCollectionConfig['start'],
   end: StatsCollectionConfig['end'],
   options: { page?: number } & BeatsProcessOptions
 ) {
-  return fetchBeatsByType(server, callCluster, clusterUuids, start, end, options, 'beats_state');
+  return fetchBeatsByType(callCluster, clusterUuids, start, end, options, 'beats_state');
 }
 
 /*
@@ -410,7 +406,6 @@ export async function fetchBeatsStates(
  * @return {Object} - Beats stats in an object keyed by the cluster UUIDs
  */
 export async function getBeatsStats(
-  server: StatsCollectionConfig['server'],
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[],
   start: StatsCollectionConfig['start'],
@@ -425,8 +420,8 @@ export async function getBeatsStats(
   };
 
   await Promise.all([
-    fetchBeatsStats(server, callCluster, clusterUuids, start, end, options),
-    fetchBeatsStates(server, callCluster, clusterUuids, start, end, options),
+    fetchBeatsStats(callCluster, clusterUuids, start, end, options),
+    fetchBeatsStates(callCluster, clusterUuids, start, end, options),
   ]);
 
   return options.clusters;

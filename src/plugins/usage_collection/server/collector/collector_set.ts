@@ -35,7 +35,7 @@ export class CollectorSet {
   private readonly maximumWaitTimeForAllCollectorsInS: number;
   private collectors: Array<Collector<any, any>> = [];
   constructor({ logger, maximumWaitTimeForAllCollectorsInS, collectors = [] }: CollectorSetConfig) {
-    this.logger = logger;
+    this.logger = logger.get('collector-set');
     this.collectors = collectors;
     this.maximumWaitTimeForAllCollectorsInS = maximumWaitTimeForAllCollectorsInS || 60;
   }

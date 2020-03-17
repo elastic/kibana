@@ -5,30 +5,33 @@
  */
 
 import { get } from 'lodash';
-// @ts-ignore
-import { createQuery } from './create_query';
-// @ts-ignore
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
-
 import {
   ClusterDetailsGetter,
   StatsCollectionConfig,
   ClusterDetails,
-} from '../../../../../../src/legacy/core_plugins/telemetry/server/collection_manager';
+} from 'src/plugins/telemetry_collection_manager/server';
+import { createQuery } from './create_query';
+import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
+import { CustomContext } from './get_all_stats';
 
 /**
  * Get a list of Cluster UUIDs that exist within the specified timespan.
  */
-export const getClusterUuids: ClusterDetailsGetter = async config => {
-  const response = await fetchClusterUuids(config);
+export const getClusterUuids: ClusterDetailsGetter<CustomContext> = async (
+  config,
+  { maxBucketSize }
+) => {
+  const response = await fetchClusterUuids(config, maxBucketSize);
   return handleClusterUuidsResponse(response);
 };
 
 /**
  * Fetch the aggregated Cluster UUIDs from the monitoring cluster.
  */
-export function fetchClusterUuids({ server, callCluster, start, end }: StatsCollectionConfig) {
-  const config = server.config();
+export function fetchClusterUuids(
+  { callCluster, start, end }: StatsCollectionConfig,
+  maxBucketSize: number
+) {
   const params = {
     index: INDEX_PATTERN_ELASTICSEARCH,
     size: 0,
@@ -40,7 +43,7 @@ export function fetchClusterUuids({ server, callCluster, start, end }: StatsColl
         cluster_uuids: {
           terms: {
             field: 'cluster_uuid',
-            size: config.get('monitoring.ui.max_bucket_size'),
+            size: maxBucketSize,
           },
         },
       },

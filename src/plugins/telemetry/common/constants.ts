@@ -17,6 +17,12 @@
  * under the License.
  */
 
+/*
+ * config options opt into telemetry
+ * @type {string}
+ */
+export const CONFIG_TELEMETRY = 'telemetry:optIn';
+
 /**
  * The amount of time, in milliseconds, to wait between reports when enabled.
  * Currently 24 hours.
@@ -37,3 +43,28 @@ export const PATH_TO_ADVANCED_SETTINGS = 'kibana#/management/kibana/settings';
  * Link to the Elastic Telemetry privacy statement.
  */
 export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/privacy-statement`;
+
+/**
+ * The type name used to publish telemetry plugin stats.
+ */
+export const TELEMETRY_STATS_TYPE = 'telemetry';
+
+/**
+ * The endpoint version when hitting the remote telemetry service
+ */
+export const ENDPOINT_VERSION = 'v2';
+
+/**
+ * UI metric usage type
+ */
+export const UI_METRIC_USAGE_TYPE = 'ui_metric';
+
+/**
+ * Application Usage type
+ */
+export const APPLICATION_USAGE_TYPE = 'application_usage';
+
+/**
+ * The type name used within the Monitoring index to publish management stats.
+ */
+export const KIBANA_STACK_MANAGEMENT_STATS_TYPE = 'stack_management';

@@ -17,24 +17,9 @@
  * under the License.
  */
 
-import * as Rx from 'rxjs';
 import { resolve } from 'path';
-import JoiNamespace from 'joi';
 import { Server } from 'hapi';
-import { PluginInitializerContext } from 'src/core/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getConfigPath } from '../../../core/server/path';
-// @ts-ignore
-import mappings from './mappings.json';
-import {
-  telemetryPlugin,
-  replaceTelemetryInjectedVars,
-  FetcherTask,
-  PluginsSetup,
-  handleOldSettings,
-} from './server';
-
-const ENDPOINT_VERSION = 'v2';
+import { replaceTelemetryInjectedVars } from 'src/plugins/telemetry/server';
 
 const telemetry = (kibana: any) => {
   return new kibana.Plugin({
@@ -42,48 +27,8 @@ const telemetry = (kibana: any) => {
     configPrefix: 'telemetry',
     publicDir: resolve(__dirname, 'public'),
     require: ['elasticsearch'],
-    config(Joi: typeof JoiNamespace) {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-        allowChangingOptInStatus: Joi.boolean().default(true),
-        optIn: Joi.when('allowChangingOptInStatus', {
-          is: false,
-          then: Joi.valid(true).default(true),
-          otherwise: Joi.boolean().default(true),
-        }),
-        // `config` is used internally and not intended to be set
-        config: Joi.string().default(getConfigPath()),
-        banner: Joi.boolean().default(true),
-        url: Joi.when('$dev', {
-          is: true,
-          then: Joi.string().default(
-            `https://telemetry-staging.elastic.co/xpack/${ENDPOINT_VERSION}/send`
-          ),
-          otherwise: Joi.string().default(
-            `https://telemetry.elastic.co/xpack/${ENDPOINT_VERSION}/send`
-          ),
-        }),
-        optInStatusUrl: Joi.when('$dev', {
-          is: true,
-          then: Joi.string().default(
-            `https://telemetry-staging.elastic.co/opt_in_status/${ENDPOINT_VERSION}/send`
-          ),
-          otherwise: Joi.string().default(
-            `https://telemetry.elastic.co/opt_in_status/${ENDPOINT_VERSION}/send`
-          ),
-        }),
-        sendUsageFrom: Joi.string()
-          .allow(['server', 'browser'])
-          .default('browser'),
-      }).default();
-    },
     uiExports: {
       managementSections: ['plugins/telemetry/views/management'],
-      savedObjectSchemas: {
-        telemetry: {
-          isNamespaceAgnostic: true,
-        },
-      },
       async replaceInjectedVars(originalInjectedVars: any, request: any, server: any) {
         const telemetryInjectedVars = await replaceTelemetryInjectedVars(request, server);
         return Object.assign({}, originalInjectedVars, telemetryInjectedVars);
@@ -103,48 +48,6 @@ const telemetry = (kibana: any) => {
           telemetryNotifyUserAboutOptInDefault: false,
         };
       },
-      mappings,
-    },
-    postInit(server: Server) {
-      const fetcherTask = new FetcherTask(server);
-      fetcherTask.start();
-    },
-    async init(server: Server) {
-      const { usageCollection } = server.newPlatform.setup.plugins;
-      const initializerContext = {
-        env: {
-          packageInfo: {
-            version: server.config().get('pkg.version'),
-          },
-        },
-        config: {
-          create() {
-            const config = server.config();
-            return Rx.of({
-              enabled: config.get('telemetry.enabled'),
-              optIn: config.get('telemetry.optIn'),
-              config: config.get('telemetry.config'),
-              banner: config.get('telemetry.banner'),
-              url: config.get('telemetry.url'),
-              allowChangingOptInStatus: config.get('telemetry.allowChangingOptInStatus'),
-            });
-          },
-        },
-      } as PluginInitializerContext;
-
-      try {
-        await handleOldSettings(server);
-      } catch (err) {
-        server.log(['warning', 'telemetry'], 'Unable to update legacy telemetry configs.');
-      }
-
-      const pluginsSetup: PluginsSetup = {
-        usageCollection,
-      };
-
-      const npPlugin = telemetryPlugin(initializerContext);
-      await npPlugin.setup(server.newPlatform.setup.core, pluginsSetup, server);
-      await npPlugin.start(server.newPlatform.start.core);
     },
   });
 };

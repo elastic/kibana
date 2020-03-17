@@ -34,8 +34,10 @@ export class Plugin {
     } = __LEGACY;
     const config = monitoringConfig();
 
-    const { usageCollection, licensing, alerting } = pluginsSetup;
-    registerMonitoringCollection();
+    const { usageCollection, licensing, alerting, telemetryCollectionManager } = pluginsSetup;
+    registerMonitoringCollection(telemetryCollectionManager, {
+      maxBucketSize: config.get('monitoring.ui.max_bucket_size'),
+    });
     /*
      * Register collector objects for stats to show up in the APIs
      */

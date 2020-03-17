@@ -13,21 +13,10 @@ import {
 
 describe('get_high_level_stats', () => {
   const callWith = sinon.stub();
-  const size = 123;
   const product = 'xyz';
   const cloudName = 'bare-metal';
   const start = 0;
   const end = 1;
-  const server = {
-    config: sinon.stub().returns({
-      get: sinon
-        .stub()
-        .withArgs(`xpack.monitoring.${product}.index_pattern`)
-        .returns(`.monitoring-${product}-N-*`)
-        .withArgs('xpack.monitoring.max_bucket_size')
-        .returns(size),
-    }),
-  };
   const response = {
     hits: {
       hits: [
@@ -243,9 +232,9 @@ describe('get_high_level_stats', () => {
     it('returns clusters', async () => {
       callWith.withArgs('search').returns(Promise.resolve(response));
 
-      expect(
-        await getHighLevelStats(server, callWith, clusterUuids, start, end, product)
-      ).toStrictEqual(expectedClusters);
+      expect(await getHighLevelStats(callWith, clusterUuids, start, end, product, 1)).toStrictEqual(
+        expectedClusters
+      );
     });
   });
 
@@ -254,7 +243,7 @@ describe('get_high_level_stats', () => {
       callWith.returns(Promise.resolve(response));
 
       expect(
-        await fetchHighLevelStats(server, callWith, clusterUuids, start, end, product)
+        await fetchHighLevelStats(callWith, clusterUuids, start, end, product, 1)
       ).toStrictEqual(response);
     });
   });

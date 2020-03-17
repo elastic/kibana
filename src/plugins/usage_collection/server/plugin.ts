@@ -18,9 +18,14 @@
  */
 
 import { first } from 'rxjs/operators';
-import { CoreStart, ISavedObjectsRepository } from 'kibana/server';
+import {
+  PluginInitializerContext,
+  Logger,
+  CoreSetup,
+  CoreStart,
+  ISavedObjectsRepository,
+} from 'kibana/server';
 import { ConfigType } from './config';
-import { PluginInitializerContext, Logger, CoreSetup } from '../../../../src/core/server';
 import { CollectorSet } from './collector';
 import { setupRoutes } from './routes';
 
@@ -29,7 +34,7 @@ export class UsageCollectionPlugin {
   logger: Logger;
   private savedObjects?: ISavedObjectsRepository;
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.logger = this.initializerContext.logger.get();
+    this.logger = this.initializerContext.logger.get('usage-collector');
   }
 
   public async setup(core: CoreSetup) {

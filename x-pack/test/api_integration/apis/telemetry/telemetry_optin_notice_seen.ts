@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { Client, DeleteDocumentParams, GetParams, GetResponse } from 'elasticsearch';
-import { TelemetrySavedObjectAttributes } from '../../../../../src/legacy/core_plugins/telemetry/server/telemetry_repository';
+import { TelemetrySavedObjectAttributes } from '../../../../../src/plugins/telemetry/server/telemetry_repository';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function optInTest({ getService }: FtrProviderContext) {

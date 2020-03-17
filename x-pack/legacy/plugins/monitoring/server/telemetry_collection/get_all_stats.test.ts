@@ -9,26 +9,12 @@ import { getStackStats, getAllStats, handleAllStats } from './get_all_stats';
 import { ESClusterStats } from './get_es_stats';
 import { KibanaStats } from './get_kibana_stats';
 import { ClustersHighLevelStats } from './get_high_level_stats';
+import { coreMock } from 'src/core/server/mocks';
 
 describe('get_all_stats', () => {
-  const size = 123;
   const start = 0;
   const end = 1;
   const callCluster = sinon.stub();
-  const server = {
-    config: sinon.stub().returns({
-      get: sinon
-        .stub()
-        .withArgs('xpack.monitoring.elasticsearch.index_pattern')
-        .returns('.monitoring-es-N-*')
-        .withArgs('xpack.monitoring.kibana.index_pattern')
-        .returns('.monitoring-kibana-N-*')
-        .withArgs('xpack.monitoring.logstash.index_pattern')
-        .returns('.monitoring-logstash-N-*')
-        .withArgs('xpack.monitoring.max_bucket_size')
-        .returns(size),
-    }),
-  };
 
   const esClusters = [
     { cluster_uuid: 'a' },
@@ -186,13 +172,21 @@ describe('get_all_stats', () => {
         .returns(Promise.resolve({})); // Beats state
 
       expect(
-        await getAllStats([{ clusterUuid: 'a' }], {
-          callCluster: callCluster as any,
-          usageCollection: {} as any,
-          server,
-          start,
-          end,
-        })
+        await getAllStats(
+          [{ clusterUuid: 'a' }],
+          {
+            callCluster: callCluster as any,
+            usageCollection: {} as any,
+            start,
+            end,
+          },
+          {
+            logger: coreMock.createPluginInitializerContext().logger.get('test'),
+            isDev: true,
+            version: 'version',
+            maxBucketSize: 1,
+          }
+        )
       ).toStrictEqual(allClusters);
     });
 
@@ -204,13 +198,21 @@ describe('get_all_stats', () => {
       callCluster.withArgs('search').returns(Promise.resolve(clusterUuidsResponse));
 
       expect(
-        await getAllStats([], {
-          callCluster: callCluster as any,
-          usageCollection: {} as any,
-          server,
-          start,
-          end,
-        })
+        await getAllStats(
+          [],
+          {
+            callCluster: callCluster as any,
+            usageCollection: {} as any,
+            start,
+            end,
+          },
+          {
+            logger: coreMock.createPluginInitializerContext().logger.get('test'),
+            isDev: true,
+            version: 'version',
+            maxBucketSize: 1,
+          }
+        )
       ).toStrictEqual([]);
     });
   });

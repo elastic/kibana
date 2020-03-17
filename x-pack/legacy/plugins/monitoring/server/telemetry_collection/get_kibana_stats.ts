@@ -6,8 +6,8 @@
 
 import moment from 'moment';
 import { isEmpty } from 'lodash';
-import { StatsCollectionConfig } from 'src/legacy/core_plugins/telemetry/server/collection_manager';
 import { SearchResponse } from 'elasticsearch';
+import { StatsCollectionConfig } from 'src/plugins/telemetry_collection_manager/server';
 import { KIBANA_SYSTEM_ID, TELEMETRY_COLLECTION_INTERVAL } from '../../common/constants';
 import {
   fetchHighLevelStats,
@@ -173,20 +173,20 @@ export function ensureTimeSpan(
  * specialized usage data that comes with kibana stats (kibana_stats.usage).
  */
 export async function getKibanaStats(
-  server: StatsCollectionConfig['server'],
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[],
   start: StatsCollectionConfig['start'],
-  end: StatsCollectionConfig['end']
+  end: StatsCollectionConfig['end'],
+  maxBucketSize: number
 ) {
   const { start: safeStart, end: safeEnd } = ensureTimeSpan(start, end);
   const rawStats = await fetchHighLevelStats<KibanaUsageStats>(
-    server,
     callCluster,
     clusterUuids,
     safeStart,
     safeEnd,
-    KIBANA_SYSTEM_ID
+    KIBANA_SYSTEM_ID,
+    maxBucketSize
   );
   const highLevelStats = handleHighLevelStatsResponse(rawStats, KIBANA_SYSTEM_ID);
   const usageStats = getUsageStats(rawStats);
