@@ -4,27 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mockJobQueueClient } from './report_info_button.test.mocks';
-
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ReportInfoButton } from './report_info_button';
+import { ReportingAPIClient } from '../lib/reporting_api_client';
+
+jest.mock('../lib/reporting_api_client');
+
+const httpSetup = {} as any;
+const apiClient = new ReportingAPIClient(httpSetup);
 
 describe('ReportInfoButton', () => {
-  beforeEach(() => {
-    mockJobQueueClient.getInfo = jest.fn(() => ({
-      payload: { title: 'Test Job' },
-    }));
-  });
-
   it('handles button click flyout on click', () => {
-    const wrapper = mountWithIntl(<ReportInfoButton jobId="abc-123" />);
+    const wrapper = mountWithIntl(<ReportInfoButton apiClient={apiClient} jobId="abc-123" />);
     const input = wrapper.find('[data-test-subj="reportInfoButton"]').hostNodes();
     expect(input).toMatchSnapshot();
   });
 
-  it('opens flyout with info', () => {
-    const wrapper = mountWithIntl(<ReportInfoButton jobId="abc-456" />);
+  it('opens flyout with info', async () => {
+    const wrapper = mountWithIntl(<ReportInfoButton apiClient={apiClient} jobId="abc-456" />);
     const input = wrapper.find('[data-test-subj="reportInfoButton"]').hostNodes();
 
     input.simulate('click');
@@ -32,17 +30,17 @@ describe('ReportInfoButton', () => {
     const flyout = wrapper.find('[data-test-subj="reportInfoFlyout"]');
     expect(flyout).toMatchSnapshot();
 
-    expect(mockJobQueueClient.getInfo).toHaveBeenCalledTimes(1);
-    expect(mockJobQueueClient.getInfo).toHaveBeenCalledWith('abc-456');
+    expect(apiClient.getInfo).toHaveBeenCalledTimes(1);
+    expect(apiClient.getInfo).toHaveBeenCalledWith('abc-456');
   });
 
   it('opens flyout with fetch error info', () => {
     // simulate fetch failure
-    mockJobQueueClient.getInfo = jest.fn(() => {
+    apiClient.getInfo = jest.fn(() => {
       throw new Error('Could not fetch the job info');
     });
 
-    const wrapper = mountWithIntl(<ReportInfoButton jobId="abc-789" />);
+    const wrapper = mountWithIntl(<ReportInfoButton apiClient={apiClient} jobId="abc-789" />);
     const input = wrapper.find('[data-test-subj="reportInfoButton"]').hostNodes();
 
     input.simulate('click');
@@ -50,7 +48,7 @@ describe('ReportInfoButton', () => {
     const flyout = wrapper.find('[data-test-subj="reportInfoFlyout"]');
     expect(flyout).toMatchSnapshot();
 
-    expect(mockJobQueueClient.getInfo).toHaveBeenCalledTimes(1);
-    expect(mockJobQueueClient.getInfo).toHaveBeenCalledWith('abc-789');
+    expect(apiClient.getInfo).toHaveBeenCalledTimes(1);
+    expect(apiClient.getInfo).toHaveBeenCalledWith('abc-789');
   });
 });
