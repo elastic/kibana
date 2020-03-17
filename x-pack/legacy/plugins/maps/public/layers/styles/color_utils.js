@@ -7,11 +7,7 @@
 import React from 'react';
 import tinycolor from 'tinycolor2';
 import chroma from 'chroma-js';
-
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
-
-import { getLegendColors, getColor } from 'ui/vis/map/color_util';
-
 import { ColorGradient } from './components/color_gradient';
 import { COLOR_PALETTE_MAX_SIZE } from '../../../common/constants';
 import { vislibColorMaps } from '../../../../../../../src/plugins/charts/public';
@@ -29,6 +25,24 @@ export const DEFAULT_LINE_COLORS = [
   '#000',
   '#FFF',
 ];
+
+function getLegendColors(colorRamp, numLegendColors = 4) {
+  const colors = [];
+  colors[0] = getColor(colorRamp, 0);
+  for (let i = 1; i < numLegendColors - 1; i++) {
+    colors[i] = getColor(colorRamp, Math.floor((colorRamp.length * i) / numLegendColors));
+  }
+  colors[numLegendColors - 1] = getColor(colorRamp, colorRamp.length - 1);
+  return colors;
+}
+
+function getColor(colorRamp, i) {
+  const color = colorRamp[i][1];
+  const red = Math.floor(color[0] * 255);
+  const green = Math.floor(color[1] * 255);
+  const blue = Math.floor(color[2] * 255);
+  return `rgb(${red},${green},${blue})`;
+}
 
 function getColorRamp(colorRampName) {
   const colorRamp = vislibColorMaps[colorRampName];
