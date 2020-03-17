@@ -87,7 +87,7 @@ export const CustomLinkFlyout = ({
                   'xpack.apm.settings.customizeUI.customLink.flyout.label',
                   {
                     defaultMessage:
-                      'Links will be available in the context of transaction details throughout the APM app. You can create an unlimited number of links and use the filter options to scope them to only appear for specific services. You can refer to dynamic variables by using any of the transaction metadata to fill in your URLs. TODO: Learn more about it in the docs.'
+                      'Links will be available in the context of transaction details throughout the APM app. You can create an unlimited number of links. You can refer to dynamic variables by using any of the transaction metadata to fill in your URLs. Learn more about it in the docs.'
                   }
                 )}
               </p>

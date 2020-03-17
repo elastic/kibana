@@ -68,12 +68,12 @@ export const FiltersSection = ({
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiText size="xs">
+      <EuiText size="s">
         {i18n.translate(
           'xpack.apm.settings.customizeUI.customLink.flyout.filters.subtitle',
           {
             defaultMessage:
-              'Add additional values within the same field by comma separating values.'
+              'Use the filter options to scope them to only appear for specific services.'
           }
         )}
       </EuiText>
