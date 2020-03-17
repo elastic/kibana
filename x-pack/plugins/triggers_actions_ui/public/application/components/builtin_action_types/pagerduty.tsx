@@ -176,15 +176,71 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
     group,
   } = actionParams;
   const severityOptions = [
-    { value: 'info', text: 'Info' },
-    { value: 'critical', text: 'Critical' },
-    { value: 'warning', text: 'Warning' },
-    { value: 'error', text: 'Error' },
+    {
+      value: 'info',
+      text: i18n.translate(
+        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectInfoOptionLabel',
+        {
+          defaultMessage: 'Info',
+        }
+      ),
+    },
+    {
+      value: 'critical',
+      text: i18n.translate(
+        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectCriticalOptionLabel',
+        {
+          defaultMessage: 'Critical',
+        }
+      ),
+    },
+    {
+      value: 'warning',
+      text: i18n.translate(
+        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectWarningOptionLabel',
+        {
+          defaultMessage: 'Warning',
+        }
+      ),
+    },
+    {
+      value: 'error',
+      text: i18n.translate(
+        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectErrorOptionLabel',
+        {
+          defaultMessage: 'Error',
+        }
+      ),
+    },
   ];
   const eventActionOptions = [
-    { value: 'trigger', text: 'Trigger' },
-    { value: 'resolve', text: 'Resolve' },
-    { value: 'acknowledge', text: 'Acknowledge' },
+    {
+      value: 'trigger',
+      text: i18n.translate(
+        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.eventSelectTriggerOptionLabel',
+        {
+          defaultMessage: 'Trigger',
+        }
+      ),
+    },
+    {
+      value: 'resolve',
+      text: i18n.translate(
+        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.eventSelectResolveOptionLabel',
+        {
+          defaultMessage: 'Resolve',
+        }
+      ),
+    },
+    {
+      value: 'acknowledge',
+      text: i18n.translate(
+        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.eventSelectAcknowledgeOptionLabel',
+        {
+          defaultMessage: 'Acknowledge',
+        }
+      ),
+    },
   ];
   const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<Record<string, boolean>>({
     dedupKey: false,
@@ -220,7 +276,9 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
         button={
           <EuiButtonIcon
             data-test-subj={`${paramsProperty}AddVariableButton`}
-            onClick={() => setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, dedupKey: true })}
+            onClick={() =>
+              setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, [paramsProperty]: true })
+            }
             iconType="indexOpen"
             aria-label={buttonName}
           />
