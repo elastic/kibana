@@ -10,7 +10,6 @@ import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { MapListing } from './components/map_listing';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setInjectedVarFunc } from '../../../../plugins/maps/public/kibana_services';
 import {
   setLicenseId,
   setInspector,
@@ -18,6 +17,8 @@ import {
   setIndexPatternSelect,
   setHttp,
   setTimeFilter,
+  setUiSettings,
+  setInjectedVarFunc,
 } from './kibana_services';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
@@ -58,6 +59,16 @@ export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
   }
   setInjectedVarFunc(injectedMetadata.getInjectedVar);
   setHttp(http);
+  setUiSettings(core.uiSettings);
+  setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
+};
+
+export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
+  const { inspector, file_upload, data } = plugins;
+  setInspector(inspector);
+  setFileUpload(file_upload);
+  setIndexPatternSelect(data.ui.IndexPatternSelect);
+  setTimeFilter(data.query.timefilter.timefilter);
 };
 
 /** @internal */
@@ -75,10 +86,6 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
   }
 
   public start(core: CoreStart, plugins: MapsPluginStartDependencies) {
-    const { inspector, file_upload, data } = plugins.np;
-    setInspector(inspector);
-    setFileUpload(file_upload);
-    setIndexPatternSelect(data.ui.IndexPatternSelect);
-    setTimeFilter(data.timefilter.timefilter);
+    bindStartCoreAndPlugins(core, plugins.np);
   }
 }
