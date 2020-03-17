@@ -134,7 +134,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
           </EuiFlexItem>
           {showDeselect && (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" onClick={() => onDeselect()}>
+              <EuiButtonEmpty size="xs" onClick={() => onDeselect()}>
                 {txtChangeButton}
               </EuiButtonEmpty>
             </EuiFlexItem>

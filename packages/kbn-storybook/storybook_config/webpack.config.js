@@ -66,7 +66,8 @@ module.exports = async ({ config }) => {
   config.module.rules.push({
     test: /\.tsx$/,
     // Exclude example files, as we don't display props info for them
-    exclude: /\.examples.tsx$/,
+    // TODO: validated_dual_range throws: https://github.com/elastic/kibana/issues/60356
+    exclude: /\.examples.tsx$|validated_dual_range.tsx$/,
     use: [
       // Parse TS comments to create Props tables in the UI
       require.resolve('react-docgen-typescript-loader'),

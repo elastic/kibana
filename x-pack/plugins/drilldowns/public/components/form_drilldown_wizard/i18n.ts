@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const txtNameOfDrilldown = i18n.translate(
   'xpack.drilldowns.components.FormCreateDrilldown.nameOfDrilldown',
   {
-    defaultMessage: 'Name of drilldown:',
+    defaultMessage: 'Name',
   }
 );
 
@@ -23,6 +23,6 @@ export const txtUntitledDrilldown = i18n.translate(
 export const txtDrilldownAction = i18n.translate(
   'xpack.drilldowns.components.FormCreateDrilldown.drilldownAction',
   {
-    defaultMessage: 'Drilldown action:',
+    defaultMessage: 'Action',
   }
 );
