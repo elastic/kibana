@@ -84,9 +84,9 @@ export interface AlertResultList {
 }
 
 export interface HostResultList {
-  /* the endpoints restricted by the page size */
+  /* the hosts restricted by the page size */
   hosts: HostMetadata[];
-  /* the total number of unique endpoints in the index */
+  /* the total number of unique hosts in the index */
   total: number;
   /* the page size requested */
   request_page_size: number;
