@@ -14,16 +14,16 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { monaco } from '@kbn/ui-shared-deps/monaco';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '../../../../../../../src/plugins/kibana_react/public';
-import { ContextChangeHandler, ContextSetup } from '../../common/types';
 
 interface Props {
-  contextSetup: ContextSetup;
-  onContextChange: ContextChangeHandler;
+  parameters: string;
+  onParametersChange: (change: string) => void;
 }
 
-export function ParametersTab({ contextSetup, onContextChange }: Props) {
+export function ParametersTab({ parameters, onParametersChange }: Props) {
   return (
     <>
       <EuiSpacer size="m" />
@@ -64,8 +64,8 @@ export function ParametersTab({ contextSetup, onContextChange }: Props) {
           <CodeEditor
             languageId="json"
             height={600}
-            value={contextSetup.params}
-            onChange={(value: string) => onContextChange({ contextSetup: { params: value } })}
+            value={parameters}
+            onChange={onParametersChange}
             options={{
               fontSize: 12,
               minimap: {
@@ -75,6 +75,13 @@ export function ParametersTab({ contextSetup, onContextChange }: Props) {
               wordWrap: 'on',
               wrappingIndent: 'indent',
               automaticLayout: true,
+            }}
+            editorDidMount={(editor: monaco.editor.IStandaloneCodeEditor) => {
+              // Updating tab size for the editor
+              const model = editor.getModel();
+              if (model) {
+                model.updateOptions({ tabSize: 2 });
+              }
             }}
           />
         </EuiPanel>

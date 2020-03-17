@@ -7,9 +7,10 @@
 import { useRef, useCallback, useState } from 'react';
 import { HttpSetup } from 'kibana/public';
 import { debounce } from 'lodash';
-import { Response } from '../common/types';
+
+import { API_BASE_PATH } from '../../../common/constants';
+import { Response, RequestPayloadConfig, PayloadFormat } from '../common/types';
 import { buildRequestPayload } from '../lib/helpers';
-import { executeCode } from '../lib/execute_code';
 
 const DEBOUNCE_MS = 800;
 
@@ -20,7 +21,7 @@ export const useSubmitCode = (http: HttpSetup) => {
 
   const submit = useCallback(
     debounce(
-      async (code: string, context: string, contextSetup: Record<string, any>) => {
+      async (config: RequestPayloadConfig) => {
         setInProgress(true);
 
         // Prevent an older request that resolves after a more recent request from clobbering it.
@@ -28,10 +29,11 @@ export const useSubmitCode = (http: HttpSetup) => {
         const requestId = ++currentRequestIdRef.current;
 
         try {
-          localStorage.setItem('painlessLabCode', code);
-          localStorage.setItem('painlessLabContext', context);
-          localStorage.setItem('painlessLabContextSetup', JSON.stringify(contextSetup));
-          const result = await executeCode(http, buildRequestPayload(code, context, contextSetup));
+          const result = await http.post(`${API_BASE_PATH}/execute`, {
+            // Stringify the string, because http runs it through JSON.parse, and we want to actually
+            // send a JSON string.
+            body: JSON.stringify(buildRequestPayload(config, PayloadFormat.UGLY)),
+          });
 
           if (currentRequestIdRef.current === requestId) {
             setResponse(result);

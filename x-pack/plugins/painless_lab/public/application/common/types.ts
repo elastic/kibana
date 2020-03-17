@@ -4,24 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface ContextSetup {
-  params?: any;
-  document: Record<string, unknown>;
-  index: string;
-}
-
 // This should be an enumerated list
 export type Context = string;
 
-export interface Script {
-  source: string;
-  params?: Record<string, unknown>;
+export interface RequestPayloadConfig {
+  code: string;
+  context: string;
+  parameters: string;
+  index: string;
+  document: string;
 }
 
-export interface Request {
-  script: Script;
-  context?: Context;
-  context_setup?: ContextSetup;
+export enum PayloadFormat {
+  UGLY = 'ugly',
+  PRETTY = 'pretty',
 }
 
 export interface Response {
@@ -47,15 +43,3 @@ export interface ExecutionError {
   position: ExecutionErrorPosition;
   script: string;
 }
-
-export type JsonArray = JsonValue[];
-export type JsonValue = null | boolean | number | string | JsonObject | JsonArray;
-
-export interface JsonObject {
-  [key: string]: JsonValue;
-}
-
-export type ContextChangeHandler = (change: {
-  context?: Partial<Context>;
-  contextSetup?: Partial<ContextSetup>;
-}) => void;

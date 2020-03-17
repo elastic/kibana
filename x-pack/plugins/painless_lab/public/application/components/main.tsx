@@ -8,52 +8,63 @@ import { HttpSetup } from 'kibana/public';
 import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { buildRequestPayload, formatJson, getFromLocalStorage } from '../lib/helpers';
-import { ContextChangeHandler } from '../common/types';
+import { buildRequestPayload, formatJson } from '../lib/helpers';
+import { painlessContextOptions, exampleScript } from '../common/constants';
+import { PayloadFormat } from '../common/types';
+import { useSubmitCode } from '../hooks';
 import { OutputPane } from './output_pane';
 import { MainControls } from './main_controls';
 import { Editor } from './editor';
 import { RequestFlyout } from './request_flyout';
-import { useSubmitCode } from '../hooks';
-import { exampleScript } from '../common/constants';
 
 interface Props {
   http: HttpSetup;
 }
 
+const PAINLESS_LAB_KEY = 'painlessLabState';
+
 export function Main({ http }: Props) {
-  const [code, setCode] = useState(getFromLocalStorage('painlessLabCode', exampleScript));
+  const [state, setState] = useState({
+    code: exampleScript,
+    context: painlessContextOptions[0].value,
+    parameters: '',
+    index: '',
+    document: '',
+    ...JSON.parse(localStorage.getItem(PAINLESS_LAB_KEY) || '{}'),
+  });
+
   const [isRequestFlyoutOpen, setRequestFlyoutOpen] = useState(false);
-
-  const [context, setContext] = useState(
-    getFromLocalStorage('painlessLabContext', 'painless_test_without_params')
-  );
-
-  const [contextSetup, setContextSetup] = useState(
-    getFromLocalStorage('painlessLabContextSetup', {}, true)
-  );
-
   const { inProgress, response, submit } = useSubmitCode(http);
 
-  // Live-update the output as the user changes the input code.
+  // Live-update the output and persist state as the user changes it.
+  const { code, context, parameters, index, document } = state;
   useEffect(() => {
-    submit(code, context, contextSetup);
-  }, [submit, code, context, contextSetup]);
+    submit(state);
+    localStorage.setItem(PAINLESS_LAB_KEY, JSON.stringify(state));
+  }, [state, submit]);
+
+  const onCodeChange = (newCode: string) => {
+    setState({ ...state, code: newCode });
+  };
+
+  const onContextChange = (newContext: string) => {
+    setState({ ...state, context: newContext });
+  };
+
+  const onParametersChange = (newParameters: string) => {
+    setState({ ...state, parameters: newParameters });
+  };
+
+  const onIndexChange = (newIndex: string) => {
+    setState({ ...state, index: newIndex });
+  };
+
+  const onDocumentChange = (newDocument: string) => {
+    setState({ ...state, document: newDocument });
+  };
 
   const toggleRequestFlyout = () => {
     setRequestFlyoutOpen(!isRequestFlyoutOpen);
-  };
-
-  const contextChangeHandler: ContextChangeHandler = ({
-    context: nextContext,
-    contextSetup: nextContextSetup,
-  }) => {
-    if (nextContext) {
-      setContext(nextContext);
-    }
-    if (nextContextSetup) {
-      setContextSetup(nextContextSetup);
-    }
   };
 
   return (
@@ -68,16 +79,21 @@ export function Main({ http }: Props) {
             </h1>
           </EuiTitle>
 
-          <Editor code={code} setCode={setCode} />
+          <Editor code={code} onChange={onCodeChange} />
         </EuiFlexItem>
 
         <EuiFlexItem>
           <OutputPane
+            isLoading={inProgress}
             response={response}
             context={context}
-            contextSetup={contextSetup}
-            isLoading={inProgress}
-            onContextChange={contextChangeHandler}
+            parameters={parameters}
+            index={index}
+            document={document}
+            onContextChange={onContextChange}
+            onParametersChange={onParametersChange}
+            onIndexChange={onIndexChange}
+            onDocumentChange={onDocumentChange}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -86,13 +102,16 @@ export function Main({ http }: Props) {
         isLoading={inProgress}
         toggleRequestFlyout={toggleRequestFlyout}
         isRequestFlyoutOpen={isRequestFlyoutOpen}
-        reset={() => setCode(exampleScript)}
+        reset={() => onCodeChange(exampleScript)}
       />
 
       {isRequestFlyoutOpen && (
         <RequestFlyout
           onClose={() => setRequestFlyoutOpen(false)}
-          requestBody={formatJson(buildRequestPayload(code, context, contextSetup))}
+          requestBody={buildRequestPayload(
+            { code, context, document, index, parameters },
+            PayloadFormat.PRETTY
+          )}
           response={response ? formatJson(response.result || response.error) : ''}
         />
       )}
