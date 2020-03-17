@@ -4873,7 +4873,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@8.10.54", "@types/node@>=8.9.0", "@types/node@^12.0.2", "@types/node@~10.17.17":
+"@types/node@*", "@types/node@8.10.54", "@types/node@>=10.17.17 <10.20.0", "@types/node@>=8.9.0", "@types/node@^12.0.2":
   version "10.17.17"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.17.17.tgz#7a183163a9e6ff720d86502db23ba4aade5999b8"
   integrity sha512-gpNnRnZP3VWzzj5k3qrpRC6Rk3H/uclhAVo1aIvwzK5p5cOrs9yEyQ8H/HBsBY0u5rrWxXEiVPQ0dEB6pkjE8Q==
