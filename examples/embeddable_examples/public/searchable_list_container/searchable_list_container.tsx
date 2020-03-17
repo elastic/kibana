@@ -21,7 +21,7 @@ import ReactDOM from 'react-dom';
 import {
   Container,
   ContainerInput,
-  GetEmbeddableFactory,
+  EmbeddableStart,
   EmbeddableInput,
 } from '../../../../src/plugins/embeddable/public';
 import { SearchableListContainerComponent } from './searchable_list_container_component';
@@ -40,7 +40,10 @@ export class SearchableListContainer extends Container<ChildInput, SearchableCon
   public readonly type = SEARCHABLE_LIST_CONTAINER;
   private node?: HTMLElement;
 
-  constructor(input: SearchableContainerInput, getEmbeddableFactory: GetEmbeddableFactory) {
+  constructor(
+    input: SearchableContainerInput,
+    getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory']
+  ) {
     super(input, { embeddableLoaded: {} }, getEmbeddableFactory);
   }
 
