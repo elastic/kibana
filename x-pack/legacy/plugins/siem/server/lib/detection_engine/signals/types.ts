@@ -11,6 +11,7 @@ import {
   State,
   AlertExecutorOptions,
 } from '../../../../../../../plugins/alerting/server';
+import { AlertAction } from '../../../../../../../plugins/alerting/common';
 
 export interface SignalsParams {
   signalIds: string[] | undefined | null;
@@ -147,6 +148,7 @@ export interface SignalHit {
 }
 
 export interface AlertAttributes {
+  actions: AlertAction[];
   enabled: boolean;
   name: string;
   tags: string[];
@@ -156,4 +158,5 @@ export interface AlertAttributes {
   schedule: {
     interval: string;
   };
+  throttle: string | null;
 }

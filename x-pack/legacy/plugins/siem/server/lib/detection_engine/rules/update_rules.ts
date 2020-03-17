@@ -86,8 +86,8 @@ export const updateRules = async ({
       tags: addTags(tags, rule.params.ruleId, immutable),
       name,
       schedule: { interval },
-      actions: rule.actions,
-      throttle: throttle ?? rule.throttle ?? null,
+      actions: actions ?? rule.actions,
+      throttle: throttle ?? throttle === null ? null : rule.throttle,
       params: {
         description,
         ruleId: rule.params.ruleId,

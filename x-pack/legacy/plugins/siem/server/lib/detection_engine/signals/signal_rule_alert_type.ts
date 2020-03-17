@@ -5,18 +5,7 @@
  */
 
 import { Logger } from 'src/core/server';
-<<<<<<< HEAD
-import moment from 'moment';
-import { i18n } from '@kbn/i18n';
-import {
-  SIGNALS_ID,
-  DEFAULT_MAX_SIGNALS,
-  DEFAULT_SEARCH_AFTER_PAGE_SIZE,
-} from '../../../../common/constants';
-import { AlertAction } from '../../../../../../../plugins/alerting/common';
-=======
 import { SIGNALS_ID, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
->>>>>>> a755e55907ef0b084c850814809e77df650d07bc
 
 import { buildEventsSearchQuery } from './build_events_query';
 import { getInputIndex } from './get_input_output_index';
@@ -74,6 +63,7 @@ export const signalRulesAlertType = ({
       });
 
       const {
+        actions,
         name,
         tags,
         createdAt,
@@ -81,6 +71,7 @@ export const signalRulesAlertType = ({
         updatedBy,
         enabled,
         schedule: { interval },
+        throttle,
       } = savedObject.attributes;
 
       const updatedAt = savedObject.updated_at ?? '';
