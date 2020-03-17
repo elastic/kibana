@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { AppState } from '../../../state';
 import { selectIndexPattern } from '../../../state/selectors';
 import { getIndexPattern } from '../../../state/actions';
-import { KueryBarComponent } from '../../functional';
+import { KueryBarComponent } from '../../functional/kuery_bar/kuery_bar';
 
 const mapStateToProps = (state: AppState) => ({ ...selectIndexPattern(state) });
 

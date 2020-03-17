@@ -5,10 +5,10 @@
  */
 
 import { connect } from 'react-redux';
-import { OverviewPageComponent } from '../../../pages/overview';
 import { selectIndexPattern } from '../../../state/selectors';
 import { AppState } from '../../../state';
 import { setEsKueryString } from '../../../state/actions';
+import { OverviewPageComponent } from '../../../pages/overview';
 
 interface DispatchProps {
   setEsKueryFilters: typeof setEsKueryString;
