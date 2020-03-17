@@ -40,19 +40,4 @@ export function defineGetApiKeysRoutes({ authc, router, clusterClient }: RouteDe
       }
     })
   );
-
-  router.post(
-    {
-      path: '/internal/security/api_key/grant',
-      validate: false,
-    },
-    createLicensedRouteHandler(async (context, request, response) => {
-      try {
-        const result = await authc.grantAPIKey(request);
-        return response.ok({ body: { result } });
-      } catch (error) {
-        return response.customError(wrapIntoCustomErrorResponse(error));
-      }
-    })
-  );
 }
