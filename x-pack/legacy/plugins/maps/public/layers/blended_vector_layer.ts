@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { VectorLayer } from './vector_layer';
 import { IVectorStyle, VectorStyle } from './styles/vector/vector_style';
 // @ts-ignore
@@ -26,6 +27,7 @@ import { canSkipSourceUpdate } from './util/can_skip_fetch';
 import { IVectorLayer, VectorLayerArguments } from './vector_layer';
 import { IESSource } from './sources/es_source';
 import { IESAggSource } from './sources/es_agg_source';
+import { ISource } from './sources/source';
 
 function getAggType(dynamicProperty: IDynamicStyleProperty): AGG_TYPE {
   return dynamicProperty.isOrdinal() ? AGG_TYPE.AVG : AGG_TYPE.TERMS;
@@ -170,6 +172,16 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     }
   }
 
+  async getDisplayName(source: ISource) {
+    const displayName = await super.getDisplayName(source);
+    return this._isClustered
+      ? i18n.translate('xpack.maps.blendedVectorLayer.clusteredLayerName', {
+          defaultMessage: 'Clustered {displayName}',
+          values: { displayName },
+        })
+      : displayName;
+  }
+
   isJoinable() {
     return false;
   }
@@ -198,8 +210,8 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   }
 
   async syncData(syncContext: unknown) {
-    // @ts-ignore
     const searchFilters = this._getSearchFilters(
+      // @ts-ignore
       syncContext.dataFilters,
       this.getSource(),
       this.getCurrentStyle()

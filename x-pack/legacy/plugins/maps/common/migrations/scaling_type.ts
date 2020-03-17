@@ -7,6 +7,7 @@
 import _ from 'lodash';
 import { ES_SEARCH, SCALING_TYPES } from '../constants';
 import { LayerDescriptor, ESSearchSourceDescriptor } from '../descriptor_types';
+import { MapSavedObjectAttributes } from '../../../../../plugins/maps/common/map_saved_object_type';
 
 function isEsDocumentSource(layerDescriptor: LayerDescriptor) {
   const sourceType = _.get(layerDescriptor, 'sourceDescriptor.type');
@@ -16,8 +17,8 @@ function isEsDocumentSource(layerDescriptor: LayerDescriptor) {
 export function migrateUseTopHitsToScalingType({
   attributes,
 }: {
-  attributes: { layerListJSON?: string; title?: string };
-}) {
+  attributes: MapSavedObjectAttributes;
+}): MapSavedObjectAttributes {
   if (!attributes || !attributes.layerListJSON) {
     return attributes;
   }
