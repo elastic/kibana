@@ -265,7 +265,6 @@ export class LegacyService implements CoreService {
         createInternalRepository: startDeps.core.savedObjects.createInternalRepository,
         createSerializer: startDeps.core.savedObjects.createSerializer,
         getTypeRegistry: startDeps.core.savedObjects.getTypeRegistry,
-        getImportExportObjectLimit: startDeps.core.savedObjects.getImportExportObjectLimit,
       },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
     };

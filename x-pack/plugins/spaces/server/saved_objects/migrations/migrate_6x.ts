@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectUnsanitizedDoc } from 'src/core/server';
+import { SavedObjectMigrationFn } from 'src/core/server';
 
-export function migrateToKibana660(doc: SavedObjectUnsanitizedDoc) {
-  const attributes = doc.attributes as Record<string, any>;
-  if (!attributes.hasOwnProperty('disabledFeatures')) {
-    attributes.disabledFeatures = [];
+export const migrateToKibana660: SavedObjectMigrationFn = doc => {
+  if (!doc.attributes.hasOwnProperty('disabledFeatures')) {
+    doc.attributes.disabledFeatures = [];
   }
   return doc;
-}
+};

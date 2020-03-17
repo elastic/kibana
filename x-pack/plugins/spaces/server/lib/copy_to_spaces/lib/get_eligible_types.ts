@@ -6,9 +6,11 @@
 
 import { SavedObjectTypeRegistry } from 'src/core/server';
 
-export function getEligibleTypes(typeRegistry: Pick<SavedObjectTypeRegistry, 'getAllTypes'>) {
+export function getEligibleTypes(
+  typeRegistry: Pick<SavedObjectTypeRegistry, 'getAllTypes' | 'isNamespaceAgnostic'>
+) {
   return typeRegistry
     .getAllTypes()
-    .filter(type => !type.namespaceAgnostic)
+    .filter(type => !typeRegistry.isNamespaceAgnostic(type.name))
     .map(type => type.name);
 }

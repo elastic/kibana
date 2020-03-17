@@ -64,6 +64,7 @@ describe('Spaces Public API', () => {
     initPostSpacesApi({
       externalRouter: router,
       getStartServices: async () => [coreStart, {}],
+      getImportExportObjectLimit: () => 1000,
       log,
       spacesService,
     });

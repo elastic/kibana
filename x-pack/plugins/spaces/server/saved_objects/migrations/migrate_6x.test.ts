@@ -5,15 +5,21 @@
  */
 
 import { migrateToKibana660 } from './migrate_6x';
+import { SavedObjectMigrationContext } from 'src/core/server';
+
+const mockContext = {} as SavedObjectMigrationContext;
 
 describe('migrateTo660', () => {
   it('adds a "disabledFeatures" attribute initialized as an empty array', () => {
     expect(
-      migrateToKibana660({
-        id: 'space:foo',
-        type: 'space',
-        attributes: {},
-      })
+      migrateToKibana660(
+        {
+          id: 'space:foo',
+          type: 'space',
+          attributes: {},
+        },
+        mockContext
+      )
     ).toEqual({
       id: 'space:foo',
       type: 'space',
@@ -26,13 +32,16 @@ describe('migrateTo660', () => {
   it('does not initialize "disabledFeatures" if the property already exists', () => {
     // This scenario shouldn't happen organically. Protecting against defects in the migration.
     expect(
-      migrateToKibana660({
-        id: 'space:foo',
-        type: 'space',
-        attributes: {
-          disabledFeatures: ['foo', 'bar', 'baz'],
+      migrateToKibana660(
+        {
+          id: 'space:foo',
+          type: 'space',
+          attributes: {
+            disabledFeatures: ['foo', 'bar', 'baz'],
+          },
         },
-      })
+        mockContext
+      )
     ).toEqual({
       id: 'space:foo',
       type: 'space',

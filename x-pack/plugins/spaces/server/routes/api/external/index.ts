@@ -16,6 +16,7 @@ import { initCopyToSpacesApi } from './copy_to_space';
 export interface ExternalRouteDeps {
   externalRouter: IRouter;
   getStartServices: CoreSetup['getStartServices'];
+  getImportExportObjectLimit: () => number;
   spacesService: SpacesServiceSetup;
   log: Logger;
 }

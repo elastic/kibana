@@ -64,6 +64,7 @@ describe('GET space', () => {
     initGetSpaceApi({
       externalRouter: router,
       getStartServices: async () => [coreStart, {}],
+      getImportExportObjectLimit: () => 1000,
       log,
       spacesService,
     });

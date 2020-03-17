@@ -217,10 +217,6 @@ export interface SavedObjectsServiceStart {
    * {@link SavedObjectsType | saved object types}
    */
   getTypeRegistry: () => ISavedObjectTypeRegistry;
-  /**
-   * Returns the maximum number of objects allowed for import or export operations.
-   */
-  getImportExportObjectLimit: () => number;
 }
 
 export interface InternalSavedObjectsServiceStart extends SavedObjectsServiceStart {
@@ -451,7 +447,6 @@ export class SavedObjectsService
       createInternalRepository: repositoryFactory.createInternalRepository,
       createSerializer: () => new SavedObjectsSerializer(this.typeRegistry),
       getTypeRegistry: () => this.typeRegistry,
-      getImportExportObjectLimit: () => this.config!.maxImportExportSize,
     };
   }
 

@@ -213,7 +213,6 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       createScopedRepository: deps.savedObjects.createScopedRepository,
       createSerializer: deps.savedObjects.createSerializer,
       getTypeRegistry: deps.savedObjects.getTypeRegistry,
-      getImportExportObjectLimit: deps.savedObjects.getImportExportObjectLimit,
     },
     uiSettings: {
       asScopedToClient: deps.uiSettings.asScopedToClient,

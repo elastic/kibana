@@ -19,10 +19,11 @@ import { createReadableStreamFromArray } from './lib/readable_stream_from_array'
 import { COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS } from './lib/saved_objects_client_opts';
 
 export function resolveCopySavedObjectsToSpacesConflictsFactory(
-  core: CoreStart,
+  savedObjects: CoreStart['savedObjects'],
+  getImportExportObjectLimit: () => number,
   request: KibanaRequest
 ) {
-  const { getTypeRegistry, getImportExportObjectLimit, getScopedClient } = core.savedObjects;
+  const { getTypeRegistry, getScopedClient } = savedObjects;
 
   const savedObjectsClient = getScopedClient(request, COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS);
 

@@ -39,7 +39,6 @@ const createStartContractMock = () => {
     createScopedRepository: jest.fn(),
     createSerializer: jest.fn(),
     getTypeRegistry: jest.fn(),
-    getImportExportObjectLimit: jest.fn(),
   };
 
   startContrat.getScopedClient.mockReturnValue(savedObjectsClientMock.create());

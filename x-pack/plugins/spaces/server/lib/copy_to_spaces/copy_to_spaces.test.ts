@@ -53,8 +53,6 @@ describe('copySavedObjectsToSpaces', () => {
   const setup = (setupOpts: SetupOpts) => {
     const coreStart = coreMock.createStart();
 
-    coreStart.savedObjects.getImportExportObjectLimit.mockReturnValue(1000);
-
     const typeRegistry = savedObjectsTypeRegistryMock.create();
     typeRegistry.getAllTypes.mockReturnValue([
       {
@@ -76,6 +74,10 @@ describe('copySavedObjectsToSpaces', () => {
         mappings: { properties: {} },
       },
     ]);
+
+    typeRegistry.isNamespaceAgnostic.mockImplementation((type: string) =>
+      typeRegistry.getAllTypes().some(t => t.name === type && t.namespaceAgnostic)
+    );
 
     coreStart.savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
 
@@ -112,12 +114,12 @@ describe('copySavedObjectsToSpaces', () => {
     );
 
     return {
-      coreStart,
+      savedObjects: coreStart.savedObjects,
     };
   };
 
   it('uses the Saved Objects Service to perform an export followed by a series of imports', async () => {
-    const { coreStart } = setup({
+    const { savedObjects } = setup({
       objects: [
         {
           type: 'dashboard',
@@ -139,7 +141,11 @@ describe('copySavedObjectsToSpaces', () => {
 
     const request = httpServerMock.createKibanaRequest();
 
-    const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(coreStart, request);
+    const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
+      savedObjects,
+      () => 1000,
+      request
+    );
 
     const result = await copySavedObjectsToSpaces('sourceSpace', ['destination1', 'destination2'], {
       includeReferences: true,
@@ -348,7 +354,7 @@ describe('copySavedObjectsToSpaces', () => {
       },
     ];
 
-    const { coreStart } = setup({
+    const { savedObjects } = setup({
       objects,
       importSavedObjectsFromStreamImpl: async opts => {
         if (opts.namespace === 'failure-space') {
@@ -364,7 +370,11 @@ describe('copySavedObjectsToSpaces', () => {
 
     const request = httpServerMock.createKibanaRequest();
 
-    const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(coreStart, request);
+    const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
+      savedObjects,
+      () => 1000,
+      request
+    );
 
     const result = await copySavedObjectsToSpaces(
       'sourceSpace',
@@ -405,7 +415,7 @@ describe('copySavedObjectsToSpaces', () => {
   });
 
   it(`handles stream read errors`, async () => {
-    const { coreStart } = setup({
+    const { savedObjects } = setup({
       objects: [
         {
           type: 'dashboard',
@@ -437,7 +447,11 @@ describe('copySavedObjectsToSpaces', () => {
 
     const request = httpServerMock.createKibanaRequest();
 
-    const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(coreStart, request);
+    const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
+      savedObjects,
+      () => 1000,
+      request
+    );
 
     await expect(
       copySavedObjectsToSpaces(

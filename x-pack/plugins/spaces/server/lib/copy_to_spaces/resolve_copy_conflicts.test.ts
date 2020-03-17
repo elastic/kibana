@@ -53,8 +53,6 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
   const setup = (setupOpts: SetupOpts) => {
     const coreStart = coreMock.createStart();
 
-    coreStart.savedObjects.getImportExportObjectLimit.mockReturnValue(1000);
-
     const typeRegistry = savedObjectsTypeRegistryMock.create();
     typeRegistry.getAllTypes.mockReturnValue([
       {
@@ -76,6 +74,10 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
         mappings: { properties: {} },
       },
     ]);
+
+    typeRegistry.isNamespaceAgnostic.mockImplementation((type: string) =>
+      typeRegistry.getAllTypes().some(t => t.name === type && t.namespaceAgnostic)
+    );
 
     coreStart.savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
 
@@ -113,12 +115,12 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
     );
 
     return {
-      coreStart,
+      savedObjects: coreStart.savedObjects,
     };
   };
 
   it('uses the Saved Objects Service to perform an export followed by a series of conflict resolution calls', async () => {
-    const { coreStart } = setup({
+    const { savedObjects } = setup({
       objects: [
         {
           type: 'dashboard',
@@ -141,7 +143,8 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
     const request = httpServerMock.createKibanaRequest();
 
     const resolveCopySavedObjectsToSpacesConflicts = resolveCopySavedObjectsToSpacesConflictsFactory(
-      coreStart,
+      savedObjects,
+      () => 1000,
       request
     );
 
@@ -381,7 +384,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
       },
     ];
 
-    const { coreStart } = setup({
+    const { savedObjects } = setup({
       objects,
       resolveSavedObjectsImportErrorsImpl: async opts => {
         if (opts.namespace === 'failure-space') {
@@ -398,7 +401,8 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
     const request = httpServerMock.createKibanaRequest();
 
     const resolveCopySavedObjectsToSpacesConflicts = resolveCopySavedObjectsToSpacesConflictsFactory(
-      coreStart,
+      savedObjects,
+      () => 1000,
       request
     );
 
@@ -459,7 +463,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
   });
 
   it(`handles stream read errors`, async () => {
-    const { coreStart } = setup({
+    const { savedObjects } = setup({
       objects: [],
       exportSavedObjectsToStreamImpl: opts => {
         return Promise.resolve(
@@ -476,7 +480,8 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
     const request = httpServerMock.createKibanaRequest();
 
     const resolveCopySavedObjectsToSpacesConflicts = resolveCopySavedObjectsToSpacesConflictsFactory(
-      coreStart,
+      savedObjects,
+      () => 1000,
       request
     );
 

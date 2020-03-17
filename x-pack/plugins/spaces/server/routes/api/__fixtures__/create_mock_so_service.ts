@@ -41,7 +41,6 @@ export const createMockSavedObjectsService = (spaces: any[] = []) => {
   } as unknown) as jest.Mocked<SavedObjectsClientContract>;
 
   const { savedObjects } = coreMock.createStart();
-  savedObjects.getImportExportObjectLimit.mockReturnValue(1000);
 
   const typeRegistry = savedObjectsTypeRegistryMock.create();
   typeRegistry.getAllTypes.mockReturnValue([
@@ -76,6 +75,9 @@ export const createMockSavedObjectsService = (spaces: any[] = []) => {
       mappings: { properties: {} },
     },
   ]);
+  typeRegistry.isNamespaceAgnostic.mockImplementation((type: string) =>
+    typeRegistry.getAllTypes().some(t => t.name === type && t.namespaceAgnostic)
+  );
   savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
 
   savedObjects.getScopedClient.mockReturnValue(mockSavedObjectsClientContract);

@@ -18,8 +18,12 @@ import { createEmptyFailureResponse } from './lib/create_empty_failure_response'
 import { readStreamToCompletion } from './lib/read_stream_to_completion';
 import { COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS } from './lib/saved_objects_client_opts';
 
-export function copySavedObjectsToSpacesFactory(core: CoreStart, request: KibanaRequest) {
-  const { getTypeRegistry, getImportExportObjectLimit, getScopedClient } = core.savedObjects;
+export function copySavedObjectsToSpacesFactory(
+  savedObjects: CoreStart['savedObjects'],
+  getImportExportObjectLimit: () => number,
+  request: KibanaRequest
+) {
+  const { getTypeRegistry, getScopedClient } = savedObjects;
 
   const savedObjectsClient = getScopedClient(request, COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS);
 
