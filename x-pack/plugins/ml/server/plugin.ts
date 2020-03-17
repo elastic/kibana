@@ -17,11 +17,7 @@ import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
 
 import { elasticsearchJsPlugin } from './client/elasticsearch_ml';
 // import { makeMlUsageCollector } from './lib/ml_telemetry';
-import {
-  mlTelemetryMappingsType,
-  registerMlUsageCollector,
-  setInternalRepository,
-} from './lib/telemetry';
+import { initMlTelemetry } from './lib/telemetry';
 import { initMlServerLog } from './client/log';
 import { initSampleDataSets } from './lib/sample_data_sets';
 
@@ -135,12 +131,7 @@ export class MlServerPlugin implements Plugin<MlSetupContract, MlStartContract, 
       cloud: plugins.cloud,
     });
     initMlServerLog({ log: this.log });
-    coreSetup.savedObjects.registerType(mlTelemetryMappingsType);
-    registerMlUsageCollector(plugins.usageCollection);
-    coreSetup.getStartServices().then(([core]) => {
-      setInternalRepository(core.savedObjects.createInternalRepository);
-      // makeMlUsageCollector(plugins.usageCollection, core.savedObjects);
-    });
+    initMlTelemetry(coreSetup, plugins.usageCollection);
 
     return createSharedServices(this.mlLicense, plugins.spaces, plugins.cloud);
   }

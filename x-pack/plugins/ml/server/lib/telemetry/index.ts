@@ -4,7 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerMlUsageCollector } from './ml_usage_collector';
-export { mlTelemetryMappingsType } from './mappings';
-export { getInternalRepository, setInternalRepository } from './internal_repository';
+export { initMlTelemetry } from './ml_usage_collector';
 export { updateTelemetry } from './telemetry';
