@@ -14,8 +14,8 @@
   So, there is only ever one build status comment on a PR at any given time, the most recent one.
 */
 def withDefaultPrComments(closure) {
-  catchError {
-    catchError {
+  catchErrors {
+    catchErrors {
       closure()
     }
 
@@ -192,14 +192,6 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
     .findAll { !!it } // No blank strings
     .collect { it.stripIndent().trim() } // This just allows us to indent various strings above, but leaves them un-indented in the comment
     .join("\n\n")
-}
-
-def withGithubCredentials(closure) {
-  withCredentials([
-    string(credentialsId: '2a9602aa-ab9f-4e52-baf3-b71ca88469c7', variable: 'GITHUB_TOKEN'),
-  ]) {
-    closure()
-  }
 }
 
 def postComment(message) {

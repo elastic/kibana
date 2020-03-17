@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from '.';
-import { FieldBasedIndexPatternColumn } from './column_types';
+import { FormattedIndexPatternColumn } from './column_types';
 
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
 
@@ -21,7 +21,7 @@ function ofName(name: string) {
   });
 }
 
-export interface CardinalityIndexPatternColumn extends FieldBasedIndexPatternColumn {
+export interface CardinalityIndexPatternColumn extends FormattedIndexPatternColumn {
   operationType: 'cardinality';
 }
 
@@ -49,7 +49,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.cardinality)
     );
   },
-  buildColumn({ suggestedPriority, field }) {
+  buildColumn({ suggestedPriority, field, previousColumn }) {
     return {
       label: ofName(field.name),
       dataType: 'number',
@@ -58,6 +58,8 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       suggestedPriority,
       sourceField: field.name,
       isBucketed: IS_BUCKETED,
+      params:
+        previousColumn && previousColumn.dataType === 'number' ? previousColumn.params : undefined,
     };
   },
   toEsAggsConfig: (column, columnId) => ({

@@ -19,7 +19,7 @@
 
 import { auto } from 'angular';
 import { i18n } from '@kbn/i18n';
-import { ExecuteTriggerActions } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { getServices } from '../../kibana_services';
 import {
   EmbeddableFactory,
@@ -32,6 +32,11 @@ import { SearchEmbeddable } from './search_embeddable';
 import { SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 
+interface StartServices {
+  executeTriggerActions: UiActionsStart['executeTriggerActions'];
+  isEditable: () => boolean;
+}
+
 export class SearchEmbeddableFactory extends EmbeddableFactory<
   SearchInput,
   SearchOutput,
@@ -40,12 +45,10 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private $injector: auto.IInjectorService | null;
   private getInjector: () => Promise<auto.IInjectorService> | null;
-  public isEditable: () => boolean;
 
   constructor(
-    private readonly executeTriggerActions: ExecuteTriggerActions,
-    getInjector: () => Promise<auto.IInjectorService>,
-    isEditable: () => boolean
+    private getStartServices: () => Promise<StartServices>,
+    getInjector: () => Promise<auto.IInjectorService>
   ) {
     super({
       savedObjectMetaData: {
@@ -58,11 +61,14 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
     });
     this.$injector = null;
     this.getInjector = getInjector;
-    this.isEditable = isEditable;
   }
 
   public canCreateNew() {
     return false;
+  }
+
+  public async isEditable() {
+    return (await this.getStartServices()).isEditable();
   }
 
   public getDisplayName() {
@@ -90,6 +96,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
     try {
       const savedObject = await getServices().getSavedSearchById(savedObjectId);
       const indexPattern = savedObject.searchSource.getField('index');
+      const { executeTriggerActions } = await this.getStartServices();
       return new SearchEmbeddable(
         {
           savedSearch: savedObject,
@@ -101,7 +108,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
           indexPatterns: indexPattern ? [indexPattern] : [],
         },
         input,
-        this.executeTriggerActions,
+        executeTriggerActions,
         parent
       );
     } catch (e) {

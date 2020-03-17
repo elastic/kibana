@@ -17,6 +17,10 @@
  * under the License.
  */
 
+export * from './aggs';
+export * from './expressions';
+export * from './tabify';
+
 export {
   ISearchSetup,
   ISearchStart,
@@ -35,20 +39,14 @@ export {
 
 export { IEsSearchResponse, IEsSearchRequest, ES_SEARCH_STRATEGY } from '../../common/search';
 
-export { SYNC_SEARCH_STRATEGY } from './sync_search_strategy';
+export { ISyncSearchRequest, SYNC_SEARCH_STRATEGY } from './sync_search_strategy';
+export { esSearchStrategyProvider, getEsPreference } from './es_search';
 
 export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
 
 export { LegacyApiCaller, SearchRequest, SearchResponse } from './es_client';
 
-export {
-  addSearchStrategy,
-  hasSearchStategyForIndexPattern,
-  defaultSearchStrategy,
-  SearchError,
-  SearchStrategyProvider,
-  getSearchErrorType,
-} from './search_strategy';
+export { SearchError, SearchStrategyProvider, getSearchErrorType } from './search_strategy';
 
 export {
   ISearchSource,

@@ -16,8 +16,8 @@ import {
   RecursivePartial,
 } from '@elastic/charts';
 import { getOr, get, isNull, isNumber } from 'lodash/fp';
-import useResizeObserver from 'use-resize-observer/polyfilled';
 
+import { useThrottledResizeObserver } from '../utils';
 import { ChartPlaceHolder } from './chart_place_holder';
 import { useTimeZone } from '../../lib/kibana';
 import {
@@ -131,7 +131,7 @@ interface AreaChartComponentProps {
 }
 
 export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({ areaChart, configs }) => {
-  const { ref: measureRef, width, height } = useResizeObserver<HTMLDivElement>({});
+  const { ref: measureRef, width, height } = useThrottledResizeObserver();
   const customHeight = get('customHeight', configs);
   const customWidth = get('customWidth', configs);
   const chartHeight = getChartHeight(customHeight, height);
@@ -146,8 +146,4 @@ export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({ areaChar
   );
 };
 
-AreaChartComponent.displayName = 'AreaChartComponent';
-
 export const AreaChart = React.memo(AreaChartComponent);
-
-AreaChart.displayName = 'AreaChart';

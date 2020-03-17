@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
@@ -13,17 +13,15 @@ import { Ecs } from '../../../../../graphql/types';
 import { DragEffects, DraggableWrapper } from '../../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../../drag_and_drop/helpers';
 import { ExternalLinkIcon } from '../../../../external_link_icon';
-import { GoogleLink, VirusTotalLink } from '../../../../links';
+import { GoogleLink, ReputationLink } from '../../../../links';
 import { Provider } from '../../../../timeline/data_providers/provider';
 import { IS_OPERATOR } from '../../../data_providers/data_provider';
 
 import * as i18n from './translations';
 
-// Ref: https://github.com/elastic/eui/issues/1655
-// const Badge = styled(EuiBadge)`
-//   vertical-align: top;
-// `;
-const Badge = (props: EuiBadgeProps) => <EuiBadge {...props} style={{ verticalAlign: 'top' }} />;
+const Badge = styled(EuiBadge)`
+  vertical-align: top;
+`;
 
 Badge.displayName = 'Badge';
 
@@ -148,8 +146,12 @@ export const TotalVirusLinkSha = React.memo<TotalVirusLinkShaProps>(({ value }) 
   value != null ? (
     <LinkFlexItem grow={false}>
       <div>
-        <VirusTotalLink link={value}>{value}</VirusTotalLink>
-        <ExternalLinkIcon />
+        <ReputationLink
+          domain={value}
+          overflowIndexStart={1}
+          showDomain={true}
+          data-test-subj="reputationLinkSha"
+        />
       </div>
     </LinkFlexItem>
   ) : null

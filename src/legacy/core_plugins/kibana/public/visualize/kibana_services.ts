@@ -29,13 +29,14 @@ import {
 
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
-import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
+import { EmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { DataPublicPluginStart, IndexPatternsContract } from '../../../../../plugins/data/public';
 import { VisualizationsStart } from '../../../visualizations/public';
 import { SavedVisualizations } from './np_ready/types';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
 import { KibanaLegacyStart } from '../../../../../plugins/kibana_legacy/public';
+import { DefaultEditorController } from '../../../vis_default_editor/public';
 
 export interface VisualizeKibanaServices {
   pluginInitializerContext: PluginInitializerContext;
@@ -43,7 +44,7 @@ export interface VisualizeKibanaServices {
   chrome: ChromeStart;
   core: CoreStart;
   data: DataPublicPluginStart;
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   getBasePath: () => string;
   indexPatterns: IndexPatternsContract;
   localStorage: Storage;
@@ -60,6 +61,7 @@ export interface VisualizeKibanaServices {
   usageCollection?: UsageCollectionSetup;
   I18nContext: I18nStart['Context'];
   setActiveUrl: (newUrl: string) => void;
+  DefaultVisualizationEditor: typeof DefaultEditorController;
 }
 
 let services: VisualizeKibanaServices | null = null;

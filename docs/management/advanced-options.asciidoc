@@ -51,19 +51,17 @@ adapt to the interval between measurements. Keys are http://en.wikipedia.org/wik
 `fields:popularLimit`:: The top N most popular fields to show.
 `filterEditor:suggestValues`:: Set this property to `false` to prevent the filter editor from suggesting values for fields.
 `filters:pinnedByDefault`:: Set this property to `true` to make filters have a global state (be pinned) by default.
-`format:bytes:defaultPattern`:: The default http://numeraljs.com/[numeral format] for the "bytes" format.
-`format:currency:defaultPattern`:: The default http://numeraljs.com/[numeral format] for the "currency" format.
+`format:bytes:defaultPattern`:: The default <<numeral, numeral pattern>> format for the "bytes" format.
+`format:currency:defaultPattern`:: The default <<numeral, numeral pattern>> format for the "currency" format.
 `format:defaultTypeMap`:: A map of the default format name for each field type. Field types that are not explicitly
 mentioned use "\_default_".
-`format:number:defaultLocale`:: The http://numeraljs.com/[numeral language] locale.
-`format:number:defaultPattern`:: The default http://numeraljs.com/[numeral format] for the "number" format.
-`format:percent:defaultPattern`:: The default http://numeraljs.com/[numeral format] for the "percent" format.
+`format:number:defaultLocale`:: The <<numeral, numeral pattern>> locale.
+`format:number:defaultPattern`:: The <<numeral, numeral pattern>> for the "number" format.
+`format:percent:defaultPattern`:: The <<numeral, numeral pattern>> for the "percent" format.
 `histogram:barTarget`:: When date histograms use the `auto` interval, Kibana attempts to generate this number of bars.
 `histogram:maxBars`:: Date histograms are not generated with more bars than the value of this property, scaling values
 when necessary.
 `history:limit`:: In fields that have history, such as query inputs, show this many recent values.
-`indexPattern:fieldMapping:lookBack`:: For index patterns containing timestamps in their names,
-look for this many recent matching patterns from which to query the field mapping.
 `indexPattern:placeholder`:: The default placeholder value to use in Management > Index Patterns > Create Index Pattern.
 `metaFields`:: Fields that exist outside of `_source`. Kibana merges these fields
 into the document when displaying it.
@@ -118,7 +116,8 @@ cluster alert notifications from Monitoring.
 ==== Dashboard
 
 [horizontal]
-`xpackDashboardMode:roles`:: The roles that belong to <<xpack-dashboard-only-mode, dashboard only mode>>.
+`xpackDashboardMode:roles`::  **Deprecated. Use <<kibana-feature-privileges,feature privileges>> instead.**
+The roles that belong to <<xpack-dashboard-only-mode, dashboard only mode>>.
 
 [float]
 [[kibana-discover-settings]]

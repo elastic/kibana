@@ -280,11 +280,13 @@ export function MachineLearningJobWizardCommonProvider(
           withAdvancedSection: sectionOptions.withAdvancedSection,
         })) === false
       ) {
-        await testSubjects.clickWhenNotDisabled(subj);
+        await retry.tryForTime(5 * 1000, async () => {
+          await testSubjects.clickWhenNotDisabled(subj);
+          await this.assertDedicatedIndexSwitchCheckedState(true, {
+            withAdvancedSection: sectionOptions.withAdvancedSection,
+          });
+        });
       }
-      await this.assertDedicatedIndexSwitchCheckedState(true, {
-        withAdvancedSection: sectionOptions.withAdvancedSection,
-      });
     },
 
     async assertModelMemoryLimitInputExists(

@@ -17,26 +17,50 @@
  * under the License.
  */
 
-.mgtAdvancedSettings__field {
+ .mgtAdvancedSettings__field {
   + * {
     margin-top: $euiSize;
   }
 
-  &Wrapper {
-    width: 640px;
-
-    @include internetExplorerOnly() {
-      min-height: 1px;
-    }
+  .mgtAdvancedSettings__fieldTitle {
+    padding-left: $euiSizeS;
+    margin-left: -$euiSizeS;
   }
 
-  &Actions {
-    padding-top: $euiSizeM;
+  &--unsaved .mgtAdvancedSettings__fieldTitle {
+    // Simulates a left side border without shifting content
+    box-shadow: -$euiSizeXS 0px $euiColorWarning;
+  }
+  &--invalid .mgtAdvancedSettings__fieldTitle {
+    // Simulates a left side border without shifting content
+    box-shadow: -$euiSizeXS 0px $euiColorDanger;
   }
 
   @include internetExplorerOnly {
+    min-height: 1px;
+
     &Row {
       min-height: 1px;
     }
   }
+}
+
+.mgtAdvancedSettings__fieldTitleUnsavedIcon {
+  margin-left: $euiSizeS;
+}
+
+.mgtAdvancedSettingsForm__unsavedCount {
+  @include euiBreakpoint('xs') {
+    display: none;
+  }
+}
+
+.mgtAdvancedSettingsForm__unsavedCountMessage {
+  // Simulates a left side border without shifting content
+  box-shadow: -$euiSizeXS 0px $euiColorWarning;
+  padding-left: $euiSizeS;
+}
+
+.mgtAdvancedSettingsForm__button {
+  width: 100%;
 }

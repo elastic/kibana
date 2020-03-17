@@ -16,11 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import moment from 'moment-timezone';
 import numeralLanguages from '@elastic/numeral/languages';
 import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
+
 import { DEFAULT_QUERY_LANGUAGE } from '../../../plugins/data/common';
+import { isRelativeUrl } from '../../../core/utils';
 
 export function getUiSettingDefaults() {
   const weekdays = moment.weekdays().slice();
@@ -67,17 +69,23 @@ export function getUiSettingDefaults() {
         defaultMessage: 'Default route',
       }),
       value: '/app/kibana',
-      validation: {
-        regexString: '^/',
-        message: i18n.translate('kbn.advancedSettings.defaultRoute.defaultRouteValidationMessage', {
-          defaultMessage: 'The route must start with a slash ("/")',
-        }),
-      },
+      schema: schema.string({
+        validate(value) {
+          if (!value.startsWith('/') || !isRelativeUrl(value)) {
+            return i18n.translate(
+              'kbn.advancedSettings.defaultRoute.defaultRouteIsRelativeValidationMessage',
+              {
+                defaultMessage: 'Must be a relative URL.',
+              }
+            );
+          }
+        },
+      }),
       description: i18n.translate('kbn.advancedSettings.defaultRoute.defaultRouteText', {
         defaultMessage:
           'This setting specifies the default route when opening Kibana. ' +
           'You can use this setting to modify the landing page when opening Kibana. ' +
-          'The route must start with a slash ("/").',
+          'The route must be a relative URL.',
       }),
     },
     'query:queryString:options': {
@@ -688,17 +696,6 @@ export function getUiSettingDefaults() {
       description: i18n.translate('kbn.advancedSettings.maxCellHeightText', {
         defaultMessage:
           'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation',
-      }),
-    },
-    'indexPattern:fieldMapping:lookBack': {
-      name: i18n.translate('kbn.advancedSettings.indexPattern.recentMatchingTitle', {
-        defaultMessage: 'Recent matching patterns',
-      }),
-      value: 5,
-      description: i18n.translate('kbn.advancedSettings.indexPattern.recentMatchingText', {
-        defaultMessage:
-          'For index patterns containing timestamps in their names, look for this many recent matching ' +
-          'patterns from which to query the field mapping',
       }),
     },
     'format:defaultTypeMap': {

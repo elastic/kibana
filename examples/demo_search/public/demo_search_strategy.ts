@@ -43,7 +43,7 @@ import { DEMO_SEARCH_STRATEGY, IDemoResponse } from '../common';
  * ```
  * context.search(request, options, DEMO_SEARCH_STRATEGY);
  * ```
- * 
+ *
  * and are ensured type safety in regard to the request and response objects.
  *
  * @param context - context supplied by other plugins.

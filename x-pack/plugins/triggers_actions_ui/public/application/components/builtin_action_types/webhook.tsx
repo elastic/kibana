@@ -22,6 +22,9 @@ import {
   EuiCodeEditor,
   EuiSwitch,
   EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiPopover,
+  EuiContextMenuPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -454,10 +457,24 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActi
   actionParams,
   editAction,
   index,
+  messageVariables,
   errors,
 }) => {
   const { body } = actionParams;
-
+  const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
+  const messageVariablesItems = messageVariables?.map((variable: string, i: number) => (
+    <EuiContextMenuItem
+      key={variable}
+      data-test-subj={`variableMenuButton-${i}`}
+      icon="empty"
+      onClick={() => {
+        editAction('body', (body ?? '').concat(` {{${variable}}}`), index);
+        setIsVariablesPopoverOpen(false);
+      }}
+    >
+      {`{{${variable}}}`}
+    </EuiContextMenuItem>
+  ));
   return (
     <Fragment>
       <EuiFormRow
@@ -471,10 +488,32 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActi
         isInvalid={errors.body.length > 0 && body !== undefined}
         fullWidth
         error={errors.body}
+        labelAppend={
+          // TODO: replace this button with a proper Eui component, when it will be ready
+          <EuiPopover
+            button={
+              <EuiButtonIcon
+                data-test-subj="webhookAddVariableButton"
+                onClick={() => setIsVariablesPopoverOpen(true)}
+                iconType="indexOpen"
+                aria-label={i18n.translate(
+                  'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.addVariablePopoverButton',
+                  {
+                    defaultMessage: 'Add variable',
+                  }
+                )}
+              />
+            }
+            isOpen={isVariablesPopoverOpen}
+            closePopover={() => setIsVariablesPopoverOpen(false)}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenuPanel items={messageVariablesItems} />
+          </EuiPopover>
+        }
       >
         <EuiCodeEditor
-          fullWidth
-          isInvalid={errors.body.length > 0 && body !== undefined}
           mode="json"
           width="100%"
           height="200px"

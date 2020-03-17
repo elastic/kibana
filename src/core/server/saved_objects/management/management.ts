@@ -18,74 +18,42 @@
  */
 
 import { SavedObject } from '../types';
-
-interface SavedObjectsManagementTypeDefinition {
-  isImportableAndExportable?: boolean;
-  defaultSearchField?: string;
-  icon?: string;
-  getTitle?: (savedObject: SavedObject) => string;
-  getEditUrl?: (savedObject: SavedObject) => string;
-  getInAppUrl?: (savedObject: SavedObject) => { path: string; uiCapabilitiesPath: string };
-}
-
-export interface SavedObjectsManagementDefinition {
-  [key: string]: SavedObjectsManagementTypeDefinition;
-}
+import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 
 export class SavedObjectsManagement {
-  private readonly definition?: SavedObjectsManagementDefinition;
+  constructor(private readonly registry: ISavedObjectTypeRegistry) {}
 
-  constructor(managementDefinition?: SavedObjectsManagementDefinition) {
-    this.definition = managementDefinition;
+  public getImportableAndExportableTypes() {
+    return this.registry
+      .getAllTypes()
+      .map(type => type.name)
+      .filter(type => this.isImportAndExportable(type));
   }
 
   public isImportAndExportable(type: string) {
-    if (this.definition && this.definition.hasOwnProperty(type)) {
-      return this.definition[type].isImportableAndExportable === true;
-    }
-
-    return false;
+    return this.registry.isImportableAndExportable(type);
   }
 
   public getDefaultSearchField(type: string) {
-    if (this.definition && this.definition.hasOwnProperty(type)) {
-      return this.definition[type].defaultSearchField;
-    }
+    return this.registry.getType(type)?.management?.defaultSearchField;
   }
 
   public getIcon(type: string) {
-    if (this.definition && this.definition.hasOwnProperty(type)) {
-      return this.definition[type].icon;
-    }
+    return this.registry.getType(type)?.management?.icon;
   }
 
   public getTitle(savedObject: SavedObject) {
-    const { type } = savedObject;
-    if (this.definition && this.definition.hasOwnProperty(type) && this.definition[type].getTitle) {
-      const { getTitle } = this.definition[type];
-      if (getTitle) {
-        return getTitle(savedObject);
-      }
-    }
+    const getTitle = this.registry.getType(savedObject.type)?.management?.getTitle;
+    return getTitle ? getTitle(savedObject) : undefined;
   }
 
   public getEditUrl(savedObject: SavedObject) {
-    const { type } = savedObject;
-    if (this.definition && this.definition.hasOwnProperty(type)) {
-      const { getEditUrl } = this.definition[type];
-      if (getEditUrl) {
-        return getEditUrl(savedObject);
-      }
-    }
+    const getEditUrl = this.registry.getType(savedObject.type)?.management?.getEditUrl;
+    return getEditUrl ? getEditUrl(savedObject) : undefined;
   }
 
   public getInAppUrl(savedObject: SavedObject) {
-    const { type } = savedObject;
-    if (this.definition && this.definition.hasOwnProperty(type)) {
-      const { getInAppUrl } = this.definition[type];
-      if (getInAppUrl) {
-        return getInAppUrl(savedObject);
-      }
-    }
+    const getInAppUrl = this.registry.getType(savedObject.type)?.management?.getInAppUrl;
+    return getInAppUrl ? getInAppUrl(savedObject) : undefined;
   }
 }

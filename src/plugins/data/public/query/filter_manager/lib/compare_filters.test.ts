@@ -48,6 +48,22 @@ describe('filter manager utilities', () => {
       expect(compareFilters(f1, f2)).toBeTruthy();
     });
 
+    test('should compare filters, where one filter is null', () => {
+      const f1 = buildQueryFilter(
+        { _type: { match: { query: 'apache', type: 'phrase' } } },
+        'index',
+        ''
+      );
+      const f2 = null;
+      expect(compareFilters(f1, f2 as any)).toBeFalsy();
+    });
+
+    test('should compare a null filter with an empty filter', () => {
+      const f1 = null;
+      const f2 = buildEmptyFilter(true);
+      expect(compareFilters(f1 as any, f2)).toBeFalsy();
+    });
+
     test('should compare duplicates, ignoring meta attributes', () => {
       const f1 = buildQueryFilter(
         { _type: { match: { query: 'apache', type: 'phrase' } } },
@@ -179,6 +195,22 @@ describe('filter manager utilities', () => {
       f2.meta.value = 'dog';
 
       expect(compareFilters([f1], [f2], COMPARE_ALL_OPTIONS)).toBeTruthy();
+    });
+
+    test('should compare alias with COMPARE_ALL_OPTIONS', () => {
+      const f1 = {
+        $state: { store: FilterStateStore.GLOBAL_STATE },
+        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+      };
+      const f2 = {
+        $state: { store: FilterStateStore.GLOBAL_STATE },
+        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+      };
+
+      f2.meta.alias = 'wassup';
+      f2.meta.alias = 'dog';
+
+      expect(compareFilters([f1], [f2], COMPARE_ALL_OPTIONS)).toBeFalsy();
     });
   });
 });

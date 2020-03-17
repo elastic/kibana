@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
 
 import { networkActions } from '../../../../store/actions';
 import {
@@ -93,7 +93,7 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
             field: criteria.sort.field.split('.')[1] as NetworkDnsFields,
             direction: criteria.sort.direction as Direction,
           };
-          if (!isEqual(newDnsSortField, sort)) {
+          if (!deepEqual(newDnsSortField, sort)) {
             updateNetworkTable({
               networkType: type,
               tableType,
@@ -115,10 +115,12 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
       [type, updateNetworkTable, isPtrIncluded]
     );
 
+    const columns = useMemo(() => getNetworkDnsColumns(), []);
+
     return (
       <PaginatedTable
         activePage={activePage}
-        columns={getNetworkDnsColumns(type)}
+        columns={columns}
         dataTestSubj={`table-${tableType}`}
         headerCount={totalCount}
         headerSupplement={

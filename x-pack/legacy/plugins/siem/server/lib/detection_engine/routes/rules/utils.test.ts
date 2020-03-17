@@ -20,12 +20,14 @@ import {
 } from './utils';
 import { getResult } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
-import { OutputRuleAlertRest, ImportRuleAlertRest } from '../../types';
+import { OutputRuleAlertRest, ImportRuleAlertRest, RuleAlertParamsRest } from '../../types';
 import { BulkError, ImportSuccessError } from '../utils';
 import { sampleRule } from '../../signals/__mocks__/es_results';
 import { getSimpleRule } from '../__mocks__/utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { createPromiseFromStreams } from '../../../../../../../../../src/legacy/utils/streams';
+import { PartialAlert } from '../../../../../../../../plugins/alerting/server';
+import { SanitizedAlert } from '../../../../../../../../plugins/alerting/server/types';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -86,11 +88,11 @@ describe('utils', () => {
         meta: {
           someMeta: 'someField',
         },
-        saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
+        note: '# Investigative notes',
         version: 1,
       };
       expect(rule).toEqual(expected);
@@ -149,11 +151,11 @@ describe('utils', () => {
         meta: {
           someMeta: 'someField',
         },
-        saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
+        note: '# Investigative notes',
         version: 1,
       };
       expect(omitData).toEqual(expected);
@@ -214,11 +216,11 @@ describe('utils', () => {
         meta: {
           someMeta: 'someField',
         },
-        saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
+        note: '# Investigative notes',
         version: 1,
       };
       expect(rule).toEqual(expected);
@@ -279,11 +281,11 @@ describe('utils', () => {
         meta: {
           someMeta: 'someField',
         },
-        saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
+        note: '# Investigative notes',
         version: 1,
       };
       expect(rule).toEqual(expected);
@@ -342,11 +344,11 @@ describe('utils', () => {
         meta: {
           someMeta: 'someField',
         },
-        saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
+        note: '# Investigative notes',
         version: 1,
       };
       expect(omitData).toEqual(expected);
@@ -408,11 +410,11 @@ describe('utils', () => {
         meta: {
           someMeta: 'someField',
         },
-        saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
+        note: '# Investigative notes',
         version: 1,
       };
       expect(ruleWithEnabledFalse).toEqual(expected);
@@ -474,11 +476,11 @@ describe('utils', () => {
         meta: {
           someMeta: 'someField',
         },
-        saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
+        note: '# Investigative notes',
         version: 1,
       };
       expect(ruleWithEnabledFalse).toEqual(expected);
@@ -540,11 +542,11 @@ describe('utils', () => {
         meta: {
           someMeta: 'someField',
         },
-        saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
         to: 'now',
         type: 'query',
+        note: '# Investigative notes',
         version: 1,
       };
       expect(rule).toEqual(expected);
@@ -627,12 +629,15 @@ describe('utils', () => {
 
   describe('transformFindAlerts', () => {
     test('outputs empty data set when data set is empty correct', () => {
-      const output = transformFindAlerts({ data: [] });
-      expect(output).toEqual({ data: [] });
+      const output = transformFindAlerts({ data: [], page: 1, perPage: 0, total: 0 });
+      expect(output).toEqual({ data: [], page: 1, perPage: 0, total: 0 });
     });
 
     test('outputs 200 if the data is of type siem alert', () => {
       const output = transformFindAlerts({
+        page: 1,
+        perPage: 0,
+        total: 0,
         data: [getResult()],
       });
       const expected: OutputRuleAlertRest = {
@@ -689,23 +694,32 @@ describe('utils', () => {
         meta: {
           someMeta: 'someField',
         },
-        saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
+        note: '# Investigative notes',
         version: 1,
       };
       expect(output).toEqual({
+        page: 1,
+        perPage: 0,
+        total: 0,
         data: [expected],
       });
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
-      const output = transformFindAlerts({ data: [{ random: 1 }] });
+      const unsafeCast = ([{ name: 'something else' }] as unknown) as SanitizedAlert[];
+      const output = transformFindAlerts({
+        data: unsafeCast,
+        page: 1,
+        perPage: 1,
+        total: 1,
+      });
       expect(output).toBeNull();
     });
   });
 
-  describe('transformOrError', () => {
+  describe('transform', () => {
     test('outputs 200 if the data is of type siem alert', () => {
       const output = transform(getResult());
       const expected: OutputRuleAlertRest = {
@@ -762,16 +776,17 @@ describe('utils', () => {
         meta: {
           someMeta: 'someField',
         },
-        saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
+        note: '# Investigative notes',
         version: 1,
       };
       expect(output).toEqual(expected);
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
-      const output = transform({ data: [{ random: 1 }] });
+      const unsafeCast = ({ data: [{ random: 1 }] } as unknown) as PartialAlert;
+      const output = transform(unsafeCast);
       expect(output).toBeNull();
     });
   });
@@ -934,16 +949,17 @@ describe('utils', () => {
         meta: {
           someMeta: 'someField',
         },
-        saved_id: 'some-id',
         timeline_id: 'some-timeline-id',
         timeline_title: 'some-timeline-title',
+        note: '# Investigative notes',
         version: 1,
       };
       expect(output).toEqual(expected);
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
-      const output = transformOrBulkError('rule-1', { data: [{ random: 1 }] });
+      const unsafeCast = ({ name: 'something else' } as unknown) as PartialAlert;
+      const output = transformOrBulkError('rule-1', unsafeCast);
       const expected: BulkError = {
         rule_id: 'rule-1',
         error: { message: 'Internal error transforming', status_code: 500 },
@@ -1023,7 +1039,6 @@ describe('utils', () => {
           references: ['http://www.example.com', 'https://ww.example.com'],
           risk_score: 50,
           rule_id: 'rule-1',
-          saved_id: 'some-id',
           severity: 'high',
           tags: [],
           threat: [
@@ -1049,6 +1064,7 @@ describe('utils', () => {
           type: 'query',
           updated_at: '2019-12-13T16:40:33.400Z',
           updated_by: 'elastic',
+          note: '# Investigative notes',
           version: 1,
         },
       ]);
@@ -1083,7 +1099,6 @@ describe('utils', () => {
           references: ['http://www.example.com', 'https://ww.example.com'],
           risk_score: 50,
           rule_id: 'rule-1',
-          saved_id: 'some-id',
           severity: 'high',
           tags: [],
           threat: [
@@ -1109,6 +1124,7 @@ describe('utils', () => {
           type: 'query',
           updated_at: '2019-12-13T16:40:33.400Z',
           updated_by: 'elastic',
+          note: '# Investigative notes',
           version: 1,
         },
         {
@@ -1132,7 +1148,6 @@ describe('utils', () => {
           references: ['http://www.example.com', 'https://ww.example.com'],
           risk_score: 50,
           rule_id: 'some other id',
-          saved_id: 'some-id',
           severity: 'high',
           tags: [],
           threat: [
@@ -1158,6 +1173,7 @@ describe('utils', () => {
           type: 'query',
           updated_at: '2019-12-13T16:40:33.400Z',
           updated_by: 'elastic',
+          note: '# Investigative notes',
           version: 1,
         },
       ]);
@@ -1194,15 +1210,12 @@ describe('utils', () => {
     });
 
     test('returns 1 error and success of false if the data is not of type siem alert', () => {
-      const output = transformOrImportError(
-        'rule-1',
-        { data: [{ random: 1 }] },
-        {
-          success: true,
-          success_count: 1,
-          errors: [],
-        }
-      );
+      const unsafeCast = ({ name: 'something else' } as unknown) as PartialAlert;
+      const output = transformOrImportError('rule-1', unsafeCast, {
+        success: true,
+        success_count: 1,
+        errors: [],
+      });
       const expected: ImportSuccessError = {
         success: false,
         errors: [
@@ -1222,20 +1235,32 @@ describe('utils', () => {
 
   describe('getDuplicates', () => {
     test("returns array of ruleIds showing the duplicate keys of 'value2' and 'value3'", () => {
-      const output = getDuplicates({
-        value1: 1,
-        value2: 2,
-        value3: 2,
-      });
+      const output = getDuplicates(
+        [
+          { rule_id: 'value1' },
+          { rule_id: 'value2' },
+          { rule_id: 'value2' },
+          { rule_id: 'value3' },
+          { rule_id: 'value3' },
+          {},
+          {},
+        ] as RuleAlertParamsRest[],
+        'rule_id'
+      );
       const expected = ['value2', 'value3'];
       expect(output).toEqual(expected);
     });
     test('returns null when given a map of no duplicates', () => {
-      const output = getDuplicates({
-        value1: 1,
-        value2: 1,
-        value3: 1,
-      });
+      const output = getDuplicates(
+        [
+          { rule_id: 'value1' },
+          { rule_id: 'value2' },
+          { rule_id: 'value3' },
+          {},
+          {},
+        ] as RuleAlertParamsRest[],
+        'rule_id'
+      );
       const expected: string[] = [];
       expect(output).toEqual(expected);
     });
@@ -1251,9 +1276,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
       const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
-        rulesObjectsStream,
+        ndJsonStream,
+        ...rulesObjectsStream,
       ]);
       const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
       const isInstanceOfError = output[0] instanceof Error;
@@ -1272,9 +1298,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
       const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
-        rulesObjectsStream,
+        ndJsonStream,
+        ...rulesObjectsStream,
       ]);
       const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
 
@@ -1290,6 +1317,30 @@ describe('utils', () => {
       ]);
     });
 
+    test('returns tuple of duplicate conflict error and single rule when rules with matching ids passed in and `overwrite` is false', async () => {
+      const rule = getSimpleRule('rule-1');
+      delete rule.rule_id;
+      const rule2 = getSimpleRule('rule-1');
+      delete rule2.rule_id;
+      const ndJsonStream = new Readable({
+        read() {
+          this.push(`${JSON.stringify(rule)}\n`);
+          this.push(`${JSON.stringify(rule2)}\n`);
+          this.push(null);
+        },
+      });
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
+      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+        ndJsonStream,
+        ...rulesObjectsStream,
+      ]);
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
+      const isInstanceOfError = output[0] instanceof Error;
+
+      expect(isInstanceOfError).toEqual(true);
+      expect(errors).toEqual([]);
+    });
+
     test('returns tuple of empty duplicate errors array and single rule when rules with matching rule-ids passed in and `overwrite` is true', async () => {
       const rule = getSimpleRule('rule-1');
       const rule2 = getSimpleRule('rule-1');
@@ -1300,9 +1351,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
       const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
-        rulesObjectsStream,
+        ndJsonStream,
+        ...rulesObjectsStream,
       ]);
       const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, true);
 
@@ -1320,9 +1372,10 @@ describe('utils', () => {
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(ndJsonStream, 1000);
+      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
       const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
-        rulesObjectsStream,
+        ndJsonStream,
+        ...rulesObjectsStream,
       ]);
       const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
       const isInstanceOfError = output[0] instanceof Error;

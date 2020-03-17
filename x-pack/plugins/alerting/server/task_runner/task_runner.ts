@@ -5,8 +5,7 @@
  */
 
 import { pick, mapValues, omit } from 'lodash';
-import { Logger } from '../../../../../src/core/server';
-import { SavedObject } from '../../../../../src/core/server';
+import { Logger, SavedObject } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
 import { createExecutionHandler } from './create_execution_handler';
@@ -94,8 +93,10 @@ export class TaskRunner {
     return this.context.getServices(fakeRequest);
   }
 
-  getExecutionHandler(
+  private getExecutionHandler(
     alertId: string,
+    alertName: string,
+    tags: string[] | undefined,
     spaceId: string,
     apiKey: string | null,
     actions: RawAlert['actions'],
@@ -115,6 +116,8 @@ export class TaskRunner {
 
     return createExecutionHandler({
       alertId,
+      alertName,
+      tags,
       logger: this.logger,
       executeAction: this.context.executeAction,
       apiKey,
@@ -226,6 +229,8 @@ export class TaskRunner {
     const params = validateAlertTypeParams(this.alertType, attributes.params);
     const executionHandler = this.getExecutionHandler(
       alertId,
+      attributes.name,
+      attributes.tags,
       spaceId,
       apiKey,
       attributes.actions,

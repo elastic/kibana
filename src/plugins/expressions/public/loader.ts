@@ -167,7 +167,7 @@ export class ExpressionLoader {
   };
 
   private render(data: Data): void {
-    this.renderHandler.render(data, this.params.extraHandlers);
+    this.renderHandler.render(data, this.params.uiState);
   }
 
   private setParams(params?: IExpressionLoaderParams) {
@@ -182,8 +182,8 @@ export class ExpressionLoader {
         this.params.searchContext || {}
       ) as any;
     }
-    if (params.extraHandlers && this.params) {
-      this.params.extraHandlers = params.extraHandlers;
+    if (params.uiState && this.params) {
+      this.params.uiState = params.uiState;
     }
     if (params.variables && this.params) {
       this.params.variables = params.variables;

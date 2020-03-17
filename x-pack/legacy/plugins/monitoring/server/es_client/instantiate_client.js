@@ -25,6 +25,7 @@ export function exposeClient({ elasticsearchConfig, events, log, elasticsearchPl
   events.on('stop', bindKey(cluster, 'close'));
   const configSource = isMonitoringCluster ? 'monitoring' : 'production';
   log([LOGGING_TAG, 'es-client'], `config sourced from: ${configSource} cluster`);
+  return cluster;
 }
 
 export function hasMonitoringCluster(config) {

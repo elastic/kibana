@@ -105,7 +105,8 @@ export function getCytoscapeElements(
             `/services/${node['service.name']}/service-map`,
             search
           ),
-          agentName: node['agent.name'] || node['agent.name'],
+          agentName: node['agent.name'],
+          frameworkName: node['service.framework.name'],
           type: 'service'
         };
       }
@@ -135,12 +136,15 @@ export function getCytoscapeElements(
 
   // instead of adding connections in two directions,
   // we add a `bidirectional` flag to use in styling
+  // and hide the inverse edge when rendering
   const dedupedConnections = (sortBy(
     Object.values(connectionsById),
     // make sure that order is stable
     'id'
   ) as ConnectionWithId[]).reduce<
-    Array<ConnectionWithId & { bidirectional?: boolean }>
+    Array<
+      ConnectionWithId & { bidirectional?: boolean; isInverseEdge?: boolean }
+    >
   >((prev, connection) => {
     const reversedConnection = prev.find(
       c =>
@@ -150,7 +154,10 @@ export function getCytoscapeElements(
 
     if (reversedConnection) {
       reversedConnection.bidirectional = true;
-      return prev;
+      return prev.concat({
+        ...connection,
+        isInverseEdge: true
+      });
     }
 
     return prev.concat(connection);
@@ -159,6 +166,7 @@ export function getCytoscapeElements(
   const cyEdges = dedupedConnections.map(connection => {
     return {
       group: 'edges' as const,
+      classes: connection.isInverseEdge ? 'invisible' : undefined,
       data: {
         id: connection.id,
         source: connection.source.id,

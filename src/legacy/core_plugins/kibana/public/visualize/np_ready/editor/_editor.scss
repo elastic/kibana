@@ -22,10 +22,6 @@ a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457 */
   }
 }
 
-.visEditor__linkedMessage {
-  padding: $euiSizeS;
-}
-
 .visEditor__content {
   @include flex-parent();
   width: 100%;

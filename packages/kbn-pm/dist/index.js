@@ -43785,6 +43785,18 @@ class KbnClientSavedObjects {
         this.requester = requester;
     }
     /**
+     * Run the saved objects migration
+     */
+    async migrate() {
+        this.log.debug('Migrating saved objects');
+        return await this.requester.request({
+            description: 'migrate saved objects',
+            path: kbn_client_requester_1.uriencode `/internal/saved_objects/_migrate`,
+            method: 'POST',
+            body: {},
+        });
+    }
+    /**
      * Get an object
      */
     async get(options) {
@@ -43908,7 +43920,7 @@ class KbnClientUiSettings {
      * Replace all uiSettings with the `doc` values, `doc` is merged
      * with some defaults
      */
-    async replace(doc) {
+    async replace(doc, { retries = 5 } = {}) {
         this.log.debug('replacing kibana config doc: %j', doc);
         const changes = {
             ...this.defaults,
@@ -43923,7 +43935,7 @@ class KbnClientUiSettings {
             method: 'POST',
             path: '/api/kibana/settings',
             body: { changes },
-            retries: 5,
+            retries,
         });
     }
     /**

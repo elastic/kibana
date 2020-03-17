@@ -16,7 +16,7 @@ export const config = {
   },
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    serviceMapEnabled: schema.boolean({ defaultValue: false }),
+    serviceMapEnabled: schema.boolean({ defaultValue: true }),
     autocreateApmIndexPattern: schema.boolean({ defaultValue: true }),
     ui: schema.object({
       enabled: schema.boolean({ defaultValue: true }),

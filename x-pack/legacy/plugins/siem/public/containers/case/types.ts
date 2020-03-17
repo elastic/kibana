@@ -4,58 +4,74 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Direction } from '../../graphql/types';
-interface FormData {
-  isNew?: boolean;
-}
+import { User } from '../../../../../../plugins/case/common/api';
 
-export interface NewCase extends FormData {
-  description: string;
-  tags: string[];
-  title: string;
+export interface Comment {
+  id: string;
+  createdAt: string;
+  createdBy: ElasticUser;
+  comment: string;
+  updatedAt: string | null;
+  updatedBy: ElasticUser | null;
+  version: string;
 }
 
 export interface Case {
-  case_id: string;
-  created_at: string;
-  created_by: ElasticUser;
+  id: string;
+  comments: Comment[];
+  commentIds: string[];
+  createdAt: string;
+  createdBy: ElasticUser;
   description: string;
-  state: string;
+  status: string;
   tags: string[];
   title: string;
-  updated_at: string;
+  updatedAt: string | null;
+  updatedBy: ElasticUser | null;
+  version: string;
 }
 
 export interface QueryParams {
   page: number;
   perPage: number;
   sortField: SortFieldCase;
-  sortOrder: Direction;
+  sortOrder: 'asc' | 'desc';
 }
 
 export interface FilterOptions {
   search: string;
+  status: string;
   tags: string[];
+  reporters: User[];
 }
 
-export interface AllCases {
+export interface CasesStatus {
+  countClosedCases: number | null;
+  countOpenCases: number | null;
+}
+
+export interface AllCases extends CasesStatus {
   cases: Case[];
   page: number;
-  per_page: number;
+  perPage: number;
   total: number;
 }
+
 export enum SortFieldCase {
-  createdAt = 'created_at',
-  state = 'state',
-  updatedAt = 'updated_at',
+  createdAt = 'createdAt',
+  updatedAt = 'updatedAt',
 }
 
 export interface ElasticUser {
   readonly username: string;
-  readonly full_name?: string;
+  readonly fullName?: string | null;
 }
 
 export interface FetchCasesProps {
   queryParams?: QueryParams;
   filterOptions?: FilterOptions;
+}
+
+export interface ApiProps {
+  signal: AbortSignal;
 }

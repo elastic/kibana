@@ -14,6 +14,7 @@ import {
   IIndexPattern,
 } from '../../../../../../../../src/plugins/data/server';
 import { PartialFilter, RuleAlertParams } from '../types';
+import { BadRequestError } from '../errors/bad_request_error';
 
 export const getQueryFilter = (
   query: string,
@@ -51,6 +52,15 @@ interface GetFilterArgs {
   index: string[] | undefined | null;
 }
 
+interface QueryAttributes {
+  // NOTE: doesn't match Query interface
+  query: {
+    query: string;
+    language: string;
+  };
+  filters: PartialFilter[];
+}
+
 export const getFilter = async ({
   filters,
   index,
@@ -65,14 +75,17 @@ export const getFilter = async ({
       if (query != null && language != null && index != null) {
         return getQueryFilter(query, language, filters || [], index);
       } else {
-        throw new TypeError('query, filters, and index parameter should be defined');
+        throw new BadRequestError('query, filters, and index parameter should be defined');
       }
     }
     case 'saved_query': {
       if (savedId != null && index != null) {
         try {
           // try to get the saved object first
-          const savedObject = await services.savedObjectsClient.get('query', savedId);
+          const savedObject = await services.savedObjectsClient.get<QueryAttributes>(
+            'query',
+            savedId
+          );
           return getQueryFilter(
             savedObject.attributes.query.query,
             savedObject.attributes.query.language,
@@ -91,7 +104,7 @@ export const getFilter = async ({
           }
         }
       } else {
-        throw new TypeError('savedId parameter should be defined');
+        throw new BadRequestError('savedId parameter should be defined');
       }
     }
   }

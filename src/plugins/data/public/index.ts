@@ -26,27 +26,27 @@ import { PluginInitializerContext } from '../../../core/public';
  */
 
 import {
-  FILTERS,
   buildEmptyFilter,
-  buildPhrasesFilter,
   buildExistsFilter,
   buildPhraseFilter,
+  buildPhrasesFilter,
   buildQueryFilter,
   buildRangeFilter,
-  toggleFilterNegated,
   disableFilter,
+  FILTERS,
   FilterStateStore,
+  getDisplayValueFromFilter,
   getPhraseFilterField,
   getPhraseFilterValue,
-  isPhraseFilter,
   isExistsFilter,
-  isPhrasesFilter,
-  isRangeFilter,
+  isFilterPinned,
   isMatchAllFilter,
   isMissingFilter,
+  isPhraseFilter,
+  isPhrasesFilter,
   isQueryStringFilter,
-  getDisplayValueFromFilter,
-  isFilterPinned,
+  isRangeFilter,
+  toggleFilterNegated,
 } from '../common';
 
 import { FilterLabel } from './ui/filter_bar';
@@ -263,6 +263,7 @@ export {
   IFieldSubType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
+  IndexPatternAttributes,
 } from '../common';
 
 /*
@@ -282,8 +283,142 @@ export {
  * Search:
  */
 
-export { IRequestTypesMap, IResponseTypesMap } from './search';
-export * from './search';
+import {
+  // aggs
+  AggConfigs,
+  aggTypeFilters,
+  aggGroupNamesMap,
+  CidrMask,
+  convertDateRangeToString,
+  convertIPRangeToString,
+  intervalOptions, // only used in Discover
+  isDateHistogramBucketAggConfig,
+  isStringType,
+  isType,
+  parentPipelineType,
+  propFilter,
+  siblingPipelineType,
+  termsAggFilter,
+  // expressions utils
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  // tabify
+  tabifyAggResponse,
+  tabifyGetColumns,
+} from './search';
+
+import {
+  dateHistogramInterval,
+  InvalidEsCalendarIntervalError,
+  InvalidEsIntervalFormatError,
+  isValidEsInterval,
+  isValidInterval,
+  parseEsInterval,
+  parseInterval,
+  toAbsoluteDates,
+} from '../common';
+
+export { ParsedInterval } from '../common';
+
+export {
+  // aggs
+  AggGroupNames,
+  AggParam, // only the type is used externally, only in vis editor
+  AggParamOption, // only the type is used externally
+  AggParamType,
+  AggTypeFieldFilters, // TODO convert to interface
+  AggTypeFilters, // TODO convert to interface
+  BUCKET_TYPES,
+  DateRangeKey, // only used in field formatter deserialization, which will live in data
+  IAggConfig,
+  IAggConfigs,
+  IAggGroupNames,
+  IAggType,
+  IFieldParamType,
+  IMetricAggType,
+  IpRangeKey, // only used in field formatter deserialization, which will live in data
+  METRIC_TYPES,
+  OptionedParamEditorProps, // only type is used externally
+  OptionedParamType,
+  OptionedValueProp, // only type is used externally
+  // search
+  ES_SEARCH_STRATEGY,
+  SYNC_SEARCH_STRATEGY,
+  getEsPreference,
+  getSearchErrorType,
+  ISearchContext,
+  TSearchStrategyProvider,
+  ISearchStrategy,
+  ISearch,
+  ISearchOptions,
+  IRequestTypesMap,
+  IResponseTypesMap,
+  ISearchGeneric,
+  IEsSearchResponse,
+  IEsSearchRequest,
+  ISyncSearchRequest,
+  IKibanaSearchResponse,
+  IKibanaSearchRequest,
+  SearchRequest,
+  SearchResponse,
+  SearchError,
+  SearchStrategyProvider,
+  ISearchSource,
+  SearchSource,
+  SearchSourceFields,
+  EsQuerySortValue,
+  SortDirection,
+  FetchOptions,
+  // tabify
+  TabbedAggColumn,
+  TabbedAggRow,
+  TabbedTable,
+} from './search';
+
+// Search namespace
+export const search = {
+  aggs: {
+    AggConfigs,
+    aggGroupNamesMap,
+    aggTypeFilters,
+    CidrMask,
+    convertDateRangeToString,
+    convertIPRangeToString,
+    dateHistogramInterval,
+    intervalOptions, // only used in Discover
+    InvalidEsCalendarIntervalError,
+    InvalidEsIntervalFormatError,
+    isDateHistogramBucketAggConfig,
+    isStringType,
+    isType,
+    isValidEsInterval,
+    isValidInterval,
+    parentPipelineType,
+    parseEsInterval,
+    parseInterval,
+    propFilter,
+    siblingPipelineType,
+    termsAggFilter,
+    toAbsoluteDates,
+  },
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  tabifyAggResponse,
+  tabifyGetColumns,
+};
+
+/*
+ * UI components
+ */
+
+export {
+  SearchBar,
+  SearchBarProps,
+  StatefulSearchBarProps,
+  FilterBar,
+  QueryStringInput,
+  IndexPatternSelect,
+} from './ui';
 
 /**
  * Types to be shared externally
@@ -293,29 +428,26 @@ export { Filter, Query, RefreshInterval, TimeRange } from '../common';
 
 export {
   createSavedQueryService,
-  syncAppFilters,
-  syncQuery,
+  connectToQueryState,
+  syncQueryStateWithUrl,
+  QueryState,
   getTime,
   getQueryLog,
-  getQueryStateContainer,
+  getDefaultQuery,
   FilterManager,
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,
-  SavedQueryAttributes,
   InputTimeRange,
-  TimefilterSetup,
   TimeHistory,
   TimefilterContract,
   TimeHistoryContract,
 } from './query';
-export * from './ui';
+
 export {
   // kbn field types
   castEsToKbnFieldTypeName,
   getKbnTypeNames,
-  // utils
-  parseInterval,
 } from '../common';
 
 /*

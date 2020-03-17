@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { createHashHistory, History } from 'history';
+
 import {
   Capabilities,
   ChromeStart,
@@ -30,13 +32,13 @@ import {
   IndexPatternsContract,
   DataPublicPluginStart,
 } from 'src/plugins/data/public';
-import { createSavedSearchesLoader } from './saved_searches';
+
 import { DiscoverStartPlugins } from './plugin';
 import { SharePluginStart } from '../../../../../plugins/share/public';
-import { SavedSearch } from './np_ready/types';
 import { DocViewsRegistry } from './np_ready/doc_views/doc_views_registry';
 import { ChartsPluginStart } from '../../../../../plugins/charts/public';
 import { VisualizationsStart } from '../../../visualizations/public';
+import { createSavedSearchesLoader, SavedSearch } from '../../../../../plugins/discover/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -46,6 +48,7 @@ export interface DiscoverServices {
   data: DataPublicPluginStart;
   docLinks: DocLinksStart;
   docViewsRegistry: DocViewsRegistry;
+  history: History;
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
   indexPatterns: IndexPatternsContract;
@@ -79,6 +82,7 @@ export async function buildServices(
     data: plugins.data,
     docLinks: core.docLinks,
     docViewsRegistry,
+    history: createHashHistory(),
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
     getSavedSearchById: async (id: string) => savedObjectService.get(id),

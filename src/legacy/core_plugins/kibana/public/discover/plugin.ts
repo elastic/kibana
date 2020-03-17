@@ -18,6 +18,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import angular, { auto } from 'angular';
@@ -25,11 +26,11 @@ import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import {
   DataPublicPluginStart,
   DataPublicPluginSetup,
-  getQueryStateContainer,
+  esFilters,
 } from '../../../../../plugins/data/public';
 import { registerFeature } from './np_ready/register_feature';
 import './kibana_services';
-import { IEmbeddableStart, IEmbeddableSetup } from '../../../../../plugins/embeddable/public';
+import { EmbeddableStart, EmbeddableSetup } from '../../../../../plugins/embeddable/public';
 import { getInnerAngularModule, getInnerAngularModuleEmbeddable } from './get_inner_angular';
 import { setAngularModule, setServices } from './kibana_services';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
@@ -62,7 +63,7 @@ export interface DiscoverSetup {
 export type DiscoverStart = void;
 export interface DiscoverSetupPlugins {
   uiActions: UiActionsSetup;
-  embeddable: IEmbeddableSetup;
+  embeddable: EmbeddableSetup;
   kibanaLegacy: KibanaLegacySetup;
   home: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
@@ -70,7 +71,7 @@ export interface DiscoverSetupPlugins {
 }
 export interface DiscoverStartPlugins {
   uiActions: UiActionsStart;
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   navigation: NavigationStart;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
@@ -102,10 +103,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   public initializeInnerAngular?: () => void;
   public initializeServices?: () => Promise<{ core: CoreStart; plugins: DiscoverStartPlugins }>;
 
-  setup(core: CoreSetup, plugins: DiscoverSetupPlugins): DiscoverSetup {
-    const { querySyncStateContainer, stop: stopQuerySyncStateContainer } = getQueryStateContainer(
-      plugins.data.query
-    );
+  setup(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins): DiscoverSetup {
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
       defaultSubUrl: '#/discover',
@@ -115,12 +113,19 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
       stateParams: [
         {
           kbnUrlKey: '_g',
-          stateUpdate$: querySyncStateContainer.state$,
+          stateUpdate$: plugins.data.query.state$.pipe(
+            filter(
+              ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
+            ),
+            map(({ state }) => ({
+              ...state,
+              filters: state.filters?.filter(esFilters.isFilterPinned),
+            }))
+          ),
         },
       ],
     });
     this.stopUrlTracking = () => {
-      stopQuerySyncStateContainer();
       stopUrlTracker();
     };
 
@@ -168,6 +173,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
     });
     registerFeature(plugins.home);
 
+    this.registerEmbeddable(core, plugins);
     return {
       addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
     };
@@ -198,8 +204,6 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
 
       return { core, plugins };
     };
-
-    this.registerEmbeddable(core, plugins);
   }
 
   stop() {
@@ -211,19 +215,25 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   /**
    * register embeddable with a slimmer embeddable version of inner angular
    */
-  private async registerEmbeddable(core: CoreStart, plugins: DiscoverStartPlugins) {
+  private async registerEmbeddable(
+    core: CoreSetup<DiscoverStartPlugins>,
+    plugins: DiscoverSetupPlugins
+  ) {
     const { SearchEmbeddableFactory } = await import('./np_ready/embeddable');
-    const isEditable = () => core.application.capabilities.discover.save as boolean;
 
     if (!this.getEmbeddableInjector) {
       throw Error('Discover plugin method getEmbeddableInjector is undefined');
     }
 
-    const factory = new SearchEmbeddableFactory(
-      plugins.uiActions.executeTriggerActions,
-      this.getEmbeddableInjector,
-      isEditable
-    );
+    const getStartServices = async () => {
+      const [coreStart, deps] = await core.getStartServices();
+      return {
+        executeTriggerActions: deps.uiActions.executeTriggerActions,
+        isEditable: () => coreStart.application.capabilities.discover.save as boolean,
+      };
+    };
+
+    const factory = new SearchEmbeddableFactory(getStartServices, this.getEmbeddableInjector);
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 

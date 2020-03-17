@@ -12,15 +12,12 @@ import {
   createMockSetupDependencies,
   createMockStartDependencies,
 } from './mocks';
+import { CoreSetup } from 'kibana/public';
 
 jest.mock('ui/new_platform');
 
 // mock away actual dependencies to prevent all of it being loaded
 jest.mock('../../../../../../src/legacy/core_plugins/interpreter/public/registries', () => {});
-jest.mock('../../../../../../src/legacy/core_plugins/data/public/legacy', () => ({
-  start: {},
-  setup: {},
-}));
 jest.mock('./embeddable/embeddable_factory', () => ({
   EmbeddableFactory: class Mock {},
 }));
@@ -45,7 +42,10 @@ describe('editor_frame service', () => {
   it('should create an editor frame instance which mounts and unmounts', async () => {
     await expect(
       (async () => {
-        pluginInstance.setup(coreMock.createSetup(), pluginSetupDependencies);
+        pluginInstance.setup(
+          coreMock.createSetup() as CoreSetup<MockedStartDependencies>,
+          pluginSetupDependencies
+        );
         const publicAPI = pluginInstance.start(coreMock.createStart(), pluginStartDependencies);
         const instance = await publicAPI.createInstance({});
         instance.mount(mountpoint, {
@@ -61,7 +61,10 @@ describe('editor_frame service', () => {
   });
 
   it('should not have child nodes after unmount', async () => {
-    pluginInstance.setup(coreMock.createSetup(), pluginSetupDependencies);
+    pluginInstance.setup(
+      coreMock.createSetup() as CoreSetup<MockedStartDependencies>,
+      pluginSetupDependencies
+    );
     const publicAPI = pluginInstance.start(coreMock.createStart(), pluginStartDependencies);
     const instance = await publicAPI.createInstance({});
     instance.mount(mountpoint, {

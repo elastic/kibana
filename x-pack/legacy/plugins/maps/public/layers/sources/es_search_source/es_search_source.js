@@ -19,7 +19,6 @@ import {
   ES_GEO_FIELD_TYPE,
   DEFAULT_MAX_BUCKETS_LIMIT,
   SORT_ORDER,
-  CATEGORICAL_DATA_TYPES,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -28,31 +27,7 @@ import { loadIndexSettings } from './load_index_settings';
 
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
-
-function getField(indexPattern, fieldName) {
-  const field = indexPattern.fields.getByName(fieldName);
-  if (!field) {
-    throw new Error(
-      i18n.translate('xpack.maps.source.esSearch.fieldNotFoundMsg', {
-        defaultMessage: `Unable to find '{fieldName}' in index-pattern '{indexPatternTitle}'.`,
-        values: { fieldName, indexPatternTitle: indexPattern.title },
-      })
-    );
-  }
-  return field;
-}
-
-function addFieldToDSL(dsl, field) {
-  return !field.scripted
-    ? { ...dsl, field: field.name }
-    : {
-        ...dsl,
-        script: {
-          source: field.script,
-          lang: field.lang,
-        },
-      };
-}
+import { getField, addFieldToDSL } from '../../util/es_agg_utils';
 
 function getDocValueAndSourceFields(indexPattern, fieldNames) {
   const docValueFields = [];
@@ -157,49 +132,6 @@ export class ESSearchSource extends AbstractESSource {
         topHitsSize={this._descriptor.topHitsSize}
       />
     );
-  }
-
-  async getNumberFields() {
-    try {
-      const indexPattern = await this.getIndexPattern();
-      return indexPattern.fields.getByType('number').map(field => {
-        return this.createField({ fieldName: field.name });
-      });
-    } catch (error) {
-      return [];
-    }
-  }
-
-  async getDateFields() {
-    try {
-      const indexPattern = await this.getIndexPattern();
-      return indexPattern.fields.getByType('date').map(field => {
-        return this.createField({ fieldName: field.name });
-      });
-    } catch (error) {
-      return [];
-    }
-  }
-
-  async getCategoricalFields() {
-    try {
-      const indexPattern = await this.getIndexPattern();
-
-      const aggFields = [];
-      CATEGORICAL_DATA_TYPES.forEach(dataType => {
-        indexPattern.fields.getByType(dataType).forEach(field => {
-          if (field.aggregatable) {
-            aggFields.push(field);
-          }
-        });
-      });
-      return aggFields.map(field => {
-        return this.createField({ fieldName: field.name });
-      });
-    } catch (error) {
-      //error surfaces in the LayerTOC UI
-      return [];
-    }
   }
 
   async getFields() {

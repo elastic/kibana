@@ -94,7 +94,6 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                                 isInspected={false}
                                 loading={false}
                                 queryId="statItems"
-                                refetch={null}
                                 selectedInspectIndex={0}
                                 setIsInspected={[Function]}
                                 title="KPI HOSTS"
@@ -122,25 +121,12 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                                       size="m"
                                       type="inspect"
                                     >
-                                      <EuiIconEmpty
-                                        aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                                        focusable="false"
-                                        role="img"
-                                        style={null}
-                                      >
-                                        <svg
-                                          aria-hidden={true}
-                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                                          focusable="false"
-                                          height={16}
-                                          role="img"
-                                          style={null}
-                                          viewBox="0 0 16 16"
-                                          width={16}
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        />
-                                      </EuiIconEmpty>
+                                      <div
+                                        aria-hidden="true"
+                                        className="euiButtonIcon__icon"
+                                        data-euiicon-type="inspect"
+                                        size="m"
+                                      />
                                     </EuiIcon>
                                   </button>
                                 </EuiButtonIcon>
@@ -328,7 +314,6 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                                 isInspected={false}
                                 loading={false}
                                 queryId="statItems"
-                                refetch={null}
                                 selectedInspectIndex={0}
                                 setIsInspected={[Function]}
                                 title="KPI HOSTS"
@@ -356,25 +341,12 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                                       size="m"
                                       type="inspect"
                                     >
-                                      <EuiIconEmpty
-                                        aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                                        focusable="false"
-                                        role="img"
-                                        style={null}
-                                      >
-                                        <svg
-                                          aria-hidden={true}
-                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                                          focusable="false"
-                                          height={16}
-                                          role="img"
-                                          style={null}
-                                          viewBox="0 0 16 16"
-                                          width={16}
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        />
-                                      </EuiIconEmpty>
+                                      <div
+                                        aria-hidden="true"
+                                        className="euiButtonIcon__icon"
+                                        data-euiicon-type="inspect"
+                                        size="m"
+                                      />
                                     </EuiIcon>
                                   </button>
                                 </EuiButtonIcon>
@@ -632,7 +604,6 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                               isInspected={false}
                               loading={false}
                               queryId="statItems"
-                              refetch={null}
                               selectedInspectIndex={0}
                               setIsInspected={[Function]}
                               title="KPI UNIQUE_PRIVATE_IPS"
@@ -660,25 +631,12 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                     size="m"
                                     type="inspect"
                                   >
-                                    <EuiIconEmpty
-                                      aria-hidden={true}
-                                      className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                                      focusable="false"
-                                      role="img"
-                                      style={null}
-                                    >
-                                      <svg
-                                        aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
-                                        focusable="false"
-                                        height={16}
-                                        role="img"
-                                        style={null}
-                                        viewBox="0 0 16 16"
-                                        width={16}
-                                        xmlns="http://www.w3.org/2000/svg"
-                                      />
-                                    </EuiIconEmpty>
+                                    <div
+                                      aria-hidden="true"
+                                      className="euiButtonIcon__icon"
+                                      data-euiicon-type="inspect"
+                                      size="m"
+                                    />
                                   </EuiIcon>
                                 </button>
                               </EuiButtonIcon>
@@ -733,35 +691,12 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                         size="l"
                                         type="cross"
                                       >
-                                        <EuiIconEmpty
-                                          aria-hidden={true}
-                                          className="euiIcon euiIcon--large euiIcon-isLoading"
+                                        <div
+                                          color="#D36086"
+                                          data-euiicon-type="cross"
                                           data-test-subj="stat-icon"
-                                          focusable="false"
-                                          role="img"
-                                          style={
-                                            Object {
-                                              "fill": "#D36086",
-                                            }
-                                          }
-                                        >
-                                          <svg
-                                            aria-hidden={true}
-                                            className="euiIcon euiIcon--large euiIcon-isLoading"
-                                            data-test-subj="stat-icon"
-                                            focusable="false"
-                                            height={16}
-                                            role="img"
-                                            style={
-                                              Object {
-                                                "fill": "#D36086",
-                                              }
-                                            }
-                                            viewBox="0 0 16 16"
-                                            width={16}
-                                            xmlns="http://www.w3.org/2000/svg"
-                                          />
-                                        </EuiIconEmpty>
+                                          size="l"
+                                        />
                                       </EuiIcon>
                                     </div>
                                   </EuiFlexItem>
@@ -828,35 +763,12 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                         size="l"
                                         type="cross"
                                       >
-                                        <EuiIconEmpty
-                                          aria-hidden={true}
-                                          className="euiIcon euiIcon--large euiIcon-isLoading"
+                                        <div
+                                          color="#9170B8"
+                                          data-euiicon-type="cross"
                                           data-test-subj="stat-icon"
-                                          focusable="false"
-                                          role="img"
-                                          style={
-                                            Object {
-                                              "fill": "#9170B8",
-                                            }
-                                          }
-                                        >
-                                          <svg
-                                            aria-hidden={true}
-                                            className="euiIcon euiIcon--large euiIcon-isLoading"
-                                            data-test-subj="stat-icon"
-                                            focusable="false"
-                                            height={16}
-                                            role="img"
-                                            style={
-                                              Object {
-                                                "fill": "#9170B8",
-                                              }
-                                            }
-                                            viewBox="0 0 16 16"
-                                            width={16}
-                                            xmlns="http://www.w3.org/2000/svg"
-                                          />
-                                        </EuiIconEmpty>
+                                          size="l"
+                                        />
                                       </EuiIcon>
                                     </div>
                                   </EuiFlexItem>

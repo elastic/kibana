@@ -18,8 +18,10 @@ import { appReducer } from './reducer';
 import { alertMiddlewareFactory } from './alerts/middleware';
 import { managementMiddlewareFactory } from './managing';
 import { policyListMiddlewareFactory } from './policy_list';
+import { policyDetailsMiddlewareFactory } from './policy_details';
 import { GlobalState } from '../types';
 import { AppAction } from './action';
+import { EndpointPluginStartDependencies } from '../../../plugin';
 
 const composeWithReduxDevTools = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
   ? (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({ name: 'EndpointApp' })
@@ -48,26 +50,47 @@ export const substateMiddlewareFactory = <Substate>(
   };
 };
 
-export const appStoreFactory = (coreStart: CoreStart): Store => {
-  const store = createStore(
-    appReducer,
-    composeWithReduxDevTools(
+/**
+ * @param middlewareDeps Optionally create the store without any middleware. This is useful for testing the store w/o side effects.
+ */
+export const appStoreFactory: (middlewareDeps?: {
+  /**
+   * Allow middleware to communicate with Kibana core.
+   */
+  coreStart: CoreStart;
+  /**
+   * Give middleware access to plugin start dependencies.
+   */
+  depsStart: EndpointPluginStartDependencies;
+}) => Store = middlewareDeps => {
+  let middleware;
+  if (middlewareDeps) {
+    const { coreStart, depsStart } = middlewareDeps;
+    middleware = composeWithReduxDevTools(
       applyMiddleware(
         substateMiddlewareFactory(
           globalState => globalState.managementList,
-          managementMiddlewareFactory(coreStart)
+          managementMiddlewareFactory(coreStart, depsStart)
         ),
         substateMiddlewareFactory(
           globalState => globalState.policyList,
-          policyListMiddlewareFactory(coreStart)
+          policyListMiddlewareFactory(coreStart, depsStart)
+        ),
+        substateMiddlewareFactory(
+          globalState => globalState.policyDetails,
+          policyDetailsMiddlewareFactory(coreStart, depsStart)
         ),
         substateMiddlewareFactory(
           globalState => globalState.alertList,
-          alertMiddlewareFactory(coreStart)
+          alertMiddlewareFactory(coreStart, depsStart)
         )
       )
-    )
-  );
+    );
+  } else {
+    // Create the store without any middleware. This is useful for testing the store w/o side effects.
+    middleware = undefined;
+  }
+  const store = createStore(appReducer, middleware);
 
   return store;
 };

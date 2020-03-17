@@ -9,7 +9,6 @@ import { EuiHorizontalRule, EuiLink, EuiText } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
-import { ActionCreator } from 'typescript-fsa';
 
 import { AllTimelinesQuery } from '../../containers/timeline/all';
 import { SortFieldTimeline, Direction } from '../../graphql/types';
@@ -22,10 +21,6 @@ import { RecentTimelines } from './recent_timelines';
 import * as i18n from './translations';
 import { FilterMode } from './types';
 
-export interface MeApiResponse {
-  username: string;
-}
-
 interface OwnProps {
   apolloClient: ApolloClient<{}>;
   filterBy: FilterMode;
@@ -35,14 +30,13 @@ export type Props = OwnProps & PropsFromRedux;
 
 const StatefulRecentTimelinesComponent = React.memo<Props>(
   ({ apolloClient, filterBy, updateIsLoading, updateTimeline }) => {
-    const actionDispatcher = updateIsLoading as ActionCreator<{ id: string; isLoading: boolean }>;
     const onOpenTimeline: OnOpenTimeline = useCallback(
       ({ duplicate, timelineId }: { duplicate: boolean; timelineId: string }) => {
         queryTimelineById({
           apolloClient,
           duplicate,
           timelineId,
-          updateIsLoading: actionDispatcher,
+          updateIsLoading,
           updateTimeline,
         });
       },

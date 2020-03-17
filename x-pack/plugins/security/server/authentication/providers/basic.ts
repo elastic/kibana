@@ -8,6 +8,7 @@ import { KibanaRequest } from '../../../../../../src/core/server';
 import { canRedirectRequest } from '../can_redirect_request';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
+import { getHTTPAuthenticationScheme } from '../get_http_authentication_scheme';
 import { BaseAuthenticationProvider } from './base';
 
 /**
@@ -75,29 +76,25 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
     this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
-    // try header-based auth
-    const {
-      authenticationResult: headerAuthResult,
-      headerNotRecognized,
-    } = await this.authenticateViaHeader(request);
-    if (headerNotRecognized) {
-      return headerAuthResult;
+    if (getHTTPAuthenticationScheme(request) != null) {
+      this.logger.debug('Cannot authenticate requests with `Authorization` header.');
+      return AuthenticationResult.notHandled();
     }
 
-    let authenticationResult = headerAuthResult;
-    if (authenticationResult.notHandled() && state) {
-      authenticationResult = await this.authenticateViaState(request, state);
-    } else if (authenticationResult.notHandled() && canRedirectRequest(request)) {
-      // If we couldn't handle authentication let's redirect user to the login page.
-      const nextURL = encodeURIComponent(
-        `${this.options.basePath.get(request)}${request.url.path}`
-      );
-      authenticationResult = AuthenticationResult.redirectTo(
-        `${this.options.basePath.get(request)}/login?next=${nextURL}`
+    if (state) {
+      return await this.authenticateViaState(request, state);
+    }
+
+    // If state isn't present let's redirect user to the login page.
+    if (canRedirectRequest(request)) {
+      this.logger.debug('Redirecting request to Login page.');
+      const basePath = this.options.basePath.get(request);
+      return AuthenticationResult.redirectTo(
+        `${basePath}/login?next=${encodeURIComponent(`${basePath}${request.url.path}`)}`
       );
     }
 
-    return authenticationResult;
+    return AuthenticationResult.notHandled();
   }
 
   /**
@@ -114,37 +111,11 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
-   * Validates whether request contains `Basic ***` Authorization header and just passes it
-   * forward to Elasticsearch backend.
-   * @param request Request instance.
+   * Returns HTTP authentication scheme (`Bearer`) that's used within `Authorization` HTTP header
+   * that provider attaches to all successfully authenticated requests to Elasticsearch.
    */
-  private async authenticateViaHeader(request: KibanaRequest) {
-    this.logger.debug('Trying to authenticate via header.');
-
-    const authorization = request.headers.authorization;
-    if (!authorization || typeof authorization !== 'string') {
-      this.logger.debug('Authorization header is not presented.');
-      return { authenticationResult: AuthenticationResult.notHandled() };
-    }
-
-    const authenticationSchema = authorization.split(/\s+/)[0];
-    if (authenticationSchema.toLowerCase() !== 'basic') {
-      this.logger.debug(`Unsupported authentication schema: ${authenticationSchema}`);
-      return {
-        authenticationResult: AuthenticationResult.notHandled(),
-        headerNotRecognized: true,
-      };
-    }
-
-    try {
-      const user = await this.getUser(request);
-
-      this.logger.debug('Request has been authenticated via header.');
-      return { authenticationResult: AuthenticationResult.succeeded(user) };
-    } catch (err) {
-      this.logger.debug(`Failed to authenticate request via header: ${err.message}`);
-      return { authenticationResult: AuthenticationResult.failed(err) };
-    }
+  public getHTTPAuthenticationScheme() {
+    return 'basic';
   }
 
   /**

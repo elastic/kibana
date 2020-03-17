@@ -43,6 +43,7 @@ import {
   ElasticsearchServiceSetup,
   IScopedClusterClient,
   configSchema as elasticsearchConfigSchema,
+  ElasticsearchServiceStart,
 } from './elasticsearch';
 
 import { HttpServiceSetup } from './http';
@@ -51,9 +52,14 @@ import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plug
 import { ContextSetup } from './context';
 import { IUiSettingsClient, UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
 import { SavedObjectsClientContract } from './saved_objects/types';
-import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './saved_objects';
+import {
+  ISavedObjectTypeRegistry,
+  SavedObjectsServiceSetup,
+  SavedObjectsServiceStart,
+} from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { UuidServiceSetup } from './uuid';
+import { MetricsServiceSetup } from './metrics';
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
@@ -88,6 +94,7 @@ export {
   ElasticsearchError,
   ElasticsearchErrorHelpers,
   ElasticsearchServiceSetup,
+  ElasticsearchServiceStart,
   APICaller,
   FakeRequest,
   ScopeableRequest,
@@ -99,9 +106,12 @@ export {
   AuthResultParams,
   AuthStatus,
   AuthToolkit,
+  AuthRedirected,
+  AuthRedirectedParams,
   AuthResult,
   AuthResultType,
   Authenticated,
+  AuthNotHandled,
   BasePath,
   IBasePath,
   CustomHttpResponseOptions,
@@ -159,6 +169,8 @@ export {
   SessionStorageCookieOptions,
   SessionCookieValidationResult,
   SessionStorageFactory,
+  DestructiveRouteMethod,
+  SafeRouteMethod,
 } from './http';
 export { RenderingServiceSetup, IRenderOptions } from './rendering';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
@@ -201,6 +213,7 @@ export {
   SavedObjectsImportRetry,
   SavedObjectsImportUnknownError,
   SavedObjectsImportUnsupportedTypeError,
+  SavedObjectMigrationContext,
   SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
   SavedObjectSanitizedDoc,
@@ -224,14 +237,20 @@ export {
   SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,
   SavedObjectTypeRegistry,
+  ISavedObjectTypeRegistry,
   SavedObjectsType,
+  SavedObjectsTypeManagementDefinition,
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
+  exportSavedObjectsToStream,
+  importSavedObjectsFromStream,
+  resolveSavedObjectsImportErrors,
 } from './saved_objects';
 
 export {
   IUiSettingsClient,
   UiSettingsParams,
+  PublicUiSettingsParams,
   UiSettingsType,
   UiSettingsServiceSetup,
   UiSettingsServiceStart,
@@ -242,6 +261,14 @@ export {
   StringValidationRegex,
   StringValidationRegexString,
 } from './ui_settings';
+
+export {
+  OpsMetrics,
+  OpsOsMetrics,
+  OpsServerMetrics,
+  OpsProcessMetrics,
+  MetricsServiceSetup,
+} from './metrics';
 
 export { RecursiveReadonly } from '../utils';
 
@@ -270,11 +297,13 @@ export {
 /**
  * Plugin specific context passed to a route handler.
  *
- * Provides the following clients:
+ * Provides the following clients and services:
  *    - {@link IScopedRenderingClient | rendering} - Rendering client
  *      which uses the data of the incoming request
  *    - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client
  *      which uses the credentials of the incoming request
+ *    - {@link ISavedObjectTypeRegistry | savedObjects.typeRegistry} - Type registry containing
+ *      all the registered types.
  *    - {@link ScopedClusterClient | elasticsearch.dataClient} - Elasticsearch
  *      data client which uses the credentials of the incoming request
  *    - {@link ScopedClusterClient | elasticsearch.adminClient} - Elasticsearch
@@ -289,6 +318,7 @@ export interface RequestHandlerContext {
     rendering: IScopedRenderingClient;
     savedObjects: {
       client: SavedObjectsClientContract;
+      typeRegistry: ISavedObjectTypeRegistry;
     };
     elasticsearch: {
       dataClient: IScopedClusterClient;
@@ -320,6 +350,8 @@ export interface CoreSetup<TPluginsStart extends object = object> {
   uiSettings: UiSettingsServiceSetup;
   /** {@link UuidServiceSetup} */
   uuid: UuidServiceSetup;
+  /** {@link MetricsServiceSetup} */
+  metrics: MetricsServiceSetup;
   /**
    * Allows plugins to get access to APIs available in start inside async handlers.
    * Promise will not resolve until Core and plugin dependencies have completed `start`.
@@ -337,6 +369,8 @@ export interface CoreSetup<TPluginsStart extends object = object> {
 export interface CoreStart {
   /** {@link CapabilitiesStart} */
   capabilities: CapabilitiesStart;
+  /** {@link ElasticsearchServiceStart} */
+  elasticsearch: ElasticsearchServiceStart;
   /** {@link SavedObjectsServiceStart} */
   savedObjects: SavedObjectsServiceStart;
   /** {@link UiSettingsServiceStart} */
