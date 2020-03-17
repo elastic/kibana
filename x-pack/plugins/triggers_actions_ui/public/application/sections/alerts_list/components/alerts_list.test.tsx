@@ -92,13 +92,6 @@ describe('alerts_list component empty', () => {
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: {
-        getInjectedVar(name: string) {
-          if (name === 'createAlertUiEnabled') {
-            return true;
-          }
-        },
-      } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       capabilities: {
@@ -220,13 +213,6 @@ describe('alerts_list component with items', () => {
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: {
-        getInjectedVar(name: string) {
-          if (name === 'createAlertUiEnabled') {
-            return true;
-          }
-        },
-      } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       capabilities: {
@@ -309,13 +295,6 @@ describe('alerts_list component empty with show only capability', () => {
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: {
-        getInjectedVar(name: string) {
-          if (name === 'createAlertUiEnabled') {
-            return true;
-          }
-        },
-      } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       capabilities: {
@@ -433,13 +412,6 @@ describe('alerts_list with show only capability', () => {
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: {
-        getInjectedVar(name: string) {
-          if (name === 'createAlertUiEnabled') {
-            return true;
-          }
-        },
-      } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       capabilities: {
