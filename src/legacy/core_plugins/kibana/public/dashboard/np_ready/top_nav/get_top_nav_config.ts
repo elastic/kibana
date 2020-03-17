@@ -170,7 +170,6 @@ function getAddConfig(action: NavAction) {
 function getShareConfig(action: NavAction) {
   return {
     id: 'share',
-    tooltip: 'test share config tooltip',
     label: i18n.translate('kbn.dashboard.topNave.shareButtonAriaLabel', {
       defaultMessage: 'share',
     }),
