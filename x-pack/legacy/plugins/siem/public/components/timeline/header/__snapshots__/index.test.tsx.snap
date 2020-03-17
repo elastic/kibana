@@ -1,9 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Header rendering renders correctly against snapshot 1`] = `
-<TimelineHeaderContainer
-  data-test-subj="timelineHeader"
->
+<Fragment>
   <DataProviders
     browserFields={Object {}}
     dataProviders={
@@ -244,5 +242,5 @@ exports[`Header rendering renders correctly against snapshot 1`] = `
     }
     timelineId="foo"
   />
-</TimelineHeaderContainer>
+</Fragment>
 `;
