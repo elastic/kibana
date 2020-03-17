@@ -27,7 +27,7 @@ export default function({ getService }: FtrProviderContext) {
   const nextPrevPrefixPageSize = 'page_size=10';
   const nextPrevPrefix = `${nextPrevPrefixQuery}&${nextPrevPrefixDateRange}&${nextPrevPrefixSort}&${nextPrevPrefixOrder}&${nextPrevPrefixPageSize}`;
 
-  describe.only('Endpoint alert API', () => {
+  describe('Endpoint alert API', () => {
     describe('when data is in elasticsearch', () => {
       before(() => esArchiver.load('endpoint/alerts/api_feature'));
       after(() => esArchiver.unload('endpoint/alerts/api_feature'));
