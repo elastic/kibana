@@ -6830,7 +6830,6 @@
     "xpack.lens.indexPatternSuggestion.removeLayerPositionLabel": "レイヤー{layerNumber}のみを表示",
     "xpack.lens.lensSavedObjectLabel": "レンズビジュアライゼーション",
     "xpack.lens.metric.label": "メトリック",
-    "xpack.lens.metric.valueLabel": "値",
     "xpack.lens.sugegstion.refreshSuggestionLabel": "更新",
     "xpack.lens.suggestion.refreshSuggestionTooltip": "選択したビジュアライゼーションに基づいて、候補を更新します。",
     "xpack.lens.suggestions.currentVisLabel": "現在",

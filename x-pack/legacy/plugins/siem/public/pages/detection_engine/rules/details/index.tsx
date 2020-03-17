@@ -38,13 +38,13 @@ import {
 } from '../../../../containers/source';
 import { SpyRoute } from '../../../../utils/route/spy_routes';
 
+import { StepAboutRuleToggleDetails } from '../components/step_about_rule_details/';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import { SignalsHistogramPanel } from '../../components/signals_histogram_panel';
 import { SignalsTable } from '../../components/signals';
 import { useUserInfo } from '../../components/user_info';
 import { DetectionEngineEmptyPage } from '../../detection_engine_empty_page';
 import { useSignalInfo } from '../../components/signals_info';
-import { StepAboutRule } from '../components/step_about_rule';
 import { StepDefineRule } from '../components/step_define_rule';
 import { StepScheduleRule } from '../components/step_schedule_rule';
 import { buildSignalsRuleIdFilter } from '../../components/signals/default_config';
@@ -105,13 +105,15 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   // This is used to re-trigger api rule status when user de/activate rule
   const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
   const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.signals);
-  const { aboutRuleData, defineRuleData, scheduleRuleData } =
+  const { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData } =
     rule != null
-      ? getStepsData({
-          rule,
-          detailsView: true,
-        })
-      : { aboutRuleData: null, defineRuleData: null, scheduleRuleData: null };
+      ? getStepsData({ rule, detailsView: true })
+      : {
+          aboutRuleData: null,
+          modifiedAboutRuleDetailsData: null,
+          defineRuleData: null,
+          scheduleRuleData: null,
+        };
   const [lastSignals] = useSignalInfo({ ruleId });
   const userHasNoPermissions =
     canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
@@ -291,16 +293,23 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                       </EuiFlexGroup>
                     </DetectionEngineHeaderPage>
                     {ruleError}
-                    {tabs}
                     <EuiSpacer />
-                    {ruleDetailTab === RuleDetailTabs.signals && (
-                      <>
-                        <EuiFlexGroup>
+                    <EuiFlexGroup>
+                      <EuiFlexItem data-test-subj="aboutRule" component="section" grow={1}>
+                        <StepAboutRuleToggleDetails
+                          loading={isLoading}
+                          stepData={aboutRuleData}
+                          stepDataDetails={modifiedAboutRuleDetailsData}
+                        />
+                      </EuiFlexItem>
+
+                      <EuiFlexItem grow={1}>
+                        <EuiFlexGroup direction="column">
                           <EuiFlexItem component="section" grow={1}>
                             <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
                               {defineRuleData != null && (
                                 <StepDefineRule
-                                  descriptionDirection="column"
+                                  descriptionColumns="singleSplit"
                                   isReadOnlyView={true}
                                   isLoading={false}
                                   defaultValues={defineRuleData}
@@ -308,25 +317,12 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                               )}
                             </StepPanel>
                           </EuiFlexItem>
-
-                          <EuiFlexItem data-test-subj="aboutRule" component="section" grow={2}>
-                            <StepPanel loading={isLoading} title={ruleI18n.ABOUT}>
-                              {aboutRuleData != null && (
-                                <StepAboutRule
-                                  descriptionDirection="row"
-                                  isReadOnlyView={true}
-                                  isLoading={false}
-                                  defaultValues={aboutRuleData}
-                                />
-                              )}
-                            </StepPanel>
-                          </EuiFlexItem>
-
+                          <EuiSpacer />
                           <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
                             <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
                               {scheduleRuleData != null && (
                                 <StepScheduleRule
-                                  descriptionDirection="column"
+                                  descriptionColumns="singleSplit"
                                   isReadOnlyView={true}
                                   isLoading={false}
                                   defaultValues={scheduleRuleData}
@@ -335,7 +331,13 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                             </StepPanel>
                           </EuiFlexItem>
                         </EuiFlexGroup>
-                        <EuiSpacer />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiSpacer />
+                    {tabs}
+                    <EuiSpacer />
+                    {ruleDetailTab === RuleDetailTabs.signals && (
+                      <>
                         <SignalsHistogramPanel
                           deleteQuery={deleteQuery}
                           filters={signalMergedFilters}

@@ -56,8 +56,9 @@ interface AgentBase {
   access_api_key_id?: string;
   default_api_key?: string;
   config_id?: string;
+  config_revision?: number;
+  config_newest_revision?: number;
   last_checkin?: string;
-  config_updated_at?: string;
   actions: AgentAction[];
 }
 

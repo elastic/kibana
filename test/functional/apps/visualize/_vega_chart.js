@@ -25,7 +25,7 @@ export default function({ getService, getPageObjects }) {
   const inspector = getService('inspector');
   const log = getService('log');
 
-  describe('visualize app', () => {
+  describe('vega chart in visualize app', () => {
     before(async () => {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
