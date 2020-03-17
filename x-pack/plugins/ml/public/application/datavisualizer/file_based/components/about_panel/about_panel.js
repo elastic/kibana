@@ -25,7 +25,7 @@ import { WelcomeContent } from './welcome_content';
 
 export function AboutPanel({ onFilePickerChange }) {
   return (
-    <EuiPage restrictWidth={1000}>
+    <EuiPage restrictWidth={1000} data-test-subj="mlPageFileDataVisualizerUpload">
       <EuiPageBody>
         <EuiPageContent className="file-datavisualizer-about-panel__content">
           <EuiFlexGroup gutterSize="xl">
@@ -58,7 +58,7 @@ export function AboutPanel({ onFilePickerChange }) {
 
 export function LoadingPanel() {
   return (
-    <EuiPage restrictWidth={400}>
+    <EuiPage restrictWidth={400} data-test-subj="mlPageFileDataVisLoading">
       <EuiPageBody>
         <EuiPageContent className="file-datavisualizer-about-panel__content" paddingSize="l">
           <div style={{ textAlign: 'center' }}>

@@ -39,6 +39,7 @@ export function ImportSummary({
         }
         color="success"
         iconType="check"
+        data-test-subj="mlFileImportSuccessCallout"
       >
         <EuiDescriptionList type="column" listItems={items} className="import-summary-list" />
       </EuiCallOut>

@@ -47,6 +47,7 @@ export const SimpleSettings = ({
               defaultMessage: 'Index name, required field',
             }
           )}
+          data-test-subj="mlFileDataVisIndexNameInput"
         />
       </EuiFormRow>
 
@@ -63,6 +64,7 @@ export const SimpleSettings = ({
         checked={createIndexPattern === true}
         disabled={initialized === true}
         onChange={onCreateIndexPatternChange}
+        data-test-subj="mlFileDataVistCreateIndexPatternCheckbox"
       />
     </React.Fragment>
   );

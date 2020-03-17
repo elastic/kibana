@@ -62,6 +62,7 @@ export function FileTooLarge({ fileSize, maxFileSize }) {
       }
       color="danger"
       iconType="cross"
+      data-test-subj="mlFileUploadErrorCallout fileTooLarge"
     >
       {errorText}
     </EuiCallOut>
@@ -79,6 +80,7 @@ export function FileCouldNotBeRead({ error, loaded }) {
       }
       color="danger"
       iconType="cross"
+      data-test-subj="mlFileUploadErrorCallout fileCouldNotBeRead"
     >
       {error !== undefined && <p>{error}</p>}
       {loaded && (
