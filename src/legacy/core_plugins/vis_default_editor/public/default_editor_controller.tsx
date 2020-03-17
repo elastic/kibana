@@ -24,7 +24,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { EventEmitter } from 'events';
 
 import { EditorRenderProps } from 'src/legacy/core_plugins/kibana/public/visualize/np_ready/types';
-import { Vis } from 'src/legacy/core_plugins/visualizations/public/';
+import { Vis } from '../../../../plugins/visualizations/public';
 import { Storage } from '../../../../plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../plugins/kibana_react/public';
 import { DefaultEditor } from './default_editor';

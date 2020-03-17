@@ -65,6 +65,10 @@ import {
   NavigationPublicPluginStart,
 } from '../../../../plugins/navigation/public';
 import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
+import {
+  VisualizationsSetup,
+  VisualizationsStart,
+} from '../../../../plugins/visualizations/public';
 
 export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
@@ -83,6 +87,7 @@ export interface PluginsSetup {
   advancedSettings: AdvancedSettingsSetup;
   management: ManagementSetup;
   visTypeVega: VisTypeVegaSetup;
+  visualizations: VisualizationsSetup;
   telemetry?: TelemetryPluginSetup;
 }
 
@@ -100,6 +105,7 @@ export interface PluginsStart {
   share: SharePluginStart;
   management: ManagementStart;
   advancedSettings: AdvancedSettingsStart;
+  visualizations: VisualizationsStart;
   telemetry?: TelemetryPluginStart;
 }
 

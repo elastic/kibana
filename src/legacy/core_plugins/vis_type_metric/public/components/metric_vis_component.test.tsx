@@ -25,7 +25,7 @@ import { MetricVisComponent, MetricVisComponentProps } from './metric_vis_compon
 import { npStart } from 'ui/new_platform';
 import { fieldFormats } from '../../../../../plugins/data/public';
 import { identity } from 'lodash';
-import { ExprVis } from '../../../visualizations/public/np_ready/public/expressions/vis';
+import { ExprVis } from '../../../../../plugins/visualizations/public';
 
 jest.mock('ui/new_platform');
 

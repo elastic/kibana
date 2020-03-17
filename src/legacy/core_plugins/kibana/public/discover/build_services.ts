@@ -37,7 +37,7 @@ import { DiscoverStartPlugins } from './plugin';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { DocViewsRegistry } from './np_ready/doc_views/doc_views_registry';
 import { ChartsPluginStart } from '../../../../../plugins/charts/public';
-import { VisualizationsStart } from '../../../visualizations/public';
+import { VisualizationsStart } from '../../../../../plugins/visualizations/public';
 import { createSavedSearchesLoader, SavedSearch } from '../../../../../plugins/discover/public';
 
 export interface DiscoverServices {

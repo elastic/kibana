@@ -34,6 +34,7 @@ export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
 export { TypesService } from './vis_types/types_service';
 export { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from './embeddable';
 export { SchemaConfig } from './legacy/build_pipeline';
+export { ExprVis } from './expressions/vis';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new VisualizationsPlugin(initializerContext);

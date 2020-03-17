@@ -49,7 +49,7 @@ import { HomePublicPluginSetup } from '../../../../../plugins/home/public';
 import {
   VisualizationsStart,
   VisualizationsSetup,
-} from '../../../visualizations/public/np_ready/public';
+} from '../../../../../plugins/visualizations/public';
 import { createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public';
 
 /**

@@ -22,16 +22,12 @@ import $ from 'jquery';
 // TODO This is an integration test and thus requires a running platform. When moving to the new platform,
 // this test has to be migrated to the newly created integration test environment.
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { npStart } from 'ui/new_platform';
+import { npSetup, npStart } from 'ui/new_platform';
 // @ts-ignore
 import getStubIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 
-import { Vis } from '../../visualizations/public';
+import { Vis } from '../../../../plugins/visualizations/public';
 import { fieldFormats } from '../../../../plugins/data/public';
-import {
-  setup as visualizationsSetup,
-  start as visualizationsStart,
-} from '../../visualizations/public/np_ready/public/legacy';
 import { createMetricVisTypeDefinition } from './metric_vis_type';
 
 jest.mock('ui/new_platform');
@@ -44,7 +40,7 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
   let vis: Vis;
 
   beforeAll(() => {
-    visualizationsSetup.createReactVisualization(createMetricVisTypeDefinition());
+    npSetup.plugins.visualizations.createReactVisualization(createMetricVisTypeDefinition());
     (npStart.plugins.data.fieldFormats.getType as jest.Mock).mockImplementation(() => {
       return fieldFormats.UrlFormat;
     });
@@ -95,7 +91,7 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
     };
 
     const el = document.createElement('div');
-    const metricVisType = visualizationsStart.get('metric');
+    const metricVisType = npStart.plugins.visualizations.get('metric');
     const Controller = metricVisType.visualization;
     const controller = new Controller(el, vis);
     const render = (esResponse: any) => {
