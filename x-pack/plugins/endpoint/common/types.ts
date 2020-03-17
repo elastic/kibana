@@ -6,7 +6,6 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { TypeOf } from '@kbn/config-schema';
-import * as kbnConfigSchemaTypes from '@kbn/config-schema/target/types/types';
 import { alertingIndexGetQuerySchema } from './schema/alert_index';
 
 /**
@@ -167,29 +166,34 @@ export type AlertEvent = Immutable<{
     module: string;
     type: string;
   };
+  endpoint: {
+    policy: {
+      id: string;
+    };
+  };
   process: {
     code_signature: {
       subject_name: string;
       trusted: boolean;
     };
-    command_line: string;
-    domain: string;
+    command_line?: string;
+    domain?: string;
     pid: number;
-    ppid: number;
+    ppid?: number;
     entity_id: string;
-    parent: {
+    parent?: {
       pid: number;
       entity_id: string;
     };
     name: string;
     hash: HashFields;
-    pe: {
+    pe?: {
       imphash: string;
     };
     executable: string;
-    sid: string;
+    sid?: string;
     start: number;
-    malware_classifier: MalwareClassifierFields;
+    malware_classifier?: MalwareClassifierFields;
     token: {
       domain: string;
       type: string;
@@ -197,9 +201,9 @@ export type AlertEvent = Immutable<{
       sid: string;
       integrity_level: number;
       integrity_level_name: string;
-      privileges: PrivilegesFields[];
+      privileges?: PrivilegesFields[];
     };
-    thread: ThreadFields[];
+    thread?: ThreadFields[];
     uptime: number;
     user: string;
   };
@@ -212,32 +216,20 @@ export type AlertEvent = Immutable<{
     created: number;
     size: number;
     hash: HashFields;
-    pe: {
+    pe?: {
       imphash: string;
     };
     code_signature: {
       trusted: boolean;
       subject_name: string;
     };
-    malware_classifier: {
-      features: {
-        data: {
-          buffer: string;
-          decompressed_size: number;
-          encoding: string;
-        };
-      };
-    } & MalwareClassifierFields;
+    malware_classifier: MalwareClassifierFields;
     temp_file_path: string;
   };
   host: HostFields;
-  thread: {};
-  dll: DllFields[];
+  dll?: DllFields[];
 }>;
 
-/**
- * Metadata associated with an alert event.
- */
 interface AlertMetadata {
   id: string;
 
@@ -252,9 +244,9 @@ interface AlertMetadata {
 export type AlertData = AlertEvent & AlertMetadata;
 
 export interface EndpointMetadata {
-  '@timestamp': string;
+  '@timestamp': number;
   event: {
-    created: Date;
+    created: number;
   };
   endpoint: {
     policy: {
@@ -262,8 +254,8 @@ export interface EndpointMetadata {
     };
   };
   agent: {
-    version: string;
     id: string;
+    version: string;
   };
   host: HostFields;
 }
@@ -310,22 +302,32 @@ export interface LegacyEndpointEvent {
 
 export interface EndpointEvent {
   '@timestamp': number;
+  agent: {
+    id: string;
+    version: string;
+    type: string;
+  };
+  ecs: {
+    version: string;
+  };
   event: {
     category: string;
     type: string;
     id: string;
+    kind: string;
   };
-  endpoint: {
-    process: {
-      entity_id: string;
-      parent: {
-        entity_id: string;
-      };
-    };
-  };
-  agent: {
+  host: {
     id: string;
-    type: string;
+    hostname: string;
+    ip: string[];
+    mac: string[];
+    os: OSFields;
+  };
+  process: {
+    entity_id: string;
+    parent?: {
+      entity_id: string;
+    };
   };
 }
 
@@ -348,16 +350,16 @@ export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';
  * const input: KbnConfigSchemaInputTypeOf<typeof schema> = value
  * schema.validate(input) // should be valid
  * ```
+ * Note that because the types coming from `@kbn/config-schema`'s schemas sometimes have deeply nested
+ * `Type` types, we process the result of `TypeOf` instead, as this will be consistent.
  */
-type KbnConfigSchemaInputTypeOf<
-  T extends kbnConfigSchemaTypes.Type<unknown>
-> = T extends kbnConfigSchemaTypes.ObjectType
+type KbnConfigSchemaInputTypeOf<T> = T extends Record<string, unknown>
   ? KbnConfigSchemaInputObjectTypeOf<
       T
     > /** `schema.number()` accepts strings, so this type should accept them as well. */
-  : kbnConfigSchemaTypes.Type<number> extends T
-  ? TypeOf<T> | string
-  : TypeOf<T>;
+  : number extends T
+  ? T | string
+  : T;
 
 /**
  * Works like ObjectResultType, except that 'maybe' schema will create an optional key.
@@ -365,20 +367,15 @@ type KbnConfigSchemaInputTypeOf<
  *
  * Instead of using this directly, use `InputTypeOf`.
  */
-type KbnConfigSchemaInputObjectTypeOf<
-  T extends kbnConfigSchemaTypes.ObjectType
-> = T extends kbnConfigSchemaTypes.ObjectType<infer P>
-  ? {
-      /** Use ? to make the field optional if the prop accepts undefined.
-       * This allows us to avoid writing `field: undefined` for optional fields.
-       */
-      [K in Exclude<
-        keyof P,
-        keyof KbnConfigSchemaNonOptionalProps<P>
-      >]?: KbnConfigSchemaInputTypeOf<P[K]>;
-    } &
-      { [K in keyof KbnConfigSchemaNonOptionalProps<P>]: KbnConfigSchemaInputTypeOf<P[K]> }
-  : never;
+type KbnConfigSchemaInputObjectTypeOf<P extends Record<string, unknown>> = {
+  /** Use ? to make the field optional if the prop accepts undefined.
+   * This allows us to avoid writing `field: undefined` for optional fields.
+   */
+  [K in Exclude<keyof P, keyof KbnConfigSchemaNonOptionalProps<P>>]?: KbnConfigSchemaInputTypeOf<
+    P[K]
+  >;
+} &
+  { [K in keyof KbnConfigSchemaNonOptionalProps<P>]: KbnConfigSchemaInputTypeOf<P[K]> };
 
 /**
  * Takes the props of a schema.object type, and returns a version that excludes
@@ -386,10 +383,14 @@ type KbnConfigSchemaInputObjectTypeOf<
  *
  * Instead of using this directly, use `InputTypeOf`.
  */
-type KbnConfigSchemaNonOptionalProps<Props extends kbnConfigSchemaTypes.Props> = Pick<
+type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pick<
   Props,
   {
-    [Key in keyof Props]: undefined extends TypeOf<Props[Key]> ? never : Key;
+    [Key in keyof Props]: undefined extends Props[Key]
+      ? never
+      : null extends Props[Key]
+      ? never
+      : Key;
   }[keyof Props]
 >;
 
@@ -397,7 +398,7 @@ type KbnConfigSchemaNonOptionalProps<Props extends kbnConfigSchemaTypes.Props> =
  * Query params to pass to the alert API when fetching new data.
  */
 export type AlertingIndexGetQueryInput = KbnConfigSchemaInputTypeOf<
-  typeof alertingIndexGetQuerySchema
+  TypeOf<typeof alertingIndexGetQuerySchema>
 >;
 
 /**

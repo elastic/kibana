@@ -139,7 +139,7 @@ describe('AddFilterToGlobalSearchBar Component', () => {
 
     wrapper
       .simulate('mouseenter')
-      .find('[data-test-subj="hover-actions-container"] .euiToolTipAnchor svg')
+      .find('[data-test-subj="hover-actions-container"] [data-euiicon-type]')
       .first()
       .simulate('click');
     wrapper.update();

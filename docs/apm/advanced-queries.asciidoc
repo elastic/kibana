@@ -5,7 +5,7 @@ When querying in the APM app, you're simply searching and selecting data from fi
 Queries entered into the query bar are also added as parameters to the URL,
 so it's easy to share a specific query or view with others.
 
-In the screenshot below, you can begin to see some of the transaction fields available for filtering on:
+You can begin to see some of the transaction fields available for filtering:
 
 [role="screenshot"]
 image::apm/images/apm-query-bar.png[Example of the Kibana Query bar in APM app in Kibana]
@@ -21,22 +21,22 @@ TIP: Read the {kibana-ref}/kuery-query.html[Kibana Query Language Enhancements] 
 
 [float]
 [[discover-advanced-queries]]
-=== Querying in the Discover app
+=== Querying in Discover
 
-It may also be helpful to view your APM data in the {kibana-ref}/discover.html[Discover app].
-Querying documents in Discover works the same way as querying in the APM app,
-and all of the example APM app queries can also be used in the Discover app.
+It may also be helpful to view your APM data in {kibana-ref}/discover.html[*Discover*].
+Querying documents in *Discover* works the same way as querying in the APM app,
+and all of the example APM app queries can also be used in *Discover*.
 
 [float]
-==== Example Discover app query
+==== Example Discover query
 
-One example where you may want to make use of the Discover app,
+One example where you may want to make use of *Discover*,
 is for viewing  _all_ transactions for an endpoint, instead of just a sample.
 
 TIP: Starting in v7.6, you can view 10 samples per bucket in the APM app, instead of just one.
 
 Use the APM app to find a transaction name and time bucket that you're interested in learning more about.
-Then, switch to the Discover app and make a search:
+Then, switch to *Discover* and make a search:
 
 ["source","sh"]
 -----

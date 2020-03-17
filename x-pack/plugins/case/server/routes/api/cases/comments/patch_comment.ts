@@ -61,10 +61,11 @@ export function initPatchCommentApi({ caseService, router }: RouteDeps) {
           client: context.core.savedObjects.client,
           commentId: query.id,
           updatedAttributes: {
-            ...query,
+            comment: query.comment,
             updated_at: new Date().toISOString(),
             updated_by: { full_name, username },
           },
+          version: query.version,
         });
 
         return response.ok({
