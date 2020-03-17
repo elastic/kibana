@@ -11,6 +11,7 @@ import { CollectConfigProps } from './types';
 import { DashboardDrilldownConfig } from '../../../components/dashboard_drilldown_config';
 import { Params } from './drilldown';
 import { SimpleSavedObject } from '../../../../../../../src/core/public';
+import { IEmbeddable } from '../../../../../../../src/plugins/embeddable/public';
 
 const mergeDashboards = (
   dashboards: Array<EuiComboBoxOptionOption<string>>,
@@ -34,6 +35,12 @@ const dashboardSavedObjectToMenuItem = (
 
 export interface CollectConfigContainerProps extends CollectConfigProps {
   params: Params;
+  context: {
+    place: string;
+    placeContext: {
+      embeddable: IEmbeddable;
+    };
+  };
 }
 
 interface CollectConfigContainerState {
@@ -75,6 +82,8 @@ export class CollectConfigContainer extends React.Component<
   }
 
   loadDashboards(searchString?: string) {
+    const currentDashboard = this.props.context.placeContext.embeddable.parent;
+    const currentDashboardId = currentDashboard && currentDashboard.id;
     this.setState({ searchString, isLoading: true });
     this.props.params.getSavedObjectsClient().then(savedObjectsClient => {
       savedObjectsClient
@@ -87,7 +96,9 @@ export class CollectConfigContainer extends React.Component<
         })
         .then(({ savedObjects }) => {
           if (searchString === this.state.searchString) {
-            const dashboardList = savedObjects.map(dashboardSavedObjectToMenuItem);
+            const dashboardList = savedObjects
+              .map(dashboardSavedObjectToMenuItem)
+              .filter(({ value }) => value !== currentDashboardId);
             this.setState({ dashboards: dashboardList, isLoading: false });
           }
         });
@@ -97,6 +108,7 @@ export class CollectConfigContainer extends React.Component<
   render() {
     const { config, onConfig } = this.props;
     const { dashboards, selectedDashboard, isLoading } = this.state;
+
     return (
       <DashboardDrilldownConfig
         activeDashboardId={config.dashboardId}
