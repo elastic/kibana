@@ -8,79 +8,75 @@ import React, { Fragment } from 'react';
 import { Option, none, some, fold, filter } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { EuiCallOut, EuiButton } from '@elastic/eui';
-import { HttpSetup } from 'kibana/public';
+import { EuiCallOut, EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { promiseResult, resolveErr } from '../lib/result_type';
 
-interface Props {
-  http: HttpSetup;
+import { DocLinksStart } from 'kibana/public';
+import {
+  ComponentOpts as BulkOperationsComponentOpts,
+  withBulkAlertOperations,
+} from '../sections/common/components/with_bulk_alert_api_operations';
+
+interface Health {
+  canGenerateApiKeys: boolean;
 }
 
-interface SecurityConfig {
-  areApiKeysEnabled: boolean;
-}
+type Props = { docLinks: Pick<DocLinksStart, 'ELASTIC_WEBSITE_URL' | 'DOC_LINK_VERSION'> } & Pick<
+  BulkOperationsComponentOpts,
+  'health'
+>;
 
-export const SecurityEnabledCallOut: React.FunctionComponent<Props> = ({ http }) => {
-  const [securityConfig, setSecurityConfig] = React.useState<Option<SecurityConfig>>(none);
+export const SecurityEnabledCallOut: React.FunctionComponent<Props> = ({ health, docLinks }) => {
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
+
+  const [alertingHealth, setAlertingHealth] = React.useState<Option<Health>>(none);
 
   React.useEffect(() => {
     async function fetchSecurityConfigured() {
-      setSecurityConfig(
-        some(
-          resolveErr(
-            await promiseResult<SecurityConfig, Error>(
-              http.get('/internal/security/api_key/privileges', {
-                credentials: 'same-origin',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-              })
-            ),
-            // if the api call fails we assume it means Security is disabled, in which case,
-            // apiKeys are enabled by default
-            () => ({ areApiKeysEnabled: true })
-          )
-        )
-      );
+      setAlertingHealth(some(await health()));
     }
 
     fetchSecurityConfigured();
-  }, [http]);
+  }, [health]);
 
   return pipe(
-    securityConfig,
-    filter(privileges => {
-      return !privileges?.areApiKeysEnabled;
-    }),
+    alertingHealth,
+    filter(healthCheck => !healthCheck?.canGenerateApiKeys),
     fold(
       () => <Fragment />,
       () => (
-        <EuiCallOut
-          title={i18n.translate(
-            'xpack.triggersActionsUI.components.securityCallOut.tlsDisabledTitle',
-            {
-              defaultMessage: 'Transport Layer Security is not enabled',
-            }
-          )}
-          color="primary"
-          iconType="info"
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.triggersActionsUI.components.securityCallOut.tlsDisabledDescription"
-              defaultMessage="Alerting relies upon API keys, which requires TLS between Elasticsearch and Kibana when security is enabled. Creating alerts is currently disabled."
-            />
-          </p>
-          <EuiButton href="#">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.components.securityCallOut.enableTlsCta"
-              defaultMessage="Enabled TLS"
-            />
-          </EuiButton>
-        </EuiCallOut>
+        <Fragment>
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.triggersActionsUI.components.securityCallOut.tlsDisabledTitle',
+              {
+                defaultMessage: 'Transport Layer Security is not enabled',
+              }
+            )}
+            color="primary"
+            iconType="iInCircle"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.triggersActionsUI.components.securityCallOut.tlsDisabledDescription"
+                defaultMessage="Alerting relies upon API keys, which requires TLS between Elasticsearch and Kibana when security is enabled. Creating alerts is currently disabled."
+              />
+            </p>
+            <EuiButton
+              href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/configuring-tls.html`}
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.components.securityCallOut.enableTlsCta"
+                defaultMessage="Enabled TLS"
+              />
+            </EuiButton>
+          </EuiCallOut>
+          <EuiSpacer />
+        </Fragment>
       )
     )
   );
 };
+
+export const SecurityEnabledCallOutWithApi = withBulkAlertOperations(SecurityEnabledCallOut);

@@ -5,13 +5,14 @@
  */
 import React, { Fragment } from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
-import { httpServiceMock } from 'src/core/public/mocks';
 import { SecurityEnabledCallOut } from './security_call_out';
 
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiButton } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 
 beforeEach(() => jest.resetAllMocks());
+
+const docLinks = { ELASTIC_WEBSITE_URL: 'elastic.co/', DOC_LINK_VERSION: 'current' };
 
 describe('security call out', () => {
   let useEffect: any;
@@ -26,59 +27,50 @@ describe('security call out', () => {
     mockUseEffect();
   });
 
-  test('renders nothing while http is loading', async () => {
-    const http = httpServiceMock.createSetupContract();
+  test('renders nothing while health is loading', async () => {
+    const health = jest.fn();
 
-    http.get.mockImplementationOnce(() => waitForUseEffect());
+    health.mockImplementationOnce(() => waitForUseEffect());
 
     let component: ShallowWrapper | undefined;
     await act(async () => {
-      component = shallow(<SecurityEnabledCallOut http={http} />);
+      component = shallow(<SecurityEnabledCallOut health={health} docLinks={docLinks} />);
     });
 
     expect(component?.is(Fragment)).toBeTruthy();
+    expect(component?.children()).toHaveLength(0);
   });
 
   test('renders nothing if keys are enabled', async () => {
-    const http = httpServiceMock.createSetupContract();
+    const health = jest.fn();
 
-    http.get.mockResolvedValue({ areApiKeysEnabled: true });
-
-    let component: ShallowWrapper | undefined;
-    await act(async () => {
-      component = shallow(<SecurityEnabledCallOut http={http} />);
-    });
-
-    expect(component?.is(Fragment)).toBeTruthy();
-  });
-
-  test('renders nothing if api call fails as it means security is likely disabled', async () => {
-    const http = httpServiceMock.createSetupContract();
-
-    http.get.mockImplementationOnce(async () => {
-      throw new Error('Bad Request');
-    });
+    health.mockResolvedValue({ canGenerateApiKeys: true });
 
     let component: ShallowWrapper | undefined;
     await act(async () => {
-      component = shallow(<SecurityEnabledCallOut http={http} />);
+      component = shallow(<SecurityEnabledCallOut health={health} docLinks={docLinks} />);
     });
 
     expect(component?.is(Fragment)).toBeTruthy();
+    expect(component?.children()).toHaveLength(0);
   });
 
   test('renders the callout if keys are disabled', async () => {
-    const http = httpServiceMock.createSetupContract();
+    const health = jest.fn();
 
-    http.get.mockImplementationOnce(async () => ({ areApiKeysEnabled: false }));
+    health.mockImplementationOnce(async () => ({ canGenerateApiKeys: false }));
 
     let component: ShallowWrapper | undefined;
     await act(async () => {
-      component = shallow(<SecurityEnabledCallOut http={http} />);
+      component = shallow(<SecurityEnabledCallOut health={health} docLinks={docLinks} />);
     });
 
     expect(component?.find(EuiCallOut).prop('title')).toMatchInlineSnapshot(
       `"Transport Layer Security is not enabled"`
+    );
+
+    expect(component?.find(EuiButton).prop('href')).toMatchInlineSnapshot(
+      `"elastic.co/guide/en/kibana/current/configuring-tls.html"`
     );
   });
 });

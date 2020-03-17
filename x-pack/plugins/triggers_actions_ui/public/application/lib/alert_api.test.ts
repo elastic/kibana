@@ -25,6 +25,7 @@ import {
   updateAlert,
   muteAlertInstance,
   unmuteAlertInstance,
+  health,
 } from './alert_api';
 import uuid from 'uuid';
 
@@ -615,6 +616,20 @@ describe('unmuteAlerts', () => {
         ],
         Array [
           "/api/alert/3/_unmute_all",
+        ],
+      ]
+    `);
+  });
+});
+
+describe('health', () => {
+  test('should call health API', async () => {
+    const result = await health({ http });
+    expect(result).toEqual(undefined);
+    expect(http.get.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "/api/alert/_health",
         ],
       ]
     `);
