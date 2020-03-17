@@ -29,7 +29,11 @@ export const painlessContextOptions = [
       <>
         <strong>{defaultLabel}</strong>
         <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">The script result will be converted to a string</p>
+          <p className="euiTextColor--subdued">
+            {i18n.translate('xpack.painlessLab.context.scoreLabel', {
+              defaultMessage: 'The script result will be converted to a string',
+            })}
+          </p>
         </EuiText>
       </>
     ),
@@ -41,7 +45,11 @@ export const painlessContextOptions = [
       <>
         <strong>{filterLabel}</strong>
         <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">Use the context of a filter&rsquo;s script query</p>
+          <p className="euiTextColor--subdued">
+            {i18n.translate('xpack.painlessLab.context.scoreLabel', {
+              defaultMessage: "Use the context of a filter's script query",
+            })}
+          </p>
         </EuiText>
       </>
     ),
@@ -54,7 +62,9 @@ export const painlessContextOptions = [
         <strong>{scoreLabel}</strong>
         <EuiText size="s" color="subdued">
           <p className="euiTextColor--subdued">
-            Use the context of a cript_score function in function_score query
+            {i18n.translate('xpack.painlessLab.context.scoreLabel', {
+              defaultMessage: 'Use the context of a script_score function in function_score query',
+            })}
           </p>
         </EuiText>
       </>
