@@ -342,7 +342,7 @@ export const DataSourceStrings = {
       }),
     getHelp: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocsLabel', {
-        defaultMessage: 'Select an index and field(s) to retrieve non-aggregated data',
+        defaultMessage: 'Pull data directly from Elasticsearch without the use of aggregations',
       }),
     getWarningTitle: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.warningTitle', {
@@ -351,7 +351,7 @@ export const DataSourceStrings = {
     getWarning: () =>
       i18n.translate('xpack.canvas.expressionTypes.datasources.esdocs.warningDescription', {
         defaultMessage: `
-        The {elasticsearch} basic data source only retrieves non-aggregated data. Use with low volume data sets`,
+        Using this data source with larger data sets can result in slower performance. Use this source only when you need exact values.`,
         values: {
           elasticsearch: ELASTICSEARCH,
         },
