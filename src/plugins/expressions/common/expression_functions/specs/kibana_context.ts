@@ -17,7 +17,6 @@
  * under the License.
  */
 import { uniq } from 'lodash';
-import { stringify } from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../../expression_functions';
 import { KibanaContext } from '../../expression_types';
@@ -37,16 +36,23 @@ export type ExpressionFunctionKibanaContext = ExpressionFunctionDefinition<
   Promise<KibanaContext>
 >;
 
-export const mergeInput = <T = any>(object: T | T[] = [], other: string | T | T[]): T[] => {
-  const parsed: T | T[] = typeof other === 'string' ? JSON.parse(other || '[]') : other;
+const mergeInput = <T = any>(
+  first: T | T[] = [],
+  second: string | T | T[],
+  iteratee: Function
+): T[] => {
+  const parsed: T | T[] = typeof second === 'string' ? JSON.parse(second || '[]') : second;
   return uniq<T>(
-    [
-      ...(Array.isArray(parsed) ? parsed : [parsed]),
-      ...(Array.isArray(object) ? object : [object]),
-    ],
-    (n: any) => stringify(n)
+    [...(Array.isArray(parsed) ? parsed : [parsed]), ...(Array.isArray(first) ? first : [first])],
+    iteratee
   );
 };
+
+const mergeQueries = (first: Query | Query[] = [], second: string | Query | Query[]) =>
+  mergeInput(first, second, (n: any) => JSON.stringify(n.query));
+
+const mergeFilters = (first: Filter | Filter[] = [], second: string | Filter | Filter[]) =>
+  mergeInput(first, second, (n: any) => JSON.stringify(n.meta));
 
 export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
   name: 'kibana_context',
@@ -89,8 +95,8 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
 
   async fn(input, args, { getSavedObject }) {
     const timeRange = args.timeRange ? JSON.parse(args.timeRange) : input?.timeRange;
-    let queries = mergeInput<Query>(input?.query, args?.q || '[]');
-    let filters = mergeInput<Filter>(input?.filters, args?.filters || '[]');
+    let queries = mergeQueries(input?.query, args?.q || '[]');
+    let filters = mergeFilters(input?.filters, args?.filters || '[]');
 
     if (args.savedSearchId) {
       if (typeof getSavedObject !== 'function') {
@@ -104,8 +110,8 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
       const search = obj.attributes.kibanaSavedObjectMeta as { searchSourceJSON: string };
       const data = JSON.parse(search.searchSourceJSON) as { query: Query[]; filter: Filter[] };
 
-      queries = mergeInput(queries, data.query);
-      filters = mergeInput(filters, data.filter);
+      queries = mergeQueries(queries, data.query);
+      filters = mergeFilters(filters, data.filter);
     }
 
     return {
