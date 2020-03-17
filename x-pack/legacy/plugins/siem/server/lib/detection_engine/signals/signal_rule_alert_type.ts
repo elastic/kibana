@@ -98,9 +98,13 @@ export const signalRulesAlertType = ({
 
       try {
         if (type === 'machine_learning') {
+          if (mlJobId == null || anomalyThreshold == null) {
+            throw new Error('Attempted to execute ML Rule, but missing jobId or anomalyThreshold');
+          }
+
           const anomalyResults = await findMlSignals(
-            mlJobId!,
-            anomalyThreshold!,
+            mlJobId,
+            anomalyThreshold,
             from,
             to,
             services.callCluster
@@ -130,6 +134,10 @@ export const signalRulesAlertType = ({
             tags,
           });
         } else {
+          if (index == null) {
+            throw new Error('Attempted to execute Query Rule, but no index was specified');
+          }
+
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({
             type,

@@ -52,6 +52,10 @@ export const searchAfterAndBulkCreate = async ({
   if (someResult.hits.hits.length === 0) {
     return true;
   }
+  const { index, from, to } = ruleParams;
+  if (index == null) {
+    throw new Error('Attempted to bulk create signals, but rule had no indexPattern');
+  }
 
   logger.debug('[+] starting bulk insertion');
   await singleBulkCreate({
@@ -98,7 +102,9 @@ export const searchAfterAndBulkCreate = async ({
       logger.debug(`sortIds: ${sortIds}`);
       const searchAfterResult: SignalSearchResponse = await singleSearchAfter({
         searchAfterSortId: sortId,
-        ruleParams,
+        index,
+        from,
+        to,
         services,
         logger,
         filter,

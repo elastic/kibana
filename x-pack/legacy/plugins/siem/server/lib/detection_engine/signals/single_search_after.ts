@@ -5,14 +5,15 @@
  */
 
 import { AlertServices } from '../../../../../../../plugins/alerting/server';
-import { RuleTypeParams } from '../types';
 import { Logger } from '../../../../../../../../src/core/server';
 import { SignalSearchResponse } from './types';
 import { buildEventsSearchQuery } from './build_events_query';
 
 interface SingleSearchAfterParams {
   searchAfterSortId: string | undefined;
-  ruleParams: RuleTypeParams;
+  index: string[];
+  from: string;
+  to: string;
   services: AlertServices;
   logger: Logger;
   pageSize: number;
@@ -22,7 +23,9 @@ interface SingleSearchAfterParams {
 // utilize search_after for paging results into bulk.
 export const singleSearchAfter = async ({
   searchAfterSortId,
-  ruleParams,
+  index,
+  from,
+  to,
   services,
   filter,
   logger,
@@ -33,9 +36,9 @@ export const singleSearchAfter = async ({
   }
   try {
     const searchAfterQuery = buildEventsSearchQuery({
-      index: ruleParams.index,
-      from: ruleParams.from,
-      to: ruleParams.to,
+      index,
+      from,
+      to,
       filter,
       size: pageSize,
       searchAfterSortId,

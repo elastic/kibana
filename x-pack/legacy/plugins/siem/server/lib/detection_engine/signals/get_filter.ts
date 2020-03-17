@@ -107,6 +107,9 @@ export const getFilter = async ({
         throw new BadRequestError('savedId parameter should be defined');
       }
     }
+    case 'machine_learning': {
+      throw new Error('getFilter called with a ML Rule');
+    }
   }
   return assertUnreachable(type);
 };
