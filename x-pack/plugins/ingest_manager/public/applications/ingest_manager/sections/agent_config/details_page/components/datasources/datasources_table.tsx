@@ -19,6 +19,8 @@ import { TableRowActions } from '../../../components/table_row_actions';
 import { DangerEuiContextMenuItem } from '../../../components/danger_eui_context_menu_item';
 import { useCapabilities } from '../../../../../hooks';
 import { useAgentConfigLink } from '../../hooks/use_details_uri';
+import { DatasourceDeleteProvider } from '../../../components/datasource_delete_provider';
+import { useConfigRefresh } from '../../hooks/use_config';
 
 interface InMemoryDatasource extends Datasource {
   streams: { total: number; enabled: number };
@@ -51,6 +53,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
 }) => {
   const hasWriteCapabilities = useCapabilities().write;
   const addDatasourceLink = useAgentConfigLink('add-datasource', { configId: config.id });
+  const refreshConfig = useConfigRefresh();
 
   // With the datasources provided on input, generate the list of datasources
   // used in the InMemoryTable (flattens some values for search) as well as
@@ -174,7 +177,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
         ),
         actions: [
           {
-            render: () => (
+            render: (datasource: InMemoryDatasource) => (
               <TableRowActions
                 items={[
                   // FIXME: implement View datasource action
@@ -198,13 +201,24 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
                       defaultMessage="Copy data source"
                     />
                   </EuiContextMenuItem>,
-                  // FIXME: implement Copy datasource action
-                  <DangerEuiContextMenuItem disabled icon="trash" onClick={() => {}}>
-                    <FormattedMessage
-                      id="xpack.ingestManager.configDetails.datasourcesTable.deleteActionTitle"
-                      defaultMessage="Delete data source"
-                    />
-                  </DangerEuiContextMenuItem>,
+                  <DatasourceDeleteProvider agentConfigId={datasource.config_id}>
+                    {deleteDatasourcePrompt => {
+                      return (
+                        <DangerEuiContextMenuItem
+                          disabled={!hasWriteCapabilities}
+                          icon="trash"
+                          onClick={() => {
+                            deleteDatasourcePrompt([datasource.id], refreshConfig);
+                          }}
+                        >
+                          <FormattedMessage
+                            id="xpack.ingestManager.configDetails.datasourcesTable.deleteActionTitle"
+                            defaultMessage="Delete data source"
+                          />
+                        </DangerEuiContextMenuItem>
+                      );
+                    }}
+                  </DatasourceDeleteProvider>,
                 ]}
               />
             ),
@@ -212,7 +226,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
         ],
       },
     ],
-    []
+    [hasWriteCapabilities, refreshConfig]
   );
 
   return (
