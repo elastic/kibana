@@ -172,13 +172,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
   });
 
   return (
-    <Popover
-      button={exportControl}
-      panelPaddingSize="none"
-      // TODO: do we still need this tooltip?
-      tooltip={strings.getViewMenuLabel()}
-      tooltipPosition="bottom"
-    >
+    <Popover button={exportControl} panelPaddingSize="none">
       {({ closePopover }: { closePopover: ClosePopoverFn }) => (
         <EuiContextMenu initialPanelId={0} panels={flattenPanelTree(getPanelTree(closePopover))} />
       )}

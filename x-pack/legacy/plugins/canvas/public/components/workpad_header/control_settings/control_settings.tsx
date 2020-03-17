@@ -6,7 +6,7 @@
 
 import React, { MouseEventHandler } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 // @ts-ignore untyped local
 import { Popover } from '../../popover';
 import { AutoRefreshControls } from './auto_refresh_controls';
@@ -50,9 +50,6 @@ export const ControlSettings = ({
       button={popoverButton}
       anchorPosition="rightUp"
       panelClassName="canvasControlSettings__popover"
-      // TODO: do we still need this tooltip?
-      tooltip={strings.getTooltip()}
-      tooltipPosition="bottom"
     >
       {() => (
         <EuiFlexGroup>

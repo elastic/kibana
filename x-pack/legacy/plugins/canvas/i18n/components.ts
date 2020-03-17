@@ -1076,10 +1076,6 @@ export const ComponentStrings = {
       }),
   },
   WorkpadHeaderControlSettings: {
-    getTooltip: () =>
-      i18n.translate('xpack.canvas.workpadHeaderControlSettings.settingsTooltip', {
-        defaultMessage: 'Control settings',
-      }),
     getButtonLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderControlSettings.buttonLabel', {
         defaultMessage: 'Options',
@@ -1161,6 +1157,14 @@ export const ComponentStrings = {
     getOtherMenuItemLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderElementMenu.otherMenuItemLabel', {
         defaultMessage: 'Other',
+      }),
+    getShapeMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.shapeMenuItemLabel', {
+        defaultMessage: 'Shape',
+      }),
+    getTextMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.textMenuItemLabel', {
+        defaultMessage: 'Text',
       }),
     getMyElementsMenuItemLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderElementMenu.myElementsMenuItemLabel', {
