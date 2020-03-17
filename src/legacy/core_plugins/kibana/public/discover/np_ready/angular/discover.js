@@ -76,6 +76,7 @@ import {
   getDefaultQuery,
 } from '../../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
+import { addFatalError } from '../../../../../../../plugins/kibana_legacy/public';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -255,11 +256,16 @@ function discoverController(
 
   // update data source when filters update
   subscriptions.add(
-    subscribeWithScope($scope, filterManager.getUpdates$(), {
-      next: () => {
-        $scope.updateDataSource();
+    subscribeWithScope(
+      $scope,
+      filterManager.getUpdates$(),
+      {
+        next: () => {
+          $scope.updateDataSource();
+        },
       },
-    })
+      error => addFatalError(core.fatalErrors, error)
+    )
   );
 
   const inspectorAdapters = {
@@ -621,16 +627,26 @@ function discoverController(
       ).pipe(debounceTime(100));
 
       subscriptions.add(
-        subscribeWithScope($scope, searchBarChanges, {
-          next: $scope.fetch,
-        })
+        subscribeWithScope(
+          $scope,
+          searchBarChanges,
+          {
+            next: $scope.fetch,
+          },
+          error => addFatalError(core.fatalErrors, error)
+        )
       );
       subscriptions.add(
-        subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
-          next: () => {
-            $scope.updateTime();
+        subscribeWithScope(
+          $scope,
+          timefilter.getTimeUpdate$(),
+          {
+            next: () => {
+              $scope.updateTime();
+            },
           },
-        })
+          error => addFatalError(core.fatalErrors, error)
+        )
       );
       //Handling change oft the histogram interval
       $scope.$watch('state.interval', function(newInterval, oldInterval) {

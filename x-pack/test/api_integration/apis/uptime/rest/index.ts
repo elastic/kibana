@@ -21,6 +21,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./selected_monitor'));
       loadTestFile(require.resolve('./ping_histogram'));
       loadTestFile(require.resolve('./monitor_duration'));
+      loadTestFile(require.resolve('./doc_count'));
     });
   });
 }
