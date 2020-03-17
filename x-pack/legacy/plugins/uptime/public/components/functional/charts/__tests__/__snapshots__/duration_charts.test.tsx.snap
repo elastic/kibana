@@ -52,6 +52,7 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
   }
 >
   <DurationChartComponent
+    anomalies={Array []}
     loading={false}
     locationDurationLines={
       Array [
