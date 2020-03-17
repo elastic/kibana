@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-import ace, { Editor as AceEditor, IEditSession } from 'brace';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -39,7 +38,7 @@ import { createTokenIterator } from '../../application/factories';
 
 import { Position, Token, Range, CoreEditor } from '../../types';
 
-let LAST_EVALUATED_TOKEN: any = null;
+let lastEvaluatedToken: any = null;
 
 function isUrlParamsToken(token: any) {
   switch ((token || {}).type) {
@@ -889,7 +888,7 @@ export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor
 
     if (!currentToken) {
       if (pos.lineNumber === 1) {
-        LAST_EVALUATED_TOKEN = null;
+        lastEvaluatedToken = null;
         return;
       }
       currentToken = { position: { column: 0, lineNumber: 0 }, value: '', type: '' }; // empty row
@@ -902,26 +901,26 @@ export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor
       if (parser.isEmptyToken(nextToken)) {
         // Empty line, or we're not on the edge of current token. Save the current position as base
         currentToken.position.column = pos.column;
-        LAST_EVALUATED_TOKEN = currentToken;
+        lastEvaluatedToken = currentToken;
       } else {
         nextToken.position.lineNumber = pos.lineNumber;
-        LAST_EVALUATED_TOKEN = nextToken;
+        lastEvaluatedToken = nextToken;
       }
       return;
     }
 
-    if (!LAST_EVALUATED_TOKEN) {
-      LAST_EVALUATED_TOKEN = currentToken;
+    if (!lastEvaluatedToken) {
+      lastEvaluatedToken = currentToken;
       return; // wait for the next typing.
     }
 
     if (
-      LAST_EVALUATED_TOKEN.position.column !== currentToken.position.column ||
-      LAST_EVALUATED_TOKEN.position.lineNumber !== currentToken.position.lineNumber ||
-      LAST_EVALUATED_TOKEN.value === currentToken.value
+      lastEvaluatedToken.position.column !== currentToken.position.column ||
+      lastEvaluatedToken.position.lineNumber !== currentToken.position.lineNumber ||
+      lastEvaluatedToken.value === currentToken.value
     ) {
       // not on the same place or nothing changed, cache and wait for the next time
-      LAST_EVALUATED_TOKEN = currentToken;
+      lastEvaluatedToken = currentToken;
       return;
     }
 
@@ -935,7 +934,7 @@ export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor
         return;
     }
 
-    LAST_EVALUATED_TOKEN = currentToken;
+    lastEvaluatedToken = currentToken;
     editor.execCommand('startAutocomplete');
   },
   100);
@@ -947,17 +946,7 @@ export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor
     }
   }
 
-  function getCompletions(
-    DO_NOT_USE: AceEditor,
-    DO_NOT_USE_SESSION: IEditSession,
-    pos: { row: number; column: number },
-    prefix: string,
-    callback: (...args: any[]) => void
-  ) {
-    const position: Position = {
-      lineNumber: pos.row + 1,
-      column: pos.column + 1,
-    };
+  function getCompletions(position: Position, prefix: string, callback: (...args: any[]) => void) {
     try {
       const context = getAutoCompleteContext(editor, position);
       if (!context) {
@@ -1028,39 +1017,12 @@ export default function({ coreEditor: editor, parser }: { coreEditor: CoreEditor
 
   editor.on('changeSelection', editorChangeListener);
 
-  // Hook into Ace
-
-  // disable standard context based autocompletion.
-  // @ts-ignore
-  ace.define('ace/autocomplete/text_completer', ['require', 'exports', 'module'], function(
-    require: any,
-    exports: any
-  ) {
-    exports.getCompletions = function(
-      innerEditor: any,
-      session: any,
-      pos: any,
-      prefix: any,
-      callback: any
-    ) {
-      callback(null, []);
-    };
-  });
-
-  const langTools = ace.acequire('ace/ext/language_tools');
-
-  langTools.setCompleters([
-    {
-      identifierRegexps: [
-        /[a-zA-Z_0-9\.\$\-\u00A2-\uFFFF]/, // adds support for dot character
-      ],
-      getCompletions,
-    },
-  ]);
-
   return {
+    getCompletions,
+    // TODO: This needs to be cleaned up
     _test: {
-      getCompletions,
+      getCompletions: (_editor: any, _editSession: any, pos: any, prefix: any, callback: any) =>
+        getCompletions(pos, prefix, callback),
       addReplacementInfoToContext,
       addChangeListener: () => editor.on('changeSelection', editorChangeListener),
       removeChangeListener: () => editor.off('changeSelection', editorChangeListener),
