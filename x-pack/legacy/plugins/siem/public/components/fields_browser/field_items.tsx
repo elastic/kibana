@@ -90,6 +90,13 @@ export const getFieldItems = ({
         key={`field-browser-field-items-field-droppable-wrapper-${timelineId}-${categoryId}-${field.name}`}
         isDropDisabled={true}
         type={DRAG_TYPE_FIELD}
+        renderClone={provided => (
+          <div {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
+            <DragEffects>
+              <DraggableFieldBadge fieldId={field.name || ''} />
+            </DragEffects>
+          </div>
+        )}
       >
         <Draggable
           draggableId={getDraggableFieldId({
@@ -97,64 +104,49 @@ export const getFieldItems = ({
             fieldId: field.name || '',
           })}
           index={0}
-          type={DRAG_TYPE_FIELD}
         >
-          {(provided, snapshot) => (
-            <div
-              {...provided.draggableProps}
-              {...provided.dragHandleProps}
-              ref={provided.innerRef}
-              style={{
-                ...provided.draggableProps.style,
-                zIndex: 9999,
-              }}
-            >
-              {!snapshot.isDragging ? (
-                <EuiFlexGroup alignItems="center" gutterSize="none">
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip content={i18n.TOGGLE_COLUMN_TOOLTIP}>
-                      <EuiCheckbox
-                        checked={columnHeaders.findIndex(c => c.id === field.name) !== -1}
-                        data-test-subj={`field-${field.name}-checkbox`}
-                        id={field.name || ''}
-                        onChange={() =>
-                          toggleColumn({
-                            columnHeaderType: defaultColumnHeaderType,
-                            id: field.name || '',
-                            width: DEFAULT_COLUMN_MIN_WIDTH,
-                          })
-                        }
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip content={field.type}>
-                      <TypeIcon
-                        data-test-subj={`field-${field.name}-icon`}
-                        type={getIconFromType(field.type || '')}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-
-                  <EuiFlexItem grow={false}>
-                    <FieldName
-                      categoryId={field.category || categoryId}
-                      categoryColumns={getColumnsWithTimestamp({
-                        browserFields,
-                        category: field.category || categoryId,
-                      })}
-                      fieldId={field.name || ''}
-                      highlight={highlight}
-                      onUpdateColumns={onUpdateColumns}
+          {provided => (
+            <div {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
+              <EuiFlexGroup alignItems="center" gutterSize="none">
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={i18n.TOGGLE_COLUMN_TOOLTIP}>
+                    <EuiCheckbox
+                      checked={columnHeaders.findIndex(c => c.id === field.name) !== -1}
+                      data-test-subj={`field-${field.name}-checkbox`}
+                      id={field.name || ''}
+                      onChange={() =>
+                        toggleColumn({
+                          columnHeaderType: defaultColumnHeaderType,
+                          id: field.name || '',
+                          width: DEFAULT_COLUMN_MIN_WIDTH,
+                        })
+                      }
                     />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ) : (
-                <DragEffects>
-                  <DraggableFieldBadge fieldId={field.name || ''} />
-                </DragEffects>
-              )}
+                  </EuiToolTip>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={field.type}>
+                    <TypeIcon
+                      data-test-subj={`field-${field.name}-icon`}
+                      type={getIconFromType(field.type || '')}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <FieldName
+                    categoryId={field.category || categoryId}
+                    categoryColumns={getColumnsWithTimestamp({
+                      browserFields,
+                      category: field.category || categoryId,
+                    })}
+                    fieldId={field.name || ''}
+                    highlight={highlight}
+                    onUpdateColumns={onUpdateColumns}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </div>
           )}
         </Draggable>

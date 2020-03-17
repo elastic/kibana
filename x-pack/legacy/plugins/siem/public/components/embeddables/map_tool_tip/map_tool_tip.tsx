@@ -12,7 +12,6 @@ import {
   EuiOutsideClickDetector,
 } from '@elastic/eui';
 import { FeatureGeometry, FeatureProperty, MapToolTipProps } from '../types';
-import { DraggablePortalContext } from '../../drag_and_drop/draggable_wrapper';
 import { ToolTipFooter } from './tooltip_footer';
 import { LineToolTipContent } from './line_tool_tip_content';
 import { PointToolTipContent } from './point_tool_tip_content';
@@ -101,46 +100,44 @@ export const MapToolTipComponent = ({
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
-    <DraggablePortalContext.Provider value={true}>
-      <EuiOutsideClickDetector
-        onOutsideClick={() => {
-          if (closeTooltip != null) {
-            closeTooltip();
-            setFeatureIndex(0);
-          }
-        }}
-      >
-        <div>
-          {featureGeometry != null && featureGeometry.type === 'LineString' ? (
-            <LineToolTipContent
-              contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}-${featureIndex}`}
-              featureProps={featureProps}
-            />
-          ) : (
-            <PointToolTipContent
-              contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}-${featureIndex}`}
-              featureProps={featureProps}
-              closeTooltip={closeTooltip}
-            />
-          )}
-          {features.length > 1 && (
-            <ToolTipFooter
-              featureIndex={featureIndex}
-              totalFeatures={features.length}
-              previousFeature={() => {
-                setFeatureIndex(featureIndex - 1);
-                setIsLoadingNextFeature(true);
-              }}
-              nextFeature={() => {
-                setFeatureIndex(featureIndex + 1);
-                setIsLoadingNextFeature(true);
-              }}
-            />
-          )}
-          {isLoadingNextFeature && <Loader data-test-subj="loading-panel" overlay size="m" />}
-        </div>
-      </EuiOutsideClickDetector>
-    </DraggablePortalContext.Provider>
+    <EuiOutsideClickDetector
+      onOutsideClick={() => {
+        if (closeTooltip != null) {
+          closeTooltip();
+          setFeatureIndex(0);
+        }
+      }}
+    >
+      <div>
+        {featureGeometry != null && featureGeometry.type === 'LineString' ? (
+          <LineToolTipContent
+            contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}-${featureIndex}`}
+            featureProps={featureProps}
+          />
+        ) : (
+          <PointToolTipContent
+            contextId={`${features[featureIndex].layerId}-${features[featureIndex].id}-${featureIndex}`}
+            featureProps={featureProps}
+            closeTooltip={closeTooltip}
+          />
+        )}
+        {features.length > 1 && (
+          <ToolTipFooter
+            featureIndex={featureIndex}
+            totalFeatures={features.length}
+            previousFeature={() => {
+              setFeatureIndex(featureIndex - 1);
+              setIsLoadingNextFeature(true);
+            }}
+            nextFeature={() => {
+              setFeatureIndex(featureIndex + 1);
+              setIsLoadingNextFeature(true);
+            }}
+          />
+        )}
+        {isLoadingNextFeature && <Loader data-test-subj="loading-panel" overlay size="m" />}
+      </div>
+    </EuiOutsideClickDetector>
   );
 };
 
