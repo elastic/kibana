@@ -181,15 +181,9 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         width={width}
         style={cytoscapeDivStyle}
       >
-        {cy => {
-          return (
-            <>
-              <Controls />
-              {serviceName && cy?.nodes().length === 1 && <EmptyBanner />}
-              <Popover focusedServiceName={serviceName} />
-            </>
-          );
-        }}
+        <Controls />
+        {serviceName && <EmptyBanner />}
+        <Popover focusedServiceName={serviceName} />
       </Cytoscape>
     </div>
   ) : (

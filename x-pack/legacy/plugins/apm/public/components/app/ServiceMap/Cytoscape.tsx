@@ -4,21 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import cytoscape from 'cytoscape';
 import React, {
-  createContext,
   CSSProperties,
-  ReactNode,
-  useCallback,
-  useEffect,
+  useState,
   useRef,
-  useState
+  useEffect,
+  ReactNode,
+  createContext,
+  useCallback
 } from 'react';
+import cytoscape from 'cytoscape';
 import { isRumAgentName } from '../../../../../../../plugins/apm/common/agent_name';
 import {
-  animationOptions,
   cytoscapeOptions,
-  nodeHeight
+  nodeHeight,
+  animationOptions
 } from './cytoscapeOptions';
 
 export const CytoscapeContext = createContext<cytoscape.Core | undefined>(
@@ -26,7 +26,7 @@ export const CytoscapeContext = createContext<cytoscape.Core | undefined>(
 );
 
 interface CytoscapeProps {
-  children?: (cy?: cytoscape.Core) => ReactNode | ReactNode;
+  children?: ReactNode;
   elements: cytoscape.ElementDefinition[];
   height: number;
   width: number;
@@ -185,7 +185,7 @@ export function Cytoscape({
   return (
     <CytoscapeContext.Provider value={cy}>
       <div ref={ref} style={divStyle}>
-        {typeof children === 'function' ? children(cy) : children}
+        {children}
       </div>
     </CytoscapeContext.Provider>
   );
