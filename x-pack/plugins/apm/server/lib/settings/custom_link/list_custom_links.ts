@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FilterOptions } from '../../../../common/custom_link_filter_options';
 import { Setup } from '../../helpers/setup_request';
 import { CustomLink } from './custom_link_types';
-import { FilterOptions } from '../../../routes/settings/custom_link';
 
 export async function listCustomLinks({
   setup,

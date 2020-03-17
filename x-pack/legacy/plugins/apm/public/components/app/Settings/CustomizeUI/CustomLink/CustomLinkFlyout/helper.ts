@@ -8,8 +8,7 @@ import { isEmpty, pick } from 'lodash';
 import {
   FilterOptions,
   filterOptions
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../../../../../plugins/apm/server/routes/settings/custom_link';
+} from '../../../../../../../../../../plugins/apm/common/custom_link_filter_options';
 import { CustomLink } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 
 export type Filters = Array<[keyof FilterOptions | '', string]>;

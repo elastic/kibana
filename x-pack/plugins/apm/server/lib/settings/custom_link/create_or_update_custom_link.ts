@@ -5,7 +5,7 @@
  */
 
 import { pick } from 'lodash';
-import { filterOptions } from '../../../routes/settings/custom_link';
+import { filterOptions } from '../../../../common/custom_link_filter_options';
 import { APMIndexDocumentParams } from '../../helpers/es_client';
 import { Setup } from '../../helpers/setup_request';
 import { CustomLink } from './custom_link_types';

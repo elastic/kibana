@@ -16,8 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FilterOptions } from '../../../../../../../../../../plugins/apm/server/routes/settings/custom_link';
+import { FilterOptions } from '../../../../../../../../../../plugins/apm/common/custom_link_filter_options';
 import {
   DEFAULT_OPTION,
   Filters,

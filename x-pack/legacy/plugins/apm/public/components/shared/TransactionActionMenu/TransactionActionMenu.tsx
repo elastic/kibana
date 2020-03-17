@@ -7,9 +7,8 @@
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useMemo, useState } from 'react';
+import { FilterOptions } from '../../../../../../../plugins/apm/common/custom_link_filter_options';
 import { CustomLink as CustomLinkType } from '../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { FilterOptions } from '../../../../../../../plugins/apm/server/routes/settings/custom_link';
 import { Transaction } from '../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import {
   ActionMenu,
