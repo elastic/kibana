@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { start as visualizationsStart } from '../../../../../core_plugins/visualizations/public/np_ready/public/legacy';
+import { npStart } from '../../legacy_imports';
 import { ImageComparator } from 'test_utils/image_comparator';
 import { createTagCloudVisualization } from '../tag_cloud_visualization';
 import basicdrawPng from './basicdraw.png';
@@ -69,7 +69,7 @@ describe('TagCloudVisualizationTest', function() {
     beforeEach(async function() {
       setupDOM('512px', '512px');
       imageComparator = new ImageComparator();
-      vis = visualizationsStart.createVis('tagcloud', {
+      vis = npStart.plugins.visualizations.createVis('tagcloud', {
         type: 'tagcloud',
         params: {
           bucket: { accessor: 0, format: {} },

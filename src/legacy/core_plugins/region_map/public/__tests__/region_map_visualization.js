@@ -37,11 +37,11 @@ import afterdatachangePng from './afterdatachange.png';
 import afterdatachangeandresizePng from './afterdatachangeandresize.png';
 import aftercolorchangePng from './aftercolorchange.png';
 import changestartupPng from './changestartup.png';
-import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
 
 import { createRegionMapVisualization } from '../region_map_visualization';
 import { createRegionMapTypeDefinition } from '../region_map_type';
-import { ExprVis } from '../../../visualizations/public/np_ready/public/expressions/vis';
+import { ExprVis } from '../../../../../plugins/visualizations/public';
+import { npSetup } from '../../../../ui/public/new_platform';
 
 const THRESHOLD = 0.45;
 const PIXEL_DIFF = 96;
@@ -107,7 +107,9 @@ describe('RegionMapsVisualizationTests', function() {
 
       if (!visRegComplete) {
         visRegComplete = true;
-        visualizationsSetup.createBaseVisualization(createRegionMapTypeDefinition(dependencies));
+        npSetup.plugins.visualizations.createBaseVisualization(
+          createRegionMapTypeDefinition(dependencies)
+        );
       }
 
       RegionMapsVisualization = createRegionMapVisualization(dependencies);

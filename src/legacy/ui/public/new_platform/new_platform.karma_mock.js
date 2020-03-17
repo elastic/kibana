@@ -33,7 +33,7 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/data/public/services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setAggs } from '../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/services';
+import { setAggs } from '../../../../plugins/visualizations/public/services';
 import {
   AggTypesRegistry,
   getAggTypes,

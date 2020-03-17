@@ -39,15 +39,11 @@ import vegaMapImage256 from './vega_map_image_256.png';
 import { VegaParser } from '../data_model/vega_parser';
 import { SearchCache } from '../data_model/search_cache';
 
-import {
-  setup as visualizationsSetup,
-  start as visualizationsStart,
-} from '../../../visualizations/public/np_ready/public/legacy';
 import { createVegaTypeDefinition } from '../vega_type';
 // TODO This is an integration test and thus requires a running platform. When moving to the new platform,
 // this test has to be migrated to the newly created integration test environment.
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { npStart } from 'ui/new_platform';
+import { npStart, npSetup } from 'ui/new_platform';
 import { setInjectedVars } from '../services';
 
 const THRESHOLD = 0.1;
@@ -91,7 +87,7 @@ describe('VegaVisualizations', () => {
 
       if (!visRegComplete) {
         visRegComplete = true;
-        visualizationsSetup.createBaseVisualization(
+        npSetup.plugins.visualizations.createBaseVisualization(
           createVegaTypeDefinition(vegaVisualizationDependencies)
         );
       }
@@ -105,7 +101,7 @@ describe('VegaVisualizations', () => {
       setupDOM('512px', '512px');
       imageComparator = new ImageComparator();
 
-      vis = visualizationsStart.createVis('vega', { type: 'vega' });
+      vis = npStart.plugins.visualizations.createVis('vega', { type: 'vega' });
     });
 
     afterEach(function() {

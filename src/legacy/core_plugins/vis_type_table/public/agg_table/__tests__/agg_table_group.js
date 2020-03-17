@@ -27,7 +27,6 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 import { getAngularModule } from '../../get_inner_angular';
 import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
 import { tableVisResponseHandler } from '../../table_vis_response_handler';
-import { start as visualizationsStart } from '../../../../visualizations/public/np_ready/public/legacy';
 
 const { tabifyAggResponse } = search;
 
@@ -45,13 +44,13 @@ describe('Table Vis - AggTableGroup Directive', function() {
         }
       },
     };
-    const vis1 = visualizationsStart.createVis('table', {
+    const vis1 = npStart.plugins.visualizations.createVis('table', {
       type: 'table',
       data: { searchSource, aggs: [] },
     });
     tabifiedData.metricOnly = tabifyAggResponse(vis1.data.aggs, metricOnly);
 
-    const vis2 = visualizationsStart.createVis('pie', {
+    const vis2 = npStart.plugins.visualizations.createVis('pie', {
       type: 'pie',
       data: {
         aggs: [

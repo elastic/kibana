@@ -27,15 +27,11 @@ import {
   oneTermOneHistogramBucketWithTwoMetricsOneTopHitOneDerivative,
 } from 'fixtures/fake_hierarchical_data';
 import sinon from 'sinon';
-import { npStart } from '../../legacy_imports';
+import { npStart, npSetup } from '../../legacy_imports';
 import { search } from '../../../../../../plugins/data/public';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { round } from 'lodash';
 import { tableVisTypeDefinition } from '../../table_vis_type';
-import {
-  setup as visualizationsSetup,
-  start as visualizationsStart,
-} from '../../../../visualizations/public/np_ready/public/legacy';
 import { getAngularModule } from '../../get_inner_angular';
 import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
 import { tableVisResponseHandler } from '../../table_vis_response_handler';
@@ -57,13 +53,13 @@ describe('Table Vis - AggTable Directive', function() {
         }
       },
     };
-    const vis1 = visualizationsStart.createVis('table', {
+    const vis1 = npStart.plugins.visualizations.createVis('table', {
       type: 'table',
       data: { searchSource, aggs: [] },
     });
     tabifiedData.metricOnly = tabifyAggResponse(vis1.data.aggs, metricOnly);
 
-    const vis2 = visualizationsStart.createVis('table', {
+    const vis2 = npStart.plugins.visualizations.createVis('table', {
       type: 'table',
       params: {
         showMetricsAtAllLevels: true,
@@ -85,7 +81,7 @@ describe('Table Vis - AggTable Directive', function() {
       metricsAtAllLevels: true,
     });
 
-    const vis3 = visualizationsStart.createVis('table', {
+    const vis3 = npStart.plugins.visualizations.createVis('table', {
       type: 'table',
       data: {
         aggs: [
@@ -129,7 +125,7 @@ describe('Table Vis - AggTable Directive', function() {
   beforeEach(initLocalAngular);
 
   ngMock.inject(function() {
-    visualizationsSetup.createBaseVisualization(tableVisTypeDefinition);
+    npSetup.plugins.visualizations.createBaseVisualization(tableVisTypeDefinition);
   });
 
   beforeEach(ngMock.module('kibana/table_vis'));

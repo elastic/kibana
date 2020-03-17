@@ -25,9 +25,8 @@ import expect from '@kbn/expect';
 import { threeTermBuckets } from 'fixtures/fake_hierarchical_data';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
-import { start as visualizationsStart } from '../../../../../visualizations/public/np_ready/public/legacy';
+import { npStart, tabifyAggResponse } from '../../../legacy_imports';
 import { getVis, getMockUiState } from '../lib/fixtures/_vis_fixture';
-import { tabifyAggResponse } from '../../../legacy_imports';
 import { vislibSlicesResponseHandler } from '../../response_handler';
 
 const rowAgg = [
@@ -133,7 +132,7 @@ describe('No global chart settings', function() {
     responseHandler = vislibSlicesResponseHandler;
 
     let id1 = 1;
-    stubVis1 = visualizationsStart.createVis('pie', {
+    stubVis1 = npStart.plugins.visualizations.createVis('pie', {
       type: 'pie',
       data: {
         aggs: rowAgg,
@@ -231,7 +230,7 @@ describe('Vislib PieChart Class Test Suite', function() {
         responseHandler = vislibSlicesResponseHandler;
 
         let id = 1;
-        stubVis = visualizationsStart.createVis('pie', {
+        stubVis = npStart.plugins.visualizations.createVis('pie', {
           type: 'pie',
           data: {
             aggs: dataAgg,
