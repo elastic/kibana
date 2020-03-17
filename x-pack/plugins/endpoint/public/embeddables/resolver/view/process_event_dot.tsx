@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, Matrix3 } from '../types';
 import { ResolverEvent } from '../../../../common/types';
-import { isLegacyEvent } from '../../../../common/models';
+import { eventName } from '../../../../common/models';
 
 /**
  * A placeholder view for a process node.
@@ -43,14 +43,13 @@ export const ProcessEventDot = styled(
        * Convert the position, which is in 'world' coordinates, to screen coordinates.
        */
       const [left, top] = applyMatrix3(position, projectionMatrix);
-      const eventName = isLegacyEvent(event) ? event.endgame.process_name : event.process.name;
       const style = {
         left: (left - 20).toString() + 'px',
         top: (top - 20).toString() + 'px',
       };
       return (
-        <span className={className} style={style}>
-          name: {eventName}
+        <span className={className} style={style} data-test-subj={'resolverNode'}>
+          name: {eventName(event)}
           <br />
           x: {position[0]}
           <br />
