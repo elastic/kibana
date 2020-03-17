@@ -5,10 +5,19 @@
  */
 
 import React, { useCallback, useMemo, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiSpacer,
+  EuiText,
+  EuiFormRow,
+} from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { euiStyled } from '../../../../../observability/public';
 import {
   WhenExpression,
   OfExpression,
@@ -155,25 +164,16 @@ export const Expressions: React.FC<Props> = props => {
     }
   }, [alertsContext.metadata, defaultExpression, setAlertParams, source]);
 
-  useEffect(() => {
-    return () => {
-      // When flyout closes, reset alert params
-      setAlertParams('criteria', []);
-      setAlertParams('filterQuery', '');
-      setAlertParams('groupBy', undefined);
-    };
-  }, [setAlertParams]);
-
   return (
     <>
       <EuiSpacer size={'m'} />
-      <EuiText>
-        <h5>
+      <EuiText size="xs">
+        <h4>
           <FormattedMessage
             id="xpack.infra.metrics.alertFlyout.conditions"
             defaultMessage="Conditions"
           />
-        </h5>
+        </h4>
       </EuiText>
       <EuiSpacer size={'xs'} />
       {alertParams.criteria &&
@@ -191,18 +191,55 @@ export const Expressions: React.FC<Props> = props => {
             />
           );
         })}
+
+      {/* The "for last" expression should appear here, only once. It applies to all the metrics above  */}
+      <EuiText color="warning">For last expression goes last here</EuiText>
+      {/* <ForLastExpression
+        timeWindowSize={timeSize}
+        timeWindowUnit={timeUnit}
+        errors={errors}
+        onChangeWindowSize={updateTimeSize}
+        onChangeWindowUnit={updateTimeUnit}
+      /> */}
+
+      <EuiButtonEmpty iconSide="left" flush="left" color="primary" iconType="plusInCircle">
+        Add condition
+      </EuiButtonEmpty>
+
       <EuiSpacer size={'m'} />
+
+      <EuiFormRow label="Filter" helpText="Some helpful text" fullWidth compressed>
+        <MetricsExplorerKueryBar
+          derivedIndexPattern={derivedIndexPattern}
+          onSubmit={onFilterQuerySubmit}
+          value={alertParams.filterQuery}
+        />
+      </EuiFormRow>
+
+      <EuiSpacer size={'m'} />
+
+      {alertsContext.metadata && (
+        <EuiFormRow label="Send alert per" helpText="Some helpful text" fullWidth compressed>
+          <MetricsExplorerGroupBy
+            onChange={onGroupByChange}
+            fields={derivedIndexPattern.fields}
+            options={alertsContext.metadata.currentOptions}
+          />
+        </EuiFormRow>
+      )}
+
+      {/* 
       <EuiText>
         <h5>
           <FormattedMessage id="xpack.infra.metrics.alertFlyout.filter" defaultMessage="Filter" />
         </h5>
       </EuiText>
-      <EuiSpacer size={'xs'} />
       <MetricsExplorerKueryBar
         derivedIndexPattern={derivedIndexPattern}
         onSubmit={onFilterQuerySubmit}
         value={alertParams.filterQuery}
       />
+
       <EuiSpacer size={'m'} />
       <EuiText>
         <h5>
@@ -219,7 +256,7 @@ export const Expressions: React.FC<Props> = props => {
           fields={derivedIndexPattern.fields}
           options={alertsContext.metadata.currentOptions}
         />
-      )}
+      )} */}
     </>
   );
 };
@@ -233,6 +270,17 @@ interface ExpressionRowProps {
   remove(id: number): void;
   setAlertParams(id: number, params: MetricExpression): void;
 }
+
+const StyledExpressionRow = euiStyled.div`
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -${props => props.theme.eui.euiSizeXS};
+`;
+
+const StyledExpression = euiStyled.div`
+  padding: 0 ${props => props.theme.eui.euiSizeXS};
+`;
+
 export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
   const { setAlertParams, expression, errors, expressionId, remove, fields } = props;
   const {
@@ -288,7 +336,52 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
 
   return (
     <>
-      <EuiFlexGroup gutterSize="s" wrap>
+      <EuiFlexGroup gutterSize="xs">
+        <EuiFlexItem grow>
+          <StyledExpressionRow>
+            <StyledExpression>
+              <WhenExpression
+                customAggTypesOptions={aggregationType}
+                aggType={aggType}
+                onChangeSelectedAggType={updateAggType}
+              />
+            </StyledExpression>
+            <StyledExpression>
+              <OfExpression
+                aggField={metric}
+                fields={fields.map(f => ({
+                  normalizedType: f.type,
+                  name: f.name,
+                }))}
+                aggType={aggType}
+                errors={errors}
+                onChangeSelectedAggField={updateMetric}
+              />
+            </StyledExpression>
+            <StyledExpression>
+              <ThresholdExpression
+                thresholdComparator={comparator || '>'}
+                threshold={threshold}
+                onChangeSelectedThresholdComparator={updateComparator}
+                onChangeSelectedThreshold={updateThreshold}
+                errors={errors}
+              />
+            </StyledExpression>
+          </StyledExpressionRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
+              defaultMessage: 'Remove condition',
+            })}
+            color={'danger'}
+            iconType={'trash'}
+            onClick={() => remove(expressionId)}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {/* <EuiFlexGroup gutterSize="xs" wrap>
         <EuiFlexItem grow={true}>
           <EuiFlexGroup gutterSize="s" wrap>
             <EuiFlexItem grow={false}>
@@ -357,7 +450,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </EuiFlexGroup> */}
       <EuiSpacer size={'s'} />
     </>
   );
