@@ -6,9 +6,9 @@
 
 import { AbstractVectorSource } from './vector_source';
 import {
-  autocompleteService,
+  getAutocompleteService,
   fetchSearchSourceAndRecordWithInspector,
-  indexPatternService,
+  getIndexPatternService,
   SearchSource,
   getTimeFilter,
 } from '../../kibana_services';
@@ -196,7 +196,7 @@ export class AbstractESSource extends AbstractVectorSource {
     }
 
     try {
-      this.indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
+      this.indexPattern = await getIndexPatternService().get(this._descriptor.indexPatternId);
       return this.indexPattern;
     } catch (error) {
       throw new Error(
@@ -320,7 +320,7 @@ export class AbstractESSource extends AbstractVectorSource {
   getValueSuggestions = async (field, query) => {
     try {
       const indexPattern = await this.getIndexPattern();
-      return await autocompleteService.getValueSuggestions({
+      return await getAutocompleteService().getValueSuggestions({
         indexPattern,
         field: indexPattern.fields.getByName(field.getRootName()),
         query,
