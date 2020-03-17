@@ -373,7 +373,6 @@ function getPreviewExpression(
           layerId,
           dateRange: frame.dateRange,
           state: datasourceState,
-          setState: () => {},
         });
       }
     });

@@ -24,6 +24,7 @@ import {
   loadEvalData,
   Eval,
 } from '../../../../common';
+import { getTaskStateBadge } from './columns';
 import { isCompletedAnalyticsJob } from './common';
 import {
   isRegressionAnalysis,
@@ -157,8 +158,15 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     title: i18n.translate('xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.state', {
       defaultMessage: 'State',
     }),
-    items: Object.entries(stateValues).map(s => {
-      return { title: s[0].toString(), description: getItemDescription(s[1]) };
+    items: Object.entries(stateValues).map(([stateKey, stateValue]) => {
+      const title = stateKey.toString();
+      if (title === 'state') {
+        return {
+          title,
+          description: getTaskStateBadge(getItemDescription(stateValue)),
+        };
+      }
+      return { title, description: getItemDescription(stateValue) };
     }),
     position: 'left',
   };

@@ -32,7 +32,6 @@ describe('netflowRowRenderer', () => {
     const children = netflowRowRenderer.renderRow({
       browserFields,
       data: getMockNetflowData(),
-      children: <span>{'some children'}</span>,
       timelineId: 'test',
     });
 
@@ -98,26 +97,10 @@ describe('netflowRowRenderer', () => {
     });
   });
 
-  test('should render children normally when given non-netflow data', () => {
-    const children = netflowRowRenderer.renderRow({
-      browserFields: mockBrowserFields,
-      data: justIdAndTimestamp,
-      children: <span>{'some children'}</span>,
-      timelineId: 'test',
-    });
-    const wrapper = mount(
-      <TestProviders>
-        <span>{children}</span>
-      </TestProviders>
-    );
-    expect(wrapper.text()).toEqual('some children');
-  });
-
   test('should render netflow data', () => {
     const children = netflowRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: getMockNetflowData(),
-      children: <span>{'some children'}</span>,
       timelineId: 'test',
     });
     const wrapper = mount(

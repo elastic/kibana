@@ -22,16 +22,23 @@ const getMountedHook = () =>
 
 describe('getErrorMessage()', () => {
   test('verify error message response formats', () => {
-    const errorMessage = getErrorMessage(new Error('the-error-message'));
-    expect(errorMessage).toBe('the-error-message');
+    const customError1 = {
+      body: { statusCode: 403, error: 'Forbidden', message: 'the-error-message' },
+    };
+    const errorMessage1 = getErrorMessage(customError1);
+    expect(errorMessage1).toBe('Forbidden: the-error-message');
 
-    const customError1 = { customErrorMessage: 'the-error-message' };
-    const errorMessageMessage1 = getErrorMessage(customError1);
-    expect(errorMessageMessage1).toBe('{"customErrorMessage":"the-error-message"}');
+    const customError2 = new Error('the-error-message');
+    const errorMessage2 = getErrorMessage(customError2);
+    expect(errorMessage2).toBe('the-error-message');
 
-    const customError2 = { message: 'the-error-message' };
-    const errorMessageMessage2 = getErrorMessage(customError2);
-    expect(errorMessageMessage2).toBe('the-error-message');
+    const customError3 = { customErrorMessage: 'the-error-message' };
+    const errorMessage3 = getErrorMessage(customError3);
+    expect(errorMessage3).toBe('{"customErrorMessage":"the-error-message"}');
+
+    const customError4 = { message: 'the-error-message' };
+    const errorMessage4 = getErrorMessage(customError4);
+    expect(errorMessage4).toBe('the-error-message');
   });
 });
 
