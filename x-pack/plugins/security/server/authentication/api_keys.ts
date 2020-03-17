@@ -178,7 +178,7 @@ export class APIKeys {
     try {
       result = (await this.clusterClient
         .asScoped(request)
-        .callAsCurrentUser('shield.grantAPIKey', { body: params })) as GrantAPIKeyResult;
+        .callAsInternalUser('shield.grantAPIKey', { body: params })) as GrantAPIKeyResult;
       this.logger.debug('API key was granted successfully');
     } catch (e) {
       this.logger.error(`Failed to grant API key: ${e.message}`);
@@ -241,6 +241,6 @@ export class APIKeys {
       };
     }
 
-    throw new Error(`Unsupported scheme ${authorizationHeader.scheme} for granting API Key`);
+    throw new Error(`Unsupported scheme "${authorizationHeader.scheme}" for granting API Key`);
   }
 }
