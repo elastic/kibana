@@ -153,7 +153,7 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
               fullWidth
               isInvalid={isApiUrlInvalid}
               name="apiUrl"
-              value={apiUrl}
+              value={apiUrl || ''}
               data-test-subj="apiUrlFromInput"
               placeholder="https://<instance>.service-now.com"
               onChange={handleOnChangeActionConfig.bind(null, 'apiUrl')}
@@ -175,7 +175,7 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
               fullWidth
               isInvalid={isUsernameInvalid}
               name="username"
-              value={username}
+              value={username || ''}
               data-test-subj="usernameFromInput"
               onChange={handleOnChangeSecretConfig.bind(null, 'username')}
               onBlur={handleOnBlurSecretConfig.bind(null, 'username')}
@@ -196,7 +196,7 @@ const ServiceNowConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
               fullWidth
               isInvalid={isPasswordInvalid}
               name="password"
-              value={password}
+              value={password || ''}
               data-test-subj="passwordFromInput"
               onChange={handleOnChangeSecretConfig.bind(null, 'password')}
               onBlur={handleOnBlurSecretConfig.bind(null, 'password')}
