@@ -194,7 +194,9 @@ export type AppUpdatableFields = Pick<AppBase, 'status' | 'navLinkStatus' | 'too
  * see {@link ApplicationSetup}
  * @public
  */
-export type AppUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefined;
+export type AppUpdater = (
+  app: AppBase
+) => Partial<AppUpdatableFields & { activeUrl: string }> | undefined;
 
 /**
  * Extension of {@link AppBase | common app properties} with the mount function.

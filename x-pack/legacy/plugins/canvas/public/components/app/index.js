@@ -5,12 +5,11 @@
  */
 
 import { connect } from 'react-redux';
-import { compose, withProps } from 'recompose';
+import { compose } from 'recompose';
 import { getAppReady, getBasePath } from '../../state/selectors/app';
 import { appReady, appError } from '../../state/actions/app';
 
 import { App as Component } from './app';
-import { trackRouteChange } from './track_route_change';
 
 const mapStateToProps = state => {
   // appReady could be an error object
@@ -43,9 +42,4 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   };
 };
 
-export const App = compose(
-  connect(mapStateToProps, mapDispatchToProps, mergeProps),
-  withProps(() => ({
-    onRouteChange: trackRouteChange,
-  }))
-)(Component);
+export const App = compose(connect(mapStateToProps, mapDispatchToProps, mergeProps))(Component);

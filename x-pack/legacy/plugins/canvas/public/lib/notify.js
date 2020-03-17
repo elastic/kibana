@@ -5,14 +5,12 @@
  */
 
 import { get } from 'lodash';
-import { getCoreStart, getStartPlugins } from '../legacy';
+import { getCoreStart } from '../legacy';
+// @ts-ignore Untyped Kibana Lib
+import { formatMsg } from '../../../../../../src/plugins/kibana_legacy/public'; // eslint-disable-line import/order
 
 const getToastNotifications = function() {
   return getCoreStart().notifications.toasts;
-};
-
-const formatMsg = function(...args) {
-  return getStartPlugins().__LEGACY.formatMsg(...args);
 };
 
 const getToast = (err, opts = {}) => {

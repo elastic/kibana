@@ -63,7 +63,7 @@ export class App extends React.PureComponent {
           routes={routes}
           showLoading={this.props.appState.ready === false}
           loadingMessage={strings.getLoadingMessage()}
-          onRouteChange={this.props.onRouteChange}
+          onRouteChange={this.props.setActiveUrl}
           onLoad={() => this.props.setAppReady(true)}
           onError={err => this.props.setAppError(err)}
         />

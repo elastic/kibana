@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Chrome } from 'ui/chrome';
-import { CoreSetup, CoreStart, Plugin } from '../../../../../src/core/public';
+import { BehaviorSubject } from 'rxjs';
+import { CoreSetup, CoreStart, Plugin, AppUpdater } from '../../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { initLoadingIndicator } from './lib/loading_indicator';
+// @ts-ignore untyped local
+import { historyProvider } from './lib/history_provider';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/expressions/public';
+import { createKbnUrlTracker } from '../../../../../src/plugins/kibana_utils/public';
+
 // @ts-ignore untyped local
 import { argTypeSpecs } from './expression_types/arg_types';
 import { transitions } from './transitions';
@@ -31,11 +35,6 @@ export interface CanvasSetupDeps {
 
 export interface CanvasStartDeps {
   expressions: ExpressionsStart;
-  __LEGACY: {
-    absoluteToParsedUrl: (url: string, basePath: string) => any;
-    formatMsg: any;
-    trackSubUrlForApp: Chrome['trackSubUrlForApp'];
-  };
 }
 
 /**
@@ -51,12 +50,24 @@ export interface CanvasStart {} // eslint-disable-line @typescript-eslint/no-emp
 /** @internal */
 export class CanvasPlugin
   implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps> {
+  private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+
   public setup(core: CoreSetup<CanvasStartDeps>, plugins: CanvasSetupDeps) {
     const { api: canvasApi, registries } = getPluginApi(plugins.expressions);
+
+    const { appMounted, appUnMounted, setActiveUrl } = createKbnUrlTracker({
+      baseUrl: core.http.basePath.prepend('/app/kibana/canvas'),
+      defaultSubUrl: `#/`,
+      storageKey: 'lastUrl:canvas',
+      navLinkUpdater$: this.appUpdater,
+      toastNotifications: core.notifications.toasts,
+      stateParams: [],
+    });
 
     core.application.register({
       id: 'canvas',
       title: 'Canvas App',
+      updater$: this.appUpdater,
       async mount(context, params) {
         // Load application bundle
         const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');
@@ -64,12 +75,19 @@ export class CanvasPlugin
         // Get start services
         const [coreStart, depsStart] = await core.getStartServices();
 
+        // Tell URL tracker we've mounted the app
+        appMounted();
+
         const canvasStore = await initializeCanvas(core, coreStart, plugins, depsStart, registries);
 
-        const unmount = renderApp(coreStart, depsStart, params, canvasStore);
+        const unmount = renderApp(coreStart, depsStart, params, canvasStore, setActiveUrl);
 
         return () => {
           unmount();
+
+          // Tell URL tracker we're unmounting the app
+          appUnMounted();
+
           teardownCanvas(coreStart);
         };
       },
