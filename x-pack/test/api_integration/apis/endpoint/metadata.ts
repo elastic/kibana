@@ -6,6 +6,11 @@
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+/**
+ * The number of alert documents in the es archive.
+ */
+const numberOfEndpointsInFixture = 3;
+
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
@@ -34,8 +39,8 @@ export default function({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200);
-        expect(body.total).to.eql(3);
-        expect(body.endpoints.length).to.eql(3);
+        expect(body.total).to.eql(numberOfEndpointsInFixture);
+        expect(body.endpoints.length).to.eql(numberOfEndpointsInFixture);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
       });
@@ -55,7 +60,7 @@ export default function({ getService }: FtrProviderContext) {
             ],
           })
           .expect(200);
-        expect(body.total).to.eql(3);
+        expect(body.total).to.eql(numberOfEndpointsInFixture);
         expect(body.endpoints.length).to.eql(1);
         expect(body.request_page_size).to.eql(1);
         expect(body.request_page_index).to.eql(1);
@@ -79,7 +84,7 @@ export default function({ getService }: FtrProviderContext) {
             ],
           })
           .expect(200);
-        expect(body.total).to.eql(3);
+        expect(body.total).to.eql(numberOfEndpointsInFixture);
         expect(body.endpoints.length).to.eql(0);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(30);
@@ -107,7 +112,7 @@ export default function({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
-          .send({ filter: 'not host.ip:10.101.149.26' })
+          .send({ filter: 'not host.ip:10.100.170.247' })
           .expect(200);
         expect(body.total).to.eql(2);
         expect(body.endpoints.length).to.eql(2);
@@ -116,7 +121,7 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       it('metadata api should return page based on filters and paging passed.', async () => {
-        const notIncludedIp = '10.101.149.26';
+        const notIncludedIp = '10.100.170.247';
         const { body } = await supertest
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
@@ -136,7 +141,14 @@ export default function({ getService }: FtrProviderContext) {
         const resultIps: string[] = [].concat(
           ...body.endpoints.map((metadata: Record<string, any>) => metadata.host.ip)
         );
-        expect(resultIps).to.eql(['10.192.213.130', '10.70.28.129', '10.46.229.234']);
+        expect(resultIps).to.eql([
+          '10.48.181.222',
+          '10.116.62.62',
+          '10.102.83.30',
+          '10.198.70.21',
+          '10.252.10.66',
+          '10.128.235.38',
+        ]);
         expect(resultIps).not.include.eql(notIncludedIp);
         expect(body.endpoints.length).to.eql(2);
         expect(body.request_page_size).to.eql(10);
@@ -152,18 +164,18 @@ export default function({ getService }: FtrProviderContext) {
             filter: `host.os.variant.keyword:${variantValue}`,
           })
           .expect(200);
-        expect(body.total).to.eql(2);
+        expect(body.total).to.eql(1);
         const resultOsVariantValue: Set<string> = new Set(
           body.endpoints.map((metadata: Record<string, any>) => metadata.host.os.variant)
         );
         expect(Array.from(resultOsVariantValue)).to.eql([variantValue]);
-        expect(body.endpoints.length).to.eql(2);
+        expect(body.endpoints.length).to.eql(1);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
       });
 
       it('metadata api should return the latest event for all the events for an endpoint', async () => {
-        const targetEndpointIp = '10.192.213.130';
+        const targetEndpointIp = '10.100.170.247';
         const { body } = await supertest
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
@@ -176,7 +188,7 @@ export default function({ getService }: FtrProviderContext) {
           (ip: string) => ip === targetEndpointIp
         );
         expect(resultIp).to.eql([targetEndpointIp]);
-        expect(body.endpoints[0].event.created).to.eql('2020-01-24T16:06:09.541Z');
+        expect(body.endpoints[0].event.created).to.eql(1584044335459);
         expect(body.endpoints.length).to.eql(1);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
@@ -190,8 +202,8 @@ export default function({ getService }: FtrProviderContext) {
             filter: '',
           })
           .expect(200);
-        expect(body.total).to.eql(3);
-        expect(body.endpoints.length).to.eql(3);
+        expect(body.total).to.eql(numberOfEndpointsInFixture);
+        expect(body.endpoints.length).to.eql(numberOfEndpointsInFixture);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
       });

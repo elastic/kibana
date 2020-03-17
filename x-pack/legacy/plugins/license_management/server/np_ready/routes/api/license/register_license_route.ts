@@ -15,7 +15,7 @@ export function registerLicenseRoute(server: Server, legacy: Legacy, xpackInfo: 
       validate: {
         query: schema.object({ acknowledge: schema.string() }),
         body: schema.object({
-          license: schema.object({}, { allowUnknowns: true }),
+          license: schema.object({}, { unknowns: 'allow' }),
         }),
       },
     },

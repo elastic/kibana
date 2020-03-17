@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HttpFetchQuery } from 'kibana/public';
+import { HttpFetchQuery } from 'src/core/public';
 import { useRequest, sendRequest } from './use_request';
 import { agentConfigRouteService } from '../../services';
 import {
@@ -39,11 +39,15 @@ export const sendGetOneAgentConfig = (agentConfigId: string) => {
   });
 };
 
-export const sendCreateAgentConfig = (body: CreateAgentConfigRequest['body']) => {
+export const sendCreateAgentConfig = (
+  body: CreateAgentConfigRequest['body'],
+  { withSysMonitoring }: { withSysMonitoring: boolean } = { withSysMonitoring: false }
+) => {
   return sendRequest<CreateAgentConfigResponse>({
     path: agentConfigRouteService.getCreatePath(),
     method: 'post',
     body: JSON.stringify(body),
+    query: withSysMonitoring ? { sys_monitoring: true } : {},
   });
 };
 
