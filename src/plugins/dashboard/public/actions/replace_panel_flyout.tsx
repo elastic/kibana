@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
-import { GetEmbeddableFactories } from 'src/plugins/embeddable/public';
+import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import { DashboardPanelState } from '../embeddable';
 import { NotificationsStart, Toast } from '../../../../core/public';
 import { IContainer, IEmbeddable, EmbeddableInput, EmbeddableOutput } from '../embeddable_plugin';
@@ -31,7 +31,7 @@ interface Props {
   onClose: () => void;
   notifications: NotificationsStart;
   panelToRemove: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
-  getEmbeddableFactories: GetEmbeddableFactories;
+  getEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
 }
 
 export class ReplacePanelFlyout extends React.Component<Props> {
