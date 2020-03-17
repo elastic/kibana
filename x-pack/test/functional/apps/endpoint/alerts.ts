@@ -12,7 +12,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('Endpoint Alert List page', function() {
+  describe('Endpoint Alert Page: when es has data and user has navigated to the page', function() {
     this.tags(['ciGroup7']);
     before(async () => {
       await esArchiver.load('endpoint/alerts/api_feature');
@@ -32,12 +32,31 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     it('includes Alert list data grid', async () => {
       await testSubjects.existOrFail('alertListGrid');
     });
-    it('updates the url upon submitting a new search bar query', async () => {
-      await pageObjects.endpointAlerts.enterSearchBarQuery();
-      await pageObjects.endpointAlerts.submitSearchBarFilter();
-      const currentUrl = await browser.getCurrentUrl();
-      expect(currentUrl).to.contain('query=');
-      expect(currentUrl).to.contain('date_range=');
+    describe('when submitting a new bar query', () => {
+      before(async () => {
+        await pageObjects.endpointAlerts.enterSearchBarQuery('test query');
+        await pageObjects.endpointAlerts.submitSearchBarFilter();
+      });
+      it('should update the url correctly', async () => {
+        const currentUrl = await browser.getCurrentUrl();
+        expect(currentUrl).to.contain('query=');
+        expect(currentUrl).to.contain('date_range=');
+      });
+      after(async () => {
+        await pageObjects.endpointAlerts.enterSearchBarQuery('');
+        await pageObjects.endpointAlerts.submitSearchBarFilter();
+      });
+    });
+
+    describe('and user has clicked details view link', () => {
+      before(async () => {
+        await pageObjects.endpointAlerts.setSearchBarDate('Mar 10, 2020 @ 19:33:40.767'); // A timestamp that encompases our es-archive data
+        await testSubjects.click('alertTypeCellLink');
+      });
+
+      it('loads the Alert List Flyout correctly', async () => {
+        await testSubjects.existOrFail('alertDetailFlyout');
+      });
     });
 
     after(async () => {

@@ -22,7 +22,7 @@ import {
   FormatRuleType,
 } from '../types';
 
-const getTimeTypeValue = (time: string): { unit: string; value: number } => {
+export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
   const timeObj = {
     unit: '',
     value: 0,
@@ -42,7 +42,7 @@ const getTimeTypeValue = (time: string): { unit: string; value: number } => {
   return timeObj;
 };
 
-const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
+export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
   const { queryBar, isNew, ...rest } = defineStepData;
   const { filters, query, saved_id: savedId } = queryBar;
   return {
@@ -54,7 +54,7 @@ const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJso
   };
 };
 
-const formatScheduleStepData = (scheduleData: ScheduleStepRule): ScheduleStepRuleJson => {
+export const formatScheduleStepData = (scheduleData: ScheduleStepRule): ScheduleStepRuleJson => {
   const { isNew, ...formatScheduleData } = scheduleData;
   if (!isEmpty(formatScheduleData.interval) && !isEmpty(formatScheduleData.from)) {
     const { unit: intervalUnit, value: intervalValue } = getTimeTypeValue(
@@ -74,8 +74,17 @@ const formatScheduleStepData = (scheduleData: ScheduleStepRule): ScheduleStepRul
   };
 };
 
-const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson => {
-  const { falsePositives, references, riskScore, threat, timeline, isNew, ...rest } = aboutStepData;
+export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson => {
+  const {
+    falsePositives,
+    references,
+    riskScore,
+    threat,
+    timeline,
+    isNew,
+    note,
+    ...rest
+  } = aboutStepData;
   return {
     false_positives: falsePositives.filter(item => !isEmpty(item)),
     references: references.filter(item => !isEmpty(item)),
@@ -96,6 +105,7 @@ const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson =>
           return { id, name, reference };
         }),
       })),
+    ...(!isEmpty(note) ? { note } : {}),
     ...rest,
   };
 };

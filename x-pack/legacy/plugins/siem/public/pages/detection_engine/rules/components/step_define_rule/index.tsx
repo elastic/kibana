@@ -81,7 +81,7 @@ const getStepDefaultValue = (
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   addPadding = false,
   defaultValues,
-  descriptionDirection = 'row',
+  descriptionColumns = 'singleSplit',
   isReadOnlyView,
   isLoading,
   isUpdateView = false,
@@ -149,9 +149,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, []);
 
   return isReadOnlyView && myStepData?.queryBar != null ? (
-    <StepContentWrapper addPadding={addPadding}>
+    <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
-        direction={descriptionDirection}
+        columns={descriptionColumns}
         indexPatterns={indexPatternQueryBar as IIndexPattern}
         schema={schema}
         data={myStepData}
