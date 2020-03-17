@@ -15,7 +15,7 @@ For example, if you are indexing log data with Logstash, you could select the
 `logstash-*` index pattern to visualize connections within the log entries.
 
 . Select one or more multi-value fields that contain the terms you want to
-graph. 
+graph.
 +
 The vertices in the graph are selected from these terms. If you're
 visualizing connections between Apache log entries, you could select the
@@ -23,12 +23,12 @@ visualizing connections between Apache log entries, you could select the
 being accessed from different locations.
 
 . Enter a search query to discover relationships between terms in the selected
-fields. 
+fields.
 +
 For example, to generate a graph of the successful requests to
 particular pages from different locations, you could search for the 200
 response code. The weight of the connection between two vertices indicates how strongly they
-are related. 
+are related.
 +
 [role="screenshot"]
 image::user/graph/images/graph-url-connections.png["URL connections"]
@@ -41,11 +41,11 @@ image::user/graph/images/graph-link-summary.png["Link summary"]
 . Use the toolbar buttons to explore
 additional connections:
 +
-* To display additional vertices that connect to your graph, click Expand 
+* To display additional vertices that connect to your graph, click Expand
 image:user/graph/images/graph-expand-button.jpg[Expand Selection].
 * To display additional
 connections between the displayed vertices, click Link
-image:user/graph/images/graph-link-button.jpg[Add links to existing terms]  
+image:user/graph/images/graph-link-button.jpg[Add links to existing terms]
 * To explore a particular area of the
 graph, select the vertices you are interested in, and click Expand or Link.
 * To step back through your changes to the graph, click Undo

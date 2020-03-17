@@ -11,7 +11,7 @@ For each property, you can specify whether to use a constant or data driven valu
 
 Use static styling to specificy a constant value for a style property.
 
-The image below shows an example of static styling using the <<add-sample-data, Kibana sample web logs>> data set.
+This image shows an example of static styling using the <<add-sample-data, Kibana sample web logs>> data set.
 The *kibana_sample_data_logs* layer uses static styling for all properties.
 
 [role="screenshot"]
@@ -36,7 +36,7 @@ When the minimum and maximum are the same and there is no range:
 * *Fill color* and *Border color* are set to last color in the color ramp.
 * *Border width* and *Symbol size* are set to the maximum size.
 
-The image below shows an example of data driven styling using the <<add-sample-data, Kibana sample web logs>> data set.
+The image shows an example of data driven styling using the <<add-sample-data, Kibana sample web logs>> data set.
 The *kibana_sample_data_logs* layer uses data driven styling for fill color and symbol size style properties.
 
 * The `hour_of_day` property determines the fill color for each feature based on where the value fits on a linear scale.
@@ -56,7 +56,7 @@ image::maps/images/vector_style_dynamic.png[]
 Class styling symbolizes features by class and requires multiple layers.
 Use <<maps-layer-based-filtering, layer filtering>> to define the class for each layer, and <<maps-vector-style-static, static styling>> to symbolize each class.
 
-The image below shows an example of class styling using the <<add-sample-data, Kibana sample web logs>> data set.
+This image shows an example of class styling using the <<add-sample-data, Kibana sample web logs>> data set.
 
 * The *Mac OS requests* layer applies the filter `machine.os : osx` so the layer only contains Mac OS requests.
 The fill color is a static value of green.
