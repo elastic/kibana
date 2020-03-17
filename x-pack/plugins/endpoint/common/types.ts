@@ -328,9 +328,6 @@ export interface EndpointEvent {
     name: string;
     parent?: {
       entity_id: string;
-      parent?: {
-        entity_id: string;
-      };
       name?: string;
     };
   };
