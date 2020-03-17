@@ -16,7 +16,6 @@ import {
   EuiButtonEmpty,
   EuiIcon,
 } from '@elastic/eui';
-import './drilldown_hello_bar.scss';
 import { txtHideHelpButtonLabel, txtHelpText, txtViewDocsLinkLabel } from './i18n';
 
 export interface DrilldownHelloBarProps {
