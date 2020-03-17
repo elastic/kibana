@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { CytoscapeContext } from './Cytoscape';
 
-const EmptyBannerContainer = styled('div')`
+const EmptyBannerContainer = styled.div`
   margin: ${lightTheme.gutterTypes.gutterSmall};
   /* Add some extra margin so it displays to the right of the controls. */
   left: calc(
