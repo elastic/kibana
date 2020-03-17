@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-const TEST_INDEX_PATTERN = 'date-nanos';
+const TEST_INDEX_PATTERN = 'date_nanos_custom_timestamp';
 const TEST_DEFAULT_CONTEXT_SIZE = 1;
 const TEST_STEP_SIZE = 3;
 
@@ -29,11 +29,12 @@ export default function({ getService, getPageObjects }) {
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'context', 'timePicker', 'discover']);
   const esArchiver = getService('esArchiver');
-
-  describe('context view for date_nanos', () => {
+  // skipped due to a recent change in ES that caused search_after queries with data containing
+  // custom timestamp formats like in the testdata to fail
+  describe.skip('context view for date_nanos with custom timestamp', () => {
     before(async function() {
-      await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos']);
-      await esArchiver.loadIfNeeded('date_nanos');
+      await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos_custom']);
+      await esArchiver.loadIfNeeded('date_nanos_custom');
       await kibanaServer.uiSettings.replace({ defaultIndex: TEST_INDEX_PATTERN });
       await kibanaServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
@@ -41,39 +42,20 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    after(async function unloadMakelogs() {
-      await security.testUser.restoreDefaults();
-      await esArchiver.unload('date_nanos');
-    });
-
     it('displays predessors - anchor - successors in right order ', async function() {
-      await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, 'AU_x3-TaGFA8no6Qj999Z');
+      await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, '1');
       const actualRowsText = await docTable.getRowsText();
       const expectedRowsText = [
-        'Sep 18, 2019 @ 06:50:13.000000000-2',
-        'Sep 18, 2019 @ 06:50:12.999999999-3',
-        'Sep 19, 2015 @ 06:50:13.0001000011',
+        'Oct 21, 2019 @ 08:30:04.828733000 -',
+        'Oct 21, 2019 @ 00:30:04.828740000 -',
+        'Oct 21, 2019 @ 00:30:04.828723000 -',
       ];
       expect(actualRowsText).to.eql(expectedRowsText);
     });
 
-    it('displays correctly when predecessors and successors are loaded', async function() {
-      await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, 'AU_x3-TaGFA8no6Qjisd');
-      await PageObjects.context.clickPredecessorLoadMoreButton();
-      await PageObjects.context.clickSuccessorLoadMoreButton();
-      const actualRowsText = await docTable.getRowsText();
-      const expectedRowsText = [
-        'Sep 22, 2019 @ 23:50:13.2531233455',
-        'Sep 18, 2019 @ 06:50:13.0000001044',
-        'Sep 18, 2019 @ 06:50:13.0000001032',
-        'Sep 18, 2019 @ 06:50:13.0000001021',
-        'Sep 18, 2019 @ 06:50:13.0000001010',
-        'Sep 18, 2019 @ 06:50:13.000000001-1',
-        'Sep 18, 2019 @ 06:50:13.000000000-2',
-        'Sep 18, 2019 @ 06:50:12.999999999-3',
-        'Sep 19, 2015 @ 06:50:13.0001000011',
-      ];
-      expect(actualRowsText).to.eql(expectedRowsText);
+    after(async function() {
+      await security.testUser.restoreDefaults();
+      await esArchiver.unload('date_nanos_custom');
     });
   });
 }
