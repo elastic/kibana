@@ -97,6 +97,10 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
             num_top_feature_importance_values: {
               optional: true,
             },
+            class_assignment_objective: {
+              optional: true,
+              defaultValue: 'maximize_minimum_recall',
+            },
           },
         }
       : {}),
