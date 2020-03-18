@@ -29,12 +29,16 @@ import { DETECTIONS } from '../urls/navigation';
 
 describe('Detections', () => {
   beforeEach(() => {
-    esArchiverLoad('signals');
+    // esArchiverLoad('signals');
     loginAndWaitForPage(DETECTIONS);
   });
 
   it('Closes and opens signals', () => {
-    waitForSignalsPanelToBeLoaded();
+    cy.get(NUMBER_OF_SIGNALS)
+      .invoke('text')
+      .should('eql', 'this is a test');
+
+    /* waitForSignalsPanelToBeLoaded();
     waitForSignalsToBeLoaded();
 
     cy.get(NUMBER_OF_SIGNALS)
@@ -151,6 +155,6 @@ describe('Detections', () => {
           .invoke('text')
           .should('eql', `Showing ${numberOfSignalsToBeClosed.toString()} signal`);
         cy.get(SIGNALS).should('have.length', numberOfSignalsToBeClosed);
-      });
+      });*/
   });
 });
