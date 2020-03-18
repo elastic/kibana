@@ -16,24 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { each, union } from 'lodash';
-import { dedupFilters } from './dedup_filters';
-import { Filter } from '../../../../common';
 
-/**
- * Remove duplicate filters from an array of filters
- *
- * @param {array} filters The filters to remove duplicates from
- * @param {object} comparatorOptions - Parameters to use for comparison
-
- * @returns {object} The original filters array with duplicates removed
- */
-export const uniqFilters = (filters: Filter[], comparatorOptions: any = {}) => {
-  let results: Filter[] = [];
-
-  each(filters, (filter: Filter) => {
-    results = union(results, dedupFilters(results, [filter]), comparatorOptions);
-  });
-
-  return results;
-};
+export { dedupFilters } from './dedup_filters';
+export { uniqFilters } from './uniq_filters';
+export { compareFilters, COMPARE_ALL_OPTIONS, FilterCompareOptions } from './compare_filters';
