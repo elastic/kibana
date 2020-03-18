@@ -697,7 +697,7 @@ describe('FeatureTable', () => {
     });
   });
 
-  it('renders with no privileges granted when minimal feature privilages are assigned, and sub-feature privileges are disallowed', () => {
+  it('renders with no privileges granted when minimal feature privileges are assigned, and sub-feature privileges are disallowed', () => {
     const role = createRole([
       {
         spaces: ['foo'],
@@ -731,7 +731,7 @@ describe('FeatureTable', () => {
     });
   });
 
-  it('renders with no privileges granted when sub feature privilages are assigned, and sub-feature privileges are disallowed', () => {
+  it('renders with no privileges granted when sub feature privileges are assigned, and sub-feature privileges are disallowed', () => {
     const role = createRole([
       {
         spaces: ['foo'],
