@@ -23,7 +23,6 @@ import {
   ExpressionFunctionDefinition,
   ExpressionValueSearchContext,
 } from 'src/plugins/expressions/public';
-
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -40,6 +39,11 @@ type SeriesSpec = InferPropType<typeof LineSeries> &
   InferPropType<typeof BarSeries> &
   InferPropType<typeof AreaSeries>;
 
+interface XYChartSeriesIdentifier {
+  yAccessor: string | number;
+  splitAccessors: Map<string | number, string | number>; // does the map have a size vs making it optional
+  seriesKeys: Array<string | number>;
+}
 export interface XYChartProps {
   data: LensMultiTable;
   args: XYArgs;
@@ -119,7 +123,7 @@ export const getXyChartRenderer = (dependencies: {
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     ReactDOM.render(
       <I18nProvider>
-        <XYChartReportable {...config} {...dependencies} />
+        <XYChartReportable {...config} {...dependencies} handlers={handlers} />
       </I18nProvider>,
       domNode,
       () => handlers.done()
@@ -133,7 +137,9 @@ function getIconForSeriesType(seriesType: SeriesType): IconType {
 
 const MemoizedChart = React.memo(XYChart);
 
-export function XYChartReportable(props: XYChartRenderProps) {
+export function XYChartReportable(
+  props: XYChartRenderProps & { handlers: IInterpreterRenderHandlers }
+) {
   const [state, setState] = useState({
     isReady: false,
   });
@@ -151,7 +157,15 @@ export function XYChartReportable(props: XYChartRenderProps) {
   );
 }
 
-export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYChartRenderProps) {
+export function XYChart({
+  data,
+  args,
+  formatFactory,
+  timeZone,
+  handlers,
+}: XYChartRenderProps & {
+  handlers: IInterpreterRenderHandlers;
+}) {
   const { legend, layers } = args;
 
   if (Object.values(data.tables).every(table => table.rows.length === 0)) {
@@ -280,6 +294,8 @@ export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYC
           index
         ) => {
           if (
+            !xAccessor ||
+            !accessors.length ||
             !data.tables[layerId] ||
             data.tables[layerId].rows.length === 0 ||
             data.tables[layerId].rows.every(row => typeof row[xAccessor] === 'undefined')
@@ -290,7 +306,6 @@ export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYC
           const columnToLabelMap = columnToLabel ? JSON.parse(columnToLabel) : {};
           const idForLegend = accessors;
           const table = data.tables[layerId];
-
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
@@ -302,24 +317,27 @@ export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYC
             yScaleType,
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
             timeZone,
-            customSeriesLabel: d => {
+            customSeriesLabel: (d: XYChartSeriesIdentifier): string => {
               if (accessors.length > 1) {
-                return d.seriesKeys.map(key => columnToLabelMap[key] || key).join(' - ');
+                return d.seriesKeys
+                  .map((key: string | number) => columnToLabelMap[key] || key)
+                  .join(' - ');
               }
               return columnToLabelMap[d.seriesKeys[0]] || null;
             },
           };
 
-          return seriesType === 'line' ? (
-            <LineSeries key={index} {...seriesProps} />
-          ) : seriesType === 'bar' ||
-            seriesType === 'bar_stacked' ||
-            seriesType === 'bar_horizontal' ||
-            seriesType === 'bar_horizontal_stacked' ? (
-            <BarSeries key={index} {...seriesProps} />
-          ) : (
-            <AreaSeries key={index} {...seriesProps} />
-          );
+          switch (seriesType) {
+            case 'line':
+              return <LineSeries key={index} {...seriesProps} />;
+            case 'bar':
+            case 'bar_stacked':
+            case 'bar_horizontal':
+            case 'bar_horizontal_stacked':
+              return <BarSeries key={index} {...seriesProps} />;
+            default:
+              return <AreaSeries key={index} {...seriesProps} />;
+          }
         }
       )}
     </Chart>
