@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiOverlayMask,
@@ -35,7 +35,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { sortBy, isEqual } from 'lodash';
-import { SavedQuery, SavedQueryAttributes, SavedQueryService } from '../..';
+import { SavedQuery, SavedQueryService } from '../..';
+import { SavedQueryAttributes } from '../../query';
 
 interface Props {
   savedQuery?: SavedQueryAttributes;
@@ -53,14 +54,14 @@ export interface SavedQueryMeta {
   shouldIncludeTimefilter: boolean;
 }
 
-export const SaveQueryForm: FunctionComponent<Props> = ({
+export function SaveQueryForm({
   savedQuery,
   savedQueryService,
   onSave,
   onClose,
   showFilterOption = true,
   showTimeFilterOption = true,
-}) => {
+}: Props) {
   const [title, setTitle] = useState(savedQuery ? savedQuery.title : '');
   const [description, setDescription] = useState(savedQuery ? savedQuery.description : '');
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
@@ -254,4 +255,4 @@ export const SaveQueryForm: FunctionComponent<Props> = ({
       </EuiModal>
     </EuiOverlayMask>
   );
-};
+}

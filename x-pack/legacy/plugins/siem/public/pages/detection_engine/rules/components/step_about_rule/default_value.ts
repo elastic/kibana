@@ -5,7 +5,7 @@
  */
 
 import { AboutStepRule } from '../../types';
-import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/search_super_select/translations';
+import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/translations';
 
 export const threatDefault = [
   {
@@ -29,4 +29,5 @@ export const stepAboutDefaultValue: AboutStepRule = {
     title: DEFAULT_TIMELINE_TITLE,
   },
   threat: threatDefault,
+  note: '',
 };

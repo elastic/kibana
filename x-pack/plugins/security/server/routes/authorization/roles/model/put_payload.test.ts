@@ -28,7 +28,7 @@ describe('Put payload schema', () => {
         kibana: [{ feature: { foo: ['!foo'] } }],
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[kibana.0.feature.foo]: only a-z, A-Z, 0-9, '_', and '-' are allowed"`
+      `"[kibana.0.feature.foo.0]: only a-z, A-Z, 0-9, '_', and '-' are allowed"`
     );
   });
 
@@ -104,7 +104,7 @@ describe('Put payload schema', () => {
         })
       ).toThrowErrorMatchingInlineSnapshot(`
 "[kibana.0.spaces]: types that failed validation:
-- [kibana.0.spaces.0.0]: expected value to equal [*] but got [foo-*]
+- [kibana.0.spaces.0.0]: expected value to equal [*]
 - [kibana.0.spaces.1.0]: must be lower case, a-z, 0-9, '_', and '-' are allowed"
 `);
     });
@@ -116,7 +116,7 @@ describe('Put payload schema', () => {
         })
       ).toThrowErrorMatchingInlineSnapshot(`
 "[kibana.0.spaces]: types that failed validation:
-- [kibana.0.spaces.0.1]: expected value to equal [*] but got [foo-space]
+- [kibana.0.spaces.0.1]: expected value to equal [*]
 - [kibana.0.spaces.1.0]: must be lower case, a-z, 0-9, '_', and '-' are allowed"
 `);
     });

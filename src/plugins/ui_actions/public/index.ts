@@ -28,5 +28,15 @@ export { UiActionsSetup, UiActionsStart } from './plugin';
 export { UiActionsServiceParams, UiActionsService } from './service';
 export { Action, createAction, IncompatibleActionError } from './actions';
 export { buildContextMenuForActions } from './context_menu';
-export { Trigger, TriggerContext } from './triggers';
-export { TriggerContextMapping, TriggerId } from './types';
+export {
+  Trigger,
+  TriggerContext,
+  SELECT_RANGE_TRIGGER,
+  selectRangeTrigger,
+  VALUE_CLICK_TRIGGER,
+  valueClickTrigger,
+  APPLY_FILTER_TRIGGER,
+  applyFilterTrigger,
+} from './triggers';
+export { TriggerContextMapping, TriggerId, ActionContextMapping, ActionType } from './types';
+export { ActionByType } from './actions';

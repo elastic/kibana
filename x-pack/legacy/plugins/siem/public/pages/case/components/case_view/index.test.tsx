@@ -12,16 +12,17 @@ import { caseProps, data } from './__mock__';
 import { TestProviders } from '../../../../mock';
 
 describe('CaseView ', () => {
-  const dispatchUpdateCaseProperty = jest.fn();
+  const updateCaseProperty = jest.fn();
 
   beforeEach(() => {
     jest.resetAllMocks();
-    jest
-      .spyOn(apiHook, 'useUpdateCase')
-      .mockReturnValue([
-        { data, isLoading: false, isError: false, updateKey: null },
-        dispatchUpdateCaseProperty,
-      ]);
+    jest.spyOn(apiHook, 'useUpdateCase').mockReturnValue({
+      caseData: data,
+      isLoading: false,
+      isError: false,
+      updateKey: null,
+      updateCaseProperty,
+    });
   });
 
   it('should render CaseComponent', () => {
@@ -38,10 +39,10 @@ describe('CaseView ', () => {
     ).toEqual(data.title);
     expect(
       wrapper
-        .find(`[data-test-subj="case-view-state"]`)
+        .find(`[data-test-subj="case-view-status"]`)
         .first()
         .text()
-    ).toEqual(data.state);
+    ).toEqual(data.status);
     expect(
       wrapper
         .find(`[data-test-subj="case-view-tag-list"] .euiBadge__text`)
@@ -76,11 +77,11 @@ describe('CaseView ', () => {
     );
 
     wrapper
-      .find('input[data-test-subj="toggle-case-state"]')
+      .find('input[data-test-subj="toggle-case-status"]')
       .simulate('change', { target: { value: false } });
 
-    expect(dispatchUpdateCaseProperty).toBeCalledWith({
-      updateKey: 'state',
+    expect(updateCaseProperty).toBeCalledWith({
+      updateKey: 'status',
       updateValue: 'closed',
     });
   });
@@ -94,7 +95,7 @@ describe('CaseView ', () => {
     expect(
       wrapper
         .find(
-          `div[data-test-subj="user-action-${data.comments[0].commentId}-avatar"] [data-test-subj="user-action-avatar"]`
+          `div[data-test-subj="user-action-${data.comments[0].id}-avatar"] [data-test-subj="user-action-avatar"]`
         )
         .first()
         .prop('name')
@@ -103,7 +104,7 @@ describe('CaseView ', () => {
     expect(
       wrapper
         .find(
-          `div[data-test-subj="user-action-${data.comments[0].commentId}"] [data-test-subj="user-action-title"] strong`
+          `div[data-test-subj="user-action-${data.comments[0].id}"] [data-test-subj="user-action-title"] strong`
         )
         .first()
         .text()
@@ -112,7 +113,7 @@ describe('CaseView ', () => {
     expect(
       wrapper
         .find(
-          `div[data-test-subj="user-action-${data.comments[0].commentId}"] [data-test-subj="markdown"]`
+          `div[data-test-subj="user-action-${data.comments[0].id}"] [data-test-subj="markdown"]`
         )
         .first()
         .prop('source')

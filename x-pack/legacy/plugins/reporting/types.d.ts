@@ -23,22 +23,6 @@ export type Job = EventEmitter & {
   };
 };
 
-export interface ReportingConfigOptions {
-  browser: BrowserConfig;
-  poll: {
-    jobCompletionNotifier: {
-      interval: number;
-      intervalErrorMultiplier: number;
-    };
-    jobsRefresh: {
-      interval: number;
-      intervalErrorMultiplier: number;
-    };
-  };
-  queue: QueueConfig;
-  capture: CaptureConfig;
-}
-
 export interface NetworkPolicyRule {
   allow: boolean;
   protocol: string;
@@ -122,6 +106,11 @@ export interface CaptureConfig {
   maxAttempts: number;
   networkPolicy: NetworkPolicy;
   loadDelay: number;
+  timeouts: {
+    openUrl: number;
+    waitForElements: number;
+    renderComplet: number;
+  };
 }
 
 export interface BrowserConfig {
@@ -219,8 +208,9 @@ export interface JobSource<JobParamsType> {
 export interface JobDocOutput {
   content_type: string;
   content: string | null;
-  max_size_reached: boolean;
   size: number;
+  max_size_reached?: boolean;
+  warnings?: string[];
 }
 
 export interface ESQueueWorker {

@@ -14,12 +14,20 @@ export const CANCEL = i18n.translate('xpack.siem.case.caseView.cancel', {
   defaultMessage: 'Cancel',
 });
 
+export const DELETE_CASE = i18n.translate('xpack.siem.case.confirmDeleteCase.deleteCase', {
+  defaultMessage: 'Delete case',
+});
+
+export const DELETE_CASES = i18n.translate('xpack.siem.case.confirmDeleteCase.deleteCases', {
+  defaultMessage: 'Delete cases',
+});
+
 export const NAME = i18n.translate('xpack.siem.case.caseView.name', {
   defaultMessage: 'Name',
 });
 
-export const CREATED_AT = i18n.translate('xpack.siem.case.caseView.createdAt', {
-  defaultMessage: 'Created at',
+export const OPENED_ON = i18n.translate('xpack.siem.case.caseView.openedOn', {
+  defaultMessage: 'Opened on',
 });
 
 export const REPORTER = i18n.translate('xpack.siem.case.caseView.createdBy', {
@@ -52,6 +60,10 @@ export const COMMENT_REQUIRED = i18n.translate(
   }
 );
 
+export const REQUIRED_FIELD = i18n.translate('xpack.siem.case.caseView.fieldRequiredError', {
+  defaultMessage: 'Required field',
+});
+
 export const EDIT = i18n.translate('xpack.siem.case.caseView.edit', {
   defaultMessage: 'Edit',
 });
@@ -60,24 +72,8 @@ export const OPTIONAL = i18n.translate('xpack.siem.case.caseView.optional', {
   defaultMessage: 'Optional',
 });
 
-export const LAST_UPDATED = i18n.translate('xpack.siem.case.caseView.updatedAt', {
-  defaultMessage: 'Last updated',
-});
-
-export const PAGE_SUBTITLE = i18n.translate('xpack.siem.case.caseView.pageSubtitle', {
-  defaultMessage: 'Cases within the Elastic SIEM',
-});
-
 export const PAGE_TITLE = i18n.translate('xpack.siem.case.pageTitle', {
   defaultMessage: 'Cases',
-});
-
-export const STATE = i18n.translate('xpack.siem.case.caseView.state', {
-  defaultMessage: 'State',
-});
-
-export const SUBMIT = i18n.translate('xpack.siem.case.caseView.submit', {
-  defaultMessage: 'Submit',
 });
 
 export const CREATE_CASE = i18n.translate('xpack.siem.case.caseView.createCase', {
@@ -86,6 +82,21 @@ export const CREATE_CASE = i18n.translate('xpack.siem.case.caseView.createCase',
 
 export const TAGS = i18n.translate('xpack.siem.case.caseView.tags', {
   defaultMessage: 'Tags',
+});
+
+export const NO_TAGS_AVAILABLE = i18n.translate('xpack.siem.case.allCases.noTagsAvailable', {
+  defaultMessage: 'No tags available',
+});
+
+export const NO_REPORTERS_AVAILABLE = i18n.translate(
+  'xpack.siem.case.caseView.noReportersAvailable',
+  {
+    defaultMessage: 'No reporters available.',
+  }
+);
+
+export const COMMENTS = i18n.translate('xpack.siem.case.allCases.comments', {
+  defaultMessage: 'Comments',
 });
 
 export const TAGS_HELP = i18n.translate('xpack.siem.case.createCase.fieldTagsHelpText', {
@@ -109,7 +120,7 @@ export const CONFIGURE_CASES_PAGE_TITLE = i18n.translate(
 );
 
 export const CONFIGURE_CASES_BUTTON = i18n.translate('xpack.siem.case.configureCasesButton', {
-  defaultMessage: 'Configure cases',
+  defaultMessage: 'Edit third-party connection',
 });
 
 export const ADD_COMMENT = i18n.translate('xpack.siem.case.caseView.comment.addComment', {

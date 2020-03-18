@@ -6,10 +6,9 @@
 
 import ApolloClient from 'apollo-client';
 import { EuiHorizontalRule, EuiLink, EuiText } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
-import { ActionCreator } from 'typescript-fsa';
 
 import { AllTimelinesQuery } from '../../containers/timeline/all';
 import { SortFieldTimeline, Direction } from '../../graphql/types';
@@ -21,10 +20,9 @@ import { updateIsLoading as dispatchUpdateIsLoading } from '../../store/timeline
 import { RecentTimelines } from './recent_timelines';
 import * as i18n from './translations';
 import { FilterMode } from './types';
-
-export interface MeApiResponse {
-  username: string;
-}
+import { useGetUrlSearch } from '../navigation/use_get_url_search';
+import { navTabs } from '../../pages/home/home_navigations';
+import { getTimelinesUrl } from '../link_to/redirect_to_timelines';
 
 interface OwnProps {
   apolloClient: ApolloClient<{}>;
@@ -35,14 +33,13 @@ export type Props = OwnProps & PropsFromRedux;
 
 const StatefulRecentTimelinesComponent = React.memo<Props>(
   ({ apolloClient, filterBy, updateIsLoading, updateTimeline }) => {
-    const actionDispatcher = updateIsLoading as ActionCreator<{ id: string; isLoading: boolean }>;
     const onOpenTimeline: OnOpenTimeline = useCallback(
       ({ duplicate, timelineId }: { duplicate: boolean; timelineId: string }) => {
         queryTimelineById({
           apolloClient,
           duplicate,
           timelineId,
-          updateIsLoading: actionDispatcher,
+          updateIsLoading,
           updateTimeline,
         });
       },
@@ -51,6 +48,11 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
 
     const noTimelinesMessage =
       filterBy === 'favorites' ? i18n.NO_FAVORITE_TIMELINES : i18n.NO_TIMELINES;
+    const urlSearch = useGetUrlSearch(navTabs.timelines);
+    const linkAllTimelines = useMemo(
+      () => <EuiLink href={getTimelinesUrl(urlSearch)}>{i18n.VIEW_ALL_TIMELINES}</EuiLink>,
+      [urlSearch]
+    );
 
     return (
       <AllTimelinesQuery
@@ -77,9 +79,7 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
               />
             )}
             <EuiHorizontalRule margin="s" />
-            <EuiText size="xs">
-              <EuiLink href="#/link-to/timelines">{i18n.VIEW_ALL_TIMELINES}</EuiLink>
-            </EuiText>
+            <EuiText size="xs">{linkAllTimelines}</EuiText>
           </>
         )}
       </AllTimelinesQuery>

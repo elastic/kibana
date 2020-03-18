@@ -10,7 +10,6 @@ import { LicenseType } from '../../licensing/common/types';
 const basicLicense: LicenseType = 'basic';
 
 export const PLUGIN = {
-  id: 'remote_clusters',
   // Remote Clusters are used in both CCS and CCR, and CCS is available for all licenses.
   minimumLicenseType: basicLicense,
   getI18nName: (): string => {
@@ -21,3 +20,6 @@ export const PLUGIN = {
 };
 
 export const API_BASE_PATH = '/api/remote_clusters';
+
+export const SNIFF_MODE = 'sniff';
+export const PROXY_MODE = 'proxy';

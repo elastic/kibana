@@ -116,13 +116,15 @@ export interface RouteConfigOptionsBody {
  */
 export interface RouteConfigOptions<Method extends RouteMethod> {
   /**
-   * A flag shows that authentication for a route:
-   * `enabled`  when true
-   * `disabled` when false
+   * Defines authentication mode for a route:
+   * - true. A user has to have valid credentials to access a resource
+   * - false. A user can access a resource without any credentials.
+   * - 'optional'. A user can access a resource if has valid credentials or no credentials at all.
+   * Can be useful when we grant access to a resource but want to identify a user if possible.
    *
-   * Enabled by default.
+   * Defaults to `true` if an auth mechanism is registered.
    */
-  authRequired?: boolean;
+  authRequired?: boolean | 'optional';
 
   /**
    * Defines xsrf protection requirements for a route:
@@ -177,7 +179,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    * access to raw values.
    * In some cases you may want to use another validation library. To do this, you need to
    * instruct the `@kbn/config-schema` library to output **non-validated values** with
-   * setting schema as `schema.object({}, { allowUnknowns: true })`;
+   * setting schema as `schema.object({}, { unknowns: 'allow' })`;
    *
    * @example
    * ```ts
@@ -210,7 +212,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    *   path: 'path/{id}',
    *   validate: {
    *     // handler has access to raw non-validated params in runtime
-   *     params: schema.object({}, { allowUnknowns: true })
+   *     params: schema.object({}, { unknowns: 'allow' })
    *   },
    * },
    * (context, req, res,) {

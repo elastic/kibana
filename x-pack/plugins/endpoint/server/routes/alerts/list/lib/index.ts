@@ -7,7 +7,7 @@ import { decode } from 'rison-node';
 import { SearchResponse } from 'elasticsearch';
 import { KibanaRequest } from 'kibana/server';
 import { RequestHandlerContext } from 'src/core/server';
-import { Filter, TimeRange } from '../../../../../../../../src/plugins/data/server';
+import { Query, Filter, TimeRange } from '../../../../../../../../src/plugins/data/server';
 import {
   AlertEvent,
   AlertData,
@@ -15,13 +15,14 @@ import {
   AlertHits,
   EndpointAppConstants,
   ESTotal,
+  AlertingIndexGetQueryResult,
 } from '../../../../../common/types';
 import { EndpointAppContext } from '../../../../types';
-import { AlertSearchQuery, AlertListRequestQuery } from '../../types';
+import { AlertSearchQuery } from '../../types';
 import { AlertListPagination } from './pagination';
 
 export const getRequestData = async (
-  request: KibanaRequest<unknown, AlertListRequestQuery, unknown>,
+  request: KibanaRequest<unknown, AlertingIndexGetQueryResult, unknown>,
   endpointAppContext: EndpointAppContext
 ): Promise<AlertSearchQuery> => {
   const config = await endpointAppContext.config();
@@ -29,13 +30,16 @@ export const getRequestData = async (
     // Defaults not enforced by schema
     pageSize: request.query.page_size || EndpointAppConstants.ALERT_LIST_DEFAULT_PAGE_SIZE,
     sort: request.query.sort || EndpointAppConstants.ALERT_LIST_DEFAULT_SORT,
-    order: request.query.order || EndpointAppConstants.ALERT_LIST_DEFAULT_ORDER,
+    order: request.query.order || 'desc',
     dateRange: ((request.query.date_range !== undefined
       ? decode(request.query.date_range)
       : config.alertResultListDefaultDateRange) as unknown) as TimeRange,
 
     // Filtering
-    query: request.query.query,
+    query:
+      request.query.query !== undefined
+        ? ((decode(request.query.query) as unknown) as Query)
+        : { query: '', language: 'kuery' },
     filters:
       request.query.filters !== undefined
         ? ((decode(request.query.filters) as unknown) as Filter[])

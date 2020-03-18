@@ -54,11 +54,10 @@ Cell.displayName = 'Cell';
 
 export interface SkeletonRowProps extends CellProps, RowProps {
   cellCount?: number;
-  style?: object;
 }
 
 export const SkeletonRow = React.memo<SkeletonRowProps>(
-  ({ cellColor, cellCount = 4, cellMargin, rowHeight, rowPadding, style }) => {
+  ({ cellColor, cellCount = 4, cellMargin, rowHeight, rowPadding }) => {
     const cells = useMemo(
       () =>
         [...Array(cellCount)].map(
@@ -69,7 +68,7 @@ export const SkeletonRow = React.memo<SkeletonRowProps>(
     );
 
     return (
-      <Row rowHeight={rowHeight} rowPadding={rowPadding} style={style}>
+      <Row rowHeight={rowHeight} rowPadding={rowPadding}>
         {cells}
       </Row>
     );

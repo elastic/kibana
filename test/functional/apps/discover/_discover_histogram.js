@@ -23,7 +23,9 @@ export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
+  const elasticChart = getService('elasticChart');
   const kibanaServer = getService('kibanaServer');
+  const security = getService('security');
   const PageObjects = getPageObjects(['settings', 'common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'long-window-logstash-*',
@@ -34,6 +36,11 @@ export default function({ getService, getPageObjects }) {
     before(async function() {
       log.debug('load kibana index with default index pattern');
       await PageObjects.common.navigateToApp('home');
+      await security.testUser.setRoles([
+        'kibana_admin',
+        'test_logstash_reader',
+        'long_window_logstash',
+      ]);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('long_window_logstash');
       await esArchiver.load('visualize');
@@ -55,6 +62,7 @@ export default function({ getService, getPageObjects }) {
       await esArchiver.unload('long_window_logstash');
       await esArchiver.unload('visualize');
       await esArchiver.unload('discover');
+      await security.testUser.restoreDefaults();
     });
 
     it('should visualize monthly data with different day intervals', async () => {
@@ -64,7 +72,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.discover.setChartInterval('Monthly');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const chartCanvasExist = await PageObjects.discover.chartCanvasExist();
+      const chartCanvasExist = await elasticChart.canvasExists();
       expect(chartCanvasExist).to.be(true);
     });
     it('should visualize weekly data with within DST changes', async () => {
@@ -74,7 +82,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.discover.setChartInterval('Weekly');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const chartCanvasExist = await PageObjects.discover.chartCanvasExist();
+      const chartCanvasExist = await elasticChart.canvasExists();
       expect(chartCanvasExist).to.be(true);
     });
     it('should visualize monthly data with different years Scaled to 30d', async () => {
@@ -84,7 +92,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.discover.setChartInterval('Daily');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const chartCanvasExist = await PageObjects.discover.chartCanvasExist();
+      const chartCanvasExist = await elasticChart.canvasExists();
       expect(chartCanvasExist).to.be(true);
     });
   });

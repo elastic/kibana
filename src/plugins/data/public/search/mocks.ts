@@ -17,9 +17,12 @@
  * under the License.
  */
 
+import { searchAggsSetupMock } from './aggs/mocks';
+
 export * from './search_source/mocks';
 
 export const searchSetupMock = {
+  aggs: searchAggsSetupMock(),
   registerSearchStrategyContext: jest.fn(),
   registerSearchStrategyProvider: jest.fn(),
 };

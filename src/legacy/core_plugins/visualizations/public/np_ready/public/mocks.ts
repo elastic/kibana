@@ -17,12 +17,6 @@
  * under the License.
  */
 
-jest.mock('ui/vis/vis_filters');
-jest.mock('ui/vis/default_feedback_message');
-jest.mock('ui/vis/vis_factory');
-jest.mock('ui/registry/vis_types');
-jest.mock('./types/vis_type_alias_registry');
-
 import { PluginInitializerContext } from '../../../../../../core/public';
 import { VisualizationsSetup, VisualizationsStart } from './';
 import { VisualizationsPlugin } from './plugin';
@@ -34,23 +28,19 @@ import { usageCollectionPluginMock } from '../../../../../../plugins/usage_colle
 import { uiActionsPluginMock } from '../../../../../../plugins/ui_actions/public/mocks';
 
 const createSetupContract = (): VisualizationsSetup => ({
-  types: {
-    createBaseVisualization: jest.fn(),
-    createReactVisualization: jest.fn(),
-    registerAlias: jest.fn(),
-    hideTypes: jest.fn(),
-  },
+  createBaseVisualization: jest.fn(),
+  createReactVisualization: jest.fn(),
+  registerAlias: jest.fn(),
+  hideTypes: jest.fn(),
 });
 
 const createStartContract = (): VisualizationsStart => ({
-  types: {
-    get: jest.fn(),
-    all: jest.fn(),
-    getAliases: jest.fn(),
-  },
+  get: jest.fn(),
+  all: jest.fn(),
+  getAliases: jest.fn(),
   savedVisualizationsLoader: {} as any,
   showNewVisModal: jest.fn(),
-  Vis: jest.fn(),
+  createVis: jest.fn(),
 });
 
 const createInstance = async () => {
@@ -59,7 +49,7 @@ const createInstance = async () => {
   const setup = plugin.setup(coreMock.createSetup(), {
     data: dataPluginMock.createSetupContract(),
     expressions: expressionsPluginMock.createSetupContract(),
-    embeddable: embeddablePluginMock.createStartContract(),
+    embeddable: embeddablePluginMock.createSetupContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
   });
   const doStart = () =>

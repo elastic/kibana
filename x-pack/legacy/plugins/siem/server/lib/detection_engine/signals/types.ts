@@ -6,7 +6,6 @@
 
 import { RuleAlertParams, OutputRuleAlertRest } from '../types';
 import { SearchResponse } from '../../types';
-import { LegacyRequest } from '../../../types';
 import {
   AlertType,
   State,
@@ -38,14 +37,6 @@ export type SignalsStatusRestParams = Omit<SignalsStatusParams, 'signalIds'> & {
 };
 
 export type SignalsQueryRestParams = SignalQueryParams;
-
-export interface SignalsStatusRequest extends LegacyRequest {
-  payload: SignalsStatusRestParams;
-}
-
-export interface SignalsQueryRequest extends LegacyRequest {
-  payload: SignalsQueryRestParams;
-}
 
 export type SearchTypes =
   | string
@@ -153,4 +144,16 @@ export interface SignalHit {
   '@timestamp': string;
   event: object;
   signal: Partial<Signal>;
+}
+
+export interface AlertAttributes {
+  enabled: boolean;
+  name: string;
+  tags: string[];
+  createdBy: string;
+  createdAt: string;
+  updatedBy: string;
+  schedule: {
+    interval: string;
+  };
 }

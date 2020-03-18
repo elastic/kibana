@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { HttpSetup } from 'kibana/public';
 import { ActionGroup } from '../../alerting/common';
 import { ActionType } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
@@ -20,11 +21,12 @@ export type AlertTypeIndex = Record<string, AlertType>;
 export type ActionTypeRegistryContract = PublicMethodsOf<TypeRegistry<ActionTypeModel>>;
 export type AlertTypeRegistryContract = PublicMethodsOf<TypeRegistry<AlertTypeModel>>;
 
-export interface ActionConnectorFieldsProps<TActionCOnnector> {
-  action: TActionCOnnector;
+export interface ActionConnectorFieldsProps<TActionConnector> {
+  action: TActionConnector;
   editActionConfig: (property: string, value: any) => void;
   editActionSecrets: (property: string, value: any) => void;
   errors: { [key: string]: string[] };
+  http?: HttpSetup;
 }
 
 export interface ActionParamsProps<TParams> {
@@ -71,11 +73,21 @@ export interface ActionConnectorTableItem extends ActionConnector {
   actionType: ActionType['name'];
 }
 
+export interface ActionVariable {
+  name: string;
+  description: string;
+}
+
+export interface ActionVariables {
+  context: ActionVariable[];
+  state: ActionVariable[];
+}
+
 export interface AlertType {
   id: string;
   name: string;
   actionGroups: ActionGroup[];
-  actionVariables: string[];
+  actionVariables: ActionVariables;
   defaultActionGroupId: ActionGroup['id'];
 }
 

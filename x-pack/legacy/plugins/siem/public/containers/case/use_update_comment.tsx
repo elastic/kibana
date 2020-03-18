@@ -4,17 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useReducer, useRef } from 'react';
-import { useStateToaster } from '../../components/toasters';
-import { errorToToaster } from '../../components/ml/api/error_to_toaster';
-import * as i18n from './translations';
-import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS } from './constants';
-import { Comment } from './types';
-import { updateComment } from './api';
-import { getTypedPayload } from './utils';
+import { useReducer, useCallback, Dispatch } from 'react';
 
-interface CommetUpdateState {
-  data: Comment[];
+import { errorToToaster, useStateToaster } from '../../components/toasters';
+
+import { patchComment } from './api';
+import * as i18n from './translations';
+import { Comment } from './types';
+
+interface CommentUpdateState {
+  comments: Comment[];
   isLoadingIds: string[];
   isError: boolean;
 }
@@ -24,69 +23,103 @@ interface CommentUpdate {
   commentId: string;
 }
 
-interface Action {
-  type: string;
-  payload?: CommentUpdate | string;
-}
+type Action =
+  | { type: 'APPEND_COMMENT'; payload: Comment }
+  | { type: 'FETCH_INIT'; payload: string }
+  | { type: 'FETCH_SUCCESS'; payload: CommentUpdate }
+  | { type: 'FETCH_FAILURE'; payload: string };
 
-const dataFetchReducer = (state: CommetUpdateState, action: Action): CommetUpdateState => {
+const dataFetchReducer = (state: CommentUpdateState, action: Action): CommentUpdateState => {
   switch (action.type) {
-    case FETCH_INIT:
+    case 'APPEND_COMMENT':
       return {
         ...state,
-        isLoadingIds: [...state.isLoadingIds, getTypedPayload<string>(action.payload)],
+        comments: [...state.comments, action.payload],
+      };
+    case 'FETCH_INIT':
+      return {
+        ...state,
+        isLoadingIds: [...state.isLoadingIds, action.payload],
         isError: false,
       };
 
-    case FETCH_SUCCESS:
-      const updatePayload = getTypedPayload<CommentUpdate>(action.payload);
-      const foundIndex = state.data.findIndex(
-        comment => comment.commentId === updatePayload.commentId
+    case 'FETCH_SUCCESS':
+      const updatePayload = action.payload;
+      const foundIndex = state.comments.findIndex(
+        comment => comment.id === updatePayload.commentId
       );
-      state.data[foundIndex] = { ...state.data[foundIndex], ...updatePayload.update };
+      const newComments = state.comments;
+      if (foundIndex !== -1) {
+        newComments[foundIndex] = { ...state.comments[foundIndex], ...updatePayload.update };
+      }
+
       return {
         ...state,
         isLoadingIds: state.isLoadingIds.filter(id => updatePayload.commentId !== id),
         isError: false,
-        data: [...state.data],
+        comments: newComments,
       };
-    case FETCH_FAILURE:
+    case 'FETCH_FAILURE':
       return {
         ...state,
-        isLoadingIds: state.isLoadingIds.filter(
-          id => getTypedPayload<string>(action.payload) !== id
-        ),
+        isLoadingIds: state.isLoadingIds.filter(id => action.payload !== id),
         isError: true,
       };
     default:
-      throw new Error();
+      return state;
   }
 };
 
-export const useUpdateComment = (
-  comments: Comment[]
-): [CommetUpdateState, (commentId: string, commentUpdate: string) => void] => {
+interface UseUpdateComment extends CommentUpdateState {
+  updateComment: (caseId: string, commentId: string, commentUpdate: string) => void;
+  addPostedComment: Dispatch<Comment>;
+}
+
+export const useUpdateComment = (comments: Comment[]): UseUpdateComment => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoadingIds: [],
     isError: false,
-    data: comments,
+    comments,
   });
-  const dispatchUpdateComment = useRef<(commentId: string, commentUpdate: string) => void>();
   const [, dispatchToaster] = useStateToaster();
 
-  dispatchUpdateComment.current = async (commentId: string, commentUpdate: string) => {
-    dispatch({ type: FETCH_INIT, payload: commentId });
-    try {
-      const currentComment = state.data.find(comment => comment.commentId === commentId) ?? {
-        version: '',
+  const dispatchUpdateComment = useCallback(
+    async (caseId: string, commentId: string, commentUpdate: string) => {
+      let cancel = false;
+      try {
+        dispatch({ type: 'FETCH_INIT', payload: commentId });
+        const currentComment = state.comments.find(comment => comment.id === commentId) ?? {
+          version: '',
+        };
+        const response = await patchComment(
+          caseId,
+          commentId,
+          commentUpdate,
+          currentComment.version
+        );
+        if (!cancel) {
+          dispatch({ type: 'FETCH_SUCCESS', payload: { update: response, commentId } });
+        }
+      } catch (error) {
+        if (!cancel) {
+          errorToToaster({
+            title: i18n.ERROR_TITLE,
+            error: error.body && error.body.message ? new Error(error.body.message) : error,
+            dispatchToaster,
+          });
+          dispatch({ type: 'FETCH_FAILURE', payload: commentId });
+        }
+      }
+      return () => {
+        cancel = true;
       };
-      const response = await updateComment(commentId, commentUpdate, currentComment.version);
-      dispatch({ type: FETCH_SUCCESS, payload: { update: response, commentId } });
-    } catch (error) {
-      errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
-      dispatch({ type: FETCH_FAILURE, payload: commentId });
-    }
-  };
+    },
+    [state]
+  );
+  const addPostedComment = useCallback(
+    (comment: Comment) => dispatch({ type: 'APPEND_COMMENT', payload: comment }),
+    []
+  );
 
-  return [state, dispatchUpdateComment.current];
+  return { ...state, updateComment: dispatchUpdateComment, addPostedComment };
 };

@@ -19,16 +19,11 @@ import { EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HttpSetup, ToastsApi } from 'kibana/public';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
-import {
-  ActionType,
-  ActionConnector,
-  IErrorObject,
-  AlertTypeModel,
-  ActionTypeModel,
-} from '../../../types';
+import { ActionType, ActionConnector, IErrorObject, ActionTypeModel } from '../../../types';
 import { connectorReducer } from './connector_reducer';
 import { createActionConnector } from '../../lib/action_connector_api';
 import { TypeRegistry } from '../../type_registry';
+import './connector_add_modal.scss';
 
 interface ConnectorAddModalProps {
   actionType: ActionType;
@@ -36,7 +31,6 @@ interface ConnectorAddModalProps {
   setAddModalVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   postSaveEventHandler?: (savedAction: ActionConnector) => void;
   http: HttpSetup;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   toastNotifications?: Pick<
     ToastsApi,
@@ -65,14 +59,17 @@ export const ConnectorAddModal = ({
   const setConnector = (value: any) => {
     dispatch({ command: { type: 'setConnector' }, payload: { key: 'connector', value } });
   };
-  const [serverError, setServerError] = useState<{
-    body: { message: string; error: string };
-  } | null>(null);
+  const [serverError, setServerError] = useState<
+    | {
+        body: { message: string; error: string };
+      }
+    | undefined
+  >(undefined);
 
   const closeModal = useCallback(() => {
     setAddModalVisibility(false);
     setConnector(initialConnector);
-    setServerError(null);
+    setServerError(undefined);
   }, [initialConnector, setAddModalVisibility]);
 
   if (!addModalVisible) {
@@ -155,6 +152,7 @@ export const ConnectorAddModal = ({
             serverError={serverError}
             errors={errors}
             actionTypeRegistry={actionTypeRegistry}
+            http={http}
           />
         </EuiModalBody>
 

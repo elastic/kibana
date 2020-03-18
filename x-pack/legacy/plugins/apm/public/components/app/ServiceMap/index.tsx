@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { ElementDefinition } from 'cytoscape';
@@ -16,23 +15,25 @@ import React, {
   useRef,
   useState
 } from 'react';
-import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
+import { EuiBetaBadge } from '@elastic/eui';
+import styled from 'styled-components';
 import { isValidPlatinumLicense } from '../../../../../../../plugins/apm/common/service_map';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceMapAPIResponse } from '../../../../../../../plugins/apm/server/lib/service_map/get_service_map';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { useCallApmApi } from '../../../hooks/useCallApmApi';
 import { useDeepObjectIdentity } from '../../../hooks/useDeepObjectIdentity';
 import { useLicense } from '../../../hooks/useLicense';
 import { useLoadingIndicator } from '../../../hooks/useLoadingIndicator';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { Controls } from './Controls';
 import { Cytoscape } from './Cytoscape';
+import { EmptyBanner } from './EmptyBanner';
 import { getCytoscapeElements } from './get_cytoscape_elements';
 import { PlatinumLicensePrompt } from './PlatinumLicensePrompt';
 import { Popover } from './Popover';
-import { useRefHeight } from './useRefHeight';
+import { useRefDimensions } from './useRefDimensions';
 
 interface ServiceMapProps {
   serviceName?: string;
@@ -57,11 +58,15 @@ ${theme.euiColorLightShade}`,
   margin: `-${theme.gutterTypes.gutterLarge}`,
   marginTop: 0
 };
-
+const BetaBadgeContainer = styled.div`
+  right: ${theme.gutterTypes.gutterMedium};
+  position: absolute;
+  top: ${theme.gutterTypes.gutterSmall};
+  z-index: 1; /* The element containing the cytoscape canvas has z-index = 0. */
+`;
 const MAX_REQUESTS = 5;
 
 export function ServiceMap({ serviceName }: ServiceMapProps) {
-  const callApmApi = useCallApmApi();
   const license = useLicense();
   const { search } = useLocation();
   const { urlParams, uiFilters } = useUrlParams();
@@ -78,7 +83,6 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
   });
 
   const renderedElements = useRef<ElementDefinition[]>([]);
-  const openToast = useRef<string | null>(null);
 
   const [responses, setResponses] = useState<ServiceMapAPIResponse[]>([]);
 
@@ -137,7 +141,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         }
       }
     },
-    [params, setIsLoading, callApmApi, responses.length, notifications.toasts]
+    [params, setIsLoading, responses.length, notifications.toasts]
   );
 
   useEffect(() => {
@@ -160,43 +164,13 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
       return !find(renderedElements.current, el => isEqual(el, element));
     });
 
-    const updateMap = () => {
-      renderedElements.current = elements;
-      if (openToast.current) {
-        notifications.toasts.remove(openToast.current);
-      }
-      forceUpdate();
-    };
-
     if (newElements.length > 0 && renderedElements.current.length > 0) {
-      openToast.current = notifications.toasts.add({
-        title: i18n.translate('xpack.apm.newServiceMapData', {
-          defaultMessage: `Newly discovered connections are available.`
-        }),
-        onClose: () => {
-          openToast.current = null;
-        },
-        toastLifeTimeMs: 24 * 60 * 60 * 1000,
-        text: toMountPoint(
-          <EuiButton onClick={updateMap}>
-            {i18n.translate('xpack.apm.updateServiceMap', {
-              defaultMessage: 'Update map'
-            })}
-          </EuiButton>
-        )
-      }).id;
+      renderedElements.current = elements;
+      forceUpdate();
     }
+  }, [elements, forceUpdate]);
 
-    return () => {
-      if (openToast.current) {
-        notifications.toasts.remove(openToast.current);
-      }
-    };
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [elements]);
-
-  const [wrapperRef, height] = useRefHeight();
+  const { ref: wrapperRef, width, height } = useRefDimensions();
 
   if (!license) {
     return null;
@@ -211,10 +185,26 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
         elements={renderedElements.current}
         serviceName={serviceName}
         height={height}
+        width={width}
         style={cytoscapeDivStyle}
       >
         <Controls />
+        {serviceName && <EmptyBanner />}
         <Popover focusedServiceName={serviceName} />
+        <BetaBadgeContainer>
+          <EuiBetaBadge
+            label={i18n.translate('xpack.apm.serviceMap.betaBadge', {
+              defaultMessage: 'Beta'
+            })}
+            tooltipContent={i18n.translate(
+              'xpack.apm.serviceMap.betaTooltipMessage',
+              {
+                defaultMessage:
+                  'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.'
+              }
+            )}
+          />
+        </BetaBadgeContainer>
       </Cytoscape>
     </div>
   ) : (

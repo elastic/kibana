@@ -5,13 +5,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, IScopedClusterClient, Logger, PluginInitializerContext } from 'src/core/server';
+import {
+  CoreSetup,
+  Plugin,
+  IScopedClusterClient,
+  Logger,
+  PluginInitializerContext,
+} from 'kibana/server';
 import { PluginsSetup, RouteInitialization } from './types';
-import { PLUGIN_ID } from '../../../legacy/plugins/ml/common/constants/app';
+import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
 
-// @ts-ignore: could not find declaration file for module
 import { elasticsearchJsPlugin } from './client/elasticsearch_ml';
-import { makeMlUsageCollector } from './lib/ml_telemetry';
+import { initMlTelemetry } from './lib/telemetry';
 import { initMlServerLog } from './client/log';
 import { initSampleDataSets } from './lib/sample_data_sets';
 
@@ -32,8 +37,9 @@ import { jobValidationRoutes } from './routes/job_validation';
 import { notificationRoutes } from './routes/notification_settings';
 import { resultsServiceRoutes } from './routes/results_service';
 import { systemRoutes } from './routes/system';
-import { MlLicense } from '../../../legacy/plugins/ml/common/license';
+import { MlLicense } from '../common/license';
 import { MlServerLicense } from './lib/license';
+import { createSharedServices, SharedServices } from './shared_services';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
@@ -43,7 +49,10 @@ declare module 'kibana/server' {
   }
 }
 
-export class MlServerPlugin {
+export type MlSetupContract = SharedServices;
+export type MlStartContract = void;
+
+export class MlServerPlugin implements Plugin<MlSetupContract, MlStartContract, PluginsSetup> {
   private log: Logger;
   private version: string;
   private mlLicense: MlServerLicense;
@@ -54,13 +63,13 @@ export class MlServerPlugin {
     this.mlLicense = new MlServerLicense();
   }
 
-  public setup(coreSetup: CoreSetup, plugins: PluginsSetup) {
+  public setup(coreSetup: CoreSetup, plugins: PluginsSetup): MlSetupContract {
     plugins.features.registerFeature({
       id: PLUGIN_ID,
       name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
         defaultMessage: 'Machine Learning',
       }),
-      icon: 'machineLearningApp',
+      icon: PLUGIN_ICON,
       navLinkId: PLUGIN_ID,
       app: [PLUGIN_ID, 'kibana'],
       catalogue: [PLUGIN_ID],
@@ -117,16 +126,16 @@ export class MlServerPlugin {
     resultsServiceRoutes(routeInit);
     jobValidationRoutes(routeInit, this.version);
     systemRoutes(routeInit, {
-      spacesPlugin: plugins.spaces,
+      spaces: plugins.spaces,
       cloud: plugins.cloud,
     });
     initMlServerLog({ log: this.log });
-    coreSetup.getStartServices().then(([core]) => {
-      makeMlUsageCollector(plugins.usageCollection, core.savedObjects);
-    });
+    initMlTelemetry(coreSetup, plugins.usageCollection);
+
+    return createSharedServices(this.mlLicense, plugins.spaces, plugins.cloud);
   }
 
-  public start() {}
+  public start(): MlStartContract {}
 
   public stop() {
     this.mlLicense.unsubscribe();

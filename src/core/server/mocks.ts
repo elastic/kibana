@@ -26,6 +26,7 @@ import { httpServiceMock } from './http/http_service.mock';
 import { contextServiceMock } from './context/context_service.mock';
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 import { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
+import { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_objects/saved_objects_type_registry.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { SharedGlobalConfig } from './plugins';
 import { InternalCoreSetup, InternalCoreStart } from './internal_types';
@@ -128,6 +129,7 @@ function createCoreSetupMock() {
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     uiSettings: uiSettingsMock,
     uuid: uuidServiceMock.createSetupContract(),
+    metrics: metricsServiceMock.createSetupContract(),
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object]>, []>()
       .mockResolvedValue([createCoreStartMock(), {}]),
@@ -139,6 +141,7 @@ function createCoreSetupMock() {
 function createCoreStartMock() {
   const mock: MockedKeys<CoreStart> = {
     capabilities: capabilitiesServiceMock.createStartContract(),
+    elasticsearch: elasticsearchServiceMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
   };
@@ -163,6 +166,7 @@ function createInternalCoreSetupMock() {
 function createInternalCoreStartMock() {
   const startDeps: InternalCoreStart = {
     capabilities: capabilitiesServiceMock.createStartContract(),
+    elasticsearch: elasticsearchServiceMock.createStart(),
     savedObjects: savedObjectsServiceMock.createInternalStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
   };
@@ -176,6 +180,7 @@ function createCoreRequestHandlerContextMock() {
     },
     savedObjects: {
       client: savedObjectsClientMock.create(),
+      typeRegistry: savedObjectsTypeRegistryMock.create(),
     },
     elasticsearch: {
       adminClient: elasticsearchServiceMock.createScopedClusterClient(),

@@ -27,6 +27,7 @@ import {
 import { TypesStart } from './vis_types';
 import { createGetterSetter } from '../../../../../../plugins/kibana_utils/public';
 import {
+  DataPublicPluginStart,
   FilterManager,
   IndexPatternsContract,
   TimefilterContract,
@@ -71,3 +72,7 @@ export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>('
 export const [getSavedVisualizationsLoader, setSavedVisualizationsLoader] = createGetterSetter<
   SavedVisualizationsLoader
 >('SavedVisualisationsLoader');
+
+export const [getAggs, setAggs] = createGetterSetter<DataPublicPluginStart['search']['aggs']>(
+  'AggConfigs'
+);

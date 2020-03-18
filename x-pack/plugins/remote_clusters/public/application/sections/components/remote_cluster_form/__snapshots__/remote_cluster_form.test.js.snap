@@ -1,5 +1,1429 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`RemoteClusterForm proxy mode renders correct connection settings when user enables proxy mode 1`] = `
+<RemoteClusterForm
+  disabledFields={Object {}}
+  fields={
+    Object {
+      "mode": "sniff",
+      "name": "",
+      "nodeConnections": 3,
+      "proxyAddress": "",
+      "proxySocketConnections": 18,
+      "seeds": Array [],
+      "serverName": "",
+      "skipUnavailable": false,
+    }
+  }
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  save={[Function]}
+>
+  <EuiForm>
+    <div
+      className="euiForm"
+    >
+      <EuiDescribedFormGroup
+        description={
+          <FormattedMessage
+            defaultMessage="A unique name for the remote cluster."
+            id="xpack.remoteClusters.remoteClusterForm.sectionNameDescription"
+            values={Object {}}
+          />
+        }
+        fullWidth={true}
+        title={
+          <EuiTitle
+            size="s"
+          >
+            <h2>
+              <FormattedMessage
+                defaultMessage="Name"
+                id="xpack.remoteClusters.remoteClusterForm.sectionNameTitle"
+                values={Object {}}
+              />
+            </h2>
+          </EuiTitle>
+        }
+      >
+        <EuiInnerText>
+          <fieldset
+            className="euiDescribedFormGroup euiDescribedFormGroup--fullWidth"
+          >
+            <EuiScreenReaderOnly>
+              <legend
+                className="euiScreenReaderOnly"
+              >
+                Name
+              </legend>
+            </EuiScreenReaderOnly>
+            <EuiFlexGroup
+              gutterSize="l"
+            >
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <EuiFlexItem>
+                  <div
+                    className="euiFlexItem"
+                  >
+                    <span>
+                      <EuiTitle
+                        aria-hidden="true"
+                        className="euiDescribedFormGroup__title"
+                        size="xs"
+                      >
+                        <EuiTitle
+                          aria-hidden="true"
+                          className="euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+                          size="s"
+                        >
+                          <h2
+                            aria-hidden="true"
+                            className="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+                          >
+                            <FormattedMessage
+                              defaultMessage="Name"
+                              id="xpack.remoteClusters.remoteClusterForm.sectionNameTitle"
+                              values={Object {}}
+                            >
+                              Name
+                            </FormattedMessage>
+                          </h2>
+                        </EuiTitle>
+                      </EuiTitle>
+                    </span>
+                    <EuiText
+                      className="euiDescribedFormGroup__description"
+                      color="subdued"
+                      size="s"
+                    >
+                      <div
+                        className="euiText euiText--small euiDescribedFormGroup__description"
+                      >
+                        <EuiTextColor
+                          color="subdued"
+                          component="div"
+                        >
+                          <div
+                            className="euiTextColor euiTextColor--subdued"
+                          >
+                            <FormattedMessage
+                              defaultMessage="A unique name for the remote cluster."
+                              id="xpack.remoteClusters.remoteClusterForm.sectionNameDescription"
+                              values={Object {}}
+                            >
+                              A unique name for the remote cluster.
+                            </FormattedMessage>
+                          </div>
+                        </EuiTextColor>
+                      </div>
+                    </EuiText>
+                  </div>
+                </EuiFlexItem>
+                <EuiFlexItem
+                  className="euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+                >
+                  <div
+                    className="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+                  >
+                    <EuiFormRow
+                      data-test-subj="remoteClusterFormNameFormRow"
+                      describedByIds={Array []}
+                      display="row"
+                      error={
+                        <FormattedMessage
+                          defaultMessage="Name is required."
+                          id="xpack.remoteClusters.form.errors.nameMissing"
+                          values={Object {}}
+                        />
+                      }
+                      fullWidth={true}
+                      hasChildLabel={true}
+                      hasEmptyLabelSpace={false}
+                      helpText={
+                        <FormattedMessage
+                          defaultMessage="Name can only contain letters, numbers, underscores, and dashes."
+                          id="xpack.remoteClusters.remoteClusterForm.fieldNameLabelHelpText"
+                          values={Object {}}
+                        />
+                      }
+                      isInvalid={false}
+                      label={
+                        <FormattedMessage
+                          defaultMessage="Name"
+                          id="xpack.remoteClusters.remoteClusterForm.fieldNameLabel"
+                          values={Object {}}
+                        />
+                      }
+                      labelType="label"
+                    >
+                      <div
+                        className="euiFormRow euiFormRow--fullWidth"
+                        data-test-subj="remoteClusterFormNameFormRow"
+                        id="mockId-row"
+                      >
+                        <div
+                          className="euiFormRow__labelWrapper"
+                        >
+                          <EuiFormLabel
+                            aria-invalid={false}
+                            className="euiFormRow__label"
+                            htmlFor="mockId"
+                            isFocused={false}
+                            isInvalid={false}
+                            type="label"
+                          >
+                            <label
+                              aria-invalid={false}
+                              className="euiFormLabel euiFormRow__label"
+                              htmlFor="mockId"
+                            >
+                              <FormattedMessage
+                                defaultMessage="Name"
+                                id="xpack.remoteClusters.remoteClusterForm.fieldNameLabel"
+                                values={Object {}}
+                              >
+                                Name
+                              </FormattedMessage>
+                            </label>
+                          </EuiFormLabel>
+                        </div>
+                        <div
+                          className="euiFormRow__fieldWrapper"
+                        >
+                          <EuiFieldText
+                            aria-describedby="mockId-help"
+                            data-test-subj="remoteClusterFormNameInput"
+                            fullWidth={true}
+                            id="mockId"
+                            isInvalid={false}
+                            onBlur={[Function]}
+                            onChange={[Function]}
+                            onFocus={[Function]}
+                            value=""
+                          >
+                            <EuiFormControlLayout
+                              fullWidth={true}
+                              inputId="mockId"
+                            >
+                              <div
+                                className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                              >
+                                <div
+                                  className="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <EuiValidatableControl
+                                    isInvalid={false}
+                                  >
+                                    <input
+                                      aria-describedby="mockId-help"
+                                      className="euiFieldText euiFieldText--fullWidth"
+                                      data-test-subj="remoteClusterFormNameInput"
+                                      id="mockId"
+                                      onBlur={[Function]}
+                                      onChange={[Function]}
+                                      onFocus={[Function]}
+                                      type="text"
+                                      value=""
+                                    />
+                                  </EuiValidatableControl>
+                                  <EuiFormControlLayoutIcons />
+                                </div>
+                              </div>
+                            </EuiFormControlLayout>
+                          </EuiFieldText>
+                          <EuiFormHelpText
+                            className="euiFormRow__text"
+                            id="mockId-help"
+                          >
+                            <div
+                              className="euiFormHelpText euiFormRow__text"
+                              id="mockId-help"
+                            >
+                              <FormattedMessage
+                                defaultMessage="Name can only contain letters, numbers, underscores, and dashes."
+                                id="xpack.remoteClusters.remoteClusterForm.fieldNameLabelHelpText"
+                                values={Object {}}
+                              >
+                                Name can only contain letters, numbers, underscores, and dashes.
+                              </FormattedMessage>
+                            </div>
+                          </EuiFormHelpText>
+                        </div>
+                      </div>
+                    </EuiFormRow>
+                  </div>
+                </EuiFlexItem>
+              </div>
+            </EuiFlexGroup>
+          </fieldset>
+        </EuiInnerText>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        description={
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Remote cluster connections work by configuring a remote cluster and connecting only to a limited number of nodes in that remote cluster."
+              id="xpack.remoteClusters.remoteClusterForm.sectionModeDescription"
+              values={Object {}}
+            />
+            <EuiFormRow
+              describedByIds={Array []}
+              display="row"
+              fullWidth={true}
+              hasChildLabel={true}
+              hasEmptyLabelSpace={true}
+              helpText={
+                <FormattedMessage
+                  defaultMessage="Configure a remote cluster with a single proxy address. {learnMoreLink}"
+                  id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription"
+                  values={
+                    Object {
+                      "learnMoreLink": <ForwardRef
+                        target="_blank"
+                      >
+                        <FormattedMessage
+                          defaultMessage="Learn more."
+                          id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription.learnMoreLinkLabel"
+                          values={Object {}}
+                        />
+                      </ForwardRef>,
+                    }
+                  }
+                />
+              }
+              labelType="label"
+            >
+              <EuiSwitch
+                checked={true}
+                data-test-subj="remoteClusterFormConnectionModeToggle"
+                label={
+                  <FormattedMessage
+                    defaultMessage="Use proxy mode"
+                    id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
+                    values={Object {}}
+                  />
+                }
+                onChange={[Function]}
+              />
+            </EuiFormRow>
+          </React.Fragment>
+        }
+        fullWidth={true}
+        title={
+          <EuiTitle
+            size="s"
+          >
+            <h2>
+              <FormattedMessage
+                defaultMessage="Connection mode"
+                id="xpack.remoteClusters.remoteClusterForm.sectionModeTitle"
+                values={Object {}}
+              />
+            </h2>
+          </EuiTitle>
+        }
+      >
+        <EuiInnerText>
+          <fieldset
+            className="euiDescribedFormGroup euiDescribedFormGroup--fullWidth"
+          >
+            <EuiScreenReaderOnly>
+              <legend
+                className="euiScreenReaderOnly"
+              >
+                Connection mode
+              </legend>
+            </EuiScreenReaderOnly>
+            <EuiFlexGroup
+              gutterSize="l"
+            >
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <EuiFlexItem>
+                  <div
+                    className="euiFlexItem"
+                  >
+                    <span>
+                      <EuiTitle
+                        aria-hidden="true"
+                        className="euiDescribedFormGroup__title"
+                        size="xs"
+                      >
+                        <EuiTitle
+                          aria-hidden="true"
+                          className="euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+                          size="s"
+                        >
+                          <h2
+                            aria-hidden="true"
+                            className="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+                          >
+                            <FormattedMessage
+                              defaultMessage="Connection mode"
+                              id="xpack.remoteClusters.remoteClusterForm.sectionModeTitle"
+                              values={Object {}}
+                            >
+                              Connection mode
+                            </FormattedMessage>
+                          </h2>
+                        </EuiTitle>
+                      </EuiTitle>
+                    </span>
+                    <EuiText
+                      className="euiDescribedFormGroup__description"
+                      color="subdued"
+                      size="s"
+                    >
+                      <div
+                        className="euiText euiText--small euiDescribedFormGroup__description"
+                      >
+                        <EuiTextColor
+                          color="subdued"
+                          component="div"
+                        >
+                          <div
+                            className="euiTextColor euiTextColor--subdued"
+                          >
+                            <FormattedMessage
+                              defaultMessage="Remote cluster connections work by configuring a remote cluster and connecting only to a limited number of nodes in that remote cluster."
+                              id="xpack.remoteClusters.remoteClusterForm.sectionModeDescription"
+                              values={Object {}}
+                            >
+                              Remote cluster connections work by configuring a remote cluster and connecting only to a limited number of nodes in that remote cluster.
+                            </FormattedMessage>
+                            <EuiFormRow
+                              describedByIds={Array []}
+                              display="row"
+                              fullWidth={true}
+                              hasChildLabel={true}
+                              hasEmptyLabelSpace={true}
+                              helpText={
+                                <FormattedMessage
+                                  defaultMessage="Configure a remote cluster with a single proxy address. {learnMoreLink}"
+                                  id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription"
+                                  values={
+                                    Object {
+                                      "learnMoreLink": <ForwardRef
+                                        target="_blank"
+                                      >
+                                        <FormattedMessage
+                                          defaultMessage="Learn more."
+                                          id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription.learnMoreLinkLabel"
+                                          values={Object {}}
+                                        />
+                                      </ForwardRef>,
+                                    }
+                                  }
+                                />
+                              }
+                              labelType="label"
+                            >
+                              <div
+                                className="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth"
+                                id="mockId-row"
+                              >
+                                <div
+                                  className="euiFormRow__fieldWrapper"
+                                >
+                                  <EuiSwitch
+                                    aria-describedby="mockId-help"
+                                    checked={true}
+                                    data-test-subj="remoteClusterFormConnectionModeToggle"
+                                    id="mockId"
+                                    label={
+                                      <FormattedMessage
+                                        defaultMessage="Use proxy mode"
+                                        id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
+                                        values={Object {}}
+                                      />
+                                    }
+                                    onBlur={[Function]}
+                                    onChange={[Function]}
+                                    onFocus={[Function]}
+                                  >
+                                    <div
+                                      className="euiSwitch"
+                                    >
+                                      <button
+                                        aria-checked={true}
+                                        aria-describedby="mockId-help"
+                                        aria-labelledby="mockId"
+                                        className="euiSwitch__button"
+                                        data-test-subj="remoteClusterFormConnectionModeToggle"
+                                        id="mockId"
+                                        onBlur={[Function]}
+                                        onClick={[Function]}
+                                        onFocus={[Function]}
+                                        role="switch"
+                                        type="button"
+                                      >
+                                        <span
+                                          className="euiSwitch__body"
+                                        >
+                                          <span
+                                            className="euiSwitch__thumb"
+                                          />
+                                          <span
+                                            className="euiSwitch__track"
+                                          >
+                                            <EuiIcon
+                                              className="euiSwitch__icon"
+                                              size="m"
+                                              type="cross"
+                                            >
+                                              <div
+                                                className="euiSwitch__icon"
+                                                data-euiicon-type="cross"
+                                                size="m"
+                                              />
+                                            </EuiIcon>
+                                            <EuiIcon
+                                              className="euiSwitch__icon euiSwitch__icon--checked"
+                                              size="m"
+                                              type="check"
+                                            >
+                                              <div
+                                                className="euiSwitch__icon euiSwitch__icon--checked"
+                                                data-euiicon-type="check"
+                                                size="m"
+                                              />
+                                            </EuiIcon>
+                                          </span>
+                                        </span>
+                                      </button>
+                                      <span
+                                        className="euiSwitch__label"
+                                        id="mockId"
+                                        onClick={[Function]}
+                                      >
+                                        <FormattedMessage
+                                          defaultMessage="Use proxy mode"
+                                          id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
+                                          values={Object {}}
+                                        >
+                                          Use proxy mode
+                                        </FormattedMessage>
+                                      </span>
+                                    </div>
+                                  </EuiSwitch>
+                                  <EuiFormHelpText
+                                    className="euiFormRow__text"
+                                    id="mockId-help"
+                                  >
+                                    <div
+                                      className="euiFormHelpText euiFormRow__text"
+                                      id="mockId-help"
+                                    >
+                                      <FormattedMessage
+                                        defaultMessage="Configure a remote cluster with a single proxy address. {learnMoreLink}"
+                                        id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription"
+                                        values={
+                                          Object {
+                                            "learnMoreLink": <ForwardRef
+                                              target="_blank"
+                                            >
+                                              <FormattedMessage
+                                                defaultMessage="Learn more."
+                                                id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription.learnMoreLinkLabel"
+                                                values={Object {}}
+                                              />
+                                            </ForwardRef>,
+                                          }
+                                        }
+                                      >
+                                        Configure a remote cluster with a single proxy address. 
+                                        <EuiLink
+                                          target="_blank"
+                                        >
+                                          <button
+                                            className="euiLink euiLink--primary"
+                                            type="button"
+                                          >
+                                            <FormattedMessage
+                                              defaultMessage="Learn more."
+                                              id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription.learnMoreLinkLabel"
+                                              values={Object {}}
+                                            >
+                                              Learn more.
+                                            </FormattedMessage>
+                                          </button>
+                                        </EuiLink>
+                                      </FormattedMessage>
+                                    </div>
+                                  </EuiFormHelpText>
+                                </div>
+                              </div>
+                            </EuiFormRow>
+                          </div>
+                        </EuiTextColor>
+                      </div>
+                    </EuiText>
+                  </div>
+                </EuiFlexItem>
+                <EuiFlexItem
+                  className="euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+                >
+                  <div
+                    className="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+                  >
+                    <EuiFormRow
+                      data-test-subj="remoteClusterFormProxyAddressFormRow"
+                      describedByIds={Array []}
+                      display="row"
+                      error={
+                        <FormattedMessage
+                          defaultMessage="A proxy address is required."
+                          id="xpack.remoteClusters.remoteClusterForm.proxyError.missingProxyMessage"
+                          values={Object {}}
+                        />
+                      }
+                      fullWidth={true}
+                      hasChildLabel={true}
+                      hasEmptyLabelSpace={false}
+                      helpText={
+                        <FormattedMessage
+                          defaultMessage="The address used for all remote connections."
+                          id="xpack.remoteClusters.remoteClusterForm.fieldProxyAddressHelpText"
+                          values={Object {}}
+                        />
+                      }
+                      isInvalid={false}
+                      label={
+                        <FormattedMessage
+                          defaultMessage="Proxy address"
+                          id="xpack.remoteClusters.remoteClusterForm.fieldProxyAddressLabel"
+                          values={Object {}}
+                        />
+                      }
+                      labelType="label"
+                    >
+                      <div
+                        className="euiFormRow euiFormRow--fullWidth"
+                        data-test-subj="remoteClusterFormProxyAddressFormRow"
+                        id="mockId-row"
+                      >
+                        <div
+                          className="euiFormRow__labelWrapper"
+                        >
+                          <EuiFormLabel
+                            aria-invalid={false}
+                            className="euiFormRow__label"
+                            htmlFor="mockId"
+                            isFocused={false}
+                            isInvalid={false}
+                            type="label"
+                          >
+                            <label
+                              aria-invalid={false}
+                              className="euiFormLabel euiFormRow__label"
+                              htmlFor="mockId"
+                            >
+                              <FormattedMessage
+                                defaultMessage="Proxy address"
+                                id="xpack.remoteClusters.remoteClusterForm.fieldProxyAddressLabel"
+                                values={Object {}}
+                              >
+                                Proxy address
+                              </FormattedMessage>
+                            </label>
+                          </EuiFormLabel>
+                        </div>
+                        <div
+                          className="euiFormRow__fieldWrapper"
+                        >
+                          <EuiFieldText
+                            aria-describedby="mockId-help"
+                            data-test-subj="remoteClusterFormProxyAddressInput"
+                            fullWidth={true}
+                            id="mockId"
+                            isInvalid={false}
+                            onBlur={[Function]}
+                            onChange={[Function]}
+                            onFocus={[Function]}
+                            placeholder="host:port"
+                            value=""
+                          >
+                            <EuiFormControlLayout
+                              fullWidth={true}
+                              inputId="mockId"
+                            >
+                              <div
+                                className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                              >
+                                <div
+                                  className="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <EuiValidatableControl
+                                    isInvalid={false}
+                                  >
+                                    <input
+                                      aria-describedby="mockId-help"
+                                      className="euiFieldText euiFieldText--fullWidth"
+                                      data-test-subj="remoteClusterFormProxyAddressInput"
+                                      id="mockId"
+                                      onBlur={[Function]}
+                                      onChange={[Function]}
+                                      onFocus={[Function]}
+                                      placeholder="host:port"
+                                      type="text"
+                                      value=""
+                                    />
+                                  </EuiValidatableControl>
+                                  <EuiFormControlLayoutIcons />
+                                </div>
+                              </div>
+                            </EuiFormControlLayout>
+                          </EuiFieldText>
+                          <EuiFormHelpText
+                            className="euiFormRow__text"
+                            id="mockId-help"
+                          >
+                            <div
+                              className="euiFormHelpText euiFormRow__text"
+                              id="mockId-help"
+                            >
+                              <FormattedMessage
+                                defaultMessage="The address used for all remote connections."
+                                id="xpack.remoteClusters.remoteClusterForm.fieldProxyAddressHelpText"
+                                values={Object {}}
+                              >
+                                The address used for all remote connections.
+                              </FormattedMessage>
+                            </div>
+                          </EuiFormHelpText>
+                        </div>
+                      </div>
+                    </EuiFormRow>
+                    <EuiFormRow
+                      data-test-subj="remoteClusterFormProxySocketConnectionsFormRow"
+                      describedByIds={Array []}
+                      display="row"
+                      fullWidth={true}
+                      hasChildLabel={true}
+                      hasEmptyLabelSpace={false}
+                      helpText={
+                        <FormattedMessage
+                          defaultMessage="The number of socket connections to open per remote cluster."
+                          id="xpack.remoteClusters.remoteClusterForm.fieldSocketConnectionsHelpText"
+                          values={Object {}}
+                        />
+                      }
+                      label={
+                        <FormattedMessage
+                          defaultMessage="Socket connections"
+                          id="xpack.remoteClusters.remoteClusterForm.fieldProxySocketConnectionsLabel"
+                          values={Object {}}
+                        />
+                      }
+                      labelType="label"
+                    >
+                      <div
+                        className="euiFormRow euiFormRow--fullWidth"
+                        data-test-subj="remoteClusterFormProxySocketConnectionsFormRow"
+                        id="mockId-row"
+                      >
+                        <div
+                          className="euiFormRow__labelWrapper"
+                        >
+                          <EuiFormLabel
+                            className="euiFormRow__label"
+                            htmlFor="mockId"
+                            isFocused={false}
+                            type="label"
+                          >
+                            <label
+                              className="euiFormLabel euiFormRow__label"
+                              htmlFor="mockId"
+                            >
+                              <FormattedMessage
+                                defaultMessage="Socket connections"
+                                id="xpack.remoteClusters.remoteClusterForm.fieldProxySocketConnectionsLabel"
+                                values={Object {}}
+                              >
+                                Socket connections
+                              </FormattedMessage>
+                            </label>
+                          </EuiFormLabel>
+                        </div>
+                        <div
+                          className="euiFormRow__fieldWrapper"
+                        >
+                          <EuiFieldNumber
+                            aria-describedby="mockId-help"
+                            fullWidth={true}
+                            id="mockId"
+                            onBlur={[Function]}
+                            onChange={[Function]}
+                            onFocus={[Function]}
+                            value={18}
+                          >
+                            <EuiFormControlLayout
+                              compressed={false}
+                              fullWidth={true}
+                              inputId="mockId"
+                              isLoading={false}
+                            >
+                              <div
+                                className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                              >
+                                <div
+                                  className="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <EuiValidatableControl>
+                                    <input
+                                      aria-describedby="mockId-help"
+                                      className="euiFieldNumber euiFieldNumber--fullWidth"
+                                      id="mockId"
+                                      onBlur={[Function]}
+                                      onChange={[Function]}
+                                      onFocus={[Function]}
+                                      type="number"
+                                      value={18}
+                                    />
+                                  </EuiValidatableControl>
+                                  <EuiFormControlLayoutIcons
+                                    isLoading={false}
+                                  />
+                                </div>
+                              </div>
+                            </EuiFormControlLayout>
+                          </EuiFieldNumber>
+                          <EuiFormHelpText
+                            className="euiFormRow__text"
+                            id="mockId-help"
+                          >
+                            <div
+                              className="euiFormHelpText euiFormRow__text"
+                              id="mockId-help"
+                            >
+                              <FormattedMessage
+                                defaultMessage="The number of socket connections to open per remote cluster."
+                                id="xpack.remoteClusters.remoteClusterForm.fieldSocketConnectionsHelpText"
+                                values={Object {}}
+                              >
+                                The number of socket connections to open per remote cluster.
+                              </FormattedMessage>
+                            </div>
+                          </EuiFormHelpText>
+                        </div>
+                      </div>
+                    </EuiFormRow>
+                    <EuiFormRow
+                      data-test-subj="remoteClusterFormServerNameFormRow"
+                      describedByIds={Array []}
+                      display="row"
+                      fullWidth={true}
+                      hasChildLabel={true}
+                      hasEmptyLabelSpace={false}
+                      helpText={
+                        <FormattedMessage
+                          defaultMessage="An optional hostname string which will be sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled."
+                          id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText"
+                          values={Object {}}
+                        />
+                      }
+                      label={
+                        <FormattedMessage
+                          defaultMessage="Server name"
+                          id="xpack.remoteClusters.remoteClusterForm.fieldServerNameLabel"
+                          values={Object {}}
+                        />
+                      }
+                      labelType="label"
+                    >
+                      <div
+                        className="euiFormRow euiFormRow--fullWidth"
+                        data-test-subj="remoteClusterFormServerNameFormRow"
+                        id="mockId-row"
+                      >
+                        <div
+                          className="euiFormRow__labelWrapper"
+                        >
+                          <EuiFormLabel
+                            className="euiFormRow__label"
+                            htmlFor="mockId"
+                            isFocused={false}
+                            type="label"
+                          >
+                            <label
+                              className="euiFormLabel euiFormRow__label"
+                              htmlFor="mockId"
+                            >
+                              <FormattedMessage
+                                defaultMessage="Server name"
+                                id="xpack.remoteClusters.remoteClusterForm.fieldServerNameLabel"
+                                values={Object {}}
+                              >
+                                Server name
+                              </FormattedMessage>
+                            </label>
+                          </EuiFormLabel>
+                        </div>
+                        <div
+                          className="euiFormRow__fieldWrapper"
+                        >
+                          <EuiFieldText
+                            aria-describedby="mockId-help"
+                            fullWidth={true}
+                            id="mockId"
+                            onBlur={[Function]}
+                            onChange={[Function]}
+                            onFocus={[Function]}
+                            value=""
+                          >
+                            <EuiFormControlLayout
+                              fullWidth={true}
+                              inputId="mockId"
+                            >
+                              <div
+                                className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                              >
+                                <div
+                                  className="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <EuiValidatableControl>
+                                    <input
+                                      aria-describedby="mockId-help"
+                                      className="euiFieldText euiFieldText--fullWidth"
+                                      id="mockId"
+                                      onBlur={[Function]}
+                                      onChange={[Function]}
+                                      onFocus={[Function]}
+                                      type="text"
+                                      value=""
+                                    />
+                                  </EuiValidatableControl>
+                                  <EuiFormControlLayoutIcons />
+                                </div>
+                              </div>
+                            </EuiFormControlLayout>
+                          </EuiFieldText>
+                          <EuiFormHelpText
+                            className="euiFormRow__text"
+                            id="mockId-help"
+                          >
+                            <div
+                              className="euiFormHelpText euiFormRow__text"
+                              id="mockId-help"
+                            >
+                              <FormattedMessage
+                                defaultMessage="An optional hostname string which will be sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled."
+                                id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText"
+                                values={Object {}}
+                              >
+                                An optional hostname string which will be sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled.
+                              </FormattedMessage>
+                            </div>
+                          </EuiFormHelpText>
+                        </div>
+                      </div>
+                    </EuiFormRow>
+                  </div>
+                </EuiFlexItem>
+              </div>
+            </EuiFlexGroup>
+          </fieldset>
+        </EuiInnerText>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        description={
+          <React.Fragment>
+            <p>
+              <FormattedMessage
+                defaultMessage="By default, a request fails if any of the queried remote clusters are unavailable. To continue sending a request to other remote clusters if this cluster is unavailable, enable {optionName}. {learnMoreLink}"
+                id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription"
+                values={
+                  Object {
+                    "learnMoreLink": <ForwardRef
+                      target="_blank"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Learn more."
+                        id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.learnMoreLinkLabel"
+                        values={Object {}}
+                      />
+                    </ForwardRef>,
+                    "optionName": <strong>
+                      <FormattedMessage
+                        defaultMessage="Skip if unavailable"
+                        id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.optionNameLabel"
+                        values={Object {}}
+                      />
+                    </strong>,
+                  }
+                }
+              />
+            </p>
+          </React.Fragment>
+        }
+        fullWidth={true}
+        title={
+          <EuiTitle
+            size="s"
+          >
+            <h2>
+              <FormattedMessage
+                defaultMessage="Make remote cluster optional"
+                id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableTitle"
+                values={Object {}}
+              />
+            </h2>
+          </EuiTitle>
+        }
+      >
+        <EuiInnerText>
+          <fieldset
+            className="euiDescribedFormGroup euiDescribedFormGroup--fullWidth"
+          >
+            <EuiScreenReaderOnly>
+              <legend
+                className="euiScreenReaderOnly"
+              >
+                Make remote cluster optional
+              </legend>
+            </EuiScreenReaderOnly>
+            <EuiFlexGroup
+              gutterSize="l"
+            >
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <EuiFlexItem>
+                  <div
+                    className="euiFlexItem"
+                  >
+                    <span>
+                      <EuiTitle
+                        aria-hidden="true"
+                        className="euiDescribedFormGroup__title"
+                        size="xs"
+                      >
+                        <EuiTitle
+                          aria-hidden="true"
+                          className="euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+                          size="s"
+                        >
+                          <h2
+                            aria-hidden="true"
+                            className="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+                          >
+                            <FormattedMessage
+                              defaultMessage="Make remote cluster optional"
+                              id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableTitle"
+                              values={Object {}}
+                            >
+                              Make remote cluster optional
+                            </FormattedMessage>
+                          </h2>
+                        </EuiTitle>
+                      </EuiTitle>
+                    </span>
+                    <EuiText
+                      className="euiDescribedFormGroup__description"
+                      color="subdued"
+                      size="s"
+                    >
+                      <div
+                        className="euiText euiText--small euiDescribedFormGroup__description"
+                      >
+                        <EuiTextColor
+                          color="subdued"
+                          component="div"
+                        >
+                          <div
+                            className="euiTextColor euiTextColor--subdued"
+                          >
+                            <p>
+                              <FormattedMessage
+                                defaultMessage="By default, a request fails if any of the queried remote clusters are unavailable. To continue sending a request to other remote clusters if this cluster is unavailable, enable {optionName}. {learnMoreLink}"
+                                id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription"
+                                values={
+                                  Object {
+                                    "learnMoreLink": <ForwardRef
+                                      target="_blank"
+                                    >
+                                      <FormattedMessage
+                                        defaultMessage="Learn more."
+                                        id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.learnMoreLinkLabel"
+                                        values={Object {}}
+                                      />
+                                    </ForwardRef>,
+                                    "optionName": <strong>
+                                      <FormattedMessage
+                                        defaultMessage="Skip if unavailable"
+                                        id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.optionNameLabel"
+                                        values={Object {}}
+                                      />
+                                    </strong>,
+                                  }
+                                }
+                              >
+                                By default, a request fails if any of the queried remote clusters are unavailable. To continue sending a request to other remote clusters if this cluster is unavailable, enable 
+                                <strong>
+                                  <FormattedMessage
+                                    defaultMessage="Skip if unavailable"
+                                    id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.optionNameLabel"
+                                    values={Object {}}
+                                  >
+                                    Skip if unavailable
+                                  </FormattedMessage>
+                                </strong>
+                                . 
+                                <EuiLink
+                                  target="_blank"
+                                >
+                                  <button
+                                    className="euiLink euiLink--primary"
+                                    type="button"
+                                  >
+                                    <FormattedMessage
+                                      defaultMessage="Learn more."
+                                      id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.learnMoreLinkLabel"
+                                      values={Object {}}
+                                    >
+                                      Learn more.
+                                    </FormattedMessage>
+                                  </button>
+                                </EuiLink>
+                              </FormattedMessage>
+                            </p>
+                          </div>
+                        </EuiTextColor>
+                      </div>
+                    </EuiText>
+                  </div>
+                </EuiFlexItem>
+                <EuiFlexItem
+                  className="euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+                >
+                  <div
+                    className="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+                  >
+                    <EuiFormRow
+                      className="remoteClusterSkipIfUnavailableSwitch"
+                      data-test-subj="remoteClusterFormSkipUnavailableFormRow"
+                      describedByIds={Array []}
+                      display="row"
+                      fullWidth={true}
+                      hasChildLabel={true}
+                      hasEmptyLabelSpace={true}
+                      helpText={null}
+                      labelType="label"
+                    >
+                      <div
+                        className="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth remoteClusterSkipIfUnavailableSwitch"
+                        data-test-subj="remoteClusterFormSkipUnavailableFormRow"
+                        id="mockId-row"
+                      >
+                        <div
+                          className="euiFormRow__fieldWrapper"
+                        >
+                          <EuiSwitch
+                            checked={false}
+                            data-test-subj="remoteClusterFormSkipUnavailableFormToggle"
+                            id="mockId"
+                            label="Skip if unavailable"
+                            onBlur={[Function]}
+                            onChange={[Function]}
+                            onFocus={[Function]}
+                          >
+                            <div
+                              className="euiSwitch"
+                            >
+                              <button
+                                aria-checked={false}
+                                aria-labelledby="mockId"
+                                className="euiSwitch__button"
+                                data-test-subj="remoteClusterFormSkipUnavailableFormToggle"
+                                id="mockId"
+                                onBlur={[Function]}
+                                onClick={[Function]}
+                                onFocus={[Function]}
+                                role="switch"
+                                type="button"
+                              >
+                                <span
+                                  className="euiSwitch__body"
+                                >
+                                  <span
+                                    className="euiSwitch__thumb"
+                                  />
+                                  <span
+                                    className="euiSwitch__track"
+                                  >
+                                    <EuiIcon
+                                      className="euiSwitch__icon"
+                                      size="m"
+                                      type="cross"
+                                    >
+                                      <div
+                                        className="euiSwitch__icon"
+                                        data-euiicon-type="cross"
+                                        size="m"
+                                      />
+                                    </EuiIcon>
+                                    <EuiIcon
+                                      className="euiSwitch__icon euiSwitch__icon--checked"
+                                      size="m"
+                                      type="check"
+                                    >
+                                      <div
+                                        className="euiSwitch__icon euiSwitch__icon--checked"
+                                        data-euiicon-type="check"
+                                        size="m"
+                                      />
+                                    </EuiIcon>
+                                  </span>
+                                </span>
+                              </button>
+                              <span
+                                className="euiSwitch__label"
+                                id="mockId"
+                                onClick={[Function]}
+                              >
+                                Skip if unavailable
+                              </span>
+                            </div>
+                          </EuiSwitch>
+                        </div>
+                      </div>
+                    </EuiFormRow>
+                  </div>
+                </EuiFlexItem>
+              </div>
+            </EuiFlexGroup>
+          </fieldset>
+        </EuiInnerText>
+      </EuiDescribedFormGroup>
+    </div>
+  </EuiForm>
+  <EuiSpacer
+    size="l"
+  >
+    <div
+      className="euiSpacer euiSpacer--l"
+    />
+  </EuiSpacer>
+  <EuiFlexGroup
+    alignItems="center"
+    justifyContent="spaceBetween"
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="m"
+          >
+            <div
+              className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            >
+              <EuiFlexItem
+                grow={false}
+              >
+                <div
+                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <EuiButton
+                    aria-describedby="staticGenerator_removeClustersErrorTitle staticGenerator_removeClustersErrorList"
+                    color="secondary"
+                    data-test-subj="remoteClusterFormSaveButton"
+                    disabled={false}
+                    fill={true}
+                    iconType="check"
+                    onClick={[Function]}
+                  >
+                    <button
+                      aria-describedby="staticGenerator_removeClustersErrorTitle staticGenerator_removeClustersErrorList"
+                      className="euiButton euiButton--secondary euiButton--fill"
+                      data-test-subj="remoteClusterFormSaveButton"
+                      disabled={false}
+                      onClick={[Function]}
+                      type="button"
+                    >
+                      <span
+                        className="euiButton__content"
+                      >
+                        <EuiIcon
+                          aria-hidden="true"
+                          className="euiButton__icon"
+                          size="m"
+                          type="check"
+                        >
+                          <div
+                            aria-hidden="true"
+                            className="euiButton__icon"
+                            data-euiicon-type="check"
+                            size="m"
+                          />
+                        </EuiIcon>
+                        <span
+                          className="euiButton__text"
+                        >
+                          <FormattedMessage
+                            defaultMessage="Save"
+                            id="xpack.remoteClusters.remoteClusterForm.saveButtonLabel"
+                            values={Object {}}
+                          >
+                            Save
+                          </FormattedMessage>
+                        </span>
+                      </span>
+                    </button>
+                  </EuiButton>
+                </div>
+              </EuiFlexItem>
+            </div>
+          </EuiFlexGroup>
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <EuiButtonEmpty
+            onClick={[Function]}
+          >
+            <button
+              className="euiButtonEmpty euiButtonEmpty--primary"
+              onClick={[Function]}
+              type="button"
+            >
+              <span
+                className="euiButtonEmpty__content"
+              >
+                <span
+                  className="euiButtonEmpty__text"
+                >
+                  <FormattedMessage
+                    defaultMessage="Show request"
+                    id="xpack.remoteClusters.remoteClusterForm.showRequestButtonLabel"
+                    values={Object {}}
+                  >
+                    Show request
+                  </FormattedMessage>
+                </span>
+              </span>
+            </button>
+          </EuiButtonEmpty>
+        </div>
+      </EuiFlexItem>
+    </div>
+  </EuiFlexGroup>
+</RemoteClusterForm>
+`;
+
 exports[`RemoteClusterForm renders untouched state 1`] = `
 Array [
   <div
@@ -101,7 +1525,7 @@ Array [
               aria-hidden="true"
               class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
             >
-              Seed nodes for cluster discovery
+              Connection mode
             </h2>
           </span>
           <div
@@ -110,7 +1534,68 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              A list of remote cluster nodes to query for the cluster state. Specify multiple seed nodes so discovery doesn't fail if a node is unavailable.
+              Remote cluster connections work by configuring a remote cluster and connecting only to a limited number of nodes in that remote cluster.
+              <div
+                class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth"
+                id="mockId-row"
+              >
+                <div
+                  class="euiFormRow__fieldWrapper"
+                >
+                  <div
+                    class="euiSwitch"
+                  >
+                    <button
+                      aria-checked="false"
+                      aria-describedby="mockId-help"
+                      aria-labelledby="mockId"
+                      class="euiSwitch__button"
+                      data-test-subj="remoteClusterFormConnectionModeToggle"
+                      id="mockId"
+                      role="switch"
+                      type="button"
+                    >
+                      <span
+                        class="euiSwitch__body"
+                      >
+                        <span
+                          class="euiSwitch__thumb"
+                        />
+                        <span
+                          class="euiSwitch__track"
+                        >
+                          <div
+                            class="euiSwitch__icon"
+                            data-euiicon-type="cross"
+                          />
+                          <div
+                            class="euiSwitch__icon euiSwitch__icon--checked"
+                            data-euiicon-type="check"
+                          />
+                        </span>
+                      </span>
+                    </button>
+                    <span
+                      class="euiSwitch__label"
+                      id="mockId"
+                    >
+                      Use proxy mode
+                    </span>
+                  </div>
+                  <div
+                    class="euiFormHelpText euiFormRow__text"
+                    id="mockId-help"
+                  >
+                    Configure a remote cluster with a single proxy address. 
+                    <button
+                      class="euiLink euiLink--primary"
+                      type="button"
+                    >
+                      Learn more.
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -165,6 +1650,7 @@ Array [
                         style="font-size:14px;display:inline-block"
                       >
                         <input
+                          aria-controls=""
                           data-test-subj="comboBoxSearchInput"
                           id="mockId"
                           role="textbox"
@@ -190,7 +1676,48 @@ Array [
                 >
                   transport port
                 </button>
-                 of the remote cluster.
+                 of the remote cluster. Specify multiple seed nodes so discovery doesn't fail if a node is unavailable.
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFormRow euiFormRow--fullWidth"
+            data-test-subj="remoteClusterFormNodeConnectionsFormRow"
+            id="mockId-row"
+          >
+            <div
+              class="euiFormRow__labelWrapper"
+            >
+              <label
+                class="euiFormLabel euiFormRow__label"
+                for="mockId"
+              >
+                Node connections
+              </label>
+            </div>
+            <div
+              class="euiFormRow__fieldWrapper"
+            >
+              <div
+                class="euiFormControlLayout euiFormControlLayout--fullWidth"
+              >
+                <div
+                  class="euiFormControlLayout__childrenWrapper"
+                >
+                  <input
+                    aria-describedby="mockId-help"
+                    class="euiFieldNumber euiFieldNumber--fullWidth"
+                    id="mockId"
+                    type="number"
+                    value="3"
+                  />
+                </div>
+              </div>
+              <div
+                class="euiFormHelpText euiFormRow__text"
+                id="mockId-help"
+              >
+                The number of gateway nodes to connect to.
               </div>
             </div>
           </div>
@@ -271,25 +1798,13 @@ Array [
                     <span
                       class="euiSwitch__track"
                     >
-                      <svg
-                        aria-hidden="true"
-                        class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
-                        focusable="false"
-                        height="16"
-                        role="img"
-                        viewBox="0 0 16 16"
-                        width="16"
-                        xmlns="http://www.w3.org/2000/svg"
+                      <div
+                        class="euiSwitch__icon"
+                        data-euiicon-type="cross"
                       />
-                      <svg
-                        aria-hidden="true"
-                        class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
-                        focusable="false"
-                        height="16"
-                        role="img"
-                        viewBox="0 0 16 16"
-                        width="16"
-                        xmlns="http://www.w3.org/2000/svg"
+                      <div
+                        class="euiSwitch__icon euiSwitch__icon--checked"
+                        data-euiicon-type="check"
                       />
                     </span>
                   </span>
@@ -331,15 +1846,10 @@ Array [
             <span
               class="euiButton__content"
             >
-              <svg
+              <div
                 aria-hidden="true"
-                class="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
-                focusable="false"
-                height="16"
-                role="img"
-                viewBox="0 0 16 16"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
+                class="euiButton__icon"
+                data-euiicon-type="check"
               />
               <span
                 class="euiButton__text"
@@ -448,7 +1958,7 @@ Array [
         aria-describedby="mockId-help mockId-error-0"
         aria-expanded="false"
         aria-haspopup="listbox"
-        class="euiComboBox euiComboBox-isInvalid euiComboBox--fullWidth"
+        class="euiComboBox euiComboBox--fullWidth euiComboBox-isInvalid"
         data-test-subj="remoteClusterFormSeedsInput"
         role="combobox"
       >
@@ -473,6 +1983,7 @@ Array [
                 style="font-size: 14px; display: inline-block;"
               >
                 <input
+                  aria-controls=""
                   data-test-subj="comboBoxSearchInput"
                   id="mockId"
                   role="textbox"
@@ -505,7 +2016,7 @@ Array [
         >
           transport port
         </button>
-         of the remote cluster.
+         of the remote cluster. Specify multiple seed nodes so discovery doesn't fail if a node is unavailable.
       </div>
     </div>
   </div>,
@@ -538,25 +2049,13 @@ Array [
             <span
               class="euiSwitch__track"
             >
-              <svg
-                aria-hidden="true"
-                class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
-                focusable="false"
-                height="16"
-                role="img"
-                viewBox="0 0 16 16"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
+              <div
+                class="euiSwitch__icon"
+                data-euiicon-type="cross"
               />
-              <svg
-                aria-hidden="true"
-                class="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
-                focusable="false"
-                height="16"
-                role="img"
-                viewBox="0 0 16 16"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
+              <div
+                class="euiSwitch__icon euiSwitch__icon--checked"
+                data-euiicon-type="check"
               />
             </span>
           </span>

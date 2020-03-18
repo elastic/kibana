@@ -7,10 +7,11 @@
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
+import { API_URLS } from '../../../../../legacy/plugins/uptime/common/constants/rest_api';
 
 export const createGetMonitorLocationsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/monitor/locations',
+  path: API_URLS.MONITOR_LOCATIONS,
   validate: {
     query: schema.object({
       monitorId: schema.string(),

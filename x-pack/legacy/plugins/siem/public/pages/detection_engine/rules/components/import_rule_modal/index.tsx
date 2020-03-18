@@ -26,6 +26,7 @@ import {
   displayErrorToast,
   displaySuccessToast,
   useStateToaster,
+  errorToToaster,
 } from '../../../../../components/toasters';
 import * as i18n from './translations';
 
@@ -48,11 +49,11 @@ export const ImportRuleModalComponent = ({
   const [overwrite, setOverwrite] = useState(false);
   const [, dispatchToaster] = useStateToaster();
 
-  const cleanupAndCloseModal = () => {
+  const cleanupAndCloseModal = useCallback(() => {
     setIsImporting(false);
     setSelectedFiles(null);
     closeModal();
-  };
+  }, [setIsImporting, setSelectedFiles, closeModal]);
 
   const importRulesCallback = useCallback(async () => {
     if (selectedFiles != null) {
@@ -83,9 +84,9 @@ export const ImportRuleModalComponent = ({
 
         importComplete();
         cleanupAndCloseModal();
-      } catch (e) {
+      } catch (error) {
         cleanupAndCloseModal();
-        displayErrorToast(i18n.IMPORT_FAILED, [e.message], dispatchToaster);
+        errorToToaster({ title: i18n.IMPORT_FAILED, error, dispatchToaster });
       }
     }
   }, [selectedFiles, overwrite]);
@@ -113,8 +114,8 @@ export const ImportRuleModalComponent = ({
               <EuiFilePicker
                 id="rule-file-picker"
                 initialPromptText={i18n.INITIAL_PROMPT_TEXT}
-                onChange={(files: FileList) => {
-                  setSelectedFiles(Object.keys(files).length > 0 ? files : null);
+                onChange={(files: FileList | null) => {
+                  setSelectedFiles(files && files.length > 0 ? files : null);
                 }}
                 display={'large'}
                 fullWidth={true}
