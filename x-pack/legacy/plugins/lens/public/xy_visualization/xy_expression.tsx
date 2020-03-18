@@ -23,10 +23,12 @@ import {
   ExpressionFunctionDefinition,
   ExpressionValueSearchContext,
 } from 'src/plugins/expressions/public';
+
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/embeddable/events';
 import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
 import { LensMultiTable } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
@@ -231,7 +233,7 @@ export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYC
             });
           }
 
-          npStart.plugins.uiActions.executeTriggerActions('VALUE_CLICK_TRIGGER', {
+          npStart.plugins.uiActions.executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, {
             data: {
               data: points.map(point => ({
                 row: point.row,

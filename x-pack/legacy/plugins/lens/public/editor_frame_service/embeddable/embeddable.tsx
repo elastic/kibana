@@ -14,8 +14,11 @@ import {
   IIndexPattern,
   TimefilterContract,
 } from 'src/plugins/data/public';
+
 import { Subscription } from 'rxjs';
 import { ReactExpressionRendererType } from '../../../../../../../src/plugins/expressions/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/embeddable/events';
+
 import {
   Embeddable as AbstractEmbeddable,
   EmbeddableOutput,
@@ -93,8 +96,8 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
   public supportedTriggers() {
     switch (this.savedVis.visualizationType) {
       case 'lnsXY':
-      case 'lnsDatatable':
-        return ['VALUE_CLICK_TRIGGER'];
+        // TODO: case 'lnsDatatable':
+        return [VIS_EVENT_TO_TRIGGER.filter];
 
       case 'lnsMetric':
       default:
