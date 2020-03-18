@@ -13,8 +13,13 @@ import { apolloClientObservable, mockGlobalState, TestProviders } from '../../mo
 import { createStore, State } from '../../store';
 import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_providers';
 
-import { Flyout, FlyoutComponent, flyoutHeaderHeight } from '.';
+import { Flyout, FlyoutComponent } from '.';
 import { FlyoutButton } from './button';
+
+jest.mock('../timeline', () => ({
+  // eslint-disable-next-line react/display-name
+  StatefulTimeline: () => <div />,
+}));
 
 const testFlyoutHeight = 980;
 const usersViewing = ['elastic'];
@@ -26,12 +31,7 @@ describe('Flyout', () => {
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(
         <TestProviders>
-          <Flyout
-            flyoutHeight={testFlyoutHeight}
-            headerHeight={flyoutHeaderHeight}
-            timelineId="test"
-            usersViewing={usersViewing}
-          />
+          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
         </TestProviders>
       );
       expect(wrapper.find('Flyout')).toMatchSnapshot();
@@ -40,12 +40,7 @@ describe('Flyout', () => {
     test('it renders the default flyout state as a button', () => {
       const wrapper = mount(
         <TestProviders>
-          <Flyout
-            flyoutHeight={testFlyoutHeight}
-            headerHeight={flyoutHeaderHeight}
-            timelineId="test"
-            usersViewing={usersViewing}
-          />
+          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
         </TestProviders>
       );
 
@@ -57,72 +52,19 @@ describe('Flyout', () => {
       ).toContain('Timeline');
     });
 
-    test('it renders the title field when its state is set to flyout is true', () => {
-      const stateShowIsTrue = set('timeline.timelineById.test.show', true, state);
-      const storeShowIsTrue = createStore(stateShowIsTrue, apolloClientObservable);
-
-      const wrapper = mount(
-        <TestProviders store={storeShowIsTrue}>
-          <Flyout
-            flyoutHeight={testFlyoutHeight}
-            headerHeight={flyoutHeaderHeight}
-            timelineId="test"
-            usersViewing={usersViewing}
-          />
-        </TestProviders>
-      );
-
-      expect(
-        wrapper
-          .find('[data-test-subj="timeline-title"]')
-          .first()
-          .props().placeholder
-      ).toContain('Untitled Timeline');
-    });
-
     test('it does NOT render the fly out button when its state is set to flyout is true', () => {
       const stateShowIsTrue = set('timeline.timelineById.test.show', true, state);
       const storeShowIsTrue = createStore(stateShowIsTrue, apolloClientObservable);
 
       const wrapper = mount(
         <TestProviders store={storeShowIsTrue}>
-          <Flyout
-            flyoutHeight={testFlyoutHeight}
-            headerHeight={flyoutHeaderHeight}
-            timelineId="test"
-            usersViewing={usersViewing}
-          />
+          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
         </TestProviders>
       );
 
       expect(wrapper.find('[data-test-subj="flyout-button-not-ready-to-drop"]').exists()).toEqual(
         false
       );
-    });
-
-    test('it renders the flyout body', () => {
-      const stateShowIsTrue = set('timeline.timelineById.test.show', true, state);
-      const storeShowIsTrue = createStore(stateShowIsTrue, apolloClientObservable);
-
-      const wrapper = mount(
-        <TestProviders store={storeShowIsTrue}>
-          <Flyout
-            flyoutHeight={testFlyoutHeight}
-            headerHeight={flyoutHeaderHeight}
-            timelineId="test"
-            usersViewing={usersViewing}
-          >
-            <p>{'Fake flyout body'}</p>
-          </Flyout>
-        </TestProviders>
-      );
-
-      expect(
-        wrapper
-          .find('[data-test-subj="eui-flyout-body"]')
-          .first()
-          .text()
-      ).toContain('Fake flyout body');
     });
 
     test('it does render the data providers badge when the number is greater than 0', () => {
@@ -135,12 +77,7 @@ describe('Flyout', () => {
 
       const wrapper = mount(
         <TestProviders store={storeWithDataProviders}>
-          <Flyout
-            flyoutHeight={testFlyoutHeight}
-            headerHeight={flyoutHeaderHeight}
-            timelineId="test"
-            usersViewing={usersViewing}
-          />
+          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
         </TestProviders>
       );
 
@@ -157,12 +94,7 @@ describe('Flyout', () => {
 
       const wrapper = mount(
         <TestProviders store={storeWithDataProviders}>
-          <Flyout
-            flyoutHeight={testFlyoutHeight}
-            headerHeight={flyoutHeaderHeight}
-            timelineId="test"
-            usersViewing={usersViewing}
-          />
+          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
         </TestProviders>
       );
 
@@ -177,12 +109,7 @@ describe('Flyout', () => {
     test('it hides the data providers badge when the timeline does NOT have data providers', () => {
       const wrapper = mount(
         <TestProviders>
-          <Flyout
-            flyoutHeight={testFlyoutHeight}
-            headerHeight={flyoutHeaderHeight}
-            timelineId="test"
-            usersViewing={usersViewing}
-          />
+          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
         </TestProviders>
       );
 
@@ -204,12 +131,7 @@ describe('Flyout', () => {
 
       const wrapper = mount(
         <TestProviders store={storeWithDataProviders}>
-          <Flyout
-            flyoutHeight={testFlyoutHeight}
-            headerHeight={flyoutHeaderHeight}
-            timelineId="test"
-            usersViewing={usersViewing}
-          />
+          <Flyout flyoutHeight={testFlyoutHeight} timelineId="test" usersViewing={usersViewing} />
         </TestProviders>
       );
 
@@ -228,7 +150,6 @@ describe('Flyout', () => {
           <FlyoutComponent
             dataProviders={mockDataProviders}
             flyoutHeight={testFlyoutHeight}
-            headerHeight={flyoutHeaderHeight}
             show={false}
             showTimeline={showTimeline}
             timelineId="test"
@@ -240,34 +161,6 @@ describe('Flyout', () => {
 
       wrapper
         .find('[data-test-subj="flyoutOverlay"]')
-        .first()
-        .simulate('click');
-
-      expect(showTimeline).toBeCalled();
-    });
-
-    test('should call the onClose when the close button is clicked', () => {
-      const stateShowIsTrue = set('timeline.timelineById.test.show', true, state);
-      const storeShowIsTrue = createStore(stateShowIsTrue, apolloClientObservable);
-
-      const showTimeline = (jest.fn() as unknown) as ActionCreator<{ id: string; show: boolean }>;
-      const wrapper = mount(
-        <TestProviders store={storeShowIsTrue}>
-          <FlyoutComponent
-            dataProviders={mockDataProviders}
-            flyoutHeight={testFlyoutHeight}
-            headerHeight={flyoutHeaderHeight}
-            show={true}
-            width={100}
-            showTimeline={showTimeline}
-            timelineId="test"
-            usersViewing={usersViewing}
-          />
-        </TestProviders>
-      );
-
-      wrapper
-        .find('[data-test-subj="close-timeline"] button')
         .first()
         .simulate('click');
 

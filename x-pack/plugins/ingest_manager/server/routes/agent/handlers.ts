@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandler, KibanaRequest } from 'kibana/server';
+import { RequestHandler, KibanaRequest } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import {
   GetAgentsResponse,
@@ -23,7 +23,6 @@ import {
   GetOneAgentEventsRequestSchema,
   PostAgentCheckinRequestSchema,
   PostAgentEnrollRequestSchema,
-  PostAgentAcksRequestSchema,
   PostAgentUnenrollRequestSchema,
   GetAgentStatusRequestSchema,
 } from '../../types';
@@ -31,7 +30,7 @@ import * as AgentService from '../../services/agents';
 import * as APIKeyService from '../../services/api_keys';
 import { appContextService } from '../../services/app_context';
 
-function getInternalUserSOClient(request: KibanaRequest) {
+export function getInternalUserSOClient(request: KibanaRequest) {
   // soClient as kibana internal users, be carefull on how you use it, security is not enabled
   return appContextService.getSavedObjects().getScopedClient(request, {
     excludedWrappers: ['security'],
@@ -200,39 +199,6 @@ export const postAgentCheckinHandler: RequestHandler<
     if (e.isBoom && e.output.statusCode === 404) {
       return response.notFound({
         body: { message: `Agent ${request.params.agentId} not found` },
-      });
-    }
-
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
-  }
-};
-
-export const postAgentAcksHandler: RequestHandler<
-  TypeOf<typeof PostAgentAcksRequestSchema.params>,
-  undefined,
-  TypeOf<typeof PostAgentAcksRequestSchema.body>
-> = async (context, request, response) => {
-  try {
-    const soClient = getInternalUserSOClient(request);
-    const res = APIKeyService.parseApiKey(request.headers);
-    const agent = await AgentService.getAgentByAccessAPIKeyId(soClient, res.apiKeyId as string);
-
-    await AgentService.acknowledgeAgentActions(soClient, agent, request.body.action_ids);
-
-    const body = {
-      action: 'acks',
-      success: true,
-    };
-
-    return response.ok({ body });
-  } catch (e) {
-    if (e.isBoom) {
-      return response.customError({
-        statusCode: e.output.statusCode,
-        body: { message: e.message },
       });
     }
 

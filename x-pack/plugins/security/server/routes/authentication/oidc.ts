@@ -103,7 +103,7 @@ export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: Route
             // The client MUST ignore unrecognized response parameters according to
             // https://openid.net/specs/openid-connect-core-1_0.html#AuthResponseValidation and
             // https://tools.ietf.org/html/rfc6749#section-4.1.2.
-            { allowUnknowns: true }
+            { unknowns: 'allow' }
           ),
         },
         options: { authRequired: false },
@@ -178,7 +178,7 @@ export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: Route
             },
             // Other parameters MAY be sent, if defined by extensions. Any parameters used that are not understood MUST
             // be ignored by the Client according to https://openid.net/specs/openid-connect-core-1_0.html#ThirdPartyInitiatedLogin.
-            { allowUnknowns: true }
+            { unknowns: 'allow' }
           ),
         },
         options: { authRequired: false },
@@ -217,7 +217,7 @@ export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: Route
           },
           // Other parameters MAY be sent, if defined by extensions. Any parameters used that are not understood MUST
           // be ignored by the Client according to https://openid.net/specs/openid-connect-core-1_0.html#ThirdPartyInitiatedLogin.
-          { allowUnknowns: true }
+          { unknowns: 'allow' }
         ),
       },
       options: { authRequired: false },

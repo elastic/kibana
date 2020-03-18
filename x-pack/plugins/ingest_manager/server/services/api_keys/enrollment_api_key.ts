@@ -5,7 +5,7 @@
  */
 
 import uuid from 'uuid';
-import { SavedObjectsClientContract, SavedObject } from 'kibana/server';
+import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
 import { EnrollmentAPIKey, EnrollmentAPIKeySOAttributes } from '../../types';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAPIKey, invalidateAPIKey } from './security';

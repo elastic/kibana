@@ -23,7 +23,7 @@ import { getCloudMetricsMetadata } from './lib/get_cloud_metric_metadata';
 import { getNodeInfo } from './lib/get_node_info';
 import { throwErrors } from '../../../common/runtime_types';
 
-const escapeHatch = schema.object({}, { allowUnknowns: true });
+const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initMetadataRoute = (libs: InfraBackendLibs) => {
   const { framework } = libs;

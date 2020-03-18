@@ -74,6 +74,8 @@ export const compareFilters = (
   second: Filter | Filter[],
   comparatorOptions: FilterCompareOptions = {}
 ) => {
+  if (!first || !second) return false;
+
   let comparators: FilterCompareOptions = {};
 
   const excludedAttributes: string[] = ['$$hashKey', 'meta'];
