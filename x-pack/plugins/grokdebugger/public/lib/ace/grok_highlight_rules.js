@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import ace from 'ace';
+import ace from 'brace';
 
 const { TextHighlightRules } = ace.acequire('ace/mode/text_highlight_rules');
 

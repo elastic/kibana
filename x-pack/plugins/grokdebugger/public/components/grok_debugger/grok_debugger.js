@@ -22,10 +22,10 @@ import { PatternInput } from '../pattern_input';
 import { CustomPatternsInput } from '../custom_patterns_input';
 import { EventOutput } from '../event_output';
 import { GrokdebuggerRequest } from '../../models/grokdebugger_request';
-import { toastNotifications } from 'ui/notify';
+import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export class GrokDebugger extends React.Component {
+export class GrokDebuggerComponent extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -73,6 +73,7 @@ export class GrokDebugger extends React.Component {
   };
 
   simulateGrok = async () => {
+    const notifications = this.props.kibana.services.notifications;
     try {
       const simulateResponse = await this.props.grokdebuggerService.simulate(
         this.grokdebuggerRequest
@@ -82,10 +83,14 @@ export class GrokDebugger extends React.Component {
       });
 
       if (!isEmpty(simulateResponse.error)) {
-        toastNotifications.addDanger(simulateResponse.error);
+        notifications.toasts.danger({
+          body: simulateResponse.error,
+        });
       }
     } catch (e) {
-      toastNotifications.addDanger(e);
+      notifications.toasts.danger({
+        body: e,
+      });
     }
   };
 
@@ -138,3 +143,5 @@ export class GrokDebugger extends React.Component {
     );
   }
 }
+
+export const GrokDebugger = withKibana(GrokDebuggerComponent);

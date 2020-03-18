@@ -10,12 +10,15 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { GrokDebugger } from './components/grok_debugger';
 import { GrokdebuggerService } from './services/grokdebugger/grokdebugger_service';
 import { I18nProvider } from '@kbn/i18n/react';
+import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
 
-export function renderApp(element, npStart) {
+export function renderApp(element, coreStart) {
   render(
-    <I18nProvider>
-      <GrokDebugger grokdebuggerService={new GrokdebuggerService(npStart.core.http)} />
-    </I18nProvider>,
+    <KibanaContextProvider services={{ ...coreStart }}>
+      <I18nProvider>
+        <GrokDebugger grokdebuggerService={new GrokdebuggerService(coreStart.http)} />
+      </I18nProvider>
+    </KibanaContextProvider>,
     element
   );
   return () => unmountComponentAtNode(element);
