@@ -11,7 +11,9 @@ import {
 } from '../../../../../../../../../../plugins/apm/common/custom_link_filter_options';
 import { CustomLink } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 
-export type Filters = Array<[keyof FilterOptions | '', string]>;
+type FilterKey = keyof FilterOptions | '';
+type FilterValue = string;
+export type FilterKeyValue = [FilterKey, FilterValue];
 
 interface FilterSelectOption {
   value: 'DEFAULT' | keyof FilterOptions;
@@ -32,9 +34,13 @@ interface FilterSelectOption {
  * results: [['service.name', 'opbeans-java'],['transaction.type', 'request']]
  * @param customLink
  */
-export const convertFiltersToArray = (customLink?: CustomLink): Filters => {
+export const convertFiltersToArray = (
+  customLink?: CustomLink
+): FilterKeyValue[] => {
   if (customLink) {
-    const filters = Object.entries(pick(customLink, filterOptions)) as Filters;
+    const filters = Object.entries(
+      pick(customLink, filterOptions)
+    ) as FilterKeyValue[];
     if (!isEmpty(filters)) {
       return filters;
     }
@@ -53,7 +59,7 @@ export const convertFiltersToArray = (customLink?: CustomLink): Filters => {
  * }
  * @param filters
  */
-export const convertFiltersToObject = (filters: Filters) => {
+export const convertFiltersToObject = (filters: FilterKeyValue[]) => {
   const convertedFilters = Object.fromEntries(
     filters
       .filter(([key, value]) => !isEmpty(key) && !isEmpty(value))
@@ -91,14 +97,16 @@ export const filterSelectOptions: FilterSelectOption[] = [
  * Returns the options available, removing filters already added, but keeping the selected filter.
  *
  * @param filters
- * @param idx
+ * @param selectedKey
  */
-export const getSelectOptions = (filters: Filters, idx: number) => {
-  return filterSelectOptions.filter(option => {
-    const indexUsedFilter = filters.findIndex(
-      filter => filter[0] === option.value
-    );
-    // Filter out all items already added, besides the one selected in the current filter.
-    return indexUsedFilter === -1 || idx === indexUsedFilter;
-  });
+export const getSelectOptions = (
+  filters: FilterKeyValue[],
+  selectedKey: FilterKey
+) => {
+  return filterSelectOptions.filter(
+    ({ value }) =>
+      !filters.some(
+        ([filterKey]) => filterKey === value && filterKey !== selectedKey
+      )
+  );
 };

@@ -68,37 +68,73 @@ describe('Custom link helper', () => {
   });
 
   describe('getSelectOptions', () => {
-    it('returns all option', () => {
-      expect(getSelectOptions([['', '']], 0)).toEqual(filterSelectOptions);
+    it('returns all available options when no filters were selected', () => {
+      expect(
+        getSelectOptions(
+          [
+            ['', ''],
+            ['', ''],
+            ['', ''],
+            ['', '']
+          ],
+          ''
+        )
+      ).toEqual([
+        { value: 'DEFAULT', text: 'Select field...' },
+        { value: 'service.name', text: 'service.name' },
+        { value: 'service.environment', text: 'service.environment' },
+        { value: 'transaction.type', text: 'transaction.type' },
+        { value: 'transaction.name', text: 'transaction.name' }
+      ]);
     });
-    it('removes options previously added from the third filter', () => {
+    it('removes item added in another filter', () => {
       expect(
         getSelectOptions(
           [
             ['service.name', 'foo'],
-            ['transaction.type', 'bar']
+            ['', ''],
+            ['', ''],
+            ['', '']
           ],
-          2
+          ''
         )
-      ).toEqual(
-        filterSelectOptions.filter(
-          ({ value }) =>
-            value !== 'service.name' && value !== 'transaction.type'
-        )
-      );
+      ).toEqual([
+        { value: 'DEFAULT', text: 'Select field...' },
+        { value: 'service.environment', text: 'service.environment' },
+        { value: 'transaction.type', text: 'transaction.type' },
+        { value: 'transaction.name', text: 'transaction.name' }
+      ]);
     });
-    it('keeps the selected option available in the current filter', () => {
+    it('removes item added in another filter but keep the current selected', () => {
       expect(
         getSelectOptions(
           [
             ['service.name', 'foo'],
-            ['transaction.type', 'bar']
+            ['transaction.name', 'bar'],
+            ['', ''],
+            ['', '']
           ],
-          1
+          'transaction.name'
         )
-      ).toEqual(
-        filterSelectOptions.filter(({ value }) => value !== 'service.name')
-      );
+      ).toEqual([
+        { value: 'DEFAULT', text: 'Select field...' },
+        { value: 'service.environment', text: 'service.environment' },
+        { value: 'transaction.type', text: 'transaction.type' },
+        { value: 'transaction.name', text: 'transaction.name' }
+      ]);
+    });
+    it('returns empty when all option were selected', () => {
+      expect(
+        getSelectOptions(
+          [
+            ['service.name', 'foo'],
+            ['transaction.name', 'bar'],
+            ['service.environment', 'baz'],
+            ['transaction.type', 'qux']
+          ],
+          ''
+        )
+      ).toEqual([{ value: 'DEFAULT', text: 'Select field...' }]);
     });
   });
 });

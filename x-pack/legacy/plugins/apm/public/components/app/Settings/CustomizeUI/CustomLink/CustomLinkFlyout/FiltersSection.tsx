@@ -19,7 +19,7 @@ import React from 'react';
 import { FilterOptions } from '../../../../../../../../../../plugins/apm/common/custom_link_filter_options';
 import {
   DEFAULT_OPTION,
-  Filters,
+  FilterKeyValue,
   filterSelectOptions,
   getSelectOptions
 } from './helper';
@@ -28,10 +28,10 @@ export const FiltersSection = ({
   filters,
   onChangeFilters
 }: {
-  filters: Filters;
-  onChangeFilters: (filters: Filters) => void;
+  filters: FilterKeyValue[];
+  onChangeFilters: (filters: FilterKeyValue[]) => void;
 }) => {
-  const onChangeFilter = (filter: Filters[0], idx: number) => {
+  const onChangeFilter = (filter: FilterKeyValue, idx: number) => {
     const newFilters = [...filters];
     newFilters[idx] = filter;
     onChangeFilters(newFilters);
@@ -83,7 +83,7 @@ export const FiltersSection = ({
       {filters.map((filter, idx) => {
         const [key, value] = filter;
         const filterId = `filter-${idx}`;
-        const selectOptions = getSelectOptions(filters, idx);
+        const selectOptions = getSelectOptions(filters, key);
         return (
           <EuiFlexGroup key={filterId} gutterSize="s" alignItems="center">
             <EuiFlexItem>
