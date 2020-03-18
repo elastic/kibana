@@ -19,6 +19,13 @@
 
 export declare function addProcessorDefinition(...args: any[]): any;
 
-export declare function resolveApi(senseVersion: string, apis: string[]): object;
+export declare function resolveApi(): object;
 
 export declare function addExtensionSpecFilePath(...args: any[]): any;
+
+/**
+ * A function that synchronously reads files JSON from disk and builds
+ * the autocomplete structures served to the client. This must be called
+ * after any extensions have been loaded.
+ */
+export declare function loadSpec(): any;
