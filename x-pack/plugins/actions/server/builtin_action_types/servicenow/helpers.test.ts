@@ -283,6 +283,16 @@ describe('appendInformationToField', () => {
     });
     expect(res).toEqual('my value (updated at 2020-03-13T08:34:53.450Z by Elastic Test User)');
   });
+
+  test('add mode', () => {
+    const res = appendInformationToField({
+      value: 'my value',
+      user: 'Elastic Test User',
+      date: '2020-03-13T08:34:53.450Z',
+      mode: 'add',
+    });
+    expect(res).toEqual('my value (added at 2020-03-13T08:34:53.450Z by Elastic Test User)');
+  });
 });
 
 describe('transformComments', () => {

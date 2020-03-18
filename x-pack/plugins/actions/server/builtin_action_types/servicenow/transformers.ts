@@ -13,7 +13,7 @@ export const informationCreated = ({
   user,
   ...rest
 }: TransformerArgs): TransformerArgs => ({
-  value: i18n.FIELD_INFORMATION('create', value, date, user),
+  value: `${value} ${i18n.FIELD_INFORMATION('create', date, user)}`,
   ...rest,
 });
 
@@ -23,7 +23,7 @@ export const informationUpdated = ({
   user,
   ...rest
 }: TransformerArgs): TransformerArgs => ({
-  value: i18n.FIELD_INFORMATION('update', value, date, user),
+  value: `${value} ${i18n.FIELD_INFORMATION('update', date, user)}`,
   ...rest,
 });
 
@@ -33,7 +33,7 @@ export const informationAdded = ({
   user,
   ...rest
 }: TransformerArgs): TransformerArgs => ({
-  value: i18n.FIELD_INFORMATION('add', value, date, user),
+  value: `${value} ${i18n.FIELD_INFORMATION('add', date, user)}`,
   ...rest,
 });
 

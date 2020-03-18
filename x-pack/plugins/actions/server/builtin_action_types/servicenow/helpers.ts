@@ -21,6 +21,7 @@ import {
 import { Incident } from './lib/types';
 
 import * as transformers from './transformers';
+import * as i18n from './translations';
 
 export const normalizeMapping = (supportedFields: string[], mapping: MapEntry[]): MapEntry[] => {
   // Prevent prototype pollution and remove unsupported fields
@@ -96,10 +97,9 @@ export const appendInformationToField = ({
   date,
   mode = 'create',
 }: AppendInformationFieldArgs): string => {
-  const action = mode === 'create' ? 'created at' : 'updated at';
   return appendField({
     value,
-    suffix: `(${action} ${date} by ${user})`,
+    suffix: i18n.FIELD_INFORMATION(mode, date, user),
   });
 };
 
