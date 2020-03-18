@@ -30,7 +30,7 @@ export const painlessContextOptions = [
         <strong>{defaultLabel}</strong>
         <EuiText size="s" color="subdued">
           <p className="euiTextColor--subdued">
-            {i18n.translate('xpack.painlessLab.context.scoreLabel', {
+            {i18n.translate('xpack.painlessLab.context.defaultLabel', {
               defaultMessage: 'The script result will be converted to a string',
             })}
           </p>
