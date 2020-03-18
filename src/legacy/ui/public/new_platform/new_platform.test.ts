@@ -28,17 +28,6 @@ import {
   PluginsSetup,
   PluginsStart,
 } from './new_platform';
-import {
-  getFieldFormats,
-  getIndexPatterns,
-  getInjectedMetadata,
-  getNotifications,
-  getOverlays,
-  getQueryService,
-  getSearchService,
-  getUiSettings,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../plugins/data/public/services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import * as dataServices from '../../../../plugins/data/public/services';
 import { LegacyCoreSetup, LegacyCoreStart } from '../../../../core/public';
