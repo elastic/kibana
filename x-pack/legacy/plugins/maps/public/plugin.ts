@@ -71,8 +71,7 @@ export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
 };
 
 export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
-  const { inspector, file_upload, data } = plugins;
-  setInspector(inspector);
+  const { file_upload, data } = plugins;
   setFileUpload(file_upload);
   setIndexPatternSelect(data.ui.IndexPatternSelect);
   setTimeFilter(data.query.timefilter.timefilter);
@@ -95,6 +94,7 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
   }
 
   public start(core: CoreStart, plugins: MapsPluginStartDependencies) {
+    setInspector(plugins.inspector);
     bindStartCoreAndPlugins(core, plugins);
   }
 }
