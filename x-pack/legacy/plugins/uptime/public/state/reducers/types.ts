@@ -4,4 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createGetIndexPatternRoute } from './get_index_pattern';
+export interface IReducerState {
+  errors: Error[];
+  loading: boolean;
+}
