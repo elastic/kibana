@@ -169,7 +169,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       <StepRuleDescription
         columns={descriptionColumns}
         indexPatterns={indexPatternQueryBar as IIndexPattern}
-        // @ts-ignore schema is insufficiently typed, but this works
         schema={filterRuleFieldsForType(schema, myStepData.ruleType)}
         data={filterRuleFieldsForType(myStepData, myStepData.ruleType)}
       />
