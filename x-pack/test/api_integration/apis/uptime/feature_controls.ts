@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PINGS_DATE_RANGE_END, PINGS_DATE_RANGE_START } from './constants';
-import { REST_API_URLS } from '../../../../legacy/plugins/uptime/common/constants';
+import { API_URLS } from '../../../../legacy/plugins/uptime/common/constants';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
@@ -30,7 +30,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     const basePath = spaceId ? `/s/${spaceId}` : '';
 
     return await supertest
-      .get(basePath + REST_API_URLS.INDEX_STATUS)
+      .get(basePath + API_URLS.INDEX_STATUS)
       .auth(username, password)
       .set('kbn-xsrf', 'foo')
       .then((response: any) => ({ error: undefined, response }))

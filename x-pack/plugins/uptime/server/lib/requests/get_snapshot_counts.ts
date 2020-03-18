@@ -88,7 +88,7 @@ const statusCountBody = (filters: any): any => {
           String id = doc["monitor.id"][0];
           String idLenDelim = Integer.toHexString(id.length()) + ":" + id;
           String idLoc = loc == null ? idLenDelim : idLenDelim + loc;
-          
+
           String status = doc["summary.down"][0] > 0 ? "d" : "u";
           String timeAndStatus = doc["@timestamp"][0].toInstant().toEpochMilli().toString() + status;
           state.locStatus[idLoc] = timeAndStatus;
@@ -110,7 +110,7 @@ const statusCountBody = (filters: any): any => {
               locStatus.merge(entry.getKey(), entry.getValue(), (a,b) -> a.compareTo(b) > 0 ? a : b)
             }
           }
-          
+
           HashMap locTotals = new HashMap();
           int total = 0;
           int down = 0;
@@ -129,7 +129,7 @@ const statusCountBody = (filters: any): any => {
             String id = idLoc.substring(colonIndex + 1, idEnd);
             String loc = idLoc.substring(idEnd, idLoc.length());
             String status = timeStatus.substring(timeStatus.length() - 1);
-            
+
             // Here we increment counters for the up/down key per location
             // We also create a new hashmap in locTotals if we've never seen this location
             // before.
@@ -140,7 +140,7 @@ const statusCountBody = (filters: any): any => {
                 res.put('up', 0);
                 res.put('down', 0);
               }
-              
+
               if (status == 'u') {
                 res.up++;
               } else {
@@ -149,8 +149,8 @@ const statusCountBody = (filters: any): any => {
 
               return res;
             });
-            
-            
+
+
             // We've encountered a new ID
             if (curId != id) {
               total++;
@@ -170,7 +170,7 @@ const statusCountBody = (filters: any): any => {
               }
             }
           }
-          
+
           Map result = new HashMap();
           result.total = total;
           result.location_totals = locTotals;
