@@ -6,10 +6,11 @@
 
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
+import { API_URLS } from '../../../../../legacy/plugins/uptime/common/constants/rest_api';
 
 export const createGetIndexPatternRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/index_pattern',
+  path: API_URLS.INDEX_PATTERN,
   validate: false,
   options: {
     tags: ['access:uptime'],
