@@ -53,7 +53,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
       title: 'a title',
       description: 'a description',
       createdAt: '2020-03-13T08:34:53.450Z',
-      createdBy: { fullName: 'Elastic User', username: null },
+      createdBy: { fullName: 'Elastic User', username: 'elastic' },
       updatedAt: null,
       updatedBy: null,
       incidentId: null,
@@ -63,7 +63,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           version: 'WzU3LDFd',
           comment: 'first comment',
           createdAt: '2020-03-13T08:34:53.450Z',
-          createdBy: { fullName: 'Elastic User', username: null },
+          createdBy: { fullName: 'Elastic User', username: 'elastic' },
           updatedAt: null,
           updatedBy: null,
         },
@@ -312,6 +312,114 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             retry: false,
             message:
               'error validating action params: [caseId]: expected value of type [string] but got [undefined]',
+          });
+        });
+    });
+
+    it('should handle failing with a simulated success without title', async () => {
+      await supertest
+        .post(`/api/action/${simulatedActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: { caseId: 'success' },
+        })
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            actionId: simulatedActionId,
+            status: 'error',
+            retry: false,
+            message:
+              'error validating action params: [title]: expected value of type [string] but got [undefined]',
+          });
+        });
+    });
+
+    it('should handle failing with a simulated success without createdAt', async () => {
+      await supertest
+        .post(`/api/action/${simulatedActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: { caseId: 'success', title: 'success' },
+        })
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            actionId: simulatedActionId,
+            status: 'error',
+            retry: false,
+            message:
+              'error validating action params: [createdAt]: expected value of type [string] but got [undefined]',
+          });
+        });
+    });
+
+    it('should handle failing with a simulated success without commentId', async () => {
+      await supertest
+        .post(`/api/action/${simulatedActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            caseId: 'success',
+            title: 'success',
+            createdAt: 'success',
+            createdBy: { username: 'elastic' },
+            comments: [{}],
+          },
+        })
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            actionId: simulatedActionId,
+            status: 'error',
+            retry: false,
+            message:
+              'error validating action params: [comments.0.commentId]: expected value of type [string] but got [undefined]',
+          });
+        });
+    });
+
+    it('should handle failing with a simulated success without comment message', async () => {
+      await supertest
+        .post(`/api/action/${simulatedActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            caseId: 'success',
+            title: 'success',
+            createdAt: 'success',
+            createdBy: { username: 'elastic' },
+            comments: [{ commentId: 'success' }],
+          },
+        })
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            actionId: simulatedActionId,
+            status: 'error',
+            retry: false,
+            message:
+              'error validating action params: [comments.0.comment]: expected value of type [string] but got [undefined]',
+          });
+        });
+    });
+
+    it('should handle failing with a simulated success without comment.createdAt', async () => {
+      await supertest
+        .post(`/api/action/${simulatedActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            caseId: 'success',
+            title: 'success',
+            createdAt: 'success',
+            createdBy: { username: 'elastic' },
+            comments: [{ commentId: 'success', comment: 'success' }],
+          },
+        })
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            actionId: simulatedActionId,
+            status: 'error',
+            retry: false,
+            message:
+              'error validating action params: [comments.0.createdAt]: expected value of type [string] but got [undefined]',
           });
         });
     });
