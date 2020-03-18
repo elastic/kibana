@@ -12,7 +12,7 @@ import {
   ElasticsearchAssetType,
 } from '../../../../types';
 import { CallESAsCurrentUser } from '../../../../types';
-import { Field, loadFieldsFromYaml } from '../../fields/field';
+import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import { generateMappings, generateTemplateName, getTemplate } from './template';
 import * as Registry from '../../registry';
@@ -98,7 +98,7 @@ export async function installTemplate({
   dataset: Dataset;
   packageVersion: string;
 }): Promise<AssetReference> {
-  const mappings = generateMappings(fields);
+  const mappings = generateMappings(processFields(fields));
   const templateName = generateTemplateName(dataset);
   let pipelineName;
   if (dataset.ingest_pipeline) {

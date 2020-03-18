@@ -152,6 +152,7 @@ export const ConnectorAddModal = ({
             serverError={serverError}
             errors={errors}
             actionTypeRegistry={actionTypeRegistry}
+            http={http}
           />
         </EuiModalBody>
 
