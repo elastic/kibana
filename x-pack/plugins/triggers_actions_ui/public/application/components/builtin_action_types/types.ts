@@ -39,9 +39,6 @@ export interface PagerDutyActionParams {
 }
 
 export interface IndexActionParams {
-  index?: string;
-  refresh?: boolean;
-  executionTimeField?: string;
   documents: string[];
 }
 
@@ -85,7 +82,9 @@ export interface EmailActionConnector extends ActionConnector {
 }
 
 interface EsIndexConfig {
-  index?: string;
+  index: string;
+  executionTimeField?: string;
+  refresh?: boolean;
 }
 
 export interface EsIndexActionConnector extends ActionConnector {

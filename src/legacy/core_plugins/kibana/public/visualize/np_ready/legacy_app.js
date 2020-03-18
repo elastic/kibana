@@ -21,7 +21,10 @@ import { find } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { createHashHistory } from 'history';
 
-import { createKbnUrlStateStorage } from '../../../../../../plugins/kibana_utils/public';
+import {
+  createKbnUrlStateStorage,
+  redirectWhenMissing,
+} from '../../../../../../plugins/kibana_utils/public';
 
 import editorTemplate from './editor/editor.html';
 import visualizeListingTemplate from './listing/visualize_listing.html';
@@ -100,8 +103,8 @@ export function initVisualizeApp(app, deps) {
         template: editorTemplate,
         k7Breadcrumbs: getCreateBreadcrumbs,
         resolve: {
-          savedVis: function(redirectWhenMissing, $route, $rootScope, kbnUrl) {
-            const { core, data, savedVisualizations, visualizations } = deps;
+          savedVis: function($route, $rootScope, kbnUrl, history) {
+            const { core, data, savedVisualizations, visualizations, toastNotifications } = deps;
             const visTypes = visualizations.all();
             const visType = find(visTypes, { name: $route.current.params.type });
             const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
@@ -128,7 +131,9 @@ export function initVisualizeApp(app, deps) {
               })
               .catch(
                 redirectWhenMissing({
-                  '*': '/visualize',
+                  history,
+                  mapping: VisualizeConstants.LANDING_PAGE_PATH,
+                  toastNotifications,
                 })
               );
           },
@@ -139,8 +144,8 @@ export function initVisualizeApp(app, deps) {
         template: editorTemplate,
         k7Breadcrumbs: getEditBreadcrumbs,
         resolve: {
-          savedVis: function(redirectWhenMissing, $route, $rootScope, kbnUrl) {
-            const { chrome, core, data, savedVisualizations } = deps;
+          savedVis: function($route, $rootScope, kbnUrl, history) {
+            const { chrome, core, data, savedVisualizations, toastNotifications } = deps;
             return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl)
               .then(() => savedVisualizations.get($route.current.params.id))
               .then(savedVis => {
@@ -155,13 +160,17 @@ export function initVisualizeApp(app, deps) {
               })
               .catch(
                 redirectWhenMissing({
-                  visualization: '/visualize',
-                  search:
-                    '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-                  'index-pattern':
-                    '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-                  'index-pattern-field':
-                    '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+                  history,
+                  mapping: {
+                    visualization: VisualizeConstants.LANDING_PAGE_PATH,
+                    search:
+                      '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+                    'index-pattern':
+                      '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+                    'index-pattern-field':
+                      '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+                  },
+                  toastNotifications,
                 })
               );
           },

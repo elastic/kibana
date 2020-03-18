@@ -27,7 +27,6 @@ import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
 } from '../embeddable_plugin_test_samples';
-import { DashboardOptions } from '../embeddable/dashboard_container_factory';
 import { coreMock } from '../../../../core/public/mocks';
 import { CoreStart } from 'kibana/public';
 
@@ -43,7 +42,7 @@ let embeddable: ContactCardEmbeddable;
 let coreStart: CoreStart;
 beforeEach(async () => {
   coreStart = coreMock.createStart();
-  const options: DashboardOptions = {
+  const options = {
     ExitFullScreenButton: () => null,
     SavedObjectFinder: () => null,
     application: {} as any,

@@ -46,7 +46,7 @@ image::maps/images/fu_gs_new_england_map.png[]
 === Upload and index GeoJSON files
 For each GeoJSON file you downloaded, complete the following steps:
 
-. Below the map legend, click *Add layer*.
+. Click *Add layer*.
 . From the list of layer types, click *Uploaded GeoJSON*.
 . Using the File Picker, upload the GeoJSON file.
 +
@@ -86,7 +86,7 @@ hot spots are. An advantage of having indexed
 {ref}/geo-point.html[geo_point] data for the
 lightning strikes is that you can perform aggregations on the data.
 
-. Below the map legend, click *Add layer*.
+. Click *Add layer*.
 . From the list of layer types, click *Grid aggregation*.
 +
 Because you indexed `lightning_detected.geojson` using the index name and
