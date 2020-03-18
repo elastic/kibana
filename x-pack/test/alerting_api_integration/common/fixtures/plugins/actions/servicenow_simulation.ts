@@ -37,7 +37,7 @@ export function initPlugin(server: Hapi.Server, path: string) {
         }),
       },
     },
-    handler: servicenowHandler,
+    handler: servicenowHandler as Hapi.Lifecycle.Method,
   });
 
   server.route({
@@ -61,7 +61,7 @@ export function initPlugin(server: Hapi.Server, path: string) {
         }),
       },
     },
-    handler: servicenowHandler,
+    handler: servicenowHandler as Hapi.Lifecycle.Method,
   });
 
   server.route({
@@ -85,7 +85,7 @@ export function initPlugin(server: Hapi.Server, path: string) {
         }),
       },
     },
-    handler: servicenowHandler,
+    handler: servicenowHandler as Hapi.Lifecycle.Method,
   });
 }
 // ServiceNow simulator: create a servicenow action pointing here, and you can get
