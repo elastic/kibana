@@ -88,8 +88,7 @@ export class MultiMetricJobCreator extends JobCreator {
 
   // called externally to set the model memory limit based current detector configuration
   public async calculateModelMemoryLimit() {
-    if (this._splitField === null) {
-      // not split field, use the default
+    if (this.jobConfig.analysis_config.detectors.length === 0) {
       this.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
     } else {
       const { modelMemoryLimit } = await ml.calculateModelMemoryLimit({
