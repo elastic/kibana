@@ -15,6 +15,16 @@ const useUpdateCaseMock = useUpdateCase as jest.Mock;
 
 describe('CaseView ', () => {
   const updateCaseProperty = jest.fn();
+  /* eslint-disable no-console */
+  // Silence until enzyme fixed to use ReactTestUtils.act()
+  const originalError = console.error;
+  beforeAll(() => {
+    console.error = jest.fn();
+  });
+  afterAll(() => {
+    console.error = originalError;
+  });
+  /* eslint-enable no-console */
 
   const defaultUpdateCaseState = {
     caseData: data,
@@ -107,7 +117,7 @@ describe('CaseView ', () => {
 
     wrapper
       .find('input[data-test-subj="toggle-case-status"]')
-      .simulate('change', { target: { value: true } });
+      .simulate('change', { target: { checked: true } });
 
     expect(updateCaseProperty).toBeCalledWith({
       updateKey: 'status',

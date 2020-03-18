@@ -239,10 +239,7 @@ export const AllCases = React.memo(() => {
     sort: { field: queryParams.sortField, direction: queryParams.sortOrder },
   };
   const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<Case>>(
-    () => ({
-      selectable: (item: Case) => true,
-      onSelectionChange: setSelectedCases,
-    }),
+    () => ({ onSelectionChange: setSelectedCases }),
     [selectedCases]
   );
   const isCasesLoading = useMemo(
@@ -313,6 +310,7 @@ export const AllCases = React.memo(() => {
                     {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
                   </UtilityBarText>
                   <UtilityBarAction
+                    data-test-subj="case-table-bulk-actions"
                     iconSide="right"
                     iconType="arrowDown"
                     popoverContent={getBulkItemsPopoverContent}
@@ -324,6 +322,7 @@ export const AllCases = React.memo(() => {
             </UtilityBar>
             <EuiBasicTable
               columns={memoizedGetCasesColumns}
+              data-test-subj="all-cases-table"
               isSelectable
               itemId="id"
               items={data.cases}
