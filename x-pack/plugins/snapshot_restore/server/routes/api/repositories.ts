@@ -122,22 +122,11 @@ export function registerRepositoriesRoutes({
         return res.internalError({ body: e });
       }
 
-      const {
-        responses: snapshotResponses,
-      }: {
-        responses: Array<{
-          repository: string;
-          snapshots: any[];
-        }>;
-      } = await callAsCurrentUser('snapshot.get', {
+      const { snapshots } = await callAsCurrentUser('snapshot.get', {
         repository: name,
         snapshot: '_all',
       }).catch(e => ({
-        responses: [
-          {
-            snapshots: null,
-          },
-        ],
+        snapshots: null,
       }));
 
       if (repositoryByName[name]) {
@@ -152,10 +141,7 @@ export function registerRepositoriesRoutes({
             },
             isManagedRepository: managedRepository === name,
             snapshots: {
-              count:
-                snapshotResponses && snapshotResponses[0] && snapshotResponses[0].snapshots
-                  ? snapshotResponses[0].snapshots.length
-                  : null,
+              count: snapshots ? snapshots.length : null,
             },
           },
         });

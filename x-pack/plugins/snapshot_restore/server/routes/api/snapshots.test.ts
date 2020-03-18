@@ -59,21 +59,11 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       };
 
       const mockGetSnapshotsFooResponse = Promise.resolve({
-        responses: [
-          {
-            repository: 'fooRepository',
-            snapshots: [{ snapshot: 'snapshot1' }],
-          },
-        ],
+        snapshots: [{ snapshot: 'snapshot1' }],
       });
 
       const mockGetSnapshotsBarResponse = Promise.resolve({
-        responses: [
-          {
-            repository: 'barRepository',
-            snapshots: [{ snapshot: 'snapshot2' }],
-          },
-        ],
+        snapshots: [{ snapshot: 'snapshot2' }],
       });
 
       router.callAsCurrentUserResponses = [
@@ -168,12 +158,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
 
     test('returns snapshot object with repository name if returned from ES', async () => {
       const mockSnapshotGetEsResponse = {
-        responses: [
-          {
-            repository,
-            snapshots: [{ snapshot }],
-          },
-        ],
+        snapshots: [{ snapshot }],
       };
 
       router.callAsCurrentUserResponses = [
