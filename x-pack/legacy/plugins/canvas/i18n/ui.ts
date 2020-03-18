@@ -480,6 +480,7 @@ export const DataSourceStrings = {
         defaultMessage: '{timelion} Query String syntax',
         values: {
           timelion: TIMELION,
+          lucene: LUCENE,
         },
       }),
     getQueryLabel: () =>
