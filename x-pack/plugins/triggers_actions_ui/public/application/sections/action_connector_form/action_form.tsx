@@ -44,7 +44,7 @@ interface ActionAccordionFormProps {
   setActionParamsProperty: (key: string, value: any, index: number) => void;
   http: HttpSetup;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  toastNotifications?: Pick<
+  toastNotifications: Pick<
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;

@@ -4,12 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { find } from 'lodash/fp';
 import { PartialAlert } from '../../../../../../../plugins/alerting/server';
 import { readRules } from './read_rules';
 import { IRuleSavedAttributesSavedObjectAttributes, UpdateRuleParams } from './types';
 import { addTags } from './add_tags';
 import { ruleStatusSavedObjectType } from './saved_object_mappings';
 import { calculateVersion } from './utils';
+import {
+  INTERNAL_NOTIFICATION_ID_KEY,
+  NOTIFICATIONS_ID,
+  APP_ID,
+} from '../../../../common/constants';
 
 export const updateRules = async ({
   alertsClient,
@@ -50,6 +56,57 @@ export const updateRules = async ({
   if (rule == null) {
     return null;
   }
+  const notificationId = find(tag => tag.startsWith(INTERNAL_NOTIFICATION_ID_KEY), rule.tags);
+
+  if (throttle) {
+    // const method = notificationId ? 'update': 'create'
+    if (notificationId) {
+      await alertsClient.update({
+        id: notificationId,
+        data: {
+          tags: addTags(tags, rule.params.ruleId, immutable, notificationId),
+          name: `Notifiacation ${name}`,
+          schedule: {
+            interval: throttle,
+          },
+          actions,
+          params: {
+            signalsIndex: outputIndex,
+            rules: [
+              {
+                id: rule.id,
+                ruleId: rule.params.ruleId,
+              },
+            ],
+          },
+          throttle: null,
+        },
+      });
+    } else {
+      await alertsClient.create({
+        data: {
+          enabled,
+          alertTypeId: NOTIFICATIONS_ID,
+          consumer: APP_ID,
+          tags: addTags(tags, rule.params.ruleId, immutable),
+          name,
+          schedule: {
+            interval: throttle,
+          },
+          actions,
+          params: {
+            signalsIndex: outputIndex,
+            ruleIds: [rule.params.ruleId],
+          },
+          throttle: null,
+        },
+      });
+    }
+  } else {
+    if (notificationId) {
+      await alertsClient.delete({ id: notificationId });
+    }
+  }
 
   const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
     actions,
@@ -83,11 +140,11 @@ export const updateRules = async ({
   const update = await alertsClient.update({
     id: rule.id,
     data: {
-      tags: addTags(tags, rule.params.ruleId, immutable),
+      tags: addTags(tags, rule.params.ruleId, immutable, notificationId),
       name,
       schedule: { interval },
       actions: actions ?? rule.actions,
-      throttle: throttle ?? throttle === null ? null : rule.throttle,
+      throttle: throttle ?? (throttle === null ? null : rule.throttle),
       params: {
         description,
         ruleId: rule.params.ruleId,

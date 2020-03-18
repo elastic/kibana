@@ -89,10 +89,6 @@ export default async function({ readConfigFile }) {
         '--telemetry.banner=false',
         '--timelion.ui.enabled=true',
         '--xpack.endpoint.enabled=true',
-        '--xpack.actions.enabled=true',
-        '--xpack.alerting.enabled=true',
-        '--xpack.triggers_actions_ui.enabled=true',
-        '--xpack.triggers_actions_ui.createAlertUiEnabled=true',
       ],
     },
     uiSettings: {

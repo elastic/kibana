@@ -169,20 +169,21 @@ export const signalRulesAlertType = ({
               const newSignalsResult = await services.callCluster('search', singalsQuery);
               const newSignalsCount = newSignalsResult.hits.total.value;
               logger.warn(`newSignalsCount ${newSignalsCount}`);
+              logger.warn(
+                `savedObject.attributes ${JSON.stringify(savedObject.attributes, null, 2)}`
+              );
 
-              // if (newSignalsCount) {
-              const alertInstance = services.alertInstanceFactory(alertId);
-              alertInstance
-                .replaceState({
-                  signalsCount: newSignalsCount,
-                })
-                .scheduleActions('default', {
-                  outputIndex,
-                  name,
-                  alertId,
-                  ruleId,
-                });
-              // }
+              if (newSignalsCount) {
+                const alertInstance = services.alertInstanceFactory(alertId);
+                alertInstance
+                  .replaceState({
+                    signalsCount: newSignalsCount,
+                  })
+                  .scheduleActions('default', {
+                    alertId,
+                    rule: newSignalsResult.hits.hits[0]._source.signal.rule,
+                  });
+              }
             }
 
             logger.debug(

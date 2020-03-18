@@ -9,7 +9,7 @@ import { APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { CreateRuleParams } from './types';
 import { addTags } from './add_tags';
 
-export const createRules = ({
+export const createRules = async ({
   alertsClient,
   actionsClient, // TODO: Use this actionsClient once we have actions such as email, etc...
   actions,

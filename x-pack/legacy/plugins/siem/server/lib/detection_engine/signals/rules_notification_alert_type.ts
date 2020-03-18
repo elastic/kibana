@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import dateMath from '@elastic/datemath';
 import { NOTIFICATIONS_ID, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import { AlertAction } from '../../../../../../../plugins/alerting/common';
 
@@ -54,25 +55,33 @@ export const rulesNotificationAlertType = ({
   defaultActionGroupId: 'default',
   validate: {
     params: schema.object({
-      ruleIds: schema.arrayOf(schema.string(), {
-        defaultValue: ['f09e14ec-cae2-481e-a221-4c952aba5cc5'],
-      }),
+      signalsIndex: schema.string(),
+      rules: schema.arrayOf(
+        schema.object({
+          id: schema.string(),
+          ruleId: schema.string(),
+        })
+      ),
     }),
   },
   async executor({ previousStartedAt, alertId, services, params }) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const ruleIds: string[] = (params as any).ruleIds;
     const savedObject = await services.savedObjectsClient.get<AlertAttributes>('alert', alertId);
+    logger.warn(
+      `notificaotin dates ${previousStartedAt} ${moment(previousStartedAt ?? undefined).format(
+        'x'
+      )} ${new Date()}`
+    );
     logger.warn(JSON.stringify(savedObject, null, 2));
-    const outputIndex = ['.siem-signals-patrykkopycinski*'];
+    logger.warn(`notification params ${JSON.stringify(params)}`);
     const name = savedObject.attributes.name;
 
     const query = buildSignalsSearchQuery({
-      index: outputIndex,
-      ruleIds,
+      index: params.signalsIndex,
+      ruleIds: params.rules.map(rule => rule.ruleId),
       to: 'now',
       // from: `now-${savedObject.attributes.schedule.interval}`,
-      from: `now-1h`,
+      from: previousStartedAt ? moment(previousStartedAt).format('x') : `now-1h`,
     });
 
     const signalsQueryResult = await services.callCluster('search', query);
@@ -85,7 +94,7 @@ export const rulesNotificationAlertType = ({
           signalsCount,
         })
         .scheduleActions('default', {
-          outputIndex,
+          index: params.signalsIndex,
           name,
         });
     }
@@ -94,6 +103,7 @@ export const rulesNotificationAlertType = ({
     logger.warn(signalsQueryResult);
     logger.warn(`previousStartedAt ${previousStartedAt}`);
     logger.warn(`alertId ${alertId}`);
+    logger.warn(`savedObject ${savedObject.attributes}`);
     // logger.warn(`services ${JSON.stringify(services, null, 2)}`);
     logger.warn(`params ${JSON.stringify(params, null, 2)}`);
   },
