@@ -18,7 +18,7 @@ export class HTTPAuthorizationHeader {
     const [scheme] = authorizationHeaderValue.split(/\s+/);
     const credentials = authorizationHeaderValue.substring(scheme.length + 1);
 
-    return new HTTPAuthorizationHeader(scheme.toLowerCase(), credentials);
+    return new HTTPAuthorizationHeader(scheme, credentials);
   }
 
   toString() {

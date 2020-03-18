@@ -33,20 +33,20 @@ describe('HTTPAuthorizationHeader.parseFromRequest()', () => {
     ).toBeNull();
   });
 
-  it('parses scheme portion of the authorization header value in lower case', () => {
+  it('parses scheme portion of the authorization header value', () => {
     const headerValueAndSchemeMap = [
-      ['Basic xxx', 'basic'],
-      ['Basic xxx yyy', 'basic'],
+      ['Basic xxx', 'Basic'],
+      ['Basic xxx yyy', 'Basic'],
       ['basic xxx', 'basic'],
       ['basic', 'basic'],
       // We don't trim leading whitespaces in scheme.
       [' Basic xxx', ''],
-      ['Negotiate xxx', 'negotiate'],
+      ['Negotiate xxx', 'Negotiate'],
       ['negotiate xxx', 'negotiate'],
       ['negotiate', 'negotiate'],
-      ['ApiKey xxx', 'apikey'],
+      ['ApiKey xxx', 'ApiKey'],
       ['apikey xxx', 'apikey'],
-      ['Api Key xxx', 'api'],
+      ['Api Key xxx', 'Api'],
     ];
 
     for (const [authorization, scheme] of headerValueAndSchemeMap) {

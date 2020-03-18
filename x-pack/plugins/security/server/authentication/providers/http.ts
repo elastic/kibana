@@ -38,7 +38,9 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
     if ((httpOptions?.supportedSchemes?.size ?? 0) === 0) {
       throw new Error('Supported schemes should be specified');
     }
-    this.supportedSchemes = httpOptions.supportedSchemes;
+    this.supportedSchemes = new Set(
+      [...httpOptions.supportedSchemes].map(scheme => scheme.toLowerCase())
+    );
   }
 
   /**
@@ -62,7 +64,7 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
-    if (!this.supportedSchemes.has(authorizationHeader.scheme)) {
+    if (!this.supportedSchemes.has(authorizationHeader.scheme.toLowerCase())) {
       this.logger.debug(`Unsupported authentication scheme: ${authorizationHeader.scheme}`);
       return AuthenticationResult.notHandled();
     }

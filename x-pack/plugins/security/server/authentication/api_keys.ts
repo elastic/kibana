@@ -223,14 +223,14 @@ export class APIKeys {
   }
 
   private getGrantParams(authorizationHeader: HTTPAuthorizationHeader): GrantAPIKeyParams {
-    if (authorizationHeader.scheme === 'bearer') {
+    if (authorizationHeader.scheme.toLowerCase() === 'bearer') {
       return {
         grant_type: 'access_token',
         access_token: authorizationHeader.credentials,
       };
     }
 
-    if (authorizationHeader.scheme === 'basic') {
+    if (authorizationHeader.scheme.toLowerCase() === 'basic') {
       const basicCredentials = BasicHTTPAuthorizationHeaderCredentials.parseFromCredentials(
         authorizationHeader.credentials
       );

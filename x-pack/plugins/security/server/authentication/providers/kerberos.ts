@@ -45,7 +45,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
-    if (authorizationHeader && authorizationHeader.scheme !== 'negotiate') {
+    if (authorizationHeader && authorizationHeader.scheme.toLowerCase() !== 'negotiate') {
       this.logger.debug(`Unsupported authentication scheme: ${authorizationHeader.scheme}`);
       return AuthenticationResult.notHandled();
     }
