@@ -53,9 +53,6 @@ export interface UptimeAppProps {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }
 
-// This is a bit ugly, but passing core around contextually isn't always possible.
-export let uptimeKibanaCore: CoreStart | undefined;
-
 const Application = (props: UptimeAppProps) => {
   const {
     basePath,
@@ -69,8 +66,6 @@ const Application = (props: UptimeAppProps) => {
     routerBasename,
     setBadge,
   } = props;
-
-  uptimeKibanaCore = core;
 
   useEffect(() => {
     renderGlobalHelpControls();

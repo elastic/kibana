@@ -22,7 +22,7 @@ import {
 } from '../api';
 import { DynamicSettings } from '../../../common/runtime_types';
 import { getBasePath } from '../selectors';
-import { uptimeKibanaCore } from '../../uptime_app';
+import { kibanaService } from '../kibana_service';
 
 export function* fetchDynamicSettingsEffect() {
   yield takeLatest(
@@ -40,7 +40,8 @@ export function* setDynamicSettingsEffect() {
       if (!action.payload) {
         const err = new Error('Cannot fetch effect without a payload');
         yield put(setDynamicSettingsFail(err));
-        yield uptimeKibanaCore?.notifications.toasts.addError(err, {
+
+        kibanaService.core.notifications.toasts.addError(err, {
           title: couldNotSaveSettingsText,
         });
         return;
@@ -48,9 +49,9 @@ export function* setDynamicSettingsEffect() {
       const basePath = yield select(getBasePath);
       yield call(setDynamicSettingsAPI, { settings: action.payload, basePath });
       yield put(setDynamicSettingsSuccess(action.payload));
-      yield uptimeKibanaCore?.notifications.toasts.addSuccess('Settings saved!');
+      kibanaService.core.notifications.toasts.addSuccess('Settings saved!');
     } catch (err) {
-      yield uptimeKibanaCore?.notifications.toasts.addError(err, {
+      kibanaService.core.notifications.toasts.addError(err, {
         title: couldNotSaveSettingsText,
       });
       yield put(setDynamicSettingsFail(err));
