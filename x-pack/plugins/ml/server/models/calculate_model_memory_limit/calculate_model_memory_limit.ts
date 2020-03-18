@@ -106,7 +106,7 @@ async function getCardinalities(
     }
 
     if (maxBucketFieldCardinalities.length > 0) {
-      maxBucketCardinality = await fieldsService.getMaxBucketCardinality(
+      maxBucketCardinality = await fieldsService.getMaxBucketCardinalities(
         indexPattern,
         maxBucketFieldCardinalities,
         query,

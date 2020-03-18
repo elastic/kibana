@@ -152,7 +152,19 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
     });
   }
 
-  async function getMaxBucketCardinality(
+  /**
+   * Retrieves max cardinalities for provided fields from date interval buckets
+   * using max bucket pipeline aggregation.
+   *
+   * @param index
+   * @param fieldNames - fields to perform cardinality aggregation on
+   * @param query
+   * @param timeFieldName
+   * @param earliestMs
+   * @param latestMs
+   * @param interval - a fixed interval for the date histogram aggregation
+   */
+  async function getMaxBucketCardinalities(
     index: string[] | string,
     fieldNames: string[],
     query: any,
@@ -161,14 +173,16 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
     latestMs: number,
     interval: string | undefined
   ): Promise<{ [key: string]: number }> {
+    if (!interval) {
+      throw new Error('Interval is required to retrieve max bucket cardinalities.');
+    }
+
     const aggregatableFields = await getAggregatableFields(index, fieldNames);
 
     if (aggregatableFields.length === 0) {
       return {};
     }
 
-    // Build the criteria to use in the bool filter part of the request.
-    // Add criteria for the time range and the datafeed config query.
     const mustCriteria = [
       {
         range: {
@@ -185,10 +199,22 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       mustCriteria.push(query);
     }
 
-    const aggs = aggregatableFields.reduce((obj, field) => {
+    const dateHistogramAggKey = 'bucket_span_buckets';
+    const getMaxBucketAggKey = (field: string) => `max_bucket_${field}`;
+
+    const fieldsCardinalityAggs = aggregatableFields.reduce((obj, field) => {
       obj[field] = { cardinality: { field } };
       return obj;
     }, {} as { [field: string]: { cardinality: { field: string } } });
+
+    const maxBucketCardinalitiesAggs = Object.keys(fieldsCardinalityAggs).reduce((acc, field) => {
+      acc[getMaxBucketAggKey(field)] = {
+        max_bucket: {
+          buckets_path: `${dateHistogramAggKey}>${field}`,
+        },
+      };
+      return acc;
+    }, {} as { [key: string]: { max_bucket: { buckets_path: string } } });
 
     const body = {
       query: {
@@ -198,21 +224,14 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       },
       size: 0,
       aggs: {
-        bucket_span_buckets: {
+        [dateHistogramAggKey]: {
           date_histogram: {
             field: timeFieldName,
             fixed_interval: interval,
           },
-          aggs,
+          aggs: fieldsCardinalityAggs,
         },
-        ...Object.keys(aggs).reduce((acc, aggKey) => {
-          acc[`max_bucket_${aggKey}`] = {
-            max_bucket: {
-              buckets_path: `bucket_span_buckets>${aggKey}`,
-            },
-          };
-          return acc;
-        }, {} as { [key: string]: { max_bucket: { buckets_path: string } } }),
+        ...maxBucketCardinalitiesAggs,
       },
     };
 
@@ -228,7 +247,7 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
     }
 
     return aggregatableFields.reduce((obj, field) => {
-      obj[field] = (aggregations[`max_bucket_${field}`] || { value: 0 }).value;
+      obj[field] = (aggregations[getMaxBucketAggKey(field)] || { value: 0 }).value;
       return obj;
     }, {} as { [field: string]: number });
   }
@@ -236,6 +255,6 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
   return {
     getCardinalityOfFields,
     getTimeFieldRange,
-    getMaxBucketCardinality,
+    getMaxBucketCardinalities,
   };
 }
