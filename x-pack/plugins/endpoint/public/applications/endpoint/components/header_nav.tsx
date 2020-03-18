@@ -24,11 +24,11 @@ export const navTabs: NavTabs[] = [
     href: '/',
   },
   {
-    id: 'management',
-    name: i18n.translate('xpack.endpoint.headerNav.management', {
-      defaultMessage: 'Management',
+    id: 'hosts',
+    name: i18n.translate('xpack.endpoint.headerNav.hosts', {
+      defaultMessage: 'Hosts',
     }),
-    href: '/management',
+    href: '/hosts',
   },
   {
     id: 'alerts',
