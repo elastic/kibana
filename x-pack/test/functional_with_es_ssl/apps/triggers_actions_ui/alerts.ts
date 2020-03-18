@@ -165,6 +165,41 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ]);
     });
 
+    it('should reset alert when canceling an edit', async () => {
+      const createdAlert = await createAlert('.index-threshold', generateUniqueKey(), {
+        aggType: 'count',
+        termSize: 5,
+        thresholdComparator: '>',
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        groupBy: 'all',
+        threshold: [1000, 5000],
+        index: ['.kibana_1'],
+        timeField: 'alert',
+      });
+      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      const editLink = await testSubjects.findAll('alertsTableCell-editLink');
+      await editLink[0].click();
+
+      const updatedAlertName = 'Changed Alert Name';
+      const nameInputToUpdate = await testSubjects.find('alertNameInput');
+      await nameInputToUpdate.click();
+      await nameInputToUpdate.clearValue();
+      await nameInputToUpdate.type(updatedAlertName);
+
+      await testSubjects.click('cancelSaveEditedAlertButton');
+      await find.waitForDeletedByCssSelector('[data-test-subj="cancelSaveEditedAlertButton"]');
+
+      const editLinkPostCancel = await testSubjects.findAll('alertsTableCell-editLink');
+      await editLinkPostCancel[0].click();
+
+      const nameInputAfterCancel = await testSubjects.find('alertNameInput');
+      const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
+      expect(textAfterCancel).to.eql(createdAlert.name);
+    });
+
     it('should search for tags', async () => {
       const createdAlert = await createAlert();
       await pageObjects.common.navigateToApp('triggersActions');
