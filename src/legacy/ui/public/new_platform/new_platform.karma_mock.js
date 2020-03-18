@@ -21,13 +21,15 @@ import sinon from 'sinon';
 import { getFieldFormatsRegistry } from '../../../../test_utils/public/stub_field_formats';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
-  setIndexPatterns,
-  setQueryService,
-  setUiSettings,
-  setInjectedMetadata,
   setFieldFormats,
-  setSearchService,
+  setIndexPatterns,
+  setInjectedMetadata,
+  setHttp,
+  setNotifications,
   setOverlays,
+  setQueryService,
+  setSearchService,
+  setUiSettings,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/data/public/services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -477,11 +479,13 @@ export function __start__(coreStart) {
 
   // Services that need to be set in the legacy platform since the legacy data plugin
   // which previously provided them has been removed.
+  setHttp(npStart.core.http);
+  setNotifications(npStart.core.notifications);
+  setOverlays(npStart.core.overlays);
   setUiSettings(npStart.core.uiSettings);
-  setQueryService(npStart.plugins.data.query);
-  setIndexPatterns(npStart.plugins.data.indexPatterns);
   setFieldFormats(npStart.plugins.data.fieldFormats);
+  setIndexPatterns(npStart.plugins.data.indexPatterns);
+  setQueryService(npStart.plugins.data.query);
   setSearchService(npStart.plugins.data.search);
   setAggs(npStart.plugins.data.search.aggs);
-  setOverlays(npStart.core.overlays);
 }
