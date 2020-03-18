@@ -13,6 +13,8 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { HttpSetup } from 'kibana/public';
+import { AgentConfiguration } from '../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/configuration_types';
+import { FETCH_STATUS } from '../../../../../hooks/useFetcher';
 import { createCallApmApi } from '../../../../../services/rest/createCallApmApi';
 import { AgentConfigurationCreateEdit } from './index';
 import {
@@ -41,11 +43,13 @@ storiesOf(
         value={(contextMock as unknown) as ApmPluginContextValue}
       >
         <AgentConfigurationCreateEdit
-          isLoadingExistingConfig={false}
           pageStep="choose-settings-step"
-          existingConfig={{
-            service: { name: 'opbeans-node', environment: 'production' },
-            settings: {}
+          existingConfigResult={{
+            status: FETCH_STATUS.SUCCESS,
+            data: {
+              service: { name: 'opbeans-node', environment: 'production' },
+              settings: {}
+            } as AgentConfiguration
           }}
         />
       </ApmPluginContext.Provider>

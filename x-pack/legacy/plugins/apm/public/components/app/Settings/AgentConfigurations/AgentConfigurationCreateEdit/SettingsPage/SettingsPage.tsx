@@ -35,15 +35,21 @@ import { SettingFormRow } from './SettingFormRow';
 import { getOptionLabel } from '../../../../../../../../../../plugins/apm/common/agent_configuration_constants';
 import { CancelButton } from '../ServicePage/CancelButton';
 
+function removeEmpty<T>(obj: T): T {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([k, v]) => v != null && v !== '')
+  );
+}
+
 export function SettingsPage({
-  isLoadingExistingConfig,
+  isLoading,
   unsavedChanges,
   newConfig,
   setNewConfig,
   isEditMode,
   onClickEdit
 }: {
-  isLoadingExistingConfig: boolean;
+  isLoading: boolean;
   unsavedChanges: Record<string, string>;
   newConfig: AgentConfigurationIntake;
   setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
@@ -118,7 +124,9 @@ export function SettingsPage({
               <EuiFlexItem>
                 <EuiStat
                   titleSize="xs"
-                  title={getOptionLabel(newConfig.service.name)}
+                  title={
+                    isLoading ? '-' : getOptionLabel(newConfig.service.name)
+                  }
                   description={i18n.translate(
                     'xpack.apm.agentConfig.chooseService.service.name.label',
                     { defaultMessage: 'Service name' }
@@ -128,7 +136,11 @@ export function SettingsPage({
               <EuiFlexItem>
                 <EuiStat
                   titleSize="xs"
-                  title={getOptionLabel(newConfig.service.environment)}
+                  title={
+                    isLoading
+                      ? '-'
+                      : getOptionLabel(newConfig.service.environment)
+                  }
                   description={i18n.translate(
                     'xpack.apm.agentConfig.chooseService.service.environment.label',
                     { defaultMessage: 'Environment' }
@@ -162,7 +174,7 @@ export function SettingsPage({
 
             <EuiSpacer size="m" />
 
-            {isLoadingExistingConfig ? (
+            {isLoading ? (
               <div style={{ textAlign: 'center' }}>
                 <EuiLoadingSpinner size="m" />
               </div>
@@ -255,11 +267,5 @@ function renderSettings({
           }}
         />
       ))
-  );
-}
-
-function removeEmpty<T>(obj: T): T {
-  return Object.fromEntries(
-    Object.entries(obj).filter(([k, v]) => v != null && v !== '')
   );
 }

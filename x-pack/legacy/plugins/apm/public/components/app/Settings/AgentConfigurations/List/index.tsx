@@ -99,11 +99,11 @@ export function AgentConfigurationList({
     />
   );
 
-  if (status === 'failure') {
+  if (status === FETCH_STATUS.FAILURE) {
     return failurePrompt;
   }
 
-  if (status === 'success' && isEmpty(data)) {
+  if (status === FETCH_STATUS.SUCCESS && isEmpty(data)) {
     return emptyStatePrompt;
   }
 

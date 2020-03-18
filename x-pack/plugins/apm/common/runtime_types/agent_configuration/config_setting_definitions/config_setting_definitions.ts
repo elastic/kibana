@@ -92,8 +92,7 @@ export type RawConfigSettingDefinition =
   | AmountAndUnit;
 
 /*
- * Settings added here will automatically be added to  `agent_configuration/agent_configuration_intake_rt.ts`
- * and validated both client and server-side
+ * Settings added here will show up in the UI and will be validated on the client and server
  */
 export const rawConfigSettingDefinitions: RawConfigSettingDefinition[] = [
   // Active

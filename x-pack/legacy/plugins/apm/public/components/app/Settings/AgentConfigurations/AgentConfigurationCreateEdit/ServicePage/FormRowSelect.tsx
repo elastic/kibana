@@ -12,6 +12,17 @@ import {
 } from '@elastic/eui';
 import { SelectWithPlaceholder } from '../../../../../shared/SelectWithPlaceholder';
 
+interface Props {
+  title: string;
+  description: string;
+  fieldLabel: string;
+  isLoading: boolean;
+  options?: EuiSelectOptionProps[];
+  value?: string;
+  disabled: boolean;
+  onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+}
+
 export function FormRowSelect({
   title,
   description,
@@ -19,18 +30,9 @@ export function FormRowSelect({
   isLoading,
   options,
   value,
-  isDisabled,
+  disabled,
   onChange
-}: {
-  title: string;
-  description: string;
-  fieldLabel: string;
-  isLoading: boolean;
-  options?: EuiSelectOptionProps[];
-  value?: string;
-  isDisabled: boolean;
-  onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
-}) {
+}: Props) {
   return (
     <EuiDescribedFormGroup
       fullWidth
@@ -42,7 +44,7 @@ export function FormRowSelect({
           isLoading={isLoading}
           options={options}
           value={value}
-          disabled={isDisabled}
+          disabled={disabled}
           onChange={onChange}
         />
       </EuiFormRow>

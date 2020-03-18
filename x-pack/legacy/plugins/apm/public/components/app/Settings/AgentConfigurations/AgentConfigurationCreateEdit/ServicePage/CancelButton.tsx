@@ -9,11 +9,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { APMLink } from '../../../../../shared/Links/apm/APMLink';
 
-export function CancelButton({
-  color = 'primary'
-}: {
+interface Props {
   color?: EuiButtonEmptyColor;
-}) {
+}
+
+export function CancelButton({ color = 'primary' }: Props) {
   return (
     <APMLink path={`/settings/agent-configuration`}>
       <EuiButtonEmpty color={color}>

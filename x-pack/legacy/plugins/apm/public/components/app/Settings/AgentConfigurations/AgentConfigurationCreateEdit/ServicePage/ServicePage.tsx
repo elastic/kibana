@@ -20,7 +20,7 @@ import {
   omitAllOption,
   getOptionLabel
 } from '../../../../../../../../../../plugins/apm/common/agent_configuration_constants';
-import { useFetcher } from '../../../../../../hooks/useFetcher';
+import { useFetcher, FETCH_STATUS } from '../../../../../../hooks/useFetcher';
 import { FormRowSelect } from './FormRowSelect';
 import { CancelButton } from './CancelButton';
 
@@ -120,10 +120,10 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
           'xpack.apm.agentConfig.servicePage.service.fieldLabel',
           { defaultMessage: 'Service Name' }
         )}
-        isLoading={serviceNamesStatus === 'loading'}
+        isLoading={serviceNamesStatus === FETCH_STATUS.LOADING}
         options={serviceNameOptions}
         value={newConfig.service.name}
-        isDisabled={serviceNamesStatus === 'loading'}
+        disabled={serviceNamesStatus === FETCH_STATUS.LOADING}
         onChange={e => {
           e.preventDefault();
           const name = e.target.value;
@@ -151,10 +151,12 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
           'xpack.apm.agentConfig.servicePage.environment.fieldLabel',
           { defaultMessage: 'Service Environment' }
         )}
-        isLoading={environmentStatus === 'loading'}
+        isLoading={environmentStatus === FETCH_STATUS.LOADING}
         options={environmentOptions}
         value={newConfig.service.environment}
-        isDisabled={!newConfig.service.name || environmentStatus === 'loading'}
+        disabled={
+          !newConfig.service.name || environmentStatus === FETCH_STATUS.LOADING
+        }
         onChange={e => {
           e.preventDefault();
           const environment = e.target.value;
@@ -179,11 +181,11 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
             type="submit"
             fill
             onClick={onClickNext}
-            isLoading={agentNameStatus === 'loading'}
+            isLoading={agentNameStatus === FETCH_STATUS.LOADING}
             isDisabled={
               !newConfig.service.name ||
               !newConfig.service.environment ||
-              agentNameStatus === 'loading'
+              agentNameStatus === FETCH_STATUS.LOADING
             }
           >
             {i18n.translate(

@@ -7,8 +7,12 @@
 import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FetcherResult, FETCH_STATUS } from '../../../../../hooks/useFetcher';
 import { history } from '../../../../../utils/history';
-import { AgentConfigurationIntake } from '../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/configuration_types';
+import {
+  AgentConfigurationIntake,
+  AgentConfiguration
+} from '../../../../../../../../../plugins/apm/common/runtime_types/agent_configuration/configuration_types';
 import { ServicePage } from './ServicePage/ServicePage';
 import { SettingsPage } from './SettingsPage/SettingsPage';
 import { fromQuery, toQuery } from '../../../../shared/Links/url_helpers';
@@ -47,20 +51,19 @@ function getUnsavedChanges({
 }
 
 export function AgentConfigurationCreateEdit({
-  isLoadingExistingConfig,
   pageStep,
-  existingConfig
+  existingConfigResult
 }: {
-  isLoadingExistingConfig: boolean;
   pageStep: PageStep;
-  existingConfig?: AgentConfigurationIntake;
+  existingConfigResult?: FetcherResult<AgentConfiguration>;
 }) {
   const [newConfig, setNewConfig] = useState<AgentConfigurationIntake>({
     agent_name: undefined,
     service: {},
     settings: {}
   });
-  const isEditMode = Boolean(existingConfig);
+  const isEditMode = Boolean(existingConfigResult);
+  const existingConfig = existingConfigResult?.data;
 
   // update newConfig when existingConfig has loaded
   useEffect(() => {
@@ -114,7 +117,7 @@ export function AgentConfigurationCreateEdit({
 
       {pageStep === 'choose-settings-step' && (
         <SettingsPage
-          isLoadingExistingConfig={isLoadingExistingConfig}
+          isLoading={existingConfigResult?.status === FETCH_STATUS.LOADING}
           unsavedChanges={unsavedChanges}
           onClickEdit={() => setPage('choose-service-step')}
           newConfig={newConfig}
@@ -123,7 +126,10 @@ export function AgentConfigurationCreateEdit({
         />
       )}
 
+      {/*
+      TODO: Add review step
       {pageStep === 'review-step' && <div>Review will be here </div>}
+      */}
     </>
   );
 }

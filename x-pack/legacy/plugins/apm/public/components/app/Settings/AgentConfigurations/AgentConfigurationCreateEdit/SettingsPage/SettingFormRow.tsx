@@ -95,7 +95,7 @@ function FormRow({
           <EuiFlexItem grow={false}>
             <EuiFieldNumber
               placeholder={setting.placeholder || defaultInputPlaceholder}
-              value={amount as any}
+              value={(amount as unknown) as number}
               onChange={e =>
                 onChange(
                   setting.key,
@@ -124,8 +124,9 @@ function FormRow({
     }
 
     default:
-      // @ts-ignore
-      throw new Error(`Unknown type "${setting.type}"`);
+      throw new Error(
+        `Unknown type "${(setting as ConfigSettingDefinition).type}"`
+      );
   }
 }
 
@@ -149,7 +150,14 @@ export function SettingFormRow({
         <h3>
           {setting.label}{' '}
           {isUnsaved && (
-            <EuiIconTip type={'dot'} color={'warning'} content={'Unsaved'} />
+            <EuiIconTip
+              type={'dot'}
+              color={'warning'}
+              content={i18n.translate(
+                'xpack.apm.agentConfig.unsavedSetting.tooltip',
+                { defaultMessage: 'Unsaved' }
+              )}
+            />
           )}
         </h3>
       }

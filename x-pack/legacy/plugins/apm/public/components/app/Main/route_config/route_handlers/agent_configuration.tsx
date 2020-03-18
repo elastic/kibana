@@ -19,7 +19,7 @@ export function EditAgentConfigurationRouteHandler() {
   // @ts-ignore
   const { name, environment, pageStep } = toQuery(search);
 
-  const { data, status } = useFetcher(
+  const res = useFetcher(
     callApmApi => {
       return callApmApi({
         pathname: '/api/apm/settings/agent-configuration/view',
@@ -32,9 +32,8 @@ export function EditAgentConfigurationRouteHandler() {
   return (
     <Settings>
       <AgentConfigurationCreateEdit
-        isLoadingExistingConfig={status === 'loading'}
         pageStep={pageStep || 'choose-settings-step'}
-        existingConfig={data}
+        existingConfigResult={res}
       />
     </Settings>
   );
@@ -50,7 +49,6 @@ export function CreateAgentConfigurationRouteHandler() {
   return (
     <Settings>
       <AgentConfigurationCreateEdit
-        isLoadingExistingConfig={false}
         pageStep={pageStep || 'choose-service-step'}
       />
     </Settings>

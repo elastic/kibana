@@ -41,11 +41,11 @@ export function ConfirmDeleteModal({ config, onCancel, onConfirm }: Props) {
         }}
         cancelButtonText={i18n.translate(
           'xpack.apm.agentConfig.deleteModal.cancel',
-          { defaultMessage: `No, cancel` }
+          { defaultMessage: `Cancel` }
         )}
         confirmButtonText={i18n.translate(
           'xpack.apm.agentConfig.deleteModal.confirm',
-          { defaultMessage: `Yes, delete` }
+          { defaultMessage: `Delete` }
         )}
         confirmButtonDisabled={isDeleting}
         buttonColor="danger"
@@ -53,7 +53,7 @@ export function ConfirmDeleteModal({ config, onCancel, onConfirm }: Props) {
       >
         <p>
           {i18n.translate('xpack.apm.agentConfig.deleteModal.text', {
-            defaultMessage: `You are about to delete the configuration for service "{serviceName}" and environment "{environment}". Do you wish to continue?`,
+            defaultMessage: `You are about to delete the configuration for service "{serviceName}" and environment "{environment}".`,
             values: {
               serviceName: getOptionLabel(config.service.name),
               environment: getOptionLabel(config.service.environment)
