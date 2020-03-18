@@ -74,9 +74,9 @@
 # Observability UIs
 /x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
 /x-pack/plugins/infra/ @elastic/logs-metrics-ui
-/x-pack/plugins/ingest_manager/ @elastic/ingest
-/x-pack/legacy/plugins/ingest_manager/ @elastic/ingest
-/x-pack/plugins/observability/ @elastic/logs-metrics-ui @elastic/apm-ui @elastic/uptime @elastic/ingest
+/x-pack/plugins/ingest_manager/ @elastic/ingest-management
+/x-pack/legacy/plugins/ingest_manager/ @elastic/ingest-management
+/x-pack/plugins/observability/ @elastic/logs-metrics-ui @elastic/apm-ui @elastic/uptime @elastic/ingest-management
 /x-pack/legacy/plugins/monitoring/ @elastic/stack-monitoring-ui
 
 # Machine Learning
