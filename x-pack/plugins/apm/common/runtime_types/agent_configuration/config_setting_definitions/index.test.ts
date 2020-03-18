@@ -63,7 +63,7 @@ describe('filterByAgent', () => {
   });
 });
 
-function hasSetting(agentName: AgentName, settingKey) {
+function hasSetting(agentName: AgentName, settingKey: string) {
   const definitions = configSettingDefinitions.filter(filterByAgent(agentName));
   return definitions.some(def => def.key === settingKey);
 }
