@@ -22,6 +22,8 @@ export interface AgentAction extends SavedObjectAttributes {
   sent_at?: string;
 }
 
+export type NewAgentAction = Pick<AgentAction, 'type' | 'data' | 'sent_at'>;
+
 export interface AgentEvent {
   type: 'STATE' | 'ERROR' | 'ACTION_RESULT' | 'ACTION';
   subtype: // State

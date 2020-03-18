@@ -1,0 +1,93 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { NewAgentActionSchema } from '../../types/models';
+import {
+  KibanaResponseFactory,
+  RequestHandlerContext,
+  SavedObjectsClientContract,
+} from 'kibana/server';
+import { savedObjectsClientMock } from '../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
+import { httpServerMock } from '../../../../../../src/core/server/http/http_server.mocks';
+import { ActionsService } from '../../services/agents';
+import { AgentAction } from '../../../common/types/models';
+import { postNewAgentActionHandlerBuilder } from './actions_handlers';
+import { PostNewAgentActionResponse } from '../../../common/types/rest_spec';
+
+describe('test actions handlers schema', () => {
+  it('validate that agent schema is valid', async () => {
+    expect(
+      NewAgentActionSchema.validate({
+        type: 'CONFIG_CHANGE',
+        data: 'data',
+        sent_at: '2020-03-14T19:45:02.620Z',
+      })
+    ).toBeTruthy();
+  });
+
+  it('validate that agent schema is invalid when required properties are not provided', async () => {
+    expect(() => {
+      NewAgentActionSchema.validate({
+        data: 'data',
+        sent_at: '2020-03-14T19:45:02.620Z',
+      });
+    }).toThrowError();
+  });
+});
+
+describe('test actions handlers', () => {
+  let mockResponse: jest.Mocked<KibanaResponseFactory>;
+  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+
+  beforeEach(() => {
+    mockSavedObjectsClient = savedObjectsClientMock.create();
+    mockResponse = httpServerMock.createResponseFactory();
+  });
+
+  it('should succeed on valid new agent action', async () => {
+    const mockRequest = httpServerMock.createKibanaRequest({
+      headers: {
+        authorization: 'ApiKey TmVqTDBIQUJsRkw1em52R1ZIUF86NS1NaTItdHFUTHFHbThmQW1Fb0ljUQ==',
+      },
+      body: {
+        action: {
+          type: 'CONFIG_CHANGE',
+          data: 'data',
+          sent_at: '2020-03-14T19:45:02.620Z',
+        },
+      },
+    });
+
+    const agentAction = ({
+      type: 'CONFIG_CHANGE',
+      id: 'action1',
+      sent_at: '2020-03-14T19:45:02.620Z',
+      timestamp: '2019-01-04T14:32:03.36764-05:00',
+      created_at: '2020-03-14T19:45:02.620Z',
+    } as unknown) as AgentAction;
+
+    const actionsService: ActionsService = {
+      getAgentByAccessAPIKeyId: jest.fn().mockReturnValueOnce({
+        id: 'agent',
+      }),
+      getSavedObjectsClientContract: jest.fn().mockReturnValueOnce(mockSavedObjectsClient),
+      updateAgentActions: jest.fn().mockReturnValueOnce(agentAction),
+    } as jest.Mocked<ActionsService>;
+
+    const postNewAgentActionHandler = postNewAgentActionHandlerBuilder(actionsService);
+    await postNewAgentActionHandler(
+      ({} as unknown) as RequestHandlerContext,
+      mockRequest,
+      mockResponse
+    );
+
+    const expectedAgentActionResponse = (mockResponse.ok.mock.calls[0][0]
+      ?.body as unknown) as PostNewAgentActionResponse;
+
+    expect(expectedAgentActionResponse.item).toEqual(agentAction);
+    expect(expectedAgentActionResponse.success).toEqual(true);
+  });
+});
