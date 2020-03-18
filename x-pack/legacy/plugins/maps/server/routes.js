@@ -5,6 +5,7 @@
  */
 
 import {
+  EMS_APP_NAME,
   EMS_CATALOGUE_PATH,
   EMS_FILES_API_PATH,
   EMS_FILES_CATALOGUE_PATH,
@@ -38,7 +39,8 @@ export function initRoutes(server, licenseUid) {
   if (mapConfig.includeElasticMapsService) {
     emsClient = new EMSClient({
       language: i18n.getLocale(),
-      kbnVersion: serverConfig.get('pkg.version'),
+      appVersion: serverConfig.get('pkg.version'),
+      appName: EMS_APP_NAME,
       fileApiUrl: mapConfig.emsFileApiUrl,
       tileApiUrl: mapConfig.emsTileApiUrl,
       landingPageUrl: mapConfig.emsLandingPageUrl,

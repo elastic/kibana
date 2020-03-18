@@ -39,7 +39,7 @@ import {
   ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/analytics';
 import { LoadingPanel } from '../loading_panel';
-import { getColumnData } from './column_data';
+import { getColumnData, ACTUAL_CLASS_ID } from './column_data';
 
 const defaultPanelWidth = 500;
 
@@ -205,11 +205,13 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     const cellValue = columnsData[rowIndex][columnId];
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
-      setCellProps({
-        style: {
-          backgroundColor: `rgba(0, 179, 164, ${cellValue})`,
-        },
-      });
+      if (columnId !== ACTUAL_CLASS_ID) {
+        setCellProps({
+          style: {
+            backgroundColor: `rgba(0, 179, 164, ${cellValue})`,
+          },
+        });
+      }
     }, [rowIndex, columnId, setCellProps]);
     return (
       <span>{typeof cellValue === 'number' ? `${Math.round(cellValue * 100)}%` : cellValue}</span>
