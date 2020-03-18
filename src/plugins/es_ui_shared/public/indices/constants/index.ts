@@ -17,10 +17,11 @@
  * under the License.
  */
 
-export { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from './constants';
+import { indexPatterns } from '../../../../data/public';
 
-export {
-  indexNameBeginsWithPeriod,
-  findIllegalCharactersInIndexName,
-  indexNameContainsSpaces,
-} from './validate';
+export const INDEX_ILLEGAL_CHARACTERS_VISIBLE = [...indexPatterns.ILLEGAL_CHARACTERS_VISIBLE, '*'];
+
+// Insert the comma into the middle, so it doesn't look as if it has grammatical meaning when
+// these characters are rendered in the UI.
+const insertionIndex = Math.floor(indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.length / 2);
+INDEX_ILLEGAL_CHARACTERS_VISIBLE.splice(insertionIndex, 0, ',');

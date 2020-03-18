@@ -16,12 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { each, union } from 'lodash';
+import { Filter } from '../../es_query';
+import { dedupFilters } from './dedup_filters';
 
-import { indexPatterns } from '../../../../../plugins/data/public';
+/**
+ * Remove duplicate filters from an array of filters
+ *
+ * @param {array} filters The filters to remove duplicates from
+ * @param {object} comparatorOptions - Parameters to use for comparison
 
-export const INDEX_ILLEGAL_CHARACTERS_VISIBLE = [...indexPatterns.ILLEGAL_CHARACTERS_VISIBLE, '*'];
+ * @returns {object} The original filters array with duplicates removed
+ */
+export const uniqFilters = (filters: Filter[], comparatorOptions: any = {}) => {
+  let results: Filter[] = [];
 
-// Insert the comma into the middle, so it doesn't look as if it has grammatical meaning when
-// these characters are rendered in the UI.
-const insertionIndex = Math.floor(indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.length / 2);
-INDEX_ILLEGAL_CHARACTERS_VISIBLE.splice(insertionIndex, 0, ',');
+  each(filters, (filter: Filter) => {
+    results = union(results, dedupFilters(results, [filter]), comparatorOptions);
+  });
+
+  return results;
+};

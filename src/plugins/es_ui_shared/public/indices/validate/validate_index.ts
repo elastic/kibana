@@ -16,24 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { each, union } from 'lodash';
-import { dedupFilters } from './dedup_filters';
-import { Filter } from '../../../../common';
 
-/**
- * Remove duplicate filters from an array of filters
- *
- * @param {array} filters The filters to remove duplicates from
- * @param {object} comparatorOptions - Parameters to use for comparison
+import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from '../constants';
 
- * @returns {object} The original filters array with duplicates removed
- */
-export const uniqFilters = (filters: Filter[], comparatorOptions: any = {}) => {
-  let results: Filter[] = [];
+// Names beginning with periods are reserved for hidden indices.
+export function indexNameBeginsWithPeriod(indexName?: string): boolean {
+  if (indexName === undefined) {
+    return false;
+  }
+  return indexName[0] === '.';
+}
 
-  each(filters, (filter: Filter) => {
-    results = union(results, dedupFilters(results, [filter]), comparatorOptions);
-  });
+export function findIllegalCharactersInIndexName(indexName: string): string[] {
+  const illegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.reduce(
+    (chars: string[], char: string): string[] => {
+      if (indexName.includes(char)) {
+        chars.push(char);
+      }
 
-  return results;
-};
+      return chars;
+    },
+    []
+  );
+
+  return illegalCharacters;
+}
+
+export function indexNameContainsSpaces(indexName: string): boolean {
+  return indexName.includes(' ');
+}

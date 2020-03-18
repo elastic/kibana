@@ -19,7 +19,7 @@
 
 import { filter, find } from 'lodash';
 import { compareFilters, FilterCompareOptions } from './compare_filters';
-import { Filter } from '../../../../common';
+import { Filter } from '../../es_query';
 
 /**
  * Combine 2 filter collections, removing duplicates

@@ -18,7 +18,7 @@
  */
 
 import { uniqFilters } from './uniq_filters';
-import { buildQueryFilter, Filter, FilterStateStore } from '../../../../common';
+import { buildQueryFilter, Filter, FilterStateStore } from '../../es_query';
 
 describe('filter manager utilities', () => {
   describe('niqFilter', () => {
