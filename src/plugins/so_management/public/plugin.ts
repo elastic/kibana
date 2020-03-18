@@ -52,10 +52,10 @@ export class SavedObjectsManagementPlugin
   ): SavedObjectsManagementPluginSetup {
     home.featureCatalogue.register({
       id: 'saved_objects',
-      title: i18n.translate('management.objects.savedObjectsTitle', {
+      title: i18n.translate('savedObjectsManagement.objects.savedObjectsTitle', {
         defaultMessage: 'Saved Objects',
       }),
-      description: i18n.translate('management.objects.savedObjectsDescription', {
+      description: i18n.translate('savedObjectsManagement.objects.savedObjectsDescription', {
         defaultMessage:
           'Import, export, and manage your saved searches, visualizations, and dashboards.',
       }),

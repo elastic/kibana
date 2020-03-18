@@ -35,6 +35,7 @@
     "newsfeed": "src/plugins/newsfeed",
     "regionMap": "src/legacy/core_plugins/region_map",
     "savedObjects": "src/plugins/saved_objects",
+    "savedObjectsManagement": "src/plugins/so_management",
     "server": "src/legacy/server",
     "statusPage": "src/legacy/core_plugins/status_page",
     "telemetry": [
