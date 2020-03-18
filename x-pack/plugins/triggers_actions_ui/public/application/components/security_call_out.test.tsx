@@ -30,7 +30,7 @@ describe('security call out', () => {
   test('renders nothing while health is loading', async () => {
     const health = jest.fn();
 
-    health.mockImplementationOnce(() => waitForUseEffect());
+    health.mockImplementationOnce(() => new Promise(() => {}));
 
     let component: ShallowWrapper | undefined;
     await act(async () => {
