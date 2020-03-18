@@ -8,6 +8,7 @@ import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
 // @ts-ignore
 import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
+import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { MapListing } from './components/map_listing';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import {
@@ -27,7 +28,6 @@ import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { Start as InspectorPluginStart } from '../../../plugins/inspector/public';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -49,7 +49,7 @@ interface MapsPluginSetupDependencies {
 interface MapsPluginStartDependencies {
   np: {
     data: DataPublicPluginStart;
-    inspector: InspectorPluginStart;
+    inspector: InspectorStartContract;
     file_upload: any; // TODO: Export type from file upload and use here
   };
 }
