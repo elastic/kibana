@@ -28,7 +28,7 @@ describe('Put payload schema', () => {
         kibana: [{ feature: { foo: ['!foo'] } }],
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[kibana.0.feature.foo]: only a-z, A-Z, 0-9, '_', and '-' are allowed"`
+      `"[kibana.0.feature.foo.0]: only a-z, A-Z, 0-9, '_', and '-' are allowed"`
     );
   });
 
