@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import url from 'url';
-
 import { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 import { toastNotifications } from '../../notify/toasts';
 import { npSetup } from '../../new_platform';
