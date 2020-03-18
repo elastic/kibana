@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { set as _set } from 'lodash/fp';
-import { SavedObjectsFindOptions } from '../../../../../../../../src/core/server';
+import {
+  SavedObjectsFindOptions,
+  SavedObjectsFindResponse,
+} from '../../../../../../../../src/core/server';
 
 import {
   ExportTimelineSavedObjectsClient,
@@ -27,41 +30,47 @@ import { transformDataToNdjson } from '../../detection_engine/routes/rules/utils
 import { NoteSavedObject } from '../../note/types';
 import { PinnedEventSavedObject } from '../../pinned_event/types';
 
-const getAllSavedNote = async (
+const getAllSavedPinnedEvents = (
+  pinnedEventsSavedObjects: SavedObjectsFindResponse<PinnedEventSavedObject>
+): PinnedEventSavedObject[] => {
+  return pinnedEventsSavedObjects != null
+    ? pinnedEventsSavedObjects.saved_objects.map(savedObject =>
+        convertSavedObjectToSavedPinnedEvent(savedObject)
+      )
+    : [];
+};
+
+const getPinnedEventsByTimelineId = (
   savedObjectsClient: ExportTimelineSavedObjectsClient,
-  options: SavedObjectsFindOptions
-): Promise<NoteSavedObject[]> => {
-  const savedObjects = await savedObjectsClient.find(options);
-  return savedObjects != null
-    ? savedObjects.saved_objects.map(savedObject => convertSavedObjectToSavedNote(savedObject))
+  timelineId: string
+): Promise<SavedObjectsFindResponse<PinnedEventSavedObject>> => {
+  const options: SavedObjectsFindOptions = {
+    type: pinnedEventSavedObjectType,
+    search: timelineId,
+    searchFields: ['timelineId'],
+  };
+  return savedObjectsClient.find(options);
+};
+
+const getAllSavedNote = (
+  noteSavedObjects: SavedObjectsFindResponse<NoteSavedObject>
+): NoteSavedObject[] => {
+  return noteSavedObjects != null
+    ? noteSavedObjects.saved_objects.map(savedObject => convertSavedObjectToSavedNote(savedObject))
     : [];
 };
 
 const getNotesByTimelineId = (
   savedObjectsClient: ExportTimelineSavedObjectsClient,
   timelineId: string
-): Promise<NoteSavedObject[]> => {
+): Promise<SavedObjectsFindResponse<NoteSavedObject>> => {
   const options: SavedObjectsFindOptions = {
     type: noteSavedObjectType,
     search: timelineId,
     searchFields: ['timelineId'],
   };
 
-  return getAllSavedNote(savedObjectsClient, options);
-};
-
-const getNotesAndPinnedEventsByTimelineId = async (
-  savedObjectsClient: ExportTimelineSavedObjectsClient,
-  timelineId: string
-): Promise<NotesAndPinnedEventsByTimelineId> => {
-  return {
-    [timelineId]: {
-      notes: await Promise.resolve(getNotesByTimelineId(savedObjectsClient, timelineId)),
-      pinnedEvents: await Promise.resolve(
-        getPinnedEventsByTimelineId(savedObjectsClient, timelineId)
-      ),
-    },
-  };
+  return savedObjectsClient.find(options);
 };
 
 const getGlobalEventNotesByTimelineId = (currentNotes: NoteSavedObject[]): ExportedNotes => {
@@ -98,31 +107,6 @@ const getExportedNotedandPinnedEvents = (
     ...getGlobalEventNotesByTimelineId(currentNote),
     pinnedEventIds: getPinnedEventsIdsByTimelineId(currentPinnedEvents),
   };
-};
-
-const getAllSavedPinnedEvents = async (
-  savedObjectsClient: ExportTimelineSavedObjectsClient,
-  options: SavedObjectsFindOptions
-): Promise<PinnedEventSavedObject[]> => {
-  const savedObjects = await savedObjectsClient.find(options);
-
-  return savedObjects != null
-    ? savedObjects.saved_objects.map(savedObject =>
-        convertSavedObjectToSavedPinnedEvent(savedObject)
-      )
-    : [];
-};
-
-const getPinnedEventsByTimelineId = (
-  savedObjectsClient: ExportTimelineSavedObjectsClient,
-  timelineId: string
-): Promise<PinnedEventSavedObject[]> => {
-  const options: SavedObjectsFindOptions = {
-    type: pinnedEventSavedObjectType,
-    search: timelineId,
-    searchFields: ['timelineId'],
-  };
-  return getAllSavedPinnedEvents(savedObjectsClient, options);
 };
 
 const getPinnedEventsIdsByTimelineId = (
@@ -162,25 +146,50 @@ const getTimelinesFromObjects = async (
     savedObjectsClient,
     request.body.objects
   );
+  // To Do for feature freeze
+  // if (timelines.length !== request.body.objects.length) {
+  //   //figure out which is missing to tell user
+  // }
 
-  const notesAndPinnedEvents: NotesAndPinnedEventsByTimelineId[] = await Promise.all(
-    request.body.objects.reduce(
-      (acc, timelineId) =>
-        timelineId != null
-          ? [...acc, getNotesAndPinnedEventsByTimelineId(savedObjectsClient, timelineId)]
-          : [...acc],
-      [] as Array<Promise<NotesAndPinnedEventsByTimelineId>>
-    )
+  const [notes, pinnedEventIds] = await Promise.all([
+    Promise.all(
+      request.body.objects.map(timelineId => getNotesByTimelineId(savedObjectsClient, timelineId))
+    ),
+    Promise.all(
+      request.body.objects.map(timelineId =>
+        getPinnedEventsByTimelineId(savedObjectsClient, timelineId)
+      )
+    ),
+  ]);
+
+  const myNotes = notes.reduce<NoteSavedObject[]>(
+    (acc, note) => [...acc, ...getAllSavedNote(note)],
+    []
   );
 
-  return (
-    timelines?.map(timeline => {
-      return {
-        ...timeline,
-        ...getExportedNotedandPinnedEvents(notesAndPinnedEvents, timeline.savedObjectId),
-      };
-    }) ?? []
+  const myPinnedEventIds = pinnedEventIds.reduce<PinnedEventSavedObject[]>(
+    (acc, pinnedEventId) => [...acc, ...getAllSavedPinnedEvents(pinnedEventId)],
+    []
   );
+
+  const myResponse = request.body.objects.reduce<ExportedTimelines[]>((acc, timelineId) => {
+    const myTimeline = timelines.find(t => t.savedObjectId === timelineId);
+    if (myTimeline != null) {
+      const timelineNotes = myNotes.filter(n => n.timelineId === timelineId);
+      const timelinePinnedEventIds = myPinnedEventIds.filter(p => p.timelineId === timelineId);
+      return [
+        ...acc,
+        {
+          ...myTimeline,
+          ...getGlobalEventNotesByTimelineId(timelineNotes),
+          pinnedEventIds: getPinnedEventsIdsByTimelineId(timelinePinnedEventIds),
+        },
+      ];
+    }
+    return acc;
+  }, []);
+
+  return myResponse ?? [];
 };
 
 export const getExportTimelineByObjectIds = async ({
