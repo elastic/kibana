@@ -86,7 +86,9 @@ export function generateMappings(fields: Field[]): Mappings {
         fieldProps.type = 'object';
         break;
       case 'array':
-        // TODO what happens when object_type is not set? beats implementation unclear
+        // this assumes array fields were validated in an earlier step
+        // adding an array field with no object_type would result in an error
+        // when the template is added to ES
         if (field.object_type) {
           fieldProps.type = field.object_type;
         }

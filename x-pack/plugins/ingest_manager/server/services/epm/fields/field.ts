@@ -129,13 +129,15 @@ function dedupFields(fields: Fields): Fields {
   return dedupedFields;
 }
 
-/** validateAliasFields takes the given fields and verifies that all fields of type
- * alias point to existing fields.
+/** validateFields takes the given fields and verifies:
  *
- * Invalid alias fields are silently removed.
+ * - all fields of type alias point to existing fields.
+ * - all fields of type array have a property object_type
+ *
+ * Invalid fields are silently removed.
  */
 
-function validateAliasFields(fields: Fields, allFields: Fields): Fields {
+function validateFields(fields: Fields, allFields: Fields): Fields {
   const validatedFields: Fields = [];
 
   fields.forEach(field => {
@@ -143,11 +145,15 @@ function validateAliasFields(fields: Fields, allFields: Fields): Fields {
       if (field.path && getField(allFields, field.path.split('.'))) {
         validatedFields.push(field);
       }
+    } else if (field.type === 'array') {
+      if (field.object_type) {
+        validatedFields.push(field);
+      }
     } else {
       validatedFields.push(field);
     }
     if (field.fields) {
-      field.fields = validateAliasFields(field.fields, allFields);
+      field.fields = validateFields(field.fields, allFields);
     }
   });
   return validatedFields;
@@ -176,7 +182,7 @@ export const getField = (fields: Fields, pathNames: string[]): Field | undefined
 export function processFields(fields: Fields): Fields {
   expandFields(fields);
   const dedupedFields = dedupFields(fields);
-  return validateAliasFields(dedupedFields, dedupedFields);
+  return validateFields(dedupedFields, dedupedFields);
 }
 
 const isFields = (path: string) => {

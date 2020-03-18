@@ -15,4 +15,9 @@
 - name: invalidalias
   type: alias
   path: euid
+- name: validarray
+  type: array
+  object_type: integer
+- name: invalidarray
+  type: array
 

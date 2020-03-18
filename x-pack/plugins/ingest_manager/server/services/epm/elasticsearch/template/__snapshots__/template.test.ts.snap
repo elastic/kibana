@@ -85,6 +85,9 @@ exports[`tests loading base.yml: base.yml 1`] = `
       "myalias": {
         "type": "alias",
         "path": "user.euid"
+      },
+      "validarray": {
+        "type": "integer"
       }
     }
   },
