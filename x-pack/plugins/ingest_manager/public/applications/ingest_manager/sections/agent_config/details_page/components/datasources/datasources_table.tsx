@@ -13,6 +13,8 @@ import {
   EuiTextColor,
   EuiContextMenuItem,
   EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { AgentConfig, Datasource } from '../../../../../types';
 import { TableRowActions } from '../../../components/table_row_actions';
@@ -141,17 +143,18 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
         ),
         render(packageTitle: string, datasource: InMemoryDatasource) {
           return (
-            <>
+            <EuiFlexGroup gutterSize="s" alignItems="center">
               {datasource.package && (
-                <PackageIcon
-                  packageName={datasource.package.name}
-                  version={datasource.package.version}
-                  size="m"
-                  style={{ marginRight: '1ch' }}
-                />
+                <EuiFlexItem grow={false}>
+                  <PackageIcon
+                    packageName={datasource.package.name}
+                    version={datasource.package.version}
+                    size="m"
+                  />
+                </EuiFlexItem>
               )}
-              {packageTitle}
-            </>
+              <EuiFlexItem grow={false}>{packageTitle}</EuiFlexItem>
+            </EuiFlexGroup>
           );
         },
       },

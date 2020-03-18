@@ -8,7 +8,7 @@ import React, { Fragment, useMemo, useRef, useState } from 'react';
 import { EuiCallOut, EuiConfirmModal, EuiOverlayMask, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useCore, sendRequest, sendDeleteDatasource } from '../../../hooks';
+import { useCore, sendRequest, sendDeleteDatasource, useConfig } from '../../../hooks';
 import { AGENT_API_ROUTES } from '../../../../../../common/constants';
 import { AgentConfig } from '../../../../../../common/types/models';
 
@@ -29,6 +29,9 @@ export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
   children,
 }) => {
   const { notifications } = useCore();
+  const {
+    fleet: { enabled: isFleetEnabled },
+  } = useConfig();
   const [datasources, setDatasources] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isLoadingAgentsCount, setIsLoadingAgentsCount] = useState<boolean>(false);
@@ -38,7 +41,7 @@ export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
 
   const fetchAgentsCount = useMemo(
     () => async () => {
-      if (isLoadingAgentsCount) {
+      if (isLoadingAgentsCount || !isFleetEnabled) {
         return;
       }
       setIsLoadingAgentsCount(true);
@@ -54,7 +57,7 @@ export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
       setAgentsCount(data?.total || 0);
       setIsLoadingAgentsCount(false);
     },
-    [agentConfig.id, isLoadingAgentsCount]
+    [agentConfig.id, isFleetEnabled, isLoadingAgentsCount]
   );
 
   const deleteDatasourcesPrompt = useMemo(
