@@ -57,6 +57,20 @@ function useCytoscape(options: cytoscape.CytoscapeOptions) {
   return [ref, cy] as [React.MutableRefObject<any>, cytoscape.Core | undefined];
 }
 
+function rotatePoint(
+  { x, y }: { x: number; y: number },
+  degreesRotated: number
+) {
+  const radiansPerDegree = Math.PI / 180;
+  const θ = radiansPerDegree * degreesRotated;
+  const cosθ = Math.cos(θ);
+  const sinθ = Math.sin(θ);
+  return {
+    x: x * cosθ - y * sinθ,
+    y: x * sinθ + y * cosθ
+  };
+}
+
 function getLayoutOptions(
   selectedRoots: string[],
   height: number,
@@ -71,10 +85,11 @@ function getLayoutOptions(
     animate: true,
     animationEasing: animationOptions.easing,
     animationDuration: animationOptions.duration,
-    // Rotate nodes from top -> bottom to display left -> right
     // @ts-ignore
-    transform: (node: any, { x, y }: cytoscape.Position) => ({ x: y, y: -x }),
-    // swap width/height of boundingBox to compensation for the rotation
+    // Rotate nodes counter-clockwise to transform layout from top→bottom to left→right.
+    // The extra 5° achieves the effect of separating overlapping taxi-styled edges.
+    transform: (node: any, pos: cytoscape.Position) => rotatePoint(pos, -95),
+    // swap width/height of boundingBox to compensate for the rotation
     boundingBox: { x1: 0, y1: 0, w: height, h: width }
   };
 }
