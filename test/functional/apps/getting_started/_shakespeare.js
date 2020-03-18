@@ -23,6 +23,7 @@ export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
+  const security = getService('security');
   const PageObjects = getPageObjects([
     'console',
     'common',
@@ -46,9 +47,14 @@ export default function({ getService, getPageObjects }) {
         'Load empty_kibana and Shakespeare Getting Started data\n' +
           'https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html'
       );
+      await security.testUser.setRoles(['kibana_admin', 'test_shakespeare_reader']);
       await esArchiver.load('empty_kibana', { skipExisting: true });
       log.debug('Load shakespeare data');
       await esArchiver.loadIfNeeded('getting_started/shakespeare');
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('should create shakespeare index pattern', async function() {
