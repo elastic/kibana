@@ -65,10 +65,12 @@ const ErrorGroupList: React.FC<Props> = props => {
               defaultMessage: 'Group ID'
             })}{' '}
             <EuiIconTip
-              size="m"
-              type="iInCircle"
+              size="s"
+              type="questionInCircle"
               color="subdued"
-              className="eui-alignTop"
+              iconProps={{
+                className: 'eui-alignTop'
+              }}
               content={i18n.translate(
                 'xpack.apm.errorsTable.groupIdColumnDescription',
                 {
