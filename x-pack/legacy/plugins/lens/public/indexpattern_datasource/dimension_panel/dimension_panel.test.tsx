@@ -34,12 +34,6 @@ jest.mock('ui/new_platform');
 jest.mock('../loader');
 jest.mock('../state_helpers');
 
-// Used by indexpattern plugin, which is a dependency of a dependency
-jest.mock('ui/chrome');
-// Contains old and new platform data plugins, used for interpreter and filter ratio
-jest.mock('ui/new_platform');
-jest.mock('plugins/data/setup', () => ({ data: { query: { ui: {} } } }));
-
 const expectedIndexPatterns = {
   1: {
     id: '1',
