@@ -4,28 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PathReporter } from 'io-ts/lib/PathReporter';
-import { isRight } from 'fp-ts/lib/Either';
-import { getApiPath } from '../../lib/helper';
-import { REST_API_URLS } from '../../../common/constants/rest_api';
+import { API_URLS } from '../../../common/constants';
 import { StatesIndexStatus, StatesIndexStatusType } from '../../../common/runtime_types';
+import { apiService } from './utils';
 
-interface ApiRequest {
-  basePath: string;
-}
-
-export const fetchIndexStatus = async ({ basePath }: ApiRequest): Promise<StatesIndexStatus> => {
-  const url = getApiPath(REST_API_URLS.INDEX_STATUS, basePath);
-
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-  const responseData = await response.json();
-  const decoded = StatesIndexStatusType.decode(responseData);
-  PathReporter.report(decoded);
-  if (isRight(decoded)) {
-    return decoded.right;
-  }
-  throw PathReporter.report(decoded);
+export const fetchIndexStatus = async (): Promise<StatesIndexStatus> => {
+  return await apiService.get(API_URLS.INDEX_STATUS, undefined, StatesIndexStatusType);
 };
