@@ -29,4 +29,5 @@ export const stepAboutDefaultValue: AboutStepRule = {
     title: DEFAULT_TIMELINE_TITLE,
   },
   threat: threatDefault,
+  note: '',
 };

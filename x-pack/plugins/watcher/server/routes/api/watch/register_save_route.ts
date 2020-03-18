@@ -22,7 +22,7 @@ const bodySchema = schema.object(
     type: schema.string(),
     isNew: schema.boolean(),
   },
-  { allowUnknowns: true }
+  { unknowns: 'allow' }
 );
 
 function fetchWatch(dataClient: IScopedClusterClient, watchId: string) {

@@ -12,7 +12,9 @@ export const MANAGE_SIGNAL_DETECTION_RULES_BTN = '[data-test-subj="manage-signal
 
 export const NUMBER_OF_SIGNALS = '[data-test-subj="server-side-event-count"]';
 
-export const OPEN_CLOSE_SIGNALS_BTN = '[data-test-subj="openCloseSignal"] .siemLinkIcon__label';
+export const OPEN_CLOSE_SIGNAL_BTN = '[data-test-subj="update-signal-status-button"]';
+
+export const OPEN_CLOSE_SIGNALS_BTN = '[data-test-subj="openCloseSignal"] button';
 
 export const OPENED_SIGNALS_BTN = '[data-test-subj="openSignals"]';
 

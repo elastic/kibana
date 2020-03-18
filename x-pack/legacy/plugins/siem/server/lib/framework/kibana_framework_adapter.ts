@@ -61,7 +61,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
     this.router.post(
       {
         path: routePath,
-        validate: { body: configSchema.object({}, { allowUnknowns: true }) },
+        validate: { body: configSchema.object({}, { unknowns: 'allow' }) },
         options: {
           tags: ['access:siem'],
         },

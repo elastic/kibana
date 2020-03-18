@@ -6830,7 +6830,6 @@
     "xpack.lens.indexPatternSuggestion.removeLayerPositionLabel": "仅显示图层 {layerNumber}",
     "xpack.lens.lensSavedObjectLabel": "Lens 可视化",
     "xpack.lens.metric.label": "指标",
-    "xpack.lens.metric.valueLabel": "值",
     "xpack.lens.sugegstion.refreshSuggestionLabel": "刷新",
     "xpack.lens.suggestion.refreshSuggestionTooltip": "基于选定可视化刷新建议。",
     "xpack.lens.suggestions.currentVisLabel": "当前",
