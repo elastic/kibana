@@ -408,6 +408,8 @@ export interface IIndexPattern {
     // (undocumented)
     id?: string;
     // (undocumented)
+    intervalName?: string | null;
+    // (undocumented)
     timeFieldName?: string;
     // (undocumented)
     title: string;
