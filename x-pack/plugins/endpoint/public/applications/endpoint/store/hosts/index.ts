@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { managementListReducer } from './reducer';
-export { ManagementAction } from './action';
-export { managementMiddlewareFactory } from './middleware';
+export { hostListReducer } from './reducer';
+export { HostAction } from './action';
+export { hostMiddlewareFactory } from './middleware';
