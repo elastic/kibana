@@ -7,7 +7,10 @@
 import Joi from 'joi';
 
 /* eslint-disable @typescript-eslint/camelcase */
-export const anomaly_threshold = Joi.number();
+export const anomaly_threshold = Joi.number()
+  .integer()
+  .greater(-1)
+  .less(101);
 export const description = Joi.string();
 export const enabled = Joi.boolean();
 export const exclude_export_details = Joi.boolean();

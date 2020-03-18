@@ -54,8 +54,7 @@ export const getAnomalies = async (
 
 const buildCriteria = (params: AnomaliesSearchParams): object[] => {
   const { earliestMs, jobIds, latestMs, threshold } = params;
-  const jobIdsFilterable =
-    jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*');
+  const jobIdsFilterable = jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*');
 
   const boolCriteria: object[] = [
     {

@@ -108,7 +108,9 @@ export const getFilter = async ({
       }
     }
     case 'machine_learning': {
-      throw new Error('getFilter called with a ML Rule');
+      throw new BadRequestError(
+        'Unsupported Rule of type "machine_learning" supplied to getFilter'
+      );
     }
   }
   return assertUnreachable(type);

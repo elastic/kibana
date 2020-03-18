@@ -97,7 +97,9 @@ export const signalRulesAlertType = ({
       try {
         if (type === 'machine_learning') {
           if (mlJobId == null || anomalyThreshold == null) {
-            throw new Error('Attempted to execute ML Rule, but missing jobId or anomalyThreshold');
+            throw new Error(
+              `Attempted to execute machine learning rule, but it is missing job id and/or anomaly threshold for rule id: "${ruleId}", name: "${name}", signals index: "${outputIndex}", job id: "${mlJobId}", anomaly threshold: "${anomalyThreshold}"`
+            );
           }
 
           const anomalyResults = await findMlSignals(
@@ -133,7 +135,9 @@ export const signalRulesAlertType = ({
           });
         } else {
           if (index == null) {
-            throw new Error('Attempted to execute Query Rule, but no index was specified');
+            throw new Error(
+              `Attempted to execute query rule, but it is missing index pattern for rule id: "${ruleId}", name: "${name}", signals index: "${outputIndex}", index pattern: "${index}"`
+            );
           }
 
           const inputIndex = await getInputIndex(services, version, index);
@@ -195,7 +199,7 @@ export const signalRulesAlertType = ({
 
         if (creationSucceeded) {
           logger.debug(
-            `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+            `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", output_index: "${outputIndex}"`
           );
           await writeCurrentStatusSucceeded({
             services,
@@ -207,7 +211,7 @@ export const signalRulesAlertType = ({
             alertId,
             currentStatusSavedObject,
             logger,
-            message: `Bulk Indexing signals failed. Check logs for further details \nRule name: "${name}"\nid: "${alertId}"\nrule_id: "${ruleId}"\n`,
+            message: `Bulk Indexing signals failed. Check logs for further details Rule name: "${name}" id: "${alertId}" rule_id: "${ruleId}" output_index: "${outputIndex}"`,
             services,
             ruleStatusSavedObjects,
             ruleId: ruleId ?? '(unknown rule id)',

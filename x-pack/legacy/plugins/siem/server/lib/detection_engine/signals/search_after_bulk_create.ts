@@ -54,7 +54,9 @@ export const searchAfterAndBulkCreate = async ({
   }
   const { index, from, to } = ruleParams;
   if (index == null) {
-    throw new Error('Attempted to bulk create signals, but rule had no indexPattern');
+    throw new Error(
+      `Attempted to bulk create signals, but rule id: ${id}, name: ${name}, signals index: ${signalsIndex} has no index pattern`
+    );
   }
 
   logger.debug('[+] starting bulk insertion');
