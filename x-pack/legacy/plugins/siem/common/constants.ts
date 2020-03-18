@@ -85,4 +85,4 @@ export const DETECTION_ENGINE_QUERY_SIGNALS_URL = `${DETECTION_ENGINE_SIGNALS_UR
  */
 export const UNAUTHENTICATED_USER = 'Unauthenticated';
 
-export const EXPORT_TIMELINES_URL = '/api/timeline/_import';
+export const IMPORT_TIMELINES_URL = '/api/timeline/_import';

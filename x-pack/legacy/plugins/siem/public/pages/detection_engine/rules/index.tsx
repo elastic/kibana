@@ -8,7 +8,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useRef, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 
-import { usePrePackagedRules } from '../../../containers/detection_engine/rules';
+import { usePrePackagedRules, importRules } from '../../../containers/detection_engine/rules';
 import {
   DETECTION_ENGINE_PAGE_NAME,
   getDetectionEngineUrl,
@@ -100,6 +100,7 @@ const RulesPageComponent: React.FC = () => {
         showModal={showImportModal}
         closeModal={() => setShowImportModal(false)}
         importComplete={handleRefreshRules}
+        importData={importRules}
       />
       <WrapperPage>
         <DetectionEngineHeaderPage

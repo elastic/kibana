@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
-import { importRules } from '../../../../../containers/detection_engine/rules';
+import { ImportRulesResponse } from '../../../../../containers/detection_engine/rules';
 import {
   displayErrorToast,
   displaySuccessToast,
@@ -34,6 +34,7 @@ interface ImportRuleModalProps {
   showModal: boolean;
   closeModal: () => void;
   importComplete: () => void;
+  importData: (ImportRulesProps) => Promise<ImportRulesResponse>;
 }
 
 /**
@@ -43,6 +44,7 @@ export const ImportRuleModalComponent = ({
   showModal,
   closeModal,
   importComplete,
+  importData,
 }: ImportRuleModalProps) => {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [isImporting, setIsImporting] = useState(false);
@@ -61,7 +63,7 @@ export const ImportRuleModalComponent = ({
       const abortCtrl = new AbortController();
 
       try {
-        const importResponse = await importRules({
+        const importResponse = await importData({
           fileToImport: selectedFiles[0],
           overwrite,
           signal: abortCtrl.signal,

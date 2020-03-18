@@ -28,6 +28,7 @@ import {
   SavedObjectsFindOptions,
 } from '../../../../../../../../src/core/server';
 import { SavedTimeline } from '../types';
+import { BulkError, createBulkErrorObject } from '../../detection_engine/routes/utils';
 export type TimelineSavedObjectsClient = Pick<
   SavedObjectsClient,
   | 'get'
@@ -107,9 +108,13 @@ export const readTimeline = async ({
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
 
   const savedObject = await savedObjectsClient.get(timelineSavedObjectType, timelineId);
+  console.log('read timeline');
+  console.log(savedObject);
   const timelineSaveObject = convertSavedObjectToSavedTimeline(savedObject);
+  console.log('read timeline 2');
+  console.log(timelineSaveObject);
   const timelineWithNotesAndPinnedEvents = await Promise.all([
-    getNotesByTimelineId(savedObjectsClient, savedObjectsClient, timelineSaveObject.savedObjectId),
+    getNotesByTimelineId(savedObjectsClient, timelineSaveObject.savedObjectId),
     getAllPinnedEventsByTimelineId(savedObjectsClient, timelineSaveObject.savedObjectId),
     Promise.resolve(timelineSaveObject),
   ]);
@@ -209,6 +214,7 @@ const persistTimeline = async ({
       };
     }
     // Update Timeline
+    console.log('update -0-', timelineId, version, request.user, timeline);
     await savedObjectsClient.update(
       timelineSavedObjectType,
       timelineId,
@@ -224,12 +230,14 @@ const persistTimeline = async ({
     };
   } catch (err) {
     if (timelineId != null && savedObjectsClient.errors.isConflictError(err)) {
+      console.log('update -1-');
       return {
         code: 409,
         message: err.message,
         timeline: await getSavedTimeline(savedObjectsClient, request, timelineId),
       };
     } else if (getOr(null, 'output.statusCode', err) === 403) {
+      console.log('update -2-');
       const timelineToReturn: TimelineResult = {
         ...timeline,
         savedObjectId: '',
@@ -389,4 +397,42 @@ export const persistNote = async (
     }
     throw err;
   }
+};
+
+export const getTupleDuplicateErrorsAndUniqueTimeline = (
+  timelines: PromiseFromStreams[],
+  isOverwrite: boolean
+): [BulkError[], PromiseFromStreams[]] => {
+  const { errors, timelinesAcc } = timelines.reduce(
+    (acc, parsedTimeline) => {
+      if (parsedTimeline instanceof Error) {
+        acc.timelinesAcc.set(uuid.v4(), parsedTimeline);
+      } else {
+        const { savedObjectId } = parsedTimeline;
+        if (savedObjectId != null) {
+          if (acc.timelinesAcc.has(savedObjectId) && !isOverwrite) {
+            acc.errors.set(
+              uuid.v4(),
+              createBulkErrorObject({
+                savedObjectId,
+                statusCode: 400,
+                message: `More than one timeline with savedObjectId: "${savedObjectId}" found`,
+              })
+            );
+          }
+          acc.timelinesAcc.set(savedObjectId, parsedTimeline);
+        } else {
+          acc.timelinesAcc.set(uuid.v4(), parsedTimeline);
+        }
+      }
+
+      return acc;
+    }, // using map (preserves ordering)
+    {
+      errors: new Map<string, BulkError>(),
+      timelinesAcc: new Map<string, PromiseFromStreams>(),
+    }
+  );
+
+  return [Array.from(errors.values()), Array.from(timelinesAcc.values())];
 };

@@ -154,6 +154,8 @@ export class Timeline {
         };
       }
       // Update Timeline
+      console.log('origing update -0-', timelineId, version, request.user, timeline);
+
       await savedObjectsClient.update(
         timelineSavedObjectType,
         timelineId,

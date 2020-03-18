@@ -5,7 +5,7 @@
  */
 
 import { extname } from 'path';
-import { chunk } from 'lodash/fp';
+import { chunk, omit } from 'lodash/fp';
 import {
   buildRouteValidation,
   buildSiemResponse,
@@ -19,7 +19,6 @@ import { HapiReadableStream } from '../../detection_engine/rules/types';
 import { IRouter } from '../../../../../../../../src/core/server';
 
 import { ImportRuleAlertRest } from '../../detection_engine/types';
-import { createRulesStreamFromNdJson } from '../../detection_engine/rules/create_rules_stream_from_ndjson';
 import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils';
 import { getTupleDuplicateErrorsAndUniqueRules } from '../../detection_engine/routes/rules/utils';
 import { validate } from '../../detection_engine/routes/rules/validate';
@@ -31,12 +30,13 @@ import {
   persistNote,
 } from './utils';
 import { LegacyServices } from '../../../types';
-import { EXPORT_TIMELINES_URL } from '../../../../common/constants';
+import { IMPORT_TIMELINES_URL } from '../../../../common/constants';
 import {
   importTimelinesQuerySchema,
   importTimelinesPayloadSchema,
 } from './schemas/import_timelines_schema';
 import { importRulesSchema } from '../../detection_engine/routes/schemas/response/import_rules_schema';
+import { createTimelinesStreamFromNdJson } from '../create_timelines_stream_from_ndjson';
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
@@ -54,7 +54,7 @@ interface ImportTimelinesRequestParams {
 export const importTimelinesRoute = (router: IRouter, config: LegacyServices['config']) => {
   router.post(
     {
-      path: `${EXPORT_TIMELINES_URL}`,
+      path: `${IMPORT_TIMELINES_URL}`,
       validate: {
         query: buildRouteValidation<ImportTimelinesRequestParams['query']>(
           importTimelinesQuerySchema
@@ -92,21 +92,27 @@ export const importTimelinesRoute = (router: IRouter, config: LegacyServices['co
           body: `Invalid file extension ${fileExtension}`,
         });
       }
-
+      console.log('xxxxxxxxxxxx1xxxxxxxxx');
       const objectLimit = config().get<number>('savedObjects.maxImportExportSize');
       try {
-        const readStream = createRulesStreamFromNdJson(objectLimit);
+        const readStream = createTimelinesStreamFromNdJson(objectLimit);
+        console.log('xxxxxxxxxxxx2xxxxxxxxx');
+
         const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
           request.body.file,
           ...readStream,
         ]);
+        console.log('-------a------');
+        console.log(parsedObjects);
         const [duplicateIdErrors, uniqueParsedObjects] = getTupleDuplicateErrorsAndUniqueRules(
           parsedObjects,
           request.query.overwrite
         );
+        console.log('-------b------');
 
         const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
         let importTimelineResponse: ImportTimelineResponse[] = [];
+        console.log('-------c------');
 
         while (chunkParseObjects.length) {
           const batchParseObjects = chunkParseObjects.shift() ?? [];
@@ -126,6 +132,7 @@ export const importTimelinesRoute = (router: IRouter, config: LegacyServices['co
                       );
                       return null;
                     }
+                    console.log('-----0------');
                     const {
                       savedObjectId,
                       version,
@@ -137,8 +144,10 @@ export const importTimelinesRoute = (router: IRouter, config: LegacyServices['co
                       const timeline = await readTimeline({
                         request,
                         savedObjectsClient,
-                        savedObjectId,
+                        timelineId: savedObjectId,
                       });
+                      console.log('------1------');
+                      console.log(timeline);
                       if (timeline == null) {
                         const {
                           timeline: { savedObjectId: newSavedObjectId },
@@ -149,6 +158,7 @@ export const importTimelinesRoute = (router: IRouter, config: LegacyServices['co
                           version,
                           timeline: parsedTimeline,
                         });
+                        console.log('------2------');
                         await Promise.all(
                           pinnedEventIds.map(eventId => {
                             return persistPinnedEventOnTimeline(
@@ -160,7 +170,7 @@ export const importTimelinesRoute = (router: IRouter, config: LegacyServices['co
                             );
                           })
                         );
-
+                        console.log('------3------');
                         await Promise.all(
                           [...eventNotes, ...globalNotes].map(note => {
                             return persistNote(savedObjectsClient, request, null, version, note);
@@ -169,14 +179,25 @@ export const importTimelinesRoute = (router: IRouter, config: LegacyServices['co
 
                         resolve({ timeline_id: newSavedObjectId, status_code: 200 });
                       } else if (timeline != null && request.query.overwrite) {
+                        console.log('------3.5------');
+
                         await patchTimelines({
                           request,
                           savedObjectsClient,
-                          savedObjectId,
+                          timelineId: savedObjectId,
                           version,
-                          timeline: parsedTimeline,
+                          timeline: omit(
+                            [
+                              'globalNotes',
+                              'eventNotes',
+                              'pinnedEventIds',
+                              'version',
+                              'savedObjectId',
+                            ],
+                            parsedTimeline
+                          ),
                         });
-
+                        console.log('------4------');
                         await Promise.all(
                           pinnedEventIds.map(eventId => {
                             return persistPinnedEventOnTimeline(
@@ -188,14 +209,17 @@ export const importTimelinesRoute = (router: IRouter, config: LegacyServices['co
                             );
                           })
                         );
-
+                        console.log('------5------');
                         await Promise.all(
                           [...eventNotes, ...globalNotes].map(note => {
                             return persistNote(savedObjectsClient, request, null, version, note);
                           })
                         );
+                        console.log('------6------');
+
                         resolve({ timeline_id: savedObjectId, status_code: 200 });
                       } else if (timeline != null) {
+                        console.log('------7------');
                         resolve(
                           createBulkErrorObject({
                             savedObjectId,
@@ -207,7 +231,7 @@ export const importTimelinesRoute = (router: IRouter, config: LegacyServices['co
                     } catch (err) {
                       resolve(
                         createBulkErrorObject({
-                          timelineId,
+                          savedObjectId,
                           statusCode: 400,
                           message: err.message,
                         })

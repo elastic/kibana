@@ -4,11 +4,55 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Joi from 'joi';
-
+import {
+  columns,
+  created,
+  createdBy,
+  dataProviders,
+  dateRange,
+  description,
+  eventNotes,
+  eventType,
+  filters,
+  globalNotes,
+  kqlMode,
+  kqlQuery,
+  savedObjectId,
+  savedQueryId,
+  sort,
+  title,
+  updated,
+  updatedBy,
+  version,
+  pinnedEventIds,
+} from './schemas';
 export const importTimelinesQuerySchema = Joi.object({
   overwrite: Joi.boolean().default(false),
 });
 
 export const importTimelinesPayloadSchema = Joi.object({
   file: Joi.object().required(),
+});
+
+export const importTimelinesSchema = Joi.object({
+  columns,
+  created,
+  createdBy,
+  dataProviders,
+  dateRange,
+  description,
+  eventNotes,
+  eventType,
+  filters,
+  globalNotes,
+  kqlMode,
+  kqlQuery,
+  savedObjectId,
+  savedQueryId,
+  sort,
+  title,
+  updated,
+  updatedBy,
+  version,
+  pinnedEventIds,
 });
