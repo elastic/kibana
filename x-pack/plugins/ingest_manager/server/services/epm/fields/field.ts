@@ -151,7 +151,7 @@ function validateAliasFields(fields: Fields, allFields: Fields): Fields {
   return validatedFields;
 }
 
-const getField = (fields: Fields, pathNames: string[]): Field | undefined => {
+export const getField = (fields: Fields, pathNames: string[]): Field | undefined => {
   if (!pathNames.length) return undefined;
   // get the first rest of path names
   const [name, ...restPathNames] = pathNames;
