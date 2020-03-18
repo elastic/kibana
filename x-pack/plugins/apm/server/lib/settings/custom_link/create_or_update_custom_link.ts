@@ -5,7 +5,7 @@
  */
 
 import { pick } from 'lodash';
-import { filterOptions } from '../../../../common/custom_link_filter_options';
+import { FILTER_OPTIONS } from '../../../../common/custom_link_filter_options';
 import { APMIndexDocumentParams } from '../../helpers/es_client';
 import { Setup } from '../../helpers/setup_request';
 import { CustomLink } from './custom_link_types';
@@ -28,7 +28,7 @@ export async function createOrUpdateCustomLink({
       '@timestamp': Date.now(),
       label: customLink.label,
       url: customLink.url,
-      ...pick(customLink, filterOptions)
+      ...pick(customLink, FILTER_OPTIONS)
     }
   };
 

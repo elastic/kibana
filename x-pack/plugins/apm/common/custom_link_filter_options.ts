@@ -20,9 +20,9 @@ export const FilterOptionsRt = t.partial({
 
 export type FilterOptions = t.TypeOf<typeof FilterOptionsRt>;
 
-export const filterOptions: Array<keyof FilterOptions> = [
+export const FILTER_OPTIONS: ReadonlyArray<keyof FilterOptions> = [
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
   TRANSACTION_TYPE,
   TRANSACTION_NAME
-];
+] as const;

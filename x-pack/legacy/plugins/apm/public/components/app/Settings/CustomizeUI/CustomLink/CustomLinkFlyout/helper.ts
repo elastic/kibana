@@ -7,7 +7,7 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty, pick } from 'lodash';
 import {
   FilterOptions,
-  filterOptions
+  FILTER_OPTIONS
 } from '../../../../../../../../../../plugins/apm/common/custom_link_filter_options';
 import { CustomLink } from '../../../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 
@@ -39,7 +39,7 @@ export const convertFiltersToArray = (
 ): FilterKeyValue[] => {
   if (customLink) {
     const filters = Object.entries(
-      pick(customLink, filterOptions)
+      pick(customLink, FILTER_OPTIONS)
     ) as FilterKeyValue[];
     if (!isEmpty(filters)) {
       return filters;
@@ -87,7 +87,7 @@ export const DEFAULT_OPTION: FilterSelectOption = {
 
 export const filterSelectOptions: FilterSelectOption[] = [
   DEFAULT_OPTION,
-  ...filterOptions.map(filter => ({
+  ...FILTER_OPTIONS.map(filter => ({
     value: filter as keyof FilterOptions,
     text: filter
   }))
