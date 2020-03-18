@@ -22,6 +22,7 @@ import {
   EuiEmptyPrompt,
   EuiButtonEmpty,
   EuiToolTip,
+  EuiIconTip,
   EuiLink,
 } from '@elastic/eui';
 import { HttpSetup, ToastsApi } from 'kibana/public';
@@ -40,7 +41,6 @@ import { TypeRegistry } from '../../type_registry';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
-import './action_form.scss';
 
 interface ActionAccordionFormProps {
   actions: AlertAction[];
@@ -274,24 +274,35 @@ export const ActionForm = ({
             <EuiFlexItem>
               <EuiTitle size="s">
                 <h5>
-                  <FormattedMessage
-                    defaultMessage="Action: {actionConnectorName}"
-                    id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeEditTitle"
-                    values={{
-                      actionConnectorName: actionConnector.name,
-                    }}
-                  />
-                  {checkEnabledResult.isEnabled === false && (
-                    <Fragment>
-                      <span className="actActionForm__disabledActionWarningTitle">
-                        <EuiIcon type="alert" />
-                        <FormattedMessage
-                          defaultMessage="This action is disabled"
-                          id="xpack.triggersActionsUI.sections.alertForm.actionDisabledTitle"
-                        />
-                      </span>
-                    </Fragment>
-                  )}
+                  <EuiFlexGroup gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <FormattedMessage
+                        defaultMessage="Action: {actionConnectorName}"
+                        id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeEditTitle"
+                        values={{
+                          actionConnectorName: actionConnector.name,
+                        }}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      {checkEnabledResult.isEnabled === false && (
+                        <Fragment>
+                          <EuiIconTip
+                            type="alert"
+                            color="danger"
+                            label="Beta"
+                            content={i18n.translate(
+                              'xpack.triggersActionsUI.sections.alertForm.actionDisabledTitle',
+                              {
+                                defaultMessage: 'This action is disabled',
+                              }
+                            )}
+                            position="right"
+                          />
+                        </Fragment>
+                      )}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </h5>
               </EuiTitle>
             </EuiFlexItem>
