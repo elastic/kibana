@@ -778,7 +778,7 @@ export interface ImageValidation {
 }
 
 // @public
-export type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'>;
+export type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError' | 'addInfo'>;
 
 // @public
 export interface IUiSettingsClient {
@@ -1278,6 +1278,8 @@ export class ToastsApi implements IToasts {
     add(toastOrTitle: ToastInput): Toast;
     addDanger(toastOrTitle: ToastInput): Toast;
     addError(error: Error, options: ErrorToastOptions): Toast;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "number"
+    addInfo(toastOrTitle: ToastInput, toastLifeTimeMs?: number): Toast;
     addSuccess(toastOrTitle: ToastInput): Toast;
     addWarning(toastOrTitle: ToastInput): Toast;
     get$(): Rx.Observable<Toast[]>;
