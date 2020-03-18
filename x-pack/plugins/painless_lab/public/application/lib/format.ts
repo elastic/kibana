@@ -17,7 +17,7 @@ function prettifyPayload(payload = '', indentationLevel = 0) {
  * e.g. 1.0, is preserved instead of being coerced to an integer, e.g. 1.
  */
 export function formatRequestPayload(
-  { code, context, parameters, index, document, query }: Store,
+  { code, context, parameters, index, document, query }: Partial<Store>,
   format: PayloadFormat = PayloadFormat.UGLY
 ): string {
   const isAdvancedContext = context === 'filter' || context === 'score';
