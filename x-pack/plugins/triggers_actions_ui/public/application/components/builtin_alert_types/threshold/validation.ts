@@ -110,7 +110,7 @@ export const validateExpression = (alertParams: IndexThresholdAlertParams): Vali
   }
   if (threshold && threshold.length === 2 && threshold[0] > threshold[1]) {
     errors.threshold1.push(
-      i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredThreshold1Text', {
+      i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.greaterThenThreshold0Text', {
         defaultMessage: 'Threshold1 should be > Threshold0.',
       })
     );
