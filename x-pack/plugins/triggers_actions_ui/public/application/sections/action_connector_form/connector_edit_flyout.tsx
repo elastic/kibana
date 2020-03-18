@@ -135,6 +135,7 @@ export const ConnectorEditFlyout = ({
           actionTypeName={connector.actionType}
           dispatch={dispatch}
           actionTypeRegistry={actionTypeRegistry}
+          http={http}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

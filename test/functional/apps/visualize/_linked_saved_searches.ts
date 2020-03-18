@@ -32,7 +32,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     'visChart',
   ]);
 
-  describe('visualize app', function describeIndexTests() {
+  describe('saved search visualizations from visualize app', function describeIndexTests() {
     describe('linked saved searched', () => {
       const savedSearchName = 'vis_saved_search';
 

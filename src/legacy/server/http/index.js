@@ -24,14 +24,11 @@ import Boom from 'boom';
 
 import { registerHapiPlugins } from './register_hapi_plugins';
 import { setupBasePathProvider } from './setup_base_path_provider';
-import { setupDefaultRouteProvider } from './setup_default_route_provider';
 
 export default async function(kbnServer, server, config) {
   server = kbnServer.server;
 
   setupBasePathProvider(kbnServer);
-
-  setupDefaultRouteProvider(server);
 
   await registerHapiPlugins(server);
 
@@ -58,14 +55,6 @@ export default async function(kbnServer, server, config) {
       isCached: config.get('optimize.viewCaching'),
       engines: _.assign({ pug: require('pug') }, engines || {}),
     });
-  });
-
-  server.route({
-    path: '/',
-    method: 'GET',
-    async handler(req, h) {
-      return h.redirect(await req.getDefaultRoute());
-    },
   });
 
   server.route({

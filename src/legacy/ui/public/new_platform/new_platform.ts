@@ -20,7 +20,7 @@
 import { IScope } from 'angular';
 
 import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
-import { IEmbeddableStart, IEmbeddableSetup } from 'src/plugins/embeddable/public';
+import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { createBrowserHistory } from 'history';
 import {
   LegacyCoreSetup,
@@ -72,7 +72,7 @@ export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
   charts: ChartsPluginSetup;
   data: ReturnType<DataPlugin['setup']>;
-  embeddable: IEmbeddableSetup;
+  embeddable: EmbeddableSetup;
   expressions: ReturnType<ExpressionsPlugin['setup']>;
   home: HomePublicPluginSetup;
   inspector: InspectorSetup;
@@ -93,7 +93,7 @@ export interface PluginsStart {
   bfetch: BfetchPublicStart;
   charts: ChartsPluginStart;
   data: ReturnType<DataPlugin['start']>;
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   expressions: ReturnType<ExpressionsPlugin['start']>;
   inspector: InspectorStart;
   uiActions: UiActionsStart;
