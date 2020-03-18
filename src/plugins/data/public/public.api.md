@@ -729,6 +729,8 @@ export interface IIndexPattern {
     // (undocumented)
     id?: string;
     // (undocumented)
+    intervalName?: string | null;
+    // (undocumented)
     timeFieldName?: string;
     // (undocumented)
     title: string;
@@ -810,6 +812,8 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     getFieldByName(name: string): IndexPatternField | void;
     // (undocumented)
+    getIndex(): string;
+    // (undocumented)
     getNonScriptedFields(): IndexPatternField[];
     // (undocumented)
     getScriptedFields(): IndexPatternField[];
@@ -824,15 +828,21 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     init(forceFieldRefresh?: boolean): Promise<this>;
     // (undocumented)
+    intervalName: string | undefined | null;
+    // (undocumented)
     isTimeBased(): boolean;
     // (undocumented)
     isTimeBasedWildcard(): boolean;
     // (undocumented)
     isTimeNanosBased(): boolean;
     // (undocumented)
+    isUnsupportedTimePattern(): boolean;
+    // (undocumented)
     isWildcard(): boolean;
     // (undocumented)
     metaFields: string[];
+    // (undocumented)
+    migrate(newTitle: string): Promise<this>;
     // (undocumented)
     popularizeField(fieldName: string, unit?: number): Promise<void>;
     // (undocumented)

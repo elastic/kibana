@@ -17,6 +17,7 @@ export interface IIndexPattern
 |  [fieldFormatMap](./kibana-plugin-plugins-data-server.iindexpattern.fieldformatmap.md) | <code>Record&lt;string, {</code><br/><code>        id: string;</code><br/><code>        params: unknown;</code><br/><code>    }&gt;</code> |  |
 |  [fields](./kibana-plugin-plugins-data-server.iindexpattern.fields.md) | <code>IFieldType[]</code> |  |
 |  [id](./kibana-plugin-plugins-data-server.iindexpattern.id.md) | <code>string</code> |  |
+|  [intervalName](./kibana-plugin-plugins-data-server.iindexpattern.intervalname.md) | <code>string &#124; null</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-server.iindexpattern.timefieldname.md) | <code>string</code> |  |
 |  [title](./kibana-plugin-plugins-data-server.iindexpattern.title.md) | <code>string</code> |  |
 |  [type](./kibana-plugin-plugins-data-server.iindexpattern.type.md) | <code>string</code> |  |
