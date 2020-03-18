@@ -49,8 +49,6 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
         `--plugin-path=${join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
         '--xpack.actions.enabled=true',
         '--xpack.alerting.enabled=true',
-        '--xpack.triggers_actions_ui.enabled=true',
-        '--xpack.triggers_actions_ui.createAlertUiEnabled=true',
       ],
     },
   };

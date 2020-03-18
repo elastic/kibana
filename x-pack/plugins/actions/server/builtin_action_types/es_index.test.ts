@@ -43,18 +43,46 @@ describe('actionTypeRegistry.get() works', () => {
 
 describe('config validation', () => {
   test('config validation succeeds when config is valid', () => {
-    const config: Record<string, any> = {};
+    const config: Record<string, any> = {
+      index: 'testing-123',
+      refresh: false,
+    };
 
-    expect(validateConfig(actionType, config)).toEqual({
-      ...config,
-      index: null,
-    });
-
-    config.index = 'testing-123';
     expect(validateConfig(actionType, config)).toEqual({
       ...config,
       index: 'testing-123',
+      refresh: false,
     });
+
+    config.executionTimeField = 'field-123';
+    expect(validateConfig(actionType, config)).toEqual({
+      ...config,
+      index: 'testing-123',
+      refresh: false,
+      executionTimeField: 'field-123',
+    });
+
+    delete config.index;
+
+    expect(() => {
+      validateConfig(actionType, { index: 666 });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [index]: expected value of type [string] but got [number]"`
+    );
+    delete config.executionTimeField;
+
+    expect(() => {
+      validateConfig(actionType, { index: 'testing-123', executionTimeField: true });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [executionTimeField]: expected value of type [string] but got [boolean]"`
+    );
+
+    delete config.refresh;
+    expect(() => {
+      validateConfig(actionType, { index: 'testing-123', refresh: 'foo' });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [refresh]: expected value of type [boolean] but got [string]"`
+    );
   });
 
   test('config validation fails when config is not valid', () => {
@@ -65,46 +93,16 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(actionType, baseConfig);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [indeX]: definition for this key is missing"`
+      `"error validating action type config: [index]: expected value of type [string] but got [undefined]"`
     );
-
-    delete baseConfig.user;
-    baseConfig.index = 666;
-
-    expect(() => {
-      validateConfig(actionType, baseConfig);
-    }).toThrowErrorMatchingInlineSnapshot(`
-"error validating action type config: [index]: types that failed validation:
-- [index.0]: expected value of type [string] but got [number]
-- [index.1]: expected value to equal [null]"
-`);
   });
 });
 
 describe('params validation', () => {
   test('params validation succeeds when params is valid', () => {
     const params: Record<string, any> = {
-      index: 'testing-123',
-      executionTimeField: 'field-used-for-time',
-      refresh: true,
       documents: [{ rando: 'thing' }],
     };
-    expect(validateParams(actionType, params)).toMatchInlineSnapshot(`
-        Object {
-          "documents": Array [
-            Object {
-              "rando": "thing",
-            },
-          ],
-          "executionTimeField": "field-used-for-time",
-          "index": "testing-123",
-          "refresh": true,
-        }
-    `);
-
-    delete params.index;
-    delete params.refresh;
-    delete params.executionTimeField;
     expect(validateParams(actionType, params)).toMatchInlineSnapshot(`
         Object {
           "documents": Array [
@@ -130,24 +128,6 @@ describe('params validation', () => {
     );
 
     expect(() => {
-      validateParams(actionType, { index: 666 });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [index]: expected value of type [string] but got [number]"`
-    );
-
-    expect(() => {
-      validateParams(actionType, { executionTimeField: true });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [executionTimeField]: expected value of type [string] but got [boolean]"`
-    );
-
-    expect(() => {
-      validateParams(actionType, { refresh: 'foo' });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [refresh]: expected value of type [boolean] but got [string]"`
-    );
-
-    expect(() => {
       validateParams(actionType, { documents: ['should be an object'] });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action params: [documents.0]: could not parse record value from json input"`
@@ -162,13 +142,10 @@ describe('execute()', () => {
     let params: ActionParamsType;
     let executorOptions: ActionTypeExecutorOptions;
 
-    // minimal params, index via param
-    config = { index: null };
+    // minimal params
+    config = { index: 'index-value', refresh: false, executionTimeField: undefined };
     params = {
-      index: 'index-via-param',
       documents: [{ jim: 'bob' }],
-      executionTimeField: undefined,
-      refresh: undefined,
     };
 
     const actionId = 'some-id';
@@ -190,19 +167,17 @@ describe('execute()', () => {
                     "jim": "bob",
                   },
                 ],
-                "index": "index-via-param",
+                "index": "index-value",
+                "refresh": false,
               },
             ],
           ]
     `);
 
-    // full params (except index), index via config
-    config = { index: 'index-via-config' };
+    // full params
+    config = { index: 'index-value', executionTimeField: 'field_to_use_for_time', refresh: true };
     params = {
-      index: undefined,
       documents: [{ jimbob: 'jr' }],
-      executionTimeField: 'field_to_use_for_time',
-      refresh: true,
     };
 
     executorOptions = { actionId, config, secrets, params, services };
@@ -226,20 +201,17 @@ describe('execute()', () => {
                   "jimbob": "jr",
                 },
               ],
-              "index": "index-via-config",
+              "index": "index-value",
               "refresh": true,
             },
           ],
         ]
     `);
 
-    // minimal params, index via config and param
-    config = { index: 'index-via-config' };
+    // minimal params
+    config = { index: 'index-value', executionTimeField: undefined, refresh: false };
     params = {
-      index: 'index-via-param',
       documents: [{ jim: 'bob' }],
-      executionTimeField: undefined,
-      refresh: undefined,
     };
 
     executorOptions = { actionId, config, secrets, params, services };
@@ -259,19 +231,17 @@ describe('execute()', () => {
                 "jim": "bob",
               },
             ],
-            "index": "index-via-config",
+            "index": "index-value",
+            "refresh": false,
           },
         ],
       ]
     `);
 
     // multiple documents
-    config = { index: null };
+    config = { index: 'index-value', executionTimeField: undefined, refresh: false };
     params = {
-      index: 'index-via-param',
       documents: [{ a: 1 }, { b: 2 }],
-      executionTimeField: undefined,
-      refresh: undefined,
     };
 
     executorOptions = { actionId, config, secrets, params, services };
@@ -297,7 +267,8 @@ describe('execute()', () => {
                     "b": 2,
                   },
                 ],
-                "index": "index-via-param",
+                "index": "index-value",
+                "refresh": false,
               },
             ],
           ]
