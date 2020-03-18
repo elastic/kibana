@@ -5,19 +5,26 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { get, pick } from 'lodash/fp';
+import { get } from 'lodash/fp';
 import moment from 'moment';
 import { useLocation } from 'react-router-dom';
 
 import { Filter } from '../../../../../../../../src/plugins/data/public';
 import { Rule } from '../../../containers/detection_engine/rules';
 import { FormData, FormHook, FormSchema } from '../../../shared_imports';
-import { AboutStepRule, DefineStepRule, IMitreEnterpriseAttack, ScheduleStepRule } from './types';
+import {
+  AboutStepRule,
+  AboutStepRuleDetails,
+  DefineStepRule,
+  IMitreEnterpriseAttack,
+  ScheduleStepRule,
+} from './types';
 
-interface GetStepsData {
-  aboutRuleData: AboutStepRule | null;
-  defineRuleData: DefineStepRule | null;
-  scheduleRuleData: ScheduleStepRule | null;
+export interface GetStepsData {
+  aboutRuleData: AboutStepRule;
+  modifiedAboutRuleDetailsData: AboutStepRuleDetails;
+  defineRuleData: DefineStepRule;
+  scheduleRuleData: ScheduleStepRule;
 }
 
 export const getStepsData = ({
@@ -27,57 +34,106 @@ export const getStepsData = ({
   rule: Rule;
   detailsView?: boolean;
 }): GetStepsData => {
-  const defineRuleData: DefineStepRule | null =
-    rule != null
-      ? {
-          isNew: false,
-          index: rule.index,
-          queryBar: {
-            query: { query: rule.query as string, language: rule.language },
-            filters: rule.filters as Filter[],
-            saved_id: rule.saved_id ?? null,
-          },
-        }
-      : null;
-  const aboutRuleData: AboutStepRule | null =
-    rule != null
-      ? {
-          isNew: false,
-          ...pick(['description', 'name', 'references', 'severity', 'tags', 'threat'], rule),
-          ...(detailsView ? { name: '' } : {}),
-          threat: rule.threat as IMitreEnterpriseAttack[],
-          falsePositives: rule.false_positives,
-          riskScore: rule.risk_score,
-          timeline: {
-            id: rule.timeline_id ?? null,
-            title: rule.timeline_title ?? null,
-          },
-        }
-      : null;
+  const defineRuleData: DefineStepRule = getDefineStepsData(rule);
+  const aboutRuleData: AboutStepRule = getAboutStepsData(rule, detailsView);
+  const modifiedAboutRuleDetailsData: AboutStepRuleDetails = getModifiedAboutDetailsData(rule);
+  const scheduleRuleData: ScheduleStepRule = getScheduleStepsData(rule);
 
-  const from = dateMath.parse(rule.from) ?? moment();
-  const interval = dateMath.parse(`now-${rule.interval}`) ?? moment();
+  return { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData };
+};
 
-  const fromDuration = moment.duration(interval.diff(from));
-  let fromHumanize = `${Math.floor(fromDuration.asHours())}h`;
+export const getDefineStepsData = (rule: Rule): DefineStepRule => {
+  const { index, query, language, filters, saved_id: savedId } = rule;
+
+  return {
+    isNew: false,
+    index,
+    queryBar: {
+      query: {
+        query,
+        language,
+      },
+      filters: filters as Filter[],
+      saved_id: savedId ?? null,
+    },
+  };
+};
+
+export const getScheduleStepsData = (rule: Rule): ScheduleStepRule => {
+  const { enabled, interval, from } = rule;
+  const fromHumanizedValue = getHumanizedDuration(from, interval);
+
+  return {
+    isNew: false,
+    enabled,
+    interval,
+    from: fromHumanizedValue,
+  };
+};
+
+export const getHumanizedDuration = (from: string, interval: string): string => {
+  const fromValue = dateMath.parse(from) ?? moment();
+  const intervalValue = dateMath.parse(`now-${interval}`) ?? moment();
+
+  const fromDuration = moment.duration(intervalValue.diff(fromValue));
+  const fromHumanize = `${Math.floor(fromDuration.asHours())}h`;
 
   if (fromDuration.asSeconds() < 60) {
-    fromHumanize = `${Math.floor(fromDuration.asSeconds())}s`;
+    return `${Math.floor(fromDuration.asSeconds())}s`;
   } else if (fromDuration.asMinutes() < 60) {
-    fromHumanize = `${Math.floor(fromDuration.asMinutes())}m`;
+    return `${Math.floor(fromDuration.asMinutes())}m`;
   }
 
-  const scheduleRuleData: ScheduleStepRule | null =
-    rule != null
-      ? {
-          isNew: false,
-          ...pick(['enabled', 'interval'], rule),
-          from: fromHumanize,
-        }
-      : null;
-
-  return { aboutRuleData, defineRuleData, scheduleRuleData };
+  return fromHumanize;
 };
+
+export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRule => {
+  const { name, description, note } = determineDetailsValue(rule, detailsView);
+  const {
+    references,
+    severity,
+    false_positives: falsePositives,
+    risk_score: riskScore,
+    tags,
+    threat,
+    timeline_id: timelineId,
+    timeline_title: timelineTitle,
+  } = rule;
+
+  return {
+    isNew: false,
+    name,
+    description,
+    note: note!,
+    references,
+    severity,
+    tags,
+    riskScore,
+    falsePositives,
+    threat: threat as IMitreEnterpriseAttack[],
+    timeline: {
+      id: timelineId ?? null,
+      title: timelineTitle ?? null,
+    },
+  };
+};
+
+export const determineDetailsValue = (
+  rule: Rule,
+  detailsView: boolean
+): Pick<Rule, 'name' | 'description' | 'note'> => {
+  const { name, description, note } = rule;
+  if (detailsView) {
+    return { name: '', description: '', note: '' };
+  }
+
+  return { name, description, note: note ?? '' };
+};
+
+export const getModifiedAboutDetailsData = (rule: Rule): AboutStepRuleDetails => ({
+  note: rule.note ?? '',
+  description: rule.description,
+});
 
 export const useQuery = () => new URLSearchParams(useLocation().search);
 

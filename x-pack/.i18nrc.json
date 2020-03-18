@@ -22,7 +22,7 @@
     "xpack.infra": "plugins/infra",
     "xpack.ingestManager": "plugins/ingest_manager",
     "xpack.lens": "legacy/plugins/lens",
-    "xpack.licenseMgmt": "legacy/plugins/license_management",
+    "xpack.licenseMgmt": "plugins/license_management",
     "xpack.licensing": "plugins/licensing",
     "xpack.logstash": "legacy/plugins/logstash",
     "xpack.main": "legacy/plugins/xpack_main",
