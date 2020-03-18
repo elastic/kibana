@@ -7,6 +7,9 @@
 import React from 'react';
 import { CoreStart } from 'src/core/public';
 import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_react/public';
+import { SharePluginStart } from '../../../../../../../src/plugins/share/public';
+import { DASHBOARD_APP_URL_GENERATOR } from '../../../../../../../src/plugins/dashboard/public';
+import { VisualizeEmbeddable } from '../../../../../../../src/legacy/core_plugins/visualizations/public';
 import { FactoryContext, ActionContext, Config, CollectConfigProps } from './types';
 import { CollectConfigContainer } from './collect_config';
 import { DASHBOARD_TO_DASHBOARD_DRILLDOWN } from './constants';
@@ -16,10 +19,11 @@ import { txtGoToDashboard } from './i18n';
 export interface Params {
   getSavedObjectsClient: () => Promise<CoreStart['savedObjects']['client']>;
   getNavigateToApp: () => Promise<CoreStart['application']['navigateToApp']>;
+  getGetUrlGenerator: () => Promise<SharePluginStart['urlGenerators']['getUrlGenerator']>;
 }
 
 export class DashboardToDashboardDrilldown
-  implements Drilldown<Config, FactoryContext, ActionContext> {
+  implements Drilldown<Config, FactoryContext, ActionContext<VisualizeEmbeddable>> {
   constructor(protected readonly params: Params) {}
 
   // TODO: public readonly places = ['dashboard'];
@@ -40,7 +44,7 @@ export class DashboardToDashboardDrilldown
 
   public readonly createConfig = () => ({
     dashboardId: '',
-    useCurrentDashboardDataRange: true,
+    useCurrentDashboardDateRange: true,
     useCurrentDashboardFilters: true,
   });
 
@@ -49,15 +53,21 @@ export class DashboardToDashboardDrilldown
     return true;
   };
 
-  // it seems like this fn is being execute with the wrong arguments
-  // first param should be Config but its { config: Config; name: string; actionFactory: string; } ( I thtink )
-
-  // @ts-ignore
-  public readonly execute = async ({ config }: Config, context: ActionContext) => {
+  public readonly execute = async (config: Config, context: ActionContext<VisualizeEmbeddable>) => {
     // todo - need to complete this
-    await this.params.getNavigateToApp().then(navigateToApp => {
-      navigateToApp('kibana', { path: `#/dashboard/${config.dashboardId}` });
+    // console.log('DEBUG', config, context);
+    // need to change date range and filter based on config
+    const getUrlGenerator = await this.params.getGetUrlGenerator();
+    const navigateToApp = await this.params.getNavigateToApp();
+    const { timeRange, query, filters } = context.embeddable.getInput();
+
+    const dashboardPath = await getUrlGenerator(DASHBOARD_APP_URL_GENERATOR).createUrl({
+      dashboardId: config.dashboardId,
+      timeRange,
+      query,
+      filters,
     });
-    // window.location.hash = `#/dashboard/${config.dashboardId}`;
+
+    navigateToApp(dashboardPath);
   };
 }

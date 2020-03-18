@@ -82,8 +82,8 @@ export class CollectConfigContainer extends React.Component<
   }
 
   loadDashboards(searchString?: string) {
-    const currentDashboard = this.props.context.placeContext.embeddable.parent;
-    const currentDashboardId = currentDashboard && currentDashboard.id;
+    // const currentDashboard = this.props.context.placeContext.embeddable.parent;
+    // const currentDashboardId = currentDashboard && currentDashboard.id;
     this.setState({ searchString, isLoading: true });
     this.props.params.getSavedObjectsClient().then(savedObjectsClient => {
       savedObjectsClient
@@ -96,9 +96,9 @@ export class CollectConfigContainer extends React.Component<
         })
         .then(({ savedObjects }) => {
           if (searchString === this.state.searchString) {
-            const dashboardList = savedObjects
-              .map(dashboardSavedObjectToMenuItem)
-              .filter(({ value }) => value !== currentDashboardId);
+            const dashboardList = savedObjects.map(dashboardSavedObjectToMenuItem);
+            // temporarily disable for dev purposes
+            // .filter(({ value }) => value !== currentDashboardId);
             this.setState({ dashboards: dashboardList, isLoading: false });
           }
         });
@@ -114,7 +114,7 @@ export class CollectConfigContainer extends React.Component<
         activeDashboardId={config.dashboardId}
         dashboards={mergeDashboards(dashboards, selectedDashboard)}
         currentFilters={config.useCurrentDashboardFilters}
-        keepRange={config.useCurrentDashboardDataRange}
+        keepRange={config.useCurrentDashboardDateRange}
         isLoading={isLoading}
         onDashboardSelect={dashboardId => {
           onConfig({ ...config, dashboardId });
@@ -129,7 +129,7 @@ export class CollectConfigContainer extends React.Component<
         onKeepRangeToggle={() =>
           onConfig({
             ...config,
-            useCurrentDashboardDataRange: !config.useCurrentDashboardDataRange,
+            useCurrentDashboardDateRange: !config.useCurrentDashboardDateRange,
           })
         }
       />

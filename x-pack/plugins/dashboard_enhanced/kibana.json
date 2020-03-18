@@ -3,5 +3,5 @@
   "version": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["uiActions", "embeddable", "drilldowns"]
+  "requiredPlugins": ["uiActions", "embeddable", "drilldowns", "share"]
 }

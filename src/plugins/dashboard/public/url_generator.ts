@@ -61,7 +61,7 @@ export const createDirectAccessDashboardLinkGenerator = (
   createUrl: async state => {
     const startServices = await getStartServices();
     const useHash = state.useHash ?? startServices.useHashedUrl;
-    const appBasePath = startServices.appBasePath;
+    // const appBasePath = startServices.appBasePath;
     const hash = state.dashboardId ? `dashboard/${state.dashboardId}` : `dashboard`;
 
     const appStateUrl = setStateToKbnUrl(
@@ -71,7 +71,7 @@ export const createDirectAccessDashboardLinkGenerator = (
         filters: state.filters,
       },
       { useHash },
-      `${appBasePath}#/${hash}`
+      `kibana#/${hash}` // use appBasePath once dashboards is migrated, using 'kibana' for now
     );
 
     return setStateToKbnUrl(

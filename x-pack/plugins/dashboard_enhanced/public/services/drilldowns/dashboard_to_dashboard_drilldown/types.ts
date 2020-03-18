@@ -7,16 +7,17 @@
 import {
   EmbeddableVisTriggerContext,
   EmbeddableContext,
+  IEmbeddable,
 } from '../../../../../../../src/plugins/embeddable/public';
 import { UiActionsCollectConfigProps } from '../../../../../../../src/plugins/ui_actions/public';
 
 export type FactoryContext = EmbeddableContext;
-export type ActionContext = EmbeddableVisTriggerContext;
+export type ActionContext<T extends IEmbeddable = IEmbeddable> = EmbeddableVisTriggerContext<T>;
 
 export interface Config {
   dashboardId?: string;
   useCurrentDashboardFilters: boolean;
-  useCurrentDashboardDataRange: boolean;
+  useCurrentDashboardDateRange: boolean;
 }
 
 export type CollectConfigProps = UiActionsCollectConfigProps<Config>;

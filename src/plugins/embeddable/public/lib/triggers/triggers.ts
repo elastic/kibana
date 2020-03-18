@@ -24,8 +24,10 @@ export interface EmbeddableContext {
   embeddable: IEmbeddable;
 }
 
-export interface EmbeddableVisTriggerContext {
-  embeddable: IEmbeddable;
+// I think this could benefit using a type variable for IEmbeddable
+// but I'm concerned that the change will touch many places
+export interface EmbeddableVisTriggerContext<T extends IEmbeddable = IEmbeddable> {
+  embeddable: T;
   timeFieldName: string;
   data: {
     e: MouseEvent;
