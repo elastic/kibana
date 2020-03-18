@@ -38,17 +38,17 @@ let timeoutId: NodeJS.Timeout | undefined;
  * resolve to wait for the URL change to happen.
  */
 export async function ensureDefaultIndexPattern(
-  newPlatform: CoreStart,
+  core: CoreStart,
   data: DataPublicPluginStart,
   history: History
 ) {
   const patterns = await data.indexPatterns.getIds();
-  let defaultId = newPlatform.uiSettings.get('defaultIndex');
+  let defaultId = core.uiSettings.get('defaultIndex');
   let defined = !!defaultId;
   const exists = contains(patterns, defaultId);
 
   if (defined && !exists) {
-    newPlatform.uiSettings.remove('defaultIndex');
+    core.uiSettings.remove('defaultIndex');
     defaultId = defined = false;
   }
 
@@ -59,10 +59,9 @@ export async function ensureDefaultIndexPattern(
   // If there is any index pattern created, set the first as default
   if (patterns.length >= 1) {
     defaultId = patterns[0];
-    newPlatform.uiSettings.set('defaultIndex', defaultId);
+    core.uiSettings.set('defaultIndex', defaultId);
   } else {
-    const canManageIndexPatterns =
-      newPlatform.application.capabilities.management.kibana.index_patterns;
+    const canManageIndexPatterns = core.application.capabilities.management.kibana.index_patterns;
     const redirectTarget = canManageIndexPatterns ? '/management/kibana/index_pattern' : '/home';
 
     if (timeoutId) {
@@ -71,7 +70,7 @@ export async function ensureDefaultIndexPattern(
 
     // Avoid being hostile to new users who don't have an index pattern setup yet
     // give them a friendly info message instead of a terse error message
-    bannerId = newPlatform.overlays.banners.replace(
+    bannerId = core.overlays.banners.replace(
       bannerId,
       toMountPoint(
         <EuiCallOut
@@ -87,7 +86,7 @@ export async function ensureDefaultIndexPattern(
 
     // hide the message after the user has had a chance to acknowledge it -- so it doesn't permanently stick around
     timeoutId = setTimeout(() => {
-      newPlatform.overlays.banners.remove(bannerId);
+      core.overlays.banners.remove(bannerId);
       timeoutId = undefined;
     }, 15000);
 
