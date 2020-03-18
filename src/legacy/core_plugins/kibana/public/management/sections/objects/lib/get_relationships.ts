@@ -17,9 +17,17 @@
  * under the License.
  */
 
+import { IHttpService } from 'angular';
 import { get } from 'lodash';
+import { SavedObjectRelation } from '../types';
 
-export async function getRelationships(type, id, savedObjectTypes, $http, basePath) {
+export async function getRelationships(
+  type: string,
+  id: string,
+  savedObjectTypes: string[],
+  $http: IHttpService,
+  basePath: string
+): Promise<SavedObjectRelation[]> {
   const url = `${basePath}/api/kibana/management/saved_objects/relationships/${encodeURIComponent(
     type
   )}/${encodeURIComponent(id)}`;
@@ -27,19 +35,19 @@ export async function getRelationships(type, id, savedObjectTypes, $http, basePa
     method: 'GET',
     url,
     params: {
-      savedObjectTypes: savedObjectTypes,
+      savedObjectTypes,
     },
   };
 
   try {
-    const response = await $http(options);
-    return response ? response.data : undefined;
+    const response = await $http<SavedObjectRelation[]>(options);
+    return response.data;
   } catch (resp) {
-    const respBody = get(resp, 'data', {});
+    const respBody = get(resp, 'data', {}) as any;
     const err = new Error(respBody.message || respBody.error || `${resp.status} Response`);
 
-    err.statusCode = respBody.statusCode || resp.status;
-    err.body = respBody;
+    (err as any).statusCode = respBody.statusCode || resp.status;
+    (err as any).body = respBody;
 
     throw err;
   }

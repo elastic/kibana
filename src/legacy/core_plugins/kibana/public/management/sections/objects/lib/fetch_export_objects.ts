@@ -17,24 +17,18 @@
  * under the License.
  */
 
-export function parseQuery(query) {
-  let queryText = undefined;
-  let visibleTypes = undefined;
+import { kfetch } from 'ui/kfetch';
 
-  if (query) {
-    if (query.ast.getTermClauses().length) {
-      queryText = query.ast
-        .getTermClauses()
-        .map(clause => clause.value)
-        .join(' ');
-    }
-    if (query.ast.getFieldClauses('type')) {
-      visibleTypes = query.ast.getFieldClauses('type')[0].value;
-    }
-  }
-
-  return {
-    queryText,
-    visibleTypes,
-  };
+export async function fetchExportObjects(
+  objects: any[],
+  includeReferencesDeep: boolean = false
+): Promise<Blob> {
+  return await kfetch({
+    method: 'POST',
+    pathname: '/api/saved_objects/_export',
+    body: JSON.stringify({
+      objects,
+      includeReferencesDeep,
+    }),
+  });
 }

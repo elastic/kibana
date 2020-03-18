@@ -17,22 +17,6 @@
  * under the License.
  */
 
-export function canViewInApp(uiCapabilities, type) {
-  switch (type) {
-    case 'search':
-    case 'searches':
-      return uiCapabilities.discover.show;
-    case 'visualization':
-    case 'visualizations':
-      return uiCapabilities.visualize.show;
-    case 'index-pattern':
-    case 'index-patterns':
-    case 'indexPatterns':
-      return uiCapabilities.management.kibana.index_patterns;
-    case 'dashboard':
-    case 'dashboards':
-      return uiCapabilities.dashboard.show;
-    default:
-      return uiCapabilities[type].show;
-  }
+export function getDefaultTitle(object: { id: string; type: string }) {
+  return `${object.type} [id=${object.id}]`;
 }

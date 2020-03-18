@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import { kfetch } from 'ui/kfetch';
+import { parseQuery } from './parse_query';
 
-export async function fetchExportByTypeAndSearch(types, search, includeReferencesDeep = false) {
-  return await kfetch({
-    method: 'POST',
-    pathname: '/api/saved_objects/_export',
-    body: JSON.stringify({
-      type: types,
-      search,
-      includeReferencesDeep,
-    }),
-  });
-}
+export const isSameQuery = (query1: any, query2: any) => {
+  const parsedQuery1 = parseQuery(query1);
+  const parsedQuery2 = parseQuery(query2);
+
+  if (parsedQuery1.queryText === parsedQuery2.queryText) {
+    if (parsedQuery1.visibleTypes === parsedQuery2.visibleTypes) {
+      return true;
+    }
+  }
+  return false;
+};

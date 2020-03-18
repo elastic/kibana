@@ -17,10 +17,24 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
+export function parseQuery(query: any) {
+  let queryText;
+  let visibleTypes;
 
-const apiBase = chrome.addBasePath('/api/kibana/management/saved_objects/scroll');
-export async function getSavedObjectCounts($http, typesToInclude, searchString) {
-  const results = await $http.post(`${apiBase}/counts`, { typesToInclude, searchString });
-  return results.data;
+  if (query) {
+    if (query.ast.getTermClauses().length) {
+      queryText = query.ast
+        .getTermClauses()
+        .map((clause: any) => clause.value)
+        .join(' ');
+    }
+    if (query.ast.getFieldClauses('type')) {
+      visibleTypes = query.ast.getFieldClauses('type')[0].value;
+    }
+  }
+
+  return {
+    queryText,
+    visibleTypes,
+  };
 }

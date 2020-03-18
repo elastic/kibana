@@ -18,14 +18,19 @@
  */
 
 import { kfetch } from 'ui/kfetch';
-import { keysToCamelCaseShallow } from './case_conversion';
 
-export async function findObjects(findOptions) {
-  const response = await kfetch({
-    method: 'GET',
-    pathname: '/api/kibana/management/saved_objects/_find',
-    query: findOptions,
+export async function fetchExportByTypeAndSearch(
+  types: string[],
+  search: string | undefined,
+  includeReferencesDeep: boolean = false
+): Promise<Blob> {
+  return await kfetch({
+    method: 'POST',
+    pathname: '/api/saved_objects/_export',
+    body: JSON.stringify({
+      type: types,
+      search,
+      includeReferencesDeep,
+    }),
   });
-
-  return keysToCamelCaseShallow(response);
 }

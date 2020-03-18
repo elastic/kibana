@@ -17,21 +17,13 @@
  * under the License.
  */
 
-import { kfetch } from 'ui/kfetch';
-
-export async function importFile(file, overwriteAll = false) {
-  const formData = new FormData();
-  formData.append('file', file);
-  return await kfetch({
-    method: 'POST',
-    pathname: '/api/saved_objects/_import',
-    body: formData,
-    headers: {
-      // Important to be undefined, it forces proper headers to be set for FormData
-      'Content-Type': undefined,
-    },
-    query: {
-      overwrite: overwriteAll,
-    },
-  });
+export function getSavedObjectLabel(type: string) {
+  switch (type) {
+    case 'index-pattern':
+    case 'index-patterns':
+    case 'indexPatterns':
+      return 'index patterns';
+    default:
+      return type;
+  }
 }

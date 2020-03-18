@@ -17,15 +17,22 @@
  * under the License.
  */
 
-import { kfetch } from 'ui/kfetch';
+import { SavedObject } from 'src/core/public';
 
-export async function fetchExportObjects(objects, includeReferencesDeep = false) {
-  return await kfetch({
-    method: 'POST',
-    pathname: '/api/saved_objects/_export',
-    body: JSON.stringify({
-      objects,
-      includeReferencesDeep,
-    }),
-  });
+export interface SavedObjectMetadata {
+  icon?: string;
+  title?: string;
+  editUrl?: string;
+  inAppUrl?: { path: string; uiCapabilitiesPath: string };
+}
+
+export type SavedObjectWithMetadata<T = unknown> = SavedObject<T> & {
+  meta: SavedObjectMetadata;
+};
+
+export interface SavedObjectRelation {
+  id: string;
+  type: string;
+  relationship: 'child' | 'parent';
+  meta: SavedObjectMetadata;
 }

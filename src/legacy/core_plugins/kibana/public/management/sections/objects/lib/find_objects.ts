@@ -17,16 +17,16 @@
  * under the License.
  */
 
-export async function importLegacyFile(file, FileReader = window.FileReader) {
-  return new Promise((resolve, reject) => {
-    const fr = new FileReader();
-    fr.onload = ({ target: { result } }) => {
-      try {
-        resolve(JSON.parse(result));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    fr.readAsText(file);
+import { kfetch } from 'ui/kfetch';
+import { SavedObjectsFindOptions } from 'src/core/public';
+import { keysToCamelCaseShallow } from './case_conversion';
+
+export async function findObjects(findOptions: SavedObjectsFindOptions) {
+  const response = await kfetch({
+    method: 'GET',
+    pathname: '/api/kibana/management/saved_objects/_find',
+    query: findOptions as Record<string, any>,
   });
+
+  return keysToCamelCaseShallow(response);
 }

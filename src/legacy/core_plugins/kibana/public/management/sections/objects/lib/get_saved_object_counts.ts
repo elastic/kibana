@@ -17,16 +17,18 @@
  * under the License.
  */
 
-import { parseQuery } from '.';
+import { IHttpService } from 'angular';
+import chrome from 'ui/chrome';
 
-export const isSameQuery = (query1, query2) => {
-  const parsedQuery1 = parseQuery(query1);
-  const parsedQuery2 = parseQuery(query2);
-
-  if (parsedQuery1.queryText === parsedQuery2.queryText) {
-    if (parsedQuery1.visibleTypes === parsedQuery2.visibleTypes) {
-      return true;
-    }
-  }
-  return false;
-};
+const apiBase = chrome.addBasePath('/api/kibana/management/saved_objects/scroll');
+export async function getSavedObjectCounts(
+  $http: IHttpService,
+  typesToInclude: string[],
+  searchString: string
+): Promise<Record<string, number>> {
+  const results = await $http.post<Record<string, number>>(`${apiBase}/counts`, {
+    typesToInclude,
+    searchString,
+  });
+  return results.data;
+}
