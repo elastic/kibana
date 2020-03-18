@@ -56,7 +56,7 @@ interface Props {
   errors: IErrorObject[];
   alertParams: {
     criteria: MetricExpression[];
-    groupBy?: string | null;
+    groupBy?: string;
     filterQuery?: string;
   };
   alertsContext: AlertsContextValue<AlertContextMeta>;
@@ -135,7 +135,7 @@ export const Expressions: React.FC<Props> = props => {
 
   const onGroupByChange = useCallback(
     (group: string | null) => {
-      setAlertParams('groupBy', group);
+      setAlertParams('groupBy', group || undefined);
     },
     [setAlertParams]
   );

@@ -145,15 +145,6 @@ export const NodeContextMenu: React.FC<Props> = ({
     isDisabled: !showUptimeLink,
   };
 
-  const alertMenuItem: SectionLinkProps = {
-    label: i18n.translate('xpack.infra.nodeContextMenu.createAlertLink', {
-      defaultMessage: 'Create Alert',
-    }),
-    onClick: () => {
-      setFlyoutVisible(true);
-    },
-  };
-
   return (
     <>
       <ActionMenu
