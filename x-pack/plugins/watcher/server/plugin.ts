@@ -10,6 +10,7 @@ declare module 'kibana/server' {
   }
 }
 
+import { once } from 'lodash';
 import {
   CoreSetup,
   IScopedClusterClient,
@@ -52,11 +53,11 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
       getLicenseStatus: () => this.licenseStatus,
     };
 
-    const getWatcherEsClient = async () => {
+    const getWatcherEsClient = once(async () => {
       const [coreStart] = await getStartServices();
       const config = { plugins: [elasticsearchJsPlugin] };
       return coreStart.elasticsearch.legacy.createClient('watcher', config);
-    };
+    });
     http.registerRouteHandlerContext('watcher', (ctx, request) => {
       return {
         client: {
