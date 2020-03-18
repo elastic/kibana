@@ -7692,7 +7692,6 @@
     "xpack.ml.datavisualizer.page.fieldsPanelTitle": "字段",
     "xpack.ml.datavisualizer.page.metricsPanelTitle": "指标",
     "xpack.ml.datavisualizer.searchPanel.allOptionLabel": "全部",
-    "xpack.ml.datavisualizer.searchPanel.kqlEditOnlyLabel": "当前仅可以编辑 KQL 已保存搜索",
     "xpack.ml.datavisualizer.searchPanel.queryBarPlaceholder": "选择较小的样例大小将减少查询运行时间和集群上的负载。",
     "xpack.ml.datavisualizer.searchPanel.queryBarPlaceholderText": "搜索……（例如，status:200 AND extension:\"PHP\"）",
     "xpack.ml.datavisualizer.searchPanel.sampleSizeAriaLabel": "选择要采样的文档数目",
