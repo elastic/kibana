@@ -11,6 +11,7 @@ import React from 'react';
 // @ts-ignore
 import { StickyContainer } from 'react-sticky';
 import styled from 'styled-components';
+import { WaterfallSelection } from '../';
 import { px } from '../../../../../../style/variables';
 import { history } from '../../../../../../utils/history';
 import { Timeline } from '../../../../../shared/charts/Timeline';
@@ -61,17 +62,19 @@ const WaterfallItemsContainer = styled.div<{
 `;
 
 interface Props {
-  waterfallItemId?: string;
-  waterfall: IWaterfall;
-  location: Location;
   exceedsMax: boolean;
+  location: Location;
+  selection: WaterfallSelection;
+  waterfall: IWaterfall;
+  waterfallItemId?: string;
 }
 
 export const Waterfall: React.FC<Props> = ({
-  waterfall,
   exceedsMax,
-  waterfallItemId,
-  location
+  location,
+  selection,
+  waterfall,
+  waterfallItemId
 }) => {
   const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
   const waterfallHeight = itemContainerHeight * waterfall.items.length;
@@ -117,7 +120,8 @@ export const Waterfall: React.FC<Props> = ({
       <StickyContainer>
         <Timeline
           marks={[...agentMarks, ...errorMarks]}
-          xMax={duration}
+          xMin={selection[0] ?? 0}
+          xMax={selection[1] ?? duration}
           height={waterfallHeight}
           margins={TIMELINE_MARGINS}
         />

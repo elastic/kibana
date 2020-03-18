@@ -46,10 +46,11 @@ export function WaterfallContainer({
         waterfall={waterfall}
       />
       <Waterfall
+        exceedsMax={exceedsMax}
         location={location}
+        selection={selection}
         waterfallItemId={urlParams.waterfallItemId}
         waterfall={waterfall}
-        exceedsMax={exceedsMax}
       />
     </div>
   );

@@ -20,7 +20,7 @@ export function SelectionText({
   resetSelection
 }: SelectionTextProps) {
   const style: CSSProperties = {
-    visibility: selection[0] ? 'visible' : 'hidden'
+    visibility: selection[0] === undefined ? 'hidden' : 'visible'
   };
 
   const start = asDuration(selection[0]);
@@ -28,7 +28,7 @@ export function SelectionText({
   const range = `${start} – ${end}`;
 
   return (
-    <span style={style}>
+    <span data-test-subj="root" style={style}>
       <EuiText color="subdued" size="xs" textAlign="right">
         {i18n.translate(
           'xpack.apm.transactionDetails.miniWaterfall.selectionText',

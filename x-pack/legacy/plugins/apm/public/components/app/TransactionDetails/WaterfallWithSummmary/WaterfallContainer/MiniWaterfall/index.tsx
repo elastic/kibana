@@ -50,7 +50,6 @@ export function MiniWaterfall({ selection, setSelection, waterfall }: Props) {
     );
     const start = Math.floor(Math.random() * maxY);
     const end = Math.floor(Math.random() * (maxY - start)) + start;
-    console.log({ start, end, maxY });
     // setSelection([y1, y2]);
     setSelection([start, end]);
   };
@@ -76,7 +75,6 @@ export function MiniWaterfall({ selection, setSelection, waterfall }: Props) {
     });
   }
 
-  console.log({ data });
   return (
     <>
       <SelectionText selection={selection} resetSelection={resetSelection} />

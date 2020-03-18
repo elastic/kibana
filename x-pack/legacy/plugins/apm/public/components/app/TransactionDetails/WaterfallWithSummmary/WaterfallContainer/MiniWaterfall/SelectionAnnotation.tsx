@@ -23,14 +23,17 @@ export function SelectionAnnotation({
   waterfall,
   xLength
 }: SelectionAnnotationProps) {
-  const x0 = 0;
+  if (selection[0] === undefined) {
+    return null;
+  }
 
   // FIXME: This is not supposed to be "-1", but it doesn't show up at all if
   // you leave that off. Using the -1 makes it show up, but the bottom bar is
   // not highlighted.
-  const x1 = selection[0] ? xLength - 1 : 0;
-  const y1left = selection[0] ?? 0;
-  const y0right = selection[1] ?? 0;
+  const x1 = xLength - 1;
+  const x0 = 0;
+  const y1left = selection[0];
+  const y0right = selection[1];
 
   return (
     <RectAnnotation

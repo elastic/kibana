@@ -51,19 +51,18 @@ class TL extends PureComponent<TimelineProps> {
       return null;
     }
     const plotValues = getPlotValues({ width, xMin, xMax, height, margins });
-    const topTraceDuration = xMax - (xMin ?? 0);
 
     return (
       <div>
         <TimelineAxis
           plotValues={plotValues}
           marks={marks}
-          topTraceDuration={topTraceDuration}
+          topTraceDuration={xMax}
         />
         <VerticalLines
           plotValues={plotValues}
           marks={marks}
-          topTraceDuration={topTraceDuration}
+          topTraceDuration={xMax}
         />
       </div>
     );
