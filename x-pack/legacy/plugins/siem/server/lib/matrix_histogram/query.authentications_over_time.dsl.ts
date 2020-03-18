@@ -13,10 +13,19 @@ export const buildAuthenticationsOverTimeQuery = ({
   sourceConfiguration: {
     fields: { timestamp },
   },
-  stackByField = 'event.type',
+  stackByField = 'event.outcome',
 }: MatrixHistogramRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
+    {
+      bool: {
+        must: [{
+          term: {
+            'event.category': 'authentication'
+          }
+        }]
+      }
+    },
     {
       range: {
         [timestamp]: {
@@ -45,7 +54,7 @@ export const buildAuthenticationsOverTimeQuery = ({
       eventActionGroup: {
         terms: {
           field: stackByField,
-          include: ['authentication_success', 'authentication_failure'],
+          include: ['success', 'failure'],
           order: {
             _count: 'desc',
           },
