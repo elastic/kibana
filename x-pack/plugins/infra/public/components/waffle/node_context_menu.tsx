@@ -188,7 +188,6 @@ export const NodeContextMenu: React.FC<Props> = ({
               <SectionLink {...nodeDetailMenuItem} />
               <SectionLink data-test-subj="viewApmTracesContextMenuItem" {...apmTracesMenuItem} />
               <SectionLink {...uptimeMenuItem} />
-              <SectionLink {...alertMenuItem} />
             </SectionLinks>
           </Section>
         </div>
