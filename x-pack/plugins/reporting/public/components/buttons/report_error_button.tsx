@@ -9,11 +9,12 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { JobStatuses } from '../../../constants';
 import { JobContent, ReportingAPIClient } from '../../lib/reporting_api_client';
+import { Job as ListingJob } from '../report_listing';
 
 interface Props {
-  jobId: string;
   intl: InjectedIntl;
   apiClient: ReportingAPIClient;
+  record: ListingJob;
 }
 
 interface State {
@@ -40,7 +41,7 @@ class ReportErrorButtonUi extends Component<Props, State> {
   }
 
   public render() {
-    const { record, apiClient, intl } = this.props;
+    const { record, intl } = this.props;
 
     if (record.status !== JobStatuses.FAILED) {
       return null;
@@ -96,9 +97,11 @@ class ReportErrorButtonUi extends Component<Props, State> {
   };
 
   private loadError = async () => {
+    const { record, apiClient, intl } = this.props;
+
     this.setState({ isLoading: true });
     try {
-      const reportContent: JobContent = await this.props.apiClient.getContent(this.props.jobId);
+      const reportContent: JobContent = await apiClient.getContent(record.id);
       if (this.mounted) {
         this.setState({ isLoading: false, error: reportContent.content });
       }
@@ -106,7 +109,7 @@ class ReportErrorButtonUi extends Component<Props, State> {
       if (this.mounted) {
         this.setState({
           isLoading: false,
-          calloutTitle: this.props.intl.formatMessage({
+          calloutTitle: intl.formatMessage({
             id: 'xpack.reporting.errorButton.unableToFetchReportContentTitle',
             defaultMessage: 'Unable to fetch report content',
           }),
