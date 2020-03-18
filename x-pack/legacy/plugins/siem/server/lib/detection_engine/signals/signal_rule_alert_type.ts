@@ -177,6 +177,7 @@ export const signalRulesAlertType = ({
             services,
             logger,
             id: alertId,
+            inputIndexPattern: inputIndex,
             signalsIndex: outputIndex,
             filter: esFilter,
             name,

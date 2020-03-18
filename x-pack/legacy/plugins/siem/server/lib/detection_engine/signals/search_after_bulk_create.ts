@@ -17,6 +17,7 @@ interface SearchAfterAndBulkCreateParams {
   services: AlertServices;
   logger: Logger;
   id: string;
+  inputIndexPattern: string[];
   signalsIndex: string;
   name: string;
   createdAt: string;
@@ -37,6 +38,7 @@ export const searchAfterAndBulkCreate = async ({
   services,
   logger,
   id,
+  inputIndexPattern,
   signalsIndex,
   filter,
   name,
@@ -51,12 +53,6 @@ export const searchAfterAndBulkCreate = async ({
 }: SearchAfterAndBulkCreateParams): Promise<boolean> => {
   if (someResult.hits.hits.length === 0) {
     return true;
-  }
-  const { index, from, to } = ruleParams;
-  if (index == null) {
-    throw new Error(
-      `Attempted to bulk create signals, but rule id: ${id}, name: ${name}, signals index: ${signalsIndex} has no index pattern`
-    );
   }
 
   logger.debug('[+] starting bulk insertion');
@@ -104,9 +100,9 @@ export const searchAfterAndBulkCreate = async ({
       logger.debug(`sortIds: ${sortIds}`);
       const searchAfterResult: SignalSearchResponse = await singleSearchAfter({
         searchAfterSortId: sortId,
-        index,
-        from,
-        to,
+        index: inputIndexPattern,
+        from: ruleParams.from,
+        to: ruleParams.to,
         services,
         logger,
         filter,
