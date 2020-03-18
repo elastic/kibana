@@ -50,7 +50,7 @@ export const severity = Joi.string().valid('low', 'medium', 'high', 'critical');
 export const status = Joi.string().valid('open', 'closed');
 export const to = Joi.string();
 export const type = Joi.string().valid('query', 'saved_query', 'machine_learning');
-export const ml_job_id = Joi.string();
+export const machine_learning_job_id = Joi.string();
 export const queryFilter = Joi.string();
 export const references = Joi.array()
   .items(Joi.string())

@@ -301,7 +301,7 @@ export const createMlRuleRequest = () =>
       ...typicalPayload(),
       type: 'machine_learning',
       anomaly_threshold: 50,
-      ml_job_id: 'some-uuid',
+      machine_learning_job_id: 'some-uuid',
     },
   });
 

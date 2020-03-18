@@ -35,7 +35,7 @@ import {
   references,
   note,
   version,
-  ml_job_id,
+  machine_learning_job_id,
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
@@ -66,7 +66,7 @@ export const createRulesSchema = Joi.object({
   timeline_id,
   timeline_title,
   meta,
-  ml_job_id: ml_job_id.when('type', {
+  machine_learning_job_id: machine_learning_job_id.when('type', {
     is: 'machine_learning',
     then: Joi.required(),
     otherwise: Joi.forbidden(),

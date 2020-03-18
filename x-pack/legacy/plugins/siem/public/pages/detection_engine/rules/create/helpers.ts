@@ -71,7 +71,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
       ...rest,
       type: ruleType,
       anomaly_threshold: anomalyThreshold,
-      ml_job_id: mlJobId,
+      machine_learning_job_id: mlJobId,
     };
   } else {
     const { queryBar, isNew, ruleType, ...rest } = ruleFields;

@@ -50,7 +50,9 @@ export const addMlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[]
   if (typeAndTimelineOnly.type === 'machine_learning') {
     return [
       t.exact(t.type({ anomaly_threshold: dependentRulesSchema.props.anomaly_threshold })),
-      t.exact(t.type({ ml_job_id: dependentRulesSchema.props.ml_job_id })),
+      t.exact(
+        t.type({ machine_learning_job_id: dependentRulesSchema.props.machine_learning_job_id })
+      ),
     ];
   } else {
     return [];

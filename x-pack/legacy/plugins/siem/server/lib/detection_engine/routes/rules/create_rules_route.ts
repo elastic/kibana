@@ -43,7 +43,7 @@ export const createRulesRoute = (router: IRouter): void => {
         timeline_id: timelineId,
         timeline_title: timelineTitle,
         meta,
-        ml_job_id: mlJobId,
+        machine_learning_job_id: mlJobId,
         filters,
         rule_id: ruleId,
         index,

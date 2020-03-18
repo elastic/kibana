@@ -75,7 +75,7 @@ export const getMlRuleResponsePayload = (anchorDate: string = ANCHOR_DATE): Rule
     ...rest,
     type: 'machine_learning',
     anomaly_threshold: 59,
-    ml_job_id: 'some_ml_job_id',
+    machine_learning_job_id: 'some_machine_learning_job_id',
   };
 };
 

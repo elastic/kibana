@@ -25,7 +25,7 @@ import {
   name,
   output_index,
   max_signals,
-  ml_job_id,
+  machine_learning_job_id,
   query,
   references,
   severity,
@@ -104,7 +104,7 @@ export const dependentRulesSchema = t.partial({
 
   // ML fields
   anomaly_threshold,
-  ml_job_id,
+  machine_learning_job_id,
 });
 
 /**

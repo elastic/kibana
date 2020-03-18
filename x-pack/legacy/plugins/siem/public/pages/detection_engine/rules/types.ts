@@ -86,7 +86,7 @@ export interface DefineStepRuleJson {
   anomaly_threshold?: number;
   index?: string[];
   filters?: Filter[];
-  ml_job_id?: string;
+  machine_learning_job_id?: string;
   saved_id?: string;
   query?: string;
   language?: string;
