@@ -84,7 +84,7 @@ const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
  */
 export type IToasts = Pick<
   ToastsApi,
-  'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
+  'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError' | 'addInfo'
 >;
 
 /**
@@ -143,6 +143,22 @@ export class ToastsApi implements IToasts {
     if (listWithoutToast.length !== list.length) {
       this.toasts$.next(listWithoutToast);
     }
+  }
+
+  /**
+   * Adds a new toast pre-configured with the info color and info icon.
+   *
+   * @param toastOrTitle - a {@link ToastInput}
+   * @param toastLifeTimeMs - a {@link number}
+   * @returns a {@link Toast}
+   */
+  public addInfo(toastOrTitle: ToastInput, toastLifeTimeMs?: number) {
+    return this.add({
+      color: 'primary',
+      iconType: 'iInCircle',
+      ...normalizeToast(toastOrTitle),
+      toastLifeTimeMs,
+    });
   }
 
   /**

@@ -146,6 +146,20 @@ describe('#remove()', () => {
   });
 });
 
+describe('#addInfo()', () => {
+  it('adds a info toast', async () => {
+    const toasts = new ToastsApi(toastDeps());
+    expect(toasts.addInfo({})).toHaveProperty('color', 'primary');
+  });
+
+  it('returns the created toast', async () => {
+    const toasts = new ToastsApi(toastDeps());
+    const toast = toasts.addInfo({});
+    const currentToasts = await getCurrentToasts(toasts);
+    expect(currentToasts[0]).toBe(toast);
+  });
+});
+
 describe('#addSuccess()', () => {
   it('adds a success toast', async () => {
     const toasts = new ToastsApi(toastDeps());
