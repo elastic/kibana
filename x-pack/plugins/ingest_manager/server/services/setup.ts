@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import uuid from 'uuid';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { CallESAsCurrentUser } from '../types';
 import { agentConfigService } from './agent_config';
@@ -19,8 +20,12 @@ import {
 } from '../../common';
 import { getPackageInfo } from './epm/packages';
 import { datasourceService } from './datasource';
+import { generateEnrollmentAPIKey } from './api_keys';
 
-export async function setup(
+const FLEET_ADMIN_USERNAME = 'fleet_enroll';
+const FLEET_ADMIN_ROLE = 'fleet_enroll';
+
+export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ) {
@@ -58,6 +63,53 @@ export async function setup(
       await addPackageToConfig(soClient, installedPackage, configWithDatasource, defaultOutput);
     }
   }
+}
+
+export async function setupFleet(
+  soClient: SavedObjectsClientContract,
+  callCluster: CallESAsCurrentUser
+) {
+  // Create fleet_enroll role
+  // This should be done directly in ES at some point
+  await callCluster('transport.request', {
+    method: 'PUT',
+    path: `/_security/role/${FLEET_ADMIN_ROLE}`,
+    body: {
+      cluster: ['monitor', 'manage_api_key'],
+      indices: [
+        {
+          names: ['logs-*', 'metrics-*', 'events-*'],
+          privileges: ['write', 'create_index'],
+        },
+      ],
+    },
+  });
+  const password = generateRandomPassword();
+  // Create fleet enroll user
+  await callCluster('transport.request', {
+    method: 'PUT',
+    path: `/_security/user/${FLEET_ADMIN_USERNAME}`,
+    body: {
+      password,
+      roles: [FLEET_ADMIN_ROLE],
+    },
+  });
+
+  // save fleet admin user
+  await outputService.updateOutput(soClient, await outputService.getDefaultOutputId(soClient), {
+    admin_username: FLEET_ADMIN_USERNAME,
+    admin_password: password,
+  });
+
+  // Generate default enrollment key
+  await generateEnrollmentAPIKey(soClient, {
+    name: 'Default',
+    configId: await agentConfigService.getDefaultAgentConfigId(soClient),
+  });
+}
+
+function generateRandomPassword() {
+  return Buffer.from(uuid.v4()).toString('base64');
 }
 
 async function addPackageToConfig(
