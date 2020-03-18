@@ -17,10 +17,17 @@
  * under the License.
  */
 
-export { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from './constants';
+import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from './constants';
 
-export {
+import {
   indexNameBeginsWithPeriod,
   findIllegalCharactersInIndexName,
   indexNameContainsSpaces,
 } from './validate';
+
+export const indices = {
+  INDEX_ILLEGAL_CHARACTERS_VISIBLE,
+  indexNameBeginsWithPeriod,
+  findIllegalCharactersInIndexName,
+  indexNameContainsSpaces,
+};
