@@ -301,7 +301,7 @@ export const ActionForm = ({
           <EuiButtonIcon
             iconType="cross"
             color="danger"
-            className="euiAccordionForm__extraAction"
+            className="actAccordionActionForm__extraAction"
             aria-label={i18n.translate(
               'xpack.triggersActionsUI.sections.alertForm.accordion.deleteIconAriaLabel',
               {
@@ -338,8 +338,8 @@ export const ActionForm = ({
         initialIsOpen={true}
         key={index}
         id={index.toString()}
-        className="euiAccordionForm"
-        buttonContentClassName="euiAccordionForm__button"
+        className="actAccordionActionForm"
+        buttonContentClassName="actAccordionActionForm__button"
         data-test-subj={`alertActionAccordion-${defaultActionGroupId}`}
         buttonContent={
           <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -365,7 +365,7 @@ export const ActionForm = ({
           <EuiButtonIcon
             iconType="cross"
             color="danger"
-            className="euiAccordionForm__extraAction"
+            className="actAccordionActionForm__extraAction"
             aria-label={i18n.translate(
               'xpack.triggersActionsUI.sections.alertForm.accordion.deleteIconAriaLabel',
               {
