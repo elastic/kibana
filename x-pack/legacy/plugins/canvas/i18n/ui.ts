@@ -477,9 +477,9 @@ export const DataSourceStrings = {
       }),
     getQueryHelp: () =>
       i18n.translate('xpack.canvas.uis.dataSources.timelion.queryLabel', {
-        defaultMessage: '{lucene} Query String syntax',
+        defaultMessage: '{timelion} Query String syntax',
         values: {
-          lucene: LUCENE,
+          timelion: TIMELION,
         },
       }),
     getQueryLabel: () =>
