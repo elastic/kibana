@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
+import { isEmpty } from 'lodash';
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { useAppDependencies } from '../../../app_context';
 import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
@@ -419,15 +420,24 @@ export const AlertsList: React.FunctionComponent = () => {
     </Fragment>
   );
 
+  const loadedItems = convertAlertsToTableItems(alertsState.data, alertTypesState.data);
+
+  const isFilterApplied = !(
+    isEmpty(searchText) &&
+    isEmpty(typesFilter) &&
+    isEmpty(actionTypesFilter)
+  );
+
   return (
     <section data-test-subj="alertsList">
       <EuiSpacer size="m" />
-      {convertAlertsToTableItems(alertsState.data, alertTypesState.data).length !== 0 && table}
-      {convertAlertsToTableItems(alertsState.data, alertTypesState.data).length === 0 &&
-        !alertTypesState.isLoading &&
-        !alertsState.isLoading &&
-        emptyPrompt}
-      {(alertTypesState.isLoading || alertsState.isLoading) && <EuiLoadingSpinner size="xl" />}
+      {loadedItems.length || isFilterApplied ? (
+        table
+      ) : alertTypesState.isLoading || alertsState.isLoading ? (
+        <EuiLoadingSpinner size="xl" />
+      ) : (
+        emptyPrompt
+      )}
       <AlertsContextProvider
         value={{
           reloadAlerts: loadAlertsData,
