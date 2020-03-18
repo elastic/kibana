@@ -6,5 +6,4 @@
 
 // @ts-ignore
 export { findIllegalCharactersInIndexName, INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
-
-export { AggTypeFilters, AggTypeFieldFilters } from '../../../../../src/plugins/data/public';
+export { PluginsStart } from 'ui/new_platform/new_platform';

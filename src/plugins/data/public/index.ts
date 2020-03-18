@@ -351,7 +351,6 @@ export {
   ISearchStrategy,
   ISearch,
   ISearchOptions,
-  ISearchStart,
   IRequestTypesMap,
   IResponseTypesMap,
   ISearchGeneric,
