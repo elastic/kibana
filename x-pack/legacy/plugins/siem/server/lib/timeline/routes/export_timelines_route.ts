@@ -38,19 +38,9 @@ export const exportTimelinesRoute = (router: IRouter, config: LegacyServices['co
       },
     },
     async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      let savedObjectsClient;
       try {
-        savedObjectsClient = context.core.savedObjects.client;
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
-      }
-
-      try {
+        const siemResponse = buildSiemResponse(response);
+        const savedObjectsClient = context.core.savedObjects.client;
         const exportSizeLimit = config().get<number>('savedObjects.maxImportExportSize');
         if (request.body?.objects != null && request.body.objects.length > exportSizeLimit) {
           return siemResponse.error({
@@ -73,6 +63,8 @@ export const exportTimelinesRoute = (router: IRouter, config: LegacyServices['co
         });
       } catch (err) {
         const error = transformError(err);
+        const siemResponse = buildSiemResponse(response);
+
         return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,

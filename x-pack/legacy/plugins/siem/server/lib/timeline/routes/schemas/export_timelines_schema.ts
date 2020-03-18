@@ -7,11 +7,11 @@
 import Joi from 'joi';
 
 /* eslint-disable @typescript-eslint/camelcase */
-import { objects, exclude_export_details, file_name } from './schemas';
+import { ids, exclude_export_details, file_name } from './schemas';
 /* eslint-disable @typescript-eslint/camelcase */
 
 export const exportTimelinesSchema = Joi.object({
-  objects,
+  ids,
 }).min(1);
 
 export const exportTimelinesQuerySchema = Joi.object({

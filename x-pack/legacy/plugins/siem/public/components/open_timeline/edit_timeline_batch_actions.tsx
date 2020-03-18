@@ -6,6 +6,7 @@
 
 import { EuiContextMenuPanel, EuiContextMenuItem, EuiBasicTable } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
+import { isEmpty } from 'lodash/fp';
 import * as i18n from './translations';
 import { DeleteTimelines, OpenTimelineResult } from './types';
 import { EditTimelineActions } from './export_timeline';
@@ -61,6 +62,7 @@ export const useEditTimelinBatchActions = ({
 
   const getBatchItemsPopoverContent = useCallback(
     (closePopover: () => void) => {
+      const isDisabled = isEmpty(selectedItems);
       return (
         <>
           <EditTimelineActions
@@ -79,7 +81,7 @@ export const useEditTimelinBatchActions = ({
           <EuiContextMenuPanel
             items={[
               <EuiContextMenuItem
-                disabled={selectedItems == null || selectedItems.length === 0}
+                disabled={isDisabled}
                 icon="exportAction"
                 key="ExportItemKey"
                 onClick={handleEnableExportTimelineDownloader}
@@ -87,7 +89,7 @@ export const useEditTimelinBatchActions = ({
                 {i18n.EXPORT_SELECTED}
               </EuiContextMenuItem>,
               <EuiContextMenuItem
-                disabled={selectedItems == null || selectedItems.length === 0}
+                disabled={isDisabled}
                 icon="trash"
                 key="DeleteItemKey"
                 onClick={handleOnOpenDeleteTimelineModal}
