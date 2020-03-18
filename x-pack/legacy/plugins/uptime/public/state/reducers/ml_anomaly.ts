@@ -11,15 +11,15 @@ import {
   getAnomalyRecordsAction,
   deleteMLJobAction,
 } from '../actions';
-import { IReducerState } from './types';
 import { getAsyncInitialState, handleAsyncAction } from './utils';
 import { IHttpFetchError } from '../../../../../../../target/types/core/public/http';
+import { AsyncInitialState } from './types';
 
-export interface MLJobState extends IReducerState {
-  mlJob: any;
-  createJob: any;
-  deleteJob: any;
-  anomalies: any;
+export interface MLJobState {
+  mlJob: AsyncInitialState<any>;
+  createJob: AsyncInitialState<any>;
+  deleteJob: AsyncInitialState<any>;
+  anomalies: AsyncInitialState<any>;
 }
 
 const initialState: MLJobState = {
@@ -27,8 +27,6 @@ const initialState: MLJobState = {
   createJob: getAsyncInitialState(),
   deleteJob: getAsyncInitialState(),
   anomalies: getAsyncInitialState(),
-  loading: false,
-  errors: [],
 };
 
 type Payload = IHttpFetchError;

@@ -10,3 +10,9 @@ export interface IReducerState {
   errors: IHttpFetchError[];
   loading: boolean;
 }
+
+export interface AsyncInitialState<StateType> {
+  data: StateType;
+  loading: boolean;
+  error?: IHttpFetchError | null;
+}

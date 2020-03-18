@@ -6,9 +6,9 @@
 
 import { Action } from 'redux-actions';
 import { AsyncAction } from '../actions/types';
-import { IReducerState } from './types';
+import { AsyncInitialState } from './types';
 
-export function handleAsyncAction<ReducerState extends IReducerState, Payload>(
+export function handleAsyncAction<ReducerState, Payload>(
   storeKey: string,
   asyncAction: AsyncAction
 ) {
@@ -16,7 +16,7 @@ export function handleAsyncAction<ReducerState extends IReducerState, Payload>(
     [String(asyncAction.get)]: (state: ReducerState) => ({
       ...state,
       [storeKey]: {
-        ...state[storeKey],
+        ...(state as any)[storeKey],
         loading: true,
       },
     }),
@@ -24,7 +24,7 @@ export function handleAsyncAction<ReducerState extends IReducerState, Payload>(
     [String(asyncAction.success)]: (state: ReducerState, action: Action<any>) => ({
       ...state,
       [storeKey]: {
-        ...state[storeKey],
+        ...(state as any)[storeKey],
         data: action.payload === null ? action.payload : { ...action.payload },
         loading: false,
       },
@@ -33,7 +33,7 @@ export function handleAsyncAction<ReducerState extends IReducerState, Payload>(
     [String(asyncAction.fail)]: (state: ReducerState, action: Action<any>) => ({
       ...state,
       [storeKey]: {
-        ...state[storeKey],
+        ...(state as any)[storeKey],
         data: null,
         error: action.payload,
         loading: false,
@@ -42,7 +42,7 @@ export function handleAsyncAction<ReducerState extends IReducerState, Payload>(
   };
 }
 
-export function getAsyncInitialState(initialData = null) {
+export function getAsyncInitialState(initialData = null): AsyncInitialState<any> {
   return {
     data: initialData,
     loading: false,

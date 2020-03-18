@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { hasNewMLJobSelector, isMLJobCreatingSelector, mlSelector } from '../../../state/selectors';
+import { hasNewMLJobSelector, isMLJobCreatingSelector } from '../../../state/selectors';
 import { createMLJobAction, getMLJobAction } from '../../../state/actions';
 import { MLJobLink } from './ml_job_link';
 import * as labels from './translations';
@@ -17,6 +17,7 @@ import {
 } from '../../../../../../../../src/plugins/kibana_react/public';
 import { MachineLearningFlyoutView } from './ml_flyout';
 import { ML_JOB_ID } from '../../../../common/constants';
+import { UptimeSettingsContext } from '../../../contexts';
 
 interface Props {
   isOpen: boolean;
@@ -25,7 +26,8 @@ interface Props {
 
 const showMLJobNotification = (
   notifications: KibanaReactNotifications,
-  monitorId,
+  monitorId: string,
+  basePath: string,
   success: boolean,
   message = ''
 ) => {
@@ -35,7 +37,9 @@ const showMLJobNotification = (
       body: (
         <p>
           {labels.JOB_CREATED_SUCCESS_MESSAGE}
-          <MLJobLink monitorId={monitorId}>{labels.VIEW_JOB}</MLJobLink>
+          <MLJobLink monitorId={monitorId} basePath={basePath}>
+            {labels.VIEW_JOB}
+          </MLJobLink>
         </p>
       ),
       toastLifeTimeMs: 5000,
@@ -51,11 +55,11 @@ const showMLJobNotification = (
 
 export const MachineLearningFlyout: React.FC<Props> = ({ isOpen, onClose }) => {
   const { notifications } = useKibana();
-  const { errors } = useSelector(mlSelector);
 
   const dispatch = useDispatch();
-  const hasMLJob = useSelector(hasNewMLJobSelector);
+  const { data: hasMLJob, error } = useSelector(hasNewMLJobSelector);
   const isMLJobCreating = useSelector(isMLJobCreatingSelector);
+  const { basePath } = useContext(UptimeSettingsContext);
 
   let { monitorId } = useParams();
   monitorId = atob(monitorId || '');
@@ -67,14 +71,19 @@ export const MachineLearningFlyout: React.FC<Props> = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isCreatingJob && !isMLJobCreating) {
       if (hasMLJob) {
-        showMLJobNotification(notifications, monitorId, true);
+        showMLJobNotification(notifications, monitorId as string, basePath, true);
         const loadMLJob = (jobId: string) =>
           dispatch(getMLJobAction.get({ jobId: `${monitorId}_${jobId}` }));
 
         loadMLJob(ML_JOB_ID);
       } else {
-        const err = errors?.pop();
-        showMLJobNotification(notifications, monitorId, false, err?.body?.message);
+        showMLJobNotification(
+          notifications,
+          monitorId as string,
+          basePath,
+          false,
+          error?.body?.message
+        );
       }
       setIsCreatingJob(false);
       onClose();
@@ -84,10 +93,11 @@ export const MachineLearningFlyout: React.FC<Props> = ({ isOpen, onClose }) => {
     notifications,
     onClose,
     isCreatingJob,
-    errors,
+    error,
     isMLJobCreating,
     monitorId,
     dispatch,
+    basePath,
   ]);
 
   if (!isOpen) {

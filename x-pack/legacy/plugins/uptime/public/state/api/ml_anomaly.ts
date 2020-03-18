@@ -4,17 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fetchGet, fetchPost } from './utils';
-import { INDEX_NAMES, ML_JOB_ID, ML_MODULE_ID } from '../../../common/constants';
+import { API_URLS, INDEX_NAMES, ML_JOB_ID, ML_MODULE_ID } from '../../../common/constants';
 import { AnomalyRecordsParams } from '../actions';
+import { apiService } from './utils';
 
-export const fetchMLJob = async ({ jobId }: { jobId: string }) => {
-  const url = `/api/ml/anomaly_detectors/${jobId}`;
-  const result = await fetchGet(url);
-  if (result instanceof Error) {
-    return null;
-  }
-  return result;
+export const getMLJobId = (monitorId: string) => `${monitorId}_${ML_JOB_ID}`;
+
+export const getExistingJobs = async () => {
+  return await apiService.get(API_URLS.ML_MODULE_JOBS + ML_MODULE_ID);
 };
 
 export const createMLJob = async ({ monitorId }: { monitorId: string }) => {
@@ -41,7 +38,7 @@ export const createMLJob = async ({ monitorId }: { monitorId: string }) => {
     },
   };
 
-  const response = await fetchPost(url, data);
+  const response = await apiService.post(url, data);
   if (
     response?.jobs?.[0]?.id === `${monitorId}_${ML_JOB_ID}` &&
     response?.jobs?.[0]?.success === true
@@ -59,7 +56,7 @@ export const deleteMLJob = async ({ monitorId }: { monitorId: string }) => {
 
   const data = { jobIds: [`${monitorId}_${ML_JOB_ID}`] };
 
-  return await fetchPost(url, data);
+  return await apiService.post(url, data);
 };
 
 export const getIndexDateRange = async () => {
@@ -71,7 +68,7 @@ export const getIndexDateRange = async () => {
     query: { bool: { must: [{ match_all: {} }] } },
   };
 
-  const result = await fetchPost(url, data);
+  const result = await apiService.post(url, data);
   return [result.start.epoch, result.end.epoch];
 };
 
@@ -96,7 +93,7 @@ export const fetchAnomalyRecords = async ({
       maxRecords: 500,
       maxExamples: 10,
     };
-    return fetchPost(url, data);
+    return apiService.post(url, data);
   } catch (error) {
     if (error?.response?.status === 404) {
       return null;

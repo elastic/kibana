@@ -22,8 +22,8 @@ interface StateProps {
 }
 
 interface DispatchProps {
-  loadMonitorStatus: (dateStart: string, dateEnd: string, monitorId: string) => void;
-  loadSelectedMonitor: (dateStart: string, dateEnd: string, monitorId: string) => void;
+  loadMonitorStatus: typeof getMonitorStatusAction;
+  loadSelectedMonitor: typeof getSelectedMonitorAction;
 }
 
 interface OwnProps {

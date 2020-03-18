@@ -36,6 +36,20 @@ export const JOB_CREATION_FAILED_MESSAGE = i18n.translate(
   }
 );
 
+export const JOB_DELETION = i18n.translate(
+  'xpack.uptime.ml.enableAnomalyDetectionPanel.jobDeletionNotificationTitle',
+  {
+    defaultMessage: 'Job deleted',
+  }
+);
+
+export const JOB_DELETION_SUCCESS = i18n.translate(
+  'xpack.uptime.ml.enableAnomalyDetectionPanel.jobDeletionSuccessNotificationText',
+  {
+    defaultMessage: 'Job is successfully deleted',
+  }
+);
+
 export const VIEW_JOB = i18n.translate(
   'xpack.uptime.ml.enableAnomalyDetectionPanel.jobCreatedNotificationText.viewJobLinkText',
   {
@@ -81,8 +95,8 @@ export const CREATE_NEW_JOB = i18n.translate(
 export const CREAT_ML_JOB_DESC = i18n.translate(
   'xpack.uptime.ml.enableAnomalyDetectionPanel.createMLJobDescription',
   {
-    defaultMessage: `Here you can create a machine learning job to calculate anomaly scores on durations for Uptime Monitor.
-              Once enabled, The monitor duration chart on details page will show the expected bounds and annotate
-              the graph once the anomaly score is >= 75.`,
+    defaultMessage: `Here you can create a machine learning job to calculate anomaly scores on
+    response durations for Uptime Monitor.Once enabled, The monitor duration chart on details page
+    will show the expected bounds and annotate the graph with anomalies.`,
   }
 );

@@ -4,23 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 import url from 'url';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import rison, { RisonValue } from 'rison-node';
-import { useParams } from 'react-router-dom';
 import { ML_JOB_ID } from '../../../../common/constants';
-import { UptimeSettingsContext } from '../../../contexts';
-import { useUrlParams } from '../../../hooks';
 
 interface Props {
   fill?: boolean;
   monitorId: string;
+  basePath: string;
 }
 
-export const MLJobLink: React.FC<Props> = ({ fill, monitorId, children }) => {
-  const { basePath } = useContext(UptimeSettingsContext);
-
+export const MLJobLink: React.FC<Props> = ({ fill, basePath, monitorId, children }) => {
   // const { dateRangeStart, dateRangeEnd } = useUrlParams()[0]();
 
   const query = {

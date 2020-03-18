@@ -19,6 +19,9 @@ import { deleteMLJobAction, getMLJobAction } from '../../../state/actions';
 import { ML_JOB_ID } from '../../../../common/constants';
 import { ConfirmJobDeletion } from './confirm_delete';
 import { UptimeRefreshContext } from '../../../contexts';
+import { getMLJobId } from '../../../state/api/ml_anomaly';
+import * as labels from './translations';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 export const MLIntegrationComponent = () => {
   const [isMlFlyoutOpen, setIsMlFlyoutOpen] = useState(false);
@@ -26,14 +29,17 @@ export const MLIntegrationComponent = () => {
 
   const { lastRefresh, refreshApp } = useContext(UptimeRefreshContext);
 
+  const { notifications } = useKibana();
+
   let { monitorId } = useParams();
   monitorId = atob(monitorId || '');
 
   const dispatch = useDispatch();
 
-  const { data, loading } = useSelector(hasMLJobSelector);
+  const { data } = useSelector(hasMLJobSelector);
 
-  const hasMLJob = !!data;
+  const hasMLJob =
+    !!data?.jobsExist && data.jobs.find((job: any) => job.id === getMLJobId(monitorId as string));
 
   const deleteMLJob = () => dispatch(deleteMLJobAction.get({ monitorId }));
   const isMLJobDeleting = useSelector(isMLJobDeletingSelector);
@@ -46,12 +52,24 @@ export const MLIntegrationComponent = () => {
   useEffect(() => {
     if (isConfirmDeleteJobOpen && jobDeletionSuccess?.[`${monitorId}_${ML_JOB_ID}`]?.deleted) {
       setIsConfirmDeleteJobOpen(false);
+      notifications.toasts.success({
+        title: <p>{labels.JOB_DELETION}</p>,
+        body: <p>{labels.JOB_DELETION_SUCCESS}</p>,
+        toastLifeTimeMs: 3000,
+      });
       // wait a couple seconds to make sure, job is deleted
       setTimeout(() => {
         refreshApp();
       }, 2000);
     }
-  }, [isMLJobDeleting, isConfirmDeleteJobOpen, jobDeletionSuccess, monitorId, refreshApp]);
+  }, [
+    isMLJobDeleting,
+    isConfirmDeleteJobOpen,
+    jobDeletionSuccess,
+    monitorId,
+    refreshApp,
+    notifications.toasts,
+  ]);
 
   useEffect(() => {
     dispatch(getMLJobAction.get({ jobId: `${monitorId}_${ML_JOB_ID}` }));

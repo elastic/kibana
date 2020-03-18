@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createSelector } from 'reselect';
 import { AppState } from '../../state';
-
-export const mlSelector = (state: AppState) => state.ml;
 
 // UI Selectors
 export const getBasePath = ({ ui: { basePath } }: AppState) => basePath;
@@ -41,22 +38,22 @@ export const selectPingHistogram = ({ ping, ui }: AppState) => {
   };
 };
 
-export const hasMLJobSelector = (state: AppState) => state.ml.mlJob;
+export const hasMLJobSelector = ({ ml }: AppState) => ml.mlJob;
 
-export const hasNewMLJobSelector = createSelector(mlSelector, ml => ml.createJob.data?.count > 0);
+export const hasNewMLJobSelector = ({ ml }: AppState) => ml.createJob;
 
-export const isMLJobCreatingSelector = createSelector(mlSelector, ml => ml.createJob.loading);
+export const isMLJobCreatingSelector = ({ ml }: AppState) => ml.createJob.loading;
 
-export const isMLJobDeletingSelector = createSelector(mlSelector, ml => ml.deleteJob.loading);
+export const isMLJobDeletingSelector = ({ ml }: AppState) => ml.deleteJob.loading;
 
-export const isMLJobDeletedSelector = createSelector(mlSelector, ml => ml.deleteJob);
+export const isMLJobDeletedSelector = ({ ml }: AppState) => ml.deleteJob;
 
-export const anomaliesSelector = createSelector(mlSelector, ml => ml.anomalies.data);
+export const anomaliesSelector = ({ ml }: AppState) => ml.anomalies.data;
 
 export const selectDurationLines = ({ monitorDuration }: AppState) => {
   return monitorDuration;
 };
 
 export const indexStatusSelector = ({ indexStatus }: AppState) => {
-  return indexStatus;
+  return indexStatus.indexStatus;
 };

@@ -12,12 +12,12 @@ import {
   deleteMLJobAction,
 } from '../actions';
 import { fetchEffectFactory } from './fetch_effect';
-import { fetchMLJob, createMLJob, fetchAnomalyRecords, deleteMLJob } from '../api/ml_anomaly';
+import { getExistingJobs, createMLJob, fetchAnomalyRecords, deleteMLJob } from '../api/ml_anomaly';
 
 export function* fetchMLJobEffect() {
   yield takeLatest(
     getMLJobAction.get,
-    fetchEffectFactory(fetchMLJob, getMLJobAction.success, getMLJobAction.fail)
+    fetchEffectFactory(getExistingJobs, getMLJobAction.success, getMLJobAction.fail)
   );
   yield takeLatest(
     createMLJobAction.get,
