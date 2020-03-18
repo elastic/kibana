@@ -7,11 +7,13 @@
 import { Reducer } from 'redux';
 import { PolicyListState } from '../../types';
 import { AppAction } from '../action';
+import { selectApiError } from './selectors';
 
 const initialPolicyListState = (): PolicyListState => {
   return {
     policyItems: [],
     isLoading: false,
+    apiError: undefined,
     pageIndex: 0,
     pageSize: 10,
     total: 0,
@@ -28,6 +30,25 @@ export const policyListReducer: Reducer<PolicyListState, AppAction> = (
       ...action.payload,
       isLoading: false,
     };
+  }
+
+  if (action.type === 'serverFailedToReturnPolicyListData') {
+    return {
+      ...state,
+      apiError: action.payload,
+      isLoading: false,
+    };
+  }
+
+  if (action.type === 'userShownPolicyListServerFailedMessage') {
+    // Make sure that the apiError currently stored is the one the user was shown
+    if (selectApiError(state) === action.payload) {
+      return {
+        ...state,
+        apiError: undefined,
+      };
+    }
+    return state;
   }
 
   if (

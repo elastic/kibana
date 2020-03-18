@@ -62,6 +62,8 @@ export type PolicyData = Datasource;
 export interface PolicyListState {
   /** Array of policy items  */
   policyItems: PolicyData[];
+  /** API error if loading data failed */
+  apiError?: ServerApiError;
   /** total number of policies */
   total: number;
   /** Number of policies per page */

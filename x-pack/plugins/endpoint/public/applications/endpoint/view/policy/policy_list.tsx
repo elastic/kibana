@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SyntheticEvent, useCallback, useMemo } from 'react';
+import React, { SyntheticEvent, useCallback, useEffect, useMemo } from 'react';
 import {
   EuiPage,
   EuiPageBody,
@@ -24,6 +24,7 @@ import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { usePageId } from '../use_page_id';
 import {
+  selectApiError,
   selectIsLoading,
   selectPageIndex,
   selectPageSize,
@@ -61,7 +62,7 @@ const renderPolicyNameLink = (value: string, _item: PolicyData) => {
 export const PolicyList = React.memo(() => {
   usePageId('policyListPage');
 
-  const { services } = useKibana();
+  const { services, notifications } = useKibana();
 
   const dispatch = useDispatch<(action: PolicyListAction) => void>();
   const policyItems = usePolicyListSelector(selectPolicyItems);
@@ -69,6 +70,21 @@ export const PolicyList = React.memo(() => {
   const pageSize = usePolicyListSelector(selectPageSize);
   const totalItemCount = usePolicyListSelector(selectTotal);
   const loading = usePolicyListSelector(selectIsLoading);
+  const apiError = usePolicyListSelector(selectApiError);
+
+  useEffect(() => {
+    if (apiError) {
+      notifications.toasts.danger({
+        title: apiError.error,
+        body: apiError.message,
+        toastLifeTimeMs: 10000,
+      });
+      dispatch({
+        type: 'userShownPolicyListServerFailedMessage',
+        payload: apiError,
+      });
+    }
+  }, [apiError, dispatch, notifications.toasts]);
 
   const paginationSetup = useMemo(() => {
     return {

@@ -29,27 +29,29 @@ export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = c
         pageIndex = state.pageIndex;
       }
 
-      const { items: policyItems, total, success } = await sendGetEndpoingDatasources(http, {
-        query: {
-          perPage: pageSize,
-          page: pageIndex + 1,
-        },
-      });
+      try {
+        const { items: policyItems, total } = await sendGetEndpoingDatasources(http, {
+          query: {
+            perPage: pageSize,
+            page: pageIndex + 1,
+          },
+        });
 
-      if (!success) {
-        // FIXME: dispatch error
-        return;
+        dispatch({
+          type: 'serverReturnedPolicyListData',
+          payload: {
+            policyItems,
+            pageIndex,
+            pageSize,
+            total,
+          },
+        });
+      } catch (err) {
+        dispatch({
+          type: 'serverFailedToReturnPolicyListData',
+          payload: err.body ?? err,
+        });
       }
-
-      dispatch({
-        type: 'serverReturnedPolicyListData',
-        payload: {
-          policyItems,
-          pageIndex,
-          pageSize,
-          total,
-        },
-      });
     }
   };
 };
