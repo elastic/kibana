@@ -1,0 +1,7 @@
+{
+  "id": "savedObjectsManagement",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["home"]
+}

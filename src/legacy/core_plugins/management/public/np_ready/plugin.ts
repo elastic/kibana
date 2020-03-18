@@ -55,7 +55,7 @@ export class ManagementPlugin
   public setup(core: CoreSetup, { home }: ManagementPluginSetupDependencies) {
     return {
       indexPattern: this.indexPattern.setup({ httpClient: core.http, home }),
-      savedObjects: this.savedObjects.setup({ home }),
+      savedObjects: this.savedObjects.setup(),
     };
   }
 

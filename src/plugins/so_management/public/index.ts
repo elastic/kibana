@@ -17,17 +17,11 @@
  * under the License.
  */
 
-import { SavedObjectsManagementActionRegistry } from './saved_objects_management_action_registry';
+import { PluginInitializerContext } from 'kibana/public';
+import { SavedObjectsManagementPlugin } from './plugin';
 
-export class SavedObjectsManagementService {
-  public setup() {
-    return {
-      registry: SavedObjectsManagementActionRegistry,
-    };
-  }
+export { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './plugin';
 
-  public stop() {}
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new SavedObjectsManagementPlugin();
 }
-
-/** @internal */
-export type SavedObjectsManagementServiceSetup = ReturnType<SavedObjectsManagementService['setup']>;
