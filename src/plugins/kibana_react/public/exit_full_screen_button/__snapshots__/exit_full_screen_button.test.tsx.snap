@@ -17,27 +17,88 @@ exports[`is rendered 1`] = `
       <button
         aria-label="Exit full screen mode"
         className="dshExitFullScreenButton"
+        data-test-subj="exitFullScreenModeLogo"
         onClick={[Function]}
       >
-        <span
-          className="dshExitFullScreenButton__logo"
-          data-test-subj="exitFullScreenModeLogo"
-        />
-        <span
-          className="dshExitFullScreenButton__text"
-          data-test-subj="exitFullScreenModeText"
+        <EuiFlexGroup
+          alignItems="center"
+          component="span"
+          gutterSize="s"
+          responsive={false}
         >
-          Exit full screen
-          <EuiIcon
-            size="s"
-            type="arrowLeft"
+          <span
+            className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
           >
-            <div
-              data-euiicon-type="arrowLeft"
-              size="s"
-            />
-          </EuiIcon>
-        </span>
+            <EuiFlexItem
+              grow={false}
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <EuiIcon
+                  size="l"
+                  type="logoElastic"
+                >
+                  <div
+                    data-euiicon-type="logoElastic"
+                    size="l"
+                  />
+                </EuiIcon>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem
+              data-test-subj="exitFullScreenModeText"
+              grow={false}
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+                data-test-subj="exitFullScreenModeText"
+              >
+                <div>
+                  <EuiTitle
+                    className="dshExitFullScreenButton__title"
+                    size="xxxs"
+                  >
+                    <p
+                      className="euiTitle euiTitle--xxxsmall dshExitFullScreenButton__title"
+                    >
+                      Elastic Kibana
+                    </p>
+                  </EuiTitle>
+                  <EuiText
+                    className="dshExitFullScreenButton__text"
+                    size="xs"
+                  >
+                    <div
+                      className="euiText euiText--extraSmall dshExitFullScreenButton__text"
+                    >
+                      <p>
+                        Exit full screen
+                      </p>
+                    </div>
+                  </EuiText>
+                </div>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <EuiIcon
+                  className="dshExitFullScreenButton__icon"
+                  type="fullScreen"
+                >
+                  <div
+                    className="dshExitFullScreenButton__icon"
+                    data-euiicon-type="fullScreen"
+                  />
+                </EuiIcon>
+              </div>
+            </EuiFlexItem>
+          </span>
+        </EuiFlexGroup>
       </button>
     </div>
   </div>
