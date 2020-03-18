@@ -83,7 +83,6 @@ import {
   AngularHttpError,
   KibanaLegacyStart,
 } from '../../../../../../plugins/kibana_legacy/public';
-import { AddPanelPopover } from './top_nav/show_add_popover';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
@@ -755,7 +754,7 @@ export class DashboardAppController {
        * When de-angularizing this code, please call the underlaying action function
        * directly and not via the top nav object.
        **/
-      navActions[TopNavIds.ADD_PANEL]();
+      navActions[TopNavIds.ADD_EXISTING]();
     };
     $scope.enterEditMode = () => {
       dashboardStateManager.setFullScreenMode(false);
@@ -847,14 +846,6 @@ export class DashboardAppController {
       };
 
       showCloneModal(onClone, currentTitle);
-    };
-
-    navActions[TopNavIds.ADD_PANEL] = async (anchorElement: HTMLElement) => {
-      AddPanelPopover({
-        anchorElement,
-        addExisting: navActions[TopNavIds.ADD_EXISTING],
-        addNew: navActions[TopNavIds.VISUALIZE],
-      });
     };
 
     navActions[TopNavIds.ADD_EXISTING] = () => {

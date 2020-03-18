@@ -49,7 +49,7 @@ export function TopNavMenu(props: TopNavMenuProps) {
         <EuiFlexItem
           grow={false}
           key={`nav-menu-${i}`}
-          className={menuItem.emphasize ? 'kbnTopNavEmphasized' : ''}
+          className={menuItem.emphasize ? 'kbnTopNavItemEmphasized' : ''}
         >
           <TopNavMenuItem {...menuItem} />
         </EuiFlexItem>

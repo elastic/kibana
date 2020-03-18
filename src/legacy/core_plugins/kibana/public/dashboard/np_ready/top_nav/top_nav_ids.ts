@@ -18,7 +18,6 @@
  */
 
 export const TopNavIds = {
-  ADD_PANEL: 'addPanel',
   SHARE: 'share',
   OPTIONS: 'options',
   SAVE: 'save',

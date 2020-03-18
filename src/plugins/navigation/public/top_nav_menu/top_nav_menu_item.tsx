@@ -44,7 +44,7 @@ export function TopNavMenuItem(props: TopNavMenuData) {
     isDisabled: isDisabled(),
     onClick: handleClick,
     iconType: props.iconType,
-    iconSide: (props.iconRight ? 'right' : 'left') as 'right' | 'left' | undefined,
+    iconSide: props.iconSide,
     'data-test-subj': props.testId,
   };
 

@@ -48,9 +48,10 @@ export function getTopNavConfig(
           ];
     case ViewMode.EDIT:
       return [
-        getAddConfig(actions[TopNavIds.ADD_PANEL]),
+        getCreateNewConfig(actions[TopNavIds.VISUALIZE]),
         getSaveConfig(actions[TopNavIds.SAVE]),
         getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
+        getAddConfig(actions[TopNavIds.ADD_EXISTING]),
         getOptionsConfig(actions[TopNavIds.OPTIONS]),
         getShareConfig(actions[TopNavIds.SHARE]),
       ];
@@ -149,17 +150,33 @@ function getCloneConfig(action: NavAction) {
  */
 function getAddConfig(action: NavAction) {
   return {
-    emphasize: true,
-    iconType: 'arrowDown',
-    iconRight: true,
     id: 'add',
     label: i18n.translate('kbn.dashboard.topNave.addButtonAriaLabel', {
-      defaultMessage: 'Add Panel',
+      defaultMessage: 'add',
     }),
     description: i18n.translate('kbn.dashboard.topNave.addConfigDescription', {
       defaultMessage: 'Add a panel to the dashboard',
     }),
     testId: 'dashboardAddPanelButton',
+    run: action,
+  };
+}
+
+/**
+ * @returns {kbnTopNavConfig}
+ */
+function getCreateNewConfig(action: NavAction) {
+  return {
+    emphasize: true,
+    iconType: 'plusInCircle',
+    id: 'addNew',
+    label: i18n.translate('kbn.dashboard.topNave.addNewButtonAriaLabel', {
+      defaultMessage: 'Create new',
+    }),
+    description: i18n.translate('kbn.dashboard.topNave.addNewConfigDescription', {
+      defaultMessage: 'Create a new panel on this dashboard',
+    }),
+    testId: 'dashboardAddNewPanelButton',
     run: action,
   };
 }
