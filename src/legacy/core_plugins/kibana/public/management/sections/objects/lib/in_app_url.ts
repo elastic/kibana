@@ -19,7 +19,7 @@
 
 import { Capabilities } from 'src/core/public';
 
-export function canViewInApp(uiCapabilities: Capabilities, type: string) {
+export function canViewInApp(uiCapabilities: Capabilities, type: string): boolean {
   switch (type) {
     case 'search':
     case 'searches':

@@ -18,20 +18,33 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { OverlayStart } from 'src/core/public';
+import {
+  SavedObject,
+  SavedObjectLoader,
+} from '../../../../../../../../plugins/saved_objects/public';
+import { IndexPatternsContract, IIndexPattern } from '../../../../../../../../plugins/data/public';
 
-async function getSavedObject(doc, services) {
-  const service = services.find(service => service.type === doc._type);
+type SavedObjectsRawDoc = Record<string, any>;
+
+async function getSavedObject(doc: SavedObjectsRawDoc, services: SavedObjectLoader[]) {
+  const service = services.find(s => s.type === doc._type);
   if (!service) {
     return;
   }
 
-  const obj = await service.get();
+  const obj = await service.get(doc._id);
   obj.id = doc._id;
   obj.migrationVersion = doc._migrationVersion;
   return obj;
 }
 
-function addJsonFieldToIndexPattern(target, sourceString, fieldName, indexName) {
+function addJsonFieldToIndexPattern(
+  target: Record<string, any>,
+  sourceString: string,
+  fieldName: string,
+  indexName: string
+) {
   if (sourceString) {
     try {
       target[fieldName] = JSON.parse(sourceString);
@@ -50,7 +63,12 @@ function addJsonFieldToIndexPattern(target, sourceString, fieldName, indexName) 
     }
   }
 }
-async function importIndexPattern(doc, indexPatterns, overwriteAll, confirmModalPromise) {
+async function importIndexPattern(
+  doc: SavedObjectsRawDoc,
+  indexPatterns: IndexPatternsContract,
+  overwriteAll: boolean,
+  confirmModalPromise: OverlayStart['openConfirm']
+) {
   // TODO: consolidate this is the code in create_index_pattern_wizard.js
   const emptyPattern = await indexPatterns.make();
   const {
@@ -66,7 +84,7 @@ async function importIndexPattern(doc, indexPatterns, overwriteAll, confirmModal
     id: doc._id,
     title,
     timeFieldName,
-  };
+  } as IIndexPattern;
   if (type) {
     importedIndexPattern.type = type;
   }
@@ -81,7 +99,7 @@ async function importIndexPattern(doc, indexPatterns, overwriteAll, confirmModal
     // We can override and we want to prompt for confirmation
     const isConfirmed = await confirmModalPromise(
       i18n.translate('kbn.management.indexPattern.confirmOverwriteLabel', {
-        values: { title: this.title },
+        values: { title },
         defaultMessage: "Are you sure you want to overwrite '{title}'?",
       }),
       {
@@ -96,7 +114,7 @@ async function importIndexPattern(doc, indexPatterns, overwriteAll, confirmModal
     );
 
     if (isConfirmed) {
-      newId = await emptyPattern.create(true);
+      newId = (await emptyPattern.create(true)) as string;
     } else {
       return;
     }
@@ -105,7 +123,7 @@ async function importIndexPattern(doc, indexPatterns, overwriteAll, confirmModal
   return newId;
 }
 
-async function importDocument(obj, doc, overwriteAll) {
+async function importDocument(obj: SavedObject, doc: any, overwriteAll: boolean) {
   await obj.applyESResp({
     references: doc._references || [],
     ...doc,
@@ -113,12 +131,12 @@ async function importDocument(obj, doc, overwriteAll) {
   return await obj.save({ confirmOverwrite: !overwriteAll });
 }
 
-function groupByType(docs) {
+function groupByType(docs: SavedObjectsRawDoc[]): Record<string, SavedObjectsRawDoc[]> {
   const defaultDocTypes = {
     searches: [],
     indexPatterns: [],
     other: [],
-  };
+  } as Record<string, SavedObjectsRawDoc[]>;
 
   return docs.reduce((types, doc) => {
     switch (doc._type) {
@@ -135,14 +153,14 @@ function groupByType(docs) {
   }, defaultDocTypes);
 }
 
-async function awaitEachItemInParallel(list, op) {
+async function awaitEachItemInParallel<T, R>(list: T[], op: (item: T) => R) {
   return await Promise.all(list.map(item => op(item)));
 }
 
 export async function resolveIndexPatternConflicts(
-  resolutions,
-  conflictedIndexPatterns,
-  overwriteAll
+  resolutions: Array<{ oldId: string; newId: string }>,
+  conflictedIndexPatterns: any[],
+  overwriteAll: boolean
 ) {
   let importCount = 0;
 
@@ -160,15 +178,13 @@ export async function resolveIndexPatternConflicts(
     }
 
     // Resolve filter index reference:
-    const filter = (obj.searchSource.getOwnField('filter') || []).map(filter => {
-      if (!(filter.meta && filter.meta.index)) {
-        return filter;
+    const filter = (obj.searchSource.getOwnField('filter') || []).map((f: any) => {
+      if (!(f.meta && f.meta.index)) {
+        return f;
       }
 
-      resolution = resolutions.find(({ oldId }) => oldId === filter.meta.index);
-      return resolution
-        ? { ...filter, ...{ meta: { ...filter.meta, index: resolution.newId } } }
-        : filter;
+      resolution = resolutions.find(({ oldId }) => oldId === f.meta.index);
+      return resolution ? { ...f, ...{ meta: { ...f.meta, index: resolution.newId } } } : f;
     });
 
     if (filter.length > 0) {
@@ -186,7 +202,7 @@ export async function resolveIndexPatternConflicts(
   return importCount;
 }
 
-export async function saveObjects(objs, overwriteAll) {
+export async function saveObjects(objs: SavedObject[], overwriteAll: boolean) {
   let importCount = 0;
   await awaitEachItemInParallel(objs, async obj => {
     if (await saveObject(obj, overwriteAll)) {
@@ -196,11 +212,16 @@ export async function saveObjects(objs, overwriteAll) {
   return importCount;
 }
 
-export async function saveObject(obj, overwriteAll) {
+export async function saveObject(obj: SavedObject, overwriteAll: boolean) {
   return await obj.save({ confirmOverwrite: !overwriteAll });
 }
 
-export async function resolveSavedSearches(savedSearches, services, indexPatterns, overwriteAll) {
+export async function resolveSavedSearches(
+  savedSearches: any[],
+  services: SavedObjectLoader[],
+  indexPatterns: IndexPatternsContract,
+  overwriteAll: boolean
+) {
   let importCount = 0;
   await awaitEachItemInParallel(savedSearches, async searchDoc => {
     const obj = await getSavedObject(searchDoc, services);
@@ -216,18 +237,18 @@ export async function resolveSavedSearches(savedSearches, services, indexPattern
 }
 
 export async function resolveSavedObjects(
-  savedObjects,
-  overwriteAll,
-  services,
-  indexPatterns,
-  confirmModalPromise
+  savedObjects: SavedObjectsRawDoc[],
+  overwriteAll: boolean,
+  services: SavedObjectLoader[],
+  indexPatterns: IndexPatternsContract,
+  confirmModalPromise: OverlayStart['openConfirm']
 ) {
   const docTypes = groupByType(savedObjects);
 
   // Keep track of how many we actually import because the user
   // can cancel an override
   let importedObjectCount = 0;
-  const failedImports = [];
+  const failedImports: any[] = [];
   // Start with the index patterns since everything is dependent on them
   await awaitEachItemInParallel(docTypes.indexPatterns, async indexPatternDoc => {
     try {
@@ -247,18 +268,18 @@ export async function resolveSavedObjects(
 
   // We want to do the same for saved searches, but we want to keep them separate because they need
   // to be applied _first_ because other saved objects can be dependent on those saved searches existing
-  const conflictedSearchDocs = [];
+  const conflictedSearchDocs: any[] = [];
   // Keep a record of the index patterns assigned to our imported saved objects that do not
   // exist. We will provide a way for the user to manually select a new index pattern for those
   // saved objects.
-  const conflictedIndexPatterns = [];
+  const conflictedIndexPatterns: any[] = [];
   // Keep a record of any objects which fail to import for unknown reasons.
 
   // It's possible to have saved objects that link to saved searches which then link to index patterns
   // and those could error out, but the error comes as an index pattern not found error. We can't resolve
   // those the same as way as normal index pattern not found errors, but when those are fixed, it's very
   // likely that these saved objects will work once resaved so keep them around to resave them.
-  const conflictedSavedObjectsLinkedToSavedSearches = [];
+  const conflictedSavedObjectsLinkedToSavedSearches: any[] = [];
 
   await awaitEachItemInParallel(docTypes.searches, async searchDoc => {
     const obj = await getSavedObject(searchDoc, services);
