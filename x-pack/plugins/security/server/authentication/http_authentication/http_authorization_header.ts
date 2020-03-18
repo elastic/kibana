@@ -7,7 +7,7 @@
 import { KibanaRequest } from '../../../../../../src/core/server';
 
 export class HTTPAuthorizationHeader {
-  constructor(public scheme: string, public credentials: string) {}
+  constructor(public readonly scheme: string, public readonly credentials: string) {}
 
   static parseFromRequest(request: KibanaRequest) {
     const authorizationHeaderValue = request.headers.authorization;
