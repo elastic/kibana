@@ -4,50 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { call, put, takeLatest, select } from 'redux-saga/effects';
-import { Action } from 'redux-actions';
+import { takeLatest } from 'redux-saga/effects';
 import {
-  getSelectedMonitor,
-  getSelectedMonitorSuccess,
-  getSelectedMonitorFail,
-  getMonitorStatus,
-  getMonitorStatusSuccess,
-  getMonitorStatusFail,
-} from '../actions/monitor_status';
+  getSelectedMonitorAction,
+  getSelectedMonitorActionSuccess,
+  getSelectedMonitorActionFail,
+  getMonitorStatusAction,
+  getMonitorStatusActionSuccess,
+  getMonitorStatusActionFail,
+} from '../actions';
 import { fetchSelectedMonitor, fetchMonitorStatus } from '../api';
-import { getBasePath } from '../selectors';
-
-function* selectedMonitorEffect(action: Action<any>) {
-  const { monitorId } = action.payload;
-  try {
-    const basePath = yield select(getBasePath);
-    const response = yield call(fetchSelectedMonitor, {
-      monitorId,
-      basePath,
-    });
-    yield put(getSelectedMonitorSuccess(response));
-  } catch (error) {
-    yield put({ type: getSelectedMonitorFail, payload: error.message });
-  }
-}
-
-function* monitorStatusEffect(action: Action<any>) {
-  const { monitorId, dateStart, dateEnd } = action.payload;
-  try {
-    const basePath = yield select(getBasePath);
-    const response = yield call(fetchMonitorStatus, {
-      monitorId,
-      basePath,
-      dateStart,
-      dateEnd,
-    });
-    yield put(getMonitorStatusSuccess(response));
-  } catch (error) {
-    yield put({ type: getMonitorStatusFail, payload: error.message });
-  }
-}
+import { fetchEffectFactory } from './fetch_effect';
 
 export function* fetchMonitorStatusEffect() {
-  yield takeLatest(getMonitorStatus, monitorStatusEffect);
-  yield takeLatest(getSelectedMonitor, selectedMonitorEffect);
+  yield takeLatest(
+    getMonitorStatusAction,
+    fetchEffectFactory(
+      fetchMonitorStatus,
+      getMonitorStatusActionSuccess,
+      getMonitorStatusActionFail
+    )
+  );
+
+  yield takeLatest(
+    getSelectedMonitorAction,
+    fetchEffectFactory(
+      fetchSelectedMonitor,
+      getSelectedMonitorActionSuccess,
+      getSelectedMonitorActionFail
+    )
+  );
 }
