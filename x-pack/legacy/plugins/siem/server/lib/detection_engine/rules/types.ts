@@ -147,11 +147,6 @@ export interface Clients {
   actionsClient: ActionsClient;
 }
 
-export interface MlRuleParams {
-  anomalyThreshold: number;
-  mlJobId: string;
-}
-
 export type PatchRuleParams = Partial<RuleAlertParams> & {
   id: string | undefined | null;
   savedObjectsClient: SavedObjectsClientContract;
@@ -167,8 +162,7 @@ export type DeleteRuleParams = Clients & {
   ruleId: string | undefined | null;
 };
 
-export type CreateRuleParams = Omit<RuleAlertParams, 'ruleId'> & { ruleId: string } & Clients &
-  Partial<MlRuleParams>;
+export type CreateRuleParams = Omit<RuleAlertParams, 'ruleId'> & { ruleId: string } & Clients;
 
 export interface ReadRuleParams {
   alertsClient: AlertsClient;

@@ -35,7 +35,7 @@ describe('rule helpers', () => {
         ruleType: 'saved_query',
         anomalyThreshold: 50,
         index: ['auditbeat-*'],
-        mlJobId: '',
+        machineLearningJobId: '',
         queryBar: {
           query: {
             query: 'user.name: root or user.name: admin',
@@ -185,7 +185,7 @@ describe('rule helpers', () => {
         isNew: false,
         ruleType: 'saved_query',
         anomalyThreshold: 50,
-        mlJobId: '',
+        machineLearningJobId: '',
         index: ['auditbeat-*'],
         queryBar: {
           query: {
@@ -210,7 +210,7 @@ describe('rule helpers', () => {
         isNew: false,
         ruleType: 'saved_query',
         anomalyThreshold: 50,
-        mlJobId: '',
+        machineLearningJobId: '',
         index: ['auditbeat-*'],
         queryBar: {
           query: {

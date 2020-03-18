@@ -127,9 +127,9 @@ export const schema: FormSchema = {
     ),
     validations: [],
   },
-  mlJobId: {
+  machineLearningJobId: {
     label: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepDefineRule.fieldMlJobIdLabel',
+      'xpack.siem.detectionEngine.createRule.stepDefineRule.fieldMachineLearningJobIdLabel',
       {
         defaultMessage: 'Machine Learning job',
       }
@@ -147,9 +147,12 @@ export const schema: FormSchema = {
           }
 
           return fieldValidators.emptyField(
-            i18n.translate('xpack.siem.detectionEngine.createRule.stepDefineRule.mlJobIdRequired', {
-              defaultMessage: 'A Machine Learning job is required.',
-            })
+            i18n.translate(
+              'xpack.siem.detectionEngine.createRule.stepDefineRule.machineLearningJobIdRequired',
+              {
+                defaultMessage: 'A Machine Learning job is required.',
+              }
+            )
           )(...args);
         },
       },

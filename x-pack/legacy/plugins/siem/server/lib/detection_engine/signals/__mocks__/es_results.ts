@@ -29,6 +29,8 @@ export const sampleRuleAlertParams = (
   riskScore: riskScore ? riskScore : 50,
   maxSignals: maxSignals ? maxSignals : 10000,
   note: '',
+  anomalyThreshold: null,
+  machineLearningJobId: null,
   filters: undefined,
   savedId: undefined,
   timelineId: undefined,

@@ -65,7 +65,7 @@ export const buildRule = ({
     version: ruleParams.version,
     created_at: createdAt,
     updated_at: updatedAt,
-    machine_learning_job_id: ruleParams.mlJobId,
+    machine_learning_job_id: ruleParams.machineLearningJobId,
     anomaly_threshold: ruleParams.anomalyThreshold,
   });
 };

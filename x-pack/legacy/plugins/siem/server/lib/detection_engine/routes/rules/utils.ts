@@ -118,7 +118,7 @@ export const transformAlertToRule = (
     language: alert.params.language,
     output_index: alert.params.outputIndex,
     max_signals: alert.params.maxSignals,
-    machine_learning_job_id: alert.params.mlJobId,
+    machine_learning_job_id: alert.params.machineLearningJobId,
     risk_score: alert.params.riskScore,
     name: alert.name,
     query: alert.params.query,

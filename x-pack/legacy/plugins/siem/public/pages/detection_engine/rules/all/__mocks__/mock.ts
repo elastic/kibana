@@ -183,7 +183,7 @@ export const mockDefineStepRule = (isNew = false): DefineStepRule => ({
   isNew,
   ruleType: 'query',
   anomalyThreshold: 50,
-  mlJobId: '',
+  machineLearningJobId: '',
   index: ['filebeat-'],
   queryBar: mockQueryBar,
 });

@@ -361,6 +361,7 @@ export const getResult = (): RuleAlertType => ({
   alertTypeId: 'siem.signals',
   consumer: 'siem',
   params: {
+    anomalyThreshold: null,
     description: 'Detecting root and admin users',
     ruleId: 'rule-1',
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -369,6 +370,7 @@ export const getResult = (): RuleAlertType => ({
     immutable: false,
     query: 'user.name: root or user.name: admin',
     language: 'kuery',
+    machineLearningJobId: null,
     outputIndex: '.siem-signals',
     timelineId: 'some-timeline-id',
     timelineTitle: 'some-timeline-title',

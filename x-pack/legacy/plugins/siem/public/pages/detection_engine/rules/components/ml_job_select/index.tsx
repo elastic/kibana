@@ -28,8 +28,8 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({ field }) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const [isLoading, siemJobs] = useSiemJobs(false);
   const handleJobChange = useCallback(
-    (mlJobId: string) => {
-      field.setValue(mlJobId);
+    (machineLearningJobId: string) => {
+      field.setValue(machineLearningJobId);
     },
     [field]
   );

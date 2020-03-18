@@ -46,7 +46,7 @@ export const signalRulesAlertType = ({
         index,
         filters,
         language,
-        mlJobId,
+        machineLearningJobId,
         outputIndex,
         savedId,
         query,
@@ -96,14 +96,14 @@ export const signalRulesAlertType = ({
 
       try {
         if (type === 'machine_learning') {
-          if (mlJobId == null || anomalyThreshold == null) {
+          if (machineLearningJobId == null || anomalyThreshold == null) {
             throw new Error(
-              `Attempted to execute machine learning rule, but it is missing job id and/or anomaly threshold for rule id: "${ruleId}", name: "${name}", signals index: "${outputIndex}", job id: "${mlJobId}", anomaly threshold: "${anomalyThreshold}"`
+              `Attempted to execute machine learning rule, but it is missing job id and/or anomaly threshold for rule id: "${ruleId}", name: "${name}", signals index: "${outputIndex}", job id: "${machineLearningJobId}", anomaly threshold: "${anomalyThreshold}"`
             );
           }
 
           const anomalyResults = await findMlSignals(
-            mlJobId,
+            machineLearningJobId,
             anomalyThreshold,
             from,
             to,

@@ -52,7 +52,7 @@ const stepDefineDefaultValue: DefineStepRule = {
   anomalyThreshold: 50,
   index: [],
   isNew: true,
-  mlJobId: '',
+  machineLearningJobId: '',
   ruleType: 'query',
   queryBar: {
     query: { query: '', language: 'kuery' },
@@ -228,7 +228,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </EuiFormRow>
           <EuiFormRow fullWidth style={{ display: localIsMlRule ? 'flex' : 'none' }}>
             <>
-              <UseField path="mlJobId" component={MlJobSelect} />
+              <UseField path="machineLearningJobId" component={MlJobSelect} />
               <UseField path="anomalyThreshold" component={AnomalyThresholdSlider} />
             </>
           </EuiFormRow>

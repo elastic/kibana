@@ -111,6 +111,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                     return null;
                   }
                   const {
+                    anomaly_threshold: anomalyThreshold,
                     description,
                     enabled,
                     false_positives: falsePositives,
@@ -118,6 +119,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                     immutable,
                     query,
                     language,
+                    machine_learning_job_id: machineLearningJobId,
                     output_index: outputIndex,
                     saved_id: savedId,
                     meta,
@@ -139,6 +141,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                     timeline_title: timelineTitle,
                     version,
                   } = parsedRule;
+
                   try {
                     const signalsIndex = siemClient.signalsIndex;
                     const indexExists = await getIndexExists(
@@ -159,6 +162,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                       await createRules({
                         alertsClient,
                         actionsClient,
+                        anomalyThreshold,
                         description,
                         enabled,
                         falsePositives,
@@ -166,6 +170,7 @@ export const importRulesRoute = (router: IRouter, config: LegacyServices['config
                         immutable,
                         query,
                         language,
+                        machineLearningJobId,
                         outputIndex: signalsIndex,
                         savedId,
                         timelineId,

@@ -41,12 +41,12 @@ export const getTimeTypeValue = (time: string): { unit: string; value: number } 
 
 interface RuleFields {
   anomalyThreshold: unknown;
-  mlJobId: unknown;
+  machineLearningJobId: unknown;
   queryBar: unknown;
   index: unknown;
   ruleType: unknown;
 }
-type QueryRuleFields<T> = Omit<T, 'anomalyThreshold' | 'mlJobId'>;
+type QueryRuleFields<T> = Omit<T, 'anomalyThreshold' | 'machineLearningJobId'>;
 type MlRuleFields<T> = Omit<T, 'queryBar' | 'index'>;
 
 const isMlFields = <T>(fields: QueryRuleFields<T> | MlRuleFields<T>): fields is MlRuleFields<T> =>
@@ -57,7 +57,7 @@ export const filterRuleFieldsForType = <T extends RuleFields>(fields: T, type: R
     const { index, queryBar, ...mlRuleFields } = fields;
     return mlRuleFields;
   } else {
-    const { anomalyThreshold, mlJobId, ...queryRuleFields } = fields;
+    const { anomalyThreshold, machineLearningJobId, ...queryRuleFields } = fields;
     return queryRuleFields;
   }
 };
@@ -66,12 +66,12 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
   const ruleFields = filterRuleFieldsForType(defineStepData, defineStepData.ruleType);
 
   if (isMlFields(ruleFields)) {
-    const { anomalyThreshold, mlJobId, isNew, ruleType, ...rest } = ruleFields;
+    const { anomalyThreshold, machineLearningJobId, isNew, ruleType, ...rest } = ruleFields;
     return {
       ...rest,
       type: ruleType,
       anomaly_threshold: anomalyThreshold,
-      machine_learning_job_id: mlJobId,
+      machine_learning_job_id: machineLearningJobId,
     };
   } else {
     const { queryBar, isNew, ruleType, ...rest } = ruleFields;

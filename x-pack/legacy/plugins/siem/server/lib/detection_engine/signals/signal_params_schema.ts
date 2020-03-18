@@ -28,7 +28,7 @@ export const signalParamsSchema = () =>
     timelineId: schema.nullable(schema.string()),
     timelineTitle: schema.nullable(schema.string()),
     meta: schema.nullable(schema.object({}, { unknowns: 'allow' })),
-    mlJobId: schema.nullable(schema.string()),
+    machineLearningJobId: schema.nullable(schema.string()),
     query: schema.nullable(schema.string()),
     filters: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
     maxSignals: schema.number({ defaultValue: DEFAULT_MAX_SIGNALS }),
