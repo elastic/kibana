@@ -34,7 +34,7 @@ interface Props {
 }
 
 const allChecksButtonContent = i18n.translate(
-  'xpack.ml.newJob.wizard.jobDetailsStep.additionalSectionButton',
+  'xpack.ml.newJob.wizard.jobDetailsStep.allChecksButton',
   {
     defaultMessage: 'View all checks performed',
   }
