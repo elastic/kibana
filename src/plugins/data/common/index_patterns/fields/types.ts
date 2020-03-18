@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { KBN_FILTERABLE_TYPE } from '../../kbn_field_types/types';
-
 export interface IFieldSubType {
   multi?: { parent: string };
   nested?: { path: string };
@@ -35,7 +33,6 @@ export interface IFieldType {
   esTypes?: string[];
   aggregatable?: boolean;
   filterable?: boolean;
-  filterableType?: KBN_FILTERABLE_TYPE;
   searchable?: boolean;
   sortable?: boolean;
   visualizable?: boolean;

@@ -18,14 +18,13 @@
  */
 
 import { KbnFieldType } from './kbn_field_type';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES, KBN_FILTERABLE_TYPE } from './types';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from './types';
 
 export const createKbnFieldTypes = (): KbnFieldType[] => [
   new KbnFieldType({
     name: KBN_FIELD_TYPES.STRING,
     sortable: true,
     filterable: true,
-    filterableType: KBN_FILTERABLE_TYPE.ALL,
     esTypes: [
       ES_FIELD_TYPES.STRING,
       ES_FIELD_TYPES.TEXT,
@@ -38,7 +37,6 @@ export const createKbnFieldTypes = (): KbnFieldType[] => [
     name: KBN_FIELD_TYPES.NUMBER,
     sortable: true,
     filterable: true,
-    filterableType: KBN_FILTERABLE_TYPE.ALL,
     esTypes: [
       ES_FIELD_TYPES.FLOAT,
       ES_FIELD_TYPES.HALF_FLOAT,
@@ -55,21 +53,18 @@ export const createKbnFieldTypes = (): KbnFieldType[] => [
     name: KBN_FIELD_TYPES.DATE,
     sortable: true,
     filterable: true,
-    filterableType: KBN_FILTERABLE_TYPE.ALL,
     esTypes: [ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.DATE_NANOS],
   }),
   new KbnFieldType({
     name: KBN_FIELD_TYPES.IP,
     sortable: true,
     filterable: true,
-    filterableType: KBN_FILTERABLE_TYPE.ALL,
     esTypes: [ES_FIELD_TYPES.IP],
   }),
   new KbnFieldType({
     name: KBN_FIELD_TYPES.BOOLEAN,
     sortable: true,
     filterable: true,
-    filterableType: KBN_FILTERABLE_TYPE.ALL,
     esTypes: [ES_FIELD_TYPES.BOOLEAN],
   }),
   new KbnFieldType({
@@ -103,7 +98,6 @@ export const createKbnFieldTypes = (): KbnFieldType[] => [
   new KbnFieldType({
     name: KBN_FIELD_TYPES.HISTOGRAM,
     filterable: true,
-    filterableType: KBN_FILTERABLE_TYPE.EXISTSONLY,
     esTypes: [ES_FIELD_TYPES.HISTOGRAM],
   }),
   new KbnFieldType({

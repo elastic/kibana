@@ -691,10 +691,6 @@ export interface IFieldType {
     esTypes?: string[];
     // (undocumented)
     filterable?: boolean;
-    // Warning: (ae-forgotten-export) The symbol "KBN_FILTERABLE_TYPE" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    filterableType?: KBN_FILTERABLE_TYPE;
     // (undocumented)
     format?: any;
     // (undocumented)
@@ -920,8 +916,6 @@ export class IndexPatternField implements IFieldType {
     esTypes?: string[];
     // (undocumented)
     filterable?: boolean;
-    // (undocumented)
-    filterableType?: KBN_FILTERABLE_TYPE;
     // (undocumented)
     format: any;
     // (undocumented)
