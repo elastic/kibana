@@ -32,7 +32,7 @@ export const ToggleAlertFlyoutButtonComponent = ({ setAlertFlyoutVisible }: Prop
         >
           <FormattedMessage
             id="xpack.uptime.alerts.toggleAlertFlyoutButtonText"
-            defaultMessage="Alerting"
+            defaultMessage="Alerts"
           />
         </EuiButtonEmpty>
       }
@@ -48,7 +48,7 @@ export const ToggleAlertFlyoutButtonComponent = ({ setAlertFlyoutVisible }: Prop
             })}
             data-test-subj="xpack.uptime.toggleAlertFlyout"
             key="create-alert"
-            icon="plusInCircle"
+            icon="alert"
             onClick={() => setAlertFlyoutVisible(true)}
           >
             <FormattedMessage
@@ -61,7 +61,7 @@ export const ToggleAlertFlyoutButtonComponent = ({ setAlertFlyoutVisible }: Prop
               defaultMessage: 'Leave Uptime and go to Alerting Management page',
             })}
             data-test-subj="xpack.uptime.navigateToAlertingUi"
-            icon="gear"
+            icon="tableOfContents"
             key="navigate-to-alerting"
             href={kibana.services?.application?.getUrlForApp(
               'kibana#/management/kibana/triggersActions/alerts'
