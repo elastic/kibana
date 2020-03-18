@@ -5,7 +5,7 @@
  */
 
 import { NotificationsSetup } from 'src/core/public';
-import { SavedObjectsManagementPluginSetup } from 'src/plugins/so_management/public';
+import { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_management/public';
 import { CopyToSpaceSavedObjectsManagementAction } from './copy_saved_objects_to_space_action';
 import { SpacesManager } from '../spaces_manager';
 

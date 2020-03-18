@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsManagementAction } from 'src/plugins/so_management/public';
+import { SavedObjectsManagementAction } from 'src/plugins/saved_objects_management/public';
 import { npSetup } from 'ui/new_platform';
 import routes from 'ui/routes';
 import { SpacesPluginSetup } from '../../../../plugins/spaces/public';

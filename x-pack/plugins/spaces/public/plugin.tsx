@@ -6,10 +6,12 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
-import { SavedObjectsManagementAction } from 'src/plugins/so_management/public';
+import {
+  SavedObjectsManagementAction,
+  SavedObjectsManagementPluginSetup,
+} from 'src/plugins/saved_objects_management/public';
 import { ManagementStart, ManagementSetup } from 'src/plugins/management/public';
 import { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
-import { SavedObjectsManagementPluginSetup } from 'src/plugins/so_management/public';
 import { SecurityPluginStart, SecurityPluginSetup } from '../../security/public';
 import { SpacesManager } from './spaces_manager';
 import { initSpacesNavControl } from './nav_control';

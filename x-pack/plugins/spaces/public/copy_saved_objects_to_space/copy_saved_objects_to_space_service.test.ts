@@ -8,7 +8,7 @@ import { CopyToSpaceSavedObjectsManagementAction } from './copy_saved_objects_to
 import { spacesManagerMock } from '../spaces_manager/mocks';
 import { CopySavedObjectsToSpaceService } from '.';
 import { notificationServiceMock } from 'src/core/public/mocks';
-import { savedObjectsManagementPluginMock } from '../../../../../src/plugins/so_management/public/mocks';
+import { savedObjectsManagementPluginMock } from '../../../../../src/plugins/saved_objects_management/public/mocks';
 
 describe('CopySavedObjectsToSpaceService', () => {
   describe('#setup', () => {

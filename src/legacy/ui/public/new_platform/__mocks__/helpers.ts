@@ -30,7 +30,7 @@ import { usageCollectionPluginMock } from '../../../../../plugins/usage_collecti
 import { kibanaLegacyPluginMock } from '../../../../../plugins/kibana_legacy/public/mocks';
 import { chartPluginMock } from '../../../../../plugins/charts/public/mocks';
 import { advancedSettingsMock } from '../../../../../plugins/advanced_settings/public/mocks';
-import { savedObjectsManagementPluginMock } from '../../../../../plugins/so_management/public/mocks';
+import { savedObjectsManagementPluginMock } from '../../../../../plugins/saved_objects_management/public/mocks';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
 export const pluginsMock = {

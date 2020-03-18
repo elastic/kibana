@@ -66,7 +66,7 @@ import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
 import {
   SavedObjectsManagementPluginSetup,
   SavedObjectsManagementPluginStart,
-} from '../../../../plugins/so_management/public';
+} from '../../../../plugins/saved_objects_management/public';
 
 export interface PluginsSetup {
   bfetch: BfetchPublicSetup;

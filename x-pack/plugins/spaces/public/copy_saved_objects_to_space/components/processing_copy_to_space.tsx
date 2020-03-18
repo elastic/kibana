@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ProcessedImportResponse } from '../../../../../../src/legacy/core_plugins/management/public';
-import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/so_management/public';
+import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
 import { Space } from '../../../common/model/space';
 import { CopyOptions, ImportRetry } from '../types';
 import { SpaceResult } from './space_result';
