@@ -15,7 +15,10 @@ import {
   ScaleType,
   Theme
 } from '@elastic/charts';
-import { IWaterfall } from '../Waterfall/waterfall_helpers/waterfall_helpers';
+import {
+  IWaterfall,
+  IWaterfallItem
+} from '../Waterfall/waterfall_helpers/waterfall_helpers';
 import { SelectionText } from './SelectionText';
 import { SelectionAnnotation } from './SelectionAnnotation';
 import { WaterfallSelection } from '..';
@@ -31,6 +34,9 @@ interface Props {
   setSelection: Dispatch<SetStateAction<WaterfallSelection>>;
   waterfall: IWaterfall;
 }
+
+// We want to have at least this many items to make it look "mini"
+const minItems = 10;
 
 export function MiniWaterfall({ selection, setSelection, waterfall }: Props) {
   function resetSelection() {
@@ -49,13 +55,26 @@ export function MiniWaterfall({ selection, setSelection, waterfall }: Props) {
     setSelection([start, end]);
   };
 
-  const data = waterfall.items.map((item, index) => ({
+  const data: Array<Partial<IWaterfallItem> & {
+    min: number;
+    max: number;
+    x: number;
+  }> = waterfall.items.map((item, index) => ({
     ...item,
     min: item.offset + item.skew,
     max: item.offset + item.duration,
     x: index
   }));
+
   const maxY = Math.max(...data.map(item => item.max));
+
+  for (let i = 0; i < minItems - waterfall.items.length; i++) {
+    data.push({
+      min: 0,
+      max: 0,
+      x: waterfall.items.length + i
+    });
+  }
 
   console.log({ data });
   return (
@@ -73,6 +92,7 @@ export function MiniWaterfall({ selection, setSelection, waterfall }: Props) {
             maxY={maxY}
             selection={selection}
             waterfall={waterfall}
+            xLength={Math.max(waterfall.items.length, minItems)}
           />
           <BarSeries
             id={getSpecId('lines')}
@@ -82,7 +102,7 @@ export function MiniWaterfall({ selection, setSelection, waterfall }: Props) {
             yAccessors={['max']}
             y0Accessors={['min']}
             styleAccessor={value => {
-              return waterfall.serviceColors[value.datum.doc.service.name];
+              return waterfall.serviceColors[value.datum.doc?.service?.name];
             }}
             data={data}
           />

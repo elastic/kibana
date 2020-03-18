@@ -14,19 +14,21 @@ interface SelectionAnnotationProps {
   maxY: number;
   selection: WaterfallSelection;
   waterfall: IWaterfall;
+  xLength: number;
 }
 
 export function SelectionAnnotation({
   maxY,
   selection,
-  waterfall
+  waterfall,
+  xLength
 }: SelectionAnnotationProps) {
   const x0 = 0;
 
   // FIXME: This is not supposed to be "-1", but it doesn't show up at all if
   // you leave that off. Using the -1 makes it show up, but the bottom bar is
   // not highlighted.
-  const x1 = selection[0] ? waterfall.items.length - 1 : 0;
+  const x1 = selection[0] ? xLength - 1 : 0;
   const y1left = selection[0] ?? 0;
   const y0right = selection[1] ?? 0;
 
