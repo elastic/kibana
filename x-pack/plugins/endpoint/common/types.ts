@@ -311,8 +311,8 @@ export interface EndpointEvent {
     version: string;
   };
   event: {
-    category: string;
-    type: string;
+    category: string | string[];
+    type: string | string[];
     id: string;
     kind: string;
   };
@@ -328,6 +328,7 @@ export interface EndpointEvent {
     name: string;
     parent?: {
       entity_id: string;
+      name?: string;
     };
   };
 }
