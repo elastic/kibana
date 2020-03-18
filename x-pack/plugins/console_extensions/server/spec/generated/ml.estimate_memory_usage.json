@@ -1,7 +1,7 @@
 {
   "ml.estimate_memory_usage": {
     "methods": [
-      "POST"
+      "PUT"
     ],
     "patterns": [
       "_ml/data_frame/analytics/_estimate_memory_usage"
