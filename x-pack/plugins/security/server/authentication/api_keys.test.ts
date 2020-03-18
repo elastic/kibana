@@ -163,7 +163,7 @@ describe('API Keys', () => {
           })
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unsupported scheme \\"digest\\" for granting API Key"`
+        `"Unsupported scheme \\"Digest\\" for granting API Key"`
       );
       expect(mockScopedClusterClient.callAsInternalUser).not.toHaveBeenCalled();
     });
