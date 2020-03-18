@@ -32,7 +32,14 @@ import { FieldFormatsService } from './field_formats_provider';
 import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
 import { IndexPatterns } from './index_patterns';
-import { setNotifications, setFieldFormats, setOverlays, setIndexPatterns } from './services';
+import {
+  setFieldFormats,
+  setHttp,
+  setIndexPatterns,
+  setNotifications,
+  setOverlays,
+  setQueryService,
+} from './services';
 import { createFilterAction, GLOBAL_APPLY_FILTER_ACTION } from './actions';
 import { APPLY_FILTER_TRIGGER } from '../../embeddable/public';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
@@ -72,12 +79,16 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
   public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
     const { uiSettings, http, notifications, savedObjects, overlays } = core;
     const fieldFormats = this.fieldFormatsService.start();
+    setHttp(http);
     setNotifications(notifications);
     setFieldFormats(fieldFormats);
     setOverlays(overlays);
 
     const indexPatternsService = new IndexPatterns(uiSettings, savedObjects.client, http);
     setIndexPatterns(indexPatternsService);
+
+    const queryService = this.queryService.start(core.savedObjects);
+    setQueryService(queryService);
 
     uiActions.attachAction(APPLY_FILTER_TRIGGER, GLOBAL_APPLY_FILTER_ACTION);
 
@@ -86,7 +97,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       getSuggestions: getSuggestionsProvider(core.uiSettings, core.http),
       search: this.searchService.start(core),
       fieldFormats,
-      query: this.queryService.start(core.savedObjects),
+      query: queryService,
       indexPatterns: indexPatternsService,
     };
 
