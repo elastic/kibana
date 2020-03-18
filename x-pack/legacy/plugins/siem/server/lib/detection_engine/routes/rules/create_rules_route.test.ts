@@ -50,7 +50,7 @@ describe('create_rules', () => {
   });
 
   describe('creating an ML Rule', () => {
-    it('works', async () => {
+    it('is successful', async () => {
       const response = await server.inject(createMlRuleRequest(), context);
       expect(response.status).toEqual(200);
     });

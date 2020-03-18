@@ -293,17 +293,20 @@ export const getCreateRequest = () =>
     body: typicalPayload(),
   });
 
-export const createMlRuleRequest = () =>
-  requestMock.create({
+export const createMlRuleRequest = () => {
+  const { query, language, index, ...mlParams } = typicalPayload();
+
+  return requestMock.create({
     method: 'post',
     path: DETECTION_ENGINE_RULES_URL,
     body: {
-      ...typicalPayload(),
+      ...mlParams,
       type: 'machine_learning',
       anomaly_threshold: 50,
       machine_learning_job_id: 'some-uuid',
     },
   });
+};
 
 export const getSetSignalStatusByIdsRequest = () =>
   requestMock.create({
