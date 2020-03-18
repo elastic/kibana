@@ -6,7 +6,6 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { TypeOf } from '@kbn/config-schema';
-import * as kbnConfigSchemaTypes from '@kbn/config-schema/target/types/types';
 import { alertingIndexGetQuerySchema } from './schema/alert_index';
 
 /**
@@ -84,10 +83,10 @@ export interface AlertResultList {
   prev: string | null;
 }
 
-export interface EndpointResultList {
-  /* the endpoints restricted by the page size */
-  endpoints: EndpointMetadata[];
-  /* the total number of unique endpoints in the index */
+export interface HostResultList {
+  /* the hosts restricted by the page size */
+  hosts: HostMetadata[];
+  /* the total number of unique hosts in the index */
   total: number;
   /* the page size requested */
   request_page_size: number;
@@ -244,7 +243,7 @@ interface AlertMetadata {
  */
 export type AlertData = AlertEvent & AlertMetadata;
 
-export interface EndpointMetadata {
+export type HostMetadata = Immutable<{
   '@timestamp': number;
   event: {
     created: number;
@@ -259,7 +258,7 @@ export interface EndpointMetadata {
     version: string;
   };
   host: HostFields;
-}
+}>;
 
 /**
  * Represents `total` response from Elasticsearch after ES 7.0.
@@ -312,8 +311,8 @@ export interface EndpointEvent {
     version: string;
   };
   event: {
-    category: string;
-    type: string;
+    category: string | string[];
+    type: string | string[];
     id: string;
     kind: string;
   };
@@ -326,8 +325,10 @@ export interface EndpointEvent {
   };
   process: {
     entity_id: string;
+    name: string;
     parent?: {
       entity_id: string;
+      name?: string;
     };
   };
 }
@@ -351,16 +352,16 @@ export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';
  * const input: KbnConfigSchemaInputTypeOf<typeof schema> = value
  * schema.validate(input) // should be valid
  * ```
+ * Note that because the types coming from `@kbn/config-schema`'s schemas sometimes have deeply nested
+ * `Type` types, we process the result of `TypeOf` instead, as this will be consistent.
  */
-type KbnConfigSchemaInputTypeOf<
-  T extends kbnConfigSchemaTypes.Type<unknown>
-> = T extends kbnConfigSchemaTypes.ObjectType
+type KbnConfigSchemaInputTypeOf<T> = T extends Record<string, unknown>
   ? KbnConfigSchemaInputObjectTypeOf<
       T
     > /** `schema.number()` accepts strings, so this type should accept them as well. */
-  : kbnConfigSchemaTypes.Type<number> extends T
-  ? TypeOf<T> | string
-  : TypeOf<T>;
+  : number extends T
+  ? T | string
+  : T;
 
 /**
  * Works like ObjectResultType, except that 'maybe' schema will create an optional key.
@@ -368,20 +369,15 @@ type KbnConfigSchemaInputTypeOf<
  *
  * Instead of using this directly, use `InputTypeOf`.
  */
-type KbnConfigSchemaInputObjectTypeOf<
-  T extends kbnConfigSchemaTypes.ObjectType
-> = T extends kbnConfigSchemaTypes.ObjectType<infer P>
-  ? {
-      /** Use ? to make the field optional if the prop accepts undefined.
-       * This allows us to avoid writing `field: undefined` for optional fields.
-       */
-      [K in Exclude<
-        keyof P,
-        keyof KbnConfigSchemaNonOptionalProps<P>
-      >]?: KbnConfigSchemaInputTypeOf<P[K]>;
-    } &
-      { [K in keyof KbnConfigSchemaNonOptionalProps<P>]: KbnConfigSchemaInputTypeOf<P[K]> }
-  : never;
+type KbnConfigSchemaInputObjectTypeOf<P extends Record<string, unknown>> = {
+  /** Use ? to make the field optional if the prop accepts undefined.
+   * This allows us to avoid writing `field: undefined` for optional fields.
+   */
+  [K in Exclude<keyof P, keyof KbnConfigSchemaNonOptionalProps<P>>]?: KbnConfigSchemaInputTypeOf<
+    P[K]
+  >;
+} &
+  { [K in keyof KbnConfigSchemaNonOptionalProps<P>]: KbnConfigSchemaInputTypeOf<P[K]> };
 
 /**
  * Takes the props of a schema.object type, and returns a version that excludes
@@ -389,10 +385,14 @@ type KbnConfigSchemaInputObjectTypeOf<
  *
  * Instead of using this directly, use `InputTypeOf`.
  */
-type KbnConfigSchemaNonOptionalProps<Props extends kbnConfigSchemaTypes.Props> = Pick<
+type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pick<
   Props,
   {
-    [Key in keyof Props]: undefined extends TypeOf<Props[Key]> ? never : Key;
+    [Key in keyof Props]: undefined extends Props[Key]
+      ? never
+      : null extends Props[Key]
+      ? never
+      : Key;
   }[keyof Props]
 >;
 
@@ -400,7 +400,7 @@ type KbnConfigSchemaNonOptionalProps<Props extends kbnConfigSchemaTypes.Props> =
  * Query params to pass to the alert API when fetching new data.
  */
 export type AlertingIndexGetQueryInput = KbnConfigSchemaInputTypeOf<
-  typeof alertingIndexGetQuerySchema
+  TypeOf<typeof alertingIndexGetQuerySchema>
 >;
 
 /**

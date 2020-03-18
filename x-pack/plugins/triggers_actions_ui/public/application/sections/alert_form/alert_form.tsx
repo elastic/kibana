@@ -25,6 +25,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { loadAlertTypes } from '../../lib/alert_api';
+import { actionVariablesFromAlertType } from '../../lib/action_variables';
 import { AlertReducerAction } from './alert_reducer';
 import { AlertTypeModel, Alert, IErrorObject, AlertAction, AlertTypeIndex } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
@@ -154,6 +155,7 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
         onClick={() => {
           setAlertProperty('alertTypeId', item.id);
           setAlertTypeModel(item);
+          setAlertProperty('params', {});
           if (alertTypesIndex && alertTypesIndex[item.id]) {
             setDefaultActionGroupId(alertTypesIndex[item.id].defaultActionGroupId);
           }
@@ -193,6 +195,7 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
               onClick={() => {
                 setAlertProperty('alertTypeId', null);
                 setAlertTypeModel(null);
+                setAlertProperty('params', {});
               }}
             />
           </EuiFlexItem>
@@ -213,7 +216,7 @@ export const AlertForm = ({ alert, canChangeTrigger = true, dispatch, errors }: 
           actions={alert.actions}
           messageVariables={
             alertTypesIndex && alertTypesIndex[alert.alertTypeId]
-              ? alertTypesIndex[alert.alertTypeId].actionVariables
+              ? actionVariablesFromAlertType(alertTypesIndex[alert.alertTypeId]).map(av => av.name)
               : undefined
           }
           defaultActionGroupId={defaultActionGroupId}

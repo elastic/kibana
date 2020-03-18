@@ -68,7 +68,7 @@ export const getGapBetweenRuns = ({
   to,
   now = moment(),
 }: {
-  previousStartedAt: moment.Moment | undefined | null;
+  previousStartedAt: Date | undefined | null;
   interval: string;
   from: string;
   to: string;

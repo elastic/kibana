@@ -20,10 +20,10 @@
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { TimefilterSetup } from '../timefilter';
-import { COMPARE_ALL_OPTIONS, compareFilters, FilterManager } from '../filter_manager';
+import { FilterManager } from '../filter_manager';
 import { QueryState, QueryStateChange } from './index';
 import { createStateContainer } from '../../../../kibana_utils/public';
-import { isFilterPinned } from '../../../common/es_query/filters';
+import { isFilterPinned, compareFilters, COMPARE_ALL_OPTIONS } from '../../../common';
 
 export function createQueryStateObservable({
   timefilter: { timefilter },

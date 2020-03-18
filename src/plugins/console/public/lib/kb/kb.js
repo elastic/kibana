@@ -147,13 +147,9 @@ function loadApisFromJson(
 }
 
 export function setActiveApi(api) {
-  if (_.isString(api)) {
+  if (!api) {
     $.ajax({
-      url:
-        '../api/console/api_server?sense_version=' +
-        encodeURIComponent('@@SENSE_VERSION') +
-        '&apis=' +
-        encodeURIComponent(api),
+      url: '../api/console/api_server',
       dataType: 'json', // disable automatic guessing
     }).then(
       function(data) {
@@ -169,7 +165,7 @@ export function setActiveApi(api) {
   ACTIVE_API = api;
 }
 
-setActiveApi('es_6_0');
+setActiveApi();
 
 export const _test = {
   loadApisFromJson: loadApisFromJson,

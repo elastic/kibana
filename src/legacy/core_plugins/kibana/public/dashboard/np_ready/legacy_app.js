@@ -23,11 +23,12 @@ import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing_ng_wrapper.html';
 import { createHashHistory } from 'history';
 
-import { ensureDefaultIndexPattern } from '../legacy_imports';
 import { initDashboardAppDirective } from './dashboard_app';
 import { createDashboardEditUrl, DashboardConstants } from './dashboard_constants';
 import {
   createKbnUrlStateStorage,
+  ensureDefaultIndexPattern,
+  redirectWhenMissing,
   InvalidJSONProperty,
   SavedObjectNotFound,
 } from '../../../../../../plugins/kibana_utils/public';
@@ -136,8 +137,8 @@ export function initDashboardApp(app, deps) {
           });
         },
         resolve: {
-          dash: function($rootScope, $route, redirectWhenMissing, kbnUrl, history) {
-            return ensureDefaultIndexPattern(deps.core, deps.data, $rootScope, kbnUrl).then(() => {
+          dash: function($route, history) {
+            return ensureDefaultIndexPattern(deps.core, deps.data, history).then(() => {
               const savedObjectsClient = deps.savedObjectsClient;
               const title = $route.current.params.title;
               if (title) {
@@ -171,17 +172,18 @@ export function initDashboardApp(app, deps) {
         controller: createNewDashboardCtrl,
         requireUICapability: 'dashboard.createNew',
         resolve: {
-          dash: function(redirectWhenMissing, $rootScope, kbnUrl) {
-            return ensureDefaultIndexPattern(deps.core, deps.data, $rootScope, kbnUrl)
-              .then(() => {
-                return deps.savedDashboards.get();
-              })
+          dash: history =>
+            ensureDefaultIndexPattern(deps.core, deps.data, history)
+              .then(() => deps.savedDashboards.get())
               .catch(
                 redirectWhenMissing({
-                  dashboard: DashboardConstants.LANDING_PAGE_PATH,
+                  history,
+                  mapping: {
+                    dashboard: DashboardConstants.LANDING_PAGE_PATH,
+                  },
+                  toastNotifications: deps.core.notifications.toasts,
                 })
-              );
-          },
+              ),
         },
       })
       .when(createDashboardEditUrl(':id'), {
@@ -189,13 +191,11 @@ export function initDashboardApp(app, deps) {
         template: dashboardTemplate,
         controller: createNewDashboardCtrl,
         resolve: {
-          dash: function($rootScope, $route, redirectWhenMissing, kbnUrl, history) {
+          dash: function($route, kbnUrl, history) {
             const id = $route.current.params.id;
 
-            return ensureDefaultIndexPattern(deps.core, deps.data, $rootScope, kbnUrl)
-              .then(() => {
-                return deps.savedDashboards.get(id);
-              })
+            return ensureDefaultIndexPattern(deps.core, deps.data, history)
+              .then(() => deps.savedDashboards.get(id))
               .then(savedDashboard => {
                 deps.chrome.recentlyAccessed.add(
                   savedDashboard.getFullPath(),
@@ -207,7 +207,7 @@ export function initDashboardApp(app, deps) {
               .catch(error => {
                 // A corrupt dashboard was detected (e.g. with invalid JSON properties)
                 if (error instanceof InvalidJSONProperty) {
-                  deps.toastNotifications.addDanger(error.message);
+                  deps.core.notifications.toasts.addDanger(error.message);
                   kbnUrl.redirect(DashboardConstants.LANDING_PAGE_PATH);
                   return;
                 }
@@ -221,7 +221,7 @@ export function initDashboardApp(app, deps) {
                     pathname: DashboardConstants.CREATE_NEW_DASHBOARD_URL,
                   });
 
-                  deps.toastNotifications.addWarning(
+                  deps.core.notifications.toasts.addWarning(
                     i18n.translate('kbn.dashboard.urlWasRemovedInSixZeroWarningMessage', {
                       defaultMessage:
                         'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.',
@@ -234,7 +234,11 @@ export function initDashboardApp(app, deps) {
               })
               .catch(
                 redirectWhenMissing({
-                  dashboard: DashboardConstants.LANDING_PAGE_PATH,
+                  history,
+                  mapping: {
+                    dashboard: DashboardConstants.LANDING_PAGE_PATH,
+                  },
+                  toastNotifications: deps.core.notifications.toasts,
                 })
               );
           },

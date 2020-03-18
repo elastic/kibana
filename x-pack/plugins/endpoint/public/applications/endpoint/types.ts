@@ -5,39 +5,42 @@
  */
 
 import { Dispatch, MiddlewareAPI } from 'redux';
+import { IIndexPattern } from 'src/plugins/data/public';
 import {
-  EndpointMetadata,
+  HostMetadata,
   AlertData,
   AlertResultList,
   Immutable,
   ImmutableArray,
 } from '../../../common/types';
+import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
 import { CoreStart } from '../../../../../../src/core/public';
 
 export { AppAction };
 export type MiddlewareFactory<S = GlobalState> = (
-  coreStart: CoreStart
+  coreStart: CoreStart,
+  depsStart: EndpointPluginStartDependencies
 ) => (
   api: MiddlewareAPI<Dispatch<AppAction>, S>
 ) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
 
-export interface ManagementListState {
-  endpoints: EndpointMetadata[];
-  total: number;
+export interface HostListState {
+  hosts: HostMetadata[];
   pageSize: number;
   pageIndex: number;
+  total: number;
   loading: boolean;
   detailsError?: ServerApiError;
-  details?: Immutable<EndpointMetadata>;
+  details?: Immutable<HostMetadata>;
   location?: Immutable<EndpointAppLocation>;
 }
 
-export interface ManagementListPagination {
+export interface HostListPagination {
   pageIndex: number;
   pageSize: number;
 }
-export interface ManagingIndexUIQueryParams {
+export interface HostIndexUIQueryParams {
   selected_host?: string;
 }
 
@@ -53,6 +56,7 @@ export interface PolicyData {
   total: number;
   pending: number;
   failed: number;
+  id: string;
   created_by: string;
   created: string;
   updated_by: string;
@@ -75,10 +79,23 @@ export interface PolicyListState {
   isLoading: boolean;
 }
 
+/**
+ * Policy list store state
+ */
+export interface PolicyDetailsState {
+  /** A single policy item  */
+  policyItem: PolicyData | undefined;
+  /** data is being retrieved from server */
+  isLoading: boolean;
+  /** current location of the application */
+  location?: Immutable<EndpointAppLocation>;
+}
+
 export interface GlobalState {
-  readonly managementList: ManagementListState;
+  readonly hostList: HostListState;
   readonly alertList: AlertListState;
   readonly policyList: PolicyListState;
+  readonly policyDetails: PolicyDetailsState;
 }
 
 /**
@@ -101,6 +118,10 @@ export interface EndpointAppLocation {
   key?: string;
 }
 
+interface AlertsSearchBarState {
+  patterns: IIndexPattern[];
+}
+
 export type AlertListData = AlertResultList;
 
 export interface AlertListState {
@@ -121,6 +142,9 @@ export interface AlertListState {
 
   /** Specific Alert data to be shown in the details view */
   readonly alertDetails?: Immutable<AlertData>;
+
+  /** Search bar state including indexPatterns */
+  readonly searchBar: AlertsSearchBarState;
 }
 
 /**
@@ -139,4 +163,7 @@ export interface AlertingIndexUIQueryParams {
    * If any value is present, show the alert detail view for the selected alert. Should be an ID for an alert event.
    */
   selected_alert?: string;
+  query?: string;
+  date_range?: string;
+  filters?: string;
 }

@@ -18,6 +18,8 @@ import styled from 'styled-components';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import * as i18n from './translations';
 
+import { Connector } from '../../../../containers/case/configure/types';
+
 const EuiFormRowExtended = styled(EuiFormRow)`
   .euiFormRow__labelWrapper {
     .euiFormRow__label {
@@ -26,26 +28,49 @@ const EuiFormRowExtended = styled(EuiFormRow)`
   }
 `;
 
-const ConnectorsComponent: React.FC = () => {
+interface Props {
+  connectors: Connector[];
+  disabled: boolean;
+  isLoading: boolean;
+  onChangeConnector: (id: string) => void;
+  selectedConnector: string;
+  handleShowAddFlyout: () => void;
+}
+const ConnectorsComponent: React.FC<Props> = ({
+  connectors,
+  disabled,
+  isLoading,
+  onChangeConnector,
+  selectedConnector,
+  handleShowAddFlyout,
+}) => {
   const dropDownLabel = (
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>{i18n.INCIDENT_MANAGEMENT_SYSTEM_LABEL}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiLink>{i18n.ADD_NEW_CONNECTOR}</EuiLink>
+        <EuiLink onClick={handleShowAddFlyout}>{i18n.ADD_NEW_CONNECTOR}</EuiLink>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 
   return (
-    <EuiDescribedFormGroup
-      fullWidth
-      title={<h3>{i18n.INCIDENT_MANAGEMENT_SYSTEM_TITLE}</h3>}
-      description={i18n.INCIDENT_MANAGEMENT_SYSTEM_DESC}
-    >
-      <EuiFormRowExtended fullWidth label={dropDownLabel}>
-        <ConnectorsDropdown />
-      </EuiFormRowExtended>
-    </EuiDescribedFormGroup>
+    <>
+      <EuiDescribedFormGroup
+        fullWidth
+        title={<h3>{i18n.INCIDENT_MANAGEMENT_SYSTEM_TITLE}</h3>}
+        description={i18n.INCIDENT_MANAGEMENT_SYSTEM_DESC}
+      >
+        <EuiFormRowExtended fullWidth label={dropDownLabel}>
+          <ConnectorsDropdown
+            connectors={connectors}
+            disabled={disabled}
+            selectedConnector={selectedConnector}
+            isLoading={isLoading}
+            onChange={onChangeConnector}
+          />
+        </EuiFormRowExtended>
+      </EuiDescribedFormGroup>
+    </>
   );
 };
 

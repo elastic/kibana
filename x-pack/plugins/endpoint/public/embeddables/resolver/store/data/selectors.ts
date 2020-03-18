@@ -14,7 +14,7 @@ import {
   ProcessWithWidthMetadata,
   Matrix3,
 } from '../../types';
-import { LegacyEndpointEvent } from '../../../../../common/types';
+import { ResolverEvent } from '../../../../../common/types';
 import { Vector2 } from '../../types';
 import { add as vector2Add, applyMatrix3 } from '../../lib/vector2';
 import { isGraphableProcess } from '../../models/process_event';
@@ -112,7 +112,7 @@ export const graphableProcesses = createSelector(
  *
  */
 function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): ProcessWidths {
-  const widths = new Map<LegacyEndpointEvent, number>();
+  const widths = new Map<ResolverEvent, number>();
 
   if (size(indexedProcessTree) === 0) {
     return widths;
@@ -313,13 +313,13 @@ function processPositions(
   indexedProcessTree: IndexedProcessTree,
   widths: ProcessWidths
 ): ProcessPositions {
-  const positions = new Map<LegacyEndpointEvent, Vector2>();
+  const positions = new Map<ResolverEvent, Vector2>();
   /**
    * This algorithm iterates the tree in level order. It keeps counters that are reset for each parent.
    * By keeping track of the last parent node, we can know when we are dealing with a new set of siblings and
    * reset the counters.
    */
-  let lastProcessedParentNode: LegacyEndpointEvent | undefined;
+  let lastProcessedParentNode: ResolverEvent | undefined;
   /**
    * Nodes are positioned relative to their siblings. We walk this in level order, so we handle
    * children left -> right.
@@ -424,7 +424,7 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
      * Transform the positions of nodes and edges so they seem like they are on an isometric grid.
      */
     const transformedEdgeLineSegments: EdgeLineSegment[] = [];
-    const transformedPositions = new Map<LegacyEndpointEvent, Vector2>();
+    const transformedPositions = new Map<ResolverEvent, Vector2>();
 
     for (const [processEvent, position] of positions) {
       transformedPositions.set(processEvent, applyMatrix3(position, isometricTransformMatrix));

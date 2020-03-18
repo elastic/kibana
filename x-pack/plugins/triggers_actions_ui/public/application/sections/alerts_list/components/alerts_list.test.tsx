@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
@@ -49,7 +49,7 @@ actionTypeRegistry.list.mockReturnValue([]);
 
 describe('alerts_list component empty', () => {
   let wrapper: ReactWrapper<any>;
-  beforeEach(async () => {
+  async function setup() {
     const { loadAlerts, loadAlertTypes } = jest.requireMock('../../../lib/alert_api');
     const { loadActionTypes, loadAllActions } = jest.requireMock(
       '../../../lib/action_connector_api'
@@ -92,13 +92,6 @@ describe('alerts_list component empty', () => {
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: {
-        getInjectedVar(name: string) {
-          if (name === 'createAlertUiEnabled') {
-            return true;
-          }
-        },
-      } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       capabilities: {
@@ -114,22 +107,25 @@ describe('alerts_list component empty', () => {
       alertTypeRegistry: alertTypeRegistry as any,
     };
 
+    wrapper = mountWithIntl(
+      <AppContextProvider appDeps={deps}>
+        <AlertsList />
+      </AppContextProvider>
+    );
+
     await act(async () => {
-      wrapper = mountWithIntl(
-        <AppContextProvider appDeps={deps}>
-          <AlertsList />
-        </AppContextProvider>
-      );
+      await nextTick();
+      wrapper.update();
     });
+  }
 
-    await waitForRender(wrapper);
-  });
-
-  it('renders empty list', () => {
+  it('renders empty list', async () => {
+    await setup();
     expect(wrapper.find('[data-test-subj="createFirstAlertEmptyPrompt"]').exists()).toBeTruthy();
   });
 
-  it('renders Create alert button', () => {
+  it('renders Create alert button', async () => {
+    await setup();
     expect(
       wrapper.find('[data-test-subj="createFirstAlertButton"]').find('EuiButton')
     ).toHaveLength(1);
@@ -140,7 +136,7 @@ describe('alerts_list component empty', () => {
 describe('alerts_list component with items', () => {
   let wrapper: ReactWrapper<any>;
 
-  beforeEach(async () => {
+  async function setup() {
     const { loadAlerts, loadAlertTypes } = jest.requireMock('../../../lib/alert_api');
     const { loadActionTypes, loadAllActions } = jest.requireMock(
       '../../../lib/action_connector_api'
@@ -217,13 +213,6 @@ describe('alerts_list component with items', () => {
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: {
-        getInjectedVar(name: string) {
-          if (name === 'createAlertUiEnabled') {
-            return true;
-          }
-        },
-      } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       capabilities: {
@@ -239,30 +228,38 @@ describe('alerts_list component with items', () => {
       alertTypeRegistry: alertTypeRegistry as any,
     };
 
-    await act(async () => {
-      wrapper = mountWithIntl(
-        <AppContextProvider appDeps={deps}>
-          <AlertsList />
-        </AppContextProvider>
-      );
-    });
+    alertTypeRegistry.has.mockReturnValue(true);
 
-    await waitForRender(wrapper);
+    wrapper = mountWithIntl(
+      <AppContextProvider appDeps={deps}>
+        <AlertsList />
+      </AppContextProvider>
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
 
     expect(loadAlerts).toHaveBeenCalled();
     expect(loadActionTypes).toHaveBeenCalled();
-  });
+  }
 
-  it('renders table of connectors', () => {
+  it('renders table of alerts', async () => {
+    await setup();
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
+  });
+  it('renders edit button for registered alert types', async () => {
+    await setup();
+    expect(wrapper.find('[data-test-subj="alertsTableCell-editLink"]').length).toBeGreaterThan(0);
   });
 });
 
 describe('alerts_list component empty with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
-  beforeEach(async () => {
+  async function setup() {
     const { loadAlerts, loadAlertTypes } = jest.requireMock('../../../lib/alert_api');
     const { loadActionTypes, loadAllActions } = jest.requireMock(
       '../../../lib/action_connector_api'
@@ -304,13 +301,6 @@ describe('alerts_list component empty with show only capability', () => {
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: {
-        getInjectedVar(name: string) {
-          if (name === 'createAlertUiEnabled') {
-            return true;
-          }
-        },
-      } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       capabilities: {
@@ -330,18 +320,20 @@ describe('alerts_list component empty with show only capability', () => {
       alertTypeRegistry: {} as any,
     };
 
+    wrapper = mountWithIntl(
+      <AppContextProvider appDeps={deps}>
+        <AlertsList />
+      </AppContextProvider>
+    );
+
     await act(async () => {
-      wrapper = mountWithIntl(
-        <AppContextProvider appDeps={deps}>
-          <AlertsList />
-        </AppContextProvider>
-      );
+      await nextTick();
+      wrapper.update();
     });
+  }
 
-    await waitForRender(wrapper);
-  });
-
-  it('not renders create alert button', () => {
+  it('not renders create alert button', async () => {
+    await setup();
     expect(wrapper.find('[data-test-subj="createAlertButton"]')).toHaveLength(0);
   });
 });
@@ -349,7 +341,7 @@ describe('alerts_list component empty with show only capability', () => {
 describe('alerts_list with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
-  beforeEach(async () => {
+  async function setup() {
     const { loadAlerts, loadAlertTypes } = jest.requireMock('../../../lib/alert_api');
     const { loadActionTypes, loadAllActions } = jest.requireMock(
       '../../../lib/action_connector_api'
@@ -426,13 +418,6 @@ describe('alerts_list with show only capability', () => {
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: {
-        getInjectedVar(name: string) {
-          if (name === 'createAlertUiEnabled') {
-            return true;
-          }
-        },
-      } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       capabilities: {
@@ -448,26 +433,28 @@ describe('alerts_list with show only capability', () => {
       alertTypeRegistry: alertTypeRegistry as any,
     };
 
+    alertTypeRegistry.has.mockReturnValue(false);
+
+    wrapper = mountWithIntl(
+      <AppContextProvider appDeps={deps}>
+        <AlertsList />
+      </AppContextProvider>
+    );
+
     await act(async () => {
-      wrapper = mountWithIntl(
-        <AppContextProvider appDeps={deps}>
-          <AlertsList />
-        </AppContextProvider>
-      );
+      await nextTick();
+      wrapper.update();
     });
+  }
 
-    await waitForRender(wrapper);
-  });
-
-  it('renders table of alerts with delete button disabled', () => {
+  it('renders table of alerts with delete button disabled', async () => {
+    await setup();
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
     // TODO: check delete button
   });
+  it('not renders edit button for non registered alert types', async () => {
+    await setup();
+    expect(wrapper.find('[data-test-subj="alertsTableCell-editLink"]').length).toBe(0);
+  });
 });
-
-async function waitForRender(wrapper: ReactWrapper<any, any>) {
-  await Promise.resolve();
-  await Promise.resolve();
-  wrapper.update();
-}

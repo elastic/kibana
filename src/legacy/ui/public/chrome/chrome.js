@@ -28,7 +28,6 @@ import '../private';
 import '../promises';
 import '../directives/storage';
 import '../directives/watch_multi';
-import './services';
 import '../react_components';
 import '../i18n';
 
