@@ -26,10 +26,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // make 10 checks
       await makeChecks(es, 'myMonitor', 1, 1, 1);
       // delete the saved object
-      await server.savedObjects.delete({
-        type: settingsObjectType,
-        id: settingsObjectId,
-      });
+      try {
+        await server.savedObjects.delete({
+          type: settingsObjectType,
+          id: settingsObjectId,
+        });
+      } catch (e) {
+        // If it's not found that's fine, we just want to ensure
+        // this is the default state
+        if (e.response?.status !== 404) {
+          throw e;
+        }
+      }
 
       await pageObjects.uptime.goToRoot();
     });

@@ -31,6 +31,13 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
     },
     apply: async () => {
       await (await testSubjects.find('apply-settings-button')).click();
+      await retry.waitFor('submit to succeed', async () => {
+        // When the form submit is complete the form will no longer be disabled
+        const disabled = await (
+          await testSubjects.find('heartbeat-indices-input', 5000)
+        ).getAttribute('disabled');
+        return disabled === null;
+      });
     },
   };
 
