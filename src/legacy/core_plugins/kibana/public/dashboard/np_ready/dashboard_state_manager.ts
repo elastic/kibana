@@ -50,6 +50,7 @@ import {
   ReduxLikeStateContainer,
   syncState,
 } from '../../../../../../plugins/kibana_utils/public';
+import { getDashboardIdFromUrl } from './url_helper';
 
 /**
  * Dashboard state manager handles connecting angular and redux state between the angular and react portions of the
@@ -174,6 +175,12 @@ export class DashboardStateManager {
           // sync state required state container to be able to handle null
           // overriding set() so it could handle null coming from url
           if (state) {
+            // Skip this update if current dashboardId in the url is different from what we have in current instance of state manager
+            // Because dashboard is driven by angular, the destroy cycle happens async,
+            // And we should not to interfere into state change longer as this instance will be destroyed soon
+            const currentDashboardIdInUrl = getDashboardIdFromUrl(history.location.pathname);
+            if (currentDashboardIdInUrl !== this.savedDashboard.id) return;
+
             this.stateContainer.set({
               ...this.stateDefaults,
               ...state,

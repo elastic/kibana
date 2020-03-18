@@ -98,3 +98,24 @@ export function getLensUrlFromDashboardAbsoluteUrl(
 function getUrlWithoutQueryParams(url: string): string {
   return url.split('?')[0];
 }
+
+/**
+ * Returns dashboard id from URL
+ * literally looks from id after `dashboard/` string and before `/`, `?` and end of string
+ * @param url to extract dashboardId from
+ * input: http://localhost:5601/lib/app/kibana#/dashboard?param1=x&param2=y&param3=z
+ * output: undefined
+ * input: http://localhost:5601/lib/app/kibana#/dashboard/39292992?param1=x&param2=y&param3=z
+ * output: 39292992
+ */
+export function getDashboardIdFromUrl(url: string): string | undefined {
+  const [, match1, match2, match3] = url.match(
+    /dashboard\/(.*)\/|dashboard\/(.*)\?|dashboard\/(.*)$/
+  ) ?? [
+    undefined, // full match
+    undefined, // group1 - dashboardId is before `/`
+    undefined, // group2 - dashboardId is before `?`
+    undefined, // group3 - dashboardID is in the end
+  ];
+  return match1 ?? match2 ?? match3 ?? undefined;
+}

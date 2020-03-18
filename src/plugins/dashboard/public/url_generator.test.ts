@@ -70,7 +70,7 @@ describe('dashboard url generator', () => {
       query: { query: 'bye', language: 'kuery' },
     });
     expect(url).toMatchInlineSnapshot(
-      `"xyz/app/kibana#/dashboard/123?_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),query:(language:kuery,query:bye))&_g=(time:(from:now-15m,mode:relative,to:now))"`
+      `"xyz/app/kibana#/dashboard/123?_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),query:(language:kuery,query:bye))&_g=(filters:!(),time:(from:now-15m,mode:relative,to:now))"`
     );
   });
 

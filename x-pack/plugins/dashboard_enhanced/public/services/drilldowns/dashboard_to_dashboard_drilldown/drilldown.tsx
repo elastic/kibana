@@ -9,12 +9,13 @@ import { CoreStart } from 'src/core/public';
 import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_react/public';
 import { SharePluginStart } from '../../../../../../../src/plugins/share/public';
 import { DASHBOARD_APP_URL_GENERATOR } from '../../../../../../../src/plugins/dashboard/public';
-import { VisualizeEmbeddable } from '../../../../../../../src/legacy/core_plugins/visualizations/public';
+import { VisualizeEmbeddableContract } from '../../../../../../../src/legacy/core_plugins/visualizations/public';
 import { FactoryContext, ActionContext, Config, CollectConfigProps } from './types';
 import { CollectConfigContainer } from './collect_config';
 import { DASHBOARD_TO_DASHBOARD_DRILLDOWN } from './constants';
 import { DrilldownsDrilldown as Drilldown } from '../../../../../drilldowns/public';
 import { txtGoToDashboard } from './i18n';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 
 export interface Params {
   getSavedObjectsClient: () => Promise<CoreStart['savedObjects']['client']>;
@@ -23,7 +24,7 @@ export interface Params {
 }
 
 export class DashboardToDashboardDrilldown
-  implements Drilldown<Config, FactoryContext, ActionContext<VisualizeEmbeddable>> {
+  implements Drilldown<Config, FactoryContext, ActionContext<VisualizeEmbeddableContract>> {
   constructor(protected readonly params: Params) {}
 
   // TODO: public readonly places = ['dashboard'];
@@ -53,21 +54,25 @@ export class DashboardToDashboardDrilldown
     return true;
   };
 
-  public readonly execute = async (config: Config, context: ActionContext<VisualizeEmbeddable>) => {
-    // todo - need to complete this
-    // console.log('DEBUG', config, context);
-    // need to change date range and filter based on config
+  public readonly execute = async (
+    config: Config,
+    context: ActionContext<VisualizeEmbeddableContract>
+  ) => {
     const getUrlGenerator = await this.params.getGetUrlGenerator();
     const navigateToApp = await this.params.getNavigateToApp();
     const { timeRange, query, filters } = context.embeddable.getInput();
 
     const dashboardPath = await getUrlGenerator(DASHBOARD_APP_URL_GENERATOR).createUrl({
       dashboardId: config.dashboardId,
-      timeRange,
       query,
-      filters,
+      timeRange: config.useCurrentDashboardDateRange ? timeRange : undefined,
+      filters: config.useCurrentDashboardFilters
+        ? filters
+        : filters?.filter(f => esFilters.isFilterPinned(f)),
     });
-
-    navigateToApp(dashboardPath);
+    const dashboardHash = dashboardPath.split('#')[1];
+    await navigateToApp('kibana', {
+      path: `#${dashboardHash}`,
+    });
   };
 }

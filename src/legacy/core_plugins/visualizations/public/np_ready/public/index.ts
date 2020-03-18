@@ -41,7 +41,6 @@ export { VisTypeAlias, VisType } from './vis_types';
 export { VisSavedObject } from './types';
 export { Vis, VisParams, VisState } from './vis';
 import { VisualizeEmbeddableFactory, VisualizeEmbeddable } from './embeddable';
-export { VisualizeEmbeddable };
 export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
 export { TypesService } from './vis_types/types_service';
