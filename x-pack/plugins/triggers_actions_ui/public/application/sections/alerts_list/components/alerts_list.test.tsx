@@ -94,13 +94,6 @@ describe('alerts_list component empty', () => {
       charts: chartPluginMock.createStartContract(),
       alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: {
-        getInjectedVar(name: string) {
-          if (name === 'createAlertUiEnabled') {
-            return true;
-          }
-        },
-      } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       navigateToApp,
@@ -224,13 +217,6 @@ describe('alerts_list component with items', () => {
       charts: chartPluginMock.createStartContract(),
       alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: {
-        getInjectedVar(name: string) {
-          if (name === 'createAlertUiEnabled') {
-            return true;
-          }
-        },
-      } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       navigateToApp,
@@ -321,13 +307,6 @@ describe('alerts_list component empty with show only capability', () => {
       charts: chartPluginMock.createStartContract(),
       alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: {
-        getInjectedVar(name: string) {
-          if (name === 'createAlertUiEnabled') {
-            return true;
-          }
-        },
-      } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       navigateToApp,
@@ -447,13 +426,6 @@ describe('alerts_list with show only capability', () => {
       charts: chartPluginMock.createStartContract(),
       alerting: alertingPluginMock.createStartContract(),
       toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: {
-        getInjectedVar(name: string) {
-          if (name === 'createAlertUiEnabled') {
-            return true;
-          }
-        },
-      } as any,
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       navigateToApp,
