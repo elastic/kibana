@@ -17,33 +17,86 @@
  * under the License.
  */
 
-import { DynamicActionManager, DynamicActionManagerParams } from './dynamic_action_manager';
+import { DynamicActionManager } from './dynamic_action_manager';
+import { ActionStorage, MemoryActionStorage, SerializedEvent } from './dynamic_action_storage';
+import { UiActionsService } from '../service';
+import { ActionFactoryDefinition } from './action_factory_definition';
+import { ActionRegistry } from '../types';
+import { SerializedAction } from './types';
+import { of } from '../../../kibana_utils';
 
-const setup = () => {
+const actionFactoryDefinition1: ActionFactoryDefinition = {
+  id: 'ACTION_FACTORY_1',
+  CollectConfig: {} as any,
+  createConfig: () => ({}),
+  isConfigValid: (() => true) as any,
+  create: () => ({
+    id: '',
+    execute: async () => {},
+  }),
+};
+
+const actionFactoryDefinition2: ActionFactoryDefinition = {
+  id: 'ACTION_FACTORY_2',
+  CollectConfig: {} as any,
+  createConfig: () => ({}),
+  isConfigValid: (() => true) as any,
+  create: () => ({
+    id: '',
+    execute: async () => {},
+  }),
+};
+
+const event1: SerializedEvent = {
+  eventId: 'EVENT_ID_1',
+  triggers: ['VALUE_CLICK_TRIGGER'],
+  action: {
+    factoryId: actionFactoryDefinition1.id,
+    name: 'Action 1',
+    config: {},
+  },
+};
+
+const event2: SerializedEvent = {
+  eventId: 'EVENT_ID_2',
+  triggers: ['VALUE_CLICK_TRIGGER'],
+  action: {
+    factoryId: actionFactoryDefinition1.id,
+    name: 'Action 2',
+    config: {},
+  },
+};
+
+const event3: SerializedEvent = {
+  eventId: 'EVENT_ID_3',
+  triggers: ['VALUE_CLICK_TRIGGER'],
+  action: {
+    factoryId: actionFactoryDefinition2.id,
+    name: 'Action 3',
+    config: {},
+  },
+};
+
+const setup = (events: readonly SerializedEvent[] = []) => {
   const isCompatible = async () => true;
-  const storage: DynamicActionManagerParams['storage'] = {
-    count: jest.fn(),
-    create: jest.fn(),
-    list: jest.fn(),
-    read: jest.fn(),
-    remove: jest.fn(),
-    update: jest.fn(),
-  };
-  const uiActions: DynamicActionManagerParams['uiActions'] = {
-    getActionFactory: jest.fn(),
-    attachAction: jest.fn(),
-    detachAction: jest.fn(),
-    registerAction: jest.fn(),
-    unregisterAction: jest.fn(),
-  };
+  const storage: ActionStorage = new MemoryActionStorage(events);
+  const actions: ActionRegistry = new Map();
+  const uiActions = new UiActionsService({
+    actions,
+  });
   const manager = new DynamicActionManager({
     isCompatible,
     storage,
     uiActions,
   });
 
+  uiActions.registerTrigger({
+    id: 'VALUE_CLICK_TRIGGER',
+  });
+
   return {
     isCompatible,
+    actions,
     storage,
     uiActions,
     manager,
@@ -52,44 +105,494 @@ const setup = () => {
 
 describe('DynamicActionManager', () => {
   test('can instantiate', () => {
-    const { manager } = setup();
+    const { manager } = setup([event1]);
     expect(manager).toBeInstanceOf(DynamicActionManager);
   });
 
   describe('.start()', () => {
-    test.todo('instantiates stored events');
-    test.todo('does nothing when no events stored');
-  });
+    test('instantiates stored events', async () => {
+      const { manager, actions, uiActions } = setup([event1]);
+      const create1 = jest.fn();
+      const create2 = jest.fn();
 
-  describe('.stop()', () => {
-    test.todo('removes events from UI actions registry');
-    test.todo('does nothing when no events stored');
-  });
+      uiActions.registerActionFactory({ ...actionFactoryDefinition1, create: create1 });
+      uiActions.registerActionFactory({ ...actionFactoryDefinition2, create: create2 });
 
-  describe('.createEvent()', () => {
-    test.todo('stores new event in storage');
-    test.todo('instantiates event in actions service');
-  });
+      expect(create1).toHaveBeenCalledTimes(0);
+      expect(create2).toHaveBeenCalledTimes(0);
+      expect(actions.size).toBe(0);
 
-  describe('.updateEvent()', () => {
-    test.todo('removes old event from ui actions service');
-    test.todo('updates event in storage');
-    test.todo('adds new event to ui actions service');
-  });
+      await manager.start();
 
-  describe('.deleteEvents()', () => {
-    test.todo('removes all actions from ui actions service');
-    test.todo('removes all events from storage');
-    describe('when event is removed from storage its action is also killed', () => {
-      test.todo('when subsequent event fails to be removed from storage');
+      expect(create1).toHaveBeenCalledTimes(1);
+      expect(create2).toHaveBeenCalledTimes(0);
+      expect(actions.size).toBe(1);
+    });
+
+    test('does nothing when no events stored', async () => {
+      const { manager, actions, uiActions } = setup();
+      const create1 = jest.fn();
+      const create2 = jest.fn();
+
+      uiActions.registerActionFactory({ ...actionFactoryDefinition1, create: create1 });
+      uiActions.registerActionFactory({ ...actionFactoryDefinition2, create: create2 });
+
+      expect(create1).toHaveBeenCalledTimes(0);
+      expect(create2).toHaveBeenCalledTimes(0);
+      expect(actions.size).toBe(0);
+
+      await manager.start();
+
+      expect(create1).toHaveBeenCalledTimes(0);
+      expect(create2).toHaveBeenCalledTimes(0);
+      expect(actions.size).toBe(0);
+    });
+
+    test('UI state is empty before manager starts', async () => {
+      const { manager } = setup([event1]);
+
+      expect(manager.state.get()).toMatchObject({
+        events: [],
+        isFetchingEvents: false,
+        fetchCount: 0,
+      });
+    });
+
+    test('loads events into UI state', async () => {
+      const { manager, uiActions } = setup([event1, event2, event3]);
+
+      uiActions.registerActionFactory(actionFactoryDefinition1);
+      uiActions.registerActionFactory(actionFactoryDefinition2);
+
+      await manager.start();
+
+      expect(manager.state.get()).toMatchObject({
+        events: [event1, event2, event3],
+        isFetchingEvents: false,
+        fetchCount: 1,
+      });
+    });
+
+    test('sets isFetchingEvents to true while fetching events', async () => {
+      const { manager, uiActions } = setup([event1, event2, event3]);
+
+      uiActions.registerActionFactory(actionFactoryDefinition1);
+      uiActions.registerActionFactory(actionFactoryDefinition2);
+
+      const promise = manager.start().catch(() => {});
+
+      expect(manager.state.get().isFetchingEvents).toBe(true);
+
+      await promise;
+
+      expect(manager.state.get().isFetchingEvents).toBe(false);
     });
   });
 
-  describe('.list()', () => {
-    test.todo('returns stored events');
+  describe('.stop()', () => {
+    test('removes events from UI actions registry', async () => {
+      const { manager, actions, uiActions } = setup([event1, event2]);
+      const create1 = jest.fn();
+      const create2 = jest.fn();
+
+      uiActions.registerActionFactory({ ...actionFactoryDefinition1, create: create1 });
+      uiActions.registerActionFactory({ ...actionFactoryDefinition2, create: create2 });
+
+      expect(actions.size).toBe(0);
+
+      await manager.start();
+
+      expect(actions.size).toBe(2);
+
+      await manager.stop();
+
+      expect(actions.size).toBe(0);
+    });
   });
 
-  describe('.count()', () => {
-    test.todo('returns number of stored events');
+  describe('.createEvent()', () => {
+    describe('when storage succeeds', () => {
+      test('stores new event in storage', async () => {
+        const { manager, storage, uiActions } = setup([]);
+
+        uiActions.registerActionFactory(actionFactoryDefinition1);
+        await manager.start();
+
+        const action: SerializedAction<unknown> = {
+          factoryId: actionFactoryDefinition1.id,
+          name: 'foo',
+          config: {},
+        };
+
+        expect(await storage.count()).toBe(0);
+
+        await manager.createEvent(action, ['VALUE_CLICK_TRIGGER']);
+
+        expect(await storage.count()).toBe(1);
+
+        const [event] = await storage.list();
+
+        expect(event).toMatchObject({
+          eventId: expect.any(String),
+          triggers: ['VALUE_CLICK_TRIGGER'],
+          action: {
+            factoryId: actionFactoryDefinition1.id,
+            name: 'foo',
+            config: {},
+          },
+        });
+      });
+
+      test('adds event to UI state', async () => {
+        const { manager, uiActions } = setup([]);
+        const action: SerializedAction<unknown> = {
+          factoryId: actionFactoryDefinition1.id,
+          name: 'foo',
+          config: {},
+        };
+
+        uiActions.registerActionFactory(actionFactoryDefinition1);
+
+        await manager.start();
+
+        expect(manager.state.get().events.length).toBe(0);
+
+        await manager.createEvent(action, ['VALUE_CLICK_TRIGGER']);
+
+        expect(manager.state.get().events.length).toBe(1);
+      });
+
+      test('optimistically adds event to UI state', async () => {
+        const { manager, uiActions } = setup([]);
+        const action: SerializedAction<unknown> = {
+          factoryId: actionFactoryDefinition1.id,
+          name: 'foo',
+          config: {},
+        };
+
+        uiActions.registerActionFactory(actionFactoryDefinition1);
+
+        await manager.start();
+
+        expect(manager.state.get().events.length).toBe(0);
+
+        const promise = manager.createEvent(action, ['VALUE_CLICK_TRIGGER']).catch(e => e);
+
+        expect(manager.state.get().events.length).toBe(1);
+
+        await promise;
+
+        expect(manager.state.get().events.length).toBe(1);
+      });
+
+      test('instantiates event in actions service', async () => {
+        const { manager, uiActions, actions } = setup([]);
+        const action: SerializedAction<unknown> = {
+          factoryId: actionFactoryDefinition1.id,
+          name: 'foo',
+          config: {},
+        };
+
+        uiActions.registerActionFactory(actionFactoryDefinition1);
+
+        await manager.start();
+
+        expect(actions.size).toBe(0);
+
+        await manager.createEvent(action, ['VALUE_CLICK_TRIGGER']);
+
+        expect(actions.size).toBe(1);
+      });
+    });
+
+    describe('when storage fails', () => {
+      test('throws an error', async () => {
+        const { manager, storage, uiActions } = setup([]);
+
+        storage.create = async () => {
+          throw new Error('foo');
+        };
+
+        uiActions.registerActionFactory(actionFactoryDefinition1);
+        await manager.start();
+
+        const action: SerializedAction<unknown> = {
+          factoryId: actionFactoryDefinition1.id,
+          name: 'foo',
+          config: {},
+        };
+
+        const [, error] = await of(manager.createEvent(action, ['VALUE_CLICK_TRIGGER']));
+
+        expect(error).toEqual(new Error('foo'));
+      });
+
+      test('does not add even to UI state', async () => {
+        const { manager, storage, uiActions } = setup([]);
+        const action: SerializedAction<unknown> = {
+          factoryId: actionFactoryDefinition1.id,
+          name: 'foo',
+          config: {},
+        };
+
+        storage.create = async () => {
+          throw new Error('foo');
+        };
+        uiActions.registerActionFactory(actionFactoryDefinition1);
+
+        await manager.start();
+        await of(manager.createEvent(action, ['VALUE_CLICK_TRIGGER']));
+
+        expect(manager.state.get().events.length).toBe(0);
+      });
+
+      test('optimistically adds event to UI state and then removes it', async () => {
+        const { manager, storage, uiActions } = setup([]);
+        const action: SerializedAction<unknown> = {
+          factoryId: actionFactoryDefinition1.id,
+          name: 'foo',
+          config: {},
+        };
+
+        storage.create = async () => {
+          throw new Error('foo');
+        };
+        uiActions.registerActionFactory(actionFactoryDefinition1);
+
+        await manager.start();
+
+        expect(manager.state.get().events.length).toBe(0);
+
+        const promise = manager.createEvent(action, ['VALUE_CLICK_TRIGGER']).catch(e => e);
+
+        expect(manager.state.get().events.length).toBe(1);
+
+        await promise;
+
+        expect(manager.state.get().events.length).toBe(0);
+      });
+
+      test('does not instantiate event in actions service', async () => {
+        const { manager, storage, uiActions, actions } = setup([]);
+        const action: SerializedAction<unknown> = {
+          factoryId: actionFactoryDefinition1.id,
+          name: 'foo',
+          config: {},
+        };
+
+        storage.create = async () => {
+          throw new Error('foo');
+        };
+        uiActions.registerActionFactory(actionFactoryDefinition1);
+
+        await manager.start();
+
+        expect(actions.size).toBe(0);
+
+        await of(manager.createEvent(action, ['VALUE_CLICK_TRIGGER']));
+
+        expect(actions.size).toBe(0);
+      });
+    });
+  });
+
+  describe('.updateEvent()', () => {
+    describe('when storage succeeds', () => {
+      test('un-registers old event from ui actions service and registers the new one', async () => {
+        const { manager, actions, uiActions } = setup([event3]);
+
+        uiActions.registerActionFactory(actionFactoryDefinition2);
+        await manager.start();
+
+        expect(actions.size).toBe(1);
+
+        const registeredAction1 = actions.values().next().value;
+
+        expect(registeredAction1.getDisplayName()).toBe('Action 3');
+
+        const action: SerializedAction<unknown> = {
+          factoryId: actionFactoryDefinition2.id,
+          name: 'foo',
+          config: {},
+        };
+
+        await manager.updateEvent(event3.eventId, action, ['VALUE_CLICK_TRIGGER']);
+
+        expect(actions.size).toBe(1);
+
+        const registeredAction2 = actions.values().next().value;
+
+        expect(registeredAction2.getDisplayName()).toBe('foo');
+      });
+
+      test('updates event in storage', async () => {
+        const { manager, storage, uiActions } = setup([event3]);
+        const storageUpdateSpy = jest.spyOn(storage, 'update');
+
+        uiActions.registerActionFactory(actionFactoryDefinition2);
+        await manager.start();
+
+        const action: SerializedAction<unknown> = {
+          factoryId: actionFactoryDefinition2.id,
+          name: 'foo',
+          config: {},
+        };
+
+        expect(storageUpdateSpy).toHaveBeenCalledTimes(0);
+
+        await manager.updateEvent(event3.eventId, action, ['VALUE_CLICK_TRIGGER']);
+
+        expect(storageUpdateSpy).toHaveBeenCalledTimes(1);
+        expect(storageUpdateSpy.mock.calls[0][0]).toMatchObject({
+          eventId: expect.any(String),
+          triggers: ['VALUE_CLICK_TRIGGER'],
+          action: {
+            factoryId: actionFactoryDefinition2.id,
+          },
+        });
+      });
+
+      test('updates event in UI state', async () => {
+        const { manager, uiActions } = setup([event3]);
+
+        uiActions.registerActionFactory(actionFactoryDefinition2);
+        await manager.start();
+
+        const action: SerializedAction<unknown> = {
+          factoryId: actionFactoryDefinition2.id,
+          name: 'foo',
+          config: {},
+        };
+
+        expect(manager.state.get().events[0].action.name).toBe('Action 3');
+
+        await manager.updateEvent(event3.eventId, action, ['VALUE_CLICK_TRIGGER']);
+
+        expect(manager.state.get().events[0].action.name).toBe('foo');
+      });
+
+      test('optimistically updates event in UI state', async () => {
+        const { manager, uiActions } = setup([event3]);
+
+        uiActions.registerActionFactory(actionFactoryDefinition2);
+        await manager.start();
+
+        const action: SerializedAction<unknown> = {
+          factoryId: actionFactoryDefinition2.id,
+          name: 'foo',
+          config: {},
+        };
+
+        expect(manager.state.get().events[0].action.name).toBe('Action 3');
+
+        const promise = manager
+          .updateEvent(event3.eventId, action, ['VALUE_CLICK_TRIGGER'])
+          .catch(e => e);
+
+        expect(manager.state.get().events[0].action.name).toBe('foo');
+
+        await promise;
+      });
+    });
+
+    describe('when storage fails', () => {
+      test('keeps the old action in actions registry', async () => {
+        const { manager, storage, actions, uiActions } = setup([event3]);
+
+        storage.update = () => {
+          throw new Error('bar');
+        };
+        uiActions.registerActionFactory(actionFactoryDefinition2);
+        await manager.start();
+
+        expect(actions.size).toBe(1);
+
+        const registeredAction1 = actions.values().next().value;
+
+        expect(registeredAction1.getDisplayName()).toBe('Action 3');
+
+        const action: SerializedAction<unknown> = {
+          factoryId: actionFactoryDefinition2.id,
+          name: 'foo',
+          config: {},
+        };
+
+        await of(manager.updateEvent(event3.eventId, action, ['VALUE_CLICK_TRIGGER']));
+
+        expect(actions.size).toBe(1);
+
+        const registeredAction2 = actions.values().next().value;
+
+        expect(registeredAction2.getDisplayName()).toBe('Action 3');
+      });
+
+      test('keeps old event in UI state', async () => {
+        const { manager, storage, uiActions } = setup([event3]);
+
+        storage.update = () => {
+          throw new Error('bar');
+        };
+        uiActions.registerActionFactory(actionFactoryDefinition2);
+        await manager.start();
+
+        const action: SerializedAction<unknown> = {
+          factoryId: actionFactoryDefinition2.id,
+          name: 'foo',
+          config: {},
+        };
+
+        expect(manager.state.get().events[0].action.name).toBe('Action 3');
+
+        await of(manager.updateEvent(event3.eventId, action, ['VALUE_CLICK_TRIGGER']));
+
+        expect(manager.state.get().events[0].action.name).toBe('Action 3');
+      });
+    });
+  });
+
+  describe('.deleteEvents()', () => {
+    describe('when storage succeeds', () => {
+      test('removes all actions from uiActions service', async () => {
+        const { manager, actions, uiActions } = setup([event2, event1]);
+
+        uiActions.registerActionFactory(actionFactoryDefinition1);
+
+        await manager.start();
+
+        expect(actions.size).toBe(2);
+
+        await manager.deleteEvents([event1.eventId, event2.eventId]);
+
+        expect(actions.size).toBe(0);
+      });
+
+      test('removes all events from storage', async () => {
+        const { manager, uiActions, storage } = setup([event2, event1]);
+
+        uiActions.registerActionFactory(actionFactoryDefinition1);
+
+        await manager.start();
+
+        expect(await storage.list()).toEqual([event2, event1]);
+
+        await manager.deleteEvents([event1.eventId, event2.eventId]);
+
+        expect(await storage.list()).toEqual([]);
+      });
+
+      test('removes all events from UI state', async () => {
+        const { manager, uiActions } = setup([event2, event1]);
+
+        uiActions.registerActionFactory(actionFactoryDefinition1);
+
+        await manager.start();
+
+        expect(manager.state.get().events).toEqual([event2, event1]);
+
+        await manager.deleteEvents([event1.eventId, event2.eventId]);
+
+        expect(manager.state.get().events).toEqual([]);
+      });
+    });
   });
 });

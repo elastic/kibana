@@ -200,8 +200,9 @@ export class DynamicActionManager {
     try {
       await this.params.storage.create(event);
       this.reviveAction(event);
-    } catch {
+    } catch (error) {
       this.ui.transitions.removeEvent(event.eventId);
+      throw error;
     }
   }
 
@@ -229,7 +230,6 @@ export class DynamicActionManager {
       triggers,
       action,
     };
-
     const oldEvent = this.getEvent(eventId);
     this.killAction(oldEvent);
 
@@ -238,10 +238,11 @@ export class DynamicActionManager {
 
     try {
       await this.params.storage.update(event);
-    } catch {
+    } catch (error) {
       this.killAction(event);
       this.reviveAction(oldEvent);
       this.ui.transitions.replaceEvent(oldEvent);
+      throw error;
     }
   }
 
@@ -262,9 +263,10 @@ export class DynamicActionManager {
 
     try {
       await this.params.storage.remove(eventId);
-    } catch {
+    } catch (error) {
       this.reviveAction(event);
       this.ui.transitions.addEvent(event);
+      throw error;
     }
   }
 
