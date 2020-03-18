@@ -11,19 +11,13 @@ import { APICaller } from 'kibana/server';
  * specific to fields in Elasticsearch indices.
  */
 export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
-  // Obtains the cardinality of one or more fields.
-  // Returns an Object whose keys are the names of the fields,
-  // with values equal to the cardinality of the field.
-  // Any of the supplied fieldNames which are not aggregatable will
-  // be omitted from the returned Object.
-  async function getCardinalityOfFields(
-    index: string[] | string,
-    fieldNames: string[],
-    query: any,
-    timeFieldName: string,
-    earliestMs: number,
-    latestMs: number
-  ): Promise<{ [key: string]: number }> {
+  /**
+   * Gets aggregatable fields.
+   */
+  async function getAggregatableFields(
+    index: string | string[],
+    fieldNames: string[]
+  ): Promise<string[]> {
     const fieldCapsResp = await callAsCurrentUser('fieldCaps', {
       index,
       fields: fieldNames,
@@ -40,6 +34,23 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
         }
       }
     });
+    return aggregatableFields;
+  }
+
+  // Obtains the cardinality of one or more fields.
+  // Returns an Object whose keys are the names of the fields,
+  // with values equal to the cardinality of the field.
+  // Any of the supplied fieldNames which are not aggregatable will
+  // be omitted from the returned Object.
+  async function getCardinalityOfFields(
+    index: string[] | string,
+    fieldNames: string[],
+    query: any,
+    timeFieldName: string,
+    earliestMs: number,
+    latestMs: number
+  ): Promise<{ [key: string]: number }> {
+    const aggregatableFields = await getAggregatableFields(index, fieldNames);
 
     if (aggregatableFields.length === 0) {
       return {};
@@ -141,8 +152,90 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
     });
   }
 
+  async function getMaxBucketCardinality(
+    index: string[] | string,
+    fieldNames: string[],
+    query: any,
+    timeFieldName: string,
+    earliestMs: number,
+    latestMs: number,
+    interval: string | undefined
+  ): Promise<{ [key: string]: number }> {
+    const aggregatableFields = await getAggregatableFields(index, fieldNames);
+
+    if (aggregatableFields.length === 0) {
+      return {};
+    }
+
+    // Build the criteria to use in the bool filter part of the request.
+    // Add criteria for the time range and the datafeed config query.
+    const mustCriteria = [
+      {
+        range: {
+          [timeFieldName]: {
+            gte: earliestMs,
+            lte: latestMs,
+            format: 'epoch_millis',
+          },
+        },
+      },
+    ];
+
+    if (query) {
+      mustCriteria.push(query);
+    }
+
+    const aggs = aggregatableFields.reduce((obj, field) => {
+      obj[field] = { cardinality: { field } };
+      return obj;
+    }, {} as { [field: string]: { cardinality: { field: string } } });
+
+    const body = {
+      query: {
+        bool: {
+          must: mustCriteria,
+        },
+      },
+      size: 0,
+      aggs: {
+        bucket_span_buckets: {
+          date_histogram: {
+            field: timeFieldName,
+            fixed_interval: interval,
+          },
+          aggs,
+        },
+        ...Object.keys(aggs).reduce((acc, aggKey) => {
+          acc[`max_bucket_${aggKey}`] = {
+            max_bucket: {
+              buckets_path: `bucket_span_buckets>${aggKey}`,
+            },
+          };
+          return acc;
+        }, {} as { [key: string]: { max_bucket: { buckets_path: string } } }),
+      },
+    };
+
+    const aggregations = (
+      await callAsCurrentUser('search', {
+        index,
+        body,
+      })
+    )?.aggregations;
+
+    if (!aggregations) {
+      return {};
+    }
+
+    return aggregatableFields.reduce((obj, field) => {
+      obj[field] = (aggregations[`max_bucket_${field}`] || { value: 0 }).value;
+      return obj;
+    }, {} as { [field: string]: number });
+  }
+
   return {
     getCardinalityOfFields,
     getTimeFieldRange,
+    getMaxBucketCardinality,
   };
 }

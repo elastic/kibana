@@ -39,8 +39,7 @@ export interface ModelMemoryEstimate {
  */
 async function getCardinalities(
   callAsCurrentUser: APICaller,
-  influencers: AnalysisConfig['influencers'],
-  detectors: AnalysisConfig['detectors'],
+  analysisConfig: AnalysisConfig,
   indexPattern: string,
   query: any,
   timeFieldName: string,
@@ -62,6 +61,8 @@ async function getCardinalities(
   );
 
   const fieldsService = fieldsServiceProvider(callAsCurrentUser);
+
+  const { detectors, influencers, bucket_span: bucketSpan } = analysisConfig;
 
   let overallCardinality = {};
   let maxBucketCardinality = {};
@@ -105,13 +106,14 @@ async function getCardinalities(
     }
 
     if (maxBucketFieldCardinalities.length > 0) {
-      maxBucketCardinality = await fieldsService.getCardinalityOfFields(
+      maxBucketCardinality = await fieldsService.getMaxBucketCardinality(
         indexPattern,
         maxBucketFieldCardinalities,
         query,
         timeFieldName,
         earliestMs,
-        latestMs
+        latestMs,
+        bucketSpan
       );
     }
 
@@ -131,7 +133,7 @@ export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) 
    * and influencers.
    */
   return async function calculateModelMemoryLimit(
-    analysisConfig: TypeOf<typeof analysisConfigSchema>,
+    analysisConfig: AnalysisConfig,
     indexPattern: string,
     query: any,
     timeFieldName: string,
@@ -151,8 +153,7 @@ export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) 
 
     const { overallCardinality, maxBucketCardinality } = await getCardinalities(
       callAsCurrentUser,
-      analysisConfig.influencers,
-      analysisConfig.detectors,
+      analysisConfig,
       indexPattern,
       query,
       timeFieldName,
