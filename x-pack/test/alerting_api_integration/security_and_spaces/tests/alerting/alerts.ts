@@ -169,14 +169,16 @@ instanceStateValue: true
           const testStart = new Date();
           // create an alert
           const reference = alertUtils.generateReference();
-          const overwrites = {
-            throttle: '1s',
-            schedule: { interval: '1s' },
-          };
-          const response = await alertUtils.createAlwaysFiringAction({ reference, overwrites });
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            overwrites: { throttle: null },
+          });
 
           // only need to test creation success paths
           if (response.statusCode !== 200) return;
+
+          // Avoid invalidating an API key while the alert is executing
+          await taskManagerUtils.waitForAllTasksIdle(testStart);
 
           // update the alert with super user
           const alertId = response.body.id;
@@ -189,8 +191,6 @@ instanceStateValue: true
             overwrites: {
               name: 'def',
               tags: ['fee', 'fi', 'fo'],
-              throttle: '1s',
-              schedule: { interval: '1s' },
             },
           });
 
