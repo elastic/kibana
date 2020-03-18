@@ -46,7 +46,7 @@ export const painlessContextOptions = [
         <strong>{filterLabel}</strong>
         <EuiText size="s" color="subdued">
           <p className="euiTextColor--subdued">
-            {i18n.translate('xpack.painlessLab.context.scoreLabel', {
+            {i18n.translate('xpack.painlessLab.context.filterLabel', {
               defaultMessage: "Use the context of a filter's script query",
             })}
           </p>
