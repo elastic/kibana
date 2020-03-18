@@ -23,6 +23,7 @@ interface StateProps {
 
 interface DispatchProps {
   loadMonitorStatus: (dateStart: string, dateEnd: string, monitorId: string) => void;
+  loadSelectedMonitor: (dateStart: string, dateEnd: string, monitorId: string) => void;
 }
 
 interface OwnProps {
@@ -33,6 +34,7 @@ type Props = OwnProps & StateProps & DispatchProps;
 
 const Container: React.FC<Props> = ({
   loadMonitorStatus,
+  loadSelectedMonitor,
   monitorId,
   monitorStatus,
   monitorLocations,
@@ -43,8 +45,9 @@ const Container: React.FC<Props> = ({
   const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = getUrlParams();
 
   useEffect(() => {
-    loadMonitorStatus(dateStart, dateEnd, monitorId);
-  }, [monitorId, dateStart, dateEnd, loadMonitorStatus, lastRefresh]);
+    loadMonitorStatus({ dateStart, dateEnd, monitorId });
+    loadSelectedMonitor({ monitorId });
+  }, [monitorId, dateStart, dateEnd, loadMonitorStatus, lastRefresh, loadSelectedMonitor]);
 
   return (
     <MonitorStatusBarComponent
@@ -61,20 +64,8 @@ const mapStateToProps = (state: AppState, ownProps: OwnProps) => ({
 });
 
 const mapDispatchToProps = (dispatch: Dispatch<any>): DispatchProps => ({
-  loadMonitorStatus: (dateStart: string, dateEnd: string, monitorId: string) => {
-    dispatch(
-      getMonitorStatus({
-        monitorId,
-        dateStart,
-        dateEnd,
-      })
-    );
-    dispatch(
-      getSelectedMonitor({
-        monitorId,
-      })
-    );
-  },
+  loadSelectedMonitor: params => dispatch(getSelectedMonitor(params)),
+  loadMonitorStatus: params => dispatch(getMonitorStatus(params)),
 });
 
 // @ts-ignore TODO: Investigate typescript issues here

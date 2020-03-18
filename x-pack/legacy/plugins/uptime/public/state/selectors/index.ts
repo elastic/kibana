@@ -39,11 +39,17 @@ export const selectPingHistogram = ({ ping, ui }: AppState) => {
   };
 };
 
-export const hasMLJobSelector = createSelector(mlSelector, ml => ml.mlJob?.count > 0);
+export const hasMLJobSelector = (state: AppState) => state.ml.mlJob;
 
-export const isMLJobCreatingSelector = createSelector(mlSelector, ml => ml.loading);
+export const hasNewMLJobSelector = createSelector(mlSelector, ml => ml.createJob.data?.count > 0);
 
-export const anomaliesSelector = createSelector(mlSelector, ml => ml.anomalies);
+export const isMLJobCreatingSelector = createSelector(mlSelector, ml => ml.createJob.loading);
+
+export const isMLJobDeletingSelector = createSelector(mlSelector, ml => ml.deleteJob.loading);
+
+export const isMLJobDeletedSelector = createSelector(mlSelector, ml => ml.deleteJob);
+
+export const anomaliesSelector = createSelector(mlSelector, ml => ml.anomalies.data);
 
 export const selectDurationLines = ({ monitorDuration }: AppState) => {
   return monitorDuration;

@@ -3,16 +3,23 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiOverlayMask, EuiConfirmModal, EuiLoadingSpinner } from '@elastic/eui';
 
 interface Props {
+  open: boolean;
   loading: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
-export const ConfirmJobDeletion: React.FC<Props> = ({ loading, onConfirm, onCancel }) => {
+export const ConfirmJobDeletion: React.FC<Props> = ({ open, loading, onConfirm, onCancel }) => {
+  const [inProgress, setInProgress] = useState(false);
+
+  if (!open) {
+    return null;
+  }
+
   return (
     <EuiOverlayMask>
       <EuiConfirmModal

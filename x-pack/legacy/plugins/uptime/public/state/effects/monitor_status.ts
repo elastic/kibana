@@ -25,7 +25,7 @@ function* selectedMonitorEffect(action: Action<any>) {
       monitorId,
       basePath,
     });
-    yield put({ type: getSelectedMonitorSuccess, payload: response });
+    yield put(getSelectedMonitorSuccess(response));
   } catch (error) {
     yield put({ type: getSelectedMonitorFail, payload: error.message });
   }
@@ -41,7 +41,7 @@ function* monitorStatusEffect(action: Action<any>) {
       dateStart,
       dateEnd,
     });
-    yield put({ type: getMonitorStatusSuccess, payload: response });
+    yield put(getMonitorStatusSuccess(response));
   } catch (error) {
     yield put({ type: getMonitorStatusFail, payload: error.message });
   }

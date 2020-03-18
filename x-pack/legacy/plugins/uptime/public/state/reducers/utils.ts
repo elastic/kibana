@@ -15,19 +15,37 @@ export function handleAsyncAction<ReducerState extends IReducerState, Payload>(
   return {
     [String(asyncAction.get)]: (state: ReducerState) => ({
       ...state,
-      loading: true,
+      [storeKey]: {
+        ...state[storeKey],
+        loading: true,
+      },
     }),
 
     [String(asyncAction.success)]: (state: ReducerState, action: Action<any>) => ({
       ...state,
-      loading: false,
-      [storeKey]: action.payload === null ? action.payload : { ...action.payload },
+      [storeKey]: {
+        ...state[storeKey],
+        data: action.payload === null ? action.payload : { ...action.payload },
+        loading: false,
+      },
     }),
 
     [String(asyncAction.fail)]: (state: ReducerState, action: Action<any>) => ({
       ...state,
-      errors: [...state.errors, action.payload],
-      loading: false,
+      [storeKey]: {
+        ...state[storeKey],
+        data: null,
+        error: action.payload,
+        loading: false,
+      },
     }),
+  };
+}
+
+export function getAsyncInitialState(initialData = null) {
+  return {
+    data: initialData,
+    loading: false,
+    error: null,
   };
 }

@@ -29,18 +29,10 @@ import { ShowLicenseInfo } from './license_info';
 interface Props {
   isCreatingJob: boolean;
   onClickCreate: () => void;
-  onClickDelete: () => void;
   onClose: () => void;
-  hasMLJob: boolean;
 }
 
-export function MachineLearningFlyoutView({
-  isCreatingJob,
-  onClickCreate,
-  onClickDelete,
-  onClose,
-  hasMLJob,
-}: Props) {
+export function MachineLearningFlyoutView({ isCreatingJob, onClickCreate, onClose }: Props) {
   const { basePath, license } = useContext(UptimeSettingsContext);
 
   const isLoadingMLJob = false;
@@ -57,17 +49,6 @@ export function MachineLearningFlyoutView({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {!hasPlatinumLicense && <ShowLicenseInfo />}
-        {hasMLJob && hasPlatinumLicense && (
-          <div>
-            <EuiCallOut title={labels.JOB_ALREADY_EXIST} color="success" iconType="check">
-              <p>
-                {labels.ML_JOB_RUNNING}
-                <MLJobLink>{labels.VIEW_EXISTING_JOB}</MLJobLink>
-              </p>
-            </EuiCallOut>
-            <EuiSpacer size="m" />
-          </div>
-        )}
         <EuiText>
           <p>{labels.CREAT_ML_JOB_DESC}</p>
           <p>
@@ -94,21 +75,9 @@ export function MachineLearningFlyoutView({
                 onClick={() => onClickCreate()}
                 fill
                 isLoading={isCreatingJob}
-                disabled={isCreatingJob || hasMLJob || isLoadingMLJob || !hasPlatinumLicense}
+                disabled={isCreatingJob || isLoadingMLJob || !hasPlatinumLicense}
               >
                 {labels.CREATE_NEW_JOB}
-              </EuiButton>
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={true}>
-            <EuiFormRow>
-              <EuiButton
-                onClick={() => onClickDelete()}
-                fill
-                disabled={isCreatingJob || !hasMLJob || isLoadingMLJob}
-                color="danger"
-              >
-                {labels.DELETE_JOB}
               </EuiButton>
             </EuiFormRow>
           </EuiFlexItem>

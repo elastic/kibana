@@ -50,13 +50,6 @@ export const ENABLE_ANOMALY_DETECTION = i18n.translate(
   }
 );
 
-export const JOB_ALREADY_EXIST = i18n.translate(
-  'xpack.uptime.ml.enableAnomalyDetectionPanel.callout.jobExistsTitle',
-  {
-    defaultMessage: 'Job already exists',
-  }
-);
-
 export const VIEW_EXISTING_JOB = i18n.translate(
   'xpack.uptime.ml.enableAnomalyDetectionPanel.callout.jobExistsDescription.viewJobLinkText',
   {
@@ -85,25 +78,11 @@ export const CREATE_NEW_JOB = i18n.translate(
   }
 );
 
-export const DELETE_JOB = i18n.translate(
-  'xpack.uptime.ml.enableAnomalyDetectionPanel.deleteJobButtonLabel',
-  {
-    defaultMessage: 'Delete Job',
-  }
-);
-
 export const CREAT_ML_JOB_DESC = i18n.translate(
   'xpack.uptime.ml.enableAnomalyDetectionPanel.createMLJobDescription',
   {
     defaultMessage: `Here you can create a machine learning job to calculate anomaly scores on durations for Uptime Monitor.
               Once enabled, The monitor duration chart on details page will show the expected bounds and annotate
               the graph once the anomaly score is >= 75.`,
-  }
-);
-
-export const ML_JOB_RUNNING = i18n.translate(
-  'xpack.uptime.ml.enableAnomalyDetectionPanel.callout.jobExistsDescription',
-  {
-    defaultMessage: 'There is currently a job running for Monitor duration chart.',
   }
 );

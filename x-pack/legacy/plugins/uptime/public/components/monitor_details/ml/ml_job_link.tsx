@@ -15,20 +15,18 @@ import { useUrlParams } from '../../../hooks';
 
 interface Props {
   fill?: boolean;
+  monitorId: string;
 }
 
-export const MLJobLink: React.FC<Props> = ({ fill, children }) => {
+export const MLJobLink: React.FC<Props> = ({ fill, monitorId, children }) => {
   const { basePath } = useContext(UptimeSettingsContext);
 
-  const { dateRangeStart, dateRangeEnd } = useUrlParams()[0]();
-
-  let { monitorId } = useParams();
-  monitorId = atob(monitorId || '');
+  // const { dateRangeStart, dateRangeEnd } = useUrlParams()[0]();
 
   const query = {
     ml: { jobIds: [ML_JOB_ID] },
     refreshInterval: { pause: true, value: 0 },
-    time: { from: dateRangeStart, to: dateRangeEnd },
+    // time: { from: dateRangeStart, to: dateRangeEnd },
   };
 
   const queryParams = {

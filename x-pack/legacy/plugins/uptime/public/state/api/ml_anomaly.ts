@@ -10,14 +10,11 @@ import { AnomalyRecordsParams } from '../actions';
 
 export const fetchMLJob = async ({ jobId }: { jobId: string }) => {
   const url = `/api/ml/anomaly_detectors/${jobId}`;
-  try {
-    return await fetchGet(url);
-  } catch (error) {
-    // if (error.response.status === 404) {
-    //   return null;
-    // }
-    throw error;
+  const result = await fetchGet(url);
+  if (result instanceof Error) {
+    return null;
   }
+  return result;
 };
 
 export const createMLJob = async ({ monitorId }: { monitorId: string }) => {
@@ -62,10 +59,7 @@ export const deleteMLJob = async ({ monitorId }: { monitorId: string }) => {
 
   const data = { jobIds: [`${monitorId}_${ML_JOB_ID}`] };
 
-  const response = await fetchPost(url, data);
-  if (response?.[ML_JOB_ID]?.deleted) {
-    return null;
-  }
+  return await fetchPost(url, data);
 };
 
 export const getIndexDateRange = async () => {
