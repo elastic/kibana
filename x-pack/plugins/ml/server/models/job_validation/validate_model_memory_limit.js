@@ -7,7 +7,7 @@
 import numeral from '@elastic/numeral';
 import { validateJobObject } from './validate_job_object';
 import { calculateModelMemoryLimitProvider } from '../../models/calculate_model_memory_limit';
-import { ALLOWED_DATA_UNITS } from '../../../../../legacy/plugins/ml/common/constants/validation';
+import { ALLOWED_DATA_UNITS } from '../../../common/constants/validation';
 
 // The minimum value the backend expects is 1MByte
 const MODEL_MEMORY_LIMIT_MINIMUM_BYTES = 1048576;

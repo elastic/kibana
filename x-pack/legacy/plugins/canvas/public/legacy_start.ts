@@ -13,12 +13,7 @@ import 'uiExports/spyModes';
 import 'uiExports/embeddableFactories';
 import 'uiExports/interpreter';
 
-// TODO: These dependencies should be moved into plugin startup methods
-// Load the interpreter so that the kbnInterpreter global will be available when plugins load
-import 'plugins/interpreter/interpreter';
-// Load our app component to initialize registries
-import './components/app';
-
+import './legacy_plugin_support';
 // load application code
 import 'uiExports/canvas';
 

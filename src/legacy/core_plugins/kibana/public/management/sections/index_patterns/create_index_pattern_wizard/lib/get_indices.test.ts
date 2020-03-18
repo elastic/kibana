@@ -19,7 +19,8 @@
 
 import { getIndices } from './get_indices';
 import { IndexPatternCreationConfig } from './../../../../../../../management/public';
-import { LegacyApiCaller } from '../../../../../../../../../plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { LegacyApiCaller } from '../../../../../../../../../plugins/data/public/search';
 
 export const successfulResponse = {
   hits: {

@@ -22,8 +22,8 @@ import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { VisOptionsProps } from '../../../../../vis_default_editor/public';
-import { BasicVislibParams, SeriesParam, ValueAxis } from '../../../types';
+import { Vis } from 'src/legacy/core_plugins/visualizations/public';
+import { SeriesParam, ValueAxis } from '../../../types';
 import { ChartTypes } from '../../../utils/collections';
 import { SelectOption } from '../../common';
 import { LineOptions } from './line_options';
@@ -31,17 +31,19 @@ import { SetParamByIndex, ChangeValueAxis } from './';
 
 export type SetChart = <T extends keyof SeriesParam>(paramName: T, value: SeriesParam[T]) => void;
 
-export interface ChartOptionsParams extends VisOptionsProps<BasicVislibParams> {
+export interface ChartOptionsParams {
   chart: SeriesParam;
   index: number;
   changeValueAxis: ChangeValueAxis;
   setParamByIndex: SetParamByIndex;
+  valueAxes: ValueAxis[];
+  vis: Vis;
 }
 
 function ChartOptions({
   chart,
   index,
-  stateParams,
+  valueAxes,
   vis,
   changeValueAxis,
   setParamByIndex,
@@ -62,7 +64,7 @@ function ChartOptions({
 
   const valueAxesOptions = useMemo(
     () => [
-      ...stateParams.valueAxes.map(({ id, name }: ValueAxis) => ({
+      ...valueAxes.map(({ id, name }: ValueAxis) => ({
         text: name,
         value: id,
       })),
@@ -73,7 +75,7 @@ function ChartOptions({
         value: 'new',
       },
     ],
-    [stateParams.valueAxes]
+    [valueAxes]
   );
 
   return (

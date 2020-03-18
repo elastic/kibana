@@ -114,9 +114,11 @@ describe('telemetry_application_usage', () => {
     expect(await collector.fetch(callCluster)).toStrictEqual({
       appId: {
         clicks_total: total - 1 + 10,
+        clicks_7_days: total - 1,
         clicks_30_days: total - 1,
         clicks_90_days: total - 1,
         minutes_on_screen_total: total - 1 + 10,
+        minutes_on_screen_7_days: total - 1,
         minutes_on_screen_30_days: total - 1,
         minutes_on_screen_90_days: total - 1,
       },

@@ -57,7 +57,7 @@ interface StorageData {
 }
 
 describe('OnPreAuth', () => {
-  it('supports registering request inceptors', async () => {
+  it('supports registering a request interceptor', async () => {
     const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
@@ -415,6 +415,23 @@ describe('Auth', () => {
       .expect(200, { content: 'ok' });
   });
 
+  it('blocks access to a resource if credentials are not provided', async () => {
+    const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) =>
+      res.ok({ body: { content: 'ok' } })
+    );
+    registerAuth((req, res, t) => t.notHandled());
+    await server.start();
+
+    const result = await supertest(innerServer.listener)
+      .get('/')
+      .expect(401);
+
+    expect(result.body.message).toBe('Unauthorized');
+  });
+
   it('enables auth for a route by default if registerAuth has been called', async () => {
     const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
@@ -492,11 +509,9 @@ describe('Auth', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
     const redirectTo = '/redirect-url';
-    registerAuth((req, res) =>
-      res.redirected({
-        headers: {
-          location: redirectTo,
-        },
+    registerAuth((req, res, t) =>
+      t.redirected({
+        location: redirectTo,
       })
     );
     await server.start();
@@ -505,6 +520,19 @@ describe('Auth', () => {
       .get('/')
       .expect(302);
     expect(response.header.location).toBe(redirectTo);
+  });
+
+  it('throws if redirection url is not provided', async () => {
+    const { registerAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
+    registerAuth((req, res, t) => t.redirected({} as any));
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .get('/')
+      .expect(500);
   });
 
   it(`doesn't expose internal error details`, async () => {
@@ -865,7 +893,7 @@ describe('Auth', () => {
       ]
     `);
   });
-  // eslint-disable-next-line
+
   it(`doesn't share request object between interceptors`, async () => {
     const { registerOnPostAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');

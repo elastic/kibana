@@ -7,12 +7,12 @@
 import _ from 'lodash';
 import moment from 'moment';
 import { SearchResponse } from 'elasticsearch';
-import { RequestHandlerContext } from 'kibana/server';
+import { APICaller } from 'kibana/server';
 import { buildAnomalyTableItems, AnomaliesTableRecord } from './build_anomaly_table_items';
-import { ML_RESULTS_INDEX_PATTERN } from '../../../../../legacy/plugins/ml/common/constants/index_patterns';
-import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../../../legacy/plugins/ml/common/constants/search';
+import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
-import { AnomalyRecordDoc } from '../../../../../legacy/plugins/ml/common/types/anomalies';
+import { AnomalyRecordDoc } from '../../../common/types/anomalies';
 
 // Service for carrying out Elasticsearch queries to obtain data for the
 // ML Results dashboards.
@@ -30,9 +30,7 @@ interface Influencer {
   fieldValue: any;
 }
 
-export function resultsServiceProvider(client: RequestHandlerContext | ((...args: any[]) => any)) {
-  const callAsCurrentUser =
-    typeof client === 'object' ? client.ml!.mlClient.callAsCurrentUser : client;
+export function resultsServiceProvider(callAsCurrentUser: APICaller) {
   // Obtains data for the anomalies table, aggregating anomalies by day or hour as requested.
   // Return an Object with properties 'anomalies' and 'interval' (interval used to aggregate anomalies,
   // one of day, hour or second. Note 'auto' can be provided as the aggregationInterval in the request,

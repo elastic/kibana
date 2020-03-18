@@ -85,17 +85,17 @@ describe('Basic authentication routes', () => {
       expect(() =>
         bodyValidator.validate({ username: '', password: '' })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[username]: value is [] but it must have a minimum length of [1]."`
+        `"[username]: value has length [0] but it must have a minimum length of [1]."`
       );
       expect(() =>
         bodyValidator.validate({ username: 'user', password: '' })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[password]: value is [] but it must have a minimum length of [1]."`
+        `"[password]: value has length [0] but it must have a minimum length of [1]."`
       );
       expect(() =>
         bodyValidator.validate({ username: '', password: 'password' })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[username]: value is [] but it must have a minimum length of [1]."`
+        `"[username]: value has length [0] but it must have a minimum length of [1]."`
       );
     });
 

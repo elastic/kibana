@@ -29,25 +29,35 @@ const getRandomNumber = () => {
   return randomNumbers[randomIndex];
 };
 
+const policyItem = (id: string) => {
+  return {
+    name: `policy with some protections  ${id}`,
+    total: getRandomNumber(),
+    pending: getRandomNumber(),
+    failed: getRandomNumber(),
+    id: `${id}`,
+    created_by: `admin ABC`,
+    created: getRandomDateIsoString(),
+    updated_by: 'admin 123',
+    updated: getRandomDateIsoString(),
+  };
+};
+
 export const getFakeDatasourceApiResponse = async (page: number, pageSize: number) => {
   await new Promise(resolve => setTimeout(resolve, 500));
 
   // Emulates the API response - see PR:
   // https://github.com/elastic/kibana/pull/56567/files#diff-431549a8739efe0c56763f164c32caeeR25
   return {
-    items: Array.from({ length: pageSize }, (x, i) => ({
-      name: `policy with some protections  ${i + 1}`,
-      total: getRandomNumber(),
-      pending: getRandomNumber(),
-      failed: getRandomNumber(),
-      created_by: `admin ABC`,
-      created: getRandomDateIsoString(),
-      updated_by: 'admin 123',
-      updated: getRandomDateIsoString(),
-    })),
+    items: Array.from({ length: pageSize }, (x, i) => policyItem(`${i + 1}`)),
     success: true,
     total: pageSize * 10,
     page,
     perPage: pageSize,
   };
+};
+
+export const getFakeDatasourceDetailsApiResponse = async (id: string) => {
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return policyItem(id);
 };

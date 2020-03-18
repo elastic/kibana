@@ -7,10 +7,11 @@
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
+import { API_URLS } from '../../../../../legacy/plugins/uptime/common/constants/rest_api';
 
 export const createGetPingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/pings',
+  path: API_URLS.PINGS,
   validate: {
     query: schema.object({
       dateRangeStart: schema.string(),

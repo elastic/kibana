@@ -46,7 +46,7 @@ Registering a feature consists of the following fields. For more information, co
 
 |`privileges` (required)
 |{repo}blob/{branch}/x-pack/plugins/features/server/feature.ts[`FeatureWithAllOrReadPrivileges`].
-|see examples below
+|See <<example-1-canvas,Example 1>> and <<example-2-dev-tools,Example 2>>
 |The set of privileges this feature requires to function.
 
 |`icon`
@@ -80,6 +80,7 @@ if (canUserSave) {
 }
 -----------
 
+[[example-1-canvas]]
 ==== Example 1: Canvas Application
 ["source","javascript"]
 -----------
@@ -134,6 +135,7 @@ if (canUserSave) {
 
 Because the `read` privilege does not define the `save` capability, users with read-only access will have their `uiCapabilities.canvas.save` flag set to `false`.
 
+[[example-2-dev-tools]]
 ==== Example 2: Dev Tools
 
 ["source","javascript"]
@@ -175,7 +177,7 @@ init(server) {
 }
 -----------
 
-Unlike the Canvas example above, Dev Tools does not require access to any saved objects to function. Dev Tools does specify an API endpoint, however. When this is configured, the Security plugin will automatically authorize access to any server API route that is tagged with `access:console`, similar to the following:
+Unlike the Canvas example, Dev Tools does not require access to any saved objects to function. Dev Tools does specify an API endpoint, however. When this is configured, the Security plugin will automatically authorize access to any server API route that is tagged with `access:console`, similar to the following:
 
 ["source","javascript"]
 -----------

@@ -19,7 +19,10 @@
 
 /** Base interface for all metrics gatherers */
 export interface MetricsCollector<T> {
+  /** collect the data currently gathered by the collector */
   collect(): Promise<T>;
+  /** reset the internal state of the collector */
+  reset(): void;
 }
 
 /**

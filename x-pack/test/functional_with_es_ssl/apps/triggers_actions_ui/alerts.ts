@@ -60,7 +60,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('thresholdAlertTimeFieldSelect');
       const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
       await fieldOptions[1].click();
+      // need this two out of popup clicks to close them
       await nameInput.click();
+      await testSubjects.click('intervalInput');
+
       await testSubjects.click('.slack-ActionTypeSelectOption');
       await testSubjects.click('createActionConnectorButton');
       const connectorNameInput = await testSubjects.find('nameInput');
@@ -77,10 +80,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await loggingMessageInput.click();
       await loggingMessageInput.clearValue();
       await loggingMessageInput.type('test message');
-      // TODO: uncomment variables test when server API will be ready
-      // await testSubjects.click('slackAddVariableButton');
-      // const variableMenuButton = await testSubjects.find('variableMenuButton-0');
-      // await variableMenuButton.click();
+      await testSubjects.click('slackAddVariableButton');
+      const variableMenuButton = await testSubjects.find('variableMenuButton-0');
+      await variableMenuButton.click();
       await find.clickByCssSelector('[data-test-subj="saveAlertButton"]');
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Saved '${alertName}'`);

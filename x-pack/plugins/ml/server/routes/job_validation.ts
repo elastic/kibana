@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { RequestHandlerContext } from 'src/core/server';
+import { RequestHandlerContext } from 'kibana/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';

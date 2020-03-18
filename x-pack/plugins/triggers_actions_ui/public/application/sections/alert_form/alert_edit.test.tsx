@@ -19,13 +19,17 @@ const alertTypeRegistry = alertTypeRegistryMock.create();
 describe('alert_edit', () => {
   let deps: any;
   let wrapper: ReactWrapper<any>;
+  let mockedCoreSetup: ReturnType<typeof coreMock.createSetup>;
 
-  beforeAll(async () => {
-    const mockes = coreMock.createSetup();
+  beforeEach(() => {
+    mockedCoreSetup = coreMock.createSetup();
+  });
+
+  async function setup() {
     deps = {
-      toastNotifications: mockes.notifications.toasts,
-      http: mockes.http,
-      uiSettings: mockes.uiSettings,
+      toastNotifications: mockedCoreSetup.notifications.toasts,
+      http: mockedCoreSetup.http,
+      uiSettings: mockedCoreSetup.uiSettings,
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
     };
@@ -122,10 +126,29 @@ describe('alert_edit', () => {
       await nextTick();
       wrapper.update();
     });
-  });
+  }
 
-  it('renders alert add flyout', () => {
+  it('renders alert add flyout', async () => {
+    await setup();
     expect(wrapper.find('[data-test-subj="editAlertFlyoutTitle"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="saveEditedAlertButton"]').exists()).toBeTruthy();
+  });
+
+  it('displays a toast message on save for server errors', async () => {
+    mockedCoreSetup.http.get.mockResolvedValue([]);
+    await setup();
+    const err = new Error() as any;
+    err.body = {};
+    err.body.message = 'Fail message';
+    mockedCoreSetup.http.put.mockRejectedValue(err);
+    await act(async () => {
+      wrapper
+        .find('[data-test-subj="saveEditedAlertButton"]')
+        .first()
+        .simulate('click');
+    });
+    expect(mockedCoreSetup.notifications.toasts.addDanger).toHaveBeenCalledWith(
+      'Failed to save alert: Fail message'
+    );
   });
 });

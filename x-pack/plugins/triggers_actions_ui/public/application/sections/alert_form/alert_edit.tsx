@@ -49,12 +49,7 @@ export const AlertEdit = ({
 
   const closeFlyout = useCallback(() => {
     setEditFlyoutVisibility(false);
-    setServerError(null);
   }, [setEditFlyoutVisibility]);
-
-  const [serverError, setServerError] = useState<{
-    body: { message: string; error: string };
-  } | null>(null);
 
   if (!editFlyoutVisible) {
     return null;
@@ -103,7 +98,16 @@ export const AlertEdit = ({
       }
       return newAlert;
     } catch (errorRes) {
-      setServerError(errorRes);
+      if (toastNotifications) {
+        toastNotifications.addDanger(
+          i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveErrorNotificationText', {
+            defaultMessage: 'Failed to save alert: {message}',
+            values: {
+              message: errorRes.body?.message ?? '',
+            },
+          })
+        );
+      }
     }
   }
 
@@ -137,13 +141,7 @@ export const AlertEdit = ({
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <AlertForm
-            alert={alert}
-            dispatch={dispatch}
-            errors={errors}
-            serverError={serverError}
-            canChangeTrigger={false}
-          />
+          <AlertForm alert={alert} dispatch={dispatch} errors={errors} canChangeTrigger={false} />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">

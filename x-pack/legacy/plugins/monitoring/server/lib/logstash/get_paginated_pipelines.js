@@ -33,7 +33,7 @@ export async function getPaginatedPipelines(
   { clusterUuid, logstashUuid },
   { throughputMetric, nodesCountMetric },
   pagination,
-  sort,
+  sort = { field: null },
   queryText
 ) {
   const sortField = sort.field;

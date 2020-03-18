@@ -7,21 +7,36 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { CaseComponent } from './';
-import * as apiHook from '../../../../containers/case/use_update_case';
+import * as updateHook from '../../../../containers/case/use_update_case';
+import * as deleteHook from '../../../../containers/case/use_delete_cases';
 import { caseProps, data } from './__mock__';
 import { TestProviders } from '../../../../mock';
 
 describe('CaseView ', () => {
-  const dispatchUpdateCaseProperty = jest.fn();
+  const handleOnDeleteConfirm = jest.fn();
+  const handleToggleModal = jest.fn();
+  const dispatchResetIsDeleted = jest.fn();
+  const updateCaseProperty = jest.fn();
+  /* eslint-disable no-console */
+  // Silence until enzyme fixed to use ReactTestUtils.act()
+  const originalError = console.error;
+  beforeAll(() => {
+    console.error = jest.fn();
+  });
+  afterAll(() => {
+    console.error = originalError;
+  });
+  /* eslint-enable no-console */
 
   beforeEach(() => {
     jest.resetAllMocks();
-    jest
-      .spyOn(apiHook, 'useUpdateCase')
-      .mockReturnValue([
-        { data, isLoading: false, isError: false, updateKey: null },
-        dispatchUpdateCaseProperty,
-      ]);
+    jest.spyOn(updateHook, 'useUpdateCase').mockReturnValue({
+      caseData: data,
+      isLoading: false,
+      isError: false,
+      updateKey: null,
+      updateCaseProperty,
+    });
   });
 
   it('should render CaseComponent', () => {
@@ -38,10 +53,10 @@ describe('CaseView ', () => {
     ).toEqual(data.title);
     expect(
       wrapper
-        .find(`[data-test-subj="case-view-state"]`)
+        .find(`[data-test-subj="case-view-status"]`)
         .first()
         .text()
-    ).toEqual(data.state);
+    ).toEqual(data.status);
     expect(
       wrapper
         .find(`[data-test-subj="case-view-tag-list"] .euiBadge__text`)
@@ -76,11 +91,11 @@ describe('CaseView ', () => {
     );
 
     wrapper
-      .find('input[data-test-subj="toggle-case-state"]')
+      .find('input[data-test-subj="toggle-case-status"]')
       .simulate('change', { target: { value: false } });
 
-    expect(dispatchUpdateCaseProperty).toBeCalledWith({
-      updateKey: 'state',
+    expect(updateCaseProperty).toBeCalledWith({
+      updateKey: 'status',
       updateValue: 'closed',
     });
   });
@@ -94,7 +109,7 @@ describe('CaseView ', () => {
     expect(
       wrapper
         .find(
-          `div[data-test-subj="user-action-${data.comments[0].commentId}-avatar"] [data-test-subj="user-action-avatar"]`
+          `div[data-test-subj="user-action-${data.comments[0].id}-avatar"] [data-test-subj="user-action-avatar"]`
         )
         .first()
         .prop('name')
@@ -103,7 +118,7 @@ describe('CaseView ', () => {
     expect(
       wrapper
         .find(
-          `div[data-test-subj="user-action-${data.comments[0].commentId}"] [data-test-subj="user-action-title"] strong`
+          `div[data-test-subj="user-action-${data.comments[0].id}"] [data-test-subj="user-action-title"] strong`
         )
         .first()
         .text()
@@ -112,10 +127,52 @@ describe('CaseView ', () => {
     expect(
       wrapper
         .find(
-          `div[data-test-subj="user-action-${data.comments[0].commentId}"] [data-test-subj="markdown"]`
+          `div[data-test-subj="user-action-${data.comments[0].id}"] [data-test-subj="markdown"]`
         )
         .first()
         .prop('source')
     ).toEqual(data.comments[0].comment);
+  });
+
+  it('toggle delete modal and cancel', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <CaseComponent {...caseProps} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
+
+    wrapper
+      .find(
+        '[data-test-subj="case-view-actions"] button[data-test-subj="property-actions-ellipses"]'
+      )
+      .first()
+      .simulate('click');
+    wrapper.find('button[data-test-subj="property-actions-trash"]').simulate('click');
+    expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeTruthy();
+    wrapper.find('button[data-test-subj="confirmModalCancelButton"]').simulate('click');
+    expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
+  });
+
+  it('toggle delete modal and confirm', () => {
+    jest.spyOn(deleteHook, 'useDeleteCases').mockReturnValue({
+      dispatchResetIsDeleted,
+      handleToggleModal,
+      handleOnDeleteConfirm,
+      isLoading: false,
+      isError: false,
+      isDeleted: false,
+      isDisplayConfirmDeleteModal: true,
+    });
+    const wrapper = mount(
+      <TestProviders>
+        <CaseComponent {...caseProps} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeTruthy();
+    wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
+    expect(handleOnDeleteConfirm.mock.calls[0][0]).toEqual([caseProps.caseId]);
   });
 });

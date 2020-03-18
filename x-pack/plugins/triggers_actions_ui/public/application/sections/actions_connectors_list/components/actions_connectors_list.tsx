@@ -18,16 +18,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ActionsConnectorsContextProvider } from '../../../context/actions_connectors_context';
 import { useAppDependencies } from '../../../app_context';
 import { loadAllActions, loadActionTypes } from '../../../lib/action_connector_api';
 import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
 import { ConnectorAddFlyout, ConnectorEditFlyout } from '../../action_connector_form';
 import { hasDeleteActionsCapability, hasSaveActionsCapability } from '../../../lib/capabilities';
 import { DeleteConnectorsModal } from '../../../components/delete_connectors_modal';
+import { ActionsConnectorsContextProvider } from '../../../context/actions_connectors_context';
+import './actions_connectors_list.scss';
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
-  const { http, toastNotifications, capabilities } = useAppDependencies();
+  const { http, toastNotifications, capabilities, actionTypeRegistry } = useAppDependencies();
   const canDelete = hasDeleteActionsCapability(capabilities);
   const canSave = hasSaveActionsCapability(capabilities);
 
@@ -377,19 +378,23 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       {data.length === 0 && !canSave && noPermissionPrompt}
       <ActionsConnectorsContextProvider
         value={{
-          addFlyoutVisible,
-          setAddFlyoutVisibility,
-          editFlyoutVisible,
-          setEditFlyoutVisibility,
-          actionTypesIndex,
+          actionTypeRegistry,
+          http,
+          capabilities,
+          toastNotifications,
           reloadConnectors: loadActions,
         }}
       >
-        <ConnectorAddFlyout />
+        <ConnectorAddFlyout
+          addFlyoutVisible={addFlyoutVisible}
+          setAddFlyoutVisibility={setAddFlyoutVisibility}
+        />
         {editedConnectorItem ? (
           <ConnectorEditFlyout
             key={editedConnectorItem.id}
             initialConnector={editedConnectorItem}
+            editFlyoutVisible={editFlyoutVisible}
+            setEditFlyoutVisibility={setEditFlyoutVisibility}
           />
         ) : null}
       </ActionsConnectorsContextProvider>

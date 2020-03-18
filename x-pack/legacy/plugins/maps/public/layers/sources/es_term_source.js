@@ -51,10 +51,6 @@ export class ESTermSource extends AbstractESAggSource {
     return _.has(this._descriptor, 'indexPatternId') && _.has(this._descriptor, 'term');
   }
 
-  getIndexPatternIds() {
-    return [this._descriptor.indexPatternId];
-  }
-
   getTermField() {
     return this._termField;
   }
@@ -90,7 +86,7 @@ export class ESTermSource extends AbstractESAggSource {
     }
 
     const indexPattern = await this.getIndexPattern();
-    const searchSource = await this._makeSearchSource(searchFilters, 0);
+    const searchSource = await this.makeSearchSource(searchFilters, 0);
     const termsField = getField(indexPattern, this._termField.getName());
     const termsAgg = { size: DEFAULT_MAX_BUCKETS_LIMIT };
     searchSource.setField('aggs', {
@@ -105,7 +101,13 @@ export class ESTermSource extends AbstractESAggSource {
       requestName: `${this._descriptor.indexPatternTitle}.${this._termField.getName()}`,
       searchSource,
       registerCancelCallback,
-      requestDescription: this._getRequestDescription(leftSourceName, leftFieldName),
+      requestDescription: i18n.translate('xpack.maps.source.esJoin.joinDescription', {
+        defaultMessage: `Elasticsearch terms aggregation request, left source: {leftSource}, right source: {rightSource}`,
+        values: {
+          leftSource: `${leftSourceName}:${leftFieldName}`,
+          rightSource: `${this._descriptor.indexPatternTitle}:${this._termField.getName()}`,
+        },
+      }),
     });
 
     const countPropertyName = this.getAggKey(AGG_TYPE.COUNT);
@@ -118,33 +120,9 @@ export class ESTermSource extends AbstractESAggSource {
     return false;
   }
 
-  _getRequestDescription(leftSourceName, leftFieldName) {
-    const metrics = this.getMetricFields().map(esAggMetric => esAggMetric.getRequestDescription());
-    const joinStatement = [];
-    joinStatement.push(
-      i18n.translate('xpack.maps.source.esJoin.joinLeftDescription', {
-        defaultMessage: `Join {leftSourceName}:{leftFieldName} with`,
-        values: { leftSourceName, leftFieldName },
-      })
-    );
-    joinStatement.push(`${this._descriptor.indexPatternTitle}:${this._termField.getName()}`);
-    joinStatement.push(
-      i18n.translate('xpack.maps.source.esJoin.joinMetricsDescription', {
-        defaultMessage: `for metrics {metrics}`,
-        values: { metrics: metrics.join(',') },
-      })
-    );
-    return i18n.translate('xpack.maps.source.esJoin.joinDescription', {
-      defaultMessage: `Elasticsearch terms aggregation request for {description}`,
-      values: {
-        description: joinStatement.join(' '),
-      },
-    });
-  }
-
   async getDisplayName() {
     //no need to localize. this is never rendered.
-    return `es_table ${this._descriptor.indexPatternId}`;
+    return `es_table ${this.getIndexPatternId()}`;
   }
 
   async filterAndFormatPropertiesToHtml(properties) {

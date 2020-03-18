@@ -6,6 +6,7 @@
 
 import { FIELD_ORIGIN } from '../../../common/constants';
 import { IVectorSource } from '../sources/vector_source';
+import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
 
 export interface IField {
   getName(): string;
@@ -13,24 +14,20 @@ export interface IField {
   canValueBeFormatted(): boolean;
   getLabel(): Promise<string>;
   getDataType(): Promise<string>;
+  createTooltipProperty(value: string | undefined): Promise<ITooltipProperty>;
+  getSource(): IVectorSource;
+  getOrigin(): FIELD_ORIGIN;
+  isValid(): boolean;
+  getOrdinalFieldMetaRequest(): Promise<unknown>;
+  getCategoricalFieldMetaRequest(): Promise<unknown>;
 }
 
 export class AbstractField implements IField {
-  private _fieldName: string;
-  private _source: IVectorSource;
-  private _origin: string;
+  private readonly _fieldName: string;
+  private readonly _origin: FIELD_ORIGIN;
 
-  constructor({
-    fieldName,
-    source,
-    origin,
-  }: {
-    fieldName: string;
-    source: IVectorSource;
-    origin: string;
-  }) {
+  constructor({ fieldName, origin }: { fieldName: string; origin: FIELD_ORIGIN }) {
     this._fieldName = fieldName;
-    this._source = source;
     this._origin = origin || FIELD_ORIGIN.SOURCE;
   }
 
@@ -43,11 +40,11 @@ export class AbstractField implements IField {
   }
 
   canValueBeFormatted(): boolean {
-    return true;
+    return false;
   }
 
   getSource(): IVectorSource {
-    return this._source;
+    throw new Error('must implement Field#getSource');
   }
 
   isValid(): boolean {
@@ -62,11 +59,12 @@ export class AbstractField implements IField {
     return this._fieldName;
   }
 
-  async createTooltipProperty(): Promise<unknown> {
-    throw new Error('must implement Field#createTooltipProperty');
+  async createTooltipProperty(value: string | undefined): Promise<ITooltipProperty> {
+    const label = await this.getLabel();
+    return new TooltipProperty(this.getName(), label, value);
   }
 
-  getOrigin(): string {
+  getOrigin(): FIELD_ORIGIN {
     return this._origin;
   }
 
@@ -74,7 +72,7 @@ export class AbstractField implements IField {
     return false;
   }
 
-  async getOrdinalFieldMetaRequest(/* config */): Promise<unknown> {
+  async getOrdinalFieldMetaRequest(): Promise<unknown> {
     return null;
   }
 

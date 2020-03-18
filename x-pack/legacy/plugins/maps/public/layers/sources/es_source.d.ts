@@ -5,5 +5,32 @@
  */
 
 import { AbstractVectorSource } from './vector_source';
+import { IVectorSource } from './vector_source';
+import { IndexPattern, SearchSource } from '../../../../../../../src/plugins/data/public';
+import { VectorLayerRequestMeta } from '../../../common/data_request_descriptor_types';
 
-export class AbstractESSource extends AbstractVectorSource {}
+export interface IESSource extends IVectorSource {
+  getId(): string;
+  getIndexPattern(): Promise<IndexPattern>;
+  getIndexPatternId(): string;
+  getGeoFieldName(): string;
+  getMaxResultWindow(): Promise<number>;
+  makeSearchSource(
+    searchFilters: VectorLayerRequestMeta,
+    limit: number,
+    initialSearchContext?: object
+  ): Promise<SearchSource>;
+}
+
+export class AbstractESSource extends AbstractVectorSource implements IESSource {
+  getId(): string;
+  getIndexPattern(): Promise<IndexPattern>;
+  getIndexPatternId(): string;
+  getGeoFieldName(): string;
+  getMaxResultWindow(): Promise<number>;
+  makeSearchSource(
+    searchFilters: VectorLayerRequestMeta,
+    limit: number,
+    initialSearchContext?: object
+  ): Promise<SearchSource>;
+}

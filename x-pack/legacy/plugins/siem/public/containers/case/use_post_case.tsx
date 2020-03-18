@@ -4,93 +4,86 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dispatch, SetStateAction, useEffect, useReducer, useState } from 'react';
-import { useStateToaster } from '../../components/toasters';
-import { errorToToaster } from '../../components/ml/api/error_to_toaster';
+import { useReducer, useCallback } from 'react';
+
+import { CaseRequest } from '../../../../../../plugins/case/common/api';
+import { errorToToaster, useStateToaster } from '../../components/toasters';
+import { postCase } from './api';
 import * as i18n from './translations';
-import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS, POST_NEW_CASE } from './constants';
-import { Case, NewCase } from './types';
-import { createCase } from './api';
-import { getTypedPayload } from './utils';
+import { Case } from './types';
 
 interface NewCaseState {
-  data: NewCase;
-  newCase?: Case;
+  caseData: Case | null;
   isLoading: boolean;
   isError: boolean;
 }
-interface Action {
-  type: string;
-  payload?: NewCase | Case;
-}
+type Action =
+  | { type: 'FETCH_INIT' }
+  | { type: 'FETCH_SUCCESS'; payload: Case }
+  | { type: 'FETCH_FAILURE' };
 
 const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => {
   switch (action.type) {
-    case FETCH_INIT:
+    case 'FETCH_INIT':
       return {
         ...state,
         isLoading: true,
         isError: false,
       };
-    case POST_NEW_CASE:
+    case 'FETCH_SUCCESS':
       return {
         ...state,
         isLoading: false,
         isError: false,
-        data: getTypedPayload<NewCase>(action.payload),
+        caseData: action.payload ?? null,
       };
-    case FETCH_SUCCESS:
-      return {
-        ...state,
-        isLoading: false,
-        isError: false,
-        newCase: getTypedPayload<Case>(action.payload),
-      };
-    case FETCH_FAILURE:
+    case 'FETCH_FAILURE':
       return {
         ...state,
         isLoading: false,
         isError: true,
       };
     default:
-      throw new Error();
+      return state;
   }
 };
-const initialData: NewCase = {
-  description: '',
-  isNew: false,
-  tags: [],
-  title: '',
-};
 
-export const usePostCase = (): [NewCaseState, Dispatch<SetStateAction<NewCase>>] => {
+interface UsePostCase extends NewCaseState {
+  postCase: (data: CaseRequest) => void;
+}
+export const usePostCase = (): UsePostCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
-    data: initialData,
+    caseData: null,
   });
-  const [formData, setFormData] = useState(initialData);
   const [, dispatchToaster] = useStateToaster();
 
-  useEffect(() => {
-    dispatch({ type: POST_NEW_CASE, payload: formData });
-  }, [formData]);
-
-  useEffect(() => {
-    const postCase = async () => {
-      dispatch({ type: FETCH_INIT });
-      try {
-        const { isNew, ...dataWithoutIsNew } = state.data;
-        const response = await createCase(dataWithoutIsNew);
-        dispatch({ type: FETCH_SUCCESS, payload: response });
-      } catch (error) {
-        errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
-        dispatch({ type: FETCH_FAILURE });
+  const postMyCase = useCallback(async (data: CaseRequest) => {
+    let cancel = false;
+    try {
+      dispatch({ type: 'FETCH_INIT' });
+      const response = await postCase({ ...data, status: 'open' });
+      if (!cancel) {
+        dispatch({
+          type: 'FETCH_SUCCESS',
+          payload: response,
+        });
       }
-    };
-    if (state.data.isNew) {
-      postCase();
+    } catch (error) {
+      if (!cancel) {
+        errorToToaster({
+          title: i18n.ERROR_TITLE,
+          error: error.body && error.body.message ? new Error(error.body.message) : error,
+          dispatchToaster,
+        });
+        dispatch({ type: 'FETCH_FAILURE' });
+      }
     }
-  }, [state.data.isNew]);
-  return [state, setFormData];
+    return () => {
+      cancel = true;
+    };
+  }, []);
+
+  return { ...state, postCase: postMyCase };
 };

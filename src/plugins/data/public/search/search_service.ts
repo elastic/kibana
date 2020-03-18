@@ -19,13 +19,25 @@
 
 import { Plugin, CoreSetup, CoreStart, PackageInfo } from '../../../../core/public';
 
-import { getCalculateAutoTimeExpression } from './aggs/buckets/lib/date_utils';
 import { SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider } from './sync_search_strategy';
 import { ISearchSetup, ISearchStart, TSearchStrategyProvider, TSearchStrategiesMap } from './types';
 import { TStrategyTypes } from './strategy_types';
 import { getEsClient, LegacyApiCaller } from './es_client';
 import { ES_SEARCH_STRATEGY, DEFAULT_SEARCH_STRATEGY } from '../../common/search';
 import { esSearchStrategyProvider } from './es_search/es_search_strategy';
+import {
+  getAggTypes,
+  AggType,
+  AggTypesRegistry,
+  AggConfig,
+  AggConfigs,
+  FieldParamType,
+  getCalculateAutoTimeExpression,
+  MetricAggType,
+  aggTypeFieldFilters,
+  parentPipelineAggHelper,
+  siblingPipelineAggHelper,
+} from './aggs';
 
 /**
  * The search plugin exposes two registration methods for other plugins:
@@ -44,6 +56,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private searchStrategies: TSearchStrategiesMap = {};
 
   private esClient?: LegacyApiCaller;
+  private readonly aggTypesRegistry = new AggTypesRegistry();
 
   private registerSearchStrategyProvider = <T extends TStrategyTypes>(
     name: T,
@@ -60,23 +73,35 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(core: CoreSetup, packageInfo: PackageInfo): ISearchSetup {
     this.esClient = getEsClient(core.injectedMetadata, core.http, packageInfo);
-
     this.registerSearchStrategyProvider(SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider);
-
     this.registerSearchStrategyProvider(ES_SEARCH_STRATEGY, esSearchStrategyProvider);
+
+    const aggTypesSetup = this.aggTypesRegistry.setup();
+    const aggTypes = getAggTypes({ uiSettings: core.uiSettings });
+    aggTypes.buckets.forEach(b => aggTypesSetup.registerBucket(b));
+    aggTypes.metrics.forEach(m => aggTypesSetup.registerMetric(m));
 
     return {
       aggs: {
         calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
+        types: aggTypesSetup,
       },
       registerSearchStrategyProvider: this.registerSearchStrategyProvider,
     };
   }
 
   public start(core: CoreStart): ISearchStart {
+    const aggTypesStart = this.aggTypesRegistry.start();
+
     return {
       aggs: {
         calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
+        createAggConfigs: (indexPattern, configStates = [], schemas) => {
+          return new AggConfigs(indexPattern, configStates, {
+            typesRegistry: aggTypesStart,
+          });
+        },
+        types: aggTypesStart,
       },
       search: (request, options, strategyName) => {
         const strategyProvider = this.getSearchStrategy(strategyName || DEFAULT_SEARCH_STRATEGY);
@@ -88,6 +113,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       },
       __LEGACY: {
         esClient: this.esClient!,
+        AggConfig,
+        AggType,
+        aggTypeFieldFilters,
+        FieldParamType,
+        MetricAggType,
+        parentPipelineAggHelper,
+        siblingPipelineAggHelper,
       },
     };
   }

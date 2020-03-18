@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Vis } from 'src/legacy/core_plugins/visualizations/public';
 import { Axis, ValueAxis, SeriesParam, Style } from '../../../types';
 import {
   ChartTypes,
@@ -25,6 +26,10 @@ import {
   ScaleTypes,
   Positions,
   AxisTypes,
+  getScaleTypes,
+  getAxisModes,
+  getPositions,
+  getInterpolationModes,
 } from '../../../utils/collections';
 
 const defaultValueAxisId = 'ValueAxis-1';
@@ -84,4 +89,17 @@ const seriesParam: SeriesParam = {
   valueAxis: defaultValueAxisId,
 };
 
-export { defaultValueAxisId, categoryAxis, valueAxis, seriesParam };
+const positions = getPositions();
+const axisModes = getAxisModes();
+const scaleTypes = getScaleTypes();
+const interpolationModes = getInterpolationModes();
+
+const vis = ({
+  type: {
+    editorConfig: {
+      collections: { scaleTypes, axisModes, positions, interpolationModes },
+    },
+  },
+} as any) as Vis;
+
+export { defaultValueAxisId, categoryAxis, valueAxis, seriesParam, vis };

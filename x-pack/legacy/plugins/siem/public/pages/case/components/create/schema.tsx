@@ -4,13 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CaseRequest } from '../../../../../../../../plugins/case/common/api';
 import { FIELD_TYPES, fieldValidators, FormSchema } from '../../../../shared_imports';
-import { OptionalFieldLabel } from './optional_field_label';
 import * as i18n from '../../translations';
 
+import { OptionalFieldLabel } from './optional_field_label';
 const { emptyField } = fieldValidators;
 
-export const schema: FormSchema = {
+export const schemaTags = {
+  type: FIELD_TYPES.COMBO_BOX,
+  label: i18n.TAGS,
+  helpText: i18n.TAGS_HELP,
+  labelAppend: OptionalFieldLabel,
+};
+
+export const schema: FormSchema<CaseRequest> = {
   title: {
     type: FIELD_TYPES.TEXT,
     label: i18n.NAME,
@@ -28,10 +36,5 @@ export const schema: FormSchema = {
       },
     ],
   },
-  tags: {
-    type: FIELD_TYPES.COMBO_BOX,
-    label: i18n.TAGS,
-    helpText: i18n.TAGS_HELP,
-    labelAppend: OptionalFieldLabel,
-  },
+  tags: schemaTags,
 };

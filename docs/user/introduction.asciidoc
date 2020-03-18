@@ -85,7 +85,7 @@ image::images/intro-dashboard.png[]
 
 * <<visualize, Visualize>> allows you to display your data in
 line charts, bar graphs, pie charts, histograms, and tables
-(just to name a few). It's also home to *Lens*, mentioned above.
+(just to name a few). It's also home to *Lens*, the drag-and-drop interface.
 *Visualize* supports the ability to add interactive
 controls to your dashboard, and filter dashboard content in real time.
 

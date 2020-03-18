@@ -17,7 +17,8 @@ import { MapEmbeddable } from './map_embeddable';
 import { indexPatternService } from '../kibana_services';
 
 import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
-import { createMapStore } from '../reducers/store';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createMapStore } from '../../../../../plugins/maps/public/reducers/store';
 import { addLayerWithoutDataSync } from '../actions/map_actions';
 import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { getInitialLayers } from '../angular/get_initial_layers';

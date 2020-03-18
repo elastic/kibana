@@ -13,3 +13,4 @@ export { MonitorStatusBar } from './monitor/status_bar_container';
 export { MonitorListDrawer } from './monitor/list_drawer_container';
 export { MonitorListActionsPopover } from './monitor/drawer_popover_container';
 export { DurationChart } from './charts/monitor_duration';
+export { EmptyState } from './empty_state/empty_state';
