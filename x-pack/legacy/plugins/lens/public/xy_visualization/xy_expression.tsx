@@ -27,6 +27,7 @@ import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
+import { EmbeddableVisTriggerContext } from '../../../../../../src/plugins/embeddable';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/embeddable/events';
 import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
 import { LensMultiTable } from '../types';
@@ -163,9 +164,8 @@ export function XYChart({
   formatFactory,
   timeZone,
   chartTheme,
-  handlers,
 }: XYChartRenderProps & {
-  handlers: IInterpreterRenderHandlers;
+  handlers?: IInterpreterRenderHandlers;
 }) {
   const { legend, layers } = args;
 
@@ -232,7 +232,9 @@ export function XYChart({
 
           const points = [
             {
-              row: table.rows.findIndex(row => row[layer.xAccessor] === geometry.x),
+              row: table.rows.findIndex(
+                row => layer.xAccessor && row[layer.xAccessor] === geometry.x
+              ),
               column: table.columns.findIndex(col => col.id === layer.xAccessor),
               value: geometry.x,
             },
@@ -242,13 +244,15 @@ export function XYChart({
             const pointValue = series.seriesKeys[0];
 
             points.push({
-              row: table.rows.findIndex(row => row[layer.splitAccessor] === pointValue),
+              row: table.rows.findIndex(
+                row => layer.splitAccessor && row[layer.splitAccessor] === pointValue
+              ),
               column: table.columns.findIndex(col => col.id === layer.splitAccessor),
               value: pointValue,
             });
           }
 
-          npStart.plugins.uiActions.executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, {
+          const context: EmbeddableVisTriggerContext = {
             data: {
               data: points.map(point => ({
                 row: point.row,
@@ -257,7 +261,9 @@ export function XYChart({
                 table,
               })),
             },
-          });
+          };
+
+          npStart.plugins.uiActions.executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, context);
         }}
       />
 
