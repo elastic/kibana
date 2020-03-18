@@ -23,8 +23,8 @@ import { palettes } from '@elastic/eui/lib/services';
 // @ts-ignore
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 
-import { Schemas, AggGroupNames } from './legacy_imports';
-
+import { AggGroupNames } from '../../../../plugins/data/public';
+import { Schemas } from '../../vis_default_editor/public';
 import {
   Positions,
   ChartTypes,

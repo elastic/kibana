@@ -21,7 +21,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { cloneDeep, uniq, get } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
-import { IAggConfig } from '../../../legacy_imports';
+import { IAggConfig } from 'src/plugins/data/public';
 import { BasicVislibParams, ValueAxis, SeriesParam, Axis } from '../../../types';
 import { ValidationVisOptionsProps } from '../../common';
 import { SeriesPanel } from './series_panel';
