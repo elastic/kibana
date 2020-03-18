@@ -102,6 +102,10 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
           };
         });
     },
+    async isAlertsListDisplayed() {
+      const table = await find.byCssSelector('[data-test-subj="alertsList"] table');
+      return table.isDisplayed();
+    },
     async clickOnAlertInAlertsList(name: string) {
       await this.searchAlerts(name);
       await find.clickDisplayedByCssSelector(`[data-test-subj="alertsList"] [title="${name}"]`);
