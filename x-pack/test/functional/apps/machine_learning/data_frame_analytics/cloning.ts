@@ -13,8 +13,7 @@ export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // eslint-disable-next-line ban/ban
-  describe.only('jobs cloning supported by UI form', function() {
+  describe('jobs cloning supported by UI form', function() {
     this.tags(['smoke']);
 
     const testDataList: Array<{
