@@ -55,3 +55,19 @@ export const STATUS = i18n.translate('xpack.siem.case.caseView.statusLabel', {
 export const CASE_OPENED = i18n.translate('xpack.siem.case.caseView.caseOpened', {
   defaultMessage: 'Case opened',
 });
+
+export const CASE_CLOSEED = i18n.translate('xpack.siem.case.caseView.caseClosed', {
+  defaultMessage: 'Case closed',
+});
+
+export const EMAIL_SUBJECT = (caseTitle: string) =>
+  i18n.translate('xpack.siem.case.caseView.emailSubject', {
+    values: { caseTitle },
+    defaultMessage: 'SIEM Case - {caseTitle}',
+  });
+
+export const EMAIL_BODY = (caseUrl: string) =>
+  i18n.translate('xpack.siem.case.caseView.emailBody', {
+    values: { caseUrl },
+    defaultMessage: 'Case reference: {caseUrl}',
+  });

@@ -13,6 +13,8 @@ export const useGetCasesMockState: UseGetCasesState = {
     countOpenCases: 0,
     cases: [
       {
+        closedAt: null,
+        closedBy: null,
         id: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
         createdAt: '2020-02-13T19:44:23.627Z',
         createdBy: { username: 'elastic' },
@@ -27,6 +29,8 @@ export const useGetCasesMockState: UseGetCasesState = {
         version: 'WzQ3LDFd',
       },
       {
+        closedAt: null,
+        closedBy: null,
         id: '362a5c10-4e99-11ea-9290-35d05cb55c15',
         createdAt: '2020-02-13T19:44:13.328Z',
         createdBy: { username: 'elastic' },
@@ -41,6 +45,8 @@ export const useGetCasesMockState: UseGetCasesState = {
         version: 'WzQ3LDFd',
       },
       {
+        closedAt: null,
+        closedBy: null,
         id: '34f8b9e0-4e99-11ea-9290-35d05cb55c15',
         createdAt: '2020-02-13T19:44:11.328Z',
         createdBy: { username: 'elastic' },
@@ -55,6 +61,8 @@ export const useGetCasesMockState: UseGetCasesState = {
         version: 'WzQ3LDFd',
       },
       {
+        closedAt: '2020-02-13T19:44:13.328Z',
+        closedBy: { username: 'elastic' },
         id: '31890e90-4e99-11ea-9290-35d05cb55c15',
         createdAt: '2020-02-13T19:44:05.563Z',
         createdBy: { username: 'elastic' },
@@ -64,11 +72,13 @@ export const useGetCasesMockState: UseGetCasesState = {
         status: 'closed',
         tags: ['phishing'],
         title: 'Uh oh',
-        updatedAt: null,
-        updatedBy: null,
+        updatedAt: '2020-02-13T19:44:13.328Z',
+        updatedBy: { username: 'elastic' },
         version: 'WzQ3LDFd',
       },
       {
+        closedAt: null,
+        closedBy: null,
         id: '2f5b3210-4e99-11ea-9290-35d05cb55c15',
         createdAt: '2020-02-13T19:44:01.901Z',
         createdBy: { username: 'elastic' },

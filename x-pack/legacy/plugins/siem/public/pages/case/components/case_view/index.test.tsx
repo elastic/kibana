@@ -7,22 +7,26 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { CaseComponent } from './';
-import * as apiHook from '../../../../containers/case/use_update_case';
-import { caseProps, data } from './__mock__';
+import { caseProps, caseClosedProps, data, dataClosed } from './__mock__';
 import { TestProviders } from '../../../../mock';
+import { useUpdateCase } from '../../../../containers/case/use_update_case';
+jest.mock('../../../../containers/case/use_update_case');
+const useUpdateCaseMock = useUpdateCase as jest.Mock;
 
 describe('CaseView ', () => {
   const updateCaseProperty = jest.fn();
 
+  const defaultUpdateCaseState = {
+    caseData: data,
+    isLoading: false,
+    isError: false,
+    updateKey: null,
+    updateCaseProperty,
+  };
+
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.spyOn(apiHook, 'useUpdateCase').mockReturnValue({
-      caseData: data,
-      isLoading: false,
-      isError: false,
-      updateKey: null,
-      updateCaseProperty,
-    });
+    useUpdateCaseMock.mockImplementation(() => defaultUpdateCaseState);
   });
 
   it('should render CaseComponent', () => {
@@ -55,6 +59,7 @@ describe('CaseView ', () => {
         .first()
         .text()
     ).toEqual(data.createdBy.username);
+    expect(wrapper.contains(`[data-test-subj="case-view-closedAt"]`)).toBe(false);
     expect(
       wrapper
         .find(`[data-test-subj="case-view-createdAt"]`)
@@ -67,6 +72,30 @@ describe('CaseView ', () => {
         .first()
         .prop('raw')
     ).toEqual(data.description);
+  });
+  it('should show closed indicators in header when case is closed', () => {
+    useUpdateCaseMock.mockImplementation(() => ({
+      ...defaultUpdateCaseState,
+      caseData: dataClosed,
+    }));
+    const wrapper = mount(
+      <TestProviders>
+        <CaseComponent {...caseClosedProps} />
+      </TestProviders>
+    );
+    expect(wrapper.contains(`[data-test-subj="case-view-createdAt"]`)).toBe(false);
+    expect(
+      wrapper
+        .find(`[data-test-subj="case-view-closedAt"]`)
+        .first()
+        .prop('value')
+    ).toEqual(dataClosed.closedAt);
+    expect(
+      wrapper
+        .find(`[data-test-subj="case-view-status"]`)
+        .first()
+        .text()
+    ).toEqual(dataClosed.status);
   });
 
   it('should dispatch update state when button is toggled', () => {

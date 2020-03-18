@@ -30,6 +30,10 @@ export const OPENED_ON = i18n.translate('xpack.siem.case.caseView.openedOn', {
   defaultMessage: 'Opened on',
 });
 
+export const CLOSED_ON = i18n.translate('xpack.siem.case.caseView.closedOn', {
+  defaultMessage: 'Closed on',
+});
+
 export const REPORTER = i18n.translate('xpack.siem.case.caseView.createdBy', {
   defaultMessage: 'Reporter',
 });

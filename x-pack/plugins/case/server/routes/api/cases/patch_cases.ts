@@ -37,10 +37,23 @@ export function initPatchCasesApi({ caseService, router }: RouteDeps) {
           client: context.core.savedObjects.client,
           caseIds: query.cases.map(q => q.id),
         });
+        let nonExistingCases: CasePatchRequest[] = [];
         const conflictedCases = query.cases.filter(q => {
           const myCase = myCases.saved_objects.find(c => c.id === q.id);
+
+          if (myCase && myCase.error) {
+            nonExistingCases = [...nonExistingCases, q];
+            return false;
+          }
           return myCase == null || myCase?.version !== q.version;
         });
+        if (nonExistingCases.length > 0) {
+          throw Boom.notFound(
+            `These cases ${nonExistingCases
+              .map(c => c.id)
+              .join(', ')} do not exist. Please check you have the correct ids.`
+          );
+        }
         if (conflictedCases.length > 0) {
           throw Boom.conflict(
             `These cases ${conflictedCases

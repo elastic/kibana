@@ -36,6 +36,7 @@ import { WhitePageWrapper } from '../wrappers';
 import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
 import { SiemPageName } from '../../../home/types';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
+import { useBasePath } from '../../../../lib/kibana';
 
 interface Props {
   caseId: string;
@@ -64,6 +65,8 @@ export interface CaseProps {
 }
 
 export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => {
+  const basePath = window.location.origin + useBasePath();
+  const caseLink = `${basePath}/app/siem#/case/${caseId}`;
   const { caseData, isLoading, updateKey, updateCaseProperty } = useUpdateCase(caseId, initialData);
 
   // Update Fields
@@ -140,7 +143,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
   const propertyActions = [
     {
       iconType: 'trash',
-      label: 'Delete case',
+      label: i18n.DELETE_CASE,
       onClick: handleToggleModal,
     },
     {
@@ -192,15 +195,27 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
                       </EuiBadge>
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiDescriptionListTitle>{i18n.CASE_OPENED}</EuiDescriptionListTitle>
-                    <EuiDescriptionListDescription>
-                      <FormattedRelativePreferenceDate
-                        data-test-subj="case-view-createdAt"
-                        value={caseData.createdAt}
-                      />
-                    </EuiDescriptionListDescription>
-                  </EuiFlexItem>
+                  {caseData.status === 'open' ? (
+                    <EuiFlexItem>
+                      <EuiDescriptionListTitle>{i18n.CASE_OPENED}</EuiDescriptionListTitle>
+                      <EuiDescriptionListDescription>
+                        <FormattedRelativePreferenceDate
+                          data-test-subj="case-view-createdAt"
+                          value={caseData.createdAt}
+                        />
+                      </EuiDescriptionListDescription>
+                    </EuiFlexItem>
+                  ) : (
+                    <EuiFlexItem>
+                      <EuiDescriptionListTitle>{i18n.CASE_CLOSEED}</EuiDescriptionListTitle>
+                      <EuiDescriptionListDescription>
+                        <FormattedRelativePreferenceDate
+                          data-test-subj="case-view-closedAt"
+                          value={caseData.closedAt}
+                        />
+                      </EuiDescriptionListDescription>
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
               </MyDescriptionList>
             </EuiFlexItem>
@@ -237,6 +252,10 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
             <EuiFlexItem grow={2}>
               <UserList
                 data-test-subj="case-view-user-list"
+                email={{
+                  subject: i18n.EMAIL_SUBJECT(caseData.title),
+                  body: i18n.EMAIL_BODY(caseLink),
+                }}
                 headline={i18n.REPORTER}
                 users={[caseData.createdBy]}
               />

@@ -37,8 +37,8 @@ export const transformNewCase = ({
   newCase: CaseRequest;
   username: string;
 }): CaseAttributes => ({
-  closed_at: null,
-  closed_by: null,
+  closed_at: newCase.status === 'closed' ? createdDate : null,
+  closed_by: newCase.status === 'closed' ? { email, full_name, username } : null,
   comment_ids: [],
   created_at: createdDate,
   created_by: { email, full_name, username },

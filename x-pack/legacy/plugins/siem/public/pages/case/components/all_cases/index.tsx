@@ -206,17 +206,25 @@ export const AllCases = React.memo(() => {
       }
       setQueryParams(newQueryParams);
     },
-    [setQueryParams, queryParams]
+    [queryParams]
   );
 
   const onFilterChangedCallback = useCallback(
     (newFilterOptions: Partial<FilterOptions>) => {
+      if (newFilterOptions.status && newFilterOptions.status === 'closed') {
+        setQueryParams({ ...queryParams, sortField: SortFieldCase.closedAt });
+      } else if (newFilterOptions.status && newFilterOptions.status === 'open') {
+        setQueryParams({ ...queryParams, sortField: SortFieldCase.createdAt });
+      }
       setFilters({ ...filterOptions, ...newFilterOptions });
     },
-    [filterOptions, setFilters]
+    [filterOptions, queryParams]
   );
 
-  const memoizedGetCasesColumns = useMemo(() => getCasesColumns(actions), [actions]);
+  const memoizedGetCasesColumns = useMemo(() => getCasesColumns(actions, filterOptions.status), [
+    actions,
+    filterOptions.status,
+  ]);
   const memoizedPagination = useMemo(
     () => ({
       pageIndex: queryParams.page - 1,
