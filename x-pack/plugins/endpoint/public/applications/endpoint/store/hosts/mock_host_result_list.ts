@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EndpointResultList } from '../../../../../common/types';
+import { HostResultList } from '../../../../../common/types';
 import { EndpointDocGenerator } from '../../../../../common/generate_data';
 
 export const mockHostResultList: (options?: {
   total?: number;
   request_page_size?: number;
   request_page_index?: number;
-}) => EndpointResultList = (options = {}) => {
+}) => HostResultList = (options = {}) => {
   const {
     total = 1,
     request_page_size: requestPageSize = 10,
@@ -24,13 +24,13 @@ export const mockHostResultList: (options?: {
   // total - numberToSkip is the count of non-skipped ones, but return no more than a pageSize, and no less than 0
   const actualCountToReturn = Math.max(Math.min(total - numberToSkip, requestPageSize), 0);
 
-  const endpoints = [];
+  const hosts = [];
   for (let index = 0; index < actualCountToReturn; index++) {
     const generator = new EndpointDocGenerator('seed');
-    endpoints.push(generator.generateEndpointMetadata());
+    hosts.push(generator.generateHostMetadata());
   }
-  const mock: EndpointResultList = {
-    endpoints,
+  const mock: HostResultList = {
+    hosts,
     total,
     request_page_size: requestPageSize,
     request_page_index: requestPageIndex,

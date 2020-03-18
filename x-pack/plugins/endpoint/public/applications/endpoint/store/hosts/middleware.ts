@@ -5,39 +5,30 @@
  */
 
 import { MiddlewareFactory } from '../../types';
-import {
-  pageIndex,
-  pageSize,
-  isOnManagementPage,
-  hasSelectedHost,
-  uiQueryParams,
-} from './selectors';
-import { ManagementListState } from '../../types';
+import { pageIndex, pageSize, isOnHostPage, hasSelectedHost, uiQueryParams } from './selectors';
+import { HostListState } from '../../types';
 import { AppAction } from '../action';
 
-export const managementMiddlewareFactory: MiddlewareFactory<ManagementListState> = coreStart => {
+export const hostMiddlewareFactory: MiddlewareFactory<HostListState> = coreStart => {
   return ({ getState, dispatch }) => next => async (action: AppAction) => {
     next(action);
     const state = getState();
     if (
       (action.type === 'userChangedUrl' &&
-        isOnManagementPage(state) &&
+        isOnHostPage(state) &&
         hasSelectedHost(state) !== true) ||
-      action.type === 'userPaginatedManagementList'
+      action.type === 'userPaginatedHostList'
     ) {
-      const managementPageIndex = pageIndex(state);
-      const managementPageSize = pageSize(state);
+      const hostPageIndex = pageIndex(state);
+      const hostPageSize = pageSize(state);
       const response = await coreStart.http.post('/api/endpoint/metadata', {
         body: JSON.stringify({
-          paging_properties: [
-            { page_index: managementPageIndex },
-            { page_size: managementPageSize },
-          ],
+          paging_properties: [{ page_index: hostPageIndex }, { page_size: hostPageSize }],
         }),
       });
-      response.request_page_index = managementPageIndex;
+      response.request_page_index = hostPageIndex;
       dispatch({
-        type: 'serverReturnedManagementList',
+        type: 'serverReturnedHostList',
         payload: response,
       });
     }
@@ -46,12 +37,12 @@ export const managementMiddlewareFactory: MiddlewareFactory<ManagementListState>
       try {
         const response = await coreStart.http.get(`/api/endpoint/metadata/${selectedHost}`);
         dispatch({
-          type: 'serverReturnedManagementDetails',
+          type: 'serverReturnedHostDetails',
           payload: response,
         });
       } catch (error) {
         dispatch({
-          type: 'serverFailedToReturnManagementDetails',
+          type: 'serverFailedToReturnHostDetails',
           payload: error,
         });
       }

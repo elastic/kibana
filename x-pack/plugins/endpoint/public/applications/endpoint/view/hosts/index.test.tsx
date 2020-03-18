@@ -8,15 +8,16 @@ import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n/react';
+import { EuiThemeProvider } from '../../../../../../../legacy/common/eui_styled_components';
 import { appStoreFactory } from '../../store';
 import { RouteCapture } from '../route_capture';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
 import { AppAction } from '../../types';
-import { ManagementList } from './index';
-import { mockHostResultList } from '../../store/managing/mock_host_result_list';
+import { HostList } from './index';
+import { mockHostResultList } from '../../store/hosts/mock_host_result_list';
 
-describe('when on the managing page', () => {
+describe('when on the hosts page', () => {
   let render: () => reactTestingLibrary.RenderResult;
   let history: MemoryHistory<never>;
   let store: ReturnType<typeof appStoreFactory>;
@@ -28,11 +29,13 @@ describe('when on the managing page', () => {
       return reactTestingLibrary.render(
         <Provider store={store}>
           <I18nProvider>
-            <Router history={history}>
-              <RouteCapture>
-                <ManagementList />
-              </RouteCapture>
-            </Router>
+            <EuiThemeProvider>
+              <Router history={history}>
+                <RouteCapture>
+                  <HostList />
+                </RouteCapture>
+              </Router>
+            </EuiThemeProvider>
           </I18nProvider>
         </Provider>
       );
@@ -41,7 +44,7 @@ describe('when on the managing page', () => {
 
   it('should show a table', async () => {
     const renderResult = render();
-    const table = await renderResult.findByTestId('managementListTable');
+    const table = await renderResult.findByTestId('hostListTable');
     expect(table).not.toBeNull();
   });
 
@@ -49,7 +52,7 @@ describe('when on the managing page', () => {
     it('should not show the flyout', () => {
       const renderResult = render();
       expect.assertions(1);
-      return renderResult.findByTestId('managementDetailsFlyout').catch(e => {
+      return renderResult.findByTestId('hostDetailsFlyout').catch(e => {
         expect(e).not.toBeNull();
       });
     });
@@ -57,14 +60,14 @@ describe('when on the managing page', () => {
       beforeEach(() => {
         reactTestingLibrary.act(() => {
           const action: AppAction = {
-            type: 'serverReturnedManagementList',
+            type: 'serverReturnedHostList',
             payload: mockHostResultList(),
           };
           store.dispatch(action);
         });
       });
 
-      it('should render the management summary row in the table', async () => {
+      it('should render the host summary row in the table', async () => {
         const renderResult = render();
         const rows = await renderResult.findAllByRole('row');
         expect(rows).toHaveLength(2);
@@ -81,7 +84,7 @@ describe('when on the managing page', () => {
         });
 
         it('should show the flyout', () => {
-          return renderResult.findByTestId('managementDetailsFlyout').then(flyout => {
+          return renderResult.findByTestId('hostDetailsFlyout').then(flyout => {
             expect(flyout).not.toBeNull();
           });
         });
@@ -100,7 +103,7 @@ describe('when on the managing page', () => {
     });
     it('should show the flyout', () => {
       const renderResult = render();
-      return renderResult.findByTestId('managementDetailsFlyout').then(flyout => {
+      return renderResult.findByTestId('hostDetailsFlyout').then(flyout => {
         expect(flyout).not.toBeNull();
       });
     });
