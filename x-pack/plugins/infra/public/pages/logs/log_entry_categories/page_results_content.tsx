@@ -13,11 +13,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { euiStyled } from '../../../../../observability/public';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
-import {
-  LogAnalysisJobProblemIndicator,
-  jobHasProblem,
-} from '../../../components/logging/log_analysis_job_status';
-import { FirstUseCallout } from '../../../components/logging/log_analysis_results';
+import { LogAnalysisJobProblemIndicator } from '../../../components/logging/log_analysis_job_status';
 import { useInterval } from '../../../hooks/use_interval';
 import { useTrackPageview } from '../../../../../observability/public';
 import { TopCategoriesSection } from './sections/top_categories';
@@ -27,6 +23,10 @@ import {
   StringTimeRange,
   useLogEntryCategoriesResultsUrlState,
 } from './use_log_entry_categories_results_url_state';
+import {
+  useLogAnalysisModuleConfiguration,
+  useLogAnalysisModuleDefinition,
+} from '../../../containers/logs/log_analysis';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
@@ -36,13 +36,16 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
 
   const {
     fetchJobStatus,
-    jobStatus,
     setupStatus,
     viewSetupForReconfiguration,
     viewSetupForUpdate,
     jobIds,
-    sourceConfiguration: { sourceId },
+    jobStatus,
+    jobSummaries,
+    moduleDescriptor,
+    sourceConfiguration,
   } = useLogEntryCategoriesModuleContext();
+  const { sourceId } = sourceConfiguration;
 
   const {
     timeRange: selectedTimeRange,
@@ -50,6 +53,16 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
     autoRefresh,
     setAutoRefresh,
   } = useLogEntryCategoriesResultsUrlState();
+
+  const { getIsJobConfigurationOutdated } = useLogAnalysisModuleConfiguration({
+    sourceConfiguration,
+    moduleDescriptor,
+  });
+
+  const { fetchModuleDefinition, getIsJobDefinitionOutdated } = useLogAnalysisModuleDefinition({
+    sourceConfiguration,
+    moduleDescriptor,
+  });
 
   const [categoryQueryTimeRange, setCategoryQueryTimeRange] = useState<{
     lastChangedTime: number;
@@ -124,11 +137,29 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
     [setAutoRefresh]
   );
 
-  const isFirstUse = useMemo(() => setupStatus === 'hiddenAfterSuccess', [setupStatus]);
-
   const hasResults = useMemo(() => topLogEntryCategories.length > 0, [
     topLogEntryCategories.length,
   ]);
+
+  const isFirstUse = useMemo(
+    () => setupStatus.type === 'skipped' && !!setupStatus.newlyCreated && !hasResults,
+    [hasResults, setupStatus]
+  );
+
+  const hasOutdatedJobConfigurations = useMemo(
+    () => jobSummaries.some(getIsJobConfigurationOutdated),
+    [getIsJobConfigurationOutdated, jobSummaries]
+  );
+
+  const hasOutdatedJobDefinitions = useMemo(() => jobSummaries.some(getIsJobDefinitionOutdated), [
+    getIsJobDefinitionOutdated,
+    jobSummaries,
+  ]);
+
+  const hasStoppedJobs = useMemo(
+    () => Object.values(jobStatus).some(currentJobStatus => currentJobStatus === 'stopped'),
+    [jobStatus]
+  );
 
   useEffect(() => {
     getTopLogEntryCategories();
@@ -137,6 +168,10 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
   useEffect(() => {
     getLogEntryCategoryDatasets();
   }, [getLogEntryCategoryDatasets, categoryQueryTimeRange.lastChangedTime]);
+
+  useEffect(() => {
+    fetchModuleDefinition();
+  }, [fetchModuleDefinition]);
 
   useInterval(() => {
     fetchJobStatus();
@@ -172,21 +207,16 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent = () => {
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
-        {jobHasProblem(jobStatus['log-entry-categories-count'], setupStatus) ? (
-          <EuiFlexItem grow={false}>
-            <LogAnalysisJobProblemIndicator
-              jobStatus={jobStatus['log-entry-categories-count']}
-              onRecreateMlJobForReconfiguration={viewSetupForReconfiguration}
-              onRecreateMlJobForUpdate={viewSetupForUpdate}
-              setupStatus={setupStatus}
-            />
-          </EuiFlexItem>
-        ) : null}
-        {isFirstUse && !hasResults ? (
-          <EuiFlexItem grow={false}>
-            <FirstUseCallout />
-          </EuiFlexItem>
-        ) : null}
+        <EuiFlexItem grow={false}>
+          <LogAnalysisJobProblemIndicator
+            hasOutdatedJobConfigurations={hasOutdatedJobConfigurations}
+            hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}
+            hasStoppedJobs={hasStoppedJobs}
+            isFirstUse={isFirstUse}
+            onRecreateMlJobForReconfiguration={viewSetupForReconfiguration}
+            onRecreateMlJobForUpdate={viewSetupForUpdate}
+          />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPanel paddingSize="m">
             <TopCategoriesSection

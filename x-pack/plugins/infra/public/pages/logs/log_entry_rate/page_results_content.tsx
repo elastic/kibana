@@ -11,21 +11,23 @@ import {
   EuiFlexItem,
   EuiPage,
   EuiPanel,
-  EuiSpacer,
   EuiSuperDatePicker,
   EuiText,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
-
-import { euiStyled } from '../../../../../observability/public';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { euiStyled, useTrackPageview } from '../../../../../observability/public';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { bucketSpan } from '../../../../common/log_analysis';
 import { LoadingOverlayWrapper } from '../../../components/loading_overlay_wrapper';
+import { LogAnalysisJobProblemIndicator } from '../../../components/logging/log_analysis_job_status';
+import {
+  useLogAnalysisModuleConfiguration,
+  useLogAnalysisModuleDefinition,
+} from '../../../containers/logs/log_analysis';
 import { useInterval } from '../../../hooks/use_interval';
-import { useTrackPageview } from '../../../../../observability/public';
 import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
 import { AnomaliesResults } from './sections/anomalies';
 import { LogRateResults } from './sections/log_rate';
@@ -35,7 +37,6 @@ import {
   StringTimeRange,
   useLogAnalysisResultsUrlState,
 } from './use_log_entry_rate_results_url_state';
-import { FirstUseCallout } from '../../../components/logging/log_analysis_results';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 
@@ -48,12 +49,15 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
   const {
     fetchJobStatus,
     jobStatus,
+    jobSummaries,
     setupStatus,
     viewSetupForReconfiguration,
     viewSetupForUpdate,
     jobIds,
-    sourceConfiguration: { sourceId },
+    moduleDescriptor,
+    sourceConfiguration,
   } = useLogEntryRateModuleContext();
+  const { sourceId } = sourceConfiguration;
 
   const {
     timeRange: selectedTimeRange,
@@ -61,6 +65,16 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     autoRefresh,
     setAutoRefresh,
   } = useLogAnalysisResultsUrlState();
+
+  const { getIsJobConfigurationOutdated } = useLogAnalysisModuleConfiguration({
+    sourceConfiguration,
+    moduleDescriptor,
+  });
+
+  const { fetchModuleDefinition, getIsJobDefinitionOutdated } = useLogAnalysisModuleDefinition({
+    sourceConfiguration,
+    moduleDescriptor,
+  });
 
   const [queryTimeRange, setQueryTimeRange] = useState<{
     value: TimeRange;
@@ -81,10 +95,6 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     endTime: queryTimeRange.value.endTime,
     bucketDuration,
   });
-
-  const hasResults = useMemo(() => (logEntryRate?.histogramBuckets?.length ?? 0) > 0, [
-    logEntryRate,
-  ]);
 
   const handleQueryTimeRangeChange = useCallback(
     ({ start: startTime, end: endTime }: { start: string; end: string }) => {
@@ -131,11 +141,37 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     [setAutoRefresh]
   );
 
-  const isFirstUse = useMemo(() => setupStatus === 'hiddenAfterSuccess', [setupStatus]);
+  const hasResults = useMemo(() => (logEntryRate?.histogramBuckets?.length ?? 0) > 0, [
+    logEntryRate,
+  ]);
+
+  const isFirstUse = useMemo(
+    () => setupStatus.type === 'skipped' && !!setupStatus.newlyCreated && !hasResults,
+    [hasResults, setupStatus]
+  );
+
+  const hasOutdatedJobConfigurations = useMemo(
+    () => jobSummaries.some(getIsJobConfigurationOutdated),
+    [getIsJobConfigurationOutdated, jobSummaries]
+  );
+
+  const hasOutdatedJobDefinitions = useMemo(() => jobSummaries.some(getIsJobDefinitionOutdated), [
+    getIsJobDefinitionOutdated,
+    jobSummaries,
+  ]);
+
+  const hasStoppedJobs = useMemo(
+    () => Object.values(jobStatus).some(currentJobStatus => currentJobStatus === 'stopped'),
+    [jobStatus]
+  );
 
   useEffect(() => {
     getLogEntryRate();
   }, [getLogEntryRate, queryTimeRange.lastChangedTime]);
+
+  useEffect(() => {
+    fetchModuleDefinition();
+  }, [fetchModuleDefinition]);
 
   useInterval(() => {
     fetchJobStatus();
@@ -196,13 +232,17 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
+          <LogAnalysisJobProblemIndicator
+            hasOutdatedJobConfigurations={hasOutdatedJobConfigurations}
+            hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}
+            hasStoppedJobs={hasStoppedJobs}
+            isFirstUse={isFirstUse}
+            onRecreateMlJobForReconfiguration={viewSetupForReconfiguration}
+            onRecreateMlJobForUpdate={viewSetupForUpdate}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiPanel paddingSize="m">
-            {isFirstUse && !hasResults ? (
-              <>
-                <FirstUseCallout />
-                <EuiSpacer />
-              </>
-            ) : null}
             <LogRateResults
               isLoading={isLoading}
               results={logEntryRate}
@@ -215,12 +255,9 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
           <EuiPanel paddingSize="m">
             <AnomaliesResults
               isLoading={isLoading}
-              jobStatus={jobStatus['log-entry-rate']}
               viewSetupForReconfiguration={viewSetupForReconfiguration}
-              viewSetupForUpdate={viewSetupForUpdate}
               results={logEntryRate}
               setTimeRange={handleChartTimeRangeChange}
-              setupStatus={setupStatus}
               timeRange={queryTimeRange.value}
               jobId={jobIds['log-entry-rate']}
             />
