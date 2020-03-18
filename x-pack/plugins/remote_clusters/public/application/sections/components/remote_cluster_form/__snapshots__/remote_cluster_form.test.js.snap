@@ -126,7 +126,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
       <EuiDescribedFormGroup
         description={
           <FormattedMessage
-            defaultMessage="A unique name for the remote cluster."
+            defaultMessage="A unique name for the cluster."
             id="xpack.remoteClusters.remoteClusterForm.sectionNameDescription"
             values={Object {}}
           />
@@ -209,11 +209,11 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                             className="euiTextColor euiTextColor--subdued"
                           >
                             <FormattedMessage
-                              defaultMessage="A unique name for the remote cluster."
+                              defaultMessage="A unique name for the cluster."
                               id="xpack.remoteClusters.remoteClusterForm.sectionNameDescription"
                               values={Object {}}
                             >
-                              A unique name for the remote cluster.
+                              A unique name for the cluster.
                             </FormattedMessage>
                           </div>
                         </EuiTextColor>
@@ -364,7 +364,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
         description={
           <React.Fragment>
             <FormattedMessage
-              defaultMessage="Remote cluster connections work by configuring a remote cluster and connecting only to a limited number of nodes in that remote cluster."
+              defaultMessage="Use seed nodes by default, or switch to a single proxy address."
               id="xpack.remoteClusters.remoteClusterForm.sectionModeDescription"
               values={Object {}}
             />
@@ -374,25 +374,6 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
               fullWidth={true}
               hasChildLabel={true}
               hasEmptyLabelSpace={true}
-              helpText={
-                <FormattedMessage
-                  defaultMessage="Configure a remote cluster with a single proxy address. {learnMoreLink}"
-                  id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription"
-                  values={
-                    Object {
-                      "learnMoreLink": <ForwardRef
-                        target="_blank"
-                      >
-                        <FormattedMessage
-                          defaultMessage="Learn more."
-                          id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription.learnMoreLinkLabel"
-                          values={Object {}}
-                        />
-                      </ForwardRef>,
-                    }
-                  }
-                />
-              }
               labelType="label"
             >
               <EuiSwitch
@@ -400,7 +381,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                 data-test-subj="remoteClusterFormConnectionModeToggle"
                 label={
                   <FormattedMessage
-                    defaultMessage="Use proxy mode"
+                    defaultMessage="Use a single proxy address"
                     id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
                     values={Object {}}
                   />
@@ -488,11 +469,11 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                             className="euiTextColor euiTextColor--subdued"
                           >
                             <FormattedMessage
-                              defaultMessage="Remote cluster connections work by configuring a remote cluster and connecting only to a limited number of nodes in that remote cluster."
+                              defaultMessage="Use seed nodes by default, or switch to a single proxy address."
                               id="xpack.remoteClusters.remoteClusterForm.sectionModeDescription"
                               values={Object {}}
                             >
-                              Remote cluster connections work by configuring a remote cluster and connecting only to a limited number of nodes in that remote cluster.
+                              Use seed nodes by default, or switch to a single proxy address.
                             </FormattedMessage>
                             <EuiFormRow
                               describedByIds={Array []}
@@ -500,25 +481,6 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                               fullWidth={true}
                               hasChildLabel={true}
                               hasEmptyLabelSpace={true}
-                              helpText={
-                                <FormattedMessage
-                                  defaultMessage="Configure a remote cluster with a single proxy address. {learnMoreLink}"
-                                  id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription"
-                                  values={
-                                    Object {
-                                      "learnMoreLink": <ForwardRef
-                                        target="_blank"
-                                      >
-                                        <FormattedMessage
-                                          defaultMessage="Learn more."
-                                          id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription.learnMoreLinkLabel"
-                                          values={Object {}}
-                                        />
-                                      </ForwardRef>,
-                                    }
-                                  }
-                                />
-                              }
                               labelType="label"
                             >
                               <div
@@ -529,13 +491,12 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                   className="euiFormRow__fieldWrapper"
                                 >
                                   <EuiSwitch
-                                    aria-describedby="mockId-help"
                                     checked={true}
                                     data-test-subj="remoteClusterFormConnectionModeToggle"
                                     id="mockId"
                                     label={
                                       <FormattedMessage
-                                        defaultMessage="Use proxy mode"
+                                        defaultMessage="Use a single proxy address"
                                         id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
                                         values={Object {}}
                                       />
@@ -549,7 +510,6 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                     >
                                       <button
                                         aria-checked={true}
-                                        aria-describedby="mockId-help"
                                         aria-labelledby="mockId"
                                         className="euiSwitch__button"
                                         data-test-subj="remoteClusterFormConnectionModeToggle"
@@ -600,60 +560,15 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                         onClick={[Function]}
                                       >
                                         <FormattedMessage
-                                          defaultMessage="Use proxy mode"
+                                          defaultMessage="Use a single proxy address"
                                           id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
                                           values={Object {}}
                                         >
-                                          Use proxy mode
+                                          Use a single proxy address
                                         </FormattedMessage>
                                       </span>
                                     </div>
                                   </EuiSwitch>
-                                  <EuiFormHelpText
-                                    className="euiFormRow__text"
-                                    id="mockId-help"
-                                  >
-                                    <div
-                                      className="euiFormHelpText euiFormRow__text"
-                                      id="mockId-help"
-                                    >
-                                      <FormattedMessage
-                                        defaultMessage="Configure a remote cluster with a single proxy address. {learnMoreLink}"
-                                        id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription"
-                                        values={
-                                          Object {
-                                            "learnMoreLink": <ForwardRef
-                                              target="_blank"
-                                            >
-                                              <FormattedMessage
-                                                defaultMessage="Learn more."
-                                                id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription.learnMoreLinkLabel"
-                                                values={Object {}}
-                                              />
-                                            </ForwardRef>,
-                                          }
-                                        }
-                                      >
-                                        Configure a remote cluster with a single proxy address. 
-                                        <EuiLink
-                                          target="_blank"
-                                        >
-                                          <button
-                                            className="euiLink euiLink--primary"
-                                            type="button"
-                                          >
-                                            <FormattedMessage
-                                              defaultMessage="Learn more."
-                                              id="xpack.remoteClusters.remoteClusterForm.fieldModeDescription.learnMoreLinkLabel"
-                                              values={Object {}}
-                                            >
-                                              Learn more.
-                                            </FormattedMessage>
-                                          </button>
-                                        </EuiLink>
-                                      </FormattedMessage>
-                                    </div>
-                                  </EuiFormHelpText>
                                 </div>
                               </div>
                             </EuiFormRow>
@@ -685,7 +600,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                       hasEmptyLabelSpace={false}
                       helpText={
                         <FormattedMessage
-                          defaultMessage="The address used for all remote connections."
+                          defaultMessage="The address to use for remote connections."
                           id="xpack.remoteClusters.remoteClusterForm.fieldProxyAddressHelpText"
                           values={Object {}}
                         />
@@ -786,11 +701,11 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                               id="mockId-help"
                             >
                               <FormattedMessage
-                                defaultMessage="The address used for all remote connections."
+                                defaultMessage="The address to use for remote connections."
                                 id="xpack.remoteClusters.remoteClusterForm.fieldProxyAddressHelpText"
                                 values={Object {}}
                               >
-                                The address used for all remote connections.
+                                The address to use for remote connections.
                               </FormattedMessage>
                             </div>
                           </EuiFormHelpText>
@@ -920,14 +835,14 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                       hasEmptyLabelSpace={false}
                       helpText={
                         <FormattedMessage
-                          defaultMessage="An optional hostname string which will be sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled."
+                          defaultMessage="A string which will be sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled."
                           id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText"
                           values={Object {}}
                         />
                       }
                       label={
                         <FormattedMessage
-                          defaultMessage="Server name"
+                          defaultMessage="Server name (optional)"
                           id="xpack.remoteClusters.remoteClusterForm.fieldServerNameLabel"
                           values={Object {}}
                         />
@@ -953,11 +868,11 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                               htmlFor="mockId"
                             >
                               <FormattedMessage
-                                defaultMessage="Server name"
+                                defaultMessage="Server name (optional)"
                                 id="xpack.remoteClusters.remoteClusterForm.fieldServerNameLabel"
                                 values={Object {}}
                               >
-                                Server name
+                                Server name (optional)
                               </FormattedMessage>
                             </label>
                           </EuiFormLabel>
@@ -1010,11 +925,11 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                               id="mockId-help"
                             >
                               <FormattedMessage
-                                defaultMessage="An optional hostname string which will be sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled."
+                                defaultMessage="A string which will be sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled."
                                 id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText"
                                 values={Object {}}
                               >
-                                An optional hostname string which will be sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled.
+                                A string which will be sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled.
                               </FormattedMessage>
                             </div>
                           </EuiFormHelpText>
@@ -1033,7 +948,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
           <React.Fragment>
             <p>
               <FormattedMessage
-                defaultMessage="By default, a request fails if any of the queried remote clusters are unavailable. To continue sending a request to other remote clusters if this cluster is unavailable, enable {optionName}. {learnMoreLink}"
+                defaultMessage="A request fails if any of the queried remote clusters are unavailable. To send requests to other remote clusters if this cluster is unavailable, enable {optionName}. {learnMoreLink}"
                 id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription"
                 values={
                   Object {
@@ -1138,7 +1053,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                           >
                             <p>
                               <FormattedMessage
-                                defaultMessage="By default, a request fails if any of the queried remote clusters are unavailable. To continue sending a request to other remote clusters if this cluster is unavailable, enable {optionName}. {learnMoreLink}"
+                                defaultMessage="A request fails if any of the queried remote clusters are unavailable. To send requests to other remote clusters if this cluster is unavailable, enable {optionName}. {learnMoreLink}"
                                 id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription"
                                 values={
                                   Object {
@@ -1161,7 +1076,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                   }
                                 }
                               >
-                                By default, a request fails if any of the queried remote clusters are unavailable. To continue sending a request to other remote clusters if this cluster is unavailable, enable 
+                                A request fails if any of the queried remote clusters are unavailable. To send requests to other remote clusters if this cluster is unavailable, enable 
                                 <strong>
                                   <FormattedMessage
                                     defaultMessage="Skip if unavailable"
@@ -1455,7 +1370,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              A unique name for the remote cluster.
+              A unique name for the cluster.
             </div>
           </div>
         </div>
@@ -1534,7 +1449,7 @@ Array [
             <div
               class="euiTextColor euiTextColor--subdued"
             >
-              Remote cluster connections work by configuring a remote cluster and connecting only to a limited number of nodes in that remote cluster.
+              Use seed nodes by default, or switch to a single proxy address.
               <div
                 class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth"
                 id="mockId-row"
@@ -1547,7 +1462,6 @@ Array [
                   >
                     <button
                       aria-checked="false"
-                      aria-describedby="mockId-help"
                       aria-labelledby="mockId"
                       class="euiSwitch__button"
                       data-test-subj="remoteClusterFormConnectionModeToggle"
@@ -1579,20 +1493,8 @@ Array [
                       class="euiSwitch__label"
                       id="mockId"
                     >
-                      Use proxy mode
+                      Use a single proxy address
                     </span>
-                  </div>
-                  <div
-                    class="euiFormHelpText euiFormRow__text"
-                    id="mockId-help"
-                  >
-                    Configure a remote cluster with a single proxy address. 
-                    <button
-                      class="euiLink euiLink--primary"
-                      type="button"
-                    >
-                      Learn more.
-                    </button>
                   </div>
                 </div>
               </div>
@@ -1717,7 +1619,7 @@ Array [
                 class="euiFormHelpText euiFormRow__text"
                 id="mockId-help"
               >
-                The number of gateway nodes to connect to.
+                The number of gateway nodes to connect to for this cluster.
               </div>
             </div>
           </div>
@@ -1751,7 +1653,7 @@ Array [
               class="euiTextColor euiTextColor--subdued"
             >
               <p>
-                By default, a request fails if any of the queried remote clusters are unavailable. To continue sending a request to other remote clusters if this cluster is unavailable, enable 
+                A request fails if any of the queried remote clusters are unavailable. To send requests to other remote clusters if this cluster is unavailable, enable 
                 <strong>
                   Skip if unavailable
                 </strong>

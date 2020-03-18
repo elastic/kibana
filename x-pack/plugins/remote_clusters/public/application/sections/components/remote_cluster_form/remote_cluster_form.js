@@ -324,7 +324,7 @@ export class RemoteClusterForm extends Component {
           helpText={
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.fieldNodeConnectionsHelpText"
-              defaultMessage="The number of gateway nodes to connect to."
+              defaultMessage="The number of gateway nodes to connect to for this cluster."
             />
           }
           fullWidth
@@ -359,7 +359,7 @@ export class RemoteClusterForm extends Component {
           helpText={
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.fieldProxyAddressHelpText"
-              defaultMessage="The address used for all remote connections."
+              defaultMessage="The address to use for remote connections."
             />
           }
           isInvalid={Boolean(areErrorsVisible && errorProxyAddress)}
@@ -410,13 +410,13 @@ export class RemoteClusterForm extends Component {
           label={
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.fieldServerNameLabel"
-              defaultMessage="Server name"
+              defaultMessage="Server name (optional)"
             />
           }
           helpText={
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText"
-              defaultMessage="An optional hostname string which will be sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled."
+              defaultMessage="A string which will be sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled."
             />
           }
           fullWidth

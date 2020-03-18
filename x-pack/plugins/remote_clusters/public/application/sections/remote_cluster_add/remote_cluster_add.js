@@ -68,7 +68,7 @@ export class RemoteClusterAdd extends PureComponent {
           description={
             <FormattedMessage
               id="xpack.remoteClusters.remoteClustersDescription"
-              defaultMessage="Add a remote cluster that is connected to either seed nodes or a single proxy address."
+              defaultMessage="Add a remote cluster that connects to seed nodes or a single proxy address."
             />
           }
         />
