@@ -4,22 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiBetaBadge } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { ElementDefinition } from 'cytoscape';
-import { find, isEqual } from 'lodash';
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react';
-import { EuiBetaBadge } from '@elastic/eui';
+import { default as React, default as React, useMemo } from 'react';
 import styled from 'styled-components';
-import React, { useMemo } from 'react';
 import { isValidPlatinumLicense } from '../../../../../../../plugins/apm/common/service_map';
 import { useDeepObjectIdentity } from '../../../hooks/useDeepObjectIdentity';
+import { useFetcher } from '../../../hooks/useFetcher';
 import { useLicense } from '../../../hooks/useLicense';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
@@ -31,7 +23,6 @@ import { getCytoscapeElements } from './get_cytoscape_elements';
 import { PlatinumLicensePrompt } from './PlatinumLicensePrompt';
 import { Popover } from './Popover';
 import { useRefDimensions } from './useRefDimensions';
-import { useFetcher } from '../../../hooks/useFetcher';
 
 interface ServiceMapProps {
   serviceName?: string;
@@ -97,7 +88,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
   }, [params]);
 
   const elements = useMemo(() => {
-    return data ? getCytoscapeElements(data, search) : [];
+    return data ? getCytoscapeElements(data as any, search) : [];
   }, [data, search]);
 
   const { ref, height, width } = useRefDimensions();
