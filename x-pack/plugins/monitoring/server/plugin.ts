@@ -24,7 +24,6 @@ import {
   KibanaResponseFactory,
   CoreSetup,
   ICustomClusterClient,
-  UiSettingsServiceStart,
   CoreStart,
   IRouter,
   IClusterClient,
