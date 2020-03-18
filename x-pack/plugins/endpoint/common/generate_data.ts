@@ -6,7 +6,7 @@
 
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
-import { AlertEvent, EndpointEvent, EndpointMetadata, OSFields, HostFields } from './types';
+import { AlertEvent, EndpointEvent, HostMetadata, OSFields, HostFields } from './types';
 
 export type Event = AlertEvent | EndpointEvent;
 
@@ -104,8 +104,8 @@ export class EndpointDocGenerator {
     this.commonInfo = this.createHostData();
   }
 
-  // This function will create new values for all the host fields, so documents from a different endpoint can be created
-  // This provides a convenient way to make documents from multiple endpoints that are all tied to a single seed value
+  // This function will create new values for all the host fields, so documents from a different host can be created
+  // This provides a convenient way to make documents from multiple hosts that are all tied to a single seed value
   public randomizeHostData() {
     this.commonInfo = this.createHostData();
   }
@@ -129,7 +129,7 @@ export class EndpointDocGenerator {
     };
   }
 
-  public generateEndpointMetadata(ts = new Date().getTime()): EndpointMetadata {
+  public generateHostMetadata(ts = new Date().getTime()): HostMetadata {
     return {
       '@timestamp': ts,
       event: {

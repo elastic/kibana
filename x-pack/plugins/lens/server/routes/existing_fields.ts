@@ -55,7 +55,7 @@ export async function existingFieldsRoute(setup: CoreSetup) {
           indexPatternId: schema.string(),
         }),
         body: schema.object({
-          dslQuery: schema.object({}, { allowUnknowns: true }),
+          dslQuery: schema.object({}, { unknowns: 'allow' }),
           fromDate: schema.maybe(schema.string()),
           toDate: schema.maybe(schema.string()),
           timeFieldName: schema.maybe(schema.string()),

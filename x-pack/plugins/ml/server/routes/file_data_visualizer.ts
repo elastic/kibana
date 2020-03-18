@@ -19,7 +19,7 @@ import {
 } from '../models/file_data_visualizer';
 
 import { RouteInitialization } from '../types';
-import { incrementFileDataVisualizerIndexCreationCount } from '../lib/ml_telemetry';
+import { updateTelemetry } from '../lib/telemetry';
 
 function analyzeFiles(context: RequestHandlerContext, data: InputData, overrides: InputOverrides) {
   const { analyzeFile } = fileDataVisualizerProvider(context.ml!.mlClient.callAsCurrentUser);
@@ -132,7 +132,7 @@ export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitializat
         // follow-up import calls to just add additional data will include the `id` of the created
         // index, we'll ignore those and don't increment the counter.
         if (id === undefined) {
-          await incrementFileDataVisualizerIndexCreationCount(context.core.savedObjects.client);
+          await updateTelemetry();
         }
 
         const result = await importData(

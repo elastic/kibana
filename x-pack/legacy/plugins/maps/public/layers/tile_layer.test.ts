@@ -32,6 +32,14 @@ class MockTileSource implements ITMSSource {
   async getUrlTemplate(): Promise<string> {
     return 'template/{x}/{y}/{z}.png';
   }
+
+  destroy(): void {
+    // no-op
+  }
+
+  getInspectorAdapters(): object {
+    return {};
+  }
 }
 
 describe('TileLayer', () => {
