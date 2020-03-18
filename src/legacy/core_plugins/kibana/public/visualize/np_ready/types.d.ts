@@ -24,7 +24,7 @@ import {
   DataPublicPluginStart,
   SavedQuery,
 } from 'src/plugins/data/public';
-import { IEmbeddableStart } from 'src/plugins/embeddable/public';
+import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import { PersistedState } from 'src/plugins/visualizations/public';
 import { LegacyCoreStart } from 'kibana/public';
 import { Vis } from 'src/legacy/core_plugins/visualizations/public';
@@ -61,7 +61,7 @@ export interface EditorRenderProps {
   appState: { save(): void };
   core: LegacyCoreStart;
   data: DataPublicPluginStart;
-  embeddable: IEmbeddableStart;
+  embeddable: EmbeddableStart;
   filters: Filter[];
   uiState: PersistedState;
   timeRange: TimeRange;

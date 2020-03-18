@@ -6,11 +6,7 @@
 
 // Follow pattern from https://github.com/elastic/kibana/pull/52447
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
-import {
-  SavedObject,
-  SavedObjectAttributes,
-  SavedObjectReference,
-} from '../../../../../../src/core/public';
+import { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
 
 export enum InstallationStatus {
   installed = 'installed',
@@ -190,6 +186,7 @@ export interface RegistryVarsEntry {
   description?: string;
   type: string;
   required?: boolean;
+  show_user?: boolean;
   multi?: boolean;
   default?: string | string[];
   os?: {

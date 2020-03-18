@@ -178,6 +178,7 @@ export class Table extends PureComponent {
           { defaultMessage: 'Type of the saved object' }
         ),
         sortable: false,
+        'data-test-subj': 'savedObjectsTableRowType',
         render: (type, object) => {
           return (
             <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
@@ -201,6 +202,7 @@ export class Table extends PureComponent {
         ),
         dataType: 'string',
         sortable: false,
+        'data-test-subj': 'savedObjectsTableRowTitle',
         render: (title, object) => {
           const { path } = object.meta.inAppUrl || {};
           const canGoInApp = this.props.canGoInApp(object);
@@ -230,6 +232,7 @@ export class Table extends PureComponent {
             icon: 'inspect',
             onClick: object => goInspectObject(object),
             available: object => !!object.meta.editUrl,
+            'data-test-subj': 'savedObjectsTableAction-inspect',
           },
           {
             name: i18n.translate(
@@ -246,10 +249,12 @@ export class Table extends PureComponent {
             type: 'icon',
             icon: 'kqlSelector',
             onClick: object => onShowRelationships(object),
+            'data-test-subj': 'savedObjectsTableAction-relationships',
           },
           ...this.extraActions.map(action => {
             return {
               ...action.euiAction,
+              'data-test-subj': `savedObjectsTableAction-${action.id}`,
               onClick: object => {
                 this.setState({
                   activeAction: action,
@@ -372,6 +377,9 @@ export class Table extends PureComponent {
             pagination={pagination}
             selection={selection}
             onChange={onTableChange}
+            rowProps={item => ({
+              'data-test-subj': `savedObjectsTableRow row-${item.id}`,
+            })}
           />
         </div>
       </Fragment>
