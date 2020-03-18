@@ -16,16 +16,17 @@ function prettifyPayload(payload = '', indentationLevel = 0) {
  * e.g. 1.0, is preserved instead of being coerced to an integer, e.g. 1.
  */
 export function formatRequestPayload(
-  { code, context, parameters, index, document }: RequestPayloadConfig,
+  { code, context, parameters, index, document, query }: RequestPayloadConfig,
   format: PayloadFormat = PayloadFormat.UGLY
 ): string {
   const isAdvancedContext = context === 'filter' || context === 'score';
 
-  let formattedCode;
-  let formattedParameters;
-  let formattedContext;
-  let formattedIndex;
-  let formattedDocument;
+  let formattedCode: string | undefined;
+  let formattedParameters: string | undefined;
+  let formattedContext: string | undefined;
+  let formattedIndex: string | undefined;
+  let formattedDocument: string | undefined;
+  let formattedQuery: string | undefined;
 
   if (format === PayloadFormat.UGLY) {
     formattedCode = JSON.stringify(code);
@@ -33,6 +34,7 @@ export function formatRequestPayload(
     formattedContext = context;
     formattedIndex = index;
     formattedDocument = document;
+    formattedQuery = query;
   } else {
     // Triple quote the code because it's multiline.
     formattedCode = `"""${prettifyPayload(code, 4)}"""`;
@@ -40,6 +42,7 @@ export function formatRequestPayload(
     formattedContext = prettifyPayload(context, 6);
     formattedIndex = prettifyPayload(index);
     formattedDocument = prettifyPayload(document, 4);
+    formattedQuery = prettifyPayload(query, 4);
   }
 
   const requestPayload = `{
@@ -56,7 +59,12 @@ export function formatRequestPayload(
   "context": "${formattedContext}",
   "context_setup": {
     "index": "${formattedIndex}",
-    "document": ${formattedDocument}
+    "document": ${formattedDocument}${
+          query && context === 'score'
+            ? `,
+    "query": ${formattedQuery}`
+            : ''
+        }
   }`
       : ``
   }

@@ -24,20 +24,21 @@ interface Props {
 const PAINLESS_LAB_KEY = 'painlessLabState';
 
 export function Main({ http }: Props) {
-  const [state, setState] = useState({
+  const [state, setState] = useState(() => ({
     code: exampleScript,
     context: painlessContextOptions[0].value,
     parameters: '',
     index: '',
     document: '',
+    query: '',
     ...JSON.parse(localStorage.getItem(PAINLESS_LAB_KEY) || '{}'),
-  });
+  }));
 
   const [isRequestFlyoutOpen, setRequestFlyoutOpen] = useState(false);
   const { inProgress, response, submit } = useSubmitCode(http);
 
   // Live-update the output and persist state as the user changes it.
-  const { code, context, parameters, index, document } = state;
+  const { code, context, parameters, index, document, query } = state;
   useEffect(() => {
     submit(state);
     localStorage.setItem(PAINLESS_LAB_KEY, JSON.stringify(state));
@@ -63,13 +64,17 @@ export function Main({ http }: Props) {
     setState({ ...state, document: newDocument });
   };
 
+  const onQueryChange = (newQuery: string) => {
+    setState({ ...state, query: newQuery });
+  };
+
   const toggleRequestFlyout = () => {
     setRequestFlyoutOpen(!isRequestFlyoutOpen);
   };
 
   return (
-    <>
-      <EuiFlexGroup gutterSize="s">
+    <div className="painlessLabMainContainer">
+      <EuiFlexGroup className="painlessLabPanelsContainer" responsive={false} gutterSize="none">
         <EuiFlexItem>
           <EuiTitle className="euiScreenReaderOnly">
             <h1>
@@ -90,10 +95,12 @@ export function Main({ http }: Props) {
             parameters={parameters}
             index={index}
             document={document}
+            query={query}
             onContextChange={onContextChange}
             onParametersChange={onParametersChange}
             onIndexChange={onIndexChange}
             onDocumentChange={onDocumentChange}
+            onQueryChange={onQueryChange}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -108,13 +115,10 @@ export function Main({ http }: Props) {
       {isRequestFlyoutOpen && (
         <RequestFlyout
           onClose={() => setRequestFlyoutOpen(false)}
-          requestBody={formatRequestPayload(
-            { code, context, document, index, parameters },
-            PayloadFormat.PRETTY
-          )}
+          requestBody={formatRequestPayload(state, PayloadFormat.PRETTY)}
           response={response ? formatJson(response.result || response.error) : ''}
         />
       )}
-    </>
+    </div>
   );
 }
