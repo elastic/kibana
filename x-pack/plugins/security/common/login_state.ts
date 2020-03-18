@@ -8,11 +8,7 @@ import { LoginLayout } from './licensing';
 
 interface LoginSelector {
   enabled: boolean;
-  providers: Array<{
-    type: string;
-    name: string;
-    options: { description?: string; order: number };
-  }>;
+  providers: Array<{ type: string; name: string; description?: string }>;
 }
 
 export interface LoginState {

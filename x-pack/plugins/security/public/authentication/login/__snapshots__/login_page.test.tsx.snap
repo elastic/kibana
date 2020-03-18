@@ -23,7 +23,7 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
 <DisabledLoginForm
   message={
     <FormattedMessage
-      defaultMessage="Refer to the Kibana logs for more details and refresh to try again."
+      defaultMessage="See the Kibana logs for details and try reloading the page."
       id="xpack.security.loginPage.unknownLayoutMessage"
       values={Object {}}
     />

@@ -5,6 +5,7 @@
  */
 
 jest.mock('./providers/basic');
+jest.mock('./providers/token');
 jest.mock('./providers/saml');
 jest.mock('./providers/http');
 
@@ -24,7 +25,7 @@ import { ConfigSchema, createConfig } from '../config';
 import { AuthenticationResult } from './authentication_result';
 import { Authenticator, AuthenticatorOptions, ProviderSession } from './authenticator';
 import { DeauthenticationResult } from './deauthentication_result';
-import { BasicAuthenticationProvider } from './providers';
+import { BasicAuthenticationProvider, SAMLAuthenticationProvider } from './providers';
 
 function getMockOptions({
   session,
@@ -32,7 +33,7 @@ function getMockOptions({
   http = {},
 }: {
   session?: AuthenticatorOptions['config']['session'];
-  providers?: Record<string, unknown>;
+  providers?: Record<string, unknown> | string[];
   http?: Partial<AuthenticatorOptions['config']['authc']['http']>;
 } = {}) {
   return {
@@ -84,6 +85,19 @@ describe('Authenticator', () => {
       ).toThrowError(
         'No authentication provider is configured. Verify `xpack.security.authc.*` config value.'
       );
+    });
+
+    it('fails if configured authentication provider is not known.', () => {
+      expect(() => new Authenticator(getMockOptions({ providers: ['super-basic'] }))).toThrowError(
+        'Unsupported authentication provider name: super-basic.'
+      );
+    });
+
+    it('fails if any of the user specified provider uses reserved __http__ name.', () => {
+      expect(
+        () =>
+          new Authenticator(getMockOptions({ providers: { basic: { __http__: { order: 0 } } } }))
+      ).toThrowError('Provider name "__http__" is reserved.');
     });
 
     describe('HTTP authentication provider', () => {
@@ -186,7 +200,7 @@ describe('Authenticator', () => {
       );
     });
 
-    it('fails if login attempt is not provided.', async () => {
+    it('fails if login attempt is not provided or invalid.', async () => {
       await expect(
         authenticator.login(httpServerMock.createKibanaRequest(), undefined as any)
       ).rejects.toThrowError(
@@ -195,6 +209,15 @@ describe('Authenticator', () => {
 
       await expect(
         authenticator.login(httpServerMock.createKibanaRequest(), {} as any)
+      ).rejects.toThrowError(
+        'Login attempt should be an object with non-empty "provider.type" or "provider.name" property.'
+      );
+
+      await expect(
+        authenticator.login(httpServerMock.createKibanaRequest(), {
+          provider: 'basic',
+          value: {},
+        } as any)
       ).rejects.toThrowError(
         'Login attempt should be an object with non-empty "provider.type" or "provider.name" property.'
       );
@@ -253,6 +276,167 @@ describe('Authenticator', () => {
       await expect(
         authenticator.login(request, { provider: { type: 'token' }, value: {} })
       ).resolves.toEqual(AuthenticationResult.notHandled());
+
+      await expect(
+        authenticator.login(request, { provider: { name: 'basic2' }, value: {} })
+      ).resolves.toEqual(AuthenticationResult.notHandled());
+    });
+
+    describe('multi-provider scenarios', () => {
+      let mockSAMLAuthenticationProvider1: jest.Mocked<PublicMethodsOf<SAMLAuthenticationProvider>>;
+      let mockSAMLAuthenticationProvider2: jest.Mocked<PublicMethodsOf<SAMLAuthenticationProvider>>;
+
+      beforeEach(() => {
+        mockSAMLAuthenticationProvider1 = {
+          login: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
+          authenticate: jest.fn(),
+          logout: jest.fn(),
+          getHTTPAuthenticationScheme: jest.fn(),
+        };
+
+        mockSAMLAuthenticationProvider2 = {
+          login: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
+          authenticate: jest.fn(),
+          logout: jest.fn(),
+          getHTTPAuthenticationScheme: jest.fn(),
+        };
+
+        jest
+          .requireMock('./providers/saml')
+          .SAMLAuthenticationProvider.mockImplementationOnce(() => ({
+            type: 'saml',
+            ...mockSAMLAuthenticationProvider1,
+          }))
+          .mockImplementationOnce(() => ({
+            type: 'saml',
+            ...mockSAMLAuthenticationProvider2,
+          }));
+
+        mockOptions = getMockOptions({
+          providers: {
+            basic: { basic1: { order: 0 } },
+            saml: {
+              saml1: { realm: 'saml1-realm', order: 1 },
+              saml2: { realm: 'saml2-realm', order: 2 },
+            },
+          },
+        });
+        mockSessionStorage = sessionStorageMock.create();
+        mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
+
+        authenticator = new Authenticator(mockOptions);
+      });
+
+      it('tries to login only with the provider that has specified name', async () => {
+        const user = mockAuthenticatedUser();
+        const request = httpServerMock.createKibanaRequest();
+
+        mockSAMLAuthenticationProvider2.login.mockResolvedValue(
+          AuthenticationResult.succeeded(user, { state: { token: 'access-token' } })
+        );
+
+        await expect(
+          authenticator.login(request, { provider: { name: 'saml2' }, value: {} })
+        ).resolves.toEqual(
+          AuthenticationResult.succeeded(user, { state: { token: 'access-token' } })
+        );
+
+        expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
+        expect(mockSessionStorage.set).toHaveBeenCalledWith({
+          ...mockSessVal,
+          provider: { type: 'saml', name: 'saml2' },
+          state: { token: 'access-token' },
+        });
+
+        expect(mockBasicAuthenticationProvider.login).not.toHaveBeenCalled();
+        expect(mockSAMLAuthenticationProvider1.login).not.toHaveBeenCalled();
+      });
+
+      it('tries to login only with the provider that has specified type', async () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        await expect(
+          authenticator.login(request, { provider: { type: 'saml' }, value: {} })
+        ).resolves.toEqual(AuthenticationResult.notHandled());
+
+        expect(mockSessionStorage.set).not.toHaveBeenCalled();
+
+        expect(mockBasicAuthenticationProvider.login).not.toHaveBeenCalled();
+        expect(mockSAMLAuthenticationProvider1.login).toHaveBeenCalledTimes(1);
+        expect(mockSAMLAuthenticationProvider2.login).toHaveBeenCalledTimes(1);
+        expect(mockSAMLAuthenticationProvider1.login.mock.invocationCallOrder[0]).toBeLessThan(
+          mockSAMLAuthenticationProvider2.login.mock.invocationCallOrder[0]
+        );
+      });
+
+      it('returns as soon as provider handles request', async () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        const authenticationResults = [
+          AuthenticationResult.failed(new Error('Fail')),
+          AuthenticationResult.succeeded(mockAuthenticatedUser(), { state: { result: '200' } }),
+          AuthenticationResult.redirectTo('/some/url', { state: { result: '302' } }),
+        ];
+
+        for (const result of authenticationResults) {
+          mockSAMLAuthenticationProvider1.login.mockResolvedValue(result);
+
+          await expect(
+            authenticator.login(request, { provider: { type: 'saml' }, value: {} })
+          ).resolves.toEqual(result);
+        }
+
+        expect(mockSessionStorage.set).toHaveBeenCalledTimes(2);
+        expect(mockSessionStorage.set).toHaveBeenCalledWith({
+          ...mockSessVal,
+          provider: { type: 'saml', name: 'saml1' },
+          state: { result: '200' },
+        });
+        expect(mockSessionStorage.set).toHaveBeenCalledWith({
+          ...mockSessVal,
+          provider: { type: 'saml', name: 'saml1' },
+          state: { result: '302' },
+        });
+
+        expect(mockBasicAuthenticationProvider.login).not.toHaveBeenCalled();
+        expect(mockSAMLAuthenticationProvider2.login).not.toHaveBeenCalled();
+        expect(mockSAMLAuthenticationProvider1.login).toHaveBeenCalledTimes(3);
+      });
+
+      it('provides session only if provider name matches', async () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        mockSessionStorage.get.mockResolvedValue({
+          ...mockSessVal,
+          provider: { type: 'saml', name: 'saml2' },
+        });
+
+        const loginAttemptValue = Symbol('attempt');
+        await expect(
+          authenticator.login(request, { provider: { type: 'saml' }, value: loginAttemptValue })
+        ).resolves.toEqual(AuthenticationResult.notHandled());
+
+        expect(mockBasicAuthenticationProvider.login).not.toHaveBeenCalled();
+
+        expect(mockSAMLAuthenticationProvider1.login).toHaveBeenCalledTimes(1);
+        expect(mockSAMLAuthenticationProvider1.login).toHaveBeenCalledWith(
+          request,
+          loginAttemptValue,
+          null
+        );
+
+        expect(mockSAMLAuthenticationProvider2.login).toHaveBeenCalledTimes(1);
+        expect(mockSAMLAuthenticationProvider2.login).toHaveBeenCalledWith(
+          request,
+          loginAttemptValue,
+          mockSessVal.state
+        );
+
+        // Presence of the session has precedence over order.
+        expect(mockSAMLAuthenticationProvider2.login.mock.invocationCallOrder[0]).toBeLessThan(
+          mockSAMLAuthenticationProvider1.login.mock.invocationCallOrder[0]
+        );
+      });
     });
 
     it('clears session if it belongs to a different provider.', async () => {
@@ -261,7 +445,10 @@ describe('Authenticator', () => {
       const request = httpServerMock.createKibanaRequest();
 
       mockBasicAuthenticationProvider.login.mockResolvedValue(AuthenticationResult.succeeded(user));
-      mockSessionStorage.get.mockResolvedValue({ ...mockSessVal, provider: 'token' });
+      mockSessionStorage.get.mockResolvedValue({
+        ...mockSessVal,
+        provider: { type: 'token', name: 'token1' },
+      });
 
       await expect(
         authenticator.login(request, { provider: { type: 'basic' }, value: credentials })
@@ -272,6 +459,35 @@ describe('Authenticator', () => {
         credentials,
         null
       );
+
+      expect(mockSessionStorage.set).not.toHaveBeenCalled();
+      expect(mockSessionStorage.clear).toHaveBeenCalled();
+    });
+
+    it('clears session if it belongs to a provider with the name that is registered but has different type.', async () => {
+      const user = mockAuthenticatedUser();
+      const credentials = { username: 'user', password: 'password' };
+      const request = httpServerMock.createKibanaRequest();
+
+      // Re-configure authenticator with `token` provider that uses the name of `basic`.
+      const loginMock = jest.fn().mockResolvedValue(AuthenticationResult.succeeded(user));
+      jest.requireMock('./providers/token').TokenAuthenticationProvider.mockImplementation(() => ({
+        type: 'token',
+        login: loginMock,
+        getHTTPAuthenticationScheme: jest.fn(),
+      }));
+      mockOptions = getMockOptions({ providers: { token: { basic1: { order: 0 } } } });
+      mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
+      authenticator = new Authenticator(mockOptions);
+
+      mockBasicAuthenticationProvider.login.mockResolvedValue(AuthenticationResult.succeeded(user));
+      mockSessionStorage.get.mockResolvedValue(mockSessVal);
+
+      await expect(
+        authenticator.login(request, { provider: { name: 'basic1' }, value: credentials })
+      ).resolves.toEqual(AuthenticationResult.succeeded(user));
+
+      expect(loginMock).toHaveBeenCalledWith(request, credentials, null);
 
       expect(mockSessionStorage.set).not.toHaveBeenCalled();
       expect(mockSessionStorage.clear).toHaveBeenCalled();
@@ -759,7 +975,10 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.notHandled()
       );
-      mockSessionStorage.get.mockResolvedValue({ ...mockSessVal, provider: 'token' });
+      mockSessionStorage.get.mockResolvedValue({
+        ...mockSessVal,
+        provider: { type: 'token', name: 'token1' },
+      });
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
         AuthenticationResult.notHandled()
@@ -777,7 +996,10 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.notHandled()
       );
-      mockSessionStorage.get.mockResolvedValue({ ...mockSessVal, provider: 'token' });
+      mockSessionStorage.get.mockResolvedValue({
+        ...mockSessVal,
+        provider: { type: 'token', name: 'token1' },
+      });
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
         AuthenticationResult.notHandled()

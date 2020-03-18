@@ -121,6 +121,7 @@ export function defineCommonRoutes({ router, authc, basePath, logger }: RouteDef
         if (authenticationResult.redirected() || authenticationResult.succeeded()) {
           return response.ok({
             body: { location: authenticationResult.redirectURL || redirectURL },
+            headers: authenticationResult.authResponseHeaders,
           });
         }
 

@@ -261,8 +261,8 @@ describe('LoginPage', () => {
           selector: {
             enabled: true,
             providers: [
-              { type: 'saml', name: 'saml1', options: { description: 'Login w/SAML', order: 0 } },
-              { type: 'pki', name: 'pki1', options: { description: 'Login w/PKI', order: 1 } },
+              { type: 'saml', name: 'saml1', description: 'Login w/SAML' },
+              { type: 'pki', name: 'pki1', description: 'Login w/PKI' },
             ],
           },
         })
@@ -294,8 +294,8 @@ describe('LoginPage', () => {
           selector: {
             enabled: true,
             providers: [
-              { type: 'saml', name: 'saml1', options: { description: 'Login w/SAML', order: 0 } },
-              { type: 'pki', name: 'pki1', options: { description: 'Login w/PKI', order: 1 } },
+              { type: 'saml', name: 'saml1', description: 'Login w/SAML' },
+              { type: 'pki', name: 'pki1', description: 'Login w/PKI' },
             ],
           },
         })

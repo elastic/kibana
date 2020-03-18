@@ -258,9 +258,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
 
     // If refresh token is no longer valid, then we should clear session and renegotiate using SPNEGO.
     if (refreshedTokenPair === null) {
-      this.logger.debug(
-        'Both access and refresh tokens are expired. Re-initiating SPNEGO handshake.'
-      );
+      this.logger.debug('Both access and refresh tokens are expired.');
       return canStartNewSession(request)
         ? this.authenticateViaSPNEGO(request, state)
         : AuthenticationResult.notHandled();

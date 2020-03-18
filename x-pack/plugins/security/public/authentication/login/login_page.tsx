@@ -20,13 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  CoreStart,
-  FatalErrorsStart,
-  HttpStart,
-  IHttpFetchError,
-  NotificationsStart,
-} from 'src/core/public';
+import { CoreStart, FatalErrorsStart, HttpStart, NotificationsStart } from 'src/core/public';
 import { LoginState } from '../../../common/login_state';
 import { BasicLoginForm, DisabledLoginForm } from './components';
 
@@ -225,7 +219,7 @@ export class LoginPage extends Component<Props, State> {
           message={
             <FormattedMessage
               id="xpack.security.loginPage.unknownLayoutMessage"
-              defaultMessage="Refer to the Kibana logs for more details and refresh to try again."
+              defaultMessage="See the Kibana logs for details and try reloading the page."
             />
           }
         />
@@ -242,7 +236,16 @@ export class LoginPage extends Component<Props, State> {
           fullWidth={true}
           onClick={() => this.login(provider.type, provider.name)}
         >
-          {provider.options.description ?? `${provider.type}/${provider.name}`}
+          {provider.description ?? (
+            <FormattedMessage
+              id="xpack.security.loginPage.loginProviderDescription"
+              defaultMessage="Login with {providerType}/{providerName}"
+              values={{
+                providerType: provider.type,
+                providerName: provider.name,
+              }}
+            />
+          )}
         </EuiButton>
       ));
 
@@ -277,18 +280,17 @@ export class LoginPage extends Component<Props, State> {
   private login = async (providerType: string, providerName: string) => {
     try {
       const { location } = await this.props.http.post<{ location: string }>(
-        `${this.props.http.basePath.serverBasePath}/internal/security/login_with`,
+        '/internal/security/login_with',
         { body: JSON.stringify({ providerType, providerName, currentURL: window.location.href }) }
       );
 
       window.location.href = location;
     } catch (err) {
-      this.props.notifications.toasts.addDanger(
-        i18n.translate('xpack.security.loginPage.loginSelectorErrorMessage', {
-          defaultMessage: 'Could not perform login: {message}. Contact your system administrator.',
-          values: { message: (err as IHttpFetchError).message },
-        })
-      );
+      this.props.notifications.toasts.addError(err, {
+        title: i18n.translate('xpack.security.loginPage.loginSelectorErrorMessage', {
+          defaultMessage: 'Could not perform login.',
+        }),
+      });
     }
   };
 }

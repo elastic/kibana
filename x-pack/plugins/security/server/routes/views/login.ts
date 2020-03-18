@@ -60,23 +60,25 @@ export function defineLoginRoutes({
     async (context, request, response) => {
       const { allowLogin, layout = 'form' } = license.getFeatures();
       const { sortedProviders, selector } = config.authc;
+
+      let showLoginForm = false;
+      const providers = [];
+      for (const { type, name, options } of sortedProviders) {
+        if (options.showInSelector) {
+          if (type === 'basic' || type === 'token') {
+            showLoginForm = true;
+          } else if (selector.enabled) {
+            providers.push({ type, name, description: options.description });
+          }
+        }
+      }
+
       const loginState: LoginState = {
         allowLogin,
         layout,
         requiresSecureConnection: config.secureCookies,
-        showLoginForm: sortedProviders.some(
-          ({ type, options: { showInSelector } }) =>
-            showInSelector && (type === 'basic' || type === 'token')
-        ),
-        selector: {
-          enabled: selector.enabled,
-          providers: selector.enabled
-            ? sortedProviders.filter(
-                ({ type, options: { showInSelector } }) =>
-                  showInSelector && type !== 'basic' && type !== 'token'
-              )
-            : [],
-        },
+        showLoginForm,
+        selector: { enabled: selector.enabled, providers },
       };
 
       return response.ok({ body: loginState });

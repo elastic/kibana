@@ -258,10 +258,10 @@ export function createConfig(
   return {
     ...config,
     authc: {
-      ...config.authc,
       selector: { ...config.authc.selector, enabled: isLoginSelectorEnabled },
       providers,
       sortedProviders: Object.freeze(sortedProviders),
+      http: config.authc.http,
     },
     encryptionKey,
     secureCookies,

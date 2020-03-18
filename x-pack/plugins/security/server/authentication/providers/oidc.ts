@@ -32,7 +32,7 @@ export enum OIDCLogin {
  * Describes the parameters that are required by the provider to process the initial login request.
  */
 export type ProviderLoginAttempt =
-  | { type: OIDCLogin.LoginInitiatedByUser; redirectURLPath?: string }
+  | { type: OIDCLogin.LoginInitiatedByUser; redirectURLPath: string }
   | {
       type: OIDCLogin.LoginWithImplicitFlow | OIDCLogin.LoginWithAuthorizationCodeFlow;
       authenticationResponseURI: string;

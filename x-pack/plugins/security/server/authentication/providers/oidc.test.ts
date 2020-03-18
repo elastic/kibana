@@ -100,6 +100,50 @@ describe('OIDCAuthenticationProvider', () => {
       });
     });
 
+    it('redirects user initiated login attempts to the OpenId Connect Provider.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      mockOptions.client.callAsInternalUser.mockResolvedValue({
+        state: 'statevalue',
+        nonce: 'noncevalue',
+        redirect:
+          'https://op-host/path/login?response_type=code' +
+          '&scope=openid%20profile%20email' +
+          '&client_id=s6BhdRkqt3' +
+          '&state=statevalue' +
+          '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc' +
+          '&login_hint=loginhint',
+      });
+
+      await expect(
+        provider.login(request, {
+          type: OIDCLogin.LoginInitiatedByUser,
+          redirectURLPath: '/mock-server-basepath/app/super-kibana',
+        })
+      ).resolves.toEqual(
+        AuthenticationResult.redirectTo(
+          'https://op-host/path/login?response_type=code' +
+            '&scope=openid%20profile%20email' +
+            '&client_id=s6BhdRkqt3' +
+            '&state=statevalue' +
+            '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc' +
+            '&login_hint=loginhint',
+          {
+            state: {
+              state: 'statevalue',
+              nonce: 'noncevalue',
+              nextURL: '/mock-server-basepath/app/super-kibana',
+              realm: 'oidc1',
+            },
+          }
+        )
+      );
+
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.oidcPrepare', {
+        body: { realm: 'oidc1' },
+      });
+    });
+
     function defineAuthenticationFlowTests(
       getMocks: () => {
         request: KibanaRequest;
@@ -224,6 +268,20 @@ describe('OIDCAuthenticationProvider', () => {
           }
         );
       });
+
+      it('fails if realm from state is different from the realm provider is configured with.', async () => {
+        const { request, attempt } = getMocks();
+
+        await expect(provider.login(request, attempt, { realm: 'other-realm' })).resolves.toEqual(
+          AuthenticationResult.failed(
+            Boom.unauthorized(
+              'State based on realm "other-realm", but provider with the name "oidc" is configured to use realm "oidc1".'
+            )
+          )
+        );
+
+        expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+      });
     }
 
     describe('authorization code flow', () => {
@@ -259,6 +317,13 @@ describe('OIDCAuthenticationProvider', () => {
     it('does not handle AJAX request that can not be authenticated.', async () => {
       const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
       await expect(provider.authenticate(request, null)).resolves.toEqual(
+        AuthenticationResult.notHandled()
+      );
+    });
+
+    it('does not handle non-AJAX request that does not require authentication.', async () => {
+      const request = httpServerMock.createKibanaRequest({ routeAuthRequired: false });
+      await expect(provider.authenticate(request)).resolves.toEqual(
         AuthenticationResult.notHandled()
       );
     });
@@ -559,6 +624,44 @@ describe('OIDCAuthenticationProvider', () => {
       });
 
       expect(request.headers).not.toHaveProperty('authorization');
+    });
+
+    it('fails for non-AJAX requests that do not require authentication with user friendly message if refresh token is expired.', async () => {
+      const request = httpServerMock.createKibanaRequest({ routeAuthRequired: false, headers: {} });
+      const tokenPair = { accessToken: 'expired-token', refreshToken: 'expired-refresh-token' };
+      const authorization = `Bearer ${tokenPair.accessToken}`;
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
+        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+      );
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
+
+      mockOptions.tokens.refresh.mockResolvedValue(null);
+
+      await expect(
+        provider.authenticate(request, { ...tokenPair, realm: 'oidc1' })
+      ).resolves.toEqual(
+        AuthenticationResult.failed(Boom.badRequest('Both access and refresh tokens are expired.'))
+      );
+
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
+
+      expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
+
+      expect(request.headers).not.toHaveProperty('authorization');
+    });
+
+    it('fails if realm from state is different from the realm provider is configured with.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      await expect(provider.authenticate(request, { realm: 'other-realm' })).resolves.toEqual(
+        AuthenticationResult.failed(
+          Boom.unauthorized(
+            'State based on realm "other-realm", but provider with the name "oidc" is configured to use realm "oidc1".'
+          )
+        )
+      );
     });
   });
 
