@@ -18,3 +18,5 @@
  */
 
 export { removeQueryParam } from './remove_query_param';
+export { redirectWhenMissing } from './redirect_when_missing';
+export { ensureDefaultIndexPattern } from './ensure_default_index_pattern';

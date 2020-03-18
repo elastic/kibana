@@ -12,7 +12,8 @@
     "features",
     "home",
     "licensing",
-    "usageCollection"
+    "usageCollection",
+    "share"
   ],
   "optionalPlugins": [
     "security",

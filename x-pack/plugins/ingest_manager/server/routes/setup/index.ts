@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IRouter } from 'kibana/server';
+import { IRouter } from 'src/core/server';
 import { PLUGIN_ID, FLEET_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
 import { GetFleetSetupRequestSchema, CreateFleetSetupRequestSchema } from '../../types';
 import {

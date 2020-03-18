@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { ISearchGeneric, ICancelGeneric } from './i_search';
+import { ISearchGeneric, ISearchCancelGeneric } from './i_search';
 
 export interface IRouteHandlerSearchContext {
   search: ISearchGeneric;
-  cancel: ICancelGeneric;
+  cancel: ISearchCancelGeneric;
 }

@@ -1595,6 +1595,8 @@ export interface RouteValidatorOptions {
 // @public
 export type SafeRouteMethod = 'get' | 'options';
 
+// Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
 // @public (undocumented)
 export interface SavedObject<T = unknown> {
     attributes: T;
