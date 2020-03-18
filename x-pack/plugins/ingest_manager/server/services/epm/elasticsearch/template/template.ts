@@ -14,6 +14,10 @@ interface Properties {
 interface Mappings {
   properties: any;
 }
+
+const DEFAULT_SCALING_FACTOR = 1000;
+const DEFAULT_IGNORE_ABOVE = 1024;
+
 /**
  * getTemplate retrieves the default template but overwrites the index pattern with the given value.
  *
@@ -33,29 +37,96 @@ export function getTemplate(
 }
 
 /**
- * Generate mapping takes the given fields array and creates the Elasticsearch
+ * Generate mapping takes the given nested fields array and creates the Elasticsearch
  * mapping properties out of it.
+ *
+ * This assumes that all fields with dotted.names have been expanded in a previous step.
  *
  * @param fields
  */
 export function generateMappings(fields: Field[]): Mappings {
   const props: Properties = {};
-  fields.forEach(field => {
-    // Are there more fields inside this field? Build them recursively
-    if (field.fields && field.fields.length > 0) {
-      props[field.name] = generateMappings(field.fields);
-      return;
-    }
+  // TODO: this can happen when the fields property in fields.yml is present but empty
+  // Maybe validation should be moved to fields/field.ts
+  if (fields) {
+    fields.forEach(field => {
+      // If type is not defined, assume keyword
+      const type = field.type || 'keyword';
 
-    // If not type is defined, take keyword
-    const type = field.type || 'keyword';
-    // Only add keyword fields for now
-    // TODO: add support for other field types
-    if (type === 'keyword') {
-      props[field.name] = { type };
-    }
-  });
+      let fieldProps = getDefaultProperties(field);
+
+      switch (type) {
+        case 'group':
+          fieldProps = generateMappings(field.fields!);
+          break;
+        case 'integer':
+          fieldProps.type = 'long';
+          break;
+        case 'scaled_float':
+          fieldProps.type = 'scaled_float';
+          fieldProps.scaling_factor = field.scaling_factor || DEFAULT_SCALING_FACTOR;
+          break;
+        case 'text':
+          fieldProps.type = 'text';
+          if (field.analyzer) {
+            fieldProps.analyzer = field.analyzer;
+          }
+          if (field.search_analyzer) {
+            fieldProps.search_analyzer = field.search_analyzer;
+          }
+          break;
+        case 'keyword':
+          fieldProps.type = 'keyword';
+          if (field.ignore_above) {
+            fieldProps.ignore_above = field.ignore_above;
+          } else {
+            fieldProps.ignore_above = DEFAULT_IGNORE_ABOVE;
+          }
+          break;
+        // TODO move handling of multi_fields here?
+        case 'object':
+          // TODO improve
+          fieldProps.type = 'object';
+          break;
+        case 'array':
+          // this assumes array fields were validated in an earlier step
+          // adding an array field with no object_type would result in an error
+          // when the template is added to ES
+          if (field.object_type) {
+            fieldProps.type = field.object_type;
+          }
+          break;
+        case 'alias':
+          // this assumes alias fields were validated in an earlier step
+          // adding a path to a field that doesn't exist would result in an error
+          // when the template is added to ES.
+          fieldProps.type = 'alias';
+          fieldProps.path = field.path;
+          break;
+        default:
+          fieldProps.type = type;
+      }
+      props[field.name] = fieldProps;
+    });
+  }
+
   return { properties: props };
+}
+
+function getDefaultProperties(field: Field): Properties {
+  const properties: Properties = {};
+
+  if (field.index) {
+    properties.index = field.index;
+  }
+  if (field.doc_values) {
+    properties.doc_values = field.doc_values;
+  }
+  if (field.copy_to) {
+    properties.copy_to = field.copy_to;
+  }
+
+  return properties;
 }
 
 /**

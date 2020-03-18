@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
 import { objectValuesToArrays } from '../../lib/helper';
+import { API_URLS } from '../../../../../legacy/plugins/uptime/common/constants/rest_api';
 
 const arrayOrStringType = schema.maybe(
   schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
@@ -15,7 +16,7 @@ const arrayOrStringType = schema.maybe(
 
 export const createGetOverviewFilters: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/filters',
+  path: API_URLS.FILTERS,
   validate: {
     query: schema.object({
       dateRangeStart: schema.string(),

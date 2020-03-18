@@ -7,9 +7,9 @@ import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 /**
- * The number of alert documents in the es archive.
+ * The number of host documents in the es archive.
  */
-const numberOfEndpointsInFixture = 3;
+const numberOfHostsInFixture = 3;
 
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -24,7 +24,7 @@ export default function({ getService }: FtrProviderContext) {
           .send()
           .expect(200);
         expect(body.total).to.eql(0);
-        expect(body.endpoints.length).to.eql(0);
+        expect(body.hosts.length).to.eql(0);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
       });
@@ -33,14 +33,14 @@ export default function({ getService }: FtrProviderContext) {
     describe('POST /api/endpoint/metadata when index is not empty', () => {
       before(() => esArchiver.load('endpoint/metadata/api_feature'));
       after(() => esArchiver.unload('endpoint/metadata/api_feature'));
-      it('metadata api should return one entry for each endpoint with default paging', async () => {
+      it('metadata api should return one entry for each host with default paging', async () => {
         const { body } = await supertest
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200);
-        expect(body.total).to.eql(numberOfEndpointsInFixture);
-        expect(body.endpoints.length).to.eql(numberOfEndpointsInFixture);
+        expect(body.total).to.eql(numberOfHostsInFixture);
+        expect(body.hosts.length).to.eql(numberOfHostsInFixture);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
       });
@@ -60,8 +60,8 @@ export default function({ getService }: FtrProviderContext) {
             ],
           })
           .expect(200);
-        expect(body.total).to.eql(numberOfEndpointsInFixture);
-        expect(body.endpoints.length).to.eql(1);
+        expect(body.total).to.eql(numberOfHostsInFixture);
+        expect(body.hosts.length).to.eql(1);
         expect(body.request_page_size).to.eql(1);
         expect(body.request_page_index).to.eql(1);
       });
@@ -84,8 +84,8 @@ export default function({ getService }: FtrProviderContext) {
             ],
           })
           .expect(200);
-        expect(body.total).to.eql(numberOfEndpointsInFixture);
-        expect(body.endpoints.length).to.eql(0);
+        expect(body.total).to.eql(numberOfHostsInFixture);
+        expect(body.hosts.length).to.eql(0);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(30);
       });
@@ -115,7 +115,7 @@ export default function({ getService }: FtrProviderContext) {
           .send({ filter: 'not host.ip:10.100.170.247' })
           .expect(200);
         expect(body.total).to.eql(2);
-        expect(body.endpoints.length).to.eql(2);
+        expect(body.hosts.length).to.eql(2);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
       });
@@ -139,7 +139,7 @@ export default function({ getService }: FtrProviderContext) {
           .expect(200);
         expect(body.total).to.eql(2);
         const resultIps: string[] = [].concat(
-          ...body.endpoints.map((metadata: Record<string, any>) => metadata.host.ip)
+          ...body.hosts.map((metadata: Record<string, any>) => metadata.host.ip)
         );
         expect(resultIps).to.eql([
           '10.48.181.222',
@@ -150,7 +150,7 @@ export default function({ getService }: FtrProviderContext) {
           '10.128.235.38',
         ]);
         expect(resultIps).not.include.eql(notIncludedIp);
-        expect(body.endpoints.length).to.eql(2);
+        expect(body.hosts.length).to.eql(2);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
       });
@@ -166,10 +166,10 @@ export default function({ getService }: FtrProviderContext) {
           .expect(200);
         expect(body.total).to.eql(1);
         const resultOsVariantValue: Set<string> = new Set(
-          body.endpoints.map((metadata: Record<string, any>) => metadata.host.os.variant)
+          body.hosts.map((metadata: Record<string, any>) => metadata.host.os.variant)
         );
         expect(Array.from(resultOsVariantValue)).to.eql([variantValue]);
-        expect(body.endpoints.length).to.eql(1);
+        expect(body.hosts.length).to.eql(1);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
       });
@@ -184,17 +184,17 @@ export default function({ getService }: FtrProviderContext) {
           })
           .expect(200);
         expect(body.total).to.eql(1);
-        const resultIp: string = body.endpoints[0].host.ip.filter(
+        const resultIp: string = body.hosts[0].host.ip.filter(
           (ip: string) => ip === targetEndpointIp
         );
         expect(resultIp).to.eql([targetEndpointIp]);
-        expect(body.endpoints[0].event.created).to.eql(1584044335459);
-        expect(body.endpoints.length).to.eql(1);
+        expect(body.hosts[0].event.created).to.eql(1584044335459);
+        expect(body.hosts.length).to.eql(1);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
       });
 
-      it('metadata api should return  all endpoints when filter is empty string', async () => {
+      it('metadata api should return all hosts when filter is empty string', async () => {
         const { body } = await supertest
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
@@ -202,8 +202,8 @@ export default function({ getService }: FtrProviderContext) {
             filter: '',
           })
           .expect(200);
-        expect(body.total).to.eql(numberOfEndpointsInFixture);
-        expect(body.endpoints.length).to.eql(numberOfEndpointsInFixture);
+        expect(body.total).to.eql(numberOfHostsInFixture);
+        expect(body.hosts.length).to.eql(numberOfHostsInFixture);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
       });
