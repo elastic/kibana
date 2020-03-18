@@ -99,8 +99,8 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
      */
     private async loginIfPrompted(appUrl: string) {
       let currentUrl = await browser.getCurrentUrl();
-      log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
-      await find.byCssSelector('[data-test-subj="kibanaChrome"]', 6 * defaultFindTimeout); // 60 sec waiting
+      log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`); // 60 sec waiting
+      await testSubjects.find('kibanaChrome', 6 * defaultFindTimeout);
       const loginPage = currentUrl.includes('/login');
       const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
 

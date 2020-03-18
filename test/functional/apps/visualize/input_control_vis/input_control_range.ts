@@ -25,6 +25,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const find = getService('find');
+  const testSubjects = getService('testSubjects');
   const { visualize, visEditor } = getPageObjects(['visualize', 'visEditor']);
 
   describe('input control range', () => {
@@ -40,7 +41,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await visEditor.clickGo();
       await visEditor.setFilterRange(0, '7', '10');
       await visEditor.inputControlSubmit();
-      const controlFilters = await find.allByCssSelector('[data-test-subj^="filter"]');
+      const controlFilters = await testSubjects.findAll('~filter');
       expect(controlFilters).to.have.length(1);
       expect(await controlFilters[0].getVisibleText()).to.equal('hour_of_day: 7 to 10');
     });
@@ -51,7 +52,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await visEditor.clickGo();
       await visEditor.setFilterRange(1, '400', '999');
       await visEditor.inputControlSubmit();
-      const controlFilters = await find.allByCssSelector('[data-test-subj^="filter"]');
+      const controlFilters = await testSubjects.findAll('~filter');
       expect(controlFilters).to.have.length(2);
       expect(await controlFilters[1].getVisibleText()).to.equal('AvgTicketPrice: $400 to $999');
     });
