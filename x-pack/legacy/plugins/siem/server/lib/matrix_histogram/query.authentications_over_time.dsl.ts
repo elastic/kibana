@@ -19,12 +19,14 @@ export const buildAuthenticationsOverTimeQuery = ({
     ...createQueryFilterClauses(filterQuery),
     {
       bool: {
-        must: [{
-          term: {
-            'event.category': 'authentication'
-          }
-        }]
-      }
+        must: [
+          {
+            term: {
+              'event.category': 'authentication',
+            },
+          },
+        ],
+      },
     },
     {
       range: {
