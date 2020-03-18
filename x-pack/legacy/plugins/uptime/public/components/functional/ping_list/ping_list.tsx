@@ -27,7 +27,7 @@ import styled from 'styled-components';
 import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { Ping, PingResults } from '../../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
-import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order/uptime_graphql_query';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
 import { pingsQuery } from '../../../queries';
 import { LocationName } from './../location_name';
 import { Pagination } from './../monitor_list';

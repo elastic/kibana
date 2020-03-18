@@ -13,7 +13,7 @@ import {
 } from '../../functional/charts/ping_histogram';
 import { getPingHistogram } from '../../../state/actions';
 import { selectPingHistogram } from '../../../state/selectors';
-import { withResponsiveWrapper, ResponsiveWrapperProps } from '../../higher_order/responsive_wrapper';
+import { withResponsiveWrapper, ResponsiveWrapperProps } from '../../higher_order';
 import { GetPingHistogramParams, HistogramResult } from '../../../../common/types';
 import { useUrlParams } from '../../../hooks';
 
