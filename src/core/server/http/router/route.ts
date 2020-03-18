@@ -179,7 +179,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    * access to raw values.
    * In some cases you may want to use another validation library. To do this, you need to
    * instruct the `@kbn/config-schema` library to output **non-validated values** with
-   * setting schema as `schema.object({}, { allowUnknowns: true })`;
+   * setting schema as `schema.object({}, { unknowns: 'allow' })`;
    *
    * @example
    * ```ts
@@ -212,7 +212,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    *   path: 'path/{id}',
    *   validate: {
    *     // handler has access to raw non-validated params in runtime
-   *     params: schema.object({}, { allowUnknowns: true })
+   *     params: schema.object({}, { unknowns: 'allow' })
    *   },
    * },
    * (context, req, res,) {

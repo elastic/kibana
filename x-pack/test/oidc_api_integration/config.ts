@@ -17,6 +17,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
   return {
     testFiles: [require.resolve('./apis/authorization_code_flow')],
     servers: xPackAPITestsConfig.get('servers'),
+    security: { disableTestUser: true },
     services,
     junit: {
       reportName: 'X-Pack OpenID Connect API Integration Tests',
