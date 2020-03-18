@@ -134,14 +134,17 @@ export const ThresholdExpression = ({
                   >
                     <EuiFieldNumber
                       data-test-subj="alertThresholdInput"
-                      value={!threshold || !threshold[i] ? 0 : threshold[i]}
+                      min={0}
+                      value={!threshold || threshold[i] === undefined ? '' : threshold[i]}
                       isInvalid={errors[`threshold${i}`].length > 0 || !threshold[i]}
                       onChange={e => {
                         const { value } = e.target;
                         const thresholdVal = value !== '' ? parseFloat(value) : undefined;
                         const newThreshold = [...threshold];
-                        if (thresholdVal) {
+                        if (thresholdVal !== undefined) {
                           newThreshold[i] = thresholdVal;
+                        } else {
+                          delete newThreshold[i];
                         }
                         onChangeSelectedThreshold(newThreshold);
                       }}
