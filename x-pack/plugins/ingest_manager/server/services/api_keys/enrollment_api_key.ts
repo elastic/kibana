@@ -93,7 +93,19 @@ export async function generateEnrollmentAPIKey(
 
   const name = providedKeyName ? `${providedKeyName} (${id})` : id;
 
-  const key = await createAPIKey(soClient, name, {});
+  const key = await createAPIKey(soClient, name, {
+    // Useless role to avoid to have the privilege of the user that created the key
+    'fleet-apikey-enroll': {
+      cluster: [],
+      applications: [
+        {
+          application: '.fleet',
+          privileges: ['no-privileges'],
+          resources: ['*'],
+        },
+      ],
+    },
+  });
 
   if (!key) {
     throw new Error('Unable to create an enrollment api key');
