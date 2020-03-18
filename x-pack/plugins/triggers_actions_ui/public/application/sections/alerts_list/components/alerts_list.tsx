@@ -52,7 +52,6 @@ export const AlertsList: React.FunctionComponent = () => {
   const history = useHistory();
   const {
     http,
-    injectedMetadata,
     toastNotifications,
     capabilities,
     alertTypeRegistry,
@@ -63,7 +62,6 @@ export const AlertsList: React.FunctionComponent = () => {
   } = useAppDependencies();
   const canDelete = hasDeleteAlertsCapability(capabilities);
   const canSave = hasSaveAlertsCapability(capabilities);
-  const createAlertUiEnabled = injectedMetadata.getInjectedVar('createAlertUiEnabled');
 
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -273,7 +271,7 @@ export const AlertsList: React.FunctionComponent = () => {
     />,
   ];
 
-  if (canSave && createAlertUiEnabled) {
+  if (canSave) {
     toolsRight.push(
       <EuiButton
         key="create-alert"
