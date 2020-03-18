@@ -10,7 +10,7 @@ import { resolve } from 'path';
 import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 import { config as reportingConfig } from './config';
 import { legacyInit } from './server/legacy';
-import { ReportingConfigOptions, ReportingPluginSpecOptions } from './types';
+import { ReportingPluginSpecOptions } from './types';
 
 const kbToBase64Length = (kb: number) => {
   return Math.floor((kb * 1024 * 8) / 6);
@@ -25,20 +25,6 @@ export const reporting = (kibana: any) => {
     config: reportingConfig,
 
     uiExports: {
-      shareContextMenuExtensions: [
-        'plugins/reporting/share_context_menu/register_csv_reporting',
-        'plugins/reporting/share_context_menu/register_reporting',
-      ],
-      embeddableActions: ['plugins/reporting/panel_actions/get_csv_panel_action'],
-      home: ['plugins/reporting/register_feature'],
-      managementSections: ['plugins/reporting/views/management'],
-      injectDefaultVars(server: Legacy.Server, options?: ReportingConfigOptions) {
-        const config = server.config();
-        return {
-          reportingPollConfig: options ? options.poll : {},
-          enablePanelActionDownload: config.get('xpack.reporting.csv.enablePanelActionDownload'),
-        };
-      },
       uiSettingDefaults: {
         [UI_SETTINGS_CUSTOM_PDF_LOGO]: {
           name: i18n.translate('xpack.reporting.pdfFooterImageLabel', {
