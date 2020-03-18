@@ -200,10 +200,14 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
     }
 
     const dateHistogramAggKey = 'bucket_span_buckets';
+    /**
+     * Replace any non-word characters
+     */
+    const getSafeAggName = (field: string) => field.replace(/\W/g, '');
     const getMaxBucketAggKey = (field: string) => `max_bucket_${field}`;
 
     const fieldsCardinalityAggs = aggregatableFields.reduce((obj, field) => {
-      obj[field] = { cardinality: { field } };
+      obj[getSafeAggName(field)] = { cardinality: { field } };
       return obj;
     }, {} as { [field: string]: { cardinality: { field: string } } });
 

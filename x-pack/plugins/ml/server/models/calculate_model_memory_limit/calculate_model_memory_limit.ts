@@ -66,64 +66,60 @@ async function getCardinalities(
 
   let overallCardinality = {};
   let maxBucketCardinality = {};
-  try {
-    const overallCardinalityFields: Set<string> = detectors.reduce(
-      (
-        acc,
-        {
-          by_field_name: byFieldName,
-          partition_field_name: partitionFieldName,
-          over_field_name: overFieldName,
-        }
-      ) => {
-        [byFieldName, partitionFieldName, overFieldName]
-          .filter(field => field !== undefined && field !== '' && !excludedKeywords.has(field))
-          .forEach(key => {
-            acc.add(key as string);
-          });
-        return acc;
-      },
-      new Set<string>()
+  const overallCardinalityFields: Set<string> = detectors.reduce(
+    (
+      acc,
+      {
+        by_field_name: byFieldName,
+        partition_field_name: partitionFieldName,
+        over_field_name: overFieldName,
+      }
+    ) => {
+      [byFieldName, partitionFieldName, overFieldName]
+        .filter(field => field !== undefined && field !== '' && !excludedKeywords.has(field))
+        .forEach(key => {
+          acc.add(key as string);
+        });
+      return acc;
+    },
+    new Set<string>()
+  );
+
+  const maxBucketFieldCardinalities: string[] = influencers.filter(
+    influencerField =>
+      typeof influencerField === 'string' &&
+      !excludedKeywords.has(influencerField) &&
+      !!influencerField &&
+      !overallCardinalityFields.has(influencerField)
+  ) as string[];
+
+  if (overallCardinalityFields.size > 0) {
+    overallCardinality = await fieldsService.getCardinalityOfFields(
+      indexPattern,
+      [...overallCardinalityFields],
+      query,
+      timeFieldName,
+      earliestMs,
+      latestMs
     );
-
-    const maxBucketFieldCardinalities: string[] = influencers.filter(
-      influencerField =>
-        typeof influencerField === 'string' &&
-        !excludedKeywords.has(influencerField) &&
-        !!influencerField &&
-        !overallCardinalityFields.has(influencerField)
-    ) as string[];
-
-    if (overallCardinalityFields.size > 0) {
-      overallCardinality = await fieldsService.getCardinalityOfFields(
-        indexPattern,
-        [...overallCardinalityFields],
-        query,
-        timeFieldName,
-        earliestMs,
-        latestMs
-      );
-    }
-
-    if (maxBucketFieldCardinalities.length > 0) {
-      maxBucketCardinality = await fieldsService.getMaxBucketCardinalities(
-        indexPattern,
-        maxBucketFieldCardinalities,
-        query,
-        timeFieldName,
-        earliestMs,
-        latestMs,
-        bucketSpan
-      );
-    }
-
-    return {
-      overallCardinality,
-      maxBucketCardinality,
-    };
-  } catch (e) {
-    throw new Error('Unable to retrieve cardinality of the partition fields or the influencers');
   }
+
+  if (maxBucketFieldCardinalities.length > 0) {
+    maxBucketCardinality = await fieldsService.getMaxBucketCardinalities(
+      indexPattern,
+      maxBucketFieldCardinalities,
+      query,
+      timeFieldName,
+      earliestMs,
+      latestMs,
+      bucketSpan
+    );
+  }
+
+  return {
+    overallCardinality,
+    maxBucketCardinality,
+  };
 }
 
 export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) {
@@ -161,38 +157,34 @@ export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) 
       latestMs
     );
 
-    try {
-      const estimatedModelMemoryLimit = (
-        await callAsCurrentUser<ModelMemoryEstimate>('ml.estimateModelMemory', {
-          body: {
-            analysis_config: analysisConfig,
-            overall_cardinality: overallCardinality,
-            max_bucket_cardinality: maxBucketCardinality,
-          },
-        })
-      ).model_memory_estimate.toUpperCase();
+    const estimatedModelMemoryLimit = (
+      await callAsCurrentUser<ModelMemoryEstimate>('ml.estimateModelMemory', {
+        body: {
+          analysis_config: analysisConfig,
+          overall_cardinality: overallCardinality,
+          max_bucket_cardinality: maxBucketCardinality,
+        },
+      })
+    ).model_memory_estimate.toUpperCase();
 
-      let modelMemoryLimit: string = estimatedModelMemoryLimit;
-      // if max_model_memory_limit has been set,
-      // make sure the estimated value is not greater than it.
-      if (!allowMMLGreaterThanMax && maxModelMemoryLimit !== undefined) {
+    let modelMemoryLimit: string = estimatedModelMemoryLimit;
+    // if max_model_memory_limit has been set,
+    // make sure the estimated value is not greater than it.
+    if (!allowMMLGreaterThanMax && maxModelMemoryLimit !== undefined) {
+      // @ts-ignore
+      const maxBytes = numeral(limits.max_model_memory_limit).value();
+      // @ts-ignore
+      const mmlBytes = numeral(estimatedModelMemoryLimit).value();
+      if (mmlBytes > maxBytes) {
         // @ts-ignore
-        const maxBytes = numeral(limits.max_model_memory_limit).value();
-        // @ts-ignore
-        const mmlBytes = numeral(estimatedModelMemoryLimit).value();
-        if (mmlBytes > maxBytes) {
-          // @ts-ignore
-          modelMemoryLimit = `${Math.floor(maxBytes / numeral('1MB').value())}MB`;
-        }
+        modelMemoryLimit = `${Math.floor(maxBytes / numeral('1MB').value())}MB`;
       }
-
-      return {
-        estimatedModelMemoryLimit,
-        modelMemoryLimit,
-        ...(maxModelMemoryLimit ? { maxModelMemoryLimit } : {}),
-      };
-    } catch (e) {
-      throw new Error('Unable to retrieve model memory estimation');
     }
+
+    return {
+      estimatedModelMemoryLimit,
+      modelMemoryLimit,
+      ...(maxModelMemoryLimit ? { maxModelMemoryLimit } : {}),
+    };
   };
 }
