@@ -54,6 +54,21 @@ export const getSimpleRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> =
   query: 'user.name: root or user.name: admin',
 });
 
+/**
+ * This is a representative ML rule payload as expected by the server
+ * @param ruleId
+ */
+export const getSimpleMlRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+  name: 'Simple ML Rule',
+  description: 'Simple Machine Learning Rule',
+  anomaly_threshold: 44,
+  risk_score: 1,
+  rule_id: ruleId,
+  severity: 'high',
+  machine_learning_job_id: 'some_job_id',
+  type: 'machine_learning',
+});
+
 export const getSignalStatus = () => ({
   aggs: { statuses: { terms: { field: 'signal.status', size: 10 } } },
 });
@@ -147,6 +162,20 @@ export const getSimpleRuleOutputWithoutRuleId = (
   const rule = getSimpleRuleOutput(ruleId);
   const { rule_id, ...ruleWithoutRuleId } = rule;
   return ruleWithoutRuleId;
+};
+
+export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => {
+  const rule = getSimpleRuleOutput(ruleId);
+  const { query, language, index, ...rest } = rule;
+
+  return {
+    ...rest,
+    name: 'Simple ML Rule',
+    description: 'Simple Machine Learning Rule',
+    anomaly_threshold: 44,
+    machine_learning_job_id: 'some_job_id',
+    type: 'machine_learning',
+  };
 };
 
 /**

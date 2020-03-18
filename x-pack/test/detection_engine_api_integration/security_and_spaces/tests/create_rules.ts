@@ -18,6 +18,8 @@ import {
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
+  getSimpleMlRule,
+  getSimpleMlRuleOutput,
 } from './utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -72,6 +74,17 @@ export default ({ getService }: FtrProviderContext) => {
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
+      });
+
+      it('should create a single Machine Learning rule', async () => {
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getSimpleMlRule())
+          .expect(200);
+
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare).to.eql(getSimpleMlRuleOutput());
       });
 
       it('should cause a 409 conflict if we attempt to create the same rule_id twice', async () => {
