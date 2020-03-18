@@ -17,6 +17,12 @@
  * under the License.
  */
 
+import { Observable } from 'rxjs';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import {
+  TelemetryCollectionManagerPluginSetup,
+  TelemetryCollectionManagerPluginStart,
+} from 'src/plugins/telemetry_collection_manager/server';
 import {
   CoreSetup,
   PluginInitializerContext,
@@ -25,13 +31,7 @@ import {
   IUiSettingsClient,
   SavedObjectsClient,
   Plugin,
-} from 'kibana/server';
-import { Observable } from 'rxjs';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import {
-  TelemetryCollectionManagerPluginSetup,
-  TelemetryCollectionManagerPluginStart,
-} from 'src/plugins/telemetry_collection_manager/server';
+} from '../../../core/server';
 import { registerRoutes } from './routes';
 import { registerCollection } from './telemetry_collection';
 import {
@@ -43,6 +43,7 @@ import {
 } from './collectors';
 import { TelemetryConfigType } from './config';
 import { FetcherTask } from './fetcher';
+import { handleOldSettings } from './handle_old_settings';
 
 export interface TelemetryPluginsSetup {
   usageCollection: UsageCollectionSetup;
@@ -73,15 +74,13 @@ export class TelemetryPlugin implements Plugin {
     });
   }
 
-  public setup(
+  public async setup(
     core: CoreSetup,
     { usageCollection, telemetryCollectionManager }: TelemetryPluginsSetup
   ) {
     const currentKibanaVersion = this.currentKibanaVersion;
     const config$ = this.config$;
     const isDev = this.isDev;
-
-    // TODO: core.uiSettings.register
 
     registerCollection(telemetryCollectionManager);
     const router = core.http.createRouter();
@@ -98,12 +97,13 @@ export class TelemetryPlugin implements Plugin {
     this.registerUsageCollectors(usageCollection, opts => core.savedObjects.registerType(opts));
   }
 
-  public start(core: CoreStart, { telemetryCollectionManager }: TelemetryPluginsStart) {
+  public async start(core: CoreStart, { telemetryCollectionManager }: TelemetryPluginsStart) {
     const { savedObjects, uiSettings } = core;
     this.savedObjectsClient = savedObjects.createInternalRepository();
-    this.uiSettingsClient = uiSettings.asScopedToClient(
-      new SavedObjectsClient(this.savedObjectsClient)
-    );
+    const savedObjectsClient = new SavedObjectsClient(this.savedObjectsClient);
+    this.uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
+
+    await handleOldSettings(savedObjectsClient, this.uiSettingsClient);
 
     this.fetcherTask.start(core, { telemetryCollectionManager });
   }

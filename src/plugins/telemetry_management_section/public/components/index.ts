@@ -16,24 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
 
-interface GetTelemetryAllowChangingOptInStatus {
-  configTelemetryAllowChangingOptInStatus: boolean;
-  telemetrySavedObject: TelemetrySavedObject;
-}
-
-export function getTelemetryAllowChangingOptInStatus({
-  telemetrySavedObject,
-  configTelemetryAllowChangingOptInStatus,
-}: GetTelemetryAllowChangingOptInStatus) {
-  if (!telemetrySavedObject) {
-    return configTelemetryAllowChangingOptInStatus;
-  }
-
-  if (typeof telemetrySavedObject.telemetryAllowChangingOptInStatus === 'undefined') {
-    return configTelemetryAllowChangingOptInStatus;
-  }
-
-  return telemetrySavedObject.telemetryAllowChangingOptInStatus;
-}
+export { OptInExampleFlyout } from './opt_in_example_flyout';
+export { telemetryManagementSectionWrapper } from './telemetry_management_section_wrapper';
+export { TelemetryManagementSection } from './telemetry_management_section';

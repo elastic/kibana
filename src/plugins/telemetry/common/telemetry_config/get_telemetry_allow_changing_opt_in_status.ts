@@ -17,22 +17,24 @@
  * under the License.
  */
 
-import { SavedObjectsErrorHelpers, SavedObjectsClientContract } from '../../../../core/server';
-import { TelemetrySavedObjectAttributes } from './';
+import { TelemetrySavedObject } from './types';
 
-export async function updateTelemetrySavedObject(
-  savedObjectsClient: SavedObjectsClientContract,
-  savedObjectAttributes: TelemetrySavedObjectAttributes
-) {
-  try {
-    return await savedObjectsClient.update('telemetry', 'telemetry', savedObjectAttributes);
-  } catch (err) {
-    if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-      return await savedObjectsClient.create('telemetry', savedObjectAttributes, {
-        id: 'telemetry',
-        overwrite: true,
-      });
-    }
-    throw err;
+interface GetTelemetryAllowChangingOptInStatus {
+  configTelemetryAllowChangingOptInStatus: boolean;
+  telemetrySavedObject: TelemetrySavedObject;
+}
+
+export function getTelemetryAllowChangingOptInStatus({
+  telemetrySavedObject,
+  configTelemetryAllowChangingOptInStatus,
+}: GetTelemetryAllowChangingOptInStatus) {
+  if (!telemetrySavedObject) {
+    return configTelemetryAllowChangingOptInStatus;
   }
+
+  if (typeof telemetrySavedObject.telemetryAllowChangingOptInStatus === 'undefined') {
+    return configTelemetryAllowChangingOptInStatus;
+  }
+
+  return telemetrySavedObject.telemetryAllowChangingOptInStatus;
 }

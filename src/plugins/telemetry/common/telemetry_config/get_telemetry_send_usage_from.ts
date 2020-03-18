@@ -16,30 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { TelemetrySavedObject } from './types';
 
-import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
-
-interface NotifyOpts {
-  allowChangingOptInStatus: boolean;
+interface GetTelemetryUsageFetcherConfig {
+  configTelemetrySendUsageFrom: 'browser' | 'server';
   telemetrySavedObject: TelemetrySavedObject;
-  telemetryOptedIn: boolean | null;
-  configTelemetryOptIn: boolean;
 }
 
-export function getNotifyUserAboutOptInDefault({
-  allowChangingOptInStatus,
+export function getTelemetrySendUsageFrom({
   telemetrySavedObject,
-  telemetryOptedIn,
-  configTelemetryOptIn,
-}: NotifyOpts) {
-  if (allowChangingOptInStatus === false) {
-    return false;
+  configTelemetrySendUsageFrom,
+}: GetTelemetryUsageFetcherConfig) {
+  if (!telemetrySavedObject) {
+    return configTelemetrySendUsageFrom;
   }
 
-  // determine if notice has been seen before
-  if (telemetrySavedObject && telemetrySavedObject.userHasSeenNotice === true) {
-    return false;
+  if (typeof telemetrySavedObject.sendUsageFrom === 'undefined') {
+    return configTelemetrySendUsageFrom;
   }
 
-  return telemetryOptedIn === true && configTelemetryOptIn === true;
+  return telemetrySavedObject.sendUsageFrom;
 }

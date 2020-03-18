@@ -31,11 +31,14 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { PRIVACY_STATEMENT_URL } from '../../common/constants';
+import { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
+import { PRIVACY_STATEMENT_URL } from '../../../telemetry/common/constants';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
 import { Field } from '../../../advanced_settings/public';
-import { ToastsStart } from '../../../../core/public/';
-import { TelemetryService } from '../services/telemetry_service';
+import { ToastsStart } from '../../../../core/public';
+
+type TelemetryService = TelemetryPluginSetup['telemetryService'];
+
 const SEARCH_TERMS = ['telemetry', 'usage', 'data', 'usage data'];
 
 interface Props {

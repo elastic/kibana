@@ -18,7 +18,7 @@
  */
 
 import { getTelemetryOptIn } from './get_telemetry_opt_in';
-import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
+import { TelemetrySavedObject } from './types';
 
 describe('getTelemetryOptIn', () => {
   it('returns null when saved object not found', () => {

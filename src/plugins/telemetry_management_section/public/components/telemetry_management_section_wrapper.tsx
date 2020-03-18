@@ -17,11 +17,24 @@
  * under the License.
  */
 
-export { replaceTelemetryInjectedVars } from './replace_injected_vars';
-export { getTelemetryOptIn } from './get_telemetry_opt_in';
-export { getTelemetrySendUsageFrom } from './get_telemetry_send_usage_from';
-export { getTelemetryAllowChangingOptInStatus } from './get_telemetry_allow_changing_opt_in_status';
-export {
-  getTelemetryFailureDetails,
-  TelemetryFailureDetails,
-} from './get_telemetry_failure_details';
+import React from 'react';
+import { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
+import { TelemetryManagementSection } from './telemetry_management_section';
+
+// It should be this but the types are way too vague in the AdvancedSettings plugin `Record<string, any>`
+// type Props = Omit<TelemetryManagementSection['props'], 'telemetryService'>;
+type Props = any;
+
+export function telemetryManagementSectionWrapper(
+  telemetryService: TelemetryPluginSetup['telemetryService']
+) {
+  const TelemetryManagementSectionWrapper = (props: Props) => (
+    <TelemetryManagementSection
+      showAppliesSettingMessage={true}
+      telemetryService={telemetryService}
+      {...props}
+    />
+  );
+
+  return TelemetryManagementSectionWrapper;
+}

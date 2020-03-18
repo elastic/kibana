@@ -16,24 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
 
-interface GetTelemetryUsageFetcherConfig {
-  configTelemetrySendUsageFrom: 'browser' | 'server';
-  telemetrySavedObject: TelemetrySavedObject;
+export interface TelemetrySavedObjectAttributes {
+  enabled?: boolean | null;
+  lastVersionChecked?: string;
+  sendUsageFrom?: 'browser' | 'server';
+  lastReported?: number;
+  telemetryAllowChangingOptInStatus?: boolean;
+  userHasSeenNotice?: boolean;
+  reportFailureCount?: number;
+  reportFailureVersion?: string;
 }
 
-export function getTelemetrySendUsageFrom({
-  telemetrySavedObject,
-  configTelemetrySendUsageFrom,
-}: GetTelemetryUsageFetcherConfig) {
-  if (!telemetrySavedObject) {
-    return configTelemetrySendUsageFrom;
-  }
-
-  if (typeof telemetrySavedObject.sendUsageFrom === 'undefined') {
-    return configTelemetrySendUsageFrom;
-  }
-
-  return telemetrySavedObject.sendUsageFrom;
-}
+export type TelemetrySavedObject = TelemetrySavedObjectAttributes | null | false;

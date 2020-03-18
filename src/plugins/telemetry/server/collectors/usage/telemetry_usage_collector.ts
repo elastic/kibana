@@ -24,7 +24,7 @@ import { dirname, join } from 'path';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getConfigPath } from 'src/core/server/path';
+import { getConfigPath } from '../../../../../core/server/path';
 
 // look for telemetry.yml in the same places we expect kibana.yml
 import { ensureDeepObject } from './ensure_deep_object';

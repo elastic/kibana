@@ -26,27 +26,25 @@
  * @return {Boolean} {@code true} if the banner should still be displayed. {@code false} if the banner should not be displayed.
  */
 
-import { Server } from 'hapi';
+import { IUiSettingsClient, SavedObjectsClientContract } from 'kibana/server';
 import { CONFIG_TELEMETRY } from '../../common/constants';
 import { updateTelemetrySavedObject } from '../telemetry_repository';
 
 const CONFIG_ALLOW_REPORT = 'xPackMonitoring:allowReport';
 
-export async function handleOldSettings(server: Server) {
-  const { getSavedObjectsRepository } = server.savedObjects;
-  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-  const savedObjectsClient = getSavedObjectsRepository(callWithInternalUser);
-  const uiSettings = server.uiSettingsServiceFactory({ savedObjectsClient });
-
-  const oldTelemetrySetting = await uiSettings.get(CONFIG_TELEMETRY);
-  const oldAllowReportSetting = await uiSettings.get(CONFIG_ALLOW_REPORT);
+export async function handleOldSettings(
+  savedObjectsClient: SavedObjectsClientContract,
+  uiSettingsClient: IUiSettingsClient
+) {
+  const oldTelemetrySetting = await uiSettingsClient.get(CONFIG_TELEMETRY);
+  const oldAllowReportSetting = await uiSettingsClient.get(CONFIG_ALLOW_REPORT);
   let legacyOptInValue = null;
 
   if (typeof oldTelemetrySetting === 'boolean') {
     legacyOptInValue = oldTelemetrySetting;
   } else if (
     typeof oldAllowReportSetting === 'boolean' &&
-    uiSettings.isOverridden(CONFIG_ALLOW_REPORT)
+    uiSettingsClient.isOverridden(CONFIG_ALLOW_REPORT)
   ) {
     legacyOptInValue = oldAllowReportSetting;
   }

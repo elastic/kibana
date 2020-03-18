@@ -18,7 +18,7 @@
  */
 
 import { getTelemetrySendUsageFrom } from './get_telemetry_send_usage_from';
-import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
+import { TelemetrySavedObject } from './types';
 
 describe('getTelemetrySendUsageFrom', () => {
   it('returns kibana.yml config when saved object not found', () => {

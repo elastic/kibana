@@ -17,15 +17,29 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { TelemetrySavedObject } from './types';
 
-/*
- * config description for opting into telemetry
- * @type {string}
- */
-export const getConfigTelemetryDesc = () => {
-  return i18n.translate('telemetry.telemetryConfigDescription', {
-    defaultMessage:
-      'Help us improve the Elastic Stack by providing usage statistics for basic features. We will not share this data outside of Elastic.',
-  });
-};
+interface NotifyOpts {
+  allowChangingOptInStatus: boolean;
+  telemetrySavedObject: TelemetrySavedObject;
+  telemetryOptedIn: boolean | null;
+  configTelemetryOptIn: boolean;
+}
+
+export function getNotifyUserAboutOptInDefault({
+  allowChangingOptInStatus,
+  telemetrySavedObject,
+  telemetryOptedIn,
+  configTelemetryOptIn,
+}: NotifyOpts) {
+  if (allowChangingOptInStatus === false) {
+    return false;
+  }
+
+  // determine if notice has been seen before
+  if (telemetrySavedObject && telemetrySavedObject.userHasSeenNotice === true) {
+    return false;
+  }
+
+  return telemetryOptedIn === true && configTelemetryOptIn === true;
+}

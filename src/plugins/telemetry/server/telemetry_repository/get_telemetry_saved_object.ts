@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { SavedObjectsErrorHelpers, SavedObjectsClientContract } from 'kibana/server';
-import { TelemetrySavedObjectAttributes } from './';
+import { SavedObjectsErrorHelpers, SavedObjectsClientContract } from '../../../../core/server';
+import { TelemetrySavedObject } from './';
 
-export type TelemetrySavedObject = TelemetrySavedObjectAttributes | null | false;
 type GetTelemetrySavedObject = (
   repository: SavedObjectsClientContract
 ) => Promise<TelemetrySavedObject>;

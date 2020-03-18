@@ -17,16 +17,9 @@
  * under the License.
  */
 
-export { getTelemetrySavedObject, TelemetrySavedObject } from './get_telemetry_saved_object';
+export { getTelemetrySavedObject } from './get_telemetry_saved_object';
 export { updateTelemetrySavedObject } from './update_telemetry_saved_object';
-
-export interface TelemetrySavedObjectAttributes {
-  enabled?: boolean | null;
-  lastVersionChecked?: string;
-  sendUsageFrom?: 'browser' | 'server';
-  lastReported?: number;
-  telemetryAllowChangingOptInStatus?: boolean;
-  userHasSeenNotice?: boolean;
-  reportFailureCount?: number;
-  reportFailureVersion?: string;
-}
+export {
+  TelemetrySavedObject,
+  TelemetrySavedObjectAttributes,
+} from '../../common/telemetry_config/types';

@@ -16,23 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { TelemetrySavedObject } from './types';
 
-import { SavedObjectsErrorHelpers, SavedObjectsClientContract } from '../../../../core/server';
-import { TelemetrySavedObjectAttributes } from './';
+interface GetTelemetryFailureDetailsConfig {
+  telemetrySavedObject: TelemetrySavedObject;
+}
 
-export async function updateTelemetrySavedObject(
-  savedObjectsClient: SavedObjectsClientContract,
-  savedObjectAttributes: TelemetrySavedObjectAttributes
-) {
-  try {
-    return await savedObjectsClient.update('telemetry', 'telemetry', savedObjectAttributes);
-  } catch (err) {
-    if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-      return await savedObjectsClient.create('telemetry', savedObjectAttributes, {
-        id: 'telemetry',
-        overwrite: true,
-      });
-    }
-    throw err;
+export interface TelemetryFailureDetails {
+  failureCount: number;
+  failureVersion?: string;
+}
+
+export function getTelemetryFailureDetails({
+  telemetrySavedObject,
+}: GetTelemetryFailureDetailsConfig): TelemetryFailureDetails {
+  if (!telemetrySavedObject) {
+    return {
+      failureVersion: undefined,
+      failureCount: 0,
+    };
   }
+  const { reportFailureCount, reportFailureVersion } = telemetrySavedObject;
+
+  return {
+    failureCount: typeof reportFailureCount === 'number' ? reportFailureCount : 0,
+    failureVersion: typeof reportFailureVersion === 'string' ? reportFailureVersion : undefined,
+  };
 }

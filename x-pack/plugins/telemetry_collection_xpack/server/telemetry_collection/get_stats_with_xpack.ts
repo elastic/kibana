@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TelemetryLocalStats, getLocalStats } from 'src/plugins/telemetry/server';
-import { StatsGetter } from 'src/plugins/telemetry_collection_manager/server';
+import { TelemetryLocalStats, getLocalStats } from '../../../../../src/plugins/telemetry/server';
+import { StatsGetter } from '../../../../../src/plugins/telemetry_collection_manager/server';
 import { getXPackUsage } from './get_xpack';
 
 export type TelemetryAggregatedStats = TelemetryLocalStats & {

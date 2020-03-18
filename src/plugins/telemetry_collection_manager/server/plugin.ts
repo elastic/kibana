@@ -63,17 +63,17 @@ export class TelemetryCollectionManagerPlugin
     this.usageCollection = usageCollection;
 
     return {
-      setCollection: this.setCollection,
-      getOptInStats: this.getOptInStats,
-      getStats: this.getStats,
+      setCollection: this.setCollection.bind(this),
+      getOptInStats: this.getOptInStats.bind(this),
+      getStats: this.getStats.bind(this),
     };
   }
 
   public start(core: CoreStart) {
     return {
-      setCollection: this.setCollection,
-      getOptInStats: this.getOptInStats,
-      getStats: this.getStats,
+      setCollection: this.setCollection.bind(this),
+      getOptInStats: this.getOptInStats.bind(this),
+      getStats: this.getStats.bind(this),
     };
   }
 
@@ -196,7 +196,9 @@ export class TelemetryCollectionManagerPlugin
           return encryptTelemetry(usageData, this.isDev);
         }
       } catch (err) {
-        this.logger.debug(`Failed to collect any usage with registered collections.`);
+        this.logger.debug(
+          `Failed to collect any usage with registered collection ${collection.title}.`
+        );
         // swallow error to try next collection;
       }
     }

@@ -19,10 +19,10 @@
 
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { ISavedObjectsRepository, SavedObjectsClient } from 'kibana/server';
+import { ISavedObjectsRepository, SavedObjectsClient } from '../../../../../core/server';
 import { TELEMETRY_STATS_TYPE } from '../../../common/constants';
 import { getTelemetrySavedObject, TelemetrySavedObject } from '../../telemetry_repository';
-import { getTelemetryOptIn, getTelemetrySendUsageFrom } from '../../telemetry_config';
+import { getTelemetryOptIn, getTelemetrySendUsageFrom } from '../../../common/telemetry_config';
 import { UsageCollectionSetup } from '../../../../usage_collection/server';
 import { TelemetryConfigType } from '../../config';
 

@@ -23,7 +23,6 @@ import * as constants from '../common/constants';
 import { configSchema, TelemetryConfigType } from './config';
 
 export { FetcherTask } from './fetcher';
-export { replaceTelemetryInjectedVars } from './telemetry_config';
 export { handleOldSettings } from './handle_old_settings';
 export { TelemetryPluginsSetup } from './plugin';
 

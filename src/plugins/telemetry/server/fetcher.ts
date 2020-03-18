@@ -22,6 +22,7 @@ import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 // @ts-ignore
 import fetch from 'node-fetch';
+import { TelemetryCollectionManagerPluginStart } from 'src/plugins/telemetry_collection_manager/server';
 import {
   PluginInitializerContext,
   Logger,
@@ -29,13 +30,12 @@ import {
   SavedObjectsClient,
   CoreStart,
   ICustomClusterClient,
-} from 'kibana/server';
-import { TelemetryCollectionManagerPluginStart } from 'src/plugins/telemetry_collection_manager/server';
+} from '../../../core/server';
 import {
   getTelemetryOptIn,
   getTelemetrySendUsageFrom,
   getTelemetryFailureDetails,
-} from './telemetry_config';
+} from '../common/telemetry_config';
 import { getTelemetrySavedObject, updateTelemetrySavedObject } from './telemetry_repository';
 import { REPORT_INTERVAL_MS } from '../common/constants';
 import { TelemetryConfigType } from './config';

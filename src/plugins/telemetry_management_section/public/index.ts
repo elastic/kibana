@@ -16,30 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
 
-interface GetTelemetryFailureDetailsConfig {
-  telemetrySavedObject: TelemetrySavedObject;
-}
+import { TelemetryManagementSectionPlugin } from './plugin';
 
-export interface TelemetryFailureDetails {
-  failureCount: number;
-  failureVersion?: string;
-}
-
-export function getTelemetryFailureDetails({
-  telemetrySavedObject,
-}: GetTelemetryFailureDetailsConfig): TelemetryFailureDetails {
-  if (!telemetrySavedObject) {
-    return {
-      failureVersion: undefined,
-      failureCount: 0,
-    };
-  }
-  const { reportFailureCount, reportFailureVersion } = telemetrySavedObject;
-
-  return {
-    failureCount: typeof reportFailureCount === 'number' ? reportFailureCount : 0,
-    failureVersion: typeof reportFailureVersion === 'string' ? reportFailureVersion : undefined,
-  };
+export function plugin() {
+  return new TelemetryManagementSectionPlugin();
 }

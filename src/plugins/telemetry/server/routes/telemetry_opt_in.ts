@@ -23,7 +23,7 @@ import { take } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
 import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
-import { getTelemetryAllowChangingOptInStatus } from '../telemetry_config';
+import { getTelemetryAllowChangingOptInStatus } from '../../common/telemetry_config';
 import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
 
 import {

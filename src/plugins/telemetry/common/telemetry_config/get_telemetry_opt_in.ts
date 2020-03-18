@@ -18,7 +18,7 @@
  */
 
 import semver from 'semver';
-import { TelemetrySavedObject } from '../telemetry_repository/get_telemetry_saved_object';
+import { TelemetrySavedObject } from './types';
 
 interface GetTelemetryOptInConfig {
   telemetrySavedObject: TelemetrySavedObject;
