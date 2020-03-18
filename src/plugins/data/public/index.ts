@@ -47,13 +47,13 @@ import {
   isQueryStringFilter,
   isRangeFilter,
   toggleFilterNegated,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
 } from '../common';
 
 import { FilterLabel } from './ui/filter_bar';
 
 import {
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
   generateFilters,
   onlyDisabledFiltersChanged,
   changeTimeFilter,
