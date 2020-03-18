@@ -5,7 +5,7 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { SetupDependencies } from '../../plugin';
+import { SetupDependencies, StartDependencies } from '../../plugin';
 import {
   CONTEXT_MENU_TRIGGER,
   EmbeddableContext,
@@ -16,7 +16,6 @@ import {
   OPEN_FLYOUT_ADD_DRILLDOWN,
   OPEN_FLYOUT_EDIT_DRILLDOWN,
 } from './actions';
-import { DrilldownsStartContract } from '../../../../drilldowns/public';
 import { DashboardToDashboardDrilldown } from './dashboard_to_dashboard_drilldown';
 
 declare module '../../../../../../src/plugins/ui_actions/public' {
@@ -27,10 +26,7 @@ declare module '../../../../../../src/plugins/ui_actions/public' {
 }
 
 export class DashboardDrilldownsService {
-  async bootstrap(
-    core: CoreSetup<{ drilldowns: DrilldownsStartContract }>,
-    plugins: SetupDependencies
-  ) {
+  async bootstrap(core: CoreSetup<StartDependencies>, plugins: SetupDependencies) {
     const overlays = async () => (await core.getStartServices())[0].overlays;
     const drilldowns = async () => (await core.getStartServices())[1].drilldowns;
     const getSavedObjectsClient = async () =>
@@ -39,7 +35,6 @@ export class DashboardDrilldownsService {
       (await core.getStartServices())[0].application.navigateToApp;
 
     const getGetUrlGenerator = async () =>
-      // @ts-ignore
       (await core.getStartServices())[1].share.urlGenerators.getUrlGenerator;
 
     const actionFlyoutCreateDrilldown = new FlyoutCreateDrilldownAction({ overlays, drilldowns });

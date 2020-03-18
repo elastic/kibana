@@ -6,13 +6,14 @@
 
 import { CoreStart, CoreSetup, Plugin } from 'src/core/public';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
-import { SharePluginStart } from '../../../../src/plugins/share/public';
+import { SharePluginStart, SharePluginSetup } from '../../../../src/plugins/share/public';
 import { DashboardDrilldownsService } from './services';
 import { DrilldownsSetupContract, DrilldownsStartContract } from '../../drilldowns/public';
 
 export interface SetupDependencies {
   uiActions: UiActionsSetup;
   drilldowns: DrilldownsSetupContract;
+  share: SharePluginSetup;
 }
 
 export interface StartDependencies {
