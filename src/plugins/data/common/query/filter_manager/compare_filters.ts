@@ -18,7 +18,7 @@
  */
 
 import { defaults, isEqual, omit, map } from 'lodash';
-import { FilterMeta, Filter } from '../../../../common';
+import { FilterMeta, Filter } from '../../es_query';
 
 export interface FilterCompareOptions {
   disabled?: boolean;

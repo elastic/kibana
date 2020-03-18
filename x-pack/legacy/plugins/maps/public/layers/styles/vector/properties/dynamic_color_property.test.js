@@ -70,7 +70,7 @@ class MockLayer {
     return new MockStyle();
   }
 
-  findDataRequestById() {
+  getDataRequest() {
     return null;
   }
 }

@@ -14,10 +14,7 @@ import { VectorStyleIconEditor } from './symbol/vector_style_icon_editor';
 import { VectorStyleLabelEditor } from './label/vector_style_label_editor';
 import { VectorStyleLabelBorderSizeEditor } from './label/vector_style_label_border_size_editor';
 import { OrientationEditor } from './orientation/orientation_editor';
-import {
-  getDefaultDynamicProperties,
-  getDefaultStaticProperties,
-} from '../vector_style_defaults';
+import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../vector_style_defaults';
 import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_utils';
 import { VECTOR_SHAPE_TYPES } from '../../../sources/vector_feature_types';
 import { i18n } from '@kbn/i18n';
@@ -69,7 +66,7 @@ export class VectorStyleEditor extends Component {
     };
 
     //These are all fields (only used for text labeling)
-    const fields = await this.props.layer.getFields();
+    const fields = await this.props.layer.getStyleEditorFields();
     const fieldPromises = fields.map(getFieldMeta);
     const fieldsArrayAll = await Promise.all(fieldPromises);
     if (!this._isMounted || _.isEqual(fieldsArrayAll, this.state.fields)) {

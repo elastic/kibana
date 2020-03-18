@@ -7,11 +7,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { VectorStyleEditor } from './components/vector_style_editor';
-import {
-  getDefaultProperties,
-  LINE_STYLES,
-  POLYGON_STYLES,
-} from './vector_style_defaults';
+import { getDefaultProperties, LINE_STYLES, POLYGON_STYLES } from './vector_style_defaults';
 import { AbstractStyle } from '../abstract_style';
 import {
   GEO_JSON_TYPE,
@@ -123,7 +119,7 @@ export class VectorStyle extends AbstractStyle {
     );
   }
 
-  _getAllStyleProperties() {
+  getAllStyleProperties() {
     return [
       this._symbolizeAsStyleProperty,
       this._iconStyleProperty,
@@ -164,7 +160,7 @@ export class VectorStyle extends AbstractStyle {
     });
 
     const styleProperties = {};
-    this._getAllStyleProperties().forEach(styleProperty => {
+    this.getAllStyleProperties().forEach(styleProperty => {
       styleProperties[styleProperty.getStyleName()] = styleProperty;
     });
 
@@ -339,7 +335,7 @@ export class VectorStyle extends AbstractStyle {
   }
 
   getDynamicPropertiesArray() {
-    const styleProperties = this._getAllStyleProperties();
+    const styleProperties = this.getAllStyleProperties();
     return styleProperties.filter(
       styleProperty => styleProperty.isDynamic() && styleProperty.isComplete()
     );
@@ -390,7 +386,7 @@ export class VectorStyle extends AbstractStyle {
       return null;
     }
 
-    const formattersDataRequest = this._layer.findDataRequestById(dataRequestId);
+    const formattersDataRequest = this._layer.getDataRequest(dataRequestId);
     if (!formattersDataRequest || !formattersDataRequest.hasData()) {
       return null;
     }
