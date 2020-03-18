@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectAttributes } from '../../../../../../src/core/public';
+import { SavedObjectAttributes } from 'src/core/public';
 import {
   Datasource,
   DatasourcePackage,

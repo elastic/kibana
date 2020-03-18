@@ -7,13 +7,12 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { Direction } from '../../../graphql/types';
 import { mockIndexPattern } from '../../../mock';
 import { TestProviders } from '../../../mock/test_providers';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 
-import { TimelineHeaderComponent } from '.';
+import { TimelineHeader } from '.';
 
 jest.mock('../../../lib/kibana');
 
@@ -24,7 +23,7 @@ describe('Header', () => {
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
-        <TimelineHeaderComponent
+        <TimelineHeader
           browserFields={{}}
           dataProviders={mockDataProviders}
           id="foo"
@@ -37,10 +36,6 @@ describe('Header', () => {
           onToggleDataProviderExcluded={jest.fn()}
           show={true}
           showCallOutUnauthorizedMsg={false}
-          sort={{
-            columnId: '@timestamp',
-            sortDirection: Direction.desc,
-          }}
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -49,7 +44,7 @@ describe('Header', () => {
     test('it renders the data providers', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineHeaderComponent
+          <TimelineHeader
             browserFields={{}}
             dataProviders={mockDataProviders}
             id="foo"
@@ -62,10 +57,6 @@ describe('Header', () => {
             onToggleDataProviderExcluded={jest.fn()}
             show={true}
             showCallOutUnauthorizedMsg={false}
-            sort={{
-              columnId: '@timestamp',
-              sortDirection: Direction.desc,
-            }}
           />
         </TestProviders>
       );
@@ -76,7 +67,7 @@ describe('Header', () => {
     test('it renders the unauthorized call out providers', () => {
       const wrapper = mount(
         <TestProviders>
-          <TimelineHeaderComponent
+          <TimelineHeader
             browserFields={{}}
             dataProviders={mockDataProviders}
             id="foo"
@@ -89,10 +80,6 @@ describe('Header', () => {
             onToggleDataProviderExcluded={jest.fn()}
             show={true}
             showCallOutUnauthorizedMsg={true}
-            sort={{
-              columnId: '@timestamp',
-              sortDirection: Direction.desc,
-            }}
           />
         </TestProviders>
       );

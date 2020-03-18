@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TypeOf } from '@kbn/config-schema';
-import { RequestHandler } from 'kibana/server';
+import { RequestHandler } from 'src/core/server';
 import bluebird from 'bluebird';
 import { appContextService, agentConfigService, datasourceService } from '../../services';
 import { listAgents } from '../../services/agents';

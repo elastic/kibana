@@ -6,12 +6,20 @@
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiTitle, EuiText, EuiHealth, EuiTabbedContent } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiTitle,
+  EuiText,
+  EuiHealth,
+  EuiTabbedContent,
+  EuiTabbedContentTab,
+} from '@elastic/eui';
 import { useAlertListSelector } from '../../hooks/use_alerts_selector';
 import * as selectors from '../../../../store/alerts/selectors';
 import { MetadataPanel } from './metadata_panel';
 import { FormattedDate } from '../../formatted_date';
 import { AlertDetailResolver } from '../../resolver';
+import { TakeActionDropdown } from './take_action_dropdown';
 
 export const AlertDetailsOverview = memo(() => {
   const alertDetailsData = useAlertListSelector(selectors.selectedAlertDetailsData);
@@ -22,10 +30,11 @@ export const AlertDetailsOverview = memo(() => {
     selectors.selectedAlertIsLegacyEndpointEvent
   );
 
-  const tabs = useMemo(() => {
+  const tabs: EuiTabbedContentTab[] = useMemo(() => {
     return [
       {
         id: 'overviewMetadata',
+        'data-test-subj': 'overviewMetadata',
         name: i18n.translate(
           'xpack.endpoint.application.endpoint.alertDetails.overview.tabs.overview',
           {
@@ -86,6 +95,8 @@ export const AlertDetailsOverview = memo(() => {
           Endpoint Status: <EuiHealth color="success">Online</EuiHealth>
         </EuiText>
         <EuiText>Alert Status: Open</EuiText>
+        <EuiSpacer />
+        <TakeActionDropdown />
         <EuiSpacer />
       </section>
       <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
