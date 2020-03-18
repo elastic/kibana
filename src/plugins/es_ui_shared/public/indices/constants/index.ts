@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { indexPatterns } from '../../../../../plugins/data/public';
+import { indexPatterns } from '../../../../data/public';
 
 export const INDEX_ILLEGAL_CHARACTERS_VISIBLE = [...indexPatterns.ILLEGAL_CHARACTERS_VISIBLE, '*'];
 
