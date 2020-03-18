@@ -67,7 +67,7 @@ export class KbnClientUiSettings {
    * Replace all uiSettings with the `doc` values, `doc` is merged
    * with some defaults
    */
-  async replace(doc: UiSettingValues) {
+  async replace(doc: UiSettingValues, { retries = 5 }: { retries?: number } = {}) {
     this.log.debug('replacing kibana config doc: %j', doc);
 
     const changes: Record<string, any> = {
@@ -85,7 +85,7 @@ export class KbnClientUiSettings {
       method: 'POST',
       path: '/api/kibana/settings',
       body: { changes },
-      retries: 5,
+      retries,
     });
   }
 

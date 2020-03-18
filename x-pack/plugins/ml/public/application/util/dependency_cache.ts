@@ -21,6 +21,7 @@ import {
   ChromeRecentlyAccessed,
   IBasePath,
 } from 'kibana/public';
+import { SharePluginStart } from 'src/plugins/share/public';
 import { SecurityPluginSetup } from '../../../../security/public';
 
 export interface DependencyCache {
@@ -40,6 +41,7 @@ export interface DependencyCache {
   http: HttpStart | null;
   security: SecurityPluginSetup | null;
   i18n: I18nStart | null;
+  urlGenerators: SharePluginStart['urlGenerators'] | null;
 }
 
 const cache: DependencyCache = {
@@ -59,6 +61,7 @@ const cache: DependencyCache = {
   http: null,
   security: null,
   i18n: null,
+  urlGenerators: null,
 };
 
 export function setDependencyCache(deps: Partial<DependencyCache>) {
@@ -78,6 +81,7 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.http = deps.http || null;
   cache.security = deps.security || null;
   cache.i18n = deps.i18n || null;
+  cache.urlGenerators = deps.urlGenerators || null;
 }
 
 export function getTimefilter() {
@@ -189,6 +193,13 @@ export function getI18n() {
     throw new Error("i18n hasn't been initialized");
   }
   return cache.i18n;
+}
+
+export function getGetUrlGenerator() {
+  if (cache.urlGenerators === null) {
+    throw new Error("urlGenerators hasn't been initialized");
+  }
+  return cache.urlGenerators.getUrlGenerator;
 }
 
 export function clearCache() {

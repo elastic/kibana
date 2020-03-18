@@ -59,7 +59,7 @@ export default function(providerContext: FtrProviderContext) {
         .expect(401);
     });
 
-    it('should return a 200 if this a valid acks access', async () => {
+    it('should return a 200 if this a valid acks request', async () => {
       const { body: apiResponse } = await supertest
         .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
         .set('kbn-xsrf', 'xx')
@@ -68,12 +68,144 @@ export default function(providerContext: FtrProviderContext) {
           `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
         )
         .send({
-          action_ids: ['action1'],
+          events: [
+            {
+              type: 'ACTION_RESULT',
+              subtype: 'CONFIG',
+              timestamp: '2019-01-04T14:32:03.36764-05:00',
+              action_id: '48cebde1-c906-4893-b89f-595d943b72a1',
+              agent_id: 'agent1',
+              message: 'hello',
+              payload: 'payload',
+            },
+            {
+              type: 'ACTION_RESULT',
+              subtype: 'CONFIG',
+              timestamp: '2019-01-05T14:32:03.36764-05:00',
+              action_id: '48cebde1-c906-4893-b89f-595d943b72a2',
+              agent_id: 'agent1',
+              message: 'hello2',
+              payload: 'payload2',
+            },
+          ],
         })
         .expect(200);
-
       expect(apiResponse.action).to.be('acks');
       expect(apiResponse.success).to.be(true);
+      const { body: eventResponse } = await supertest
+        .get(`/api/ingest_manager/fleet/agents/agent1/events`)
+        .set('kbn-xsrf', 'xx')
+        .set(
+          'Authorization',
+          `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
+        )
+        .expect(200);
+      const expectedEvents = eventResponse.list.filter(
+        (item: Record<string, string>) =>
+          item.action_id === '48cebde1-c906-4893-b89f-595d943b72a1' ||
+          item.action_id === '48cebde1-c906-4893-b89f-595d943b72a2'
+      );
+      expect(expectedEvents.length).to.eql(2);
+      const expectedEvent = expectedEvents.find(
+        (item: Record<string, string>) => item.action_id === '48cebde1-c906-4893-b89f-595d943b72a1'
+      );
+      expect(expectedEvent).to.eql({
+        type: 'ACTION_RESULT',
+        subtype: 'CONFIG',
+        timestamp: '2019-01-04T14:32:03.36764-05:00',
+        action_id: '48cebde1-c906-4893-b89f-595d943b72a1',
+        agent_id: 'agent1',
+        message: 'hello',
+        payload: 'payload',
+      });
+    });
+
+    it('should return a 400 when request event list contains event for another agent id', async () => {
+      const { body: apiResponse } = await supertest
+        .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
+        .set('kbn-xsrf', 'xx')
+        .set(
+          'Authorization',
+          `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
+        )
+        .send({
+          events: [
+            {
+              type: 'ACTION_RESULT',
+              subtype: 'CONFIG',
+              timestamp: '2019-01-04T14:32:03.36764-05:00',
+              action_id: '48cebde1-c906-4893-b89f-595d943b72a1',
+              agent_id: 'agent2',
+              message: 'hello',
+              payload: 'payload',
+            },
+          ],
+        })
+        .expect(400);
+      expect(apiResponse.message).to.eql(
+        'agent events contains events with different agent id from currently authorized agent'
+      );
+    });
+
+    it('should return a 400 when request event list contains action that does not belong to agent current actions', async () => {
+      const { body: apiResponse } = await supertest
+        .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
+        .set('kbn-xsrf', 'xx')
+        .set(
+          'Authorization',
+          `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
+        )
+        .send({
+          events: [
+            {
+              type: 'ACTION_RESULT',
+              subtype: 'CONFIG',
+              timestamp: '2019-01-04T14:32:03.36764-05:00',
+              action_id: '48cebde1-c906-4893-b89f-595d943b72a1',
+              agent_id: 'agent1',
+              message: 'hello',
+              payload: 'payload',
+            },
+            {
+              type: 'ACTION_RESULT',
+              subtype: 'CONFIG',
+              timestamp: '2019-01-04T14:32:03.36764-05:00',
+              action_id: 'does-not-exist',
+              agent_id: 'agent1',
+              message: 'hello',
+              payload: 'payload',
+            },
+          ],
+        })
+        .expect(400);
+      expect(apiResponse.message).to.eql('all actions should belong to current agent');
+    });
+
+    it('should return a 400 when request event list contains action types that are not allowed for acknowledgement', async () => {
+      const { body: apiResponse } = await supertest
+        .post(`/api/ingest_manager/fleet/agents/agent1/acks`)
+        .set('kbn-xsrf', 'xx')
+        .set(
+          'Authorization',
+          `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
+        )
+        .send({
+          events: [
+            {
+              type: 'ACTION',
+              subtype: 'FAILED',
+              timestamp: '2019-01-04T14:32:03.36764-05:00',
+              action_id: '48cebde1-c906-4893-b89f-595d943b72a1',
+              agent_id: 'agent1',
+              message: 'hello',
+              payload: 'payload',
+            },
+          ],
+        })
+        .expect(400);
+      expect(apiResponse.message).to.eql(
+        'ACTION not allowed for acknowledgment only ACTION_RESULT'
+      );
     });
   });
 }

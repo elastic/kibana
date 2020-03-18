@@ -82,7 +82,6 @@ export class Plugin
             charts: plugins.charts,
             element: params.element,
             toastNotifications: core.notifications.toasts,
-            injectedMetadata: core.injectedMetadata,
             http: core.http,
             uiSettings: core.uiSettings,
             docLinks: core.docLinks,
