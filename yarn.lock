@@ -4543,6 +4543,15 @@
     "@types/vinyl-fs" "*"
     chokidar "^2.1.2"
 
+"@types/h2o2@^8.1.1":
+  version "8.1.1"
+  resolved "https://registry.yarnpkg.com/@types/h2o2/-/h2o2-8.1.1.tgz#f990302cd2fdfd7909cff9d6643052002b69998f"
+  integrity sha512-lwF9WSvo4sfT0TnDZDXKef9Yza4xUXC3561QG4Q3Axhrkr+ZFBVJ7kCwI1mUNzk60jI1aMTYVIIoHKZjwCGuHw==
+  dependencies:
+    "@types/boom" "*"
+    "@types/hapi" "*"
+    "@types/node" "*"
+
 "@types/hapi-auth-cookie@^9.1.0":
   version "9.1.0"
   resolved "https://registry.yarnpkg.com/@types/hapi-auth-cookie/-/hapi-auth-cookie-9.1.0.tgz#cbcd2236b7d429bd0632a8cc45cfd355fdd7e7a2"
@@ -4609,6 +4618,13 @@
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@types/indent-string/-/indent-string-3.0.0.tgz#9ebb391ceda548926f5819ad16405349641b999f"
   integrity sha1-nrs5HO2lSJJvWBmtFkBTSWQbmZ8=
+
+"@types/inert@^5.1.2":
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/@types/inert/-/inert-5.1.2.tgz#2bb8bef3b2462f904c960654c9edfa39285a85c6"
+  integrity sha512-3IoSFLQWvhLfZ85kHas/F3iD/TyZPfeJbTsDjrwYljK1MgBGCB2OywAsyeA/YiJ62VbNXfXBwpD1/VbJPIZSGA==
+  dependencies:
+    "@types/hapi" "*"
 
 "@types/intl-relativeformat@^2.1.0":
   version "2.1.0"
