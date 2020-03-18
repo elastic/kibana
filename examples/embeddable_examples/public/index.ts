@@ -21,7 +21,7 @@ import { PluginInitializer } from 'kibana/public';
 export {
   HELLO_WORLD_EMBEDDABLE,
   HelloWorldEmbeddable,
-  HelloWorldEmbeddableFactory,
+  createHelloWorldEmbeddableFactory,
 } from './hello_world';
 export { ListContainer, LIST_CONTAINER } from './list_container';
 export { TODO_EMBEDDABLE } from './todo';

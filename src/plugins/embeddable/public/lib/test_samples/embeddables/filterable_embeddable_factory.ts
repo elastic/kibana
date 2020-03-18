@@ -23,23 +23,18 @@ import {
   FilterableEmbeddableInput,
   FILTERABLE_EMBEDDABLE,
 } from './filterable_embeddable';
-import { EmbeddableFactory } from '../../embeddables';
+import { EmbeddableFactoryDefinition } from '../../embeddables';
 import { IContainer } from '../../containers';
 
-export class FilterableEmbeddableFactory extends EmbeddableFactory<FilterableEmbeddableInput> {
-  public readonly type = FILTERABLE_EMBEDDABLE;
+export const createFilterableEmbeddableFactory = (): EmbeddableFactoryDefinition<FilterableEmbeddableInput> => ({
+  type: FILTERABLE_EMBEDDABLE,
 
-  public async isEditable() {
-    return true;
-  }
-
-  public getDisplayName() {
-    return i18n.translate('embeddableApi.samples.filterableEmbeddable.displayName', {
+  isEditable: async () => true,
+  getDisplayName: () =>
+    i18n.translate('embeddableApi.samples.filterableEmbeddable.displayName', {
       defaultMessage: 'filterable',
-    });
-  }
+    }),
 
-  public async create(initialInput: FilterableEmbeddableInput, parent?: IContainer) {
-    return new FilterableEmbeddable(initialInput, parent);
-  }
-}
+  create: async (initialInput: FilterableEmbeddableInput, parent?: IContainer) =>
+    new FilterableEmbeddable(initialInput, parent),
+});

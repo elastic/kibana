@@ -30,7 +30,7 @@ import { DashboardContainer, DashboardContainerOptions } from '../dashboard_cont
 import { getSampleDashboardInput } from '../../test_helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
+  createContactCardEmbeddableFactory,
 } from '../../embeddable_plugin_test_samples';
 import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
 
@@ -44,7 +44,7 @@ function getProps(
   const embeddableFactories = new Map<string, EmbeddableFactory>();
   embeddableFactories.set(
     CONTACT_CARD_EMBEDDABLE,
-    new ContactCardEmbeddableFactory({}, (() => null) as any, {} as any)
+    createContactCardEmbeddableFactory((() => null) as any, {} as any) as EmbeddableFactory
   );
 
   const options: DashboardContainerOptions = {

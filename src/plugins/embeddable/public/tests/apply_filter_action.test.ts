@@ -23,11 +23,11 @@ import {
   FilterableContainer,
   FilterableContainerInput,
   FILTERABLE_CONTAINER,
-  FilterableEmbeddableFactory,
   HelloWorldContainer,
   FILTERABLE_EMBEDDABLE,
   FilterableEmbeddable,
-  FilterableContainerFactory,
+  createFilterableEmbeddableFactory,
+  createFilterableContainerFactory,
   FilterableEmbeddableInput,
 } from '../lib/test_samples';
 // eslint-disable-next-line
@@ -38,8 +38,8 @@ test('ApplyFilterAction applies the filter to the root of the container tree', a
   const { doStart, setup } = testPlugin();
   const api = doStart();
 
-  const factory1 = new FilterableContainerFactory(api.getEmbeddableFactory);
-  const factory2 = new FilterableEmbeddableFactory();
+  const factory1 = createFilterableContainerFactory(api.getEmbeddableFactory);
+  const factory2 = createFilterableEmbeddableFactory();
 
   setup.registerEmbeddableFactory(factory1.type, factory1);
   setup.registerEmbeddableFactory(factory2.type, factory2);
@@ -111,7 +111,7 @@ test('ApplyFilterAction is incompatible if the root container does not accept a 
     }
   );
 
-  const factory = new FilterableEmbeddableFactory();
+  const factory = createFilterableEmbeddableFactory();
   setup.registerEmbeddableFactory(factory.type, factory);
 
   const embeddable = await parent.addNewEmbeddable<
@@ -133,7 +133,7 @@ test('trying to execute on incompatible context throws an error ', async () => {
   const api = doStart();
   const inspector = inspectorPluginMock.createStartContract();
 
-  const factory = new FilterableEmbeddableFactory();
+  const factory = createFilterableEmbeddableFactory();
   setup.registerEmbeddableFactory(factory.type, factory);
 
   const applyFilterAction = createFilterAction();

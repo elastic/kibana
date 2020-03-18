@@ -26,14 +26,17 @@ import {
   FilterableEmbeddable,
   FilterableEmbeddableInput,
 } from '../../../test_samples/embeddables/filterable_embeddable';
-import { FilterableEmbeddableFactory } from '../../../test_samples/embeddables/filterable_embeddable_factory';
+import { createFilterableEmbeddableFactory } from '../../../test_samples/embeddables/filterable_embeddable_factory';
 import { FilterableContainer } from '../../../test_samples/embeddables/filterable_container';
 import { ViewMode } from '../../../types';
 import { ContactCardEmbeddable } from '../../../test_samples/embeddables/contact_card/contact_card_embeddable';
 import { esFilters, Filter } from '../../../../../../../plugins/data/public';
 
 const embeddableFactories = new Map<string, EmbeddableFactory>();
-embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
+embeddableFactories.set(
+  FILTERABLE_EMBEDDABLE,
+  createFilterableEmbeddableFactory() as EmbeddableFactory
+);
 const getFactory = (id: string) => embeddableFactories.get(id);
 
 let container: FilterableContainer;

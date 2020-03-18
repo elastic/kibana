@@ -40,7 +40,7 @@ import {
   setTimeFilter,
   setAggs,
 } from './services';
-import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeEmbeddableFactory } from './embeddable';
+import { VISUALIZE_EMBEDDABLE_TYPE } from './embeddable';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../../../plugins/expressions/public';
 import { EmbeddableSetup } from '../../../../../../plugins/embeddable/public';
 import { visualization as visualizationFunction } from './expressions/visualization_function';
@@ -56,6 +56,7 @@ import { VisImpl } from './vis_impl';
 import { showNewVisModal } from './wizard';
 import { UiActionsStart } from '../../../../../../plugins/ui_actions/public';
 import { VisState } from './types';
+import { createVisualizeEmbeddableFactory } from './embeddable/visualize_embeddable_factory';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -114,7 +115,7 @@ export class VisualizationsPlugin
     expressions.registerFunction(visualizationFunction);
     expressions.registerRenderer(visualizationRenderer);
 
-    const embeddableFactory = new VisualizeEmbeddableFactory();
+    const embeddableFactory = createVisualizeEmbeddableFactory();
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 
     return {

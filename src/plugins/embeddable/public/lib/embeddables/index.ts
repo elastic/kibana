@@ -27,3 +27,5 @@ export { ErrorEmbeddable, isErrorEmbeddable } from './error_embeddable';
 export { withEmbeddableSubscription } from './with_subscription';
 export { EmbeddableFactoryRenderer } from './embeddable_factory_renderer';
 export { EmbeddableRoot } from './embeddable_root';
+export { getCreateEmbeddableFactory } from './create_embeddable_factory';
+export { EmbeddableFactoryDefinition } from './embeddable_factory_definition';

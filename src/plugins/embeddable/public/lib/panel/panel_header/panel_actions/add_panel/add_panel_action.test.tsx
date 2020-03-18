@@ -25,7 +25,7 @@ import {
   FilterableEmbeddable,
   FilterableEmbeddableInput,
 } from '../../../../test_samples/embeddables/filterable_embeddable';
-import { FilterableEmbeddableFactory } from '../../../../test_samples/embeddables/filterable_embeddable_factory';
+import { createFilterableEmbeddableFactory } from '../../../../test_samples/embeddables/filterable_embeddable_factory';
 import { FilterableContainer } from '../../../../test_samples/embeddables/filterable_container';
 // eslint-disable-next-line
 import { coreMock } from '../../../../../../../../core/public/mocks';
@@ -34,7 +34,10 @@ import { esFilters, Filter } from '../../../../../../../../plugins/data/public';
 import { EmbeddableStart } from 'src/plugins/embeddable/public/plugin';
 
 const embeddableFactories = new Map<string, EmbeddableFactory>();
-embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
+embeddableFactories.set(
+  FILTERABLE_EMBEDDABLE,
+  createFilterableEmbeddableFactory() as EmbeddableFactory
+);
 const getFactory = (id: string) => embeddableFactories.get(id);
 
 let container: FilterableContainer;

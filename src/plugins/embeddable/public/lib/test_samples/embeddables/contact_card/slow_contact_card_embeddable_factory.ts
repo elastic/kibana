@@ -18,7 +18,7 @@
  */
 
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
-import { Container, EmbeddableFactory } from '../../..';
+import { Container, EmbeddableFactoryDefinition } from '../../..';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';
 import { CONTACT_CARD_EMBEDDABLE } from './contact_card_embeddable_factory';
 
@@ -27,31 +27,20 @@ interface SlowContactCardEmbeddableFactoryOptions {
   loadTickCount?: number;
 }
 
-export class SlowContactCardEmbeddableFactory extends EmbeddableFactory<
-  ContactCardEmbeddableInput
-> {
-  private loadTickCount = 0;
-  public readonly type = CONTACT_CARD_EMBEDDABLE;
+export const createSlowContactCardEmbeddableFactory = (
+  options: SlowContactCardEmbeddableFactoryOptions
+): EmbeddableFactoryDefinition<ContactCardEmbeddableInput> => {
+  const loadTickCount = options.loadTickCount ?? 0;
 
-  constructor(private readonly options: SlowContactCardEmbeddableFactoryOptions) {
-    super();
-    if (options.loadTickCount) {
-      this.loadTickCount = options.loadTickCount;
-    }
-  }
-
-  public async isEditable() {
-    return true;
-  }
-
-  public getDisplayName() {
-    return 'slow to load contact card';
-  }
-
-  public async create(initialInput: ContactCardEmbeddableInput, parent?: Container) {
-    for (let i = 0; i < this.loadTickCount; i++) {
-      await Promise.resolve();
-    }
-    return new ContactCardEmbeddable(initialInput, { execAction: this.options.execAction }, parent);
-  }
-}
+  return {
+    type: CONTACT_CARD_EMBEDDABLE,
+    isEditable: async () => true,
+    getDisplayName: () => 'slow to load contact card',
+    create: async (initialInput: ContactCardEmbeddableInput, parent?: Container) => {
+      for (let i = 0; i < loadTickCount; i++) {
+        await Promise.resolve();
+      }
+      return new ContactCardEmbeddable(initialInput, { execAction: options.execAction }, parent);
+    },
+  };
+};

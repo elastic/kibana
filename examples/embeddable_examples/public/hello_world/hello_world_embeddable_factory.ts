@@ -21,29 +21,27 @@ import { i18n } from '@kbn/i18n';
 import {
   IContainer,
   EmbeddableInput,
-  EmbeddableFactory,
+  EmbeddableFactoryDefinition,
 } from '../../../../src/plugins/embeddable/public';
 import { HelloWorldEmbeddable, HELLO_WORLD_EMBEDDABLE } from './hello_world_embeddable';
 
-export class HelloWorldEmbeddableFactory extends EmbeddableFactory {
-  public readonly type = HELLO_WORLD_EMBEDDABLE;
+export const createHelloWorldEmbeddableFactory = (): EmbeddableFactoryDefinition => {
+  return {
+    type: HELLO_WORLD_EMBEDDABLE,
 
-  /**
-   * In our simple example, we let everyone have permissions to edit this. Most
-   * embeddables should check the UI Capabilities service to be sure of
-   * the right permissions.
-   */
-  public async isEditable() {
-    return true;
-  }
-
-  public async create(initialInput: EmbeddableInput, parent?: IContainer) {
-    return new HelloWorldEmbeddable(initialInput, parent);
-  }
-
-  public getDisplayName() {
-    return i18n.translate('embeddableExamples.helloworld.displayName', {
-      defaultMessage: 'hello world',
-    });
-  }
-}
+    /**
+     * In our simple example, we let everyone have permissions to edit this. Most
+     * embeddables should check the UI Capabilities service to be sure of
+     * the right permissions.
+     */
+    isEditable: () => Promise.resolve(true),
+    create: async (initialInput: EmbeddableInput, parent?: IContainer) => {
+      return new HelloWorldEmbeddable(initialInput, parent);
+    },
+    getDisplayName: () => {
+      return i18n.translate('embeddableExamples.helloworld.displayName', {
+        defaultMessage: 'hello world',
+      });
+    },
+  };
+};

@@ -219,7 +219,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
     core: CoreSetup<DiscoverStartPlugins>,
     plugins: DiscoverSetupPlugins
   ) {
-    const { SearchEmbeddableFactory } = await import('./np_ready/embeddable');
+    const { createSearchEmbeddableFactory } = await import('./np_ready/embeddable');
 
     if (!this.getEmbeddableInjector) {
       throw Error('Discover plugin method getEmbeddableInjector is undefined');
@@ -233,7 +233,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
       };
     };
 
-    const factory = new SearchEmbeddableFactory(getStartServices, this.getEmbeddableInjector);
+    const factory = createSearchEmbeddableFactory(getStartServices, this.getEmbeddableInjector);
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 

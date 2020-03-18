@@ -31,7 +31,7 @@ import { EmbeddableFactory, isErrorEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from './embeddable_panel';
 import { createEditModeAction } from '../test_samples/actions';
 import {
-  ContactCardEmbeddableFactory,
+  createContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,
 } from '../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { HelloWorldContainer } from '../test_samples/embeddables/hello_world_container';
@@ -53,11 +53,10 @@ const editModeAction = createEditModeAction();
 const trigger: Trigger = {
   id: CONTEXT_MENU_TRIGGER,
 };
-const embeddableFactory = new ContactCardEmbeddableFactory(
-  {} as any,
+const embeddableFactory = createContactCardEmbeddableFactory(
   (() => null) as any,
-  {} as any
-);
+  null as any
+) as EmbeddableFactory;
 
 actionRegistry.set(editModeAction.id, editModeAction);
 triggerRegistry.set(trigger.id, trigger);

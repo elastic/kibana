@@ -6,26 +6,22 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  EmbeddableFactory,
+  EmbeddableFactoryDefinition,
   IContainer,
   EmbeddableInput,
 } from '../../../../../../src/plugins/embeddable/public';
 import { ResolverEmbeddable } from './embeddable';
 
-export class ResolverEmbeddableFactory extends EmbeddableFactory {
-  public readonly type = 'resolver';
+export const createResolverEmbeddableFactory = (): EmbeddableFactoryDefinition => ({
+  type: 'resolver',
 
-  public async isEditable() {
-    return true;
-  }
+  isEditable: async () => true,
 
-  public async create(initialInput: EmbeddableInput, parent?: IContainer) {
-    return new ResolverEmbeddable(initialInput, {}, parent);
-  }
+  create: async (initialInput: EmbeddableInput, parent?: IContainer) =>
+    new ResolverEmbeddable(initialInput, {}, parent),
 
-  public getDisplayName() {
-    return i18n.translate('xpack.endpoint.resolver.displayNameTitle', {
+  getDisplayName: () =>
+    i18n.translate('xpack.endpoint.resolver.displayNameTitle', {
       defaultMessage: 'Resolver',
-    });
-  }
-}
+    }),
+});

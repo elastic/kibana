@@ -23,7 +23,7 @@ import { OverlayStart } from 'kibana/public';
 import { EuiFieldText } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
-import { IContainer, EmbeddableFactory } from '../../../../src/plugins/embeddable/public';
+import { IContainer, EmbeddableFactoryDefinition } from '../../../../src/plugins/embeddable/public';
 import { TodoEmbeddable, TODO_EMBEDDABLE, TodoInput, TodoOutput } from './todo_embeddable';
 
 function TaskInput({ onSave }: { onSave: (task: string) => void }) {
@@ -47,24 +47,14 @@ interface StartServices {
   openModal: OverlayStart['openModal'];
 }
 
-export class TodoEmbeddableFactory extends EmbeddableFactory<
-  TodoInput,
-  TodoOutput,
-  TodoEmbeddable
-> {
-  public readonly type = TODO_EMBEDDABLE;
-
-  constructor(private getStartServices: () => Promise<StartServices>) {
-    super();
-  }
-
-  public async isEditable() {
-    return true;
-  }
-
-  public async create(initialInput: TodoInput, parent?: IContainer) {
+export const createTodoEmbeddableFactory = (
+  getStartServices: () => Promise<StartServices>
+): EmbeddableFactoryDefinition<TodoInput, TodoOutput, TodoEmbeddable> => ({
+  type: TODO_EMBEDDABLE,
+  isEditable: async () => true,
+  create: async (initialInput: TodoInput, parent?: IContainer) => {
     return new TodoEmbeddable(initialInput, parent);
-  }
+  },
 
   /**
    * This function is used when dynamically creating a new embeddable to add to a
@@ -72,8 +62,8 @@ export class TodoEmbeddableFactory extends EmbeddableFactory<
    * used to collect specific embeddable input that the container will not provide, like
    * in this case, the task string.
    */
-  public async getExplicitInput() {
-    const { openModal } = await this.getStartServices();
+  getExplicitInput: async () => {
+    const { openModal } = await getStartServices();
     return new Promise<{ task: string }>(resolve => {
       const onSave = (task: string) => resolve({ task });
       const overlay = openModal(
@@ -87,11 +77,11 @@ export class TodoEmbeddableFactory extends EmbeddableFactory<
         )
       );
     });
-  }
+  },
 
-  public getDisplayName() {
+  getDisplayName: () => {
     return i18n.translate('embeddableExamples.todo.displayName', {
       defaultMessage: 'Todo item',
     });
-  }
-}
+  },
+});

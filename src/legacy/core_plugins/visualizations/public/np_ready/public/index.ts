@@ -40,8 +40,8 @@ export { VisualizationsSetup, VisualizationsStart };
 export { VisTypeAlias, VisType } from './vis_types';
 export { VisSavedObject } from './types';
 export { Vis, VisParams, VisState } from './vis';
-import { VisualizeEmbeddableFactory, VisualizeEmbeddable } from './embeddable';
-export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
+import { createVisualizeEmbeddableFactory, VisualizeEmbeddable } from './embeddable';
+export type VisualizeEmbeddableFactoryContract = PublicContract<createVisualizeEmbeddableFactory>;
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
 export { TypesService } from './vis_types/types_service';
 export { Status } from './legacy/update_status'; // should remove

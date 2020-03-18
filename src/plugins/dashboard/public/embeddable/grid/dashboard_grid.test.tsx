@@ -29,7 +29,7 @@ import { DashboardContainer, DashboardContainerOptions } from '../dashboard_cont
 import { getSampleDashboardInput } from '../../test_helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
+  createContactCardEmbeddableFactory,
 } from '../../embeddable_plugin_test_samples';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
 
@@ -39,7 +39,7 @@ function prepare(props?: Partial<DashboardGridProps>) {
   const embeddableFactories = new Map<string, EmbeddableFactory>();
   embeddableFactories.set(
     CONTACT_CARD_EMBEDDABLE,
-    new ContactCardEmbeddableFactory({} as any, (() => {}) as any, {} as any)
+    createContactCardEmbeddableFactory((() => {}) as any, {} as any) as EmbeddableFactory
   );
   const getEmbeddableFactory = (id: string) => embeddableFactories.get(id);
   const initialInput = getSampleDashboardInput({

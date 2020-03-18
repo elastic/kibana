@@ -7,7 +7,7 @@
 import {
   EmbeddableInput,
   IContainer,
-  EmbeddableFactory,
+  EmbeddableFactoryDefinition,
 } from '../../../../../src/plugins/embeddable/public';
 import { TimeRange } from '../../../../../src/plugins/data/public';
 import { TIME_RANGE_EMBEDDABLE, TimeRangeEmbeddable } from './time_range_embeddable';
@@ -16,18 +16,10 @@ interface EmbeddableTimeRangeInput extends EmbeddableInput {
   timeRange: TimeRange;
 }
 
-export class TimeRangeEmbeddableFactory extends EmbeddableFactory<EmbeddableTimeRangeInput> {
-  public readonly type = TIME_RANGE_EMBEDDABLE;
-
-  public async isEditable() {
-    return true;
-  }
-
-  public async create(initialInput: EmbeddableTimeRangeInput, parent?: IContainer) {
-    return new TimeRangeEmbeddable(initialInput, parent);
-  }
-
-  public getDisplayName() {
-    return 'time range';
-  }
-}
+export const createTimeRangeEmbeddableFactory = (): EmbeddableFactoryDefinition<EmbeddableTimeRangeInput> => ({
+  type: TIME_RANGE_EMBEDDABLE,
+  isEditable: async () => true,
+  create: async (initialInput: EmbeddableTimeRangeInput, parent?: IContainer) =>
+    new TimeRangeEmbeddable(initialInput, parent),
+  getDisplayName: () => 'time range',
+});

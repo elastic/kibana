@@ -23,12 +23,12 @@ import {
   FILTERABLE_EMBEDDABLE,
   FilterableEmbeddableInput,
 } from '../lib/test_samples/embeddables/filterable_embeddable';
-import { FilterableEmbeddableFactory } from '../lib/test_samples/embeddables/filterable_embeddable_factory';
+import { createFilterableEmbeddableFactory } from '../lib/test_samples/embeddables/filterable_embeddable_factory';
 import { CONTACT_CARD_EMBEDDABLE } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import { SlowContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
+import { createSlowContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
 import {
   HELLO_WORLD_EMBEDDABLE,
-  HelloWorldEmbeddableFactory,
+  createHelloWorldEmbeddableFactory,
 } from '../../../../../examples/embeddable_examples/public';
 import { FilterableContainer } from '../lib/test_samples/embeddables/filterable_container';
 import { isErrorEmbeddable } from '../lib';
@@ -43,13 +43,13 @@ const { setup, doStart, coreStart, uiActions } = testPlugin(
 );
 const start = doStart();
 
-setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
-const factory = new SlowContactCardEmbeddableFactory({
+setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, createFilterableEmbeddableFactory());
+const factory = createSlowContactCardEmbeddableFactory({
   loadTickCount: 2,
   execAction: uiActions.executeTriggerActions,
 });
 setup.registerEmbeddableFactory(CONTACT_CARD_EMBEDDABLE, factory);
-setup.registerEmbeddableFactory(HELLO_WORLD_EMBEDDABLE, new HelloWorldEmbeddableFactory());
+setup.registerEmbeddableFactory(HELLO_WORLD_EMBEDDABLE, createHelloWorldEmbeddableFactory());
 
 test('Explicit embeddable input mapped to undefined will default to inherited', async () => {
   const derivedFilter: Filter = {

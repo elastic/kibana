@@ -23,64 +23,56 @@ import { UiActionsStart } from 'src/plugins/ui_actions/public';
 
 import { CoreStart } from 'src/core/public';
 import { toMountPoint } from '../../../../../../kibana_react/public';
-import { EmbeddableFactory } from '../../../embeddables';
+import { EmbeddableFactoryDefinition } from '../../../embeddables';
 import { Container } from '../../../containers';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';
 import { ContactCardInitializer } from './contact_card_initializer';
-import { EmbeddableFactoryOptions } from '../../../embeddables/embeddable_factory';
 
 export const CONTACT_CARD_EMBEDDABLE = 'CONTACT_CARD_EMBEDDABLE';
 
-export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardEmbeddableInput> {
-  public readonly type = CONTACT_CARD_EMBEDDABLE;
+export const createContactCardEmbeddableFactory = (
+  execTrigger: UiActionsStart['executeTriggerActions'],
+  overlays: CoreStart['overlays']
+): EmbeddableFactoryDefinition<ContactCardEmbeddableInput> => {
+  return {
+    type: CONTACT_CARD_EMBEDDABLE,
+    isEditable: async () => true,
+    getDisplayName: () =>
+      i18n.translate('embeddableApi.samples.contactCard.displayName', {
+        defaultMessage: 'contact card',
+      }),
 
-  constructor(
-    options: EmbeddableFactoryOptions<any>,
-    private readonly execTrigger: UiActionsStart['executeTriggerActions'],
-    private readonly overlays: CoreStart['overlays']
-  ) {
-    super(options);
-  }
+    getExplicitInput: (): Promise<Partial<ContactCardEmbeddableInput>> => {
+      return new Promise(resolve => {
+        const modalSession = overlays.openModal(
+          toMountPoint(
+            <ContactCardInitializer
+              onCancel={() => {
+                modalSession.close();
+                resolve(undefined);
+              }}
+              onCreate={(input: { firstName: string; lastName?: string }) => {
+                modalSession.close();
+                resolve(input);
+              }}
+            />
+          ),
+          {
+            'data-test-subj': 'createContactCardEmbeddable',
+          }
+        );
+      });
+    },
 
-  public async isEditable() {
-    return true;
-  }
-
-  public getDisplayName() {
-    return i18n.translate('embeddableApi.samples.contactCard.displayName', {
-      defaultMessage: 'contact card',
-    });
-  }
-
-  public getExplicitInput(): Promise<Partial<ContactCardEmbeddableInput>> {
-    return new Promise(resolve => {
-      const modalSession = this.overlays.openModal(
-        toMountPoint(
-          <ContactCardInitializer
-            onCancel={() => {
-              modalSession.close();
-              resolve(undefined);
-            }}
-            onCreate={(input: { firstName: string; lastName?: string }) => {
-              modalSession.close();
-              resolve(input);
-            }}
-          />
-        ),
+    create: async (initialInput: ContactCardEmbeddableInput, parent?: Container) =>
+      new ContactCardEmbeddable(
+        initialInput,
         {
-          'data-test-subj': 'createContactCardEmbeddable',
-        }
-      );
-    });
-  }
-
-  public async create(initialInput: ContactCardEmbeddableInput, parent?: Container) {
-    return new ContactCardEmbeddable(
-      initialInput,
-      {
-        execAction: this.execTrigger,
-      },
-      parent
-    );
-  }
-}
+          execAction: execTrigger,
+        },
+        parent
+      ),
+    getDefaultInput: () => ({}),
+    isContainerType: false,
+  };
+};

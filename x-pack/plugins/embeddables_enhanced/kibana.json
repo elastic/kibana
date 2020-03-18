@@ -1,0 +1,13 @@
+{
+  "id": "embeddablesEnhanced",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": [
+    "xpack"
+  ],
+  "requiredPlugins": [
+    "embeddables"
+  ],
+  "server": false,
+  "ui": true
+}

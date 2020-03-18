@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IContainer, EmbeddableFactory } from '../../../../src/plugins/embeddable/public';
+import { IContainer, EmbeddableFactoryDefinition } from '../../../../src/plugins/embeddable/public';
 import {
   MultiTaskTodoEmbeddable,
   MULTI_TASK_TODO_EMBEDDABLE,
@@ -26,32 +26,28 @@ import {
   MultiTaskTodoOutput,
 } from './multi_task_todo_embeddable';
 
-export class MultiTaskTodoEmbeddableFactory extends EmbeddableFactory<
+export const createMultiTaskTodoEmbeddableFactory = (): EmbeddableFactoryDefinition<
   MultiTaskTodoInput,
   MultiTaskTodoOutput
-> {
-  public readonly type = MULTI_TASK_TODO_EMBEDDABLE;
-
-  public async isEditable() {
-    return true;
-  }
-
-  public async create(initialInput: MultiTaskTodoInput, parent?: IContainer) {
+> => ({
+  type: MULTI_TASK_TODO_EMBEDDABLE,
+  isEditable: async () => true,
+  create: async (initialInput: MultiTaskTodoInput, parent?: IContainer) => {
     return new MultiTaskTodoEmbeddable(initialInput, parent);
-  }
+  },
 
   /**
    * Check out todo_embeddable_factory for a better example that asks for data from
    * the user. This just returns default data.  That's okay too though, if you want to
    * start with default data and expose an "edit" action to modify it.
    */
-  public async getExplicitInput() {
+  getExplicitInput: async () => {
     return { title: 'default title', tasks: ['Im default data'] };
-  }
+  },
 
-  public getDisplayName() {
+  getDisplayName: () => {
     return i18n.translate('embeddableExamples.multiTaskTodo.displayName', {
       defaultMessage: 'Multi-task todo item',
     });
-  }
-}
+  },
+});

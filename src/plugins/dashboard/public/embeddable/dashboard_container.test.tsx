@@ -25,7 +25,7 @@ import { DashboardContainer, DashboardContainerOptions } from './dashboard_conta
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
+  createContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddable,
   ContactCardEmbeddableOutput,
@@ -50,9 +50,11 @@ beforeEach(() => {
   const embeddableFactories = new Map<string, EmbeddableFactory>();
   embeddableFactories.set(
     CONTACT_CARD_EMBEDDABLE,
-    new ContactCardEmbeddableFactory({} as any, (() => null) as any, {} as any)
+    createContactCardEmbeddableFactory((() => null) as any, {} as any) as EmbeddableFactory
   );
-  options.embeddable.getEmbeddableFactory = (id: string) => embeddableFactories.get(id) as any;
+  options.embeddable.getEmbeddableFactory = (id: string) => {
+    return embeddableFactories.get(id) as any;
+  };
 });
 
 test('DashboardContainer initializes embeddables', async done => {

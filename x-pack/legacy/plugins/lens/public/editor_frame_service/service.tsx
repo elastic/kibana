@@ -27,7 +27,7 @@ import {
 import { EditorFrame } from './editor_frame';
 import { mergeTables } from './merge_tables';
 import { formatColumn } from './format_column';
-import { EmbeddableFactory } from './embeddable/embeddable_factory';
+import { createEmbeddableFactory } from './embeddable/embeddable_factory';
 import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 
 export interface EditorFrameSetupPlugins {
@@ -79,7 +79,7 @@ export class EditorFrameService {
       };
     };
 
-    plugins.embeddable.registerEmbeddableFactory('lens', new EmbeddableFactory(getStartServices));
+    plugins.embeddable.registerEmbeddableFactory('lens', createEmbeddableFactory(getStartServices));
 
     return {
       registerDatasource: datasource => {

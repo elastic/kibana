@@ -18,36 +18,29 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Container, EmbeddableFactory } from '../..';
+import { Container, EmbeddableFactoryDefinition } from '../..';
 import {
   FilterableContainer,
   FilterableContainerInput,
   FILTERABLE_CONTAINER,
 } from './filterable_container';
-import { EmbeddableFactoryOptions } from '../../embeddables/embeddable_factory';
 import { EmbeddableStart } from '../../../plugin';
 
-export class FilterableContainerFactory extends EmbeddableFactory<FilterableContainerInput> {
-  public readonly type = FILTERABLE_CONTAINER;
-
-  constructor(
-    private readonly getFactory: EmbeddableStart['getEmbeddableFactory'],
-    options: EmbeddableFactoryOptions<any> = {}
-  ) {
-    super(options);
-  }
-
-  public getDisplayName() {
+export const createFilterableContainerFactory = (
+  getFactory: EmbeddableStart['getEmbeddableFactory']
+): EmbeddableFactoryDefinition<FilterableContainerInput> => ({
+  type: FILTERABLE_CONTAINER,
+  getDisplayName: () => {
     return i18n.translate('embeddableApi.samples.filterableContainer.displayName', {
       defaultMessage: 'filterable dashboard',
     });
-  }
+  },
 
-  public async isEditable() {
+  isEditable: async () => {
     return true;
-  }
+  },
 
-  public async create(initialInput: FilterableContainerInput, parent?: Container) {
-    return new FilterableContainer(initialInput, this.getFactory, parent);
-  }
-}
+  create: async (initialInput: FilterableContainerInput, parent?: Container) => {
+    return new FilterableContainer(initialInput, getFactory, parent);
+  },
+});

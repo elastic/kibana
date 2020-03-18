@@ -26,12 +26,12 @@ import {
   FILTERABLE_EMBEDDABLE,
 } from '../lib/test_samples/embeddables/filterable_embeddable';
 import { ERROR_EMBEDDABLE_TYPE } from '../lib/embeddables/error_embeddable';
-import { FilterableEmbeddableFactory } from '../lib/test_samples/embeddables/filterable_embeddable_factory';
+import { createFilterableEmbeddableFactory } from '../lib/test_samples/embeddables/filterable_embeddable_factory';
 import { CONTACT_CARD_EMBEDDABLE } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import { SlowContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
+import { createSlowContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
 import {
   HELLO_WORLD_EMBEDDABLE,
-  HelloWorldEmbeddableFactory,
+  createHelloWorldEmbeddableFactory,
 } from '../../../../../examples/embeddable_examples/public';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
 import {
@@ -58,11 +58,11 @@ async function creatHelloWorldContainerAndEmbeddable(
   const { setup, doStart, uiActions } = testPlugin(coreSetup, coreStart);
   const start = doStart();
 
-  const filterableFactory = new FilterableEmbeddableFactory();
-  const slowContactCardFactory = new SlowContactCardEmbeddableFactory({
+  const filterableFactory = createFilterableEmbeddableFactory();
+  const slowContactCardFactory = createSlowContactCardEmbeddableFactory({
     execAction: uiActions.executeTriggerActions,
   });
-  const helloWorldFactory = new HelloWorldEmbeddableFactory();
+  const helloWorldFactory = createHelloWorldEmbeddableFactory();
 
   setup.registerEmbeddableFactory(filterableFactory.type, filterableFactory);
   setup.registerEmbeddableFactory(slowContactCardFactory.type, slowContactCardFactory);
@@ -582,7 +582,7 @@ test('Container changes made directly after adding a new embeddable are propagat
     }
   );
 
-  const factory = new SlowContactCardEmbeddableFactory({
+  const factory = createSlowContactCardEmbeddableFactory({
     loadTickCount: 3,
     execAction: uiActions.executeTriggerActions,
   });
@@ -724,7 +724,7 @@ test('untilEmbeddableLoaded() resolves if child is loaded in the container', asy
     coreMock.createSetup(),
     coreMock.createStart()
   );
-  const factory = new HelloWorldEmbeddableFactory();
+  const factory = createHelloWorldEmbeddableFactory();
   setup.registerEmbeddableFactory(factory.type, factory);
   const start = doStart();
   const container = new HelloWorldContainer(
@@ -760,7 +760,7 @@ test('untilEmbeddableLoaded resolves with undefined if child is subsequently rem
     coreMock.createStart()
   );
   const start = doStart();
-  const factory = new SlowContactCardEmbeddableFactory({
+  const factory = createSlowContactCardEmbeddableFactory({
     loadTickCount: 3,
     execAction: uiActions.executeTriggerActions,
   });
@@ -800,7 +800,7 @@ test('adding a panel then subsequently removing it before its loaded removes the
     coreMock.createStart()
   );
   const start = doStart();
-  const factory = new SlowContactCardEmbeddableFactory({
+  const factory = createSlowContactCardEmbeddableFactory({
     loadTickCount: 1,
     execAction: uiActions.executeTriggerActions,
   });

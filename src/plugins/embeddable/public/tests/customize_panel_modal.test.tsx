@@ -28,7 +28,7 @@ import {
 } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable';
 import {
   CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
+  createContactCardEmbeddableFactory,
 } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
 // eslint-disable-next-line
@@ -49,8 +49,7 @@ beforeEach(async () => {
   );
   api = doStart();
 
-  const contactCardFactory = new ContactCardEmbeddableFactory(
-    {},
+  const contactCardFactory = createContactCardEmbeddableFactory(
     uiActions.executeTriggerActions,
     {} as any
   );

@@ -22,9 +22,9 @@ import { i18n } from '@kbn/i18n';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { getServices } from '../../kibana_services';
 import {
-  EmbeddableFactory,
   ErrorEmbeddable,
   Container,
+  EmbeddableFactoryDefinition,
 } from '../../../../../../../plugins/embeddable/public';
 
 import { TimeRange } from '../../../../../../../plugins/data/public';
@@ -37,87 +37,71 @@ interface StartServices {
   isEditable: () => boolean;
 }
 
-export class SearchEmbeddableFactory extends EmbeddableFactory<
-  SearchInput,
-  SearchOutput,
-  SearchEmbeddable
-> {
-  public readonly type = SEARCH_EMBEDDABLE_TYPE;
-  private $injector: auto.IInjectorService | null;
-  private getInjector: () => Promise<auto.IInjectorService> | null;
+export const createSearchEmbeddableFactory = (
+  getStartServices: () => Promise<StartServices>,
+  getInjector: () => Promise<auto.IInjectorService>
+): EmbeddableFactoryDefinition<SearchInput, SearchOutput, SearchEmbeddable> => {
+  let $injector: auto.IInjectorService | undefined;
 
-  constructor(
-    private getStartServices: () => Promise<StartServices>,
-    getInjector: () => Promise<auto.IInjectorService>
-  ) {
-    super({
-      savedObjectMetaData: {
-        name: i18n.translate('kbn.discover.savedSearch.savedObjectName', {
-          defaultMessage: 'Saved search',
-        }),
-        type: 'search',
-        getIconForSavedObject: () => 'search',
-      },
-    });
-    this.$injector = null;
-    this.getInjector = getInjector;
-  }
+  return {
+    type: SEARCH_EMBEDDABLE_TYPE,
+    savedObjectMetaData: {
+      name: i18n.translate('kbn.discover.savedSearch.savedObjectName', {
+        defaultMessage: 'Saved search',
+      }),
+      type: 'search',
+      getIconForSavedObject: () => 'search',
+    },
 
-  public canCreateNew() {
-    return false;
-  }
+    canCreateNew: () => false,
+    isEditable: async () => (await getStartServices()).isEditable(),
+    getDisplayName: () => {
+      return i18n.translate('kbn.embeddable.search.displayName', {
+        defaultMessage: 'search',
+      });
+    },
+    createFromSavedObject: async (
+      savedObjectId: string,
+      input: Partial<SearchInput> & { id: string; timeRange: TimeRange },
+      parent?: Container
+    ): Promise<SearchEmbeddable | ErrorEmbeddable> => {
+      if ($injector) {
+        $injector = await getInjector();
+      }
+      $injector = $injector as auto.IInjectorService;
 
-  public async isEditable() {
-    return (await this.getStartServices()).isEditable();
-  }
+      const $compile = $injector.get<ng.ICompileService>('$compile');
+      const $rootScope = $injector.get<ng.IRootScopeService>('$rootScope');
+      const filterManager = getServices().filterManager;
 
-  public getDisplayName() {
-    return i18n.translate('kbn.embeddable.search.displayName', {
-      defaultMessage: 'search',
-    });
-  }
+      const url = await getServices().getSavedSearchUrlById(savedObjectId);
+      const editUrl = getServices().addBasePath(`/app/kibana${url}`);
+      try {
+        const savedObject = await getServices().getSavedSearchById(savedObjectId);
+        const indexPattern = savedObject.searchSource.getField('index');
+        const { executeTriggerActions } = await getStartServices();
+        return new SearchEmbeddable(
+          {
+            savedSearch: savedObject,
+            $rootScope,
+            $compile,
+            editUrl,
+            filterManager,
+            editable: getServices().capabilities.discover.save as boolean,
+            indexPatterns: indexPattern ? [indexPattern] : [],
+          },
+          input,
+          executeTriggerActions,
+          parent
+        );
+      } catch (e) {
+        console.error(e); // eslint-disable-line no-console
+        return new ErrorEmbeddable(e, input, parent);
+      }
+    },
 
-  public async createFromSavedObject(
-    savedObjectId: string,
-    input: Partial<SearchInput> & { id: string; timeRange: TimeRange },
-    parent?: Container
-  ): Promise<SearchEmbeddable | ErrorEmbeddable> {
-    if (!this.$injector) {
-      this.$injector = await this.getInjector();
-    }
-    const $injector = this.$injector as auto.IInjectorService;
-
-    const $compile = $injector.get<ng.ICompileService>('$compile');
-    const $rootScope = $injector.get<ng.IRootScopeService>('$rootScope');
-    const filterManager = getServices().filterManager;
-
-    const url = await getServices().getSavedSearchUrlById(savedObjectId);
-    const editUrl = getServices().addBasePath(`/app/kibana${url}`);
-    try {
-      const savedObject = await getServices().getSavedSearchById(savedObjectId);
-      const indexPattern = savedObject.searchSource.getField('index');
-      const { executeTriggerActions } = await this.getStartServices();
-      return new SearchEmbeddable(
-        {
-          savedSearch: savedObject,
-          $rootScope,
-          $compile,
-          editUrl,
-          filterManager,
-          editable: getServices().capabilities.discover.save as boolean,
-          indexPatterns: indexPattern ? [indexPattern] : [],
-        },
-        input,
-        executeTriggerActions,
-        parent
-      );
-    } catch (e) {
-      console.error(e); // eslint-disable-line no-console
-      return new ErrorEmbeddable(e, input, parent);
-    }
-  }
-
-  public async create(input: SearchInput) {
-    return new ErrorEmbeddable('Saved searches can only be created from a saved object', input);
-  }
-}
+    create: async (input: SearchInput) => {
+      return new ErrorEmbeddable('Saved searches can only be created from a saved object', input);
+    },
+  };
+};

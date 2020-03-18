@@ -20,7 +20,7 @@
 import * as React from 'react';
 import { AddPanelFlyout } from './add_panel_flyout';
 import {
-  ContactCardEmbeddableFactory,
+  createContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,
 } from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { HelloWorldContainer } from '../../../../test_samples/embeddables/hello_world_container';
@@ -45,8 +45,7 @@ function DummySavedObjectFinder(props: { children: React.ReactNode }) {
 test('createNewEmbeddable() add embeddable to container', async () => {
   const core = coreMock.createStart();
   const { overlays } = core;
-  const contactCardEmbeddableFactory = new ContactCardEmbeddableFactory(
-    {},
+  const contactCardEmbeddableFactory = createContactCardEmbeddableFactory(
     (() => null) as any,
     overlays
   );
@@ -90,8 +89,7 @@ test('createNewEmbeddable() add embeddable to container', async () => {
 test('selecting embeddable in "Create new ..." list calls createNewEmbeddable()', async () => {
   const core = coreMock.createStart();
   const { overlays } = core;
-  const contactCardEmbeddableFactory = new ContactCardEmbeddableFactory(
-    {},
+  const contactCardEmbeddableFactory = createContactCardEmbeddableFactory(
     (() => null) as any,
     overlays
   );

@@ -29,7 +29,7 @@ import {
 } from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable';
 import {
   CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
+  createContactCardEmbeddableFactory,
 } from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { HelloWorldContainer } from '../../../../test_samples/embeddables/hello_world_container';
 import { EmbeddableFactory } from '../../../../embeddables';
@@ -42,7 +42,7 @@ function createHelloWorldContainer(input = { id: '123', panels: {} }) {
   const getEmbeddableFactory = (id: string) => embeddableFactories.get(id);
   embeddableFactories.set(
     CONTACT_CARD_EMBEDDABLE,
-    new ContactCardEmbeddableFactory({}, (() => {}) as any, {} as any)
+    createContactCardEmbeddableFactory((() => {}) as any, {} as any) as EmbeddableFactory
   );
   return new HelloWorldContainer(input, { getEmbeddableFactory } as any);
 }

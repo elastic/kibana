@@ -18,8 +18,8 @@
  */
 
 import { testPlugin } from './test_plugin';
-import { FilterableContainerFactory } from '../lib/test_samples/embeddables/filterable_container_factory';
-import { ContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
+import { createFilterableContainerFactory } from '../lib/test_samples/embeddables/filterable_container_factory';
+import { createContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 
 test('exports getEmbeddableFactories() function', () => {
   const { doStart } = testPlugin();
@@ -38,8 +38,8 @@ test('returns existing embeddable factories', () => {
   const start = doStart();
   const { length } = [...start.getEmbeddableFactories()];
 
-  const factory1 = new FilterableContainerFactory(start.getEmbeddableFactory);
-  const factory2 = new ContactCardEmbeddableFactory({} as any, (() => null) as any, {} as any);
+  const factory1 = createFilterableContainerFactory(start.getEmbeddableFactory);
+  const factory2 = createContactCardEmbeddableFactory((() => null) as any, {} as any);
   setup.registerEmbeddableFactory(factory1.type, factory1);
   setup.registerEmbeddableFactory(factory2.type, factory2);
 

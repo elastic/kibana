@@ -23,7 +23,7 @@ import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
+  createContactCardEmbeddableFactory,
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
@@ -32,7 +32,7 @@ import {
 const embeddableFactories = new Map<string, EmbeddableFactory>();
 embeddableFactories.set(
   CONTACT_CARD_EMBEDDABLE,
-  new ContactCardEmbeddableFactory({} as any, (() => null) as any, {} as any)
+  createContactCardEmbeddableFactory((() => null) as any, {} as any) as EmbeddableFactory
 );
 
 let container: DashboardContainer;

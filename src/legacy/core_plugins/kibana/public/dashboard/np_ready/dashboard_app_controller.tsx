@@ -48,7 +48,7 @@ import {
 import {
   DASHBOARD_CONTAINER_TYPE,
   DashboardContainer,
-  DashboardContainerFactory,
+  createDashboardContainerFactory,
   DashboardContainerInput,
   DashboardPanelState,
 } from '../../../../../../plugins/dashboard/public';
@@ -58,6 +58,8 @@ import {
   isErrorEmbeddable,
   openAddPanelFlyout,
   ViewMode,
+  ContainerOutput,
+  EmbeddableFactory,
 } from '../../../../embeddable_api/public/np_ready/public';
 import { NavAction, SavedDashboardPanel } from './types';
 
@@ -309,11 +311,11 @@ export class DashboardAppController {
     const dashboardDom = document.getElementById('dashboardViewport');
     const dashboardFactory = embeddable.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE
-    ) as DashboardContainerFactory;
+    ) as EmbeddableFactory<DashboardContainerInput, ContainerOutput, DashboardContainer>;
     dashboardFactory
       .create(getDashboardInput())
-      .then((container: DashboardContainer | ErrorEmbeddable) => {
-        if (!isErrorEmbeddable(container)) {
+      .then((container: DashboardContainer | ErrorEmbeddable | undefined) => {
+        if (container && !isErrorEmbeddable(container)) {
           dashboardContainer = container;
 
           dashboardContainer.renderEmpty = () => {
@@ -380,7 +382,7 @@ export class DashboardAppController {
           }
         }
 
-        if (dashboardDom) {
+        if (container && dashboardDom) {
           container.render(dashboardDom);
         }
       });

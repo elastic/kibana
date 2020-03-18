@@ -21,10 +21,10 @@ import { InspectPanelAction } from './inspect_panel_action';
 import {
   FilterableContainer,
   FILTERABLE_EMBEDDABLE,
-  FilterableEmbeddableFactory,
   FilterableEmbeddableInput,
   FilterableEmbeddable,
   ContactCardEmbeddable,
+  createFilterableEmbeddableFactory,
 } from '../../../test_samples';
 // eslint-disable-next-line
 import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
@@ -40,7 +40,10 @@ import { EmbeddableStart } from 'src/plugins/embeddable/public/plugin';
 
 const setup = async () => {
   const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
+  embeddableFactories.set(
+    FILTERABLE_EMBEDDABLE,
+    createFilterableEmbeddableFactory() as EmbeddableFactory
+  );
   const getFactory = (id: string) => embeddableFactories.get(id);
   const container = new FilterableContainer(
     {

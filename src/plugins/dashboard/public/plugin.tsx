@@ -25,7 +25,7 @@ import { SharePluginSetup } from 'src/plugins/share/public';
 import { UiActionsSetup, UiActionsStart } from '../../../plugins/ui_actions/public';
 import { CONTEXT_MENU_TRIGGER, EmbeddableSetup, EmbeddableStart } from './embeddable_plugin';
 import { ExpandPanelAction, ReplacePanelAction } from '.';
-import { DashboardContainerFactory } from './embeddable/dashboard_container_factory';
+import { createDashboardContainer } from './embeddable/dashboard_container_factory';
 import { Start as InspectorStartContract } from '../../../plugins/inspector/public';
 import { getSavedObjectFinder } from '../../../plugins/saved_objects/public';
 import {
@@ -117,7 +117,7 @@ export class DashboardEmbeddableContainerPublicPlugin
       };
     };
 
-    const factory = new DashboardContainerFactory(getStartServices);
+    const factory = createDashboardContainer(getStartServices);
     embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 

@@ -19,7 +19,7 @@
 import React from 'react';
 import {
   HELLO_WORLD_EMBEDDABLE,
-  HelloWorldEmbeddableFactory,
+  createHelloWorldEmbeddableFactory,
 } from '../../../../../../examples/embeddable_examples/public';
 import { EmbeddableFactory } from './embeddable_factory';
 import { EmbeddableFactoryRenderer } from './embeddable_factory_renderer';
@@ -31,7 +31,10 @@ import { EmbeddableStart } from '../../plugin';
 
 test('EmbeddableFactoryRenderer renders an embeddable', async () => {
   const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(HELLO_WORLD_EMBEDDABLE, new HelloWorldEmbeddableFactory());
+  embeddableFactories.set(
+    HELLO_WORLD_EMBEDDABLE,
+    createHelloWorldEmbeddableFactory() as EmbeddableFactory
+  );
   const getEmbeddableFactory = (id: string) => embeddableFactories.get(id);
 
   const component = mount(

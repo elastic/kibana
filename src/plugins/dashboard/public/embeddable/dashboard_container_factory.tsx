@@ -23,7 +23,7 @@ import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import { CoreStart } from '../../../../core/public';
 import {
   ContainerOutput,
-  EmbeddableFactory,
+  EmbeddableFactoryDefinition,
   ErrorEmbeddable,
   Container,
 } from '../embeddable_plugin';
@@ -43,41 +43,37 @@ interface StartServices {
   uiActions: UiActionsStart;
 }
 
-export class DashboardContainerFactory extends EmbeddableFactory<
-  DashboardContainerInput,
-  ContainerOutput
-> {
-  public readonly isContainerType = true;
-  public readonly type = DASHBOARD_CONTAINER_TYPE;
+export const createDashboardContainer = (
+  getStartServices: () => Promise<StartServices>
+): EmbeddableFactoryDefinition<DashboardContainerInput, ContainerOutput> => {
+  return {
+    isContainerType: true,
+    type: DASHBOARD_CONTAINER_TYPE,
+    isEditable: async () => {
+      const { capabilities } = await getStartServices();
+      return !!capabilities.createNew && !!capabilities.showWriteControls;
+    },
 
-  constructor(private readonly getStartServices: () => Promise<StartServices>) {
-    super();
-  }
+    getDisplayName: () => {
+      return i18n.translate('dashboard.factory.displayName', {
+        defaultMessage: 'dashboard',
+      });
+    },
 
-  public async isEditable() {
-    const { capabilities } = await this.getStartServices();
-    return !!capabilities.createNew && !!capabilities.showWriteControls;
-  }
+    getDefaultInput: (): Partial<DashboardContainerInput> => {
+      return {
+        panels: {},
+        isFullScreenMode: false,
+        useMargins: true,
+      };
+    },
 
-  public getDisplayName() {
-    return i18n.translate('dashboard.factory.displayName', {
-      defaultMessage: 'dashboard',
-    });
-  }
-
-  public getDefaultInput(): Partial<DashboardContainerInput> {
-    return {
-      panels: {},
-      isFullScreenMode: false,
-      useMargins: true,
-    };
-  }
-
-  public async create(
-    initialInput: DashboardContainerInput,
-    parent?: Container
-  ): Promise<DashboardContainer | ErrorEmbeddable> {
-    const services = await this.getStartServices();
-    return new DashboardContainer(initialInput, services, parent);
-  }
-}
+    create: async (
+      initialInput: DashboardContainerInput,
+      parent?: Container
+    ): Promise<DashboardContainer | ErrorEmbeddable> => {
+      const services = await getStartServices();
+      return new DashboardContainer(initialInput, services, parent);
+    },
+  };
+};

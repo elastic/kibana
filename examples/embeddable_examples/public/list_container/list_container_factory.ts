@@ -18,37 +18,24 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  EmbeddableFactory,
-  ContainerInput,
-  EmbeddableStart,
-} from '../../../../src/plugins/embeddable/public';
+import { ContainerInput, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { LIST_CONTAINER, ListContainer } from './list_container';
 
 interface StartServices {
   getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
 }
 
-export class ListContainerFactory extends EmbeddableFactory {
-  public readonly type = LIST_CONTAINER;
-  public readonly isContainerType = true;
-
-  constructor(private getStartServices: () => Promise<StartServices>) {
-    super();
-  }
-
-  public async isEditable() {
-    return true;
-  }
-
-  public async create(initialInput: ContainerInput) {
-    const { getEmbeddableFactory } = await this.getStartServices();
+export const createListContainerFactory = (getStartServices: () => Promise<StartServices>) => ({
+  type: LIST_CONTAINER,
+  isContainerType: true,
+  isEditable: async () => true,
+  create: async (initialInput: ContainerInput) => {
+    const { getEmbeddableFactory } = await getStartServices();
     return new ListContainer(initialInput, getEmbeddableFactory);
-  }
-
-  public getDisplayName() {
+  },
+  getDisplayName: () => {
     return i18n.translate('embeddableExamples.searchableListContainer.displayName', {
       defaultMessage: 'List container',
     });
-  }
-}
+  },
+});

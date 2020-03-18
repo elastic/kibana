@@ -22,7 +22,7 @@ import { nextTick } from 'test_utils/enzyme_helpers';
 import { EmbeddableChildPanel } from './embeddable_child_panel';
 import { EmbeddableFactory } from '../embeddables';
 import { CONTACT_CARD_EMBEDDABLE } from '../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import { SlowContactCardEmbeddableFactory } from '../test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
+import { createSlowContactCardEmbeddableFactory } from '../test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
 import { HelloWorldContainer } from '../test_samples/embeddables/hello_world_container';
 import {
   ContactCardEmbeddableInput,
@@ -39,7 +39,7 @@ test('EmbeddableChildPanel renders an embeddable when it is done loading', async
   const embeddableFactories = new Map<string, EmbeddableFactory>();
   embeddableFactories.set(
     CONTACT_CARD_EMBEDDABLE,
-    new SlowContactCardEmbeddableFactory({ execAction: (() => null) as any })
+    createSlowContactCardEmbeddableFactory({ execAction: (() => null) as any }) as EmbeddableFactory
   );
   const getEmbeddableFactory = (id: string) => embeddableFactories.get(id);
 
