@@ -118,6 +118,13 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
           },
     [caseData.closedAt, caseData.createdAt, caseData.status]
   );
+  const emailContent = useMemo(
+    () => ({
+      subject: i18n.EMAIL_SUBJECT(caseData.title),
+      body: i18n.EMAIL_BODY(caseLink),
+    }),
+    [caseData.title]
+  );
   return (
     <>
       <MyWrapper>
@@ -158,10 +165,7 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
             <EuiFlexItem grow={2}>
               <UserList
                 data-test-subj="case-view-user-list"
-                email={{
-                  subject: i18n.EMAIL_SUBJECT(caseData.title),
-                  body: i18n.EMAIL_BODY(caseLink),
-                }}
+                email={emailContent}
                 headline={i18n.REPORTER}
                 users={[caseData.createdBy]}
               />

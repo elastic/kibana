@@ -40,23 +40,26 @@ const CaseViewActionsComponent: React.FC<CaseViewActions> = ({ caseId, caseTitle
     [isDisplayConfirmDeleteModal]
   );
   // TO DO refactor each of these const's into their own components
-  const propertyActions = [
-    {
-      iconType: 'trash',
-      label: i18n.DELETE_CASE,
-      onClick: handleToggleModal,
-    },
-    {
-      iconType: 'popout',
-      label: 'View ServiceNow incident',
-      onClick: () => null,
-    },
-    {
-      iconType: 'importAction',
-      label: 'Update ServiceNow incident',
-      onClick: () => null,
-    },
-  ];
+  const propertyActions = useMemo(
+    () => [
+      {
+        iconType: 'trash',
+        label: i18n.DELETE_CASE,
+        onClick: handleToggleModal,
+      },
+      {
+        iconType: 'popout',
+        label: 'View ServiceNow incident',
+        onClick: () => null,
+      },
+      {
+        iconType: 'importAction',
+        label: 'Update ServiceNow incident',
+        onClick: () => null,
+      },
+    ],
+    [handleToggleModal]
+  );
 
   if (isDeleted) {
     return <Redirect to={`/${SiemPageName.case}`} />;
