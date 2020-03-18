@@ -18,7 +18,7 @@ const FETCH_THROTTLE_INTERVAL = 3000;
 interface UseLogHighlightsStateProps {
   sourceId: string;
   sourceVersion: string | undefined;
-  centerPoint: TimeKey | null;
+  centerCursor: TimeKey | null;
   size: number;
   filterQuery: string | null;
 }
@@ -26,7 +26,7 @@ interface UseLogHighlightsStateProps {
 export const useLogHighlightsState = ({
   sourceId,
   sourceVersion,
-  centerPoint,
+  centerCursor,
   size,
   filterQuery,
 }: UseLogHighlightsStateProps) => {
@@ -47,7 +47,7 @@ export const useLogHighlightsState = ({
     sourceVersion,
     throttledStartTimestamp,
     throttledEndTimestamp,
-    centerPoint,
+    centerCursor,
     size,
     filterQuery,
     highlightTerms

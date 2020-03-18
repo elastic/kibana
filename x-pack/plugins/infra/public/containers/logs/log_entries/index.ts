@@ -69,6 +69,7 @@ export interface LogEntriesStateParams {
   entries: LogEntriesResponse['data']['entries'];
   topCursor: LogEntriesResponse['data']['topCursor'] | null;
   bottomCursor: LogEntriesResponse['data']['bottomCursor'] | null;
+  centerCursor: TimeKey | null;
   isReloading: boolean;
   isLoadingMore: boolean;
   lastLoadedTime: Date | null;
@@ -88,6 +89,7 @@ export const logEntriesInitialState: LogEntriesStateParams = {
   entries: [],
   topCursor: null,
   bottomCursor: null,
+  centerCursor: null,
   isReloading: true,
   isLoadingMore: false,
   lastLoadedTime: null,
@@ -348,7 +350,7 @@ const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: Action
       return {
         ...prevState,
         ...action.payload,
-        entries: action.payload.entries,
+        centerCursor: getCenterCursor(action.payload.entries),
         lastLoadedTime: new Date(),
         isReloading: false,
 
@@ -360,13 +362,15 @@ const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: Action
     case Action.ReceiveEntriesBefore: {
       const newEntries = action.payload.entries;
       const prevEntries = cleanDuplicateItems(prevState.entries, newEntries);
+      const entries = [...newEntries, ...prevEntries];
 
       const update = {
-        entries: [...newEntries, ...prevEntries],
+        entries,
         isLoadingMore: false,
         hasMoreBeforeStart: newEntries.length > 0,
         // Keep the previous cursor if request comes empty, to easily extend the range.
         topCursor: newEntries.length > 0 ? action.payload.topCursor : prevState.topCursor,
+        centerCursor: getCenterCursor(entries),
         lastLoadedTime: new Date(),
       };
 
@@ -375,13 +379,15 @@ const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: Action
     case Action.ReceiveEntriesAfter: {
       const newEntries = action.payload.entries;
       const prevEntries = cleanDuplicateItems(prevState.entries, newEntries);
+      const entries = [...prevEntries, ...newEntries];
 
       const update = {
-        entries: [...prevEntries, ...newEntries],
+        entries,
         isLoadingMore: false,
         hasMoreAfterEnd: newEntries.length > 0,
         // Keep the previous cursor if request comes empty, to easily extend the range.
         bottomCursor: newEntries.length > 0 ? action.payload.bottomCursor : prevState.bottomCursor,
+        centerCursor: getCenterCursor(entries),
         lastLoadedTime: new Date(),
       };
 
@@ -394,6 +400,7 @@ const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: Action
         entries: [],
         topCursor: null,
         bottomCursor: null,
+        centerCursor: null,
         hasMoreBeforeStart: true,
         hasMoreAfterEnd: true,
       };
@@ -418,5 +425,9 @@ const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: Action
       throw new Error();
   }
 };
+
+function getCenterCursor(entries: LogEntry[]): TimeKey | null {
+  return entries.length > 0 ? entries[Math.floor(entries.length / 2)].cursor : null;
+}
 
 export const LogEntriesState = createContainer(useLogEntriesState);
