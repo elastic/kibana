@@ -87,6 +87,8 @@ export async function loadAlerts({
       search: searchText,
       filter: filters.length ? filters.join(' and ') : undefined,
       default_search_operator: 'AND',
+      sort_field: 'name.keyword',
+      sort_order: 'asc',
     },
   });
 }
