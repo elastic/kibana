@@ -13,6 +13,7 @@ export function editAgentConfigurationHref(
 ) {
   const { search } = history.location;
   return getAPMHref('/settings/agent-configuration/edit', search, {
+    // ignoring because `name` has not been added to url params. Related: https://github.com/elastic/kibana/issues/51963
     // @ts-ignore
     name: configService.name,
     environment: configService.environment

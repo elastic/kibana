@@ -33,17 +33,16 @@ export const agentConfigurationRoute = createRoute(core => ({
 }));
 
 // get a single configuration
-export const getSingleAgentConfigurationRoute = createRoute(core => ({
-  method: 'POST',
+export const getSingleAgentConfigurationRoute = createRoute(() => ({
   path: '/api/apm/settings/agent-configuration/view',
   params: {
-    body: t.type({
-      service: serviceRt
-    })
+    query: serviceRt
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    const { service } = context.params.body;
+    const { name, environment } = context.params.query;
+
+    const service = { name, environment };
     const config = await findExactConfiguration({ service, setup });
 
     if (!config) {

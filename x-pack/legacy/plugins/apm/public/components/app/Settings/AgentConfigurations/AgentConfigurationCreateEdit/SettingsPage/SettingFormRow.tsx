@@ -91,7 +91,7 @@ function FormRow({
       const { amount, unit } = amountAndUnitToObject(value ?? '');
 
       return (
-        <EuiFlexGroup gutterSize="none">
+        <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiFieldNumber
               placeholder={setting.placeholder || defaultInputPlaceholder}
@@ -155,7 +155,7 @@ export function SettingFormRow({
       }
       description={
         <>
-          {setting.helpText}
+          {setting.description}
 
           {setting.defaultValue && (
             <>

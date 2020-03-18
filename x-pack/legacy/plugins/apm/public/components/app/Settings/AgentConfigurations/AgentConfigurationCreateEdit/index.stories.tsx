@@ -41,6 +41,7 @@ storiesOf(
         value={(contextMock as unknown) as ApmPluginContextValue}
       >
         <AgentConfigurationCreateEdit
+          isLoadingExistingConfig={false}
           pageStep="choose-settings-step"
           existingConfig={{
             service: { name: 'opbeans-node', environment: 'production' },

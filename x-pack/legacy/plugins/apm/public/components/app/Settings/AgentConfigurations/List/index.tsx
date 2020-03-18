@@ -197,7 +197,7 @@ export function AgentConfigurationList({
 
   return (
     <>
-      {configToBeDeleted ? (
+      {configToBeDeleted && (
         <ConfirmDeleteModal
           config={configToBeDeleted}
           onCancel={() => setConfigToBeDeleted(null)}
@@ -206,7 +206,7 @@ export function AgentConfigurationList({
             refetch();
           }}
         />
-      ) : null}
+      )}
 
       <ManagedTable
         noItemsMessage={<LoadingStatePrompt />}

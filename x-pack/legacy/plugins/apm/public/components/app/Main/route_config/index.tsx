@@ -23,9 +23,10 @@ import { resolveUrlParams } from '../../../../context/UrlParamsContext/resolveUr
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../../../../plugins/apm/common/i18n';
 import { TraceLink } from '../../TraceLink';
 import { CustomizeUI } from '../../Settings/CustomizeUI';
-import { AgentConfigurationCreateEdit } from '../../Settings/AgentConfigurations/AgentConfigurationCreateEdit';
-import { useFetcher } from '../../../../hooks/useFetcher';
-import { history } from '../../../../utils/history';
+import {
+  EditAgentConfigurationRouteHandler,
+  CreateAgentConfigurationRouteHandler
+} from './route_handlers/agent_configuration';
 
 const metricsBreadcrumb = i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
   defaultMessage: 'Metrics'
@@ -104,9 +105,7 @@ export const routes: BreadcrumbRoute[] = [
     ),
     breadcrumb: i18n.translate(
       'xpack.apm.breadcrumb.settings.agentConfigurationTitle',
-      {
-        defaultMessage: 'Agent Configuration'
-      }
+      { defaultMessage: 'Agent Configuration' }
     ),
     name: RouteName.AGENT_CONFIGURATION
   },
@@ -119,21 +118,7 @@ export const routes: BreadcrumbRoute[] = [
       { defaultMessage: 'Create Agent Configuration' }
     ),
     name: RouteName.AGENT_CONFIGURATION_CREATE,
-    component: () => {
-      const { search } = history.location;
-
-      // Ignoring here because we specifically DO NOT want to add the query params to the global route handler
-      // @ts-ignore
-      const { pageStep } = toQuery(search);
-
-      return (
-        <Settings>
-          <AgentConfigurationCreateEdit
-            pageStep={pageStep || 'choose-service-step'}
-          />
-        </Settings>
-      );
-    }
+    component: () => <CreateAgentConfigurationRouteHandler />
   },
   {
     exact: true,
@@ -143,40 +128,7 @@ export const routes: BreadcrumbRoute[] = [
       { defaultMessage: 'Edit Agent Configuration' }
     ),
     name: RouteName.AGENT_CONFIGURATION_EDIT,
-    component: () => {
-      const { search } = history.location;
-
-      // typescript complains because `pageStop` does not exist in `APMQueryParams`
-      // Going forward we should move away from globally declared query params and this is a first step
-      // @ts-ignore
-      const { name, environment, pageStep } = toQuery(search);
-
-      // hooks rule is complaining about not using a hook here but it works so 🤷
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const { data } = useFetcher(
-        callApmApi => {
-          return callApmApi({
-            method: 'POST',
-            pathname: '/api/apm/settings/agent-configuration/view',
-            params: { body: { service: { name, environment } } }
-          });
-        },
-        [name, environment]
-      );
-
-      if (!data) {
-        return null;
-      }
-
-      return (
-        <Settings>
-          <AgentConfigurationCreateEdit
-            pageStep={pageStep || 'choose-settings-step'}
-            existingConfig={data}
-          />
-        </Settings>
-      );
-    }
+    component: () => <EditAgentConfigurationRouteHandler />
   },
   {
     exact: true,

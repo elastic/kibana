@@ -14,14 +14,49 @@ import { BYTE_UNITS, bytesRt } from '../bytes_rt';
 import { DURATION_UNITS, durationRt } from '../duration_rt';
 
 interface BaseSetting {
+  /**
+   * UI: unique key to identify setting
+   */
   key: string;
+
+  /**
+   * UI: Human readable name of setting
+   */
   label: string;
+
+  /**
+   * UI:
+   */
   defaultValue?: string;
-  helpText: string;
+
+  /**
+   * UI: description of setting
+   */
+  description: string;
+
+  /**
+   * UI: placeholder to show in input field
+   */
   placeholder?: string;
+
+  /**
+   * runtime validation of the input
+   */
   validation?: t.Type<any, string, unknown>;
+
+  /**
+   * UI: error shown when the runtime validation fails
+   */
   validationError?: string;
+
+  /**
+   * Limits the setting to no agents, except those specified in `includeAgents`
+   */
   includeAgents?: AgentName[];
+
+  /**
+   * Limits the setting to all agents, except those specified in `excludeAgents`
+   */
   excludeAgents?: AgentName[];
 }
 
@@ -69,7 +104,7 @@ export const rawConfigSettingDefinitions: RawConfigSettingDefinition[] = [
     label: i18n.translate('xpack.apm.agentConfig.active.label', {
       defaultMessage: 'Active'
     }),
-    helpText: i18n.translate('xpack.apm.agentConfig.active.helpText', {
+    description: i18n.translate('xpack.apm.agentConfig.active.description', {
       defaultMessage:
         'A boolean specifying if the agent should be active or not.\nWhen active, the agent instruments incoming HTTP requests, tracks errors and collects and sends metrics.\nWhen inactive, the agent works as a noop, not collecting data and not communicating with the APM Server.\nAs this is a reversible switch, agent threads are not being killed when inactivated, but they will be \nmostly idle in this state, so the overhead should be negligible.\n\nYou can use this setting to dynamically disable Elastic APM at runtime.'
     }),
@@ -90,10 +125,13 @@ export const rawConfigSettingDefinitions: RawConfigSettingDefinition[] = [
     label: i18n.translate('xpack.apm.agentConfig.apiRequestSize.label', {
       defaultMessage: 'API Request Size'
     }),
-    helpText: i18n.translate('xpack.apm.agentConfig.apiRequestSize.helpText', {
-      defaultMessage:
-        'The maximum total compressed size of the request body which is sent to the APM server intake api via a chunked encoding (HTTP streaming).\nNote that a small overshoot is possible.\n\nAllowed byte units are `b`, `kb` and `mb`. `1kb` is equal to `1024b`.'
-    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.apiRequestSize.description',
+      {
+        defaultMessage:
+          'The maximum total compressed size of the request body which is sent to the APM server intake api via a chunked encoding (HTTP streaming).\nNote that a small overshoot is possible.\n\nAllowed byte units are `b`, `kb` and `mb`. `1kb` is equal to `1024b`.'
+      }
+    ),
     excludeAgents: ['js-base', 'rum-js']
   },
 
@@ -111,10 +149,13 @@ export const rawConfigSettingDefinitions: RawConfigSettingDefinition[] = [
     label: i18n.translate('xpack.apm.agentConfig.apiRequestTime.label', {
       defaultMessage: 'API Request Time'
     }),
-    helpText: i18n.translate('xpack.apm.agentConfig.apiRequestTime.helpText', {
-      defaultMessage:
-        "Maximum time to keep an HTTP request to the APM Server open for.\n\nNOTE: This value has to be lower than the APM Server's `read_timeout` setting."
-    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.apiRequestTime.description',
+      {
+        defaultMessage:
+          "Maximum time to keep an HTTP request to the APM Server open for.\n\nNOTE: This value has to be lower than the APM Server's `read_timeout` setting."
+      }
+    ),
     excludeAgents: ['js-base', 'rum-js']
   },
 
@@ -126,10 +167,13 @@ export const rawConfigSettingDefinitions: RawConfigSettingDefinition[] = [
     label: i18n.translate('xpack.apm.agentConfig.captureHeaders.label', {
       defaultMessage: 'Capture Headers'
     }),
-    helpText: i18n.translate('xpack.apm.agentConfig.captureHeaders.helpText', {
-      defaultMessage:
-        'If set to `true`, the agent will capture request and response headers, including cookies.\n\nNOTE: Setting this to `false` reduces network bandwidth, disk space and object allocations.'
-    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.captureHeaders.description',
+      {
+        defaultMessage:
+          'If set to `true`, the agent will capture request and response headers, including cookies.\n\nNOTE: Setting this to `false` reduces network bandwidth, disk space and object allocations.'
+      }
+    ),
     excludeAgents: ['js-base', 'rum-js']
   },
 
@@ -141,8 +185,8 @@ export const rawConfigSettingDefinitions: RawConfigSettingDefinition[] = [
     label: i18n.translate('xpack.apm.agentConfig.enableLogCorrelation.label', {
       defaultMessage: 'Enable log correlation'
     }),
-    helpText: i18n.translate(
-      'xpack.apm.agentConfig.enableLogCorrelation.helpText',
+    description: i18n.translate(
+      'xpack.apm.agentConfig.enableLogCorrelation.description',
       {
         defaultMessage:
           "A boolean specifying if the agent should integrate into SLF4J's https://www.slf4j.org/api/org/slf4j/MDC.html[MDC] to enable trace-log correlation.\nIf set to `true`, the agent will set the `trace.id` and `transaction.id` for the currently active spans and transactions to the MDC.\nSee <<log-correlation>> for more details.\n\nNOTE: While it's allowed to enable this setting at runtime, you can't disable it without a restart."
@@ -160,7 +204,7 @@ export const rawConfigSettingDefinitions: RawConfigSettingDefinition[] = [
     label: i18n.translate('xpack.apm.agentConfig.logLevel.label', {
       defaultMessage: 'Log level'
     }),
-    helpText: i18n.translate('xpack.apm.agentConfig.logLevel.helpText', {
+    description: i18n.translate('xpack.apm.agentConfig.logLevel.description', {
       defaultMessage: 'Sets the logging level for the agent'
     }),
     excludeAgents: ['js-base', 'rum-js']
@@ -182,10 +226,13 @@ export const rawConfigSettingDefinitions: RawConfigSettingDefinition[] = [
     label: i18n.translate('xpack.apm.agentConfig.serverTimeout.label', {
       defaultMessage: 'Server Timeout'
     }),
-    helpText: i18n.translate('xpack.apm.agentConfig.serverTimeout.helpText', {
-      defaultMessage:
-        'If a request to the APM server takes longer than the configured timeout,\nthe request is cancelled and the event (exception or transaction) is discarded.\nSet to 0 to disable timeouts.\n\nWARNING: If timeouts are disabled or set to a high value, your app could experience memory issues if the APM server times out.'
-    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.serverTimeout.description',
+      {
+        defaultMessage:
+          'If a request to the APM server takes longer than the configured timeout,\nthe request is cancelled and the event (exception or transaction) is discarded.\nSet to 0 to disable timeouts.\n\nWARNING: If timeouts are disabled or set to a high value, your app could experience memory issues if the APM server times out.'
+      }
+    ),
     excludeAgents: ['js-base', 'rum-js']
   },
 
@@ -205,8 +252,8 @@ export const rawConfigSettingDefinitions: RawConfigSettingDefinition[] = [
     label: i18n.translate('xpack.apm.agentConfig.spanFramesMinDuration.label', {
       defaultMessage: 'Span frames minimum duration'
     }),
-    helpText: i18n.translate(
-      'xpack.apm.agentConfig.spanFramesMinDuration.helpText',
+    description: i18n.translate(
+      'xpack.apm.agentConfig.spanFramesMinDuration.description',
       {
         defaultMessage:
           'In its default settings, the APM agent will collect a stack trace with every recorded span.\nWhile this is very helpful to find the exact place in your code that causes the span, collecting this stack trace does have some overhead. \nWhen setting this option to a negative value, like `-1ms`, stack traces will be collected for all spans. Setting it to a positive value, e.g. `5ms`, will limit stack trace collection to spans with durations equal to or longer than the given value, e.g. 5 milliseconds.\n\nTo disable stack trace collection for spans completely, set the value to `0ms`.'
@@ -227,10 +274,13 @@ export const rawConfigSettingDefinitions: RawConfigSettingDefinition[] = [
     label: i18n.translate('xpack.apm.agentConfig.stackTraceLimit.label', {
       defaultMessage: 'Stack trace limit'
     }),
-    helpText: i18n.translate('xpack.apm.agentConfig.stackTraceLimit.helpText', {
-      defaultMessage:
-        'Setting it to 0 will disable stack trace collection. Any positive integer value will be used as the maximum number of frames to collect. Setting it -1 means that all frames will be collected.'
-    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.stackTraceLimit.description',
+      {
+        defaultMessage:
+          'Setting it to 0 will disable stack trace collection. Any positive integer value will be used as the maximum number of frames to collect. Setting it -1 means that all frames will be collected.'
+      }
+    ),
     includeAgents: ['java']
   },
 
@@ -248,8 +298,8 @@ export const rawConfigSettingDefinitions: RawConfigSettingDefinition[] = [
         defaultMessage: 'Trace methods duration threshold'
       }
     ),
-    helpText: i18n.translate(
-      'xpack.apm.agentConfig.traceMethodsDurationThreshold.helpText',
+    description: i18n.translate(
+      'xpack.apm.agentConfig.traceMethodsDurationThreshold.description',
       {
         defaultMessage:
           'If trace_methods config option is set, provides a threshold to limit spans based on duration. When set to a value greater than 0, spans representing methods traced based on trace_methods will be discarded by default.'
@@ -271,8 +321,8 @@ export const rawConfigSettingDefinitions: RawConfigSettingDefinition[] = [
     label: i18n.translate('xpack.apm.agentConfig.transactionSampleRate.label', {
       defaultMessage: 'Transaction sample rate'
     }),
-    helpText: i18n.translate(
-      'xpack.apm.agentConfig.transactionSampleRate.helpText',
+    description: i18n.translate(
+      'xpack.apm.agentConfig.transactionSampleRate.description',
       {
         defaultMessage:
           'By default, the agent will sample every transaction (e.g. request to your service). To reduce overhead and storage requirements, you can set the sample rate to a value between 0.0 and 1.0. We still record overall time and the result for unsampled transactions, but no context information, labels, or spans.'
@@ -289,10 +339,13 @@ export const rawConfigSettingDefinitions: RawConfigSettingDefinition[] = [
     label: i18n.translate('xpack.apm.agentConfig.captureBody.label', {
       defaultMessage: 'Capture body'
     }),
-    helpText: i18n.translate('xpack.apm.agentConfig.captureBody.helpText', {
-      defaultMessage:
-        'For transactions that are HTTP requests, the agent can optionally capture the request body (e.g. POST variables). Default is "off".'
-    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.captureBody.description',
+      {
+        defaultMessage:
+          'For transactions that are HTTP requests, the agent can optionally capture the request body (e.g. POST variables). Default is "off".'
+      }
+    ),
     options: [
       { text: 'off' },
       { text: 'errors' },
@@ -315,8 +368,8 @@ export const rawConfigSettingDefinitions: RawConfigSettingDefinition[] = [
     label: i18n.translate('xpack.apm.agentConfig.transactionMaxSpans.label', {
       defaultMessage: 'Transaction max spans'
     }),
-    helpText: i18n.translate(
-      'xpack.apm.agentConfig.transactionMaxSpans.helpText',
+    description: i18n.translate(
+      'xpack.apm.agentConfig.transactionMaxSpans.description',
       {
         defaultMessage:
           'Limits the amount of spans that are recorded per transaction. Default is 500.'

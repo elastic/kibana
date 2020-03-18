@@ -7,7 +7,7 @@
 import { EuiButtonEmpty, EuiButtonEmptyColor } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { history } from '../../../../../../utils/history';
+import { APMLink } from '../../../../../shared/Links/apm/APMLink';
 
 export function CancelButton({
   color = 'primary'
@@ -15,18 +15,12 @@ export function CancelButton({
   color?: EuiButtonEmptyColor;
 }) {
   return (
-    <EuiButtonEmpty
-      color={color}
-      onClick={() => {
-        history.push({
-          pathname: '/settings/agent-configuration',
-          search: history.location.search
-        });
-      }}
-    >
-      {i18n.translate('xpack.apm.agentConfig.settingsPage.cancelButton', {
-        defaultMessage: 'Cancel'
-      })}
-    </EuiButtonEmpty>
+    <APMLink path={`/settings/agent-configuration`}>
+      <EuiButtonEmpty color={color}>
+        {i18n.translate('xpack.apm.agentConfig.settingsPage.cancelButton', {
+          defaultMessage: 'Cancel'
+        })}
+      </EuiButtonEmpty>
+    </APMLink>
   );
 }

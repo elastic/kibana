@@ -108,13 +108,16 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
 
       {/* Service name options */}
       <FormRowSelect
-        title="Service"
+        title={i18n.translate(
+          'xpack.apm.agentConfig.servicePage.service.title',
+          { defaultMessage: 'Service' }
+        )}
         description={i18n.translate(
-          'xpack.apm.agentConfig.servicePage.serviceNameSelectHelpText',
+          'xpack.apm.agentConfig.servicePage.service.description',
           { defaultMessage: 'Choose the service you want to configure.' }
         )}
         fieldLabel={i18n.translate(
-          'xpack.apm.agentConfig.servicePage.serviceNameSelectLabel',
+          'xpack.apm.agentConfig.servicePage.service.fieldLabel',
           { defaultMessage: 'Service Name' }
         )}
         isLoading={serviceNamesStatus === 'loading'}
@@ -133,16 +136,19 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
 
       {/* Environment options */}
       <FormRowSelect
-        title="Environment"
+        title={i18n.translate(
+          'xpack.apm.agentConfig.servicePage.environment.title',
+          { defaultMessage: 'Environment' }
+        )}
         description={i18n.translate(
-          'xpack.apm.agentConfig.servicePage.serviceEnvironmentSelectHelpText',
+          'xpack.apm.agentConfig.servicePage.environment.description',
           {
             defaultMessage:
               'Only a single environment per configuration is supported.'
           }
         )}
         fieldLabel={i18n.translate(
-          'xpack.apm.agentConfig.servicePage.serviceEnvironmentSelectLabel',
+          'xpack.apm.agentConfig.servicePage.environment.fieldLabel',
           { defaultMessage: 'Service Environment' }
         )}
         isLoading={environmentStatus === 'loading'}

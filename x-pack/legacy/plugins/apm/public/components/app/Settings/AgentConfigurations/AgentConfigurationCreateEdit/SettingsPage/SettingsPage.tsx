@@ -15,7 +15,8 @@ import {
   EuiStat,
   EuiBottomBar,
   EuiText,
-  EuiHealth
+  EuiHealth,
+  EuiLoadingSpinner
 } from '@elastic/eui';
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -35,12 +36,14 @@ import { getOptionLabel } from '../../../../../../../../../../plugins/apm/common
 import { CancelButton } from '../ServicePage/CancelButton';
 
 export function SettingsPage({
+  isLoadingExistingConfig,
   unsavedChanges,
   newConfig,
   setNewConfig,
   isEditMode,
   onClickEdit
 }: {
+  isLoadingExistingConfig: boolean;
   unsavedChanges: Record<string, string>;
   newConfig: AgentConfigurationIntake;
   setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
@@ -103,7 +106,7 @@ export function SettingsPage({
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">
               <h3>
-                {i18n.translate('xpack.apm.agentConfig.chooseServiceTitle', {
+                {i18n.translate('xpack.apm.agentConfig.chooseService.title', {
                   defaultMessage: 'Choose service'
                 })}
               </h3>
@@ -116,22 +119,29 @@ export function SettingsPage({
                 <EuiStat
                   titleSize="xs"
                   title={getOptionLabel(newConfig.service.name)}
-                  description="Service name"
+                  description={i18n.translate(
+                    'xpack.apm.agentConfig.chooseService.service.name.label',
+                    { defaultMessage: 'Service name' }
+                  )}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiStat
                   titleSize="xs"
                   title={getOptionLabel(newConfig.service.environment)}
-                  description="Environment"
+                  description={i18n.translate(
+                    'xpack.apm.agentConfig.chooseService.service.environment.label',
+                    { defaultMessage: 'Environment' }
+                  )}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 {!isEditMode && (
                   <EuiButton onClick={onClickEdit} iconType="pencil">
-                    {i18n.translate('xpack.apm.agentConfig.editButton', {
-                      defaultMessage: 'Edit'
-                    })}
+                    {i18n.translate(
+                      'xpack.apm.agentConfig.chooseService.editButton',
+                      { defaultMessage: 'Edit' }
+                    )}
                   </EuiButton>
                 )}
               </EuiFlexItem>
@@ -145,35 +155,20 @@ export function SettingsPage({
             <EuiTitle size="s">
               <h3>
                 {i18n.translate('xpack.apm.agentConfig.settings.title', {
-                  defaultMessage: 'Core configuration options'
+                  defaultMessage: 'Configuration options'
                 })}
               </h3>
             </EuiTitle>
 
             <EuiSpacer size="m" />
 
-            {configSettingDefinitions
-
-              // filter out agent specific items that are not applicable
-              // to the selected service
-              .filter(filterByAgent(newConfig.agent_name as AgentName))
-              .map(setting => (
-                <SettingFormRow
-                  isUnsaved={unsavedChanges.hasOwnProperty(setting.key)}
-                  key={setting.key}
-                  setting={setting}
-                  value={newConfig.settings[setting.key]}
-                  onChange={(key, value) => {
-                    setNewConfig(prev => ({
-                      ...prev,
-                      settings: {
-                        ...prev.settings,
-                        [key]: value
-                      }
-                    }));
-                  }}
-                />
-              ))}
+            {isLoadingExistingConfig ? (
+              <div style={{ textAlign: 'center' }}>
+                <EuiLoadingSpinner size="m" />
+              </div>
+            ) : (
+              renderSettings({ unsavedChanges, newConfig, setNewConfig })
+            )}
           </EuiPanel>
         </form>
       </EuiForm>
@@ -210,10 +205,12 @@ export function SettingsPage({
                     fill
                     isLoading={isSaving}
                     isDisabled={!isFormValid}
+                    color="secondary"
+                    iconType="check"
                   >
                     {i18n.translate(
                       'xpack.apm.agentConfig.settingsPage.saveButton',
-                      { defaultMessage: 'Save' }
+                      { defaultMessage: 'Save configuration' }
                     )}
                   </EuiButton>
                 </EuiFlexItem>
@@ -223,6 +220,41 @@ export function SettingsPage({
         </EuiBottomBar>
       )}
     </>
+  );
+}
+
+function renderSettings({
+  newConfig,
+  unsavedChanges,
+  setNewConfig
+}: {
+  newConfig: AgentConfigurationIntake;
+  unsavedChanges: Record<string, string>;
+  setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
+}) {
+  return (
+    configSettingDefinitions
+
+      // filter out agent specific items that are not applicable
+      // to the selected service
+      .filter(filterByAgent(newConfig.agent_name as AgentName))
+      .map(setting => (
+        <SettingFormRow
+          isUnsaved={unsavedChanges.hasOwnProperty(setting.key)}
+          key={setting.key}
+          setting={setting}
+          value={newConfig.settings[setting.key]}
+          onChange={(key, value) => {
+            setNewConfig(prev => ({
+              ...prev,
+              settings: {
+                ...prev.settings,
+                [key]: value
+              }
+            }));
+          }}
+        />
+      ))
   );
 }
 

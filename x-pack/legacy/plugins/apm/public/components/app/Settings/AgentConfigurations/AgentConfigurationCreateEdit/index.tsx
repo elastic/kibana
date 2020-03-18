@@ -47,18 +47,29 @@ function getUnsavedChanges({
 }
 
 export function AgentConfigurationCreateEdit({
+  isLoadingExistingConfig,
   pageStep,
   existingConfig
 }: {
+  isLoadingExistingConfig: boolean;
   pageStep: PageStep;
   existingConfig?: AgentConfigurationIntake;
 }) {
   const [newConfig, setNewConfig] = useState<AgentConfigurationIntake>({
-    agent_name: existingConfig?.agent_name,
-    service: existingConfig?.service || {},
-    settings: existingConfig?.settings || {}
+    agent_name: undefined,
+    service: {},
+    settings: {}
   });
   const isEditMode = Boolean(existingConfig);
+
+  // update newConfig when existingConfig has loaded
+  useEffect(() => {
+    setNewConfig({
+      agent_name: existingConfig?.agent_name,
+      service: existingConfig?.service || {},
+      settings: existingConfig?.settings || {}
+    });
+  }, [existingConfig]);
 
   useEffect(() => {
     // the user tried to edit the service of an existing config
@@ -84,9 +95,11 @@ export function AgentConfigurationCreateEdit({
       </EuiTitle>
 
       <EuiText size="s">
-        This allows you to fine-tune your agent configuration directly in
+        {i18n.translate('xpack.apm.agentConfig.newConfig.description', {
+          defaultMessage: `This allows you to fine-tune your agent configuration directly in
         Kibana. Best of all, changes are automatically propagated to your APM
-        agents so there’s no need to redeploy.
+        agents so there’s no need to redeploy.`
+        })}
       </EuiText>
 
       <EuiSpacer size="m" />
@@ -101,6 +114,7 @@ export function AgentConfigurationCreateEdit({
 
       {pageStep === 'choose-settings-step' && (
         <SettingsPage
+          isLoadingExistingConfig={isLoadingExistingConfig}
           unsavedChanges={unsavedChanges}
           onClickEdit={() => setPage('choose-service-step')}
           newConfig={newConfig}
