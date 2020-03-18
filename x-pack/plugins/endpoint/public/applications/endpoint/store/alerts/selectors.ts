@@ -165,15 +165,3 @@ export const hasSelectedAlert: (state: AlertListState) => boolean = createSelect
   uiQueryParams,
   ({ selected_alert: selectedAlert }) => selectedAlert !== undefined
 );
-
-/**
- * Determine if the alert event is most likely compatible with LegacyEndpointEvent.
- */
-export const selectedAlertIsLegacyEndpointEvent: (
-  state: AlertListState
-) => boolean = createSelector(selectedAlertDetailsData, function(event) {
-  if (event === undefined) {
-    return false;
-  }
-  return 'endgame' in event;
-});

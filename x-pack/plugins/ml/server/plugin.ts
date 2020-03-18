@@ -16,7 +16,7 @@ import { PluginsSetup, RouteInitialization } from './types';
 import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
 
 import { elasticsearchJsPlugin } from './client/elasticsearch_ml';
-import { makeMlUsageCollector } from './lib/ml_telemetry';
+import { initMlTelemetry } from './lib/telemetry';
 import { initMlServerLog } from './client/log';
 import { initSampleDataSets } from './lib/sample_data_sets';
 
@@ -130,9 +130,7 @@ export class MlServerPlugin implements Plugin<MlSetupContract, MlStartContract, 
       cloud: plugins.cloud,
     });
     initMlServerLog({ log: this.log });
-    coreSetup.getStartServices().then(([core]) => {
-      makeMlUsageCollector(plugins.usageCollection, core.savedObjects);
-    });
+    initMlTelemetry(coreSetup, plugins.usageCollection);
 
     return createSharedServices(this.mlLicense, plugins.spaces, plugins.cloud);
   }

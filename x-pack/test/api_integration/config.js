@@ -15,6 +15,7 @@ export async function getApiIntegrationConfig({ readConfigFile }) {
     testFiles: [require.resolve('./apis')],
     services,
     servers: xPackFunctionalTestsConfig.get('servers'),
+    security: xPackFunctionalTestsConfig.get('security'),
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {
       reportName: 'X-Pack API Integration Tests',
