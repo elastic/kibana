@@ -5,7 +5,7 @@
  */
 
 import { ResolverEvent } from '../../../../common/types';
-import { isLegacyEvent } from '../../../../common/models';
+import * as event from '../../../../common/models/event';
 import { ResolverProcessType } from '../types';
 
 /**
@@ -28,7 +28,7 @@ function isValue(field: string | string[], value: string) {
  * Returns a custom event type for a process event based on the event's metadata.
  */
 export function eventType(passedEvent: ResolverEvent): ResolverProcessType {
-  if (isLegacyEvent(passedEvent)) {
+  if (event.isLegacyEvent(passedEvent)) {
     const {
       endgame: { event_type_full: type, event_subtype_full: subType },
     } = passedEvent;
@@ -70,21 +70,21 @@ export function eventType(passedEvent: ResolverEvent): ResolverProcessType {
 /**
  * Returns the process event's pid
  */
-export function uniquePidForProcess(event: ResolverEvent): string {
-  if (isLegacyEvent(event)) {
-    return String(event.endgame.unique_pid);
+export function uniquePidForProcess(passedEvent: ResolverEvent): string {
+  if (event.isLegacyEvent(passedEvent)) {
+    return String(passedEvent.endgame.unique_pid);
   } else {
-    return event.process.entity_id;
+    return passedEvent.process.entity_id;
   }
 }
 
 /**
  * Returns the process event's parent pid
  */
-export function uniqueParentPidForProcess(event: ResolverEvent): string | undefined {
-  if (isLegacyEvent(event)) {
-    return String(event.endgame.unique_ppid);
+export function uniqueParentPidForProcess(passedEvent: ResolverEvent): string | undefined {
+  if (event.isLegacyEvent(passedEvent)) {
+    return String(passedEvent.endgame.unique_ppid);
   } else {
-    return event.process.parent?.entity_id;
+    return passedEvent.process.parent?.entity_id;
   }
 }

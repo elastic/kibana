@@ -9,7 +9,7 @@ import { KibanaReactContextValue } from '../../../../../../../src/plugins/kibana
 import { EndpointPluginServices } from '../../../plugin';
 import { ResolverState, ResolverAction } from '../types';
 import { ResolverEvent } from '../../../../common/types';
-import { isLegacyEvent } from '../../../../common/models';
+import * as event from '../../../../common/models/event';
 
 type MiddlewareFactory<S = ResolverState> = (
   context?: KibanaReactContextValue<EndpointPluginServices>
@@ -30,7 +30,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
         let children = [];
         const ancestors: ResolverEvent[] = [];
         const maxAncestors = 5;
-        if (isLegacyEvent(action.payload.selectedEvent)) {
+        if (event.isLegacyEvent(action.payload.selectedEvent)) {
           const uniquePid = action.payload.selectedEvent?.endgame?.unique_pid;
           const legacyEndpointID = action.payload.selectedEvent?.agent?.id;
           [{ lifecycle }, { children }, { events: relatedEvents }] = await Promise.all([

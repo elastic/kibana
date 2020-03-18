@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EndpointEvent, LegacyEndpointEvent } from './types';
+import { EndpointEvent, LegacyEndpointEvent } from '../types';
 
 export function isLegacyEvent(
   event: EndpointEvent | LegacyEndpointEvent

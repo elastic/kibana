@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, Matrix3 } from '../types';
 import { ResolverEvent } from '../../../../common/types';
-import { eventName } from '../../../../common/models';
+import * as eventModel from '../../../../common/models/event';
 
 /**
  * A placeholder view for a process node.
@@ -49,7 +49,7 @@ export const ProcessEventDot = styled(
       };
       return (
         <span className={className} style={style} data-test-subj={'resolverNode'}>
-          name: {eventName(event)}
+          name: {eventModel.eventName(event)}
           <br />
           x: {position[0]}
           <br />

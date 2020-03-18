@@ -12,7 +12,7 @@ import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { SideEffectContext } from './side_effect_context';
 import { ResolverEvent } from '../../../../common/types';
-import { eventTimestamp, eventName } from '../../../../common/models';
+import * as event from '../../../../common/models/event';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as selectors from '../store/selectors';
 
@@ -49,8 +49,8 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
     () =>
       [...processNodePositions.keys()].map(processEvent => {
         let dateTime;
-        const eventTime = eventTimestamp(processEvent);
-        const name = eventName(processEvent);
+        const eventTime = event.eventTimestamp(processEvent);
+        const name = event.eventName(processEvent);
         if (eventTime) {
           const date = new Date(eventTime);
           if (isFinite(date.getTime())) {
