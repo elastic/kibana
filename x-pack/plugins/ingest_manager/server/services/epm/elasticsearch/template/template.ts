@@ -46,65 +46,69 @@ export function getTemplate(
  */
 export function generateMappings(fields: Field[]): Mappings {
   const props: Properties = {};
-  fields.forEach(field => {
-    // If type is not defined, assume keyword
-    const type = field.type || 'keyword';
+  // TODO: this can happen when the fields property in fields.yml is present but empty
+  // Maybe validation should be moved to fields/field.ts
+  if (fields) {
+    fields.forEach(field => {
+      // If type is not defined, assume keyword
+      const type = field.type || 'keyword';
 
-    let fieldProps = getDefaultProperties(field);
+      let fieldProps = getDefaultProperties(field);
 
-    switch (type) {
-      case 'group':
-        fieldProps = generateMappings(field.fields!);
-        break;
-      case 'integer':
-        fieldProps.type = 'long';
-        break;
-      case 'scaled_float':
-        fieldProps.type = 'scaled_float';
-        fieldProps.scaling_factor = field.scaling_factor || DEFAULT_SCALING_FACTOR;
-        break;
-      case 'text':
-        fieldProps.type = 'text';
-        if (field.analyzer) {
-          fieldProps.analyzer = field.analyzer;
-        }
-        if (field.search_analyzer) {
-          fieldProps.search_analyzer = field.search_analyzer;
-        }
-        break;
-      case 'keyword':
-        fieldProps.type = 'keyword';
-        if (field.ignore_above) {
-          fieldProps.ignore_above = field.ignore_above;
-        } else {
-          fieldProps.ignore_above = DEFAULT_IGNORE_ABOVE;
-        }
-        break;
-      // TODO move handling of multi_fields here?
-      case 'object':
-        // TODO improve
-        fieldProps.type = 'object';
-        break;
-      case 'array':
-        // this assumes array fields were validated in an earlier step
-        // adding an array field with no object_type would result in an error
-        // when the template is added to ES
-        if (field.object_type) {
-          fieldProps.type = field.object_type;
-        }
-        break;
-      case 'alias':
-        // this assumes alias fields were validated in an earlier step
-        // adding a path to a field that doesn't exist would result in an error
-        // when the template is added to ES.
-        fieldProps.type = 'alias';
-        fieldProps.path = field.path;
-        break;
-      default:
-        fieldProps.type = type;
-    }
-    props[field.name] = fieldProps;
-  });
+      switch (type) {
+        case 'group':
+          fieldProps = generateMappings(field.fields!);
+          break;
+        case 'integer':
+          fieldProps.type = 'long';
+          break;
+        case 'scaled_float':
+          fieldProps.type = 'scaled_float';
+          fieldProps.scaling_factor = field.scaling_factor || DEFAULT_SCALING_FACTOR;
+          break;
+        case 'text':
+          fieldProps.type = 'text';
+          if (field.analyzer) {
+            fieldProps.analyzer = field.analyzer;
+          }
+          if (field.search_analyzer) {
+            fieldProps.search_analyzer = field.search_analyzer;
+          }
+          break;
+        case 'keyword':
+          fieldProps.type = 'keyword';
+          if (field.ignore_above) {
+            fieldProps.ignore_above = field.ignore_above;
+          } else {
+            fieldProps.ignore_above = DEFAULT_IGNORE_ABOVE;
+          }
+          break;
+        // TODO move handling of multi_fields here?
+        case 'object':
+          // TODO improve
+          fieldProps.type = 'object';
+          break;
+        case 'array':
+          // this assumes array fields were validated in an earlier step
+          // adding an array field with no object_type would result in an error
+          // when the template is added to ES
+          if (field.object_type) {
+            fieldProps.type = field.object_type;
+          }
+          break;
+        case 'alias':
+          // this assumes alias fields were validated in an earlier step
+          // adding a path to a field that doesn't exist would result in an error
+          // when the template is added to ES.
+          fieldProps.type = 'alias';
+          fieldProps.path = field.path;
+          break;
+        default:
+          fieldProps.type = type;
+      }
+      props[field.name] = fieldProps;
+    });
+  }
 
   return { properties: props };
 }
