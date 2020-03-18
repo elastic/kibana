@@ -129,6 +129,7 @@ describe('UPDATE remote clusters', () => {
       payload: {
         seeds: ['127.0.0.1:9300'],
         skipUnavailable: true,
+        mode: 'sniff',
       },
       asserts: {
         apiArguments: [
@@ -139,7 +140,17 @@ describe('UPDATE remote clusters', () => {
               body: {
                 persistent: {
                   cluster: {
-                    remote: { test: { seeds: ['127.0.0.1:9300'], skip_unavailable: true } },
+                    remote: {
+                      test: {
+                        seeds: ['127.0.0.1:9300'],
+                        skip_unavailable: true,
+                        mode: 'sniff',
+                        node_connections: null,
+                        proxy_address: null,
+                        proxy_socket_connections: null,
+                        server_name: null,
+                      },
+                    },
                   },
                 },
               },
@@ -156,6 +167,7 @@ describe('UPDATE remote clusters', () => {
           name: 'test',
           seeds: ['127.0.0.1:9300'],
           skipUnavailable: true,
+          mode: 'sniff',
         },
       },
     });
@@ -167,6 +179,7 @@ describe('UPDATE remote clusters', () => {
       payload: {
         seeds: ['127.0.0.1:9300'],
         skipUnavailable: false,
+        mode: 'sniff',
       },
       params: {
         name: 'test',
@@ -198,6 +211,7 @@ describe('UPDATE remote clusters', () => {
       payload: {
         seeds: ['127.0.0.1:9300'],
         skipUnavailable: false,
+        mode: 'sniff',
       },
       params: {
         name: 'test',
@@ -211,7 +225,17 @@ describe('UPDATE remote clusters', () => {
               body: {
                 persistent: {
                   cluster: {
-                    remote: { test: { seeds: ['127.0.0.1:9300'], skip_unavailable: false } },
+                    remote: {
+                      test: {
+                        seeds: ['127.0.0.1:9300'],
+                        skip_unavailable: false,
+                        mode: 'sniff',
+                        node_connections: null,
+                        proxy_address: null,
+                        proxy_socket_connections: null,
+                        server_name: null,
+                      },
+                    },
                   },
                 },
               },
