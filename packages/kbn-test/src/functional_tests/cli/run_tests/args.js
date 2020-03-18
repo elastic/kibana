@@ -46,6 +46,14 @@ const options = {
   updateBaselines: {
     desc: 'Replace baseline screenshots with whatever is generated from the test.',
   },
+  include: {
+    arg: '<file>',
+    desc: 'Files that must included to be run, can be included multiple times.',
+  },
+  exclude: {
+    arg: '<file>',
+    desc: 'Files that must NOT be included to be run, can be included multiple times.',
+  },
   'include-tag': {
     arg: '<tag>',
     desc: 'Tags that suites must include to be run, can be included multiple times.',
@@ -114,6 +122,13 @@ export function processOptions(userOptions, defaultConfigPaths) {
     userOptions.installDir = userOptions['kibana-install-dir'];
     delete userOptions['kibana-install-dir'];
   }
+
+  userOptions.suiteFiles = {
+    include: [].concat(userOptions.include || []),
+    exclude: [].concat(userOptions.exclude || []),
+  };
+  delete userOptions.include;
+  delete userOptions.exclude;
 
   userOptions.suiteTags = {
     include: [].concat(userOptions['include-tag'] || []),

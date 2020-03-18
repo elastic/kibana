@@ -15,6 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { DatasourceInput, RegistryVarsEntry } from '../../../../types';
+import { isAdvancedVar } from '../services';
 import { DatasourceInputVarField } from './datasource_input_var_field';
 
 export const DatasourceInputConfig: React.FunctionComponent<{
@@ -30,10 +31,10 @@ export const DatasourceInputConfig: React.FunctionComponent<{
 
   if (packageInputVars) {
     packageInputVars.forEach(varDef => {
-      if (varDef.required && !varDef.default) {
-        requiredVars.push(varDef);
-      } else {
+      if (isAdvancedVar(varDef)) {
         advancedVars.push(varDef);
+      } else {
+        requiredVars.push(varDef);
       }
     });
   }

@@ -45,7 +45,7 @@ class JobService {
     this.jobStats = {
       activeNodes: {
         label: i18n.translate('xpack.ml.jobService.activeMLNodesLabel', {
-          defaultMessage: 'Active ML Nodes',
+          defaultMessage: 'Active ML nodes',
         }),
         value: 0,
         show: true,
@@ -747,8 +747,7 @@ class JobService {
     return datafeedId;
   }
 
-  getDatafeedPreview(jobId) {
-    const datafeedId = this.getDatafeedId(jobId);
+  getDatafeedPreview(datafeedId) {
     return ml.datafeedPreview({ datafeedId });
   }
 
