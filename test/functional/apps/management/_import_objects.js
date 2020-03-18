@@ -35,6 +35,7 @@ export default function({ getService, getPageObjects }) {
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await esArchiver.load('management');
+        await PageObjects.settings.clickKibanaSavedObjects();
       });
 
       afterEach(async function() {
@@ -42,41 +43,31 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should import saved objects', async function() {
-        await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects.ndjson')
         );
         await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
-        await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
-        const objects = await PageObjects.settings.getSavedObjectsInTable();
-        const isSavedObjectImported = objects.includes('Log Agents');
-        expect(isSavedObjectImported).to.be(true);
 
-        // new stuff here ////////
         // get all the elements in the table, and index them by the 'title' visible text field
-        await PageObjects.common.sleep(2000);
         const elements = indexBy(
           await PageObjects.settings.getSavedObjectElementsInTable(),
           'title'
         );
-        log.debug(`the title = ${elements['Log Agents'].title}`);
-        log.debug(`the object type = ${elements['Log Agents'].objectType}`);
-        log.debug(`the keys of the list returned = ${Object.keys(elements)}`);
-        log.debug(`the size of the list returned = ${Object.keys(elements).length}`);
-        // seems like I can click relationshipsElement and InspectElement, but then I can't click checkbox
-        // await elements['Log Agents'].relationshipsElement.click();
-        // await elements['Log Agents'].InspectElement.click();
+        log.debug("check that 'Log Agents' is in table as a visualization");
+        expect(elements['Log Agents'].objectType).to.eql('visualization');
 
-        // or I can click the checkbox.  Maybe it's because I didn't close the relationshipsElement and InspectElement flyouts?
-        await elements['Log Agents'].checkbox.click();
-
-        // this is just so I can see the actions above
-        await PageObjects.common.sleep(20000);
+        await elements['logstash-*'].relationshipsElement.click();
+        const flyout = indexBy(await PageObjects.settings.getRelationshipFlyout(), 'title');
+        log.debug(
+          "check that 'Shared-Item Visualization AreaChart' shows 'logstash-*' as it's Parent"
+        );
+        expect(flyout['Shared-Item Visualization AreaChart'].relationship).to.eql('Parent');
+        log.debug("check that 'Log Agents' shows 'logstash-*' as it's Parent");
+        expect(flyout['Log Agents'].relationship).to.eql('Parent');
       });
 
       it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function() {
-        await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_conflicts.ndjson')
         );
@@ -88,15 +79,12 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.settings.clickConfirmChanges();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.settings.clickImportDone();
-        await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
         const objects = await PageObjects.settings.getSavedObjectsInTable();
         const isSavedObjectImported = objects.includes('saved object with index pattern conflict');
         expect(isSavedObjectImported).to.be(true);
       });
 
       it('should allow the user to override duplicate saved objects', async function() {
-        await PageObjects.settings.clickKibanaSavedObjects();
-
         // This data has already been loaded by the "visualize" esArchive. We'll load it again
         // so that we can override the existing visualization.
         await PageObjects.settings.importFile(
@@ -116,8 +104,6 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should allow the user to cancel overriding duplicate saved objects', async function() {
-        await PageObjects.settings.clickKibanaSavedObjects();
-
         // This data has already been loaded by the "visualize" esArchive. We'll load it again
         // so that we can be prompted to override the existing visualization.
         await PageObjects.settings.importFile(
@@ -137,21 +123,17 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should import saved objects linked to saved searches', async function() {
-        await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_saved_search.ndjson')
         );
         await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
 
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.ndjson')
         );
         await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
-        await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
         const objects = await PageObjects.settings.getSavedObjectsInTable();
         const isSavedObjectImported = objects.includes('saved object connected to saved search');
@@ -159,14 +141,11 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should not import saved objects linked to saved searches when saved search does not exist', async function() {
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.ndjson')
         );
         await PageObjects.settings.checkNoneImported();
         await PageObjects.settings.clickImportDone();
-        await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
         const objects = await PageObjects.settings.getSavedObjectsInTable();
         const isSavedObjectImported = objects.includes('saved object connected to saved search');
@@ -174,12 +153,13 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should not import saved objects linked to saved searches when saved search index pattern does not exist', async function() {
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.removeLogstashIndexPatternIfExist();
+        const elements = indexBy(
+          await PageObjects.settings.getSavedObjectElementsInTable(),
+          'title'
+        );
+        await elements['logstash-*'].checkbox.click();
+        await PageObjects.settings.clickSavedObjectsDelete();
 
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_with_saved_search.ndjson')
         );
@@ -187,7 +167,6 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.settings.checkImportConflictsWarning();
         await PageObjects.settings.clickConfirmChanges();
         await PageObjects.settings.clickImportDone();
-        await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
         const objects = await PageObjects.settings.getSavedObjectsInTable();
         const isSavedObjectImported = objects.includes('saved object connected to saved search');
@@ -196,14 +175,11 @@ export default function({ getService, getPageObjects }) {
 
       it('should import saved objects with index patterns when index patterns already exists', async () => {
         // First, import the objects
-        await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_with_index_patterns.ndjson')
         );
         await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
-        // Wait for all the saves to happen
-        await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
         const objects = await PageObjects.settings.getSavedObjectsInTable();
         const isSavedObjectImported = objects.includes('saved object imported with index pattern');
@@ -212,19 +188,19 @@ export default function({ getService, getPageObjects }) {
 
       it('should import saved objects with index patterns when index patterns does not exists', async () => {
         // First, we need to delete the index pattern
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.removeLogstashIndexPatternIfExist();
+        const elements = indexBy(
+          await PageObjects.settings.getSavedObjectElementsInTable(),
+          'title'
+        );
+        await elements['logstash-*'].checkbox.click();
+        await PageObjects.settings.clickSavedObjectsDelete();
 
         // Then, import the objects
-        await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_with_index_patterns.ndjson')
         );
         await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
-        // Wait for all the saves to happen
-        await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
         const objects = await PageObjects.settings.getSavedObjectsInTable();
         const isSavedObjectImported = objects.includes('saved object imported with index pattern');
@@ -245,20 +221,17 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should import saved objects', async function() {
-        await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects.json')
         );
         await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
-        await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
         const objects = await PageObjects.settings.getSavedObjectsInTable();
         const isSavedObjectImported = objects.includes('Log Agents');
         expect(isSavedObjectImported).to.be(true);
       });
 
       it('should provide dialog to allow the importing of saved objects with index pattern conflicts', async function() {
-        await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects-conflicts.json')
         );
@@ -271,15 +244,12 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.settings.clickConfirmChanges();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.settings.clickImportDone();
-        await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
         const objects = await PageObjects.settings.getSavedObjectsInTable();
         const isSavedObjectImported = objects.includes('saved object with index pattern conflict');
         expect(isSavedObjectImported).to.be(true);
       });
 
       it('should allow the user to override duplicate saved objects', async function() {
-        await PageObjects.settings.clickKibanaSavedObjects();
-
         // This data has already been loaded by the "visualize" esArchive. We'll load it again
         // so that we can override the existing visualization.
         await PageObjects.settings.importFile(
@@ -300,8 +270,6 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should allow the user to cancel overriding duplicate saved objects', async function() {
-        await PageObjects.settings.clickKibanaSavedObjects();
-
         // This data has already been loaded by the "visualize" esArchive. We'll load it again
         // so that we can be prompted to override the existing visualization.
         await PageObjects.settings.importFile(
@@ -322,21 +290,19 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should import saved objects linked to saved searches', async function() {
-        await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_saved_search.json')
         );
         await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
 
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaSavedObjects();
+        // await PageObjects.settings.navigateTo();
+        // await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json')
         );
         await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
-        await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
         const objects = await PageObjects.settings.getSavedObjectsInTable();
         const isSavedObjectImported = objects.includes('saved object connected to saved search');
@@ -344,14 +310,13 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should not import saved objects linked to saved searches when saved search does not exist', async function() {
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaSavedObjects();
+        // await PageObjects.settings.navigateTo();
+        // await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json')
         );
         await PageObjects.settings.checkImportFailedWarning();
         await PageObjects.settings.clickImportDone();
-        await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
         const objects = await PageObjects.settings.getSavedObjectsInTable();
         const isSavedObjectImported = objects.includes('saved object connected to saved search');
@@ -360,7 +325,6 @@ export default function({ getService, getPageObjects }) {
 
       it('should not import saved objects linked to saved searches when saved search index pattern does not exist', async function() {
         // First, import the saved search
-        await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_saved_search.json')
         );
@@ -369,21 +333,23 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.settings.clickImportDone();
 
         // Second, we need to delete the index pattern
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.removeLogstashIndexPatternIfExist();
+        const elements = indexBy(
+          await PageObjects.settings.getSavedObjectElementsInTable(),
+          'title'
+        );
+        await elements['logstash-*'].checkbox.click();
+        await PageObjects.settings.clickSavedObjectsDelete();
 
         // Last, import a saved object connected to the saved search
         // This should NOT show the conflicts
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaSavedObjects();
+        // await PageObjects.settings.navigateTo();
+        // await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.json')
         );
         // Wait for all the saves to happen
         await PageObjects.settings.checkNoneImported();
         await PageObjects.settings.clickImportDone();
-        await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
         const objects = await PageObjects.settings.getSavedObjectsInTable();
         const isSavedObjectImported = objects.includes('saved object connected to saved search');
@@ -392,14 +358,11 @@ export default function({ getService, getPageObjects }) {
 
       it('should import saved objects with index patterns when index patterns already exists', async () => {
         // First, import the objects
-        await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_with_index_patterns.json')
         );
         await PageObjects.settings.checkImportFailedWarning();
         await PageObjects.settings.clickImportDone();
-        // Wait for all the saves to happen
-        await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
         const objects = await PageObjects.settings.getSavedObjectsInTable();
         const isSavedObjectImported = objects.includes('saved object imported with index pattern');
@@ -408,19 +371,20 @@ export default function({ getService, getPageObjects }) {
 
       it('should import saved objects with index patterns when index patterns does not exists', async () => {
         // First, we need to delete the index pattern
-        await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.removeLogstashIndexPatternIfExist();
+        const elements = indexBy(
+          await PageObjects.settings.getSavedObjectElementsInTable(),
+          'title'
+        );
+        await elements['logstash-*'].checkbox.click();
+        await PageObjects.settings.clickSavedObjectsDelete();
 
         // Then, import the objects
-        await PageObjects.settings.clickKibanaSavedObjects();
+        // await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_with_index_patterns.json')
         );
         await PageObjects.settings.checkImportSucceeded();
         await PageObjects.settings.clickImportDone();
-        // Wait for all the saves to happen
-        await PageObjects.settings.waitUntilSavedObjectsTableIsNotLoading();
 
         const objects = await PageObjects.settings.getSavedObjectsInTable();
         const isSavedObjectImported = objects.includes('saved object imported with index pattern');

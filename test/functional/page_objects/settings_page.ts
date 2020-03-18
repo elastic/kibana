@@ -47,6 +47,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async clickKibanaSavedObjects() {
       await testSubjects.click('objects');
+      await this.waitUntilSavedObjectsTableIsNotLoading();
     }
 
     async clickKibanaIndexPatterns() {
@@ -651,6 +652,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async clickImportDone() {
       await testSubjects.click('importSavedObjectsDoneBtn');
+      await this.waitUntilSavedObjectsTableIsNotLoading();
     }
 
     async clickConfirmChanges() {
@@ -685,21 +687,27 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async getSavedObjectElementsInTable() {
-      const rows = await find.allByCssSelector('.euiTableRow');
+      const rows = await testSubjects.findAll('~savedObjectsTableRow');
       return mapAsync(rows, async row => {
-        const checkbox = await row.findByCssSelector('.euiCheckbox__input');
-        // would be nice to return the object type aria-label="index patterns"
+        const checkbox = await row.findByCssSelector('[data-test-subj*="checkboxSelectRow"]');
+        // return the object type aria-label="index patterns"
         const objectType = await row.findByCssSelector('td:nth-child(2) svg');
-        const titleElement = await row.findByCssSelector('.euiLink');
+        const titleElement = await row.findByCssSelector(
+          '[data-test-subj="savedObjectsTableRowTitle"]'
+        );
         // not all rows have inspect button - Advanced Settings objects don't
         let inspectElement;
         const innerHtml = await row.getAttribute('innerHTML');
         if (innerHtml.includes('Inspect')) {
-          inspectElement = await row.findByCssSelector('[aria-label="Inspect"]');
+          inspectElement = await row.findByCssSelector(
+            '[data-test-subj="savedObjectsTableAction-inspect"]'
+          );
         } else {
           inspectElement = null;
         }
-        const relationshipsElement = await row.findByCssSelector('[aria-label="Relationships"]');
+        const relationshipsElement = await row.findByCssSelector(
+          '[data-test-subj="savedObjectsTableAction-relationships"]'
+        );
         return {
           checkbox,
           objectType: await objectType.getAttribute('aria-label'),
@@ -721,6 +729,19 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       }
 
       return objects;
+    }
+
+    async getRelationshipFlyout() {
+      const table = await find.byCssSelector('.euiFlyout');
+      const rows = await table.findAllByCssSelector('.euiTableRow');
+      return mapAsync(rows, async row => {
+        const relationship = await row.findByCssSelector('td:nth-child(2)');
+        const title = await row.findByCssSelector('td:nth-child(3)');
+        return {
+          relationship: await relationship.getVisibleText(),
+          title: await title.getVisibleText(),
+        };
+      });
     }
 
     async getSavedObjectsTableSummary() {
@@ -753,18 +774,27 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       return await deleteButton.isEnabled();
     }
 
-    async canSavedObjectBeDeleted(id: string) {
-      const allCheckBoxes = await testSubjects.findAll('checkboxSelectRow*');
-      for (const checkBox of allCheckBoxes) {
-        if (await checkBox.isSelected()) {
-          await checkBox.click();
-        }
-      }
-
-      const checkBox = await testSubjects.find(`checkboxSelectRow-${id}`);
-      await checkBox.click();
-      return await this.canSavedObjectsBeDeleted();
+    async clickSavedObjectsDelete() {
+      await testSubjects.click('savedObjectsManagementDelete');
+      await testSubjects.click('confirmModalConfirmButton');
+      await this.waitUntilSavedObjectsTableIsNotLoading();
     }
+
+    // is this used anywhere?
+    // change it to use getSavedObjectElementsInTable() and take (title) instead of (id)
+    //   async canSavedObjectBeDeleted(id: string) {
+    //     const allCheckBoxes = await testSubjects.findAll('checkboxSelectRow*');
+    //     for (const checkBox of allCheckBoxes) {
+    //       if (await checkBox.isSelected()) {
+    //         await checkBox.click();
+    //       }
+    //     }
+
+    //     const checkBox = await testSubjects.find(`checkboxSelectRow-${id}`);
+    //     await checkBox.click();
+    //     return await this.canSavedObjectsBeDeleted();
+    //   }
+    // }
   }
 
   return new SettingsPage();
