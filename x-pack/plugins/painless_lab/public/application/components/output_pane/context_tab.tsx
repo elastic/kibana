@@ -109,13 +109,13 @@ export const ContextTab = ({
       <EuiFormRow
         label={
           <EuiToolTip
-            content={i18n.translate('xpack.painlessLab.queryFieldLabel', {
+            content={i18n.translate('xpack.painlessLab.queryFieldTooltipText', {
               defaultMessage:
                 'Use query to specify that that _score will be used to calculate score.',
             })}
           >
             <span>
-              <FormattedMessage id="xpack.painlessLab.indexFieldLabel" defaultMessage="Query" />{' '}
+              <FormattedMessage id="xpack.painlessLab.queryFieldLabel" defaultMessage="Query" />{' '}
               <EuiIcon type="questionInCircle" color="subdued" />
             </span>
           </EuiToolTip>
