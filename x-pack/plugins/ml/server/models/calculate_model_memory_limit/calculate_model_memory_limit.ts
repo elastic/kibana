@@ -169,7 +169,7 @@ export function calculateModelMemoryLimitProvider(callAsCurrentUser: APICaller) 
     // make sure the estimated value is not greater than it.
     if (!allowMMLGreaterThanMax && maxModelMemoryLimit !== undefined) {
       // @ts-ignore
-      const maxBytes = numeral(limits.max_model_memory_limit).value();
+      const maxBytes = numeral(maxModelMemoryLimit).value();
       // @ts-ignore
       const mmlBytes = numeral(estimatedModelMemoryLimit).value();
       if (mmlBytes > maxBytes) {
