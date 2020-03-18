@@ -5,14 +5,34 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore: implicit any for JS file
-import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import React from 'react';
-import { npSetup } from 'ui/new_platform';
-import { ReportingPanelContent } from '../components/reporting_panel_content';
-import { ShareContext } from '../../../../../../src/plugins/share/public';
 
-function reportingProvider() {
+import { ToastsSetup } from 'src/core/public';
+import { ReportingPanelContent } from '../components/reporting_panel_content';
+import { ReportingAPIClient } from '../lib/reporting_api_client';
+import { checkLicense } from '../lib/license_check';
+import { LicensingPluginSetup } from '../../../licensing/public';
+import { ShareContext } from '../../../../../src/plugins/share/public';
+
+interface ReportingProvider {
+  apiClient: ReportingAPIClient;
+  toasts: ToastsSetup;
+  license$: LicensingPluginSetup['license$'];
+}
+
+export const csvReportingProvider = ({ apiClient, toasts, license$ }: ReportingProvider) => {
+  let toolTipContent = '';
+  let disabled = true;
+  let hasCSVReporting = false;
+
+  license$.subscribe(license => {
+    const { enableLinks, showLinks, message } = checkLicense(license.check('reporting', 'basic'));
+
+    toolTipContent = message;
+    hasCSVReporting = showLinks;
+    disabled = !enableLinks;
+  });
+
   const getShareMenuItems = ({
     objectType,
     objectId,
@@ -32,7 +52,8 @@ function reportingProvider() {
     };
 
     const shareActions = [];
-    if (xpackInfo.get('features.reporting.csv.showLinks', false)) {
+
+    if (hasCSVReporting) {
       const panelTitle = i18n.translate('xpack.reporting.shareContextMenu.csvReportsButtonLabel', {
         defaultMessage: 'CSV Reports',
       });
@@ -41,8 +62,8 @@ function reportingProvider() {
         shareMenuItem: {
           name: panelTitle,
           icon: 'document',
-          toolTipContent: xpackInfo.get('features.reporting.csv.message'),
-          disabled: !xpackInfo.get('features.reporting.csv.enableLinks', false) ? true : false,
+          toolTipContent,
+          disabled,
           ['data-test-subj']: 'csvReportMenuItem',
           sortOrder: 1,
         },
@@ -51,6 +72,8 @@ function reportingProvider() {
           title: panelTitle,
           content: (
             <ReportingPanelContent
+              apiClient={apiClient}
+              toasts={toasts}
               reportType="csv"
               layoutId={undefined}
               objectType={objectType}
@@ -71,6 +94,4 @@ function reportingProvider() {
     id: 'csvReports',
     getShareMenuItems,
   };
-}
-
-npSetup.plugins.share.register(reportingProvider());
+};

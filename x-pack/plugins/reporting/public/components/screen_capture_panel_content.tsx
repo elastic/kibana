@@ -7,9 +7,13 @@
 import { EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
+import { ToastsSetup } from 'src/core/public';
 import { ReportingPanelContent } from './reporting_panel_content';
+import { ReportingAPIClient } from '../lib/reporting_api_client';
 
 interface Props {
+  apiClient: ReportingAPIClient;
+  toasts: ToastsSetup;
   reportType: string;
   objectId?: string;
   objectType: string;
@@ -38,6 +42,8 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
   public render() {
     return (
       <ReportingPanelContent
+        apiClient={this.props.apiClient}
+        toasts={this.props.toasts}
         reportType={this.props.reportType}
         layoutId={this.getLayout().id}
         objectType={this.props.objectType}

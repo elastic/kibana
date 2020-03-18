@@ -7,12 +7,14 @@
 import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
-import { toastNotifications } from 'ui/notify';
 import url from 'url';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
-import * as reportingClient from '../lib/reporting_client';
+import { ToastsSetup } from 'src/core/public';
+import { ReportingAPIClient } from '../lib/reporting_api_client';
+import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 
 interface Props {
+  apiClient: ReportingAPIClient;
+  toasts: ToastsSetup;
   reportType: string;
   layoutId: string | undefined;
   objectId?: string;
@@ -31,23 +33,6 @@ interface State {
 }
 
 class ReportingPanelContentUi extends Component<Props, State> {
-  public static getDerivedStateFromProps(nextProps: Props, prevState: State) {
-    if (nextProps.layoutId !== prevState.layoutId) {
-      return {
-        ...prevState,
-        absoluteUrl: ReportingPanelContentUi.getAbsoluteReportGenerationUrl(nextProps),
-      };
-    }
-    return prevState;
-  }
-
-  private static getAbsoluteReportGenerationUrl = (props: Props) => {
-    const relativePath = reportingClient.getReportingJobPath(
-      props.reportType,
-      props.getJobParams()
-    );
-    return url.resolve(window.location.href, relativePath);
-  };
   private mounted?: boolean;
 
   constructor(props: Props) {
@@ -55,9 +40,27 @@ class ReportingPanelContentUi extends Component<Props, State> {
 
     this.state = {
       isStale: false,
-      absoluteUrl: '',
+      absoluteUrl: this.getAbsoluteReportGenerationUrl(props),
       layoutId: '',
     };
+  }
+
+  private getAbsoluteReportGenerationUrl = (props: Props) => {
+    const relativePath = this.props.apiClient.getReportingJobPath(
+      props.reportType,
+      props.getJobParams()
+    );
+    return url.resolve(window.location.href, relativePath);
+  };
+
+  public componentDidUpdate(prevProps: Props, prevState: State) {
+    if (this.props.layoutId && this.props.layoutId !== prevState.layoutId) {
+      this.setState({
+        ...prevState,
+        absoluteUrl: this.getAbsoluteReportGenerationUrl(this.props),
+        layoutId: this.props.layoutId,
+      });
+    }
   }
 
   public componentWillUnmount() {
@@ -188,17 +191,17 @@ class ReportingPanelContentUi extends Component<Props, State> {
     if (!this.mounted) {
       return;
     }
-    const absoluteUrl = ReportingPanelContentUi.getAbsoluteReportGenerationUrl(this.props);
+    const absoluteUrl = this.getAbsoluteReportGenerationUrl(this.props);
     this.setState({ absoluteUrl });
   };
 
   private createReportingJob = () => {
     const { intl } = this.props;
 
-    return reportingClient
+    return this.props.apiClient
       .createReportingJob(this.props.reportType, this.props.getJobParams())
       .then(() => {
-        toastNotifications.addSuccess({
+        this.props.toasts.addSuccess({
           title: intl.formatMessage(
             {
               id: 'xpack.reporting.panelContent.successfullyQueuedReportNotificationTitle',
@@ -218,7 +221,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
       })
       .catch((error: any) => {
         if (error.message === 'not exportable') {
-          return toastNotifications.addWarning({
+          return this.props.toasts.addWarning({
             title: intl.formatMessage(
               {
                 id: 'xpack.reporting.panelContent.whatCanBeExportedWarningTitle',
@@ -248,7 +251,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
             />
           );
 
-        toastNotifications.addDanger({
+        this.props.toasts.addDanger({
           title: intl.formatMessage({
             id: 'xpack.reporting.panelContent.notification.reportingErrorTitle',
             defaultMessage: 'Reporting error',

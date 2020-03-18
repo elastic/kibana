@@ -6,11 +6,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import moment from 'moment';
 import { get } from 'lodash';
+import moment from 'moment';
 import React, { Component } from 'react';
-import chrome from 'ui/chrome';
-import { toastNotifications } from 'ui/notify';
+import { Subscription } from 'rxjs';
+
 import {
   EuiBasicTable,
   EuiButtonIcon,
@@ -21,10 +21,13 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { Poller } from '../../../../common/poller';
-import { JobStatuses } from '../constants/job_statuses';
-import { downloadReport } from '../lib/download_report';
-import { jobQueueClient, JobQueueEntry } from '../lib/job_queue_client';
+
+import { ToastsSetup, ApplicationStart } from 'src/core/public';
+import { LicensingPluginSetup, ILicense } from '../../../licensing/public';
+import { Poller } from '../../common/poller';
+import { JobStatuses, JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG } from '../../constants';
+import { ReportingAPIClient, JobQueueEntry } from '../lib/reporting_api_client';
+import { checkLicense } from '../lib/license_check';
 import { ReportErrorButton } from './report_error_button';
 import { ReportInfoButton } from './report_info_button';
 
@@ -47,11 +50,11 @@ interface Job {
 }
 
 interface Props {
-  badLicenseMessage: string;
-  showLinks: boolean;
-  enableLinks: boolean;
-  redirect: (url: string) => void;
   intl: InjectedIntl;
+  apiClient: ReportingAPIClient;
+  license$: LicensingPluginSetup['license$'];
+  redirect: ApplicationStart['navigateToApp'];
+  toasts: ToastsSetup;
 }
 
 interface State {
@@ -59,6 +62,9 @@ interface State {
   total: number;
   jobs: Job[];
   isLoading: boolean;
+  showLinks: boolean;
+  enableLinks: boolean;
+  badLicenseMessage: string;
 }
 
 const jobStatusLabelsMap = new Map<JobStatuses, string>([
@@ -95,9 +101,10 @@ const jobStatusLabelsMap = new Map<JobStatuses, string>([
 ]);
 
 class ReportListingUi extends Component<Props, State> {
+  private isInitialJobsFetch: boolean;
+  private licenseSubscription?: Subscription;
   private mounted?: boolean;
   private poller?: any;
-  private isInitialJobsFetch: boolean;
 
   constructor(props: Props) {
     super(props);
@@ -107,6 +114,9 @@ class ReportListingUi extends Component<Props, State> {
       total: 0,
       jobs: [],
       isLoading: false,
+      showLinks: false,
+      enableLinks: false,
+      badLicenseMessage: '',
     };
 
     this.isInitialJobsFetch = true;
@@ -137,22 +147,40 @@ class ReportListingUi extends Component<Props, State> {
   public componentWillUnmount() {
     this.mounted = false;
     this.poller.stop();
+
+    if (this.licenseSubscription) {
+      this.licenseSubscription.unsubscribe();
+    }
   }
 
   public componentDidMount() {
     this.mounted = true;
-    const { jobsRefresh } = chrome.getInjected('reportingPollConfig');
     this.poller = new Poller({
       functionToPoll: () => {
         return this.fetchJobs();
       },
-      pollFrequencyInMillis: jobsRefresh.interval,
+      pollFrequencyInMillis:
+        JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG.jobCompletionNotifier.interval,
       trailing: false,
       continuePollingOnError: true,
-      pollFrequencyErrorMultiplier: jobsRefresh.intervalErrorMultiplier,
+      pollFrequencyErrorMultiplier:
+        JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG.jobCompletionNotifier.intervalErrorMultiplier,
     });
     this.poller.start();
+    this.licenseSubscription = this.props.license$.subscribe(this.licenseHandler);
   }
+
+  private licenseHandler = (license: ILicense) => {
+    const { enableLinks, showLinks, message: badLicenseMessage } = checkLicense(
+      license.check('reporting', 'basic')
+    );
+
+    this.setState({
+      enableLinks,
+      showLinks,
+      badLicenseMessage,
+    });
+  };
 
   private renderTable() {
     const { intl } = this.props;
@@ -275,7 +303,6 @@ class ReportListingUi extends Component<Props, State> {
             <div>
               {statusLabel}
               {maxSizeReached}
-              {warnings}
             </div>
           );
         },
@@ -340,7 +367,7 @@ class ReportListingUi extends Component<Props, State> {
     const { intl } = this.props;
     const button = (
       <EuiButtonIcon
-        onClick={() => downloadReport(record.id)}
+        onClick={() => this.props.apiClient.downloadReport(record.id)}
         iconType="importAction"
         aria-label={intl.formatMessage({
           id: 'xpack.reporting.listing.table.downloadReportAriaLabel',
@@ -386,11 +413,11 @@ class ReportListingUi extends Component<Props, State> {
       return;
     }
 
-    return <ReportErrorButton jobId={record.id} />;
+    return <ReportErrorButton apiClient={this.props.apiClient} jobId={record.id} />;
   };
 
   private renderInfoButton = (record: Job) => {
-    return <ReportInfoButton jobId={record.id} />;
+    return <ReportInfoButton apiClient={this.props.apiClient} jobId={record.id} />;
   };
 
   private onTableChange = ({ page }: { page: { index: number } }) => {
@@ -407,19 +434,19 @@ class ReportListingUi extends Component<Props, State> {
     let jobs: JobQueueEntry[];
     let total: number;
     try {
-      jobs = await jobQueueClient.list(this.state.page);
-      total = await jobQueueClient.total();
+      jobs = await this.props.apiClient.list(this.state.page);
+      total = await this.props.apiClient.total();
       this.isInitialJobsFetch = false;
-    } catch (kfetchError) {
+    } catch (fetchError) {
       if (!this.licenseAllowsToShowThisPage()) {
-        toastNotifications.addDanger(this.props.badLicenseMessage);
-        this.props.redirect('/management');
+        this.props.toasts.addDanger(this.state.badLicenseMessage);
+        this.props.redirect('kibana#/management');
         return;
       }
 
-      if (kfetchError.res.status !== 401 && kfetchError.res.status !== 403) {
-        toastNotifications.addDanger(
-          kfetchError.res.statusText ||
+      if (fetchError.message === 'Failed to fetch') {
+        this.props.toasts.addDanger(
+          fetchError.message ||
             this.props.intl.formatMessage({
               id: 'xpack.reporting.listing.table.requestFailedErrorMessage',
               defaultMessage: 'Request failed',
@@ -463,7 +490,7 @@ class ReportListingUi extends Component<Props, State> {
   };
 
   private licenseAllowsToShowThisPage = () => {
-    return this.props.showLinks && this.props.enableLinks;
+    return this.state.showLinks && this.state.enableLinks;
   };
 
   private formatDate(timestamp: string) {
