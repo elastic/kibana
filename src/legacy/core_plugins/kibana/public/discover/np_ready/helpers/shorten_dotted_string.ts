@@ -17,18 +17,10 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { shortenDottedString } from '../shorten_dotted_string';
+const DOT_PREFIX_RE = /(.).+?\./g;
 
-describe('shortenDottedString', () => {
-  it('Convert a dot.notated.string into a short string', () => {
-    expect(shortenDottedString('dot.notated.string')).to.equal('d.n.string');
-  });
-
-  it('Ignores non-string values', () => {
-    expect(shortenDottedString(true)).to.equal(true);
-    expect(shortenDottedString(123)).to.equal(123);
-    const obj = { key: 'val' };
-    expect(shortenDottedString(obj)).to.equal(obj);
-  });
-});
+/**
+ * Convert a dot.notated.string into a short
+ * version (d.n.string)
+ */
+export const shortenDottedString = (input: string) => input.replace(DOT_PREFIX_RE, '$1.');
