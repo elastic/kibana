@@ -6,9 +6,10 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
-import { SavedObjectsManagementAction } from 'src/legacy/core_plugins/management/public';
+import { SavedObjectsManagementAction } from 'src/plugins/so_management/public';
 import { ManagementStart, ManagementSetup } from 'src/plugins/management/public';
 import { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
+import { SavedObjectsManagementPluginSetup } from 'src/plugins/so_management/public';
 import { SecurityPluginStart, SecurityPluginSetup } from '../../security/public';
 import { SpacesManager } from './spaces_manager';
 import { initSpacesNavControl } from './nav_control';
@@ -23,6 +24,7 @@ export interface PluginsSetup {
   home?: HomePublicPluginSetup;
   management?: ManagementSetup;
   security?: SecurityPluginSetup;
+  savedObjectsManagement?: SavedObjectsManagementPluginSetup;
 }
 
 export interface PluginsStart {
@@ -67,6 +69,15 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       });
     }
 
+    if (plugins.savedObjectsManagement) {
+      const copySavedObjectsToSpaceService = new CopySavedObjectsToSpaceService();
+      copySavedObjectsToSpaceService.setup({
+        spacesManager: this.spacesManager,
+        notificationsSetup: core.notifications,
+        savedObjectsManagementSetup: plugins.savedObjectsManagement,
+      });
+    }
+
     spaceSelectorApp.create({
       getStartServices: core.getStartServices,
       application: core.application,
@@ -74,26 +85,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
     });
 
     return {
-      registerLegacyAPI: (legacyAPI: LegacyAPI) => {
-        const copySavedObjectsToSpaceService = new CopySavedObjectsToSpaceService();
-        copySavedObjectsToSpaceService.setup({
-          spacesManager: this.spacesManager,
-          managementSetup: {
-            savedObjects: {
-              registry: {
-                register: action => legacyAPI.registerSavedObjectsManagementAction(action),
-                has: () => {
-                  throw new Error('not available in legacy shim');
-                },
-                get: () => {
-                  throw new Error('not available in legacy shim');
-                },
-              },
-            },
-          },
-          notificationsSetup: core.notifications,
-        });
-      },
+      registerLegacyAPI: (legacyAPI: LegacyAPI) => {},
     };
   }
 

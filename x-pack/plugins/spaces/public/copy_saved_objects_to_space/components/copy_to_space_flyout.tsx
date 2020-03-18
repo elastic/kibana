@@ -23,10 +23,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ToastsStart } from 'src/core/public';
 import {
-  SavedObjectsManagementRecord,
   ProcessedImportResponse,
   processImportResponse,
 } from '../../../../../../src/legacy/core_plugins/management/public';
+import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/so_management/public';
 import { Space } from '../../../common/model/space';
 import { SpacesManager } from '../../spaces_manager';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';

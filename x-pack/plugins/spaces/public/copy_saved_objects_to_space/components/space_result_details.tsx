@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SummarizedCopyToSpaceResult } from '../index';
-import { SavedObjectsManagementRecord } from '../../../../../../src/legacy/core_plugins/management/public';
+import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/so_management/public';
 import { Space } from '../../../common/model/space';
 import { CopyStatusIndicator } from './copy_status_indicator';
 import { ImportRetry } from '../types';

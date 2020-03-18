@@ -18,7 +18,7 @@
  */
 
 import chrome from 'ui/chrome';
-import { setup as managementSetup } from '../../../../../../../../../management/public/legacy';
+import { npSetup } from 'ui/new_platform';
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
@@ -79,7 +79,7 @@ export class Table extends PureComponent {
 
   constructor(props) {
     super(props);
-    this.extraActions = managementSetup.savedObjects.registry.get();
+    this.extraActions = npSetup.plugins.savedObjectsManagement.actionRegistry.getAll();
   }
 
   onChange = ({ query, error }) => {
