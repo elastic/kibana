@@ -59,7 +59,9 @@ export function initVisualizationDirective(app, deps) {
         });
 
         $scope.$on('$destroy', () => {
-          $scope._handler.destroy();
+          if ($scope._handler) {
+            $scope._handler.destroy();
+          }
         });
       },
     };

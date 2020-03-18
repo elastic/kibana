@@ -15,6 +15,8 @@ interface ColumnData {
   error_count?: number;
 }
 
+export const ACTUAL_CLASS_ID = 'actual_class';
+
 export function getColumnData(confusionMatrixData: ConfusionMatrix[]) {
   const colData: Partial<ColumnData[]> = [];
 
@@ -67,7 +69,7 @@ export function getColumnData(confusionMatrixData: ConfusionMatrix[]) {
 
   const columns: any = [
     {
-      id: 'actual_class',
+      id: ACTUAL_CLASS_ID,
       display: <span />,
     },
   ];
