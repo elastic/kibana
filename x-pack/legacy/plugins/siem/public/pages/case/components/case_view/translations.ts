@@ -56,7 +56,7 @@ export const CASE_OPENED = i18n.translate('xpack.siem.case.caseView.caseOpened',
   defaultMessage: 'Case opened',
 });
 
-export const CASE_CLOSEED = i18n.translate('xpack.siem.case.caseView.caseClosed', {
+export const CASE_CLOSED = i18n.translate('xpack.siem.case.caseView.caseClosed', {
   defaultMessage: 'Case closed',
 });
 

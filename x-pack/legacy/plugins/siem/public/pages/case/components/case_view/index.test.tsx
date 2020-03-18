@@ -107,7 +107,7 @@ describe('CaseView ', () => {
 
     wrapper
       .find('input[data-test-subj="toggle-case-status"]')
-      .simulate('change', { target: { value: false } });
+      .simulate('change', { target: { value: true } });
 
     expect(updateCaseProperty).toBeCalledWith({
       updateKey: 'status',

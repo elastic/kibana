@@ -5,7 +5,7 @@
  */
 
 import { useReducer, useCallback } from 'react';
-
+import { cloneDeep } from 'lodash/fp';
 import { CaseRequest } from '../../../../../../plugins/case/common/api';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 
@@ -47,7 +47,7 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
         ...state,
         isLoading: false,
         isError: false,
-        caseData: action.payload,
+        caseData: cloneDeep(action.payload),
         updateKey: null,
       };
     case 'FETCH_FAILURE':

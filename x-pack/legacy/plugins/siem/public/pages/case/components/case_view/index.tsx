@@ -5,26 +5,14 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import {
-  EuiBadge,
-  EuiButtonToggle,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
-import styled, { css } from 'styled-components';
-import { Redirect } from 'react-router-dom';
+import styled from 'styled-components';
 import * as i18n from './translations';
 import { Case } from '../../../../containers/case/types';
-import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
 import { getCaseUrl } from '../../../../components/link_to';
 import { HeaderPage } from '../../../../components/header_page';
 import { EditableTitle } from '../../../../components/header_page/editable_title';
-import { PropertyActions } from '../property_actions';
 import { TagList } from '../tag_list';
 import { useGetCase } from '../../../../containers/case/use_get_case';
 import { UserActionTree } from '../user_action_tree';
@@ -33,23 +21,12 @@ import { useUpdateCase } from '../../../../containers/case/use_update_case';
 import { WrapperPage } from '../../../../components/wrapper_page';
 import { getTypedPayload } from '../../../../containers/case/utils';
 import { WhitePageWrapper } from '../wrappers';
-import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
-import { SiemPageName } from '../../../home/types';
-import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { useBasePath } from '../../../../lib/kibana';
+import { CaseStatus } from '../case_status';
 
 interface Props {
   caseId: string;
 }
-
-const MyDescriptionList = styled(EuiDescriptionList)`
-  ${({ theme }) => css`
-    & {
-      padding-right: ${theme.eui.euiSizeL};
-      border-right: ${theme.eui.euiBorderThin};
-    }
-  `}
-`;
 
 const MyWrapper = styled(WrapperPage)`
   padding-bottom: 0;
@@ -110,58 +87,37 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
           return null;
       }
     },
-    [updateCaseProperty, caseData.status]
+    [caseData.status]
   );
-  const toggleStatusCase = useCallback(
-    e => onUpdateField('status', e.target.checked ? 'open' : 'closed'),
-    [onUpdateField]
-  );
-  const onSubmitTitle = useCallback(newTitle => onUpdateField('title', newTitle), [onUpdateField]);
   const onSubmitTags = useCallback(newTags => onUpdateField('tags', newTags), [onUpdateField]);
+  const onSubmitTitle = useCallback(newTitle => onUpdateField('title', newTitle), [onUpdateField]);
+  const toggleStatusCase = useCallback(status => onUpdateField('status', status), [onUpdateField]);
 
-  // Delete case
-  const {
-    handleToggleModal,
-    handleOnDeleteConfirm,
-    isDeleted,
-    isDisplayConfirmDeleteModal,
-  } = useDeleteCases();
-
-  const confirmDeleteModal = useMemo(
-    () => (
-      <ConfirmDeleteCaseModal
-        caseTitle={caseData.title}
-        isModalVisible={isDisplayConfirmDeleteModal}
-        isPlural={false}
-        onCancel={handleToggleModal}
-        onConfirm={handleOnDeleteConfirm.bind(null, [caseId])}
-      />
-    ),
-    [isDisplayConfirmDeleteModal]
+  const caseStatusData = useMemo(
+    () =>
+      caseData.status === 'open'
+        ? {
+            'data-test-subj': 'case-view-createdAt',
+            value: caseData.createdAt,
+            title: i18n.CASE_OPENED,
+            buttonLabel: i18n.CLOSE_CASE,
+            status: caseData.status,
+            icon: 'checkInCircleFilled',
+            badgeColor: 'secondary',
+            isSelected: false,
+          }
+        : {
+            'data-test-subj': 'case-view-closedAt',
+            value: caseData.closedAt,
+            title: i18n.CASE_CLOSED,
+            buttonLabel: i18n.REOPEN_CASE,
+            status: caseData.status,
+            icon: 'magnet',
+            badgeColor: 'danger',
+            isSelected: true,
+          },
+    [caseData.closedAt, caseData.createdAt, caseData.status]
   );
-  // TO DO refactor each of these const's into their own components
-  const propertyActions = [
-    {
-      iconType: 'trash',
-      label: i18n.DELETE_CASE,
-      onClick: handleToggleModal,
-    },
-    {
-      iconType: 'popout',
-      label: 'View ServiceNow incident',
-      onClick: () => null,
-    },
-    {
-      iconType: 'importAction',
-      label: 'Update ServiceNow incident',
-      onClick: () => null,
-    },
-  ];
-
-  if (isDeleted) {
-    return <Redirect to={`/${SiemPageName.case}`} />;
-  }
-
   return (
     <>
       <MyWrapper>
@@ -180,63 +136,13 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
           }
           title={caseData.title}
         >
-          <EuiFlexGroup gutterSize="l" justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <MyDescriptionList compressed>
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
-                    <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
-                    <EuiDescriptionListDescription>
-                      <EuiBadge
-                        color={caseData.status === 'open' ? 'secondary' : 'danger'}
-                        data-test-subj="case-view-status"
-                      >
-                        {caseData.status}
-                      </EuiBadge>
-                    </EuiDescriptionListDescription>
-                  </EuiFlexItem>
-                  {caseData.status === 'open' ? (
-                    <EuiFlexItem>
-                      <EuiDescriptionListTitle>{i18n.CASE_OPENED}</EuiDescriptionListTitle>
-                      <EuiDescriptionListDescription>
-                        <FormattedRelativePreferenceDate
-                          data-test-subj="case-view-createdAt"
-                          value={caseData.createdAt}
-                        />
-                      </EuiDescriptionListDescription>
-                    </EuiFlexItem>
-                  ) : (
-                    <EuiFlexItem>
-                      <EuiDescriptionListTitle>{i18n.CASE_CLOSEED}</EuiDescriptionListTitle>
-                      <EuiDescriptionListDescription>
-                        <FormattedRelativePreferenceDate
-                          data-test-subj="case-view-closedAt"
-                          value={caseData.closedAt}
-                        />
-                      </EuiDescriptionListDescription>
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              </MyDescriptionList>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="l" alignItems="center">
-                <EuiFlexItem>
-                  <EuiButtonToggle
-                    data-test-subj="toggle-case-status"
-                    iconType={caseData.status === 'open' ? 'checkInCircleFilled' : 'magnet'}
-                    isLoading={isLoading && updateKey === 'status'}
-                    isSelected={caseData.status === 'open'}
-                    label={caseData.status === 'open' ? 'Close case' : 'Reopen case'}
-                    onChange={toggleStatusCase}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <PropertyActions propertyActions={propertyActions} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <CaseStatus
+            caseId={caseData.id}
+            caseTitle={caseData.title}
+            isLoading={isLoading && updateKey === 'status'}
+            toggleStatusCase={toggleStatusCase}
+            {...caseStatusData}
+          />
         </HeaderPage>
       </MyWrapper>
       <WhitePageWrapper>
@@ -269,7 +175,6 @@ export const CaseComponent = React.memo<CaseProps>(({ caseId, initialData }) => 
           </EuiFlexGroup>
         </MyWrapper>
       </WhitePageWrapper>
-      {confirmDeleteModal}
     </>
   );
 });
@@ -292,4 +197,5 @@ export const CaseView = React.memo(({ caseId }: Props) => {
   return <CaseComponent caseId={caseId} initialData={data} />;
 });
 
+CaseComponent.displayName = 'CaseComponent';
 CaseView.displayName = 'CaseView';
