@@ -150,9 +150,14 @@ export class DynamicActionManager {
     if (this.ui.get().isFetchingEvents) return;
 
     this.ui.transitions.startFetching();
-    const events = await this.params.storage.list();
-    for (const event of events) this.reviveAction(event);
-    this.ui.transitions.finishFetching(events);
+    try {
+      const events = await this.params.storage.list();
+      for (const event of events) this.reviveAction(event);
+      this.ui.transitions.finishFetching(events);
+    } catch (error) {
+      this.ui.transitions.failFetching(error instanceof Error ? error : { message: String(error) });
+      throw error;
+    }
 
     if (this.params.storage.reload$) {
       this.reloadSubscription = this.params.storage.reload$.subscribe(this.onSync);

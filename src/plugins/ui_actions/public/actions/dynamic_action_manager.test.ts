@@ -187,6 +187,30 @@ describe('DynamicActionManager', () => {
 
       expect(manager.state.get().isFetchingEvents).toBe(false);
     });
+
+    test('throws if storage threw', async () => {
+      const { manager, storage } = setup([event1]);
+
+      storage.list = async () => {
+        throw new Error('baz');
+      };
+
+      const [, error] = await of(manager.start());
+
+      expect(error).toEqual(new Error('baz'));
+    });
+
+    test('sets UI state error if error happened during initial fetch', async () => {
+      const { manager, storage } = setup([event1]);
+
+      storage.list = async () => {
+        throw new Error('baz');
+      };
+
+      await of(manager.start());
+
+      expect(manager.state.get().fetchError!.message).toBe('baz');
+    });
   });
 
   describe('.stop()', () => {
@@ -496,6 +520,28 @@ describe('DynamicActionManager', () => {
     });
 
     describe('when storage fails', () => {
+      test('throws error', async () => {
+        const { manager, storage, uiActions } = setup([event3]);
+
+        storage.update = () => {
+          throw new Error('bar');
+        };
+        uiActions.registerActionFactory(actionFactoryDefinition2);
+        await manager.start();
+
+        const action: SerializedAction<unknown> = {
+          factoryId: actionFactoryDefinition2.id,
+          name: 'foo',
+          config: {},
+        };
+
+        const [, error] = await of(
+          manager.updateEvent(event3.eventId, action, ['VALUE_CLICK_TRIGGER'])
+        );
+
+        expect(error).toEqual(new Error('bar'));
+      });
+
       test('keeps the old action in actions registry', async () => {
         const { manager, storage, actions, uiActions } = setup([event3]);
 

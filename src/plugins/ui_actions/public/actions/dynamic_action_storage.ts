@@ -71,6 +71,10 @@ export abstract class AbstractActionStorage implements ActionStorage {
   abstract list(): Promise<SerializedEvent[]>;
 }
 
+/**
+ * This is an in-memory implementation of ActionStorage. It is used in testing,
+ * but can also be used production code to store events in memory.
+ */
 export class MemoryActionStorage extends AbstractActionStorage {
   constructor(public events: readonly SerializedEvent[] = []) {
     super();
@@ -86,13 +90,13 @@ export class MemoryActionStorage extends AbstractActionStorage {
 
   public async update(event: SerializedEvent) {
     const index = this.events.findIndex(({ eventId }) => eventId === event.eventId);
-    if (index < 0) throw new Error('Event not found');
+    if (index < 0) throw new Error(`Event [eventId = ${event.eventId}] not found`);
     this.events = [...this.events.slice(0, index), { ...event }, ...this.events.slice(index + 1)];
   }
 
   public async remove(eventId: string) {
     const index = this.events.findIndex(ev => eventId === ev.eventId);
-    if (index < 0) throw new Error('Event not found');
+    if (index < 0) throw new Error(`Event [eventId = ${eventId}] not found`);
     this.events = [...this.events.slice(0, index), ...this.events.slice(index + 1)];
   }
 }
