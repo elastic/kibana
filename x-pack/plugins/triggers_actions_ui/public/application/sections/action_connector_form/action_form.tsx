@@ -263,8 +263,8 @@ export const ActionForm = ({
         initialIsOpen={true}
         key={index}
         id={index.toString()}
-        className="euiAccordionForm"
-        buttonContentClassName="euiAccordionForm__button"
+        className="actAccordionActionForm"
+        buttonContentClassName="actAccordionActionForm__button"
         data-test-subj={`alertActionAccordion-${defaultActionGroupId}`}
         buttonContent={
           <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -549,7 +549,6 @@ export const ActionForm = ({
                       target="_blank"
                       className="actActionForm__getMoreActionsLink"
                     >
-                      <EuiIcon type="starEmptySpace" />
                       <FormattedMessage
                         defaultMessage="Get more actions"
                         id="xpack.triggersActionsUI.sections.actionForm.getMoreActionsTitle"
