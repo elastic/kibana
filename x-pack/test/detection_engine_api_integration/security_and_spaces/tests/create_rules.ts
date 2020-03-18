@@ -65,6 +65,20 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare).to.eql(getSimpleRuleOutput());
       });
 
+      it('should create a single rule without an input index', async () => {
+        const { index, ...payload } = getSimpleRule();
+        const { index: _index, ...expected } = getSimpleRuleOutput();
+
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(payload)
+          .expect(200);
+
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare).to.eql(expected);
+      });
+
       it('should create a single rule without a rule_id', async () => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
