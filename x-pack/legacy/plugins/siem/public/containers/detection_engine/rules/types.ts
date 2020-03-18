@@ -212,6 +212,10 @@ export interface RuleInfoStatus {
   last_success_at: string | null;
   last_failure_message: string | null;
   last_success_message: string | null;
+  last_look_back_date: Date | null | undefined;
+  gap: string | null | undefined;
+  bulk_create_time_durations: string[] | null | undefined;
+  search_after_time_durations: string[] | null | undefined;
 }
 
 export type RuleStatusResponse = Record<string, RuleStatus>;

@@ -10,6 +10,8 @@ import {
   EuiEmptyPrompt,
   EuiLoadingContent,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -18,6 +20,7 @@ import uuid from 'uuid';
 
 import {
   useRules,
+  useRulesStatuses,
   CreatePreBuiltRules,
   FilterOptions,
   Rule,
@@ -41,7 +44,7 @@ import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
 import { EuiBasicTableOnChange } from '../types';
 import { getBatchItems } from './batch_actions';
-import { getColumns } from './columns';
+import { getColumns, getMonitoringColumns } from './columns';
 import { showRulesTable } from './helpers';
 import { allRulesReducer, State } from './reducer';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
@@ -82,6 +85,26 @@ interface AllRulesProps {
   setRefreshRulesData: (refreshRule: (refreshPrePackagedRule?: boolean) => void) => void;
 }
 
+enum AllRulesTabs {
+  rules = 'rules',
+  monitoring = 'monitoring',
+}
+
+const allRulesTabs = [
+  {
+    id: AllRulesTabs.rules,
+    // name: detectionI18n.SIGNAL,
+    name: 'Rules',
+    disabled: false,
+  },
+  {
+    id: AllRulesTabs.monitoring,
+    // name: i18n.FAILURE_HISTORY_TAB,
+    name: 'Monitoring',
+    disabled: false,
+  },
+];
+
 /**
  * Table Component for displaying all Rules for a given cluster. Provides the ability to filter
  * by name, sort by enabled, and perform the following actions:
@@ -90,6 +113,8 @@ interface AllRulesProps {
  *   * Delete
  *   * Import/Export
  */
+// TODO: remove below eslint-disable
+/* eslint-disable complexity */
 export const AllRules = React.memo<AllRulesProps>(
   ({
     createPrePackagedRules,
@@ -104,6 +129,7 @@ export const AllRules = React.memo<AllRulesProps>(
     setRefreshRulesData,
   }) => {
     const [initLoading, setInitLoading] = useState(true);
+    const [allRulesTab, setAllRulesTab] = useState(AllRulesTabs.rules);
     const tableRef = useRef<EuiBasicTable>();
     const [
       {
@@ -117,6 +143,7 @@ export const AllRules = React.memo<AllRulesProps>(
       },
       dispatch,
     ] = useReducer(allRulesReducer(tableRef), initialState);
+    const { loading: isLoadingRulesStatuses, rulesStatuses } = useRulesStatuses(rules);
     const history = useHistory();
     const [, dispatchToaster] = useStateToaster();
 
@@ -243,6 +270,24 @@ export const AllRules = React.memo<AllRulesProps>(
       return false;
     }, [loadingRuleIds, loadingRulesAction]);
 
+    const tabs = useMemo(
+      () => (
+        <EuiTabs>
+          {allRulesTabs.map(tab => (
+            <EuiTab
+              onClick={() => setAllRulesTab(tab.id)}
+              isSelected={tab.id === allRulesTab}
+              disabled={tab.disabled}
+              key={tab.id}
+            >
+              {tab.name}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+      ),
+      [allRulesTabs, allRulesTab, setAllRulesTab]
+    );
+
     return (
       <>
         <GenericDownloader
@@ -274,9 +319,10 @@ export const AllRules = React.memo<AllRulesProps>(
               />
             </HeaderSection>
 
-            {(loading || isLoadingRules || isLoadingAnActionOnRule) && !initLoading && (
-              <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
-            )}
+            {(loading || isLoadingRules || isLoadingAnActionOnRule || isLoadingRulesStatuses) &&
+              !initLoading && (
+                <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
+              )}
             {rulesCustomInstalled != null &&
               rulesCustomInstalled === 0 &&
               prePackagedRuleStatus === 'ruleNotInstalled' && (
@@ -318,24 +364,47 @@ export const AllRules = React.memo<AllRulesProps>(
                     </UtilityBarGroup>
                   </UtilityBarSection>
                 </UtilityBar>
-                <MyEuiBasicTable
-                  data-test-subj="rules-table"
-                  columns={columns}
-                  isSelectable={!hasNoPermissions ?? false}
-                  itemId="id"
-                  items={rules ?? []}
-                  noItemsMessage={emptyPrompt}
-                  onChange={tableOnChangeCallback}
-                  pagination={{
-                    pageIndex: pagination.page - 1,
-                    pageSize: pagination.perPage,
-                    totalItemCount: pagination.total,
-                    pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
-                  }}
-                  ref={tableRef}
-                  sorting={{ sort: { field: 'enabled', direction: filterOptions.sortOrder } }}
-                  selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
-                />
+                {tabs}
+                {allRulesTab === AllRulesTabs.rules && (
+                  <MyEuiBasicTable
+                    data-test-subj="rules-table"
+                    columns={columns}
+                    isSelectable={!hasNoPermissions ?? false}
+                    itemId="id"
+                    items={rules ?? []}
+                    noItemsMessage={emptyPrompt}
+                    onChange={tableOnChangeCallback}
+                    pagination={{
+                      pageIndex: pagination.page - 1,
+                      pageSize: pagination.perPage,
+                      totalItemCount: pagination.total,
+                      pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
+                    }}
+                    ref={tableRef}
+                    sorting={{ sort: { field: 'enabled', direction: filterOptions.sortOrder } }}
+                    selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
+                  />
+                )}
+                {allRulesTab === AllRulesTabs.monitoring && (
+                  <MyEuiBasicTable
+                    data-test-subj="monitoring-table"
+                    columns={getMonitoringColumns()}
+                    isSelectable={!hasNoPermissions ?? false}
+                    itemId="id"
+                    items={rulesStatuses}
+                    noItemsMessage={emptyPrompt}
+                    onChange={tableOnChangeCallback}
+                    pagination={{
+                      pageIndex: pagination.page - 1,
+                      pageSize: pagination.perPage,
+                      totalItemCount: pagination.total,
+                      pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
+                    }}
+                    ref={tableRef}
+                    sorting={{ sort: { field: 'enabled', direction: filterOptions.sortOrder } }}
+                    selection={hasNoPermissions ? undefined : euiBasicTableSelectionProps}
+                  />
+                )}
               </>
             )}
           </>

@@ -17,7 +17,7 @@ import {
 import * as H from 'history';
 import React, { Dispatch } from 'react';
 
-import { Rule } from '../../../../containers/detection_engine/rules';
+import { Rule, RuleStatus } from '../../../../containers/detection_engine/rules';
 import { getEmptyTagValue } from '../../../../components/empty_value';
 import { FormattedDate } from '../../../../components/formatted_date';
 import { getRuleDetailsUrl } from '../../../../components/link_to/redirect_to_detection_engine';
@@ -75,7 +75,12 @@ export const getActions = (
   },
 ];
 
+export type RuleStatusRowItemType = RuleStatus & {
+  name: string;
+  id: string;
+};
 type RulesColumns = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
+type RulesStatusesColumns = EuiBasicTableColumn<RuleStatusRowItemType>;
 
 interface GetColumns {
   dispatch: React.Dispatch<Action>;
@@ -195,4 +200,77 @@ export const getColumns = ({
   ];
 
   return hasNoPermissions ? cols : [...cols, ...actions];
+};
+
+export const getMonitoringColumns = (): RulesStatusesColumns[] => {
+  const cols: RulesStatusesColumns[] = [
+    {
+      field: 'name',
+      name: i18n.COLUMN_RULE,
+      render: (value: RuleStatus['current_status']['status'], item: RuleStatusRowItemType) => {
+        return (
+          <EuiLink data-test-subj="ruleName" href={getRuleDetailsUrl(item.id)}>
+            {value}
+          </EuiLink>
+        );
+      },
+      truncateText: true,
+      width: '24%',
+    },
+    {
+      field: 'current_status.gap',
+      name: 'gap',
+      render: (value: RuleStatus['current_status']['gap']) => (
+        <EuiText data-test-subj="gap" size="s">
+          {value}
+        </EuiText>
+      ),
+      truncateText: true,
+      width: '14%',
+    },
+    {
+      field: 'current_status.last_look_back_date',
+      name: 'last look back date',
+      render: (value: RuleStatus) => {
+        return (
+          <EuiText data-test-subj="lastLookBack" size="s">
+            {value}
+          </EuiText>
+        );
+      },
+      truncateText: true,
+      width: '16%',
+    },
+    {
+      field: 'current_status.status_date',
+      name: i18n.COLUMN_LAST_COMPLETE_RUN,
+      render: (value: RuleStatus['current_status']['status_date']) => {
+        return value == null ? (
+          getEmptyTagValue()
+        ) : (
+          <FormattedDate value={value} fieldName={i18n.COLUMN_LAST_COMPLETE_RUN} />
+        );
+      },
+      sortable: true,
+      truncateText: true,
+      width: '20%',
+    },
+    {
+      field: 'current_status.status',
+      name: i18n.COLUMN_LAST_RESPONSE,
+      render: (value: RuleStatus['current_status']['status']) => {
+        return (
+          <>
+            <EuiHealth color={getStatusColor(value ?? null)}>
+              {value ?? getEmptyTagValue()}
+            </EuiHealth>
+          </>
+        );
+      },
+      width: '16%',
+      truncateText: true,
+    },
+  ];
+
+  return cols;
 };
