@@ -40,6 +40,7 @@ export default function({ getService }) {
             name: 'test_cluster',
             seeds: [NODE_SEED],
             skipUnavailable: true,
+            mode: 'sniff',
           })
           .expect(200);
 
@@ -58,6 +59,7 @@ export default function({ getService }) {
             name: 'test_cluster',
             seeds: [NODE_SEED],
             skipUnavailable: false,
+            mode: 'sniff',
           })
           .expect(409);
 
@@ -79,6 +81,7 @@ export default function({ getService }) {
           .send({
             skipUnavailable: false,
             seeds: [NODE_SEED],
+            mode: 'sniff',
           })
           .expect(200);
 
@@ -87,6 +90,7 @@ export default function({ getService }) {
           skipUnavailable: 'false', // ES issue #35671
           seeds: [NODE_SEED],
           isConfiguredByNode: false,
+          mode: 'sniff',
         });
       });
     });
@@ -109,6 +113,7 @@ export default function({ getService }) {
               initialConnectTimeout: '30s',
               skipUnavailable: false,
               isConfiguredByNode: false,
+              mode: 'sniff',
             },
           ]);
         });
@@ -139,6 +144,7 @@ export default function({ getService }) {
             name: 'test_cluster1',
             seeds: [NODE_SEED],
             skipUnavailable: true,
+            mode: 'sniff',
           })
           .expect(200);
 
@@ -149,6 +155,7 @@ export default function({ getService }) {
             name: 'test_cluster2',
             seeds: [NODE_SEED],
             skipUnavailable: true,
+            mode: 'sniff',
           })
           .expect(200);
 

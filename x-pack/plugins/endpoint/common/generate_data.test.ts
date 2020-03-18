@@ -21,8 +21,8 @@ describe('data generator', () => {
     const generator1 = new EndpointDocGenerator('seed');
     const generator2 = new EndpointDocGenerator('seed');
     const timestamp = new Date().getTime();
-    const metadata1 = generator1.generateEndpointMetadata(timestamp);
-    const metadata2 = generator2.generateEndpointMetadata(timestamp);
+    const metadata1 = generator1.generateHostMetadata(timestamp);
+    const metadata2 = generator2.generateHostMetadata(timestamp);
     expect(metadata1).toEqual(metadata2);
   });
 
@@ -30,14 +30,14 @@ describe('data generator', () => {
     const generator1 = new EndpointDocGenerator('seed');
     const generator2 = new EndpointDocGenerator('different seed');
     const timestamp = new Date().getTime();
-    const metadata1 = generator1.generateEndpointMetadata(timestamp);
-    const metadata2 = generator2.generateEndpointMetadata(timestamp);
+    const metadata1 = generator1.generateHostMetadata(timestamp);
+    const metadata2 = generator2.generateHostMetadata(timestamp);
     expect(metadata1).not.toEqual(metadata2);
   });
 
-  it('creates endpoint metadata documents', () => {
+  it('creates host metadata documents', () => {
     const timestamp = new Date().getTime();
-    const metadata = generator.generateEndpointMetadata(timestamp);
+    const metadata = generator.generateHostMetadata(timestamp);
     expect(metadata['@timestamp']).toEqual(timestamp);
     expect(metadata.event.created).toEqual(timestamp);
     expect(metadata.endpoint).not.toBeNull();
@@ -62,10 +62,11 @@ describe('data generator', () => {
     expect(processEvent['@timestamp']).toEqual(timestamp);
     expect(processEvent.event.category).toEqual('process');
     expect(processEvent.event.kind).toEqual('event');
-    expect(processEvent.event.type).toEqual('creation');
+    expect(processEvent.event.type).toEqual('start');
     expect(processEvent.agent).not.toBeNull();
     expect(processEvent.host).not.toBeNull();
     expect(processEvent.process.entity_id).not.toBeNull();
+    expect(processEvent.process.name).not.toBeNull();
   });
 
   it('creates other event documents', () => {
@@ -74,10 +75,11 @@ describe('data generator', () => {
     expect(processEvent['@timestamp']).toEqual(timestamp);
     expect(processEvent.event.category).toEqual('dns');
     expect(processEvent.event.kind).toEqual('event');
-    expect(processEvent.event.type).toEqual('creation');
+    expect(processEvent.event.type).toEqual('start');
     expect(processEvent.agent).not.toBeNull();
     expect(processEvent.host).not.toBeNull();
     expect(processEvent.process.entity_id).not.toBeNull();
+    expect(processEvent.process.name).not.toBeNull();
   });
 
   describe('creates alert ancestor tree', () => {
@@ -151,7 +153,7 @@ describe('data generator', () => {
     const timestamp = new Date().getTime();
     const root = generator.generateEvent({ timestamp });
     const generations = 2;
-    const events = generator.generateDescendantsTree(root, generations);
+    const events = [root, ...generator.generateDescendantsTree(root, generations)];
     const rootNode = buildResolverTree(events);
     const visitedEvents = countResolverEvents(rootNode, generations);
     expect(visitedEvents).toEqual(events.length);

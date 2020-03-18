@@ -8,7 +8,7 @@ import {
   ContainerInput,
   Container,
   ContainerOutput,
-  GetEmbeddableFactory,
+  EmbeddableStart,
 } from '../../../../../src/plugins/embeddable/public';
 import { TimeRange } from '../../../../../src/plugins/data/public';
 
@@ -37,7 +37,7 @@ export class TimeRangeContainer extends Container<
   public readonly type = TIME_RANGE_CONTAINER;
   constructor(
     initialInput: ContainerTimeRangeInput,
-    getFactory: GetEmbeddableFactory,
+    getFactory: EmbeddableStart['getEmbeddableFactory'],
     parent?: Container
   ) {
     super(initialInput, { embeddableLoaded: {} }, getFactory, parent);

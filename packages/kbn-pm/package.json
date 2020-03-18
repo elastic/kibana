@@ -48,6 +48,7 @@
     "globby": "^8.0.1",
     "has-ansi": "^3.0.0",
     "indent-string": "^3.2.0",
+    "is-path-inside": "^3.0.2",
     "lodash.clonedeepwith": "^4.5.0",
     "log-symbols": "^2.2.0",
     "multimatch": "^4.0.0",
