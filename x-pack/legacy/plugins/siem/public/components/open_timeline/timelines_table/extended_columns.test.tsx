@@ -10,7 +10,6 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
-import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
 import { getEmptyValue } from '../../empty_value';
 import { mockTimelineResults } from '../../../mock/timeline_results';
 import { OpenTimelineResult } from '../types';
@@ -18,34 +17,13 @@ import { OpenTimelineResult } from '../types';
 import { TimelinesTable, TimelinesTableProps } from '.';
 
 import * as i18n from '../translations';
-import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
+import { getMockTimelinesTableProps } from './mocks';
 
 jest.mock('../../../lib/kibana');
 
 describe('#getExtendedColumns', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let mockResults: OpenTimelineResult[];
-
-  const getDefaultProps = (mockOpenTimelineResults: OpenTimelineResult[]): TimelinesTableProps => ({
-    actionTimelineToShow: ['delete', 'duplicate', 'selectable'],
-    deleteTimelines: jest.fn(),
-    defaultPageSize: DEFAULT_SEARCH_RESULTS_PER_PAGE,
-    enableExportTimelineDownloader: jest.fn(),
-    itemIdToExpandedNotesRowMap: {},
-    loading: false,
-    onOpenDeleteTimelineModal: jest.fn(),
-    onOpenTimeline: jest.fn(),
-    onSelectionChange: jest.fn(),
-    onTableChange: jest.fn(),
-    onToggleShowNotes: jest.fn(),
-    pageIndex: 0,
-    pageSize: DEFAULT_SEARCH_RESULTS_PER_PAGE,
-    searchResults: mockOpenTimelineResults,
-    showExtendedColumns: true,
-    sortDirection: DEFAULT_SORT_DIRECTION,
-    sortField: DEFAULT_SORT_FIELD,
-    totalSearchResultsCount: mockOpenTimelineResults.length,
-  });
 
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);
@@ -54,7 +32,7 @@ describe('#getExtendedColumns', () => {
   describe('Modified By column', () => {
     test('it renders the expected column name', () => {
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(mockResults),
+        ...getMockTimelinesTableProps(mockResults),
       };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
@@ -72,7 +50,7 @@ describe('#getExtendedColumns', () => {
 
     test('it renders the username when the timeline has an updatedBy property', () => {
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(mockResults),
+        ...getMockTimelinesTableProps(mockResults),
       };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
@@ -91,7 +69,7 @@ describe('#getExtendedColumns', () => {
     test('it renders a placeholder when the timeline is missing the updatedBy property', () => {
       const missingUpdatedBy: OpenTimelineResult[] = [omit('updatedBy', { ...mockResults[0] })];
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(missingUpdatedBy),
+        ...getMockTimelinesTableProps(missingUpdatedBy),
       };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>

@@ -14,7 +14,6 @@ import { TimelinesTable } from './timelines_table';
 import { TitleRow } from './title_row';
 
 import * as i18n from './translations';
-import { EditTimelineActions } from './export_timeline/.';
 import {
   UtilityBarGroup,
   UtilityBarText,
@@ -24,6 +23,7 @@ import {
 } from '../utility_bar';
 import { useEditTimelinBatchActions } from './edit_timeline_batch_actions';
 import { useEditTimelineActions } from './edit_timeline_actions';
+import { EditOneTimelineAction } from './export_timeline';
 
 export const OpenTimeline = React.memo<OpenTimelineProps>(
   ({
@@ -86,19 +86,27 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       [totalSearchResultsCount, query]
     );
 
-    const actionItemId = useMemo(() => (actionItem != null ? [actionItem.savedObjectId] : []), [
-      actionItem,
-    ]);
+    const actionItemId = useMemo(
+      () =>
+        actionItem != null && actionItem.savedObjectId != null ? [actionItem.savedObjectId] : [],
+      [actionItem]
+    );
+
+    const onRefreshBtnClick = useCallback(() => {
+      if (typeof refetch === 'function') refetch();
+    }, [refetch]);
 
     return (
       <>
-        <EditTimelineActions
+        <EditOneTimelineAction
           deleteTimelines={deleteTimelines}
           ids={actionItemId}
           isDeleteTimelineModalOpen={isDeleteTimelineModalOpen}
           isEnableDownloader={isEnableDownloader}
           onComplete={onCompleteEditTimelineAction}
-          title={actionItem != null ? actionItem.title : ''}
+          title={
+            actionItem != null && actionItem.title ? actionItem.title : i18n.SELECTED_TIMELINES(1)
+          }
         />
 
         <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>
@@ -137,13 +145,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
                 >
                   {i18n.BATCH_ACTIONS}
                 </UtilityBarAction>
-                <UtilityBarAction
-                  iconSide="right"
-                  iconType="refresh"
-                  onClick={useCallback(() => {
-                    if (typeof refetch === 'function') refetch();
-                  }, [refetch])}
-                >
+                <UtilityBarAction iconSide="right" iconType="refresh" onClick={onRefreshBtnClick}>
                   {i18n.REFRESH}
                 </UtilityBarAction>
               </UtilityBarGroup>

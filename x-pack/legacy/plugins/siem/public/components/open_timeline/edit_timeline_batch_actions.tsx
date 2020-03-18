@@ -8,7 +8,7 @@ import { EuiContextMenuPanel, EuiContextMenuItem, EuiBasicTable } from '@elastic
 import React, { useCallback, useMemo } from 'react';
 import * as i18n from './translations';
 import { DeleteTimelines, OpenTimelineResult } from './types';
-import { EditOneTimelineActions } from './export_timeline';
+import { EditTimelineActions } from './export_timeline';
 import { useEditTimelineActions } from './edit_timeline_actions';
 
 const getExportedIds = (selectedTimelines: OpenTimelineResult[]) => {
@@ -63,7 +63,7 @@ export const useEditTimelinBatchActions = ({
     (closePopover: () => void) => {
       return (
         <>
-          <EditOneTimelineActions
+          <EditTimelineActions
             deleteTimelines={deleteTimelines}
             ids={selectedIds}
             isEnableDownloader={isEnableDownloader}

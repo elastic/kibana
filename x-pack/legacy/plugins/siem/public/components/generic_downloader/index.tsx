@@ -6,7 +6,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { isFunction, isNil } from 'lodash/fp';
+import { isFunction } from 'lodash/fp';
 import * as i18n from './translations';
 
 import { ExportDocumentsProps } from '../../containers/detection_engine/rules';
@@ -54,19 +54,14 @@ export const GenericDownloaderComponent = ({
     const abortCtrl = new AbortController();
 
     const exportData = async () => {
-      if (
-        anchorRef &&
-        anchorRef.current &&
-        ((ids != null && ids.length > 0) || (ids != null && ids.length > 0))
-      ) {
+      if (anchorRef && anchorRef.current && ids != null && ids.length > 0) {
         let exportResponse;
         try {
-          if (!isNil(exportSelectedData)) {
-            exportResponse = await exportSelectedData({
-              ids,
-              signal: abortCtrl.signal,
-            });
-          }
+          exportResponse = await exportSelectedData({
+            ids,
+            signal: abortCtrl.signal,
+          });
+
           if (isSubscribed) {
             // this is for supporting IE
             if (isFunction(window.navigator.msSaveOrOpenBlob)) {

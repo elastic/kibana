@@ -9,7 +9,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useState } from 'react';
 
 import * as i18n from '../translations';
-import { OpenTimelineResult, SetActionTimeline } from '../types';
 
 interface Props {
   title?: string | JSX.Element | null;

@@ -15,7 +15,6 @@ import {
   ExportedNotes,
   TimelineSavedObject,
   ExportedTimelines,
-  NotesAndPinnedEventsByTimelineId,
 } from '../types';
 import {
   timelineSavedObjectType,
@@ -93,20 +92,6 @@ const getGlobalEventNotesByTimelineId = (currentNotes: NoteSavedObject[]): Expor
         };
     }, initialNotes) ?? initialNotes
   );
-};
-
-const getExportedNotedandPinnedEvents = (
-  data: NotesAndPinnedEventsByTimelineId[],
-  timelineId: string
-) => {
-  const currentRecord = data.find(note => Object.keys(note)[0] === timelineId) ?? {};
-  const currentNote = currentRecord[timelineId]?.notes ?? [];
-  const currentPinnedEvents = currentRecord[timelineId]?.pinnedEvents ?? [];
-
-  return {
-    ...getGlobalEventNotesByTimelineId(currentNote),
-    pinnedEventIds: getPinnedEventsIdsByTimelineId(currentPinnedEvents),
-  };
 };
 
 const getPinnedEventsIdsByTimelineId = (

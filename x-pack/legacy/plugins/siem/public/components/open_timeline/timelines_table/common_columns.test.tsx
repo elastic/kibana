@@ -11,7 +11,6 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
 import { getEmptyValue } from '../../empty_value';
 import { OpenTimelineResult } from '../types';
 import { mockTimelineResults } from '../../../mock/timeline_results';
@@ -19,33 +18,14 @@ import { NotePreviews } from '../note_previews';
 import { TimelinesTable, TimelinesTableProps } from '.';
 
 import * as i18n from '../translations';
-import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
+import { getMockTimelinesTableProps } from './mocks';
 
 jest.mock('../../../lib/kibana');
 
 describe('#getCommonColumns', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let mockResults: OpenTimelineResult[];
-  const getDefaultProps = (mockOpenTimelineResults: OpenTimelineResult[]): TimelinesTableProps => ({
-    actionTimelineToShow: ['delete', 'duplicate', 'selectable'],
-    deleteTimelines: jest.fn(),
-    defaultPageSize: DEFAULT_SEARCH_RESULTS_PER_PAGE,
-    enableExportTimelineDownloader: jest.fn(),
-    itemIdToExpandedNotesRowMap: {},
-    loading: false,
-    onOpenDeleteTimelineModal: jest.fn(),
-    onOpenTimeline: jest.fn(),
-    onSelectionChange: jest.fn(),
-    onTableChange: jest.fn(),
-    onToggleShowNotes: jest.fn(),
-    pageIndex: 0,
-    pageSize: DEFAULT_SEARCH_RESULTS_PER_PAGE,
-    searchResults: mockOpenTimelineResults,
-    showExtendedColumns: true,
-    sortDirection: DEFAULT_SORT_DIRECTION,
-    sortField: DEFAULT_SORT_FIELD,
-    totalSearchResultsCount: mockOpenTimelineResults.length,
-  });
+
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);
   });
@@ -55,7 +35,7 @@ describe('#getCommonColumns', () => {
       const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(hasNotes),
+        ...getMockTimelinesTableProps(hasNotes),
       };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
@@ -70,7 +50,7 @@ describe('#getCommonColumns', () => {
       const missingNotes: OpenTimelineResult[] = [omit('notes', { ...mockResults[0] })];
 
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(missingNotes),
+        ...getMockTimelinesTableProps(missingNotes),
       };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
@@ -85,7 +65,7 @@ describe('#getCommonColumns', () => {
       const nullNotes: OpenTimelineResult[] = [{ ...mockResults[0], notes: null }];
 
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(nullNotes),
+        ...getMockTimelinesTableProps(nullNotes),
       };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
@@ -100,7 +80,7 @@ describe('#getCommonColumns', () => {
       const emptylNotes: OpenTimelineResult[] = [{ ...mockResults[0], notes: [] }];
 
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(emptylNotes),
+        ...getMockTimelinesTableProps(emptylNotes),
       };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
@@ -116,7 +96,7 @@ describe('#getCommonColumns', () => {
         omit('savedObjectId', { ...mockResults[0] }),
       ];
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(missingSavedObjectId),
+        ...getMockTimelinesTableProps(missingSavedObjectId),
       };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
@@ -131,7 +111,7 @@ describe('#getCommonColumns', () => {
       const nullSavedObjectId: OpenTimelineResult[] = [{ ...mockResults[0], savedObjectId: null }];
 
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(nullSavedObjectId),
+        ...getMockTimelinesTableProps(nullSavedObjectId),
       };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
@@ -146,7 +126,7 @@ describe('#getCommonColumns', () => {
       const hasNotes: OpenTimelineResult[] = [{ ...mockResults[0] }];
 
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(hasNotes),
+        ...getMockTimelinesTableProps(hasNotes),
       };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
@@ -170,7 +150,7 @@ describe('#getCommonColumns', () => {
       };
 
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(hasNotes),
+        ...getMockTimelinesTableProps(hasNotes),
         itemIdToExpandedNotesRowMap,
       };
       const wrapper = mountWithIntl(
@@ -197,7 +177,7 @@ describe('#getCommonColumns', () => {
       };
 
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(hasNotes),
+        ...getMockTimelinesTableProps(hasNotes),
         itemIdToExpandedNotesRowMap,
         onToggleShowNotes,
       };
@@ -229,7 +209,7 @@ describe('#getCommonColumns', () => {
       };
 
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(hasNotes),
+        ...getMockTimelinesTableProps(hasNotes),
         itemIdToExpandedNotesRowMap,
         onToggleShowNotes,
       };
@@ -253,7 +233,7 @@ describe('#getCommonColumns', () => {
   describe('Timeline Name column', () => {
     test('it renders the expected column name', () => {
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(mockResults),
+        ...getMockTimelinesTableProps(mockResults),
       };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
@@ -271,7 +251,7 @@ describe('#getCommonColumns', () => {
 
     test('it renders the title when the timeline has a title and a saved object id', () => {
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(mockResults),
+        ...getMockTimelinesTableProps(mockResults),
       };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
@@ -293,7 +273,7 @@ describe('#getCommonColumns', () => {
       ];
 
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(missingSavedObjectId),
+        ...getMockTimelinesTableProps(missingSavedObjectId),
       };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
@@ -313,7 +293,7 @@ describe('#getCommonColumns', () => {
       const missingTitle: OpenTimelineResult[] = [omit('title', { ...mockResults[0] })];
 
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(missingTitle),
+        ...getMockTimelinesTableProps(missingTitle),
       };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
@@ -335,7 +315,7 @@ describe('#getCommonColumns', () => {
       ];
 
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(withMissingSavedObjectIdAndTitle),
+        ...getMockTimelinesTableProps(withMissingSavedObjectIdAndTitle),
       };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
@@ -357,7 +337,7 @@ describe('#getCommonColumns', () => {
       ];
 
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(withJustWhitespaceTitle),
+        ...getMockTimelinesTableProps(withJustWhitespaceTitle),
       };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
@@ -379,7 +359,7 @@ describe('#getCommonColumns', () => {
       ];
 
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(withMissingSavedObjectId),
+        ...getMockTimelinesTableProps(withMissingSavedObjectId),
       };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
@@ -398,7 +378,7 @@ describe('#getCommonColumns', () => {
     test('it renders a hyperlink when the timeline has a saved object id', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <TimelinesTable {...getDefaultProps(mockResults)} />
+          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
         </ThemeProvider>
       );
 
@@ -416,7 +396,7 @@ describe('#getCommonColumns', () => {
       ];
 
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(missingSavedObjectId),
+        ...getMockTimelinesTableProps(missingSavedObjectId),
       };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
@@ -436,7 +416,7 @@ describe('#getCommonColumns', () => {
       const onOpenTimeline = jest.fn();
 
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(mockResults),
+        ...getMockTimelinesTableProps(mockResults),
         onOpenTimeline,
       };
       const wrapper = mountWithIntl(
@@ -461,7 +441,7 @@ describe('#getCommonColumns', () => {
     test('it renders the expected column name', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <TimelinesTable {...getDefaultProps(mockResults)} />
+          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
         </ThemeProvider>
       );
 
@@ -476,7 +456,7 @@ describe('#getCommonColumns', () => {
     test('it renders the description when the timeline has a description', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <TimelinesTable {...getDefaultProps(mockResults)} />
+          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
         </ThemeProvider>
       );
 
@@ -493,7 +473,7 @@ describe('#getCommonColumns', () => {
 
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <TimelinesTable {...getDefaultProps(missingDescription)} />
+          <TimelinesTable {...getMockTimelinesTableProps(missingDescription)} />
         </ThemeProvider>
       );
       expect(
@@ -510,7 +490,7 @@ describe('#getCommonColumns', () => {
       ];
 
       const testProps: TimelinesTableProps = {
-        ...getDefaultProps(justWhitespaceDescription),
+        ...getMockTimelinesTableProps(justWhitespaceDescription),
       };
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
@@ -530,7 +510,7 @@ describe('#getCommonColumns', () => {
     test('it renders the expected column name', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <TimelinesTable {...getDefaultProps(mockResults)} />
+          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
         </ThemeProvider>
       );
 
@@ -545,7 +525,7 @@ describe('#getCommonColumns', () => {
     test('it renders the last modified (updated) date when the timeline has an updated property', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
-          <TimelinesTable {...getDefaultProps(mockResults)} />
+          <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
         </ThemeProvider>
       );
 
@@ -563,7 +543,7 @@ describe('#getCommonColumns', () => {
 
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <TimelinesTable {...getDefaultProps(missingUpdated)} />
+        <TimelinesTable {...getMockTimelinesTableProps(missingUpdated)} />
       </ThemeProvider>
     );
     expect(

@@ -10,37 +10,16 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
-import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
 import { mockTimelineResults } from '../../../mock/timeline_results';
 import { TimelinesTable, TimelinesTableProps } from '.';
 import { OpenTimelineResult } from '../types';
-import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
-
+import { getMockTimelinesTableProps } from './mocks';
 jest.mock('../../../lib/kibana');
 
 describe('#getActionsColumns', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let mockResults: OpenTimelineResult[];
-  const getDefaultProps = (mockOpenTimelineResults: OpenTimelineResult[]): TimelinesTableProps => ({
-    actionTimelineToShow: ['delete', 'duplicate', 'selectable'],
-    deleteTimelines: jest.fn(),
-    defaultPageSize: DEFAULT_SEARCH_RESULTS_PER_PAGE,
-    enableExportTimelineDownloader: jest.fn(),
-    itemIdToExpandedNotesRowMap: {},
-    loading: false,
-    onOpenDeleteTimelineModal: jest.fn(),
-    onOpenTimeline: jest.fn(),
-    onSelectionChange: jest.fn(),
-    onTableChange: jest.fn(),
-    onToggleShowNotes: jest.fn(),
-    pageIndex: 0,
-    pageSize: DEFAULT_SEARCH_RESULTS_PER_PAGE,
-    searchResults: mockOpenTimelineResults,
-    showExtendedColumns: true,
-    sortDirection: DEFAULT_SORT_DIRECTION,
-    sortField: DEFAULT_SORT_FIELD,
-    totalSearchResultsCount: mockOpenTimelineResults.length,
-  });
+
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);
   });
@@ -48,7 +27,7 @@ describe('#getActionsColumns', () => {
   test('it renders the pinned events header icon', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <TimelinesTable {...getDefaultProps(mockResults)} />
+        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
       </ThemeProvider>
     );
 
@@ -58,7 +37,7 @@ describe('#getActionsColumns', () => {
   test('it renders the expected pinned events count', () => {
     const with6Events = [mockResults[0]];
     const testProps: TimelinesTableProps = {
-      ...getDefaultProps(with6Events),
+      ...getMockTimelinesTableProps(with6Events),
     };
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
@@ -72,7 +51,7 @@ describe('#getActionsColumns', () => {
   test('it renders the notes count header icon', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <TimelinesTable {...getDefaultProps(mockResults)} />
+        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
       </ThemeProvider>
     );
 
@@ -82,7 +61,7 @@ describe('#getActionsColumns', () => {
   test('it renders the expected notes count', () => {
     const with4Notes = [mockResults[0]];
     const testProps: TimelinesTableProps = {
-      ...getDefaultProps(with4Notes),
+      ...getMockTimelinesTableProps(with4Notes),
     };
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
@@ -96,7 +75,7 @@ describe('#getActionsColumns', () => {
   test('it renders the favorites header icon', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <TimelinesTable {...getDefaultProps(mockResults)} />
+        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
       </ThemeProvider>
     );
 
@@ -106,7 +85,7 @@ describe('#getActionsColumns', () => {
   test('it renders an empty star when favorite is undefined', () => {
     const undefinedFavorite: OpenTimelineResult[] = [omit('favorite', { ...mockResults[0] })];
     const testProps: TimelinesTableProps = {
-      ...getDefaultProps(undefinedFavorite),
+      ...getMockTimelinesTableProps(undefinedFavorite),
     };
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
@@ -120,7 +99,7 @@ describe('#getActionsColumns', () => {
   test('it renders an empty star when favorite is null', () => {
     const nullFavorite: OpenTimelineResult[] = [{ ...mockResults[0], favorite: null }];
     const testProps: TimelinesTableProps = {
-      ...getDefaultProps(nullFavorite),
+      ...getMockTimelinesTableProps(nullFavorite),
     };
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
@@ -134,7 +113,7 @@ describe('#getActionsColumns', () => {
   test('it renders an empty star when favorite is empty', () => {
     const emptyFavorite: OpenTimelineResult[] = [{ ...mockResults[0], favorite: [] }];
     const testProps: TimelinesTableProps = {
-      ...getDefaultProps(emptyFavorite),
+      ...getMockTimelinesTableProps(emptyFavorite),
     };
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
@@ -159,7 +138,7 @@ describe('#getActionsColumns', () => {
     ];
 
     const testProps: TimelinesTableProps = {
-      ...getDefaultProps(favorite),
+      ...getMockTimelinesTableProps(favorite),
     };
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
@@ -188,7 +167,7 @@ describe('#getActionsColumns', () => {
     ];
 
     const testProps: TimelinesTableProps = {
-      ...getDefaultProps(favorite),
+      ...getMockTimelinesTableProps(favorite),
     };
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>

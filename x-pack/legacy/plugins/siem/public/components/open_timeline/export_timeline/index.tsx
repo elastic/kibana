@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback, Dispatch, SetStateAction } from 'react';
-import { OpenTimelineResult, DeleteTimelines } from '../types';
-import { ExportSelectedData } from '../../generic_downloader';
+import React, { useState, useCallback } from 'react';
+import { DeleteTimelines } from '../types';
 
 import { TimelineDownloader } from './export_timeline';
 import { DeleteTimelineModalOverlay } from '../delete_timeline_modal';
@@ -15,9 +14,7 @@ import { exportSelectedTimeline } from '../../../containers/timeline/all/api';
 export interface ExportTimeline {
   disableExportTimelineDownloader: () => void;
   enableExportTimelineDownloader: () => void;
-  // exportedIds: string[] | undefined;
   isEnableDownloader: boolean;
-  // setIsEnableDownloader: Dispatch<SetStateAction<boolean>>;
 }
 
 export const useExportTimeline = (): ExportTimeline => {
@@ -72,4 +69,5 @@ const EditTimelineActionsComponent: React.FC<{
   </>
 );
 
-export const EditOneTimelineActions = React.memo(EditTimelineActionsComponent);
+export const EditTimelineActions = React.memo(EditTimelineActionsComponent);
+export const EditOneTimelineAction = React.memo(EditTimelineActionsComponent);

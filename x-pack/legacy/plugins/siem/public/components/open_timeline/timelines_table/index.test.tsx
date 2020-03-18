@@ -10,39 +10,18 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
-import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
 import { mockTimelineResults } from '../../../mock/timeline_results';
 import { OpenTimelineResult } from '../types';
 import { TimelinesTable, TimelinesTableProps } from '.';
+import { getMockTimelinesTableProps } from './mocks';
 
 import * as i18n from '../translations';
-import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
 
 jest.mock('../../../lib/kibana');
 
 describe('TimelinesTable', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let mockResults: OpenTimelineResult[];
-  const getDefaultProps = (mockOpenTimelineResults: OpenTimelineResult[]): TimelinesTableProps => ({
-    actionTimelineToShow: ['delete', 'duplicate', 'selectable'],
-    deleteTimelines: jest.fn(),
-    defaultPageSize: DEFAULT_SEARCH_RESULTS_PER_PAGE,
-    enableExportTimelineDownloader: jest.fn(),
-    itemIdToExpandedNotesRowMap: {},
-    loading: false,
-    onOpenDeleteTimelineModal: jest.fn(),
-    onOpenTimeline: jest.fn(),
-    onSelectionChange: jest.fn(),
-    onTableChange: jest.fn(),
-    onToggleShowNotes: jest.fn(),
-    pageIndex: 0,
-    pageSize: DEFAULT_SEARCH_RESULTS_PER_PAGE,
-    searchResults: mockOpenTimelineResults,
-    showExtendedColumns: true,
-    sortDirection: DEFAULT_SORT_DIRECTION,
-    sortField: DEFAULT_SORT_FIELD,
-    totalSearchResultsCount: mockOpenTimelineResults.length,
-  });
 
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);
@@ -51,7 +30,7 @@ describe('TimelinesTable', () => {
   test('it renders the select all timelines header checkbox when actionTimelineToShow has the action selectable', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <TimelinesTable {...getDefaultProps(mockResults)} />
+        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
       </ThemeProvider>
     );
 
@@ -65,7 +44,7 @@ describe('TimelinesTable', () => {
 
   test('it does NOT render the select all timelines header checkbox when actionTimelineToShow has not the action selectable', () => {
     const testProps: TimelinesTableProps = {
-      ...getDefaultProps(mockResults),
+      ...getMockTimelinesTableProps(mockResults),
       actionTimelineToShow: ['delete', 'duplicate'],
     };
     const wrapper = mountWithIntl(
@@ -84,7 +63,7 @@ describe('TimelinesTable', () => {
 
   test('it renders the Modified By column when showExtendedColumns is true ', () => {
     const testProps: TimelinesTableProps = {
-      ...getDefaultProps(mockResults),
+      ...getMockTimelinesTableProps(mockResults),
       showExtendedColumns: true,
     };
     const wrapper = mountWithIntl(
@@ -103,7 +82,7 @@ describe('TimelinesTable', () => {
 
   test('it renders the notes column in the position of the Modified By column when showExtendedColumns is false', () => {
     const testProps: TimelinesTableProps = {
-      ...getDefaultProps(mockResults),
+      ...getMockTimelinesTableProps(mockResults),
       showExtendedColumns: false,
     };
     const wrapper = mountWithIntl(
@@ -125,7 +104,7 @@ describe('TimelinesTable', () => {
   test('it renders the delete timeline (trash icon) when actionTimelineToShow has the delete action', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <TimelinesTable {...getDefaultProps(mockResults)} />
+        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
       </ThemeProvider>
     );
 
@@ -139,7 +118,7 @@ describe('TimelinesTable', () => {
 
   test('it does NOT render the delete timeline (trash icon) when actionTimelineToShow has NOT the delete action', () => {
     const testProps: TimelinesTableProps = {
-      ...getDefaultProps(mockResults),
+      ...getMockTimelinesTableProps(mockResults),
       actionTimelineToShow: ['duplicate', 'selectable'],
     };
     const wrapper = mountWithIntl(
@@ -159,7 +138,7 @@ describe('TimelinesTable', () => {
   test('it renders the rows per page selector when showExtendedColumns is true', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <TimelinesTable {...getDefaultProps(mockResults)} />
+        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
       </ThemeProvider>
     );
 
@@ -173,7 +152,7 @@ describe('TimelinesTable', () => {
 
   test('it does NOT render the rows per page selector when showExtendedColumns is false', () => {
     const testProps: TimelinesTableProps = {
-      ...getDefaultProps(mockResults),
+      ...getMockTimelinesTableProps(mockResults),
       showExtendedColumns: false,
     };
     const wrapper = mountWithIntl(
@@ -193,7 +172,7 @@ describe('TimelinesTable', () => {
   test('it renders the default page size specified by the defaultPageSize prop', () => {
     const defaultPageSize = 123;
     const testProps = {
-      ...getDefaultProps(mockResults),
+      ...getMockTimelinesTableProps(mockResults),
       defaultPageSize,
       pageSize: defaultPageSize,
     };
@@ -214,7 +193,7 @@ describe('TimelinesTable', () => {
   test('it sorts the Last Modified column in descending order when showExtendedColumns is true ', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <TimelinesTable {...getDefaultProps(mockResults)} />
+        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
       </ThemeProvider>
     );
 
@@ -228,7 +207,7 @@ describe('TimelinesTable', () => {
 
   test('it sorts the Last Modified column in descending order when showExtendedColumns is false ', () => {
     const testProps: TimelinesTableProps = {
-      ...getDefaultProps(mockResults),
+      ...getMockTimelinesTableProps(mockResults),
       showExtendedColumns: false,
     };
     const wrapper = mountWithIntl(
@@ -247,7 +226,7 @@ describe('TimelinesTable', () => {
 
   test('it displays the expected message when no search results are found', () => {
     const testProps: TimelinesTableProps = {
-      ...getDefaultProps(mockResults),
+      ...getMockTimelinesTableProps(mockResults),
       searchResults: [],
     };
     const wrapper = mountWithIntl(
@@ -267,7 +246,7 @@ describe('TimelinesTable', () => {
   test('it invokes onTableChange with the expected parameters when a table header is clicked to sort it', () => {
     const onTableChange = jest.fn();
     const testProps: TimelinesTableProps = {
-      ...getDefaultProps(mockResults),
+      ...getMockTimelinesTableProps(mockResults),
       onTableChange,
     };
     const wrapper = mountWithIntl(
@@ -292,7 +271,7 @@ describe('TimelinesTable', () => {
   test('it invokes onSelectionChange when a row is selected', () => {
     const onSelectionChange = jest.fn();
     const testProps: TimelinesTableProps = {
-      ...getDefaultProps(mockResults),
+      ...getMockTimelinesTableProps(mockResults),
       onSelectionChange,
     };
     const wrapper = mountWithIntl(
@@ -313,7 +292,7 @@ describe('TimelinesTable', () => {
 
   test('it enables the table loading animation when isLoading is true', () => {
     const testProps: TimelinesTableProps = {
-      ...getDefaultProps(mockResults),
+      ...getMockTimelinesTableProps(mockResults),
       loading: true,
     };
     const wrapper = mountWithIntl(
@@ -333,7 +312,7 @@ describe('TimelinesTable', () => {
   test('it disables the table loading animation when isLoading is false', () => {
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <TimelinesTable {...getDefaultProps(mockResults)} />
+        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
       </ThemeProvider>
     );
 

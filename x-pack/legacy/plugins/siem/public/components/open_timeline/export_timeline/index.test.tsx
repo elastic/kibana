@@ -5,19 +5,14 @@
  */
 
 import React from 'react';
-import { mockSelectedTimeline } from './mocks';
 import { mount } from 'enzyme';
 import { useExportTimeline, ExportTimeline } from '.';
-import { get } from 'lodash/fp';
 
 describe('useExportTimeline', () => {
   describe('call with selected timelines', () => {
     let exportTimelineRes: ExportTimeline;
     const TestHook = () => {
-      exportTimelineRes = useExportTimeline({
-        selectedItems: mockSelectedTimeline,
-        setActionTimeline: jest.fn(),
-      });
+      exportTimelineRes = useExportTimeline();
       return <div />;
     };
 
@@ -29,33 +24,12 @@ describe('useExportTimeline', () => {
       expect(exportTimelineRes.isEnableDownloader).toBeFalsy();
     });
 
-    test('exportedIds should include timelineId', () => {
-      expect(get('exportedIds[0]', exportTimelineRes)).toEqual(
-        mockSelectedTimeline[0].savedObjectId
-      );
-    });
-  });
-
-  describe('call without selected timelines', () => {
-    let exportTimelineRes: ExportTimeline;
-    const TestHook = () => {
-      exportTimelineRes = useExportTimeline({
-        selectedItems: undefined,
-        setActionTimeline: jest.fn(),
-      });
-      return <div />;
-    };
-
-    beforeAll(() => {
-      mount(<TestHook />);
+    test('Should include disableExportTimelineDownloader in return value', () => {
+      expect(exportTimelineRes).toHaveProperty('disableExportTimelineDownloader');
     });
 
-    test('should contain exportedIds', () => {
-      expect(exportTimelineRes?.hasOwnProperty('exportedIds')).toBeTruthy();
-    });
-
-    test('should have no exportedIds', () => {
-      expect(exportTimelineRes.exportedIds).toBeUndefined();
+    test('Should include enableExportTimelineDownloader in return value', () => {
+      expect(exportTimelineRes).toHaveProperty('enableExportTimelineDownloader');
     });
   });
 });
