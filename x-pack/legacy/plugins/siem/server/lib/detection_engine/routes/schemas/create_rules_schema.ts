@@ -55,8 +55,16 @@ export const createRulesSchema = Joi.object({
   rule_id,
   index,
   interval: interval.default('5m'),
-  query, // TODO conditional type/default?
-  language,
+  query: query.when('type', {
+    is: 'machine_learning',
+    then: Joi.forbidden(),
+    otherwise: query.allow('').default(''),
+  }),
+  language: language.when('type', {
+    is: 'machine_learning',
+    then: Joi.forbidden(),
+    otherwise: language.default('kuery'),
+  }),
   output_index,
   saved_id: saved_id.when('type', {
     is: 'saved_query',
