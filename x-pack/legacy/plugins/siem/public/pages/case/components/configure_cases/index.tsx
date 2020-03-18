@@ -9,8 +9,18 @@ import styled, { css } from 'styled-components';
 
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { noop, isEmpty } from 'lodash/fp';
+import { useKibana } from '../../../../lib/kibana';
 import { useConnectors } from '../../../../containers/case/configure/use_connectors';
 import { useCaseConfigure } from '../../../../containers/case/configure/use_configure';
+import {
+  ActionsConnectorsContextProvider,
+  ConnectorAddFlyout,
+  ConnectorEditFlyout,
+} from '../../../../../../../../plugins/triggers_actions_ui/public';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ActionConnectorTableItem } from '../../../../../../../../plugins/triggers_actions_ui/public/types';
+
 import {
   ClosureType,
   CasesConfigurationMapping,
@@ -40,8 +50,25 @@ const initialState: State = {
   mapping: null,
 };
 
+const actionTypes = [
+  {
+    id: '.servicenow',
+    name: 'ServiceNow',
+    enabled: true,
+  },
+];
+
 const ConfigureCasesComponent: React.FC = () => {
+  const { http, triggers_actions_ui, notifications, application } = useKibana().services;
+
   const [connectorIsValid, setConnectorIsValid] = useState(true);
+  const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
+  const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
+  const [editedConnectorItem, setEditedConnectorItem] = useState<ActionConnectorTableItem | null>(
+    null
+  );
+
+  const handleShowAddFlyout = useCallback(() => setAddFlyoutVisibility(true), []);
 
   const [{ connectorId, closureType, mapping }, dispatch] = useReducer(
     configureCasesReducer(),
@@ -73,20 +100,18 @@ const ConfigureCasesComponent: React.FC = () => {
     setConnectorId,
     setClosureType,
   });
-  const {
-    loading: isLoadingConnectors,
-    connectors,
-    refetchConnectors,
-    updateConnector,
-  } = useConnectors();
+  const { loading: isLoadingConnectors, connectors, refetchConnectors } = useConnectors();
 
+  // ActionsConnectorsContextProvider reloadConnectors prop expects a Promise<void>.
+  // TODO: Fix it if reloadConnectors type change.
+  const reloadConnectors = useCallback(async () => refetchConnectors(), []);
   const isLoadingAny = isLoadingConnectors || persistLoading || loadingCaseConfigure;
+  const updateConnectorDisabled = isLoadingAny || !connectorIsValid || connectorId === 'none';
 
   const handleSubmit = useCallback(
     // TO DO give a warning/error to user when field are not mapped so they have chance to do it
     () => {
       persistCaseConfigure({ connectorId, closureType });
-      updateConnector(connectorId, mapping ?? []);
     },
     [connectorId, closureType, mapping]
   );
@@ -124,6 +149,14 @@ const ConfigureCasesComponent: React.FC = () => {
     }
   }, [connectors, connectorId]);
 
+  useEffect(() => {
+    if (!isLoadingConnectors && connectorId !== 'none') {
+      setEditedConnectorItem(
+        connectors.find(c => c.id === connectorId) as ActionConnectorTableItem
+      );
+    }
+  }, [connectors, connectorId]);
+
   return (
     <FormWrapper>
       {!connectorIsValid && (
@@ -139,7 +172,7 @@ const ConfigureCasesComponent: React.FC = () => {
           disabled={persistLoading || isLoadingConnectors}
           isLoading={isLoadingConnectors}
           onChangeConnector={setConnectorId}
-          refetchConnectors={refetchConnectors}
+          handleShowAddFlyout={handleShowAddFlyout}
           selectedConnector={connectorId}
         />
       </SectionWrapper>
@@ -152,15 +185,11 @@ const ConfigureCasesComponent: React.FC = () => {
       </SectionWrapper>
       <SectionWrapper>
         <Mapping
-          disabled={
-            isEmpty(connectors) ||
-            connectorId === 'none' ||
-            loadingCaseConfigure ||
-            persistLoading ||
-            isLoadingConnectors
-          }
+          disabled
+          updateConnectorDisabled={updateConnectorDisabled}
           mapping={mapping}
           onChangeMapping={setMapping}
+          setEditFlyoutVisibility={setEditFlyoutVisibility}
         />
       </SectionWrapper>
       <SectionWrapper>
@@ -194,6 +223,29 @@ const ConfigureCasesComponent: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </SectionWrapper>
+      <ActionsConnectorsContextProvider
+        value={{
+          http,
+          actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
+          toastNotifications: notifications.toasts,
+          capabilities: application.capabilities,
+          reloadConnectors,
+        }}
+      >
+        <ConnectorAddFlyout
+          addFlyoutVisible={addFlyoutVisible}
+          setAddFlyoutVisibility={setAddFlyoutVisibility}
+          actionTypes={actionTypes}
+        />
+        {editedConnectorItem && (
+          <ConnectorEditFlyout
+            key={editedConnectorItem.id}
+            initialConnector={editedConnectorItem}
+            editFlyoutVisible={editFlyoutVisible}
+            setEditFlyoutVisibility={setEditFlyoutVisibility}
+          />
+        )}
+      </ActionsConnectorsContextProvider>
     </FormWrapper>
   );
 };
