@@ -20,7 +20,7 @@ interface Props {
   deleteTimelines: DeleteTimelines;
   onComplete?: () => void;
   isModalOpen: boolean;
-  savedObjectIds?: string[] | null | undefined;
+  savedObjectIds: string[];
   title: string | JSX.Element | null;
 }
 /**
@@ -34,10 +34,12 @@ export const DeleteTimelineModalOverlay = React.memo<Props>(
       }
     }, [onComplete]);
     const onDelete = useCallback(() => {
-      if (deleteTimelines != null && savedObjectIds != null) {
+      if (savedObjectIds != null) {
         deleteTimelines(savedObjectIds);
       }
-      if (onComplete != null) onComplete();
+      if (onComplete != null) {
+        onComplete();
+      }
     }, [deleteTimelines, savedObjectIds, onComplete]);
     return (
       <>

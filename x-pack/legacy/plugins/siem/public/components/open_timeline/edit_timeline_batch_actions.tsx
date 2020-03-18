@@ -5,36 +5,38 @@
  */
 
 import { EuiContextMenuPanel, EuiContextMenuItem, EuiBasicTable } from '@elastic/eui';
-import React, { useCallback, Dispatch } from 'react';
-import { TimelineDownloader } from './export_timeline/export_timeline';
-import { DeleteTimelineModalOverlay } from './delete_timeline_modal';
+import React, { useCallback, useMemo } from 'react';
 import * as i18n from './translations';
-import { DeleteTimeline, DeleteTimelines, OpenTimelineResult } from './types';
-import { ExportTimeline } from './export_timeline';
+import { DeleteTimelines, OpenTimelineResult } from './types';
+import { EditOneTimelineActions } from './export_timeline';
 import { useEditTimelineActions } from './edit_timeline_actions';
-import { ActionToaster } from '../toasters';
-import { exportSelectedTimeline } from '../../containers/timeline/all/api';
+
+const getExportedIds = (selectedTimelines: OpenTimelineResult[]) => {
+  const array = Array.isArray(selectedTimelines) ? selectedTimelines : [selectedTimelines];
+  return array.reduce(
+    (acc, item) => (item.savedObjectId != null ? [...acc, item.savedObjectId] : [...acc]),
+    [] as string[]
+  );
+};
 
 export const useEditTimelinBatchActions = ({
   deleteTimelines,
-  dispatchToaster,
   selectedItems,
   tableRef,
 }: {
-  deleteTimelines: DeleteTimelines | undefined;
-  dispatchToaster: Dispatch<ActionToaster>;
-  selectedItems: OpenTimelineResult[] | undefined;
+  deleteTimelines?: DeleteTimelines;
+  selectedItems?: OpenTimelineResult[];
   tableRef: React.MutableRefObject<EuiBasicTable<OpenTimelineResult> | undefined>;
 }) => {
   const {
     enableExportTimelineDownloader,
     disableExportTimelineDownloader,
-    exportedIds,
     isEnableDownloader,
     isDeleteTimelineModalOpen,
     onOpenDeleteTimelineModal,
     onCloseDeleteTimelineModal,
-  }: DeleteTimeline & ExportTimeline = useEditTimelineActions(selectedItems);
+  } = useEditTimelineActions();
+
   const onCompleteBatchActions = useCallback(
     (closePopover?: () => void) => {
       if (closePopover != null) closePopover();
@@ -44,44 +46,43 @@ export const useEditTimelinBatchActions = ({
       disableExportTimelineDownloader();
       onCloseDeleteTimelineModal();
     },
-    [tableRef.current]
+    [disableExportTimelineDownloader, onCloseDeleteTimelineModal, tableRef.current]
   );
+
+  const selectedIds = useMemo(() => getExportedIds(selectedItems ?? []), [selectedItems]);
+
+  const handleEnableExportTimelineDownloader = useCallback(() => enableExportTimelineDownloader(), [
+    enableExportTimelineDownloader,
+  ]);
+
+  const handleOnOpenDeleteTimelineModal = useCallback(() => onOpenDeleteTimelineModal(), [
+    onOpenDeleteTimelineModal,
+  ]);
 
   const getBatchItemsPopoverContent = useCallback(
     (closePopover: () => void) => {
       return (
         <>
-          <TimelineDownloader
-            exportedIds={exportedIds}
-            getExportedData={exportSelectedTimeline}
+          <EditOneTimelineActions
+            deleteTimelines={deleteTimelines}
+            ids={selectedIds}
             isEnableDownloader={isEnableDownloader}
+            isDeleteTimelineModalOpen={isDeleteTimelineModalOpen}
             onComplete={onCompleteBatchActions.bind(null, closePopover)}
+            title={
+              selectedItems?.length !== 1
+                ? i18n.SELECTED_TIMELINES(selectedItems?.length ?? 0)
+                : `"${selectedItems[0]?.title}"`
+            }
           />
-          {deleteTimelines != null && (
-            <DeleteTimelineModalOverlay
-              deleteTimelines={deleteTimelines}
-              onComplete={onCompleteBatchActions.bind(null, closePopover)}
-              isModalOpen={isDeleteTimelineModalOpen}
-              savedObjectIds={selectedItems?.reduce(
-                (acc, item) => (item.savedObjectId != null ? [...acc, item.savedObjectId] : acc),
-                [] as string[]
-              )}
-              title={
-                selectedItems?.length !== 1
-                  ? i18n.SELECTED_TIMELINES(selectedItems?.length ?? 0)
-                  : `"${selectedItems[0]?.title}"`
-              }
-            />
-          )}
+
           <EuiContextMenuPanel
             items={[
               <EuiContextMenuItem
                 disabled={selectedItems == null || selectedItems.length === 0}
                 icon="exportAction"
                 key="ExportItemKey"
-                onClick={() => {
-                  enableExportTimelineDownloader();
-                }}
+                onClick={handleEnableExportTimelineDownloader}
               >
                 {i18n.EXPORT_SELECTED}
               </EuiContextMenuItem>,
@@ -89,9 +90,7 @@ export const useEditTimelinBatchActions = ({
                 disabled={selectedItems == null || selectedItems.length === 0}
                 icon="trash"
                 key="DeleteItemKey"
-                onClick={() => {
-                  onOpenDeleteTimelineModal();
-                }}
+                onClick={handleOnOpenDeleteTimelineModal}
               >
                 {i18n.DELETE_SELECTED}
               </EuiContextMenuItem>,
@@ -102,16 +101,13 @@ export const useEditTimelinBatchActions = ({
     },
     [
       deleteTimelines,
-      dispatchToaster,
-      disableExportTimelineDownloader,
-      exportedIds,
       isEnableDownloader,
       isDeleteTimelineModalOpen,
+      selectedIds,
       selectedItems,
-      onCloseDeleteTimelineModal,
+      handleEnableExportTimelineDownloader,
+      handleOnOpenDeleteTimelineModal,
       onCompleteBatchActions,
-      enableExportTimelineDownloader,
-      onOpenDeleteTimelineModal,
     ]
   );
   return { onCompleteBatchActions, getBatchItemsPopoverContent };

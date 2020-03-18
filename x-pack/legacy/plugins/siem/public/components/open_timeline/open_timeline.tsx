@@ -14,7 +14,6 @@ import { TimelinesTable } from './timelines_table';
 import { TitleRow } from './title_row';
 
 import * as i18n from './translations';
-import { useStateToaster } from '../toasters';
 import { EditTimelineActions } from './export_timeline/.';
 import {
   UtilityBarGroup,
@@ -25,7 +24,7 @@ import {
 } from '../utility_bar';
 import { useEditTimelinBatchActions } from './edit_timeline_batch_actions';
 import { useEditTimelineActions } from './edit_timeline_actions';
-import { exportSelectedTimeline } from '../../containers/timeline/all/api';
+
 export const OpenTimeline = React.memo<OpenTimelineProps>(
   ({
     deleteTimelines,
@@ -53,12 +52,10 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     totalSearchResultsCount,
   }) => {
     const tableRef = useRef<EuiBasicTable<OpenTimelineResult>>();
-    const [, dispatchToaster] = useStateToaster();
 
     const {
       actionItem,
       enableExportTimelineDownloader,
-      exportedIds,
       isEnableDownloader,
       isDeleteTimelineModalOpen,
       onOpenDeleteTimelineModal,
@@ -67,7 +64,6 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
 
     const { getBatchItemsPopoverContent } = useEditTimelinBatchActions({
       deleteTimelines,
-      dispatchToaster,
       selectedItems,
       tableRef,
     });
@@ -90,16 +86,19 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       [totalSearchResultsCount, query]
     );
 
+    const actionItemId = useMemo(() => (actionItem != null ? [actionItem.savedObjectId] : []), [
+      actionItem,
+    ]);
+
     return (
       <>
         <EditTimelineActions
-          actionItem={actionItem}
           deleteTimelines={deleteTimelines}
-          exportedIds={exportedIds}
-          getExportedData={exportSelectedTimeline}
+          ids={actionItemId}
           isDeleteTimelineModalOpen={isDeleteTimelineModalOpen}
           isEnableDownloader={isEnableDownloader}
           onComplete={onCompleteEditTimelineAction}
+          title={actionItem != null ? actionItem.title : ''}
         />
 
         <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>

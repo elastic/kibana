@@ -5,31 +5,54 @@
  */
 
 import { useState, useCallback } from 'react';
-import { useExportTimeline, ExportTimeline } from './export_timeline/.';
-import { OpenTimelineResult, DeleteTimeline } from './types';
-import { useDeleteTimeline } from './delete_timeline_modal/delete_timeline_modal';
+import { OpenTimelineResult } from './types';
 
-export const useEditTimelineActions = (selectedItems?: OpenTimelineResult[] | undefined) => {
-  const [actionItem, setActionTimeline] = useState<undefined | OpenTimelineResult>(undefined);
+export const useEditTimelineActions = () => {
+  const [actionItem, setActionTimeline] = useState<null | OpenTimelineResult>(null);
+  const [isDeleteTimelineModalOpen, setIsDeleteTimelineModalOpen] = useState<boolean>(false);
+  const [isEnableDownloader, setIsEnableDownloader] = useState(false);
 
-  const deleteTimeline: DeleteTimeline = useDeleteTimeline({
-    setActionTimeline,
-  });
-  const exportTimeline: ExportTimeline = useExportTimeline({
-    selectedItems: actionItem != null ? [actionItem] : selectedItems,
-    setActionTimeline,
-  });
+  // Handle Delete Modal
+  const onCloseDeleteTimelineModal = useCallback(() => {
+    setIsDeleteTimelineModalOpen(false);
+    setActionTimeline(null);
+  }, [actionItem]);
 
+  const onOpenDeleteTimelineModal = useCallback((selectedActionItem?: OpenTimelineResult) => {
+    setIsDeleteTimelineModalOpen(true);
+    if (selectedActionItem != null) {
+      setActionTimeline(selectedActionItem);
+    }
+  }, []);
+
+  // Handle Downloader Modal
+  const enableExportTimelineDownloader = useCallback((selectedActionItem?: OpenTimelineResult) => {
+    setIsEnableDownloader(true);
+    if (selectedActionItem != null) {
+      setActionTimeline(selectedActionItem);
+    }
+  }, []);
+
+  const disableExportTimelineDownloader = useCallback(() => {
+    setIsEnableDownloader(false);
+    setActionTimeline(null);
+  }, []);
+
+  // On Compete every tasks
   const onCompleteEditTimelineAction = useCallback(() => {
-    deleteTimeline.onCloseDeleteTimelineModal();
-    exportTimeline.disableExportTimelineDownloader();
-  }, [deleteTimeline.onCloseDeleteTimelineModal, exportTimeline.disableExportTimelineDownloader]);
+    setIsDeleteTimelineModalOpen(false);
+    setIsEnableDownloader(false);
+    setActionTimeline(null);
+  }, []);
 
   return {
     actionItem,
     onCompleteEditTimelineAction,
-    setActionTimeline,
-    ...deleteTimeline,
-    ...exportTimeline,
+    isDeleteTimelineModalOpen,
+    onCloseDeleteTimelineModal,
+    onOpenDeleteTimelineModal,
+    isEnableDownloader,
+    enableExportTimelineDownloader,
+    disableExportTimelineDownloader,
   };
 };

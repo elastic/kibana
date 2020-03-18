@@ -142,7 +142,7 @@ export const transformAlertToRule = (
   });
 };
 
-export const transformDataToNdjson = (data: Array<Partial<OutputRuleAlertRest>>): string => {
+export const transformDataToNdjson = (data: unknown[]): string => {
   if (data.length !== 0) {
     const dataString = data.map(rule => JSON.stringify(rule)).join('\n');
     return `${dataString}\n`;

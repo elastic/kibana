@@ -15,87 +15,61 @@ import { exportSelectedTimeline } from '../../../containers/timeline/all/api';
 export interface ExportTimeline {
   disableExportTimelineDownloader: () => void;
   enableExportTimelineDownloader: () => void;
-  exportedIds: string[] | undefined;
+  // exportedIds: string[] | undefined;
   isEnableDownloader: boolean;
-  setIsEnableDownloader: Dispatch<SetStateAction<boolean>>;
+  // setIsEnableDownloader: Dispatch<SetStateAction<boolean>>;
 }
 
-export const useExportTimeline = ({
-  selectedItems,
-  setActionTimeline,
-}: {
-  selectedItems?: OpenTimelineResult | OpenTimelineResult[];
-  setActionTimeline: Dispatch<SetStateAction<undefined | OpenTimelineResult>>;
-}): ExportTimeline => {
+export const useExportTimeline = (): ExportTimeline => {
   const [isEnableDownloader, setIsEnableDownloader] = useState(false);
 
-  const getExportedIds = useCallback(
-    (selectedTimelines: OpenTimelineResult | OpenTimelineResult[]) => {
-      const array = Array.isArray(selectedTimelines) ? selectedTimelines : [selectedTimelines];
-      return array.reduce(
-        (acc, item) => (item.savedObjectId ? [...acc, item.savedObjectId] : [...acc]),
-        [] as string[]
-      );
-    },
-    [selectedItems]
-  );
-
-  const enableExportTimelineDownloader = useCallback(
-    (selectedActionItem?: OpenTimelineResult) => {
-      setIsEnableDownloader(true);
-      setActionTimeline(selectedActionItem);
-    },
-    [setIsEnableDownloader, setActionTimeline]
-  );
+  const enableExportTimelineDownloader = useCallback(() => {
+    setIsEnableDownloader(true);
+  }, []);
 
   const disableExportTimelineDownloader = useCallback(() => {
     setIsEnableDownloader(false);
-  }, [setIsEnableDownloader]);
+  }, []);
 
   return {
     disableExportTimelineDownloader,
     enableExportTimelineDownloader,
-    exportedIds: selectedItems != null ? getExportedIds(selectedItems) : undefined,
     isEnableDownloader,
-    setIsEnableDownloader,
   };
 };
 
 const EditTimelineActionsComponent: React.FC<{
-  actionItem: OpenTimelineResult | undefined;
   deleteTimelines: DeleteTimelines | undefined;
-  exportedIds: string[] | undefined;
-  getExportedData: ExportSelectedData;
+  ids: string[];
   isEnableDownloader: boolean;
   isDeleteTimelineModalOpen: boolean;
   onComplete: () => void;
+  title: string;
 }> = ({
-  actionItem,
   deleteTimelines,
-  exportedIds,
-  getExportedData,
+  ids,
   isEnableDownloader,
   isDeleteTimelineModalOpen,
   onComplete,
-}) =>
-  actionItem ? (
-    <>
-      <TimelineDownloader
-        exportedIds={exportedIds}
-        getExportedData={exportSelectedTimeline}
-        isEnableDownloader={isEnableDownloader}
+  title,
+}) => (
+  <>
+    <TimelineDownloader
+      exportedIds={ids}
+      getExportedData={exportSelectedTimeline}
+      isEnableDownloader={isEnableDownloader}
+      onComplete={onComplete}
+    />
+    {deleteTimelines != null && (
+      <DeleteTimelineModalOverlay
+        deleteTimelines={deleteTimelines}
+        isModalOpen={isDeleteTimelineModalOpen}
         onComplete={onComplete}
+        savedObjectIds={ids}
+        title={title}
       />
-      {deleteTimelines != null && actionItem.savedObjectId && (
-        <DeleteTimelineModalOverlay
-          deleteTimelines={deleteTimelines}
-          isModalOpen={isDeleteTimelineModalOpen}
-          onComplete={onComplete}
-          savedObjectIds={[actionItem.savedObjectId]}
-          title={`"${actionItem?.title}"`}
-        />
-      )}
-    </>
-  ) : null;
+    )}
+  </>
+);
 
-export const EditTimelineActions = React.memo(EditTimelineActionsComponent);
+export const EditOneTimelineActions = React.memo(EditTimelineActionsComponent);
