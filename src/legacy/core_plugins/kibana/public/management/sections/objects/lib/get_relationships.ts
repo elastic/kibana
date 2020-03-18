@@ -41,7 +41,7 @@ export async function getRelationships(
 
   try {
     const response = await $http<SavedObjectRelation[]>(options);
-    return response.data;
+    return response?.data;
   } catch (resp) {
     const respBody = get(resp, 'data', {}) as any;
     const err = new Error(respBody.message || respBody.error || `${resp.status} Response`);
