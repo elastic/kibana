@@ -22,6 +22,7 @@ import { Adapters } from '../types';
 import { IContainer } from '../containers';
 import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 import { ViewMode } from '../types';
+import { TriggerContextMapping } from '../ui_actions';
 import { EmbeddableActionStorage } from './embeddable_action_storage';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
@@ -194,5 +195,9 @@ export abstract class Embeddable<
     });
 
     this.onResetInput(newInput);
+  }
+
+  public supportedTriggers(): Array<keyof TriggerContextMapping> {
+    return [];
   }
 }

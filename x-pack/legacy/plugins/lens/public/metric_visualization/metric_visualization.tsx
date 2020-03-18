@@ -4,23 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { render } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Ast } from '@kbn/interpreter/target/common';
 import { getSuggestions } from './metric_suggestions';
-import { MetricConfigPanel } from './metric_config_panel';
-import { Visualization, FramePublicAPI } from '../types';
+import { Visualization, FramePublicAPI, OperationMetadata } from '../types';
 import { State, PersistableState } from './types';
-import { generateId } from '../id_generator';
 import chartMetricSVG from '../assets/chart_metric.svg';
 
 const toExpression = (
   state: State,
   frame: FramePublicAPI,
   mode: 'reduced' | 'full' = 'full'
-): Ast => {
+): Ast | null => {
+  if (!state.accessor) {
+    return null;
+  }
+
   const [datasource] = Object.values(frame.datasourceLayers);
   const operation = datasource && datasource.getOperationForColumnId(state.accessor);
 
@@ -57,7 +56,7 @@ export const metricVisualization: Visualization<State, PersistableState> = {
   clearLayer(state) {
     return {
       ...state,
-      accessor: generateId(),
+      accessor: undefined,
     };
   },
 
@@ -80,22 +79,37 @@ export const metricVisualization: Visualization<State, PersistableState> = {
     return (
       state || {
         layerId: frame.addNewLayer(),
-        accessor: generateId(),
+        accessor: undefined,
       }
     );
   },
 
   getPersistableState: state => state,
 
-  renderLayerConfigPanel: (domElement, props) =>
-    render(
-      <I18nProvider>
-        <MetricConfigPanel {...props} />
-      </I18nProvider>,
-      domElement
-    ),
+  getConfiguration(props) {
+    return {
+      groups: [
+        {
+          groupId: 'metric',
+          groupLabel: i18n.translate('xpack.lens.metric.label', { defaultMessage: 'Metric' }),
+          layerId: props.state.layerId,
+          accessors: props.state.accessor ? [props.state.accessor] : [],
+          supportsMoreColumns: false,
+          filterOperations: (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number',
+        },
+      ],
+    };
+  },
 
   toExpression,
   toPreviewExpression: (state: State, frame: FramePublicAPI) =>
     toExpression(state, frame, 'reduced'),
+
+  setDimension({ prevState, columnId }) {
+    return { ...prevState, accessor: columnId };
+  },
+
+  removeDimension({ prevState }) {
+    return { ...prevState, accessor: undefined };
+  },
 };

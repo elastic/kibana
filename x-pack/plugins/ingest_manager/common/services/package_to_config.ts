@@ -10,6 +10,7 @@ import {
   Datasource,
   DatasourceInput,
   DatasourceInputStream,
+  NewDatasource,
 } from '../types';
 
 /*
@@ -66,4 +67,32 @@ export const packageToConfigDatasourceInputs = (packageInfo: PackageInfo): Datas
   }
 
   return inputs;
+};
+
+/**
+ * Builds a `NewDatasource` structure based on a package
+ *
+ * @param packageInfo
+ * @param configId
+ * @param outputId
+ * @param datasourceName
+ */
+export const packageToConfigDatasource = (
+  packageInfo: PackageInfo,
+  configId: string,
+  outputId: string,
+  datasourceName?: string
+): NewDatasource => {
+  return {
+    name: datasourceName || `${packageInfo.name}-1`,
+    package: {
+      name: packageInfo.name,
+      title: packageInfo.title,
+      version: packageInfo.version,
+    },
+    enabled: true,
+    config_id: configId,
+    output_id: outputId,
+    inputs: packageToConfigDatasourceInputs(packageInfo),
+  };
 };

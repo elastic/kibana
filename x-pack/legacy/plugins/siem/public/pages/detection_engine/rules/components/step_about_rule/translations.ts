@@ -68,3 +68,10 @@ export const URL_FORMAT_INVALID = i18n.translate(
     defaultMessage: 'Url is invalid format',
   }
 );
+
+export const ADD_RULE_NOTE_HELP_TEXT = i18n.translate(
+  'xpack.siem.detectionEngine.createRule.stepAboutrule.noteHelpText',
+  {
+    defaultMessage: 'Add rule investigation notes...',
+  }
+);

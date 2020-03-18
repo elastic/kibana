@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from 'src/core/public';
 import {
   SendRequestConfig,
   SendRequestResponse,

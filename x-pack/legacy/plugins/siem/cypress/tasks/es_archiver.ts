@@ -12,6 +12,14 @@ export const esArchiverLoadEmptyKibana = () => {
   );
 };
 
+export const esArchiverLoad = (folder: string) => {
+  cy.exec(
+    `node ../../../../scripts/es_archiver load ${folder} --dir ../../../test/siem_cypress/es_archives --config ../../../../test/functional/config.js --es-url ${Cypress.env(
+      'ELASTICSEARCH_URL'
+    )} --kibana-url ${Cypress.config().baseUrl}`
+  );
+};
+
 export const esArchiverUnloadEmptyKibana = () => {
   cy.exec(
     `node ../../../../scripts/es_archiver empty_kibana unload empty--dir ../../../test/siem_cypress/es_archives --config ../../../../test/functional/config.js --es-url ${Cypress.env(

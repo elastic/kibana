@@ -7,10 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import { APICaller } from 'kibana/server';
-import {
-  JOB_STATE,
-  DATAFEED_STATE,
-} from '../../../../../legacy/plugins/ml/common/constants/states';
+import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import {
   MlSummaryJob,
   AuditMessage,
@@ -18,7 +15,7 @@ import {
   JobStats,
   DatafeedWithStats,
   CombinedJobWithStats,
-} from '../../../../../legacy/plugins/ml/common/types/anomaly_detection_jobs';
+} from '../../../common/types/anomaly_detection_jobs';
 import { datafeedsProvider, MlDatafeedsResponse, MlDatafeedsStatsResponse } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
 import { resultsServiceProvider } from '../results_service';
@@ -27,7 +24,7 @@ import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import {
   getLatestDataOrBucketTimestamp,
   isTimeSeriesViewJob,
-} from '../../../../../legacy/plugins/ml/common/util/job_utils';
+} from '../../../common/util/job_utils';
 import { groupsProvider } from './groups';
 
 export interface MlJobsResponse {

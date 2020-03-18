@@ -19,9 +19,8 @@
 
 import { Vis, VisState, VisParams } from './vis';
 import { VisType } from './vis_types';
-import { IIndexPattern } from '../../../../../../plugins/data/common';
+import { IAggConfig, IIndexPattern } from '../../../../../../plugins/data/public';
 import { Schema } from '../../../../vis_default_editor/public';
-import { IAggConfig } from '../../../../data/public/search/aggs';
 
 type InitVisStateType =
   | Partial<VisState>

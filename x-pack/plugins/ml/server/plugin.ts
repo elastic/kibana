@@ -13,10 +13,10 @@ import {
   PluginInitializerContext,
 } from 'kibana/server';
 import { PluginsSetup, RouteInitialization } from './types';
-import { PLUGIN_ID } from '../../../legacy/plugins/ml/common/constants/app';
+import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
 
 import { elasticsearchJsPlugin } from './client/elasticsearch_ml';
-import { makeMlUsageCollector } from './lib/ml_telemetry';
+import { initMlTelemetry } from './lib/telemetry';
 import { initMlServerLog } from './client/log';
 import { initSampleDataSets } from './lib/sample_data_sets';
 
@@ -37,7 +37,7 @@ import { jobValidationRoutes } from './routes/job_validation';
 import { notificationRoutes } from './routes/notification_settings';
 import { resultsServiceRoutes } from './routes/results_service';
 import { systemRoutes } from './routes/system';
-import { MlLicense } from '../../../legacy/plugins/ml/common/license';
+import { MlLicense } from '../common/license';
 import { MlServerLicense } from './lib/license';
 import { createSharedServices, SharedServices } from './shared_services';
 
@@ -69,7 +69,7 @@ export class MlServerPlugin implements Plugin<MlSetupContract, MlStartContract, 
       name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
         defaultMessage: 'Machine Learning',
       }),
-      icon: 'machineLearningApp',
+      icon: PLUGIN_ICON,
       navLinkId: PLUGIN_ID,
       app: [PLUGIN_ID, 'kibana'],
       catalogue: [PLUGIN_ID],
@@ -130,9 +130,7 @@ export class MlServerPlugin implements Plugin<MlSetupContract, MlStartContract, 
       cloud: plugins.cloud,
     });
     initMlServerLog({ log: this.log });
-    coreSetup.getStartServices().then(([core]) => {
-      makeMlUsageCollector(plugins.usageCollection, core.savedObjects);
-    });
+    initMlTelemetry(coreSetup, plugins.usageCollection);
 
     return createSharedServices(this.mlLicense, plugins.spaces, plugins.cloud);
   }
