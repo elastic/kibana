@@ -7,7 +7,11 @@ import { i18n } from '@kbn/i18n';
 import { AlertTypeModel, ValidationResult } from '../../../../types';
 import { IndexThresholdAlertTypeExpression } from './expression';
 import { IndexThresholdAlertParams } from './types';
-import { builtInGroupByTypes, builtInAggregationTypes } from '../../../../common/constants';
+import {
+  builtInGroupByTypes,
+  builtInAggregationTypes,
+  builtInComparators,
+} from '../../../../common/constants';
 
 export function getAlertType(): AlertTypeModel {
   return {
@@ -26,6 +30,7 @@ export function getAlertType(): AlertTypeModel {
         termField,
         threshold,
         timeWindowSize,
+        thresholdComparator,
       } = alertParams;
       const validationResult = { errors: {} };
       const errors = {
@@ -84,17 +89,29 @@ export function getAlertType(): AlertTypeModel {
           )
         );
       }
-      if (threshold && threshold.length > 0 && !threshold[0]) {
+      if (!threshold || threshold.length === 0 || (threshold.length === 1 && !threshold[0])) {
         errors.threshold0.push(
           i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredThreshold0Text', {
             defaultMessage: 'Threshold0, is required.',
           })
         );
       }
-      if (threshold && threshold.length > 1 && !threshold[1]) {
+      if (
+        thresholdComparator &&
+        builtInComparators[thresholdComparator].requiredValues > 1 &&
+        (!threshold ||
+          (threshold && threshold.length < builtInComparators[thresholdComparator!].requiredValues))
+      ) {
         errors.threshold1.push(
           i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredThreshold1Text', {
             defaultMessage: 'Threshold1 is required.',
+          })
+        );
+      }
+      if (threshold && threshold.length === 2 && threshold[0] > threshold[1]) {
+        errors.threshold1.push(
+          i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredThreshold1Text', {
+            defaultMessage: 'Threshold1 should be > Threshold0.',
           })
         );
       }
