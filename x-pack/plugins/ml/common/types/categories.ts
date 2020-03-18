@@ -56,11 +56,17 @@ export interface FieldExampleCheck {
 }
 
 export const VALIDATION_CHECK_DESCRIPTION = {
+  [VALIDATION_RESULT.FAILED_TO_TOKENIZE]: i18n.translate(
+    'xpack.ml.models.jobService.categorization.messages.validFailureToGetTokens',
+    {
+      defaultMessage: 'The examples loaded were tokenized successfully.',
+    }
+  ),
   [VALIDATION_RESULT.TOKEN_COUNT]: i18n.translate(
     'xpack.ml.models.jobService.categorization.messages.validTokenLength',
     {
       defaultMessage:
-        'More than 3 tokens per example were found in over 75% of the examples loaded',
+        'More than 3 tokens per example were found in over 75% of the examples loaded.',
     }
   ),
   [VALIDATION_RESULT.MEDIAN_LINE_LENGTH]: i18n.translate(
@@ -72,25 +78,19 @@ export const VALIDATION_CHECK_DESCRIPTION = {
   [VALIDATION_RESULT.NULL_VALUES]: i18n.translate(
     'xpack.ml.models.jobService.categorization.messages.validNullValues',
     {
-      defaultMessage: 'Less than 25% of the examples loaded were null',
+      defaultMessage: 'Less than 25% of the examples loaded were null.',
     }
   ),
   [VALIDATION_RESULT.NO_EXAMPLES]: i18n.translate(
     'xpack.ml.models.jobService.categorization.messages.validNoDataFound',
     {
-      defaultMessage: 'Examples were successfully loaded.',
+      defaultMessage: 'Examples  were successfully loaded.',
     }
   ),
   [VALIDATION_RESULT.TOO_MANY_TOKENS]: i18n.translate(
     'xpack.ml.models.jobService.categorization.messages.validTooManyTokens',
     {
-      defaultMessage: 'Less than 10000 tokens where found in total in the examples loaded.',
-    }
-  ),
-  [VALIDATION_RESULT.FAILED_TO_TOKENIZE]: i18n.translate(
-    'xpack.ml.models.jobService.categorization.messages.validFailureToGetTokens',
-    {
-      defaultMessage: 'The examples loaded were tokenized successfully.',
+      defaultMessage: 'Less than 10000 tokens were found in total in the examples loaded.',
     }
   ),
   [VALIDATION_RESULT.INSUFFICIENT_PRIVILEGES]: i18n.translate(
