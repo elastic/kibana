@@ -691,7 +691,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       return mapAsync(rows, async row => {
         const checkbox = await row.findByCssSelector('[data-test-subj*="checkboxSelectRow"]');
         // return the object type aria-label="index patterns"
-        const objectType = await row.findByCssSelector('td:nth-child(2) svg');
+        const objectType = await row.findByCssSelector('[data-test-subj="objectType"]');
         const titleElement = await row.findByCssSelector(
           '[data-test-subj="savedObjectsTableRowTitle"]'
         );
@@ -721,7 +721,9 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getSavedObjectsInTable() {
       const table = await testSubjects.find('savedObjectsTable');
-      const cells = await table.findAllByCssSelector('td:nth-child(3)');
+      const cells = await table.findAllByCssSelector(
+        '[data-test-subj="savedObjectsTableRowTitle"]'
+      );
 
       const objects = [];
       for (const cell of cells) {
@@ -732,14 +734,22 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async getRelationshipFlyout() {
-      const table = await find.byCssSelector('.euiFlyout');
-      const rows = await table.findAllByCssSelector('.euiTableRow');
+      const rows = await find.allByCssSelector('[data-test-subj="relationshipsTableRow"]');
       return mapAsync(rows, async row => {
-        const relationship = await row.findByCssSelector('td:nth-child(2)');
-        const title = await row.findByCssSelector('td:nth-child(3)');
+        const objectType = await row.findByCssSelector(
+          '[data-test-subj="relationshipsObjectType"]'
+        );
+        const relationship = await row.findByCssSelector('[data-test-subj="directRelationship"]');
+        const titleElement = await row.findByCssSelector('[data-test-subj="relationshipsTitle"]');
+        const inspectElement = await row.findByCssSelector(
+          '[data-test-subj="relationshipsTableAction-inspect"]'
+        );
         return {
+          objectType: await objectType.getAttribute('aria-label'),
           relationship: await relationship.getVisibleText(),
-          title: await title.getVisibleText(),
+          titleElement,
+          title: await titleElement.getVisibleText(),
+          inspectElement,
         };
       });
     }
