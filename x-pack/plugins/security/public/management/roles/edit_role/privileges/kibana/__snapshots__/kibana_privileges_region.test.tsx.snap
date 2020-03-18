@@ -6,6 +6,7 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
   title="Kibana"
 >
   <SpaceAwarePrivilegeSection
+    canCustomizeSubFeaturePrivileges={true}
     editable={true}
     kibanaPrivileges={
       KibanaPrivileges {

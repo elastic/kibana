@@ -10,7 +10,6 @@ import {
   EuiInMemoryTable,
   EuiText,
   EuiButtonIcon,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
@@ -33,6 +32,7 @@ interface Props {
   privilegeIndex: number;
   onChange: (featureId: string, privileges: string[]) => void;
   onChangeAll: (privileges: string[]) => void;
+  canCustomizeSubFeaturePrivileges: boolean;
   disabled?: boolean;
 }
 
@@ -129,8 +129,10 @@ export class FeatureTable extends Component<Props, State> {
       this.props.role.kibana[this.props.privilegeIndex]
     );
 
-    const columns = [
-      {
+    const columns = [];
+
+    if (this.props.canCustomizeSubFeaturePrivileges) {
+      columns.push({
         width: '30px',
         isExpander: true,
         field: 'featureId',
@@ -150,7 +152,10 @@ export class FeatureTable extends Component<Props, State> {
             />
           );
         },
-      },
+      });
+    }
+
+    columns.push(
       {
         field: 'feature',
         width: '200px',
@@ -255,8 +260,8 @@ export class FeatureTable extends Component<Props, State> {
             </EuiFlexGroup>
           );
         },
-      },
-    ] as Array<EuiBasicTableColumn<TableRow>>;
+      }
+    );
     return columns;
   };
 

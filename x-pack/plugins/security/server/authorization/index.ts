@@ -81,7 +81,7 @@ export function setupAuthorization({
     clusterClient,
     applicationName
   );
-  const privileges = privilegesFactory(actions, featuresService);
+  const privileges = privilegesFactory(actions, featuresService, license);
   const logger = loggers.get('authorization');
 
   const authz = {

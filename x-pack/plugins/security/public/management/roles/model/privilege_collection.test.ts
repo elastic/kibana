@@ -16,11 +16,11 @@ describe('PrivilegeCollection', () => {
       expect(collection.grantsPrivilege(privilege)).toEqual(true);
     });
 
-    it('returns true when a non-empty collection tests an empty privilege', () => {
+    it('returns false when a non-empty collection tests an empty privilege', () => {
       const privilege = new KibanaPrivilege('some-privilege', ['action:foo', 'action:bar']);
       const collection = new PrivilegeCollection([privilege]);
 
-      expect(collection.grantsPrivilege(new KibanaPrivilege('test', []))).toEqual(true);
+      expect(collection.grantsPrivilege(new KibanaPrivilege('test', []))).toEqual(false);
     });
 
     it('returns true for collections comprised of multiple privileges, with actions spanning them', () => {

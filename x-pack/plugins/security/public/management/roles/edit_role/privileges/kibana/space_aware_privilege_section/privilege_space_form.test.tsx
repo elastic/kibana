@@ -53,6 +53,7 @@ describe('PrivilegeSpaceForm', () => {
         role={role}
         spaces={displaySpaces}
         kibanaPrivileges={kibanaPrivileges}
+        canCustomizeSubFeaturePrivileges={true}
         onChange={jest.fn()}
         onCancel={jest.fn()}
       />
@@ -98,6 +99,7 @@ describe('PrivilegeSpaceForm', () => {
         role={role}
         spaces={displaySpaces}
         kibanaPrivileges={kibanaPrivileges}
+        canCustomizeSubFeaturePrivileges={true}
         privilegeIndex={0}
         onChange={jest.fn()}
         onCancel={jest.fn()}
@@ -150,6 +152,7 @@ describe('PrivilegeSpaceForm', () => {
         role={role}
         spaces={displaySpaces}
         kibanaPrivileges={kibanaPrivileges}
+        canCustomizeSubFeaturePrivileges={true}
         privilegeIndex={0}
         onChange={jest.fn()}
         onCancel={jest.fn()}
@@ -209,6 +212,7 @@ describe('PrivilegeSpaceForm', () => {
         role={role}
         spaces={displaySpaces}
         kibanaPrivileges={kibanaPrivileges}
+        canCustomizeSubFeaturePrivileges={true}
         onChange={jest.fn()}
         onCancel={jest.fn()}
       />
@@ -248,6 +252,7 @@ describe('PrivilegeSpaceForm', () => {
         role={role}
         spaces={displaySpaces}
         kibanaPrivileges={kibanaPrivileges}
+        canCustomizeSubFeaturePrivileges={true}
         privilegeIndex={0}
         onChange={jest.fn()}
         onCancel={jest.fn()}
@@ -309,6 +314,7 @@ describe('PrivilegeSpaceForm', () => {
         role={role}
         spaces={displaySpaces}
         kibanaPrivileges={kibanaPrivileges}
+        canCustomizeSubFeaturePrivileges={true}
         privilegeIndex={0}
         onChange={onChange}
         onCancel={jest.fn()}
@@ -341,5 +347,36 @@ describe('PrivilegeSpaceForm', () => {
         },
       ])
     );
+  });
+
+  it('passes the `canCustomizeSubFeaturePrivileges` prop to the FeatureTable', () => {
+    const role = createRole([
+      {
+        base: [],
+        feature: {
+          with_sub_features: ['all'],
+        },
+        spaces: ['foo'],
+      },
+    ]);
+    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+
+    const onChange = jest.fn();
+
+    const canCustomize = (Symbol('can customize') as unknown) as boolean;
+
+    const wrapper = mountWithIntl(
+      <PrivilegeSpaceForm
+        role={role}
+        spaces={displaySpaces}
+        kibanaPrivileges={kibanaPrivileges}
+        canCustomizeSubFeaturePrivileges={canCustomize}
+        privilegeIndex={0}
+        onChange={onChange}
+        onCancel={jest.fn()}
+      />
+    );
+
+    expect(wrapper.find(FeatureTable).props().canCustomizeSubFeaturePrivileges).toBe(canCustomize);
   });
 });

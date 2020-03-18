@@ -10,11 +10,6 @@ import { act } from '@testing-library/react';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { Capabilities } from 'src/core/public';
 import { Feature } from '../../../../../features/public';
-// These modules should be moved into a common directory
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Actions } from '../../../../server/authorization/actions';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { privilegesFactory } from '../../../../server/authorization/privileges';
 import { Role } from '../../../../common/model';
 import { DocumentationLinksService } from '../documentation_links';
 import { EditRolePage } from './edit_role_page';
@@ -28,6 +23,7 @@ import { userAPIClientMock } from '../../users/index.mock';
 import { rolesAPIClientMock, indicesAPIClientMock, privilegesAPIClientMock } from '../index.mock';
 import { Space } from '../../../../../spaces/public';
 import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
+import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
 
 const buildFeatures = () => {
   return [
@@ -80,12 +76,6 @@ const buildFeatures = () => {
       },
     }),
   ] as Feature[];
-};
-
-const buildRawKibanaPrivileges = () => {
-  return privilegesFactory(new Actions('unit_test_version'), {
-    getFeatures: () => buildFeatures().map(config => new Feature(config)),
-  }).get();
 };
 
 const buildBuiltinESPrivileges = () => {
@@ -160,7 +150,7 @@ function getProps({
   userAPIClient.getUsers.mockResolvedValue([]);
 
   const privilegesAPIClient = privilegesAPIClientMock.create();
-  privilegesAPIClient.getAll.mockResolvedValue(buildRawKibanaPrivileges());
+  privilegesAPIClient.getAll.mockResolvedValue(createRawKibanaPrivileges(buildFeatures()));
   privilegesAPIClient.getBuiltIn.mockResolvedValue(buildBuiltinESPrivileges());
 
   const license = licenseMock.create();

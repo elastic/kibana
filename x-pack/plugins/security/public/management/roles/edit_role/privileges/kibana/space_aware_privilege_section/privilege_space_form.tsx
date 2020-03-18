@@ -39,6 +39,7 @@ interface Props {
   kibanaPrivileges: KibanaPrivileges;
   spaces: Space[];
   privilegeIndex: number;
+  canCustomizeSubFeaturePrivileges: boolean;
   onChange: (role: Role) => void;
   onCancel: () => void;
 }
@@ -296,6 +297,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           onChangeAll={this.onChangeAllFeaturePrivileges}
           kibanaPrivileges={this.props.kibanaPrivileges}
           privilegeIndex={this.state.privilegeIndex}
+          canCustomizeSubFeaturePrivileges={this.props.canCustomizeSubFeaturePrivileges}
           disabled={this.state.selectedBasePrivilege.length > 0 || !hasSelectedSpaces}
         />
 

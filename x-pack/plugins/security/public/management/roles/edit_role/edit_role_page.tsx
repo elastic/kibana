@@ -435,6 +435,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
           spaces={spaces}
           spacesEnabled={spacesEnabled}
           uiCapabilities={uiCapabilities}
+          canCustomizeSubFeaturePrivileges={license.getFeatures().allowSubFeaturePrivileges}
           editable={!isRoleReadOnly}
           role={role}
           onChange={onRoleChange}

@@ -47,6 +47,7 @@ const buildProps = (customProps: any = {}) => {
     onChange: jest.fn(),
     validator: new RoleValidator(),
     kibanaPrivileges: createKibanaPrivileges(kibanaFeatures),
+    canCustomizeSubFeaturePrivileges: true,
     ...customProps,
   };
 };

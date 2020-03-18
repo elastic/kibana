@@ -61,6 +61,7 @@ const buildProps = (customProps = {}) => {
     editable: true,
     onChange: jest.fn(),
     validator: new RoleValidator(),
+    canCustomizeSubFeaturePrivileges: true,
     ...customProps,
   };
 };

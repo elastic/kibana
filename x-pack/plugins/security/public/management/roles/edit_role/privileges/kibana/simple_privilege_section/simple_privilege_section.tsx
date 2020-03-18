@@ -27,6 +27,7 @@ interface Props {
   kibanaPrivileges: KibanaPrivileges;
   onChange: (role: Role) => void;
   editable: boolean;
+  canCustomizeSubFeaturePrivileges: boolean;
 }
 
 interface State {
@@ -217,6 +218,7 @@ export class SimplePrivilegeSection extends Component<Props, State> {
                   privilegeIndex={this.props.role.kibana.findIndex(k =>
                     isGlobalPrivilegeDefinition(k)
                   )}
+                  canCustomizeSubFeaturePrivileges={this.props.canCustomizeSubFeaturePrivileges}
                 />
               </EuiFormRow>
             )}

@@ -32,6 +32,7 @@ interface Props {
   spaces: Space[];
   onChange: (role: Role) => void;
   editable: boolean;
+  canCustomizeSubFeaturePrivileges: boolean;
   validator: RoleValidator;
   uiCapabilities: Capabilities;
 }
@@ -125,6 +126,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
               onCancel={this.onCancelEditPrivileges}
               spaces={this.getAvailableSpaces(this.state.privilegeIndex)}
               privilegeIndex={this.state.privilegeIndex}
+              canCustomizeSubFeaturePrivileges={this.props.canCustomizeSubFeaturePrivileges}
             />
           )}
         </Fragment>
@@ -210,6 +212,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
         role={this.props.role}
         spaces={this.getDisplaySpaces()}
         kibanaPrivileges={this.props.kibanaPrivileges}
+        canCustomizeSubFeaturePrivileges={this.props.canCustomizeSubFeaturePrivileges}
       />
     );
 
