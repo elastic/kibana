@@ -18,7 +18,13 @@
  */
 
 import { UiActionsService } from './ui_actions_service';
-import { Action, ActionInternal, createAction } from '../actions';
+import {
+  Action,
+  ActionInternal,
+  createAction,
+  ActionFactoryDefinition,
+  ActionFactory,
+} from '../actions';
 import { createHelloWorldAction } from '../tests/test_samples';
 import { ActionRegistry, TriggerRegistry, TriggerId, ActionType } from '../types';
 import { Trigger } from '../triggers';
@@ -103,7 +109,20 @@ describe('UiActionsService', () => {
       });
     });
 
-    test.todo('return action instance');
+    test('return action instance', () => {
+      const service = new UiActionsService();
+      const action = service.registerAction({
+        id: 'test',
+        execute: async () => {},
+        getDisplayName: () => 'test',
+        getIconType: () => '',
+        isCompatible: async () => true,
+        type: 'test' as ActionType,
+      });
+
+      expect(action).toBeInstanceOf(ActionInternal);
+      expect(action.id).toBe('test');
+    });
   });
 
   describe('.getTriggerActions()', () => {
@@ -403,7 +422,7 @@ describe('UiActionsService', () => {
       expect(actions[0].id).toBe(ACTION_HELLO_WORLD);
     });
 
-    test('can detach an action to a trigger', () => {
+    test('can detach an action from a trigger', () => {
       const service = new UiActionsService();
 
       const trigger: Trigger = {
@@ -480,10 +499,62 @@ describe('UiActionsService', () => {
   });
 
   describe('action factories', () => {
-    test.todo('.getActionFactories() returns empty array if no action factories registered');
-    test.todo('can register an action factory');
-    test.todo('can retrieve all action factories');
-    test.todo('can retrieve action factory by ID');
-    test.todo('throws when retrieving action factory that does not exist');
+    const factoryDefinition1: ActionFactoryDefinition = {
+      id: 'test-factory-1',
+      CollectConfig: {} as any,
+      createConfig: () => ({}),
+      isConfigValid: (() => true) as any,
+      create: () => ({} as any),
+    };
+    const factoryDefinition2: ActionFactoryDefinition = {
+      id: 'test-factory-2',
+      CollectConfig: {} as any,
+      createConfig: () => ({}),
+      isConfigValid: (() => true) as any,
+      create: () => ({} as any),
+    };
+
+    test('.getActionFactories() returns empty array if no action factories registered', () => {
+      const service = new UiActionsService();
+
+      const factories = service.getActionFactories();
+
+      expect(factories).toEqual([]);
+    });
+
+    test('can register and retrieve an action factory', () => {
+      const service = new UiActionsService();
+
+      service.registerActionFactory(factoryDefinition1);
+
+      const factory = service.getActionFactory(factoryDefinition1.id);
+
+      expect(factory).toBeInstanceOf(ActionFactory);
+      expect(factory.id).toBe(factoryDefinition1.id);
+    });
+
+    test('can retrieve all action factories', () => {
+      const service = new UiActionsService();
+
+      service.registerActionFactory(factoryDefinition1);
+      service.registerActionFactory(factoryDefinition2);
+
+      const factories = service.getActionFactories();
+      const factoriesSorted = [...factories].sort((f1, f2) => (f1.id > f2.id ? 1 : -1));
+
+      expect(factoriesSorted.length).toBe(2);
+      expect(factoriesSorted[0].id).toBe(factoryDefinition1.id);
+      expect(factoriesSorted[1].id).toBe(factoryDefinition2.id);
+    });
+
+    test('throws when retrieving action factory that does not exist', () => {
+      const service = new UiActionsService();
+
+      service.registerActionFactory(factoryDefinition1);
+
+      expect(() => service.getActionFactory('UNKNOWN_ID')).toThrowError(
+        'Action factory [actionFactoryId = UNKNOWN_ID] does not exist.'
+      );
+    });
   });
 });
