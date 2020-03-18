@@ -48,8 +48,6 @@ export class SavedObjectsManagementPlugin
     const managementService = new SavedObjectsManagement(core.savedObjects.getTypeRegistry());
     this.managementService$.next(managementService);
 
-    return {
-      management: managementService,
-    };
+    return {};
   }
 }

@@ -18,14 +18,12 @@
  */
 
 import { SavedObject } from 'src/core/server';
-import { ISavedObjectsManagement } from './services';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SavedObjectsManagementPluginSetup {}
 
-export interface SavedObjectsManagementPluginStart {
-  management: ISavedObjectsManagement;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SavedObjectsManagementPluginStart {}
 
 /**
  * The metadata injected into a {@link SavedObject | saved object} when returning

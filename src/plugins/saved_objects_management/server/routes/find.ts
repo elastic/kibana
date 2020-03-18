@@ -80,7 +80,7 @@ export const registerFindRoute = (
         .map(so => injectMetaAttributes(so, managementService))
         .map(obj => {
           const result = { ...obj, attributes: {} as Record<string, any> };
-          for (const field of includedFields || []) {
+          for (const field of includedFields) {
             result.attributes[field] = obj.attributes[field];
           }
           return result;

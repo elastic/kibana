@@ -82,5 +82,21 @@ export default function({ getService }: FtrProviderContext) {
         search: 0,
       });
     });
+
+    it('includes all requested types even when none match the search', async () => {
+      const res = await supertest
+        .post(apiUrl)
+        .send({
+          typesToInclude: ['dashboard', 'search', 'visualization'],
+          searchString: 'nothing-will-match',
+        })
+        .expect(200);
+
+      expect(res.body).to.eql({
+        dashboard: 0,
+        visualization: 0,
+        search: 0,
+      });
+    });
   });
 }
