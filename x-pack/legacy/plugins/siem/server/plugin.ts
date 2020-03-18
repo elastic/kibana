@@ -27,7 +27,8 @@ import { compose } from './lib/compose/kibana';
 import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
-import { rulesNotificationAlertType } from './lib/detection_engine/signals/rules_notification_alert_type';
+import { rulesNotificationAlertType } from './lib/detection_engine/notifications/rules_notification_alert_type';
+import { isNotificationAlertExecutor } from './lib/detection_engine/notifications/types';
 import {
   noteSavedObjectType,
   pinnedEventSavedObjectType,
@@ -154,11 +155,13 @@ export class Plugin {
         version: this.context.env.packageInfo.version,
       });
 
-      [signalRuleType, ruleNotificationType].forEach(type => {
-        if (isAlertExecutor(type)) {
-          plugins.alerting.registerType(type);
-        }
-      });
+      if (isAlertExecutor(signalRuleType)) {
+        plugins.alerting.registerType(signalRuleType);
+      }
+
+      if (isNotificationAlertExecutor(ruleNotificationType)) {
+        plugins.alerting.registerType(ruleNotificationType);
+      }
     }
 
     const libs = compose(core, plugins, this.context.env.mode.prod);

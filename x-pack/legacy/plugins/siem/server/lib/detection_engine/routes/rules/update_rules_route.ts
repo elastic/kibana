@@ -16,6 +16,7 @@ import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { updateRules } from '../../rules/update_rules';
+import { updateNotifications } from '../../notifications/update_notifications';
 
 export const updateRulesRoute = (router: IRouter) => {
   router.put(
@@ -111,7 +112,19 @@ export const updateRulesRoute = (router: IRouter) => {
           note,
           version,
         });
+
         if (rule != null) {
+          console.log(`aaa ${JSON.stringify(rule, null, 2)}`);
+          await updateNotifications({
+            alertsClient,
+            actions,
+            enabled,
+            ruleAlertId: rule.id,
+            ruleId: rule.params?.ruleId,
+            interval: throttle,
+            name,
+          });
+
           const ruleStatuses = await savedObjectsClient.find<
             IRuleSavedAttributesSavedObjectAttributes
           >({

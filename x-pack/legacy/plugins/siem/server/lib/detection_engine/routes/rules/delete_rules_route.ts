@@ -16,6 +16,7 @@ import {
   IRuleSavedAttributesSavedObjectAttributes,
 } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { deleteNotifications } from '../../notifications/delete_notifications';
 
 export const deleteRulesRoute = (router: IRouter) => {
   router.delete(
@@ -52,6 +53,8 @@ export const deleteRulesRoute = (router: IRouter) => {
           ruleId,
         });
         if (rule != null) {
+          console.log('aaaa', JSON.stringify(rule, null, 2));
+          await deleteNotifications({ alertsClient, ruleId });
           const ruleStatuses = await savedObjectsClient.find<
             IRuleSavedAttributesSavedObjectAttributes
           >({
