@@ -17,6 +17,14 @@
  * under the License.
  */
 
-/** @internal */
-export { shortenDottedString } from './shorten_dotted_string';
-export { AbortError, toPromise, getCombinedSignal } from './abort_utils';
+/**
+ * Class used to signify that a request timed out. Useful for applications to conditionally handle
+ * this type of error differently than other errors.
+ */
+export class RequestTimeoutError extends Error {
+  constructor(message = 'Request timed out') {
+    super(message);
+    this.message = message;
+    this.name = 'RequestTimeoutError';
+  }
+}
