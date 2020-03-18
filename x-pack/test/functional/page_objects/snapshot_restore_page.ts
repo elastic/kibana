@@ -28,15 +28,15 @@ export function SnapshotRestorePageProvider({ getService }: FtrProviderContext) 
     },
     async getRepoList() {
       const table = await testSubjects.find('repositoryTable');
-      const rows = await table.findAll('row');
+      const rows = await table.findAllByTestSubject('row');
       return await Promise.all(
         rows.map(async row => {
           return {
-            repoName: await (await row.find('Name_cell')).getVisibleText(),
-            repoLink: await (await row.find('Name_cell')).findByCssSelector('a'),
-            repoType: await (await row.find('Type_cell')).getVisibleText(),
-            repoEdit: await row.find('editRepositoryButton'),
-            repoDelete: await row.find('deleteRepositoryButton'),
+            repoName: await (await row.findByTestSubject('Name_cell')).getVisibleText(),
+            repoLink: await (await row.findByTestSubject('Name_cell')).findByCssSelector('a'),
+            repoType: await (await row.findByTestSubject('Type_cell')).getVisibleText(),
+            repoEdit: await row.findByTestSubject('editRepositoryButton'),
+            repoDelete: await row.findByTestSubject('deleteRepositoryButton'),
           };
         })
       );

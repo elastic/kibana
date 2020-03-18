@@ -229,12 +229,12 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     async getElasticsearchUsers() {
       const users = await testSubjects.findAll('userRow');
       return mapAsync(users, async user => {
-        const fullnameElement = await user.find('userRowFullName');
-        const usernameElement = await user.find('userRowUserName');
-        const emailElement = await user.find('userRowEmail');
-        const rolesElement = await user.find('userRowRoles');
+        const fullnameElement = await user.findByTestSubject('userRowFullName');
+        const usernameElement = await user.findByTestSubject('userRowUserName');
+        const emailElement = await user.findByTestSubject('userRowEmail');
+        const rolesElement = await user.findByTestSubject('userRowRoles');
         // findAll is substantially faster than `find.descendantExistsByCssSelector for negative cases
-        const isUserReserved = (await user.findAll('userReserved', 1)).length > 0;
+        const isUserReserved = (await user.findAllByTestSubject('userReserved', 1)).length > 0;
 
         return {
           username: await usernameElement.getVisibleText(),
@@ -250,11 +250,11 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       const users = await testSubjects.findAll('roleRow');
       return mapAsync(users, async role => {
         const [rolename, reserved, deprecated] = await Promise.all([
-          role.find('roleRowName').then(el => el.getVisibleText()),
+          role.findByTestSubject('roleRowName').then(el => el.getVisibleText()),
           // findAll is substantially faster than `find.descendantExistsByCssSelector for negative cases
-          role.findAll('roleReserved', 1).then(el => el.length > 0),
+          role.findAllByTestSubject('roleReserved', 1).then(el => el.length > 0),
           // findAll is substantially faster than `find.descendantExistsByCssSelector for negative cases
-          role.findAll('roleDeprecated', 1).then(el => el.length > 0),
+          role.findAllByTestSubject('roleDeprecated', 1).then(el => el.length > 0),
         ]);
 
         return {

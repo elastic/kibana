@@ -48,12 +48,12 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
 
     public async getBodyRows(): Promise<WebElementWrapper[]> {
       const table = await this.getTable();
-      return await table.findAll('~docTableRow');
+      return await table.findAllByTestSubject('~docTableRow');
     }
 
     public async getAnchorRow(): Promise<WebElementWrapper> {
       const table = await this.getTable();
-      return await table.find('~docTableAnchorRow');
+      return await table.findByTestSubject('~docTableAnchorRow');
     }
 
     public async getRow(options: SelectOptions): Promise<WebElementWrapper> {
@@ -73,7 +73,7 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
     ): Promise<void> {
       const row = await this.getRow(options);
-      const toggle = await row.find('~docTableExpandToggleColumn');
+      const toggle = await row.findByTestSubject('~docTableExpandToggleColumn');
       await toggle.click();
     }
 
@@ -90,7 +90,7 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       const detailsRow = options.isAnchorRow
         ? await this.getAnchorDetailsRow()
         : (await this.getDetailsRows())[options.rowIndex];
-      return await detailsRow.findAll('~docTableRowAction');
+      return await detailsRow.findAllByTestSubject('~docTableRowAction');
     }
 
     public async getFields(options: { isAnchorRow: boolean } = { isAnchorRow: false }) {
@@ -122,13 +122,13 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
       detailsRow: WebElementWrapper,
       fieldName: WebElementWrapper
     ): Promise<WebElementWrapper> {
-      return await detailsRow.find(`~tableDocViewRow-${fieldName}`);
+      return await detailsRow.findByTestSubject(`~tableDocViewRow-${fieldName}`);
     }
 
     public async getAddInclusiveFilterButton(
       tableDocViewRow: WebElementWrapper
     ): Promise<WebElementWrapper> {
-      return await tableDocViewRow.find(`~addInclusiveFilterButton`);
+      return await tableDocViewRow.findByTestSubject(`~addInclusiveFilterButton`);
     }
 
     public async addInclusiveFilter(
@@ -144,7 +144,7 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
     public async getAddExistsFilterButton(
       tableDocViewRow: WebElementWrapper
     ): Promise<WebElementWrapper> {
-      return await tableDocViewRow.find(`~addExistsFilterButton`);
+      return await tableDocViewRow.findByTestSubject(`~addExistsFilterButton`);
     }
 
     public async addExistsFilter(
@@ -169,7 +169,7 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
         const detailsRow = await row.findByXpath(
           './following-sibling::*[@data-test-subj="docTableDetailsRow"]'
         );
-        return detailsRow.find('~docViewer');
+        return detailsRow.findByTestSubject('~docViewer');
       });
     }
   }

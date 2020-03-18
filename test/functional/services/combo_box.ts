@@ -218,7 +218,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
           return;
         }
 
-        const clearBtn = await comboBox.find('comboBoxClearButton');
+        const clearBtn = await comboBox.findByTestSubject('comboBoxClearButton');
         await clearBtn.click();
 
         const clearButtonStillExists = await this.doesClearButtonExist(comboBox);
@@ -230,7 +230,10 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
     }
 
     public async doesClearButtonExist(comboBoxElement: WebElementWrapper): Promise<boolean> {
-      const found = await comboBoxElement.findAll('comboBoxClearButton', WAIT_FOR_EXISTS_TIME);
+      const found = await comboBoxElement.findAllByTestSubject(
+        'comboBoxClearButton',
+        WAIT_FOR_EXISTS_TIME
+      );
       return found.length > 0;
     }
 
@@ -261,7 +264,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
     public async openOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
       const isOptionsListOpen = await testSubjects.exists('~comboBoxOptionsList');
       if (!isOptionsListOpen) {
-        const toggleBtn = await comboBoxElement.find('comboBoxToggleListButton');
+        const toggleBtn = await comboBoxElement.findByTestSubject('comboBoxToggleListButton');
         await toggleBtn.click();
       }
     }

@@ -543,7 +543,7 @@ export class WebElementWrapper {
    * @param {string} selector
    * @return {Promise<WebElementWrapper>}
    */
-  public async find(selector: string) {
+  public async findByTestSubject(selector: string) {
     return await this.retryCall(async function find(wrapper) {
       return wrapper._wrap(
         await wrapper._webElement.findElement(wrapper.By.css(testSubjSelector(selector))),
@@ -559,7 +559,7 @@ export class WebElementWrapper {
    * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
-  public async findAll(selector: string, timeout?: number) {
+  public async findAllByTestSubject(selector: string, timeout?: number) {
     return await this.retryCall(async function findAll(wrapper) {
       return wrapper._wrapAll(
         await wrapper._findWithCustomTimeout(
