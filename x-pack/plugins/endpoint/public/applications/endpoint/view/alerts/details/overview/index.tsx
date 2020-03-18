@@ -93,9 +93,22 @@ export const AlertDetailsOverview = styled(
           </EuiText>
           <EuiSpacer />
           <EuiText>
-            Endpoint Status: <EuiHealth color="success">Online</EuiHealth>
+            Endpoint Status:{' '}
+            <EuiHealth color="success">
+              {' '}
+              <FormattedMessage
+                id="xpack.endpoint.application.endpoint.alertDetails.endpoint.status.online"
+                defaultMessage="Online"
+              />
+            </EuiHealth>
           </EuiText>
-          <EuiText>Alert Status: Open</EuiText>
+          <EuiText>
+            {' '}
+            <FormattedMessage
+              id="xpack.endpoint.application.endpoint.alertDetails.alert.status.open"
+              defaultMessage="Alert Status: Open"
+            />
+          </EuiText>
           <EuiSpacer />
           <TakeActionDropdown />
           <EuiSpacer />

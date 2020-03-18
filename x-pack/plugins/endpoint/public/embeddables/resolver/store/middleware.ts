@@ -21,6 +21,9 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
   return api => next => async (action: ResolverAction) => {
     next(action);
     if (action.type === 'userChangedSelectedEvent') {
+      /**
+       * concurrently fetches a process's details, its ancestors, and its related events.
+       */
       if (context?.services.http && action.payload.selectedEvent) {
         api.dispatch({ type: 'appRequestedResolverData' });
         let response = [];

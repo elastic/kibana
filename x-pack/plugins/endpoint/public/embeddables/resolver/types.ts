@@ -275,6 +275,9 @@ export interface SideEffectSimulator {
   mock: jest.Mocked<Omit<SideEffectors, 'ResizeObserver'>> & Pick<SideEffectors, 'ResizeObserver'>;
 }
 
+/**
+ * The internal types of process events used by resolver, mapped from v0 and v1 events.
+ */
 export type ResolverProcessType =
   | 'processCreated'
   | 'processRan'

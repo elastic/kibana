@@ -33,7 +33,7 @@ interface UserChangedSelectedEvent {
     /**
      * Optional because they could have unselected the event.
      */
-    selectedEvent?: ResolverEvent;
+    readonly selectedEvent?: ResolverEvent;
   };
 }
 
