@@ -117,7 +117,7 @@
     "@babel/core": "^7.5.5",
     "@babel/register": "^7.7.0",
     "@elastic/apm-rum": "^4.6.0",
-    "@elastic/charts": "^17.1.1",
+    "@elastic/charts": "^18.0.0",
     "@elastic/datemath": "5.0.2",
     "@elastic/ems-client": "7.7.0",
     "@elastic/eui": "20.0.2",
