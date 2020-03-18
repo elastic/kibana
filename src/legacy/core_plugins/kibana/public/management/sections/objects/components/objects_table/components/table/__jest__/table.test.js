@@ -21,7 +21,7 @@ import React from 'react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { keyCodes } from '@elastic/eui/lib/services';
-import { mockManagementPlugin } from '../../../../../../../../../../management/public/np_ready/mocks';
+import { npSetup as mockNpSetup } from '../../../../../../../../../../../ui/public/new_platform/__mocks__';
 
 jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
 
@@ -29,9 +29,8 @@ jest.mock('ui/chrome', () => ({
   addBasePath: () => '',
 }));
 
-jest.mock('../../../../../../../../../../management/public/legacy', () => ({
-  setup: mockManagementPlugin.createSetupContract(),
-  start: mockManagementPlugin.createStartContract(),
+jest.mock('ui/new_platform', () => ({
+  npSetup: mockNpSetup,
 }));
 
 import { Table } from '../table';
