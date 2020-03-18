@@ -17,9 +17,31 @@
  * under the License.
  */
 
-export { ProxyConfig } from './proxy_config';
-export { ProxyConfigCollection } from './proxy_config_collection';
-export { proxyRequest } from './proxy_request';
-export { getElasticsearchProxyConfig } from './elasticsearch_proxy_config';
-export { setHeaders } from './set_headers';
-export { addProcessorDefinition, addExtensionSpecFilePath, loadSpec } from './spec_definitions';
+import Api from './api';
+import { getSpec } from './json';
+import { register } from './js/ingest';
+const ES = new Api('es');
+
+export const loadSpec = () => {
+  const spec = getSpec();
+
+  // adding generated specs
+  Object.keys(spec).forEach(endpoint => {
+    ES.addEndpointDescription(endpoint, spec[endpoint]);
+  });
+
+  // adding globals and custom API definitions
+  require('./js/aliases')(ES);
+  require('./js/aggregations')(ES);
+  require('./js/document')(ES);
+  require('./js/filter')(ES);
+  require('./js/globals')(ES);
+  register(ES);
+  require('./js/mappings')(ES);
+  require('./js/settings')(ES);
+  require('./js/query')(ES);
+  require('./js/reindex')(ES);
+  require('./js/search')(ES);
+};
+
+export default ES;
