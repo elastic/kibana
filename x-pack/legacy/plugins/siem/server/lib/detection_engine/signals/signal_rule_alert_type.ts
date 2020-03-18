@@ -134,12 +134,6 @@ export const signalRulesAlertType = ({
             tags,
           });
         } else {
-          if (index == null) {
-            throw new Error(
-              `Attempted to execute query rule, but it is missing index pattern for rule id: "${ruleId}", name: "${name}", signals index: "${outputIndex}", index pattern: "${index}"`
-            );
-          }
-
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({
             type,
