@@ -34,6 +34,7 @@ export type ESSearchSourceResponseMeta = {
   totalEntities?: number;
 };
 
+// Partial because objects are justified downstream in constructors
 export type DataMeta = Partial<VectorLayerRequestMeta> & Partial<ESSearchSourceResponseMeta>;
 
 export type DataRequestDescriptor = {

@@ -52,8 +52,8 @@ export class AbstractLayer {
   }
 
   destroy() {
-    if (this.getSource()) {
-      this.getSource().destroy();
+    if (this._source) {
+      this._source.destroy();
     }
   }
 
