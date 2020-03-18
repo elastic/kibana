@@ -289,17 +289,9 @@ describe('get mapbox color expression', () => {
               'coalesce',
               [
                 'case',
-                ['==', ['feature-state', '__kbn__dynamic__foobar__lineColor'], null],
+                ['==', ['feature-state', 'foobar'], null],
                 -1,
-                [
-                  'max',
-                  [
-                    'min',
-                    ['to-number', ['feature-state', '__kbn__dynamic__foobar__lineColor']],
-                    100,
-                  ],
-                  0,
-                ],
+                ['max', ['min', ['to-number', ['feature-state', 'foobar']], 100], 0],
               ],
               -1,
             ],
@@ -359,7 +351,7 @@ describe('get mapbox color expression', () => {
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toEqual([
           'step',
-          ['coalesce', ['feature-state', '__kbn__dynamic__foobar__lineColor'], 9],
+          ['coalesce', ['feature-state', 'foobar'], 9],
           'rgba(0,0,0,0)',
           10,
           '#f7faff',

@@ -27,10 +27,7 @@ export const MAPBOX_STYLES = {
             'case',
             [
               '==',
-              [
-                'feature-state',
-                '__kbn__dynamic____kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name__fillColor',
-              ],
+              ['feature-state', 'kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name'],
               null,
             ],
             2,
@@ -42,7 +39,7 @@ export const MAPBOX_STYLES = {
                   'to-number',
                   [
                     'feature-state',
-                    '__kbn__dynamic____kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name__fillColor',
+                    'kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name',
                   ],
                 ],
                 12,
