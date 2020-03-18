@@ -96,6 +96,7 @@ describe('alert monitor status component', () => {
       const mockValueHandler = jest.fn();
       const component = mountWithIntl(
         <AlertFieldNumber
+          aria-label="test label"
           data-test-subj="foo"
           disabled={false}
           fieldValue={23}
@@ -117,6 +118,7 @@ describe('alert monitor status component', () => {
       const mockValueHandler = jest.fn();
       const component = mountWithIntl(
         <AlertFieldNumber
+          aria-label="test label"
           data-test-subj="foo"
           disabled={false}
           fieldValue={23}
@@ -132,6 +134,7 @@ describe('alert monitor status component', () => {
       const mockValueHandler = jest.fn();
       const component = mountWithIntl(
         <AlertFieldNumber
+          aria-label="test label"
           data-test-subj="foo"
           disabled={false}
           fieldValue={23}
