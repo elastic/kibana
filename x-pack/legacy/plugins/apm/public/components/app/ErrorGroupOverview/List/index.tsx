@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiBadge, EuiToolTip, EuiIconTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -60,27 +60,24 @@ const ErrorGroupList: React.FC<Props> = props => {
     () => [
       {
         name: (
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.apm.errorsTable.groupIdColumnDescription',
-              {
-                defaultMessage:
-                  'Hash of the stack trace. Groups similar errors together, even when the error message is different due to dynamic parameters.'
-              }
-            )}
-          >
-            <>
-              {i18n.translate('xpack.apm.errorsTable.groupIdColumnLabel', {
-                defaultMessage: 'Group ID'
-              })}{' '}
-              <EuiIcon
-                size="m"
-                color="subdued"
-                type="iInCircle"
-                className="eui-alignTop"
-              />
-            </>
-          </EuiToolTip>
+          <>
+            {i18n.translate('xpack.apm.errorsTable.groupIdColumnLabel', {
+              defaultMessage: 'Group ID'
+            })}{' '}
+            <EuiIconTip
+              size="m"
+              type="iInCircle"
+              color="subdued"
+              className="eui-alignTop"
+              content={i18n.translate(
+                'xpack.apm.errorsTable.groupIdColumnDescription',
+                {
+                  defaultMessage:
+                    'Hash of the stack trace. Groups similar errors together, even when the error message is different due to dynamic parameters.'
+                }
+              )}
+            />
+          </>
         ),
         field: 'groupId',
         sortable: false,
