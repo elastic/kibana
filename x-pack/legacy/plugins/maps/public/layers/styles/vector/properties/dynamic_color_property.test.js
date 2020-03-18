@@ -237,7 +237,62 @@ test('Should pluck the categorical style-meta from fieldmeta', async () => {
   });
 });
 
-describe('get mapbox color expression', () => {
+describe('sync mapbox color expression (via public API)', () => {
+  test('Should call .syncCircleColorWthMb with custom color ramp', async () => {
+    const colorStyle = makeProperty({
+      color: 'Blues',
+      type: undefined,
+    });
+
+    const calls = [];
+    const mockMbMap = {
+      setPaintProperty(...args) {
+        calls.push(args);
+      },
+    };
+
+    colorStyle.syncCircleColorWithMb('foobarid', mockMbMap, 1);
+    expect(calls[0]).toEqual([
+      'foobarid',
+      'circle-color',
+      [
+        'interpolate',
+        ['linear'],
+        [
+          'coalesce',
+          [
+            'case',
+            ['==', ['feature-state', 'foobar'], null],
+            -1,
+            ['max', ['min', ['to-number', ['feature-state', 'foobar']], 100], 0],
+          ],
+          -1,
+        ],
+        -1,
+        'rgba(0,0,0,0)',
+        0,
+        '#f7faff',
+        12.5,
+        '#ddeaf7',
+        25,
+        '#c5daee',
+        37.5,
+        '#9dc9e0',
+        50,
+        '#6aadd5',
+        62.5,
+        '#4191c5',
+        75,
+        '#2070b4',
+        87.5,
+        '#072f6b',
+      ],
+    ]);
+    expect(calls[1]).toEqual(['foobarid', 'circle-opacity', 1]);
+  });
+});
+
+describe('get mapbox color expression (via internal _getMbColor)', () => {
   describe('ordinal color ramp', () => {
     test('should return null when field is not provided', async () => {
       const dynamicStyleOptions = {
@@ -263,59 +318,6 @@ describe('get mapbox color expression', () => {
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toBeNull();
-      });
-
-      test('Should call .syncCircleColorWthMb correctly', async () => {
-        const colorStyle = makeProperty({
-          color: 'Blues',
-          type: undefined,
-        });
-
-        const calls = [];
-        const mockMbMap = {
-          setPaintProperty(...args) {
-            calls.push(args);
-          },
-        };
-
-        colorStyle.syncCircleColorWithMb('foobarid', mockMbMap, 1);
-        expect(calls[0]).toEqual([
-          'foobarid',
-          'circle-color',
-          [
-            'interpolate',
-            ['linear'],
-            [
-              'coalesce',
-              [
-                'case',
-                ['==', ['feature-state', 'foobar'], null],
-                -1,
-                ['max', ['min', ['to-number', ['feature-state', 'foobar']], 100], 0],
-              ],
-              -1,
-            ],
-            -1,
-            'rgba(0,0,0,0)',
-            0,
-            '#f7faff',
-            12.5,
-            '#ddeaf7',
-            25,
-            '#c5daee',
-            37.5,
-            '#9dc9e0',
-            50,
-            '#6aadd5',
-            62.5,
-            '#4191c5',
-            75,
-            '#2070b4',
-            87.5,
-            '#072f6b',
-          ],
-        ]);
-        expect(calls[1]).toEqual(['foobarid', 'circle-opacity', 1]);
       });
     });
 
