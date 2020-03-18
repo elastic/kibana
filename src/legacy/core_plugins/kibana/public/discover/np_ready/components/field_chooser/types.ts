@@ -55,3 +55,26 @@ export interface Bucket {
   percent: number;
   count: number;
 }
+
+export interface FieldFilterBoolOpt {
+  label: string;
+  value?: string;
+}
+
+export interface FieldFilterVals extends Field {
+  missing: boolean;
+  type: string;
+  name: string;
+}
+
+export interface FieldFilter {
+  props: string[];
+  defaults: {
+    missing: boolean;
+    type: string;
+    name: string;
+  };
+  boolOpts: FieldFilterBoolOpt[];
+  reset: () => void;
+  vals: FieldFilterVals;
+}

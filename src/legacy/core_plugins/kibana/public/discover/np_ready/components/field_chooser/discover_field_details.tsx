@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { EuiLink, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { getWarnings } from './lib/get_warnings';
@@ -87,18 +87,7 @@ export function DiscoverFieldDetails({ field, details, onAddFilter }: Props) {
               defaultMessage="Visualize"
             />
           </EuiLink>
-          {warnings.length > 0 && (
-            <EuiToolTip content={warnings.join(' ')}>
-              <span>
-                <i aria-hidden="true" className="fa fa-warning" />
-                <FormattedMessage
-                  id="kbn.discover.fieldChooser.detailViews.warningsText"
-                  defaultMessage="Number of warnings: {warningsLength}"
-                  values={{ warningsLength: warnings.length }}
-                />
-              </span>
-            </EuiToolTip>
-          )}
+          {warnings.length > 0 && <EuiIconTip content={warnings.join(' ')} />}
         </>
       )}
     </div>

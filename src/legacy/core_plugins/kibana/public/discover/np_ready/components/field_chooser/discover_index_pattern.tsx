@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { useState, useEffect } from 'react';
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from 'kibana/public';
 import { IIndexPattern, IndexPatternAttributes } from 'src/plugins/data/public';
 import { I18nProvider } from '@kbn/i18n/react';
 

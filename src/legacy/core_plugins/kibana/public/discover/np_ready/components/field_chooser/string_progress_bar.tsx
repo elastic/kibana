@@ -32,7 +32,7 @@ export function StringFieldProgressBar(props: Props) {
       delay="regular"
       position="right"
     >
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup alignItems="center" responsive={false}>
         <EuiFlexItem>
           <EuiProgress
             value={props.percent}

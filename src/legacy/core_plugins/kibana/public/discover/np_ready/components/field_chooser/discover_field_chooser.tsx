@@ -18,34 +18,32 @@
  */
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiButtonIcon, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverField } from './discover_field';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
-import { IIndexPattern } from '../../../../../../../../plugins/data/common/index_patterns';
-import { Field } from './types';
+import { IIndexPattern, IndexPatternAttributes } from '../../../../../../../../plugins/data/common';
+import { Field, FieldDetails, FieldFilter } from './types';
+import { SavedObject } from '../../../../../../../../core/types';
 
 export interface Props {
   fields: Field[];
-  fieldTypes: any;
-  filter: any;
-  indexPatternList: any;
-  getDetails: any;
+  fieldTypes: string[];
+  filter: FieldFilter;
+  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  getDetails: (field: Field) => FieldDetails;
   groupedFields: {
-    selected: any;
-    popular: any;
-    unpopular: any;
+    selected: Field[];
+    popular: Field[];
+    unpopular: Field[];
   };
-  onAddField: any;
-  onAddFilter: any;
-  onRemoveField: any;
-  onShowFields: any;
-  openFields: any;
+  onAddField: (fieldName: string) => void;
+  onAddFilter: (field: Field | string, value: string, type: '+' | '-') => void;
+  onRemoveField: (fieldName: string) => void;
   selectedIndexPattern: IIndexPattern;
-  setFilterValue: any;
-  setIndexPattern: any;
-  showDetails: boolean;
-  showFields: any;
+  setFilterValue: (field: string, value: string | boolean | undefined) => void;
+  setIndexPattern: (id: string) => void;
 }
 
 export function DiscoverFieldChooser({
@@ -128,16 +126,14 @@ export function DiscoverFieldChooser({
         {fields && fields.length && (
           <>
             <div className="dscSidebar__listHeader sidebar-list-header">
-              <h3
-                className="euiFlexItem euiTitle euiTitle--xxxsmall sidebar-list-header-heading"
-                id="selected_fields"
-                tabIndex={0}
-              >
-                <FormattedMessage
-                  id="kbn.discover.fieldChooser.filter.selectedFieldsTitle"
-                  defaultMessage="Selected fields"
-                />
-              </h3>
+              <EuiTitle size="xxxs" id="selected_fields">
+                <h3>
+                  <FormattedMessage
+                    id="kbn.discover.fieldChooser.filter.selectedFieldsTitle"
+                    defaultMessage="Selected fields"
+                  />
+                </h3>
+              </EuiTitle>
             </div>
             <ul className="list-unstyled dscFieldList--selected" aria-labelledby="selected_fields">
               {fields.filter(isFieldFilteredAndDisplayed).map((field: Field, idx: number) => {
@@ -159,7 +155,6 @@ export function DiscoverFieldChooser({
             <div className="sidebar-list-header sidebar-item euiFlexGroup euiFlexGroup--gutterMedium">
               <h3
                 className="euiFlexItem euiTitle euiTitle--xxxsmall sidebar-list-header-heading"
-                id="available_fields"
                 tabIndex={0}
               >
                 <FormattedMessage
@@ -168,16 +163,26 @@ export function DiscoverFieldChooser({
                 />
               </h3>
               <div className="euiFlexItem euiFlexItem--flexGrowZero">
-                <button
+                <EuiButtonIcon
+                  className={'visible-xs visible-sm dscFieldChooser__toggle'}
+                  iconType={showFields ? 'arrowDown' : 'arrowRight'}
                   onClick={() => setShowFields(!showFields)}
-                  aria-hidden="true"
-                  className="kuiButton kuiButton--small visible-xs visible-sm pull-right dscFieldChooser__toggle"
-                >
-                  <span
-                    aria-hidden="true"
-                    className={`kuiIcon ${showFields ? 'fa-chevron-down' : 'fa-chevron-right'}`}
-                  />
-                </button>
+                  aria-label={
+                    showFields
+                      ? i18n.translate(
+                          'kbn.discover.fieldChooser.filter.indexAndFieldsSectionHideAriaLabel',
+                          {
+                            defaultMessage: 'Hide fields',
+                          }
+                        )
+                      : i18n.translate(
+                          'kbn.discover.fieldChooser.filter.indexAndFieldsSectionShowAriaLabel',
+                          {
+                            defaultMessage: 'Show fields',
+                          }
+                        )
+                  }
+                />
               </div>
             </div>
           </>

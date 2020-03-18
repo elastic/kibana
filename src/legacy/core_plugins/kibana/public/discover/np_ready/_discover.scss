@@ -109,31 +109,6 @@ discover-app {
   text-align: center;
 }
 
-.dscFieldSearch {
-  padding: $euiSizeS;
-}
-
-.dscFieldFilter {
-  margin-top: $euiSizeS;
-}
-
-.dscFieldDetails {
-  padding: 0 $euiSizeS $euiSizeS $euiSizeS;
-
-  color: $euiTextColor;
-}
-
-// SASSTODO: replace the padding and margin values with variables
-.dscFieldDetails__progress {
-  background-color: $euiColorEmptyShade;
-  color: $euiColorDarkShade;
-  padding: $euiSizeXS;
-}
-
-.dscFieldName--noResults {
-  color: $euiColorDarkShade;
-}
-
 .dscResults {
   h3 {
     margin: -20px 0 10px 0;
