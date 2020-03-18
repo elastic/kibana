@@ -225,7 +225,7 @@ export const AlertsList: React.FunctionComponent = () => {
         ? [
             {
               render: (item: AlertTableItem) => {
-                return (
+                return alertTypeRegistry.has(item.alertTypeId) ? (
                   <EuiLink
                     data-test-subj="alertsTableCell-editLink"
                     color="primary"
@@ -236,6 +236,8 @@ export const AlertsList: React.FunctionComponent = () => {
                       id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editLinkTitle"
                     />
                   </EuiLink>
+                ) : (
+                  <></>
                 );
               },
             },
