@@ -56,6 +56,12 @@ export interface FieldExampleCheck {
 }
 
 export const VALIDATION_CHECK_DESCRIPTION = {
+  [VALIDATION_RESULT.NO_EXAMPLES]: i18n.translate(
+    'xpack.ml.models.jobService.categorization.messages.validNoDataFound',
+    {
+      defaultMessage: 'Examples  were successfully loaded.',
+    }
+  ),
   [VALIDATION_RESULT.FAILED_TO_TOKENIZE]: i18n.translate(
     'xpack.ml.models.jobService.categorization.messages.validFailureToGetTokens',
     {
@@ -79,12 +85,6 @@ export const VALIDATION_CHECK_DESCRIPTION = {
     'xpack.ml.models.jobService.categorization.messages.validNullValues',
     {
       defaultMessage: 'Less than 25% of the examples loaded were null.',
-    }
-  ),
-  [VALIDATION_RESULT.NO_EXAMPLES]: i18n.translate(
-    'xpack.ml.models.jobService.categorization.messages.validNoDataFound',
-    {
-      defaultMessage: 'Examples  were successfully loaded.',
     }
   ),
   [VALIDATION_RESULT.TOO_MANY_TOKENS]: i18n.translate(
