@@ -74,9 +74,3 @@ describe('security call out', () => {
     );
   });
 });
-
-function waitForUseEffect() {
-  return new Promise(resolve => {
-    setTimeout(resolve, 0);
-  });
-}
