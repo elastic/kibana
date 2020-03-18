@@ -22,7 +22,7 @@ import { SelfChangingComponent } from './self_changing_components';
 
 import { setup as visualizations } from '../../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/legacy';
 
-visualizations.types.createReactVisualization({
+visualizations.createReactVisualization({
   name: 'self_changing_vis',
   title: 'Self Changing Vis',
   icon: 'controlsHorizontal',

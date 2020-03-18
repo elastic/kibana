@@ -11,5 +11,9 @@ export const getNestedProperty = (
   accessor: string,
   defaultValue?: any
 ) => {
-  return accessor.split('.').reduce((o, i) => o?.[i], obj) || defaultValue;
+  const value = accessor.split('.').reduce((o, i) => o?.[i], obj);
+
+  if (value === undefined) return defaultValue;
+
+  return value;
 };

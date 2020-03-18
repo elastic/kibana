@@ -9,6 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiBadge,
+  EuiTableActionsColumnType,
+  EuiTableComputedColumnType,
+  EuiTableFieldDataColumnType,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,13 +23,6 @@ import {
 } from '@elastic/eui';
 
 import { TransformId, TRANSFORM_STATE } from '../../../../../../common';
-
-import {
-  ActionsColumnType,
-  ComputedColumnType,
-  ExpanderColumnType,
-  FieldDataColumnType,
-} from '../../../../../shared_imports';
 
 import {
   getTransformProgress,
@@ -89,15 +85,15 @@ export const getColumns = (
   }
 
   const columns: [
-    ExpanderColumnType<TransformListRow>,
-    FieldDataColumnType<TransformListRow>,
-    FieldDataColumnType<TransformListRow>,
-    FieldDataColumnType<TransformListRow>,
-    FieldDataColumnType<TransformListRow>,
-    ComputedColumnType<TransformListRow>,
-    ComputedColumnType<TransformListRow>,
-    ComputedColumnType<TransformListRow>,
-    ActionsColumnType<TransformListRow>
+    EuiTableComputedColumnType<TransformListRow>,
+    EuiTableFieldDataColumnType<TransformListRow>,
+    EuiTableFieldDataColumnType<TransformListRow>,
+    EuiTableFieldDataColumnType<TransformListRow>,
+    EuiTableFieldDataColumnType<TransformListRow>,
+    EuiTableComputedColumnType<TransformListRow>,
+    EuiTableComputedColumnType<TransformListRow>,
+    EuiTableComputedColumnType<TransformListRow>,
+    EuiTableActionsColumnType<TransformListRow>
   ] = [
     {
       name: (

@@ -9,7 +9,7 @@ import moment from 'moment';
 import uuid from 'uuid';
 
 import { NewsItem, RawNewsApiItem, RawNewsApiResponse } from './types';
-import { throwIfNotOk } from '../../hooks/api/api';
+import { KibanaServices } from '../../lib/kibana';
 
 /**
  * Removes the `-SNAPSHOT` that is sometimes appended to the Kibana version,
@@ -90,15 +90,11 @@ export const fetchNews = async ({
 }: {
   newsFeedUrl: string;
 }): Promise<RawNewsApiResponse> => {
-  const response = await fetch(newsFeedUrl, {
-    credentials: 'omit',
+  return KibanaServices.get().http.fetch<RawNewsApiResponse>(newsFeedUrl, {
     method: 'GET',
+    credentials: 'omit',
     mode: 'cors',
   });
-
-  await throwIfNotOk(response);
-
-  return response.json();
 };
 
 /**

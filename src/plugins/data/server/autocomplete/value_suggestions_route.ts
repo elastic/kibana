@@ -39,7 +39,7 @@ export function registerValueSuggestionsRoute(
           {
             index: schema.string(),
           },
-          { allowUnknowns: false }
+          { unknowns: 'allow' }
         ),
         body: schema.object(
           {
@@ -47,7 +47,7 @@ export function registerValueSuggestionsRoute(
             query: schema.string(),
             boolFilter: schema.maybe(schema.any()),
           },
-          { allowUnknowns: false }
+          { unknowns: 'allow' }
         ),
       },
     },

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import moment from 'moment-timezone';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -17,9 +18,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
+  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 
+import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
 import { getNestedProperty } from '../../../../../../common/utils/object_utils';
 
 import {
@@ -29,6 +32,7 @@ import {
   PivotQuery,
 } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
+import { useToastNotifications } from '../../../../app_dependencies';
 
 import { getSourceIndexDevConsoleStatement } from './common';
 import { SOURCE_INDEX_STATUS, useSourceIndexData } from './use_source_index_data';
@@ -52,9 +56,8 @@ interface Props {
   query: PivotQuery;
 }
 
-const defaultPagination = { pageIndex: 0, pageSize: 5 };
-
 export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, query }) => {
+  const toastNotifications = useToastNotifications();
   const allFields = indexPattern.fields.map(f => f.name);
   const indexPatternFields: string[] = allFields.filter(f => {
     if (indexPattern.metaFields.includes(f)) {
@@ -73,38 +76,67 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<EsFieldName[]>(indexPatternFields);
 
-  const [pagination, setPagination] = useState(defaultPagination);
-
-  useEffect(() => {
-    setPagination(defaultPagination);
-  }, [query]);
-
-  const { errorMessage, status, rowCount, tableItems: data } = useSourceIndexData(
-    indexPattern,
-    query,
-    pagination
-  );
+  const {
+    errorMessage,
+    pagination,
+    setPagination,
+    setSortingColumns,
+    rowCount,
+    sortingColumns,
+    status,
+    tableItems: data,
+  } = useSourceIndexData(indexPattern, query);
 
   // EuiDataGrid State
-  const dataGridColumns = indexPatternFields.map(id => {
-    const field = indexPattern.fields.getByName(id);
+  const dataGridColumns = [
+    ...indexPatternFields.map(id => {
+      const field = indexPattern.fields.getByName(id);
 
-    let schema = 'string';
+      // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
+      // To fall back to the default string schema it needs to be undefined.
+      let schema;
 
-    switch (field?.type) {
-      case 'date':
-        schema = 'datetime';
-        break;
-      case 'geo_point':
-        schema = 'json';
-        break;
-      case 'number':
-        schema = 'numeric';
-        break;
-    }
+      switch (field?.type) {
+        case 'date':
+          schema = 'datetime';
+          break;
+        case 'geo_point':
+          schema = 'json';
+          break;
+        case 'number':
+          schema = 'numeric';
+          break;
+      }
 
-    return { id, schema };
-  });
+      return { id, schema };
+    }),
+  ];
+
+  const onSort = useCallback(
+    (sc: Array<{ id: string; direction: 'asc' | 'desc' }>) => {
+      // Check if an unsupported column type for sorting was selected.
+      const invalidSortingColumnns = sc.reduce<string[]>((arr, current) => {
+        const columnType = dataGridColumns.find(dgc => dgc.id === current.id);
+        if (columnType?.schema === 'json') {
+          arr.push(current.id);
+        }
+        return arr;
+      }, []);
+      if (invalidSortingColumnns.length === 0) {
+        setSortingColumns(sc);
+      } else {
+        invalidSortingColumnns.forEach(columnId => {
+          toastNotifications.addDanger(
+            i18n.translate('xpack.transform.sourceIndexPreview.invalidSortingColumnError', {
+              defaultMessage: `The column '{columnId}' cannot be used for sorting.`,
+              values: { columnId },
+            })
+          );
+        });
+      }
+    },
+    [dataGridColumns, setSortingColumns, toastNotifications]
+  );
 
   const onChangeItemsPerPage = useCallback(
     pageSize => {
@@ -119,10 +151,6 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
   const onChangePage = useCallback(pageIndex => setPagination(p => ({ ...p, pageIndex })), [
     setPagination,
   ]);
-
-  // ** Sorting config
-  const [sortingColumns, setSortingColumns] = useState([]);
-  const onSort = useCallback(sc => setSortingColumns(sc), [setSortingColumns]);
 
   const renderCellValue = useMemo(() => {
     return ({
@@ -144,32 +172,18 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
         return JSON.stringify(cellValue);
       }
 
-      if (cellValue === undefined) {
+      if (cellValue === undefined || cellValue === null) {
         return null;
+      }
+
+      const field = indexPattern.fields.getByName(columnId);
+      if (field?.type === 'date') {
+        return formatHumanReadableDateTimeSeconds(moment(cellValue).unix() * 1000);
       }
 
       return cellValue;
     };
-  }, [data, pagination.pageIndex, pagination.pageSize]);
-
-  if (status === SOURCE_INDEX_STATUS.ERROR) {
-    return (
-      <div data-test-subj="transformSourceIndexPreview error">
-        <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
-        <EuiCallOut
-          title={i18n.translate('xpack.transform.sourceIndexPreview.sourceIndexPatternError', {
-            defaultMessage: 'An error occurred loading the source index data.',
-          })}
-          color="danger"
-          iconType="cross"
-        >
-          <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable>
-            {errorMessage}
-          </EuiCodeBlock>
-        </EuiCallOut>
-      </div>
-    );
-  }
+  }, [data, indexPattern.fields, pagination.pageIndex, pagination.pageSize]);
 
   if (status === SOURCE_INDEX_STATUS.LOADED && data.length === 0) {
     return (
@@ -200,7 +214,11 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
   });
 
   return (
-    <div data-test-subj="transformSourceIndexPreview loaded">
+    <div
+      data-test-subj={`transformSourceIndexPreview ${
+        status === SOURCE_INDEX_STATUS.ERROR ? 'error' : 'loaded'
+      }`}
+    >
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem>
           <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
@@ -222,24 +240,38 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
           <EuiProgress size="xs" color="accent" max={1} value={0} />
         )}
       </div>
-      {dataGridColumns.length > 0 && data.length > 0 && (
-        <EuiDataGrid
-          aria-label="Source index preview"
-          columns={dataGridColumns}
-          columnVisibility={{ visibleColumns, setVisibleColumns }}
-          gridStyle={euiDataGridStyle}
-          rowCount={rowCount}
-          renderCellValue={renderCellValue}
-          sorting={{ columns: sortingColumns, onSort }}
-          toolbarVisibility={euiDataGridToolbarSettings}
-          pagination={{
-            ...pagination,
-            pageSizeOptions: [5, 10, 25],
-            onChangeItemsPerPage,
-            onChangePage,
-          }}
-        />
+      {status === SOURCE_INDEX_STATUS.ERROR && (
+        <div data-test-subj="transformSourceIndexPreview error">
+          <EuiCallOut
+            title={i18n.translate('xpack.transform.sourceIndexPreview.sourceIndexPatternError', {
+              defaultMessage: 'An error occurred loading the source index data.',
+            })}
+            color="danger"
+            iconType="cross"
+          >
+            <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable>
+              {errorMessage}
+            </EuiCodeBlock>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </div>
       )}
+      <EuiDataGrid
+        aria-label="Source index preview"
+        columns={dataGridColumns}
+        columnVisibility={{ visibleColumns, setVisibleColumns }}
+        gridStyle={euiDataGridStyle}
+        rowCount={rowCount}
+        renderCellValue={renderCellValue}
+        sorting={{ columns: sortingColumns, onSort }}
+        toolbarVisibility={euiDataGridToolbarSettings}
+        pagination={{
+          ...pagination,
+          pageSizeOptions: [5, 10, 25],
+          onChangeItemsPerPage,
+          onChangePage,
+        }}
+      />
     </div>
   );
 });

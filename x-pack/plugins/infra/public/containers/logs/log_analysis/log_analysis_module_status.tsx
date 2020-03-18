@@ -329,18 +329,14 @@ const getSetupStatus = <JobType extends string>(
       ) {
         return setupStatus;
       } else if (
-        setupStatus === 'skippedButUpdatable' ||
-        (jobDefinition &&
-          !isJobRevisionCurrent(
-            jobId,
-            jobDefinition.config.custom_settings.job_revision || 0
-          )(jobSummaries))
+        jobDefinition &&
+        !isJobRevisionCurrent(
+          jobId,
+          jobDefinition.config.custom_settings.job_revision || 0
+        )(jobSummaries)
       ) {
         return 'skippedButUpdatable';
-      } else if (
-        setupStatus === 'skippedButReconfigurable' ||
-        !isJobConfigurationConsistent(jobId, sourceConfiguration)(jobSummaries)
-      ) {
+      } else if (!isJobConfigurationConsistent(jobId, sourceConfiguration)(jobSummaries)) {
         return 'skippedButReconfigurable';
       } else if (setupStatus === 'hiddenAfterSuccess') {
         return setupStatus;

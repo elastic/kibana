@@ -432,6 +432,14 @@
         ],
       },
       {
+        groupSlug: 'js-search',
+        groupName: 'js-search related packages',
+        packageNames: [
+          'js-search',
+          '@types/js-search',
+        ],
+      },
+      {
         groupSlug: 'js-yaml',
         groupName: 'js-yaml related packages',
         packageNames: [
@@ -875,6 +883,14 @@
         packageNames: [
           'supertest-as-promised',
           '@types/supertest-as-promised',
+        ],
+      },
+      {
+        groupSlug: 'tar',
+        groupName: 'tar related packages',
+        packageNames: [
+          'tar',
+          '@types/tar',
         ],
       },
       {

@@ -657,6 +657,10 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       await testSubjects.click('importSavedObjectsConfirmBtn');
     }
 
+    async clickEditFieldFormat() {
+      await testSubjects.click('editFieldFormat');
+    }
+
     async associateIndexPattern(oldIndexPatternId: string, newIndexPatternTitle: string) {
       await find.clickByCssSelector(
         `select[data-test-subj="managementChangeIndexSelection-${oldIndexPatternId}"] >

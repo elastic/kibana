@@ -6,6 +6,7 @@ Array [
     "convertToAliasScript": undefined,
     "hidden": false,
     "indexPattern": undefined,
+    "management": undefined,
     "mappings": Object {
       "properties": Object {
         "fieldA": Object {
@@ -21,6 +22,7 @@ Array [
     "convertToAliasScript": undefined,
     "hidden": false,
     "indexPattern": undefined,
+    "management": undefined,
     "mappings": Object {
       "properties": Object {
         "fieldB": Object {
@@ -36,6 +38,7 @@ Array [
     "convertToAliasScript": undefined,
     "hidden": false,
     "indexPattern": undefined,
+    "management": undefined,
     "mappings": Object {
       "properties": Object {
         "fieldC": Object {
@@ -56,6 +59,7 @@ Array [
     "convertToAliasScript": undefined,
     "hidden": true,
     "indexPattern": "myIndex",
+    "management": undefined,
     "mappings": Object {
       "properties": Object {
         "fieldA": Object {
@@ -74,6 +78,7 @@ Array [
     "convertToAliasScript": "some alias script",
     "hidden": false,
     "indexPattern": undefined,
+    "management": undefined,
     "mappings": Object {
       "properties": Object {
         "anotherFieldB": Object {
@@ -92,6 +97,7 @@ Array [
     "convertToAliasScript": undefined,
     "hidden": false,
     "indexPattern": undefined,
+    "management": undefined,
     "mappings": Object {
       "properties": Object {
         "fieldC": Object {
@@ -114,6 +120,7 @@ Array [
     "convertToAliasScript": undefined,
     "hidden": true,
     "indexPattern": "fooBar",
+    "management": undefined,
     "mappings": Object {
       "properties": Object {
         "fieldA": Object {
@@ -129,6 +136,7 @@ Array [
     "convertToAliasScript": undefined,
     "hidden": false,
     "indexPattern": undefined,
+    "management": undefined,
     "mappings": Object {
       "properties": Object {
         "fieldC": Object {

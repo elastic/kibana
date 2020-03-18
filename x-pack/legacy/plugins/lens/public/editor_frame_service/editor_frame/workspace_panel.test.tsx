@@ -23,11 +23,6 @@ import { Ast } from '@kbn/interpreter/common';
 import { coreMock } from 'src/core/public/mocks';
 import { esFilters, IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
-const waitForPromises = async () =>
-  act(async () => {
-    await new Promise(resolve => setTimeout(resolve));
-  });
-
 describe('workspace_panel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
   let mockVisualization2: jest.Mocked<Visualization>;
@@ -41,7 +36,7 @@ describe('workspace_panel', () => {
     mockVisualization = createMockVisualization();
     mockVisualization2 = createMockVisualization();
 
-    mockDatasource = createMockDatasource();
+    mockDatasource = createMockDatasource('a');
 
     expressionRendererMock = createExpressionRendererMock();
   });
@@ -204,7 +199,7 @@ describe('workspace_panel', () => {
   });
 
   it('should include data fetching for each layer in the expression', () => {
-    const mockDatasource2 = createMockDatasource();
+    const mockDatasource2 = createMockDatasource('a');
     const framePublicAPI = createMockFramePublicAPI();
     framePublicAPI.datasourceLayers = {
       first: mockDatasource.publicAPIMock,
@@ -299,41 +294,43 @@ describe('workspace_panel', () => {
 
     expressionRendererMock = jest.fn(_arg => <span />);
 
-    instance = mount(
-      <InnerWorkspacePanel
-        activeDatasourceId={'mock'}
-        datasourceStates={{
-          mock: {
-            state: {},
-            isLoading: false,
-          },
-        }}
-        datasourceMap={{
-          mock: mockDatasource,
-        }}
-        framePublicAPI={framePublicAPI}
-        activeVisualizationId="vis"
-        visualizationMap={{
-          vis: { ...mockVisualization, toExpression: () => 'vis' },
-        }}
-        visualizationState={{}}
-        dispatch={() => {}}
-        ExpressionRenderer={expressionRendererMock}
-        core={coreMock.createSetup()}
-      />
-    );
-
-    // "wait" for the expression to execute
-    await waitForPromises();
+    await act(async () => {
+      instance = mount(
+        <InnerWorkspacePanel
+          activeDatasourceId={'mock'}
+          datasourceStates={{
+            mock: {
+              state: {},
+              isLoading: false,
+            },
+          }}
+          datasourceMap={{
+            mock: mockDatasource,
+          }}
+          framePublicAPI={framePublicAPI}
+          activeVisualizationId="vis"
+          visualizationMap={{
+            vis: { ...mockVisualization, toExpression: () => 'vis' },
+          }}
+          visualizationState={{}}
+          dispatch={() => {}}
+          ExpressionRenderer={expressionRendererMock}
+          core={coreMock.createSetup()}
+        />
+      );
+    });
     instance.update();
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(1);
 
-    instance.setProps({
-      framePublicAPI: { ...framePublicAPI, dateRange: { fromDate: 'now-90d', toDate: 'now-30d' } },
+    await act(async () => {
+      instance.setProps({
+        framePublicAPI: {
+          ...framePublicAPI,
+          dateRange: { fromDate: 'now-90d', toDate: 'now-30d' },
+        },
+      });
     });
-
-    await waitForPromises();
     instance.update();
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(2);
@@ -351,33 +348,32 @@ describe('workspace_panel', () => {
       .mockReturnValueOnce('datasource second');
 
     expressionRendererMock = jest.fn(_arg => <span />);
+    await act(async () => {
+      instance = mount(
+        <InnerWorkspacePanel
+          activeDatasourceId={'mock'}
+          datasourceStates={{
+            mock: {
+              state: {},
+              isLoading: false,
+            },
+          }}
+          datasourceMap={{
+            mock: mockDatasource,
+          }}
+          framePublicAPI={framePublicAPI}
+          activeVisualizationId="vis"
+          visualizationMap={{
+            vis: { ...mockVisualization, toExpression: () => 'vis' },
+          }}
+          visualizationState={{}}
+          dispatch={() => {}}
+          ExpressionRenderer={expressionRendererMock}
+          core={coreMock.createSetup()}
+        />
+      );
+    });
 
-    instance = mount(
-      <InnerWorkspacePanel
-        activeDatasourceId={'mock'}
-        datasourceStates={{
-          mock: {
-            state: {},
-            isLoading: false,
-          },
-        }}
-        datasourceMap={{
-          mock: mockDatasource,
-        }}
-        framePublicAPI={framePublicAPI}
-        activeVisualizationId="vis"
-        visualizationMap={{
-          vis: { ...mockVisualization, toExpression: () => 'vis' },
-        }}
-        visualizationState={{}}
-        dispatch={() => {}}
-        ExpressionRenderer={expressionRendererMock}
-        core={coreMock.createSetup()}
-      />
-    );
-
-    // "wait" for the expression to execute
-    await waitForPromises();
     instance.update();
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(1);
@@ -385,14 +381,15 @@ describe('workspace_panel', () => {
     const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
     const field = ({ name: 'myfield' } as unknown) as IFieldType;
 
-    instance.setProps({
-      framePublicAPI: {
-        ...framePublicAPI,
-        filters: [esFilters.buildExistsFilter(field, indexPattern)],
-      },
+    await act(async () => {
+      instance.setProps({
+        framePublicAPI: {
+          ...framePublicAPI,
+          filters: [esFilters.buildExistsFilter(field, indexPattern)],
+        },
+      });
     });
 
-    await waitForPromises();
     instance.update();
 
     expect(expressionRendererMock).toHaveBeenCalledTimes(2);
@@ -442,32 +439,31 @@ describe('workspace_panel', () => {
       first: mockDatasource.publicAPIMock,
     };
 
-    instance = mount(
-      <InnerWorkspacePanel
-        activeDatasourceId={'mock'}
-        datasourceStates={{
-          mock: {
-            state: {},
-            isLoading: false,
-          },
-        }}
-        datasourceMap={{
-          mock: mockDatasource,
-        }}
-        framePublicAPI={framePublicAPI}
-        activeVisualizationId="vis"
-        visualizationMap={{
-          vis: { ...mockVisualization, toExpression: () => 'vis' },
-        }}
-        visualizationState={{}}
-        dispatch={() => {}}
-        ExpressionRenderer={expressionRendererMock}
-        core={coreMock.createSetup()}
-      />
-    );
-
-    // "wait" for the expression to execute
-    await waitForPromises();
+    await act(async () => {
+      instance = mount(
+        <InnerWorkspacePanel
+          activeDatasourceId={'mock'}
+          datasourceStates={{
+            mock: {
+              state: {},
+              isLoading: false,
+            },
+          }}
+          datasourceMap={{
+            mock: mockDatasource,
+          }}
+          framePublicAPI={framePublicAPI}
+          activeVisualizationId="vis"
+          visualizationMap={{
+            vis: { ...mockVisualization, toExpression: () => 'vis' },
+          }}
+          visualizationState={{}}
+          dispatch={() => {}}
+          ExpressionRenderer={expressionRendererMock}
+          core={coreMock.createSetup()}
+        />
+      );
+    });
 
     instance.update();
 
@@ -486,32 +482,31 @@ describe('workspace_panel', () => {
       first: mockDatasource.publicAPIMock,
     };
 
-    instance = mount(
-      <InnerWorkspacePanel
-        activeDatasourceId={'mock'}
-        datasourceStates={{
-          mock: {
-            state: {},
-            isLoading: false,
-          },
-        }}
-        datasourceMap={{
-          mock: mockDatasource,
-        }}
-        framePublicAPI={framePublicAPI}
-        activeVisualizationId="vis"
-        visualizationMap={{
-          vis: { ...mockVisualization, toExpression: () => 'vis' },
-        }}
-        visualizationState={{}}
-        dispatch={() => {}}
-        ExpressionRenderer={expressionRendererMock}
-        core={coreMock.createSetup()}
-      />
-    );
-
-    // "wait" for the expression to execute
-    await waitForPromises();
+    await act(async () => {
+      instance = mount(
+        <InnerWorkspacePanel
+          activeDatasourceId={'mock'}
+          datasourceStates={{
+            mock: {
+              state: {},
+              isLoading: false,
+            },
+          }}
+          datasourceMap={{
+            mock: mockDatasource,
+          }}
+          framePublicAPI={framePublicAPI}
+          activeVisualizationId="vis"
+          visualizationMap={{
+            vis: { ...mockVisualization, toExpression: () => 'vis' },
+          }}
+          visualizationState={{}}
+          dispatch={() => {}}
+          ExpressionRenderer={expressionRendererMock}
+          core={coreMock.createSetup()}
+        />
+      );
+    });
 
     instance.update();
 

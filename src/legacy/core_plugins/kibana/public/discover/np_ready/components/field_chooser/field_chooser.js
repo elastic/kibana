@@ -30,7 +30,7 @@ import {
 } from '../../../../../../../../plugins/data/public';
 import { getMapsAppUrl, isFieldVisualizable, isMapsAppRegistered } from './lib/visualize_url_utils';
 
-export function createFieldChooserDirective($location, config, $route) {
+export function createFieldChooserDirective($location, config) {
   return {
     restrict: 'E',
     scope: {
@@ -48,20 +48,7 @@ export function createFieldChooserDirective($location, config, $route) {
     link: function($scope) {
       $scope.showFilter = false;
       $scope.toggleShowFilter = () => ($scope.showFilter = !$scope.showFilter);
-
-      $scope.selectedIndexPattern = $scope.indexPatternList.find(
-        pattern => pattern.id === $scope.indexPattern.id
-      );
       $scope.indexPatternList = _.sortBy($scope.indexPatternList, o => o.get('title'));
-      $scope.setIndexPattern = function(id) {
-        $scope.state.index = id;
-        $scope.state.save();
-      };
-
-      $scope.$watch('state.index', function(id, previousId) {
-        if (previousId == null || previousId === id) return;
-        $route.reload();
-      });
 
       const filter = ($scope.filter = {
         props: ['type', 'aggregatable', 'searchable', 'missing', 'name'],

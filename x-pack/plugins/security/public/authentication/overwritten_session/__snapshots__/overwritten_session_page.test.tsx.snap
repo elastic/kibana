@@ -33,43 +33,10 @@ exports[`OverwrittenSessionPage renders as expected 1`] = `
             size="xxl"
             type="logoKibana"
           >
-            <EuiIconLogoKibana
-              aria-hidden={true}
-              className="euiIcon euiIcon--xxLarge euiIcon-isLoaded"
-              focusable="false"
-              role="img"
-              style={null}
-            >
-              <svg
-                aria-hidden={true}
-                className="euiIcon euiIcon--xxLarge euiIcon-isLoaded"
-                focusable="false"
-                height={32}
-                role="img"
-                style={null}
-                viewBox="0 0 32 32"
-                width={32}
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <g
-                  fill="none"
-                  fillRule="evenodd"
-                >
-                  <path
-                    d="M4 0v28.789L28.935.017z"
-                    fill="#F04E98"
-                  />
-                  <path
-                    className="euiIcon__fillNegative"
-                    d="M4 12v16.789l11.906-13.738A24.721 24.721 0 004 12"
-                  />
-                  <path
-                    d="M18.479 16.664L6.268 30.754l-1.073 1.237h23.191c-1.252-6.292-4.883-11.719-9.908-15.327"
-                    fill="#00BFB3"
-                  />
-                </g>
-              </svg>
-            </EuiIconLogoKibana>
+            <div
+              data-euiicon-type="logoKibana"
+              size="xxl"
+            />
           </EuiIcon>
         </span>
         <EuiTitle

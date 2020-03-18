@@ -78,6 +78,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
               to,
               type,
               references,
+              note,
               timeline_id: timelineId,
               timeline_title: timelineTitle,
               version,
@@ -131,6 +132,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
                 type,
                 threat,
                 references,
+                note,
                 version,
               });
               return transformValidateBulkError(ruleIdOrUuid, createdRule);

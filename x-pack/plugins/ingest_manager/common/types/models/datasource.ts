@@ -4,40 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface DatasourceBaseSchema {
+export interface DatasourcePackage {
   name: string;
-  namespace: string;
-  read_alias: string;
-  agent_config_id: string;
-  package: {
-    assets: Array<{
-      id: string;
-      type: string;
-    }>;
-    description: string;
-    name: string;
-    title: string;
-    version: string;
-  };
-  streams: Array<{
-    config: Record<string, any>;
-    input: {
-      type: string;
-      config: Record<string, any>;
-      fields: Array<Record<string, any>>;
-      ilm_policy: string;
-      index_template: string;
-      ingest_pipelines: string[];
-    };
-    output_id: string;
-    processors: string[];
-  }>;
+  title: string;
+  version: string;
 }
 
-export type NewDatasourceSchema = DatasourceBaseSchema;
+export interface DatasourceInputStream {
+  id: string;
+  enabled: boolean;
+  dataset: string;
+  processors?: string[];
+  config?: Record<string, any>;
+}
 
-export type DatasourceSchema = DatasourceBaseSchema & { id: string };
+export interface DatasourceInput {
+  type: string;
+  enabled: boolean;
+  processors?: string[];
+  streams: DatasourceInputStream[];
+}
 
-export type NewDatasource = NewDatasourceSchema;
+export interface NewDatasource {
+  name: string;
+  description?: string;
+  namespace?: string;
+  config_id: string;
+  enabled: boolean;
+  package?: DatasourcePackage;
+  output_id: string;
+  inputs: DatasourceInput[];
+}
 
-export type Datasource = DatasourceSchema;
+export type Datasource = NewDatasource & {
+  id: string;
+  revision: number;
+};

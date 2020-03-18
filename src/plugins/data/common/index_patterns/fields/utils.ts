@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { getFilterableKbnTypeNames, IFieldType } from '../..';
+import { getFilterableKbnTypeNames } from '../../kbn_field_types';
+import { IFieldType } from './types';
 
 const filterableTypes = getFilterableKbnTypeNames();
 

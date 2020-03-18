@@ -15,7 +15,7 @@ import { GraphControls } from './graph_controls';
 import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
 import { ResolverAction } from '../types';
-import { LegacyEndpointEvent } from '../../../../common/types';
+import { ResolverEvent } from '../../../../common/types';
 
 const StyledPanel = styled(Panel)`
   position: absolute;
@@ -39,7 +39,7 @@ export const Resolver = styled(
     selectedEvent,
   }: {
     className?: string;
-    selectedEvent?: LegacyEndpointEvent;
+    selectedEvent?: ResolverEvent;
   }) {
     const { processNodePositions, edgeLineSegments } = useSelector(
       selectors.processNodePositionsAndEdgeLineSegments

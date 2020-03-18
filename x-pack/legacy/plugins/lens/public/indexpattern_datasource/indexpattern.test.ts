@@ -408,7 +408,6 @@ describe('IndexPattern Data Source', () => {
       const initialState = stateFromPersistedState(persistedState);
       publicAPI = indexPatternDatasource.getPublicAPI({
         state: initialState,
-        setState: () => {},
         layerId: 'first',
         dateRange: {
           fromDate: 'now-30d',

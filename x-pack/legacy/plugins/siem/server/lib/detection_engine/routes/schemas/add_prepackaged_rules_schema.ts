@@ -32,6 +32,7 @@ import {
   type,
   threat,
   references,
+  note,
   version,
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
@@ -79,5 +80,6 @@ export const addPrepackagedRulesSchema = Joi.object({
   type: type.required(),
   threat: threat.default([]),
   references: references.default([]),
+  note: note.allow(''),
   version: version.required(),
 });

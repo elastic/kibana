@@ -4,15 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Dispatch, SetStateAction } from 'react';
 
 import { SearchResponse } from 'elasticsearch';
 
+import { EuiDataGridPaginationProps, EuiDataGridSorting } from '@elastic/eui';
+
 import { IIndexPattern } from 'src/plugins/data/public';
 
-import { useApi } from '../../../../hooks/use_api';
+import { Dictionary } from '../../../../../../common/types/common';
 
 import { isDefaultQuery, matchAllQuery, EsDocSource, PivotQuery } from '../../../../common';
+import { useApi } from '../../../../hooks/use_api';
 
 export enum SOURCE_INDEX_STATUS {
   UNUSED,
@@ -21,19 +24,25 @@ export enum SOURCE_INDEX_STATUS {
   ERROR,
 }
 
+type EsSorting = Dictionary<{
+  order: 'asc' | 'desc';
+}>;
+
 interface ErrorResponse {
-  error: {
-    body: string;
-    msg: string;
-    path: string;
-    query: any;
-    response: string;
+  request: Dictionary<any>;
+  response: Dictionary<any>;
+  body: {
     statusCode: number;
+    error: string;
+    message: string;
   };
+  name: string;
+  req: Dictionary<any>;
+  res: Dictionary<any>;
 }
 
 const isErrorResponse = (arg: any): arg is ErrorResponse => {
-  return arg.error !== undefined;
+  return arg?.body?.error !== undefined && arg?.body?.message !== undefined;
 };
 
 // The types specified in `@types/elasticsearch` are out of date and still have `total: number`.
@@ -46,42 +55,60 @@ interface SearchResponse7 extends SearchResponse<any> {
   };
 }
 
-type SourceIndexSearchResponse = ErrorResponse | SearchResponse7;
+type SourceIndexSearchResponse = SearchResponse7;
+
+type SourceIndexPagination = Pick<EuiDataGridPaginationProps, 'pageIndex' | 'pageSize'>;
+const defaultPagination: SourceIndexPagination = { pageIndex: 0, pageSize: 5 };
 
 export interface UseSourceIndexDataReturnType {
   errorMessage: string;
-  status: SOURCE_INDEX_STATUS;
+  pagination: SourceIndexPagination;
+  setPagination: Dispatch<SetStateAction<SourceIndexPagination>>;
+  setSortingColumns: Dispatch<SetStateAction<EuiDataGridSorting['columns']>>;
   rowCount: number;
+  sortingColumns: EuiDataGridSorting['columns'];
+  status: SOURCE_INDEX_STATUS;
   tableItems: EsDocSource[];
 }
 
 export const useSourceIndexData = (
   indexPattern: IIndexPattern,
-  query: PivotQuery,
-  pagination: { pageIndex: number; pageSize: number }
+  query: PivotQuery
 ): UseSourceIndexDataReturnType => {
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(SOURCE_INDEX_STATUS.UNUSED);
+  const [pagination, setPagination] = useState(defaultPagination);
+  const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
   const [rowCount, setRowCount] = useState(0);
   const [tableItems, setTableItems] = useState<EsDocSource[]>([]);
   const api = useApi();
+
+  useEffect(() => {
+    setPagination(defaultPagination);
+  }, [query]);
 
   const getSourceIndexData = async function() {
     setErrorMessage('');
     setStatus(SOURCE_INDEX_STATUS.LOADING);
 
-    try {
-      const resp: SourceIndexSearchResponse = await api.esSearch({
-        index: indexPattern.title,
+    const sort: EsSorting = sortingColumns.reduce((s, column) => {
+      s[column.id] = { order: column.direction };
+      return s;
+    }, {} as EsSorting);
+
+    const esSearchRequest = {
+      index: indexPattern.title,
+      body: {
+        // Instead of using the default query (`*`), fall back to a more efficient `match_all` query.
+        query: isDefaultQuery(query) ? matchAllQuery : query,
         from: pagination.pageIndex * pagination.pageSize,
         size: pagination.pageSize,
-        // Instead of using the default query (`*`), fall back to a more efficient `match_all` query.
-        body: { query: isDefaultQuery(query) ? matchAllQuery : query },
-      });
+        ...(Object.keys(sort).length > 0 ? { sort } : {}),
+      },
+    };
 
-      if (isErrorResponse(resp)) {
-        throw resp.error;
-      }
+    try {
+      const resp: SourceIndexSearchResponse = await api.esSearch(esSearchRequest);
 
       const docs = resp.hits.hits.map(d => d._source);
 
@@ -89,12 +116,11 @@ export const useSourceIndexData = (
       setTableItems(docs);
       setStatus(SOURCE_INDEX_STATUS.LOADED);
     } catch (e) {
-      if (e.message !== undefined) {
-        setErrorMessage(e.message);
+      if (isErrorResponse(e)) {
+        setErrorMessage(`${e.body.error}: ${e.body.message}`);
       } else {
         setErrorMessage(JSON.stringify(e, null, 2));
       }
-      setTableItems([]);
       setStatus(SOURCE_INDEX_STATUS.ERROR);
     }
   };
@@ -103,6 +129,15 @@ export const useSourceIndexData = (
     getSourceIndexData();
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [indexPattern.title, JSON.stringify(query), JSON.stringify(pagination)]);
-  return { errorMessage, status, rowCount, tableItems };
+  }, [indexPattern.title, JSON.stringify([query, pagination, sortingColumns])]);
+  return {
+    errorMessage,
+    pagination,
+    setPagination,
+    setSortingColumns,
+    rowCount,
+    sortingColumns,
+    status,
+    tableItems,
+  };
 };

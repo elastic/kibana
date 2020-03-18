@@ -43,7 +43,7 @@ export function savedObjectsMixin(kbnServer, server) {
   server.decorate(
     'server',
     'getSavedObjectsManagement',
-    () => new SavedObjectsManagement(kbnServer.uiExports.savedObjectsManagement)
+    () => new SavedObjectsManagement(typeRegistry)
   );
 
   const warn = message => server.log(['warning', 'saved-objects'], message);

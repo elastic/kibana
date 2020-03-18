@@ -57,7 +57,7 @@ export class MetricsPlugin implements Plugin<Promise<void>, void> {
   ) {
     expressions.registerFunction(createMetricsFn);
     setUISettings(core.uiSettings);
-    visualizations.types.createReactVisualization(metricsVisDefinition);
+    visualizations.createReactVisualization(metricsVisDefinition);
   }
 
   public start(core: CoreStart, { data }: MetricsPluginStartDependencies) {

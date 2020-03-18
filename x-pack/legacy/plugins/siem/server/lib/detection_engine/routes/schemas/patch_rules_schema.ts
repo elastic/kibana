@@ -32,6 +32,7 @@ import {
   type,
   threat,
   references,
+  note,
   id,
   version,
 } from './schemas';
@@ -63,5 +64,6 @@ export const patchRulesSchema = Joi.object({
   type,
   threat,
   references,
+  note: note.allow(''),
   version,
 }).xor('id', 'rule_id');

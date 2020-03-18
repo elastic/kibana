@@ -141,4 +141,71 @@ describe('create_rules_bulk_schema', () => {
       '"value" at position 0 fails because [child "severity" fails because ["severity" must be one of [low, medium, high, critical]]]'
     );
   });
+
+  test('You can set "note" to a string', () => {
+    expect(
+      createRulesBulkSchema.validate<Partial<PatchRuleAlertParamsRest>>([
+        {
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          note: '# test markdown',
+          version: 1,
+        },
+      ]).error
+    ).toBeFalsy();
+  });
+
+  test('You can set "note" to an empty string', () => {
+    expect(
+      createRulesBulkSchema.validate<Partial<PatchRuleAlertParamsRest>>([
+        {
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          note: '',
+          version: 1,
+        },
+      ]).error
+    ).toBeFalsy();
+  });
+
+  test('You cannot set "note" to anything other than string', () => {
+    expect(
+      createRulesBulkSchema.validate<Partial<PatchRuleAlertParamsRest>>([
+        {
+          rule_id: 'rule-1',
+          risk_score: 50,
+          description: 'some description',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          note: {
+            something: 'some object',
+          },
+          version: 1,
+        },
+      ]).error.message
+    ).toEqual(
+      '"value" at position 0 fails because [child "note" fails because ["note" must be a string]]'
+    );
+  });
 });

@@ -93,7 +93,7 @@ describe('VegaVisualizations', () => {
 
       if (!visRegComplete) {
         visRegComplete = true;
-        visualizationsSetup.types.createBaseVisualization(
+        visualizationsSetup.createBaseVisualization(
           createVegaTypeDefinition(vegaVisualizationDependencies)
         );
       }
@@ -108,7 +108,7 @@ describe('VegaVisualizations', () => {
       setupDOM('512px', '512px');
       imageComparator = new ImageComparator();
 
-      vis = new visualizationsStart.Vis(indexPattern, { type: 'vega' });
+      vis = visualizationsStart.createVis(indexPattern, { type: 'vega' });
     });
 
     afterEach(function() {

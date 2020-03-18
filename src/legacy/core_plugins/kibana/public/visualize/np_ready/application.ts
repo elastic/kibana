@@ -23,13 +23,10 @@ import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { AppMountContext } from 'kibana/public';
 import {
   configureAppAngularModule,
-  GlobalStateProvider,
   KbnUrlProvider,
-  RedirectWhenMissingProvider,
   IPrivate,
   PrivateProvider,
   PromiseServiceCreator,
-  StateManagementConfigProvider,
 } from '../legacy_imports';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
 import {
@@ -87,53 +84,24 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
   createLocalI18nModule();
   createLocalPrivateModule();
   createLocalPromiseModule();
-  createLocalConfigModule(core);
   createLocalKbnUrlModule();
-  createLocalStateModule();
   createLocalTopNavModule(navigation);
 
   const visualizeAngularModule: IModule = angular.module(moduleName, [
     ...thirdPartyAngularDependencies,
-    'app/visualize/Config',
     'app/visualize/I18n',
     'app/visualize/Private',
     'app/visualize/TopNav',
-    'app/visualize/State',
+    'app/visualize/KbnUrl',
+    'app/visualize/Promise',
   ]);
   return visualizeAngularModule;
-}
-
-function createLocalStateModule() {
-  angular
-    .module('app/visualize/State', [
-      'app/visualize/Private',
-      'app/visualize/Config',
-      'app/visualize/KbnUrl',
-      'app/visualize/Promise',
-    ])
-    .service('globalState', function(Private: IPrivate) {
-      return Private(GlobalStateProvider);
-    });
 }
 
 function createLocalKbnUrlModule() {
   angular
     .module('app/visualize/KbnUrl', ['app/visualize/Private', 'ngRoute'])
-    .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider))
-    .service('redirectWhenMissing', (Private: IPrivate) => Private(RedirectWhenMissingProvider));
-}
-
-function createLocalConfigModule(core: AppMountContext['core']) {
-  angular
-    .module('app/visualize/Config', ['app/visualize/Private'])
-    .provider('stateManagementConfig', StateManagementConfigProvider)
-    .provider('config', () => {
-      return {
-        $get: () => ({
-          get: core.uiSettings.get.bind(core.uiSettings),
-        }),
-      };
-    });
+    .service('kbnUrl', (Private: IPrivate) => Private(KbnUrlProvider));
 }
 
 function createLocalPromiseModule() {

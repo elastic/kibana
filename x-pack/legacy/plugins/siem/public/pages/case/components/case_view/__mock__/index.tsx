@@ -11,6 +11,7 @@ export const caseProps: CaseProps = {
   caseId: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
   initialData: {
     id: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
+    commentIds: ['a357c6a0-5435-11ea-b427-fb51a1fcb7b8'],
     comments: [
       {
         comment: 'Solve this fast!',
@@ -21,22 +22,29 @@ export const caseProps: CaseProps = {
           username: 'smilovic',
         },
         updatedAt: '2020-02-20T23:06:33.798Z',
+        updatedBy: {
+          username: 'elastic',
+        },
         version: 'WzQ3LDFd',
       },
     ],
     createdAt: '2020-02-13T19:44:23.627Z',
     createdBy: { fullName: null, username: 'elastic' },
     description: 'Security banana Issue',
-    state: 'open',
+    status: 'open',
     tags: ['defacement'],
     title: 'Another horrible breach!!',
     updatedAt: '2020-02-19T15:02:57.995Z',
+    updatedBy: {
+      username: 'elastic',
+    },
     version: 'WzQ3LDFd',
   },
 };
 
 export const data: Case = {
   id: '3c4ddcc0-4e99-11ea-9290-35d05cb55c15',
+  commentIds: ['a357c6a0-5435-11ea-b427-fb51a1fcb7b8'],
   comments: [
     {
       comment: 'Solve this fast!',
@@ -47,15 +55,21 @@ export const data: Case = {
         username: 'smilovic',
       },
       updatedAt: '2020-02-20T23:06:33.798Z',
+      updatedBy: {
+        username: 'elastic',
+      },
       version: 'WzQ3LDFd',
     },
   ],
   createdAt: '2020-02-13T19:44:23.627Z',
   createdBy: { username: 'elastic', fullName: null },
   description: 'Security banana Issue',
-  state: 'open',
+  status: 'open',
   tags: ['defacement'],
   title: 'Another horrible breach!!',
   updatedAt: '2020-02-19T15:02:57.995Z',
+  updatedBy: {
+    username: 'elastic',
+  },
   version: 'WzQ3LDFd',
 };

@@ -19,7 +19,7 @@
 
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
-import { QuerySuggestion } from '../..';
+import { QuerySuggestion } from '../../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
 
 interface Props {

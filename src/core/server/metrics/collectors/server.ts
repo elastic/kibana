@@ -26,12 +26,12 @@ interface ServerResponseTime {
 }
 
 export class ServerMetricsCollector implements MetricsCollector<OpsServerMetrics> {
-  private readonly requests: OpsServerMetrics['requests'] = {
+  private requests: OpsServerMetrics['requests'] = {
     disconnects: 0,
     total: 0,
     statusCodes: {},
   };
-  private readonly responseTimes: ServerResponseTime = {
+  private responseTimes: ServerResponseTime = {
     count: 0,
     total: 0,
     max: 0,
@@ -75,6 +75,19 @@ export class ServerMetricsCollector implements MetricsCollector<OpsServerMetrics
         max_in_millis: this.responseTimes.max,
       },
       concurrent_connections: connections,
+    };
+  }
+
+  public reset() {
+    this.requests = {
+      disconnects: 0,
+      total: 0,
+      statusCodes: {},
+    };
+    this.responseTimes = {
+      count: 0,
+      total: 0,
+      max: 0,
     };
   }
 }

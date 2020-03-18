@@ -16,7 +16,8 @@ import { timefilter } from 'ui/timefilter';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
-import { copyPersistentState } from '../../reducers/util';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { copyPersistentState } from '../../../../../../plugins/maps/public/reducers/util';
 import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
 import { DataRequestAbortError } from '../util/data_request';
 import { expandToTileBoundaries } from './es_geo_grid_source/geo_tile_utils';
