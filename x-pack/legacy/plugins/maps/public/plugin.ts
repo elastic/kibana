@@ -9,6 +9,7 @@ import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
 import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+// @ts-ignore
 import { MapListing } from './components/map_listing';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import {
@@ -23,11 +24,15 @@ import {
   setToasts,
   setIndexPatternService,
   setAutocompleteService,
+  // @ts-ignore
 } from './kibana_services';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
+import {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+} from '../../../../../src/plugins/data/public';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -42,16 +47,14 @@ interface MapsPluginSetupDependencies {
   np: {
     licensing?: LicensingPluginSetup;
     home: HomePublicPluginSetup;
-    data: DataPublicPluginStart;
+    data: DataPublicPluginSetup;
   };
 }
 
 interface MapsPluginStartDependencies {
-  np: {
-    data: DataPublicPluginStart;
-    inspector: InspectorStartContract;
-    file_upload: any; // TODO: Export type from file upload and use here
-  };
+  data: DataPublicPluginStart;
+  inspector: InspectorStartContract;
+  // file_upload TODO: Export type from file upload and use here
 }
 
 export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
@@ -92,6 +95,6 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
   }
 
   public start(core: CoreStart, plugins: MapsPluginStartDependencies) {
-    bindStartCoreAndPlugins(core, plugins.np);
+    bindStartCoreAndPlugins(core, plugins);
   }
 }
