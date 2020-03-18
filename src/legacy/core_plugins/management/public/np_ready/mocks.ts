@@ -40,13 +40,6 @@ const createSetupContract = (): ManagementSetup => ({
       areScriptedFieldsEnabled: jest.fn(),
     } as any,
   },
-  savedObjects: {
-    registry: {
-      register: jest.fn(),
-      has: jest.fn(),
-      get: jest.fn(() => []),
-    },
-  },
 });
 
 const createStartContract = (): ManagementStart => ({});

@@ -20,9 +20,14 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { HomePublicPluginSetup, FeatureCatalogueCategory } from '../../home/public';
+import {
+  SavedObjectsManagementActionRegistry,
+  ISavedObjectsManagementActionRegistry,
+} from './services';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SavedObjectsManagementPluginSetup {}
+export interface SavedObjectsManagementPluginSetup {
+  actionRegistry: ISavedObjectsManagementActionRegistry;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SavedObjectsManagementPluginStart {}
@@ -39,6 +44,8 @@ export class SavedObjectsManagementPlugin
       SetupDependencies,
       {}
     > {
+  private actionRegistry = new SavedObjectsManagementActionRegistry();
+
   public setup(
     core: CoreSetup<{}>,
     { home }: SetupDependencies
@@ -58,7 +65,9 @@ export class SavedObjectsManagementPlugin
       category: FeatureCatalogueCategory.ADMIN,
     });
 
-    return {};
+    return {
+      actionRegistry: this.actionRegistry,
+    };
   }
 
   public start(core: CoreStart) {

@@ -17,16 +17,8 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { SavedObjectsManagementPlugin } from './plugin';
-
-export { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './plugin';
 export {
+  SavedObjectsManagementActionRegistry,
   ISavedObjectsManagementActionRegistry,
-  SavedObjectsManagementAction,
-  SavedObjectsManagementRecord,
-} from './services';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new SavedObjectsManagementPlugin();
-}
+} from './action_registry';
+export { SavedObjectsManagementAction, SavedObjectsManagementRecord } from './action_types';

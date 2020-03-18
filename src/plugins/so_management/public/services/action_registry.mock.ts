@@ -17,6 +17,21 @@
  * under the License.
  */
 
-export * from './saved_objects_management_action_registry';
-export * from './saved_objects_management_action';
-export * from './saved_objects_management_service';
+import { ISavedObjectsManagementActionRegistry } from './action_registry';
+
+const createRegistryMock = (): jest.Mocked<ISavedObjectsManagementActionRegistry> => {
+  const mock = {
+    register: jest.fn(),
+    has: jest.fn(),
+    getAll: jest.fn(),
+  };
+
+  mock.has.mockReturnValue(true);
+  mock.getAll.mockReturnValue([]);
+
+  return mock;
+};
+
+export const actionRegistryMock = {
+  create: createRegistryMock,
+};

@@ -18,12 +18,8 @@
  */
 
 import { ReactNode } from 'react';
+import { SavedObjectReference } from 'src/core/public';
 
-export interface SavedObjectsManagementRecordReference {
-  type: string;
-  id: string;
-  name: string;
-}
 export interface SavedObjectsManagementRecord {
   type: string;
   id: string;
@@ -31,7 +27,7 @@ export interface SavedObjectsManagementRecord {
     icon: string;
     title: string;
   };
-  references: SavedObjectsManagementRecordReference[];
+  references: SavedObjectReference[];
 }
 
 export abstract class SavedObjectsManagementAction {
