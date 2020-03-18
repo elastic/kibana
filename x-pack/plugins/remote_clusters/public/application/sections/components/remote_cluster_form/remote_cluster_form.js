@@ -34,7 +34,11 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 
-import { skippingDisconnectedClustersUrl, transportPortUrl } from '../../../services/documentation';
+import {
+  skippingDisconnectedClustersUrl,
+  transportPortUrl,
+  proxySettingsUrl,
+} from '../../../services/documentation';
 
 import { RequestFlyout } from './request_flyout';
 
@@ -416,7 +420,17 @@ export class RemoteClusterForm extends Component {
           helpText={
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText"
-              defaultMessage="A string which will be sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled."
+              defaultMessage="A string sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink href={proxySettingsUrl} target="_blank">
+                    <FormattedMessage
+                      id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText.learnMoreLinkLabel"
+                      defaultMessage="Learn more."
+                    />
+                  </EuiLink>
+                ),
+              }}
             />
           }
           fullWidth

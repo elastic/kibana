@@ -835,9 +835,21 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                       hasEmptyLabelSpace={false}
                       helpText={
                         <FormattedMessage
-                          defaultMessage="A string which will be sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled."
+                          defaultMessage="A string sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled. {learnMoreLink}"
                           id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText"
-                          values={Object {}}
+                          values={
+                            Object {
+                              "learnMoreLink": <ForwardRef
+                                target="_blank"
+                              >
+                                <FormattedMessage
+                                  defaultMessage="Learn more."
+                                  id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText.learnMoreLinkLabel"
+                                  values={Object {}}
+                                />
+                              </ForwardRef>,
+                            }
+                          }
                         />
                       }
                       label={
@@ -925,11 +937,39 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                               id="mockId-help"
                             >
                               <FormattedMessage
-                                defaultMessage="A string which will be sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled."
+                                defaultMessage="A string sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled. {learnMoreLink}"
                                 id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText"
-                                values={Object {}}
+                                values={
+                                  Object {
+                                    "learnMoreLink": <ForwardRef
+                                      target="_blank"
+                                    >
+                                      <FormattedMessage
+                                        defaultMessage="Learn more."
+                                        id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText.learnMoreLinkLabel"
+                                        values={Object {}}
+                                      />
+                                    </ForwardRef>,
+                                  }
+                                }
                               >
-                                A string which will be sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled.
+                                A string sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled. 
+                                <EuiLink
+                                  target="_blank"
+                                >
+                                  <button
+                                    className="euiLink euiLink--primary"
+                                    type="button"
+                                  >
+                                    <FormattedMessage
+                                      defaultMessage="Learn more."
+                                      id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText.learnMoreLinkLabel"
+                                      values={Object {}}
+                                    >
+                                      Learn more.
+                                    </FormattedMessage>
+                                  </button>
+                                </EuiLink>
                               </FormattedMessage>
                             </div>
                           </EuiFormHelpText>
