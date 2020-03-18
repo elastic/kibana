@@ -91,7 +91,7 @@ const TimelionDatasource = ({ args, updateArgs, defaultIndex }) => {
         labelAppend={
           <EuiText size="xs">
             <EuiLink href={TIMELION_QUERY_URL} target="_blank">
-              {strings.getQueryHelp()}
+              {strings.getQueryUrl()}
             </EuiLink>
           </EuiText>
         }

@@ -475,8 +475,8 @@ export const DataSourceStrings = {
       i18n.translate('xpack.canvas.uis.dataSources.timelion.intervalTitle', {
         defaultMessage: 'Interval',
       }),
-    getQueryHelp: () =>
-      i18n.translate('xpack.canvas.uis.dataSources.timelion.queryLabel', {
+    getQueryUrl: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.timelion.queryUrl', {
         defaultMessage: '{timelion} Query String syntax',
         values: {
           timelion: TIMELION,
