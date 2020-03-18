@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { docCountQuery, docCountQueryString } from './doc_count_query';
 export { pingsQuery, pingsQueryString } from './pings_query';

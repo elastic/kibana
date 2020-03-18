@@ -28,7 +28,6 @@ import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
 } from '../embeddable_plugin_test_samples';
-import { DashboardOptions } from '../embeddable/dashboard_container_factory';
 
 const embeddableFactories = new Map<string, EmbeddableFactory>();
 embeddableFactories.set(
@@ -40,7 +39,7 @@ let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable;
 
 beforeEach(async () => {
-  const options: DashboardOptions = {
+  const options = {
     ExitFullScreenButton: () => null,
     SavedObjectFinder: () => null,
     application: {} as any,

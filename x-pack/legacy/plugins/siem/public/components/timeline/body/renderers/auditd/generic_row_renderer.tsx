@@ -32,19 +32,16 @@ export const createGenericAuditRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, children, timelineId }) => (
-    <>
-      {children}
-      <RowRendererContainer>
-        <AuditdGenericDetails
-          browserFields={browserFields}
-          data={data}
-          contextId={`${actionName}-${timelineId}`}
-          text={text}
-          timelineId={timelineId}
-        />
-      </RowRendererContainer>
-    </>
+  renderRow: ({ browserFields, data, timelineId }) => (
+    <RowRendererContainer>
+      <AuditdGenericDetails
+        browserFields={browserFields}
+        data={data}
+        contextId={`${actionName}-${timelineId}`}
+        text={text}
+        timelineId={timelineId}
+      />
+    </RowRendererContainer>
   ),
 });
 
@@ -67,20 +64,17 @@ export const createGenericFileRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, children, timelineId }) => (
-    <>
-      {children}
-      <RowRendererContainer>
-        <AuditdGenericFileDetails
-          browserFields={browserFields}
-          data={data}
-          contextId={`${actionName}-${timelineId}`}
-          text={text}
-          fileIcon={fileIcon}
-          timelineId={timelineId}
-        />
-      </RowRendererContainer>
-    </>
+  renderRow: ({ browserFields, data, timelineId }) => (
+    <RowRendererContainer>
+      <AuditdGenericFileDetails
+        browserFields={browserFields}
+        data={data}
+        contextId={`${actionName}-${timelineId}`}
+        text={text}
+        fileIcon={fileIcon}
+        timelineId={timelineId}
+      />
+    </RowRendererContainer>
   ),
 });
 
