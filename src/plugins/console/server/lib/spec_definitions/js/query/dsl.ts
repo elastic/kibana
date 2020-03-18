@@ -18,6 +18,9 @@
  */
 
 import _ from 'lodash';
+
+import { SpecDefinitionsService } from '../../../../services';
+
 import {
   spanFirstTemplate,
   spanNearTemplate,
@@ -32,6 +35,8 @@ import {
   rangeTemplate,
   regexpTemplate,
 } from './templates';
+
+/* eslint-disable @typescript-eslint/camelcase */
 const matchOptions = {
   cutoff_frequency: 0.001,
   query: '',
@@ -57,6 +62,7 @@ const matchOptions = {
   prefix_length: 1,
   minimum_should_match: 1,
 };
+
 const innerHits = {
   docvalue_fields: ['FIELD'],
   from: {},
@@ -84,6 +90,7 @@ const innerHits = {
     __one_of: ['true', 'false'],
   },
 };
+
 const SPAN_QUERIES_NO_FIELD_MASK = {
   // TODO add one_of for objects
   span_first: {
@@ -115,6 +122,7 @@ const SPAN_QUERIES_NO_FIELD_MASK = {
     __scope_link: '.span_within',
   },
 };
+
 const SPAN_QUERIES = {
   ...SPAN_QUERIES_NO_FIELD_MASK,
   field_masking_span: {
@@ -165,13 +173,14 @@ const DECAY_FUNC_DESC = {
     decay: 0.5,
   },
 };
+
 const SCORING_FUNCS = {
   script_score: {
     __template: {
       script: "_score * doc['f'].value",
     },
     script: {
-      //populated by a global rule
+      // populated by a global rule
     },
   },
   boost_factor: 2.0,
@@ -204,8 +213,8 @@ const SCORING_FUNCS = {
   },
 };
 
-export function queryDsl(api) {
-  api.addGlobalAutocompleteRules('query', {
+export const query = (specService: SpecDefinitionsService) => {
+  specService.addGlobalAutocompleteRules('query', {
     match: {
       __template: {
         FIELD: 'TEXT',
@@ -629,7 +638,7 @@ export function queryDsl(api) {
           filter: {},
           boost: 2.0,
           script: {
-            //populated by a global rule
+            // populated by a global rule
           },
         },
       ],
@@ -693,7 +702,7 @@ export function queryDsl(api) {
         script: "_score * doc['f'].value",
       },
       script: {
-        //populated by a global rule
+        // populated by a global rule
       },
     },
     wrapper: {
@@ -703,4 +712,4 @@ export function queryDsl(api) {
       query: '',
     },
   });
-}
+};

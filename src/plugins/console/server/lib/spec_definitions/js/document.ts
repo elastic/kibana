@@ -16,9 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SpecDefinitionsService } from '../../../services';
 
-export default function(api) {
-  api.addEndpointDescription('update', {
+/* eslint-disable @typescript-eslint/camelcase */
+export const document = (specService: SpecDefinitionsService) => {
+  specService.addEndpointDescription('update', {
     data_autocomplete_rules: {
       script: {
         // populated by a global rule
@@ -29,7 +31,7 @@ export default function(api) {
     },
   });
 
-  api.addEndpointDescription('put_script', {
+  specService.addEndpointDescription('put_script', {
     methods: ['POST', 'PUT'],
     patterns: ['_scripts/{lang}/{id}', '_scripts/{lang}/{id}/_create'],
     url_components: {
@@ -40,7 +42,7 @@ export default function(api) {
     },
   });
 
-  api.addEndpointDescription('termvectors', {
+  specService.addEndpointDescription('termvectors', {
     data_autocomplete_rules: {
       fields: ['{field}'],
       offsets: { __one_of: [false, true] },
@@ -68,4 +70,4 @@ export default function(api) {
       },
     },
   });
-}
+};

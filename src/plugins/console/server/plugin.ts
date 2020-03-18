@@ -21,12 +21,8 @@ import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/serv
 
 import { readLegacyEsConfig } from '../../../legacy/core_plugins/console_legacy';
 
-import {
-  ProxyConfigCollection,
-  addExtensionSpecFilePath,
-  addProcessorDefinition,
-  loadSpec,
-} from './lib';
+import { ProxyConfigCollection } from './lib';
+import { SpecDefinitionsService } from './services';
 import { ConfigType } from './config';
 import { registerProxyRoute } from './routes/api/console/proxy';
 import { registerSpecDefinitionsRoute } from './routes/api/console/spec_definitions';
@@ -34,6 +30,8 @@ import { ESConfigForProxy, ConsoleSetup } from './types';
 
 export class ConsoleServerPlugin implements Plugin<ConsoleSetup> {
   log: Logger;
+
+  specDefinitionsService = new SpecDefinitionsService();
 
   constructor(private readonly ctx: PluginInitializerContext<ConfigType>) {
     this.log = this.ctx.logger.get();
@@ -72,15 +70,24 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup> {
       router,
     });
 
-    registerSpecDefinitionsRoute({ router });
+    registerSpecDefinitionsRoute({
+      router,
+      services: { specDefinitions: this.specDefinitionsService },
+    });
 
     return {
-      addExtensionSpecFilePath,
-      addProcessorDefinition,
+      addExtensionSpecFilePath: this.specDefinitionsService.addExtensionSpecFilePath.bind(
+        this.specDefinitionsService
+      ),
     };
   }
 
   start() {
-    loadSpec();
+    this.specDefinitionsService.start();
+    return {
+      addProcessorDefinition: this.specDefinitionsService.addProcessorDefinition.bind(
+        this.specDefinitionsService
+      ),
+    };
   }
 }

@@ -17,12 +17,15 @@
  * under the License.
  */
 
-const _ = require('lodash');
+import _ from 'lodash';
+
+import { SpecDefinitionsService } from '../../../services';
 
 import { BOOLEAN } from './shared';
 
-export default function(api) {
-  api.addEndpointDescription('put_mapping', {
+/* eslint-disable @typescript-eslint/camelcase */
+export const mappings = (specService: SpecDefinitionsService) => {
+  specService.addEndpointDescription('put_mapping', {
     priority: 10, // collides with put doc by id
     data_autocomplete_rules: {
       __template: {
@@ -249,4 +252,4 @@ export default function(api) {
       },
     },
   });
-}
+};

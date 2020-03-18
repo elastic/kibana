@@ -16,9 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SpecDefinitionsService } from '../../../services';
 
-export default function(api) {
-  api.addEndpointDescription('search', {
+/* eslint-disable @typescript-eslint/camelcase */
+export const search = (specService: SpecDefinitionsService) => {
+  specService.addEndpointDescription('search', {
     priority: 10, // collides with get doc by id
     data_autocomplete_rules: {
       query: {
@@ -191,7 +193,7 @@ export default function(api) {
     },
   });
 
-  api.addEndpointDescription('search_template', {
+  specService.addEndpointDescription('search_template', {
     data_autocomplete_rules: {
       template: {
         __one_of: [{ __scope_link: 'search' }, { __scope_link: 'GLOBAL.script' }],
@@ -200,18 +202,18 @@ export default function(api) {
     },
   });
 
-  api.addEndpointDescription('render_search_template', {
+  specService.addEndpointDescription('render_search_template', {
     data_autocomplete_rules: {
       __one_of: [{ source: { __scope_link: 'search' } }, { __scope_link: 'GLOBAL.script' }],
       params: {},
     },
   });
 
-  api.addEndpointDescription('_search/template/{id}', {
+  specService.addEndpointDescription('_search/template/{id}', {
     data_autocomplete_rules: {
       template: {
         __scope_link: 'search',
       },
     },
   });
-}
+};

@@ -16,8 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SpecDefinitionsService } from '../../../services';
 
-const filters = {};
+/* eslint-disable @typescript-eslint/camelcase */
+const filters: Record<string, any> = {};
 
 filters.and = {
   __template: {
@@ -324,6 +326,6 @@ filters.nested = {
   _name: '',
 };
 
-export default function(api) {
-  api.addGlobalAutocompleteRules('filter', filters);
-}
+export const filter = (specService: SpecDefinitionsService) => {
+  specService.addGlobalAutocompleteRules('filter', filters);
+};

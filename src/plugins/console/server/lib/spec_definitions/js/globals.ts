@@ -16,7 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SpecDefinitionsService } from '../../../services';
 
+/* eslint-disable @typescript-eslint/camelcase */
 const highlightOptions = {
   boundary_chars: {},
   boundary_max_scan: 20,
@@ -48,8 +50,9 @@ const highlightOptions = {
   },
   tags_schema: {},
 };
-export default function(api) {
-  api.addGlobalAutocompleteRules('highlight', {
+
+export const globals = (specService: SpecDefinitionsService) => {
+  specService.addGlobalAutocompleteRules('highlight', {
     ...highlightOptions,
     fields: {
       '{field}': {
@@ -60,7 +63,7 @@ export default function(api) {
     },
   });
 
-  api.addGlobalAutocompleteRules('script', {
+  specService.addGlobalAutocompleteRules('script', {
     __template: {
       source: 'SCRIPT',
     },
@@ -70,4 +73,4 @@ export default function(api) {
     lang: '',
     params: {},
   });
-}
+};

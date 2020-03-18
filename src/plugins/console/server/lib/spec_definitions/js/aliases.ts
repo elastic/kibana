@@ -16,5 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SpecDefinitionsService } from '../../../services';
 
-export { queryDsl as default } from './dsl';
+/* eslint-disable @typescript-eslint/camelcase */
+export const aliases = (specService: SpecDefinitionsService) => {
+  const aliasRules = {
+    filter: {},
+    routing: '1',
+    search_routing: '1,2',
+    index_routing: '1',
+  };
+  specService.addGlobalAutocompleteRules('aliases', {
+    '*': aliasRules,
+  });
+};

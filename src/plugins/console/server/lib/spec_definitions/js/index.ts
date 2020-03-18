@@ -17,10 +17,30 @@
  * under the License.
  */
 
-export { addProcessorDefinition } from './js/ingest';
+import { SpecDefinitionsService } from '../../../services';
 
-export { addExtensionSpecFilePath } from './json';
+import { aggs } from './aggregations';
+import { aliases } from './aliases';
+import { document } from './document';
+import { filter } from './filter';
+import { globals } from './globals';
+import { ingest } from './ingest';
+import { mappings } from './mappings';
+import { settings } from './settings';
+import { query } from './query';
+import { reindex } from './reindex';
+import { search } from './search';
 
-export { loadSpec } from './es';
-
-export { resolveApi } from './server';
+export const jsSpecLoaders: Array<(registry: SpecDefinitionsService) => void> = [
+  aggs,
+  aliases,
+  document,
+  filter,
+  globals,
+  ingest,
+  mappings,
+  settings,
+  query,
+  reindex,
+  search,
+];
