@@ -13,8 +13,8 @@ export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // failing test, see https://github.com/elastic/kibana/issues/60389
-  describe.skip('jobs cloning supported by UI form', function() {
+  // eslint-disable-next-line ban/ban
+  describe.only('jobs cloning supported by UI form', function() {
     this.tags(['smoke']);
 
     const testDataList: Array<{
