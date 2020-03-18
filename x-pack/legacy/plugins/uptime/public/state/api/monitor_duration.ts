@@ -4,29 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { stringify } from 'query-string';
-
-import { getApiPath } from '../../lib/helper';
 import { BaseParams } from './types';
+import { apiService } from './utils';
+import { API_URLS } from '../../../common/constants/rest_api';
 
-export const fetchMonitorDuration = async ({
-  basePath,
-  monitorId,
-  dateStart,
-  dateEnd,
-}: BaseParams) => {
-  const url = getApiPath(`/api/uptime/monitor/duration`, basePath);
-
-  const params = {
+export const fetchMonitorDuration = async ({ monitorId, dateStart, dateEnd }: BaseParams) => {
+  const queryParams = {
     monitorId,
     dateStart,
     dateEnd,
   };
-  const urlParams = stringify(params);
 
-  const response = await fetch(`${url}?${urlParams}`);
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-  return await response.json();
+  return await apiService.get(API_URLS.MONITOR_DURATION, queryParams);
 };
