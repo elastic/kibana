@@ -28,28 +28,27 @@ exports[`is rendered 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
           data-test-subj="exitFullScreenModeText"
         >
-          <div
-            class="euiText euiText--extraSmall"
-          >
+          <div>
+            <p
+              class="euiTitle euiTitle--xxxsmall dshExitFullScreenButton__title"
+            >
+              Elastic Kibana
+            </p>
             <div
-              class="euiTextColor euiTextColor--subdued"
+              class="euiText euiText--extraSmall dshExitFullScreenButton__text"
             >
               <p>
-                Powered by
+                Exit full screen
               </p>
             </div>
           </div>
-          <p
-            class="euiTitle euiTitle--xxsmall"
-          >
-            Elastic Kibana
-          </p>
         </div>
         <div
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            data-euiicon-type="cross"
+            class="dshExitFullScreenButton__icon"
+            data-euiicon-type="fullScreen"
           />
         </div>
       </span>
